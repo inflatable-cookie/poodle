@@ -15,6 +15,17 @@ pub enum TabsOverflowStrategy {
     Shed,
 }
 
+/// Selection treatment on the active tab. Matches the Svelte/React
+/// `activeFill` prop (`"tint" | "solid"`, default `"tint"`).
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum TabActiveFill {
+    /// Accent-tinted selection on the active tab.
+    #[default]
+    Tint,
+    /// Fully accent-filled active tab with an inverse foreground.
+    Solid,
+}
+
 /// A part a `Tabs` strip may give up to keep its labels.
 ///
 /// Labels are deliberately absent: shedding one would leave a tab as an unnamed
@@ -31,6 +42,13 @@ pub struct TabsSpec {
     pub value: Option<String>,
     pub default_value: Option<String>,
     pub variant: TabVariant,
+    /// Opt-in outline on the active tab — the decoration the former `card`
+    /// variant had by default. Matches Svelte `activeOutline` (default
+    /// false).
+    pub active_outline: bool,
+    /// Selection treatment on the active tab: tint or fully accent-filled.
+    /// Matches Svelte `activeFill` (default `"tint"`).
+    pub active_fill: TabActiveFill,
     pub orientation: Orientation,
     pub activation_mode: TabActivationMode,
     pub aria_label: Option<String>,
@@ -38,7 +56,7 @@ pub struct TabsSpec {
     /// consumer to actually commit the new order. Matches Svelte
     /// `reorderable` prop.
     pub is_reorderable: bool,
-    /// When true, the Underline variant renders the bottom border
+    /// When true, the Card variant renders the bottom border
     /// line under the whole tab list (the default). When false the
     /// indicator is suppressed — useful for flush layouts. Matches
     /// Svelte `bordered` prop (default true).
@@ -89,7 +107,9 @@ impl Default for TabsSpec {
             tabs: Vec::new(),
             value: None,
             default_value: None,
-            variant: TabVariant::Underline,
+            variant: TabVariant::Card,
+            active_outline: false,
+            active_fill: TabActiveFill::Tint,
             orientation: Orientation::Horizontal,
             activation_mode: TabActivationMode::Automatic,
             aria_label: None,
@@ -185,6 +205,19 @@ impl TabsSpec {
 
     pub fn with_variant(mut self, variant: TabVariant) -> Self {
         self.variant = variant;
+        self
+    }
+
+    /// Opt in to an outline on the active tab — the decoration the former
+    /// `card` variant had by default.
+    pub fn with_active_outline(mut self, active_outline: bool) -> Self {
+        self.active_outline = active_outline;
+        self
+    }
+
+    /// Set the selection treatment on the active tab (tint or solid).
+    pub fn with_active_fill(mut self, active_fill: TabActiveFill) -> Self {
+        self.active_fill = active_fill;
         self
     }
 
@@ -336,5 +369,22 @@ mod tests {
             .with_drop_target_value(None);
         assert!(spec.drag_value.is_none());
         assert!(spec.drop_target_value.is_none());
+    }
+
+    #[test]
+    fn active_decorations_default_off_and_tint() {
+        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A")]);
+        assert!(!spec.active_outline);
+        assert_eq!(spec.active_fill, TabActiveFill::Tint);
+        assert_eq!(spec.variant, TabVariant::Card);
+    }
+
+    #[test]
+    fn active_decorations_builders_set_both() {
+        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A")])
+            .with_active_outline(true)
+            .with_active_fill(TabActiveFill::Solid);
+        assert!(spec.active_outline);
+        assert_eq!(spec.active_fill, TabActiveFill::Solid);
     }
 }

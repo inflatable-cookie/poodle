@@ -311,7 +311,7 @@ fn build_specimen_page(
             };
             section = section.child(crate::jsx::jel(crate::compat::js_tabs(
                 &poodle_specs::TabsSpec::new(items)
-                    .with_variant(poodle_specs::TabVariant::Underline)
+                    .with_variant(poodle_specs::TabVariant::Card)
                     .with_size(poodle_specs::ControlSize::Sm)
                     .with_value(value),
                 theme,

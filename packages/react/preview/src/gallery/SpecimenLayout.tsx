@@ -52,7 +52,7 @@ export function SpecimenLayout({
       <Tabs
         value={activeTab}
         items={tabs}
-        variant="text"
+        variant="card"
         ariaLabel="Specimen view"
         onValueChange={(value) => setActiveTab(value as typeof activeTab)}
       />

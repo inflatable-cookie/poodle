@@ -7,6 +7,22 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — The web visual gate's fixed ports (4174/4180) are squattable by
+  any other worktree's dev server: a stale `vite --port 4180 --strictPort`
+  left running by a previous session makes the gate's strict-port spawn die
+  instantly while `waitForPort` polls the squatter's 404s until the 60s
+  timeout, with the failing port hidden because the spawned preview's output
+  is ignored. `test/visual/run.ts` should pre-flight `isUp` + a content probe
+  (200 + expected root) before spawning, or the gate should pick ephemeral
+  ports. Affects every card that needs visual enumeration.
+
+- 2026-08-11 — g13-013's batch-card Known State claimed `render_underline`
+  renders "no accessories at all — no icon, no count, no close", but
+  `build_tab_label` already renders icon+count in every renderer (only close
+  was missing). Card Known State is not always current against the working
+  tree; workers must verify rather than trust "verified — build on this".
+  Affects card-authoring accuracy and worker trust.
+
 - 2026-08-11 — `effigy docs:lint` requires every Cargo.toml under
   `packages/` to be registered in `packages/release-manifest.json` (reverse
   check in `packages/svelte/preview/scripts/lint-docs.ts`

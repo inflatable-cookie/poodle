@@ -38,7 +38,7 @@
   <Tabs
     value={activeTab}
     items={tabs}
-    variant="text"
+    variant="card"
     ariaLabel="Specimen view"
     onValueChange={(value) => (activeTab = value as typeof activeTab)}
   />

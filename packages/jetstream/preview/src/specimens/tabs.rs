@@ -1,10 +1,12 @@
-//! Tabs specimen — all four variants, icon+count tabs, disabled tabs.
+//! Tabs specimen — card/pill/block variants, icon+count tabs, disabled tabs.
 
 use crate::compat::js_tabs;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{ControlDensity, ControlSize, Orientation, TabDefinition, TabVariant, TabsSpec};
+use poodle_specs::{
+    ControlDensity, ControlSize, Orientation, TabActiveFill, TabDefinition, TabVariant, TabsSpec,
+};
 
 use crate::app_state::AppState;
 
@@ -65,19 +67,19 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
     div()
         .flex_col()
         .gap(32.0)
-        // ── Underline (default) ──────────────────────────────────────────
+        // ── Card (default) ──────────────────────────────────────────────
         .child(group(
-            "Underline — first selected",
+            "Card — first selected",
             secondary,
             js_tabs(&TabsSpec::new(items.clone()).with_value("overview"), theme),
         ))
         .child(group(
-            "Underline — second selected",
+            "Card — second selected",
             secondary,
             js_tabs(&TabsSpec::new(items.clone()).with_value("details"), theme),
         ))
         .child(group(
-            "Underline — no bottom border",
+            "Card — no bottom border",
             secondary,
             js_tabs(
                 &TabsSpec::new(items.clone())
@@ -86,24 +88,26 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
                 theme,
             ),
         ))
-        // ── Card ─────────────────────────────────────────────────────────
+        // ── Card decorations ────────────────────────────────────────────
         .child(group(
-            "Card — first selected",
+            "Card — active outline",
             secondary,
             js_tabs(
                 &TabsSpec::new(items.clone())
                     .with_variant(TabVariant::Card)
+                    .with_active_outline(true)
                     .with_value("overview"),
                 theme,
             ),
         ))
         .child(group(
-            "Card — second selected",
+            "Card — solid fill",
             secondary,
             js_tabs(
                 &TabsSpec::new(items.clone())
                     .with_variant(TabVariant::Card)
-                    .with_value("details"),
+                    .with_active_fill(TabActiveFill::Solid)
+                    .with_value("overview"),
                 theme,
             ),
         ))
@@ -151,7 +155,7 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
         ))
         // ── Decorations ──────────────────────────────────────────────────
         .child(group(
-            "With icons (Underline)",
+            "With icons (Card)",
             secondary,
             js_tabs(
                 &TabsSpec::new(items_icons.clone()).with_value("overview"),
@@ -175,7 +179,7 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
         ))
         // ── Disabled tab ─────────────────────────────────────────────────
         .child(group(
-            "With disabled tab (Underline)",
+            "With disabled tab (Card)",
             secondary,
             js_tabs(
                 &TabsSpec::new(items_disabled.clone()).with_value("active"),
@@ -247,7 +251,7 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
             secondary,
             js_tabs(
                 &TabsSpec::new(items_vertical.clone())
-                    .with_variant(TabVariant::Underline)
+                    .with_variant(TabVariant::Card)
                     .with_orientation(Orientation::Vertical)
                     .with_value("files"),
                 theme,

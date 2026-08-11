@@ -45,6 +45,18 @@
     defaultValue?: string | null;
     items?: TabItem[];
     variant?: TabVariant;
+    /**
+     * Opt-in outline on the active tab — the decoration the former `card`
+     * variant had by default. Reuses the old card selected-border value so
+     * the opted-in look matches what card gave.
+     */
+    activeOutline?: boolean;
+    /**
+     * Selection treatment on the active tab: `"tint"` is the accent-tinted
+     * fill; `"solid"` fills the tab with `accent-base` and switches the
+     * foreground to `text-inverse` for contrast.
+     */
+    activeFill?: "tint" | "solid";
     orientation?: Orientation;
     activationMode?: TabActivationMode;
     bordered?: boolean;
@@ -87,7 +99,9 @@
     value = $bindable<string | null>(null),
     defaultValue = null,
     items = [],
-    variant = "text",
+    variant = "card",
+    activeOutline = false,
+    activeFill = "tint",
     orientation = "horizontal",
     activationMode = "automatic",
     bordered = true,
@@ -187,7 +201,6 @@
   const isVertical = $derived(orientation === "vertical");
   const hasTooltips = $derived(isVertical || showTooltips);
   const canCollapse = $derived(collapseWhenOverflow && !isVertical);
-  const resolvedVariant = $derived(variant === "underline" ? "text" : variant);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const resolvedIconSize = $derived(resolveSupportingVisualSize(resolvedSize));
@@ -452,7 +465,7 @@
     void renderedItems;
     void resolvedDensity;
     void resolvedSize;
-    void resolvedVariant;
+    void variant;
     void canCollapse;
     void actions;
     void evaluateCollapsedOverflow();
@@ -539,8 +552,10 @@
 <div
   bind:this={rootElement}
   class="poodle-tabs"
-  data-variant={resolvedVariant}
+  data-variant={variant}
   data-bordered={bordered}
+  data-active-outline={activeOutline || undefined}
+  data-active-fill={activeFill}
   data-orientation={orientation}
   data-size={resolvedSize}
   data-density={resolvedDensity}

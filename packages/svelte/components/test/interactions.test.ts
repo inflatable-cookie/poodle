@@ -24,6 +24,32 @@ describe("svelte interaction", () => {
     expect(onCheckedChange).toHaveBeenCalledWith(true);
   });
 
+  it("Tabs defaults to card variant with tint fill and no active outline", () => {
+    const { container } = render(Tabs, {
+      props: {
+        items: [{ value: "a", label: "A" }],
+      },
+    });
+    const root = container.querySelector(".poodle-tabs")!;
+    expect(root.getAttribute("data-variant")).toBe("card");
+    expect(root.getAttribute("data-active-fill")).toBe("tint");
+    expect(root.hasAttribute("data-active-outline")).toBe(false);
+  });
+
+  it("Tabs emits activeOutline and solid fill data attributes", () => {
+    const { container } = render(Tabs, {
+      props: {
+        items: [{ value: "a", label: "A" }],
+        variant: "card",
+        activeOutline: true,
+        activeFill: "solid",
+      },
+    });
+    const root = container.querySelector(".poodle-tabs")!;
+    expect(root.getAttribute("data-active-outline")).toBe("true");
+    expect(root.getAttribute("data-active-fill")).toBe("solid");
+  });
+
   it("Tabs reorders and preserves the dragged value through dragend", async () => {
     const onReorder = vi.fn();
     const onDragEnd = vi.fn();

@@ -3779,6 +3779,11 @@ impl Tabs {
         self
     }
 
+    pub(crate) fn on_close(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_close = Some(handler);
+        self
+    }
+
     pub(crate) fn with_content(
         mut self,
         value: impl Into<String>,

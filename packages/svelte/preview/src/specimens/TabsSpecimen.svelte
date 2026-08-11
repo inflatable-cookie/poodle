@@ -73,7 +73,7 @@
       </div>
     </SpecimenGroup>
 
-    <SpecimenGroup label="Text variant (default, with indicator line)">
+    <SpecimenGroup label="Card variant (default, with indicator line)">
       <Tabs
         items={basicTabs}
         defaultValue="overview"
@@ -85,7 +85,7 @@
       </Tabs>
     </SpecimenGroup>
 
-    <SpecimenGroup label="Text variant (no border)">
+    <SpecimenGroup label="Card variant (no border)">
       <Tabs
         items={basicTabs}
         defaultValue="overview"
@@ -112,6 +112,26 @@
       {/if}
     </SpecimenGroup>
 
+    <SpecimenGroup label="Card variant (active outline)">
+      <Tabs
+        items={basicTabs}
+        variant="card"
+        activeOutline
+        defaultValue="overview"
+        ariaLabel="Outlined section tabs"
+      />
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Card variant (solid fill)">
+      <Tabs
+        items={basicTabs}
+        variant="card"
+        activeFill="solid"
+        defaultValue="overview"
+        ariaLabel="Solid section tabs"
+      />
+    </SpecimenGroup>
+
     <SpecimenGroup label="Block variant (full-width shell tabs with separators)">
       <div class="poodle-specimen__frame">
         <Tabs
@@ -136,7 +156,7 @@
       />
     </SpecimenGroup>
 
-    <SpecimenGroup label="Underline (with icons, no panel)">
+    <SpecimenGroup label="Card variant (with icons, no panel)">
       <Tabs
         items={iconTabs}
         defaultValue="home"
