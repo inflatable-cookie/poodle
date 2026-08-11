@@ -81,6 +81,7 @@ primitives and layout surfaces through higher-order application components.
 - `format-file-size.md`
 - `grid.md`
 - `hover-card.md`
+- `history-center.md`
 - `icon-button.md`
 - `icon-provider.md`
 - `icon.md`

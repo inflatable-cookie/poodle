@@ -157,6 +157,7 @@ import UiPresentationProviderSpecimen from "./UiPresentationProviderSpecimen.sve
 import ActionDiscoveryPanelSpecimen from "./ActionDiscoveryPanelSpecimen.svelte";
 import AppHeaderSpecimen from "./AppHeaderSpecimen.svelte";
 import MessageCenterSpecimen from "./MessageCenterSpecimen.svelte";
+import HistoryCenterSpecimen from "./HistoryCenterSpecimen.svelte";
 import CollapseToggleSpecimen from "./CollapseToggleSpecimen.svelte";
 import CommandPaletteSpecimen from "./CommandPaletteSpecimen.svelte";
 import DockRegionSpecimen from "./DockRegionSpecimen.svelte";
@@ -329,6 +330,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "action-discovery-panel": ActionDiscoveryPanelSpecimen,
   "app-header": AppHeaderSpecimen,
   "message-center": MessageCenterSpecimen,
+  "history-center": HistoryCenterSpecimen,
   "collapse-toggle": CollapseToggleSpecimen,
   "command-palette": CommandPaletteSpecimen,
   "debug-dialog": DebugDialogSpecimen,

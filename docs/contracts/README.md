@@ -123,6 +123,7 @@ contract references the rule rather than restating it:
 - `components/format-file-size.md`
 - `components/grid.md`
 - `components/hover-card.md`
+- `components/history-center.md`
 - `components/icon-button.md`
 - `components/icon-provider.md`
 - `components/icon.md`

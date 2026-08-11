@@ -205,6 +205,7 @@ export { default as StateTile } from "./StateTile.svelte";
 export { default as ValidationSummary } from "./ValidationSummary.svelte";
 export { default as ModelPicker } from "./ModelPicker.svelte";
 export { default as MessageCenter } from "./MessageCenter.svelte";
+export { default as HistoryCenter } from "./HistoryCenter.svelte";
 export { default as ToastStack } from "./ToastStack.svelte";
 export { default as ToastHost } from "./ToastHost.svelte";
 export {
@@ -389,6 +390,10 @@ export type {
   MediaUploadWorkflowStep,
   MediaState,
   MessageCenterItem,
+  HistoryEntry,
+  HistoryEntryPosition,
+  HistoryBranch,
+  HistoryStatus,
   DockExternalDragCancelContext,
   DockExternalDragCancelReason,
   DockExternalDragEndContext,

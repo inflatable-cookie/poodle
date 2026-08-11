@@ -365,6 +365,24 @@ export {
 } from "./toggle-group";
 
 export {
+  historyCenterTransition,
+  historyCenterKeydownEvent,
+  historyCenterRows,
+  historyCenterRowCount,
+  historyCenterDefaultContext,
+  isForkPoint,
+  type HistoryEntry,
+  type HistoryEntryPosition,
+  type HistoryBranch,
+  type HistoryCenterState,
+  type HistoryCenterContext,
+  type HistoryCenterEvent,
+  type HistoryCenterEffect,
+  type HistoryCenterResult,
+  type HistoryCenterRow,
+} from "./history-center";
+
+export {
   sliderTransition,
   rangeSliderTransition,
   normalizeSliderValue,

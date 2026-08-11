@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — The 85-icon default icon set has no undo, redo, history, or
+  pin glyphs (no `corner-up-left`, `rotate-ccw`, `pin`, …), so the new
+  `HistoryCenter` titlebar cluster falls back to `arrow-left` / `list` /
+  `arrow-right` and checkpoint pins to `git-commit-horizontal`. Tooltips and
+  labels carry the semantics, but canonical undo/redo/pin affordances need
+  the icon set extended (an icon-crate change, not a component change).
+
 - 2026-08-11 — Consumers are compensating for Poodle API gaps with `:global`
   CSS overrides, and those fail silently when Poodle refactors: a scan found
   `.poodle-tabs*` overrides in 9 repos, including three still targeting the

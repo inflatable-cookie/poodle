@@ -703,6 +703,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "ErrorBoundary",
       "FormDialog",
       "FormLayout",
+      "HistoryCenter",
       "InlineListSection",
       "LogList",
       "MarkdownEditor",

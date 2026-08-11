@@ -4761,6 +4761,69 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 />`,
   },
 
+  "history-center": {
+    props: [
+      { name: "entries", type: "HistoryEntry[]", default: "[]", description: "Caller-owned page of history entries." },
+      { name: "totalEntries", type: "number", default: "0", description: "Total entry count shown in the header." },
+      { name: "hasMoreEntries", type: "boolean", default: "false", description: "Shows the entries load-more action." },
+      { name: "branches", type: "HistoryBranch[] | null", default: "null", description: "Fork branch rows; null hides all branch and checkpoint UI." },
+      { name: "totalBranches", type: "number", default: "0", description: "Total branch count shown in the header when branches are supplied." },
+      { name: "hasMoreBranches", type: "boolean", default: "false", description: "Shows the branches load-more action." },
+      { name: "canUndo", type: "boolean", default: "false", description: "Enables the undo trigger." },
+      { name: "canRedo", type: "boolean", default: "false", description: "Enables the redo trigger." },
+      { name: "busy", type: "boolean", default: "false", description: "Disables undo and redo while an authority operation runs." },
+      { name: "status", type: '"idle" | "loading" | "failed"', default: '"idle"', description: "Source status; loading shows a spinner row, failed shows statusMessage." },
+      { name: "statusMessage", type: "string | null", default: "null", description: "Copy for the failed status row." },
+      { name: "rejection", type: "string | null", default: "null", description: "Transient inline notice; never silent, never sticky." },
+      { name: "maxBranchNameBytes", type: "number", default: "256", description: "Client-side affordance only; caps inline rename input length." },
+      { name: "open", type: "boolean | null", default: "null", description: "Controlled open state; bindable." },
+      { name: "defaultOpen", type: "boolean", default: "false", description: "Initial uncontrolled open state." },
+      { name: "placement", type: "OverlayPlacement", default: '"bottom-end"', description: "Popover placement hint." },
+      { name: "undoLabel", type: "string", default: '"Undo"', description: "Undo trigger accessible name and tooltip." },
+      { name: "redoLabel", type: "string", default: '"Redo"', description: "Redo trigger accessible name and tooltip." },
+      { name: "listLabel", type: "string", default: '"History"', description: "List trigger accessible name, tooltip, and list region label." },
+      { name: "title", type: "string", default: '"History"', description: "Surface heading and default accessible label." },
+      { name: "emptyMessage", type: "string", default: '"No history entries yet."', description: "Empty-state copy." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Overrides the surface label." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit semantic size override." },
+      { name: "sizeRole", type: "SemanticControlSizeRole", default: '"chrome"', description: "Semantic size role used when inheriting presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override." },
+      { name: "onUndo", type: "(() => void) | null", default: "null", description: "Undo command; the host owns what undo does." },
+      { name: "onRedo", type: "(() => void) | null", default: "null", description: "Redo command; the host owns what redo does." },
+      { name: "onOpenChange", type: "((open: boolean) => void) | null", default: "null", description: "Open-state request callback." },
+      { name: "onSelectEntry", type: "((id: string) => void) | null", default: "null", description: "Entry row activation." },
+      { name: "onCheckout", type: "((branchId: string, entryId: string) => void) | null", default: "null", description: "Branch row activation; carries the fork context." },
+      { name: "onRenameBranch", type: "((branchId: string, name: string) => void) | null", default: "null", description: "Committed inline branch rename." },
+      { name: "onLoadMoreEntries", type: "((offset: number) => void) | null", default: "null", description: "Requests the next entries page; offset is the supplied count." },
+      { name: "onLoadMoreBranches", type: "((offset: number) => void) | null", default: "null", description: "Requests the next branches page; offset is the supplied count." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { HistoryCenter, type HistoryBranch, type HistoryEntry } from "@inflatable-cookie/poodle-svelte";
+
+  let entries: HistoryEntry[] = [
+    { id: "mix-1", label: "Committed mix 1", position: "past" },
+    { id: "fork", label: "Fork point", position: "past", branchCount: 2 },
+    { id: "draft", label: "Current draft", position: "current" },
+  ];
+
+  let branches: HistoryBranch[] = [
+    { id: "b-lead", name: "feature/lead", entryCount: 3, current: true },
+  ];
+</script>
+
+<HistoryCenter
+  {entries}
+  {branches}
+  canUndo
+  onSelectEntry={(id) => console.log("select", id)}
+  onCheckout={(branchId, entryId) => console.log("checkout", branchId, entryId)}
+  onRenameBranch={(branchId, name) => branches = branches.map((branch) => branch.id === branchId ? { ...branch, name } : branch)}
+  onLoadMoreEntries={(offset) => console.log("load more", offset)}
+/>`,
+  },
+
   "action-discovery-panel": {
     props: [
       { name: "items", type: "CommandActionItem[]", default: "[]", description: "Array of discoverable action items." },
