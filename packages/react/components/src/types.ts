@@ -662,11 +662,13 @@ export type TabActivationMode = "automatic" | "manual";
 export type ActiveEdge = "none" | "outline" | "underline";
 
 /**
- * Selection treatment on the active control: `"tint"` is the accent-tinted
- * fill; `"solid"` fills with `accent-base` and switches the foreground to
- * `text-inverse`. Shared type — see `docs/contracts/004-shared-control-types.md`.
+ * Selection treatment on the active control: `"none"` draws no selection
+ * fill (selection is carried by the edge and the selected text colour
+ * alone); `"tint"` is the accent-tinted fill; `"solid"` fills with
+ * `accent-base` and switches the foreground to `text-inverse`. Shared type —
+ * see `docs/contracts/004-shared-control-types.md`.
  */
-export type ActiveFill = "tint" | "solid";
+export type ActiveFill = "none" | "tint" | "solid";
 
 export type DockEdge = "left" | "right" | "top" | "bottom";
 export type DockEmphasis = "standard" | "quiet" | "strong";

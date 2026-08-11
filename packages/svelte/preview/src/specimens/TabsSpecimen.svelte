@@ -180,15 +180,15 @@
       </div>
     </SpecimenGroup>
 
-    <SpecimenGroup label="Block variant (active underline — the former strip)">
+    <SpecimenGroup label="Block variant (active underline, no fill — the former strip)">
       <div class="poodle-specimen__frame">
         <Tabs
           items={stripTabs}
           variant="block"
           activeEdge="underline"
-          activeFill="solid"
+          activeFill="none"
           defaultValue="editor"
-          ariaLabel="Solid underlined block tabs"
+          ariaLabel="Strip-equivalent block tabs"
         />
       </div>
     </SpecimenGroup>

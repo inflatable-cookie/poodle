@@ -35,9 +35,10 @@
      */
     activeEdge?: ActiveEdge;
     /**
-     * Selection treatment on the open trigger: `"tint"` is the accent-tinted
-     * fill; `"solid"` fills the trigger with `accent-base` and switches the
-     * foreground to `text-inverse` for contrast.
+     * Selection treatment on the open trigger: `"none"` draws no fill (the
+     * edge and the selected text colour carry selection alone), `"tint"` is
+     * the accent-tinted fill; `"solid"` fills the trigger with `accent-base`
+     * and switches the foreground to `text-inverse` for contrast.
      */
     activeFill?: ActiveFill;
     onValueChange?: ((value: string | null) => void) | undefined;

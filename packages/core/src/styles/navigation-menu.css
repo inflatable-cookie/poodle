@@ -86,6 +86,16 @@
     background: var(--poodle-recipe-navigation-menu-active-solid-fill, var(--poodle-color-accent-base));
   }
 
+  /* activeFill="none": the off state of the fill axis — the open trigger
+     carries no selection fill, symmetric with activeEdge="none". It keeps
+     the idle trigger fill, which is not a selection treatment; the edge and
+     the selected text colour still mark the open trigger. The generic
+     hover/focus accent-12% rule still applies, exactly as for an idle
+     trigger — only the selection fill is gone. */
+  .poodle-navigation-menu[data-active-fill="none"] .poodle-navigation-menu__trigger[data-open="true"] {
+    background: var(--poodle-recipe-navigation-menu-trigger-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
+  }
+
   .poodle-navigation-menu__trigger:disabled {
     cursor: not-allowed;
     opacity: var(--poodle-state-opacity-disabled);

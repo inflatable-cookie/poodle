@@ -2636,7 +2636,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "items", type: "NavigationMenuItem[]", default: "[]", description: "Array of top-level navigation items." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the navigation region." },
       { name: "activeEdge", type: '"none" | "outline" | "underline"', default: '"none"', description: "Selection edge on the open trigger: none draws no edge, outline draws the accent border (the border the trigger carried by default before g13.016), underline draws the accent edge along the trigger's bottom." },
-      { name: "activeFill", type: '"tint" | "solid"', default: '"tint"', description: "Selection treatment on the open trigger: tint is the accent-tinted fill; solid fills with accent-base and swaps the foreground to text-inverse." },
+      { name: "activeFill", type: '"none" | "tint" | "solid"', default: '"tint"', description: "Selection treatment on the open trigger: none draws no selection fill (the edge and the selected text colour carry selection alone), tint is the accent-tinted fill; solid fills with accent-base and swaps the foreground to text-inverse." },
       { name: "onValueChange", type: "((value: string | null) => void) | undefined", default: "undefined", description: "Called when the active navigation item changes." },
     ],
     slots: [
@@ -4053,7 +4053,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "items", type: "TabItem[]", default: "[]", description: "Array of tab items to render." },
       { name: "variant", type: "TabVariant", default: '"card"', description: "Visual style variant of the tabs." },
       { name: "activeEdge", type: '"none" | "outline" | "underline"', default: '"none"', description: "Selection edge on the active tab: none draws no edge, outline draws the accent border (the former card selected-border value), underline draws the accent edge along the inline-end side (the former strip indicator)." },
-      { name: "activeFill", type: '"tint" | "solid"', default: '"tint"', description: "Selection treatment on the active tab: tint is the accent-tinted fill, solid fills the tab with accent-base and switches the foreground to text-inverse." },
+      { name: "activeFill", type: '"none" | "tint" | "solid"', default: '"tint"', description: "Selection treatment on the active tab: none draws no selection fill (the edge and the selected text colour carry selection alone — block + none + underline is the former strip), tint is the accent-tinted fill, solid fills the tab with accent-base and switches the foreground to text-inverse." },
       { name: "bordered", type: "boolean", default: "false", description: "Card variant only: draws the separating border on the list and the outer padding that holds the tabs off it." },
       { name: "orientation", type: "Orientation", default: '"horizontal"', description: "Layout orientation of the tab list." },
       { name: "activationMode", type: "TabActivationMode", default: '"automatic"', description: "Whether tabs activate on focus or on click." },

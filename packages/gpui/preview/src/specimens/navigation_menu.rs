@@ -167,6 +167,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("specimen-nav-solid-hover"),
                 ),
         )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Navigation menu (no fill)"),
+                    theme,
+                ))
+                .child(
+                    NavigationMenu::from_spec(
+                        NavigationMenuSpec::new(items.clone())
+                            .with_value("components")
+                            .with_aria_label("No-fill underlined main navigation")
+                            .with_active_fill(ActiveFill::None)
+                            .with_active_edge(ActiveEdge::Underline),
+                        theme,
+                    )
+                    .with_id("specimen-nav-none"),
+                ),
+        )
         .into_any_element();
 
     let make_items = || {

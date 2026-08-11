@@ -177,12 +177,13 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
             ),
         ))
         .child(group(
-            "Block — active underline (the former strip)",
+            "Block — active underline, no fill (the former strip)",
             secondary,
             js_tabs(
                 &TabsSpec::new(items.clone())
                     .with_variant(TabVariant::Block)
                     .with_active_edge(ActiveEdge::Underline)
+                    .with_active_fill(ActiveFill::None)
                     .with_value("overview"),
                 theme,
             ),

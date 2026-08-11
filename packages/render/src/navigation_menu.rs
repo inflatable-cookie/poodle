@@ -107,8 +107,19 @@ pub fn navigation_menu(
         // layout.
         let outline_on = spec.active_edge == ActiveEdge::Outline;
         let (bg, border_color, border_width) = if is_active {
+            let fill_bg = if solid {
+                accent
+            } else if spec.active_fill == ActiveFill::None {
+                // The off value of the fill axis: no selection fill, so the
+                // open trigger keeps the idle trigger fill (which is not a
+                // selection treatment). Selection is marked by the edge and
+                // the selected text colour alone.
+                idle_bg
+            } else {
+                active_bg
+            };
             (
-                if solid { accent } else { active_bg },
+                fill_bg,
                 if outline_on { outline_selected_border } else { TRANSPARENT },
                 if outline_on { border_w } else { 0.0 },
             )
@@ -385,5 +396,34 @@ mod tests {
             closed_hover.background,
             Some(with_alpha(accent, accent.3 * 0.12))
         );
+    }
+
+    #[test]
+    fn none_fill_keeps_idle_background_and_underline_still_marks_open_trigger() {
+        let theme = theme();
+        let spec = NavigationMenuSpec::new(items())
+            .with_value("a")
+            .with_active_fill(ActiveFill::None)
+            .with_active_edge(ActiveEdge::Underline);
+        let accent = theme.resolve_color("color.accent.base");
+        let surface = theme.resolve_color("color.background.surface");
+        let idle = with_alpha(surface, surface.3 * 0.88);
+
+        let root = navigation_menu(&spec, &theme, None);
+        let open = trigger_of(&root, "A");
+        // No selection fill: the open trigger keeps the idle trigger fill.
+        assert_eq!(open.style.descriptor.background, Some(idle));
+        // The underline still renders.
+        assert_eq!(open.style.border_bottom_width, Some(rem_to_px(0.125)));
+        assert_eq!(open.style.border_color_bottom, Some(accent));
+        // The selected text colour is unaffected (text-primary, not inverse).
+        assert_eq!(
+            label_text(&root, "A").style.descriptor.text_color,
+            Some(theme.resolve_color("color.text.primary"))
+        );
+
+        let closed = trigger_of(&root, "B");
+        assert_eq!(closed.style.descriptor.background, Some(idle));
+        assert_eq!(closed.style.border_color_bottom, Some(TRANSPARENT));
     }
 }

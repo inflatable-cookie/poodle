@@ -49,6 +49,12 @@
     </div>
   </SpecimenGroup>
 
+  <!-- activeFill="none": the open trigger keeps its idle fill; the edge and
+       the selected text colour mark selection alone. -->
+  <SpecimenGroup label="Navigation menu (no fill)">
+    <NavigationMenu {items} value="components" activeFill="none" activeEdge="underline" ariaLabel="No-fill underlined main navigation" />
+  </SpecimenGroup>
+
   {#snippet sizes(size)}
     <NavigationMenu {items} value="components" {size} ariaLabel={size + " navigation"} />
   {/snippet}

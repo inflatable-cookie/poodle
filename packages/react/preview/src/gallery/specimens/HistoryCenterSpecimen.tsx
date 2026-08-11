@@ -30,10 +30,10 @@ export function HistoryCenterSpecimen() {
   const [branches, setBranches] = useState(initialBranches);
 
   return (
-    {/* Axis tabs are advertised by SpecimenLayout whether or not a specimen
-        fills them (showSizes/showDensities default true), so omitting these
-        renders empty Sizes and Densities tabs. Triggers stay closed here:
-        several open popovers would stack in one place. */}
+    // Axis tabs are advertised by SpecimenLayout whether or not a specimen
+    // fills them (showSizes/showDensities default true), so omitting these
+    // renders empty Sizes and Densities tabs. Triggers stay closed here:
+    // several open popovers would stack in one place.
     <SpecimenLayout
       bareVariants
       sizes={(size) => (

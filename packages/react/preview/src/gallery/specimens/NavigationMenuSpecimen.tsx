@@ -76,6 +76,18 @@ export function NavigationMenuSpecimen() {
           />
         </div>
       </SpecimenGroup>
+
+      {/* activeFill="none": the open trigger keeps its idle fill; the edge
+          and the selected text colour mark selection alone. */}
+      <SpecimenGroup label="Navigation menu (no fill)">
+        <NavigationMenu
+          items={items}
+          value="components"
+          activeFill="none"
+          activeEdge="underline"
+          ariaLabel="No-fill underlined main navigation"
+        />
+      </SpecimenGroup>
     </SpecimenLayout>
   );
 }

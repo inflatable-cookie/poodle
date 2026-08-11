@@ -16,10 +16,14 @@ pub enum TabsOverflowStrategy {
 }
 
 /// Selection treatment on the active tab. Matches the Svelte/React
-/// `activeFill` prop (`"tint" | "solid"`, default `"tint"`). Shared type —
-/// see `docs/contracts/004-shared-control-types.md`.
+/// `activeFill` prop (`"none" | "tint" | "solid"`, default `"tint"`). Shared
+/// type — see `docs/contracts/004-shared-control-types.md`.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum ActiveFill {
+    /// No selection fill — selection is carried by the edge and the selected
+    /// text colour alone. The off value of the fill axis, symmetric with
+    /// `ActiveEdge::None`.
+    None,
     /// Accent-tinted selection on the active tab.
     #[default]
     Tint,
@@ -64,8 +68,8 @@ pub struct TabsSpec {
     /// Selection edge on the active tab — see `ActiveEdge`. Matches Svelte
     /// `activeEdge` (default `"none"`).
     pub active_edge: ActiveEdge,
-    /// Selection treatment on the active tab: tint or fully accent-filled.
-    /// Matches Svelte `activeFill` (default `"tint"`).
+    /// Selection treatment on the active tab: none (no fill), tint, or fully
+    /// accent-filled. Matches Svelte `activeFill` (default `"tint"`).
     pub active_fill: ActiveFill,
     pub orientation: Orientation,
     pub activation_mode: TabActivationMode,
@@ -232,7 +236,7 @@ impl TabsSpec {
         self
     }
 
-    /// Set the selection treatment on the active tab (tint or solid).
+    /// Set the selection treatment on the active tab (none, tint, or solid).
     pub fn with_active_fill(mut self, active_fill: ActiveFill) -> Self {
         self.active_fill = active_fill;
         self
