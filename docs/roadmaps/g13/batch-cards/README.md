@@ -19,6 +19,7 @@ and roadmap closeout.
 | `007` | value-domain drift inventory (report-only) | contract amendments `282ce489` | merged (`8090521c`) |
 | `008` | split-button tone parity + primary status shadow | `006` merged + shadow ruling | merged (`f59adac0`) |
 | `009` | dialog initial-focus hook (side-quest) | `b1a4a5e7` | dispatched |
+| `010` | TextInput focus parity: autofocus + focus() to React | `b1a4a5e7` | dispatched |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
 evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of
@@ -37,3 +38,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 007](007-value-domain-drift-inventory.md)
 - [Batch 008](008-split-button-tone-parity.md)
 - [Batch 009](009-dialog-initial-focus.md)
+- [Batch 010](010-text-input-focus-parity.md)

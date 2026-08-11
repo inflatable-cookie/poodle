@@ -36,6 +36,33 @@ prefer the narrower current authority and repair the stale document.
   lifecycle, and drawing concerns.
 - Extend the shared node vocabulary only for reusable rendering capabilities.
 
+## Runtime Parity Authority
+
+Poodle has four runtimes: Svelte, React, GPUI, and Jetstream.
+
+- **Svelte is the reference implementation.** Where runtimes disagree on what a
+  component can do, Svelte is what the others are brought up to.
+- A capability present in Svelte and absent elsewhere is a **gap to port**, not
+  an accepted delta. Port it to React, GPUI, and Jetstream.
+- A capability present in another runtime and absent from Svelte is a
+  **candidate for inclusion**, not an automatic port. Evaluate it, then either
+  add it to Svelte and the contract, or record why it stays runtime-specific.
+- The exception is genuinely runtime-owned behavior — focus, IME, portals,
+  measurement, pointer capture, text systems, accessibility projection. Those
+  are adapter capabilities and are expected to differ in mechanism while
+  matching in observable result.
+- Porting a capability includes documenting it. An undocumented capability is
+  not "in Svelte and missing elsewhere"; it is drift on every side. The
+  contract's props table is part of the port.
+- Web-native attributes (for example `autocomplete`, `spellcheck`, `autofocus`)
+  belong to the web runtimes and stay excluded from the portable Rust spec.
+  Imperative escape hatches (for example `focus()`) are documented as methods,
+  not props, and are expected in both web runtimes.
+
+Contracts remain the semantic authority. This rule decides what *should* be
+true when a contract is silent and the runtimes disagree; it does not let an
+implementation override a contract that already speaks.
+
 ## Component Ownership
 
 - Poodle owns reusable primitives, composites, and general workstation shells.
