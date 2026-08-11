@@ -27,6 +27,7 @@
     autocomplete?: HTMLInputAttributes["autocomplete"];
     disabled?: boolean;
     readOnly?: boolean;
+    autofocus?: boolean;
     required?: boolean;
     pattern?: string | undefined;
     spellcheck?: HTMLInputAttributes["spellcheck"];
@@ -86,6 +87,8 @@
     trailing?: Snippet<[]>;
   }
 
+  let control = $state<HTMLInputElement | HTMLTextAreaElement | null>(null);
+
   let {
     id = "",
     value = $bindable<string | null | undefined>(undefined),
@@ -95,6 +98,7 @@
     autocomplete = undefined,
     disabled = false,
     readOnly = false,
+    autofocus = false,
     required = false,
     pattern = undefined,
     spellcheck = undefined,
@@ -136,6 +140,8 @@
     leading: leadingSnippet = undefined,
     trailing: trailingSnippet = undefined,
   }: Props = $props();
+
+  export { focus };
 
   const uiPresentation = getUiPresentation();
   const generatedInputId = `poodle-text-input-${crypto.randomUUID()}`;
@@ -360,6 +366,10 @@
     onValueChange?.(currentValue);
   }
 
+  function focus(): void {
+    control?.focus();
+  }
+
   function handleInput(event: Event): void {
     const nextValue = normalizeInputValue((event.currentTarget as HTMLInputElement).value);
     commitValue(nextValue, { markSlugEdited: isSlug });
@@ -517,6 +527,7 @@
         maxlength={maxLength ?? undefined}
         disabled={disabled}
         readonly={readOnly}
+        autofocus={autofocus || undefined}
         aria-label={ariaLabel ?? undefined}
         aria-describedby={effectiveDescribedBy}
         aria-invalid={ariaInvalid}
@@ -533,9 +544,11 @@
         }}
         onfocus={onFocus}
         onblur={handleBlurEvent}
+        bind:this={control}
       ></textarea>
     {:else}
       <input
+        bind:this={control}
         id={id || undefined}
         {name}
         list={list ?? undefined}
@@ -554,6 +567,7 @@
         maxlength={maxLength ?? undefined}
         disabled={disabled}
         readonly={readOnly}
+        autofocus={autofocus || undefined}
         aria-label={ariaLabel ?? undefined}
         aria-describedby={effectiveDescribedBy}
         aria-invalid={ariaInvalid}

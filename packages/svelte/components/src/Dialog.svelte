@@ -111,8 +111,10 @@
     if (isOpen && !previousOpen) {
       lastFocusedElement = document.activeElement as HTMLElement | null;
       tick().then(() => {
-        const focusable = getFocusableElements(surfaceElement);
-        focusable[0]?.focus() ?? surfaceElement?.focus();
+        if (!surfaceElement?.contains(document.activeElement)) {
+          const focusable = getFocusableElements(surfaceElement);
+          focusable[0]?.focus() ?? surfaceElement?.focus();
+        }
       });
 
       if (typeof document !== "undefined") {
@@ -126,7 +128,15 @@
         document.body.style.overflow = bodyOverflow;
       }
 
-      lastFocusedElement?.focus();
+      // Defer the focus restore one macrotask: a pending keyboard event
+      // (e.g. the Enter keyup that just submitted the dialog) must dispatch
+      // before the trigger regains focus, or it re-activates the trigger
+      // button and reopens the dialog.
+      const target = lastFocusedElement;
+      lastFocusedElement = null;
+      if (target !== null) {
+        setTimeout(() => target.focus(), 0);
+      }
     }
 
     previousOpen = isOpen;
