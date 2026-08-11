@@ -29,7 +29,8 @@ and roadmap closeout.
 | `017` | AppHeader centre region | `014` merged | dispatched |
 | `018` | Tabs `bordered` defaults to false | — | retired — folded into `020` |
 | `019` | HistoryCenter — web reference | none | dispatched |
-| `020` | ActiveEdge + strip consolidation + Tabs defaults | `016` merged | dispatched |
+| `020` | ActiveEdge + strip consolidation + Tabs defaults | `016` merged | merged (`2115e5c1`) |
+| `021` | `ActiveFill` gains `none` (strip equivalence) | `020` merged | dispatched |
 | `021` | HistoryCenter — native parity | `019` merged | planned |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
@@ -60,3 +61,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 018](018-tabs-bordered-default-false.md)
 - [Batch 019](019-history-center-web-reference.md)
 - [Batch 020](020-tabs-active-edge-and-strip-consolidation.md)
+- [Batch 021](021-active-fill-none.md)
