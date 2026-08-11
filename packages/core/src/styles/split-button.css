@@ -41,12 +41,63 @@
     --poodle-split-fill: var(--poodle-color-status-danger);
     --poodle-split-border: color-mix(in srgb, var(--poodle-color-status-danger) 84%, black);
     --poodle-split-text: var(--poodle-color-text-inverse);
+    --poodle-split-shadow: var(
+      --poodle-recipe-split-button-primary-danger-shadow,
+      inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
+      0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent)
+    );
   }
 
   .poodle-split-button[data-variant="ghost"][data-tone="danger"] {
     --poodle-split-fill: transparent;
     --poodle-split-border: transparent;
     --poodle-split-text: var(--poodle-color-status-danger);
+  }
+
+  .poodle-split-button[data-tone="success"] {
+    --poodle-split-fill: color-mix(in srgb, var(--poodle-color-status-success) 16%, var(--poodle-color-background-surface));
+    --poodle-split-border: color-mix(in srgb, var(--poodle-color-status-success) 46%, var(--poodle-color-border-default));
+    --poodle-split-text: var(--poodle-color-text-primary);
+  }
+
+  .poodle-split-button[data-variant="primary"][data-tone="success"] {
+    --poodle-split-fill: var(--poodle-color-status-success);
+    --poodle-split-border: color-mix(in srgb, var(--poodle-color-status-success) 84%, black);
+    --poodle-split-text: var(--poodle-color-text-inverse);
+    --poodle-split-shadow: var(
+      --poodle-recipe-split-button-primary-success-shadow,
+      inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
+      0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent)
+    );
+  }
+
+  .poodle-split-button[data-variant="ghost"][data-tone="success"] {
+    --poodle-split-fill: transparent;
+    --poodle-split-border: transparent;
+    --poodle-split-text: var(--poodle-color-status-success);
+  }
+
+  .poodle-split-button[data-tone="warning"] {
+    --poodle-split-fill: color-mix(in srgb, var(--poodle-color-status-warning) 16%, var(--poodle-color-background-surface));
+    --poodle-split-border: color-mix(in srgb, var(--poodle-color-status-warning) 46%, var(--poodle-color-border-default));
+    --poodle-split-text: var(--poodle-color-text-primary);
+  }
+
+  .poodle-split-button[data-variant="primary"][data-tone="warning"] {
+    --poodle-split-fill: var(--poodle-color-status-warning);
+    --poodle-split-border: color-mix(in srgb, var(--poodle-color-status-warning) 84%, black);
+    --poodle-split-text: var(--poodle-color-text-inverse);
+    --poodle-split-shadow: var(
+      --poodle-recipe-split-button-primary-warning-shadow,
+      inset 0 0.0625rem 0 color-mix(in srgb, white 14%, transparent),
+      0 0.375rem 1.125rem color-mix(in srgb, black 18%, transparent)
+    );
+  }
+
+  .poodle-split-button[data-variant="ghost"][data-tone="warning"] {
+    --poodle-split-fill: transparent;
+    --poodle-split-border: transparent;
+    --poodle-split-text: var(--poodle-color-status-warning);
   }
 
   .poodle-split-button__primary,

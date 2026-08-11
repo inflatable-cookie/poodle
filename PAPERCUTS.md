@@ -7,6 +7,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — `effigy visual:report` (sweep tier) reports 53 failing
+  Svelte↔React pairs at HEAD (308 compared; 46 size / 4 capture / 3 pixels,
+  spread across both themes — e.g. `tree`, `xy-pad`, `tool-call`, `fader`,
+  `agent-plan`) with no allowlist or debt inventory covering them, so report
+  mode cannot distinguish pre-existing parity debt from a card's real
+  regressions without a manual before/after comparison (g13.008 had to run
+  the gate twice and diff the summaries). Track the failing-pair set (committed
+  allowlist with reasons, or a parity-debt inventory) so cards can diff
+  against it. Affects visual-gate triage.
+
 - 2026-08-11 — Batch card 006 (button tone parity) lists `split-button.css`
   as "implements danger", but the contract amendment it depends on
   (`282ce489`) added a `--poodle-split-shadow` column to split-button.md §8
