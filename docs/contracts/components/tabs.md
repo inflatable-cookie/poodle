@@ -432,6 +432,23 @@ When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 | `border-radius` | `999px` |
 | `gap` | `0.125rem` |
 
+### Switches on strip: the underline is replaced, not combined
+
+`activeOutline` and `activeFill` apply to all four variants. On `strip` they
+interact with the variant's own selection mechanism, and the switch wins.
+
+Strip marks selection with a border on the item — `border-bottom` when
+horizontal, `border-right` when vertical — pulled over the list edge by a
+negative margin. Both switches decorate that same element, so the indicator and
+the decoration cannot coexist. When either switch is on, strip **drops its
+underline** and the switch provides the selection affordance instead. The
+negative margin is cleared with it, so the item no longer overlaps the list
+edge.
+
+`block` keeps its `border-left` separators under `activeOutline`; the outline
+covers the remaining sides. Solid fill overrides block's and strip's own
+item-hover backgrounds, so the fill does not revert on hover.
+
 ### Item (activeOutline)
 
 Applies when `activeOutline` is set, on every variant. A transparent border on

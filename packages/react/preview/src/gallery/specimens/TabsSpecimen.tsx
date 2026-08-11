@@ -183,6 +183,35 @@ export function TabsSpecimen() {
           <Tabs items={basicTabs} variant="card" activeFill="solid" defaultValue="overview" ariaLabel="Solid section tabs" />
         </SpecimenGroup>
 
+        {/* The switches are variant-agnostic, so every variant needs coverage.
+            Only card had it, which is why the strip-indicator clash and the
+            block hover revert both shipped unseen. */}
+        <SpecimenGroup label="Pill variant (active outline)">
+          <Tabs items={basicTabs} variant="pill" activeOutline defaultValue="overview" ariaLabel="Outlined pill tabs" />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Pill variant (solid fill)">
+          <Tabs items={basicTabs} variant="pill" activeFill="solid" defaultValue="overview" ariaLabel="Solid pill tabs" />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Block variant (solid fill — hover the active tab)">
+          <div style={frameStyle}>
+            <Tabs items={stripTabs} variant="block" activeFill="solid" defaultValue="editor" ariaLabel="Solid block tabs" />
+          </div>
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Strip variant (active outline — replaces the underline)">
+          <div style={frameStyle}>
+            <Tabs items={stripTabs} variant="strip" activeOutline defaultValue="editor" ariaLabel="Outlined strip tabs" />
+          </div>
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Strip variant (solid fill — replaces the underline)">
+          <div style={frameStyle}>
+            <Tabs items={stripTabs} variant="strip" activeFill="solid" defaultValue="editor" ariaLabel="Solid strip tabs" />
+          </div>
+        </SpecimenGroup>
+
         <SpecimenGroup label="Block variant (full-width shell tabs with separators)">
           <div style={frameStyle}>
             <Tabs items={stripTabs} variant="block" defaultValue="editor" reorderable ariaLabel="Workspace surfaces" />

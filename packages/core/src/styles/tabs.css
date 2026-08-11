@@ -471,6 +471,43 @@
     color: var(--poodle-recipe-tabs-active-solid-text, var(--poodle-color-text-inverse));
   }
 
+  /* Solid fill must survive hover. Block and strip both define their own
+     item-hover backgrounds; without this the fill reverts on hover while the
+     foreground stays text-inverse, leaving inverse text on a light tint. This
+     selector is variant-agnostic and one step more specific than any of them. */
+  .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"]:hover {
+    background: var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-color-accent-base));
+  }
+
+  /* ── Strip: either switch replaces the underline indicator ──
+
+     Strip marks selection with a border on the item — `border-bottom` when
+     horizontal, `border-right` when vertical — pulled over the list edge by a
+     negative margin. Both switches decorate that same element, so the
+     indicator and the decoration cannot coexist: per ruling, the switch wins
+     and the underline goes.
+
+     With activeOutline the generic `border` shorthand has already replaced the
+     indicator border, so only the negative margin needs clearing. With solid
+     fill alone the indicator border is still there and must be removed too. */
+  .poodle-tabs[data-variant="strip"][data-active-outline="true"] .poodle-tabs__item {
+    margin-bottom: 0;
+  }
+
+  .poodle-tabs[data-variant="strip"][data-active-fill="solid"]:not([data-active-outline="true"]) .poodle-tabs__item {
+    border-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  .poodle-tabs[data-variant="strip"][data-orientation="vertical"][data-active-outline="true"] .poodle-tabs__item {
+    margin-right: 0;
+  }
+
+  .poodle-tabs[data-variant="strip"][data-orientation="vertical"][data-active-fill="solid"]:not([data-active-outline="true"]) .poodle-tabs__item {
+    border-right: 0;
+    margin-right: 0;
+  }
+
   /* Focus */
   .poodle-tabs__tab:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
