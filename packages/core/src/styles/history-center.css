@@ -292,7 +292,12 @@
 
 .poodle-history-center__rename-input {
   box-sizing: border-box;
-  width: 100%;
+  /* `width: 100%` with horizontal margins overflows: border-box accounts for
+     padding and border but never margin, so the input measured 100% + 2x the
+     inset and spilled past the panel edge. `width: auto` is not an option —
+     an input is a replaced element, so auto resolves to its intrinsic size
+     rather than filling. Subtract the inset the margin adds. */
+  width: calc(100% - (2 * var(--poodle-space-stack-sm)));
   min-width: 0;
   margin: calc(var(--poodle-space-panel-y) * 0.4) var(--poodle-space-stack-sm);
   padding: 0.2rem 0.4rem;

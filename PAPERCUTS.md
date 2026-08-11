@@ -7,6 +7,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — `box-sizing: border-box` plus `width: 100%` plus a horizontal
+  margin overflows by twice the margin: border-box covers padding and border but
+  never margin. Hit on `HistoryCenter`'s inline rename input, which spilled past
+  the popover edge. `width: auto` is not the escape for form controls — an
+  `<input>` is replaced, so auto resolves to its intrinsic size rather than
+  filling. Worth a lint rule or a shared field-inset helper, since the
+  combination reads as correct.
+
 - 2026-08-11 — Components that render inside a `Popover` can set a width that
   fights the surface's. `HistoryCenter` set `width: clamp(20rem, 34vw, 26rem)`
   while passing the surface `surfaceMaxWidth: min(26rem, ...)`, so content could
