@@ -507,8 +507,31 @@ fn emitted_typescript_type_checks_with_no_framework_dependency() {
         output.status.success(),
         "generated TypeScript must type-check:\n{stdout}\n{stderr}"
     );
-    assert!(
-        !stderr.contains("node_modules") || !stderr.contains("svelte") || !stderr.contains("react"),
-        "no framework types in the check: {stderr}"
-    );
+    // Assert on the emitted source, not on stderr. A stderr-based check is
+    // vacuous exactly when it matters: tsc writes nothing on success, so an
+    // emitter that pulled in `svelte` would still pass it. Every import an
+    // emitted file declares must be relative -- a bare specifier is by
+    // definition a package dependency.
+    for entry in fs::read_dir(&root).expect("generated ts dir is readable") {
+        let path = entry.expect("dir entry").path();
+        if path.extension().and_then(|e| e.to_str()) != Some("ts") {
+            continue;
+        }
+        let source = fs::read_to_string(&path).expect("emitted file is readable");
+        for line in source.lines() {
+            let trimmed = line.trim_start();
+            if !trimmed.starts_with("import ") && !trimmed.starts_with("export ") {
+                continue;
+            }
+            let Some((_, after)) = trimmed.split_once(" from \"") else {
+                continue;
+            };
+            let specifier = after.trim_end_matches("\";");
+            assert!(
+                specifier.starts_with("./") || specifier.starts_with("../"),
+                "emitted TypeScript must not depend on a package: {} imports {specifier}",
+                path.display()
+            );
+        }
+    }
 }
