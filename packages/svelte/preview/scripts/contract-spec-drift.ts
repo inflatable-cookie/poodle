@@ -56,6 +56,10 @@ const WEB_ONLY_PROPS = new Set([
   "asRole",
   "autocapitalize",
   "autocorrect",
+  // Native input attribute, same class as autocapitalize/autocorrect/spellcheck
+  // above: web runtimes forward it to the element, and it stays out of the
+  // portable spec (001-working-rules.md, Runtime Parity Authority).
+  "autofocus",
   "class",
   "className",
   "compressionOptions",

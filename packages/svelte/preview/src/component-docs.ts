@@ -4100,6 +4100,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "autocomplete", type: "string | undefined", default: "undefined", description: "Native autocomplete attribute." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the input is disabled." },
       { name: "readOnly", type: "boolean", default: "false", description: "Whether the input is read-only." },
+      { name: "autofocus", type: "boolean", default: "false", description: "Web-only native autofocus attribute. Falsy omits the attribute; excluded from TextInputSpec." },
       { name: "required", type: "boolean", default: "false", description: "Whether the native input is required." },
       { name: "pattern", type: "string | undefined", default: "undefined", description: "Native input pattern attribute." },
       { name: "spellcheck", type: "boolean | undefined", default: "undefined", description: "Native spellcheck attribute." },
@@ -4142,6 +4143,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { TextInput } from "@inflatable-cookie/poodle-svelte";
 
   let email = "";
+  let emailInput: TextInput | undefined;
   async function validateEmail(value: string) {
     return value.includes("@")
       ? { valid: true }
@@ -4150,13 +4152,17 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <TextInput
+  bind:this={emailInput}
   id="email"
   bind:value={email}
   placeholder="you@example.com"
   type="email"
   autocomplete="email"
+  autofocus
   validate={validateEmail}
-/>`,
+/>
+
+<button onclick={() => emailInput?.focus()}>Focus email</button>`,
   },
 
   "time-ago": {
