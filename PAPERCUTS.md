@@ -7,6 +7,15 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — `docs/guides/svelte-developer-guide.md` §Types still defines
+  `type ButtonTone = "default" | "danger"` (2 members) while
+  `docs/contracts/004-shared-control-types.md` canonically defines all four
+  (`default | danger | success | warning`); the same block restates
+  `ControlSize`/`ControlDensity`/`SemanticControlSizeRole`/`ButtonVariant`/
+  `ValidationState`/`StatusTone` with no link to 004. The guide contradicts the
+  canonical contract and misleads docs-based type resolution. Refresh the block
+  or replace it with a 004 reference. Affects docs-authority consistency.
+
 - 2026-08-11 — The g13.002 generated-LOC measure globs
   `packages/core/src/tokens/generated/*` and `packages/tokens/artifacts/**`
   return 0 lines without bash `globstar`: the first matches only the

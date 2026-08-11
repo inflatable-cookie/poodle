@@ -146,6 +146,12 @@
 # Contract <-> poodle-specs drift. Also runs inside docs:lint; this selector is
 # for standalone/report use (DRIFT_REPORT=1 lists gaps without failing).
 "docs:spec-drift" = "bun packages/svelte/preview/scripts/contract-spec-drift.ts"
+# Contract <-> implementation value-domain drift: compares the permitted value
+# set of each enumerated prop (contract union vs Svelte types.ts vs the
+# poodle-specs enum). Report-only — exits 0 unless VALUE_DOMAIN_ENFORCE=1 is
+# set (the inverse of DRIFT_REPORT). Deliberately not in docs:check until the
+# inventory backlog is triaged; see docs/roadmaps/g13/007-value-domain-drift-inventory.md.
+"docs:value-domain-drift" = "bun packages/svelte/preview/scripts/contract-value-domain-drift.ts"
 # A GPUI component that accepts a handler must use it. `Stepper` stored two and
 # attached neither — the builders type-checked and nothing happened when you
 # clicked. Runs in ci:native.
