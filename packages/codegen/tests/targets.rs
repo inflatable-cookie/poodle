@@ -475,6 +475,80 @@ fn conformance_vectors_carry_steps_guards_and_declared_by() {
 }
 
 // ---------------------------------------------------------------------------
+// Docs-fragment content contract
+// ---------------------------------------------------------------------------
+
+#[test]
+fn docs_fragments_render_contract_style_props_tables() {
+    let files = render_target("docs");
+    let badge = files
+        .iter()
+        .find(|file| file.path == "badge.md")
+        .expect("badge fragment");
+    assert!(
+        badge.contents.contains("### Public Props"),
+        "fragment opens the contract section"
+    );
+    assert!(
+        badge.contents.contains(
+            "| `tone` | `\"danger\" \\| \"default\" \\| \"success\"` | `\"default\"` | no |"
+        ),
+        "the R6.2 subset union survives into the fragment: {}",
+        badge.contents
+    );
+    assert!(
+        badge
+            .contents
+            .contains("| `label` | `string` | `—` | yes |"),
+        "required props render yes, no default renders an em dash"
+    );
+    assert!(
+        badge
+            .contents
+            .contains("| `maxWidth` | `number` | `120.5` | no |"),
+        "numbers use the fixed formatter, never locale output"
+    );
+
+    let gauge = files
+        .iter()
+        .find(|file| file.path == "gauge.md")
+        .expect("gauge fragment");
+    assert!(
+        gauge
+            .contents
+            .contains("| `orientation` | `Orientation` | `\"horizontal\"` | no |"),
+        "an unreserved shared prop references the shared type by name"
+    );
+    assert!(
+        gauge
+            .contents
+            .contains("| `value` | `[number, number]` | `[0, 100]` | no |"),
+        "pairs render inline"
+    );
+
+    let search = files
+        .iter()
+        .find(|file| file.path == "search-field.md")
+        .expect("search-field fragment");
+    assert!(
+        search.contents.contains("web-only (CROSS-03)"),
+        "web-only props are included and marked (the TypeScript target's include-and-mark decision)"
+    );
+    assert!(
+        search
+            .contents
+            .contains("| `hint` | `string` | `derived` | no |"),
+        "expression-derived defaults render as derived"
+    );
+    assert!(
+        search
+            .contents
+            .contains("| `accent` | `\"danger\"` | `\"danger\"` | no |"),
+        "a one-member subset renders as a single-member union"
+    );
+}
+
+// ---------------------------------------------------------------------------
 // JSON Schema round trip (acceptance "emitted JSON validates against the
 // emitted JSON Schema, proven by test")
 // ---------------------------------------------------------------------------
