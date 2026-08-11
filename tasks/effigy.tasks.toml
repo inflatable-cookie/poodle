@@ -256,10 +256,13 @@
 "parity:check" = [{ task = "docs:check" }]
 "parity:report" = [{ task = "report:parity" }]
 
-# Full local release-health aggregator. Visual gates stay separate because the
-# GPUI sweep needs a window and is intentionally slow; everything headless or
-# CPU-only belongs here.
-health = [
+# Cheap orientation for `effigy doctor`. Never alias health to the full board.
+health = [{ task = "docs:lint" }]
+
+# Full local release board (headless / CPU-only). Visual GPUI sweep stays
+# separate (`test:native-visual`). Was previously misnamed `health`, which made
+# every `effigy doctor` run the whole suite.
+qa = [
   { task = "ci" },
   { task = "ci:native" },
   { task = "test:web-pack-install" },

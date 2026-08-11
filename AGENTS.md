@@ -36,8 +36,8 @@ Common commands:
 - `effigy tokens:build` — build design tokens
 - `effigy docs:dev` — start documentation dev server
 - `effigy docs:check` — run all documentation checks
-- `effigy health` — full health check
-- `effigy doctor` — environment and configuration health
+- `effigy qa` — full local release board (headless / CPU-only)
+- `effigy doctor` — orientation (built-ins + cheap `tasks.health`)
 - `effigy scan attention-markers` — scan for TODO/FIXME markers
 
 Legacy npm scripts in `package.json` are deprecated; use `effigy <task>` instead.

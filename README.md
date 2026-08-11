@@ -133,7 +133,7 @@ Before submitting a change, run the checks relevant to it. The broad repository
 check is:
 
 ```sh
-effigy health
+effigy qa
 ```
 
 Use `effigy tasks` to see narrower validation and build tasks.
