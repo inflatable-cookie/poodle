@@ -7,6 +7,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — `effigy docs:lint` requires every Cargo.toml under
+  `packages/` to be registered in `packages/release-manifest.json` (reverse
+  check in `packages/svelte/preview/scripts/lint-docs.ts`
+  `validateReleaseOperations`), so a new contract crate cannot pass the docs
+  gate until the orchestrator adds its entry — but card writable-path rules
+  exclude the release manifest. g13-011 shipped `poodle-ir` with `docs:lint`
+  failing on exactly this error and recorded the conflict in its batch log
+  (entry shape already fixed by ruling R1: kind `contract-crate`, channel
+  `preview`). Either extend the lint to accept a "registration pending" state
+  for new crates, or make the release-manifest writable on crate-creation
+  cards. Affects new-crate onboarding.
+
 - 2026-08-11 — `effigy visual:report` (sweep tier) reports 53 failing
   Svelte↔React pairs at HEAD (308 compared; 46 size / 4 capture / 3 pixels,
   spread across both themes — e.g. `tree`, `xy-pad`, `tool-call`, `fader`,
