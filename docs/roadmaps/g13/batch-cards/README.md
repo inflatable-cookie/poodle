@@ -15,6 +15,8 @@ and roadmap closeout.
 | `003` | crate placement ruling and g13.002 handoff | `001`–`002` merged | ready to compile — dependencies met |
 | `004` | Rust IR prior-art and failure-mode research | none | dead — recompile required |
 | `005` | pilot contract expressiveness corpus | none | merged (`2f8dc5db`) |
+| `006` | button-family tone parity (CSS/specimens) | contract amendments `282ce489` | ready |
+| `007` | value-domain drift inventory (report-only) | contract amendments `282ce489` | ready |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
 evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of
@@ -29,3 +31,5 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 003](003-crate-placement-ruling-and-schema-handoff.md)
 - [Batch 004](004-rust-ir-prior-art-and-failure-audit.md)
 - [Batch 005](005-pilot-contract-expressiveness-corpus.md)
+- [Batch 006](006-button-family-tone-parity.md)
+- [Batch 007](007-value-domain-drift-inventory.md)
