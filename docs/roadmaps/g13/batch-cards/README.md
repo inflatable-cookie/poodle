@@ -13,7 +13,7 @@ and roadmap closeout.
 | `001` | authority inventory and inherited docs-baseline repair | none | merged (`251cc858`) |
 | `002` | pilot fixture freeze and quantitative baseline | `001` merged | merged (`89debbcb`) |
 | `003` | crate placement ruling and g13.002 handoff | `001`–`002` merged | complete — rulings recorded |
-| `004` | Rust IR prior-art and failure-mode research | none | dead — recompile required |
+| `004` | Rust IR prior-art and failure-mode research | none | retired — superseded by `015` |
 | `005` | pilot contract expressiveness corpus | none | merged (`2f8dc5db`) |
 | `006` | button-family tone parity (CSS/specimens) | contract amendments `282ce489` | merged (`22337a31`) — Button + IconButton; SplitButton deferred to `008` |
 | `007` | value-domain drift inventory (report-only) | contract amendments `282ce489` | merged (`8090521c`) |
@@ -24,6 +24,7 @@ and roadmap closeout.
 | `012` | IR bounded expression vocabulary | `011` merged | merged (`911fdfd8`) |
 | `013` | Tabs variant consolidation (side-quest) | maintainer ruling | dispatched |
 | `014` | AppHeader element access (side-quest) | maintainer ruling | dispatched |
+| `015` | deterministic emission + drift-gating research (codegen precursor) | supersedes `004` | dispatched |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
 evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of
@@ -47,3 +48,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 012](012-ir-expression-vocabulary.md)
 - [Batch 013](013-tabs-variant-consolidation.md)
 - [Batch 014](014-app-header-element-access.md)
+- [Batch 015](015-deterministic-emission-and-drift-gating.md)

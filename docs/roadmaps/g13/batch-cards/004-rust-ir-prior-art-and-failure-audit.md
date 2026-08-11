@@ -1,6 +1,19 @@
 # 004 Rust IR Prior-art And Failure Audit
 
-Status: dead — provider stalled twice; recompile before redispatch
+Status: retired — superseded by `015-deterministic-emission-and-drift-gating.md`
+
+Retired 2026-08-11, not redispatched. This card existed to expose failure modes
+*before* `g13.002` chose libraries or schema mechanics. `g13-b011` has since
+chosen serde and delivered tagged unions, stable identifiers, defaults,
+optionality, schema versioning, deterministic ordering and JSON round-trip;
+`g13-b012` closed the expression boundary. Re-running it would research settled
+decisions.
+
+Its still-live half — Rust→TypeScript emission, deterministic output, and drift
+gating — is recompiled into card `015`, scoped to the codegen decision. The
+`ts-rs`/`typeshare`/`specta` candidate set was also mis-aimed: those mirror Rust
+types as TypeScript types, whereas `poodle-codegen` emits component surfaces
+from IR *instances*. The original grok stall is incidental to this ruling.
 Milestone: `g13.002` research precursor
 Owner: Poodle core
 Branch: `thread/g13-rust-ir-prior-art`
