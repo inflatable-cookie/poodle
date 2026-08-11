@@ -19,6 +19,16 @@ fn slider_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(f64) + Send 
     })
 }
 
+fn slider_fraction_change(state: &AppState, key: String) -> Arc<dyn Fn(f64) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.clone(),
+            value: format!("{value:.2}"),
+        });
+    })
+}
+
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
@@ -35,7 +45,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .get("slider-opacity")
         .and_then(|v| v.parse::<f64>().ok())
         .unwrap_or(100.0);
-
     let examples = div()
         .flex()
         .flex_col()
@@ -212,23 +221,55 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "slider",
         examples,
         |size, theme: &GpuiThemeProvider| {
-            Slider::from_spec(
-                SliderSpec::new(60.0)
-                    .with_bounds(0.0, 100.0)
-                    .with_size(size),
-                theme,
-            )
-            .with_id(format!("specimen-size-{:?}", size))
-            .into_any_element()
+            let key = format!("slider-size-value-{size:?}");
+            let value = state
+                .specimens
+                .text
+                .get(&key)
+                .and_then(|value| value.parse::<f64>().ok())
+                .unwrap_or(0.4);
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(
+                    Slider::from_spec(
+                        SliderSpec::new(value).with_bounds(0.0, 1.0).with_size(size),
+                        theme,
+                    )
+                    .with_id(format!("specimen-size-standard-{:?}", size))
+                    .on_change(slider_fraction_change(state, key.clone())),
+                )
+                .child(
+                    Slider::from_spec(
+                        SliderSpec::new(value)
+                            .with_bounds(0.0, 1.0)
+                            .with_size(size)
+                            .with_embedded_control(SliderPolarity::Unipolar),
+                        theme,
+                    )
+                    .with_id(format!("specimen-size-embedded-{:?}", size))
+                    .on_change(slider_fraction_change(state, key)),
+                )
+                .into_any_element()
         },
         |density, theme: &GpuiThemeProvider| {
+            let key = format!("slider-density-value-{density:?}");
+            let value = state
+                .specimens
+                .text
+                .get(&key)
+                .and_then(|value| value.parse::<f64>().ok())
+                .unwrap_or(-0.4);
             Slider::from_spec(
-                SliderSpec::new(60.0)
-                    .with_bounds(0.0, 100.0)
-                    .with_density(density),
+                SliderSpec::new(value)
+                    .with_bounds(-1.0, 1.0)
+                    .with_density(density)
+                    .with_embedded_control(SliderPolarity::Bipolar),
                 theme,
             )
             .with_id(format!("specimen-density-{:?}", density))
+            .on_change(slider_fraction_change(state, key))
             .into_any_element()
         },
     )

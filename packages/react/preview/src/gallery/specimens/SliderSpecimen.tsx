@@ -8,15 +8,28 @@ export function SliderSpecimen() {
   const [opacity, setOpacity] = useState(100);
   const [unipolar, setUnipolar] = useState(0.35);
   const [bipolar, setBipolar] = useState(-0.45);
+  const [sizeValues, setSizeValues] = useState<Record<string, number>>({ xs: 0.4, sm: 0.4, md: 0.4, lg: 0.4, xl: 0.4 });
+  const [densityValues, setDensityValues] = useState<Record<string, number>>({ compact: -0.4, default: -0.4, comfortable: -0.4 });
+
+  const variantStyle = { display: "flex", width: "100%", flexDirection: "column" as const, gap: "0.375rem" };
+  const labelStyle = { color: "var(--poodle-color-text-secondary)", fontSize: "var(--poodle-typography-label-size)" };
 
   return (
     <div style={{ maxWidth: "20rem" }}>
       <SpecimenLayout
         sizes={(size) => (
-          <Slider value={50} min={0} max={100} size={size} ariaLabel={"Slider at " + size} />
+          <span style={variantStyle}>
+            <span style={labelStyle}>{size.toUpperCase()} · standard</span>
+            <Slider value={sizeValues[size]} min={0} max={1} step={0.01} size={size} ariaLabel={`Standard slider at ${size}`} onValueChange={(value) => setSizeValues((current) => ({ ...current, [size]: value }))} />
+            <span style={labelStyle}>{size.toUpperCase()} · embedded</span>
+            <Slider variant="embedded" polarity="unipolar" value={sizeValues[size]} min={0} max={1} step={0.01} size={size} ariaLabel={`Embedded slider at ${size}`} onValueChange={(value) => setSizeValues((current) => ({ ...current, [size]: value }))} />
+          </span>
         )}
         densities={(density) => (
-          <Slider variant="embedded" polarity="bipolar" value={-0.4} min={-1} max={1} density={density} ariaLabel={`Embedded slider at ${density} density`} />
+          <span style={variantStyle}>
+            <span style={labelStyle}>{density}</span>
+            <Slider variant="embedded" polarity="bipolar" value={densityValues[density]} min={-1} max={1} step={0.01} density={density} ariaLabel={`Embedded slider at ${density} density`} onValueChange={(value) => setDensityValues((current) => ({ ...current, [density]: value }))} />
+          </span>
         )}
       >
         <SpecimenGroup label="Default">

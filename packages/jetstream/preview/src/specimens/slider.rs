@@ -111,11 +111,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             div()
                 .flex_col()
                 .gap(12.0)
-                .child(row(js_slider(&s(60.0).with_size(ControlSize::Xs), theme)))
-                .child(row(js_slider(&s(60.0).with_size(ControlSize::Sm), theme)))
-                .child(row(js_slider(&s(60.0).with_size(ControlSize::Md), theme)))
-                .child(row(js_slider(&s(60.0).with_size(ControlSize::Lg), theme)))
-                .child(row(js_slider(&s(60.0).with_size(ControlSize::Xl), theme))),
+                .child(size_pair(theme, ControlSize::Xs))
+                .child(size_pair(theme, ControlSize::Sm))
+                .child(size_pair(theme, ControlSize::Md))
+                .child(size_pair(theme, ControlSize::Lg))
+                .child(size_pair(theme, ControlSize::Xl)),
         ))
         // Densities — spacing axis only; track thickness / thumb / min-height
         // unchanged (contract §8 density note for the single-thumb slider).
@@ -125,19 +125,37 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             div()
                 .flex_col()
                 .gap(12.0)
-                .child(row(js_slider(
-                    &s(60.0).with_density(ControlDensity::Compact),
-                    theme,
-                )))
-                .child(row(js_slider(
-                    &s(60.0).with_density(ControlDensity::Default),
-                    theme,
-                )))
-                .child(row(js_slider(
-                    &s(60.0).with_density(ControlDensity::Comfortable),
-                    theme,
-                ))),
+                .child(density_slider(theme, ControlDensity::Compact))
+                .child(density_slider(theme, ControlDensity::Default))
+                .child(density_slider(theme, ControlDensity::Comfortable)),
         ))
+}
+
+fn size_pair(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
+    div()
+        .flex_col()
+        .gap(8.0)
+        .child(row(js_slider(
+            &SliderSpec::new(0.4).with_bounds(0.0, 1.0).with_size(size),
+            theme,
+        )))
+        .child(row(js_slider(
+            &SliderSpec::new(0.4)
+                .with_bounds(0.0, 1.0)
+                .with_size(size)
+                .with_embedded_control(SliderPolarity::Unipolar),
+            theme,
+        )))
+}
+
+fn density_slider(theme: &JetstreamThemeProvider, density: ControlDensity) -> El {
+    row(js_slider(
+        &SliderSpec::new(-0.4)
+            .with_bounds(-1.0, 1.0)
+            .with_density(density)
+            .with_embedded_control(SliderPolarity::Bipolar),
+        theme,
+    ))
 }
 
 fn row(content: El) -> El {

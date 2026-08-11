@@ -7,6 +7,8 @@
   let opacity = $state(100);
   let unipolar = $state(0.35);
   let bipolar = $state(-0.45);
+  let sizeValues = $state<Record<string, number>>({ xs: 0.4, sm: 0.4, md: 0.4, lg: 0.4, xl: 0.4 });
+  let densityValues = $state<Record<string, number>>({ compact: -0.4, default: -0.4, comfortable: -0.4 });
 </script>
 
 <div class="poodle-slider-specimen">
@@ -44,11 +46,19 @@
   </SpecimenGroup>
 
   {#snippet sizes(size)}
-    <Slider value={50} min={0} max={100} {size} ariaLabel={"Slider at " + size} />
+    <div class="poodle-slider-specimen__variant-pair">
+      <span>{size.toUpperCase()} · standard</span>
+      <Slider value={sizeValues[size]} min={0} max={1} step={0.01} {size} ariaLabel={"Standard slider at " + size} onValueChange={(value) => (sizeValues[size] = value)} />
+      <span>{size.toUpperCase()} · embedded</span>
+      <Slider variant="embedded" polarity="unipolar" value={sizeValues[size]} min={0} max={1} step={0.01} {size} ariaLabel={"Embedded slider at " + size} onValueChange={(value) => (sizeValues[size] = value)} />
+    </div>
   {/snippet}
 
   {#snippet densities(density)}
-    <Slider variant="embedded" polarity="bipolar" value={-0.4} min={-1} max={1} {density} ariaLabel={"Embedded slider at " + density + " density"} />
+    <div class="poodle-slider-specimen__density">
+      <span>{density}</span>
+      <Slider variant="embedded" polarity="bipolar" value={densityValues[density]} min={-1} max={1} step={0.01} {density} ariaLabel={"Embedded slider at " + density + " density"} onValueChange={(value) => (densityValues[density] = value)} />
+    </div>
   {/snippet}
 
 </SpecimenLayout>
@@ -57,5 +67,19 @@
 <style>
   .poodle-slider-specimen {
     max-width: 20rem;
+  }
+
+  .poodle-slider-specimen__variant-pair,
+  .poodle-slider-specimen__density {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .poodle-slider-specimen__variant-pair > span,
+  .poodle-slider-specimen__density > span {
+    color: var(--poodle-color-text-secondary);
+    font-size: var(--poodle-typography-label-size);
   }
 </style>
