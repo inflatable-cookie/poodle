@@ -88,6 +88,14 @@
       "channel": "preview"
     },
     {
+      "name": "poodle-ir",
+      "path": "packages/contracts/ir",
+      "kind": "contract-crate",
+      "language": "rust",
+      "publicIntent": true,
+      "channel": "preview"
+    },
+    {
       "name": "poodle-markdown",
       "path": "packages/contracts/markdown",
       "kind": "contract-crate",

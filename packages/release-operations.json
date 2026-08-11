@@ -147,6 +147,15 @@
       "removalGate": "successor-and-generation-delay"
     },
     {
+      "name": "poodle-ir",
+      "channel": "preview",
+      "publicIntent": true,
+      "changeControl": "contract-backed",
+      "requiresReleaseNotes": true,
+      "requiresDeprecationRecord": true,
+      "removalGate": "successor-and-generation-delay"
+    },
+    {
       "name": "poodle-headless",
       "channel": "preview",
       "publicIntent": true,
