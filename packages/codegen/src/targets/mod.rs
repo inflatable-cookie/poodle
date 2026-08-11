@@ -7,6 +7,7 @@ use crate::emit::EmitTarget;
 
 mod json_common;
 
+pub mod conformance;
 pub mod json;
 pub mod registry;
 pub mod schema;
@@ -15,6 +16,7 @@ pub mod ts;
 /// Every registered target, in stable order.
 pub fn all() -> Vec<&'static dyn EmitTarget> {
     vec![
+        &conformance::ConformanceTarget,
         &json::JsonSurfaceTarget,
         &registry::RegistryTarget,
         &schema::JsonSchemaTarget,

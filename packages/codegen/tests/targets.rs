@@ -426,6 +426,55 @@ fn registry_lists_every_component_with_capabilities_axes_and_shared_types() {
 }
 
 // ---------------------------------------------------------------------------
+// Conformance vector content contract
+// ---------------------------------------------------------------------------
+
+#[test]
+fn conformance_vectors_carry_steps_guards_and_declared_by() {
+    let files = render_target("conformance");
+    let vectors = files
+        .iter()
+        .find(|file| file.path == "vectors.json")
+        .expect("conformance target emits vectors.json");
+    let doc: serde_json::Value = serde_json::from_str(&vectors.contents).expect("vectors is JSON");
+    let vectors = doc["vectors"].as_array().expect("vectors");
+
+    let vector = vectors
+        .iter()
+        .find(|vector| vector["id"] == "gauge-bounds")
+        .expect("gauge-bounds vector");
+    assert_eq!(
+        vector["applies_to"]
+            .as_array()
+            .expect("applies_to")
+            .iter()
+            .map(|target| target.as_str().expect("runtime target"))
+            .collect::<Vec<_>>(),
+        vec!["svelte", "react", "gpui", "jetstream"]
+    );
+    assert_eq!(
+        vector["declared_by"][0].as_str(),
+        Some("gauge"),
+        "declared_by lists the component whose conformance names the vector"
+    );
+
+    let steps = vector["steps"].as_array().expect("steps");
+    assert_eq!(steps.len(), 3, "the three fixture steps survive in order");
+    assert_eq!(steps[0]["kind"], "invariant");
+    assert!(steps[0]["guard"].is_null());
+    assert_eq!(steps[1]["kind"], "transition");
+    assert_eq!(
+        steps[1]["guard"]["and"]
+            .as_array()
+            .expect("and operands")
+            .len(),
+        2,
+        "the bounded guard expression survives as JSON"
+    );
+    assert_eq!(steps[2]["kind"], "effect-intent");
+}
+
+// ---------------------------------------------------------------------------
 // JSON Schema round trip (acceptance "emitted JSON validates against the
 // emitted JSON Schema, proven by test")
 // ---------------------------------------------------------------------------
