@@ -31,7 +31,7 @@
 //!   independent formatter, mirroring `ts.rs` — the two targets must never
 //!   disagree on a literal.
 
-use poodle_ir::{ComponentDefinition, Identifier, IrModel, Prop, PropType, Value};
+use poodle_ir::{ComponentDefinition, Identifier, IrModel, PropType, Value};
 
 use crate::emit::{sort_by_id, EmitTarget, GeneratedFile};
 use crate::error::{CodegenError, Result};
