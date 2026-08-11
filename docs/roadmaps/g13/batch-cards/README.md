@@ -27,6 +27,7 @@ and roadmap closeout.
 | `015` | deterministic emission + drift-gating research (codegen precursor) | supersedes `004` | merged (`7878c537`) |
 | `016` | shared `ActiveFill` type + NavigationMenu switches | Tabs switches merged | dispatched |
 | `017` | AppHeader centre region | `014` merged | dispatched |
+| `018` | Tabs `bordered` defaults to false | `016` merged (file conflict) | blocked |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
 evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of
@@ -53,3 +54,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 015](015-deterministic-emission-and-drift-gating.md)
 - [Batch 016](016-active-fill-shared-type-and-navigation-menu.md)
 - [Batch 017](017-app-header-center-region.md)
+- [Batch 018](018-tabs-bordered-default-false.md)
