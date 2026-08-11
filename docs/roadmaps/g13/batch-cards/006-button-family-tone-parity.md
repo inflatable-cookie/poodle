@@ -1,6 +1,6 @@
 # 006 Button Family Tone Parity
 
-Status: merged (Button + IconButton); SplitButton slice deferred to `008`
+Status: merged (`22337a31`); SplitButton slice completed by `008`
 Milestone: `g13.001` (contract-conformance work, not IR implementation)
 Owner: Poodle core
 Branch: `thread/g13-006-button-tone-parity`
@@ -158,15 +158,14 @@ diffs, **do not update baselines** — record the diff list and stop.
 
 ## Acceptance Criteria
 
-- [ ] All three stylesheets implement all four tones across primary, secondary,
-  and ghost. **Button and IconButton done; SplitButton deferred to `008`.**
+- [x] All three stylesheets implement all four tones across primary, secondary,
+  and ghost. **SplitButton completed by `008` (`f59adac0`).**
 - [x] Each added rule derives from that component's own danger rules with only
   the status color substituted; no new percentages invented.
 - [x] Rust renderer tone delivery verified and reported for all three
   components; no Rust edited.
-- [ ] Svelte and React specimens show all four tones for all three components,
-  and remain identical to each other. **Button and IconButton done; SplitButton
-  deferred to `008`.**
+- [x] Svelte and React specimens show all four tones for all three components,
+  and remain identical to each other. **SplitButton completed by `008`.**
 - [x] No component source, props, public API, token, or baseline changed.
 - [x] `effigy docs:lint`, `test:components`, `test:parity`, `docs:check`, and
   `git diff --check` all exit 0.

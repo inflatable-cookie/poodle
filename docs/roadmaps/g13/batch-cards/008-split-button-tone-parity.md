@@ -1,6 +1,6 @@
 # 008 SplitButton Tone Parity And Primary Status Shadow
 
-Status: ready
+Status: merged (commit `f59adac0`)
 Milestone: `g13.001` (contract-conformance work, not IR implementation)
 Owner: Poodle core
 Branch: `thread/g13-008-split-button-tone-parity`
@@ -127,20 +127,20 @@ Record every command and exit state.
 
 ## Acceptance Criteria
 
-- [ ] `split-button.css` implements the primary danger elevation shadow per
+- [x] `split-button.css` implements the primary danger elevation shadow per
   contract §8.
-- [ ] `split-button.css` implements success and warning across primary,
+- [x] `split-button.css` implements success and warning across primary,
   secondary, and ghost, derived from SplitButton's own danger rules with only
   the status colour substituted.
-- [ ] Svelte and React SplitButton specimens show all four tones and remain
+- [x] Svelte and React SplitButton specimens show all four tones and remain
   identical.
-- [ ] Visual diffs enumerated and classified in the batch log; **no baseline
+- [x] Visual diffs enumerated and classified in the batch log; **no baseline
   file modified**.
-- [ ] No component source, props, public API, token, or Rust changed.
-- [ ] No unrelated working-tree edits staged or committed.
-- [ ] `effigy docs:lint`, `test:components`, `test:parity`, `docs:check`, and
+- [x] No component source, props, public API, token, or Rust changed.
+- [x] No unrelated working-tree edits staged or committed.
+- [x] `effigy docs:lint`, `test:components`, `test:parity`, `docs:check`, and
   `git diff --check` all exit 0.
-- [ ] Batch log records commands, exit states, and the diff table.
+- [x] Batch log records commands, exit states, and the diff table.
 
 ## Stop Conditions
 
