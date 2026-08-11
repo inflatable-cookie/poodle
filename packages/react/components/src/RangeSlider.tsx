@@ -1,9 +1,13 @@
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent, type PointerEvent } from "react";
 import {
+  createRangeSliderControlContext,
   normalizeRangeValue,
+  rangeSliderControlTransition,
   rangeSliderTransition,
+  rangeSliderVisualState,
   safeSliderMax,
-  type RangeSliderContext,
+  type AudioValueLaw, type RangeSliderContext, type RangeSliderControlContext,
+  type SliderPolarity, type SliderVariant,
 } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/range-slider.css";
@@ -21,6 +25,10 @@ export interface RangeSliderProps {
   min?: number;
   max?: number;
   step?: number;
+  variant?: SliderVariant;
+  polarity?: SliderPolarity;
+  centerValue?: number | null;
+  law?: AudioValueLaw;
   orientation?: Orientation;
   disabled?: boolean;
   ariaLabel?: string | null;
@@ -39,6 +47,10 @@ export function RangeSlider({
   min = 0,
   max = 100,
   step = 1,
+  variant = "standard",
+  polarity = "unipolar",
+  centerValue = null,
+  law = { type: "linear" },
   orientation = "horizontal",
   disabled = false,
   ariaLabel = null,
@@ -49,19 +61,27 @@ export function RangeSlider({
 }: RangeSliderProps) {
   const uiPresentation = useUiPresentation();
   const [uncontrolledValue, setUncontrolledValue] = useState<[number, number]>(defaultValue);
+  const [controlMachine, setControlMachine] = useState(createRangeSliderControlContext);
+  const controlRef = useRef(createRangeSliderControlContext());
+  const root = useRef<HTMLDivElement>(null);
+  const activePointer = useRef<number | null>(null);
 
   const isControlled = value !== undefined;
   const currentValue = isControlled ? value : uncontrolledValue;
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
   const machineContext: RangeSliderContext = { value: currentValue, min, max, step, disabled };
+  const controlContext: RangeSliderControlContext = { ...controlMachine, value: currentValue, min, max, step, disabled, law, polarity, centerValue };
+  controlRef.current = { ...controlRef.current, ...controlContext };
+  const visualState = rangeSliderVisualState(controlContext);
   const safeMax = safeSliderMax(min, max);
   const [displayLower, displayUpper] = normalizeRangeValue(machineContext);
-  const lowerPercent = ((displayLower - min) / (safeMax - min)) * 100;
-  const upperPercent = ((displayUpper - min) / (safeMax - min)) * 100;
+  const lowerPercent = visualState.lowerNorm * 100;
+  const upperPercent = visualState.upperNorm * 100;
   const rangeStyle = {
     "--poodle-range-start": `${lowerPercent}%`,
     "--poodle-range-end": `${upperPercent}%`,
+    "--poodle-range-center": `${visualState.centerNorm * 100}%`,
   } as CSSProperties;
 
   function send(type: "INPUT" | "COMMIT", thumb: "lower" | "upper", event: FormEvent<HTMLInputElement>): void {
@@ -77,20 +97,54 @@ export function RangeSlider({
     }
   }
 
+  function runControl(event: Parameters<typeof rangeSliderControlTransition>[1]): void {
+    const result = rangeSliderControlTransition(controlRef.current, event); controlRef.current = result.context; setControlMachine(result.context);
+    for (const effect of result.effects) {
+      if (!isControlled) setUncontrolledValue(effect.value);
+      if (effect.type === "emitValueChange") onValueChange?.(effect.value); else onValueCommit?.(effect.value);
+    }
+  }
+  function pointNorm(event: PointerEvent<HTMLDivElement>): number {
+    const rect = root.current!.getBoundingClientRect();
+    return orientation === "horizontal" ? Math.min(Math.max((event.clientX - rect.left) / Math.max(rect.width, 1), 0), 1) : 1 - Math.min(Math.max((event.clientY - rect.top) / Math.max(rect.height, 1), 0), 1);
+  }
+  function pointerDown(event: PointerEvent<HTMLDivElement>): void {
+    if (variant !== "embedded" || event.button !== 0 || disabled || !root.current) return;
+    event.preventDefault(); activePointer.current = event.pointerId; root.current.setPointerCapture(event.pointerId); runControl({ type: "POINTER_BEGIN", valueNorm: pointNorm(event) });
+  }
+  function pointerMove(event: PointerEvent<HTMLDivElement>): void { if (activePointer.current === event.pointerId) runControl({ type: "POINTER_MOVE", valueNorm: pointNorm(event) }); }
+  function pointerEnd(event: PointerEvent<HTMLDivElement>): void { if (activePointer.current === event.pointerId) { activePointer.current = null; runControl({ type: "POINTER_END" }); } }
+  function embeddedKey(event: KeyboardEvent<HTMLDivElement>, thumb: "lower" | "upper"): void {
+    const direction = ({ ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 } as Record<string, -1 | 1>)[event.key];
+    const current = thumb === "lower" ? displayLower : displayUpper;
+    const raw = event.key === "Home" ? min : event.key === "End" ? safeMax : direction ? current + direction * step : null;
+    if (raw == null) return;
+    event.preventDefault();
+    const changed = rangeSliderTransition(machineContext, { type: "INPUT", thumb, raw });
+    const committed = rangeSliderTransition(changed.context, { type: "COMMIT", thumb, raw: thumb === "lower" ? changed.context.value[0] : changed.context.value[1] });
+    for (const effect of [...changed.effects, ...committed.effects]) {
+      if (!isControlled) setUncontrolledValue(effect.value);
+      if (effect.type === "emitValueChange") onValueChange?.(effect.value); else onValueCommit?.(effect.value);
+    }
+  }
+
   return (
-    <div
+    <div ref={root}
       className="poodle-range-slider"
       data-orientation={orientation}
       data-disabled={disabled}
       style={rangeStyle}
       data-size={resolvedSize}
       data-density={resolvedDensity}
+      data-variant={variant} data-polarity={polarity} data-state={visualState.pointerActive ? "active" : "idle"}
+      onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd}
     >
       <span className="poodle-range-slider__track" aria-hidden="true">
         <span className="poodle-range-slider__fill" />
+        <span className="poodle-range-slider__center" />
       </span>
 
-      <input
+      {variant === "standard" && <><input
         className="poodle-range-slider__control poodle-range-slider__control--lower"
         type="range"
         min={min}
@@ -116,7 +170,11 @@ export function RangeSlider({
         aria-valuetext={upperValueText ?? undefined}
         onInput={(event) => send("INPUT", "upper", event)}
         onChange={(event) => send("COMMIT", "upper", event)}
-      />
+      /></>}
+      {variant === "embedded" && <>
+        <div className="poodle-range-slider__embedded-control poodle-range-slider__embedded-control--lower" role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => embeddedKey(event, "lower")} />
+        <div className="poodle-range-slider__embedded-control poodle-range-slider__embedded-control--upper" role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"} aria-valuemin={displayLower} aria-valuemax={safeMax} aria-valuenow={displayUpper} aria-valuetext={upperValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => embeddedKey(event, "upper")} />
+      </>}
     </div>
   );
 }

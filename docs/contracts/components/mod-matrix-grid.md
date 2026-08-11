@@ -52,9 +52,9 @@ separate `step` parameter remains the normal keyboard nudge increment.
 Classification: machine-backed (`modMatrixTransition`). Pointer activation
 focuses a cell; Space toggles it. Arrows navigate by row/column, Home/End move
 to row bounds, and Control+Home/End move to grid bounds. Page Up/Down nudges
-amount using the focused cell's step; Shift uses one tenth step. Pointer drag
-maps normalized vertical travel through that cell's range and law. Disabling a
-cell preserves its amount and parameters.
+amount using the focused cell's step; Shift uses one tenth step. Horizontal
+pointer drag is delegated to the Slider embedded-control machine, then mapped through that
+cell's range and law. Disabling a cell preserves its amount and parameters.
 
 ## 5. Callbacks
 
@@ -80,6 +80,10 @@ size axis and never derives from column width. Bars expand from the published
 zero anchor: centered for default bipolar cells, from the left for positive
 unipolar cells, and from the right for negative unipolar cells. No synth
 semantics are inferred.
+
+Each amount surface uses Slider's `embedded` variant. ModMatrixGrid owns grid
+navigation, enablement, caller IDs, and parameter mapping; it does not own a
+second pointer/value-control implementation.
 
 ## 8. Token Usage
 

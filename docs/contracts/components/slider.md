@@ -1,7 +1,7 @@
 # Slider
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-11
 
 ## 1. Purpose
 
@@ -11,7 +11,8 @@ Updated: 2026-07-10
   range input overlaid on a custom track with fill visualization; supports
   horizontal and vertical orientation via CSS custom property for fill width
 - In scope: current value, min/max bounds, step behavior, keyboard and pointer
-  adjustment, value commit semantics, horizontal and vertical orientation
+  adjustment, value commit semantics, horizontal and vertical orientation,
+  standard and embedded variants, unipolar and bipolar fill geometry
 - Out of scope: dual-thumb range editing (see RangeSlider), knob/fader
   semantics, tick marks, value labels
 
@@ -41,6 +42,10 @@ Updated: 2026-07-10
 | `min` | `number` | `0` | no | lower bound |
 | `max` | `number` | `100` | no | upper bound |
 | `step` | `number` | `1` | no | increment size |
+| `variant` | `"standard" \| "embedded"` | `"standard"` | no | native-input control or dense composite control |
+| `polarity` | `"unipolar" \| "bipolar"` | `"unipolar"` | no | fill from minimum or from the resolved center |
+| `centerValue` | `number \| null` | `null` | no | bipolar fill anchor; defaults to zero when zero is inside the range, otherwise the midpoint |
+| `law` | `AudioValueLaw` | `linear` | no | embedded-variant value mapping; standard remains the native linear range path |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | layout and interaction axis |
 | `disabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name; required when no visible label exists |
@@ -85,7 +90,9 @@ Behavior classification: machine-backed (`sliderTransition` in
 `@inflatable-cookie/poodle-core`)
 
 Keyboard and pointer interaction come from the native range input; the
-machine owns value normalization and the change/commit split.
+machine owns value normalization and the change/commit split. The embedded
+variant replaces the native pointer path with normalized pointer events owned
+by the adapter and interpreted by `sliderControlTransition`.
 
 - Context: `value` (controllable), `min`, `max`, `step`, `disabled`
 - Events: `INPUT { raw }` (native input), `COMMIT { raw }` (native change),
@@ -97,6 +104,21 @@ machine owns value normalization and the change/commit split.
   `emitValueChange(value)`; `COMMIT` sets normalized value, effect
   `emitValueCommit(value)`
 - Machinery dependencies: none.
+
+### Embedded Control Variant
+
+`variant="embedded"` is the dense, thumb-light Slider used inside composite
+controls. The adapter owns pointer capture and converts the pointer position to
+a normalized axis coordinate. The framework-free core owns pointer begin,
+move, and end state, law mapping, step constraint, live change, and commit.
+Drawing consumes `SliderVisualState`; it never reads machine context.
+
+Unipolar fill starts at zero clamped to the nearest range edge. This makes
+positive-only ranges grow from the minimum and negative-only ranges grow from
+the maximum. Bipolar fill starts at the resolved
+`centerValue` and expands toward the current value. VisualState publishes
+`valueNorm`, `centerNorm`, `fillStartNorm`, and `fillSpanNorm`, so renderers do
+not infer polarity or center geometry.
 
 ## 5. Callbacks
 
@@ -110,6 +132,8 @@ machine owns value normalization and the change/commit split.
 ### Semantics
 
 - Role: native `<input type="range">` provides slider role automatically
+- Embedded variant: adapter root exposes the same slider role, bounds, value,
+  value text, orientation, disabled state, and keyboard behavior
 - `aria-label`: from ariaLabel prop; required when no visible label exists
 - `aria-valuemin`: from min prop
 - `aria-valuemax`: from max prop
@@ -151,6 +175,8 @@ machine owns value normalization and the change/commit split.
 - track thickness is 0.375rem
 - thumb is 1rem diameter
 - slider length is parent-owned
+- embedded variant is valid inside dense grids; its parent owns both axis
+  lengths and the root remains the complete hit target
 
 ### Composition
 
@@ -161,6 +187,18 @@ machine owns value normalization and the change/commit split.
   vertical orientation uses CSS transform rotate(-90deg) on the native input
 
 ## 8. Token Usage — Exact Values
+
+### Recipe hooks
+
+- `--poodle-recipe-slider-track-fill`
+- `--poodle-recipe-slider-fill-fill`
+- `--poodle-recipe-slider-track-border`
+- `--poodle-recipe-slider-center-fill`
+- `--poodle-recipe-slider-control-fill`
+- `--poodle-recipe-slider-control-thumb-fill`
+- `--poodle-recipe-slider-control-shadow`
+- `--poodle-recipe-slider-focus-ring`
+- `--poodle-recipe-slider-focus-control-shadow`
 
 ### Root `.slider`
 
@@ -433,6 +471,12 @@ One disabled slider:
 | Label | Min | Max | Value | Props |
 |-------|-----|-----|-------|-------|
 | Disabled | 0 | 100 | 40 | `disabled: true` |
+
+### Embedded controls
+
+One unipolar `0..1` control and one bipolar `-1..1` control. Both use
+`variant="embedded"`, expose size and density axes, and render only from
+`SliderVisualState`.
 
 ## 14. Approval And Adoption Notes
 

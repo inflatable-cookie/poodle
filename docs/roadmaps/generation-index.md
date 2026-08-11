@@ -6,6 +6,13 @@
 
 ## Latest Completed Track
 
+- `g15`
+  - Status: completed
+  - Range: `001`
+  - Notes: adds embedded, core-driven Slider and RangeSlider variants with
+    unipolar/bipolar geometry, then migrates ModMatrixGrid off its bespoke
+    scalar pointer path.
+
 - `g14`
   - Status: completed
   - Range: `001`

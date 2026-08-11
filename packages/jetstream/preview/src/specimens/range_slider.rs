@@ -11,7 +11,7 @@ use crate::compat::js_range_slider;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{ControlDensity, ControlSize, RangeSliderSpec};
+use poodle_specs::{ControlDensity, ControlSize, RangeSliderSpec, SliderPolarity};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -89,6 +89,16 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_bounds(0.0, 100.0)
                     .with_disabled(true)
                     .with_aria_label("Disabled range"),
+                theme,
+            )),
+        ))
+        .child(group(
+            "Embedded bipolar control",
+            secondary,
+            row(js_range_slider(
+                &RangeSliderSpec::new(-0.6, 0.35)
+                    .with_bounds(-1.0, 1.0)
+                    .with_embedded_control(SliderPolarity::Bipolar),
                 theme,
             )),
         ))

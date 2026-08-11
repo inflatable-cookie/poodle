@@ -1,6 +1,7 @@
-import { clampAudioValue, constrainAudioValue, denormalizeAudioValue, linearValueLaw, normalizeAudioValue } from "./laws";
-import type { AudioValueLaw, ContinuousValueLaw } from "./laws";
+import { clampAudioValue, constrainAudioValue, linearValueLaw, normalizeAudioValue } from "./laws";
+import type { AudioValueLaw } from "./laws";
 import type { AudioDragState, ModMatrixCell, ModMatrixHeader, ModMatrixVisualState, ResolvedModMatrixCellParameters } from "./types";
+import { createSliderControlContext, sliderControlTransition, sliderVisualState, type SliderControlEvent, type SliderPolarity } from "../slider";
 
 const bipolarLaw = { type: "bipolar-center", center: 0 } as const;
 
@@ -44,10 +45,6 @@ function normalizeHeaders(headers: ModMatrixHeader[], axis: string): ModMatrixHe
 }
 
 const cellKey = (sourceId: string, destinationId: string): string => `${sourceId}\u0000${destinationId}`;
-
-function visualLaw(law: AudioValueLaw): ContinuousValueLaw {
-  return law.type === "stepped" ? law.law ?? linearValueLaw : law;
-}
 
 export function resolveModMatrixCellParameters(
   cell: Pick<ModMatrixCell, "parameters">,
@@ -133,6 +130,32 @@ function updateFocused(context: ModMatrixContext, update: (cell: ModMatrixCell) 
   ] };
 }
 
+function cellPolarity(parameters: ResolvedModMatrixCellParameters): SliderPolarity {
+  return parameters.min < 0 && parameters.max > 0 ? "bipolar" : "unipolar";
+}
+
+function updateFocusedFromSlider(context: ModMatrixContext, event: SliderControlEvent, commit = false): ModMatrixResult {
+  const index = focusedIndex(context);
+  const cell = index == null ? null : context.cells[index] ?? null;
+  if (!cell) return { context, effects: [] };
+  const parameters = resolveModMatrixCellParameters(cell, context.step);
+  const control = createSliderControlContext({
+    value: cell.amount,
+    min: parameters.min,
+    max: parameters.max,
+    step: parameters.step,
+    law: parameters.law,
+    polarity: cellPolarity(parameters),
+    centerValue: null,
+    pointerActive: context.drag !== "none",
+    disabled: context.disabled,
+  });
+  const result = sliderControlTransition(control, event);
+  const effect = result.effects.at(-1);
+  if (!effect) return { context, effects: [] };
+  return updateFocused(context, (candidate) => ({ ...candidate, amount: effect.value }), commit);
+}
+
 export function modMatrixTransition(context: ModMatrixContext, event: ModMatrixEvent): ModMatrixResult {
   switch (event.type) {
     case "SET_DATA": return { context: createModMatrixContext({ ...context, ...event }), effects: [] };
@@ -161,18 +184,15 @@ export function modMatrixTransition(context: ModMatrixContext, event: ModMatrixE
     case "DRAG_BEGIN": {
       if (context.disabled) return { context, effects: [] };
       const focused = { ...context, ...boundedFocus(context, event.row, event.column), drag: event.fine ? "fine" as const : "coarse" as const };
-      const result = updateFocused(focused, (cell) => {
-        const parameters = resolveModMatrixCellParameters(cell, context.step);
-        return { ...cell, amount: denormalizeAudioValue(event.amountNorm, parameters.min, parameters.max, parameters.law) };
-      }, false);
+      const result = updateFocusedFromSlider(focused, { type: "POINTER_BEGIN", valueNorm: event.amountNorm });
       return { context: result.context, effects: [{ type: "beginGesture" }, ...result.effects] };
     }
     case "DRAG_MOVE": {
       if (context.disabled || context.drag === "none") return { context, effects: [] };
-      return updateFocused({ ...context, drag: event.fine ? "fine" : "coarse" }, (cell) => {
-        const parameters = resolveModMatrixCellParameters(cell, context.step);
-        return { ...cell, amount: denormalizeAudioValue(event.amountNorm, parameters.min, parameters.max, parameters.law) };
-      }, false);
+      return updateFocusedFromSlider(
+        { ...context, drag: event.fine ? "fine" : "coarse" },
+        { type: "POINTER_MOVE", valueNorm: event.amountNorm },
+      );
     }
     case "DRAG_END": {
       const index = focusedIndex(context);
@@ -191,15 +211,23 @@ export function modMatrixVisualState(context: ModMatrixContext): ModMatrixVisual
     destinations: context.destinations,
     cells: context.cells.map((cell, cellIndex) => {
       const parameters = resolveModMatrixCellParameters(cell, context.step);
-      const amountNorm = normalizeAudioValue(cell.amount, parameters.min, parameters.max, parameters.law);
-      const zeroNorm = normalizeAudioValue(clampAudioValue(0, parameters.min, parameters.max), parameters.min, parameters.max, visualLaw(parameters.law));
+      const slider = sliderVisualState(createSliderControlContext({
+        value: cell.amount,
+        min: parameters.min,
+        max: parameters.max,
+        step: parameters.step,
+        law: parameters.law,
+        polarity: cellPolarity(parameters),
+      }));
+      const amountNorm = slider.valueNorm;
+      const zeroNorm = slider.centerNorm;
       return {
         ...cell,
         parameters,
         amountNorm,
         zeroNorm,
-        fillStartNorm: Math.min(amountNorm, zeroNorm),
-        fillSpanNorm: Math.abs(amountNorm - zeroNorm),
+        fillStartNorm: slider.fillStartNorm,
+        fillSpanNorm: slider.fillSpanNorm,
         focused: cellIndex === index,
       };
     }),

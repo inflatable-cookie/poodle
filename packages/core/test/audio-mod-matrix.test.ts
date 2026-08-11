@@ -62,7 +62,7 @@ describe("mod matrix machine", () => {
     context = modMatrixTransition(context, { type: "NUDGE_FOCUSED", direction: 1, fine: true }).context;
     expect(context.cells[0]!.amount).toBeCloseTo(0.51);
     context = modMatrixTransition(context, { type: "DRAG_BEGIN", row: 0, column: 0, amountNorm: 0.75 }).context;
-    expect(context.cells[0]!.amount).toBe(0.75);
+    expect(context.cells[0]!.amount).toBe(0.8); // Embedded Slider snaps pointer values to the cell's step.
     expect(() => createModMatrixContext({ sources, destinations, cells: [{ sourceId: "lfo", destinationId: "pitch", amount: 0, enabled: true, parameters: { min: 1, max: 1 } }] })).toThrow(RangeError);
     visual = modMatrixVisualState(context);
     expect(JSON.parse(JSON.stringify(visual))).toEqual(visual);

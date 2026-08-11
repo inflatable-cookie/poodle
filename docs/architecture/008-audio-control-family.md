@@ -174,6 +174,13 @@ keyboard, accessibility-tree, and host-lifecycle translation. Core hit-test
 helpers operate on geometry values only. Later skins may replace renderer
 components or node builders without changing those paths.
 
+Dense scalar tracks reuse the foundation Slider and RangeSlider embedded
+variants. Those adapters report normalized pointer positions to the shared
+slider-control machines. Polarity and center-derived fill geometry are
+published in serializable Slider VisualState, not recomputed by composite
+renderers. ModMatrixGrid composes that seam rather than maintaining its own
+pointer/value-control path.
+
 ## Value Laws
 
 All laws map a plain value in `[min, max]` to a normalized value in `[0, 1]`

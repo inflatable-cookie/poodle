@@ -1,6 +1,16 @@
+use poodle_headless::audio::AudioValueLaw;
 use poodle_tokens::semantic;
 
+pub use poodle_headless::slider::SliderPolarity;
+
 use crate::types::{ControlDensity, ControlSize, Orientation, SemanticControlSizeRole};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum SliderVariant {
+    #[default]
+    Standard,
+    Embedded,
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SliderSpec {
@@ -8,6 +18,10 @@ pub struct SliderSpec {
     pub min: f64,
     pub max: f64,
     pub step: f64,
+    pub variant: SliderVariant,
+    pub polarity: SliderPolarity,
+    pub center_value: Option<f64>,
+    pub law: AudioValueLaw,
     pub orientation: Orientation,
     pub is_disabled: bool,
     pub aria_label: Option<String>,
@@ -24,6 +38,10 @@ impl Default for SliderSpec {
             min: 0.0,
             max: 100.0,
             step: 1.0,
+            variant: SliderVariant::Standard,
+            polarity: SliderPolarity::Unipolar,
+            center_value: None,
+            law: AudioValueLaw::Linear,
             orientation: Orientation::Horizontal,
             is_disabled: false,
             aria_label: None,
@@ -51,6 +69,17 @@ impl SliderSpec {
 
     pub fn with_orientation(mut self, orientation: Orientation) -> Self {
         self.orientation = orientation;
+        self
+    }
+
+    pub fn with_embedded_control(mut self, polarity: SliderPolarity) -> Self {
+        self.variant = SliderVariant::Embedded;
+        self.polarity = polarity;
+        self
+    }
+
+    pub fn with_law(mut self, law: AudioValueLaw) -> Self {
+        self.law = law;
         self
     }
 

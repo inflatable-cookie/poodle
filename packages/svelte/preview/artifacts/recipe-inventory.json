@@ -1,9 +1,9 @@
 {
   "summary": {
     "components": 142,
-    "recipeHooks": 1085,
+    "recipeHooks": 1091,
     "hookCandidates": 4,
-    "metricVariables": 389
+    "metricVariables": 392
   },
   "inventory": {
     "accordion": {
@@ -1714,12 +1714,15 @@
     },
     "range-slider": {
       "recipe": [
+        "--poodle-recipe-range-slider-center-fill",
         "--poodle-recipe-range-slider-control-fill",
         "--poodle-recipe-range-slider-control-thumb-fill",
         "--poodle-recipe-range-slider-control-thumb-shadow",
         "--poodle-recipe-range-slider-control-track-fill",
         "--poodle-recipe-range-slider-fill-fill",
         "--poodle-recipe-range-slider-focus-control-thumb-shadow",
+        "--poodle-recipe-range-slider-focus-ring",
+        "--poodle-recipe-range-slider-track-border",
         "--poodle-recipe-range-slider-track-fill"
       ],
       "candidates": [],
@@ -1935,15 +1938,21 @@
     },
     "slider": {
       "recipe": [
+        "--poodle-recipe-slider-center-fill",
         "--poodle-recipe-slider-control-fill",
         "--poodle-recipe-slider-control-shadow",
         "--poodle-recipe-slider-control-thumb-fill",
         "--poodle-recipe-slider-fill-fill",
         "--poodle-recipe-slider-focus-control-shadow",
+        "--poodle-recipe-slider-focus-ring",
+        "--poodle-recipe-slider-track-border",
         "--poodle-recipe-slider-track-fill"
       ],
       "candidates": [],
       "metric": [
+        "--poodle-slider-center",
+        "--poodle-slider-fill-span",
+        "--poodle-slider-fill-start",
         "--poodle-slider-percent"
       ]
     },

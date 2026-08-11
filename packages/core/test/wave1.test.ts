@@ -4,9 +4,15 @@ import { switchTransition } from "../src/switch.ts";
 import { singleSelectTransition, type SingleSelectContext } from "../src/single-select.ts";
 import { toggleGroupTransition, type ToggleGroupContext } from "../src/toggle-group.ts";
 import {
+  createRangeSliderControlContext,
+  createSliderControlContext,
   normalizeRangeValue,
+  rangeSliderControlTransition,
+  rangeSliderVisualState,
   rangeSliderTransition,
   safeSliderMax,
+  sliderControlTransition,
+  sliderVisualState,
   sliderTransition,
   snapToStep,
   type RangeSliderContext,
@@ -107,6 +113,20 @@ describe("slider", () => {
     expect(safeSliderMax(10, 5)).toBe(11);
     expect(snapToStep(7, 0, 0)).toBe(7);
   });
+
+  test("embedded pointer gestures map laws and publish unipolar/bipolar fill geometry", () => {
+    let control = createSliderControlContext({ value: 0, min: -1, max: 1, step: 0, polarity: "bipolar" });
+    let result = sliderControlTransition(control, { type: "POINTER_BEGIN", valueNorm: 0.25 });
+    expect(result.context.value).toBe(-0.5);
+    expect(result.effects).toEqual([{ type: "emitValueChange", value: -0.5 }]);
+    control = result.context;
+    expect(sliderVisualState(control)).toMatchObject({ centerNorm: 0.5, fillStartNorm: 0.25, fillSpanNorm: 0.25, pointerActive: true });
+    result = sliderControlTransition(control, { type: "POINTER_END" });
+    expect(result.effects).toEqual([{ type: "emitValueCommit", value: -0.5 }]);
+
+    const negative = sliderVisualState(createSliderControlContext({ value: -0.25, min: -1, max: 0, step: 0 }));
+    expect(negative).toMatchObject({ centerNorm: 1, fillStartNorm: 0.75, fillSpanNorm: 0.25 });
+  });
 });
 
 describe("rangeSlider", () => {
@@ -129,5 +149,19 @@ describe("rangeSlider", () => {
     const result = rangeSliderTransition(ctx, { type: "COMMIT", thumb: "upper", raw: 62 });
     expect(result.context.value).toEqual([20, 60]);
     expect(result.effects).toEqual([{ type: "emitValueCommit", value: [20, 60] }]);
+  });
+
+  test("embedded pointer keeps the selected thumb and exposes the bipolar center", () => {
+    let control = createRangeSliderControlContext({ value: [-0.5, 0.5], min: -1, max: 1, step: 0, polarity: "bipolar" });
+    let result = rangeSliderControlTransition(control, { type: "POINTER_BEGIN", valueNorm: 0.1 });
+    expect(result.context.activeThumb).toBe("lower");
+    control = result.context;
+    result = rangeSliderControlTransition(control, { type: "POINTER_MOVE", valueNorm: 0.9 });
+    expect(result.context.value).toEqual([0.5, 0.5]);
+    expect(result.context.activeThumb).toBe("lower");
+    control = result.context;
+    expect(rangeSliderVisualState(control)).toMatchObject({ lowerNorm: 0.75, upperNorm: 0.75, centerNorm: 0.5, fillSpanNorm: 0 });
+    result = rangeSliderControlTransition(control, { type: "POINTER_END" });
+    expect(result.effects).toEqual([{ type: "emitValueCommit", value: [0.5, 0.5] }]);
   });
 });

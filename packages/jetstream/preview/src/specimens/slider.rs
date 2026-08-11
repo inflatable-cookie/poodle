@@ -10,7 +10,7 @@ use crate::compat::js_slider;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{ControlDensity, ControlSize, SliderSpec};
+use poodle_specs::{ControlDensity, ControlSize, SliderPolarity, SliderSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -85,6 +85,25 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             spec.aria_label = Some("Disabled slider".to_string());
             row(js_slider(&spec, theme))
         }))
+        .child(group(
+            "Embedded controls",
+            secondary,
+            div()
+                .flex_col()
+                .gap(12.0)
+                .child(row(js_slider(
+                    &SliderSpec::new(0.35)
+                        .with_bounds(0.0, 1.0)
+                        .with_embedded_control(SliderPolarity::Unipolar),
+                    theme,
+                )))
+                .child(row(js_slider(
+                    &SliderSpec::new(-0.45)
+                        .with_bounds(-1.0, 1.0)
+                        .with_embedded_control(SliderPolarity::Bipolar),
+                    theme,
+                ))),
+        ))
         // Sizes — xs–xl, thumb diameter + min-height scale per the §8 size table.
         .child(group(
             "Sizes",

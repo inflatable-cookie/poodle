@@ -1,7 +1,7 @@
 # Range Slider
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-11
 
 ## 1. Purpose
 
@@ -12,7 +12,8 @@ Updated: 2026-07-10
   fill visualization driven by CSS custom properties
 - In scope: lower/upper value pair, min/max bounds, stepped adjustment,
   separate thumb focus, horizontal and vertical orientation, value commit
-  semantics
+  semantics, standard and embedded variants, unipolar and bipolar reference
+  geometry
 - Out of scope: histogram overlays, arbitrary multi-thumb editing beyond two
   thumbs, single-value selection (see Slider)
 
@@ -44,6 +45,10 @@ Updated: 2026-07-10
 | `min` | `number` | `0` | no | lower bound |
 | `max` | `number` | `100` | no | upper bound |
 | `step` | `number` | `1` | no | increment size |
+| `variant` | `"standard" \| "embedded"` | `"standard"` | no | native-input control or dense composite control |
+| `polarity` | `"unipolar" \| "bipolar"` | `"unipolar"` | no | ordinary range or range with an explicit bipolar center reference |
+| `centerValue` | `number \| null` | `null` | no | bipolar reference; defaults to zero when zero is inside the range, otherwise the midpoint |
+| `law` | `AudioValueLaw` | `linear` | no | embedded-variant value mapping; standard remains the native linear range path |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | layout and interaction axis |
 | `disabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
 | `ariaLabel` | `string \| null` | `null` | no | base accessible name for the control |
@@ -118,6 +123,19 @@ interaction.
   `COMMIT` sets the pair, effect `emitValueCommit(pair)`
 - Machinery dependencies: none.
 
+### Embedded Control Variant
+
+`variant="embedded"` uses `rangeSliderControlTransition`. The adapter reports
+normalized pointer coordinates; the core selects the nearer thumb on begin,
+holds that thumb for the gesture, maps through the declared law, prevents
+crossing, and emits the change/commit split. `RangeSliderVisualState` publishes
+both normalized thumb positions, the center reference, and the selected fill
+window.
+
+Unipolar and bipolar variants both preserve RangeSlider's low-to-high selected
+window. Bipolar adds the explicit center reference; it does not reinterpret the
+pair as two unrelated scalar values.
+
 ## 5. Callbacks
 
 | Callback | When It Fires | Payload | Notes |
@@ -130,6 +148,8 @@ interaction.
 ### Semantics
 
 - Role: two related `<input type="range">` elements (slider role each)
+- Embedded variant: two adapter-owned slider focus stops expose the same
+  per-thumb semantics while pointer capture remains on the shared root
 - Lower input `aria-label`: `"{ariaLabel} minimum"` when ariaLabel is provided,
   otherwise `"Minimum value"`
 - Upper input `aria-label`: `"{ariaLabel} maximum"` when ariaLabel is provided,
@@ -175,6 +195,8 @@ interaction.
 - track thickness is 0.375rem (same as Slider)
 - thumb is 1rem diameter (same as Slider)
 - track length is parent-owned
+- embedded variant is valid inside dense composites and keeps the full root as
+  its pointer target
 
 ### Composition
 
@@ -184,6 +206,19 @@ interaction.
   thumb overlap and crossing behavior must preserve the lower<=upper invariant
 
 ## 8. Token Usage — Exact Values
+
+### Recipe hooks
+
+- `--poodle-recipe-range-slider-track-fill`
+- `--poodle-recipe-range-slider-fill-fill`
+- `--poodle-recipe-range-slider-track-border`
+- `--poodle-recipe-range-slider-center-fill`
+- `--poodle-recipe-range-slider-control-fill`
+- `--poodle-recipe-range-slider-control-track-fill`
+- `--poodle-recipe-range-slider-control-thumb-fill`
+- `--poodle-recipe-range-slider-control-thumb-shadow`
+- `--poodle-recipe-range-slider-focus-ring`
+- `--poodle-recipe-range-slider-focus-control-thumb-shadow`
 
 ### Root `.range-slider`
 
@@ -473,6 +508,11 @@ so the control geometry is unchanged — only the grabbable margin grows.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Disabled | `value=[30, 70]`, `min=0`, `max=100`, `disabled=true`, `ariaLabel="Disabled range"` | Reduced opacity; thumbs non-interactive; fill visible between 30% and 70% |
+
+### Group: Embedded bipolar control
+
+`value=[-0.6, 0.35]`, `min=-1`, `max=1`, `variant="embedded"`, and
+`polarity="bipolar"`. Sizes and densities use the same variant.
 
 ## 14. Approval And Adoption Notes
 

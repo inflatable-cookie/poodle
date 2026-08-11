@@ -6,13 +6,16 @@ import { SpecimenLayout } from "../SpecimenLayout";
 export function RangeSliderSpecimen() {
   const [priceRange, setPriceRange] = useState<[number, number]>([20, 80]);
   const [ageRange, setAgeRange] = useState<[number, number]>([23, 43]);
+  const [embeddedRange, setEmbeddedRange] = useState<[number, number]>([-0.6, 0.35]);
 
   return (
     <div style={{ maxWidth: "20rem" }}>
       <SpecimenLayout
-        showDensities={false}
         sizes={(size) => (
           <RangeSlider value={[25, 75]} min={0} max={100} size={size} ariaLabel={`Range at ${size}`} />
+        )}
+        densities={(density) => (
+          <RangeSlider variant="embedded" polarity="bipolar" value={[-0.5, 0.5]} min={-1} max={1} density={density} ariaLabel={`Embedded range at ${density} density`} />
         )}
       >
         <SpecimenGroup label="Default">
@@ -44,6 +47,10 @@ export function RangeSliderSpecimen() {
 
         <SpecimenGroup label="Disabled">
           <RangeSlider value={[30, 70]} min={0} max={100} disabled ariaLabel="Disabled range" />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Embedded bipolar control">
+          <RangeSlider variant="embedded" polarity="bipolar" value={embeddedRange} min={-1} max={1} step={0.01} ariaLabel="Bipolar modulation range" onValueChange={setEmbeddedRange} />
         </SpecimenGroup>
       </SpecimenLayout>
     </div>

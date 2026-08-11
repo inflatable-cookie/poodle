@@ -7,6 +7,9 @@
     align-items: center;
     width: 100%;
     min-height: 1.5rem;
+    --poodle-slider-fill-start: 0%;
+    --poodle-slider-fill-span: var(--poodle-slider-percent, 0%);
+    --poodle-slider-center: 0%;
   }
 
   .poodle-slider[data-orientation="vertical"] {
@@ -38,8 +41,9 @@
   }
 
   .poodle-slider__fill {
-    display: block;
-    width: var(--poodle-slider-percent);
+    position: absolute;
+    left: var(--poodle-slider-fill-start);
+    width: var(--poodle-slider-fill-span);
     height: 100%;
     border-radius: inherit;
     background: var(--poodle-recipe-slider-fill-fill, var(--poodle-color-accent-base));
@@ -47,9 +51,46 @@
 
   .poodle-slider[data-orientation="vertical"] .poodle-slider__fill {
     position: absolute;
-    bottom: 0;
+    bottom: var(--poodle-slider-fill-start);
     width: 100%;
-    height: var(--poodle-slider-percent);
+    height: var(--poodle-slider-fill-span);
+  }
+
+  .poodle-slider__center { display: none; }
+
+  .poodle-slider[data-variant="embedded"] {
+    min-width: 2.5rem;
+    min-height: 1.25rem;
+    border: 0.0625rem solid var(--poodle-recipe-slider-track-border, var(--poodle-color-border-default));
+    border-radius: 0.25rem;
+    background: var(--poodle-recipe-slider-control-fill, var(--poodle-color-background-canvas));
+    cursor: pointer;
+    touch-action: none;
+  }
+
+  .poodle-slider[data-variant="embedded"] .poodle-slider__track { inset-inline: 0.25rem; }
+  .poodle-slider[data-variant="embedded"] .poodle-slider__center {
+    display: block;
+    position: absolute;
+    inset-block: 18%;
+    left: var(--poodle-slider-center);
+    width: 0.0625rem;
+    background: var(--poodle-recipe-slider-center-fill, var(--poodle-color-border-strong));
+  }
+  .poodle-slider[data-variant="embedded"][data-orientation="vertical"] .poodle-slider__track { inset: 0.25rem auto; }
+  .poodle-slider[data-variant="embedded"][data-orientation="vertical"] .poodle-slider__center {
+    inset-inline: 18%;
+    bottom: var(--poodle-slider-center);
+    left: auto;
+    width: auto;
+    height: 0.0625rem;
+  }
+  .poodle-slider[data-variant="embedded"]:focus-visible {
+    outline: 0.125rem solid var(--poodle-recipe-slider-focus-ring, var(--poodle-color-accent-focusRing));
+    outline-offset: 0.0625rem;
+  }
+  .poodle-slider[data-variant="embedded"][data-state="active"] .poodle-slider__fill {
+    filter: brightness(1.08);
   }
 
   .poodle-slider__control {

@@ -17,7 +17,7 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, ScrubPhase,
     ShadowValue,
 };
-use poodle_specs::{ControlSize, RangeSliderSpec};
+use poodle_specs::{ControlSize, RangeSliderSpec, SliderVariant};
 
 use crate::color::with_alpha;
 use crate::presentation::{rem_to_px, resolve_semantic_size};
@@ -65,8 +65,22 @@ pub fn range_slider(
 
     // Display the supplied values as-is. Step snapping belongs to interaction
     // updates; applying it during rendering moves valid off-grid input values.
-    let lo = spec.normalized_low().clamp(0.0, 1.0) as f32;
-    let hi = (spec.normalized_high().clamp(0.0, 1.0) as f32).max(lo);
+    let visual = poodle_headless::slider::range_slider_visual_state(
+        poodle_headless::slider::RangeSliderControlContext {
+            value: (spec.low, spec.high),
+            min: spec.min,
+            max: spec.max,
+            step: spec.step,
+            disabled: spec.is_disabled,
+            law: spec.law,
+            polarity: spec.polarity,
+            center_value: spec.center_value,
+            pointer_active: false,
+            active_thumb: None,
+        },
+    );
+    let lo = visual.lower_norm as f32;
+    let hi = visual.upper_norm.max(visual.lower_norm) as f32;
 
     let thumb_r = thumb_size * 0.5;
 
@@ -135,8 +149,8 @@ pub fn range_slider(
     let mut scrub_handler: Option<Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>> = None;
     {
         use poodle_headless::slider::{
-            range_slider_transition, RangeSliderContext, RangeSliderEffect, RangeSliderEvent,
-            RangeThumb,
+            range_slider_control_transition, RangeSliderControlContext, RangeSliderControlEvent,
+            RangeSliderEffect, RangeThumb,
         };
 
         if !(spec.is_disabled
@@ -144,12 +158,17 @@ pub fn range_slider(
         {
             let low = Arc::new(AtomicU64::new(spec.low.to_bits()));
             let high = Arc::new(AtomicU64::new(spec.high.to_bits()));
-            let context = RangeSliderContext {
+            let context = RangeSliderControlContext {
                 value: (spec.low, spec.high),
                 min: spec.min,
                 max: spec.max,
                 step: spec.step,
                 disabled: false,
+                law: spec.law,
+                polarity: spec.polarity,
+                center_value: spec.center_value,
+                pointer_active: false,
+                active_thumb: None,
             };
 
             // Which thumb this gesture owns: 0 = undecided, 1 = lower,
@@ -163,8 +182,6 @@ pub fn range_slider(
             // happens to have stopped.
             let dragged = Arc::new(AtomicBool::new(false));
 
-            let min = spec.min;
-            let max = spec.max;
             let on_change = handlers.on_change.clone();
             let on_value_commit = handlers.on_value_commit.clone();
 
@@ -174,65 +191,53 @@ pub fn range_slider(
                         f64::from_bits(low.load(Ordering::SeqCst)),
                         f64::from_bits(high.load(Ordering::SeqCst)),
                     );
-                    let raw = min + (max - min) * fraction as f64;
-
-                    let thumb = match phase {
+                    let active_thumb = match active.load(Ordering::SeqCst) {
+                        1 => Some(RangeThumb::Lower),
+                        2 => Some(RangeThumb::Upper),
+                        _ => None,
+                    };
+                    let event = match phase {
                         ScrubPhase::Press => {
                             if dragged.swap(false, Ordering::SeqCst) {
                                 // The click that ends a drag. The value is
                                 // already where the drag left it.
                                 return;
                             }
-                            // Nearest thumb wins the press, which is also what
-                            // makes clicking the track move something sensible.
-                            let thumb = if (raw - live.0).abs() <= (live.1 - raw).abs() {
-                                RangeThumb::Lower
-                            } else {
-                                RangeThumb::Upper
-                            };
-                            active.store(
-                                match thumb {
-                                    RangeThumb::Lower => 1,
-                                    RangeThumb::Upper => 2,
-                                },
-                                Ordering::SeqCst,
-                            );
-                            thumb
+                            RangeSliderControlEvent::PointerBegin {
+                                value_norm: fraction as f64,
+                            }
                         }
                         ScrubPhase::Drag => {
                             dragged.store(true, Ordering::SeqCst);
-                            match active.load(Ordering::SeqCst) {
-                                2 => RangeThumb::Upper,
-                                1 => RangeThumb::Lower,
-                                // A drag with no press before it (the press was
-                                // swallowed): fall back to nearest, once.
-                                _ => {
-                                    let thumb = if (raw - live.0).abs() <= (live.1 - raw).abs() {
-                                        RangeThumb::Lower
-                                    } else {
-                                        RangeThumb::Upper
-                                    };
-                                    active.store(
-                                        match thumb {
-                                            RangeThumb::Lower => 1,
-                                            RangeThumb::Upper => 2,
-                                        },
-                                        Ordering::SeqCst,
-                                    );
-                                    thumb
+                            if active_thumb.is_some() {
+                                RangeSliderControlEvent::PointerMove {
+                                    value_norm: fraction as f64,
+                                }
+                            } else {
+                                RangeSliderControlEvent::PointerBegin {
+                                    value_norm: fraction as f64,
                                 }
                             }
                         }
                     };
 
-                    let context = RangeSliderContext {
+                    let context = RangeSliderControlContext {
                         value: live,
+                        pointer_active: active_thumb.is_some(),
+                        active_thumb,
                         ..context
                     };
-                    let (next, effects) =
-                        range_slider_transition(context, RangeSliderEvent::Input { thumb, raw });
+                    let (next, effects) = range_slider_control_transition(context, event);
                     low.store(next.value.0.to_bits(), Ordering::SeqCst);
                     high.store(next.value.1.to_bits(), Ordering::SeqCst);
+                    active.store(
+                        match next.active_thumb {
+                            Some(RangeThumb::Lower) => 1,
+                            Some(RangeThumb::Upper) => 2,
+                            None => 0,
+                        },
+                        Ordering::SeqCst,
+                    );
 
                     for effect in effects {
                         match effect {
@@ -290,12 +295,24 @@ pub fn range_slider(
         c.bottom_right = pill;
         c.bottom_left = pill;
     }
-    let mut track = track
-        .child(seg_lo)
-        .child(seg_fill)
-        .child(seg_hi)
-        .child(low_thumb_layer)
-        .child(high_thumb_layer);
+    let mut track = track.child(seg_lo).child(seg_fill).child(seg_hi);
+    if spec.variant == SliderVariant::Standard {
+        track = track.child(low_thumb_layer).child(high_thumb_layer);
+    } else {
+        let mut marker = Node::container();
+        marker.style.descriptor.layout.width = LayoutSizing::Fixed(border_w);
+        marker.style.descriptor.layout.height = LayoutSizing::Fixed(track_h * 3.0);
+        marker.style.descriptor.background = Some(border_default);
+        marker.position = NodePosition::Absolute {
+            top: Some(-track_h),
+            left: None,
+            right: Some(0.0),
+            bottom: None,
+        };
+        let mut anchor = segment(visual.center_norm as f32, None);
+        anchor.position = NodePosition::Relative;
+        track = track.child(anchor.child(marker));
+    }
 
     // The scrub belongs to a full-width grab overlay, not to either thumb: the
     // fraction is measured across whichever node carries it, and a fraction

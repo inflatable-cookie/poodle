@@ -5,10 +5,11 @@
 
   let priceRange: [number, number] = $state([20, 80]);
   let ageRange: [number, number] = $state([23, 43]);
+  let embeddedRange: [number, number] = $state([-0.6, 0.35]);
 </script>
 
 <div class="poodle-range-slider-specimen">
-<SpecimenLayout showDensities={false}>
+<SpecimenLayout>
   <SpecimenGroup label="Default">
     <RangeSlider
       value={priceRange}
@@ -36,8 +37,16 @@
     <RangeSlider value={[30, 70]} min={0} max={100} disabled ariaLabel="Disabled range" />
   </SpecimenGroup>
 
+  <SpecimenGroup label="Embedded bipolar control">
+    <RangeSlider variant="embedded" polarity="bipolar" value={embeddedRange} min={-1} max={1} step={0.01} ariaLabel="Bipolar modulation range" onValueChange={(value) => (embeddedRange = value)} />
+  </SpecimenGroup>
+
   {#snippet sizes(size)}
     <RangeSlider value={[25, 75]} min={0} max={100} {size} ariaLabel={"Range at " + size} />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <RangeSlider variant="embedded" polarity="bipolar" value={[-0.5, 0.5]} min={-1} max={1} {density} ariaLabel={"Embedded range at " + density + " density"} />
   {/snippet}
 
 </SpecimenLayout>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/mod-matrix-grid.css";
+  import "@inflatable-cookie/poodle-core/styles/slider.css";
   import { createModMatrixContext, formatAudioValue, modMatrixTransition, modMatrixVisualState, type ModMatrixCell, type ModMatrixContext, type ModMatrixEffect, type ModMatrixHeader } from "@inflatable-cookie/poodle-core";
   import ModMatrixVisual from "./audio/ModMatrixVisual.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -23,14 +24,15 @@
     const column = destinations.findIndex((destination) => destination.id === target.dataset.destinationId);
     if (row < 0 || column < 0) return;
     event.preventDefault(); dragPointer = event.pointerId; dragTarget = target; root.setPointerCapture(event.pointerId);
-    send({ type: "DRAG_BEGIN", row, column, amountNorm: Math.min(Math.max(1 - (event.clientY - target.getBoundingClientRect().top) / Math.max(target.getBoundingClientRect().height, 1), 0), 1), fine: event.shiftKey });
+    const rect = target.getBoundingClientRect();
+    send({ type: "DRAG_BEGIN", row, column, amountNorm: Math.min(Math.max((event.clientX - rect.left) / Math.max(rect.width, 1), 0), 1), fine: event.shiftKey });
     root.querySelectorAll<HTMLButtonElement>(".poodle-mod-matrix-grid__control")[row * destinations.length + column]?.focus();
   }
   function pointerMove(event: PointerEvent) {
     if (dragPointer !== event.pointerId) return;
     if (!dragTarget) return;
     const rect = dragTarget.getBoundingClientRect();
-    send({ type: "DRAG_MOVE", amountNorm: Math.min(Math.max(1 - (event.clientY - rect.top) / Math.max(rect.height, 1), 0), 1), fine: event.shiftKey });
+    send({ type: "DRAG_MOVE", amountNorm: Math.min(Math.max((event.clientX - rect.left) / Math.max(rect.width, 1), 0), 1), fine: event.shiftKey });
   }
   function pointerEnd(event: PointerEvent) { if (dragPointer === event.pointerId) { dragPointer = null; dragTarget = null; send({ type: "DRAG_END" }); } }
   function key(event: KeyboardEvent) { if (event.key.startsWith("Arrow")) { event.preventDefault(); send({ type: "MOVE_FOCUS", rows: event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0, columns: event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0 }); } else if (event.key === "Home" || event.key === "End") { event.preventDefault(); send({ type: "BOUND_FOCUS", bound: event.ctrlKey ? (event.key === "Home" ? "grid-start" : "grid-end") : (event.key === "Home" ? "row-start" : "row-end") }); } else if (event.key === " ") { event.preventDefault(); send({ type: "TOGGLE_FOCUSED" }); } else if (event.key === "PageUp" || event.key === "PageDown") { event.preventDefault(); send({ type: "NUDGE_FOCUSED", direction: event.key === "PageUp" ? 1 : -1, fine: event.shiftKey }); } }

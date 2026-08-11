@@ -15,7 +15,7 @@ use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeDragEvent,
     NodeDragPhase, NodePosition, ShadowValue,
 };
-use poodle_specs::{ControlSize, SliderSpec};
+use poodle_specs::{ControlSize, SliderSpec, SliderVariant};
 
 use crate::color::with_alpha;
 use crate::presentation::{rem_to_px, resolve_semantic_size};
@@ -61,8 +61,20 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
     // 88% of its own alpha.
     let track_bg = with_alpha(surface, surface.3 * 0.88);
 
-    let range = (spec.max - spec.min).max(0.001);
-    let fraction = ((spec.value - spec.min) / range).clamp(0.0, 1.0) as f32;
+    let visual = poodle_headless::slider::slider_visual_state(
+        poodle_headless::slider::SliderControlContext {
+            value: spec.value,
+            min: spec.min,
+            max: spec.max,
+            step: spec.step,
+            disabled: spec.is_disabled,
+            law: spec.law,
+            polarity: spec.polarity,
+            center_value: spec.center_value,
+            pointer_active: false,
+        },
+    );
+    let fraction = visual.value_norm as f32;
 
     let thumb_r = thumb_size * 0.5;
 
@@ -142,35 +154,65 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
     // track jump the value there, which a delta can never do.
     let scrub_handler: Option<Arc<dyn Fn(f32, poodle_node::ScrubPhase) + Send + Sync>> =
         if handlers.change.is_none() {
-        None
-    } else {
-        let min = spec.min;
-        let max = spec.max;
-        let context = poodle_headless::slider::SliderContext {
-            value: spec.value,
-            min: spec.min,
-            max: spec.max,
-            step: spec.step,
-            disabled: false,
-        };
-        let on_change = handlers.change.clone();
-        // A single-thumb slider treats press and drag identically: there is
-        // only one thing the pointer can be moving.
-        Some(Arc::new(move |fraction: f32, _phase| {
-            let raw = min + (max - min) * fraction as f64;
-            let (_, effects) = poodle_headless::slider::slider_transition(
-                context,
-                poodle_headless::slider::SliderEvent::Input { raw },
-            );
-            for effect in effects {
-                if let poodle_headless::slider::SliderEffect::EmitValueChange { value } = effect {
-                    if let Some(handler) = &on_change {
-                        handler(value);
+            None
+        } else {
+            use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+            let context = poodle_headless::slider::SliderControlContext {
+                value: spec.value,
+                min: spec.min,
+                max: spec.max,
+                step: spec.step,
+                disabled: false,
+                law: spec.law,
+                polarity: spec.polarity,
+                center_value: spec.center_value,
+                pointer_active: false,
+            };
+            let live = Arc::new(AtomicU64::new(spec.value.to_bits()));
+            let active = Arc::new(AtomicBool::new(false));
+            let on_change = handlers.change.clone();
+            // A single-thumb slider treats press and drag identically: there is
+            // only one thing the pointer can be moving.
+            Some(Arc::new(move |fraction: f32, phase| {
+                let current = f64::from_bits(live.load(Ordering::SeqCst));
+                let pointer_active = active.load(Ordering::SeqCst);
+                let event = match phase {
+                    poodle_node::ScrubPhase::Press => {
+                        poodle_headless::slider::SliderControlEvent::PointerBegin {
+                            value_norm: fraction as f64,
+                        }
+                    }
+                    poodle_node::ScrubPhase::Drag if pointer_active => {
+                        poodle_headless::slider::SliderControlEvent::PointerMove {
+                            value_norm: fraction as f64,
+                        }
+                    }
+                    poodle_node::ScrubPhase::Drag => {
+                        poodle_headless::slider::SliderControlEvent::PointerBegin {
+                            value_norm: fraction as f64,
+                        }
+                    }
+                };
+                let (next, effects) = poodle_headless::slider::slider_control_transition(
+                    poodle_headless::slider::SliderControlContext {
+                        value: current,
+                        pointer_active,
+                        ..context
+                    },
+                    event,
+                );
+                live.store(next.value.to_bits(), Ordering::SeqCst);
+                active.store(next.pointer_active, Ordering::SeqCst);
+                for effect in effects {
+                    if let poodle_headless::slider::SliderEffect::EmitValueChange { value } = effect
+                    {
+                        if let Some(handler) = &on_change {
+                            handler(value);
+                        }
                     }
                 }
-            }
-        }))
-    };
+            }))
+        };
 
     // Thumb and fill only advertise the affordance. The scrub itself belongs to
     // the TRACK, because the fraction is measured across the node that carries
@@ -229,7 +271,11 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
     fill.position = NodePosition::Relative;
     {
         let s = &mut fill.style;
-        s.width_pct = Some(fraction);
+        s.width_pct = Some(if spec.variant == SliderVariant::Embedded {
+            visual.fill_span_norm as f32
+        } else {
+            fraction
+        });
         s.descriptor.layout.height = LayoutSizing::Fixed(track_h);
         s.descriptor.background = Some(accent);
         s.descriptor.corner_radii.top_left = pill;
@@ -238,7 +284,11 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
         s.descriptor.corner_radii.bottom_left = pill;
     }
     draggable(&mut fill);
-    let fill = fill.child(thumb);
+    let fill = if spec.variant == SliderVariant::Embedded {
+        fill
+    } else {
+        fill.child(thumb)
+    };
 
     // Track: full-width 6px pill. Its absolute thumb may overflow vertically
     // without changing the 6px layout height, matching the old GPUI anatomy.
@@ -256,7 +306,14 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
         s.descriptor.corner_radii.bottom_left = pill;
     }
     track.position = NodePosition::Relative;
-    let track = track.child(fill);
+    let track = if spec.variant == SliderVariant::Embedded {
+        let mut leading = Node::container();
+        leading.style.width_pct = Some(visual.fill_start_norm as f32);
+        leading.style.descriptor.layout.height = LayoutSizing::Fixed(track_h);
+        track.child(leading).child(fill)
+    } else {
+        track.child(fill)
+    };
 
     // Grab area. The track paints 6px tall, which is a punishing pointer
     // target — the same reason ResizeHandle's contract puts its grab area on an

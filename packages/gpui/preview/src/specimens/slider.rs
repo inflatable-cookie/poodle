@@ -6,7 +6,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{EyebrowSpec, SliderSpec};
+use poodle_specs::{EyebrowSpec, SliderPolarity, SliderSpec};
 use std::sync::Arc;
 
 fn slider_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(f64) + Send + Sync> {
@@ -174,6 +174,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     )
                     .with_id("slider-disabled"),
+                ),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Embedded controls"),
+                    theme,
+                ))
+                .child(
+                    Slider::from_spec(
+                        SliderSpec::new(0.35)
+                            .with_bounds(0.0, 1.0)
+                            .with_embedded_control(SliderPolarity::Unipolar),
+                        theme,
+                    )
+                    .with_id("slider-embedded-unipolar"),
+                )
+                .child(
+                    Slider::from_spec(
+                        SliderSpec::new(-0.45)
+                            .with_bounds(-1.0, 1.0)
+                            .with_embedded_control(SliderPolarity::Bipolar),
+                        theme,
+                    )
+                    .with_id("slider-embedded-bipolar"),
                 ),
         )
         .into_any_element();

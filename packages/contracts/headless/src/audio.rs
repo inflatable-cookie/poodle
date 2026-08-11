@@ -1601,18 +1601,6 @@ impl Default for ModMatrixCellParameters {
         }
     }
 }
-fn mod_matrix_continuous_law(law: AudioValueLaw) -> AudioValueLaw {
-    match continuous_law(law) {
-        ContinuousAudioValueLaw::Linear => AudioValueLaw::Linear,
-        ContinuousAudioValueLaw::Logarithmic => AudioValueLaw::Logarithmic,
-        ContinuousAudioValueLaw::Exponential { exponent } => {
-            AudioValueLaw::Exponential { exponent }
-        }
-        ContinuousAudioValueLaw::BipolarCenter { center } => {
-            AudioValueLaw::BipolarCenter { center }
-        }
-    }
-}
 #[derive(Clone, Debug, PartialEq)]
 pub struct ModMatrixCell {
     pub source_id: String,
@@ -1780,12 +1768,25 @@ impl ModMatrixContext {
             if !self.disabled {
                 let index = row * self.destinations.len() + column;
                 let parameters = self.cells[index].parameters.clone();
-                self.cells[index].amount = denormalize_value(
-                    norm,
-                    parameters.min,
-                    parameters.max,
-                    parameters.law,
+                let (next, _) = crate::slider::slider_control_transition(
+                    crate::slider::SliderControlContext {
+                        value: self.cells[index].amount,
+                        min: parameters.min,
+                        max: parameters.max,
+                        step: parameters.step,
+                        disabled: false,
+                        law: parameters.law,
+                        polarity: if parameters.min < 0.0 && parameters.max > 0.0 {
+                            crate::slider::SliderPolarity::Bipolar
+                        } else {
+                            crate::slider::SliderPolarity::Unipolar
+                        },
+                        center_value: None,
+                        pointer_active: false,
+                    },
+                    crate::slider::SliderControlEvent::PointerBegin { value_norm: norm },
                 );
+                self.cells[index].amount = next.value;
             }
         }
         self
@@ -1804,24 +1805,28 @@ impl ModMatrixContext {
                 .enumerate()
                 .map(|(index, cell)| {
                     let parameters = &cell.parameters;
-                    let amount_norm = normalize_value(
-                        cell.amount,
-                        parameters.min,
-                        parameters.max,
-                        parameters.law,
-                    );
-                    let zero_norm = normalize_value(
-                        clamp_value(0.0, parameters.min, parameters.max),
-                        parameters.min,
-                        parameters.max,
-                        mod_matrix_continuous_law(parameters.law),
-                    );
+                    let slider =
+                        crate::slider::slider_visual_state(crate::slider::SliderControlContext {
+                            value: cell.amount,
+                            min: parameters.min,
+                            max: parameters.max,
+                            step: parameters.step,
+                            disabled: self.disabled,
+                            law: parameters.law,
+                            polarity: if parameters.min < 0.0 && parameters.max > 0.0 {
+                                crate::slider::SliderPolarity::Bipolar
+                            } else {
+                                crate::slider::SliderPolarity::Unipolar
+                            },
+                            center_value: None,
+                            pointer_active: false,
+                        });
                     ModMatrixVisualCell {
                         cell: cell.clone(),
-                        amount_norm,
-                        zero_norm,
-                        fill_start_norm: amount_norm.min(zero_norm),
-                        fill_span_norm: (amount_norm - zero_norm).abs(),
+                        amount_norm: slider.value_norm,
+                        zero_norm: slider.center_norm,
+                        fill_start_norm: slider.fill_start_norm,
+                        fill_span_norm: slider.fill_span_norm,
                         focused: focused == Some(index),
                     }
                 })
@@ -1974,11 +1979,11 @@ mod tests {
         .nudge(1.0, false)
         .set_normalized(0.75);
         let visual = context.visual_state();
-        close(context.cells[0].amount, 0.75);
-        close(visual.cells[0].amount_norm, 0.75);
+        close(context.cells[0].amount, 0.8);
+        close(visual.cells[0].amount_norm, 0.8);
         close(visual.cells[0].zero_norm, 0.0);
         close(visual.cells[0].fill_start_norm, 0.0);
-        close(visual.cells[0].fill_span_norm, 0.75);
+        close(visual.cells[0].fill_span_norm, 0.8);
     }
 
     #[test]

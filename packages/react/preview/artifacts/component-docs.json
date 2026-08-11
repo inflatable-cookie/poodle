@@ -8130,6 +8130,30 @@
         "description": "Step increment between values."
       },
       {
+        "name": "variant",
+        "type": "\"standard\" | \"embedded\"",
+        "default": "\"standard\"",
+        "description": "Uses native range inputs or the dense control-machine pointer surface."
+      },
+      {
+        "name": "polarity",
+        "type": "\"unipolar\" | \"bipolar\"",
+        "default": "\"unipolar\"",
+        "description": "Selects a zero-origin or center-referenced embedded presentation."
+      },
+      {
+        "name": "centerValue",
+        "type": "number | null",
+        "default": "null",
+        "description": "Optional bipolar center override; zero or the range midpoint is used when omitted."
+      },
+      {
+        "name": "law",
+        "type": "AudioValueLaw",
+        "default": "linear",
+        "description": "Value law used by embedded pointer mapping."
+      },
+      {
         "name": "orientation",
         "type": "Orientation",
         "default": "\"horizontal\"",
@@ -9209,6 +9233,30 @@
         "type": "number",
         "default": "1",
         "description": "Step increment between values."
+      },
+      {
+        "name": "variant",
+        "type": "\"standard\" | \"embedded\"",
+        "default": "\"standard\"",
+        "description": "Uses the native input or dense control-machine pointer surface."
+      },
+      {
+        "name": "polarity",
+        "type": "\"unipolar\" | \"bipolar\"",
+        "default": "\"unipolar\"",
+        "description": "Selects a zero-origin or center-referenced embedded presentation."
+      },
+      {
+        "name": "centerValue",
+        "type": "number | null",
+        "default": "null",
+        "description": "Optional bipolar center override; zero or the range midpoint is used when omitted."
+      },
+      {
+        "name": "law",
+        "type": "AudioValueLaw",
+        "default": "linear",
+        "description": "Value law used by embedded pointer mapping."
       },
       {
         "name": "orientation",

@@ -6,7 +6,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{EyebrowSpec, RangeSliderSpec};
+use poodle_specs::{EyebrowSpec, RangeSliderSpec, SliderPolarity};
 use std::sync::Arc;
 
 fn range_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(f64, f64) + Send + Sync> {
@@ -164,6 +164,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     RangeSliderSpec::new(75.0, 100.0)
                         .with_bounds(0.0, 100.0)
                         .with_aria_label("High range"),
+                    theme,
+                )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Embedded bipolar control"),
+                    theme,
+                ))
+                .child(RangeSlider::from_spec(
+                    RangeSliderSpec::new(-0.6, 0.35)
+                        .with_bounds(-1.0, 1.0)
+                        .with_embedded_control(SliderPolarity::Bipolar)
+                        .with_aria_label("Bipolar modulation range"),
                     theme,
                 )),
         )
