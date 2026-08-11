@@ -18,6 +18,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   `$$typeof` check) so forwardRef components stay gated. Affects Svelte↔React
   parity and smoke coverage.
 
+- 2026-08-11 — `packages/tokens/scripts/build-tokens.ts --check` cannot see a
+  stale committed artifact: `writeFile` only writes/compares files the
+  generator still emits and never deletes (`build-tokens.ts:233-251`), so a
+  token file removed from the generator stays committed forever and the gate
+  passes. Only the svelte mirror deletes on regenerate
+  (`syncSvelteTokenArtifacts`, `:270-274`); `scripts/build-default-icons.ts`
+  has the right pattern (stale set, deleted in write mode / failed in check
+  mode, `build-default-icons.ts:176-197`). Port the icons stale-detection to
+  `audit:tokens`. Affects token drift gating (found by card 015 research).
+
 - 2026-08-11 — `effigy docs:lint` requires every Cargo.toml under
   `packages/` to be registered in `packages/release-manifest.json` (reverse
   check in `packages/svelte/preview/scripts/lint-docs.ts`
