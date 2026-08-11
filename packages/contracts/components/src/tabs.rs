@@ -27,6 +27,24 @@ pub enum ActiveFill {
     Solid,
 }
 
+/// Selection edge on the active control. Matches the Svelte/React
+/// `activeEdge` prop (`"none" | "outline" | "underline"`, default `"none"`).
+/// Shared type — see `docs/contracts/004-shared-control-types.md`.
+///
+/// One enum, not booleans: `outline` and `underline` are both borders on the
+/// active control and conflict on the same property, so a boolean pair would
+/// admit nonsense combinations. Exactly one value applies.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum ActiveEdge {
+    /// No edge drawn.
+    #[default]
+    None,
+    /// Accent border around the active control.
+    Outline,
+    /// Accent edge along the inline-end side (bottom horizontal, right vertical).
+    Underline,
+}
+
 /// A part a `Tabs` strip may give up to keep its labels.
 ///
 /// Labels are deliberately absent: shedding one would leave a tab as an unnamed
@@ -43,10 +61,9 @@ pub struct TabsSpec {
     pub value: Option<String>,
     pub default_value: Option<String>,
     pub variant: TabVariant,
-    /// Opt-in outline on the active tab — the decoration the former `card`
-    /// variant had by default. Matches Svelte `activeOutline` (default
-    /// false).
-    pub active_outline: bool,
+    /// Selection edge on the active tab — see `ActiveEdge`. Matches Svelte
+    /// `activeEdge` (default `"none"`).
+    pub active_edge: ActiveEdge,
     /// Selection treatment on the active tab: tint or fully accent-filled.
     /// Matches Svelte `activeFill` (default `"tint"`).
     pub active_fill: ActiveFill,
@@ -58,9 +75,9 @@ pub struct TabsSpec {
     /// `reorderable` prop.
     pub is_reorderable: bool,
     /// When true, the Card variant renders the bottom border
-    /// line under the whole tab list (the default). When false the
-    /// indicator is suppressed — useful for flush layouts. Matches
-    /// Svelte `bordered` prop (default true).
+    /// line under the whole tab list. When false (the default since g13-020)
+    /// the list renders flush to its container — useful for titlebars and
+    /// toolbars. Matches Svelte `bordered` prop (default false).
     pub is_bordered: bool,
     /// When true (and orientation is horizontal), tabs flex to fill the
     /// row at equal widths with centered labels. Matches Svelte
@@ -109,13 +126,13 @@ impl Default for TabsSpec {
             value: None,
             default_value: None,
             variant: TabVariant::Card,
-            active_outline: false,
+            active_edge: ActiveEdge::None,
             active_fill: ActiveFill::Tint,
             orientation: Orientation::Horizontal,
             activation_mode: TabActivationMode::Automatic,
             aria_label: None,
             is_reorderable: false,
-            is_bordered: true,
+            is_bordered: false,
             is_full_width: false,
             history_key: None,
             drag_value: None,
@@ -209,10 +226,9 @@ impl TabsSpec {
         self
     }
 
-    /// Opt in to an outline on the active tab — the decoration the former
-    /// `card` variant had by default.
-    pub fn with_active_outline(mut self, active_outline: bool) -> Self {
-        self.active_outline = active_outline;
+    /// Set the selection edge on the active tab (none, outline, or underline).
+    pub fn with_active_edge(mut self, active_edge: ActiveEdge) -> Self {
+        self.active_edge = active_edge;
         self
     }
 
@@ -375,17 +391,18 @@ mod tests {
     #[test]
     fn active_decorations_default_off_and_tint() {
         let spec = TabsSpec::new(vec![TabDefinition::new("a", "A")]);
-        assert!(!spec.active_outline);
+        assert_eq!(spec.active_edge, ActiveEdge::None);
         assert_eq!(spec.active_fill, ActiveFill::Tint);
         assert_eq!(spec.variant, TabVariant::Card);
+        assert!(!spec.is_bordered, "bordered defaults to false (g13-020 R3)");
     }
 
     #[test]
     fn active_decorations_builders_set_both() {
         let spec = TabsSpec::new(vec![TabDefinition::new("a", "A")])
-            .with_active_outline(true)
+            .with_active_edge(ActiveEdge::Outline)
             .with_active_fill(ActiveFill::Solid);
-        assert!(spec.active_outline);
+        assert_eq!(spec.active_edge, ActiveEdge::Outline);
         assert_eq!(spec.active_fill, ActiveFill::Solid);
     }
 }

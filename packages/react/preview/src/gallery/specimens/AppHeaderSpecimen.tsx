@@ -188,8 +188,8 @@ export function AppHeaderSpecimen() {
             center={
               <Tabs
                 items={centerTabs}
-                variant="strip"
-                activeOutline
+                variant="block"
+                activeEdge="outline"
                 defaultValue="editor"
                 size="sm"
                 ariaLabel="Destinations"
@@ -207,8 +207,8 @@ export function AppHeaderSpecimen() {
               center={
                 <Tabs
                   items={centerTabs}
-                  variant="strip"
-                  activeOutline
+                  variant="block"
+                  activeEdge="outline"
                   defaultValue="editor"
                   size="sm"
                   ariaLabel="Destinations"

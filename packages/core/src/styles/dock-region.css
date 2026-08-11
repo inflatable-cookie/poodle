@@ -95,7 +95,7 @@
     min-width: 0;
   }
 
-  .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs[data-variant="strip"] .poodle-tabs__list {
+  .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs[data-variant="block"] .poodle-tabs__list {
     border-bottom: 0;
   }
 
@@ -176,7 +176,7 @@
 
   .poodle-dock-region[data-edge="right"]
     .poodle-dock-region__strip[data-orientation="vertical"]
-    .poodle-tabs[data-variant="strip"] .poodle-tabs__item {
+    .poodle-tabs[data-active-edge="underline"] .poodle-tabs__item {
     border-right: 0;
     margin-right: 0;
     border-left: 0.125rem solid transparent;
@@ -185,7 +185,7 @@
 
   .poodle-dock-region[data-edge="right"]
     .poodle-dock-region__strip[data-orientation="vertical"]
-    .poodle-tabs[data-variant="strip"] .poodle-tabs__item[data-selected="true"] {
+    .poodle-tabs[data-active-edge="underline"] .poodle-tabs__item[data-selected="true"] {
     border-left-color: var(--poodle-color-accent-base);
   }
 

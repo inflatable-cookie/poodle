@@ -649,8 +649,17 @@ export interface TabItem {
   separator?: boolean;
 }
 
-export type TabVariant = "card" | "pill" | "block" | "strip";
+export type TabVariant = "card" | "pill" | "block";
 export type TabActivationMode = "automatic" | "manual";
+
+/**
+ * Selection edge on the active control: `"none"` draws no edge, `"outline"`
+ * draws the accent border around the active control, `"underline"` draws the
+ * accent edge along the inline-end side. One enum because outline and
+ * underline are both borders on the same property and cannot compose. Shared
+ * type — see `docs/contracts/004-shared-control-types.md`.
+ */
+export type ActiveEdge = "none" | "outline" | "underline";
 
 /**
  * Selection treatment on the active control: `"tint"` is the accent-tinted

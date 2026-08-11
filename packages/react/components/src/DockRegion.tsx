@@ -69,7 +69,7 @@ export function DockRegion({
   size = null,
   sizeRole = "chrome",
   density = null,
-  tabVariant = "strip",
+  tabVariant = "block",
   items = [],
   value = null,
   ariaLabel = null,
@@ -339,6 +339,7 @@ export function DockRegion({
   const stripTabs = (orientation: "horizontal" | "vertical", withTooltips: boolean) => (
     <Tabs
       variant={tabVariant}
+      activeEdge="underline"
       orientation={orientation}
       size={size}
       sizeRole={sizeRole}

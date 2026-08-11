@@ -10,9 +10,8 @@
     --poodle-tabs-content-gap: var(--poodle-space-inline-sm);
     --poodle-tabs-list-gap: var(--poodle-space-inline-sm);
     --poodle-tabs-separator-margin: var(--poodle-space-inline-sm);
-    --poodle-tabs-strip-inline-padding: var(--poodle-tabs-control-x);
-    --poodle-tabs-strip-tab-x: var(--poodle-tabs-control-x);
-    --poodle-tabs-strip-close-margin-end: 0.25rem;
+    --poodle-tabs-block-inline-padding: var(--poodle-tabs-control-x);
+    --poodle-tabs-block-close-margin-end: 0.25rem;
     display: grid;
     gap: var(--poodle-space-stack-md);
     min-width: 0;
@@ -95,9 +94,8 @@
     --poodle-tabs-content-gap: 0.375rem;
     --poodle-tabs-list-gap: 0.25rem;
     --poodle-tabs-separator-margin: 0.375rem;
-    --poodle-tabs-strip-inline-padding: 0.5rem;
-    --poodle-tabs-strip-tab-x: 0.5rem;
-    --poodle-tabs-strip-close-margin-end: 0.25rem;
+    --poodle-tabs-block-inline-padding: 0.5rem;
+    --poodle-tabs-block-close-margin-end: 0.25rem;
   }
 
   .poodle-tabs[data-density="default"] {
@@ -105,9 +103,8 @@
     --poodle-tabs-content-gap: var(--poodle-space-inline-sm);
     --poodle-tabs-list-gap: var(--poodle-space-inline-sm);
     --poodle-tabs-separator-margin: var(--poodle-space-inline-sm);
-    --poodle-tabs-strip-inline-padding: 0.75rem;
-    --poodle-tabs-strip-tab-x: 0.75rem;
-    --poodle-tabs-strip-close-margin-end: 0.375rem;
+    --poodle-tabs-block-inline-padding: 0.75rem;
+    --poodle-tabs-block-close-margin-end: 0.375rem;
   }
 
   .poodle-tabs[data-density="comfortable"] {
@@ -115,9 +112,8 @@
     --poodle-tabs-content-gap: 0.625rem;
     --poodle-tabs-list-gap: 0.625rem;
     --poodle-tabs-separator-margin: 0.625rem;
-    --poodle-tabs-strip-inline-padding: 0.75rem;
-    --poodle-tabs-strip-tab-x: 0.75rem;
-    --poodle-tabs-strip-close-margin-end: 0.375rem;
+    --poodle-tabs-block-inline-padding: 0.75rem;
+    --poodle-tabs-block-close-margin-end: 0.375rem;
   }
 
   .poodle-tabs[data-orientation="vertical"] {
@@ -171,9 +167,8 @@
     border-right: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
   }
 
-  /* Pill + Strip + Block: no wrapping, allow scroll on main axis only */
+  /* Pill + Block: no wrapping, allow scroll on main axis only */
   .poodle-tabs[data-variant="pill"] .poodle-tabs__list,
-  .poodle-tabs[data-variant="strip"] .poodle-tabs__list,
   .poodle-tabs[data-variant="block"] .poodle-tabs__list {
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -181,30 +176,30 @@
   }
 
   .poodle-tabs[data-variant="pill"][data-orientation="vertical"] .poodle-tabs__list,
-  .poodle-tabs[data-variant="strip"][data-orientation="vertical"] .poodle-tabs__list,
   .poodle-tabs[data-variant="block"][data-orientation="vertical"] .poodle-tabs__list {
     flex-direction: column;
     overflow-x: hidden;
     overflow-y: auto;
   }
 
-  /* Strip: full-width cohesive bar */
-  .poodle-tabs[data-variant="strip"] .poodle-tabs__list {
-    display: flex;
-    gap: 0;
-    padding: 0 var(--poodle-tabs-strip-inline-padding);
-    border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
-    background: var(--poodle-recipe-tabs-strip-list-fill, color-mix(in srgb, var(--poodle-color-background-panel) 92%, transparent));
-  }
-
-  /* Block: full-width tabs with separators, no radius, no outer border chrome */
+  /* Block: full-width tabs with separators, no radius, no outer border chrome.
+     Block absorbed the former strip variant's inline padding — the list's
+     outer padding holding the tabs off the bar edge. */
   .poodle-tabs[data-variant="block"] .poodle-tabs__list {
     display: flex;
     width: 100%;
     gap: 0;
-    padding: 0;
+    padding: 0 var(--poodle-tabs-block-inline-padding);
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
     background: var(--poodle-recipe-tabs-block-list-fill, color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent));
+  }
+
+  /* Block vertical absorbed the former strip variant's list handling: the
+     border shifts to the inline-end edge and the list stops clipping so the
+     negative-margin underline can overlap it. */
+  .poodle-tabs[data-variant="block"][data-orientation="vertical"] .poodle-tabs__list {
+    border-right: 0.0625rem solid var(--poodle-color-border-subtle);
+    overflow: visible;
   }
 
   /* ── Item wrapper (for tab + close) ── */
@@ -224,6 +219,14 @@
     background: var(--poodle-recipe-tabs-separator-fill, var(--poodle-color-border-default));
   }
 
+  .poodle-tabs[data-orientation="vertical"] .poodle-tabs__separator {
+    width: auto;
+    height: 0.0625rem;
+    margin-right: 0;
+    margin-bottom: var(--poodle-tabs-separator-margin);
+    align-self: stretch;
+  }
+
   .poodle-tabs[data-variant="block"] .poodle-tabs__item {
     display: flex;
     flex: 0 0 auto;
@@ -236,7 +239,7 @@
 
   .poodle-tabs[data-variant="block"] .poodle-tabs__close {
     margin-left: -0.25rem;
-    margin-right: 0.25rem;
+    margin-right: var(--poodle-tabs-block-close-margin-end);
   }
 
   .poodle-tabs[data-variant="block"] .poodle-tabs__item + .poodle-tabs__item {
@@ -290,7 +293,7 @@
   /* The chip is __item, not __tab. __item wraps the tab button and the close
      button; __tab is a <button> and cannot contain another one, so filling
      __tab would leave the close affordance outside the selected chip. `block`
-     and `strip` already fill __item — `card` fills it too, and only differed
+     already fills __item — `card` fills it too, and only differed
      because it inherited this from the former text variant, which had no
      close button to group. Matches poodle-render, where `close` is a child of
      the styled `tab_el` (render/src/tabs.rs). */
@@ -325,87 +328,29 @@
     color: var(--poodle-recipe-tabs-block-selected-tab-text, var(--poodle-color-text-primary));
   }
 
+  /* Block absorbed the former strip variant's item hover background. */
   .poodle-tabs[data-variant="block"] .poodle-tabs__item:not([data-selected="true"]):hover {
-    background: var(--poodle-recipe-tabs-block-hover-item-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 50%, transparent));
+    background: var(--poodle-recipe-tabs-block-hover-item-fill, color-mix(in srgb, var(--poodle-color-surface-hover) 50%, transparent));
   }
 
   .poodle-tabs[data-variant="block"] .poodle-tabs__item[data-selected="true"]:hover {
     background: var(--poodle-recipe-tabs-block-selected-hover-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, var(--poodle-color-background-surface)));
   }
 
-  /* Strip variant: compact tabs in a bar */
-  .poodle-tabs[data-variant="strip"] .poodle-tabs__item {
-    border-bottom: 0.125rem solid transparent;
-    margin-bottom: -0.0625rem;
-  }
-
-  .poodle-tabs[data-variant="strip"] .poodle-tabs__separator {
-    margin-right: 0;
-    margin-left: var(--poodle-tabs-separator-margin);
-    margin-block: 0.375rem;
-  }
-
-  .poodle-tabs[data-orientation="vertical"] .poodle-tabs__separator {
-    width: auto;
-    height: 0.0625rem;
-    margin-right: 0;
-    margin-bottom: var(--poodle-tabs-separator-margin);
-    align-self: stretch;
-  }
-
-  .poodle-tabs[data-variant="strip"] .poodle-tabs__item[data-selected="true"] {
-    border-bottom-color: var(--poodle-color-accent-base);
-  }
-
-  .poodle-tabs[data-variant="strip"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
-    color: var(--poodle-recipe-tabs-strip-selected-tab-text, var(--poodle-color-text-primary));
-  }
-
-  .poodle-tabs[data-variant="strip"] .poodle-tabs__tab {
-    min-height: var(--poodle-tabs-control-height);
-    padding: 0 var(--poodle-tabs-strip-tab-x);
-    border-radius: 0;
-  }
-
-  .poodle-tabs[data-variant="strip"] .poodle-tabs__item:hover {
-    background: var(--poodle-recipe-tabs-strip-hover-item-fill, color-mix(in srgb, var(--poodle-color-surface-hover) 50%, transparent));
-  }
-
-  .poodle-tabs[data-variant="strip"] .poodle-tabs__close {
-    margin-right: var(--poodle-tabs-strip-close-margin-end);
-  }
-
-  /* Strip vertical: border shifts to right edge, icon-only compact tabs */
-  .poodle-tabs[data-variant="strip"][data-orientation="vertical"] .poodle-tabs__list {
-    padding: 0;
-    border-bottom: 0;
-    border-right: 0.0625rem solid var(--poodle-color-border-subtle);
-    overflow: visible;
-  }
-
-  .poodle-tabs[data-variant="strip"][data-orientation="vertical"] .poodle-tabs__item {
-    border-bottom: 0;
-    border-right: 0.125rem solid transparent;
-    margin-bottom: 0;
-    margin-right: -0.125rem;
-  }
-
-  .poodle-tabs[data-variant="strip"][data-orientation="vertical"] .poodle-tabs__item[data-selected="true"] {
-    border-right-color: var(--poodle-color-accent-base);
-  }
-
-  .poodle-tabs[data-variant="strip"][data-orientation="vertical"] .poodle-tabs__tab {
+  /* Block vertical absorbed the former strip variant's compact icon tab
+     sizing. */
+  .poodle-tabs[data-variant="block"][data-orientation="vertical"] .poodle-tabs__tab {
     justify-content: center;
     min-height: 0;
     min-width: var(--poodle-tabs-control-height);
     padding: var(--poodle-tabs-control-x);
   }
 
-  .poodle-tabs[data-variant="strip"][data-orientation="vertical"] .poodle-tabs__item:first-child .poodle-tabs__tab {
+  .poodle-tabs[data-variant="block"][data-orientation="vertical"] .poodle-tabs__item:first-child .poodle-tabs__tab {
     padding-top: 0.75rem;
   }
 
-  .poodle-tabs[data-variant="strip"][data-orientation="vertical"] .poodle-tabs__item:last-child .poodle-tabs__tab {
+  .poodle-tabs[data-variant="block"][data-orientation="vertical"] .poodle-tabs__item:last-child .poodle-tabs__tab {
     padding-bottom: 0.75rem;
   }
 
@@ -447,25 +392,45 @@
     color: var(--poodle-recipe-tabs-pill-selected-tab-text, var(--poodle-color-text-primary));
   }
 
-  /* activeOutline: outline on the selected tab, reusing the former card
-     variant's selected-border value so the opted-in look matches what card
-     gave. A transparent border on every tab keeps the bar from shifting when
-     the selected border becomes visible.
+  /* activeEdge="outline": outline on the selected item, reusing the former
+     card variant's selected-border value so the opted-in look matches what
+     card gave. A transparent border on every item keeps the bar from shifting
+     when the selected border becomes visible.
 
-     The border sits on __tab, not __item, so it picks up each variant's own
-     tab radius — radius-control for card, 999px for pill, 0 for block and
-     strip — and so it shares a box with the selection fill, which is also on
-     __tab. The former card variant put its border on __item because that
-     variant also gave __item the radius; card now takes its radius from the
-     former text variant. The outline goes on __item, the chip that wraps both
-     the tab button and the close button, so it encloses the close affordance
-     and picks up the chip's radius. */
-  .poodle-tabs[data-active-outline="true"] .poodle-tabs__item {
+     The border sits on __item, the chip that wraps both the tab button and
+     the close button, so it encloses the close affordance and picks up the
+     chip's radius. */
+  .poodle-tabs[data-active-edge="outline"] .poodle-tabs__item {
     border: 0.0625rem solid transparent;
   }
 
-  .poodle-tabs[data-active-outline="true"] .poodle-tabs__item[data-selected="true"] {
+  .poodle-tabs[data-active-edge="outline"] .poodle-tabs__item[data-selected="true"] {
     border-color: var(--poodle-recipe-tabs-active-outline-border, color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle)));
+  }
+
+  /* activeEdge="underline": the accent edge along the inline-end side —
+     bottom when horizontal, right when vertical. The former strip variant's
+     indicator, pulled over the list edge by a negative margin so it visually
+     replaces the list's border line. The edge axis is an enum, so underline
+     and outline can never both apply — no suppression rules needed. */
+  .poodle-tabs[data-active-edge="underline"] .poodle-tabs__item {
+    border-bottom: 0.125rem solid transparent;
+    margin-bottom: -0.0625rem;
+  }
+
+  .poodle-tabs[data-active-edge="underline"] .poodle-tabs__item[data-selected="true"] {
+    border-bottom-color: var(--poodle-color-accent-base);
+  }
+
+  .poodle-tabs[data-active-edge="underline"][data-orientation="vertical"] .poodle-tabs__item {
+    border-bottom: 0;
+    border-right: 0.125rem solid transparent;
+    margin-bottom: 0;
+    margin-right: -0.125rem;
+  }
+
+  .poodle-tabs[data-active-edge="underline"][data-orientation="vertical"] .poodle-tabs__item[data-selected="true"] {
+    border-right-color: var(--poodle-color-accent-base);
   }
 
   /* activeFill="solid": fully accent-filled active tab. The foreground uses
@@ -480,41 +445,12 @@
     color: var(--poodle-recipe-tabs-active-solid-text, var(--poodle-color-text-inverse));
   }
 
-  /* Solid fill must survive hover. Block and strip both define their own
-     item-hover backgrounds; without this the fill reverts on hover while the
-     foreground stays text-inverse, leaving inverse text on a light tint. This
-     selector is variant-agnostic and one step more specific than any of them. */
+  /* Solid fill must survive hover. Block defines its own item-hover
+     background; without this the fill reverts on hover while the foreground
+     stays text-inverse, leaving inverse text on a light tint. This selector
+     is variant-agnostic and one step more specific than any of them. */
   .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"]:hover {
     background: var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-color-accent-base));
-  }
-
-  /* ── Strip: either switch replaces the underline indicator ──
-
-     Strip marks selection with a border on the item — `border-bottom` when
-     horizontal, `border-right` when vertical — pulled over the list edge by a
-     negative margin. Both switches decorate that same element, so the
-     indicator and the decoration cannot coexist: per ruling, the switch wins
-     and the underline goes.
-
-     With activeOutline the generic `border` shorthand has already replaced the
-     indicator border, so only the negative margin needs clearing. With solid
-     fill alone the indicator border is still there and must be removed too. */
-  .poodle-tabs[data-variant="strip"][data-active-outline="true"] .poodle-tabs__item {
-    margin-bottom: 0;
-  }
-
-  .poodle-tabs[data-variant="strip"][data-active-fill="solid"]:not([data-active-outline="true"]) .poodle-tabs__item {
-    border-bottom: 0;
-    margin-bottom: 0;
-  }
-
-  .poodle-tabs[data-variant="strip"][data-orientation="vertical"][data-active-outline="true"] .poodle-tabs__item {
-    margin-right: 0;
-  }
-
-  .poodle-tabs[data-variant="strip"][data-orientation="vertical"][data-active-fill="solid"]:not([data-active-outline="true"]) .poodle-tabs__item {
-    border-right: 0;
-    margin-right: 0;
   }
 
   /* Focus */

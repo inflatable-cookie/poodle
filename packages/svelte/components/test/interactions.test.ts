@@ -25,7 +25,7 @@ describe("svelte interaction", () => {
     expect(onCheckedChange).toHaveBeenCalledWith(true);
   });
 
-  it("Tabs defaults to card variant with tint fill and no active outline", () => {
+  it("Tabs defaults to card variant with tint fill, no edge and no border", () => {
     const { container } = render(Tabs, {
       props: {
         items: [{ value: "a", label: "A" }],
@@ -34,24 +34,39 @@ describe("svelte interaction", () => {
     const root = container.querySelector(".poodle-tabs")!;
     expect(root.getAttribute("data-variant")).toBe("card");
     expect(root.getAttribute("data-active-fill")).toBe("tint");
-    expect(root.hasAttribute("data-active-outline")).toBe(false);
+    expect(root.getAttribute("data-active-edge")).toBe("none");
+    expect(root.getAttribute("data-bordered")).toBe("false");
   });
 
-  it("Tabs emits activeOutline and solid fill data attributes", () => {
+  it("Tabs emits activeEdge and solid fill data attributes", () => {
     const { container } = render(Tabs, {
       props: {
         items: [{ value: "a", label: "A" }],
         variant: "card",
-        activeOutline: true,
+        activeEdge: "outline",
         activeFill: "solid",
       },
     });
     const root = container.querySelector(".poodle-tabs")!;
-    expect(root.getAttribute("data-active-outline")).toBe("true");
+    expect(root.getAttribute("data-active-edge")).toBe("outline");
     expect(root.getAttribute("data-active-fill")).toBe("solid");
   });
 
-  it("NavigationMenu defaults to tint fill with no active outline", () => {
+  it("Tabs block + underline renders the underline edge", () => {
+    const { container } = render(Tabs, {
+      props: {
+        items: [{ value: "a", label: "A" }],
+        variant: "block",
+        activeEdge: "underline",
+      },
+    });
+    const root = container.querySelector(".poodle-tabs")!;
+    // The edge axis is a single enum member: exactly one value is emitted.
+    expect(root.getAttribute("data-variant")).toBe("block");
+    expect(root.getAttribute("data-active-edge")).toBe("underline");
+  });
+
+  it("NavigationMenu defaults to tint fill with no edge", () => {
     const { container } = render(NavigationMenu, {
       props: {
         items: [{ value: "a", label: "A" }],
@@ -59,19 +74,19 @@ describe("svelte interaction", () => {
     });
     const root = container.querySelector(".poodle-navigation-menu")!;
     expect(root.getAttribute("data-active-fill")).toBe("tint");
-    expect(root.hasAttribute("data-active-outline")).toBe(false);
+    expect(root.getAttribute("data-active-edge")).toBe("none");
   });
 
-  it("NavigationMenu emits activeOutline and solid fill data attributes", () => {
+  it("NavigationMenu emits activeEdge and solid fill data attributes", () => {
     const { container } = render(NavigationMenu, {
       props: {
         items: [{ value: "a", label: "A" }],
-        activeOutline: true,
+        activeEdge: "underline",
         activeFill: "solid",
       },
     });
     const root = container.querySelector(".poodle-navigation-menu")!;
-    expect(root.getAttribute("data-active-outline")).toBe("true");
+    expect(root.getAttribute("data-active-edge")).toBe("underline");
     expect(root.getAttribute("data-active-fill")).toBe("solid");
   });
 
