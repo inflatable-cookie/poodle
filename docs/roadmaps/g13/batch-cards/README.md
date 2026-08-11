@@ -17,7 +17,8 @@ and roadmap closeout.
 | `005` | pilot contract expressiveness corpus | none | merged (`2f8dc5db`) |
 | `006` | button-family tone parity (CSS/specimens) | contract amendments `282ce489` | merged (`22337a31`) — Button + IconButton; SplitButton deferred to `008` |
 | `007` | value-domain drift inventory (report-only) | contract amendments `282ce489` | merged (`8090521c`) |
-| `008` | split-button tone parity + primary status shadow | `006` merged + shadow ruling | ready |
+| `008` | split-button tone parity + primary status shadow | `006` merged + shadow ruling | dispatched |
+| `009` | dialog initial-focus hook (side-quest) | `b1a4a5e7` | dispatched |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
 evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of
@@ -35,3 +36,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 006](006-button-family-tone-parity.md)
 - [Batch 007](007-value-domain-drift-inventory.md)
 - [Batch 008](008-split-button-tone-parity.md)
+- [Batch 009](009-dialog-initial-focus.md)
