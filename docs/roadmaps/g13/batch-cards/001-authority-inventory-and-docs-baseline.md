@@ -1,9 +1,11 @@
 # 001 Authority Inventory And Docs Baseline
 
-Status: worker complete — review pending
+Status: merged
 Milestone: `g13.001`
 Owner: Poodle core
-Branch: `thread/g13-001-authority-inventory`
+Branch: `thread/g13-001-authority-inventory` (commit `251cc858`, merged
+`a0ca039d`)
+Review: `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`
 Governing refs: `docs/specs/063-rust-authored-component-and-scene-ir.md`
 (`IR-01`–`IR-12`), `docs/architecture/001-poodle-system-shape.md`,
 `docs/architecture/006-headless-core-and-machine-model.md`,
@@ -87,20 +89,20 @@ starting IR implementation.
 
 ## Acceptance Criteria
 
-- [ ] `authority-inventory.md` maps every required web/native definition and
+- [x] `authority-inventory.md` maps every required web/native definition and
   evidence surface with exact paths.
-- [ ] Direct native bypasses and compatibility layers are enumerated rather
+- [x] Direct native bypasses and compatibility layers are enumerated rather
   than summarized as generic debt.
-- [ ] Pilot component/shell/axis file maps are complete across all four
+- [x] Pilot component/shell/axis file maps are complete across all four
   runtimes.
-- [ ] Crate-placement evidence is sufficient for an orchestrator ruling and
+- [x] Crate-placement evidence is sufficient for an orchestrator ruling and
   contains no worker decision.
-- [ ] Named docs inventory drift is repaired without component behavior or API
+- [x] Named docs inventory drift is repaired without component behavior or API
   changes.
-- [ ] `effigy docs:check` passes.
-- [ ] `git diff --check` passes.
-- [ ] Batch log contains command exit states and measured counts.
-- [ ] No file outside scope changed.
+- [x] `effigy docs:check` passes.
+- [x] `git diff --check` passes.
+- [x] Batch log contains command exit states and measured counts.
+- [x] No file outside scope changed.
 
 ## Evidence
 

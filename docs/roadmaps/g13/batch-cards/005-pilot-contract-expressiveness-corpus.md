@@ -1,9 +1,11 @@
 # 005 Pilot Contract Expressiveness Corpus
 
-Status: worker complete — review pending
+Status: merged
 Milestone: `g13.002` research precursor
 Owner: Poodle core
-Branch: `thread/g13-pilot-expressiveness-corpus`
+Branch: `thread/g13-pilot-expressiveness-corpus` (commit `2f8dc5db`, merged
+`bb3f79ef`)
+Review: `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`
 Governing refs: `docs/specs/063-rust-authored-component-and-scene-ir.md`
 (`IR-02`–`IR-11`), `docs/contracts/components/button.md`,
 `docs/contracts/components/range-slider.md`,
@@ -72,14 +74,14 @@ contract-derived stress corpus, not an IR schema or implementation design.
 
 ## Acceptance Criteria
 
-- [ ] The corpus covers all three pilot components and all four preview shells.
-- [ ] Every requirement has a stable ID, classification, contract citation,
+- [x] The corpus covers all three pilot components and all four preview shells.
+- [x] Every requirement has a stable ID, classification, contract citation,
   and evidence path or explicit evidence gap.
-- [ ] Controlled state, environment capabilities, accessibility, recipes,
+- [x] Controlled state, environment capabilities, accessibility, recipes,
   axes, VisualState, and event timing are not collapsed into generic rows.
-- [ ] Negative cases directly exercise IR-03–IR-06.
-- [ ] No representation/schema recommendation appears.
-- [ ] `git diff --check` passes and the batch log records command exit states
+- [x] Negative cases directly exercise IR-03–IR-06.
+- [x] No representation/schema recommendation appears.
+- [x] `git diff --check` passes and the batch log records command exit states
   and requirement counts.
 
 ## Stop Conditions
