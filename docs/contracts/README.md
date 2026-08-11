@@ -126,6 +126,7 @@ contract references the rule rather than restating it:
 - `components/icon.md`
 - `components/inline-list-section.md`
 - `components/inline-remediation.md`
+- `components/keyboard.md`
 - `components/knob.md`
 - `components/list-card-counter.md`
 - `components/list-card.md`
@@ -144,6 +145,7 @@ contract references the rule rather than restating it:
 - `components/meta-item.md`
 - `components/meter.md`
 - `components/metric-tile.md`
+- `components/mod-matrix-grid.md`
 - `components/model-picker.md`
 - `components/nav-card.md`
 - `components/navigation-menu.md`
@@ -212,6 +214,7 @@ contract references the rule rather than restating it:
 - `components/validation-summary.md`
 - `components/value-readout.md`
 - `components/video-player.md`
+- `components/waveform-display.md`
 - `components/xy-pad.md`
 
 This index is generated manually and must stay aligned when contract files are

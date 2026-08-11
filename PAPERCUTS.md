@@ -7,6 +7,15 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — `effigy docs:check` rewrites the committed
+  `packages/tokens/artifacts/rust/*` via `report:parity` → `tokens:build`,
+  leaving a dirty worktree, and `effigy audit:tokens` fails at HEAD: commit
+  `45caae82` rustfmt-formatted the generated Rust artifacts without updating
+  `packages/tokens/scripts/build-tokens.ts`, whose emitter writes 4-space
+  override arrays. Align the generator with the committed formatting or
+  regenerate the artifacts from it. Affects the docs gate and token drift
+  audit.
+
 - 2026-08-10 — `effigy doctor` runs a failing health check that reformats
   generated Rust token artifacts and unrelated Rust tests, leaving a dirty
   worktree. Make doctor diagnostics read-only or isolate formatter output.

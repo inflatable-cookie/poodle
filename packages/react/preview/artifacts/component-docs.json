@@ -424,6 +424,79 @@
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { AgentQuestionRecord } from \"@inflatable-cookie/poodle-svelte\";\n\n  const question = {\n    id: \"runtime\",\n    prompt: \"Which runtime should be verified first?\",\n    options: [{ value: \"web\", label: \"Web\" }, { value: \"native\", label: \"Native\" }],\n  };\n  const answer = { questionId: \"runtime\", outcome: \"selected\" as const, values: [\"web\"], text: \"\" };\n</script>\n\n<AgentQuestionRecord {question} {answer} />"
   },
+  "agent-subagent": {
+    "props": [
+      {
+        "name": "item",
+        "type": "AgentSubagentItem",
+        "required": true,
+        "description": "The child work this group renders; with no item the component renders nothing."
+      },
+      {
+        "name": "expanded",
+        "type": "boolean",
+        "default": "false",
+        "description": "Bindable disclosure state; the detail region shows while expanded."
+      },
+      {
+        "name": "detailLines",
+        "type": "string[]",
+        "default": "[]",
+        "description": "Recent activity lines shown when expanded."
+      },
+      {
+        "name": "expandLabel",
+        "type": "string",
+        "default": "\"Show activity\"",
+        "description": "Collapsed disclosure label."
+      },
+      {
+        "name": "collapseLabel",
+        "type": "string",
+        "default": "\"Hide activity\"",
+        "description": "Expanded disclosure label."
+      },
+      {
+        "name": "openChildLabel",
+        "type": "string",
+        "default": "\"Open child work\"",
+        "description": "Click-through action label."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"control\"",
+        "description": "Semantic size role used when size is inherited."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onToggle",
+        "type": "((expanded: boolean) => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the disclosure is used."
+      },
+      {
+        "name": "onOpenChild",
+        "type": "(() => void) | undefined",
+        "default": "undefined",
+        "description": "Called when the click-through is used; unset hides the open action."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { AgentSubagent, type AgentSubagentItem } from \"@inflatable-cookie/poodle-svelte\";\n\n  const item: AgentSubagentItem = {\n    id: \"child-1\",\n    label: \"Scout\",\n    status: \"running\",\n    activityLine: \"Searching for stale conformance vectors\",\n  };\n</script>\n\n<AgentSubagent {item} detailLines={[\"Indexed 3 registries\", \"Comparing render outputs\"]} onOpenChild={() => console.log(\"open child work\")} />"
+  },
   "agent-transcript": {
     "props": [
       {
@@ -7833,6 +7906,12 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the popover."
+      },
+      {
+        "name": "triggerIsInteractive",
+        "type": "boolean",
+        "default": "false",
+        "description": "Delegates trigger semantics and keyboard activation to an interactive child."
       }
     ],
     "slots": [
@@ -7852,7 +7931,7 @@
         "description": "Fires when the open state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Popover, Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Popover placement=\"bottom-start\" onOpenChange={(open) => console.log(open)}>\n  {#snippet trigger()}\n    <Button>Open Popover</Button>\n  {/snippet}\n  <div style=\"padding: 1rem;\">\n    <p>Popover content goes here.</p>\n  </div>\n</Popover>"
+    "usage": "<script lang=\"ts\">\n  import { Popover, Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Popover placement=\"bottom-start\" triggerIsInteractive onOpenChange={(open) => console.log(open)}>\n  {#snippet trigger()}\n    <Button>Open Popover</Button>\n  {/snippet}\n  <div style=\"padding: 1rem;\">\n    <p>Popover content goes here.</p>\n  </div>\n</Popover>"
   },
   "progress": {
     "props": [
@@ -11642,6 +11721,121 @@
     "slots": [],
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { TokenInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let tags = [\"draft\"];\n</script>\n\n<TokenInput bind:values={tags} placeholder=\"Type a tag...\" />"
+  },
+  "message-center": {
+    "props": [
+      {
+        "name": "items",
+        "type": "MessageCenterItem[]",
+        "default": "[]",
+        "description": "Caller-owned durable message archive."
+      },
+      {
+        "name": "open",
+        "type": "boolean | null",
+        "default": "null",
+        "description": "Controlled open state."
+      },
+      {
+        "name": "defaultOpen",
+        "type": "boolean",
+        "default": "false",
+        "description": "Initial uncontrolled open state."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "default": "\"Notifications\"",
+        "description": "Surface heading and default accessible label."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Accessible surface label override."
+      },
+      {
+        "name": "triggerLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Trigger label override; otherwise includes unread count."
+      },
+      {
+        "name": "triggerIcon",
+        "type": "IconProp",
+        "default": "\"bell\"",
+        "description": "IconButton trigger glyph."
+      },
+      {
+        "name": "placement",
+        "type": "OverlayPlacement",
+        "default": "\"bottom-end\"",
+        "description": "Popover placement hint."
+      },
+      {
+        "name": "emptyTitle",
+        "type": "string",
+        "default": "\"No messages\"",
+        "description": "Empty-state heading."
+      },
+      {
+        "name": "emptyMessage",
+        "type": "string",
+        "default": "\"New messages will appear here.\"",
+        "description": "Empty-state copy."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"chrome\"",
+        "description": "Semantic size role used when inheriting presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | null",
+        "default": "null",
+        "description": "Open-state request callback."
+      },
+      {
+        "name": "onItemSelect",
+        "type": "((id: string) => void) | null",
+        "default": "null",
+        "description": "Makes message bodies actionable."
+      },
+      {
+        "name": "onReadChange",
+        "type": "((id: string, read: boolean) => void) | null",
+        "default": "null",
+        "description": "Requests one item's next read state."
+      },
+      {
+        "name": "onRemove",
+        "type": "((id: string) => void) | null",
+        "default": "null",
+        "description": "Requests item removal."
+      },
+      {
+        "name": "onMarkAllRead",
+        "type": "(() => void) | null",
+        "default": "null",
+        "description": "Adds the mark-all-read header action."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { MessageCenter, type MessageCenterItem } from \"@inflatable-cookie/poodle-svelte\";\n\n  let items: MessageCenterItem[] = [\n    { id: \"render\", title: \"Render complete\", message: \"Preview is ready.\", read: false, tone: \"success\" },\n  ];\n</script>\n\n<MessageCenter\n  {items}\n  onReadChange={(id, read) => items = items.map((item) => item.id === id ? { ...item, read } : item)}\n  onRemove={(id) => items = items.filter((item) => item.id !== id)}\n/>"
   },
   "action-discovery-panel": {
     "props": [
