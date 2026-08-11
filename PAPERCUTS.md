@@ -7,6 +7,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — A playbook-style detached `nohup omp -p` launch exited
+  immediately with an empty log and untouched worktree under the Codex exec
+  harness. Document a harness-safe detach or persistent-session recipe.
+  Affects worker orchestration from agent threads.
+
 - 2026-08-10 — `effigy doctor` runs a failing health check that reformats
   generated Rust token artifacts and unrelated Rust tests, leaving a dirty
   worktree. Make doctor diagnostics read-only or isolate formatter output.

@@ -10,7 +10,7 @@ and roadmap closeout.
 
 | Batch | Purpose | Dependency | Status |
 | --- | --- | --- | --- |
-| `001` | authority inventory and inherited docs-baseline repair | none | ready |
+| `001` | authority inventory and inherited docs-baseline repair | none | dispatched |
 | `002` | pilot fixture freeze and quantitative baseline | `001` merged | planned |
 | `003` | crate placement ruling and g13.002 handoff | `001`–`002` merged | planned |
 
