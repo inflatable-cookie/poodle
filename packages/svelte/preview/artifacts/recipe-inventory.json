@@ -3,7 +3,7 @@
     "components": 142,
     "recipeHooks": 1093,
     "hookCandidates": 4,
-    "metricVariables": 395
+    "metricVariables": 398
   },
   "inventory": {
     "accordion": {
@@ -1727,7 +1727,11 @@
         "--poodle-recipe-range-slider-track-fill"
       ],
       "candidates": [],
-      "metric": []
+      "metric": [
+        "--poodle-range-slider-control-min-height",
+        "--poodle-range-slider-thumb-size",
+        "--poodle-range-slider-track-thickness"
+      ]
     },
     "rating": {
       "recipe": [

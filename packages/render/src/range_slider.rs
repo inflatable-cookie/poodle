@@ -40,6 +40,17 @@ fn thumb_diameter_rem(size: ControlSize) -> f32 {
     }
 }
 
+/// Visible track thickness in rem per the contract §8 size table.
+fn track_thickness_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.1875,
+        ControlSize::Sm => 0.25,
+        ControlSize::Md => 0.375,
+        ControlSize::Lg => 0.5,
+        ControlSize::Xl => 0.625,
+    }
+}
+
 pub fn range_slider(
     spec: &RangeSliderSpec,
     theme: &dyn ThemeProvider,
@@ -47,10 +58,10 @@ pub fn range_slider(
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
-    // Contract §7/§8: thumb diameter + min-height from the size table,
-    // track thickness fixed at 0.375rem.
+    // Contract §7/§8: thumb diameter, track thickness, and min-height share
+    // the size axis.
     let thumb_size = rem_to_px(thumb_diameter_rem(effective_size));
-    let track_h = rem_to_px(0.375);
+    let track_h = rem_to_px(track_thickness_rem(effective_size));
     // Pill radius (contract: 999px full-pill) and thumb border (0.0625rem).
     let pill = theme.resolve_radius("radius.pill");
     let border_w = rem_to_px(0.0625);
@@ -467,5 +478,14 @@ mod tests {
         let after_drag = seen.lock().unwrap().last().copied().unwrap();
         scrub(0.4, ScrubPhase::Press); // the release click
         assert_eq!(seen.lock().unwrap().last().copied(), Some(after_drag));
+    }
+
+    #[test]
+    fn track_thickness_scales_with_size() {
+        assert_eq!(track_thickness_rem(ControlSize::Xs), 0.1875);
+        assert_eq!(track_thickness_rem(ControlSize::Sm), 0.25);
+        assert_eq!(track_thickness_rem(ControlSize::Md), 0.375);
+        assert_eq!(track_thickness_rem(ControlSize::Lg), 0.5);
+        assert_eq!(track_thickness_rem(ControlSize::Xl), 0.625);
     }
 }
