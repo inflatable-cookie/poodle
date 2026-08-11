@@ -382,7 +382,9 @@
                       onclick={() => handleRowClick(row.index)}
                     >
                       {#if hasBranches && row.entry.checkpoint}
-                        <Icon icon="git-commit-horizontal" size={resolvedSize} class="poodle-history-center__pin" />
+                        <span class="poodle-history-center__pin">
+                          <Icon icon="git-commit-horizontal" size={resolvedSize} />
+                        </span>
                       {:else}
                         <span class="poodle-history-center__position-marker" data-position={row.entry.position}></span>
                       {/if}

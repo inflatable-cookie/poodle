@@ -7,6 +7,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — `packages/svelte/components` has no `tsconfig.json` and is never
+  type-checked. `effigy check:svelte` runs `svelte-check` against
+  `packages/svelte/install-smoke` — one file, 0 errors — so the 164 components
+  are unchecked. A `class` prop passed to `Icon`, which accepts no such prop,
+  shipped through every gate: it was reported from a consumer repo whose own
+  type-check caught it. The prop was silently dropped, so the checkpoint pin
+  also rendered unstyled. Pairs with the 2026-08-10 React entry (`react:build`
+  transpiles without `tsc`): neither web runtime has a type gate. Standing one
+  up will surface a backlog, so it wants its own card.
+
 - 2026-08-11 — `box-sizing: border-box` plus `width: 100%` plus a horizontal
   margin overflows by twice the margin: border-box covers padding and border but
   never margin. Hit on `HistoryCenter`'s inline rename input, which spilled past
