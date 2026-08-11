@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — React ports of Button and TextInput omit contract-listed
+  web-native props: `Button.tsx` has no `formenctype`/`formmethod` passthrough
+  and `TextInput.tsx` has no `autocorrect`, all three documented in the
+  contracts and implemented in Svelte. Add the props to the React components.
+  Affects Svelte↔React surface parity.
+
 - 2026-08-11 — A playbook-style detached `nohup omp -p` launch exited
   immediately with an empty log and untouched worktree under the Codex exec
   harness. Document a harness-safe detach or persistent-session recipe.
