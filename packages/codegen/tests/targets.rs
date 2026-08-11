@@ -342,6 +342,90 @@ fn json_surface_documents_carry_the_ir07_generated_object() {
 }
 
 // ---------------------------------------------------------------------------
+// Registry content contract
+// ---------------------------------------------------------------------------
+
+#[test]
+fn registry_lists_every_component_with_capabilities_axes_and_shared_types() {
+    let files = render_target("registry");
+    let registry = files
+        .iter()
+        .find(|file| file.path == "registry.json")
+        .expect("registry target emits registry.json");
+    let doc: serde_json::Value =
+        serde_json::from_str(&registry.contents).expect("registry is JSON");
+    let components = doc["components"].as_array().expect("components");
+
+    let ids: Vec<&str> = components
+        .iter()
+        .map(|entry| entry["id"].as_str().expect("component id"))
+        .collect();
+    assert_eq!(
+        ids,
+        vec!["badge", "gauge", "search-field"],
+        "registry is id-sorted"
+    );
+
+    let gauge = components
+        .iter()
+        .find(|entry| entry["id"] == "gauge")
+        .expect("gauge entry");
+    assert_eq!(
+        gauge["capabilities"]
+            .as_array()
+            .expect("capabilities")
+            .iter()
+            .map(|capability| capability.as_str().expect("capability"))
+            .collect::<Vec<_>>(),
+        vec!["pointer-capture", "scrub-fraction"],
+        "capabilities sort by the inventory order, not declaration order"
+    );
+    assert_eq!(
+        gauge["axes"]
+            .as_array()
+            .expect("axes")
+            .iter()
+            .map(|axis| axis.as_str().expect("axis"))
+            .collect::<Vec<_>>(),
+        vec!["size", "density", "orientation"],
+        "axes list the declared axes in fixed struct order"
+    );
+    assert_eq!(
+        gauge["shared_types"][0].as_str(),
+        Some("orientation"),
+        "shared-type references resolve to ids"
+    );
+
+    let badge = components
+        .iter()
+        .find(|entry| entry["id"] == "badge")
+        .expect("badge entry");
+    assert_eq!(badge["shared_types"][0].as_str(), Some("tone"));
+    assert_eq!(
+        badge["capabilities"]
+            .as_array()
+            .expect("capabilities")
+            .len(),
+        0
+    );
+
+    let search = components
+        .iter()
+        .find(|entry| entry["id"] == "search-field")
+        .expect("search-field entry");
+    assert_eq!(
+        search["shared_types"]
+            .as_array()
+            .expect("shared types")
+            .iter()
+            .map(|entry| entry.as_str().expect("shared type id"))
+            .collect::<Vec<_>>(),
+        vec!["tone", "validation-state"],
+        "shared types sort by id"
+    );
+}
+
+// ---------------------------------------------------------------------------
 // JSON Schema round trip (acceptance "emitted JSON validates against the
 // emitted JSON Schema, proven by test")
 // ---------------------------------------------------------------------------

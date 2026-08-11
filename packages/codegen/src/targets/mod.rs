@@ -8,6 +8,7 @@ use crate::emit::EmitTarget;
 mod json_common;
 
 pub mod json;
+pub mod registry;
 pub mod schema;
 pub mod ts;
 
@@ -15,6 +16,7 @@ pub mod ts;
 pub fn all() -> Vec<&'static dyn EmitTarget> {
     vec![
         &json::JsonSurfaceTarget,
+        &registry::RegistryTarget,
         &schema::JsonSchemaTarget,
         &ts::TypeScriptTarget,
     ]
