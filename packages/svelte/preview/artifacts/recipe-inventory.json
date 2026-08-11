@@ -3,7 +3,7 @@
     "components": 142,
     "recipeHooks": 1093,
     "hookCandidates": 4,
-    "metricVariables": 392
+    "metricVariables": 395
   },
   "inventory": {
     "accordion": {
@@ -1953,9 +1953,12 @@
       "candidates": [],
       "metric": [
         "--poodle-slider-center",
+        "--poodle-slider-control-min-height",
         "--poodle-slider-fill-span",
         "--poodle-slider-fill-start",
-        "--poodle-slider-percent"
+        "--poodle-slider-percent",
+        "--poodle-slider-thumb-size",
+        "--poodle-slider-track-thickness"
       ]
     },
     "spinner": {

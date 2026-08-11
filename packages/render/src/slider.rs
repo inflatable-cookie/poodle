@@ -36,6 +36,17 @@ fn thumb_diameter_rem(size: ControlSize) -> f32 {
     }
 }
 
+/// Visible track thickness in rem — contract §8 size table.
+fn track_thickness_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.1875,
+        ControlSize::Sm => 0.25,
+        ControlSize::Md => 0.375,
+        ControlSize::Lg => 0.5,
+        ControlSize::Xl => 0.625,
+    }
+}
+
 /// Handlers: `change` fires per-frame during a drag (clamped, snapped);
 /// `commit` fires once at drag end with the settled value.
 #[derive(Default, Clone)]
@@ -48,7 +59,7 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
     let thumb_size = rem_to_px(thumb_diameter_rem(effective_size));
-    let track_h = rem_to_px(0.375);
+    let track_h = rem_to_px(track_thickness_rem(effective_size));
     let pill = theme.resolve_radius("radius.pill");
     let border_w = rem_to_px(0.0625);
 
@@ -398,5 +409,14 @@ mod tests {
         let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
         let node = slider(&spec, &theme(), &SliderHandlers::default());
         assert!(find_scrub(&node).is_none());
+    }
+
+    #[test]
+    fn track_thickness_scales_with_size() {
+        assert_eq!(track_thickness_rem(ControlSize::Xs), 0.1875);
+        assert_eq!(track_thickness_rem(ControlSize::Sm), 0.25);
+        assert_eq!(track_thickness_rem(ControlSize::Md), 0.375);
+        assert_eq!(track_thickness_rem(ControlSize::Lg), 0.5);
+        assert_eq!(track_thickness_rem(ControlSize::Xl), 0.625);
     }
 }

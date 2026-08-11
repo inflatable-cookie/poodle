@@ -172,10 +172,11 @@ negative status color. All other values publish `fillTone="positive"`.
 
 ### Sizing
 
-- horizontal: width is 100% of parent; min-height 1.5rem for touch target
-- vertical: width is 1.5rem; min-height 10rem; height is 100% of parent
-- track thickness is 0.375rem
-- thumb is 1rem diameter
+- horizontal: width is 100% of parent; cross-size follows the size table
+- vertical: cross-size follows the size table; min-height 10rem; height is 100%
+- track thickness follows the size axis: 0.1875rem (`xs`), 0.25rem (`sm`),
+  0.375rem (`md`), 0.5rem (`lg`), and 0.625rem (`xl`)
+- thumb diameter follows the size table (`1rem` at `md`)
 - slider length is parent-owned
 - embedded variant is valid inside dense grids; its parent owns both axis
   lengths and the root remains the complete hit target
@@ -211,14 +212,14 @@ negative status color. All other values publish `fillTone="positive"`.
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `width` | `100%` |
-| `min-height` | `1.5rem` |
+| `min-height` | `var(--poodle-slider-control-min-height)` (`1.5rem` at `md`) |
 
 ### Root vertical `[data-orientation="vertical"]`
 
 | Property | Value |
 |----------|-------|
-| `width` | `1.5rem` |
-| `min-width` | `1.5rem` |
+| `width` | `var(--poodle-slider-control-min-height)` |
+| `min-width` | `var(--poodle-slider-control-min-height)` |
 | `min-height` | `10rem` |
 | `height` | `100%` |
 | `justify-content` | `center` |
@@ -235,7 +236,7 @@ negative status color. All other values publish `fillTone="positive"`.
 |----------|-------|
 | `position` | `absolute` |
 | `inset` | `50% 0 0` |
-| `height` | `0.375rem` |
+| `height` | `var(--poodle-slider-track-thickness)` (`0.375rem` at `md`) |
 | `transform` | `translateY(-50%)` |
 | `border-radius` | `999px` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent)` |
@@ -245,7 +246,7 @@ negative status color. All other values publish `fillTone="positive"`.
 | Property | Value |
 |----------|-------|
 | `inset` | `0 auto 0 50%` |
-| `width` | `0.375rem` |
+| `width` | `var(--poodle-slider-track-thickness)` (`0.375rem` at `md`) |
 | `height` | `100%` |
 | `transform` | `translateX(-50%)` |
 
@@ -341,25 +342,29 @@ negative status color. All other values publish `fillTone="positive"`.
 
 | Property | Value |
 |----------|-------|
-| `height` | `0.375rem` |
+| `height` | `var(--poodle-slider-track-thickness)` |
 | `background` | `transparent` |
 
 ### Track pseudo `::-moz-range-track`
 
 | Property | Value |
 |----------|-------|
-| `height` | `0.375rem` |
+| `height` | `var(--poodle-slider-track-thickness)` |
 | `background` | `transparent` |
 
 ### Size adjustments
 
-| Size | min-height | thumb diameter | thumb margin-top |
-|------|------------|----------------|------------------|
-| `xs` | `1.25rem` | `0.75rem` | `-0.1875rem` |
-| `sm` | `1.375rem` | `0.875rem` | `-0.25rem` |
-| `md` | `1.5rem` | `1rem` | `-0.3125rem` |
-| `lg` | _(base)_ | `1.125rem` | `-0.375rem` |
-| `xl` | _(base)_ | `1.25rem` | `-0.4375rem` |
+| Size | min-height | track thickness | thumb diameter |
+|------|------------|-----------------|----------------|
+| `xs` | `1.25rem` | `0.1875rem` | `0.75rem` |
+| `sm` | `1.375rem` | `0.25rem` | `0.875rem` |
+| `md` | `1.5rem` | `0.375rem` | `1rem` |
+| `lg` | `1.625rem` | `0.5rem` | `1.125rem` |
+| `xl` | `1.75rem` | `0.625rem` | `1.25rem` |
+
+The WebKit thumb margin is derived from the size metrics as
+`(thumb diameter - track thickness) / -2`, keeping the thumb centered on the
+track at every size.
 
 ### Density And Vertical Padding
 
@@ -428,8 +433,9 @@ negative status color. All other values publish `fillTone="positive"`.
 ### Tier 2: Visual Parity
 
 - [ ] all five sizes visually match (height, padding, font-size per size table)
-- [ ] track thickness (0.375rem) and border-radius (999px) match
-- [ ] thumb sizing (1rem diameter) matches
+- [ ] track thickness follows the `xs`–`xl` size table and border-radius
+  remains 999px
+- [ ] thumb diameter follows the `xs`–`xl` size table
 - [ ] thumb border, background (elevated), and box-shadow match
 - [ ] fill uses accent-base color
 - [ ] track background uses semi-transparent surface color-mix
