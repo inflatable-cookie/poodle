@@ -89,7 +89,11 @@ type HistoryBranch = {
                              // with the authority's `divergence_entry_id` —
                              // the stitcher never attaches to it (see row
                              // model).
-  recordedAtMs?: number;     // authority-supplied; never invented client-side (ruling D2)
+                             // No `recordedAtMs` here, deliberately: the agreed
+                             // upstream shape puts `recorded_at` on entry
+                             // metadata only, with no branch-level equivalent
+                             // proposed. A run caption takes its relative time
+                             // from its own run's most recent entry (ruling D2).
   entryCount?: number;
   current?: boolean;
   pinned?: boolean;

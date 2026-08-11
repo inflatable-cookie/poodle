@@ -38,6 +38,13 @@ export interface HistoryEntry {
   recordedAtMs?: number;
 }
 
+/**
+ * A branch record. Deliberately has no `recordedAtMs`: the agreed upstream
+ * shape puts `recorded_at` on entry metadata only, with no branch-level
+ * equivalent proposed, so a field here would be one nothing ever populates.
+ * A run caption derives its relative time from its own run's most recent
+ * entry — derivation from supplied data, not an invented clock (D2).
+ */
 export interface HistoryBranch {
   id: string;
   /** Auto-named by the authority; null means the id is displayed. */
@@ -47,8 +54,6 @@ export interface HistoryBranch {
   headEntryId?: string;
   /** Entry on the current branch after which this branch diverged; absent at root. */
   divergedAfterEntryId?: string;
-  /** Optional recorded-at timestamp supplied by the authority; never invented here (D2). */
-  recordedAtMs?: number;
   entryCount?: number;
   current?: boolean;
   pinned?: boolean;

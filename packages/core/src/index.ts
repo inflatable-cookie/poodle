@@ -370,7 +370,6 @@ export {
   historyCenterRows,
   historyCenterRowCount,
   historyCenterDefaultContext,
-  isForkPoint,
   type HistoryEntry,
   type HistoryEntryPosition,
   type HistoryBranch,
