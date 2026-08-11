@@ -76,6 +76,7 @@ Updated: 2026-07-10
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
+| `initialFocus` | `"auto" \| "none" \| string` | `"auto"` | no | where focus lands when the dialog opens. `"auto"` focuses the first focusable element in the content region (`.dialog__body`), skipping header chrome such as the close button; the surface itself when the body has none. `"none"` focuses nothing on open (the focus trap still applies). Any other string is a CSS selector resolved within the surface, falling back to `"auto"` behaviour when it matches nothing |
 
 ### Width Presets
 
@@ -144,8 +145,9 @@ and Drawer.
   `emitOpenChange(false)`, preserving the onRequestClose -> onOpenChange
   ordering; programmatic `CLOSE` skips `emitRequestClose`
 - Effects on open: `saveFocusAndEnter` (store the previously focused
-  element, focus the first focusable in the surface or the surface itself),
-  `lockBodyScroll`; on close: `unlockBodyScroll`, `restoreFocus`
+  element, then resolve initial focus per the `initialFocus` prop — see
+  §6 Focus And Announcement), `lockBodyScroll`; on close:
+  `unlockBodyScroll`, `restoreFocus`
 - Focus trap: shared `trapFocusKeydown` machinery — Tab wraps last->first
   and first->last; with no focusable children focus pins to the surface
 - Machinery dependencies: dismissable-layer stack (escape targets the
@@ -186,8 +188,19 @@ and Drawer.
 
 ### Focus And Announcement
 
-- focus entry: on open, focus moves to first focusable element within surface;
-  if none found, surface itself receives focus (via tabindex="-1")
+- focus entry: on open, focus resolves per `initialFocus`. The
+  already-focused guard runs first: if the active element is already inside
+  the surface when the open edge settles, no initial focus happens at all —
+  a field's own autofocus or a consumer effect is never stolen. Otherwise:
+  - `"auto"` (default): first focusable element within `.dialog__body` —
+    the close button and other header chrome are never the target —
+    falling back to the surface itself (via `tabindex="-1"`) when the body
+    has no focusable element; in `bare` mode there is no body region, so
+    the surface receives focus
+  - `"none"`: nothing receives focus on open; the focus trap still applies
+  - a string: treated as a CSS selector resolved within the surface; an
+    unmatched selector falls back to the `"auto"` behaviour rather than
+    throwing
 - focus trap: Tab/Shift+Tab cycle is constrained to the surface; when no
   focusable elements exist, Tab is prevented and surface is re-focused
 - focus restoration: on close, focus returns to the element that was focused
@@ -367,6 +380,8 @@ The close button renders an `IconButton` with `icon="x"`, `variant="ghost"`, `si
 - Body overflow saved/restored on open/close and on component teardown
 - `previousOpen` reactive variable tracks transitions to detect open/close
   edges
+- `initialFocus` resolves inside the open-edge `$effect` after `tick()`; the
+  already-focused guard runs before any `initialFocus` resolution
 - Surface uses `bind:this` for DOM reference needed by focus trap
 - Entire dialog tree conditionally rendered with `{#if isOpen}` (mount/unmount)
 - Close button rendered only when `showCloseButton=true`; receives `size={resolvedSize}` and `sizeRole="chrome"`
@@ -412,6 +427,9 @@ The close button renders an `IconButton` with `icon="x"`, `variant="ghost"`, `si
 - [ ] dialog/alertdialog role and aria-modal match
 - [ ] accessible name from title or ariaLabel matches
 - [ ] focus trap behavior matches (Tab cycling, empty surface handling)
+- [ ] initial focus resolution matches (`initialFocus`: `"auto"` body-first
+  ordering, `"none"`, selector targeting, unmatched-selector fallback,
+  already-focused guard)
 - [ ] focus restoration to previously focused element matches
 - [ ] escape dismissal behavior matches (respects dismissOnEscape)
 - [ ] backdrop dismissal behavior matches (respects dismissOnBackdrop)

@@ -70,6 +70,7 @@ Updated: 2026-07-10
 | `size` | `ControlSize \| null` | `null` | no | explicit semantic size override for dialog and action controls |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic role used to resolve inherited size scale |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for dialog and action controls |
+| `initialFocus` | `"auto" \| "none" \| string` | `"auto"` | no | initial focus target on open, passed through to Dialog. The default differs from plain Dialog in effect: `"auto"` here focuses the first focusable element in the form body — the first field — since the body is always the form region. A consumer-supplied value overrides this default and is forwarded to Dialog unchanged; in `bare` mode there is no body region, so the Dialog `"auto"` fallback applies (the surface receives focus) |
 
 ### Snippets
 
@@ -148,7 +149,11 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 ### Focus And Announcement
 
 - Focus trap: delegated to Dialog primitive
-- Initial focus: delegated to Dialog primitive (typically first focusable element)
+- Initial focus: delegated to Dialog via the `initialFocus` prop. The
+  default is `"auto"`, which focuses the first focusable element in the
+  form body — the first field. A consumer-supplied `initialFocus` overrides
+  the default. The Dialog already-focused guard and resolution order (§6 of
+  the Dialog contract) apply unchanged.
 - Focus return: delegated to Dialog primitive (returns to trigger on close)
 
 ## 7. Layout
@@ -244,6 +249,8 @@ None.
 - custom width is applied through `contentStyle` and `contentClassName`
   props on Dialog; the global `.form-dialog__surface` class sets the width
 - Dialog receives `showCloseButton={true}` always
+- `initialFocus` (default `"auto"`) is passed through to Dialog; a
+  consumer-supplied value wins over the first-field default
 - custom actions are rendered on the Dialog action rail inside a full-width
   wrapper rather than replacing the footer surface entirely
 - `bare` mode: when true, snippet content is rendered directly without a

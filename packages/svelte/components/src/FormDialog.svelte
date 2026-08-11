@@ -27,6 +27,7 @@
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
+    initialFocus?: "auto" | "none" | string;
     onSubmit?: (() => void) | undefined;
     onCancel?: (() => void) | undefined;
     onOpenChange?: ((open: boolean) => void) | undefined;
@@ -54,6 +55,7 @@
     size = null,
     sizeRole = "control",
     density = null,
+    initialFocus = "auto",
     onSubmit = undefined,
     onCancel = undefined,
     onOpenChange = undefined,
@@ -124,6 +126,7 @@
   showCloseButton={true}
   {contentClassName}
   {contentStyle}
+  {initialFocus}
   onOpenChange={handleDialogOpenChange}
 >
   {#if subtitleContent}

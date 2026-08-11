@@ -39,6 +39,7 @@
     closeButtonSize?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
+    initialFocus?: "auto" | "none" | string;
     onOpenChange?: ((open: boolean) => void) | undefined;
     onRequestClose?: (() => void) | undefined;
     kind?: "dialog" | "alertdialog" | undefined;
@@ -69,6 +70,7 @@
     closeButtonSize = null,
     sizeRole = "control",
     density = null,
+    initialFocus = "auto",
     onOpenChange = undefined,
     onRequestClose = undefined,
     kind = undefined,
@@ -111,10 +113,13 @@
     if (isOpen && !previousOpen) {
       lastFocusedElement = document.activeElement as HTMLElement | null;
       tick().then(() => {
-        if (!surfaceElement?.contains(document.activeElement)) {
-          const focusable = getFocusableElements(surfaceElement);
-          focusable[0]?.focus() ?? surfaceElement?.focus();
+        // Already-focused guard (b1a4a5e7): never steal focus when something
+        // inside the surface is already focused (e.g. TextInput `autofocus` or
+        // a consumer effect). Runs before any initialFocus resolution.
+        if (!surfaceElement || surfaceElement.contains(document.activeElement)) {
+          return;
         }
+        focusInitialElement();
       });
 
       if (typeof document !== "undefined") {
@@ -175,6 +180,39 @@
 
   function trapFocus(event: KeyboardEvent): void {
     trapFocusKeydown(surfaceElement, event);
+  }
+
+  /**
+   * Resolve where focus lands on the open edge, per the `initialFocus` prop.
+   * The already-focused guard has already run (see the open-edge $effect), so
+   * the active element is outside the surface here.
+   *
+   * - "none": focus nothing; the surface still traps focus.
+   * - a CSS selector string: resolved within the surface; an unmatched
+   *   selector falls back to "auto" behaviour rather than throwing.
+   * - "auto" (default): first focusable in the content region
+   *   (`.poodle-dialog__body`), skipping header chrome such as the close
+   *   button; the surface itself when the body has no focusable element (and
+   *   always in `bare` mode, where no body region exists).
+   */
+  function focusInitialElement(): void {
+    const surface = surfaceElement;
+    if (!surface || initialFocus === "none") {
+      return;
+    }
+
+    if (initialFocus !== "auto") {
+      const target = surface.querySelector<HTMLElement>(initialFocus);
+      if (target) {
+        target.focus();
+        return;
+      }
+    }
+
+    const body = surface.querySelector<HTMLElement>(".poodle-dialog__body");
+    const focusable = getFocusableElements(body ?? surface);
+    const target = focusable[0] ?? surface;
+    target.focus();
   }
 
   $effect(() => {
