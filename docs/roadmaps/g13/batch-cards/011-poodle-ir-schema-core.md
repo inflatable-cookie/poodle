@@ -1,6 +1,6 @@
 # 011 poodle-ir Schema Core
 
-Status: ready
+Status: merged (`4a22c8d8`)
 Milestone: `g13.002`
 Owner: Poodle core
 Branch: `thread/g13-011-poodle-ir-schema-core`
@@ -149,23 +149,23 @@ Any other changed path is a scope failure.
 
 ## Acceptance Criteria
 
-- [ ] `packages/contracts/ir/` exists as a lib-only crate with the ruled
+- [x] `packages/contracts/ir/` exists as a lib-only crate with the ruled
   manifest posture and `poodle-tokens` as its only in-repo dependency.
-- [ ] Shared types are first-class, and a component can declare a permitted
+- [x] Shared types are first-class, and a component can declare a permitted
   subset of one.
-- [ ] Every scope bullet has a representation, each doc-commented with the
+- [x] Every scope bullet has a representation, each doc-commented with the
   corpus requirement ID or contract section it serves.
-- [ ] Validation reports all findings at once, with identifier and actionable
+- [x] Validation reports all findings at once, with identifier and actionable
   message, covering every listed rule including subset violation.
-- [ ] JSON round-trips preserve meaning and ordering; a schema version is
+- [x] JSON round-trips preserve meaning and ordering; a schema version is
   present.
-- [ ] No framework, DOM, GPUI, Jetstream, or `poodle-node` type appears in the
+- [x] No framework, DOM, GPUI, Jetstream, or `poodle-node` type appears in the
   schema.
-- [ ] No macro, no codegen, no emission.
-- [ ] Nothing outside `packages/contracts/ir/` changed except the log and
+- [x] No macro, no codegen, no emission.
+- [x] Nothing outside `packages/contracts/ir/` changed except the log and
   papercuts; no other manifest references the crate.
-- [ ] All commands in step 7 exit 0.
-- [ ] Batch log records commands, exit states, module layout, and every corpus
+- [x] All commands in step 7 exit 0.
+- [x] Batch log records commands, exit states, module layout, and every corpus
   requirement the model cannot yet express.
 
 ## Stop Conditions

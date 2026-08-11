@@ -57,6 +57,57 @@ Cross-runtime behavior must be represented as one of:
 
 This narrows the compiler problem enough to keep generated output dependable.
 
+### The bounded expression vocabulary (normative)
+
+Added 2026-08-11. The spec asked for "a bounded expression vocabulary" without
+bounding it; `g13-b011` hit the gap on `CROSS-20`
+(`isUnavailable = disabled || loading`). The bound below is derived from every
+`$derived` in the three pilot components, not chosen in the abstract.
+
+**Operands.** A reference to one of: a declared prop, a declared state field, a
+VisualState projection field, a slot's presence, a resolved axis value; or a
+literal boolean, integer, string, or shared-type member.
+
+**Operators.** Exactly these, and no others:
+
+| Group | Operators |
+|---|---|
+| Logical | `and`, `or`, `not` |
+| Equality | `eq`, `ne` — against a literal or shared-type member |
+| Nullability | `is_null`, `is_present`, `coalesce` |
+| Ordering | `gt`, `gte`, `lt`, `lte` — integers only |
+| Emptiness | `is_empty` — strings and collections |
+| Selection | `if / then / else` |
+
+**Excluded, deliberately:** arithmetic (`+ - * /`), string manipulation,
+interpolation and formatting, function calls of any kind, iteration, recursion,
+variable binding, and indexing or field access beyond the declared references
+above.
+
+**Expressions are total, pure, and typed.** They always evaluate, have no side
+effects, and are type-checked against declared prop types during IR validation
+— a malformed expression fails at its authored source, not at generation time.
+
+**Where expressions may appear.** Only in: state-derived attribute emission
+conditions and values, part render conditions, prop default and axis fallback
+resolution, and guard conditions on transitions and effect-intents. They may
+not compute values that feed a behaviour machine.
+
+**If you need something excluded, it is not an expression.** The three escapes
+already in this spec absorb every case found in the pilots:
+
+- Needs arithmetic, string building, or normalization → it is a **VisualState
+  projection field** or a **conformance vector**. `visualState.lowerNorm * 100`,
+  the adornment-count padding of `TXT-16`, and `${charCount}/${maxLength}` are
+  projection and formatting concerns; `safeSliderMax`, `normalizeRangeValue`,
+  `slugify`, and `rangeSliderVisualState` are machines.
+- Needs the environment → it is a **named adapter capability**.
+- Needs to differ per runtime → it is an **explicit runtime extension**.
+
+This keeps arithmetic out of the shared expression language entirely, which is
+what makes the vocabulary total and every target able to evaluate it without a
+runtime.
+
 ## Pilot Rules
 
 - **IR-01 — Rust authority:** renderer-independent component and scene
