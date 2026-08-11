@@ -10,7 +10,8 @@ Updated: 2026-07-10
 - Summary: a general action trigger for commands, confirmations, and view-level
   affordances
 - In scope: text buttons, icon-leading buttons, icon-only buttons, loading and
-  disabled states, three visual variants, default/danger/warning tones, truncate
+  disabled states, three visual variants, the full `ButtonTone` set
+  (default/danger/success/warning), truncate
   and fit-content layout modes, semantic size roles, and five explicit
   control sizes
 - Out of scope: transport controls, DAW-specific command widgets
@@ -43,7 +44,7 @@ Updated: 2026-07-10
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `variant` | `"primary" \| "secondary" \| "ghost"` | `"secondary"` | no | visual treatment |
-| `tone` | `"default" \| "danger" \| "warning"` | `"default"` | no | intent modifier; composes with variant for danger×{primary,secondary,ghost} and warning×{primary,secondary,ghost} |
+| `tone` | `ButtonTone` | `"default"` | no | intent modifier; `ButtonTone` is defined in `../004-shared-control-types.md` (`default \| danger \| success \| warning`); every tone composes with every variant |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -246,6 +247,14 @@ Note: The secondary danger idle border uses `border-default` (matching normal se
 | `--poodle-button-border` | `transparent` | `color-mix(in srgb, status-danger 28%, transparent)` | (inherits hover) |
 | `--poodle-button-text` | `status-danger` | (inherits) | (inherits) |
 | `--poodle-button-shadow` | `none` | (inherits) | (inherits) |
+
+### Tone: success
+
+Success tone is a status tone. It mirrors the danger tone structure above with
+`status-success` substituted for `status-danger` throughout — fill, border, and
+text, across idle, hover, and active, for each of `primary`, `secondary`, and
+`ghost`. See the status-tone derivation rule in
+`../004-shared-control-types.md`.
 
 ### Tone: warning
 

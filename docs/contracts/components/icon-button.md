@@ -11,7 +11,8 @@ Updated: 2026-07-19
   label prop rather than visible text content, with variant, size, pressed,
   loading, and disabled states
 - In scope: icon-only command triggers, ghost/primary/secondary variants,
-  default/danger/success tones, semantic size roles, xs/sm/md/lg/xl sizes,
+  the full `ButtonTone` set (default/danger/success/warning), semantic size
+  roles, xs/sm/md/lg/xl sizes,
   pressed/selected state when explicitly configured,
   disabled/loading behavior with shared spinner usage, CSS custom property theming
 - Out of scope: toolbar roving-focus behavior, menu-button or toggle-button
@@ -42,7 +43,7 @@ Updated: 2026-07-19
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `variant` | `ButtonVariant` | `"ghost"` | no | semantic appearance |
-| `tone` | `ButtonTone` | `"default"` | no | intent modifier; composes with variant for danger/success × primary, secondary, ghost |
+| `tone` | `ButtonTone` | `"default"` | no | intent modifier; `ButtonTone` is defined in `../004-shared-control-types.md` (`default \| danger \| success \| warning`); every tone composes with every variant |
 | `size` | `ControlSize` | `null` | no | explicit control size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -67,8 +68,10 @@ type ButtonVariant = "ghost" | "primary" | "secondary"
 
 ### ButtonTone
 
+Defined in `../004-shared-control-types.md`. Not restated here.
+
 ```
-type ButtonTone = "default" | "danger" | "success"
+type ButtonTone = "default" | "danger" | "success" | "warning"
 ```
 
 ### ControlSize
@@ -278,6 +281,17 @@ same machine Tooltip runs). Pressed state is plain controllable state.
 | `[data-variant="primary"][data-tone="success"]` | `var(--poodle-color-status-success)` | `color-mix(in srgb, var(--poodle-color-status-success) 84%, black)` | `var(--poodle-color-text-inverse)` |
 | `[data-variant="ghost"][data-tone="success"]` | `transparent` | `transparent` | `var(--poodle-color-status-success)` |
 
+### Tone: warning
+
+Warning is a status tone derived from the danger structure above with
+`status-warning` substituted (`../004-shared-control-types.md`).
+
+| Selector | `--poodle-icon-button-fill` | `--poodle-icon-button-border` | `--poodle-icon-button-text` |
+|----------|--------------------------|----------------------------|--------------------------|
+| `[data-tone="warning"]` (base) | `color-mix(in srgb, var(--poodle-color-status-warning) 16%, var(--poodle-color-background-surface))` | `color-mix(in srgb, var(--poodle-color-status-warning) 46%, var(--poodle-color-border-default))` | (inherits) |
+| `[data-variant="primary"][data-tone="warning"]` | `var(--poodle-color-status-warning)` | `color-mix(in srgb, var(--poodle-color-status-warning) 84%, black)` | `var(--poodle-color-text-inverse)` |
+| `[data-variant="ghost"][data-tone="warning"]` | `transparent` | `transparent` | `var(--poodle-color-status-warning)` |
+
 ### Ghost danger hover
 
 | Selector | Property | Value |
@@ -291,6 +305,13 @@ same machine Tooltip runs). Pressed state is plain controllable state.
 |----------|----------|-------|
 | `.icon-button[data-variant="ghost"][data-tone="success"]:hover:not(:disabled)` | `--poodle-icon-button-border` | `color-mix(in srgb, var(--poodle-color-status-success) 46%, var(--poodle-color-border-default))` |
 | `.icon-button[data-variant="ghost"][data-tone="success"]:hover:not(:disabled)` | `background` | `color-mix(in srgb, var(--poodle-color-status-success) 10%, transparent)` |
+
+### Ghost warning hover
+
+| Selector | Property | Value |
+|----------|----------|-------|
+| `.icon-button[data-variant="ghost"][data-tone="warning"]:hover:not(:disabled)` | `--poodle-icon-button-border` | `color-mix(in srgb, var(--poodle-color-status-warning) 46%, var(--poodle-color-border-default))` |
+| `.icon-button[data-variant="ghost"][data-tone="warning"]:hover:not(:disabled)` | `background` | `color-mix(in srgb, var(--poodle-color-status-warning) 10%, transparent)` |
 
 ### Root — Pressed (`pressed=true`)
 

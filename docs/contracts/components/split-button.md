@@ -9,7 +9,8 @@ Updated: 2026-07-10
 - Layer: `foundation`
 - Summary: a compound action control that pairs a primary button with a dropdown
   menu toggle for secondary actions
-- In scope: variant and size parity with Button, dropdown menu with items and
+- In scope: variant, tone, and size parity with Button (the full `ButtonTone`
+  set: default/danger/success/warning), dropdown menu with items and
   separators, keyboard navigation, loading state, disabled state, submit/reset
   semantics on the primary action half, and automatic vertical flipping within
   the nearest scrollable boundary
@@ -49,7 +50,7 @@ Updated: 2026-07-10
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `variant` | `"primary" \| "secondary" \| "ghost"` | `"secondary"` | no | appearance family |
-| `tone` | `"default" \| "danger"` | `"default"` | no | intent modifier; composes with variant for danger×primary, danger×secondary, danger×ghost |
+| `tone` | `ButtonTone` | `"default"` | no | intent modifier; `ButtonTone` is defined in `../004-shared-control-types.md` (`default \| danger \| success \| warning`); every tone composes with every variant |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -176,6 +177,13 @@ Menu open/dismiss (now on the dismissable-layer stack); item activation via shar
 | `[data-tone="danger"]` (secondary base) | `color-mix(in srgb, var(--poodle-color-status-danger) 16%, var(--poodle-color-background-surface))` | `color-mix(in srgb, var(--poodle-color-status-danger) 46%, var(--poodle-color-border-default))` | `var(--poodle-color-text-primary)` | default |
 | `[data-variant="primary"][data-tone="danger"]` | `var(--poodle-color-status-danger)` | `color-mix(in srgb, var(--poodle-color-status-danger) 84%, black)` | `var(--poodle-color-text-inverse)` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` |
 | `[data-variant="ghost"][data-tone="danger"]` | `transparent` | `transparent` | `var(--poodle-color-status-danger)` | `none` |
+
+### Tone: success and warning
+
+Both are status tones derived from the danger structure above with
+`status-success` / `status-warning` substituted for `status-danger` throughout —
+fill, border, text, and shadow, for each of `primary`, `secondary`, and `ghost`.
+See the status-tone derivation rule in `../004-shared-control-types.md`.
 
 ### Root
 

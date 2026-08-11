@@ -41,6 +41,8 @@ contract references the rule rather than restating it:
   and is positioned in viewport coordinates
 - `003-native-accessibility.md` — neither native runtime exposes an
   accessibility API, so `aria_label` is carried but inert there
+- `004-shared-control-types.md` — types shared by more than one component
+  contract are defined once and referenced, never restated with fewer members
 
 ## Current Contracts
 

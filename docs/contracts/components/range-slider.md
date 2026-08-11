@@ -163,9 +163,23 @@ values. Unipolar publishes an empty negative segment and one positive segment.
 - `aria-valuenow`: lower value on lower input, upper value on upper input
 - `aria-valuetext`: from lowerValueText on lower input, upperValueText on upper
   input
-- `aria-orientation`: NOT set on the range inputs; orientation is conveyed via
-  `data-orientation` on the root element only (matches Svelte and the Slider
-  contract)
+- `aria-orientation`, standard variant: NOT set on the native range inputs.
+  `<input type="range">` carries implicit slider semantics and the browser
+  conveys orientation to assistive technology; an explicit `aria-orientation`
+  there is redundant. Orientation is conveyed via `data-orientation` on the root
+  element (matches the Slider contract).
+- `aria-orientation`, embedded variant: **required** on both `role="slider"`
+  focus stops, set to the current `orientation`. The embedded stops are custom
+  widgets with no implicit orientation; ARIA defaults `role="slider"` to
+  horizontal, so omitting the attribute would announce a vertical control as
+  horizontal. `data-orientation` on the root is a styling hook and is not
+  exposed to assistive technology.
+
+  This rule was written before the embedded variant existed and originally
+  described only the native inputs. Amended 2026-08-11 to cover both variants
+  explicitly. Svelte (`RangeSlider.svelte`) and React (`RangeSlider.tsx`)
+  already comply; the native targets do not yet carry an orientation channel
+  (see §12).
 - `disabled`: native disabled attribute when disabled on both inputs
 - Labeling rules: each thumb must be individually focusable and distinguishable
   to assistive technology as lower or upper bound
@@ -504,6 +518,7 @@ so the control geometry is unchanged — only the grabbable margin grows.
 | two overlapping inputs vs single custom control | DOM pattern is Svelte-specific | allowed | same interaction and a11y result required |
 | vertical via CSS rotation vs native | Svelte uses rotate(-90deg); GPUI implements natively | allowed | same visual and interaction result required |
 | color-mix formulas | GPUI must achieve same visual result by any means | allowed | verify visual parity |
+| embedded `aria-orientation` absent on native targets | `poodle-node` carries no orientation channel in its accessibility vocabulary, so neither native adapter can project it today | temporary | add an orientation field to the node a11y vocabulary; lands with native vertical orientation (which is itself unimplemented on both Rust targets) |
 
 ## 13. Specimen Definitions
 
