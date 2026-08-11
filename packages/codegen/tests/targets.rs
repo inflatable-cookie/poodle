@@ -549,6 +549,162 @@ fn docs_fragments_render_contract_style_props_tables() {
 }
 
 // ---------------------------------------------------------------------------
+// Milestone acceptance (spec 063 "One Rust definition change must update
+// every expected target in one build"; g13.003 acceptance "one fixture
+// change updates every declared artifact in one command")
+// ---------------------------------------------------------------------------
+
+/// One added component definition — a single fixture change. It exercises
+/// every surface the targets emit: a shared-type prop with a permitted
+/// subset, an event, an axis-free layout (the registry's axes list must
+/// still reflect it), a capability, and a conformance-vector reference.
+fn added_status_light() -> serde_json::Value {
+    serde_json::json!({
+        "id": "status-light",
+        "name": "StatusLight",
+        "layer": "foundation",
+        "contract": { "path": "docs/contracts/components/status-light.md", "section": "§3" },
+        "description": "Synthetic status light exercising the full emit surface added by g13-025.",
+        "props": [
+            {
+                "id": "tone",
+                "name": "tone",
+                "prop_type": { "Shared": "tone" },
+                "default": { "Member": "success" },
+                "default_expr": null,
+                "required": false,
+                "web_only": false,
+                "description": "Semantic status tone.",
+                "permitted_subset": { "shared_type": "tone", "members": ["success", "warning"] }
+            },
+            {
+                "id": "label",
+                "name": "label",
+                "prop_type": "String",
+                "default": null,
+                "default_expr": null,
+                "required": true,
+                "web_only": false,
+                "description": "Accessible label for the light.",
+                "permitted_subset": null
+            }
+        ],
+        "controlled_state": [],
+        "events": [
+            {
+                "id": "status-change",
+                "name": "onStatusChange",
+                "kind": "value-change",
+                "payload": { "name": "status", "kind": "string" },
+                "timing": { "phase": "during-interaction", "debounce_ms": null, "flush_on_blur": false, "ordering": [] },
+                "description": "Reports the status string as it changes."
+            }
+        ],
+        "parts": [],
+        "attributes": [],
+        "axes": { "size": null, "density": null, "orientation": null },
+        "tokens": [],
+        "recipe_hooks": [],
+        "accessibility": {
+            "role": "group",
+            "name_rule": "from-content",
+            "name_source": null,
+            "aria": [],
+            "native": [],
+            "description": "Group role; the label names it."
+        },
+        "capabilities": [
+            { "capability": "announcements", "purpose": "Live-region announcements for status changes (CROSS-17)." }
+        ],
+        "keyboard": [],
+        "visual_state": [],
+        "conformance": ["gauge-bounds"],
+        "extensions": []
+    })
+}
+
+/// The fixture with exactly one change: `status-light` appended to
+/// `components`. Validates clean against the IR.
+fn fixture_with_added_component() -> poodle_ir::IrModel {
+    let source = fs::read_to_string(&fixture_path()).expect("fixture reads");
+    let mut doc: serde_json::Value = serde_json::from_str(&source).expect("fixture is JSON");
+    doc["components"]
+        .as_array_mut()
+        .expect("components is an array")
+        .push(added_status_light());
+    let model: poodle_ir::IrModel =
+        serde_json::from_value(doc).expect("changed model deserializes");
+    let findings = model.validate();
+    assert!(
+        findings.is_empty(),
+        "the one added component validates: {:?}",
+        findings
+    );
+    model
+}
+
+#[test]
+fn one_fixture_change_updates_every_declared_artifact() {
+    let base_model = load_and_validate(&fixture_path()).expect("fixture loads and validates");
+    let baseline: Vec<(&str, Vec<GeneratedFile>)> = targets::all()
+        .iter()
+        .map(|target| {
+            (
+                target.id(),
+                generate(&base_model, FIXTURE, *target).expect("baseline renders"),
+            )
+        })
+        .collect();
+
+    let changed = fixture_with_added_component();
+
+    // One `ir:build`-equivalent pass: every registered target rendered from
+    // the one changed model.
+    for (target_id, before) in &baseline {
+        let target = targets::by_id(target_id).expect("registered target");
+        let after = generate(&changed, FIXTURE, target).expect("changed model renders");
+        assert_ne!(
+            after, *before,
+            "the one fixture change did not update target '{target_id}' — \
+             every declared artifact must move with the model"
+        );
+    }
+
+    // The update is real, not incidental: the new component lands in the
+    // per-component artifacts and its references land in the cross-references.
+    let json_files =
+        generate(&changed, FIXTURE, targets::by_id("json").expect("json")).expect("json renders");
+    assert!(
+        json_files
+            .iter()
+            .any(|file| file.path == "status-light.json"),
+        "the JSON surface gains the new component document"
+    );
+    let conformance = generate(
+        &changed,
+        FIXTURE,
+        targets::by_id("conformance").expect("conformance"),
+    )
+    .expect("conformance renders");
+    let vectors: serde_json::Value = serde_json::from_str(
+        &conformance
+            .iter()
+            .find(|file| file.path == "vectors.json")
+            .expect("vectors.json")
+            .contents,
+    )
+    .expect("vectors is JSON");
+    assert!(
+        vectors["vectors"][0]["declared_by"]
+            .as_array()
+            .expect("declared_by")
+            .iter()
+            .any(|id| id == "status-light"),
+        "the new component's conformance reference lands in the vector's declared_by"
+    );
+}
+
+// ---------------------------------------------------------------------------
 // JSON Schema round trip (acceptance "emitted JSON validates against the
 // emitted JSON Schema, proven by test")
 // ---------------------------------------------------------------------------
