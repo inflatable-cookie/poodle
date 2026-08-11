@@ -432,23 +432,22 @@ When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 | `border-radius` | `999px` |
 | `gap` | `0.125rem` |
 
-### Tab (activeOutline)
+### Item (activeOutline)
 
 Applies when `activeOutline` is set, on every variant. A transparent border on
-every tab keeps the layout stable when the selected tab's border becomes
+every item keeps the layout stable when the selected item's border becomes
 visible — the opt-in outline never nudges the tab bar.
 
-The border sits on the **tab**, not the item, for two reasons: it shares a box
-with the selection fill, which is also on the tab, and it inherits each
-variant's own tab radius — `radius-control` for `card`, `999px` for `pill`, `0`
-for `block` and `strip`. Bordering the item instead draws a square outline
-around a rounded tab.
+The border sits on the **item**, the chip that wraps both the tab button and
+the close button. The tab is a `<button>` and cannot contain another button, so
+bordering the tab would leave the close affordance outside the outline. The
+item also carries the chip radius, so the outline is correctly rounded.
 
 | Property | Value |
 |----------|-------|
 | `border` | `0.0625rem solid transparent` |
 
-### Tab (activeOutline, selected)
+### Item (activeOutline, selected)
 
 | Property | Value |
 |----------|-------|
@@ -476,20 +475,20 @@ exactly the outline the old variant drew by default.
 | `line-height` | `1` |
 | `white-space` | `nowrap` |
 
-### Tab — Card variant
+### Item — Card variant (chip)
 
 | Property | Value |
 |----------|-------|
 | `border-radius` | `var(--poodle-radius-control)` |
 
-### Tab — Card variant (selected)
+### Item — Card variant (selected)
 
 | Property | Value |
 |----------|-------|
 | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)` |
 | `color` | `var(--poodle-color-text-primary)` |
 
-### Tab — Card variant (activeFill="solid", selected)
+### Item — Card variant (activeFill="solid", selected)
 
 | Property | Value |
 |----------|-------|
@@ -508,7 +507,7 @@ switches to `text-inverse`, the same token the primary Button uses on
 | `padding` | `0 0.625rem` |
 | `border-radius` | `999px` |
 
-### Tab — Pill variant (selected)
+### Item — Pill variant (selected)
 
 | Property | Value |
 |----------|-------|

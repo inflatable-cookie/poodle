@@ -278,11 +278,18 @@
   }
 
   /* Card variant: pill-shaped highlight on selected */
-  .poodle-tabs[data-variant="card"] .poodle-tabs__tab {
+  /* The chip is __item, not __tab. __item wraps the tab button and the close
+     button; __tab is a <button> and cannot contain another one, so filling
+     __tab would leave the close affordance outside the selected chip. `block`
+     and `strip` already fill __item — `card` fills it too, and only differed
+     because it inherited this from the former text variant, which had no
+     close button to group. Matches poodle-render, where `close` is a child of
+     the styled `tab_el` (render/src/tabs.rs). */
+  .poodle-tabs[data-variant="card"] .poodle-tabs__item {
     border-radius: var(--poodle-radius-control);
   }
 
-  .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
+  .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] {
     background: var(--poodle-recipe-tabs-card-selected-tab-fill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent));
     color: var(--poodle-recipe-tabs-card-selected-tab-text, var(--poodle-color-text-primary));
   }
@@ -411,7 +418,12 @@
     border-radius: 999px;
   }
 
-  .poodle-tabs[data-variant="pill"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
+  /* Chip on __item, as for card — see the note there. */
+  .poodle-tabs[data-variant="pill"] .poodle-tabs__item {
+    border-radius: 999px;
+  }
+
+  .poodle-tabs[data-variant="pill"] .poodle-tabs__item[data-selected="true"] {
     background: var(--poodle-recipe-tabs-pill-selected-tab-fill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent));
     color: var(--poodle-recipe-tabs-pill-selected-tab-text, var(--poodle-color-text-primary));
   }
@@ -426,20 +438,21 @@
      strip — and so it shares a box with the selection fill, which is also on
      __tab. The former card variant put its border on __item because that
      variant also gave __item the radius; card now takes its radius from the
-     former text variant, which puts it on __tab. Bordering __item here drew a
-     square outline around a rounded tab. */
-  .poodle-tabs[data-active-outline="true"] .poodle-tabs__tab {
+     former text variant. The outline goes on __item, the chip that wraps both
+     the tab button and the close button, so it encloses the close affordance
+     and picks up the chip's radius. */
+  .poodle-tabs[data-active-outline="true"] .poodle-tabs__item {
     border: 0.0625rem solid transparent;
   }
 
-  .poodle-tabs[data-active-outline="true"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
+  .poodle-tabs[data-active-outline="true"] .poodle-tabs__item[data-selected="true"] {
     border-color: var(--poodle-recipe-tabs-active-outline-border, color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle)));
   }
 
   /* activeFill="solid": fully accent-filled active tab. The foreground uses
      text-inverse, the same token the primary Button uses on accent-base, so
      the filled tab keeps legible contrast against every accent. */
-  .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
+  .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"] {
     background: var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-color-accent-base));
     color: var(--poodle-recipe-tabs-active-solid-text, var(--poodle-color-text-inverse));
   }
