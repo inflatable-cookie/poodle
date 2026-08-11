@@ -31,7 +31,7 @@ and roadmap closeout.
 | `019` | HistoryCenter — web reference | none | dispatched |
 | `020` | ActiveEdge + strip consolidation + Tabs defaults | `016` merged | merged (`2115e5c1`) |
 | `021` | `ActiveFill` gains `none` (strip equivalence) | `020` merged | dispatched |
-| `021` | HistoryCenter — native parity | `019` merged | planned |
+| `022` | HistoryCenter — native parity | `019` merged | planned |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
 evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of
