@@ -130,7 +130,9 @@ normalized pointer coordinates; the core selects the nearer thumb on begin,
 holds that thumb for the gesture, maps through the declared law, prevents
 crossing, and emits the change/commit split. `RangeSliderVisualState` publishes
 both normalized thumb positions, the center reference, and separate negative
-and positive selected-fill segments.
+and positive selected-fill segments. It also marks when both segments meet at
+the center so renderers square only the touching corners and keep the outer
+tips rounded.
 
 Unipolar and bipolar variants both preserve RangeSlider's low-to-high selected
 window. Bipolar splits that window at the explicit center reference: the

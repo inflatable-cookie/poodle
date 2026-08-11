@@ -158,7 +158,11 @@ describe("rangeSlider", () => {
       negativeFillSpanNorm: 0.25,
       positiveFillStartNorm: 0.5,
       positiveFillSpanNorm: 0.25,
+      fillSplitAtCenter: true,
     });
+    expect(rangeSliderVisualState(createRangeSliderControlContext({
+      value: [-0.5, 0], min: -1, max: 1, step: 0, polarity: "bipolar",
+    })).fillSplitAtCenter).toBe(false);
     let result = rangeSliderControlTransition(control, { type: "POINTER_BEGIN", valueNorm: 0.1 });
     expect(result.context.activeThumb).toBe("lower");
     control = result.context;

@@ -373,6 +373,7 @@ pub struct RangeSliderVisualState {
     pub negative_fill_span_norm: f64,
     pub positive_fill_start_norm: f64,
     pub positive_fill_span_norm: f64,
+    pub fill_split_at_center: bool,
     pub polarity: SliderPolarity,
     pub pointer_active: bool,
     pub active_thumb: Option<RangeThumb>,
@@ -432,6 +433,7 @@ pub fn range_slider_visual_state(context: RangeSliderControlContext) -> RangeSli
         negative_fill_span_norm,
         positive_fill_start_norm,
         positive_fill_span_norm,
+        fill_split_at_center: negative_fill_span_norm > 0.0 && positive_fill_span_norm > 0.0,
         polarity: context.polarity,
         pointer_active: context.pointer_active,
         active_thumb: context.active_thumb,
@@ -565,6 +567,20 @@ mod control_tests {
         assert!((state.negative_fill_span_norm - 0.25).abs() < 1e-9);
         assert!((state.positive_fill_start_norm - 0.5).abs() < 1e-9);
         assert!((state.positive_fill_span_norm - 0.25).abs() < 1e-9);
+        assert!(state.fill_split_at_center);
+    }
+
+    #[test]
+    fn bipolar_range_only_squares_a_join_when_both_segments_meet() {
+        let state = range_slider_visual_state(RangeSliderControlContext {
+            value: (-0.5, 0.0),
+            min: -1.0,
+            max: 1.0,
+            step: 0.01,
+            polarity: SliderPolarity::Bipolar,
+            ..RangeSliderControlContext::default()
+        });
+        assert!(!state.fill_split_at_center);
     }
 
     #[test]

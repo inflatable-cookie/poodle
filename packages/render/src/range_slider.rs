@@ -117,6 +117,12 @@ pub fn range_slider(
         fill_corners.bottom_right = pill;
         fill_corners.bottom_left = pill;
     }
+    if visual.fill_split_at_center {
+        seg_negative.style.descriptor.corner_radii.top_right = 0.0;
+        seg_negative.style.descriptor.corner_radii.bottom_right = 0.0;
+        seg_positive.style.descriptor.corner_radii.top_left = 0.0;
+        seg_positive.style.descriptor.corner_radii.bottom_left = 0.0;
+    }
 
     // Contract §8 thumb drop shadow (offset/blur contract-exact rem;
     // black@0.18 is the one noted literal).

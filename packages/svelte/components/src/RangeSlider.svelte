@@ -135,7 +135,7 @@
   }
 </script>
 
-<div bind:this={root} class="poodle-range-slider" role="group" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-polarity={visualState.polarity} data-state={visualState.pointerActive ? "active" : "idle"} style={rangeStyle} data-size={resolvedSize} data-density={resolvedDensity}
+<div bind:this={root} class="poodle-range-slider" role="group" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-polarity={visualState.polarity} data-fill-split={visualState.fillSplitAtCenter} data-state={visualState.pointerActive ? "active" : "idle"} style={rangeStyle} data-size={resolvedSize} data-density={resolvedDensity}
   onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd}>
   <span class="poodle-range-slider__track" aria-hidden="true">
     <span class="poodle-range-slider__fill poodle-range-slider__fill--negative"></span>

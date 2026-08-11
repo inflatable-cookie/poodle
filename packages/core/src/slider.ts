@@ -257,6 +257,7 @@ export interface RangeSliderVisualState {
   negativeFillSpanNorm: number;
   positiveFillStartNorm: number;
   positiveFillSpanNorm: number;
+  fillSplitAtCenter: boolean;
   polarity: SliderPolarity;
   pointerActive: boolean;
   activeThumb: "lower" | "upper" | null;
@@ -308,6 +309,7 @@ export function rangeSliderVisualState(context: RangeSliderControlContext): Rang
     negativeFillSpanNorm,
     positiveFillStartNorm,
     positiveFillSpanNorm,
+    fillSplitAtCenter: negativeFillSpanNorm > 0 && positiveFillSpanNorm > 0,
     polarity: context.polarity,
     pointerActive: context.pointerActive,
     activeThumb: context.activeThumb,

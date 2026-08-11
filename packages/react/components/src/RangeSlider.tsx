@@ -140,7 +140,7 @@ export function RangeSlider({
       style={rangeStyle}
       data-size={resolvedSize}
       data-density={resolvedDensity}
-      data-variant={variant} data-polarity={visualState.polarity} data-state={visualState.pointerActive ? "active" : "idle"}
+      data-variant={variant} data-polarity={visualState.polarity} data-fill-split={visualState.fillSplitAtCenter} data-state={visualState.pointerActive ? "active" : "idle"}
       onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd}
     >
       <span className="poodle-range-slider__track" aria-hidden="true">
