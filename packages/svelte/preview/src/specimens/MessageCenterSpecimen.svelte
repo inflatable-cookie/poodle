@@ -39,6 +39,16 @@
       </SpecimenGroup>
     </div>
   {/snippet}
+
+  <!-- Same gap HistoryCenter inherited from this specimen: SpecimenLayout
+       advertises the axis tabs regardless, so omitting these left them empty. -->
+  {#snippet sizes(size)}
+    <MessageCenter {items} {size} />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <MessageCenter {items} {density} />
+  {/snippet}
 </SpecimenLayout>
 
 <style>

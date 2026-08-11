@@ -86,6 +86,18 @@
       </SpecimenGroup>
     </div>
   {/snippet}
+
+  <!-- Axis tabs are advertised by SpecimenLayout whether or not a specimen
+       fills them (showSizes/showDensities default true), so a specimen that
+       omits these renders empty Sizes and Densities tabs. Triggers stay closed
+       here: several open popovers would stack in one place. -->
+  {#snippet sizes(size)}
+    <HistoryCenter entries={linearEntries} totalEntries={linearEntries.length} {size} canUndo canRedo />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <HistoryCenter entries={linearEntries} totalEntries={linearEntries.length} {density} canUndo canRedo />
+  {/snippet}
 </SpecimenLayout>
 
 <style>

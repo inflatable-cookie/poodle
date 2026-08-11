@@ -14,7 +14,13 @@ export function MessageCenterSpecimen() {
   const [items, setItems] = useState(initialItems);
 
   return (
-    <SpecimenLayout bareVariants>
+    {/* Same gap HistoryCenter inherited from this specimen: SpecimenLayout
+        advertises the axis tabs regardless, so omitting these left them empty. */}
+    <SpecimenLayout
+      bareVariants
+      sizes={(size) => <MessageCenter items={items} size={size} />}
+      densities={(density) => <MessageCenter items={items} density={density} />}
+    >
       <div style={{ display: "grid", gap: "2rem", minHeight: "38rem" }}>
         <SpecimenGroup label="Notification archive">
           <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
