@@ -432,17 +432,23 @@ When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 | `border-radius` | `999px` |
 | `gap` | `0.125rem` |
 
-### Item — Card variant (activeOutline)
+### Tab (activeOutline)
 
 Applies when `activeOutline` is set, on every variant. A transparent border on
-every item keeps the layout stable when the selected item's border becomes
+every tab keeps the layout stable when the selected tab's border becomes
 visible — the opt-in outline never nudges the tab bar.
+
+The border sits on the **tab**, not the item, for two reasons: it shares a box
+with the selection fill, which is also on the tab, and it inherits each
+variant's own tab radius — `radius-control` for `card`, `999px` for `pill`, `0`
+for `block` and `strip`. Bordering the item instead draws a square outline
+around a rounded tab.
 
 | Property | Value |
 |----------|-------|
 | `border` | `0.0625rem solid transparent` |
 
-### Item — Card variant (activeOutline, selected)
+### Tab (activeOutline, selected)
 
 | Property | Value |
 |----------|-------|

@@ -63,6 +63,30 @@ Contracts remain the semantic authority. This rule decides what *should* be
 true when a contract is silent and the runtimes disagree; it does not let an
 implementation override a contract that already speaks.
 
+### Every component ships in all four runtimes
+
+A component is not exempt from a runtime because of where it is typically used.
+A titlebar control, a desktop-only affordance, a dev-tool surface — all four
+runtimes still implement it. "It's only used on the web" is not a reason to
+skip GPUI and Jetstream; the runtimes are targets, not use cases.
+
+Distinguish two things that sound alike:
+
+- **Component parity is required.** Every component has a contract, a Svelte
+  and React implementation, a `<Name>Spec`, a `poodle-render` implementation,
+  and a specimen in both native previews.
+- **Web-platform prop parity is not.** Native attributes like `autocomplete`,
+  `autofocus` and `spellcheck`, imperative escape hatches, and DOM-node props
+  stay web-only and out of the portable spec. `WEB_ONLY_PROPS` in
+  `contract-spec-drift.ts` is the sanctioned register for these, and each entry
+  carries its reason.
+
+A capability that genuinely cannot cross — a CSS selector, a DOM element
+reference — is a documented delta with its rationale, not a silent omission.
+Where a web capability has no native equivalent, the native target implements
+the *observable result* by its own means, or the contract records why it
+cannot.
+
 ## Component Ownership
 
 - Poodle owns reusable primitives, composites, and general workstation shells.

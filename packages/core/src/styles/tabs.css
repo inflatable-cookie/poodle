@@ -416,15 +416,23 @@
     color: var(--poodle-recipe-tabs-pill-selected-tab-text, var(--poodle-color-text-primary));
   }
 
-  /* activeOutline: outline on the selected item, reusing the former card
+  /* activeOutline: outline on the selected tab, reusing the former card
      variant's selected-border value so the opted-in look matches what card
-     gave. A transparent border on every item keeps the bar from shifting
-     when the selected border becomes visible. */
-  .poodle-tabs[data-active-outline="true"] .poodle-tabs__item {
+     gave. A transparent border on every tab keeps the bar from shifting when
+     the selected border becomes visible.
+
+     The border sits on __tab, not __item, so it picks up each variant's own
+     tab radius — radius-control for card, 999px for pill, 0 for block and
+     strip — and so it shares a box with the selection fill, which is also on
+     __tab. The former card variant put its border on __item because that
+     variant also gave __item the radius; card now takes its radius from the
+     former text variant, which puts it on __tab. Bordering __item here drew a
+     square outline around a rounded tab. */
+  .poodle-tabs[data-active-outline="true"] .poodle-tabs__tab {
     border: 0.0625rem solid transparent;
   }
 
-  .poodle-tabs[data-active-outline="true"] .poodle-tabs__item[data-selected="true"] {
+  .poodle-tabs[data-active-outline="true"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
     border-color: var(--poodle-recipe-tabs-active-outline-border, color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle)));
   }
 

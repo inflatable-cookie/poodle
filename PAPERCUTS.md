@@ -7,6 +7,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — The visual gate cannot catch a bug in a brand-new specimen:
+  with no prior baseline to differ from, a new specimen reports no diff. `b013`
+  added `activeOutline` specimens and the sweep showed zero tabs diffs, while
+  the outline was in fact drawing a square border around a rounded tab. Only a
+  human looking at it found it. Consider failing, or at least reporting, when a
+  gate encounters a slug with no baseline rather than silently passing.
+  Affects visual-gate trust for new components and new specimens.
+
 - 2026-08-11 — Both the Svelte↔React parity gate
   (`test/parity/component-parity.test.tsx`) and the React smoke sweep
   (`packages/react/components/test/smoke.test.tsx`) enumerate React exports
