@@ -7,6 +7,31 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — The g13.002 generated-LOC measure globs
+  `packages/core/src/tokens/generated/*` and `packages/tokens/artifacts/**`
+  return 0 lines without bash `globstar`: the first matches only the
+  `css/`/`ts/` subdirectories and `**` degenerates to `*`. Actual counts are
+  1,813 lines / 25 files and 2,407 lines / 31 files. Document the recursion or
+  use an explicit recursive glob. Affects reproducible measurement.
+
+- 2026-08-11 — `pilot-expressiveness-corpus.md` §8 counts `EXT` as
+  Button 5 / RangeSlider 3 / TextInput 2 (10 total), but the row-level
+  classification marks only 3/2/1 (6 total). The manifest records both; the
+  count table drifted from the rows. Recompute the §8 table from the rows.
+  Affects corpus arithmetic.
+
+- 2026-08-11 — Jetstream RangeSlider densities specimen
+  (`packages/jetstream/preview/src/specimens/range_slider.rs`) renders the
+  standard variant, while range-slider.md §13 / `RNG-25` specify density
+  specimens use embedded bipolar (Svelte/React do). Align the Jetstream
+  densities group. Affects cross-runtime specimen parity.
+
+- 2026-08-11 — `docs/parity/text-input.md` status line reads `gpui=2
+  jetstream=2` but its own gap sections enumerate 8 GPUI / 9 Jetstream open
+  `[ ]` bullets. The pass-level count drifted from the bullets (distinct from
+  the stale-path lag of `OBS-04`). Refresh the status line. Affects parity-doc
+  readability.
+
 - 2026-08-11 — `effigy docs:check` rewrites the committed
   `packages/tokens/artifacts/rust/*` via `report:parity` → `tokens:build`,
   leaving a dirty worktree, and `effigy audit:tokens` fails at HEAD: commit
