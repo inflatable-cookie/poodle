@@ -85,4 +85,24 @@ describe("svelte interaction", () => {
       sourceZone: "left",
     });
   });
+
+  it("DockRegion showTabs=false omits the tab strip", () => {
+    const { container, queryByRole } = render(DockRegion, {
+      props: {
+        edge: "left",
+        showTabs: false,
+        items: [{ value: "inspector", label: "Inspector" }],
+        value: "inspector",
+        children: () => "body",
+      },
+    });
+
+    expect(queryByRole("tab")).toBeNull();
+    expect(
+      container.querySelector(".poodle-dock-region__strip"),
+    ).toBeNull();
+    expect(
+      container.querySelector('.poodle-dock-region[data-show-tabs="false"]'),
+    ).toBeTruthy();
+  });
 });

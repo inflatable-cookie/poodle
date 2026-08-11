@@ -30,6 +30,9 @@
      * collapse controls (e.g. SplitView pills) set this false to avoid a
      * redundant affordance. Collapse state rendering is unaffected. */
     showCollapseToggle?: boolean;
+    /** When false, omit the tab strip (hosts render tabs elsewhere, e.g.
+     * titlebar). Body / stack / collapse affordances are unchanged. */
+    showTabs?: boolean;
     collapsed?: boolean;
     collapsedPosture?: DockCollapsedPosture;
     emphasis?: DockEmphasis;
@@ -59,6 +62,7 @@
     sizing = "flexible",
     collapsible = false,
     showCollapseToggle = true,
+    showTabs = true,
     collapsed = false,
     collapsedPosture = "icon-strip",
     emphasis = "standard",
@@ -366,6 +370,7 @@
   data-density={resolvedDensity}
   data-collapsed={collapsed || undefined}
   data-collapsed-posture={collapsed ? collapsedPosture : undefined}
+  data-show-tabs={showTabs ? undefined : "false"}
   aria-label={ariaLabel ?? `${edge} dock`}
   ondragover={handleRegionDragOver}
   ondragleave={handleRegionDragLeave}
@@ -418,38 +423,13 @@
           onToggle={handleCollapseToggle}
         />
       {/if}
-      <Tabs
-        variant={tabVariant}
-        orientation="vertical"
-        {size}
-        {sizeRole}
-        {density}
-        items={tabItems}
-        value={activeItem?.value ?? ""}
-        reorderable={true}
-        ariaLabel={ariaLabel ?? `${edge} dock panels`}
-        onValueChange={handleValueChange}
-        onReorder={handleReorder}
-        onClose={handleClose}
-        onDragPrepare={externalDrag.prepare}
-        onDragStart={handleTabDragStart}
-        onDragEnd={handleTabDragEnd}
-      />
-    </div>
-  {:else if showIconStrip}
-    <div
-      class="poodle-dock-region__strip"
-      data-orientation="horizontal"
-      data-compact={isCompact || undefined}
-    >
-      <div class="poodle-dock-region__tabs" use:observeStrip>
+      {#if showTabs}
         <Tabs
           variant={tabVariant}
-          orientation="horizontal"
+          orientation="vertical"
           {size}
           {sizeRole}
           {density}
-          showTooltips={isCompact}
           items={tabItems}
           value={activeItem?.value ?? ""}
           reorderable={true}
@@ -461,7 +441,36 @@
           onDragStart={handleTabDragStart}
           onDragEnd={handleTabDragEnd}
         />
-      </div>
+      {/if}
+    </div>
+  {:else if showIconStrip}
+    <div
+      class="poodle-dock-region__strip"
+      data-orientation="horizontal"
+      data-compact={isCompact || undefined}
+    >
+      {#if showTabs}
+        <div class="poodle-dock-region__tabs" use:observeStrip>
+          <Tabs
+            variant={tabVariant}
+            orientation="horizontal"
+            {size}
+            {sizeRole}
+            {density}
+            showTooltips={isCompact}
+            items={tabItems}
+            value={activeItem?.value ?? ""}
+            reorderable={true}
+            ariaLabel={ariaLabel ?? `${edge} dock panels`}
+            onValueChange={handleValueChange}
+            onReorder={handleReorder}
+            onClose={handleClose}
+            onDragPrepare={externalDrag.prepare}
+            onDragStart={handleTabDragStart}
+            onDragEnd={handleTabDragEnd}
+          />
+        </div>
+      {/if}
       {#if collapsible && showCollapseToggle}
         <CollapseToggle
           {collapsed}
@@ -472,40 +481,51 @@
       {/if}
     </div>
   {:else}
-    <div
-      class="poodle-dock-region__strip"
-      data-orientation="horizontal"
-      data-compact={isCompact || undefined}
-    >
-      <div class="poodle-dock-region__tabs" use:observeStrip>
-        <Tabs
-          variant={tabVariant}
-          orientation="horizontal"
-          {size}
-          {sizeRole}
-          {density}
-          showTooltips={isCompact}
-          items={tabItems}
-          value={activeItem?.value ?? ""}
-          reorderable={true}
-          ariaLabel={ariaLabel ?? `${edge} dock panels`}
-          onValueChange={handleValueChange}
-          onReorder={handleReorder}
-          onClose={handleClose}
-          onDragPrepare={externalDrag.prepare}
-          onDragStart={handleTabDragStart}
-          onDragEnd={handleTabDragEnd}
-        />
+    {#if showTabs}
+      <div
+        class="poodle-dock-region__strip"
+        data-orientation="horizontal"
+        data-compact={isCompact || undefined}
+      >
+        <div class="poodle-dock-region__tabs" use:observeStrip>
+          <Tabs
+            variant={tabVariant}
+            orientation="horizontal"
+            {size}
+            {sizeRole}
+            {density}
+            showTooltips={isCompact}
+            items={tabItems}
+            value={activeItem?.value ?? ""}
+            reorderable={true}
+            ariaLabel={ariaLabel ?? `${edge} dock panels`}
+            onValueChange={handleValueChange}
+            onReorder={handleReorder}
+            onClose={handleClose}
+            onDragPrepare={externalDrag.prepare}
+            onDragStart={handleTabDragStart}
+            onDragEnd={handleTabDragEnd}
+          />
+        </div>
+        {#if collapsible && showCollapseToggle}
+          <CollapseToggle
+            {collapsed}
+            direction={collapseDirection}
+            ariaLabel={`Collapse ${edge} dock`}
+            onToggle={handleCollapseToggle}
+          />
+        {/if}
       </div>
-      {#if collapsible && showCollapseToggle}
+    {:else if collapsible && showCollapseToggle}
+      <div class="poodle-dock-region__edge-toggle">
         <CollapseToggle
           {collapsed}
           direction={collapseDirection}
           ariaLabel={`Collapse ${edge} dock`}
           onToggle={handleCollapseToggle}
         />
-      {/if}
-    </div>
+      </div>
+    {/if}
 
     <div class="poodle-dock-region__body">
       {@render children?.(activeItem)}
