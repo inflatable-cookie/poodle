@@ -11,17 +11,18 @@ and roadmap closeout.
 | Batch | Purpose | Dependency | Status |
 | --- | --- | --- | --- |
 | `001` | authority inventory and inherited docs-baseline repair | none | merged (`251cc858`) |
-| `002` | pilot fixture freeze and quantitative baseline | `001` merged | ready |
-| `003` | crate placement ruling and g13.002 handoff | `001`–`002` merged | planned |
+| `002` | pilot fixture freeze and quantitative baseline | `001` merged | merged (`89debbcb`) |
+| `003` | crate placement ruling and g13.002 handoff | `001`–`002` merged | ready to compile — dependencies met |
 | `004` | Rust IR prior-art and failure-mode research | none | dead — recompile required |
 | `005` | pilot contract expressiveness corpus | none | merged (`2f8dc5db`) |
 
-`001` and `005` were reviewed, validated, and merged on 2026-08-11; evidence in
-`docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. `002` is now
-dispatchable. `003` stays a planning placeholder until `002` merges; it owns the
-crate-placement ruling plus the two open contract questions carried out of `005`
-(`UNKNOWN-01` embedded RangeSlider `aria-orientation`, `UNKNOWN-02` Rust Button
-`Danger`/`Success`).
+`001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
+evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of
+`003`'s dependencies are now met, but it is a maintainer-judgment card: it owns
+the crate-placement ruling plus the two open contract questions carried out of
+`005` (`UNKNOWN-01` embedded RangeSlider `aria-orientation`, `UNKNOWN-02` Rust
+Button `Danger`/`Success`). Those are not worker decisions — the orchestrator
+must rule before `003` can be compiled into a dispatchable card.
 
 - [Batch 001](001-authority-inventory-and-docs-baseline.md)
 - [Batch 002](002-pilot-fixture-and-metrics-freeze.md)

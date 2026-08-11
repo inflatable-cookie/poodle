@@ -166,7 +166,86 @@ These pass to `g13-b002` (fixtures/metrics) and `g13-b003` (placement ruling):
   and stop conditions filled in.
 - Worker worktrees removed after ancestry and cleanliness checks.
 
+## Addendum — `g13-b002` dispatch, review, and merge (same day)
+
+`g13-b002` was dispatched after the closeout above and completed within the
+session. Reviewed and merged here rather than in a separate log, since its
+findings amend `g13-b005`.
+
+| Batch | Card | Branch | Commit | Merge | Verdict |
+|---|---|---|---|---|---|
+| `g13-b002` | `g13/batch-cards/002-pilot-fixture-and-metrics-freeze.md` | `thread/g13-002-pilot-fixture-metrics` | `89debbcb` | `2368f436` | accepted, merged |
+
+Dispatch: `deepseek-v4-flash` `xhigh`, isolated worktree, `--max-time 90m`,
+detached `omp -p` with an event-driven pid watcher — no polling model monitor.
+Merged with no conflicts. Gate on merged `main`: `effigy docs:lint`,
+`effigy svelte:surface-audit`, `git diff --check`, `git status --porcelain` all
+exit 0.
+
+### Independent verification
+
+| Claim | Verdict |
+|---|---|
+| 32 fixtures (`FIX-BTN` 8, `FIX-RNG` 6, `FIX-TXT` 4, `FIX-SHELL` 10, `FIX-AXIS` 4) | confirmed — 32 rows |
+| Per-file authored LOC | confirmed — `Button.svelte` 220, `Button.tsx` 164, `render/src/button.rs` 621, `headless/src/text_input.rs` 837, `core/src/input.ts` 76 all exact |
+| Glob totals | confirmed — `packages/svelte/components/src/*.svelte` = 28,835 exact |
+| Verbatim drift-gate quotes | confirmed — `surface-audit.ts:116-121` matches the quoted source exactly |
+| Jetstream RangeSlider densities finding | confirmed — `range_slider.rs:139` builds `RangeSliderSpec::new(25.0, 75.0)` with no `with_embedded_control` |
+| `PAPERCUTS.md` restored additively after the worker's self-caught clobber | confirmed — diff against `main` shows four additions and zero removals |
+| `UNKNOWN-01`/`UNKNOWN-02` left open | confirmed — `FIX-RNG-04`, `FIX-RNG-05` `blocked:UNKNOWN-01`; `FIX-BTN-08` `blocked:UNKNOWN-02`; no answer assumed |
+| No package, schema, generator, or baseline refresh | confirmed — only the three writable paths changed |
+
+### Correction to the `g13-b005` review above
+
+`g13-b002` found that the corpus §8 classification table did not match the
+corpus's own row marks. It is right, and the defect is wider than it reported.
+The `b005` review recorded above verified requirement counts, ID uniqueness,
+register counts, the two unknowns, and the absence of a schema recommendation —
+it did **not** verify the classification column totals, and that gap let the
+error through the merge gate.
+
+Audited across all five columns, row marks versus the merged §8 table:
+
+| Column | §8 as merged | Row marks | Status |
+|---|---|---|---|
+| SDD | 80 | 94 | wrong |
+| GTA | 2 | 2 | correct |
+| AC | 22 | 14 | wrong |
+| CV | 39 | 28 | wrong |
+| EXT | 10 | 6 | wrong |
+
+The requirement counts themselves (129; `CROSS` 21, `BTN` 29, `RNG` 29, `TXT`
+32, `SHELL` 10, `NEG` 8) were verified correct at merge and remain correct.
+
+**Ruling: row-level marks win.** Each row carries its own contract citation and
+evidence path; §8 was derived arithmetic. The corpus §8 table has been
+recomputed from the rows and carries an amendment note preserving the
+superseded figures. The baseline runtime-extension count is **6** — `BTN-26`,
+`BTN-27`, `BTN-29`, `RNG-26`, `RNG-27`, `TXT-31`. Manifest §4.5 records the
+same ruling. The `b005` worker's batch log is left unedited as historical
+worker evidence.
+
+### Other b002 findings
+
+1. **Jetstream RangeSlider densities specimen renders the standard variant**
+   where contract §13 / `RNG-25` specify embedded bipolar (Svelte and React
+   comply). Accepted as a real cross-runtime specimen divergence; recorded as a
+   papercut, not fixed here — it is specimen source work outside `g13.001`.
+2. **Generated-LOC globs measure 0 without bash `globstar`.** Accepted; a
+   measurement trap in the card I wrote, now a papercut. The manifest records
+   the correct recursive counts.
+3. **`docs/parity/text-input.md` status line (`gpui=2 jetstream=2`) lags its
+   own enumerated bullets (8 GPUI / 9 Jetstream).** Accepted as historical-file
+   drift, distinct from `OBS-04`'s stale paths. `docs/parity/` stays
+   non-authoritative; not repaired.
+
+No b002 claim was rejected. The manifest correctly reports the four-runtime
+drift count with both the status-line and enumerated-bullet bases rather than
+silently picking one.
+
 ## Not done
 
 No `g13.002` schema implementation. No IR crate or package. No family
-migration — that stays gated on the `g13.008` adopt verdict.
+migration — that stays gated on the `g13.008` adopt verdict. `g13-b003` is
+unblocked on dependencies but waits on two maintainer rulings (`UNKNOWN-01`,
+`UNKNOWN-02`) plus the crate-placement decision.

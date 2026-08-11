@@ -309,18 +309,35 @@ or changing code.
 
 ### Counts by component and classification
 
+Corrected 2026-08-11 by the orchestrator — see the amendment note below.
+
 | Component | SDD | GTA | AC | CV | EXT | Total |
 |-----------|-----|-----|----|----|-----|-------|
-| Cross-cutting (CROSS) | 16 | 1 | 4 | 9 | 0 | 21 |
-| Button (BTN) | 21 | 0 | 2 | 2 | 5 | 29 |
-| RangeSlider (RNG) | 16 | 0 | 5 | 15 | 3 | 29 |
-| TextInput (TXT) | 18 | 0 | 11 | 12 | 2 | 32 |
+| Cross-cutting (CROSS) | 16 | 1 | 2 | 5 | 0 | 21 |
+| Button (BTN) | 26 | 0 | 1 | 0 | 3 | 29 |
+| RangeSlider (RNG) | 20 | 0 | 4 | 13 | 2 | 29 |
+| TextInput (TXT) | 23 | 0 | 7 | 9 | 1 | 32 |
 | Shells (SHELL) | 9 | 1 | 0 | 1 | 0 | 10 |
 | Negative (NEG) | 0 | 0 | 0 | 0 | 0 | 8 (IR-boundary cases) |
-| **Total** | 80 | 2 | 22 | 39 | 10 | 129 |
+| **Total** | 94 | 2 | 14 | 28 | 6 | 129 |
 
 (A requirement carrying two codes counts in both columns; NEG rows are
 IR-boundary cases, not vocabulary classes.)
+
+**Amendment note (2026-08-11).** As merged at `2f8dc5db`, this table read
+`CROSS 16/1/4/9/0`, `BTN 21/0/2/2/5`, `RNG 16/0/5/15/3`, `TXT 18/0/11/12/2`,
+total `80/2/22/39/10`. Those figures do not match the classification column of
+the corpus's own requirement rows in §1–§5. Batch `g13-b002` found the
+discrepancy on the `EXT` column (§4.5 of
+`docs/roadmaps/g13/pilot-baseline-manifest.md`); the orchestrator then audited
+all five columns and found four of them wrong. The table above is recomputed
+directly from the row marks, which are the individually cited and evidenced
+data; the previous figures were planning-time arithmetic. The requirement
+counts themselves (129 total; `CROSS` 21, `BTN` 29, `RNG` 29, `TXT` 32,
+`SHELL` 10, `NEG` 8) were verified correct at merge and are unchanged. Any
+consumer that recorded `EXT = 10` — including a runtime-extension baseline —
+should use `EXT = 6` (`BTN-26`, `BTN-27`, `BTN-29`, `RNG-26`, `RNG-27`,
+`TXT-31`).
 
 ### Acceptance criteria
 

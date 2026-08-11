@@ -1,9 +1,11 @@
 # 002 Pilot Fixture And Metrics Freeze
 
-Status: ready
+Status: merged
 Milestone: `g13.001`
 Owner: Poodle core
-Branch: `thread/g13-002-pilot-fixture-metrics`
+Branch: `thread/g13-002-pilot-fixture-metrics` (commit `89debbcb`, merged
+`2368f436`)
+Review: `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`
 Depends on: `g13-b001` merged (`251cc858`), `g13-b005` merged (`2f8dc5db`)
 Governing refs: `docs/specs/063-rust-authored-component-and-scene-ir.md`
 (`IR-05`–`IR-11`), `docs/contracts/components/button.md`,
@@ -164,23 +166,23 @@ writable paths changed. Then commit and push.
 
 ## Acceptance Criteria
 
-- [ ] `pilot-baseline-manifest.md` exists at the ruled path with fixture tables
+- [x] `pilot-baseline-manifest.md` exists at the ruled path with fixture tables
   covering all three pilot components, the preview shell, and the size/density
   axes across four runtimes.
-- [ ] Every fixture has a stable `FIX-*` ID, at least one corpus requirement
+- [x] Every fixture has a stable `FIX-*` ID, at least one corpus requirement
   ID, an owning contract section, per-runtime paths or a named gap, and a
   status.
-- [ ] Every quantitative measure in step 3 is recorded with the command that
+- [x] Every quantitative measure in step 3 is recorded with the command that
   produced it, or an explicit `not measurable` reason.
-- [ ] `UNKNOWN-01` and `UNKNOWN-02` appear as blocked fixtures with no assumed
+- [x] `UNKNOWN-01` and `UNKNOWN-02` appear as blocked fixtures with no assumed
   answer.
-- [ ] `GAP-01`–`GAP-07` each map to at least one fixture row or an explicit
+- [x] `GAP-01`–`GAP-07` each map to at least one fixture row or an explicit
   statement that no fixture covers them.
-- [ ] No package, crate, schema, generator, or representation appears.
-- [ ] No visual baseline refreshed; no token artifact rewrite committed.
-- [ ] `effigy docs:lint`, `effigy docs:check`, and `git diff --check` exit 0.
-- [ ] Only the three writable paths changed.
-- [ ] Batch log records commands, exit states, and measured counts.
+- [x] No package, crate, schema, generator, or representation appears.
+- [x] No visual baseline refreshed; no token artifact rewrite committed.
+- [x] `effigy docs:lint`, `effigy docs:check`, and `git diff --check` exit 0.
+- [x] Only the three writable paths changed.
+- [x] Batch log records commands, exit states, and measured counts.
 
 ## Evidence
 

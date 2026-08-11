@@ -231,6 +231,13 @@ rows `312–318`), which does not equal the row-level `EXT` marks (3/2/1 = 6).
 The row-level classification is the measured evidence; the §8 table appears to
 be planning-time arithmetic. Both numbers are recorded; no authority is chosen.
 
+**Orchestrator ruling (2026-08-11).** Row-level marks win. The audit that
+followed this finding showed four of the five §8 columns disagreed with the
+rows, not just `EXT`; the corpus §8 table has been recomputed from the rows and
+carries an amendment note. The baseline runtime-extension count is **6**
+(`BTN-26`, `BTN-27`, `BTN-29`, `RNG-26`, `RNG-27`, `TXT-31`). The `10` figure is
+superseded and must not be used as a pilot before-state.
+
 ### 4.6 Clean build time
 
 Method: `cargo clean --manifest-path <pkg>/Cargo.toml`, then one wall-clock

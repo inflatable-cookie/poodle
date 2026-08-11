@@ -15,10 +15,11 @@ the pilot fixtures that later cards must preserve.
 
 - [x] `g13-b001` — authority inventory and inherited docs-baseline repair
   (merged `251cc858`; [review log](../../logs/2026-08/11-g13-b001-b005-review-and-merge.md))
-- [ ] `g13-b002` — pilot fixture and quantitative-metrics freeze
-  (ready; dispatchable)
+- [x] `g13-b002` — pilot fixture and quantitative-metrics freeze
+  (merged `89debbcb`; 32 `FIX-*` fixtures +
+  [baseline manifest](pilot-baseline-manifest.md))
 - [ ] `g13-b003` — maintainer crate-placement ruling and executable g13.002
-  handoff
+  handoff (dependencies met; blocked on the maintainer rulings below)
 
 Parallel research batch `g13-b005` is merged (`2f8dc5db`); its 129-requirement
 corpus is the acceptance input for the `g13.002` schema card. Prior-art batch
@@ -49,8 +50,9 @@ Crate/package placement for `poodle-ir` and `poodle-codegen` remains **unruled**
 ## Acceptance
 
 - [x] No implementation package is created in this card.
-- [ ] Every pilot fixture has a stable identifier and owning contract.
-      (`g13-b002`)
+- [x] Every pilot fixture has a stable identifier and owning contract.
+      (32 `FIX-*` fixtures in
+      [pilot-baseline-manifest.md](pilot-baseline-manifest.md))
 - [ ] Unknown authority or runtime behavior becomes a named decision, not an
   inferred compiler feature. (named below; ruled by `g13-b003`)
 - [x] `effigy docs:check` is green before schema implementation begins.
