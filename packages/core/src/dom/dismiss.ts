@@ -2,9 +2,22 @@
  * Dismissable-layer stack.
  *
  * Overlays register while open; document-level Escape and outside-pointerdown
- * dismiss the innermost (most recently registered) layer only, so nested
- * overlays close one at a time instead of all at once. Listeners are attached
- * while at least one layer is registered and removed when the stack empties.
+ * dismiss from this stack. Listeners are attached while at least one layer is
+ * registered and removed when the stack empties.
+ *
+ * The two reasons deliberately differ:
+ *
+ * - **Escape** dismisses the innermost layer only, so nested overlays unwind
+ *   one keypress at a time — Esc closes the menu, Esc again closes the dialog
+ *   it sits in.
+ * - **Outside interaction** dismisses *every* layer the interaction fell
+ *   outside of. Peer overlays are indistinguishable from nested ones here (a
+ *   layer knows whether it contains the target, not whether another layer
+ *   contains it), and dismissing only the innermost made sibling overlays
+ *   queue: with N open peers, N clicks were needed to get past them, each one
+ *   closing a different overlay than the one the user aimed at. Closing
+ *   everything the click was outside of is both what a user expects and the
+ *   only behaviour that does not depend on registration order.
  *
  * The stack logic is pure and unit-tested via `resolveDismiss`; the document
  * wiring below is the thin DOM binding.
@@ -20,33 +33,37 @@ export interface DismissLayer {
 }
 
 /**
- * Which layer, if any, should dismiss for an interaction. Pure so the
- * innermost-first policy is testable without a DOM.
+ * Which layers should dismiss for an interaction, innermost first. Pure so the
+ * policy is testable without a DOM.
+ *
+ * Escape yields at most the innermost layer. An outside interaction yields
+ * every layer that opted into outside dismissal and does not contain the
+ * target.
  */
 export function resolveDismiss(
   layers: readonly DismissLayer[],
   reason: "escape" | "outside",
   target: Node | null,
-): DismissLayer | null {
+): DismissLayer[] {
   const top = layers[layers.length - 1];
 
   if (!top) {
-    return null;
+    return [];
   }
 
   if (reason === "escape") {
-    return top;
+    return [top];
   }
 
-  if (!top.dismissOnOutsideInteract) {
-    return null;
-  }
-
-  if (target && top.contains(target)) {
-    return null;
-  }
-
-  return top;
+  // Innermost first, so a layer that closes something beneath it has already
+  // run by the time the outer layer is dismissed.
+  return layers
+    .slice()
+    .reverse()
+    .filter(
+      (layer) =>
+        layer.dismissOnOutsideInteract && !(target !== null && layer.contains(target)),
+    );
 }
 
 /**
@@ -65,7 +82,11 @@ const stack: DismissLayer[] = [];
 let listenersAttached = false;
 
 function handlePointerDown(event: MouseEvent): void {
-  resolveDismiss(stack, "outside", event.target as Node | null)?.onDismiss("outside");
+  // Snapshot before dispatching: each onDismiss unregisters its own layer and
+  // mutates `stack` while we are iterating it.
+  for (const layer of resolveDismiss(stack, "outside", event.target as Node | null)) {
+    layer.onDismiss("outside");
+  }
 }
 
 function handleKeydown(event: KeyboardEvent): void {
@@ -73,7 +94,7 @@ function handleKeydown(event: KeyboardEvent): void {
     return;
   }
 
-  const layer = resolveDismiss(stack, "escape", null);
+  const [layer] = resolveDismiss(stack, "escape", null);
 
   if (layer) {
     event.preventDefault();
