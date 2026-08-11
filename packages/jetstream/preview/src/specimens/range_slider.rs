@@ -121,26 +121,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             div()
                 .flex_col()
                 .gap(12.0)
-                .child(row(js_range_slider(
-                    &RangeSliderSpec::new(25.0, 75.0).with_size(ControlSize::Xs),
-                    theme,
-                )))
-                .child(row(js_range_slider(
-                    &RangeSliderSpec::new(25.0, 75.0).with_size(ControlSize::Sm),
-                    theme,
-                )))
-                .child(row(js_range_slider(
-                    &RangeSliderSpec::new(25.0, 75.0).with_size(ControlSize::Md),
-                    theme,
-                )))
-                .child(row(js_range_slider(
-                    &RangeSliderSpec::new(25.0, 75.0).with_size(ControlSize::Lg),
-                    theme,
-                )))
-                .child(row(js_range_slider(
-                    &RangeSliderSpec::new(25.0, 75.0).with_size(ControlSize::Xl),
-                    theme,
-                ))),
+                .child(size_variants(theme, ControlSize::Xs))
+                .child(size_variants(theme, ControlSize::Sm))
+                .child(size_variants(theme, ControlSize::Md))
+                .child(size_variants(theme, ControlSize::Lg))
+                .child(size_variants(theme, ControlSize::Xl)),
         ))
         // Densities — vertical hit-area only (contract §8 RangeSlider density
         // exception); track thickness / thumb / control geometry unchanged.
@@ -163,6 +148,35 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     theme,
                 ))),
         ))
+}
+
+fn size_variants(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
+    div()
+        .flex_col()
+        .gap(8.0)
+        .child(row(js_range_slider(
+            &RangeSliderSpec::new(0.2, 0.75)
+                .with_bounds(0.0, 1.0)
+                .with_step(0.01)
+                .with_size(size),
+            theme,
+        )))
+        .child(row(js_range_slider(
+            &RangeSliderSpec::new(0.2, 0.75)
+                .with_bounds(0.0, 1.0)
+                .with_step(0.01)
+                .with_size(size)
+                .with_embedded_control(SliderPolarity::Unipolar),
+            theme,
+        )))
+        .child(row(js_range_slider(
+            &RangeSliderSpec::new(-0.5, 0.5)
+                .with_bounds(-1.0, 1.0)
+                .with_step(0.01)
+                .with_size(size)
+                .with_embedded_control(SliderPolarity::Bipolar),
+            theme,
+        )))
 }
 
 fn row(content: El) -> El {

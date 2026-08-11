@@ -534,6 +534,9 @@ so the control geometry is unchanged — only the grabbable margin grows.
 `variant="embedded"`, and `polarity="bipolar"`. Density specimens use the
 same variant.
 
+The Sizes tab renders standard unipolar, embedded unipolar, and embedded
+bipolar controls at every `xs`–`xl` size.
+
 ## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`

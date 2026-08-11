@@ -26,9 +26,10 @@ fn range_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(f64, f64) + S
 
 fn range_fraction_change(
     state: &AppState,
-    key: &'static str,
+    key: impl Into<String>,
 ) -> Arc<dyn Fn(f64, f64) + Send + Sync> {
     let events = state.node_events.clone();
+    let key = key.into();
     Arc::new(move |low, high| {
         let mut events = events.lock().unwrap();
         events.push(NodeSpecimenEvent::SetText {
@@ -302,14 +303,75 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "range-slider",
         examples,
         |size, theme: &GpuiThemeProvider| {
-            RangeSlider::from_spec(
-                RangeSliderSpec::new(20.0, 80.0)
-                    .with_bounds(0.0, 100.0)
-                    .with_aria_label("Range"),
-                theme,
-            )
-            .size(size)
-            .into_any_element()
+            let unipolar_key = format!("range-slider-size-unipolar-{size:?}");
+            let bipolar_key = format!("range-slider-size-bipolar-{size:?}");
+            let read_range = |key: &str, fallback: (f64, f64)| {
+                (
+                    state
+                        .specimens
+                        .text
+                        .get(&format!("{key}-lo"))
+                        .and_then(|value| value.parse().ok())
+                        .unwrap_or(fallback.0),
+                    state
+                        .specimens
+                        .text
+                        .get(&format!("{key}-hi"))
+                        .and_then(|value| value.parse().ok())
+                        .unwrap_or(fallback.1),
+                )
+            };
+            let unipolar = read_range(&unipolar_key, (0.2, 0.75));
+            let bipolar = read_range(&bipolar_key, (-0.5, 0.5));
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(
+                    RangeSlider::from_spec(
+                        RangeSliderSpec::new(unipolar.0, unipolar.1)
+                            .with_bounds(0.0, 1.0)
+                            .with_step(0.01)
+                            .with_aria_label("Standard range"),
+                        theme,
+                    )
+                    .size(size)
+                    .on_change(
+                        format!("{unipolar_key}-standard"),
+                        range_fraction_change(state, unipolar_key.clone()),
+                    ),
+                )
+                .child(
+                    RangeSlider::from_spec(
+                        RangeSliderSpec::new(unipolar.0, unipolar.1)
+                            .with_bounds(0.0, 1.0)
+                            .with_step(0.01)
+                            .with_embedded_control(SliderPolarity::Unipolar)
+                            .with_aria_label("Embedded unipolar range"),
+                        theme,
+                    )
+                    .size(size)
+                    .on_change(
+                        format!("{unipolar_key}-embedded"),
+                        range_fraction_change(state, unipolar_key),
+                    ),
+                )
+                .child(
+                    RangeSlider::from_spec(
+                        RangeSliderSpec::new(bipolar.0, bipolar.1)
+                            .with_bounds(-1.0, 1.0)
+                            .with_step(0.01)
+                            .with_embedded_control(SliderPolarity::Bipolar)
+                            .with_aria_label("Embedded bipolar range"),
+                        theme,
+                    )
+                    .size(size)
+                    .on_change(
+                        bipolar_key.clone(),
+                        range_fraction_change(state, bipolar_key),
+                    ),
+                )
+                .into_any_element()
         },
         |density, theme: &GpuiThemeProvider| {
             RangeSlider::from_spec(
