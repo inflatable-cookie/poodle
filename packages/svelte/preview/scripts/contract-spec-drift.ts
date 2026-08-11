@@ -46,6 +46,13 @@ const WEB_ONLY_PROPS = new Set([
   // — `TreeSpec` lives in `tree/mod.rs` and had never been checked.
   "virtualized",
   "virtualHeight",
+  // Dialog/FormDialog initial-focus intent. Web-only *for now*, by decision:
+  // the "auto"/"none" policy is portable but the third form is a CSS selector,
+  // which cannot cross to native. Rather than design portable focus-intent
+  // semantics for one component ad hoc, this defers to the g13 IR, which owns
+  // the focus/adapter-capability boundary (spec 063 IR-05; corpus CROSS-17,
+  // NEG-03). Remove this entry when the IR rules on declarative focus intent.
+  "initialFocus",
   "asRole",
   "autocapitalize",
   "autocorrect",

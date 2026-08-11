@@ -26,6 +26,7 @@ export interface FormDialogProps {
   size?: ControlSize | null;
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
+  initialFocus?: "auto" | "none" | string;
   onSubmit?: (() => void) | undefined;
   onCancel?: (() => void) | undefined;
   onOpenChange?: ((open: boolean) => void) | undefined;
@@ -53,6 +54,7 @@ export function FormDialog({
   size = null,
   sizeRole = "control",
   density = null,
+  initialFocus = "auto",
   onSubmit = undefined,
   onCancel = undefined,
   onOpenChange = undefined,
@@ -112,6 +114,7 @@ export function FormDialog({
       showCloseButton={true}
       contentClassName={contentClassName}
       contentStyle={contentStyle}
+      initialFocus={initialFocus}
       onOpenChange={handleDialogOpenChange}
       header={
         subtitleContent ? (

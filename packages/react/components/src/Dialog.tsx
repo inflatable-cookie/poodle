@@ -43,6 +43,7 @@ export interface DialogProps {
   closeButtonSize?: ControlSize | null;
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
+  initialFocus?: "auto" | "none" | string;
   onOpenChange?: (open: boolean) => void;
   onRequestClose?: () => void;
   kind?: "dialog" | "alertdialog";
@@ -73,6 +74,7 @@ export function Dialog({
   closeButtonSize = null,
   sizeRole = "control",
   density = null,
+  initialFocus = "auto",
   onOpenChange,
   onRequestClose,
   kind,
@@ -135,6 +137,37 @@ export function Dialog({
     }
   };
 
+  /**
+   * Resolve where focus lands on the open edge, per the `initialFocus` prop.
+   * The already-focused guard runs first (see the surface ref callback), so
+   * the active element is outside the surface here.
+   *
+   * - "none": focus nothing; the surface still traps focus.
+   * - a CSS selector string: resolved within the surface; an unmatched
+   *   selector falls back to "auto" behaviour rather than throwing.
+   * - "auto" (default): first focusable in the content region
+   *   (`.poodle-dialog__body`), skipping header chrome such as the close
+   *   button; the surface itself when the body has no focusable element (and
+   *   always in `bare` mode, where no body region exists).
+   */
+  function resolveInitialFocus(node: HTMLElement): void {
+    if (initialFocus === "none") {
+      return;
+    }
+
+    if (initialFocus !== "auto") {
+      const target = node.querySelector<HTMLElement>(initialFocus);
+      if (target) {
+        target.focus();
+        return;
+      }
+    }
+
+    const body = node.querySelector<HTMLElement>(".poodle-dialog__body");
+    const focusable = getFocusableElements(body ?? node);
+    (focusable[0] ?? node).focus();
+  }
+
   useEffect(() => {
     if (!isOpen) return;
     return registerDismissLayer({
@@ -173,8 +206,13 @@ export function Dialog({
             surfaceRef.current = node;
             if (node && pendingFocus.current) {
               pendingFocus.current = false;
-              const focusable = getFocusableElements(node);
-              (focusable[0] ?? node).focus();
+              // Already-focused guard (parity with b1a4a5e7 Svelte): never
+              // steal focus when something inside the surface is already
+              // focused (e.g. a consumer ref that focuses on attach). Runs
+              // before any initialFocus resolution.
+              if (!node.contains(document.activeElement)) {
+                resolveInitialFocus(node);
+              }
             }
           }}
           className={`poodle-dialog__surface ${contentClassName}${bare ? " poodle-dialog__surface--bare" : ""}`}

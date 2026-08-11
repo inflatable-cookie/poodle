@@ -17,6 +17,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   allowlist with reasons, or a parity-debt inventory) so cards can diff
   against it. Affects visual-gate triage.
 
+- 2026-08-11 — A new public web prop cannot be documented in a contract
+  without `effigy docs:lint` failing: the contract ↔ poodle-specs drift gate
+  (`packages/svelte/preview/scripts/contract-spec-drift.ts`) requires every
+  documented Public Prop to exist on the matching `*Spec` struct, so g13.009's
+  `initialFocus` (a focus-behaviour semantic, not web plumbing) cannot ship
+  without `DialogSpec`/`FormDialogSpec` gaining `initial_focus` — stopped the
+  card; see `docs/logs/2026-08/11-g13-009-dialog-initial-focus.md` §5. Either
+  the Specs need the field (native renderers own focus per dialog.md §10) or
+  the gate needs a sanctioned web-only carve-out; a decision is required
+  before the next prop of this kind lands.
+
 - 2026-08-11 — Batch card 006 (button tone parity) lists `split-button.css`
   as "implements danger", but the contract amendment it depends on
   (`282ce489`) added a `--poodle-split-shadow` column to split-button.md §8
