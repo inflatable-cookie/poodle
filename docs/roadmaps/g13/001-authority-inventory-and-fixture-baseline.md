@@ -1,6 +1,6 @@
 # g13.001 Authority Inventory And Fixture Baseline
 
-Status: in progress
+Status: complete (2026-08-11)
 Owner: Poodle core
 Depends on: `docs/specs/063-rust-authored-component-and-scene-ir.md`
 Governing rules: `IR-01`–`IR-12`
@@ -18,8 +18,9 @@ the pilot fixtures that later cards must preserve.
 - [x] `g13-b002` — pilot fixture and quantitative-metrics freeze
   (merged `89debbcb`; 32 `FIX-*` fixtures +
   [baseline manifest](pilot-baseline-manifest.md))
-- [ ] `g13-b003` — maintainer crate-placement ruling and executable g13.002
-  handoff (dependencies met; blocked on the maintainer rulings below)
+- [x] `g13-b003` — maintainer crate-placement ruling and executable g13.002
+  handoff (rulings recorded in
+  [batch card 003](batch-cards/003-crate-placement-ruling-and-schema-handoff.md))
 
 Parallel research batch `g13-b005` is merged (`2f8dc5db`); its 129-requirement
 corpus is the acceptance input for the `g13.002` schema card. Prior-art batch
@@ -53,8 +54,8 @@ Crate/package placement for `poodle-ir` and `poodle-codegen` remains **unruled**
 - [x] Every pilot fixture has a stable identifier and owning contract.
       (32 `FIX-*` fixtures in
       [pilot-baseline-manifest.md](pilot-baseline-manifest.md))
-- [ ] Unknown authority or runtime behavior becomes a named decision, not an
-  inferred compiler feature. (named below; ruled by `g13-b003`)
+- [x] Unknown authority or runtime behavior becomes a named decision, not an
+  inferred compiler feature. (all ruled in `g13-b003` R3/R5)
 - [x] `effigy docs:check` is green before schema implementation begins.
       (exit 0 on merged `main`, 2026-08-11)
 
@@ -63,15 +64,16 @@ Crate/package placement for `poodle-ir` and `poodle-codegen` remains **unruled**
 Named by the merged batches, deliberately unresolved. None may be settled
 implicitly by a fixture or an IR representation.
 
-- `UNKNOWN-01` — does `range-slider.md` §6's "`aria-orientation` NOT set"
-  extend to the embedded variant's `role="slider"` stops? Svelte and React emit
-  it there; the contract is silent. Maintainer decision, `g13-b003`.
-- `UNKNOWN-02` — are `ButtonVariant::Danger` and `ButtonTone::Success`
-  in-scope vocabulary, or do they need a `button.md` §3 contract change under
-  `IR-09`? Maintainer decision, `g13-b003`.
-- Jetstream `component_registry.rs` declares generator derivation from the
-  Svelte registry but no generator exists. Candidate codegen target,
-  `g13-b003`.
+- ~~`UNKNOWN-01`~~ — **RULED** (`g13-b003` R5): the rule predated the embedded
+  variant. `aria-orientation` is now required on the embedded `role="slider"`
+  stops. Implemented in `range-slider.md` §6.
+- ~~`UNKNOWN-02`~~ — **RULED** (`g13-b003` R5): not a Rust superset.
+  `ButtonTone` is shared across the button family and the contracts' union is
+  exactly the four members. One canonical definition now lives in
+  `docs/contracts/004-shared-control-types.md`; all four tones ship in all
+  three components.
+- ~~Jetstream `component_registry.rs`~~ — **RULED** (`g13-b003` R3): the
+  pilot's first real codegen target.
 - Evidence gaps `GAP-01`–`GAP-07` (missing range/text conformance vectors, no
   executed native AT traces, native vertical RangeSlider, GPUI per-thumb focus,
   Jetstream TextInput typing events, contract-silent Button density values,

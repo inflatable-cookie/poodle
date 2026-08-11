@@ -1,6 +1,6 @@
 # g13.002 Rust IR Schema And Validation Core
 
-Status: planned
+Status: in progress (first card `011` dispatched 2026-08-11)
 Owner: Poodle core
 Depends on: `g13.001`
 
@@ -8,6 +8,22 @@ Depends on: `g13.001`
 
 Create the versioned Rust model for component and scene definitions without
 adding renderer or framework behavior.
+
+## Fixed Inputs (from `g13-b003`)
+
+- Crate: `packages/contracts/ir/`, name `poodle-ir`, **lib only**.
+- Dependencies: `poodle-tokens` only. Nothing may depend on `poodle-ir` yet.
+- Requirements source: `docs/roadmaps/g13/pilot-expressiveness-corpus.md`
+  (129 requirements).
+- Before-state: `docs/roadmaps/g13/pilot-baseline-manifest.md`.
+
+Two requirements discovered after spec 063 was written (`g13-b003` R6):
+
+1. **Shared types are first-class.** `ButtonTone` and `OverlayPlacement` each
+   fragmented across three contracts, and 8 enumerated shared types have no
+   definition anywhere in `docs/`.
+2. **Per-component permitted subsets** of a shared type must be expressible and
+   must reach the generated artifacts.
 
 ## Deliverables
 

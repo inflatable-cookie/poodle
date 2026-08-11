@@ -98,6 +98,29 @@ Each component definition carries stable identifiers for:
 - size, density, orientation, direction, and contrast axes
 - renderer-neutral render nodes and conditional/repeated composition
 - contract and specimen references
+- **references to shared types, and the subset of a shared type this component
+  permits** (added 2026-08-11, see below)
+
+### Shared types and permitted subsets
+
+Added from `g13.001` evidence, after this spec was first written.
+
+A named enumerated type used by more than one component is defined **once** and
+referenced. Per-component prop lists are not sufficient: `ButtonTone` fragmented
+across three contracts into three disagreeing unions, `OverlayPlacement`
+fragmented the same way across three more, and `g13-b007` found 8 further
+enumerated shared types with no definition anywhere in `docs/`.
+
+A component may permit a **subset** of a shared type's members, and that
+constraint is first-class in the IR and must survive into every generated
+artifact. The motivating case is exact: `ButtonSpec` accepted
+`ButtonTone::Success` while `button.md` permitted only three tones, and the
+inverse held for IconButton — a value that type-checked, resolved correctly in
+the Rust renderer, and silently rendered as default on the web.
+
+This is the most direct evidence the pilot has that one source prevents real
+drift, and the schema is required to express it. The docs-side counterpart is
+`docs/contracts/004-shared-control-types.md`.
 
 The component IR is above `poodle-node`. `poodle-node` remains resolved native
 output. It is not the universal authoring model: web lowering must retain DOM
