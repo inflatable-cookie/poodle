@@ -1,6 +1,6 @@
 # 004 Rust IR Prior-art And Failure Audit
 
-Status: ready
+Status: dispatched
 Milestone: `g13.002` research precursor
 Owner: Poodle core
 Branch: `thread/g13-rust-ir-prior-art`

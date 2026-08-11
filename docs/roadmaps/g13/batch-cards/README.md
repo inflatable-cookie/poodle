@@ -13,8 +13,8 @@ and roadmap closeout.
 | `001` | authority inventory and inherited docs-baseline repair | none | dispatched |
 | `002` | pilot fixture freeze and quantitative baseline | `001` merged | planned |
 | `003` | crate placement ruling and g13.002 handoff | `001`–`002` merged | planned |
-| `004` | Rust IR prior-art and failure-mode research | none | ready |
-| `005` | pilot contract expressiveness corpus | none | ready |
+| `004` | Rust IR prior-art and failure-mode research | none | dispatched |
+| `005` | pilot contract expressiveness corpus | none | dispatched |
 
 Only `001` is worker-ready. Later cards remain planning placeholders until the
 preceding evidence is reviewed.
