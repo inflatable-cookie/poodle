@@ -291,6 +291,12 @@
 
   .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] {
     background: var(--poodle-recipe-tabs-card-selected-tab-fill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent));
+  }
+
+  /* Colour stays targeted at the tab and close: `.poodle-tabs__tab` sets an
+     explicit `color`, so it does not inherit from the chip. */
+  .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab,
+  .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__close {
     color: var(--poodle-recipe-tabs-card-selected-tab-text, var(--poodle-color-text-primary));
   }
 
@@ -425,6 +431,10 @@
 
   .poodle-tabs[data-variant="pill"] .poodle-tabs__item[data-selected="true"] {
     background: var(--poodle-recipe-tabs-pill-selected-tab-fill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent));
+  }
+
+  .poodle-tabs[data-variant="pill"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab,
+  .poodle-tabs[data-variant="pill"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__close {
     color: var(--poodle-recipe-tabs-pill-selected-tab-text, var(--poodle-color-text-primary));
   }
 
@@ -454,6 +464,10 @@
      the filled tab keeps legible contrast against every accent. */
   .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"] {
     background: var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-color-accent-base));
+  }
+
+  .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab,
+  .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__close {
     color: var(--poodle-recipe-tabs-active-solid-text, var(--poodle-color-text-inverse));
   }
 

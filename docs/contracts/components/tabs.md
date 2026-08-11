@@ -475,6 +475,21 @@ exactly the outline the old variant drew by default.
 | `line-height` | `1` |
 | `white-space` | `nowrap` |
 
+### Selection surface: which element carries what
+
+One rule, applied by every variant and both opt-in switches:
+
+- **Item** carries the *chip* — `border-radius`, `background`, and the
+  `activeOutline` border. The item wraps the tab button and the close button,
+  so a fill placed here encloses the close affordance. Placing it on the tab
+  would leave close outside the selection, and the tab is a `<button>` that
+  cannot contain another button.
+- **Tab and Close** carry the *foreground* — `color`. `.poodle-tabs__tab` sets
+  an explicit `color`, so it does **not** inherit from the item; a colour set
+  on the chip never reaches the label. Selected-text rules therefore target
+  `.poodle-tabs__tab` and `.poodle-tabs__close` directly, which also keeps the
+  close glyph legible on a solid fill.
+
 ### Item — Card variant (chip)
 
 | Property | Value |
@@ -486,6 +501,11 @@ exactly the outline the old variant drew by default.
 | Property | Value |
 |----------|-------|
 | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)` |
+
+### Tab and Close — Card variant (selected)
+
+| Property | Value |
+|----------|-------|
 | `color` | `var(--poodle-color-text-primary)` |
 
 ### Item — Card variant (activeFill="solid", selected)
@@ -493,6 +513,11 @@ exactly the outline the old variant drew by default.
 | Property | Value |
 |----------|-------|
 | `background` | `var(--poodle-color-accent-base)` |
+
+### Tab and Close — activeFill="solid", selected
+
+| Property | Value |
+|----------|-------|
 | `color` | `var(--poodle-color-text-inverse)` |
 
 The solid fill applies to the selected tab on any variant; the foreground
