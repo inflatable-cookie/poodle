@@ -7,6 +7,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — Components that render inside a `Popover` can set a width that
+  fights the surface's. `HistoryCenter` set `width: clamp(20rem, 34vw, 26rem)`
+  while passing the surface `surfaceMaxWidth: min(26rem, ...)`, so content could
+  reach the surface's own maximum and then the surface's horizontal padding
+  pushed it past the rounded edge. `MessageCenter` has the same shape
+  (`clamp(22rem, 36vw, 28rem)` inside a 30rem surface) and only escapes because
+  its numbers happen to leave room for the padding — a token change to
+  `space-panel-x` would break it. Consider a rule that a popover-hosted root
+  never sets its own width, or a check for it.
+
 - 2026-08-11 — The 85-icon default icon set has no undo, redo, history, or
   pin glyphs (no `corner-up-left`, `rotate-ccw`, `pin`, …), so the new
   `HistoryCenter` titlebar cluster falls back to `arrow-left` / `list` /
