@@ -38,6 +38,16 @@
       </div>
 
       <div class="poodle-specimen__row">
+        <Eyebrow>Success</Eyebrow>
+        <SplitButton tone="success" items={[{ value: "publish-now", label: "Publish now" }, { value: "schedule-publish", label: "Schedule" }]} onClick={() => (lastAction = "Publish")} onAction={(value) => (lastAction = value)}>Publish</SplitButton>
+      </div>
+
+      <div class="poodle-specimen__row">
+        <Eyebrow>Warning</Eyebrow>
+        <SplitButton tone="warning" items={[{ value: "archive-selected", label: "Archive selected" }, { value: "archive-all", label: "Archive all" }]} onClick={() => (lastAction = "Archive")} onAction={(value) => (lastAction = value)}>Archive</SplitButton>
+      </div>
+
+      <div class="poodle-specimen__row">
         <Eyebrow>Loading</Eyebrow>
         <SplitButton variant="primary" items={saveItems} loading>Saving…</SplitButton>
       </div>

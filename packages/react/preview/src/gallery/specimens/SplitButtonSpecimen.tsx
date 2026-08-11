@@ -63,6 +63,36 @@ export function SplitButtonSpecimen() {
           </div>
 
           <div className="poodle-specimen__row">
+            <Eyebrow>Success</Eyebrow>
+            <SplitButton
+              tone="success"
+              items={[
+                { value: "publish-now", label: "Publish now" },
+                { value: "schedule-publish", label: "Schedule" },
+              ]}
+              onClick={() => setLastAction("Publish")}
+              onAction={(value) => setLastAction(value)}
+            >
+              Publish
+            </SplitButton>
+          </div>
+
+          <div className="poodle-specimen__row">
+            <Eyebrow>Warning</Eyebrow>
+            <SplitButton
+              tone="warning"
+              items={[
+                { value: "archive-selected", label: "Archive selected" },
+                { value: "archive-all", label: "Archive all" },
+              ]}
+              onClick={() => setLastAction("Archive")}
+              onAction={(value) => setLastAction(value)}
+            >
+              Archive
+            </SplitButton>
+          </div>
+
+          <div className="poodle-specimen__row">
             <Eyebrow>Loading</Eyebrow>
             <SplitButton variant="primary" items={saveItems} loading>
               Saving…
