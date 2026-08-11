@@ -9,6 +9,10 @@
     --poodle-app-header-padding-inline: var(--poodle-space-panel-x);
     --poodle-app-header-title-size: 0.9375rem;
     --poodle-app-header-subtitle-size: 0.75rem;
+    /* Collapse guard for the symmetric side columns when a centre region is
+       present (g13-b017). Defaults to 0; a consumer can raise it (soundcheck
+       uses 9rem) without hard-coding the grid. */
+    --poodle-app-header-side-min: 0;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
     gap: var(--poodle-app-header-gap);
@@ -20,12 +24,34 @@
     overflow: visible;
   }
 
+  /* Centre region present (g13-b017): the layout switch is presence itself —
+     no layout prop. Both side columns share the free space symmetrically with
+     an optional collapse floor, actions/utility share the trailing column. */
+  .poodle-app-header[data-center] {
+    grid-template-columns:
+      minmax(var(--poodle-app-header-side-min, 0), 1fr)
+      auto
+      minmax(var(--poodle-app-header-side-min, 0), 1fr);
+  }
+
   .poodle-app-header__identity,
+  .poodle-app-header__center,
   .poodle-app-header__actions,
   .poodle-app-header__utility {
     display: flex;
     align-items: center;
     gap: var(--poodle-app-header-region-gap);
+    min-width: 0;
+  }
+
+  /* The trailing column group (only emitted when a centre region is present):
+     actions and utility share the third grid column, justified to the end
+     exactly as they were as separate columns. */
+  .poodle-app-header__trailing {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--poodle-app-header-gap);
     min-width: 0;
   }
 
@@ -102,6 +128,12 @@
   @media (max-width: 45rem) {
     .poodle-app-header {
       grid-template-columns: 1fr;
+    }
+
+    /* A centred header reflows rather than stacks: one row, the centre
+       absorbing the free space and no longer strictly centred. */
+    .poodle-app-header[data-center] {
+      grid-template-columns: auto minmax(0, 1fr) auto;
     }
 
     .poodle-app-header__utility {

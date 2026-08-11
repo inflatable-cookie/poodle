@@ -1,8 +1,16 @@
 import type { CSSProperties } from "react";
-import { AppHeader, Button, IconButton, Menubar } from "@inflatable-cookie/poodle-react";
-import type { MenubarItem } from "@inflatable-cookie/poodle-react";
+import { AppHeader, Button, IconButton, Menubar, Tabs } from "@inflatable-cookie/poodle-react";
+import type { MenubarItem, TabsItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
+
+// Destination tabs in the centre region (mirrors soundcheck's centred
+// header: symmetric side columns keep the middle truly centred).
+const centerTabs: TabsItem[] = [
+  { value: "editor", label: "Editor", icon: "code" },
+  { value: "preview", label: "Preview", icon: "eye" },
+  { value: "terminal", label: "Terminal", icon: "terminal" },
+];
 
 const menuItems: MenubarItem[] = [
   {
@@ -93,6 +101,12 @@ const variantLabelStyle: CSSProperties = {
   textTransform: "uppercase",
 };
 
+// Narrow-width posture: a ≤45rem frame shows the centred header reflowed
+// to one row (the reflow itself is viewport-driven, see the contract).
+const narrowFrameStyle: CSSProperties = {
+  width: "min(40rem, 100%)",
+};
+
 const actionButtons = (
   <>
     <Button sizeRole="chrome" variant="ghost">New</Button>
@@ -166,6 +180,44 @@ export function AppHeaderSpecimen() {
               </>
             }
           />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Centred header (destination tabs in the centre)" bare>
+          <AppHeader
+            title="My Application"
+            center={
+              <Tabs
+                items={centerTabs}
+                variant="strip"
+                activeOutline
+                defaultValue="editor"
+                size="sm"
+                ariaLabel="Destinations"
+              />
+            }
+            actions={actionButtons}
+            utility={settingsUtility}
+          />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Centred header at narrow width (≤45rem viewport)" bare>
+          <div style={narrowFrameStyle}>
+            <AppHeader
+              title="My Application"
+              center={
+                <Tabs
+                  items={centerTabs}
+                  variant="strip"
+                  activeOutline
+                  defaultValue="editor"
+                  size="sm"
+                  ariaLabel="Destinations"
+                />
+              }
+              actions={actionButtons}
+              utility={settingsUtility}
+            />
+          </div>
         </SpecimenGroup>
       </div>
     </SpecimenLayout>

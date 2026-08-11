@@ -9,21 +9,48 @@
 //!   - Actions region (optional global-actions slot)
 //!   - Utility region (optional trailing utility slot, right-aligned)
 //!
-//! The contract `grid minmax(0,1fr) auto auto` is emulated with flex —
-//! identity grows (`Grow` + min-width 0 for truncation), actions/utility hold
-//! intrinsic width (shrink 0), utility justifies to the end.
+//! An optional centre region (`center` node) is the presence-driven layout
+//! switch (contract §8, g13-b017): when present, the contract grid becomes
+//! the symmetric `minmax(0,1fr) auto minmax(0,1fr)` and actions/utility
+//! share a trailing Grow column, justified to the end. Without it the
+//! default `minmax(0,1fr) auto auto` emulation applies unchanged.
+//!
+//! The contract grid is emulated with flex — identity grows (`Grow` +
+//! min-width 0 for truncation), actions/utility hold intrinsic width
+//! (shrink 0), utility justifies to the end.
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::AppHeaderSpec;
 
 use crate::color::with_alpha;
 use crate::presentation::rem_to_px;
 
+/// A region container: row, centered cross-axis, region gap, never shrinking
+/// below natural size. `justify_end` packs the region's items to the end
+/// (the utility posture; the trailing column group uses its own gap).
+fn region_container(region_gap: f32, justify_end: bool) -> Node {
+    let mut region = Node::container();
+    {
+        let s = &mut region.style;
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.descriptor.layout.alignment.main = if justify_end {
+            MainAxisAlignment::End
+        } else {
+            MainAxisAlignment::Start
+        };
+        s.descriptor.layout.spacing.gap = region_gap;
+        s.flex_shrink_zero = true;
+    }
+    region
+}
+
 pub fn app_header(
     spec: &AppHeaderSpec,
     theme: &dyn ThemeProvider,
     identity: Option<Node>,
+    center: Option<Node>,
     actions: Option<Node>,
     utility: Option<Node>,
 ) -> Node {
@@ -117,31 +144,54 @@ pub fn app_header(
     }
     let mut header = header.child(identity_region);
 
-    // ── Actions region (grid column 2: auto) ─────────────────────
-    if let Some(actions) = actions {
-        let mut region = Node::container();
-        {
-            let s = &mut region.style;
-            s.descriptor.layout.direction = LayoutDirection::Row;
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.descriptor.layout.spacing.gap = region_gap;
-            s.flex_shrink_zero = true;
-        }
-        header = header.child(region.child(actions));
+    // Presence is captured before the node is consumed by its region block.
+    let centered = center.is_some();
+
+    // ── Center region (grid column 2: auto) ─────────────────────
+    if let Some(center) = center {
+        let region = region_container(region_gap, false);
+        header = header.child(region.child(center));
     }
 
-    // ── Utility region (grid column 3: auto, justify-end) ────────
-    if let Some(utility) = utility {
-        let mut region = Node::container();
+    // ── Trailing column ─────────────────────────────────────────
+    // With a centre region, actions + utility share the third column
+    // (`minmax(0, 1fr)` — symmetric with identity, which is what keeps the
+    // centre truly centred). They are grouped in one Grow container that
+    // justifies to the end; without a centre region each stays a direct
+    // grid child exactly as before.
+    if centered {
+        let mut trailing = Node::container();
         {
-            let s = &mut region.style;
+            let s = &mut trailing.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.descriptor.layout.alignment.main = MainAxisAlignment::End;
-            s.descriptor.layout.spacing.gap = region_gap;
-            s.flex_shrink_zero = true;
+            s.descriptor.layout.spacing.gap = grid_gap;
+            s.descriptor.layout.width = LayoutSizing::Grow;
+            s.min_width = Some(0.0);
         }
-        header = header.child(region.child(utility));
+        let mut trailing = trailing;
+        if let Some(actions) = actions {
+            let region = region_container(region_gap, false);
+            trailing = trailing.child(region.child(actions));
+        }
+        if let Some(utility) = utility {
+            let region = region_container(region_gap, true);
+            trailing = trailing.child(region.child(utility));
+        }
+        header = header.child(trailing);
+    } else {
+        // ── Actions region (grid column 2: auto) ────────────────
+        if let Some(actions) = actions {
+            let region = region_container(region_gap, false);
+            header = header.child(region.child(actions));
+        }
+
+        // ── Utility region (grid column 3: auto, justify-end) ───
+        if let Some(utility) = utility {
+            let region = region_container(region_gap, true);
+            header = header.child(region.child(utility));
+        }
     }
 
     // Contract: `aria-label` falls back to `title`.
@@ -151,4 +201,143 @@ pub fn app_header(
         }
     }
     header
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_node::NodeKind;
+    use poodle_specs::ControlSize;
+
+    /// The real token resolver over the ECLIPSE theme. Pure — no backend.
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn header(
+        center: bool,
+        actions: bool,
+        utility: bool,
+    ) -> Node {
+        app_header(
+            &AppHeaderSpec::new()
+                .with_title("Finch")
+                .with_center(center),
+            &theme(),
+            None,
+            center.then(|| Node::text("centre")),
+            actions.then(|| Node::text("action")),
+            utility.then(|| Node::text("utility")),
+        )
+    }
+
+    #[test]
+    fn default_layout_keeps_actions_and_utility_as_flat_region_children() {
+        // Ruling 3: without a centre region the trailing actions/utility stay
+        // direct grid children — no wrapper, no layout change. The third child
+        // is the utility region itself (Fit, justify-end), not a Grow group.
+        let node = header(false, true, true);
+        assert_eq!(node.children.len(), 3, "identity + actions + utility");
+        let utility_region = &node.children[2];
+        assert!(
+            !matches!(
+                utility_region.style.descriptor.layout.width,
+                LayoutSizing::Grow
+            ),
+            "utility region must not grow without a centre region"
+        );
+        assert_eq!(
+            utility_region.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::End
+        );
+        assert_eq!(
+            utility_region.style.descriptor.layout.spacing.gap,
+            rem_to_px(AppHeaderSpec::new().region_gap_rem())
+        );
+        assert_eq!(utility_region.children.len(), 1);
+        assert!(matches!(
+            &utility_region.children[0].kind,
+            NodeKind::Text { content } if content == "utility"
+        ));
+
+        // No centre region anywhere in the tree.
+        assert!(!node.texts().iter().any(|t| *t == "centre"));
+    }
+
+    #[test]
+    fn centered_layout_groups_actions_and_utility_into_a_trailing_column() {
+        // Ruling 2: with a centre region the grid is symmetric — identity and
+        // the trailing column both grow, so the centre stays centred; actions
+        // and utility share the trailing column, justified to the end.
+        let node = header(true, true, true);
+        assert_eq!(node.children.len(), 3, "identity + centre + trailing");
+
+        // Centre region sits between identity and the trailing column.
+        assert!(matches!(
+            &node.children[1].children[0].kind,
+            NodeKind::Text { content } if content == "centre"
+        ));
+
+        let trailing = &node.children[2];
+        assert!(
+            matches!(
+                trailing.style.descriptor.layout.width,
+                LayoutSizing::Grow
+            ),
+            "trailing column must grow symmetrically with identity"
+        );
+        assert_eq!(
+            trailing.style.descriptor.layout.alignment.main,
+            MainAxisAlignment::End,
+            "trailing group justifies to the end"
+        );
+        // The inter-region gap is preserved inside the group.
+        assert_eq!(
+            trailing.style.descriptor.layout.spacing.gap,
+            rem_to_px(AppHeaderSpec::new().gap_rem())
+        );
+        assert_eq!(trailing.children.len(), 2, "actions + utility inside");
+        assert!(matches!(
+            &trailing.children[0].children[0].kind,
+            NodeKind::Text { content } if content == "action"
+        ));
+        assert!(matches!(
+            &trailing.children[1].children[0].kind,
+            NodeKind::Text { content } if content == "utility"
+        ));
+    }
+
+    #[test]
+    fn centered_layout_without_actions_or_utility_still_emits_the_trailing_column() {
+        // The trailing column exists whenever the centre region is present so
+        // the symmetric grow split (and therefore the centring) holds even with
+        // an empty trailing side.
+        let node = header(true, false, false);
+        assert_eq!(node.children.len(), 3);
+        assert!(node.children[2].children.is_empty());
+        assert!(matches!(
+            node.children[2].style.descriptor.layout.width,
+            LayoutSizing::Grow
+        ));
+    }
+
+    #[test]
+    fn size_resolution_and_label_are_unchanged_by_the_centre_region() {
+        // The centre region must not disturb the size/density ladders or the
+        // aria-label fallback (ruling 3: no pixel shift without a centre).
+        let spec = AppHeaderSpec::new()
+            .with_title("Finch")
+            .with_size(ControlSize::Lg)
+            .with_center(true);
+        let node = app_header(
+            &spec,
+            &theme(),
+            None,
+            Some(Node::text("centre")),
+            None,
+            None,
+        );
+        assert_eq!(node.style.min_height, Some(rem_to_px(spec.min_height_rem())));
+        assert_eq!(node.a11y.label.as_deref(), Some("Finch"));
+    }
 }

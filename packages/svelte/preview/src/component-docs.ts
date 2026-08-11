@@ -4797,6 +4797,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     slots: [
       { name: "identity", description: "Custom content snippet for the identity/logo area." },
+      { name: "center", description: "Optional centre region. Its presence switches the grid to the symmetric side-column layout and groups actions + utility into the trailing column." },
       { name: "actions", description: "Primary action button snippet for the header." },
       { name: "utility", description: "Utility control snippet (for example user menu or settings)." },
     ],

@@ -18,6 +18,11 @@ pub struct AppHeaderSpec {
     /// Explicit density override for shell spacing (contract §3 `density`).
     /// `None` resolves to `Default`.
     pub density: Option<ControlDensity>,
+    /// Presence of the optional centre region (contract §3/§4 `center`).
+    /// Presence is the signal: it switches the grid to the symmetric
+    /// side-column layout and groups actions + utility into the trailing
+    /// column. The rendered content arrives as the renderer's `center` node.
+    pub center: bool,
     pub primary_action_count: usize,
     pub utility_item_count: usize,
 }
@@ -32,6 +37,7 @@ impl Default for AppHeaderSpec {
             size: None,
             size_role: SemanticControlSizeRole::Control,
             density: None,
+            center: false,
             primary_action_count: 0,
             utility_item_count: 0,
         }
@@ -75,6 +81,14 @@ impl AppHeaderSpec {
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = Some(density);
+        self
+    }
+
+    /// Declare the optional centre region present (contract `center`). The
+    /// renderer still keys the layout switch off the actual `center` node
+    /// being passed, mirroring the web snippet's presence semantics.
+    pub fn with_center(mut self, center: bool) -> Self {
+        self.center = center;
         self
     }
 
