@@ -117,8 +117,10 @@ Unipolar fill starts at zero clamped to the nearest range edge. This makes
 positive-only ranges grow from the minimum and negative-only ranges grow from
 the maximum. Bipolar fill starts at the resolved
 `centerValue` and expands toward the current value. VisualState publishes
-`valueNorm`, `centerNorm`, `fillStartNorm`, and `fillSpanNorm`, so renderers do
-not infer polarity or center geometry.
+`valueNorm`, `centerNorm`, `fillStartNorm`, `fillSpanNorm`, and `fillTone`, so
+renderers do not infer polarity, center geometry, or semantic color. A bipolar
+value below center publishes `fillTone="negative"`; its default recipe uses the
+negative status color. All other values publish `fillTone="positive"`.
 
 ## 5. Callbacks
 
@@ -192,6 +194,7 @@ not infer polarity or center geometry.
 
 - `--poodle-recipe-slider-track-fill`
 - `--poodle-recipe-slider-fill-fill`
+- `--poodle-recipe-slider-fill-negative`
 - `--poodle-recipe-slider-track-border`
 - `--poodle-recipe-slider-center-fill`
 - `--poodle-recipe-slider-control-fill`
@@ -255,6 +258,12 @@ not infer polarity or center geometry.
 | `height` | `100%` |
 | `border-radius` | `inherit` |
 | `background` | `var(--poodle-color-accent-base)` |
+
+### Negative bipolar fill `[data-polarity="bipolar"][data-fill-tone="negative"] .slider__fill`
+
+| Property | Value |
+|----------|-------|
+| `background` | `var(--poodle-recipe-slider-fill-negative, var(--poodle-color-status-danger))` |
 
 ### Fill vertical `[data-orientation="vertical"] .slider__fill`
 

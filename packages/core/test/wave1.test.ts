@@ -120,7 +120,7 @@ describe("slider", () => {
     expect(result.context.value).toBe(-0.5);
     expect(result.effects).toEqual([{ type: "emitValueChange", value: -0.5 }]);
     control = result.context;
-    expect(sliderVisualState(control)).toMatchObject({ centerNorm: 0.5, fillStartNorm: 0.25, fillSpanNorm: 0.25, pointerActive: true });
+    expect(sliderVisualState(control)).toMatchObject({ centerNorm: 0.5, fillStartNorm: 0.25, fillSpanNorm: 0.25, fillTone: "negative", pointerActive: true });
     result = sliderControlTransition(control, { type: "POINTER_END" });
     expect(result.effects).toEqual([{ type: "emitValueCommit", value: -0.5 }]);
 
@@ -153,6 +153,12 @@ describe("rangeSlider", () => {
 
   test("embedded pointer keeps the selected thumb and exposes the bipolar center", () => {
     let control = createRangeSliderControlContext({ value: [-0.5, 0.5], min: -1, max: 1, step: 0, polarity: "bipolar" });
+    expect(rangeSliderVisualState(control)).toMatchObject({
+      negativeFillStartNorm: 0.25,
+      negativeFillSpanNorm: 0.25,
+      positiveFillStartNorm: 0.5,
+      positiveFillSpanNorm: 0.25,
+    });
     let result = rangeSliderControlTransition(control, { type: "POINTER_BEGIN", valueNorm: 0.1 });
     expect(result.context.activeThumb).toBe("lower");
     control = result.context;

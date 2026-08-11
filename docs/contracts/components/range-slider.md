@@ -129,12 +129,14 @@ interaction.
 normalized pointer coordinates; the core selects the nearer thumb on begin,
 holds that thumb for the gesture, maps through the declared law, prevents
 crossing, and emits the change/commit split. `RangeSliderVisualState` publishes
-both normalized thumb positions, the center reference, and the selected fill
-window.
+both normalized thumb positions, the center reference, and separate negative
+and positive selected-fill segments.
 
 Unipolar and bipolar variants both preserve RangeSlider's low-to-high selected
-window. Bipolar adds the explicit center reference; it does not reinterpret the
-pair as two unrelated scalar values.
+window. Bipolar splits that window at the explicit center reference: the
+negative segment uses the negative status color and the positive segment uses
+the accent color. It does not reinterpret the pair as two unrelated scalar
+values. Unipolar publishes an empty negative segment and one positive segment.
 
 ## 5. Callbacks
 
@@ -211,6 +213,7 @@ pair as two unrelated scalar values.
 
 - `--poodle-recipe-range-slider-track-fill`
 - `--poodle-recipe-range-slider-fill-fill`
+- `--poodle-recipe-range-slider-fill-negative`
 - `--poodle-recipe-range-slider-track-border`
 - `--poodle-recipe-range-slider-center-fill`
 - `--poodle-recipe-range-slider-control-fill`
@@ -266,25 +269,30 @@ pair as two unrelated scalar values.
 | `height` | `100%` |
 | `transform` | `translateX(-50%)` |
 
-### Fill `.range-slider__fill`
+### Fill segments `.range-slider__fill`
 
 | Property | Value |
 |----------|-------|
 | `position` | `absolute` |
-| `left` | `var(--poodle-range-start)` |
-| `width` | `calc(var(--poodle-range-end) - var(--poodle-range-start))` |
 | `height` | `100%` |
 | `border-radius` | `inherit` |
-| `background` | `var(--poodle-color-accent-base)` |
+| positive `left` | `var(--poodle-range-positive-start)` |
+| positive `width` | `var(--poodle-range-positive-span)` |
+| positive `background` | `var(--poodle-color-accent-base)` |
+| negative `left` | `var(--poodle-range-negative-start)` |
+| negative `width` | `var(--poodle-range-negative-span)` |
+| negative `background` | `var(--poodle-recipe-range-slider-fill-negative, var(--poodle-color-status-danger))` |
 
 ### Fill vertical `[data-orientation="vertical"] .range-slider__fill`
 
 | Property | Value |
 |----------|-------|
 | `left` | `0` |
-| `bottom` | `var(--poodle-range-start)` |
 | `width` | `100%` |
-| `height` | `calc(var(--poodle-range-end) - var(--poodle-range-start))` |
+| positive `bottom` | `var(--poodle-range-positive-start)` |
+| positive `height` | `var(--poodle-range-positive-span)` |
+| negative `bottom` | `var(--poodle-range-negative-start)` |
+| negative `height` | `var(--poodle-range-negative-span)` |
 
 ### Control `.range-slider__control`
 

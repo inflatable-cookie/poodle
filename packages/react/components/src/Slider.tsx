@@ -129,7 +129,8 @@ export function Slider({
       data-size={resolvedSize}
       data-density={resolvedDensity}
       data-variant={variant}
-      data-polarity={polarity}
+      data-polarity={visualState.polarity}
+      data-fill-tone={visualState.fillTone}
       data-state={visualState.pointerActive ? "active" : "idle"}
       role={variant === "embedded" ? "slider" : undefined}
       tabIndex={variant === "embedded" && !disabled ? 0 : undefined}

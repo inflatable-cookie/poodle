@@ -78,6 +78,10 @@
     `--poodle-range-start: ${lowerPercent}%`,
     `--poodle-range-end: ${upperPercent}%`,
     `--poodle-range-center: ${visualState.centerNorm * 100}%`,
+    `--poodle-range-negative-start: ${visualState.negativeFillStartNorm * 100}%`,
+    `--poodle-range-negative-span: ${visualState.negativeFillSpanNorm * 100}%`,
+    `--poodle-range-positive-start: ${visualState.positiveFillStartNorm * 100}%`,
+    `--poodle-range-positive-span: ${visualState.positiveFillSpanNorm * 100}%`,
   ]));
 
   function send(type: "INPUT" | "COMMIT", thumb: "lower" | "upper", event: Event): void {
@@ -131,10 +135,11 @@
   }
 </script>
 
-<div bind:this={root} class="poodle-range-slider" role="group" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-polarity={polarity} data-state={visualState.pointerActive ? "active" : "idle"} style={rangeStyle} data-size={resolvedSize} data-density={resolvedDensity}
+<div bind:this={root} class="poodle-range-slider" role="group" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-polarity={visualState.polarity} data-state={visualState.pointerActive ? "active" : "idle"} style={rangeStyle} data-size={resolvedSize} data-density={resolvedDensity}
   onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd}>
   <span class="poodle-range-slider__track" aria-hidden="true">
-    <span class="poodle-range-slider__fill"></span>
+    <span class="poodle-range-slider__fill poodle-range-slider__fill--negative"></span>
+    <span class="poodle-range-slider__fill poodle-range-slider__fill--positive"></span>
     <span class="poodle-range-slider__center"></span>
   </span>
 

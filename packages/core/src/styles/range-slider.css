@@ -40,11 +40,20 @@
 
   .poodle-range-slider__fill {
     position: absolute;
-    left: var(--poodle-range-start);
-    width: calc(var(--poodle-range-end) - var(--poodle-range-start));
     height: 100%;
     border-radius: inherit;
     background: var(--poodle-recipe-range-slider-fill-fill, var(--poodle-color-accent-base));
+  }
+
+  .poodle-range-slider__fill--negative {
+    left: var(--poodle-range-negative-start);
+    width: var(--poodle-range-negative-span);
+    background: var(--poodle-recipe-range-slider-fill-negative, var(--poodle-color-status-danger));
+  }
+
+  .poodle-range-slider__fill--positive {
+    left: var(--poodle-range-positive-start);
+    width: var(--poodle-range-positive-span);
   }
 
   .poodle-range-slider__center { display: none; }
@@ -102,9 +111,17 @@
 
   .poodle-range-slider[data-orientation="vertical"] .poodle-range-slider__fill {
     left: 0;
-    bottom: var(--poodle-range-start);
     width: 100%;
-    height: calc(var(--poodle-range-end) - var(--poodle-range-start));
+  }
+
+  .poodle-range-slider[data-orientation="vertical"] .poodle-range-slider__fill--negative {
+    bottom: var(--poodle-range-negative-start);
+    height: var(--poodle-range-negative-span);
+  }
+
+  .poodle-range-slider[data-orientation="vertical"] .poodle-range-slider__fill--positive {
+    bottom: var(--poodle-range-positive-start);
+    height: var(--poodle-range-positive-span);
   }
 
   .poodle-range-slider__control {

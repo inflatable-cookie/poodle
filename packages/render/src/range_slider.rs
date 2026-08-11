@@ -56,6 +56,7 @@ pub fn range_slider(
     let border_w = rem_to_px(0.0625);
 
     let accent = theme.resolve_color(spec.range_fill_token());
+    let negative = theme.resolve_color("color.status.danger");
     let surface = theme.resolve_color("color.background.surface");
     let border_default = theme.resolve_color("color.border.default");
     let elevated = theme.resolve_color("color.background.elevated");
@@ -95,13 +96,16 @@ pub fn range_slider(
     };
 
     let seg_lo = segment(lo, None);
-    let mut seg_fill = segment((hi - lo).max(0.0), Some(accent));
+    let mut seg_negative = segment(visual.negative_fill_span_norm as f32, Some(negative));
+    let mut seg_positive = segment(visual.positive_fill_span_norm as f32, Some(accent));
     let seg_hi = segment((1.0 - hi).max(0.0), None);
-    let fill_corners = &mut seg_fill.style.descriptor.corner_radii;
-    fill_corners.top_left = pill;
-    fill_corners.top_right = pill;
-    fill_corners.bottom_right = pill;
-    fill_corners.bottom_left = pill;
+    for fill in [&mut seg_negative, &mut seg_positive] {
+        let fill_corners = &mut fill.style.descriptor.corner_radii;
+        fill_corners.top_left = pill;
+        fill_corners.top_right = pill;
+        fill_corners.bottom_right = pill;
+        fill_corners.bottom_left = pill;
+    }
 
     // Contract §8 thumb drop shadow (offset/blur contract-exact rem;
     // black@0.18 is the one noted literal).
@@ -295,7 +299,11 @@ pub fn range_slider(
         c.bottom_right = pill;
         c.bottom_left = pill;
     }
-    let mut track = track.child(seg_lo).child(seg_fill).child(seg_hi);
+    let mut track = track
+        .child(seg_lo)
+        .child(seg_negative)
+        .child(seg_positive)
+        .child(seg_hi);
     if spec.variant == SliderVariant::Standard {
         track = track.child(low_thumb_layer).child(high_thumb_layer);
     } else {

@@ -82,6 +82,10 @@ export function RangeSlider({
     "--poodle-range-start": `${lowerPercent}%`,
     "--poodle-range-end": `${upperPercent}%`,
     "--poodle-range-center": `${visualState.centerNorm * 100}%`,
+    "--poodle-range-negative-start": `${visualState.negativeFillStartNorm * 100}%`,
+    "--poodle-range-negative-span": `${visualState.negativeFillSpanNorm * 100}%`,
+    "--poodle-range-positive-start": `${visualState.positiveFillStartNorm * 100}%`,
+    "--poodle-range-positive-span": `${visualState.positiveFillSpanNorm * 100}%`,
   } as CSSProperties;
 
   function send(type: "INPUT" | "COMMIT", thumb: "lower" | "upper", event: FormEvent<HTMLInputElement>): void {
@@ -136,11 +140,12 @@ export function RangeSlider({
       style={rangeStyle}
       data-size={resolvedSize}
       data-density={resolvedDensity}
-      data-variant={variant} data-polarity={polarity} data-state={visualState.pointerActive ? "active" : "idle"}
+      data-variant={variant} data-polarity={visualState.polarity} data-state={visualState.pointerActive ? "active" : "idle"}
       onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd}
     >
       <span className="poodle-range-slider__track" aria-hidden="true">
-        <span className="poodle-range-slider__fill" />
+        <span className="poodle-range-slider__fill poodle-range-slider__fill--negative" />
+        <span className="poodle-range-slider__fill poodle-range-slider__fill--positive" />
         <span className="poodle-range-slider__center" />
       </span>
 

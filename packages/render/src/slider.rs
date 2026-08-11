@@ -53,6 +53,7 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
     let border_w = rem_to_px(0.0625);
 
     let accent = theme.resolve_color(spec.range_fill_token());
+    let negative = theme.resolve_color("color.status.danger");
     let surface = theme.resolve_color("color.background.surface");
     let border_default = theme.resolve_color("color.border.default");
     let elevated = theme.resolve_color("color.background.elevated");
@@ -277,7 +278,13 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
             fraction
         });
         s.descriptor.layout.height = LayoutSizing::Fixed(track_h);
-        s.descriptor.background = Some(accent);
+        s.descriptor.background = Some(
+            if visual.fill_tone == poodle_headless::slider::SliderFillTone::Negative {
+                negative
+            } else {
+                accent
+            },
+        );
         s.descriptor.corner_radii.top_left = pill;
         s.descriptor.corner_radii.top_right = pill;
         s.descriptor.corner_radii.bottom_right = pill;

@@ -192,9 +192,16 @@ pub struct SliderVisualState {
     pub center_norm: f64,
     pub fill_start_norm: f64,
     pub fill_span_norm: f64,
+    pub fill_tone: SliderFillTone,
     pub polarity: SliderPolarity,
     pub pointer_active: bool,
     pub enabled: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SliderFillTone {
+    Positive,
+    Negative,
 }
 
 fn slider_center_value(context: SliderControlContext) -> f64 {
@@ -253,6 +260,11 @@ pub fn slider_visual_state(context: SliderControlContext) -> SliderVisualState {
         center_norm,
         fill_start_norm: value_norm.min(center_norm),
         fill_span_norm: (value_norm - center_norm).abs(),
+        fill_tone: if context.polarity == SliderPolarity::Bipolar && value_norm < center_norm {
+            SliderFillTone::Negative
+        } else {
+            SliderFillTone::Positive
+        },
         polarity: context.polarity,
         pointer_active: context.pointer_active,
         enabled: !context.disabled,
@@ -357,6 +369,10 @@ pub struct RangeSliderVisualState {
     pub center_norm: f64,
     pub fill_start_norm: f64,
     pub fill_span_norm: f64,
+    pub negative_fill_start_norm: f64,
+    pub negative_fill_span_norm: f64,
+    pub positive_fill_start_norm: f64,
+    pub positive_fill_span_norm: f64,
     pub polarity: SliderPolarity,
     pub pointer_active: bool,
     pub active_thumb: Option<RangeThumb>,
@@ -390,6 +406,21 @@ pub fn range_slider_visual_state(context: RangeSliderControlContext) -> RangeSli
         max,
         context.law,
     );
+    let negative_fill_span_norm = if context.polarity == SliderPolarity::Bipolar {
+        (upper_norm.min(center_norm) - lower_norm).max(0.0)
+    } else {
+        0.0
+    };
+    let positive_fill_start_norm = if context.polarity == SliderPolarity::Bipolar {
+        lower_norm.max(center_norm)
+    } else {
+        lower_norm
+    };
+    let positive_fill_span_norm = if context.polarity == SliderPolarity::Bipolar {
+        (upper_norm - positive_fill_start_norm).max(0.0)
+    } else {
+        upper_norm - lower_norm
+    };
     RangeSliderVisualState {
         value,
         lower_norm,
@@ -397,6 +428,10 @@ pub fn range_slider_visual_state(context: RangeSliderControlContext) -> RangeSli
         center_norm,
         fill_start_norm: lower_norm,
         fill_span_norm: upper_norm - lower_norm,
+        negative_fill_start_norm: lower_norm,
+        negative_fill_span_norm,
+        positive_fill_start_norm,
+        positive_fill_span_norm,
         polarity: context.polarity,
         pointer_active: context.pointer_active,
         active_thumb: context.active_thumb,
@@ -513,6 +548,23 @@ mod control_tests {
         assert!((state.center_norm - 0.5).abs() < 1e-9);
         assert!((state.fill_start_norm - 0.25).abs() < 1e-9);
         assert!((state.fill_span_norm - 0.25).abs() < 1e-9);
+        assert_eq!(state.fill_tone, SliderFillTone::Negative);
+    }
+
+    #[test]
+    fn bipolar_range_splits_negative_and_positive_fill() {
+        let state = range_slider_visual_state(RangeSliderControlContext {
+            value: (-0.5, 0.5),
+            min: -1.0,
+            max: 1.0,
+            step: 0.01,
+            polarity: SliderPolarity::Bipolar,
+            ..RangeSliderControlContext::default()
+        });
+        assert!((state.negative_fill_start_norm - 0.25).abs() < 1e-9);
+        assert!((state.negative_fill_span_norm - 0.25).abs() < 1e-9);
+        assert!((state.positive_fill_start_norm - 0.5).abs() < 1e-9);
+        assert!((state.positive_fill_span_norm - 0.25).abs() < 1e-9);
     }
 
     #[test]

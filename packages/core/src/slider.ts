@@ -99,6 +99,7 @@ export interface SliderVisualState {
   centerNorm: number;
   fillStartNorm: number;
   fillSpanNorm: number;
+  fillTone: "positive" | "negative";
   polarity: SliderPolarity;
   pointerActive: boolean;
   enabled: boolean;
@@ -141,6 +142,7 @@ export function sliderVisualState(context: SliderControlContext): SliderVisualSt
     centerNorm,
     fillStartNorm: Math.min(valueNorm, centerNorm),
     fillSpanNorm: Math.abs(valueNorm - centerNorm),
+    fillTone: context.polarity === "bipolar" && valueNorm < centerNorm ? "negative" : "positive",
     polarity: context.polarity,
     pointerActive: context.pointerActive,
     enabled: !context.disabled,
@@ -251,6 +253,10 @@ export interface RangeSliderVisualState {
   centerNorm: number;
   fillStartNorm: number;
   fillSpanNorm: number;
+  negativeFillStartNorm: number;
+  negativeFillSpanNorm: number;
+  positiveFillStartNorm: number;
+  positiveFillSpanNorm: number;
   polarity: SliderPolarity;
   pointerActive: boolean;
   activeThumb: "lower" | "upper" | null;
@@ -284,6 +290,13 @@ export function rangeSliderVisualState(context: RangeSliderControlContext): Rang
   const lowerNorm = normalizeAudioValue(value[0], context.min, max, context.law);
   const upperNorm = normalizeAudioValue(value[1], context.min, max, context.law);
   const centerNorm = normalizeAudioValue(sliderCenterValue(context), context.min, max, context.law);
+  const negativeFillSpanNorm = context.polarity === "bipolar"
+    ? Math.max(0, Math.min(upperNorm, centerNorm) - lowerNorm)
+    : 0;
+  const positiveFillStartNorm = context.polarity === "bipolar" ? Math.max(lowerNorm, centerNorm) : lowerNorm;
+  const positiveFillSpanNorm = context.polarity === "bipolar"
+    ? Math.max(0, upperNorm - positiveFillStartNorm)
+    : upperNorm - lowerNorm;
   return {
     value,
     lowerNorm,
@@ -291,6 +304,10 @@ export function rangeSliderVisualState(context: RangeSliderControlContext): Rang
     centerNorm,
     fillStartNorm: lowerNorm,
     fillSpanNorm: upperNorm - lowerNorm,
+    negativeFillStartNorm: lowerNorm,
+    negativeFillSpanNorm,
+    positiveFillStartNorm,
+    positiveFillSpanNorm,
     polarity: context.polarity,
     pointerActive: context.pointerActive,
     activeThumb: context.activeThumb,

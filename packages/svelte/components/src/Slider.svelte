@@ -132,7 +132,7 @@
 
 <!-- The embedded branch supplies slider semantics; the standard branch delegates them to the native input. -->
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-<div bind:this={root} class="poodle-slider" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-polarity={polarity} data-state={visualState.pointerActive ? "active" : "idle"} style={sliderStyle} data-size={resolvedSize} data-density={resolvedDensity}
+<div bind:this={root} class="poodle-slider" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-polarity={visualState.polarity} data-fill-tone={visualState.fillTone} data-state={visualState.pointerActive ? "active" : "idle"} style={sliderStyle} data-size={resolvedSize} data-density={resolvedDensity}
   role={variant === "embedded" ? "slider" : undefined} tabindex={variant === "embedded" && !disabled ? 0 : undefined}
   aria-label={variant === "embedded" ? ariaLabel ?? undefined : undefined} aria-valuemin={variant === "embedded" ? min : undefined} aria-valuemax={variant === "embedded" ? safeMax : undefined} aria-valuenow={variant === "embedded" ? visualState.value : undefined} aria-valuetext={variant === "embedded" ? valueText ?? undefined : undefined} aria-orientation={variant === "embedded" ? orientation : undefined} aria-disabled={variant === "embedded" ? disabled : undefined}
   onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onkeydown={variant === "embedded" ? embeddedKey : undefined}>

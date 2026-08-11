@@ -49,6 +49,10 @@
     background: var(--poodle-recipe-slider-fill-fill, var(--poodle-color-accent-base));
   }
 
+  .poodle-slider[data-polarity="bipolar"][data-fill-tone="negative"] .poodle-slider__fill {
+    background: var(--poodle-recipe-slider-fill-negative, var(--poodle-color-status-danger));
+  }
+
   .poodle-slider[data-orientation="vertical"] .poodle-slider__fill {
     position: absolute;
     bottom: var(--poodle-slider-fill-start);
