@@ -1,6 +1,6 @@
 # 010 TextInput Focus Parity (autofocus + focus())
 
-Status: ready
+Status: merged (`b2aa40ae`)
 Milestone: side-quest (runtime parity, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-010-text-input-focus-parity`
@@ -122,18 +122,18 @@ Regenerated preview artifacts are permitted only as generator output.
 
 ## Acceptance Criteria
 
-- [ ] React `TextInput` accepts `autofocus` with Svelte's exact semantics, in
+- [x] React `TextInput` accepts `autofocus` with Svelte's exact semantics, in
   both input and textarea modes.
-- [ ] React `TextInput` exposes `focus()` through `useImperativeHandle`,
+- [x] React `TextInput` exposes `focus()` through `useImperativeHandle`,
   following the `MenuSurface` precedent, focusing the underlying control.
-- [ ] `text-input.md` documents `autofocus` as a web-only prop and `focus()` as
+- [x] `text-input.md` documents `autofocus` as a web-only prop and `focus()` as
   an imperative method, both marked as excluded from `TextInputSpec`.
-- [ ] Usage docs updated for `text-input` only; no other entry in
+- [x] Usage docs updated for `text-input` only; no other entry in
   `component-docs.ts` modified.
-- [ ] Tests cover every case in step 7.
-- [ ] No Rust, adapter, spec, Svelte component, or baseline changed.
-- [ ] All commands in step 8 exit 0.
-- [ ] Batch log records commands, exit states, and the handle pattern used.
+- [x] Tests cover every case in step 7.
+- [x] No Rust, adapter, spec, Svelte component, or baseline changed.
+- [x] All commands in step 8 exit 0.
+- [x] Batch log records commands, exit states, and the handle pattern used.
 
 ## Stop Conditions
 

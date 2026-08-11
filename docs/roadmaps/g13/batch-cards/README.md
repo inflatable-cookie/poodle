@@ -18,8 +18,8 @@ and roadmap closeout.
 | `006` | button-family tone parity (CSS/specimens) | contract amendments `282ce489` | merged (`22337a31`) — Button + IconButton; SplitButton deferred to `008` |
 | `007` | value-domain drift inventory (report-only) | contract amendments `282ce489` | merged (`8090521c`) |
 | `008` | split-button tone parity + primary status shadow | `006` merged + shadow ruling | merged (`f59adac0`) |
-| `009` | dialog initial-focus hook (side-quest) | `b1a4a5e7` | dispatched |
-| `010` | TextInput focus parity: autofocus + focus() to React | `b1a4a5e7` | dispatched |
+| `009` | dialog initial-focus hook (side-quest) | `b1a4a5e7` | merged (`e4af527e`) |
+| `010` | TextInput focus parity: autofocus + focus() to React | `b1a4a5e7` | merged (`b2aa40ae`) |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
 evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of

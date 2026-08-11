@@ -1,6 +1,6 @@
 # 009 Dialog Initial-Focus Hook
 
-Status: ready
+Status: merged (`e4af527e`)
 Milestone: side-quest (consumer-driven component work, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-009-dialog-initial-focus`
@@ -146,22 +146,22 @@ Regenerated preview artifacts are permitted only as generator output.
 
 ## Acceptance Criteria
 
-- [ ] `Dialog` accepts `initialFocus` with one consistent shape in Svelte and
+- [x] `Dialog` accepts `initialFocus` with one consistent shape in Svelte and
   React, defaulting to `"auto"`.
-- [ ] `"auto"` prefers the first focusable in `.poodle-dialog__body`, skips the
+- [x] `"auto"` prefers the first focusable in `.poodle-dialog__body`, skips the
   header close button, and falls back to the surface.
-- [ ] `FormDialog` focuses its first field by default; a consumer-supplied
+- [x] `FormDialog` focuses its first field by default; a consumer-supplied
   value wins.
-- [ ] The `b1a4a5e7` already-focused guard and deferred close restore are
+- [x] The `b1a4a5e7` already-focused guard and deferred close restore are
   preserved and still work.
-- [ ] `dialog.md` and `form-dialog.md` document the prop, its resolution order,
+- [x] `dialog.md` and `form-dialog.md` document the prop, its resolution order,
   and FormDialog's differing default.
-- [ ] Usage docs updated for both components.
-- [ ] Tests cover every case in step 7.
-- [ ] Svelte and React remain at parity; no other component changed; no Rust,
+- [x] Usage docs updated for both components.
+- [x] Tests cover every case in step 7.
+- [x] Svelte and React remain at parity; no other component changed; no Rust,
   adapter, or baseline touched.
-- [ ] All commands in step 8 exit 0.
-- [ ] Batch log records commands, exit states, and the chosen prop shape with
+- [x] All commands in step 8 exit 0.
+- [x] Batch log records commands, exit states, and the chosen prop shape with
   its rationale.
 
 ## Stop Conditions
