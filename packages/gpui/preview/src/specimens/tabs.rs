@@ -6,7 +6,7 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_specs::{
-    ControlDensity, ControlSize, EyebrowSpec, Orientation, TabActiveFill, TabDefinition,
+    ControlDensity, ControlSize, EyebrowSpec, Orientation, ActiveFill, TabDefinition,
     TabStripItem, TabStripSpec, TabVariant, TabsSpec,
 };
 use std::sync::Arc;
@@ -191,7 +191,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         TabDefinition::new("faq", "FAQ").with_disabled(true),
     ])
     .with_variant(TabVariant::Card)
-    .with_active_fill(TabActiveFill::Solid)
+    .with_active_fill(ActiveFill::Solid)
     .with_value(&solid_value)
     .with_aria_label("Solid section tabs");
 

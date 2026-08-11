@@ -1,7 +1,7 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { Checkbox, Switch } from "../src";
+import { Checkbox, NavigationMenu, Switch } from "../src";
 
 // Interaction wiring: the @inflatable-cookie/poodle-core machines have their own suite; these
 // assert the React binding actually drives a click through to the documented
@@ -19,5 +19,21 @@ describe("react interaction", () => {
     const { getByRole } = render(<Switch onCheckedChange={onCheckedChange} />);
     fireEvent.click(getByRole("switch"));
     expect(onCheckedChange).toHaveBeenCalledWith(true);
+  });
+
+  it("NavigationMenu defaults to tint fill with no active outline", () => {
+    const { container } = render(<NavigationMenu items={[{ value: "a", label: "A" }]} />);
+    const root = container.querySelector(".poodle-navigation-menu")!;
+    expect(root.getAttribute("data-active-fill")).toBe("tint");
+    expect(root.hasAttribute("data-active-outline")).toBe(false);
+  });
+
+  it("NavigationMenu emits activeOutline and solid fill data attributes", () => {
+    const { container } = render(
+      <NavigationMenu items={[{ value: "a", label: "A" }]} activeOutline activeFill="solid" />,
+    );
+    const root = container.querySelector(".poodle-navigation-menu")!;
+    expect(root.getAttribute("data-active-outline")).toBe("true");
+    expect(root.getAttribute("data-active-fill")).toBe("solid");
   });
 });

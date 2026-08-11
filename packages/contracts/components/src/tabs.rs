@@ -16,9 +16,10 @@ pub enum TabsOverflowStrategy {
 }
 
 /// Selection treatment on the active tab. Matches the Svelte/React
-/// `activeFill` prop (`"tint" | "solid"`, default `"tint"`).
+/// `activeFill` prop (`"tint" | "solid"`, default `"tint"`). Shared type —
+/// see `docs/contracts/004-shared-control-types.md`.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-pub enum TabActiveFill {
+pub enum ActiveFill {
     /// Accent-tinted selection on the active tab.
     #[default]
     Tint,
@@ -48,7 +49,7 @@ pub struct TabsSpec {
     pub active_outline: bool,
     /// Selection treatment on the active tab: tint or fully accent-filled.
     /// Matches Svelte `activeFill` (default `"tint"`).
-    pub active_fill: TabActiveFill,
+    pub active_fill: ActiveFill,
     pub orientation: Orientation,
     pub activation_mode: TabActivationMode,
     pub aria_label: Option<String>,
@@ -109,7 +110,7 @@ impl Default for TabsSpec {
             default_value: None,
             variant: TabVariant::Card,
             active_outline: false,
-            active_fill: TabActiveFill::Tint,
+            active_fill: ActiveFill::Tint,
             orientation: Orientation::Horizontal,
             activation_mode: TabActivationMode::Automatic,
             aria_label: None,
@@ -216,7 +217,7 @@ impl TabsSpec {
     }
 
     /// Set the selection treatment on the active tab (tint or solid).
-    pub fn with_active_fill(mut self, active_fill: TabActiveFill) -> Self {
+    pub fn with_active_fill(mut self, active_fill: ActiveFill) -> Self {
         self.active_fill = active_fill;
         self
     }
@@ -375,7 +376,7 @@ mod tests {
     fn active_decorations_default_off_and_tint() {
         let spec = TabsSpec::new(vec![TabDefinition::new("a", "A")]);
         assert!(!spec.active_outline);
-        assert_eq!(spec.active_fill, TabActiveFill::Tint);
+        assert_eq!(spec.active_fill, ActiveFill::Tint);
         assert_eq!(spec.variant, TabVariant::Card);
     }
 
@@ -383,8 +384,8 @@ mod tests {
     fn active_decorations_builders_set_both() {
         let spec = TabsSpec::new(vec![TabDefinition::new("a", "A")])
             .with_active_outline(true)
-            .with_active_fill(TabActiveFill::Solid);
+            .with_active_fill(ActiveFill::Solid);
         assert!(spec.active_outline);
-        assert_eq!(spec.active_fill, TabActiveFill::Solid);
+        assert_eq!(spec.active_fill, ActiveFill::Solid);
     }
 }

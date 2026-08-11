@@ -5,7 +5,13 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent as ReactKeyboard
 import { findNextEnabledIndex, firstEnabledIndex, registerDismissLayer } from "@inflatable-cookie/poodle-core";
 
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
-import type { ControlDensity, ControlSize, NavigationMenuItem, SemanticControlSizeRole } from "./types";
+import type {
+  ActiveFill,
+  ControlDensity,
+  ControlSize,
+  NavigationMenuItem,
+  SemanticControlSizeRole,
+} from "./types";
 
 export interface NavigationMenuProps {
   value?: string | null;
@@ -15,6 +21,17 @@ export interface NavigationMenuProps {
   sizeRole?: SemanticControlSizeRole;
   size?: ControlSize | null;
   density?: ControlDensity | null;
+  /**
+   * Opt-in outline on the open trigger — the border the trigger carried by
+   * default before g13.016. Same semantics and default as Tabs.
+   */
+  activeOutline?: boolean;
+  /**
+   * Selection treatment on the open trigger: `"tint"` is the accent-tinted
+   * fill; `"solid"` fills the trigger with `accent-base` and switches the
+   * foreground to `text-inverse` for contrast.
+   */
+  activeFill?: ActiveFill;
   onValueChange?: ((value: string | null) => void) | undefined;
   children?: (value: string | null, item: NavigationMenuItem | null) => ReactNode;
 }
@@ -27,6 +44,8 @@ export function NavigationMenu({
   sizeRole = "chrome",
   size = null,
   density = null,
+  activeOutline = false,
+  activeFill = "tint",
   onValueChange = undefined,
   children,
 }: NavigationMenuProps) {
@@ -115,7 +134,14 @@ export function NavigationMenu({
   }, [currentValue]);
 
   return (
-    <div ref={rootRef} className="poodle-navigation-menu" data-size={resolvedSize} data-density={resolvedDensity}>
+    <div
+      ref={rootRef}
+      className="poodle-navigation-menu"
+      data-size={resolvedSize}
+      data-density={resolvedDensity}
+      data-active-outline={activeOutline || undefined}
+      data-active-fill={activeFill}
+    >
       <nav className="poodle-navigation-menu__list" aria-label={ariaLabel ?? undefined}>
         {items.map((item, index) => (
           <button

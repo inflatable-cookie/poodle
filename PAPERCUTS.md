@@ -7,6 +7,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — Removing an explicit `border` declaration from a `<button>`-based
+  component style leaks the UA default `2px outset buttonborder`, and the two
+  preview shells resolve that default differently (Svelte preview: black,
+  React preview: white — a `color-scheme` difference), silently breaking the
+  Svelte↔React visual gate. g13-016 hit exactly this: deleting the
+  NavigationMenu trigger's unconditional border without adding `border: 0`
+  produced a 0.564% pixel diff on the navigation-menu slug only. Button styles
+  that go borderless must declare `border: 0` explicitly (the `.poodle-tabs__tab`
+  and Menubar trigger pattern). Affects any future border-removal on a button.
+
 - 2026-08-11 — The visual gate cannot catch a bug in a brand-new specimen:
   with no prior baseline to differ from, a new specimen reports no diff. `b013`
   added `activeOutline` specimens and the sweep showed zero tabs diffs, while

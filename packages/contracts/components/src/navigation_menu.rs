@@ -1,5 +1,6 @@
 use poodle_tokens::semantic;
 
+use crate::tabs::ActiveFill;
 use crate::types::{ControlDensity, ControlSize, NavigationMenuEntry, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -8,6 +9,13 @@ pub struct NavigationMenuSpec {
     pub value: Option<String>,
     pub default_value: Option<String>,
     pub aria_label: Option<String>,
+    /// Opt-in outline on the open trigger — the border the trigger carried by
+    /// default before g13.016. Matches Svelte `activeOutline` (default
+    /// false).
+    pub active_outline: bool,
+    /// Selection treatment on the open trigger: tint or fully accent-filled.
+    /// Matches Svelte `activeFill` (default `"tint"`).
+    pub active_fill: ActiveFill,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -20,6 +28,8 @@ impl Default for NavigationMenuSpec {
             value: None,
             default_value: None,
             aria_label: None,
+            active_outline: false,
+            active_fill: ActiveFill::Tint,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Chrome,
             density: ControlDensity::Default,
@@ -47,6 +57,18 @@ impl NavigationMenuSpec {
 
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());
+        self
+    }
+
+    /// Opt into the outline on the open trigger (g13.016; default off).
+    pub fn with_active_outline(mut self, active_outline: bool) -> Self {
+        self.active_outline = active_outline;
+        self
+    }
+
+    /// Set the selection treatment on the open trigger (tint or solid).
+    pub fn with_active_fill(mut self, active_fill: ActiveFill) -> Self {
+        self.active_fill = active_fill;
         self
     }
 
@@ -96,5 +118,27 @@ impl NavigationMenuSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = density;
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::tabs::ActiveFill;
+
+    #[test]
+    fn defaults_have_no_outline_and_tint_fill() {
+        let spec = NavigationMenuSpec::new(vec![]);
+        assert!(!spec.active_outline);
+        assert_eq!(spec.active_fill, ActiveFill::Tint);
+    }
+
+    #[test]
+    fn builders_set_outline_and_fill() {
+        let spec = NavigationMenuSpec::new(vec![])
+            .with_active_outline(true)
+            .with_active_fill(ActiveFill::Solid);
+        assert!(spec.active_outline);
+        assert_eq!(spec.active_fill, ActiveFill::Solid);
     }
 }

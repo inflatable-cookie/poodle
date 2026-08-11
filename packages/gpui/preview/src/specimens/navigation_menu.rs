@@ -6,7 +6,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{EyebrowSpec, NavigationMenuEntry, NavigationMenuSpec};
+use poodle_specs::{ActiveFill, EyebrowSpec, NavigationMenuEntry, NavigationMenuSpec};
 use std::sync::Arc;
 
 fn change_handler(state: &AppState) -> Arc<dyn Fn(&str) + Send + Sync> {
@@ -51,7 +51,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_else(|| "components".to_string());
 
-    let spec = NavigationMenuSpec::new(items)
+    let spec = NavigationMenuSpec::new(items.clone())
         .with_value(active_value.clone())
         .with_aria_label("Main navigation");
 
@@ -78,6 +78,72 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .text_sm()
                         .text_color(color_to_hsla(text_secondary))
                         .child(format!("Active section: {}", active_value)),
+                ),
+        )
+        // g13.016 switches: the default trigger is borderless; activeOutline
+        // opts the border back in, solid fill covers the open trigger with
+        // accent-base + text-inverse and must survive hover (native previews
+        // have no hover simulation — the render test proves the hover patch).
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Navigation menu (active outline)"),
+                    theme,
+                ))
+                .child(
+                    NavigationMenu::from_spec(
+                        NavigationMenuSpec::new(items.clone())
+                            .with_value("components")
+                            .with_aria_label("Outlined main navigation")
+                            .with_active_outline(true),
+                        theme,
+                    )
+                    .with_id("specimen-nav-outline"),
+                ),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Navigation menu (solid fill)"),
+                    theme,
+                ))
+                .child(
+                    NavigationMenu::from_spec(
+                        NavigationMenuSpec::new(items.clone())
+                            .with_value("components")
+                            .with_aria_label("Solid main navigation")
+                            .with_active_fill(ActiveFill::Solid),
+                        theme,
+                    )
+                    .with_id("specimen-nav-solid"),
+                ),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content(
+                        "Navigation menu (solid fill — hover the open trigger)",
+                    ),
+                    theme,
+                ))
+                .child(
+                    NavigationMenu::from_spec(
+                        NavigationMenuSpec::new(items.clone())
+                            .with_value("components")
+                            .with_aria_label("Solid hovered main navigation")
+                            .with_active_fill(ActiveFill::Solid),
+                        theme,
+                    )
+                    .with_id("specimen-nav-solid-hover"),
                 ),
         )
         .into_any_element();

@@ -2635,6 +2635,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "defaultValue", type: "string | null", default: "null", description: "Initial active navigation item for uncontrolled mode." },
       { name: "items", type: "NavigationMenuItem[]", default: "[]", description: "Array of top-level navigation items." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the navigation region." },
+      { name: "activeOutline", type: "boolean", default: "false", description: "Opt-in outline on the open trigger — the border the trigger carried by default before g13.016." },
+      { name: "activeFill", type: '"tint" | "solid"', default: '"tint"', description: "Selection treatment on the open trigger: tint is the accent-tinted fill; solid fills with accent-base and swaps the foreground to text-inverse." },
       { name: "onValueChange", type: "((value: string | null) => void) | undefined", default: "undefined", description: "Called when the active navigation item changes." },
     ],
     slots: [

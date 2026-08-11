@@ -31,6 +31,7 @@
   } from "./presentation";
 
   import type {
+    ActiveFill,
     ControlDensity,
     ControlSize,
     Orientation,
@@ -56,7 +57,7 @@
      * fill; `"solid"` fills the tab with `accent-base` and switches the
      * foreground to `text-inverse` for contrast.
      */
-    activeFill?: "tint" | "solid";
+    activeFill?: ActiveFill;
     orientation?: Orientation;
     activationMode?: TabActivationMode;
     bordered?: boolean;

@@ -20,7 +20,7 @@
     gap: var(--poodle-space-inline-sm);
     min-height: var(--poodle-size-control-height);
     padding: 0 var(--poodle-space-control-x);
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 72%, transparent);
+    border: 0;
     border-radius: var(--poodle-radius-control);
     background: var(--poodle-recipe-navigation-menu-trigger-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent));
     color: var(--poodle-recipe-navigation-menu-trigger-text, var(--poodle-color-text-primary));
@@ -33,13 +33,46 @@
 
   .poodle-navigation-menu__trigger[data-open="true"] {
     background: var(--poodle-recipe-navigation-menu-open-trigger-fill, color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent));
-    border-color: var(--poodle-recipe-navigation-menu-open-trigger-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)));
   }
 
   .poodle-navigation-menu__trigger:hover:not(:disabled),
   .poodle-navigation-menu__trigger:focus-visible {
     background: var(--poodle-recipe-navigation-menu-hover-focus-trigger-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
     outline: none;
+  }
+
+  /* activeOutline: an opt-in border on the trigger — the decoration the
+     trigger had by default before g13.016 (border-subtle@72% idle,
+     accent-42% when open). The trigger IS the chip (no item wrapper), so the
+     outline sits on it directly. A transparent border on every trigger keeps
+     the list from shifting when the open trigger's border becomes visible;
+     without `data-active-outline` there is no border at all. */
+  .poodle-navigation-menu[data-active-outline="true"] .poodle-navigation-menu__trigger {
+    border: 0.0625rem solid transparent;
+  }
+
+  .poodle-navigation-menu[data-active-outline="true"] .poodle-navigation-menu__trigger[data-open="true"] {
+    border-color: var(--poodle-recipe-navigation-menu-active-outline-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)));
+  }
+
+  /* activeFill="solid": fully accent-filled open trigger. The foreground
+     uses text-inverse, the same token the primary Button uses on
+     accent-base, so the filled trigger keeps legible contrast against every
+     accent. More specific than the open-trigger rule above (both carry
+     `[data-open="true"]`; this adds the root attribute). */
+  .poodle-navigation-menu[data-active-fill="solid"] .poodle-navigation-menu__trigger[data-open="true"] {
+    background: var(--poodle-recipe-navigation-menu-active-solid-fill, var(--poodle-color-accent-base));
+    color: var(--poodle-recipe-navigation-menu-active-solid-text, var(--poodle-color-text-inverse));
+  }
+
+  /* Solid fill must survive hover and focus-visible. The rule above this
+     block sets accent-12% for `:hover:not(:disabled)` / `:focus-visible`;
+     without this the fill reverts to the tint while the foreground stays
+     text-inverse, leaving inverse text on a light tint. This selector is one
+     step more specific than that rule. */
+  .poodle-navigation-menu[data-active-fill="solid"] .poodle-navigation-menu__trigger[data-open="true"]:hover,
+  .poodle-navigation-menu[data-active-fill="solid"] .poodle-navigation-menu__trigger[data-open="true"]:focus-visible {
+    background: var(--poodle-recipe-navigation-menu-active-solid-fill, var(--poodle-color-accent-base));
   }
 
   .poodle-navigation-menu__trigger:disabled {

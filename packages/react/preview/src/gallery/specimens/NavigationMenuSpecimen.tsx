@@ -20,6 +20,11 @@ export function NavigationMenuSpecimen() {
     color: "var(--poodle-color-text-secondary)",
   } as const;
 
+  const frameStyle = {
+    border: "1px dashed var(--poodle-color-border-subtle)",
+    padding: "0.5rem",
+  } as const;
+
   return (
     <SpecimenLayout
       sizes={(size) => (
@@ -44,6 +49,28 @@ export function NavigationMenuSpecimen() {
             </p>
           )}
         </NavigationMenu>
+      </SpecimenGroup>
+
+      {/* The default trigger is borderless since g13.016; activeOutline opts
+          the border back in. Solid fill covers the open trigger with
+          accent-base + text-inverse, and must survive hover. */}
+      <SpecimenGroup label="Navigation menu (active outline)">
+        <NavigationMenu items={items} value="components" activeOutline ariaLabel="Outlined main navigation" />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Navigation menu (solid fill)">
+        <NavigationMenu items={items} value="components" activeFill="solid" ariaLabel="Solid main navigation" />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Navigation menu (solid fill — hover the open trigger)">
+        <div style={frameStyle}>
+          <NavigationMenu
+            items={items}
+            value="components"
+            activeFill="solid"
+            ariaLabel="Solid hovered main navigation"
+          />
+        </div>
       </SpecimenGroup>
     </SpecimenLayout>
   );

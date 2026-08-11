@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import Checkbox from "../src/Checkbox.svelte";
 import DockRegion from "../src/DockRegion.svelte";
+import NavigationMenu from "../src/NavigationMenu.svelte";
 import Switch from "../src/Switch.svelte";
 import Tabs from "../src/Tabs.svelte";
 
@@ -46,6 +47,30 @@ describe("svelte interaction", () => {
       },
     });
     const root = container.querySelector(".poodle-tabs")!;
+    expect(root.getAttribute("data-active-outline")).toBe("true");
+    expect(root.getAttribute("data-active-fill")).toBe("solid");
+  });
+
+  it("NavigationMenu defaults to tint fill with no active outline", () => {
+    const { container } = render(NavigationMenu, {
+      props: {
+        items: [{ value: "a", label: "A" }],
+      },
+    });
+    const root = container.querySelector(".poodle-navigation-menu")!;
+    expect(root.getAttribute("data-active-fill")).toBe("tint");
+    expect(root.hasAttribute("data-active-outline")).toBe(false);
+  });
+
+  it("NavigationMenu emits activeOutline and solid fill data attributes", () => {
+    const { container } = render(NavigationMenu, {
+      props: {
+        items: [{ value: "a", label: "A" }],
+        activeOutline: true,
+        activeFill: "solid",
+      },
+    });
+    const root = container.querySelector(".poodle-navigation-menu")!;
     expect(root.getAttribute("data-active-outline")).toBe("true");
     expect(root.getAttribute("data-active-fill")).toBe("solid");
   });

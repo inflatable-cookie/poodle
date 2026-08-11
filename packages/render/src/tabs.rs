@@ -18,7 +18,7 @@ use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node, NodeRole, ShadowLayer,
 };
-use poodle_specs::{TabActiveFill, TabVariant, TabsSpec};
+use poodle_specs::{ActiveFill, TabVariant, TabsSpec};
 
 use crate::color::{mix_srgb, with_alpha};
 use crate::presentation::{
@@ -204,7 +204,7 @@ fn render_card(
     let selected = spec.current_value().map(|s| s.to_string());
     let vertical = spec.is_vertical();
     let full_width = spec.uses_full_width();
-    let solid = spec.active_fill == TabActiveFill::Solid;
+    let solid = spec.active_fill == ActiveFill::Solid;
 
     let mut tab_bar = Node::container();
     {
@@ -477,7 +477,7 @@ fn render_block(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_specs::{TabActiveFill, TabDefinition};
+    use poodle_specs::{ActiveFill, TabDefinition};
     use std::sync::Mutex;
 
     /// The real token resolver over the ECLIPSE theme. Pure — no backend.
@@ -533,7 +533,7 @@ mod tests {
         let theme = theme();
         let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
             .with_variant(TabVariant::Card)
-            .with_active_fill(TabActiveFill::Solid)
+            .with_active_fill(ActiveFill::Solid)
             .with_value("a");
 
         let root = tabs(&spec, &theme, None, None);
