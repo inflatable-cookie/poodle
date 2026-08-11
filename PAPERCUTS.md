@@ -17,6 +17,24 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   as well as props — a selector break produces no type error and no build
   error, just wrong layout.
 
+- 2026-08-11 — happy-dom evaluates `@media` rules only at stylesheet parse
+  time: changing the window width afterwards updates `matchMedia` but not the
+  cascade, so `getComputedStyle` keeps the pre-resize rules (verified with a
+  standalone happy-dom probe). A responsive-layout test must set the width
+  *before* injecting the stylesheet, which is fragile when the CSS arrives via
+  a component import (vitest stubs CSS anyway, so tests re-inject it).
+  Affects any future media-query behavior test in the component suites.
+
+- 2026-08-11 — `cargo build --manifest-path packages/jetstream/preview/`
+  cannot resolve its poodle deps from a g13 worktree: the sibling
+  `jetstream-poodle` crate (`~/Dev/projects/poodle-wt/jetstream/crates/
+  jetstream-poodle/Cargo.toml`) hard-points `../../../poodle/packages/…` at the
+  main checkout, which does not exist alongside the worktrees — so the
+  jetstream preview never compiles here (g13-013 hit the same wall and logged
+  it). The workaround for a one-off check is temporarily repointing those
+  paths at the worktree; it should not need to exist. Consider canonicalizing
+  the sibling path or documenting the required checkout layout.
+
 - 2026-08-11 — The docs preview's global `button:focus-visible,
   input:focus-visible` outline (`packages/svelte/preview/src/app.css`) outranked
   every component that draws its own focus treatment: a bare element selector

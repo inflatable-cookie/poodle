@@ -135,6 +135,37 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )),
                 ),
         )
+        // --- Centred header: destination centre, actions + utility trailing ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content(
+                        "Centred header (destination tabs in the centre)",
+                    ),
+                    theme,
+                ))
+                .child(centered_header(theme, "c")),
+        )
+        // --- Centred header at narrow width (≤45rem viewport) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content(
+                        "Centred header at narrow width (≤45rem viewport)",
+                    ),
+                    theme,
+                ))
+                // 40rem frame: the native renderer has no viewport breakpoint,
+                // so the centred row holds at narrow width (web reflows via
+                // the CSS media query; see the contract §8).
+                .child(div().w(px(640.0)).child(centered_header(theme, "n"))),
+        )
         // --- Density ladder ---
         .child(
             div()
@@ -257,6 +288,45 @@ fn identity_slot(theme: &GpuiThemeProvider) -> Node {
     title.style.text_weight = Some(600);
     title.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
     row.child(mark).child(title)
+}
+
+/// A destination-style centre region: three muted labels standing in for a
+/// tabs group (mirrors soundcheck's centred destinations).
+fn destination_row(theme: &GpuiThemeProvider) -> Node {
+    let mut row = Node::container();
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    row.style.descriptor.layout.spacing.gap = 16.0;
+    for label in ["Editor", "Preview", "Terminal"] {
+        let mut t = Node::text(label);
+        t.style.text_size = Some(12.0);
+        t.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+        row = row.child(t);
+    }
+    row
+}
+
+/// The centred demo header shared by the centred and narrow groups: a
+/// "My Application" title, destination centre, New/Open actions, settings
+/// utility.
+fn centered_header(theme: &GpuiThemeProvider, id_suffix: &str) -> AppHeader {
+    let new_id = format!("ah-new-{id_suffix}");
+    let open_id = format!("ah-open-{id_suffix}");
+    let settings_id = format!("ah-settings-{id_suffix}");
+    AppHeader::from_spec(AppHeaderSpec::new().with_title("My Application"), theme)
+        .with_center(destination_row(theme))
+        .with_primary_actions(action_row(
+            theme,
+            &[(new_id.as_str(), "New"), (open_id.as_str(), "Open")],
+            ControlSize::Sm,
+            6.0,
+        ))
+        .with_utility_items(utility_row(
+            theme,
+            &[(settings_id.as_str(), "settings")],
+            ControlSize::Sm,
+            4.0,
+        ))
 }
 
 /// Label above a ladder header, mirroring the Svelte specimen's variant-block label.

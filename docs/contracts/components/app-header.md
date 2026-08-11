@@ -23,15 +23,25 @@ Updated: 2026-07-10
   │     └── [Title Group]  (when no identity snippet)
   │           ├── <strong> title
   │           └── <span> subtitle  (optional)
-  ├── [Actions Region]  (optional snippet)
-  └── [Utility Region]  (optional snippet)
+  ├── [Center Region]  (optional snippet; presence is the layout signal)
+  └── [Trailing Column]
+        ├── [Actions Region]  (optional snippet)
+        └── [Utility Region]  (optional snippet)
 ```
+
+Without a `center` snippet there is no Center Region and no Trailing Column:
+the Actions and Utility Regions are flat siblings of the Identity Region,
+exactly as before the centre region existed. With `center` present, Actions
+and Utility are grouped into a single Trailing Column so they can share the
+third grid track.
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root Header | yes | top shell chrome | background, border, height |
 | Identity Region | yes | app name/icon or custom identity snippet | typography, icon, spacing |
 | Title Group | no | default identity when no identity snippet is provided | title + subtitle layout |
+| Center Region | no | optional centred region (destinations, tabs); its presence switches the grid | gap, control grouping |
+| Trailing Column | no | groups Actions + Utility when a Center Region is present | gap, action roles |
 | Actions Region | no | global shell actions | gap, action roles |
 | Utility Region | no | connection/status indicators | text, status, spacing |
 
@@ -94,8 +104,20 @@ Non-goals (deliberate, per g13-b014 rulings):
 | Snippet | Purpose | Fallback |
 |---------|---------|----------|
 | `identity()` | custom identity content (logo, branded element) | title/subtitle text |
+| `center()` | centred region (destination tabs, status cluster) | none |
 | `actions()` | primary global actions (buttons, menubar) | none |
 | `utility()` | trailing utility controls (icon buttons, status) | none |
+
+### Presence Is The Signal
+
+`center` is a presence-switched snippet, not a layout prop. Supplying it
+switches the grid to the symmetric side-column layout and groups `actions()`
+and `utility()` into the trailing column; omitting it keeps the default
+`minmax(0, 1fr) auto auto` grid and the flat three-region DOM — a header
+without `center` renders byte-identical DOM and computed grid to a pre-centre
+header. There is deliberately no `layout` or `columns` prop: a
+`layout: "centered"` with an empty middle would be a state with no meaning,
+and a free-form `columns` prop would leak CSS through the API.
 
 ### Behavior Machine
 
@@ -110,11 +132,12 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | standard | default | steady shell header with three-column grid |
+| centred | `center` snippet supplied | symmetric side-column grid with the centre truly centred and actions/utility sharing the trailing column |
 | drag-region | `dragRegion=true` | header supports window dragging where supported |
 | compact density | `density="compact"` | tighter padding and inter-region spacing |
 | comfortable density | `density="comfortable"` | looser padding and inter-region spacing |
 | size ladder | `size="xs"..."xl"` | header height and title/subtitle typography scale with nested controls |
-| collapsed | viewport <= 45rem | single-column layout; utility region left-aligned |
+| collapsed | viewport <= 45rem | default header collapses to a single column; a centred header reflows to `auto minmax(0, 1fr) auto` (one row, centre absorbing the free space) |
 
 ## 6. Events
 
@@ -143,17 +166,50 @@ No component-owned events. Child action behavior is host-owned.
 
 ## 8. Layout
 
-### Default (>45rem)
+### Default (>45rem, no `center`)
 
 - Three-column grid: `minmax(0, 1fr) auto auto`
 - Gap: `--poodle-app-header-gap`
 - Min-height: `--poodle-app-header-min-height`
 - Padding: `--poodle-app-header-padding-block --poodle-app-header-padding-inline`
 - Border-bottom: `0.0625rem solid --poodle-color-border-subtle`
+- Identity occupies the leading track; actions then utility pack right
+
+### Centred (>45rem, `center` supplied)
+
+- Symmetric three-column grid:
+
+  ```css
+  grid-template-columns:
+    minmax(var(--poodle-app-header-side-min, 0), 1fr)
+    auto
+    minmax(var(--poodle-app-header-side-min, 0), 1fr);
+  ```
+
+- The centre region sits in the middle `auto` track; actions and utility
+  share the trailing `1fr` track as one trailing column, justified to the
+  end exactly as they were as separate columns. Both side tracks split the
+  free space equally, which is what keeps the centre truly centred.
+- The trailing column is only emitted when `center` is present — the default
+  DOM is untouched.
+
+### `--poodle-app-header-side-min`
+
+A collapse guard for the symmetric side columns, declared on
+`.poodle-app-header` and defaulting to `0`. A consumer raises it (soundcheck
+uses `9rem`) so a wide side column cannot drag the centre off. Overriding it
+hits the same specificity trap as `--poodle-app-header-min-height` below:
+a plain `.poodle-app-header { … }` override is `0,1,0` and silently loses to
+the `[data-center]` gate's `0,2,0`, so use a matching-or-higher selector
+(e.g. `.app-shell .poodle-app-header[data-center]`, `0,3,0`).
 
 ### Responsive (<=45rem)
 
-- Single-column grid: `1fr`
+- Default header collapses to a single-column grid: `1fr`
+- A centred header **reflows rather than stacks**: `auto minmax(0, 1fr) auto`
+  — one row, the centre absorbing the free space and no longer strictly
+  centred. Stacking four regions would make the bar tall, and a titlebar
+  cannot grow; soundcheck does exactly this at its own breakpoint.
 - Utility region switches to `justify-content: flex-start`
 
 ### Overriding Header Height
@@ -215,14 +271,31 @@ does **not** require `dragRegion` to be set: `data-size` is always rendered.
 | `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent)` |
 | `overflow` | `visible` |
+| `--poodle-app-header-side-min` | `0` (collapse guard for the centred side columns) |
 
-#### `.app-header__identity`, `.app-header__actions`, `.app-header__utility` (Shared)
+#### `.app-header[data-center]` (Centred, Additional)
+
+| Property | Value |
+|----------|-------|
+| `grid-template-columns` | `minmax(var(--poodle-app-header-side-min, 0), 1fr) auto minmax(var(--poodle-app-header-side-min, 0), 1fr)` |
+
+#### `.app-header__identity`, `.app-header__center`, `.app-header__actions`, `.app-header__utility` (Shared)
 
 | Property | Value |
 |----------|-------|
 | `display` | `flex` |
 | `align-items` | `center` |
 | `gap` | `var(--poodle-app-header-region-gap)` |
+| `min-width` | `0` |
+
+#### `.app-header__trailing` (Only When `center` Is Present)
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `align-items` | `center` |
+| `justify-content` | `flex-end` |
+| `gap` | `var(--poodle-app-header-gap)` |
 | `min-width` | `0` |
 
 #### `.app-header__title-group`
@@ -267,6 +340,12 @@ does **not** require `dragRegion` to be set: `data-size` is always rendered.
 |----------|-------|
 | `grid-template-columns` | `1fr` |
 
+#### `.app-header[data-center]` (Centred Reflow)
+
+| Property | Value |
+|----------|-------|
+| `grid-template-columns` | `auto minmax(0, 1fr) auto` |
+
 #### `.app-header__utility`
 
 | Property | Value |
@@ -278,6 +357,7 @@ does **not** require `dragRegion` to be set: `data-size` is always rendered.
 | Attribute | Element | Purpose |
 |-----------|---------|---------|
 | `data-drag-region` | `<header>` root | enables native window drag posture |
+| `data-center` | `<header>` root | present when a `center` snippet is supplied; gates the symmetric grid and the narrow reflow |
 | `data-size` | `<header>` root | size ladder for shell height and typography |
 | `data-density` | `<header>` root | density ladder for shell spacing |
 
@@ -306,5 +386,7 @@ does **not** require `dragRegion` to be set: `data-size` is always rendered.
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
 | Custom identity slot | identity slot with custom logo badge ("P") and bold "Poodle Studio" text, utility slot with bell and user ghost IconButtons | Header with custom branded identity region replacing default title, trailing utility icons |
+| Centred header | `title="My Application"`, `center` slot with a strip Tabs group ("Editor", "Preview", "Terminal"), actions slot with New/Open ghost Buttons, utility slot with settings ghost IconButton | Header with symmetric side columns, destination tabs truly centred, actions + utility sharing the trailing column |
+| Centred header at narrow width | same centred config inside a `≤45rem` frame | One-row reflow: `auto minmax(0, 1fr) auto`, centre absorbing the free space and no longer strictly centred |
 | Density ladder | `density="compact" \| "default" \| "comfortable"` with actions and utility controls | Header spacing tightens or loosens while nested controls follow the same density |
 | Size ladder | `size="xs" \| "sm" \| "md" \| "lg" \| "xl"` with actions and utility controls | Header height and title/subtitle scale together while nested controls follow the same size |

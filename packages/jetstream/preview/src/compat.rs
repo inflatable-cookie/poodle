@@ -105,20 +105,22 @@ pub fn js_alert_dialog_working(
 }
 
 pub fn js_app_header(spec: &AppHeaderSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::app_header(spec, theme, None, None, None))
+    El(pr::app_header(spec, theme, None, None, None, None))
 }
 
 pub fn js_app_header_with_slots(
     spec: &AppHeaderSpec,
     theme: &JetstreamThemeProvider,
     identity: Option<El>,
+    center: Option<El>,
     actions: Option<El>,
     utility: Option<El>,
 ) -> El {
     let identity: Option<Node> = identity.map(Node::from);
+    let center: Option<Node> = center.map(Node::from);
     let actions: Option<Node> = actions.map(Node::from);
     let utility: Option<Node> = utility.map(Node::from);
-    El(pr::app_header(spec, theme, identity, actions, utility))
+    El(pr::app_header(spec, theme, identity, center, actions, utility))
 }
 
 pub fn js_audio_player(spec: &AudioPlayerSpec, theme: &JetstreamThemeProvider) -> El {

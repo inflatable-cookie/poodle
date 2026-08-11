@@ -3,8 +3,9 @@
 //! Mirrors the GPUI specimen groups (`gpui/preview/src/specimens/app_header.rs`)
 //! and the contract §10 specimen: a full app-window header (title + ghost-button
 //! nav + utility IconButtons), title + actions + utility, title-only, a custom
-//! identity slot, plus density and size ladders. The three-region shell is
-//! composed via `js_app_header_with_slots`; action / utility clusters are real
+//! identity slot, centred + centred-at-narrow-width groups (g13-b017), plus
+//! density and size ladders. The three-region shell is composed via
+//! `js_app_header_with_slots`; action / utility clusters are real
 //! `js_button` / `js_icon_button` rows. Zero hand-rolled boxes.
 
 use crate::compat::js_button;
@@ -51,6 +52,17 @@ fn utility_icons(theme: &JetstreamThemeProvider, icons: &[&str], size: ControlSi
     row
 }
 
+/// A destination-style centre region: three muted labels standing in for a
+/// tabs group (mirrors soundcheck's centred destinations).
+fn destination_row(theme: &JetstreamThemeProvider) -> El {
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let mut row = div().flex_row().items_center().gap(16.0);
+    for lbl in ["Editor", "Preview", "Terminal"] {
+        row = row.child(label(lbl).text_color(secondary).text_size(12.0));
+    }
+    row
+}
+
 /// The shared demo header used by both ladders: a "My Application" title with
 /// New/Open ghost actions and a settings utility icon (mirrors GPUI `demo_header`).
 fn demo_header(spec: AppHeaderSpec, theme: &JetstreamThemeProvider) -> El {
@@ -59,8 +71,23 @@ fn demo_header(spec: AppHeaderSpec, theme: &JetstreamThemeProvider) -> El {
         &spec,
         theme,
         None,
+        None,
         Some(ghost_actions(theme, &["New", "Open"], size)),
         Some(utility_icons(theme, &["settings"], size)),
+    )
+}
+
+/// The centred demo header shared by the centred and narrow groups: a
+/// "My Application" title, destination centre, New/Open actions, settings
+/// utility.
+fn centered_header(theme: &JetstreamThemeProvider) -> El {
+    js_app_header_with_slots(
+        &AppHeaderSpec::new().with_title("My Application").with_center(true),
+        theme,
+        None,
+        Some(destination_row(theme)),
+        Some(ghost_actions(theme, &["New", "Open"], ControlSize::Sm)),
+        Some(utility_icons(theme, &["settings"], ControlSize::Sm)),
     )
 }
 
@@ -83,6 +110,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_aria_label("Application header"),
                 theme,
                 None,
+                None,
                 Some(ghost_actions(
                     theme,
                     &["File", "Edit", "View", "Help"],
@@ -102,6 +130,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_app_header_with_slots(
                 &AppHeaderSpec::new().with_title("My Application"),
                 theme,
+                None,
                 None,
                 Some(ghost_actions(theme, &["New", "Open"], ControlSize::Sm)),
                 Some(utility_icons(theme, &["settings"], ControlSize::Sm)),
@@ -137,8 +166,24 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         ),
                 ),
                 None,
+                None,
                 Some(utility_icons(theme, &["bell", "user"], ControlSize::Sm)),
             ),
+        ))
+        // Centred header: destination centre, actions + utility trailing.
+        .child(group(
+            "Centred header (destination tabs in the centre)",
+            secondary,
+            centered_header(theme),
+        ))
+        // Centred header at narrow width (≤45rem viewport).
+        .child(group(
+            "Centred header at narrow width (≤45rem viewport)",
+            secondary,
+            // 40rem frame: the native renderer has no viewport breakpoint,
+            // so the centred row holds at narrow width (web reflows via the
+            // CSS media query; see the contract §8).
+            div().w(640.0).child(centered_header(theme)),
         ))
         // Density ladder — region gaps tighten/loosen, height unchanged.
         .child(group(

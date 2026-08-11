@@ -14,6 +14,10 @@ export interface AppHeaderProps {
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
   identity?: ReactNode;
+  /** Optional centre region (g13-b017). Its presence is the signal: it
+   * switches the grid to the symmetric side-column layout and groups
+   * `actions` + `utility` into the trailing column. */
+  center?: ReactNode;
   actions?: ReactNode;
   utility?: ReactNode;
 }
@@ -30,6 +34,7 @@ export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(function AppHea
     sizeRole = "control",
     density = null,
     identity,
+    center,
     actions,
     utility,
   },
@@ -46,6 +51,7 @@ export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(function AppHea
         ref={ref}
         className="poodle-app-header"
         data-drag-region={dragRegion}
+        data-center={center ? "" : undefined}
         data-size={resolvedSize}
         data-density={resolvedDensity}
         aria-label={ariaLabel ?? title ?? undefined}
@@ -60,9 +66,19 @@ export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(function AppHea
             ) : null)}
         </div>
 
-        {actions ? <div className="poodle-app-header__actions">{actions}</div> : null}
+        {center ? <div className="poodle-app-header__center">{center}</div> : null}
 
-        {utility ? <div className="poodle-app-header__utility">{utility}</div> : null}
+        {center ? (
+          <div className="poodle-app-header__trailing">
+            {actions ? <div className="poodle-app-header__actions">{actions}</div> : null}
+            {utility ? <div className="poodle-app-header__utility">{utility}</div> : null}
+          </div>
+        ) : (
+          <>
+            {actions ? <div className="poodle-app-header__actions">{actions}</div> : null}
+            {utility ? <div className="poodle-app-header__utility">{utility}</div> : null}
+          </>
+        )}
       </header>
     </UiPresentationProvider>
   );

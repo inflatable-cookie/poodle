@@ -1,8 +1,16 @@
 <script lang="ts">
-  import { Button, IconButton, Menubar } from "@inflatable-cookie/poodle-svelte";
+  import { Button, IconButton, Menubar, Tabs, type TabItem } from "@inflatable-cookie/poodle-svelte";
   import { AppHeader } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
+
+  // Destination tabs in the centre region (mirrors soundcheck's centred
+  // header: symmetric side columns keep the middle truly centred).
+  const centerTabs: TabItem[] = [
+    { value: "editor", label: "Editor", icon: "code" },
+    { value: "preview", label: "Preview", icon: "eye" },
+    { value: "terminal", label: "Terminal", icon: "terminal" },
+  ];
 
   const menuItems = [
     {
@@ -101,6 +109,38 @@
           {/snippet}
         </AppHeader>
       </SpecimenGroup>
+
+      <SpecimenGroup label="Centred header (destination tabs in the centre)" bare>
+        <AppHeader title="My Application">
+          {#snippet center()}
+            <Tabs items={centerTabs} variant="strip" activeOutline defaultValue="editor" size="sm" ariaLabel="Destinations" />
+          {/snippet}
+          {#snippet actions()}
+            <Button sizeRole="chrome" variant="ghost">New</Button>
+            <Button sizeRole="chrome" variant="ghost">Open</Button>
+          {/snippet}
+          {#snippet utility()}
+            <IconButton icon="settings" sizeRole="chrome" variant="ghost" ariaLabel="Settings" />
+          {/snippet}
+        </AppHeader>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Centred header at narrow width (≤45rem viewport)" bare>
+        <div class="poodle-app-header-specimen__narrow">
+          <AppHeader title="My Application">
+            {#snippet center()}
+              <Tabs items={centerTabs} variant="strip" activeOutline defaultValue="editor" size="sm" ariaLabel="Destinations" />
+            {/snippet}
+            {#snippet actions()}
+              <Button sizeRole="chrome" variant="ghost">New</Button>
+              <Button sizeRole="chrome" variant="ghost">Open</Button>
+            {/snippet}
+            {#snippet utility()}
+              <IconButton icon="settings" sizeRole="chrome" variant="ghost" ariaLabel="Settings" />
+            {/snippet}
+          </AppHeader>
+        </div>
+      </SpecimenGroup>
     </div>
   {/snippet}
 
@@ -187,6 +227,12 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    width: min(40rem, 100%);
+  }
+
+  /* Narrow-width posture: a ≤45rem frame shows the centred header reflowed
+     to one row (the reflow itself is viewport-driven, see the contract). */
+  .poodle-app-header-specimen__narrow {
     width: min(40rem, 100%);
   }
 

@@ -17,6 +17,10 @@
      * can attach behaviour (for example window dragging) to the root. */
     element?: HTMLElement | null;
     identity?: Snippet;
+    /** Optional centre region (g13-b017). Its presence is the signal: it
+     * switches the grid to the symmetric side-column layout and groups
+     * `actions` + `utility` into the trailing column. */
+    center?: Snippet;
     actions?: Snippet;
     utility?: Snippet;
   }
@@ -31,6 +35,7 @@
     density = null,
     element = $bindable<HTMLElement | null>(null),
     identity,
+    center,
     actions,
     utility,
   }: Props = $props();
@@ -46,6 +51,7 @@
     bind:this={element}
     class="poodle-app-header"
     data-drag-region={dragRegion}
+    data-center={center ? "" : undefined}
     data-size={resolvedSize}
     data-density={resolvedDensity}
     aria-label={ariaLabel ?? title ?? undefined}
@@ -63,16 +69,37 @@
       {/if}
     </div>
 
-    {#if actions}
-      <div class="poodle-app-header__actions">
-        {@render actions()}
+    {#if center}
+      <div class="poodle-app-header__center">
+        {@render center()}
       </div>
     {/if}
 
-    {#if utility}
-      <div class="poodle-app-header__utility">
-        {@render utility()}
+    {#if center}
+      <div class="poodle-app-header__trailing">
+        {#if actions}
+          <div class="poodle-app-header__actions">
+            {@render actions()}
+          </div>
+        {/if}
+        {#if utility}
+          <div class="poodle-app-header__utility">
+            {@render utility()}
+          </div>
+        {/if}
       </div>
+    {:else}
+      {#if actions}
+        <div class="poodle-app-header__actions">
+          {@render actions()}
+        </div>
+      {/if}
+
+      {#if utility}
+        <div class="poodle-app-header__utility">
+          {@render utility()}
+        </div>
+      {/if}
     {/if}
   </header>
 </UiPresentationProvider>

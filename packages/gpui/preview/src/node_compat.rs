@@ -373,6 +373,7 @@ pub(crate) struct AppHeader {
     spec: AppHeaderSpec,
     theme: GpuiThemeProvider,
     identity: Option<poodle_node::Node>,
+    center: Option<poodle_node::Node>,
     actions: Option<poodle_node::Node>,
     utility: Option<poodle_node::Node>,
 }
@@ -383,6 +384,7 @@ impl AppHeader {
             spec,
             theme: theme.clone(),
             identity: None,
+            center: None,
             actions: None,
             utility: None,
         }
@@ -395,6 +397,11 @@ impl AppHeader {
 
     pub(crate) fn with_utility_items(mut self, utility: impl IntoCompatNode) -> Self {
         self.utility = Some(utility.into_compat_node());
+        self
+    }
+
+    pub(crate) fn with_center(mut self, center: impl IntoCompatNode) -> Self {
+        self.center = Some(center.into_compat_node());
         self
     }
 
@@ -412,6 +419,7 @@ impl AppHeader {
             &self.spec,
             &self.theme,
             self.identity,
+            self.center,
             self.actions,
             self.utility,
         )
