@@ -158,14 +158,15 @@ diffs, **do not update baselines** — record the diff list and stop.
 
 ## Acceptance Criteria
 
-- [x] All three stylesheets implement all four tones across primary, secondary,
-  and ghost.
+- [ ] All three stylesheets implement all four tones across primary, secondary,
+  and ghost. **Button and IconButton done; SplitButton deferred to `008`.**
 - [x] Each added rule derives from that component's own danger rules with only
   the status color substituted; no new percentages invented.
 - [x] Rust renderer tone delivery verified and reported for all three
   components; no Rust edited.
-- [x] Svelte and React specimens show all four tones for all three components,
-  and remain identical to each other.
+- [ ] Svelte and React specimens show all four tones for all three components,
+  and remain identical to each other. **Button and IconButton done; SplitButton
+  deferred to `008`.**
 - [x] No component source, props, public API, token, or baseline changed.
 - [x] `effigy docs:lint`, `test:components`, `test:parity`, `docs:check`, and
   `git diff --check` all exit 0.
