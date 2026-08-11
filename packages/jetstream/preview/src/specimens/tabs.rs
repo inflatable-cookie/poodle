@@ -5,7 +5,7 @@ use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
-    ControlDensity, ControlSize, Orientation, TabActiveFill, TabDefinition, TabVariant, TabsSpec,
+    ControlDensity, ControlSize, Orientation, ActiveFill, TabDefinition, TabVariant, TabsSpec,
 };
 
 use crate::app_state::AppState;
@@ -106,7 +106,7 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
             js_tabs(
                 &TabsSpec::new(items.clone())
                     .with_variant(TabVariant::Card)
-                    .with_active_fill(TabActiveFill::Solid)
+                    .with_active_fill(ActiveFill::Solid)
                     .with_value("overview"),
                 theme,
             ),

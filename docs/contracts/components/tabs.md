@@ -56,7 +56,7 @@ Updated: 2026-07-29
 | `items` | `TabItem[]` | `[]` | yes | tab definitions |
 | `variant` | `"card" \| "pill" \| "block" \| "strip"` | `"card"` | no | visual variant; `"card"` is the default |
 | `activeOutline` | `boolean` | `false` | no | opt-in outline on the active tab — the decoration the former `card` variant had by default (selected item border `accent-base` 32% mixed with `border-subtle`) |
-| `activeFill` | `"tint" \| "solid"` | `"tint"` | no | selection treatment on the active tab: `tint` is the accent-tinted fill, `solid` fills the tab fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
+| `activeFill` | `ActiveFill` | `"tint"` | no | selection treatment on the active tab; shared type (see `004-shared-control-types.md`): `tint` is the accent-tinted fill, `solid` fills the tab fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
 | `bordered` | `boolean` | `true` | no | card variant only: draws the separating border on the list — bottom when horizontal, right when vertical — **and the outer padding that holds the tabs off it**. When false the strip renders flush to its container in both orientations, and the consumer owns any spacing beneath. Use `bordered={false}` for titlebars, toolbars and other confined layouts where the tabs are not above content |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | navigation axis |
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | no | whether focus changes selection |

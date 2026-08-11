@@ -36,6 +36,7 @@ import {
   useUiPresentation,
 } from "./presentation";
 import type {
+  ActiveFill,
   ControlDensity,
   ControlSize,
   Orientation,
@@ -64,7 +65,7 @@ export interface TabsProps {
    * fill; `"solid"` fills the tab with `accent-base` and switches the
    * foreground to `text-inverse` for contrast.
    */
-  activeFill?: "tint" | "solid";
+  activeFill?: ActiveFill;
   orientation?: Orientation;
   activationMode?: TabActivationMode;
   bordered?: boolean;

@@ -6,7 +6,9 @@
 //! rendering the active item's `description` (Known Delta §12 slot-prop
 //! equivalent), a disabled item (Changelog), plus size and density ladders.
 //! The active fill, leading icon and viewport panel are all rendered by
-//! `js_navigation_menu` from the spec.
+//! `js_navigation_menu` from the spec. g13.016 adds the switch groups:
+//! active-outline and solid-fill specimens (default appearance is the
+//! existing borderless "Horizontal navigation" group).
 //!
 //! No chevron group: neither the Jetstream nor the GPUI component renders a
 //! disclosure chevron (the trigger has no expand affordance), so a chevron
@@ -16,7 +18,7 @@ use crate::compat::js_navigation_menu;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{ControlDensity, ControlSize, NavigationMenuEntry, NavigationMenuSpec};
+use poodle_specs::{ActiveFill, ControlDensity, ControlSize, NavigationMenuEntry, NavigationMenuSpec};
 
 /// The full item set with leading icons + viewport descriptions (mirrors GPUI),
 /// ending in a disabled Changelog entry.
@@ -78,6 +80,44 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 &NavigationMenuSpec::new(full_items())
                     .with_value("tokens")
                     .with_aria_label("Main navigation"),
+                theme,
+            ),
+        ))
+        // g13.016 switches: the default trigger is borderless since g13.016;
+        // activeOutline opts the border back in, solid fill covers the open
+        // trigger with accent-base + text-inverse and must survive hover (the
+        // native preview has no hover simulation — the render test proves the
+        // hover patch; this group documents the intended hovered state).
+        .child(group(
+            "Navigation menu (active outline)",
+            secondary,
+            js_navigation_menu(
+                &NavigationMenuSpec::new(full_items())
+                    .with_value("components")
+                    .with_aria_label("Outlined main navigation")
+                    .with_active_outline(true),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Navigation menu (solid fill)",
+            secondary,
+            js_navigation_menu(
+                &NavigationMenuSpec::new(full_items())
+                    .with_value("components")
+                    .with_aria_label("Solid main navigation")
+                    .with_active_fill(ActiveFill::Solid),
+                theme,
+            ),
+        ))
+        .child(group(
+            "Navigation menu (solid fill — hover the open trigger)",
+            secondary,
+            js_navigation_menu(
+                &NavigationMenuSpec::new(full_items())
+                    .with_value("components")
+                    .with_aria_label("Solid hovered main navigation")
+                    .with_active_fill(ActiveFill::Solid),
                 theme,
             ),
         ))

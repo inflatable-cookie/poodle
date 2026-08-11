@@ -79,3 +79,31 @@ matrix and every cell has a defined treatment.
 `ButtonVariant::Danger` is retained in Rust for backward compatibility only and
 is equivalent to `Primary` + `Danger` tone. It is not part of the authored
 vocabulary and must not be used in new specs, specimens, or IR definitions.
+
+## ActiveFill
+
+```
+type ActiveFill = "tint" | "solid"
+```
+
+Default: `"tint"`.
+
+Consumers: `components/tabs.md`, `components/navigation-menu.md`.
+
+Rust: `ActiveFill` in `packages/contracts/components/src/tabs.rs`, re-exported
+from `packages/contracts/components/src/lib.rs`; resolved by each component's
+renderer against its own selection state (`TabsSpec::active_fill`,
+`NavigationMenuSpec::active_fill`).
+
+TypeScript: `ActiveFill` in `packages/svelte/components/src/types.ts` and
+`packages/react/components/src/types.ts`.
+
+### Semantics
+
+`tint` is the accent-tinted selection fill a component defines for its own
+active state (Tabs' variant fills, NavigationMenu's `accent-base` 16% open
+trigger). `solid` fills the active control fully with `accent-base` and
+switches the foreground to `text-inverse` — the same token the primary Button
+uses on `accent-base`, so the filled control keeps legible contrast against
+every accent. There are exactly two members; a third value is a contract
+violation (T2), not an extension.

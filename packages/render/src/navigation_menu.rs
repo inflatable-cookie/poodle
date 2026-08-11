@@ -7,9 +7,9 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
-use poodle_specs::{ControlDensity, NavigationMenuSpec};
+use poodle_specs::{ActiveFill, ControlDensity, NavigationMenuSpec};
 
-use crate::color::{mix_srgb, with_alpha};
+use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
 use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size};
 
 /// Trigger horizontal padding in rem per density (contract §8 Density table):
@@ -56,6 +56,7 @@ pub fn navigation_menu(
 
     let text_primary = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color("color.text.secondary");
+    let text_inverse = theme.resolve_color("color.text.inverse");
     let accent = theme.resolve_color("color.accent.base");
     let surface = theme.resolve_color("color.background.surface");
     let border_subtle = theme.resolve_color("color.border.subtle");
@@ -64,13 +65,18 @@ pub fn navigation_menu(
     // Hover/focus trigger: background = color-mix(accent 12%, transparent).
     let hover_bg = with_alpha(accent, accent.3 * 0.12);
 
-    // Idle trigger: surface@88% fill, border-subtle@72% border.
+    // Idle trigger: surface@88% fill, borderless since g13.016 (the border
+    // is opt-in via `activeOutline`).
     let idle_bg = with_alpha(surface, surface.3 * 0.88);
-    let idle_border = with_alpha(border_subtle, border_subtle.3 * 0.72);
 
-    // Active (open) trigger: accent@16% fill, accent42%↔border-default border.
+    // Active (open) trigger: accent@16% fill.
     let active_bg = with_alpha(accent, accent.3 * 0.16);
-    let active_border = mix_srgb(accent, border_default, 0.42);
+
+    // activeOutline: the former default trigger border, now opt-in. Open
+    // trigger border = accent-42% ↔ border-default (the old open border
+    // value); other triggers carry a transparent reserve border so selection
+    // does not shift layout.
+    let outline_selected_border = mix_srgb(accent, border_default, 0.42);
 
     let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
 
@@ -89,10 +95,22 @@ pub fn navigation_menu(
     for entry in &spec.items {
         let is_active = current == Some(entry.value.as_str());
 
-        let (bg, border_color) = if is_active {
-            (active_bg, active_border)
+        // Solid fill: fully accent-filled open trigger with an inverse
+        // foreground (the same token the primary Button uses on accent-base).
+        let solid = is_active && spec.active_fill == ActiveFill::Solid;
+        let text_color = if solid { text_inverse } else { text_primary };
+
+        let border_on = spec.active_outline;
+        let (bg, border_color, border_width) = if is_active {
+            (
+                if solid { accent } else { active_bg },
+                if border_on { outline_selected_border } else { TRANSPARENT },
+                if border_on { border_w } else { 0.0 },
+            )
         } else {
-            (idle_bg, idle_border)
+            // Reserve a transparent border under activeOutline so the open
+            // trigger's visible border does not shift the list.
+            (idle_bg, TRANSPARENT, if border_on { border_w } else { 0.0 })
         };
 
         // Contract §3 `icon`: an entry with a leading icon composes icon +
@@ -105,11 +123,11 @@ pub fn navigation_menu(
             b.style.descriptor.layout.spacing.gap = list_gap;
             if let Some(ref icon_name) = entry.icon {
                 let mut glyph = Node::icon(icon_name.as_str(), font_size);
-                glyph.style.descriptor.text_color = Some(text_primary);
+                glyph.style.descriptor.text_color = Some(text_color);
                 b = b.child(glyph);
             }
             let mut label = Node::text(&entry.label);
-            label.style.descriptor.text_color = Some(text_primary);
+            label.style.descriptor.text_color = Some(text_color);
             label.style.text_size = Some(font_size);
             label.style.text_weight = Some(600);
             b.child(label)
@@ -121,7 +139,7 @@ pub fn navigation_menu(
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = pad_x;
             pad.right = pad_x;
-            s.descriptor.border.width = border_w;
+            s.descriptor.border.width = border_width;
             s.descriptor.border.color = border_color;
             s.descriptor.background = Some(bg);
             s.descriptor.cursor = CursorHint::Pointer;
@@ -139,11 +157,12 @@ pub fn navigation_menu(
                 btn.interaction.on_activate = Some(Arc::new(move || handler(&value)));
             }
 
-            // Hover: accent-12% fill. Active triggers keep their open fill on
-            // hover in the reference — the patch overrides bg on both, which
-            // matches the reference tier's `.hover(bg)` behaviour.
+            // Hover: accent-12% fill. A solid open trigger keeps its accent
+            // fill on hover — without this the fill reverts to the tint while
+            // the foreground stays text-inverse, leaving inverse text on a
+            // light tint (mirrors the web CSS hover-survival rule).
             btn.style.hover = Some(StylePatch {
-                background: Some(hover_bg),
+                background: Some(if solid { accent } else { hover_bg }),
                 border_color: None,
                 text_color: None,
                 opacity: None,
@@ -211,4 +230,131 @@ pub fn navigation_menu(
         }
     }
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_node::NodeKind;
+    use poodle_specs::NavigationMenuEntry;
+
+    /// The real token resolver over the ECLIPSE theme. Pure — no backend.
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn items() -> Vec<NavigationMenuEntry> {
+        vec![
+            NavigationMenuEntry::new("a", "A"),
+            NavigationMenuEntry::new("b", "B"),
+        ]
+    }
+
+    /// The trigger button whose subtree contains `label`.
+    fn trigger_of<'a>(root: &'a Node, label: &str) -> &'a Node {
+        root.find(&|n| {
+            n.a11y.role == Some(NodeRole::Button) && n.has_text(label)
+        })
+        .unwrap_or_else(|| panic!("trigger {label} exists"))
+    }
+
+    /// The label text node for `label`.
+    fn label_text<'a>(root: &'a Node, label: &str) -> &'a Node {
+        root.find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == label))
+            .unwrap_or_else(|| panic!("label text {label} exists"))
+    }
+
+    #[test]
+    fn default_trigger_is_borderless_with_tint_fill() {
+        let theme = theme();
+        let spec = NavigationMenuSpec::new(items()).with_value("a");
+        let accent = theme.resolve_color("color.accent.base");
+
+        let root = navigation_menu(&spec, &theme, None);
+        let open = trigger_of(&root, "A");
+        assert_eq!(open.style.descriptor.border.width, 0.0);
+        assert_eq!(
+            open.style.descriptor.background,
+            Some(with_alpha(accent, accent.3 * 0.16))
+        );
+
+        let closed = trigger_of(&root, "B");
+        assert_eq!(closed.style.descriptor.border.width, 0.0);
+        assert_eq!(
+            closed.style.descriptor.background,
+            Some(with_alpha(
+                theme.resolve_color("color.background.surface"),
+                theme.resolve_color("color.background.surface").3 * 0.88
+            ))
+        );
+    }
+
+    #[test]
+    fn active_outline_reserves_transparent_border_and_marks_open_trigger() {
+        let theme = theme();
+        let spec = NavigationMenuSpec::new(items())
+            .with_value("a")
+            .with_active_outline(true);
+        let accent = theme.resolve_color("color.accent.base");
+        let border_default = theme.resolve_color("color.border.default");
+
+        let root = navigation_menu(&spec, &theme, None);
+        let open = trigger_of(&root, "A");
+        assert_eq!(open.style.descriptor.border.width, rem_to_px(0.0625));
+        assert_eq!(
+            open.style.descriptor.border.color,
+            mix_srgb(accent, border_default, 0.42)
+        );
+
+        let closed = trigger_of(&root, "B");
+        assert_eq!(closed.style.descriptor.border.width, rem_to_px(0.0625));
+        assert_eq!(closed.style.descriptor.border.color, TRANSPARENT);
+    }
+
+    #[test]
+    fn solid_fill_uses_accent_with_inverse_foreground() {
+        let theme = theme();
+        let spec = NavigationMenuSpec::new(items())
+            .with_value("a")
+            .with_active_fill(ActiveFill::Solid);
+        let accent = theme.resolve_color("color.accent.base");
+        let inverse = theme.resolve_color("color.text.inverse");
+
+        let root = navigation_menu(&spec, &theme, None);
+        let open = trigger_of(&root, "A");
+        assert_eq!(open.style.descriptor.background, Some(accent));
+        assert_eq!(label_text(&root, "A").style.descriptor.text_color, Some(inverse));
+
+        let closed = trigger_of(&root, "B");
+        assert_eq!(
+            closed.style.descriptor.background,
+            Some(with_alpha(
+                theme.resolve_color("color.background.surface"),
+                theme.resolve_color("color.background.surface").3 * 0.88
+            ))
+        );
+        assert_eq!(
+            label_text(&root, "B").style.descriptor.text_color,
+            Some(theme.resolve_color("color.text.primary"))
+        );
+    }
+
+    #[test]
+    fn solid_open_trigger_keeps_accent_on_hover() {
+        let theme = theme();
+        let spec = NavigationMenuSpec::new(items())
+            .with_value("a")
+            .with_active_fill(ActiveFill::Solid);
+        let accent = theme.resolve_color("color.accent.base");
+
+        let root = navigation_menu(&spec, &theme, None);
+        let open_hover = trigger_of(&root, "A").style.hover.as_ref().expect("hover patch");
+        assert_eq!(open_hover.background, Some(accent));
+
+        let closed_hover = trigger_of(&root, "B").style.hover.as_ref().expect("hover patch");
+        assert_eq!(
+            closed_hover.background,
+            Some(with_alpha(accent, accent.3 * 0.12))
+        );
+    }
 }

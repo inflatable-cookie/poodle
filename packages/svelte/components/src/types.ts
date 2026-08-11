@@ -181,6 +181,13 @@ export interface TabItem {
 
 export type TabVariant = "card" | "pill" | "block" | "strip";
 
+/**
+ * Selection treatment on the active control: `"tint"` is the accent-tinted
+ * fill; `"solid"` fills with `accent-base` and switches the foreground to
+ * `text-inverse`. Shared type — see `docs/contracts/004-shared-control-types.md`.
+ */
+export type ActiveFill = "tint" | "solid";
+
 /** @deprecated Use TabItem instead */
 export type TabDefinition = TabItem;
 /** @deprecated Use TabItem instead */
