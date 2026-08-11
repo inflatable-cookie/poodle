@@ -1,6 +1,6 @@
 import "@inflatable-cookie/poodle-core/styles/app-header.css";
 
-import type { ReactNode } from "react";
+import { forwardRef, type ReactNode } from "react";
 
 import { UiPresentationProvider, resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -18,18 +18,23 @@ export interface AppHeaderProps {
   utility?: ReactNode;
 }
 
-export function AppHeader({
-  title = null,
-  subtitle = null,
-  dragRegion = false,
-  ariaLabel = null,
-  size = null,
-  sizeRole = "control",
-  density = null,
-  identity,
-  actions,
-  utility,
-}: AppHeaderProps) {
+/** React forwards `ref` to the rendered `<header>` DOM element (Svelte's
+ * counterpart is the bindable `element` prop). */
+export const AppHeader = forwardRef<HTMLElement, AppHeaderProps>(function AppHeader(
+  {
+    title = null,
+    subtitle = null,
+    dragRegion = false,
+    ariaLabel = null,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    identity,
+    actions,
+    utility,
+  },
+  ref,
+) {
   const uiPresentation = useUiPresentation();
 
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
@@ -38,6 +43,7 @@ export function AppHeader({
   return (
     <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
       <header
+        ref={ref}
         className="poodle-app-header"
         data-drag-region={dragRegion}
         data-size={resolvedSize}
@@ -60,4 +66,4 @@ export function AppHeader({
       </header>
     </UiPresentationProvider>
   );
-}
+});

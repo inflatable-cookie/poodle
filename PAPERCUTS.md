@@ -7,6 +7,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — Both the Svelte↔React parity gate
+  (`test/parity/component-parity.test.tsx`) and the React smoke sweep
+  (`packages/react/components/test/smoke.test.tsx`) enumerate React exports
+  with `typeof comp === "function"`, and React `forwardRef` returns an element
+  type object, not a function — so every ref-forwarding component silently
+  drops out of both gates. MenuSurface and (since b010) TextInput already sit
+  outside coverage this way; g13-014's AppHeader joined them. Counts drift
+  down with no signal. Accept element-type objects in the filter (a
+  `$$typeof` check) so forwardRef components stay gated. Affects Svelte↔React
+  parity and smoke coverage.
+
 - 2026-08-11 — `effigy docs:lint` requires every Cargo.toml under
   `packages/` to be registered in `packages/release-manifest.json` (reverse
   check in `packages/svelte/preview/scripts/lint-docs.ts`

@@ -4791,6 +4791,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "subtitle", type: "string | null", default: "null", description: "Secondary subtitle below the title." },
       { name: "dragRegion", type: "boolean", default: "false", description: "Whether the header acts as a window drag region." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the header." },
+      { name: "element", type: "HTMLElement | null", default: "null", description: "Bindable escape hatch: the rendered header DOM element, for attaching host behaviour (for example window dragging)." },
     ],
     slots: [
       { name: "identity", description: "Custom content snippet for the identity/logo area." },
@@ -4801,9 +4802,21 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     usage: `<script lang="ts">
   import { AppHeader } from "@inflatable-cookie/poodle-svelte";
   import { Button } from "@inflatable-cookie/poodle-svelte";
+
+  let headerElement = $state<HTMLElement | null>(null);
+
+  $effect(() => {
+    const header = headerElement;
+    if (!header) return;
+    // Host-owned behaviour — Poodle implements no gesture. For example:
+    // a window-drag handler, or double-click-to-maximize.
+    const onDblClick = () => console.log("toggle maximize");
+    header.addEventListener("dblclick", onDblClick);
+    return () => header.removeEventListener("dblclick", onDblClick);
+  });
 </script>
 
-<AppHeader title="My App" subtitle="Dashboard">
+<AppHeader bind:element={headerElement} title="My App" subtitle="Dashboard">
   {#snippet actions()}
     <Button variant="primary">New</Button>
   {/snippet}
