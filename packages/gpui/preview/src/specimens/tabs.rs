@@ -275,9 +275,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_id("specimen-block-outline")
         .on_change(node_value_handler(state, "tabs-block-outline-value"));
 
-    // 3d. BLOCK VARIANT WITH ACTIVE EDGE UNDERLINE — the former strip
-    // variant's indicator, reproduced on block (contract §13: block + each
-    // activeEdge value).
+    // 3d. BLOCK VARIANT WITH ACTIVE EDGE UNDERLINE + NO FILL — exactly the
+    // former strip variant: an accent underline and no selected fill
+    // (contract §13: block + activeFill="none" + activeEdge="underline").
     let underline_value = state
         .specimens
         .text
@@ -294,9 +294,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     ])
     .with_variant(TabVariant::Block)
     .with_active_edge(ActiveEdge::Underline)
+    .with_active_fill(ActiveFill::None)
     .with_value(&underline_value)
     .with_reorderable(true)
-    .with_aria_label("Workspace surfaces");
+    .with_aria_label("Strip-equivalent workspace surfaces");
 
     let underline_component = Tabs::from_spec(underline_spec, theme)
         .with_id("specimen-block-underline")
@@ -596,7 +597,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(block_outline_component),
         )
-        // 3d. Block variant (active underline — the former strip)
+        // 3d. Block variant (active underline, no fill — the former strip)
         .child(
             div()
                 .flex()
@@ -604,7 +605,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
                     EyebrowSpec::new().with_content(
-                        "Block variant (active underline — the former strip)",
+                        "Block variant (active underline, no fill — the former strip)",
                     ),
                     theme,
                 ))

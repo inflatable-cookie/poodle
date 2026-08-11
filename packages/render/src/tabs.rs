@@ -296,7 +296,7 @@ fn render_card(
                 s.fill_width = true;
                 s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
             }
-            if is_active {
+            if is_active && spec.active_fill != ActiveFill::None {
                 s.descriptor.background = if solid {
                     Some(accent)
                 } else {
@@ -390,7 +390,7 @@ fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Option<&Ta
             s.text_weight = Some(600);
             s.descriptor.text_color = Some(text_color);
             s.descriptor.cursor = CursorHint::Pointer;
-            if is_active {
+            if is_active && spec.active_fill != ActiveFill::None {
                 s.descriptor.background = Some(active_bg);
             }
             if is_disabled {
@@ -490,7 +490,7 @@ fn render_block(
                     s.border_color_left = Some(separator);
                 }
             }
-            if is_active {
+            if is_active && spec.active_fill != ActiveFill::None {
                 s.descriptor.background = Some(selected_bg);
             }
             if is_disabled {
@@ -686,5 +686,58 @@ mod tests {
         // The outline still applies to the remaining sides.
         assert_eq!(second.style.descriptor.border.width, 1.0);
         assert_eq!(second.style.descriptor.border.color, TRANSPARENT);
+    }
+
+    #[test]
+    fn none_fill_suppresses_selected_background_on_every_variant() {
+        let theme = theme();
+        let text_primary = theme.resolve_color("color.text.primary");
+        for variant in [TabVariant::Card, TabVariant::Pill, TabVariant::Block] {
+            let spec =
+                TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
+                    .with_variant(variant)
+                    .with_active_fill(ActiveFill::None)
+                    .with_value("a");
+
+            let root = tabs(&spec, &theme, None, None);
+            let active = tab_of(&root, "a");
+            assert_eq!(
+                active.style.descriptor.background, None,
+                "{variant:?} must not fill the selected tab under None"
+            );
+            // The selected text colour is unaffected: text-primary, never the
+            // inverse swap solid uses.
+            assert_eq!(
+                active.style.descriptor.text_color,
+                Some(text_primary),
+                "{variant:?} selected text colour must be unaffected"
+            );
+            let inactive = tab_of(&root, "b");
+            assert_eq!(inactive.style.descriptor.background, None);
+        }
+    }
+
+    #[test]
+    fn block_none_fill_keeps_underline_edge() {
+        let theme = theme();
+        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
+            .with_variant(TabVariant::Block)
+            .with_active_fill(ActiveFill::None)
+            .with_active_edge(ActiveEdge::Underline)
+            .with_value("a");
+
+        let root = tabs(&spec, &theme, None, None);
+        let accent = theme.resolve_color(spec.indicator_token());
+
+        // The strip equivalent: underline and no fill.
+        let active = tab_of(&root, "a");
+        assert_eq!(active.style.descriptor.background, None);
+        assert_eq!(active.style.border_bottom_width, Some(rem_to_px(0.125)));
+        assert_eq!(active.style.border_color_bottom, Some(accent));
+
+        // Unselected tabs keep the transparent reserve edge.
+        let inactive = tab_of(&root, "b");
+        assert_eq!(inactive.style.border_bottom_width, Some(rem_to_px(0.125)));
+        assert_eq!(inactive.style.border_color_bottom, Some(TRANSPARENT));
     }
 }

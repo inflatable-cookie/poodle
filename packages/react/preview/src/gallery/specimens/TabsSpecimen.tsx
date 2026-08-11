@@ -206,9 +206,9 @@ export function TabsSpecimen() {
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Block variant (active underline — the former strip)">
+        <SpecimenGroup label="Block variant (active underline, no fill — the former strip)">
           <div style={frameStyle}>
-            <Tabs items={stripTabs} variant="block" activeEdge="underline" activeFill="solid" defaultValue="editor" ariaLabel="Solid underlined block tabs" />
+            <Tabs items={stripTabs} variant="block" activeEdge="underline" activeFill="none" defaultValue="editor" ariaLabel="Strip-equivalent block tabs" />
           </div>
         </SpecimenGroup>
 

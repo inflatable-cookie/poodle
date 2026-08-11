@@ -453,6 +453,23 @@
     background: var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-color-accent-base));
   }
 
+  /* activeFill="none": the off state of the fill axis — the selected item
+     carries no fill, symmetric with activeEdge="none". Selection is then
+     marked only by the edge and the selected text colour. The selected fill
+     comes from the variant rules above (card/block/pill), so these suppress
+     them; the same one-step-more-specific trick the solid rules use. Block's
+     selected-hover fill is suppressed too — it is a selection fill (accent-
+     based, unlike the unselected hover), and the former strip's active item
+     never filled on hover. Only the fill goes: text colour and the edge are
+     untouched. */
+  .poodle-tabs[data-active-fill="none"] .poodle-tabs__item[data-selected="true"] {
+    background: transparent;
+  }
+
+  .poodle-tabs[data-active-fill="none"] .poodle-tabs__item[data-selected="true"]:hover {
+    background: transparent;
+  }
+
   /* Focus */
   .poodle-tabs__tab:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);

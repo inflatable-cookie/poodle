@@ -14,8 +14,8 @@ export function MessageCenterSpecimen() {
   const [items, setItems] = useState(initialItems);
 
   return (
-    {/* Same gap HistoryCenter inherited from this specimen: SpecimenLayout
-        advertises the axis tabs regardless, so omitting these left them empty. */}
+    // Same gap HistoryCenter inherited from this specimen: SpecimenLayout
+    // advertises the axis tabs regardless, so omitting these left them empty.
     <SpecimenLayout
       bareVariants
       sizes={(size) => <MessageCenter items={items} size={size} />}

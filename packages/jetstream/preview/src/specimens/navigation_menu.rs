@@ -132,6 +132,18 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 theme,
             ),
         ))
+        .child(group(
+            "Navigation menu (no fill)",
+            secondary,
+            js_navigation_menu(
+                &NavigationMenuSpec::new(full_items())
+                    .with_value("components")
+                    .with_aria_label("No-fill underlined main navigation")
+                    .with_active_fill(ActiveFill::None)
+                    .with_active_edge(ActiveEdge::Underline),
+                theme,
+            ),
+        ))
         // Size ladder — trigger height + font scale xs..xl.
         .child(group(
             "Size ladder",

@@ -49,7 +49,7 @@ Updated: 2026-07-10
 | `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for item spacing; when null, resolves from inherited presentation |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the nav element |
 | `activeEdge` | `ActiveEdge` | `"none"` | no | selection edge on the open trigger; shared type (see `004-shared-control-types.md`): `"none"` draws no edge, `"outline"` draws the accent border around the open trigger — the border the trigger carried by default before g13.016, `"underline"` draws the accent edge along the trigger's bottom edge |
-| `activeFill` | `ActiveFill` | `"tint"` | no | selection treatment on the open trigger; shared type (see `004-shared-control-types.md`): `tint` is the accent-tinted open fill, `solid` fills the trigger fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
+| `activeFill` | `ActiveFill` | `"tint"` | no | selection treatment on the open trigger; shared type (see `004-shared-control-types.md`): `none` draws no fill (the open trigger keeps its idle fill; the edge and the selected text colour carry selection alone), `tint` is the accent-tinted open fill, `solid` fills the trigger fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
 
 ### NavigationMenuItem Type
 
@@ -85,7 +85,7 @@ Updated: 2026-07-10
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | all closed | default | no viewport visible, triggers borderless (the border is opt-in via `activeEdge`), tint open state available |
-| item active | value matches a trigger | that trigger shows open styling (accent 16% tint; accent fill with `text-inverse` when `activeFill="solid"`), viewport visible with slot content |
+| item active | value matches a trigger | that trigger shows open styling (accent 16% tint; accent fill with `text-inverse` when `activeFill="solid"`; no open fill — the idle trigger fill — when `activeFill="none"`), viewport visible with slot content |
 | trigger hover | pointer over trigger (when not disabled) | hover background treatment (accent 12%) — except a solid-filled open trigger, which keeps its accent fill on hover |
 | trigger focus | keyboard focus on trigger | focus background treatment (accent 12%), outline: none — except a solid-filled open trigger, which keeps its accent fill on focus |
 | disabled | `disabled` on NavigationMenuItem | trigger muted, non-interactive, reduced opacity |
@@ -274,6 +274,18 @@ from shifting when the open trigger's edge becomes visible.
 | `color` (open trigger) | `var(--poodle-color-text-inverse)` — the same token the primary Button uses on `accent-base`, so the filled trigger stays legible against every accent |
 | `background` (open trigger, hover / focus-visible) | `var(--poodle-color-accent-base)` — the fill survives hover/focus; the generic accent-12% hover rule must not override it |
 
+### Trigger — activeFill="none"
+
+| Property | Value |
+|----------|-------|
+| `background` (open trigger) | `var(--poodle-recipe-navigation-menu-trigger-fill, color-mix(in srgb, var(--poodle-color-background-surface) 88%, transparent))` — the idle trigger fill; no selection fill is added |
+
+`activeFill="none"` suppresses the open trigger's selection fill: the trigger
+keeps its idle fill, so selection is marked only by the `activeEdge`
+treatment and the selected text colour. The generic hover/focus accent-12%
+rule still applies (same as an idle trigger) — only the selection fill is
+gone.
+
 ### Viewport `.navigation-menu__viewport`
 
 | Property | Value |
@@ -332,7 +344,7 @@ no height change):
   pill-style border when `activeEdge` is set); this is an accepted visual
   change — the old unconditional border is gone
 - Root emits `data-active-edge` (`"none"` / `"outline"` / `"underline"`) and
-  `data-active-fill` (`"tint"` / `"solid"`) alongside `data-size` and
+  `data-active-fill` (`"none"` / `"tint"` / `"solid"`) alongside `data-size` and
   `data-density`; the CSS switches key off these root attributes
 - The open state uses a distinct accent-base 16% background,
   differentiating it from the hover state at 12%; a border accent appears
@@ -366,7 +378,10 @@ no height change):
   (`border_color_bottom`) with a transparent reserve on every trigger.
 - `activeFill="solid"` maps to a full `accent-base` background on the open
   trigger with `color.text.inverse` foreground, and the hover patch keeps the
-  accent fill on hover (no 12% revert).
+  accent fill on hover (no 12% revert). `activeFill="none"` maps to **no**
+  selection fill: the open trigger keeps the idle trigger fill
+  (`background-surface` 88%); the hover patch stays the generic accent-12%
+  hover fill, same as an idle trigger.
 - Open trigger: 16% accent-base (tint fill only; no border accent)
 - Hover trigger: 12% accent-base
 - Viewport border: 74% on border-subtle
@@ -412,6 +427,7 @@ no height change):
 - [ ] trigger has no border by default (g13.016; border is opt-in via `activeEdge`)
 - [ ] activeEdge="outline" gives every trigger a transparent 0.0625rem reserve border; the open trigger's border uses accent-base 42% blended with border-default; activeEdge="underline" gives the open trigger an accent 0.125rem bottom edge
 - [ ] activeFill="solid" fills the open trigger with accent-base and swaps the foreground to text-inverse; the fill survives hover and focus
+- [ ] activeFill="none" leaves the open trigger on its idle fill (no selection fill) while the edge and selected text colour still mark it
 - [ ] trigger min-height uses control-height minus 0.125rem
 - [ ] trigger padding 0 0.875rem matches
 - [ ] trigger gap 0.375rem for icon matches
@@ -451,6 +467,7 @@ no height change):
 | Navigation menu (active underline) | `activeEdge="underline"`, `value="components"` | Every trigger carries a 0.125rem transparent bottom border (reserve); the open Components trigger shows the accent underline |
 | Navigation menu (solid fill) | `activeFill="solid"`, `value="components"` | Open Components trigger fills fully with `accent-base`, foreground `text-inverse`; other triggers borderless with default fills |
 | Navigation menu (solid fill — hover the open trigger) | `activeFill="solid"`, `value="components"` | Same as solid fill; the hint labels the hover state, where the open trigger keeps its accent fill (no revert to the accent-12% hover tint) |
+| Navigation menu (no fill) | `activeFill="none"`, `value="components"` | Open Components trigger keeps its idle trigger fill (no selection fill); selection is marked only by the edge and the selected text colour |
 
 #### Navigation Items
 

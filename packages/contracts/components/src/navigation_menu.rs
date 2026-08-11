@@ -13,8 +13,8 @@ pub struct NavigationMenuSpec {
     /// Selection edge on the open trigger — see `ActiveEdge`. Matches Svelte
     /// `activeEdge` (default `"none"`).
     pub active_edge: ActiveEdge,
-    /// Selection treatment on the open trigger: tint or fully accent-filled.
-    /// Matches Svelte `activeFill` (default `"tint"`).
+    /// Selection treatment on the open trigger: none (no fill), tint, or
+    /// fully accent-filled. Matches Svelte `activeFill` (default `"tint"`).
     pub active_fill: ActiveFill,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
@@ -66,7 +66,7 @@ impl NavigationMenuSpec {
         self
     }
 
-    /// Set the selection treatment on the open trigger (tint or solid).
+    /// Set the selection treatment on the open trigger (none, tint, or solid).
     pub fn with_active_fill(mut self, active_fill: ActiveFill) -> Self {
         self.active_fill = active_fill;
         self

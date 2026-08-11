@@ -56,7 +56,7 @@ Updated: 2026-07-29
 | `items` | `TabItem[]` | `[]` | yes | tab definitions |
 | `variant` | `"card" \| "pill" \| "block"` | `"card"` | no | visual variant; `"card"` is the default |
 | `activeEdge` | `ActiveEdge` | `"none"` | no | selection edge on the active tab; shared type (see `004-shared-control-types.md`): `"none"` draws no edge, `"outline"` draws the accent border around the active item (the decoration the former `card` variant had by default — selected item border `accent-base` 32% mixed with `border-subtle`), `"underline"` draws the accent edge along the inline-end side (bottom horizontal, right vertical — the former `strip` variant's indicator). The edge axis is mutually exclusive by construction |
-| `activeFill` | `ActiveFill` | `"tint"` | no | selection treatment on the active tab; shared type (see `004-shared-control-types.md`): `tint` is the accent-tinted fill, `solid` fills the tab fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
+| `activeFill` | `ActiveFill` | `"tint"` | no | selection treatment on the active tab; shared type (see `004-shared-control-types.md`): `none` draws no fill (the edge and the selected text colour carry selection alone — `block` + `activeFill="none"` + `activeEdge="underline"` is exactly the deleted `strip` variant), `tint` is the accent-tinted fill, `solid` fills the tab fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
 | `bordered` | `boolean` | `false` | no | card variant only: draws the separating border on the list — bottom when horizontal, right when vertical — **and the outer padding that holds the tabs off it**. When false the strip renders flush to its container in both orientations, and the consumer owns any spacing beneath. `card` is a plain baseline by default — `bordered` for tabs above content, `activeEdge`/`activeFill` for selection emphasis. Use `bordered={false}` for titlebars, toolbars and other confined layouts where the tabs are not above content |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | navigation axis |
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | no | whether focus changes selection |
@@ -442,11 +442,11 @@ strip's indicator and was patched with strip-specific rules). The enum makes
 the conflict unrepresentable: exactly one edge value applies.
 
 `underline` draws the accent edge along the inline-end side — the former
-`strip` variant's indicator. `block` + `activeEdge="underline"` is the
-replacement for the deleted `strip` variant: block absorbs strip's list inline
-padding, item hover background, close-button margin-end tweak, and
-vertical-orientation handling, and keeps its own separators, full-width
-behaviour, and rounded-corner handling.
+`strip` variant's indicator. `block` + `activeEdge="underline"` +
+`activeFill="none"` is exactly the deleted `strip` variant: underline and no
+fill. Block absorbs strip's list inline padding, item hover background,
+close-button margin-end tweak, and vertical-orientation handling, and keeps
+its own separators, full-width behaviour, and rounded-corner handling.
 
 `block` keeps its `border-left` separators under `activeEdge="outline"`; the
 outline covers the remaining sides. Solid fill overrides block's own
@@ -577,6 +577,18 @@ One rule, applied by every variant and both opt-in switches:
 The solid fill applies to the selected tab on any variant; the foreground
 switches to `text-inverse`, the same token the primary Button uses on
 `accent-base`, so the filled tab keeps legible contrast against every accent.
+
+### Item — activeFill="none", selected
+
+| Property | Value |
+|----------|-------|
+| `background` | `transparent` |
+
+`activeFill="none"` suppresses the selected fill on every variant: the item
+keeps its idle background (none, on every variant) in both the selected and
+selected-hover states. The selected text colour and the `activeEdge`
+treatment are unaffected — only the fill goes. `block` + `activeFill="none"` +
+`activeEdge="underline"` is the deleted `strip` variant: underline, no fill.
 
 ### Tab — Pill variant
 
@@ -818,7 +830,7 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - The renamed `Card` variant renders icon, count, and close-button accessories on every tab, with the close button wired to `on_close` (inert when unwired, so an unwired X does not bubble to the tab and select what it was closing).
 - `activeEdge::Outline` maps to a 1px border on the selected tab element: `mix_srgb(accent, border-subtle, 0.32)` — the former card selected-border value. All tabs get a transparent 1px border so selection does not shift layout.
 - `activeEdge::Underline` maps to a 2px accent border on the inline-end side of the selected tab element (`border-bottom` horizontal, `border-right` vertical — `border_color_bottom` / `descriptor.border.color`), with a transparent reserve border on every tab so selection does not shift layout.
-- `activeFill="solid"` maps to a full `accent-base` background on the selected tab with `color.text.inverse` foreground.
+- `activeFill="solid"` maps to a full `accent-base` background on the selected tab with `color.text.inverse` foreground. `activeFill="none"` maps to **no** background on the selected tab (the `is_active` branch skips the fill assignment entirely); the selected text colour and the `activeEdge` treatment are unaffected.
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
 - Card variant border opacity: 82% → `0.82` multiplier on border-subtle
 - Panel border: 74% → `0.74` on border-subtle; panel bg: 96% → `0.96` on background-panel
@@ -944,12 +956,25 @@ Card tabs with icons and no panel below:
 ### Block variant (each activeEdge value)
 
 Block tabs with every `activeEdge` value: the full-width shell bar
-(`"none"`), the accent outline (`"outline"`), and the accent underline —
-the former `strip` variant's look (`"underline"`):
+(`"none"`), the accent outline (`"outline"`), and the accent underline
+(`"underline"`):
 
 | Tab label | Icon | State |
 |-----------|------|-------|
 | Editor | code | active (default) |
+| Preview | eye | inactive, closable |
+| Terminal | terminal | inactive, closable |
+| Output | file-text | inactive, closable |
+
+### Block variant (active underline, no fill — the former strip)
+
+Block tabs with `activeFill="none"` and `activeEdge="underline"` — exactly
+the deleted `strip` variant: an accent underline and **no** selected fill.
+Selection is marked only by the underline and the selected text colour:
+
+| Tab label | Icon | State |
+|-----------|------|-------|
+| Editor | code | active (default), underlined, no fill |
 | Preview | eye | inactive, closable |
 | Terminal | terminal | inactive, closable |
 | Output | file-text | inactive, closable |

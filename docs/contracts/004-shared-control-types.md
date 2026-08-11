@@ -83,7 +83,7 @@ vocabulary and must not be used in new specs, specimens, or IR definitions.
 ## ActiveFill
 
 ```
-type ActiveFill = "tint" | "solid"
+type ActiveFill = "none" | "tint" | "solid"
 ```
 
 Default: `"tint"`.
@@ -100,13 +100,22 @@ TypeScript: `ActiveFill` in `packages/svelte/components/src/types.ts` and
 
 ### Semantics
 
-`tint` is the accent-tinted selection fill a component defines for its own
-active state (Tabs' variant fills, NavigationMenu's `accent-base` 16% open
-trigger). `solid` fills the active control fully with `accent-base` and
-switches the foreground to `text-inverse` — the same token the primary Button
-uses on `accent-base`, so the filled control keeps legible contrast against
-every accent. There are exactly two members; a third value is a contract
-violation (T2), not an extension.
+`none` draws no selection fill — selection is carried by the edge and the
+selected text colour alone. It is the off value of the fill axis, symmetric
+with `ActiveEdge::none`: `block` + `activeFill="none"` +
+`activeEdge="underline"` is exactly the deleted `strip` variant (underline
+and no fill). `tint` is the accent-tinted selection fill a component defines
+for its own active state (Tabs' variant fills, NavigationMenu's `accent-base`
+16% open trigger). `solid` fills the active control fully with `accent-base`
+and switches the foreground to `text-inverse` — the same token the primary
+Button uses on `accent-base`, so the filled control keeps legible contrast
+against every accent.
+
+Members are added by ruling and recorded here — a contract restating this
+type with fewer members is a T2 violation, but the type is not frozen by
+that rule (the former "exactly two members" line predated `ActiveEdge` and
+was wrong on both counts: T2 forbids a *contract* narrowing a shared type,
+and a recorded ruling is exactly how a member legitimately arrives).
 
 ## ActiveEdge
 
