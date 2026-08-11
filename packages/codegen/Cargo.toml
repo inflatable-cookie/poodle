@@ -1,0 +1,26 @@
+[package]
+name = "poodle-codegen"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+rust-version = "1.95"
+description = "Deterministic emitter turning validated poodle IR into committed TypeScript artifacts."
+repository = "https://github.com/inflatable-cookie/poodle"
+homepage = "https://github.com/inflatable-cookie/poodle"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "poodle-codegen"
+path = "src/bin/poodle-codegen.rs"
+
+[dependencies]
+poodle-ir = { version = "0.1.0", path = "../contracts/ir" }
+serde_json = "1"
+
+[package.metadata.poodle]
+public-intent = false
+channel = "internal"
+stability = "internal-tooling"

@@ -255,6 +255,15 @@
       "removalGate": "owner-directed-with-doc-update"
     },
     {
+      "name": "poodle-codegen",
+      "channel": "internal",
+      "publicIntent": false,
+      "changeControl": "tooling-owned",
+      "requiresReleaseNotes": false,
+      "requiresDeprecationRecord": false,
+      "removalGate": "owner-directed-with-doc-update"
+    },
+    {
       "name": "poodle-node",
       "channel": "preview",
       "publicIntent": true,

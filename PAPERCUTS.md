@@ -7,6 +7,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-11 — `effigy docs:check` fails at HEAD once the parity reports
+  regenerate: `packages/svelte/preview/artifacts/parity-report.json` reports
+  201 exports / 164 components (`HistoryCenter`, from g13-b020/b021) while
+  the committed report and `packages/shared-demo-app-audit.json` say
+  200/163, so `docs:lint`'s audit-json consistency check fails. The report
+  generators have no `--check` mode (b015 failure mode 8), so the committed
+  report drifted silently and the first regeneration after any component
+  lands breaks the gate. Either regenerate+commit the report artifacts
+  together with component landings, or give the report generators a check
+  mode wired into `docs:check`. Affects every gate run after a component
+  lands.
+
 - 2026-08-11 — `packages/svelte/components` has no `tsconfig.json` and is never
   type-checked. `effigy check:svelte` runs `svelte-check` against
   `packages/svelte/install-smoke` — one file, 0 errors — so the 164 components

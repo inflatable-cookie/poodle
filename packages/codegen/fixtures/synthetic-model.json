@@ -1,0 +1,373 @@
+{
+  "schema_version": 1,
+  "shared_types": [
+    {
+      "id": "tone",
+      "name": "Tone",
+      "description": "Semantic emphasis tone for controls. Synthetic stand-in for the shared enumerated types of g13-b003 R6.1.",
+      "canonical_ref": { "path": "docs/contracts/004-shared-control-types.md", "section": "Shared enumerated types" },
+      "members": [
+        { "id": "default", "name": "Default", "description": "Neutral emphasis." },
+        { "id": "danger", "name": "Danger", "description": "Destructive emphasis." },
+        { "id": "success", "name": "Success", "description": "Positive emphasis." },
+        { "id": "warning", "name": "Warning", "description": "Caution emphasis." }
+      ]
+    },
+    {
+      "id": "placement",
+      "name": "Placement",
+      "description": "Overlay placement relative to an anchor. Synthetic fixture vocabulary.",
+      "canonical_ref": { "path": "docs/contracts/004-shared-control-types.md", "section": "Shared enumerated types" },
+      "members": [
+        { "id": "top", "name": "Top", "description": "Above the anchor." },
+        { "id": "bottom", "name": "Bottom", "description": "Below the anchor." },
+        { "id": "start", "name": "Start", "description": "Inline-start of the anchor." },
+        { "id": "end", "name": "End", "description": "Inline-end of the anchor." },
+        { "id": "center", "name": "Center", "description": "Centered on the anchor." }
+      ]
+    },
+    {
+      "id": "orientation",
+      "name": "Orientation",
+      "description": "Layout orientation axis (CROSS-11). Synthetic fixture vocabulary.",
+      "canonical_ref": { "path": "docs/contracts/004-shared-control-types.md", "section": "Shared enumerated types" },
+      "members": [
+        { "id": "horizontal", "name": "Horizontal", "description": "Horizontal layout." },
+        { "id": "vertical", "name": "Vertical", "description": "Vertical layout." }
+      ]
+    },
+    {
+      "id": "validation-state",
+      "name": "ValidationState",
+      "description": "Validation outcome surface (TXT-12). Synthetic fixture vocabulary.",
+      "canonical_ref": { "path": "docs/contracts/004-shared-control-types.md", "section": "Shared enumerated types" },
+      "members": [
+        { "id": "none", "name": "None", "description": "No validation feedback." },
+        { "id": "error", "name": "Error", "description": "Invalid input." },
+        { "id": "warning", "name": "Warning", "description": "Advisory input." },
+        { "id": "success", "name": "Success", "description": "Valid input." }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "id": "badge",
+      "name": "Badge",
+      "layer": "foundation",
+      "contract": { "path": "docs/contracts/components/badge.md", "section": "§3" },
+      "description": "Synthetic badge component exercising the string, number, boolean, and shared-enum prop vocabulary.",
+      "props": [
+        {
+          "id": "tone",
+          "name": "tone",
+          "prop_type": { "Shared": "tone" },
+          "default": { "Member": "default" },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Semantic emphasis tone.",
+          "permitted_subset": { "shared_type": "tone", "members": ["danger", "default", "success"] }
+        },
+        {
+          "id": "label",
+          "name": "label",
+          "prop_type": "String",
+          "default": null,
+          "default_expr": null,
+          "required": true,
+          "web_only": false,
+          "description": "Text the badge renders.",
+          "permitted_subset": null
+        },
+        {
+          "id": "maxWidth",
+          "name": "maxWidth",
+          "prop_type": "Number",
+          "default": { "Number": 120.5 },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Maximum rendered width in pixels.",
+          "permitted_subset": null
+        },
+        {
+          "id": "pill",
+          "name": "pill",
+          "prop_type": "Bool",
+          "default": { "Bool": false },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Renders with fully rounded ends.",
+          "permitted_subset": null
+        }
+      ],
+      "controlled_state": [],
+      "events": [],
+      "parts": [],
+      "attributes": [],
+      "axes": { "size": null, "density": null, "orientation": null },
+      "tokens": [],
+      "recipe_hooks": [],
+      "accessibility": {
+        "role": "group",
+        "name_rule": "from-content",
+        "name_source": "content",
+        "aria": [],
+        "native": [],
+        "description": "Group role; the label content names it."
+      },
+      "capabilities": [],
+      "keyboard": [],
+      "visual_state": [],
+      "conformance": [],
+      "extensions": []
+    },
+    {
+      "id": "gauge",
+      "name": "Gauge",
+      "layer": "foundation",
+      "contract": { "path": "docs/contracts/components/gauge.md", "section": "§3" },
+      "description": "Synthetic gauge component exercising pair, list, and unreserved shared-enum props.",
+      "props": [
+        {
+          "id": "min",
+          "name": "min",
+          "prop_type": "Number",
+          "default": { "Number": 0 },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Minimum value of the gauge range.",
+          "permitted_subset": null
+        },
+        {
+          "id": "max",
+          "name": "max",
+          "prop_type": "Number",
+          "default": { "Number": 100 },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Maximum value of the gauge range.",
+          "permitted_subset": null
+        },
+        {
+          "id": "value",
+          "name": "value",
+          "prop_type": { "Pair": "Number" },
+          "default": { "Pair": [{ "Number": 0 }, { "Number": 100 }] },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Controlled [lower, upper] value pair.",
+          "permitted_subset": null
+        },
+        {
+          "id": "orientation",
+          "name": "orientation",
+          "prop_type": { "Shared": "orientation" },
+          "default": { "Member": "horizontal" },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Layout orientation of the gauge.",
+          "permitted_subset": null
+        },
+        {
+          "id": "tickValues",
+          "name": "tickValues",
+          "prop_type": { "List": "Number" },
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Tick positions as fractions of the range.",
+          "permitted_subset": null
+        },
+        {
+          "id": "showLabels",
+          "name": "showLabels",
+          "prop_type": "Bool",
+          "default": { "Bool": true },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Whether value labels render at the ends.",
+          "permitted_subset": null
+        },
+        {
+          "id": "unit",
+          "name": "unit",
+          "prop_type": "String",
+          "default": null,
+          "default_expr": null,
+          "required": true,
+          "web_only": false,
+          "description": "Unit suffix for the value labels.",
+          "permitted_subset": null
+        }
+      ],
+      "controlled_state": [],
+      "events": [],
+      "parts": [],
+      "attributes": [],
+      "axes": {
+        "size": null,
+        "density": null,
+        "orientation": { "default": "horizontal", "values": ["horizontal", "vertical"] }
+      },
+      "tokens": [],
+      "recipe_hooks": [],
+      "accessibility": {
+        "role": "group",
+        "name_rule": "from-content",
+        "name_source": null,
+        "aria": [],
+        "native": [],
+        "description": "Group role for the composite gauge surface."
+      },
+      "capabilities": [],
+      "keyboard": [],
+      "visual_state": [],
+      "conformance": [],
+      "extensions": []
+    },
+    {
+      "id": "search-field",
+      "name": "SearchField",
+      "layer": "foundation",
+      "contract": { "path": "docs/contracts/components/search-field.md", "section": "§3" },
+      "description": "Synthetic search field exercising null, expression-derived defaults, web-only marks, and one-member subsets.",
+      "props": [
+        {
+          "id": "value",
+          "name": "value",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Controlled value; null is the empty controlled state.",
+          "permitted_subset": null
+        },
+        {
+          "id": "placeholder",
+          "name": "placeholder",
+          "prop_type": "String",
+          "default": { "String": "say \"hi\" \\ now" },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Placeholder text shown while empty.",
+          "permitted_subset": null
+        },
+        {
+          "id": "spellcheck",
+          "name": "spellcheck",
+          "prop_type": "Bool",
+          "default": { "Bool": false },
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Native spellcheck attribute projection.",
+          "permitted_subset": null
+        },
+        {
+          "id": "accent",
+          "name": "accent",
+          "prop_type": { "Shared": "tone" },
+          "default": { "Member": "danger" },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Accent tone for the focus ring; only danger is permitted.",
+          "permitted_subset": { "shared_type": "tone", "members": ["danger"] }
+        },
+        {
+          "id": "validationState",
+          "name": "validationState",
+          "prop_type": { "Shared": "validation-state" },
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Declared validation outcome.",
+          "permitted_subset": null
+        },
+        {
+          "id": "tokens",
+          "name": "tokens",
+          "prop_type": { "List": "String" },
+          "default": { "List": [{ "String": "alpha" }, { "String": "beta" }] },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Search token list seeded in uncontrolled mode.",
+          "permitted_subset": null
+        },
+        {
+          "id": "hint",
+          "name": "hint",
+          "prop_type": "String",
+          "default": null,
+          "default_expr": {
+            "coalesce": [
+              { "operand": { "prop": "placeholder" } },
+              { "operand": { "literal": { "string": "search hint" } } }
+            ]
+          },
+          "required": false,
+          "web_only": false,
+          "description": "Helper text; defaults to the placeholder via a bounded expression.",
+          "permitted_subset": null
+        },
+        {
+          "id": "ariaLabel",
+          "name": "ariaLabel",
+          "prop_type": "String",
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Accessible name for the search input.",
+          "permitted_subset": null
+        }
+      ],
+      "controlled_state": [],
+      "events": [],
+      "parts": [],
+      "attributes": [],
+      "axes": { "size": null, "density": null, "orientation": null },
+      "tokens": [],
+      "recipe_hooks": [],
+      "accessibility": {
+        "role": "searchbox",
+        "name_rule": { "from-prop": "ariaLabel" },
+        "name_source": { "prop": "ariaLabel" },
+        "aria": [
+          {
+            "aria_attr": "aria-invalid",
+            "source": "validationState",
+            "description": "Maps the declared validation outcome to aria-invalid."
+          }
+        ],
+        "native": [
+          {
+            "name": "aria-label",
+            "description": "Native aria-label projection carries the accessible name."
+          }
+        ],
+        "description": "Searchbox role; the ariaLabel prop names it."
+      },
+      "capabilities": [],
+      "keyboard": [],
+      "visual_state": [],
+      "conformance": [],
+      "extensions": []
+    }
+  ],
+  "conformance_vectors": [],
+  "scenes": [],
+  "specimen_registry": null
+}

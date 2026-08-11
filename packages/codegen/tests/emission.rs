@@ -1,0 +1,514 @@
+//! Integration tests for the emission core, the drift gate, and the CLI.
+//!
+//! Every b015 failure mode has a home here or a one-line owner note in the
+//! batch log; these tests are the mechanical proof for the acceptance
+//! criteria: byte-identical double generation, drift detection with
+//! whitespace-only classification, read-only check mode, stale-orphan
+//! detection, panic-free malformed/invalid input, and framework-free
+//! TypeScript that actually type-checks.
+
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::process::Command;
+
+use poodle_codegen::{
+    check_outputs, generate, load_and_validate, targets, write_outputs, CodegenError, DriftKind,
+    GeneratedFile,
+};
+
+/// Repo-relative fixture path, exactly as the Effigy selector passes it —
+/// this is also the authored source path the headers carry.
+const FIXTURE: &str = "packages/codegen/fixtures/synthetic-model.json";
+
+fn crate_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+}
+
+fn repo_root() -> PathBuf {
+    crate_dir()
+        .parent()
+        .expect("packages/codegen has a parent")
+        .parent()
+        .expect("packages has a parent")
+        .to_path_buf()
+}
+
+fn fixture_path() -> PathBuf {
+    repo_root().join(FIXTURE)
+}
+
+/// A scratch directory for one test, under the target dir cargo cleans.
+fn scratch(name: &str) -> PathBuf {
+    let dir = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join(name);
+    let _ = fs::remove_dir_all(&dir);
+    fs::create_dir_all(&dir).expect("scratch dir creates");
+    dir
+}
+
+/// The committed artifact root a test writes into and checks against: the
+/// `ts/` subdir of the scratch dir, mirroring the real layout (`--out
+/// packages/codegen/generated` → `generated/ts`). The CLI is invoked with
+/// the scratch dir as `--out` so its `--out/ts` equals this root.
+fn target_root(name: &str) -> PathBuf {
+    scratch(name).join("ts")
+}
+
+fn render_fixture() -> Vec<GeneratedFile> {
+    let model = load_and_validate(&fixture_path()).expect("fixture loads and validates");
+    let target = targets::by_id("typescript").expect("typescript target registered");
+    generate(&model, FIXTURE, target).expect("fixture renders")
+}
+
+fn write_fixture(root: &Path) -> Vec<GeneratedFile> {
+    let files = render_fixture();
+    write_outputs(root, &files).expect("write mode succeeds");
+    files
+}
+
+/// Recursively maps relative path → bytes under `root`.
+fn snapshot(root: &Path) -> Vec<(String, Vec<u8>)> {
+    let mut out = Vec::new();
+    let mut stack = vec![root.to_path_buf()];
+    while let Some(dir) = stack.pop() {
+        for entry in fs::read_dir(&dir).expect("snapshot reads dir") {
+            let entry = entry.expect("snapshot entry");
+            let path = entry.path();
+            if path.is_dir() {
+                stack.push(path);
+            } else {
+                let relative = path
+                    .strip_prefix(root)
+                    .expect("under root")
+                    .to_str()
+                    .expect("utf8")
+                    .to_owned();
+                out.push((relative, fs::read(&path).expect("snapshot reads file")));
+            }
+        }
+    }
+    out.sort();
+    out
+}
+
+// ---------------------------------------------------------------------------
+// Determinism (b015 failure mode 10; acceptance "two consecutive clean
+// generations are byte-identical, proven by test")
+// ---------------------------------------------------------------------------
+
+#[test]
+fn double_generation_is_byte_identical() {
+    let first = render_fixture();
+    let second = render_fixture();
+    assert_eq!(first.len(), second.len());
+    for (a, b) in first.iter().zip(&second) {
+        assert_eq!(
+            a, b,
+            "two renders of the same model must be byte-identical ({} drifted)",
+            a.path
+        );
+    }
+}
+
+#[test]
+fn double_generation_via_cli_is_byte_identical() {
+    let bin = env!("CARGO_BIN_EXE_poodle-codegen");
+    let a = scratch("double-gen-a");
+    let b = scratch("double-gen-b");
+    for out in [&a, &b] {
+        let status = Command::new(bin)
+            .args([FIXTURE, "--out"])
+            .arg(out)
+            .current_dir(repo_root())
+            .status()
+            .expect("bin runs");
+        assert!(status.success(), "generation exited 0");
+    }
+    assert_eq!(
+        snapshot(&a),
+        snapshot(&b),
+        "two CLI generations land byte-identical on disk"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// The generated header (IR-07; acceptance "no timestamp, no absolute path,
+// no machine identifier")
+// ---------------------------------------------------------------------------
+
+#[test]
+fn header_carries_source_ir_and_generator_versions_only() {
+    for file in render_fixture() {
+        let mut lines = file.contents.lines();
+        let first = lines.next().expect("header first line");
+        assert!(
+            first.starts_with("// Generated by poodle-codegen "),
+            "header names the generator and version: {first}"
+        );
+        assert!(
+            first.ends_with(". Do not edit manually."),
+            "header marks the file generated"
+        );
+        assert_eq!(
+            lines.next(),
+            Some("// Source: packages/codegen/fixtures/synthetic-model.json")
+        );
+        assert_eq!(lines.next(), Some("// IR schema version: 1"));
+        assert_eq!(
+            lines.next(),
+            Some("// Regenerate with `effigy ir:build`; drift is gated by `effigy ir:check`.")
+        );
+        // The header is exactly four lines; content follows — no timestamp
+        // or environment slot can hide here.
+        let fifth = lines.next().expect("content after header");
+        assert!(
+            !fifth.starts_with("//"),
+            "no extra header line (a timestamp slot would land here): {fifth}"
+        );
+    }
+}
+
+#[test]
+fn generated_files_contain_no_absolute_path() {
+    for file in render_fixture() {
+        assert!(
+            !file.contents.contains("/Users/"),
+            "{} embeds an absolute path",
+            file.path
+        );
+        for line in file.contents.lines() {
+            if let Some(source) = line.strip_prefix("// Source: ") {
+                assert!(
+                    !source.starts_with('/'),
+                    "{} carries an absolute source path: {source}",
+                    file.path
+                );
+            }
+        }
+    }
+}
+
+/// The header must be independent of the environment (b015 failure mode 10):
+/// two generations under different USER/HOME values land byte-identical.
+#[test]
+fn generation_is_independent_of_environment() {
+    let bin = env!("CARGO_BIN_EXE_poodle-codegen");
+    let a = scratch("env-a");
+    let b = scratch("env-b");
+    let run = |out: &Path| {
+        Command::new(bin)
+            .args([FIXTURE, "--out"])
+            .arg(out)
+            .env("USER", "someone-else")
+            .env("HOME", "/tmp/nonexistent-home")
+            .current_dir(repo_root())
+            .status()
+            .expect("bin runs")
+            .success()
+    };
+    assert!(run(&a), "generation with altered env succeeds");
+    assert!(run(&b), "second generation with altered env succeeds");
+    assert_eq!(
+        snapshot(&a),
+        snapshot(&b),
+        "environment values never reach the emitted bytes"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Drift gate (b015 failure modes 1, 3, 5, 6; acceptance "fails on drift,
+// reports every drifted path, classifies whitespace-only, detects stale
+// orphans, leaves the worktree unchanged")
+// ---------------------------------------------------------------------------
+
+#[test]
+fn check_detects_content_drift_and_reports_every_path() {
+    let root = target_root("drift-content");
+    let files = write_fixture(&root);
+
+    // Drift two files with real content changes.
+    let badge = root.join("badge.ts");
+    let mut contents = fs::read_to_string(&badge).expect("badge exists");
+    contents = contents.replace("label: string", "label: number");
+    assert_ne!(
+        contents,
+        fs::read_to_string(&badge).expect("badge"),
+        "badge drift is real"
+    );
+    fs::write(&badge, contents).expect("drift badge");
+    fs::write(root.join("gauge.ts"), "export type GaugeProps = {};\n").expect("drift gauge");
+
+    let report = check_outputs(&root, &files).expect("check runs");
+    assert!(!report.is_clean());
+    let drifted_paths: Vec<String> = report
+        .drifted
+        .iter()
+        .map(|(path, _)| path.display().to_string())
+        .collect();
+    assert!(
+        drifted_paths.contains(&"badge.ts".to_owned())
+            && drifted_paths.contains(&"gauge.ts".to_owned()),
+        "every drifted path is reported, not just the first: {drifted_paths:?}"
+    );
+    assert!(
+        report
+            .drifted
+            .iter()
+            .all(|(_, kind)| *kind == DriftKind::Content),
+        "content changes classify as content drift"
+    );
+}
+
+#[test]
+fn check_classifies_whitespace_only_drift_separately() {
+    let root = target_root("drift-whitespace");
+    let files = write_fixture(&root);
+
+    // Same tokens, different whitespace — the `45caae82` failure class.
+    let badge = root.join("badge.ts");
+    let original = fs::read_to_string(&badge).expect("badge exists");
+    let reformatted = original
+        .replace(
+            "export type BadgeProps = Readonly<{",
+            "export   type BadgeProps =\n  Readonly<{",
+        )
+        .replace("tone?:", "  tone   ?:");
+    assert_ne!(original, reformatted, "the whitespace edit is real");
+    fs::write(&badge, reformatted).expect("reformat badge");
+
+    let report = check_outputs(&root, &files).expect("check runs");
+    assert!(!report.is_clean());
+    let (path, kind) = report
+        .drifted
+        .iter()
+        .find(|(path, _)| path.ends_with("badge.ts"))
+        .expect("badge reported");
+    assert_eq!(path.display().to_string(), "badge.ts");
+    assert_eq!(
+        *kind,
+        DriftKind::WhitespaceOnly,
+        "whitespace-only drift is classified"
+    );
+}
+
+#[test]
+fn check_reports_missing_committed_file_as_drift() {
+    let root = target_root("drift-missing");
+    let files = write_fixture(&root);
+    fs::remove_file(root.join("index.ts")).expect("remove index");
+
+    let report = check_outputs(&root, &files).expect("check runs");
+    assert!(
+        report
+            .drifted
+            .iter()
+            .any(|(path, kind)| path.ends_with("index.ts") && *kind == DriftKind::Missing),
+        "missing committed file is Missing drift"
+    );
+}
+
+#[test]
+fn check_detects_stale_orphan() {
+    let root = target_root("drift-orphan");
+    let files = write_fixture(&root);
+    fs::write(root.join("obsolete.ts"), "export type Obsolete = {};\n").expect("plant orphan");
+
+    let report = check_outputs(&root, &files).expect("check runs");
+    assert!(
+        report
+            .stale
+            .iter()
+            .any(|path| path.ends_with("obsolete.ts")),
+        "stale orphan reported: {:?}",
+        report.stale
+    );
+    assert!(!report.is_clean());
+}
+
+#[test]
+fn write_mode_deletes_stale_orphan() {
+    let root = target_root("write-orphan");
+    let files = write_fixture(&root);
+    fs::write(root.join("obsolete.ts"), "export type Obsolete = {};\n").expect("plant orphan");
+
+    write_outputs(&root, &files).expect("write mode succeeds");
+    assert!(
+        !root.join("obsolete.ts").exists(),
+        "write mode deletes stale orphans (icons pattern)"
+    );
+}
+
+#[test]
+fn check_leaves_the_tree_unchanged_even_on_drift() {
+    let root = target_root("drift-readonly");
+    let files = write_fixture(&root);
+
+    // Drift every class: content, whitespace-only, missing, orphan.
+    let badge = root.join("badge.ts");
+    let badge_contents = fs::read_to_string(&badge).expect("badge");
+    fs::write(
+        &badge,
+        badge_contents.replace("label: string", "label: number"),
+    )
+    .expect("content drift");
+    let gauge = root.join("gauge.ts");
+    let gauge_contents = fs::read_to_string(&gauge).expect("gauge");
+    fs::write(
+        &gauge,
+        gauge_contents.replace("min?: number", "min ?:number"),
+    )
+    .expect("whitespace drift");
+    fs::remove_file(root.join("index.ts")).expect("remove for missing drift");
+    fs::write(root.join("orphan.ts"), "export type Orphan = {};\n").expect("plant orphan");
+
+    // The drifted state is the baseline the check must not disturb.
+    let drifted = snapshot(&root);
+
+    let report = check_outputs(&root, &files).expect("check runs");
+    assert!(!report.is_clean(), "drift is detected");
+    assert_eq!(
+        snapshot(&root),
+        drifted,
+        "check mode never mutates the tree"
+    );
+
+    // And the CLI exits 1 while leaving the tree alone.
+    let bin = env!("CARGO_BIN_EXE_poodle-codegen");
+    let out = root
+        .parent()
+        .expect("target root has a scratch parent")
+        .to_path_buf();
+    let status = Command::new(bin)
+        .args([FIXTURE, "--out"])
+        .arg(&out)
+        .arg("--check")
+        .current_dir(repo_root())
+        .output()
+        .expect("bin runs");
+    assert!(!status.status.success(), "check exits non-zero on drift");
+    let stderr = String::from_utf8_lossy(&status.stderr);
+    assert!(stderr.contains("badge.ts"), "stderr lists drifted path");
+    assert!(stderr.contains("whitespace-only"), "stderr classifies");
+    assert!(stderr.contains("orphan.ts"), "stderr lists stale orphan");
+    assert_eq!(
+        snapshot(&root),
+        drifted,
+        "the CLI check also leaves the tree unchanged"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Input handling (acceptance "malformed and invalid-IR input handled
+// without panic")
+// ---------------------------------------------------------------------------
+
+#[test]
+fn malformed_json_is_a_clean_error_not_a_panic() {
+    let scratch = scratch("malformed");
+    let bad = scratch.join("bad.json");
+    fs::write(&bad, "{ this is not json").expect("write garbage");
+
+    let err = load_and_validate(&bad).expect_err("malformed JSON fails");
+    assert!(
+        matches!(err, CodegenError::Malformed { .. }),
+        "malformed JSON is a Malformed error: {err}"
+    );
+
+    let bin = env!("CARGO_BIN_EXE_poodle-codegen");
+    let output = Command::new(bin)
+        .arg(&bad)
+        .args(["--out"])
+        .arg(scratch.join("out"))
+        .current_dir(repo_root())
+        .output()
+        .expect("bin runs");
+    assert!(!output.status.success(), "bin exits non-zero");
+    assert!(
+        !String::from_utf8_lossy(&output.stderr).contains("panicked"),
+        "no panic on malformed input"
+    );
+}
+
+#[test]
+fn invalid_model_is_a_clean_error_not_a_panic() {
+    let scratch = scratch("invalid");
+    let invalid = scratch.join("invalid.json");
+    let model: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(&fixture_path()).expect("fixture reads"))
+            .expect("fixture is JSON");
+    let mut invalid_model = model.clone();
+    invalid_model["schema_version"] = serde_json::json!(99);
+    fs::write(
+        &invalid,
+        serde_json::to_string_pretty(&invalid_model).expect("serialize"),
+    )
+    .expect("write invalid model");
+
+    let err = load_and_validate(&invalid).expect_err("invalid model fails");
+    assert!(
+        matches!(err, CodegenError::Invalid { ref findings, .. } if !findings.is_empty()),
+        "invalid model is an Invalid error carrying findings: {err}"
+    );
+    let message = err.to_string();
+    assert!(
+        message.contains("schema_version"),
+        "the finding names the offending rule: {message}"
+    );
+
+    let bin = env!("CARGO_BIN_EXE_poodle-codegen");
+    let output = Command::new(bin)
+        .arg(&invalid)
+        .args(["--out"])
+        .arg(scratch.join("out"))
+        .current_dir(repo_root())
+        .output()
+        .expect("bin runs");
+    assert!(!output.status.success(), "bin exits non-zero");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(!stderr.contains("panicked"), "no panic on invalid model");
+    assert!(
+        stderr.contains("failed IR validation"),
+        "stderr reports validation failure"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Emitted TypeScript type-checks standalone (acceptance "type-checks with
+// no framework dependency")
+// ---------------------------------------------------------------------------
+
+#[test]
+fn emitted_typescript_type_checks_with_no_framework_dependency() {
+    let root = target_root("tsc");
+    write_fixture(&root);
+
+    // --lib es2020 proves no DOM dependency; --noEmit proves compile-only.
+    // `bunx --no-install tsc` resolves the repo-pinned typescript without a
+    // network fetch. Ignore any stray tsconfig so the generated files are
+    // checked exactly as emitted.
+    let output = Command::new("bunx")
+        .args([
+            "--no-install",
+            "tsc",
+            "--noEmit",
+            "--strict",
+            "--lib",
+            "es2020",
+            "--skipLibCheck",
+            "--ignoreConfig",
+        ])
+        .arg(root.join("index.ts"))
+        .current_dir(repo_root())
+        .output()
+        .expect("tsc runs");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        output.status.success(),
+        "generated TypeScript must type-check:\n{stdout}\n{stderr}"
+    );
+    assert!(
+        !stderr.contains("node_modules") || !stderr.contains("svelte") || !stderr.contains("react"),
+        "no framework types in the check: {stderr}"
+    );
+}

@@ -176,6 +176,14 @@
       "channel": "internal"
     },
     {
+      "name": "poodle-codegen",
+      "path": "packages/codegen",
+      "kind": "tooling",
+      "language": "rust",
+      "publicIntent": false,
+      "channel": "internal"
+    },
+    {
       "name": "poodle-node",
       "path": "packages/contracts/node",
       "kind": "contract-crate",
