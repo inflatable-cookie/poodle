@@ -1,0 +1,830 @@
+{
+  "$defs": {
+    "axes": {
+      "additionalProperties": false,
+      "properties": {
+        "density": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "adjustments": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "applies_to": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "block": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object"
+                          }
+                        ]
+                      },
+                      "density": {
+                        "enum": [
+                          "compact",
+                          "default",
+                          "comfortable"
+                        ]
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "inline": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "object"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "density",
+                      "applies_to",
+                      "inline",
+                      "block",
+                      "description"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "explicit": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "enum": [
+                        "compact",
+                        "default",
+                        "comfortable"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "explicit",
+                "adjustments"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "orientation": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "default": {
+                  "enum": [
+                    "horizontal",
+                    "vertical"
+                  ]
+                },
+                "values": {
+                  "items": {
+                    "enum": [
+                      "horizontal",
+                      "vertical"
+                    ]
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "default",
+                "values"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "size": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "explicit": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "enum": [
+                        "xs",
+                        "sm",
+                        "md",
+                        "lg",
+                        "xl"
+                      ]
+                    }
+                  ]
+                },
+                "fallback": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object"
+                    }
+                  ]
+                },
+                "ladder": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string"
+                      },
+                      "metrics": {
+                        "type": "object"
+                      },
+                      "size": {
+                        "enum": [
+                          "xs",
+                          "sm",
+                          "md",
+                          "lg",
+                          "xl"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "size",
+                      "metrics",
+                      "description"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "size_role": {
+                  "enum": [
+                    "chrome",
+                    "control",
+                    "prominent"
+                  ]
+                }
+              },
+              "required": [
+                "explicit",
+                "size_role",
+                "fallback",
+                "ladder"
+              ],
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "required": [
+        "size",
+        "density",
+        "orientation"
+      ],
+      "type": "object"
+    },
+    "component-document": {
+      "additionalProperties": false,
+      "properties": {
+        "axes": {
+          "$ref": "#/$defs/axes"
+        },
+        "component": {
+          "additionalProperties": false,
+          "properties": {
+            "contract": {
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "section": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "path",
+                "section"
+              ],
+              "type": "object"
+            },
+            "description": {
+              "type": "string"
+            },
+            "id": {
+              "$ref": "#/$defs/component-id"
+            },
+            "layer": {
+              "enum": [
+                "foundation"
+              ]
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "layer",
+            "contract",
+            "description"
+          ],
+          "type": "object"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/event"
+          },
+          "type": "array"
+        },
+        "generated": {
+          "$ref": "#/$defs/generated"
+        },
+        "props": {
+          "items": {
+            "$ref": "#/$defs/prop"
+          },
+          "type": "array"
+        },
+        "shared_types": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/shared-type-id"
+              },
+              "members": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "uniqueItems": true
+              },
+              "name": {
+                "type": "string"
+              },
+              "referenced_by": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "members",
+              "referenced_by"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "generated",
+        "component",
+        "props",
+        "shared_types",
+        "events",
+        "axes"
+      ],
+      "type": "object"
+    },
+    "component-id": {
+      "enum": [
+        "badge",
+        "gauge",
+        "search-field"
+      ],
+      "type": "string"
+    },
+    "event": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "activation",
+            "value-change",
+            "value-commit",
+            "focus-change",
+            "pressed-change",
+            "submit",
+            "cancel",
+            "clear",
+            "selection-change"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "none",
+                    "string",
+                    "number",
+                    "boolean",
+                    "pair",
+                    "validation-status"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "kind"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "timing": {
+          "additionalProperties": false,
+          "properties": {
+            "debounce_ms": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              ]
+            },
+            "flush_on_blur": {
+              "type": "boolean"
+            },
+            "ordering": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "after": {
+                    "type": "string"
+                  },
+                  "before": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "before",
+                  "after",
+                  "reason"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "phase": {
+              "enum": [
+                "during-interaction",
+                "on-release",
+                "on-blur",
+                "immediate"
+              ]
+            }
+          },
+          "required": [
+            "phase",
+            "debounce_ms",
+            "flush_on_blur",
+            "ordering"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "payload",
+        "timing",
+        "description"
+      ],
+      "type": "object"
+    },
+    "generated": {
+      "additionalProperties": false,
+      "properties": {
+        "generator": {
+          "pattern": "^poodle-codegen ",
+          "type": "string"
+        },
+        "ir_schema_version": {
+          "const": 1
+        },
+        "source": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "generator",
+        "source",
+        "ir_schema_version"
+      ],
+      "type": "object"
+    },
+    "index-document": {
+      "additionalProperties": false,
+      "properties": {
+        "components": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "document": {
+                "type": "string"
+              },
+              "id": {
+                "$ref": "#/$defs/component-id"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "document"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "generated": {
+          "$ref": "#/$defs/generated"
+        }
+      },
+      "required": [
+        "generated",
+        "components"
+      ],
+      "type": "object"
+    },
+    "prop": {
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/value"
+            }
+          ]
+        },
+        "default_expr": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object"
+            }
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "permitted_subset": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            }
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "type": {
+          "$ref": "#/$defs/prop-type"
+        },
+        "web_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "required",
+        "web_only",
+        "description"
+      ],
+      "type": "object"
+    },
+    "prop-type": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "number"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "boolean"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "shared"
+            },
+            "shared_type": {
+              "$ref": "#/$defs/shared-type-id"
+            }
+          },
+          "required": [
+            "kind",
+            "shared_type"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "pair"
+            },
+            "of": {
+              "$ref": "#/$defs/prop-type"
+            }
+          },
+          "required": [
+            "kind",
+            "of"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "list"
+            },
+            "of": {
+              "$ref": "#/$defs/prop-type"
+            }
+          },
+          "required": [
+            "kind",
+            "of"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "opaque"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "shared-type-id": {
+      "enum": [
+        "orientation",
+        "placement",
+        "tone",
+        "validation-state"
+      ],
+      "type": "string"
+    },
+    "value": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "number"
+            },
+            "value": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "boolean"
+            },
+            "value": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "member"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "pair"
+            },
+            "values": {
+              "items": {
+                "$ref": "#/$defs/value"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            }
+          },
+          "required": [
+            "kind",
+            "values"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "list"
+            },
+            "values": {
+              "items": {
+                "$ref": "#/$defs/value"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "kind",
+            "values"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "null"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        }
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "$ref": "#/$defs/component-document"
+    },
+    {
+      "$ref": "#/$defs/index-document"
+    }
+  ],
+  "description": "Validates the documents emitted by the poodle-codegen `json` target (per-component prop-surface documents and index.json). Hand-emitted from the validated IR model; the component-id and shared-type-id enums are exactly this model's ids.",
+  "generated": {
+    "generator": "poodle-codegen 0.1.0",
+    "ir_schema_version": 1,
+    "source": "packages/codegen/fixtures/synthetic-model.json"
+  },
+  "title": "poodle IR JSON surface schema"
+}

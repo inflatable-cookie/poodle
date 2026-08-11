@@ -340,3 +340,88 @@ fn json_surface_documents_carry_the_ir07_generated_object() {
         );
     }
 }
+
+// ---------------------------------------------------------------------------
+// JSON Schema round trip (acceptance "emitted JSON validates against the
+// emitted JSON Schema, proven by test")
+// ---------------------------------------------------------------------------
+
+/// The emitted schema, compiled. `jsonschema` is a test-only oracle (not a
+/// type-mirroring emitter — ruling R4); it renders nothing.
+fn emitted_schema_validator() -> jsonschema::Validator {
+    let schema_files = render_target("schema");
+    let schema_file = schema_files
+        .iter()
+        .find(|file| file.path == "schema.json")
+        .expect("schema target emits schema.json");
+    let schema: serde_json::Value =
+        serde_json::from_str(&schema_file.contents).expect("schema is JSON");
+    jsonschema::options()
+        .with_draft(jsonschema::Draft::Draft202012)
+        .build(&schema)
+        .expect("the emitted schema compiles")
+}
+
+#[test]
+fn every_emitted_json_document_validates_against_the_emitted_schema() {
+    let validator = emitted_schema_validator();
+    for file in render_target("json") {
+        let doc: serde_json::Value =
+            serde_json::from_str(&file.contents).expect("document is JSON");
+        let result = validator.validate(&doc);
+        assert!(
+            result.is_ok(),
+            "{} does not validate against the emitted schema: {}",
+            file.path,
+            result.err().expect("err on failure")
+        );
+    }
+}
+
+#[test]
+fn emitted_schema_rejects_tampered_documents() {
+    let validator = emitted_schema_validator();
+    let files = render_target("json");
+
+    // Unknown component id — the model-derived enum has teeth.
+    let badge = files
+        .iter()
+        .find(|file| file.path == "badge.json")
+        .expect("badge document");
+    let mut badge_doc: serde_json::Value =
+        serde_json::from_str(&badge.contents).expect("badge is JSON");
+    badge_doc["component"]["id"] = serde_json::json!("not-a-component");
+    assert!(
+        validator.validate(&badge_doc).is_err(),
+        "an unknown component id must fail the schema"
+    );
+
+    // Unknown prop-type kind — the closed tag vocabulary has teeth.
+    let gauge = files
+        .iter()
+        .find(|file| file.path == "gauge.json")
+        .expect("gauge document");
+    let mut gauge_doc: serde_json::Value =
+        serde_json::from_str(&gauge.contents).expect("gauge is JSON");
+    gauge_doc["props"][0]["type"]["kind"] = serde_json::json!("decimal");
+    assert!(
+        validator.validate(&gauge_doc).is_err(),
+        "an unknown prop-type kind must fail the schema"
+    );
+
+    // A missing required field — required has teeth.
+    let index = files
+        .iter()
+        .find(|file| file.path == "index.json")
+        .expect("index document");
+    let mut index_doc: serde_json::Value =
+        serde_json::from_str(&index.contents).expect("index is JSON");
+    index_doc
+        .as_object_mut()
+        .expect("index is an object")
+        .remove("components");
+    assert!(
+        validator.validate(&index_doc).is_err(),
+        "a document missing 'components' must fail the schema"
+    );
+}

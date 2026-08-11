@@ -8,11 +8,16 @@ use crate::emit::EmitTarget;
 mod json_common;
 
 pub mod json;
+pub mod schema;
 pub mod ts;
 
 /// Every registered target, in stable order.
 pub fn all() -> Vec<&'static dyn EmitTarget> {
-    vec![&json::JsonSurfaceTarget, &ts::TypeScriptTarget]
+    vec![
+        &json::JsonSurfaceTarget,
+        &schema::JsonSchemaTarget,
+        &ts::TypeScriptTarget,
+    ]
 }
 
 /// Looks up a target by id.
