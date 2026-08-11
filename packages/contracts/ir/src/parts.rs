@@ -11,7 +11,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::Identifier;
+use crate::{Expr, Identifier};
 
 /// One part of a component's anatomy (`CROSS-12`; `B §2`, `R §2`, `T §2`).
 ///
@@ -52,6 +52,20 @@ pub enum PartKind {
         /// Prop id whose truthiness gates the part; must be a boolean prop.
         #[serde(rename = "when")]
         when: Identifier,
+        /// Why the part is conditional, citing the contract.
+        description: String,
+    },
+    /// Present only when the boolean expression evaluates true — the
+    /// expression form of a part render condition (spec 063 "part render
+    /// conditions"; `TXT-08` `canClear` gates the clear button, `TXT-12`
+    /// the validation indicator, `TXT-06` the multiline input control).
+    /// `validate` type-checks the expression as boolean.
+    #[serde(rename = "conditional-expr")]
+    ConditionalExpr {
+        /// Expression gating the part; must type-check as boolean
+        /// (spec 063 expression vocabulary).
+        #[serde(rename = "when")]
+        when: Expr,
         /// Why the part is conditional, citing the contract.
         description: String,
     },

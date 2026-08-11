@@ -8,7 +8,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::Identifier;
+use crate::{Expr, Identifier};
 
 /// A state-derived attribute on a component (`CROSS-13`; `B §9`, `R §9`,
 /// `T §9`).
@@ -37,8 +37,25 @@ pub struct StateAttribute {
     /// from, e.g. `loading` for `data-loading` (`BTN-08`), `pressed` for
     /// `data-pressed` (`BTN-14`), or `lowerNorm` for the fill-geometry
     /// custom properties (`RNG-17`). `validate` checks the reference
-    /// resolves.
+    /// resolves. Mutually exclusive with [`Self::value`].
     pub source: Option<Identifier>,
+    /// Optional boolean expression gating emission — the expression form of
+    /// an emission condition (spec 063 "state-derived attribute emission
+    /// conditions"; `CROSS-13`; `BTN-18` `data-tone` omitted when default,
+    /// `BTN-14` `data-pressed` emitted only when the button is a toggle,
+    /// `CROSS-20` `isUnavailable = disabled || loading` as a condition).
+    /// The attribute is emitted only when the expression evaluates true;
+    /// `validate` type-checks it as boolean.
+    #[serde(default)]
+    pub condition: Option<Expr>,
+    /// Optional expression deriving the emitted value — the expression form
+    /// of a valued attribute (spec 063 "state-derived attribute emission
+    /// conditions and values"; `CROSS-13`; `RNG-17`/`TXT-16` computed custom
+    /// properties as expressions; `CROSS-04` `currentPressed` selection).
+    /// Mutually exclusive with [`Self::source`] and meaningless on a
+    /// presence-only attribute; `validate` rejects both contradictions.
+    #[serde(default)]
+    pub value: Option<Expr>,
     /// What the attribute conveys and when it is emitted, citing the
     /// contract section.
     pub description: String,
