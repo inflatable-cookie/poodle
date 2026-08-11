@@ -1,6 +1,6 @@
 # 001 Authority Inventory And Docs Baseline
 
-Status: dispatched
+Status: worker complete — review pending
 Milestone: `g13.001`
 Owner: Poodle core
 Branch: `thread/g13-001-authority-inventory`

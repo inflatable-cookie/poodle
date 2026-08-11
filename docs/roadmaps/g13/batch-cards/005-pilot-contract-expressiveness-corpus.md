@@ -1,6 +1,6 @@
 # 005 Pilot Contract Expressiveness Corpus
 
-Status: dispatched
+Status: worker complete — review pending
 Milestone: `g13.002` research precursor
 Owner: Poodle core
 Branch: `thread/g13-pilot-expressiveness-corpus`

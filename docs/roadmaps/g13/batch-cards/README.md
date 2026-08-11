@@ -10,14 +10,15 @@ and roadmap closeout.
 
 | Batch | Purpose | Dependency | Status |
 | --- | --- | --- | --- |
-| `001` | authority inventory and inherited docs-baseline repair | none | dispatched |
+| `001` | authority inventory and inherited docs-baseline repair | none | worker complete — review pending |
 | `002` | pilot fixture freeze and quantitative baseline | `001` merged | planned |
 | `003` | crate placement ruling and g13.002 handoff | `001`–`002` merged | planned |
 | `004` | Rust IR prior-art and failure-mode research | none | dead — recompile required |
-| `005` | pilot contract expressiveness corpus | none | dispatched |
+| `005` | pilot contract expressiveness corpus | none | worker complete — review pending |
 
-Only `001` is worker-ready. Later cards remain planning placeholders until the
-preceding evidence is reviewed.
+Worker output for `001` and `005` is pushed but remains untrusted until
+orchestrator review and merge. Later cards remain planning placeholders until
+their dependencies are reviewed.
 
 - [Batch 001](001-authority-inventory-and-docs-baseline.md)
 - [Batch 002](002-pilot-fixture-and-metrics-freeze.md)

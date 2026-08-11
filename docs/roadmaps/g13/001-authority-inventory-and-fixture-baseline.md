@@ -14,11 +14,15 @@ the pilot fixtures that later cards must preserve.
 ## Execution Plan
 
 - [ ] `g13-b001` — authority inventory and inherited docs-baseline repair
-  ([dispatched](../dispatch.md))
+  ([worker complete; review pending](../dispatch.md))
 - [ ] `g13-b002` — pilot fixture and quantitative-metrics freeze after the
   inventory is reviewed
 - [ ] `g13-b003` — maintainer crate-placement ruling and executable g13.002
   handoff
+
+Parallel research batch `g13-b005` is also worker-complete and awaiting
+review. Prior-art batch `g13-b004` is dead and must be recompiled before any
+new dispatch.
 
 ## Deliverables
 
