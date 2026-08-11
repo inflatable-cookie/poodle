@@ -1,15 +1,18 @@
-# 001 Audio Family Phase 3
+# 026 Audio Family Phase 3
 
 Status: completed
 Owner: Poodle core
 Created: 2026-08-10
 Depends on: `docs/architecture/008-audio-control-family.md`,
-`docs/roadmaps/g13/001-audio-cross-runtime-parity.md`
+`docs/roadmaps/g12/025-audio-cross-runtime-parity.md`
 
 ## Scope
 
 Close the audio family with three generalized components using the established
 VisualState seam and full Svelte, React, GPUI, and Jetstream parity.
+
+This work was briefly filed as `g14.001`; it is consolidated into g12 because
+it continued the same active delivery program.
 
 ## Contracts
 

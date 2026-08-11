@@ -3,20 +3,20 @@
 Status: reference
 Updated: 2026-08-11
 
-Roadmaps record Poodle's executable milestone work. `g15` is complete.
+Roadmaps record Poodle's executable milestone work. `g13` is active.
 
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary.
-- `g15` corrected the Slider/RangeSlider embedded-control boundary and migrated
-  ModMatrixGrid onto it.
-- `g14` closed the audio family with Keyboard, Waveform Display, and Mod Matrix
-  Grid across every in-flight backend.
-- `g09`, `g10`, `g11`, `g12`, `g13`, `g14`, and `g15` are complete.
+- `g13` is the Rust-authored component and scene IR program. Its first eight
+  cards are a gated pilot; broad migration requires an explicit adopt verdict.
+- The former single-card g13–g15 audio generations are consolidated into
+  `g12.025`–`027`. `g12` is closed.
+- `g09`, `g10`, `g11`, and `g12` are complete.
 - The GPUI node-backend migration is complete and the duplicate GPUI component
   tier has been removed.
-- Web, native, accessibility, visual-parity, and package-consumer gates are
-  green.
+- The current docs gate has inherited inventory drift; `g13.001` must repair
+  it before IR schema implementation begins.
 - Release automation is tracked separately from roadmap implementation work.
 
 Historical generation READMEs and cards preserve the decisions, evidence, and
@@ -36,15 +36,14 @@ operator guide for the present package shape.
 - `g09` — GPUI continuation and semantic sizing and density
 - `g10` — Jetstream feasibility and GPUI production hardening
 - `g11` — Svelte modernization and consumer rollout
-- `g12` — React parity, verification depth, native hardening, and package consolidation
-- `g13` — audio family parity across Svelte, React, GPUI, and Jetstream
-- `g14` — audio family Phase 3 closeout
-- `g15` — embedded Slider controls and ModMatrixGrid composition correction
+- `g12` — React parity, verification depth, native hardening, package
+  consolidation, and the complete audio-family delivery
+- `g13` — Rust-authored component/scene IR pilot and gated cross-runtime rollout
 
 ## Rules
 
-- Active milestone files live in generation folders such as `g12/`.
-- File names use `NNN-slug.md`; roadmap IDs use forms such as `g12.019`.
+- Active milestone files live in generation folders such as `g13/`.
+- File names use `NNN-slug.md`; roadmap IDs use forms such as `g13.001`.
 - Backlog items belong in `backlog/`.
 - Architecture belongs in `../architecture/`, not here.
 - Generation rollover is manual. Close, pause, supersede, or rehome every live

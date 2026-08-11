@@ -1,7 +1,7 @@
 # g12 — React Full Parity And Web Verification Depth
 
-**Status: completed.** The React parity program (`001`–`008`) and
-the bounded work through `018` are complete. `017` remains
+**Status: completed.** Cards `001`–`027` are closed. The React parity program
+(`001`–`008`) and the bounded work through `018` are complete. `017` remains
 native-interaction evidence; its IME follow-up is still unpromoted, and its
 "headless GPUI click driver is blocked" note is superseded — the driver works
 (see that card). `019` (GPUI node backend) is **complete** as of 2026-08-07:
@@ -239,6 +239,13 @@ Runway:
   from a consumer repo rather than from Poodle's own gates.
 - `024-audio-control-follow-ons.md` completes the audio family through Phase 2
   and records Phase 3 keyboard, waveform/graph, and mod-matrix issue stubs.
+- `025-audio-cross-runtime-parity.md` extends the nine-component audio family
+  across React, GPUI, and Jetstream.
+- `026-audio-family-phase-3.md` closes the family with Keyboard, Waveform
+  Display, and Mod Matrix Grid across all four runtimes.
+- `027-embedded-slider-controls.md` corrects the dense-control boundary with
+  shared embedded Slider/RangeSlider variants and migrates ModMatrixGrid onto
+  them.
 
 ## Closeout
 
@@ -254,8 +261,13 @@ repointed at `poodle-render` rather than dropped with its old subject, and the
 orphaned `drift:clicks` was retired.
 
 The follow-up accessibility gap is closed: `ci:native` audits 135 specimens and
-20,644 nodes, and every role that requires an accessible name has one. The
-generation has no remaining release blocker.
+20,644 nodes, and every role that requires an accessible name has one.
+
+The audio-family cards briefly filed as single-card generations g13–g15 were
+consolidated here during the 2026-08-11 closeout. They continued the same
+delivery baseline and did not justify generation rollover. The generation has
+no live card. Current documentation-inventory drift found during rollover is
+named as the first repair in `g13.001`; it is not hidden in this closeout.
 
 Logs: `docs/logs/2026-08/07-gpui-components-tier-deleted.md` and
 `docs/logs/2026-08/07-gpui-node-backend-waves-41-45.md`.

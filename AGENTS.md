@@ -24,7 +24,7 @@ Scope: whole `poodle/` repository.
 - `docs/architecture/product-guardrails.md`
 - `docs/contracts/001-working-rules.md`
 - `docs/roadmaps/README.md`
-- `docs/roadmaps/g12/README.md`
+- `docs/roadmaps/g13/README.md`
 - `docs/specs/README.md`
 
 ## Task Runner

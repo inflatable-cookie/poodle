@@ -1,4 +1,4 @@
-# 001 Audio Cross-runtime Parity
+# 025 Audio Cross-runtime Parity
 
 Status: complete
 Owner: Poodle core
@@ -11,7 +11,8 @@ Depends on: `docs/architecture/008-audio-control-family.md`,
 The maintainer expanded the completed Svelte audio family to require full
 Svelte, React, GPUI, and Jetstream coverage. Card g12.024 remains the
 historical Phase 1/2 delivery record; this card owns the new runtime-parity
-baseline.
+baseline. This work was briefly filed as `g13.001`; it is consolidated into
+g12 because it continued the same active delivery program.
 
 Asset skins, host parameter binding, and Phase 3 components remain out of
 scope.
