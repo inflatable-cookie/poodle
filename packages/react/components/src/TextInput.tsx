@@ -1,5 +1,7 @@
 import {
+  forwardRef,
   useEffect,
+  useImperativeHandle,
   useRef,
   useState,
   type ChangeEvent,
@@ -35,6 +37,7 @@ export interface TextInputProps {
   autoComplete?: string;
   disabled?: boolean;
   readOnly?: boolean;
+  autofocus?: boolean;
   required?: boolean;
   pattern?: string;
   spellCheck?: boolean;
@@ -76,6 +79,10 @@ export interface TextInputProps {
   trailing?: ReactNode;
 }
 
+export interface TextInputHandle {
+  focus: () => void;
+}
+
 function serializeValidationContext(context: unknown): string {
   try {
     return JSON.stringify(context ?? null);
@@ -91,55 +98,59 @@ function mergeValidationContext(context: unknown, key: unknown): unknown {
   return { value: context, validationKey: key };
 }
 
-export function TextInput({
-  id = "",
-  value,
-  defaultValue = "",
-  placeholder = null,
-  name,
-  autoComplete,
-  disabled = false,
-  readOnly = false,
-  required = false,
-  pattern,
-  spellCheck,
-  autoCapitalize,
-  enterKeyHint = null,
-  debounce = null,
-  validate,
-  validationContext,
-  validationKey,
-  validationDebounce = 300,
-  validateOnBlur = true,
-  showValidationStatus = true,
-  validationState = "none",
-  ariaLabel = null,
-  describedBy = null,
-  list = null,
-  inputMode = null,
-  type = "text",
-  rows = null,
-  resize = "vertical",
-  source = null,
-  prefix = null,
-  suffix = null,
-  maxLength = null,
-  showCharCount = false,
-  size = null,
-  sizeRole = "control",
-  density = null,
-  showClearButton = true,
-  onValueChange,
-  onValidationChange,
-  onSubmit,
-  onCancel,
-  onClear,
-  onKeyDown,
-  onFocus,
-  onBlur,
-  leading: leadingSlot,
-  trailing: trailingSlot,
-}: TextInputProps) {
+export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function TextInput(
+  {
+    id = "",
+    value,
+    defaultValue = "",
+    placeholder = null,
+    name,
+    autoComplete,
+    disabled = false,
+    readOnly = false,
+    autofocus = false,
+    required = false,
+    pattern,
+    spellCheck,
+    autoCapitalize,
+    enterKeyHint = null,
+    debounce = null,
+    validate,
+    validationContext,
+    validationKey,
+    validationDebounce = 300,
+    validateOnBlur = true,
+    showValidationStatus = true,
+    validationState = "none",
+    ariaLabel = null,
+    describedBy = null,
+    list = null,
+    inputMode = null,
+    type = "text",
+    rows = null,
+    resize = "vertical",
+    source = null,
+    prefix = null,
+    suffix = null,
+    maxLength = null,
+    showCharCount = false,
+    size = null,
+    sizeRole = "control",
+    density = null,
+    showClearButton = true,
+    onValueChange,
+    onValidationChange,
+    onSubmit,
+    onCancel,
+    onClear,
+    onKeyDown,
+    onFocus,
+    onBlur,
+    leading: leadingSlot,
+    trailing: trailingSlot,
+  },
+  ref,
+) {
   const uiPresentation = useUiPresentation();
   const generatedInputId = useRef(`poodle-text-input-${Math.random().toString(36).slice(2, 10)}`).current;
 
@@ -148,6 +159,7 @@ export function TextInput({
   const [internalValidationMessage, setInternalValidationMessage] = useState("");
   const [userEditedSlug, setUserEditedSlug] = useState(false);
 
+  const controlRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const validationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeValidationKey = useRef<string | null>(null);
@@ -388,6 +400,13 @@ export function TextInput({
     onBlur?.(event);
   }
 
+  // Svelte exports `focus()`; MenuSurface.tsx is the precedent for exposing an
+  // imperative handle through useImperativeHandle. Focuses the underlying
+  // control, never the wrapper.
+  useImperativeHandle(ref, () => ({
+    focus: () => controlRef.current?.focus(),
+  }));
+
   const rootStyle = {
     "--poodle-text-input-control-padding-start": controlPaddingStart,
     "--poodle-text-input-control-padding-end": controlPaddingEnd,
@@ -417,6 +436,7 @@ export function TextInput({
 
           {isMultiline ? (
             <textarea
+              ref={controlRef}
               id={id || undefined}
               name={name}
               className="poodle-text-input__control poodle-text-input__control--multiline"
@@ -430,6 +450,7 @@ export function TextInput({
               maxLength={maxLength ?? undefined}
               disabled={disabled}
               readOnly={readOnly}
+              autoFocus={autofocus || undefined}
               aria-label={ariaLabel ?? undefined}
               aria-describedby={effectiveDescribedBy}
               aria-invalid={ariaInvalid}
@@ -445,6 +466,7 @@ export function TextInput({
             />
           ) : (
             <input
+              ref={controlRef}
               id={id || undefined}
               name={name}
               list={list ?? undefined}
@@ -462,6 +484,7 @@ export function TextInput({
               maxLength={maxLength ?? undefined}
               disabled={disabled}
               readOnly={readOnly}
+              autoFocus={autofocus || undefined}
               aria-label={ariaLabel ?? undefined}
               aria-describedby={effectiveDescribedBy}
               aria-invalid={ariaInvalid}
@@ -527,4 +550,4 @@ export function TextInput({
       ) : null}
     </>
   );
-}
+});

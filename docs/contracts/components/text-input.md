@@ -65,6 +65,7 @@ Updated: 2026-07-10
 | `autocomplete` | `string \| undefined` | `undefined` | no | native autocomplete attribute |
 | `disabled` | `boolean` | `false` | no | disables editing and interaction |
 | `readOnly` | `boolean` | `false` | no | allows selection without editing |
+| `autofocus` | `boolean` | `false` | no | web-only native autofocus attribute; falsy omits the attribute. Excluded from `TextInputSpec` alongside the other native attributes |
 | `selectionStart` | `number` | `0` | no | caret / selection start, in characters. **Rust targets only** — the web target reads the DOM's own selection |
 | `selectionEnd` | `number` | `0` | no | caret / selection end; equal to `selectionStart` means a plain caret. **Rust targets only** |
 | `isFocused` | `boolean` | `false` | no | whether the field holds focus, so the caret is drawn. **Rust targets only** |
@@ -108,6 +109,20 @@ Updated: 2026-07-10
 | `onBlur` | `(event: FocusEvent) => void` | `undefined` | no | native blur passthrough |
 | `leading` | `Snippet` | `undefined` | no | optional leading affordance snippet; replaces named `leading` slot |
 | `trailing` | `Snippet` | `undefined` | no | optional trailing affordance snippet; replaces named `trailing` slot |
+
+### Imperative Methods
+
+- `focus()` — moves focus to the underlying control (the `<input>` or
+  `<textarea>` element itself, never the wrapper). Both web runtimes expose it:
+  Svelte exports it from the component instance; React exposes it through the
+  component's ref handle (`TextInputHandle`).
+
+Neither `autofocus` nor `focus()` reaches `TextInputSpec`. `autofocus` is a
+web-native attribute, like `autocomplete`, `spellcheck`, `autocapitalize`,
+`autocorrect`, and `enterKeyHint` — web runtimes render it, and a native
+target has nothing to do with it. `focus()` is an imperative escape hatch into
+the DOM; the Rust targets own focus through `isFocused` (see Caret Ownership
+in §6) and have no DOM node to target. Both are web-runtime surface only.
 
 ### Controlled And Uncontrolled
 
