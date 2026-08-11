@@ -195,6 +195,26 @@ and Drawer.
 | `Shift+Tab` | reverse-cycles focus within the surface |
 | `Escape` | requests dismissal when `dismissOnEscape=true` |
 
+#### Close-edge focus restore
+
+On close the dialog restores focus to whatever held it when the dialog opened,
+**deferred by one macrotask**. The deferral is required: a pending keyboard
+event — the Enter keyup that just submitted, for example — must dispatch before
+the trigger regains focus, or it re-activates the trigger and reopens the
+dialog.
+
+Two rules bound that deferral, and both are required behaviour:
+
+- **It is cancelled** if the dialog reopens or unmounts first. A restore must
+  never fire after the component is gone, and a restore queued by one close
+  must never land after a subsequent open.
+- **It restores only into a focus vacuum.** If, when the timer fires, focus sits
+  outside the closing surface — the application moved it deliberately to a page
+  anchor, a search result, the next field — the restore is abandoned. The
+  deferral exists to stop focus falling to `body`, not to win a race against the
+  host. Restoring when focus is on `body`, is `null`, or is still inside the
+  closing surface covers the vacuum case exactly.
+
 ### Focus And Announcement
 
 - focus entry: on open, focus resolves per `initialFocus`. The

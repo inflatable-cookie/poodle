@@ -86,6 +86,15 @@
   let uncontrolledOpen = $state(false);
   let seededDefaultOpen = $state(false);
   let lastFocusedElement = $state<HTMLElement | null>(null);
+  // Handle for the deferred close-edge focus restore, so it can be cancelled.
+  let pendingRestore: ReturnType<typeof setTimeout> | null = null;
+
+  function cancelPendingRestore(): void {
+    if (pendingRestore !== null) {
+      clearTimeout(pendingRestore);
+      pendingRestore = null;
+    }
+  }
   let bodyOverflow = $state<string | null>(null);
   let previousOpen = $state(false);
 
@@ -111,6 +120,8 @@
 
   $effect(() => {
     if (isOpen && !previousOpen) {
+      // A restore queued by the previous close must not land after a reopen.
+      cancelPendingRestore();
       lastFocusedElement = document.activeElement as HTMLElement | null;
       tick().then(() => {
         // Already-focused guard (b1a4a5e7): never steal focus when something
@@ -137,10 +148,30 @@
       // (e.g. the Enter keyup that just submitted the dialog) must dispatch
       // before the trigger regains focus, or it re-activates the trigger
       // button and reopens the dialog.
+      //
+      // The handle is kept so the restore can be cancelled. Without that it
+      // outlives the Dialog: it fires after unmount, and it overwrites focus
+      // the application placed deliberately in the same macrotask.
       const target = lastFocusedElement;
       lastFocusedElement = null;
       if (target !== null) {
-        setTimeout(() => target.focus(), 0);
+        cancelPendingRestore();
+        pendingRestore = setTimeout(() => {
+          pendingRestore = null;
+          // Only restore into a focus vacuum. The deferral exists to stop
+          // focus falling to `body` when the surface goes away — not to win a
+          // race against an application that has already placed focus. If
+          // something outside the closing surface holds focus, the restore is
+          // abandoned.
+          const active = document.activeElement;
+          const vacuum =
+            active === null ||
+            active === document.body ||
+            (surfaceElement?.contains(active) ?? false);
+          if (vacuum) {
+            target.focus();
+          }
+        }, 0);
       }
     }
 
@@ -228,6 +259,7 @@
   });
 
   onDestroy(() => {
+    cancelPendingRestore();
     if (bodyOverflow !== null) {
       document.body.style.overflow = bodyOverflow;
     }

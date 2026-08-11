@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useId,
   useRef,
@@ -107,8 +108,24 @@ export function Dialog({
   // through the theme portal one render after isOpen flips, so initial focus
   // runs from the surface ref callback (pendingFocus) rather than here.
   const pendingFocus = useRef(false);
+  // Handle for the deferred close-edge focus restore, so it can be cancelled.
+  const pendingRestore = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelPendingRestore = useCallback(() => {
+    if (pendingRestore.current !== null) {
+      clearTimeout(pendingRestore.current);
+      pendingRestore.current = null;
+    }
+  }, []);
+
+  // Cancel any queued restore on unmount, so it cannot fire after the Dialog
+  // is gone.
+  useEffect(() => cancelPendingRestore, [cancelPendingRestore]);
+
   useEffect(() => {
     if (isOpen) {
+      // A restore queued by the previous close must not land after a reopen.
+      cancelPendingRestore();
       lastFocusedElement.current = document.activeElement as HTMLElement | null;
       pendingFocus.current = true;
       bodyOverflow.current = document.body.style.overflow;
@@ -119,10 +136,32 @@ export function Dialog({
           document.body.style.overflow = bodyOverflow.current;
           bodyOverflow.current = null;
         }
-        lastFocusedElement.current?.focus();
+
+        // Defer one macrotask so a pending keyup (e.g. the Enter that just
+        // submitted) dispatches before the trigger regains focus and
+        // re-activates it. Ported from Svelte, which is the reference: React
+        // restored synchronously and still had that reopen bug.
+        const target = lastFocusedElement.current;
+        lastFocusedElement.current = null;
+        if (target !== null) {
+          cancelPendingRestore();
+          pendingRestore.current = setTimeout(() => {
+            pendingRestore.current = null;
+            // Only restore into a focus vacuum — never overwrite focus the
+            // application placed deliberately in the same macrotask.
+            const active = document.activeElement;
+            const vacuum =
+              active === null ||
+              active === document.body ||
+              (surfaceRef.current?.contains(active) ?? false);
+            if (vacuum) {
+              target.focus();
+            }
+          }, 0);
+        }
       };
     }
-  }, [isOpen]);
+  }, [isOpen, cancelPendingRestore]);
 
   const sendRef = useRef<(event: ModalEvent) => void>(() => {});
   sendRef.current = (event: ModalEvent) => {
