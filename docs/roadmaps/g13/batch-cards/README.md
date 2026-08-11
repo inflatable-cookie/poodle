@@ -16,3 +16,7 @@ and roadmap closeout.
 
 Only `001` is worker-ready. Later cards remain planning placeholders until the
 preceding evidence is reviewed.
+
+- [Batch 001](001-authority-inventory-and-docs-baseline.md)
+- [Batch 002](002-pilot-fixture-and-metrics-freeze.md)
+- [Batch 003](003-crate-placement-ruling-and-schema-handoff.md)
