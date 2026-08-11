@@ -16,6 +16,16 @@
 # something fails if the tree and the generator disagree -- this is that.
 "audit:tokens" = "bun packages/tokens/scripts/build-tokens.ts --check"
 
+# IR code generation (g13.003). The generated TypeScript under
+# packages/codegen/generated/ is committed for the same reason the token
+# artifacts are: a clean clone packs everything. `ir:check` is the gate --
+# read-only, byte-exact, whitespace-classified, orphan-aware -- and
+# `ir:build` is its write-mode twin. Like `tokens:build`, the write selector
+# never composes into a gate (that composition is the 45caae82 failure);
+# gates may only reach `*:check`.
+"ir:build" = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated"
+"ir:check" = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated --check"
+
 # Preview (documentation site)
 "svelte:build" = "bun run --cwd packages/svelte/preview build"
 "svelte:run" = "bun run --cwd packages/svelte/preview dev"
