@@ -3477,6 +3477,12 @@
         "description": "Explicit density override. Supports compact, default, and comfortable."
       },
       {
+        "name": "initialFocus",
+        "type": "\"auto\" | \"none\" | string",
+        "default": "\"auto\"",
+        "description": "Where focus lands when the dialog opens. \"auto\" focuses the first focusable element in the body (the surface itself when the body has none); \"none\" focuses nothing; a string is a CSS selector resolved within the surface, falling back to \"auto\" when unmatched."
+      },
+      {
         "name": "dismissOnEscape",
         "type": "boolean",
         "default": "true",
@@ -5219,6 +5225,12 @@
         "description": "When false, hides the built-in submit/cancel buttons and expects a custom actions snippet."
       },
       {
+        "name": "initialFocus",
+        "type": "\"auto\" | \"none\" | string",
+        "default": "\"auto\"",
+        "description": "Where focus lands when the dialog opens. The default focuses the first focusable element in the form body — the first field. A consumer-supplied value wins."
+      },
+      {
         "name": "ariaLabel",
         "type": "string | null",
         "default": "null",
@@ -6527,6 +6539,18 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the navigation region."
+      },
+      {
+        "name": "activeEdge",
+        "type": "\"none\" | \"outline\" | \"underline\"",
+        "default": "\"none\"",
+        "description": "Selection edge on the open trigger: none draws no edge, outline draws the accent border (the border the trigger carried by default before g13.016), underline draws the accent edge along the trigger's bottom."
+      },
+      {
+        "name": "activeFill",
+        "type": "\"none\" | \"tint\" | \"solid\"",
+        "default": "\"tint\"",
+        "description": "Selection treatment on the open trigger: none draws no selection fill (the edge and the selected text colour carry selection alone), tint is the accent-tinted fill; solid fills with accent-base and swaps the foreground to text-inverse."
       },
       {
         "name": "onValueChange",
@@ -10004,8 +10028,26 @@
       {
         "name": "variant",
         "type": "TabVariant",
-        "default": "\"underline\"",
+        "default": "\"card\"",
         "description": "Visual style variant of the tabs."
+      },
+      {
+        "name": "activeEdge",
+        "type": "\"none\" | \"outline\" | \"underline\"",
+        "default": "\"none\"",
+        "description": "Selection edge on the active tab: none draws no edge, outline draws the accent border (the former card selected-border value), underline draws the accent edge along the inline-end side (the former strip indicator)."
+      },
+      {
+        "name": "activeFill",
+        "type": "\"none\" | \"tint\" | \"solid\"",
+        "default": "\"tint\"",
+        "description": "Selection treatment on the active tab: none draws no selection fill (the edge and the selected text colour carry selection alone — block + none + underline is the former strip), tint is the accent-tinted fill, solid fills the tab with accent-base and switches the foreground to text-inverse."
+      },
+      {
+        "name": "bordered",
+        "type": "boolean",
+        "default": "false",
+        "description": "Card variant only: draws the separating border on the list and the outer padding that holds the tabs off it."
       },
       {
         "name": "orientation",
@@ -10154,6 +10196,12 @@
         "type": "boolean",
         "default": "false",
         "description": "Whether the input is read-only."
+      },
+      {
+        "name": "autofocus",
+        "type": "boolean",
+        "default": "false",
+        "description": "Web-only native autofocus attribute. Falsy omits the attribute; excluded from TextInputSpec."
       },
       {
         "name": "required",
@@ -10347,7 +10395,7 @@
         "description": "Fires when the input loses focus."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { TextInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let email = \"\";\n  async function validateEmail(value: string) {\n    return value.includes(\"@\")\n      ? { valid: true }\n      : { valid: false, message: \"Enter a valid email address.\" };\n  }\n</script>\n\n<TextInput\n  id=\"email\"\n  bind:value={email}\n  placeholder=\"you@example.com\"\n  type=\"email\"\n  autocomplete=\"email\"\n  validate={validateEmail}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { TextInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let email = \"\";\n  let emailInput: TextInput | undefined;\n  async function validateEmail(value: string) {\n    return value.includes(\"@\")\n      ? { valid: true }\n      : { valid: false, message: \"Enter a valid email address.\" };\n  }\n</script>\n\n<TextInput\n  bind:this={emailInput}\n  id=\"email\"\n  bind:value={email}\n  placeholder=\"you@example.com\"\n  type=\"email\"\n  autocomplete=\"email\"\n  autofocus\n  validate={validateEmail}\n/>\n\n<button onclick={() => emailInput?.focus()}>Focus email</button>"
   },
   "time-ago": {
     "props": [
@@ -11837,6 +11885,211 @@
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { MessageCenter, type MessageCenterItem } from \"@inflatable-cookie/poodle-svelte\";\n\n  let items: MessageCenterItem[] = [\n    { id: \"render\", title: \"Render complete\", message: \"Preview is ready.\", read: false, tone: \"success\" },\n  ];\n</script>\n\n<MessageCenter\n  {items}\n  onReadChange={(id, read) => items = items.map((item) => item.id === id ? { ...item, read } : item)}\n  onRemove={(id) => items = items.filter((item) => item.id !== id)}\n/>"
   },
+  "history-center": {
+    "props": [
+      {
+        "name": "entries",
+        "type": "HistoryEntry[]",
+        "default": "[]",
+        "description": "Caller-owned page of history entries."
+      },
+      {
+        "name": "totalEntries",
+        "type": "number",
+        "default": "0",
+        "description": "Total entry count shown in the header."
+      },
+      {
+        "name": "hasMoreEntries",
+        "type": "boolean",
+        "default": "false",
+        "description": "Shows the entries load-more action."
+      },
+      {
+        "name": "branches",
+        "type": "HistoryBranch[] | null",
+        "default": "null",
+        "description": "Fork branch rows; null hides all branch and checkpoint UI."
+      },
+      {
+        "name": "totalBranches",
+        "type": "number",
+        "default": "0",
+        "description": "Total branch count shown in the header when branches are supplied."
+      },
+      {
+        "name": "hasMoreBranches",
+        "type": "boolean",
+        "default": "false",
+        "description": "Shows the branches load-more action."
+      },
+      {
+        "name": "canUndo",
+        "type": "boolean",
+        "default": "false",
+        "description": "Enables the undo trigger."
+      },
+      {
+        "name": "canRedo",
+        "type": "boolean",
+        "default": "false",
+        "description": "Enables the redo trigger."
+      },
+      {
+        "name": "busy",
+        "type": "boolean",
+        "default": "false",
+        "description": "Disables undo and redo while an authority operation runs."
+      },
+      {
+        "name": "status",
+        "type": "\"idle\" | \"loading\" | \"failed\"",
+        "default": "\"idle\"",
+        "description": "Source status; loading shows a spinner row, failed shows statusMessage."
+      },
+      {
+        "name": "statusMessage",
+        "type": "string | null",
+        "default": "null",
+        "description": "Copy for the failed status row."
+      },
+      {
+        "name": "rejection",
+        "type": "string | null",
+        "default": "null",
+        "description": "Transient inline notice; never silent, never sticky."
+      },
+      {
+        "name": "maxBranchNameBytes",
+        "type": "number",
+        "default": "256",
+        "description": "Client-side affordance only; caps inline rename input length."
+      },
+      {
+        "name": "open",
+        "type": "boolean | null",
+        "default": "null",
+        "description": "Controlled open state; bindable."
+      },
+      {
+        "name": "defaultOpen",
+        "type": "boolean",
+        "default": "false",
+        "description": "Initial uncontrolled open state."
+      },
+      {
+        "name": "placement",
+        "type": "OverlayPlacement",
+        "default": "\"bottom-end\"",
+        "description": "Popover placement hint."
+      },
+      {
+        "name": "undoLabel",
+        "type": "string",
+        "default": "\"Undo\"",
+        "description": "Undo trigger accessible name and tooltip."
+      },
+      {
+        "name": "redoLabel",
+        "type": "string",
+        "default": "\"Redo\"",
+        "description": "Redo trigger accessible name and tooltip."
+      },
+      {
+        "name": "listLabel",
+        "type": "string",
+        "default": "\"History\"",
+        "description": "List trigger accessible name, tooltip, and list region label."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "default": "\"History\"",
+        "description": "Surface heading and default accessible label."
+      },
+      {
+        "name": "emptyMessage",
+        "type": "string",
+        "default": "\"No history entries yet.\"",
+        "description": "Empty-state copy."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Overrides the surface label."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"chrome\"",
+        "description": "Semantic size role used when inheriting presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onUndo",
+        "type": "(() => void) | null",
+        "default": "null",
+        "description": "Undo command; the host owns what undo does."
+      },
+      {
+        "name": "onRedo",
+        "type": "(() => void) | null",
+        "default": "null",
+        "description": "Redo command; the host owns what redo does."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | null",
+        "default": "null",
+        "description": "Open-state request callback."
+      },
+      {
+        "name": "onSelectEntry",
+        "type": "((id: string) => void) | null",
+        "default": "null",
+        "description": "Entry row activation."
+      },
+      {
+        "name": "onCheckout",
+        "type": "((branchId: string, entryId: string) => void) | null",
+        "default": "null",
+        "description": "Branch row activation; carries the fork context."
+      },
+      {
+        "name": "onRenameBranch",
+        "type": "((branchId: string, name: string) => void) | null",
+        "default": "null",
+        "description": "Committed inline branch rename."
+      },
+      {
+        "name": "onLoadMoreEntries",
+        "type": "((offset: number) => void) | null",
+        "default": "null",
+        "description": "Requests the next entries page; offset is the supplied count."
+      },
+      {
+        "name": "onLoadMoreBranches",
+        "type": "((offset: number) => void) | null",
+        "default": "null",
+        "description": "Requests the next branches page; offset is the supplied count."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { HistoryCenter, type HistoryBranch, type HistoryEntry } from \"@inflatable-cookie/poodle-svelte\";\n\n  let entries: HistoryEntry[] = [\n    { id: \"mix-1\", label: \"Committed mix 1\", position: \"past\" },\n    { id: \"fork\", label: \"Fork point\", position: \"past\", branchCount: 2 },\n    { id: \"draft\", label: \"Current draft\", position: \"current\" },\n  ];\n\n  let branches: HistoryBranch[] = [\n    { id: \"b-lead\", name: \"feature/lead\", entryCount: 3, current: true },\n  ];\n</script>\n\n<HistoryCenter\n  {entries}\n  {branches}\n  canUndo\n  onSelectEntry={(id) => console.log(\"select\", id)}\n  onCheckout={(branchId, entryId) => console.log(\"checkout\", branchId, entryId)}\n  onRenameBranch={(branchId, name) => branches = branches.map((branch) => branch.id === branchId ? { ...branch, name } : branch)}\n  onLoadMoreEntries={(offset) => console.log(\"load more\", offset)}\n/>"
+  },
   "action-discovery-panel": {
     "props": [
       {
@@ -11923,12 +12176,22 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the header."
+      },
+      {
+        "name": "element",
+        "type": "HTMLElement | null",
+        "default": "null",
+        "description": "Bindable escape hatch: the rendered header DOM element, for attaching host behaviour (for example window dragging)."
       }
     ],
     "slots": [
       {
         "name": "identity",
         "description": "Custom content snippet for the identity/logo area."
+      },
+      {
+        "name": "center",
+        "description": "Optional centre region. Its presence switches the grid to the symmetric side-column layout and groups actions + utility into the trailing column."
       },
       {
         "name": "actions",
@@ -11940,7 +12203,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AppHeader } from \"@inflatable-cookie/poodle-svelte\";\n  import { Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AppHeader title=\"My App\" subtitle=\"Dashboard\">\n  {#snippet actions()}\n    <Button variant=\"primary\">New</Button>\n  {/snippet}\n</AppHeader>"
+    "usage": "<script lang=\"ts\">\n  import { AppHeader } from \"@inflatable-cookie/poodle-svelte\";\n  import { Button } from \"@inflatable-cookie/poodle-svelte\";\n\n  let headerElement = $state<HTMLElement | null>(null);\n\n  $effect(() => {\n    const header = headerElement;\n    if (!header) return;\n    // Host-owned behaviour — Poodle implements no gesture. For example:\n    // a window-drag handler, or double-click-to-maximize.\n    const onDblClick = () => console.log(\"toggle maximize\");\n    header.addEventListener(\"dblclick\", onDblClick);\n    return () => header.removeEventListener(\"dblclick\", onDblClick);\n  });\n</script>\n\n<AppHeader bind:element={headerElement} title=\"My App\" subtitle=\"Dashboard\">\n  {#snippet actions()}\n    <Button variant=\"primary\">New</Button>\n  {/snippet}\n</AppHeader>"
   },
   "knob": {
     "props": [

@@ -18,12 +18,12 @@ pub const COMFORTABLE: DensityDefinition = DensityDefinition {
     name: "comfortable",
     selector: "[data-density=\"comfortable\"]",
     overrides: &[
-        ("space.panel.x", "1.25rem"),
-        ("space.panel.y", "1rem"),
-        ("space.control.x", "1rem"),
-        ("space.control.y", "0.75rem"),
-        ("space.stack.md", "1rem"),
-        ("space.stack.lg", "1.5rem"),
+    ("space.panel.x", "1.25rem"),
+    ("space.panel.y", "1rem"),
+    ("space.control.x", "1rem"),
+    ("space.control.y", "0.75rem"),
+    ("space.stack.md", "1rem"),
+    ("space.stack.lg", "1.5rem"),
     ],
 };
 
@@ -31,12 +31,12 @@ pub const COMPACT: DensityDefinition = DensityDefinition {
     name: "compact",
     selector: "[data-density=\"compact\"]",
     overrides: &[
-        ("space.panel.x", "0.75rem"),
-        ("space.panel.y", "0.5rem"),
-        ("space.control.x", "0.5rem"),
-        ("space.control.y", "0.25rem"),
-        ("space.stack.md", "0.5rem"),
-        ("space.stack.lg", "1rem"),
+    ("space.panel.x", "0.75rem"),
+    ("space.panel.y", "0.5rem"),
+    ("space.control.x", "0.5rem"),
+    ("space.control.y", "0.25rem"),
+    ("space.stack.md", "0.5rem"),
+    ("space.stack.lg", "1rem"),
     ],
 };
 
@@ -44,12 +44,12 @@ pub const DEFAULT: DensityDefinition = DensityDefinition {
     name: "default",
     selector: "[data-density=\"default\"]",
     overrides: &[
-        ("space.panel.x", "1rem"),
-        ("space.panel.y", "0.75rem"),
-        ("space.control.x", "0.75rem"),
-        ("space.control.y", "0.5rem"),
-        ("space.stack.md", "0.75rem"),
-        ("space.stack.lg", "1.25rem"),
+    ("space.panel.x", "1rem"),
+    ("space.panel.y", "0.75rem"),
+    ("space.control.x", "0.75rem"),
+    ("space.control.y", "0.5rem"),
+    ("space.stack.md", "0.75rem"),
+    ("space.stack.lg", "1.25rem"),
     ],
 };
 
@@ -57,9 +57,9 @@ pub const CONTROL_SIZE_LG: ControlSizeDefinition = ControlSizeDefinition {
     name: "lg",
     selector: "[data-control-size=\"lg\"]",
     overrides: &[
-        ("size.control.height", "2.75rem"),
-        ("size.control.minWidth", "7rem"),
-        ("size.icon.default", "1.25rem"),
+    ("size.control.height", "2.75rem"),
+    ("size.control.minWidth", "7rem"),
+    ("size.icon.default", "1.25rem"),
     ],
 };
 
@@ -67,9 +67,9 @@ pub const CONTROL_SIZE_MD: ControlSizeDefinition = ControlSizeDefinition {
     name: "md",
     selector: "[data-control-size=\"md\"]",
     overrides: &[
-        ("size.control.height", "2.25rem"),
-        ("size.control.minWidth", "6rem"),
-        ("size.icon.default", "1rem"),
+    ("size.control.height", "2.25rem"),
+    ("size.control.minWidth", "6rem"),
+    ("size.icon.default", "1rem"),
     ],
 };
 
@@ -77,9 +77,9 @@ pub const CONTROL_SIZE_SM: ControlSizeDefinition = ControlSizeDefinition {
     name: "sm",
     selector: "[data-control-size=\"sm\"]",
     overrides: &[
-        ("size.control.height", "1.75rem"),
-        ("size.control.minWidth", "5.25rem"),
-        ("size.icon.default", "0.75rem"),
+    ("size.control.height", "1.75rem"),
+    ("size.control.minWidth", "5.25rem"),
+    ("size.icon.default", "0.75rem"),
     ],
 };
 
@@ -87,9 +87,9 @@ pub const CONTROL_SIZE_XL: ControlSizeDefinition = ControlSizeDefinition {
     name: "xl",
     selector: "[data-control-size=\"xl\"]",
     overrides: &[
-        ("size.control.height", "3.25rem"),
-        ("size.control.minWidth", "8rem"),
-        ("size.icon.default", "1.5rem"),
+    ("size.control.height", "3.25rem"),
+    ("size.control.minWidth", "8rem"),
+    ("size.icon.default", "1.5rem"),
     ],
 };
 
@@ -97,8 +97,8 @@ pub const CONTROL_SIZE_XS: ControlSizeDefinition = ControlSizeDefinition {
     name: "xs",
     selector: "[data-control-size=\"xs\"]",
     overrides: &[
-        ("size.control.height", "1.5rem"),
-        ("size.control.minWidth", "4.5rem"),
-        ("size.icon.default", "0.625rem"),
+    ("size.control.height", "1.5rem"),
+    ("size.control.minWidth", "4.5rem"),
+    ("size.icon.default", "0.625rem"),
     ],
 };

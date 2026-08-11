@@ -182,10 +182,10 @@
     "summary": [
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
-        "exportCount": 200,
-        "componentCount": 163,
+        "exportCount": 201,
+        "componentCount": 164,
         "helperCount": 37,
-        "previewedCount": 200,
+        "previewedCount": 201,
         "contractOnlyCount": 0
       }
     ],
@@ -1327,6 +1327,19 @@
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "HistoryCenter",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
         "sectionIds": [
           "catalog-hub"
         ],
