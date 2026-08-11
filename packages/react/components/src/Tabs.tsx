@@ -53,6 +53,18 @@ export interface TabsProps {
   defaultValue?: string | null;
   items?: TabItem[];
   variant?: TabVariant;
+  /**
+   * Opt-in outline on the active tab — the decoration the former `card`
+   * variant had by default. Reuses the old card selected-border value so
+   * the opted-in look matches what card gave.
+   */
+  activeOutline?: boolean;
+  /**
+   * Selection treatment on the active tab: `"tint"` is the accent-tinted
+   * fill; `"solid"` fills the tab with `accent-base` and switches the
+   * foreground to `text-inverse` for contrast.
+   */
+  activeFill?: "tint" | "solid";
   orientation?: Orientation;
   activationMode?: TabActivationMode;
   bordered?: boolean;
@@ -107,7 +119,9 @@ export function Tabs({
   value: controlledValue = null,
   defaultValue = null,
   items = [],
-  variant = "text",
+  variant = "card",
+  activeOutline = false,
+  activeFill = "tint",
   orientation = "horizontal",
   activationMode = "automatic",
   bordered = true,
@@ -190,7 +204,6 @@ export function Tabs({
   const isVertical = orientation === "vertical";
   const hasTooltips = isVertical || showTooltips;
   const canCollapse = collapseWhenOverflow && !isVertical;
-  const resolvedVariant = variant === "underline" ? "text" : variant;
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
   const resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
@@ -363,7 +376,7 @@ export function Tabs({
     };
     // `isShedding` and `shed` belong here: a strategy or order change has to
     // re-run the ladder, not wait for the next resize.
-  }, [canCollapse, isShedding, shed, itemsSignature, resolvedSize, resolvedDensity, resolvedVariant, actions]);
+  }, [canCollapse, isShedding, shed, itemsSignature, resolvedSize, resolvedDensity, variant, actions]);
 
   // ── URL history sync ──
 
@@ -521,8 +534,10 @@ export function Tabs({
     <div
       ref={rootRef}
       className="poodle-tabs"
-      data-variant={resolvedVariant}
+      data-variant={variant}
       data-bordered={bordered}
+      data-active-outline={activeOutline || undefined}
+      data-active-fill={activeFill}
       data-orientation={orientation}
       data-size={resolvedSize}
       data-density={resolvedDensity}

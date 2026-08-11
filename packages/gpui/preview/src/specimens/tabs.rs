@@ -6,8 +6,8 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_specs::{
-    ControlDensity, ControlSize, EyebrowSpec, Orientation, TabDefinition, TabStripItem,
-    TabStripSpec, TabVariant, TabsSpec,
+    ControlDensity, ControlSize, EyebrowSpec, Orientation, TabActiveFill, TabDefinition,
+    TabStripItem, TabStripSpec, TabVariant, TabsSpec,
 };
 use std::sync::Arc;
 
@@ -31,30 +31,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let border = theme.resolve_color("color.border.default");
     let bg_surface = theme.resolve_color("color.background.surface");
 
-    // 1. UNDERLINE VARIANT (DEFAULT, WITH PANEL)
-    let underline_tabs = vec![
+    // 1. CARD VARIANT (DEFAULT, WITH PANEL)
+    let basic_card_tabs = vec![
         TabDefinition::new("overview", "Overview"),
         TabDefinition::new("features", "Features"),
         TabDefinition::new("pricing", "Pricing"),
         TabDefinition::new("faq", "FAQ").with_disabled(true),
     ];
 
-    let underline_value = state
+    let basic_card_value = state
         .specimens
         .text
-        .get("tabs-underline-value")
+        .get("tabs-card-default-value")
         .map(|s| s.as_str())
         .unwrap_or("overview")
         .to_string();
 
-    let underline_spec = TabsSpec::new(underline_tabs)
-        .with_variant(TabVariant::Underline)
-        .with_value(&underline_value)
+    let basic_card_spec = TabsSpec::new(basic_card_tabs)
+        .with_variant(TabVariant::Card)
+        .with_value(&basic_card_value)
         .with_aria_label("Section tabs");
 
-    let underline_component = Tabs::from_spec(underline_spec, theme)
-        .with_id("specimen-underline")
-        .on_change(node_value_handler(state, "tabs-underline-value"))
+    let basic_card_component = Tabs::from_spec(basic_card_spec, theme)
+        .with_id("specimen-card-default")
+        .on_change(node_value_handler(state, "tabs-card-default-value"))
         .with_content(
             "overview".to_string(),
             div()
@@ -111,7 +111,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     let card_component = Tabs::from_spec(card_spec, theme)
         .with_id("specimen-card")
-        .on_change(node_value_handler(state, "tabs-card-value"));
+        .on_change(node_value_handler(state, "tabs-card-value"))
+        .on_close(node_close_handler(state, "tabs-card-closed"));
+
+    let last_card_closed = state
+        .specimens
+        .text
+        .get("tabs-card-closed")
+        .cloned()
+        .unwrap_or_default();
 
     // 2b. CARD VARIANT WITH COUNTS — icons + count badges on each tab.
     let counts_tabs = vec![
@@ -140,6 +148,56 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let counts_component = Tabs::from_spec(counts_spec, theme)
         .with_id("specimen-card-counts")
         .on_change(node_value_handler(state, "tabs-counts-value"));
+
+    // 2c. CARD VARIANT WITH ACTIVE OUTLINE — the former card variant's
+    // selected border, opted back in via `activeOutline`.
+    let outline_value = state
+        .specimens
+        .text
+        .get("tabs-outline-value")
+        .map(|s| s.as_str())
+        .unwrap_or("overview")
+        .to_string();
+
+    let outline_spec = TabsSpec::new(vec![
+        TabDefinition::new("overview", "Overview"),
+        TabDefinition::new("features", "Features"),
+        TabDefinition::new("pricing", "Pricing"),
+        TabDefinition::new("faq", "FAQ").with_disabled(true),
+    ])
+    .with_variant(TabVariant::Card)
+    .with_active_outline(true)
+    .with_value(&outline_value)
+    .with_aria_label("Outlined section tabs");
+
+    let outline_component = Tabs::from_spec(outline_spec, theme)
+        .with_id("specimen-card-outline")
+        .on_change(node_value_handler(state, "tabs-outline-value"));
+
+    // 2d. CARD VARIANT WITH SOLID FILL — `activeFill="solid"`: the selected
+    // tab is fully accent-filled with an inverse foreground.
+    let solid_value = state
+        .specimens
+        .text
+        .get("tabs-solid-value")
+        .map(|s| s.as_str())
+        .unwrap_or("overview")
+        .to_string();
+
+    let solid_spec = TabsSpec::new(vec![
+        TabDefinition::new("overview", "Overview"),
+        TabDefinition::new("features", "Features"),
+        TabDefinition::new("pricing", "Pricing"),
+        TabDefinition::new("faq", "FAQ").with_disabled(true),
+    ])
+    .with_variant(TabVariant::Card)
+    .with_active_fill(TabActiveFill::Solid)
+    .with_value(&solid_value)
+    .with_aria_label("Solid section tabs");
+
+    let solid_component = Tabs::from_spec(solid_spec, theme)
+        .with_id("specimen-card-solid")
+        .on_change(node_value_handler(state, "tabs-solid-value"));
 
     // 3. PILL VARIANT (WITH ICONS)
     let pill_tabs = vec![
@@ -190,30 +248,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_id("specimen-block")
         .on_change(node_value_handler(state, "tabs-block-value"));
 
-    // 4. UNDERLINE WITH ICONS (NO PANEL)
-    let underline_icon_tabs = vec![
+    // 4. CARD WITH ICONS (NO PANEL)
+    let card_icon_tabs = vec![
         TabDefinition::new("home", "Home").with_icon("home"),
         TabDefinition::new("settings", "Settings").with_icon("settings"),
         TabDefinition::new("users", "Users").with_icon("users"),
     ];
 
-    let underline_icon_value = state
+    let card_icon_value = state
         .specimens
         .text
-        .get("tabs-underline-icon-value")
+        .get("tabs-card-icon-value")
         .map(|s| s.as_str())
         .unwrap_or("home")
         .to_string();
 
-    let underline_icon_spec = TabsSpec::new(underline_icon_tabs)
-        .with_variant(TabVariant::Underline)
+    let card_icon_spec = TabsSpec::new(card_icon_tabs)
+        .with_variant(TabVariant::Card)
         .with_bordered(false)
-        .with_value(&underline_icon_value)
+        .with_value(&card_icon_value)
         .with_aria_label("Icon tabs");
 
-    let underline_icon_component = Tabs::from_spec(underline_icon_spec, theme)
-        .with_id("specimen-underline-icons")
-        .on_change(node_value_handler(state, "tabs-underline-icon-value"));
+    let card_icon_component = Tabs::from_spec(card_icon_spec, theme)
+        .with_id("specimen-card-icons")
+        .on_change(node_value_handler(state, "tabs-card-icon-value"));
 
     // 5. STRIP VARIANT (HORIZONTAL, CLOSABLE, REORDERABLE)
     let strip_items = vec![
@@ -391,15 +449,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     };
     let drag_underline = Tabs::from_spec(
         TabsSpec::new(drag_tabs())
-            .with_variant(TabVariant::Underline)
-            .with_value("overview")
-            .with_drag_value(Some("features".to_string()))
-            .with_drop_target_value(Some("pricing".to_string())),
-        theme,
-    )
-    .with_id("specimen-drag-underline");
-    let drag_card = Tabs::from_spec(
-        TabsSpec::new(drag_tabs())
             .with_variant(TabVariant::Card)
             .with_value("overview")
             .with_drag_value(Some("features".to_string()))
@@ -407,23 +456,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         theme,
     )
     .with_id("specimen-drag-card");
+    let drag_card = Tabs::from_spec(
+        TabsSpec::new(drag_tabs())
+            .with_variant(TabVariant::Card)
+            .with_active_outline(true)
+            .with_value("overview")
+            .with_drag_value(Some("features".to_string()))
+            .with_drop_target_value(Some("pricing".to_string())),
+        theme,
+    )
+    .with_id("specimen-drag-card-outline");
 
     // ASSEMBLE
     div()
         .flex()
         .flex_col()
         .gap(px(24.0))
-        // 1. Underline variant (default, with panel)
+        // 1. Card variant (default, with panel)
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Text variant (default, with indicator line)"),
+                    EyebrowSpec::new().with_content("Card variant (default, with indicator line)"),
                     theme,
                 ))
-                .child(underline_component),
+                .child(basic_card_component),
         )
         // 2. Card variant (closable, reorderable)
         .child(
@@ -437,6 +496,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(card_component),
         )
+        .when(!last_card_closed.is_empty(), |d| {
+            d.child(
+                div()
+                    .text_sm()
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(format!("Last closed: {}", last_card_closed)),
+            )
+        })
         // 2b. Card variant with counts and icons
         .child(
             div()
@@ -448,6 +515,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(counts_component),
+        )
+        // 2c. Card variant with active outline
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Card variant (active outline)"),
+                    theme,
+                ))
+                .child(outline_component),
+        )
+        // 2d. Card variant with solid fill
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Card variant (solid fill)"),
+                    theme,
+                ))
+                .child(solid_component),
         )
         // 3. Pill variant
         .child(
@@ -473,17 +564,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(block_component),
         )
-        // 4. Underline with icons (no panel)
+        // 4. Card with icons (no panel)
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Text variant (no border)"),
+                    EyebrowSpec::new().with_content("Card variant (no border)"),
                     theme,
                 ))
-                .child(underline_icon_component),
+                .child(card_icon_component),
         )
         // 5. Strip variant (horizontal, closable, reorderable)
         .child(
@@ -693,7 +784,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
                     EyebrowSpec::new().with_content(
-                        "Reorder drag states — 'Features' dragged (dimmed), 'Pricing' drop-target (ring)",
+                        "Reorder drag states — 'Features' dragged (dimmed), 'Pricing' drop-target (ring); second row with active outline",
                     ),
                     theme,
                 ))

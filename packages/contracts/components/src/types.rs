@@ -778,7 +778,11 @@ pub enum DrawerEdge {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TabVariant {
-    Underline,
+    /// Flat tabs with a bottom border on the list and a pill-shaped
+    /// accent-tinted selection on the tab itself. The default. Renamed from
+    /// the former `Underline`/`text` member; the former `Card` member is
+    /// deleted — its decorations moved to `activeOutline` / `activeFill`.
+    /// Matches Svelte `data-variant="card"`.
     Card,
     Pill,
     /// Full-width tabs with vertical separators, no radius, no outer chrome.

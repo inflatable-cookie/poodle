@@ -11,7 +11,7 @@ Updated: 2026-07-29
   active content panel
 - In scope: tablist semantics, tab activation, tab-panel relationship,
   orientation, automatic vs manual activation, visual variants
-  (text/card/pill/strip/block), reorderable tabs, closable tabs, tab counts,
+  (card/pill/block/strip), reorderable tabs, closable tabs, tab counts,
   optional visual separators, trailing actions snippet, lightweight URL query sync,
   full-width flex layout, overflow collapse into a menu
 - Out of scope: docking
@@ -54,8 +54,10 @@ Updated: 2026-07-29
 | `value` | `string \| null` | `null` | no | controlled active tab |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial active tab |
 | `items` | `TabItem[]` | `[]` | yes | tab definitions |
-| `variant` | `"text" \| "card" \| "pill" \| "strip" \| "block"` | `"text"` | no | visual variant (`"underline"` is a deprecated alias for `"text"`) |
-| `bordered` | `boolean` | `true` | no | when false, hides the bottom border line on the text variant |
+| `variant` | `"card" \| "pill" \| "block" \| "strip"` | `"card"` | no | visual variant; `"card"` is the default |
+| `activeOutline` | `boolean` | `false` | no | opt-in outline on the active tab — the decoration the former `card` variant had by default (selected item border `accent-base` 32% mixed with `border-subtle`) |
+| `activeFill` | `"tint" \| "solid"` | `"tint"` | no | selection treatment on the active tab: `tint` is the accent-tinted fill, `solid` fills the tab fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
+| `bordered` | `boolean` | `true` | no | when false, hides the bottom border line on the card variant |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | navigation axis |
 | `activationMode` | `"automatic" \| "manual"` | `"automatic"` | no | whether focus changes selection |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
@@ -277,7 +279,7 @@ them, wrapping modulo item count), not draggable.
 | Part | Attribute | Value |
 |------|-----------|-------|
 | root | `data-scope` / `data-part` | `tabs` / `root` |
-| root | `data-orientation` / `data-variant` / `data-bordered` / `data-collapsed` / `data-full-width` | resolved inputs and overflow state |
+| root | `data-orientation` / `data-variant` / `data-bordered` / `data-active-outline` / `data-active-fill` / `data-collapsed` / `data-full-width` | resolved inputs and overflow state |
 | list | `data-part` / `role` | `list` / `"tablist"` |
 | list | `aria-label` / `aria-orientation` | `ariaLabel` / `orientation` |
 | tab | `data-part` / `role` / `id` | `trigger` / `"tab"` / `poodle-tab-{instance}-{value}` |
@@ -347,8 +349,8 @@ not shared services.
 
 - Root: `display: grid`, `gap: space-stack-md`, `min-width: 0`
 - Vertical: `grid-template-columns: auto minmax(0, 1fr)`, `align-items: start`
-- List: `display: inline-flex`, `flex-wrap: wrap` (text), `flex-wrap: nowrap` (card/pill)
-- Card/Pill/Strip overflow: `overflow-x: auto; overflow-y: hidden`
+- List: `display: inline-flex`, `flex-wrap: wrap` (card), `flex-wrap: nowrap` (pill/strip/block)
+- Pill/Strip/Block overflow: `overflow-x: auto; overflow-y: hidden`
 - Item: `display: inline-flex`, `align-items: center`, `min-width: 0`, `position: relative`
 
 ### Composition
@@ -387,7 +389,7 @@ not shared services.
 | `align-items` | `stretch` |
 | `gap` | `0.25rem` |
 
-### List — Text variant
+### List — Card variant
 
 | Property | Value |
 |----------|-------|
@@ -396,7 +398,7 @@ not shared services.
 
 When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 
-### List — Text vertical
+### List — Card vertical
 
 | Property | Value |
 |----------|-------|
@@ -406,7 +408,7 @@ When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 | `border-bottom` | `0` |
 | `border-right` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
 
-### List — Card + Pill + Strip + Block
+### List — Pill + Strip + Block
 
 | Property | Value |
 |----------|-------|
@@ -414,7 +416,7 @@ When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 | `overflow-x` | `auto` |
 | `overflow-y` | `hidden` |
 
-### List — Card + Pill + Strip + Block vertical
+### List — Pill + Strip + Block vertical
 
 | Property | Value |
 |----------|-------|
@@ -430,21 +432,24 @@ When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 | `border-radius` | `999px` |
 | `gap` | `0.125rem` |
 
-### Item — Card variant
+### Item — Card variant (activeOutline)
+
+Applies when `activeOutline` is set, on every variant. A transparent border on
+every item keeps the layout stable when the selected item's border becomes
+visible — the opt-in outline never nudges the tab bar.
 
 | Property | Value |
 |----------|-------|
-| `gap` | `0` |
-| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 68%, transparent)` |
-| `border-radius` | `var(--poodle-radius-control)` |
-| `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 92%, transparent)` |
+| `border` | `0.0625rem solid transparent` |
 
-### Item — Card variant (selected)
+### Item — Card variant (activeOutline, selected)
 
 | Property | Value |
 |----------|-------|
 | `border-color` | `color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))` |
-| `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface))` |
+
+This is the former `card` variant's selected-border value, so opting in restores
+exactly the outline the old variant drew by default.
 
 ### Tab button (all variants)
 
@@ -465,25 +470,29 @@ When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 | `line-height` | `1` |
 | `white-space` | `nowrap` |
 
-### Tab — Text variant
+### Tab — Card variant
 
 | Property | Value |
 |----------|-------|
 | `border-radius` | `var(--poodle-radius-control)` |
 
-### Tab — Text variant (selected)
+### Tab — Card variant (selected)
 
 | Property | Value |
 |----------|-------|
 | `background` | `color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent)` |
 | `color` | `var(--poodle-color-text-primary)` |
 
-### Tab — Card variant
+### Tab — Card variant (activeFill="solid", selected)
 
 | Property | Value |
 |----------|-------|
-| `padding` | `0 0.5rem` |
-| `color` | `var(--poodle-color-text-primary)` |
+| `background` | `var(--poodle-color-accent-base)` |
+| `color` | `var(--poodle-color-text-inverse)` |
+
+The solid fill applies to the selected tab on any variant; the foreground
+switches to `text-inverse`, the same token the primary Button uses on
+`accent-base`, so the filled tab keeps legible contrast against every accent.
 
 ### Tab — Pill variant
 
@@ -754,7 +763,7 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - `data-full-width` — set when `fullWidth` is true; drives the full-width flex layout (non-vertical only)
 - `showTooltips` wraps each tab in a `Tooltip`; for vertical/icon-only tabs the tooltip surfaces the hidden label
 - `collapseWhenOverflow` measures the tablist against its container and, on overflow, replaces the tabs with a `Menu` trigger labeled by `collapseLabel` (falling back to the active tab label)
-- Variant resolution: `variant="underline"` is normalized to `"text"` (`resolvedVariant`); the rendered `data-variant` is `"text"`. `"text"` is the canonical Svelte name and the default
+- Variant resolution: the rendered `data-variant` is the resolved `variant` prop; `"card"` is the canonical Svelte name and the default. `data-active-outline` and `data-active-fill` carry `activeOutline` / `activeFill` on the root
 
 ## 10. GPUI Notes
 
@@ -762,12 +771,12 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - Spec struct: `TabsSpec` in primitives crate holds tab definitions + variant
 - Component struct: `PoodleTabs` in components crate renders via `IntoElement`
 - Opacity multipliers centralized in spec: `pill_border_opacity() -> 0.68`, `pill_active_bg_opacity() -> 0.18`
-- Note: `"underline"` is accepted as a deprecated alias for `"text"` in the variant prop. The Rust `TabVariant` enum names this canonical member `Underline` (enum: `Underline | Card | Pill | Block`); it is the same variant Svelte renders as `data-variant="text"`. The naming difference is implementation-side only — both target Svelte's text/underline variant.
+- The Rust `TabVariant` enum is `Card | Pill | Block`, matching the web union minus `strip` — the strip variant renders through the separate `TabStripSpec`/`TabStrip` component on the native targets. The `TabVariant` `Strip` member is a known gap, deliberately deferred; see the g13-013 batch log.
+- The renamed `Card` variant renders icon, count, and close-button accessories on every tab, with the close button wired to `on_close` (inert when unwired, so an unwired X does not bubble to the tab and select what it was closing).
+- `activeOutline` maps to a 1px border on the selected tab element: `mix_srgb(accent, border-subtle, 0.32)` — the former card selected-border value. All tabs get a transparent 1px border so selection does not shift layout.
+- `activeFill="solid"` maps to a full `accent-base` background on the selected tab with `color.text.inverse` foreground.
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
-- Text variant border opacity: 82% → `0.82` multiplier on border-subtle
-- Card item border opacity: 68% → `0.68` multiplier on border-subtle
-- Card item bg opacity: 92% → `0.92` on background-surface
-- Card selected: accent 32% mix + border-subtle (not simple opacity), accent 14% mix + background-surface
+- Card variant border opacity: 82% → `0.82` multiplier on border-subtle
 - Panel border: 74% → `0.74` on border-subtle; panel bg: 96% → `0.96` on background-panel
 
 ## 10a. Jetstream Notes
@@ -795,8 +804,8 @@ Applies when `fullWidth` is set and orientation is horizontal.
 
 ### Tier 2: Visual Parity
 
-- [ ] all five variants render with exact token/dimension match
-- [ ] color-mix percentages match (82%, 68%, 18%, 14%, 32%, 74%, 92%, 96%)
+- [ ] all four variants render with exact token/dimension match
+- [ ] color-mix percentages match (82%, 18%, 74%, 92%, 96%; activeOutline 32%)
 - [ ] font-size 0.75rem, font-weight 600, line-height 1 match
 - [ ] min-height calc expressions match per variant
 - [ ] padding values match per variant
@@ -822,9 +831,9 @@ Applies when `fullWidth` is set and orientation is horizontal.
 
 All preview apps must render the following specimens identically.
 
-### Text variant (default, with panel)
+### Card variant (default, with panel)
 
-Text tabs with associated panel content:
+Card tabs with associated panel content:
 
 | Tab label | Panel content | State |
 |-----------|--------------|-------|
@@ -835,7 +844,7 @@ Text tabs with associated panel content:
 
 ### Card variant (closable, reorderable)
 
-Card tabs simulating file tabs:
+Card tabs simulating file tabs, with close buttons wired to `onClose`:
 
 | Tab label | Props |
 |-----------|-------|
@@ -843,6 +852,30 @@ Card tabs simulating file tabs:
 | App.svelte | closable |
 | utils.ts | closable |
 | types.ts | closable |
+
+### Card variant (active outline)
+
+Card tabs with `activeOutline` set. The selected tab carries the former
+`card` variant's outline (accent 32% border); everything else is flat:
+
+| Tab label | State |
+|-----------|-------|
+| Overview | active (default), outlined |
+| Features | inactive |
+| Pricing | inactive |
+| FAQ | disabled |
+
+### Card variant (solid fill)
+
+Card tabs with `activeFill="solid"` set. The selected tab is fully
+accent-filled with inverse foreground:
+
+| Tab label | State |
+|-----------|-------|
+| Overview | active (default), solid fill |
+| Features | inactive |
+| Pricing | inactive |
+| FAQ | disabled |
 
 ### Pill variant (with icons)
 
@@ -854,9 +887,9 @@ Pill tabs with leading icons:
 | Settings | settings | inactive |
 | Users | users | inactive |
 
-### Text (with icons, no panel)
+### Card (with icons, no panel)
 
-Text tabs with icons and no panel below:
+Card tabs with icons and no panel below:
 
 | Tab label | Icon | State |
 |-----------|------|-------|

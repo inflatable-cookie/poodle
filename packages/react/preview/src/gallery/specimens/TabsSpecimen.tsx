@@ -139,7 +139,7 @@ export function TabsSpecimen() {
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Text variant (default, with indicator line)">
+        <SpecimenGroup label="Card variant (default, with indicator line)">
           <Tabs items={basicTabs} defaultValue="overview" ariaLabel="Section tabs">
             {(activeValue) => (
               <p>
@@ -149,7 +149,7 @@ export function TabsSpecimen() {
           </Tabs>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Text variant (no border)">
+        <SpecimenGroup label="Card variant (no border)">
           <Tabs items={basicTabs} defaultValue="overview" bordered={false} ariaLabel="Section tabs without border" />
         </SpecimenGroup>
 
@@ -175,6 +175,14 @@ export function TabsSpecimen() {
           ) : null}
         </SpecimenGroup>
 
+        <SpecimenGroup label="Card variant (active outline)">
+          <Tabs items={basicTabs} variant="card" activeOutline defaultValue="overview" ariaLabel="Outlined section tabs" />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Card variant (solid fill)">
+          <Tabs items={basicTabs} variant="card" activeFill="solid" defaultValue="overview" ariaLabel="Solid section tabs" />
+        </SpecimenGroup>
+
         <SpecimenGroup label="Block variant (full-width shell tabs with separators)">
           <div style={frameStyle}>
             <Tabs items={stripTabs} variant="block" defaultValue="editor" reorderable ariaLabel="Workspace surfaces" />
@@ -188,7 +196,7 @@ export function TabsSpecimen() {
           <Tabs items={iconTabs} variant="pill" defaultValue="home" ariaLabel="Navigation" />
         </SpecimenGroup>
 
-        <SpecimenGroup label="Underline (with icons, no panel)">
+        <SpecimenGroup label="Card variant (with icons, no panel)">
           <Tabs items={iconTabs} defaultValue="home" ariaLabel="Icon tabs" />
         </SpecimenGroup>
 

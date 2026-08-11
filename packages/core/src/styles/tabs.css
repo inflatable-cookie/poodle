@@ -145,16 +145,16 @@
     max-width: none;
   }
 
-  /* Underline: bottom border on list */
-  .poodle-tabs[data-variant="text"] .poodle-tabs__list {
+  /* Card: bottom border on list */
+  .poodle-tabs[data-variant="card"] .poodle-tabs__list {
     padding-bottom: var(--poodle-space-inline-sm);
   }
 
-  .poodle-tabs[data-variant="text"][data-bordered="true"] .poodle-tabs__list {
+  .poodle-tabs[data-variant="card"][data-bordered="true"] .poodle-tabs__list {
     border-bottom: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
   }
 
-  .poodle-tabs[data-variant="text"][data-orientation="vertical"] .poodle-tabs__list {
+  .poodle-tabs[data-variant="card"][data-orientation="vertical"] .poodle-tabs__list {
     flex-direction: column;
     padding-bottom: 0;
     padding-right: 0.5rem;
@@ -162,8 +162,7 @@
     border-right: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent);
   }
 
-  /* Card + Pill + Strip + Block: no wrapping, allow scroll on main axis only */
-  .poodle-tabs[data-variant="card"] .poodle-tabs__list,
+  /* Pill + Strip + Block: no wrapping, allow scroll on main axis only */
   .poodle-tabs[data-variant="pill"] .poodle-tabs__list,
   .poodle-tabs[data-variant="strip"] .poodle-tabs__list,
   .poodle-tabs[data-variant="block"] .poodle-tabs__list {
@@ -172,7 +171,6 @@
     overflow-y: hidden;
   }
 
-  .poodle-tabs[data-variant="card"][data-orientation="vertical"] .poodle-tabs__list,
   .poodle-tabs[data-variant="pill"][data-orientation="vertical"] .poodle-tabs__list,
   .poodle-tabs[data-variant="strip"][data-orientation="vertical"] .poodle-tabs__list,
   .poodle-tabs[data-variant="block"][data-orientation="vertical"] .poodle-tabs__list {
@@ -215,20 +213,6 @@
     flex-shrink: 0;
     margin: 0 var(--poodle-tabs-separator-margin);
     background: var(--poodle-recipe-tabs-separator-fill, var(--poodle-color-border-default));
-  }
-
-  /* Card variant: bordered card items */
-  .poodle-tabs[data-variant="card"] .poodle-tabs__item {
-    gap: 0;
-    border: 0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 68%, transparent);
-    border-radius: var(--poodle-radius-control);
-    background: var(--poodle-recipe-tabs-card-item-fill, color-mix(in srgb, var(--poodle-color-background-surface) 92%, transparent));
-    box-shadow: var(--poodle-recipe-tabs-card-item-shadow, none);
-  }
-
-  .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] {
-    border-color: var(--poodle-recipe-tabs-card-selected-item-border, color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle)));
-    background: var(--poodle-recipe-tabs-card-selected-item-fill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, var(--poodle-color-background-surface)));
   }
 
   .poodle-tabs[data-variant="block"] .poodle-tabs__item {
@@ -293,20 +277,14 @@
     justify-content: center;
   }
 
-  /* Underline variant: pill-shaped highlight on selected */
-  .poodle-tabs[data-variant="text"] .poodle-tabs__tab {
+  /* Card variant: pill-shaped highlight on selected */
+  .poodle-tabs[data-variant="card"] .poodle-tabs__tab {
     border-radius: var(--poodle-radius-control);
   }
 
-  .poodle-tabs[data-variant="text"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
-    background: var(--poodle-recipe-tabs-text-selected-tab-fill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent));
-    color: var(--poodle-recipe-tabs-text-selected-tab-text, var(--poodle-color-text-primary));
-  }
-
-  /* Card variant: transparent tab inside card */
-  .poodle-tabs[data-variant="card"] .poodle-tabs__tab {
-    padding: 0 var(--poodle-tabs-control-x);
-    color: var(--poodle-recipe-tabs-card-tab-text, var(--poodle-color-text-primary));
+  .poodle-tabs[data-variant="card"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
+    background: var(--poodle-recipe-tabs-card-selected-tab-fill, color-mix(in srgb, var(--poodle-color-accent-base) 18%, transparent));
+    color: var(--poodle-recipe-tabs-card-selected-tab-text, var(--poodle-color-text-primary));
   }
 
   .poodle-tabs[data-variant="block"] .poodle-tabs__tab {
@@ -438,6 +416,26 @@
     color: var(--poodle-recipe-tabs-pill-selected-tab-text, var(--poodle-color-text-primary));
   }
 
+  /* activeOutline: outline on the selected item, reusing the former card
+     variant's selected-border value so the opted-in look matches what card
+     gave. A transparent border on every item keeps the bar from shifting
+     when the selected border becomes visible. */
+  .poodle-tabs[data-active-outline="true"] .poodle-tabs__item {
+    border: 0.0625rem solid transparent;
+  }
+
+  .poodle-tabs[data-active-outline="true"] .poodle-tabs__item[data-selected="true"] {
+    border-color: var(--poodle-recipe-tabs-active-outline-border, color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle)));
+  }
+
+  /* activeFill="solid": fully accent-filled active tab. The foreground uses
+     text-inverse, the same token the primary Button uses on accent-base, so
+     the filled tab keeps legible contrast against every accent. */
+  .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__tab {
+    background: var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-color-accent-base));
+    color: var(--poodle-recipe-tabs-active-solid-text, var(--poodle-color-text-inverse));
+  }
+
   /* Focus */
   .poodle-tabs__tab:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
@@ -528,11 +526,11 @@
     background: var(--poodle-recipe-tabs-panel-fill, color-mix(in srgb, var(--poodle-color-background-panel) 96%, transparent));
   }
 
-  .poodle-tabs[data-variant="text"] .poodle-tabs__panel {
+  .poodle-tabs[data-variant="card"] .poodle-tabs__panel {
     padding: 0;
     border: 0;
     border-radius: 0;
-    background: var(--poodle-recipe-tabs-text-panel-fill, transparent);
+    background: var(--poodle-recipe-tabs-card-panel-fill, transparent);
   }
 
 /* ── Graded overflow: shed decoration before collapsing ──────────────────────

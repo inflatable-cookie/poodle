@@ -624,7 +624,7 @@ export interface TabItem {
   separator?: boolean;
 }
 
-export type TabVariant = "text" | "card" | "pill" | "strip" | "block" | "underline";
+export type TabVariant = "card" | "pill" | "block" | "strip";
 export type TabActivationMode = "automatic" | "manual";
 
 export type DockEdge = "left" | "right" | "top" | "bottom";
