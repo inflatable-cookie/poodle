@@ -21,7 +21,8 @@ and roadmap closeout.
 | `009` | dialog initial-focus hook (side-quest) | `b1a4a5e7` | merged (`e4af527e`) |
 | `010` | TextInput focus parity: autofocus + focus() to React | `b1a4a5e7` | merged (`b2aa40ae`) |
 | `011` | `poodle-ir` schema core (**g13.002**) | `003` rulings | merged (`4a22c8d8`) |
-| `012` | IR bounded expression vocabulary | `011` merged | dispatched |
+| `012` | IR bounded expression vocabulary | `011` merged | merged (`911fdfd8`) |
+| `013` | Tabs variant consolidation (side-quest) | maintainer ruling | dispatched |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
 evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of
@@ -43,3 +44,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 010](010-text-input-focus-parity.md)
 - [Batch 011](011-poodle-ir-schema-core.md)
 - [Batch 012](012-ir-expression-vocabulary.md)
+- [Batch 013](013-tabs-variant-consolidation.md)

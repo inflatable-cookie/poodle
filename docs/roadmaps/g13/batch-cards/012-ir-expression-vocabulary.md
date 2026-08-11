@@ -1,6 +1,6 @@
 # 012 IR Bounded Expression Vocabulary
 
-Status: ready
+Status: merged (`911fdfd8`)
 Milestone: `g13.002`
 Owner: Poodle core
 Branch: `thread/g13-012-ir-expression-vocabulary`
@@ -154,18 +154,18 @@ constructed or does not type-check.
 
 ## Acceptance Criteria
 
-- [ ] `Expr` implements exactly the ruled operand and operator sets — no more.
-- [ ] Expressions are total (no error case in evaluation typing), pure, and
+- [x] `Expr` implements exactly the ruled operand and operator sets — no more.
+- [x] Expressions are total (no error case in evaluation typing), pure, and
   serializable with deterministic ordering.
-- [ ] Type errors and unresolved references surface as validation `Finding`s
+- [x] Type errors and unresolved references surface as validation `Finding`s
   alongside all others, with identifier and actionable message.
-- [ ] `Expr` is wired into all four sanctioned slots and no others.
-- [ ] Every "must express" conformance row has a passing test.
-- [ ] At least one test proves an excluded shape cannot be expressed.
-- [ ] No evaluator, no codegen, no macro, no new dependency.
-- [ ] Nothing outside `packages/contracts/ir/` changed except log and papercuts.
-- [ ] All step-7 commands exit 0.
-- [ ] Batch log records commands, exit states, and any conformance row that
+- [x] `Expr` is wired into all four sanctioned slots and no others.
+- [x] Every "must express" conformance row has a passing test.
+- [x] At least one test proves an excluded shape cannot be expressed.
+- [x] No evaluator, no codegen, no macro, no new dependency.
+- [x] Nothing outside `packages/contracts/ir/` changed except log and papercuts.
+- [x] All step-7 commands exit 0.
+- [x] Batch log records commands, exit states, and any conformance row that
   needed interpretation.
 
 ## Stop Conditions
