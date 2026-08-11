@@ -289,18 +289,18 @@ freeform mode, and native-mode delegation stay adapter-side.
 | `min-height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
 | `border` | `0.0625rem solid var(--poodle-color-border-default)` |
-| `border-radius` | `var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control))` |
-| `background` | `var(--poodle-treatment-interactive-subtle-fill, var(--poodle-color-background-surface))` |
-| `box-shadow` | `var(--poodle-treatment-interactive-subtle-shadow, none)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-recipe-select-fill, var(--poodle-color-background-surface))` |
+| `box-shadow` | `var(--poodle-recipe-select-shadow, none)` |
 | `transition` | `border-color, box-shadow, background` |
 
 ### Root — focus-within
 
 | Property | Value |
 |----------|-------|
-| `border-color` | `var(--poodle-color-accent-focusRing)` |
-| `background` | `var(--poodle-treatment-interactive-subtle-fill-focus, var(--poodle-color-background-surface))` |
-| `box-shadow` | `var(--poodle-treatment-interactive-subtle-shadow-focus, 0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent))` |
+| `border-color` | `var(--poodle-recipe-select-focus-border, var(--poodle-color-accent-focusRing))` |
+| `background` | `var(--poodle-recipe-select-focus-fill, var(--poodle-color-background-surface))` |
+| `box-shadow` | `var(--poodle-recipe-select-focus-shadow, 0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent))` |
 
 ### Root — has disabled select
 
@@ -426,7 +426,8 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 - Uses a native `<select>` element for full platform accessibility without a custom overlay
 - `appearance: none` on the select removes native browser chrome; the custom indicator provides the disclosure chevron
 - `data-placeholder="true"` attribute on root signals placeholder state for CSS targeting
-- Treatment tokens (`--poodle-treatment-interactive-subtle-*`) provide themed styling with fallbacks to base tokens
+- Component Recipe hooks (`--poodle-recipe-select-*`) provide scoped
+  appearance overrides with semantic-token fallbacks.
 - Placeholder rendered as a disabled `<option>` with `selected` when no value is set
 - Option groups rendered as native `<optgroup>` elements
 - Emits `data-size` on root element reflecting the resolved size
@@ -458,7 +459,8 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 - expected crate/module surface: `poodle_gpui::primitives::select`
 - GPUI must model the select as a trigger that opens a platform-appropriate option list
 - Must expose selected value, expanded state, and option list through native accessibility tree
-- Treatment token fallback chain can be modeled as: use treatment token if set, else base token
+- Recipe fallback chains use the component override when set and otherwise use
+  the semantic-token default.
 - The indicator chevron is decorative and does not need separate accessibility exposure
 
 ## 10a. Jetstream Notes
@@ -481,7 +483,7 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 ### Tier 2: Visual Parity
 
 - [ ] control height uses control-height token
-- [ ] treatment token system matches (subtle radius, fill, shadow with fallbacks)
+- [ ] Recipe hooks and semantic-token fallbacks match for fill, border, and shadow
 - [ ] focus-within treatment matches (border-color, background, box-shadow)
 - [ ] placeholder color (text-secondary) matches
 - [ ] indicator color (icon-muted) matches
@@ -500,7 +502,7 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 |-------|-------------|-----------------|-----------|
 | native select dropdown appearance differs per platform | native `<select>` renders platform-native dropdowns | allowed | keep value/selection semantics strict |
 | GPUI may use custom overlay instead of native select | GPUI has no native `<select>` equivalent | allowed | must preserve option group support and keyboard navigation |
-| treatment token fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result required |
+| Recipe fallback chain | CSS custom property vs Rust spec/token override | allowed | same visual result required |
 
 ## 13. Specimen Definitions
 

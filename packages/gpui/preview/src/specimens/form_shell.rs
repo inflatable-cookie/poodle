@@ -104,21 +104,25 @@ fn group(theme: &GpuiThemeProvider, label: &str, spec: FormShellSpec, fields: Fi
 
     let account_slot = node_column(
         12.0,
-        [name_field.into_compat_node(), email_field.into_compat_node()],
+        [
+            name_field.into_compat_node(),
+            email_field.into_compat_node(),
+        ],
     );
 
     // ── Profile section slot (real Field + TextInput) ────────
-    let bio_slot = Field::new("fs-bio", "Bio", theme).with_control(
-        TextInput::from_spec(
-            TextInputSpec::new()
-                .with_placeholder("A few words about yourself…")
-                .with_rows(3)
-                .with_disabled(disabled || busy),
-            theme,
+    let bio_slot = Field::new("fs-bio", "Bio", theme)
+        .with_control(
+            TextInput::from_spec(
+                TextInputSpec::new()
+                    .with_placeholder("A few words about yourself…")
+                    .with_rows(3)
+                    .with_disabled(disabled || busy),
+                theme,
+            )
+            .with_id(format!("fs-bio-{label}")),
         )
-        .with_id(format!("fs-bio-{label}")),
-    )
-    .into_compat_node();
+        .into_compat_node();
 
     div()
         .flex()

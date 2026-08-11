@@ -50,8 +50,7 @@ impl RenderComponent<ButtonSpec> for GpuiAdapter {
             gpui_style.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
         }
 
-        let mut element_id =
-            format!("button-{}", spec.label.as_deref().unwrap_or("anonymous"));
+        let mut element_id = format!("button-{}", spec.label.as_deref().unwrap_or("anonymous"));
         if let Some(expanded) = spec.aria_expanded {
             element_id.push_str(if expanded {
                 "|aria_expanded=true"

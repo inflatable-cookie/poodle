@@ -185,7 +185,8 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 - `appearance: none` may be needed for consistent cross-browser styling
 - Public value uses local time strings in HH:MM or HH:MM:SS form
 - Browser-native time picker UI is allowed; Poodle does not override it
-- Treatment tokens may be added for themed styling with fallbacks
+- New appearance overrides must use component-scoped Recipe hooks with
+  semantic-token fallbacks.
 - `data-size` data attribute on the input reflects the resolved size
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 

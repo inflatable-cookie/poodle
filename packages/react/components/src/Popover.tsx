@@ -26,6 +26,7 @@ export interface PopoverProps {
   initialFocus?: PopoverInitialFocus;
   ariaLabel?: string | null;
   block?: boolean;
+  triggerIsInteractive?: boolean;
   disabled?: boolean;
   surfaceWidth?: "content" | "trigger";
   surfaceMinWidth?: string | null;
@@ -45,6 +46,7 @@ export function Popover({
   initialFocus = "first-focusable",
   ariaLabel = null,
   block = false,
+  triggerIsInteractive = false,
   disabled = false,
   surfaceWidth = "content",
   surfaceMinWidth = null,
@@ -122,6 +124,7 @@ export function Popover({
     surfaceId: popoverId.current,
     ariaLabel,
     block,
+    triggerIsInteractive,
     placement: resolvedPlacement,
     surfaceWidth,
   });
@@ -138,7 +141,7 @@ export function Popover({
         {...reactifyPart(parts.trigger)}
         className="poodle-popover__trigger"
         onClick={() => sendRef.current({ type: "TOGGLE" })}
-        onKeyDown={(event) => {
+        onKeyDown={triggerIsInteractive ? undefined : (event) => {
           if (disabled) return;
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();

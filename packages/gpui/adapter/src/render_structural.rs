@@ -180,7 +180,6 @@ impl RenderComponent<ScrollShellSpec> for GpuiAdapter {
     }
 }
 
-
 impl RenderComponent<CallOutSpec> for GpuiAdapter {
     type Target = GpuiTarget;
 

@@ -26,21 +26,19 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_title("Edit Profile")
                     .with_description("Make changes to your profile here."),
                 theme,
-                vec![
-                    div()
-                        .flex_col()
-                        .gap(8.0)
-                        .child(
-                            label("Name: Jane Doe")
-                                .text_color(text_primary)
-                                .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
-                        )
-                        .child(
-                            label("Email: jane@example.com")
-                                .text_color(secondary)
-                                .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
-                        ),
-                ],
+                vec![div()
+                    .flex_col()
+                    .gap(8.0)
+                    .child(
+                        label("Name: Jane Doe")
+                            .text_color(text_primary)
+                            .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
+                    )
+                    .child(
+                        label("Email: jane@example.com")
+                            .text_color(secondary)
+                            .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
+                    )],
                 None,
             ),
         ))
@@ -51,11 +49,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_dialog(
                 &DialogSpec::new().with_title("Confirm Action"),
                 theme,
-                vec![
-                    label("Are you sure you want to proceed?")
-                        .text_color(text_primary)
-                        .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
-                ],
+                vec![label("Are you sure you want to proceed?")
+                    .text_color(text_primary)
+                    .text_size(rem_to_px(size_font_rem(ControlSize::Md)))],
                 None,
             ),
         ))
@@ -82,11 +78,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_description("This dialog has a close button in the header.")
                     .with_show_close_button(true),
                 theme,
-                vec![
-                    label("Content goes here.")
-                        .text_color(text_primary)
-                        .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
-                ],
+                vec![label("Content goes here.")
+                    .text_color(text_primary)
+                    .text_size(rem_to_px(size_font_rem(ControlSize::Md)))],
                 None,
             ),
         ))
@@ -100,11 +94,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_description("Set up a new project workspace.")
                     .with_show_close_button(true),
                 theme,
-                vec![
-                    label("Configure the project before continuing.")
-                        .text_color(secondary)
-                        .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
-                ],
+                vec![label("Configure the project before continuing.")
+                    .text_color(secondary)
+                    .text_size(rem_to_px(size_font_rem(ControlSize::Md)))],
                 Some(
                     div()
                         .flex_row()
@@ -137,11 +129,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         "This will permanently remove the item and all associated data.",
                     ),
                 theme,
-                vec![
-                    label("This action cannot be undone.")
-                        .text_color(secondary)
-                        .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
-                ],
+                vec![label("This action cannot be undone.")
+                    .text_color(secondary)
+                    .text_size(rem_to_px(size_font_rem(ControlSize::Md)))],
                 Some(
                     div()
                         .flex_row()
@@ -171,11 +161,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_title("Small Dialog")
                     .with_width(DialogWidth::Sm),
                 theme,
-                vec![
-                    label("24rem wide.")
-                        .text_color(text_primary)
-                        .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
-                ],
+                vec![label("24rem wide.")
+                    .text_color(text_primary)
+                    .text_size(rem_to_px(size_font_rem(ControlSize::Md)))],
                 None,
             ),
         ))
@@ -188,11 +176,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_title("Large Dialog")
                     .with_width(DialogWidth::Lg),
                 theme,
-                vec![
-                    label("48rem wide.")
-                        .text_color(text_primary)
-                        .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
-                ],
+                vec![label("48rem wide.")
+                    .text_color(text_primary)
+                    .text_size(rem_to_px(size_font_rem(ControlSize::Md)))],
                 None,
             ),
         ))
@@ -205,11 +191,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_title("Extra-large Dialog")
                     .with_width(DialogWidth::Xl),
                 theme,
-                vec![
-                    label("64rem wide.")
-                        .text_color(text_primary)
-                        .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
-                ],
+                vec![label("64rem wide.")
+                    .text_color(text_primary)
+                    .text_size(rem_to_px(size_font_rem(ControlSize::Md)))],
                 None,
             ),
         ))
@@ -222,11 +206,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_title("Full-width Dialog")
                     .with_width(DialogWidth::Full),
                 theme,
-                vec![
-                    label("Fills the available overlay width.")
-                        .text_color(text_primary)
-                        .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
-                ],
+                vec![label("Fills the available overlay width.")
+                    .text_color(text_primary)
+                    .text_size(rem_to_px(size_font_rem(ControlSize::Md)))],
                 None,
             ),
         ))
@@ -268,19 +250,17 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_dialog(
                 &DialogSpec::new().with_bare(true),
                 theme,
-                vec![
-                    div()
-                        .flex_col()
-                        .items_center()
-                        .justify_center()
-                        .pt(rem_to_px(1.5))
-                        .pb(rem_to_px(1.5))
-                        .child(
-                            label("Fully custom content")
-                                .text_color(text_primary)
-                                .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
-                        ),
-                ],
+                vec![div()
+                    .flex_col()
+                    .items_center()
+                    .justify_center()
+                    .pt(rem_to_px(1.5))
+                    .pb(rem_to_px(1.5))
+                    .child(
+                        label("Fully custom content")
+                            .text_color(text_primary)
+                            .text_size(rem_to_px(size_font_rem(ControlSize::Md))),
+                    )],
                 None,
             ),
         ))

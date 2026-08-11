@@ -74,7 +74,7 @@ Extends spec `026` from strategy to product surface:
 - Poodle ships the default recipe per component; a consuming app overrides
   recipe slots per component without touching behavior and without rebuilding
   the suite
-- token purity, treatment roles, and the cross-runtime/web-only lanes from
+- token purity, Recipe hooks, and the cross-runtime/web-only lanes from
   spec `026` still govern what a recipe may contain
 
 ## Decision: Rust Mirror Path
@@ -187,7 +187,7 @@ Build list for `g11.003`, from the pilot specs:
 - ~~Recipe override delivery mechanism~~ **Resolved (g11.005):** CSS
   custom-property contracts in a dedicated read-only namespace
   (`--poodle-recipe-<component>[-<variant>]-<slot>[-<state>]`), no JS API.
-  Components resolve recipe hook -> treatment role -> token. Key finding:
+  Components resolve Recipe hook -> semantic token. Key finding:
   component-local variables cannot be the public surface (components define
   them, so app overrides lose the cascade) — the seed's `--poodle-recipe-*`
   namespace from g03.005 was the correct pattern and is now the documented

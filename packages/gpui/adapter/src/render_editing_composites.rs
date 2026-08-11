@@ -13,7 +13,9 @@ use poodle_specs::{
     EmptyStateSpec, LogListSpec, MarkdownEditorSpec, MediaPickerSpec, PageHeaderSpec,
     PageLoadingSpec, StateTileSpec, ToastStackSpec, VideoPlayerSpec,
 };
-use poodle_specs::{BreadcrumbsSpec, FilterBuilderSpec, ListCardSpec, NavCardSpec, OrderBySpec, ThemeSelectSpec};
+use poodle_specs::{
+    BreadcrumbsSpec, FilterBuilderSpec, ListCardSpec, NavCardSpec, OrderBySpec, ThemeSelectSpec,
+};
 use poodle_style::StyleDescriptor;
 
 use crate::style_map::map_style;

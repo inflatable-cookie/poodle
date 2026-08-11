@@ -207,7 +207,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Hover-revealed toggles (pointer onto the seam)"),
+                    EyebrowSpec::new()
+                        .with_content("Hover-revealed toggles (pointer onto the seam)"),
                     theme,
                 ))
                 .child(

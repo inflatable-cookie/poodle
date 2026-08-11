@@ -306,10 +306,7 @@ mod tests {
         let node = render(&spec);
         let cluster = cluster(&node);
         assert_eq!(cluster.style.descriptor.opacity, 0.0);
-        assert_eq!(
-            cluster.style.hover.expect("hover patch").opacity,
-            Some(1.0)
-        );
+        assert_eq!(cluster.style.hover.expect("hover patch").opacity, Some(1.0));
     }
 
     #[test]

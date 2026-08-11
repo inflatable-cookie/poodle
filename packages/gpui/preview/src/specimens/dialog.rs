@@ -25,10 +25,7 @@ fn set_toggle_click(
     })
 }
 
-fn set_toggle_open_change(
-    state: &AppState,
-    key: &'static str,
-) -> Arc<dyn Fn(bool) + Send + Sync> {
+fn set_toggle_open_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(bool) + Send + Sync> {
     let events = state.node_events.clone();
     Arc::new(move |value| {
         events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
@@ -169,13 +166,21 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         ("md", "dialog-width-md-trigger", "dialog-width-md-open"),
         ("lg", "dialog-width-lg-trigger", "dialog-width-lg-open"),
         ("xl", "dialog-width-xl-trigger", "dialog-width-xl-open"),
-        ("full", "dialog-width-full-trigger", "dialog-width-full-open"),
+        (
+            "full",
+            "dialog-width-full-trigger",
+            "dialog-width-full-open",
+        ),
     ]
     .into_iter()
-    .fold(div().flex().flex_wrap().items_center().gap(px(8.0)), |row, (label, id, key)| {
-        row.child(open_button(id, key, label))
-    });
-    root = root.child(button_row("Width presets", width_buttons.into_any_element()));
+    .fold(
+        div().flex().flex_wrap().items_center().gap(px(8.0)),
+        |row, (label, id, key)| row.child(open_button(id, key, label)),
+    );
+    root = root.child(button_row(
+        "Width presets",
+        width_buttons.into_any_element(),
+    ));
 
     root = root.child(button_row(
         "Alert",
@@ -201,7 +206,16 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             ("Esc", "Close dialog"),
         ]
         .into_iter()
-        .map(|(keys, label)| row([text(theme, keys, 12.0, "color.text.primary"), text(theme, label, 13.0, text_secondary)], 12.0, false));
+        .map(|(keys, label)| {
+            row(
+                [
+                    text(theme, keys, 12.0, "color.text.primary"),
+                    text(theme, label, 13.0, text_secondary),
+                ],
+                12.0,
+                false,
+            )
+        });
         root = root.child(
             Dialog::from_spec(
                 DialogSpec::new()
@@ -340,7 +354,12 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 theme,
             )
             .on_open_change(set_toggle_open_change(state, "dialog-terms-open"))
-            .with_content(text(theme, "By using this service, you agree to our terms and conditions.", 13.0, text_secondary))
+            .with_content(text(
+                theme,
+                "By using this service, you agree to our terms and conditions.",
+                13.0,
+                text_secondary,
+            ))
             .with_footer(footer),
         );
     }
@@ -350,7 +369,11 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         preview.style.descriptor.layout.direction = LayoutDirection::Column;
         preview.style.min_height = Some(320.0);
         preview.style.descriptor.background = Some(theme.resolve_color("color.background.canvas"));
-        preview = preview.child(row([text(theme, "2400 × 1600", 14.0, text_secondary)], 0.0, false));
+        preview = preview.child(row(
+            [text(theme, "2400 × 1600", 14.0, text_secondary)],
+            0.0,
+            false,
+        ));
         let details = row(
             [
                 column(
@@ -403,8 +426,18 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             let minute = (i * 17) % 60;
             row(
                 [
-                    text(theme, format!("{hour:02}:{minute:02}"), 12.0, text_secondary),
-                    text(theme, messages[(i as usize) % messages.len()], 13.0, "color.text.primary"),
+                    text(
+                        theme,
+                        format!("{hour:02}:{minute:02}"),
+                        12.0,
+                        text_secondary,
+                    ),
+                    text(
+                        theme,
+                        messages[(i as usize) % messages.len()],
+                        13.0,
+                        "color.text.primary",
+                    ),
                 ],
                 12.0,
                 false,
@@ -456,7 +489,12 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )
                 .on_open_change(set_toggle_open_change(state, key))
-                .with_content(text(theme, format!("This dialog uses width=\"{label}\"."), 13.0, text_secondary))
+                .with_content(text(
+                    theme,
+                    format!("This dialog uses width=\"{label}\"."),
+                    13.0,
+                    text_secondary,
+                ))
                 .with_actions(close_button(theme, state, key)),
             );
         }
@@ -472,7 +510,12 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 theme,
             )
             .on_open_change(set_toggle_open_change(state, "dialog-persistent-open"))
-            .with_content(text(theme, "This dialog cannot be dismissed by clicking the backdrop or pressing Escape.", 13.0, text_secondary))
+            .with_content(text(
+                theme,
+                "This dialog cannot be dismissed by clicking the backdrop or pressing Escape.",
+                13.0,
+                text_secondary,
+            ))
             .with_actions(button(
                 theme,
                 ButtonSpec::new().with_label("Done"),
@@ -488,11 +531,18 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 DialogSpec::new()
                     .with_role(DialogKind::AlertDialog)
                     .with_title("Delete item?")
-                    .with_description("This will permanently remove the item and all associated data."),
+                    .with_description(
+                        "This will permanently remove the item and all associated data.",
+                    ),
                 theme,
             )
             .on_open_change(set_toggle_open_change(state, "dialog-alert-open"))
-            .with_content(text(theme, "This action cannot be undone.", 13.0, text_secondary))
+            .with_content(text(
+                theme,
+                "This action cannot be undone.",
+                13.0,
+                text_secondary,
+            ))
             .with_actions(action_row([
                 button(
                     theme,

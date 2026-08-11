@@ -27,6 +27,21 @@ pub fn js_action_discovery_panel(
     El(pr::action_discovery_panel(spec, theme, None))
 }
 
+pub fn js_message_center(spec: &MessageCenterSpec, theme: &JetstreamThemeProvider) -> El {
+    let handlers = pr::MessageCenterHandlers {
+        on_item_select: Some(std::sync::Arc::new(|_| {})),
+        on_read_change: Some(std::sync::Arc::new(|_, _| {})),
+        on_remove: Some(std::sync::Arc::new(|_| {})),
+        on_mark_all_read: Some(std::sync::Arc::new(|| {})),
+        ..Default::default()
+    };
+    El(pr::message_center(
+        spec,
+        theme,
+        handlers,
+    ))
+}
+
 pub fn js_agent_chat_input(
     spec: &AgentChatInputSpec,
     theme: &JetstreamThemeProvider,

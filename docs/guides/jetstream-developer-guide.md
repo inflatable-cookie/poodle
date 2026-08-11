@@ -78,7 +78,7 @@ same DTCG source as the web CSS.
 | --- | --- |
 | `poodle-specs` | Renderer-neutral component inputs and state |
 | `poodle-tokens` | Generated themes and semantic values |
-| `poodle-render` | Shared native composition, treatment, and interaction intent |
+| `poodle-render` | Shared native composition, appearance, and interaction intent |
 | `poodle-node` | Renderer-neutral output vocabulary |
 | `poodle-jetstream` | Jetstream theme and shared style mapping |
 | `jetstream-poodle` | Node-to-`JsEl` conversion at the engine boundary |

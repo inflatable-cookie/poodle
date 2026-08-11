@@ -1,0 +1,190 @@
+.poodle-message-center-popover { display: inline-flex; }
+
+.poodle-message-center__trigger { position: relative; display: inline-flex; }
+
+.poodle-message-center__indicator {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0.85rem;
+  height: 0.85rem;
+  padding: 0 0.18rem;
+  box-sizing: border-box;
+  border: 0.125rem solid var(--poodle-surface, var(--poodle-color-background-canvas));
+  border-radius: 999px;
+  background: var(--poodle-recipe-message-center-indicator-fill, var(--poodle-color-status-danger));
+  color: var(--poodle-recipe-message-center-indicator-text, white);
+  font-family: var(--poodle-typography-label-family);
+  font-size: 0.5rem;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.poodle-message-center {
+  width: clamp(22rem, 36vw, 28rem);
+  max-width: calc(100vw - 4rem);
+  font-family: var(--poodle-typography-body-family);
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-message-center__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--poodle-space-stack-md);
+  padding-bottom: var(--poodle-space-stack-md);
+  border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+}
+
+.poodle-message-center__header h2,
+.poodle-message-center__header p { margin: 0; }
+
+.poodle-message-center__header h2 {
+  font-family: var(--poodle-typography-heading-family);
+  font-size: var(--poodle-typography-body-size);
+  font-weight: var(--poodle-typography-label-weight);
+  line-height: var(--poodle-typography-body-lineHeight);
+}
+
+.poodle-message-center__header p,
+.poodle-message-center__meta {
+  color: var(--poodle-color-text-secondary);
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
+}
+
+.poodle-message-center__empty { padding: var(--poodle-space-stack-lg) 0; }
+
+.poodle-message-center__list {
+  max-height: min(31rem, 65vh);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  overscroll-behavior: contain;
+}
+
+.poodle-message-center__item {
+  --poodle-message-center-tone: var(--poodle-color-status-info);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+  background: var(--poodle-recipe-message-center-item-fill, transparent);
+}
+
+.poodle-message-center__item:last-child { border-bottom: 0; }
+
+.poodle-message-center__item[data-read="false"] {
+  background: var(--poodle-recipe-message-center-unread-fill, color-mix(in srgb, var(--poodle-color-accent-base) 8%, transparent));
+}
+
+.poodle-message-center__item[data-tone="success"] { --poodle-message-center-tone: var(--poodle-color-status-success); }
+.poodle-message-center__item[data-tone="warning"] { --poodle-message-center-tone: var(--poodle-color-status-warning); }
+.poodle-message-center__item[data-tone="danger"] { --poodle-message-center-tone: var(--poodle-color-status-danger); }
+.poodle-message-center__item[data-tone="neutral"] { --poodle-message-center-tone: var(--poodle-color-text-tertiary); }
+.poodle-message-center__item[data-tone="pending"] { --poodle-message-center-tone: var(--poodle-color-status-pending, var(--poodle-color-status-info)); }
+
+.poodle-message-center__content {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--poodle-space-stack-md);
+  min-width: 0;
+  padding: var(--poodle-space-panel-y) var(--poodle-space-stack-sm);
+  color: inherit;
+  text-align: left;
+}
+
+button.poodle-message-center__content {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.poodle-message-center__content--interactive:hover {
+  background: var(--poodle-recipe-message-center-item-hover-fill, color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent));
+}
+
+.poodle-message-center__content--interactive:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: -0.125rem;
+}
+
+.poodle-message-center__leading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  min-height: 1.5rem;
+  color: var(--poodle-message-center-tone);
+}
+
+.poodle-message-center__read-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.poodle-message-center__item[data-read="false"] .poodle-message-center__read-dot {
+  background: var(--poodle-message-center-tone);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-message-center-tone) 15%, transparent);
+}
+
+.poodle-message-center__copy { display: grid; gap: 0.18rem; min-width: 0; }
+
+.poodle-message-center__title {
+  overflow: hidden;
+  font-size: var(--poodle-typography-body-size);
+  font-weight: 400;
+  line-height: var(--poodle-typography-body-lineHeight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.poodle-message-center__item[data-read="false"] .poodle-message-center__title {
+  font-weight: var(--poodle-typography-label-weight);
+}
+
+.poodle-message-center__message {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--poodle-color-text-secondary);
+  font-size: var(--poodle-typography-label-size);
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.poodle-message-center__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.poodle-message-center__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding-right: var(--poodle-space-stack-sm);
+}
+
+.poodle-message-center[data-density="compact"] .poodle-message-center__content {
+  padding-block: calc(var(--poodle-space-panel-y) * 0.7);
+}
+
+.poodle-message-center[data-density="comfortable"] .poodle-message-center__content {
+  padding-block: calc(var(--poodle-space-panel-y) * 1.25);
+}
+
+@media (max-width: 30rem) {
+  .poodle-message-center { width: calc(100vw - 4rem); }
+}

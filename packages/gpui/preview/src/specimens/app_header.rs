@@ -40,15 +40,22 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             )
                             .with_primary_actions(action_row(
                                 theme,
-                                &[("ah-file", "File"), ("ah-edit", "Edit"),
-                                  ("ah-view", "View"), ("ah-help", "Help")],
+                                &[
+                                    ("ah-file", "File"),
+                                    ("ah-edit", "Edit"),
+                                    ("ah-view", "View"),
+                                    ("ah-help", "Help"),
+                                ],
                                 ControlSize::Sm,
                                 4.0,
                             ))
                             .with_utility_items(utility_row(
                                 theme,
-                                &[("ah-search", "search"), ("ah-bell", "bell"),
-                                  ("ah-settings", "settings")],
+                                &[
+                                    ("ah-search", "search"),
+                                    ("ah-bell", "bell"),
+                                    ("ah-settings", "settings"),
+                                ],
                                 ControlSize::Sm,
                                 4.0,
                             )),
@@ -271,10 +278,7 @@ fn demo_header(spec: AppHeaderSpec, theme: &GpuiThemeProvider, id_suffix: &str) 
     AppHeader::from_spec(spec, theme)
         .with_primary_actions(action_row(
             theme,
-            &[
-                (new_id.as_str(), "New"),
-                (open_id.as_str(), "Open"),
-            ],
+            &[(new_id.as_str(), "New"), (open_id.as_str(), "Open")],
             action_size,
             6.0,
         ))

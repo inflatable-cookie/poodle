@@ -1,7 +1,7 @@
+use crate::node_compat::PasswordRequirements;
 use crate::node_compat::{Eyebrow, TextInput};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use crate::node_compat::PasswordRequirements;
 use poodle_specs::{
     ControlSize, EyebrowSpec, PasswordRequirementsPolicy, PasswordRequirementsSpec, TextInputSpec,
 };

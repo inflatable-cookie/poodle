@@ -85,6 +85,7 @@ export interface PopoverPartProps {
   surfaceId: string;
   ariaLabel?: string | null;
   block: boolean;
+  triggerIsInteractive?: boolean;
   placement: string;
   surfaceWidth: "content" | "trigger";
 }
@@ -114,11 +115,11 @@ export function popoverParts(
       "data-state": state,
       "data-block": props.block,
       "data-disabled": context.disabled,
-      role: "button",
-      tabindex: context.disabled ? -1 : 0,
-      "aria-disabled": context.disabled ? "true" : undefined,
-      "aria-expanded": isOpen ? "true" : "false",
-      "aria-controls": isOpen ? props.surfaceId : undefined,
+      role: props.triggerIsInteractive ? undefined : "button",
+      tabindex: props.triggerIsInteractive ? undefined : context.disabled ? -1 : 0,
+      "aria-disabled": props.triggerIsInteractive ? undefined : context.disabled ? "true" : undefined,
+      "aria-expanded": props.triggerIsInteractive ? undefined : isOpen ? "true" : "false",
+      "aria-controls": props.triggerIsInteractive ? undefined : isOpen ? props.surfaceId : undefined,
     },
     surface: {
       "data-part": "surface",

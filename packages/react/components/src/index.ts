@@ -13,6 +13,7 @@ export {
   type ActionDiscoveryPanelProps,
   type ActionDiscoveryPanelHandle,
 } from "./ActionDiscoveryPanel";
+export { MessageCenter, type MessageCenterProps } from "./MessageCenter";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
 export { AppHeader, type AppHeaderProps } from "./AppHeader";
 export { Breadcrumbs, type BreadcrumbsProps } from "./Breadcrumbs";

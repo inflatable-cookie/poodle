@@ -185,7 +185,7 @@ Menu open/dismiss (now on the dismissable-layer stack); item activation via shar
 | `display` | `inline-flex` |
 | `align-items` | `stretch` |
 | `width` | `fit-content` |
-| `border-radius` | `var(--poodle-treatment-interactive-radius, var(--poodle-radius-control))` |
+| `border-radius` | `var(--poodle-radius-control)` |
 
 ### Primary and Toggle (shared)
 
@@ -237,7 +237,7 @@ Note: Both density variants set `gap: 0` on the root, removing the default spaci
 | `min-width` | `4rem` |
 | `padding` | `0 var(--poodle-space-control-x)` |
 | `border-right` | `0` |
-| `border-radius` | `var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) 0 0 var(--poodle-treatment-interactive-radius, var(--poodle-radius-control))` |
+| `border-radius` | `var(--poodle-radius-control) 0 0 var(--poodle-radius-control)` |
 
 ### Toggle half
 
@@ -246,7 +246,7 @@ Note: Both density variants set `gap: 0` on the root, removing the default spaci
 | `width` | `2rem` |
 | `padding` | `0` |
 | `border-left` | `0` |
-| `border-radius` | `0 var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) var(--poodle-treatment-interactive-radius, var(--poodle-radius-control)) 0` |
+| `border-radius` | `0 var(--poodle-radius-control) var(--poodle-radius-control) 0` |
 
 ### Divider
 

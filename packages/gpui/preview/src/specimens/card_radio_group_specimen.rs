@@ -62,9 +62,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex()
                         .flex_col()
                         .gap(px(4.0))
-                        .child(CardRadioGroup::from_spec(spec, theme).on_change(
-                            card_radio_change(state, "card-radio-plan"),
-                        ))
+                        .child(
+                            CardRadioGroup::from_spec(spec, theme)
+                                .on_change(card_radio_change(state, "card-radio-plan")),
+                        )
                         .when(selected_plan.is_some(), |d| {
                             d.child(
                                 div()
@@ -103,9 +104,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex()
                         .flex_col()
                         .gap(px(4.0))
-                        .child(CardRadioGroup::from_spec(spec, theme).on_change(
-                            card_radio_change(state, "card-radio-size"),
-                        ))
+                        .child(
+                            CardRadioGroup::from_spec(spec, theme)
+                                .on_change(card_radio_change(state, "card-radio-size")),
+                        )
                         .when(selected_size.is_some(), |d| {
                             d.child(
                                 div()

@@ -77,11 +77,7 @@ impl RenderComponent<ConfirmActionSpec> for GpuiAdapter {
         // `poodle_gpui_components::ConfirmAction` cannot be mounted here without a
         // circular crate dependency (adapter → components → adapter). Encode a
         // stable, spec-derived handle so demo manifests and tests observe real input.
-        let element_id = format!(
-            "confirm-action|open={}|title={}",
-            spec.is_open,
-            spec.title
-        );
+        let element_id = format!("confirm-action|open={}|title={}", spec.is_open, spec.title);
         GpuiElementHandle::new(element_id, "ConfirmActionSpec")
     }
 }

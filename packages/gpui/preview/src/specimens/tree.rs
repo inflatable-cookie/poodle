@@ -61,9 +61,7 @@ fn selection_for(
     let order: Vec<String> = rows.iter().map(|row| row.value.clone()).collect();
     let selectable: Vec<String> = rows
         .iter()
-        .filter(|row| {
-            find_node(&spec.nodes, &row.value).is_none_or(|node| !node.is_disabled)
-        })
+        .filter(|row| find_node(&spec.nodes, &row.value).is_none_or(|node| !node.is_disabled))
         .map(|row| row.value.clone())
         .collect();
     let mode = if mods.shift {

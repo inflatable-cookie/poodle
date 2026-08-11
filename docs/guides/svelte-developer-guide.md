@@ -170,10 +170,10 @@ Semantic tokens (contextual purpose)
 
     ↓ optionally overridden by
 
-Treatment tokens (interactive-state styling)
-  --poodle-treatment-interactive-fill
-  --poodle-treatment-interactive-border
-  --poodle-treatment-interactive-radius
+Component Recipe hooks (app-scoped appearance overrides)
+  --poodle-recipe-button-fill
+  --poodle-recipe-button-border
+  --poodle-recipe-card-shadow
 ```
 
 ### Key semantic tokens

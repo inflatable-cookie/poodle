@@ -32,7 +32,7 @@ Render functions accept the component spec, a `ThemeProvider`, and typed slots
 or handlers where the contract requires them. Backends interpret the completed
 node tree; they do not reimplement component recipes.
 
-Add shared native composition, token treatment, and interaction intent here.
+Add shared native composition, token-resolved appearance, and interaction intent here.
 Keep engine input, text, lifecycle, and drawing behavior in the backend.
 
 See the [native architecture](../../docs/architecture/001-poodle-system-shape.md)

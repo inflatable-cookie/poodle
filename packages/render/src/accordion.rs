@@ -68,7 +68,10 @@ pub fn accordion_with_content(
     root
 }
 
-#[expect(clippy::too_many_arguments, reason = "item rendering keeps shared visual metrics explicit")]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "item rendering keeps shared visual metrics explicit"
+)]
 fn render_item(
     spec: &AccordionSpec,
     item: &AccordionItemSpec,

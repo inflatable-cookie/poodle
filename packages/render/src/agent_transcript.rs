@@ -141,8 +141,7 @@ pub fn agent_transcript(
                     on_toggle: handlers.on_subagent_toggle.as_ref().map(|handler| {
                         let handler = Arc::clone(handler);
                         let id = group_id.clone();
-                        Arc::new(move |_expanded| handler(&id))
-                            as Arc<dyn Fn(bool) + Send + Sync>
+                        Arc::new(move |_expanded| handler(&id)) as Arc<dyn Fn(bool) + Send + Sync>
                     }),
                     on_open_child: handlers.on_subagent_open.as_ref().map(|handler| {
                         let handler = Arc::clone(handler);
@@ -151,7 +150,9 @@ pub fn agent_transcript(
                     }),
                 };
                 root = root.child(crate::agent_subagent::agent_subagent(
-                    &card, theme, group_handlers,
+                    &card,
+                    theme,
+                    group_handlers,
                 ));
             }
             // Decided plans are retained in the shared transcript contract;

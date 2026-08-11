@@ -18,10 +18,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let info_dismiss = Arc::new({
         let events = state.node_events.clone();
         move || {
-            events
-                .lock()
-                .unwrap()
-                .push(NodeSpecimenEvent::Toggle("callout-dismissed-info".to_string()));
+            events.lock().unwrap().push(NodeSpecimenEvent::Toggle(
+                "callout-dismissed-info".to_string(),
+            ));
         }
     });
     let warning_dismiss = Arc::new({

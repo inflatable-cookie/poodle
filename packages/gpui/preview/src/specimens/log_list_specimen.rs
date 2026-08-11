@@ -15,11 +15,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let sample_entries = || {
         vec![
             stream("10:23:01", LogLevel::Info, "Server started on port 3000"),
-            stream(
-                "10:23:02",
-                LogLevel::Info,
-                "Loading configuration from env",
-            ),
+            stream("10:23:02", LogLevel::Info, "Loading configuration from env"),
             stream("10:23:05", LogLevel::Warn, "Cache miss for key 'user:42'"),
             stream(
                 "10:23:08",
@@ -88,14 +84,12 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     EyebrowSpec::new().with_content("Log output with filtering"),
                     theme,
                 ))
-                .child(
-                    LogList::from_spec(
-                        LogListSpec::new()
-                            .with_entries(sample_entries())
-                            .with_auto_scroll(true),
-                        theme,
-                    ),
-                ),
+                .child(LogList::from_spec(
+                    LogListSpec::new()
+                        .with_entries(sample_entries())
+                        .with_auto_scroll(true),
+                    theme,
+                )),
         )
         // -- Filtered (errors only) --
         .child(
@@ -107,15 +101,13 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     EyebrowSpec::new().with_content("Filtered (errors only)"),
                     theme,
                 ))
-                .child(
-                    LogList::from_spec(
-                        LogListSpec::new()
-                            .with_entries(sample_entries())
-                            .with_filter_level("error")
-                            .with_auto_scroll(true),
-                        theme,
-                    ),
-                ),
+                .child(LogList::from_spec(
+                    LogListSpec::new()
+                        .with_entries(sample_entries())
+                        .with_filter_level("error")
+                        .with_auto_scroll(true),
+                    theme,
+                )),
         )
         // -- Audit log (actor + resource links) --
         .child(
@@ -127,14 +119,12 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     EyebrowSpec::new().with_content("Audit log (actor + resource links)"),
                     theme,
                 ))
-                .child(
-                    LogList::from_spec(
-                        LogListSpec::new()
-                            .with_entries(audit_entries())
-                            .with_auto_scroll(false),
-                        theme,
-                    ),
-                ),
+                .child(LogList::from_spec(
+                    LogListSpec::new()
+                        .with_entries(audit_entries())
+                        .with_auto_scroll(false),
+                    theme,
+                )),
         )
         // -- Audit log with filter toolbar + pagination --
         .child(
@@ -146,25 +136,23 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     EyebrowSpec::new().with_content("Audit log (toolbar + pagination)"),
                     theme,
                 ))
-                .child(
-                    LogList::from_spec(
-                        LogListSpec::new()
-                            .with_entries(audit_entries())
-                            .with_filter(
-                                LogFilter::select("action", "Action")
-                                    .with_placeholder("All actions")
-                                    .with_option("create", "Create")
-                                    .with_option("update", "Update")
-                                    .with_option("delete", "Delete"),
-                            )
-                            .with_filter(LogFilter::date("from", "From"))
-                            .with_filter_value("action", "update")
-                            .with_page(2)
-                            .with_page_size(4)
-                            .with_total(18),
-                        theme,
-                    ),
-                ),
+                .child(LogList::from_spec(
+                    LogListSpec::new()
+                        .with_entries(audit_entries())
+                        .with_filter(
+                            LogFilter::select("action", "Action")
+                                .with_placeholder("All actions")
+                                .with_option("create", "Create")
+                                .with_option("update", "Update")
+                                .with_option("delete", "Delete"),
+                        )
+                        .with_filter(LogFilter::date("from", "From"))
+                        .with_filter_value("action", "update")
+                        .with_page(2)
+                        .with_page_size(4)
+                        .with_total(18),
+                    theme,
+                )),
         )
         // -- Audit log loading state --
         .child(

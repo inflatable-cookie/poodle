@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
-use crate::node_compat::Eyebrow;
 use crate::node_compat::AgentQuestion;
+use crate::node_compat::Eyebrow;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -73,7 +73,9 @@ fn multi_select_handler(state: &AppState) -> Arc<dyn Fn(&str) + Send + Sync> {
         events
             .lock()
             .unwrap()
-            .push(NodeSpecimenEvent::Toggle(format!("agent-question-multi-{value}")));
+            .push(NodeSpecimenEvent::Toggle(format!(
+                "agent-question-multi-{value}"
+            )));
     })
 }
 

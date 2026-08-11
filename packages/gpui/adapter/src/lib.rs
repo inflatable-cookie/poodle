@@ -216,6 +216,7 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
 /// counterpart and are gone with it.
 const SUPPORTED_SHELL: &[&str] = &[
     "ActionDiscoveryPanelSpec",
+    "MessageCenterSpec",
     "AppHeaderSpec",
     "CommandPaletteSpec",
     "DockRegionSpec",
@@ -276,8 +277,9 @@ mod tests {
             adapter.supported_components().len(),
             SUPPORTED_PRIMITIVES.len() + SUPPORTED_COMPOSITES.len() + SUPPORTED_SHELL.len()
         );
-        assert_eq!(adapter.supported_components().len(), 100);
+        assert_eq!(adapter.supported_components().len(), 101);
         assert!(adapter.supported_components().contains(&"TimeFieldSpec"));
+        assert!(adapter.supported_components().contains(&"MessageCenterSpec"));
         assert_eq!(adapter.unsupported_components().len(), 0);
     }
 

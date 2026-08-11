@@ -212,7 +212,7 @@ same machine Tooltip runs). Pressed state is plain controllable state.
 | `height` | `var(--poodle-size-control-height)` |
 | `padding` | `0` |
 | `border` | `0.0625rem solid var(--poodle-icon-button-border)` |
-| `border-radius` | `var(--poodle-treatment-interactive-radius, var(--poodle-radius-control))` |
+| `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `var(--poodle-icon-button-fill)` |
 | `box-shadow` | `none` (ghost default); `inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent)` (primary/secondary) |
 | `color` | `var(--poodle-icon-button-text)` |
@@ -313,7 +313,7 @@ pressed.
 |----------|-------|
 | `background` | `var(--poodle-icon-button-fill-hover)` |
 | `border-color` | `color-mix(in srgb, var(--poodle-icon-button-border) 74%, var(--poodle-color-text-primary))` |
-| `box-shadow` | `var(--poodle-treatment-interactive-shadow-active, var(--poodle-icon-button-shadow))` |
+| `box-shadow` | `var(--poodle-recipe-icon-button-shadow, var(--poodle-icon-button-shadow))` |
 
 ### Root — Active (`:active`)
 
@@ -391,7 +391,7 @@ button-owned wrapper.
 - `data-variant`, `data-tone`, `data-size`, and `data-density` attributes on root for CSS targeting
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - Icon glyph is `aria-hidden` as the accessible name comes from `ariaLabel`
-- border-radius uses `--poodle-treatment-interactive-radius` with
+- border-radius uses `--poodle-radius-control` with
   fallback to `--poodle-radius-control`
 - Built-in tooltip renders as a `<span role="tooltip">` with auto-generated
   `id`, linked to the button via `aria-describedby`

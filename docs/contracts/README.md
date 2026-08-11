@@ -133,6 +133,7 @@ contract references the rule rather than restating it:
 - `components/list-grid.md`
 - `components/log-list.md`
 - `components/markdown-editor.md`
+- `components/message-center.md`
 - `components/media-browse-panel.md`
 - `components/media-picker.md`
 - `components/media-preview.md`
@@ -205,7 +206,6 @@ contract references the rule rather than restating it:
 - `components/tool-call.md`
 - `components/toolbar.md`
 - `components/tooltip.md`
-- `components/treatment-tokens.md`
 - `components/tree.md`
 - `components/tri-state-switch.md`
 - `components/ui-presentation-provider.md`

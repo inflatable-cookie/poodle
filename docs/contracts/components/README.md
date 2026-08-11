@@ -89,6 +89,7 @@ primitives and layout surfaces through higher-order application components.
 - `list-card-counter.md`
 - `list-card.md`
 - `list-container.md`
+- `message-center.md`
 - `list-grid.md`
 - `log-list.md`
 - `markdown-editor.md`
@@ -170,7 +171,6 @@ primitives and layout surfaces through higher-order application components.
 - `toolbar.md`
 - `token-input.md`
 - `tooltip.md`
-- `treatment-tokens.md`
 - `tree.md`
 - `tri-state-switch.md`
 - `ui-presentation-provider.md`

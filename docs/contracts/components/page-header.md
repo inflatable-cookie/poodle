@@ -296,7 +296,7 @@ icon-only link.
 | `width` | `2rem` |
 | `height` | `2rem` |
 | `border` | `0.0625rem solid transparent` |
-| `border-radius` | `var(--poodle-treatment-interactive-radius, var(--poodle-radius-control))` |
+| `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `transparent` |
 
 #### `.page-header__context-dot`

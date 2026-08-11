@@ -22,7 +22,7 @@ const OUT = join(OUT_DIR, "recipe-inventory.json");
 // Token/system prefixes that are not component recipe variables.
 const SYSTEM_PREFIXES = [
   "color", "space", "size", "typography", "radius", "border", "state",
-  "elevation", "overlay", "treatment", "motion", "focus",
+  "elevation", "overlay", "motion", "focus",
 ];
 
 // Appearance suffix heuristics: these participate in the public recipe

@@ -1,8 +1,8 @@
 use crate::node_compat::{Eyebrow, ScrollShell};
 use gpui::*;
-use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::{Direction, EyebrowSpec, ScrollShellSpec};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
@@ -87,13 +87,11 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 .with_label("Horizontal items"),
                             theme,
                         )
-                        .with_child(
-                            {
-                                let mut row = Node::container();
-                                row.style.descriptor.layout.direction = LayoutDirection::Row;
-                                row.style.descriptor.layout.spacing.gap = 4.0;
-                                row
-                                .child(column_item("Column 1", border, text_secondary))
+                        .with_child({
+                            let mut row = Node::container();
+                            row.style.descriptor.layout.direction = LayoutDirection::Row;
+                            row.style.descriptor.layout.spacing.gap = 4.0;
+                            row.child(column_item("Column 1", border, text_secondary))
                                 .child(column_item("Column 2", border, text_secondary))
                                 .child(column_item("Column 3", border, text_secondary))
                                 .child(column_item("Column 4", border, text_secondary))
@@ -103,8 +101,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                 .child(column_item("Column 8", border, text_secondary))
                                 .child(column_item("Column 9", border, text_secondary))
                                 .child(column_item("Column 10", border, text_secondary))
-                            },
-                        ),
+                        }),
                     ),
                 ),
         )

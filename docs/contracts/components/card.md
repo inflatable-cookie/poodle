@@ -129,14 +129,14 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 | Var | Value |
 |-----|-------|
-| `--poodle-recipe-card-radius` | `var(--poodle-treatment-surface-radius, var(--poodle-radius-surface))` |
-| `--poodle-recipe-card-fill` | `color-mix(in srgb, var(--poodle-color-background-panel) 10%, var(--poodle-color-background-elevated))` |
-| `--poodle-recipe-card-border` | `color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent)` |
-| `--poodle-recipe-card-shadow` | `inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent)` |
-| `--poodle-recipe-card-divider` | `color-mix(in srgb, var(--poodle-color-border-subtle) 52%, transparent)` |
-| `--poodle-recipe-card-hover-fill` | `var(--poodle-treatment-surface-hover-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 94%, var(--poodle-color-background-panel)))` |
-| `--poodle-recipe-card-hover-border` | `var(--poodle-treatment-surface-hover-border, color-mix(in srgb, var(--poodle-color-accent-base) 28%, var(--poodle-color-border-subtle)))` |
-| `--poodle-recipe-card-hover-shadow` | `var(--poodle-treatment-surface-hover-shadow, var(--poodle-recipe-card-shadow))` |
+| `--poodle-card-radius` | `var(--poodle-recipe-card-radius, var(--poodle-radius-surface))` |
+| `--poodle-card-fill` | `var(--poodle-recipe-card-fill, color-mix(in srgb, var(--poodle-color-background-panel) 10%, var(--poodle-color-background-elevated)))` |
+| `--poodle-card-border` | `var(--poodle-recipe-card-border, color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent))` |
+| `--poodle-card-shadow` | `var(--poodle-recipe-card-shadow, inset 0 0 0 0.0625rem color-mix(in srgb, var(--poodle-color-border-subtle) 18%, transparent))` |
+| `--poodle-card-divider` | `var(--poodle-recipe-card-divider, color-mix(in srgb, var(--poodle-color-border-subtle) 52%, transparent))` |
+| `--poodle-card-hover-fill` | `var(--poodle-recipe-card-hover-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 94%, var(--poodle-color-background-panel)))` |
+| `--poodle-card-hover-border` | `var(--poodle-recipe-card-hover-border, color-mix(in srgb, var(--poodle-color-accent-base) 28%, var(--poodle-color-border-subtle)))` |
+| `--poodle-card-hover-shadow` | `var(--poodle-recipe-card-hover-shadow, var(--poodle-card-shadow))` |
 | `--poodle-card-gap` | density/layout-controlled internal gap |
 | `--poodle-card-padding-block` | density/layout-controlled block padding |
 | `--poodle-card-padding-inline` | density/layout-controlled inline padding |
@@ -150,11 +150,11 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `align-content` | `start` |
 | `gap` | `var(--poodle-card-gap)` |
 | `padding` | `var(--poodle-card-padding-block) var(--poodle-card-padding-inline)` |
-| `border` | `0.0625rem solid var(--poodle-recipe-card-border)` |
-| `border-radius` | `var(--poodle-recipe-card-radius)` |
-| `background` | `var(--poodle-treatment-surface-fill, color-mix(in srgb, var(--poodle-surface) 88%, var(--poodle-color-text-primary)))` |
-| `--poodle-surface` | `var(--poodle-treatment-surface-fill, var(--poodle-recipe-card-fill))` |
-| `box-shadow` | `var(--poodle-treatment-surface-shadow, var(--poodle-recipe-card-shadow))` |
+| `border` | `0.0625rem solid var(--poodle-card-border)` |
+| `border-radius` | `var(--poodle-card-radius)` |
+| `background` | `var(--poodle-card-fill)` |
+| `--poodle-surface` | `var(--poodle-card-fill)` |
+| `box-shadow` | `var(--poodle-card-shadow)` |
 
 ### Outlined variant
 
@@ -166,9 +166,9 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 | Property | Value |
 |----------|-------|
-| `border-radius` | `var(--poodle-treatment-surface-elevated-radius, var(--poodle-recipe-card-radius))` |
-| `border-color` | `color-mix(in srgb, var(--poodle-treatment-surface-elevated-border, var(--poodle-color-border-default)) 82%, var(--poodle-color-border-default))` |
-| `background` | `var(--poodle-treatment-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
+| `border-radius` | `var(--poodle-card-radius)` |
+| `border-color` | `color-mix(in srgb, var(--poodle-recipe-card-elevated-border, var(--poodle-color-border-default)) 82%, var(--poodle-color-border-default))` |
+| `background` | `var(--poodle-recipe-card-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
 
 ### Elevated variant box-shadow (dark mode)
 
@@ -238,7 +238,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | Property | Value |
 |----------|-------|
 | `padding-top` | `var(--poodle-card-footer-padding-top)` |
-| `border-top` | `0.0625rem solid var(--poodle-treatment-surface-divider, var(--poodle-recipe-card-divider))` |
+| `border-top` | `0.0625rem solid var(--poodle-card-divider)` |
 
 ## 9. Svelte Notes
 

@@ -246,6 +246,7 @@ const SUPPORTED_COMPOSITES: &[&str] = &[
     "ShellStatusBarSpec",
     // Workstation composites registered here (moved from separate list)
     "ActionDiscoveryPanelSpec",
+    "MessageCenterSpec",
     "AppHeaderSpec",
     "CommandPaletteSpec",
     "DockRegionSpec",
@@ -314,7 +315,7 @@ mod tests {
     #[test]
     fn direct_component_counts() {
         assert_eq!(SUPPORTED_PRIMITIVES.len(), 60);
-        assert_eq!(SUPPORTED_COMPOSITES.len(), 47);
-        assert_eq!(supported_components().len(), 107);
+        assert_eq!(SUPPORTED_COMPOSITES.len(), 48);
+        assert_eq!(supported_components().len(), 108);
     }
 }

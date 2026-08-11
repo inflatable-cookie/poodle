@@ -16,10 +16,7 @@ fn row(name: &str, status: &str, theme: &GpuiThemeProvider) -> poodle_node::Node
     row.style.descriptor.layout.width = LayoutSizing::Grow;
     row.style.min_width = Some(0.0);
     row.children = vec![
-        Text::node_from_spec(
-            TextSpec::new(name).with_weight(TextWeight::Medium),
-            theme,
-        ),
+        Text::node_from_spec(TextSpec::new(name).with_weight(TextWeight::Medium), theme),
         Pill::from_spec(
             PillSpec::new()
                 .with_label(status)

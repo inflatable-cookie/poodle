@@ -30,7 +30,7 @@ before rendering mechanics.
 ## What Poodle Owns
 
 - W3C DTCG design-token sources and CSS, TypeScript, and Rust artifacts
-- portable theme, density, control-size, and appearance-treatment rules
+- portable theme, density, control-size, and appearance-Recipe rules
 - framework-neutral component contracts
 - foundational controls and layout primitives
 - reusable application composites

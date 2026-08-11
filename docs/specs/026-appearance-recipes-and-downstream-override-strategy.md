@@ -15,7 +15,7 @@ foundational tokens.
 Poodle styling now operates in three layers:
 
 - canonical semantic tokens
-- public appearance recipes and treatment roles
+- public component-scoped appearance Recipes
 - app-owned wrappers and composites
 
 Downstream branding should move downward through those layers in order. It must
@@ -38,7 +38,7 @@ Do not broaden token meaning just to satisfy a web-only styling trick such as:
 - gloss or bevel effects
 - backdrop-filter presentation
 
-If a brand treatment needs those, it belongs in the appearance-recipe layer,
+If a brand appearance needs those, it belongs in the Recipe layer,
 not the canonical token layer.
 
 ## Appearance Recipe Rule
@@ -60,7 +60,7 @@ Examples of acceptable recipe concerns:
 - text/icon tone
 - shadow
 - radius
-- hover or active treatment
+- hover or active appearance
 
 Examples of unacceptable recipe exposure:
 
@@ -68,21 +68,11 @@ Examples of unacceptable recipe exposure:
 - implementation-only wrapper selectors
 - DOM-shape assumptions consumers must target manually
 
-## Treatment Role Rule
+## Component Scope Rule
 
-Poodle should prefer family-level treatment roles over per-component reinvention.
-
-The current seed treatment roles are:
-
-- `surface`
-- `surface-elevated`
-- `interactive`
-- `interactive-primary`
-- `interactive-subtle`
-- `focus-ring`
-
-Components may map these into local aliases, but they should not invent a new
- treatment vocabulary for every file.
+Public overrides use `--poodle-recipe-<component>-*` hooks. Each hook names a
+stable component part, variant, or state and falls back directly to a semantic
+token or documented formula. Family-level intermediate roles are retired.
 
 ## Extension Lane Rule
 
@@ -92,7 +82,6 @@ Two extension lanes are allowed:
 
 Use this when the override should remain part of the shared contract:
 
-- treatment roles
 - appearance recipe variables
 - stable component-part overrides
 - variant-level appearance changes
@@ -132,8 +121,8 @@ to become a marketing-site kit.
 Downstream apps may:
 
 - scope recipe-variable overrides to a subtree
-- define reusable brand treatments
-- apply those treatments consistently across multiple Poodle families
+- define reusable app-owned brand variables
+- map those variables into component Recipe hooks consistently
 - create app-owned branded wrappers above Poodle primitives
 
 Downstream apps must not:
@@ -145,27 +134,20 @@ Downstream apps must not:
 
 ## Gradient Rule
 
-Gradients are valid appearance treatments, not canonical colors.
+Gradients are valid Recipe values, not canonical colors.
 
-If a downstream app wants consistent 3D or raised treatment across clickable
-surfaces, it should override:
-
-- `interactive`
-- `interactive-primary`
-- `interactive-subtle`
-
-with scoped recipe variables rather than converting a color token into a
-gradient value.
+If a downstream app wants consistent 3D or raised appearance across clickable
+surfaces, it should point the relevant component Recipe hooks at shared
+app-owned variables rather than converting a color token into a gradient.
 
 ## Seed `g03.005` Baseline
 
 The current seed implementation proves this strategy on the Svelte side by:
 
-- defining a scoped appearance-treatment override in the preview surface
-- mapping shared interactive treatment roles into buttons, tabs, and text-entry
-  controls
-- mapping shared `surface` and `surface-elevated` roles into cards, panel
-  framing, and page-header presentation
+- defining scoped component Recipe overrides in the preview surface
+- mapping component Recipe hooks into buttons, tabs, and text-entry controls
+- mapping component Recipe hooks into cards, panel framing, and page-header
+  presentation
 - showing one branded website-style wrapper that consumes recipe variables
   without redefining semantic tokens
 - keeping the base semantic token set unchanged

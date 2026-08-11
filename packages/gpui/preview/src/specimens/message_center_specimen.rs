@@ -1,0 +1,117 @@
+use std::sync::Arc;
+
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::PreviewRoot;
+use gpui::*;
+use poodle_render::{message_center, MessageCenterHandlers};
+use poodle_specs::{MessageCenterItem, MessageCenterSpec, OverlayPlacement, StatusTone};
+
+const IDS: &[&str] = &["render", "mention", "maintenance"];
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+    let items = vec![
+        MessageCenterItem::new("render", "Render complete")
+            .with_message("Mix preview 42 is ready for review.")
+            .with_meta("Render queue")
+            .with_timestamp("2026-08-11T09:40:00Z")
+            .with_tone(StatusTone::Success),
+        MessageCenterItem::new("mention", "Maya mentioned you")
+            .with_message("Can you check the limiter settings before export?")
+            .with_meta("Studio chat")
+            .with_timestamp("2026-08-11T09:20:00Z"),
+        MessageCenterItem::new("maintenance", "Maintenance scheduled")
+            .with_message("Workstation services restart tonight at 23:00.")
+            .with_meta("Operations")
+            .with_timestamp("2026-08-10T15:00:00Z")
+            .with_tone(StatusTone::Warning)
+            .with_read(true),
+    ]
+    .into_iter()
+    .filter(|item| {
+        !state
+            .specimens
+            .is_on(&format!("message-center-removed-{}", item.id))
+    })
+    .map(|mut item| {
+        let key = format!("message-center-read-{}", item.id);
+        if state.specimens.toggles.contains_key(&key) {
+            item.read = state.specimens.is_on(&key);
+        }
+        item
+    })
+    .collect();
+
+    let open = state.specimens.is_on("message-center-open");
+    let queue = state.node_events.clone();
+    let open_queue = queue.clone();
+    let read_queue = queue.clone();
+    let remove_queue = queue.clone();
+    let mark_queue = queue.clone();
+    let select_queue = queue;
+    let handlers = MessageCenterHandlers {
+        on_open_change: Some(Arc::new(move |value| {
+            open_queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetToggle {
+                    key: "message-center-open".into(),
+                    value,
+                });
+        })),
+        on_item_select: Some(Arc::new(move |id| {
+            select_queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetText {
+                    key: "message-center-selected".into(),
+                    value: id.into(),
+                });
+        })),
+        on_read_change: Some(Arc::new(move |id, read| {
+            read_queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetToggle {
+                    key: format!("message-center-read-{id}"),
+                    value: read,
+                });
+        })),
+        on_remove: Some(Arc::new(move |id| {
+            remove_queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetToggle {
+                    key: format!("message-center-removed-{id}"),
+                    value: true,
+                });
+        })),
+        on_mark_all_read: Some(Arc::new(move || {
+            let mut events = mark_queue.lock().unwrap();
+            for id in IDS {
+                events.push(NodeSpecimenEvent::SetToggle {
+                    key: format!("message-center-read-{id}"),
+                    value: true,
+                });
+            }
+        })),
+    };
+
+    let spec = MessageCenterSpec::new(items)
+        .with_open(open)
+        .with_placement(OverlayPlacement::BottomStart);
+    let center = poodle_gpui_node_backend::to_gpui(&message_center(&spec, &state.theme, handlers));
+    let selected = state
+        .specimens
+        .text
+        .get("message-center-selected")
+        .cloned()
+        .unwrap_or_else(|| "none".into());
+
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(12.0))
+        .min_h(px(520.0))
+        .child(center)
+        .child(format!("Selected message: {selected}"))
+}

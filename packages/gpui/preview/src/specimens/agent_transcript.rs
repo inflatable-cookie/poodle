@@ -115,9 +115,12 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let toggle = |prefix: &'static str| -> Arc<dyn Fn(&str) + Send + Sync> {
         let events = state.node_events.clone();
         Arc::new(move |id| {
-            events.lock().unwrap().push(NodeSpecimenEvent::Toggle(format!(
-                "transcript.{prefix}.{id}"
-            )));
+            events
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::Toggle(format!(
+                    "transcript.{prefix}.{id}"
+                )));
         })
     };
     let file_clicks = state.specimens.count("transcript.files");

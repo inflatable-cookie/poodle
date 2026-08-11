@@ -774,6 +774,11 @@ pub static SHELLS: &[ComponentEntry] = &[
         description: "Grouped action list with keyboard navigation.",
     },
     ComponentEntry {
+        slug: "message-center",
+        display_name: "MessageCenter",
+        description: "Icon-triggered archive for notifications and durable messages.",
+    },
+    ComponentEntry {
         slug: "app-header",
         display_name: "AppHeader",
         description: "Top-level application header with branding and actions.",

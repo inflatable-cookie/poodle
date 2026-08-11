@@ -439,6 +439,17 @@ export type CommandActionItem = {
   disabled?: boolean;
 };
 
+export type MessageCenterItem = {
+  id: string;
+  title: string;
+  message?: string | null;
+  meta?: string | null;
+  timestamp?: Date | string | number | null;
+  read: boolean;
+  tone?: StatusTone;
+  icon?: IconProp | null;
+};
+
 export interface MenubarItem {
   value: string;
   label: string;

@@ -188,7 +188,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `height` | `var(--poodle-size-control-height)` |
 | `padding` | `0 var(--poodle-space-control-x)` |
 | `border` | `0.0625rem solid var(--poodle-color-border-default)` |
-| `border-radius` | `var(--poodle-treatment-interactive-radius, var(--poodle-radius-control))` |
+| `border-radius` | `var(--poodle-radius-control)` |
 | `background` | `var(--poodle-button-fill)` (see CSS Custom Properties table for per-variant values) |
 | `box-shadow` | `var(--poodle-button-shadow)` (see CSS Custom Properties table for per-variant values) |
 | `color` | `var(--poodle-color-text-primary)` |
@@ -207,13 +207,13 @@ The secondary variant uses **elevation stacking** via `color-mix` toward `text-p
 
 | Var | Secondary (default) | Primary | Ghost |
 |-----|---------------------|---------|-------|
-| `--poodle-button-fill` | `var(--poodle-treatment-interactive-fill, color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 88%, var(--poodle-color-text-primary)))` | `accent-base` | `transparent` |
-| `--poodle-button-fill-hover` | `var(--poodle-treatment-interactive-fill-active, color-mix(in srgb, var(--poodle-surface, ...) 80%, var(--poodle-color-text-primary)))` | `color-mix(in srgb, white 12%, accent-base)` | inherits generic hover formula |
+| `--poodle-button-fill` | `var(--poodle-recipe-button-fill, color-mix(in srgb, var(--poodle-surface, var(--poodle-color-background-surface)) 88%, var(--poodle-color-text-primary)))` | `accent-base` | `transparent` |
+| `--poodle-button-fill-hover` | `var(--poodle-recipe-button-fill-hover, color-mix(in srgb, var(--poodle-surface, ...) 80%, var(--poodle-color-text-primary)))` | `color-mix(in srgb, white 12%, accent-base)` | inherits generic hover formula |
 | `--poodle-button-fill-active` | `color-mix(in srgb, var(--poodle-surface, ...) 84%, var(--poodle-color-text-primary))` | `color-mix(in srgb, accent-base 88%, black)` | inherits generic active formula |
-| `--poodle-button-border` | `var(--poodle-treatment-interactive-border, var(--poodle-color-border-default))` | `color-mix(in srgb, accent-base 84%, black)` | `transparent` |
-| `--poodle-button-border-hover` | `var(--poodle-treatment-interactive-border-active, color-mix(in srgb, var(--poodle-button-border) 78%, var(--poodle-color-text-primary)))` | inherits generic hover formula | `transparent` |
+| `--poodle-button-border` | `var(--poodle-recipe-button-border, var(--poodle-color-border-default))` | `color-mix(in srgb, accent-base 84%, black)` | `transparent` |
+| `--poodle-button-border-hover` | `var(--poodle-recipe-button-border-hover, color-mix(in srgb, var(--poodle-button-border) 78%, var(--poodle-color-text-primary)))` | inherits generic hover formula | `transparent` |
 | `--poodle-button-text` | `text-primary` | `text-inverse` | `text-primary` |
-| `--poodle-button-shadow` | `var(--poodle-treatment-interactive-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent))` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` | `none` |
+| `--poodle-button-shadow` | `var(--poodle-recipe-button-shadow, inset 0 0.0625rem 0 color-mix(in srgb, white 8%, transparent))` | `inset 0 0.0625rem 0 color-mix(white 14%, transparent), 0 0.375rem 1.125rem color-mix(black 18%, transparent)` | `none` |
 
 ### Tone: danger
 
@@ -331,7 +331,7 @@ more, lg does not reduce, xl adds slightly).
 |----------|-------|
 | `background` | `var(--poodle-button-fill-hover)` |
 | `border-color` | `var(--poodle-button-border-hover)` |
-| `box-shadow` | `var(--poodle-treatment-interactive-shadow-active, var(--poodle-button-shadow))` |
+| `box-shadow` | `var(--poodle-button-shadow)` |
 
 ### Active (not disabled)
 
@@ -433,7 +433,7 @@ Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is non-n
 - `isUnavailable = disabled || loading` — both disable the native button
 - Icon and spinner supporting visuals resolve through the shared supporting-size mapping rather than a fixed absolute size
 - Supports `leading()` and `trailing()` snippet content for custom icon content
-- Treatment token: `--poodle-treatment-interactive-radius` with fallback to `--poodle-radius-control`
+- Border radius uses `--poodle-radius-control` directly.
 - Secondary variant uses elevation stacking: `color-mix` toward `var(--poodle-color-text-primary)` rather than toward a separate elevated background token; the surface color (`--poodle-surface` with fallback to `--poodle-color-background-surface`) is mixed at 88% idle / 80% hover / 84% active with text-primary
 - Danger tone defines all three interaction states (idle, hover, active) for fill and border inline in the danger CSS custom properties, keeping hover/active within the red family rather than deferring to generic `--poodle-button-fill-hover`/`--poodle-button-border-hover`
 - `data-pressed` emits the current pressed boolean when button is in toggle mode; omitted entirely for non-toggle buttons
@@ -447,7 +447,7 @@ Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is non-n
 - Spec struct: `ButtonSpec` in primitives crate
 - Component struct: `PoodleButton` in components crate
 - GPUI must replicate the hover/active color-mix chains
-- The treatment radius fallback can be modeled as: use treatment token if set, else radius-control
+- Border radius resolves directly from `--poodle-radius-control`.
 - Active translateY(0.03125rem) — half a pixel press-down — may be omitted in GPUI (known delta)
 - GPUI uses the shared `Spinner` primitive rather than a button-owned loader treatment
 
@@ -495,7 +495,7 @@ Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is non-n
 | Jetstream has no `onPressedChange` | `pressed` is a spec input there; a host that owns the state derives the change from `on_click` | accepted | none |
 | active translateY(0.03125rem) may be omitted in GPUI | sub-pixel transform, GPUI limitation | allowed | revisit if GPUI gains sub-pixel transforms |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
-| Treatment radius fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result |
+| Recipe fallback chain | CSS custom property vs Rust spec/token override | allowed | same visual result |
 | box-shadow omitted in GPUI | GPUI lacks CSS box-shadow support | allowed | revisit if GPUI adds shadow primitives |
 | letter-spacing omitted in GPUI | GPUI text rendering has no letter-spacing API | allowed | minor visual impact |
 

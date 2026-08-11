@@ -11,7 +11,7 @@
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{
-    ActionDiscoveryPanelSpec, AppHeaderSpec, CommandPaletteSpec, DockRegionSpec,
+    ActionDiscoveryPanelSpec, AppHeaderSpec, CommandPaletteSpec, DockRegionSpec, MessageCenterSpec,
     ShellStatusBarSpec, SplitViewSpec,
 };
 use poodle_style::StyleDescriptor;
@@ -29,6 +29,19 @@ impl RenderComponent<ActionDiscoveryPanelSpec> for GpuiAdapter {
     ) -> GpuiElementHandle {
         let _s = map_style(style);
         GpuiElementHandle::new("action-discovery-panel", "ActionDiscoveryPanelSpec")
+    }
+}
+
+impl RenderComponent<MessageCenterSpec> for GpuiAdapter {
+    type Target = GpuiTarget;
+    fn render(
+        &self,
+        _spec: &MessageCenterSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> GpuiElementHandle {
+        let _s = map_style(style);
+        GpuiElementHandle::new("message-center", "MessageCenterSpec")
     }
 }
 

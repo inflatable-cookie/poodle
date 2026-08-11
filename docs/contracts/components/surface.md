@@ -127,23 +127,22 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 | Var | Default Value |
 |-----|---------------|
-| `--poodle-surface-fill` | `var(--poodle-treatment-surface-fill, color-mix(in srgb, var(--poodle-color-background-surface) 96%, transparent))` |
+| `--poodle-surface-fill` | `var(--poodle-recipe-surface-fill, color-mix(in srgb, var(--poodle-color-background-surface) 96%, transparent))` |
 | `--poodle-surface` | `var(--poodle-surface-fill)` — propagates surface context to descendants (see [surface-elevation](./surface-elevation.md)) |
-| `--poodle-surface-border` | `var(--poodle-treatment-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent))` |
-| `--poodle-surface-shadow` | `var(--poodle-treatment-surface-shadow, none)` |
+| `--poodle-surface-border` | `var(--poodle-recipe-surface-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent))` |
+| `--poodle-surface-shadow` | `var(--poodle-recipe-surface-shadow, none)` |
 
-Each surface var resolves a `--poodle-treatment-*` override first and falls
-back to the computed default. The full set of treatment override tokens:
+Each surface appearance variable resolves a `--poodle-recipe-surface-*` hook
+first and falls back to the computed semantic-token default. The full set:
 
-| Treatment Token | Overrides | Fallback |
+| Recipe Hook | Overrides | Fallback |
 |-----------------|-----------|----------|
-| `--poodle-treatment-surface-fill` | base fill | `color-mix(... background-surface 96%, transparent)` |
-| `--poodle-treatment-surface-border` | base + elevated border | `color-mix(... border-subtle 74%, transparent)` |
-| `--poodle-treatment-surface-shadow` | base shadow | `none` |
-| `--poodle-treatment-surface-elevated-fill` | elevated fill | `color-mix(... background-elevated 96%, background-panel)` |
-| `--poodle-treatment-surface-elevated-border` | elevated border | `color-mix(... border-subtle 74%, transparent)` |
-| `--poodle-treatment-surface-elevated-shadow` | elevated shadow | `var(--poodle-elevation-surface)` |
-| `--poodle-treatment-surface-radius` | border-radius | `var(--poodle-radius-surface)` |
+| `--poodle-recipe-surface-fill` | base fill | `color-mix(... background-surface 96%, transparent)` |
+| `--poodle-recipe-surface-border` | base + elevated border | `color-mix(... border-subtle 74%, transparent)` |
+| `--poodle-recipe-surface-shadow` | base shadow | `none` |
+| `--poodle-recipe-surface-elevated-fill` | elevated fill | `color-mix(... background-elevated 96%, background-panel)` |
+| `--poodle-recipe-surface-elevated-border` | elevated border | `color-mix(... border-subtle 74%, transparent)` |
+| `--poodle-recipe-surface-elevated-shadow` | elevated shadow | `var(--poodle-elevation-surface)` |
 
 ### Root (.surface) — base styles
 
@@ -152,7 +151,7 @@ back to the computed default. The full set of treatment override tokens:
 | `min-width` | `0` |
 | `min-height` | `0` |
 | `border` | `0.0625rem solid var(--poodle-surface-border)` |
-| `border-radius` | `var(--poodle-treatment-surface-radius, var(--poodle-radius-surface))` |
+| `border-radius` | `var(--poodle-radius-surface)` |
 | `background` | `var(--poodle-surface-fill)` |
 | `box-shadow` | `var(--poodle-surface-shadow)` |
 
@@ -168,17 +167,17 @@ back to the computed default. The full set of treatment override tokens:
 
 | Var | Value |
 |-----|-------|
-| `--poodle-surface-fill` | `var(--poodle-treatment-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel)))` |
-| `--poodle-surface-border` | `var(--poodle-treatment-surface-elevated-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent))` |
-| `--poodle-surface-shadow` | `var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-surface))` |
+| `--poodle-surface-fill` | `var(--poodle-recipe-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel)))` |
+| `--poodle-surface-border` | `var(--poodle-recipe-surface-elevated-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent))` |
+| `--poodle-surface-shadow` | `var(--poodle-recipe-surface-elevated-shadow, var(--poodle-elevation-surface))` |
 
 ### elevated override — .surface[data-elevated="true"]
 
 | Var | Value |
 |-----|-------|
-| `--poodle-surface-fill` | `var(--poodle-treatment-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel)))` |
-| `--poodle-surface-border` | `var(--poodle-treatment-surface-elevated-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent))` |
-| `--poodle-surface-shadow` | `var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-surface))` |
+| `--poodle-surface-fill` | `var(--poodle-recipe-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 96%, var(--poodle-color-background-panel)))` |
+| `--poodle-surface-border` | `var(--poodle-recipe-surface-elevated-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent))` |
+| `--poodle-surface-shadow` | `var(--poodle-recipe-surface-elevated-shadow, var(--poodle-elevation-surface))` |
 
 ### Border: none — .surface[data-border="none"]
 
@@ -219,16 +218,15 @@ utility, providing roomier defaults suited to container-level spacing.
   (roomier than the shared `scaleToSpace`; see §8 Padding table)
 - when `asRole` is set, the `role` attribute is applied to the root element
 - when `label` is set, `aria-label` is applied to the root element
-- every surface CSS var wraps a `--poodle-treatment-*` override before its
-  computed default, giving themes per-property override hooks. The seven
-  treatment tokens: `--poodle-treatment-surface-fill`,
-  `--poodle-treatment-surface-border`, `--poodle-treatment-surface-shadow`,
-  `--poodle-treatment-surface-elevated-fill`,
-  `--poodle-treatment-surface-elevated-border`,
-  `--poodle-treatment-surface-elevated-shadow`, and
-  `--poodle-treatment-surface-radius` (fallback `--poodle-radius-surface`)
+- every surface appearance variable wraps a `--poodle-recipe-surface-*` hook
+  before its computed default. The Recipe hooks are
+  `--poodle-recipe-surface-fill`,
+  `--poodle-recipe-surface-border`, `--poodle-recipe-surface-shadow`,
+  `--poodle-recipe-surface-elevated-fill`,
+  `--poodle-recipe-surface-elevated-border`, and
+  `--poodle-recipe-surface-elevated-shadow`.
 - the elevated selector re-sets `--poodle-surface-border` in addition to fill
-  and shadow (via `--poodle-treatment-surface-elevated-border`)
+  and shadow (via `--poodle-recipe-surface-elevated-border`)
 - CSS custom properties (`--poodle-surface-fill`, `--poodle-surface-border`,
   `--poodle-surface-shadow`) are set on the root and overridden by data-attribute
   selectors for tone, border, and elevation variants
@@ -242,7 +240,7 @@ utility, providing roomier defaults suited to container-level spacing.
 - tone and border variants must produce matching fill colors using equivalent
   color-mix logic
 - elevation shadow (`--poodle-elevation-surface`) maps to GPUI shadow drawing
-- treatment radius fallback: use treatment token if set, else radius-surface
+- radius resolves directly from `--poodle-radius-surface`
 - region/group semantics must map into platform accessibility APIs when
   `asRole` is provided
 - decorative surfaces (no asRole) must not surface as named accessibility nodes
@@ -261,7 +259,7 @@ utility, providing roomier defaults suited to container-level spacing.
 
 - [ ] background fill color-mix values match across runtimes
 - [ ] border color and width match (0.0625rem solid)
-- [ ] border-radius matches (treatment fallback chain)
+- [ ] border-radius matches `radius-surface`
 - [ ] elevation shadow matches
 - [ ] padding scale values match
 
@@ -276,7 +274,7 @@ utility, providing roomier defaults suited to container-level spacing.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
-| Treatment radius fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result |
+| Recipe fallback chain | CSS custom property vs Rust spec/token override | allowed | same visual result |
 
 ## 13. Specimen Definitions
 

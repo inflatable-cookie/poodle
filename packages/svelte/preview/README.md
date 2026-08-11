@@ -27,7 +27,7 @@ effigy docs:check
 
 - inspect live token artifact output rather than hand-copied demo values
 - exercise theme, density, and control-size overlays
-- exercise scoped appearance-treatment overrides without redefining token meaning
+- exercise scoped appearance Recipe overrides without redefining token meaning
 - provide the first catalog-style docs and examples surface while the larger
   docs-site program remains early
 - make package and contract ownership visible alongside the live examples

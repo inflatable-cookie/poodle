@@ -68,6 +68,11 @@ OverlayPlacement:
 | `trigger` | trigger element |
 | `children` | popover body content |
 
+Web adapters also accept `triggerIsInteractive`. Set it when `trigger` is
+already an interactive control such as `IconButton`; the wrapper then observes
+clicks without adding a second button role or keyboard handler. Native adapters
+compose their trigger directly and do not need this DOM-only switch.
+
 ### Controlled And Uncontrolled
 
 - controlled: `open` plus `onOpenChange(open)`
@@ -272,11 +277,11 @@ wiring, presence (if open/close animation is added later).
 | `min-width` | `var(--poodle-popover-surface-min-width, 14rem)` |
 | `max-width` | `var(--poodle-popover-surface-max-width, min(24rem, 90vw))` |
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| `border` | `0.0625rem solid var(--poodle-treatment-surface-elevated-border, color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent))` |
-| `border-radius` | `var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface))` |
-| `background` | `var(--poodle-color-background-elevated)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 74%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `var(--poodle-recipe-popover-surface-fill, var(--poodle-color-background-elevated))` |
 | `--poodle-surface` | `var(--poodle-color-background-elevated)` |
-| `box-shadow` | `inset 0 0.0625rem 0 rgba(255, 255, 255, 0.08), 0 0.625rem 1.5rem rgba(9, 13, 18, 0.22), 0 0.125rem 0.375rem rgba(0, 0, 0, 0.15)` (3-layer: inset highlight + two drop shadows) |
+| `box-shadow` | `var(--poodle-recipe-popover-surface-shadow, inset highlight + two drop shadows)` |
 
 ### Surface — trigger width `.popover__surface[data-surface-width="trigger"]`
 
@@ -329,7 +334,7 @@ in viewport coordinates. See `002-anchored-overlays.md`.
   constructs
 - surface sizing constraints must match: min-width 14rem, max-width
   min(24rem, 90vw) (both overridable via `surfaceMinWidth`/`surfaceMaxWidth`)
-- border uses 74% opacity color-mix for `border-subtle` (treatment-elevated override when present)
+- border uses a 74% opacity color-mix for `border-subtle`
 
 ## 11. Parity Checklist
 
@@ -343,9 +348,9 @@ in viewport coordinates. See `002-anchored-overlays.md`.
 ### Tier 2: Visual Parity
 
 - [ ] surface min-width 14rem, max-width min(24rem, 90vw)
-- [ ] border: 0.0625rem solid with `border-subtle` at 74% (treatment-elevated override when present)
+- [ ] border: 0.0625rem solid with `border-subtle` at 74%
 - [ ] background: plain `background-elevated`
-- [ ] border-radius: `radius-surface` (treatment-elevated-radius override when present)
+- [ ] border-radius: `radius-surface`
 - [ ] box-shadow: 3-layer stack (inset highlight + two drop shadows)
 - [ ] padding: panel-y / panel-x
 - [ ] trigger focus ring matches (focus width, focusRing color, 0.125rem offset)

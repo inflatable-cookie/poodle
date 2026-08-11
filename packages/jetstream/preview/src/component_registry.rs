@@ -1044,6 +1044,13 @@ pub static ALL_COMPONENTS: &[ComponentEntry] = &[
         has_specimen: true,
     },
     ComponentEntry {
+        slug: "message-center",
+        display_name: "MessageCenter",
+        description: "Icon-triggered archive for notifications and durable messages.",
+        tag: ComponentTag::Workstation,
+        has_specimen: true,
+    },
+    ComponentEntry {
         slug: "app-header",
         display_name: "AppHeader",
         description: "Top-level application header with branding and actions.",

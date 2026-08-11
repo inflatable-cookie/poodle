@@ -172,8 +172,7 @@ pub fn code_input_with_handlers(
                 let filled = chars.len();
                 slot.style.descriptor.cursor = poodle_node::CursorHint::Pointer;
                 slot.interaction.on_activate = Some(std::sync::Arc::new(move || {
-                    let (start, end) =
-                        poodle_headless::text_input::code_slot_selection(i, filled);
+                    let (start, end) = poodle_headless::text_input::code_slot_selection(i, filled);
                     on_selection_change(start, end);
                 }));
             }
@@ -185,9 +184,7 @@ pub fn code_input_with_handlers(
     // Keys land on the slot row, not on any one slot: the value is one string
     // and the active slot is derived from its length, so there is nothing
     // per-slot to dispatch to.
-    if !spec.is_disabled
-        && (handlers.on_value_change.is_some() || handlers.on_complete.is_some())
-    {
+    if !spec.is_disabled && (handlers.on_value_change.is_some() || handlers.on_complete.is_some()) {
         row.interaction.focusable = true;
         let value = spec.current_value().to_string();
         let length = spec.length;
@@ -372,7 +369,10 @@ mod tests {
         // A letter in a digits-only code is consumed and discarded.
         let spec = CodeInputSpec::new().with_length(4).with_value("12");
         let (changes, _) = typed(&spec, "q");
-        assert!(changes.is_empty(), "a letter cannot enter a digits-only code");
+        assert!(
+            changes.is_empty(),
+            "a letter cannot enter a digits-only code"
+        );
     }
 
     /// A full code keeps its caret on the last slot, so a further digit
@@ -435,7 +435,9 @@ mod tests {
                 ..CodeInputHandlers::default()
             },
         );
-        assert!(node.find(&|n| n.interaction.on_edit_key.is_some()).is_none());
+        assert!(node
+            .find(&|n| n.interaction.on_edit_key.is_some())
+            .is_none());
     }
 
     /// Paste is how a one-time code usually arrives, and it completes too.

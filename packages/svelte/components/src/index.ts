@@ -204,6 +204,7 @@ export { default as MetricTile } from "./MetricTile.svelte";
 export { default as StateTile } from "./StateTile.svelte";
 export { default as ValidationSummary } from "./ValidationSummary.svelte";
 export { default as ModelPicker } from "./ModelPicker.svelte";
+export { default as MessageCenter } from "./MessageCenter.svelte";
 export { default as ToastStack } from "./ToastStack.svelte";
 export { default as ToastHost } from "./ToastHost.svelte";
 export {
@@ -387,6 +388,7 @@ export type {
   MediaUploadWorkflowResult,
   MediaUploadWorkflowStep,
   MediaState,
+  MessageCenterItem,
   DockExternalDragCancelContext,
   DockExternalDragCancelReason,
   DockExternalDragEndContext,

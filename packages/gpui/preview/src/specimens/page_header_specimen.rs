@@ -102,7 +102,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                     .with_actions(actions(
                         theme,
-                        &[("ph-media-upload", "Upload"), ("ph-media-settings", "Settings")],
+                        &[
+                            ("ph-media-upload", "Upload"),
+                            ("ph-media-settings", "Settings"),
+                        ],
                     )),
                 ),
         )
@@ -191,7 +194,10 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_meta(meta(theme))
                     .with_actions(actions(
                         theme,
-                        &[("ph-meta-run", "Run now"), ("ph-meta-edit", "Edit schedule")],
+                        &[
+                            ("ph-meta-run", "Run now"),
+                            ("ph-meta-edit", "Edit schedule"),
+                        ],
                     )),
                 ),
         )

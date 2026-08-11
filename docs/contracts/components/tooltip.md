@@ -190,19 +190,19 @@ offset `0.125rem`).
 | `z-index` | `var(--poodle-overlay-z-menu)` |
 | `max-width` | `16rem` |
 | `padding` | `0.375rem 0.5rem` |
-| `border` | `var(--poodle-treatment-surface-elevated-border, color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent))` |
-| `border-radius` | `var(--poodle-treatment-surface-elevated-radius, calc(var(--poodle-radius-control) - 0.125rem))` |
-| `background` | `var(--poodle-treatment-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
-| `box-shadow` | `0 0.5rem 1.25rem rgba(0, 0, 0, 0.3), 0 0.125rem 0.375rem rgba(0, 0, 0, 0.2)` |
-| `color` | `var(--poodle-color-text-primary)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 72%, transparent)` |
+| `border-radius` | `calc(var(--poodle-radius-control) - 0.125rem)` |
+| `background` | `var(--poodle-recipe-tooltip-bubble-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
+| `box-shadow` | `var(--poodle-recipe-tooltip-bubble-shadow, 0 0.5rem 1.25rem rgba(0, 0, 0, 0.3), 0 0.125rem 0.375rem rgba(0, 0, 0, 0.2))` |
+| `color` | `var(--poodle-recipe-tooltip-bubble-text, var(--poodle-color-text-primary))` |
 | `font-size` | `0.6875rem` |
 | `line-height` | `1.35` |
 | `white-space` | `nowrap` |
 
-Border, radius, and background resolve through the
-`--poodle-treatment-surface-elevated-*` custom properties when present, falling
-back to the color-mix forms above. The box-shadow is a literal two-layer drop
-shadow (not the `--poodle-elevation-overlay` token).
+Bubble fill and shadow resolve their component Recipe hooks first, then fall
+back to the semantic-token forms above. Border and radius resolve directly
+from semantic tokens. The box-shadow is a literal two-layer drop shadow, not
+the `--poodle-elevation-overlay` token.
 
 ### Placement — JS-resolved viewport coordinates
 
@@ -233,9 +233,8 @@ and exposes the resolved value via `data-placement`.
   writes the resolved value to `data-placement`
 - interactive content should escalate to `Popover`
 - bubble uses a fixed 0.5rem offset gap for all placements
-- border, radius, and background resolve through
-  `--poodle-treatment-surface-elevated-*` custom props, with control radius minus
-  0.125rem (and the color-mix forms) as fallbacks
+- fill and shadow resolve through `--poodle-recipe-tooltip-bubble-*` hooks;
+  border and control radius minus 0.125rem resolve from semantic tokens
 - font-size is 0.6875rem (11px) for compact descriptive text
 
 ## 10. GPUI Notes
@@ -264,7 +263,7 @@ and exposes the resolved value via `data-placement`.
 - [ ] bubble padding: 0.375rem 0.5rem
 - [ ] border: 0.0625rem solid with 72% opacity border color
 - [ ] border-radius: calc(control-radius - 0.125rem)
-- [ ] background: 98% elevated mixed with panel (via `--poodle-treatment-surface-elevated-fill`, with the color-mix as fallback)
+- [ ] background: 98% elevated mixed with panel (via `--poodle-recipe-tooltip-bubble-fill`, with the color-mix as fallback)
 - [ ] box-shadow: two-layer drop shadow (`0 0.5rem 1.25rem rgba(0,0,0,0.3), 0 0.125rem 0.375rem rgba(0,0,0,0.2)`)
 - [ ] font-size: 0.6875rem, line-height: 1.35
 - [ ] color: text-primary

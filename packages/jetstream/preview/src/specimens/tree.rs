@@ -11,7 +11,7 @@ use poodle_jetstream::JetstreamThemeProvider;
 use crate::compat::js_tree;
 use poodle_specs::{ControlDensity, ControlSize, TreeNode, TreeSpec};
 
-use crate::app_state::{AppState, demo_file_tree};
+use crate::app_state::{demo_file_tree, AppState};
 
 fn expanded() -> Vec<String> {
     vec!["src".into(), "src/components".into()]
@@ -43,11 +43,9 @@ pub fn render(state: &AppState, theme: &JetstreamThemeProvider) -> El {
             "Lazy / async children (loading row)",
             secondary,
             js_tree(
-                &TreeSpec::new(vec![
-                    TreeNode::new("remote", "remote")
-                        .with_icon("folder")
-                        .with_branch(true),
-                ])
+                &TreeSpec::new(vec![TreeNode::new("remote", "remote")
+                    .with_icon("folder")
+                    .with_branch(true)])
                 .with_expanded_values(vec!["remote".into()])
                 .with_loading_values(vec!["remote".into()]),
                 theme,

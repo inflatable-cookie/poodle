@@ -125,7 +125,7 @@ pub fn button(
             )
         }
         (ButtonVariant::Primary, _) => {
-            // Border: the fill darkened toward black (treatment-interactive-primary-border).
+            // Border: the primary fill darkened toward black.
             (base_fill, mix_black(base_fill, 0.86), base_text)
         }
         (ButtonVariant::Ghost, Some(status_color)) => {

@@ -138,94 +138,95 @@ pub fn duration_input_with_handlers(
     // ── Segment builder ──
     // Column of label + field. Typography is inherited from the preview's
     // Inter root, matching the old GPUI tier.
-    let build_segment = |unit_label: &str, value_text: &str, unit: Option<DurationSegment>| -> Node {
-        // Label: per-size font, secondary, line-height 1, tracking 0.05em.
-        let mut label = Node::text(unit_label);
-        {
-            let s = &mut label.style;
-            s.text_size = Some(label_font);
-            // Node backend interprets line-height as a font-size multiple.
-            s.line_height = Some(1.0);
-            s.descriptor.text_color = Some(text_secondary);
-            s.letter_spacing_em = Some(0.05);
-        }
-
-        // Field: per-size width, digit font, centered, line-height 1.
-        let mut field = Node::text(value_text);
-        {
-            let s = &mut field.style;
-            s.descriptor.layout.width = LayoutSizing::Fixed(field_w);
-            // Keep the segment's 13px line box while the fractional glyph
-            // size above reproduces the old GPUI coverage.
-            s.descriptor.layout.height = LayoutSizing::Fixed(field_line_box);
-            s.text_size = Some(field_font);
-            // Node backend interprets line-height as a font-size multiple.
-            s.line_height = Some(1.0);
-            s.descriptor.text_color = Some(text_primary);
-            s.text_weight = Some(600);
-            s.text_align = Some(poodle_node::TextAlign::Center);
-            if raster_phase_adjust {
-                s.descriptor.layout.spacing.margin.top = 0.5;
-                s.descriptor.layout.spacing.margin.bottom = -0.5;
+    let build_segment =
+        |unit_label: &str, value_text: &str, unit: Option<DurationSegment>| -> Node {
+            // Label: per-size font, secondary, line-height 1, tracking 0.05em.
+            let mut label = Node::text(unit_label);
+            {
+                let s = &mut label.style;
+                s.text_size = Some(label_font);
+                // Node backend interprets line-height as a font-size multiple.
+                s.line_height = Some(1.0);
+                s.descriptor.text_color = Some(text_secondary);
+                s.letter_spacing_em = Some(0.05);
             }
-        }
 
-        let mut seg = Node::container();
-        {
-            let s = &mut seg.style;
-            s.descriptor.layout.direction = LayoutDirection::Column;
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.descriptor.layout.spacing.gap = label_gap;
-            let pad = &mut s.descriptor.layout.spacing.padding;
-            pad.left = segment_pad;
-            pad.right = segment_pad;
-            pad.top = segment_pad;
-            pad.bottom = segment_pad;
-            s.descriptor.corner_radii.top_left = segment_radius;
-            s.descriptor.corner_radii.top_right = segment_radius;
-            s.descriptor.corner_radii.bottom_right = segment_radius;
-            s.descriptor.corner_radii.bottom_left = segment_radius;
-        }
-        // Keys act on the focused segment. Disabled inputs stay inert, and a
-        // segment with no handler stays a plain visual rather than advertising
-        // a focus stop that does nothing.
-        if let (Some(unit), Some(on_change), false) =
-            (unit, handlers.on_change.clone(), spec.is_disabled)
-        {
-            seg.interaction.focusable = true;
-            let current = current_value;
-            let max_hours = spec.max_hours;
-            seg.interaction.on_edit_key = Some(Arc::new(move |key: &str, _mods| {
-                let next = match key {
-                    "up" => adjust_duration_segment(current, unit, 1, max_hours),
-                    "down" => adjust_duration_segment(current, unit, -1, max_hours),
-                    key => {
-                        let mut chars = key.chars();
-                        match (chars.next(), chars.next()) {
-                            (Some(c), None) if c.is_ascii_digit() => type_duration_digit(
-                                current,
-                                unit,
-                                c.to_digit(10).expect("checked ascii digit"),
-                                max_hours,
-                            ),
-                            // Not ours: Tab and Enter have to reach the host.
-                            _ => return,
-                        }
-                    }
-                };
-                if next == current {
-                    return;
+            // Field: per-size width, digit font, centered, line-height 1.
+            let mut field = Node::text(value_text);
+            {
+                let s = &mut field.style;
+                s.descriptor.layout.width = LayoutSizing::Fixed(field_w);
+                // Keep the segment's 13px line box while the fractional glyph
+                // size above reproduces the old GPUI coverage.
+                s.descriptor.layout.height = LayoutSizing::Fixed(field_line_box);
+                s.text_size = Some(field_font);
+                // Node backend interprets line-height as a font-size multiple.
+                s.line_height = Some(1.0);
+                s.descriptor.text_color = Some(text_primary);
+                s.text_weight = Some(600);
+                s.text_align = Some(poodle_node::TextAlign::Center);
+                if raster_phase_adjust {
+                    s.descriptor.layout.spacing.margin.top = 0.5;
+                    s.descriptor.layout.spacing.margin.bottom = -0.5;
                 }
-                on_change(
-                    next.hours,
-                    next.minutes,
-                    next.seconds,
-                    duration_total_seconds(next),
-                );
-            }));
-        }
-        seg.child(label).child(field)
-    };
+            }
+
+            let mut seg = Node::container();
+            {
+                let s = &mut seg.style;
+                s.descriptor.layout.direction = LayoutDirection::Column;
+                s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+                s.descriptor.layout.spacing.gap = label_gap;
+                let pad = &mut s.descriptor.layout.spacing.padding;
+                pad.left = segment_pad;
+                pad.right = segment_pad;
+                pad.top = segment_pad;
+                pad.bottom = segment_pad;
+                s.descriptor.corner_radii.top_left = segment_radius;
+                s.descriptor.corner_radii.top_right = segment_radius;
+                s.descriptor.corner_radii.bottom_right = segment_radius;
+                s.descriptor.corner_radii.bottom_left = segment_radius;
+            }
+            // Keys act on the focused segment. Disabled inputs stay inert, and a
+            // segment with no handler stays a plain visual rather than advertising
+            // a focus stop that does nothing.
+            if let (Some(unit), Some(on_change), false) =
+                (unit, handlers.on_change.clone(), spec.is_disabled)
+            {
+                seg.interaction.focusable = true;
+                let current = current_value;
+                let max_hours = spec.max_hours;
+                seg.interaction.on_edit_key = Some(Arc::new(move |key: &str, _mods| {
+                    let next = match key {
+                        "up" => adjust_duration_segment(current, unit, 1, max_hours),
+                        "down" => adjust_duration_segment(current, unit, -1, max_hours),
+                        key => {
+                            let mut chars = key.chars();
+                            match (chars.next(), chars.next()) {
+                                (Some(c), None) if c.is_ascii_digit() => type_duration_digit(
+                                    current,
+                                    unit,
+                                    c.to_digit(10).expect("checked ascii digit"),
+                                    max_hours,
+                                ),
+                                // Not ours: Tab and Enter have to reach the host.
+                                _ => return,
+                            }
+                        }
+                    };
+                    if next == current {
+                        return;
+                    }
+                    on_change(
+                        next.hours,
+                        next.minutes,
+                        next.seconds,
+                        duration_total_seconds(next),
+                    );
+                }));
+            }
+            seg.child(label).child(field)
+        };
 
     // ── Separator builder ──
     // 2-row column: a spacer matched to the label row (label height + label
@@ -311,7 +312,11 @@ pub fn duration_input_with_handlers(
     segments = segments
         .child(build_segment("H", &hours_str, Some(DurationSegment::Hours)))
         .child(build_separator())
-        .child(build_segment("M", &minutes_str, Some(DurationSegment::Minutes)));
+        .child(build_segment(
+            "M",
+            &minutes_str,
+            Some(DurationSegment::Minutes),
+        ));
 
     // Optional seconds
     if spec.show_seconds {
@@ -428,7 +433,10 @@ mod tests {
     fn arrow_up_on_minutes_carries_into_hours() {
         let (node, seen) = armed(&DurationInputSpec::new().with_value("00:59:00"));
         let minutes = segments(&node)[1];
-        (minutes.interaction.on_edit_key.as_ref().unwrap())("up", poodle_node::NodeModifiers::default());
+        (minutes.interaction.on_edit_key.as_ref().unwrap())(
+            "up",
+            poodle_node::NodeModifiers::default(),
+        );
         assert_eq!(
             seen.lock().unwrap().last().copied(),
             Some((1, 0, 0, 3600)),
@@ -440,7 +448,10 @@ mod tests {
     fn digits_shift_into_the_focused_segment() {
         let (node, seen) = armed(&DurationInputSpec::new().with_value("00:04:00"));
         let minutes = segments(&node)[1];
-        (minutes.interaction.on_edit_key.as_ref().unwrap())("5", poodle_node::NodeModifiers::default());
+        (minutes.interaction.on_edit_key.as_ref().unwrap())(
+            "5",
+            poodle_node::NodeModifiers::default(),
+        );
         assert_eq!(seen.lock().unwrap().last().copied(), Some((0, 45, 0, 2700)));
     }
 
@@ -450,7 +461,10 @@ mod tests {
         let (node, seen) = armed(&DurationInputSpec::new().with_value("00:04:00"));
         let minutes = segments(&node)[1];
         for key in ["tab", "enter", "escape", "left"] {
-            (minutes.interaction.on_edit_key.as_ref().unwrap())(key, poodle_node::NodeModifiers::default());
+            (minutes.interaction.on_edit_key.as_ref().unwrap())(
+                key,
+                poodle_node::NodeModifiers::default(),
+            );
         }
         assert!(seen.lock().unwrap().is_empty());
     }

@@ -4,10 +4,10 @@ use crate::specimens::specimen_layout::specimen_layout;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use std::sync::Arc;
 use poodle_specs::{
     ControlSize, EyebrowSpec, RemediationAction, SelectionSummaryItem, SelectionSummarySpec,
 };
+use std::sync::Arc;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;

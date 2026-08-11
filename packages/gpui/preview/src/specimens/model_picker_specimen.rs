@@ -210,7 +210,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
             .into_any_element(),
         ))
-
         .child(section(
             "No model selected",
             theme,

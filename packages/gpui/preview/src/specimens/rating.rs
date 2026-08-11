@@ -1,5 +1,5 @@
-use crate::app_state::NodeSpecimenEvent;
 use crate::app_state::AppState;
+use crate::app_state::NodeSpecimenEvent;
 use crate::node_compat::{Eyebrow, Rating};
 use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
@@ -22,13 +22,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or(3);
     let node_events = state.node_events.clone();
     let on_change = Arc::new(move |value: u32| {
-        node_events
-            .lock()
-            .unwrap()
-            .push(NodeSpecimenEvent::Select {
-                key: "rating-interactive".to_string(),
-                index: value as usize,
-            });
+        node_events.lock().unwrap().push(NodeSpecimenEvent::Select {
+            key: "rating-interactive".to_string(),
+            index: value as usize,
+        });
     });
 
     let examples = div()

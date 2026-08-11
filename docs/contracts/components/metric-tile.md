@@ -242,7 +242,7 @@ The `buildSparkline()` function generates an SVG `<path>` from data points:
 
 | Selector | Property | Value |
 |----------|----------|-------|
-| `:global([data-theme="iceberg"]) .state-tile` | background | `var(--poodle-treatment-surface-fill)` |
+| `:global([data-theme="iceberg"]) .state-tile` | background | `var(--poodle-recipe-metric-tile-fill)` |
 
 ### Composed Primitives
 
@@ -260,7 +260,7 @@ The `buildSparkline()` function generates an SVG `<path>` from data points:
 - Trend icons use the `Icon` primitive (no explicit `size` prop — inherits
   from font-size of parent `trend-arrow` span)
 - Iceberg theme override uses `:global([data-theme="iceberg"])` selector with
-  `--poodle-treatment-surface-fill` token
+  `--poodle-recipe-metric-tile-fill` token
 - `sparklinePath` is a reactive derived value computed when `sparklineData`
   has 2+ entries
 

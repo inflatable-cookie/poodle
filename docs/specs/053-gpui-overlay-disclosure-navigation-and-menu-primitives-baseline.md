@@ -97,7 +97,7 @@ from `poodle-gpui-tokens` for at least:
 
 - elevated and overlay background roles
 - dialog and overlay elevation roles
-- accent and focus treatment roles
+- accent and focus appearance semantics
 - panel, rule, and subtle border roles
 - spacing and radius roles shared with earlier primitive tranches
 

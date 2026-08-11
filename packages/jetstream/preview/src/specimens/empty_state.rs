@@ -47,10 +47,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_empty_state(
                 &EmptyStateSpec::new("No items")
                     .with_message("Create an item to get started.")
-                    .with_actions(vec![
-                        RemediationAction::new("create", "New Item")
-                            .with_variant(ButtonVariant::Primary),
-                    ]),
+                    .with_actions(vec![RemediationAction::new("create", "New Item")
+                        .with_variant(ButtonVariant::Primary)]),
                 theme,
             ),
         ))

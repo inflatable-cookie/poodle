@@ -125,7 +125,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ),
                     };
 
-                    let mut spec = CalendarSpec::new().with_today("2026-03-12").with_mode(CalendarMode::Range);
+                    let mut spec = CalendarSpec::new()
+                        .with_today("2026-03-12")
+                        .with_mode(CalendarMode::Range);
                     spec.range_value =
                         Some(DateRangeValue::new(eff_start.clone(), eff_end.clone()));
                     spec.visible_month = Some("2026-03".to_string());
@@ -157,7 +159,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child({
-                    let mut spec = CalendarSpec::new().with_today("2026-03-12").with_mode(CalendarMode::Range);
+                    let mut spec = CalendarSpec::new()
+                        .with_today("2026-03-12")
+                        .with_mode(CalendarMode::Range);
                     spec.default_range_value = DateRangeValue::new(
                         Some("2026-03-05".to_string()),
                         Some("2026-03-12".to_string()),
@@ -196,7 +200,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child({
-                    let mut spec = CalendarSpec::new().with_today("2026-03-12").with_mode(CalendarMode::Range);
+                    let mut spec = CalendarSpec::new()
+                        .with_today("2026-03-12")
+                        .with_mode(CalendarMode::Range);
                     spec.is_disabled = true;
                     spec.aria_label = Some("Disabled range calendar".to_string());
                     Calendar::from_spec(spec, theme).with_id("range-disabled")

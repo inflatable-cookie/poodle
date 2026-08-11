@@ -171,11 +171,11 @@ In single mode with `allowDeactivation=true`, `onValueChange` may receive
 |----------|-------|
 | `min-height` | `calc(var(--poodle-toggle-group-height) - 0.25rem)` |
 | `padding` | `0 var(--poodle-toggle-group-x)` |
-| `border` | `0.0625rem solid var(--poodle-treatment-interactive-border, color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent))` |
-| `border-radius` | `var(--poodle-treatment-interactive-radius, var(--poodle-radius-control))` |
-| `background` | `var(--poodle-treatment-interactive-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)))` |
-| `box-shadow` | `var(--poodle-treatment-interactive-shadow, none)` |
-| `color` | `var(--poodle-color-text-primary)` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
+| `border-radius` | `var(--poodle-radius-control)` |
+| `background` | `var(--poodle-recipe-toggle-group-item-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)))` |
+| `box-shadow` | `var(--poodle-recipe-toggle-group-item-shadow, none)` |
+| `color` | `var(--poodle-recipe-toggle-group-item-text, var(--poodle-color-text-primary))` |
 | `cursor` | `pointer` |
 | `font-family` | `var(--poodle-typography-label-family)` |
 | `font-size` | `var(--poodle-typography-label-size)` |
@@ -189,8 +189,8 @@ The selected fill layers a flat accent tint **over** the unselected item fill (t
 
 | Property | Value |
 |----------|-------|
-| `background` | `linear-gradient(color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent), color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)), var(--poodle-treatment-interactive-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)))` |
-| `border-color` | `var(--poodle-treatment-interactive-border-active, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)))` |
+| `background` | `var(--poodle-recipe-toggle-group-selected-item-fill, accent tint over the item fill)` |
+| `border-color` | `var(--poodle-recipe-toggle-group-item-border, color-mix(in srgb, var(--poodle-color-accent-base) 42%, var(--poodle-color-border-default)))` |
 
 ### Item — focus visible (`:focus-visible`)
 
@@ -214,7 +214,9 @@ The selected fill layers a flat accent tint **over** the unselected item fill (t
 - Root container role switches between `radiogroup` and `group` based on
   `selectionMode`
 - Selected items carry both the `poodle-selected` class (drives the selected fill/border) and `data-selected="true|false"`
-- Item border/fill/radius/shadow read from `--poodle-treatment-interactive-*` treatment variables (a brand-raised theming hook) with the color-mix formulas as fallbacks; the selected border reads `--poodle-treatment-interactive-border-active`
+- Item fill, shadow, text, and selected fill/border expose component Recipe
+  hooks with semantic-token formulas as fallbacks. Radius resolves from
+  `--poodle-radius-control`.
 - Selection state managed internally when `value` is `undefined` (uncontrolled mode); single mode seeds `null`, multiple mode seeds `[]`
 - Transition uses explicit `180ms ease` timing
 

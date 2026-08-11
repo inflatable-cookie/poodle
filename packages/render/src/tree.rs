@@ -275,7 +275,6 @@ fn render_row(
     let is_selected = spec.is_selected(&node.value);
     let is_focused = m.focused.as_deref() == Some(node.value.as_str());
 
-
     let mut row = Node::container();
     // Contract: rows are treeitems carrying their depth so a screen reader
     // can announce "level 3".
@@ -306,8 +305,7 @@ fn render_row(
         let handler = Arc::clone(handler);
         let value = node.value.clone();
         row.style.descriptor.cursor = CursorHint::Pointer;
-        row.interaction.on_activate_modified =
-            Some(Arc::new(move |mods| handler(&value, mods)));
+        row.interaction.on_activate_modified = Some(Arc::new(move |mods| handler(&value, mods)));
     } else if let (false, Some(handler)) = (node.is_disabled, &handlers.on_select) {
         let handler = Arc::clone(handler);
         let value = node.value.clone();

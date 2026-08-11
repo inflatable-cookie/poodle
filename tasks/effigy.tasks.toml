@@ -158,6 +158,10 @@
 # Direct adapter manifests are independent runtime evidence, but must match the
 # RenderComponent implementations they claim exactly.
 "drift:adapter-manifests" = "bun packages/gpui/preview/scripts/adapter-manifest-drift.ts"
+# The family-level Treatment layer is retired. Historical records and the
+# architecture tombstone are preserved; active code, contracts, guides,
+# previews, and current evidence must use component Recipes directly.
+"drift:recipes" = "bun scripts/check-recipe-only-surface.ts"
 # The Jetstream sibling, and stronger: GPUI can only check that a handler field
 # is read, because a real click there needs a live window. Jetstream dispatches
 # clicks with no window, so this demands a test that actually drives one. Also
@@ -185,6 +189,7 @@
 "ci:web" = [
   { task = "audit:icons" },
   { task = "audit:tokens" },
+  { task = "drift:recipes" },
   { task = "test:core" },
   { task = "test:components" },
   { task = "svelte:surface-audit" },
@@ -238,6 +243,7 @@
 "docs:dev" = [{ task = "svelte:run" }]
 "docs:build" = [{ task = "svelte:build" }]
 "docs:check" = [
+  { task = "drift:recipes" },
   { task = "svelte:surface-audit" },
   { task = "docs:lint" },
   { task = "react:docs" },

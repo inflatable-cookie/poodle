@@ -81,6 +81,7 @@ pub mod media_preview;
 pub mod media_thumbnail;
 pub mod menu;
 pub mod menubar;
+pub mod message_center;
 pub mod meta_bar;
 pub mod meta_item;
 pub mod meter;
@@ -355,6 +356,7 @@ pub fn render_specimen(
     match slug {
         "accordion" => Some(el(accordion::render(theme))),
         "action-discovery-panel" => Some(el(action_discovery_panel::render(theme))),
+        "message-center" => Some(el(message_center::render(theme))),
         "alert-dialog" => Some(el(alert_dialog::render(theme))),
         "app-header" => Some(el(app_header::render(theme))),
         "audio-player" => Some(el(audio_player::render(theme))),

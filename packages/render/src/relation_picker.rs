@@ -410,7 +410,10 @@ fn build_search(
     col
 }
 
-#[expect(clippy::too_many_arguments, reason = "drill-row rendering keeps resolved token metrics explicit")]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "drill-row rendering keeps resolved token metrics explicit"
+)]
 fn drill_row(
     item: &poodle_specs::DrillDownItem,
     text_primary: ColorValue,
@@ -477,7 +480,10 @@ fn drill_row(
     row.child(copy).child(trailing)
 }
 
-#[expect(clippy::too_many_arguments, reason = "candidate rendering keeps picker state and resolved metrics explicit")]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "candidate rendering keeps picker state and resolved metrics explicit"
+)]
 fn candidate_row(
     item: &PickerItemSpec,
     is_selected: bool,

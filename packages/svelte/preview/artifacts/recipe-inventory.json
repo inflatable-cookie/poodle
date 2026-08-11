@@ -1,8 +1,8 @@
 {
   "summary": {
-    "components": 142,
-    "recipeHooks": 1093,
-    "hookCandidates": 4,
+    "components": 143,
+    "recipeHooks": 1098,
+    "hookCandidates": 5,
     "metricVariables": 398
   },
   "inventory": {
@@ -1374,6 +1374,19 @@
         "--poodle-recipe-menubar-trigger-text"
       ],
       "candidates": [],
+      "metric": []
+    },
+    "message-center": {
+      "recipe": [
+        "--poodle-recipe-message-center-indicator-fill",
+        "--poodle-recipe-message-center-indicator-text",
+        "--poodle-recipe-message-center-item-fill",
+        "--poodle-recipe-message-center-item-hover-fill",
+        "--poodle-recipe-message-center-unread-fill"
+      ],
+      "candidates": [
+        "--poodle-message-center-tone"
+      ],
       "metric": []
     },
     "meta-bar": {

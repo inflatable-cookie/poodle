@@ -6,6 +6,7 @@ import { AgentQuestionRecordSpecimen } from "./specimens/AgentQuestionRecordSpec
 import { AgentQuestionSpecimen } from "./specimens/AgentQuestionSpecimen";
 import { AlertDialogSpecimen } from "./specimens/AlertDialogSpecimen";
 import { AppHeaderSpecimen } from "./specimens/AppHeaderSpecimen";
+import { MessageCenterSpecimen } from "./specimens/MessageCenterSpecimen";
 import { AudioPlayerSpecimen } from "./specimens/AudioPlayerSpecimen";
 import { AudioMeterSpecimen } from "./specimens/AudioMeterSpecimen";
 import { AudioSwitchSpecimen } from "./specimens/AudioSwitchSpecimen";
@@ -166,6 +167,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "agent-question-record": AgentQuestionRecordSpecimen,
   "alert-dialog": AlertDialogSpecimen,
   "app-header": AppHeaderSpecimen,
+  "message-center": MessageCenterSpecimen,
   "audio-player": AudioPlayerSpecimen,
   "audio-meter": AudioMeterSpecimen,
   "audio-switch": AudioSwitchSpecimen,

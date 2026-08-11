@@ -15,11 +15,10 @@
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{
     AccordionSpec, ActionDiscoveryPanelSpec, AppHeaderSpec, BadgeSpec, BoxSpec, BreadcrumbsSpec,
-    ButtonSpec, CheckboxSpec, CommandPaletteSpec, DockEdge, DockRegionSpec, ShellStatusBarSpec,
-    SplitOrientation, SplitViewSpec,
-    FieldSpec, GridSpec, MenuSpec, NavCardSpec, ProgressSpec, SelectSpec, SeparatorSpec,
-    SkeletonSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec, SwitchSpec, TabsSpec, TextInputSpec,
-    ToolbarSpec,
+    ButtonSpec, CheckboxSpec, CommandPaletteSpec, DockEdge, DockRegionSpec, FieldSpec, GridSpec,
+    MenuSpec, NavCardSpec, ProgressSpec, SelectSpec, SeparatorSpec, ShellStatusBarSpec,
+    SkeletonSpec, SplitOrientation, SplitViewSpec, StackSpec, StatusIndicatorSpec, SurfaceSpec,
+    SwitchSpec, TabsSpec, TextInputSpec, ToolbarSpec,
 };
 use poodle_specs::{
     ConfirmActionSpec, DataTableSpec, DetailSectionSpec, DetailShellSpec, EmptyStateSpec,

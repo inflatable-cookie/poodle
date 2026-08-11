@@ -91,7 +91,7 @@ Selection, feedback, and date-time primitives must continue resolving from
 
 - accent and status color roles
 - control-size and surface roles
-- focus treatment roles
+- focus appearance semantics
 - range and progress emphasis roles
 - muted and emphasized inline feedback roles
 

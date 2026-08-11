@@ -25,13 +25,7 @@ fn all_corners(node: &mut Node, r: f32) {
     c.bottom_left = r;
 }
 
-fn abs_block(
-    position: NodePosition,
-    w: f32,
-    h: f32,
-    radius: f32,
-    bg: ColorValue,
-) -> Node {
+fn abs_block(position: NodePosition, w: f32, h: f32, radius: f32, bg: ColorValue) -> Node {
     let mut n = Node::container();
     n.position = position;
     {

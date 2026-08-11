@@ -199,7 +199,7 @@ impl PreviewRoot {
         _cx: &mut Context<Self>,
     ) -> impl IntoElement {
         let active_value = self.state.section.label();
-        let nav_sections = [Section::Components, Section::Tokens, Section::Treatments];
+        let nav_sections = [Section::Components, Section::Tokens];
         let tab_defs: Vec<TabDefinition> = nav_sections
             .iter()
             .map(|s| TabDefinition::new(s.label(), s.label()))
@@ -216,7 +216,6 @@ impl PreviewRoot {
                 let section = match val {
                     "Components" => Section::Components,
                     "Tokens" => Section::Tokens,
-                    "Treatments" => Section::Treatments,
                     _ => return,
                 };
                 queue
@@ -258,7 +257,7 @@ impl PreviewRoot {
             .child(pill(self.state.control_size.label()))
     }
 
-    /// Display controls bar — theme, density, size, treatment toggle groups + catalogue search.
+    /// Display controls bar — theme, density, size, and catalogue search.
     /// Matches Svelte: 80px height, panel bg, 12px 16px padding, 20px/32px gap.
     #[expect(clippy::too_many_arguments, reason = "the preview control bar keeps resolved theme values explicit")]
     fn render_display_controls(
@@ -560,7 +559,6 @@ impl PreviewRoot {
         let section_content = match self.state.section {
             Section::Components => self.render_components_section(available_h, cx),
             Section::Tokens => self.render_tokens_section(available_h, cx),
-            Section::Treatments => self.render_treatments_section(available_h),
         };
 
         div()
@@ -991,410 +989,6 @@ impl PreviewRoot {
         )
     }
 
-    fn render_treatments_section(&self, available_h: Pixels) -> Div {
-        let theme = &self.state.theme;
-        let text_primary = theme.resolve_color("color.text.primary");
-        let text_secondary = theme.resolve_color("color.text.secondary");
-        let border_subtle = theme.resolve_color("color.border.subtle");
-        let elevated_bg = theme.resolve_color("color.background.elevated");
-        let panel_bg = theme.resolve_color("color.background.panel");
-        let accent = theme.resolve_color("color.accent.base");
-
-        let card =
-            |eyebrow: &'static str, title: &'static str, body: &'static str, active: bool| {
-                div()
-                    .flex_1()
-                    .min_w(px(220.0))
-                    .p(px(16.0))
-                    .rounded(px(8.0))
-                    .bg(if active {
-                        color_to_hsla(accent).opacity(0.07)
-                    } else {
-                        color_to_hsla(elevated_bg)
-                    })
-                    .border_1()
-                    .border_color(if active {
-                        color_to_hsla(accent).opacity(0.4)
-                    } else {
-                        color_to_hsla(border_subtle)
-                    })
-                    .flex()
-                    .flex_col()
-                    .gap(px(6.0))
-                    .child(
-                        div()
-                            .text_size(px(11.0))
-                            .font_weight(FontWeight::SEMIBOLD)
-                            .text_color(color_to_hsla(text_secondary))
-                            .child(eyebrow),
-                    )
-                    .child(
-                        div()
-                            .text_sm()
-                            .font_weight(FontWeight::SEMIBOLD)
-                            .text_color(color_to_hsla(text_primary))
-                            .child(title),
-                    )
-                    .child(
-                        div()
-                            .text_sm()
-                            .line_height(relative(1.6))
-                            .text_color(color_to_hsla(text_secondary))
-                            .child(body),
-                    )
-            };
-
-        let section_heading = |title: &'static str| {
-            div()
-                .text_lg()
-                .font_weight(FontWeight::SEMIBOLD)
-                .text_color(color_to_hsla(text_primary))
-                .child(title)
-        };
-
-        let body = |text: &'static str| {
-            div()
-                .text_sm()
-                .line_height(relative(1.6))
-                .text_color(color_to_hsla(text_secondary))
-                .child(text)
-        };
-
-        let code_panel = |content: &'static str| {
-            Code::from_spec(
-                CodeSpec::new()
-                    .with_language("css")
-                    .with_content(content)
-                    .with_copyable(false),
-                theme,
-            )
-        };
-
-        let role_card = |name: &'static str,
-                         description: &'static str,
-                         variables: &'static [(&'static str, &'static str)],
-                         components: &'static [&'static str]| {
-            let mut role = div()
-                .p(px(16.0))
-                .rounded(px(8.0))
-                .bg(color_to_hsla(elevated_bg))
-                .border_1()
-                .border_color(color_to_hsla(border_subtle))
-                .flex()
-                .flex_col()
-                .gap(px(10.0))
-                .child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(6.0))
-                        .child(
-                            div()
-                                .text_sm()
-                                .font_weight(FontWeight::SEMIBOLD)
-                                .text_color(color_to_hsla(text_primary))
-                                .child(name),
-                        )
-                        .child(body(description)),
-                );
-
-            if !components.is_empty() {
-                let mut component_row = div().flex().flex_wrap().gap(px(6.0));
-                for component in components {
-                    component_row = component_row.child(
-                        div()
-                            .px(px(8.0))
-                            .py(px(3.0))
-                            .rounded(px(999.0))
-                            .border_1()
-                            .border_color(color_to_hsla(border_subtle))
-                            .bg(color_to_hsla(panel_bg))
-                            .text_size(px(11.0))
-                            .text_color(color_to_hsla(text_secondary))
-                            .child((*component).to_string()),
-                    );
-                }
-                role = role.child(component_row);
-            }
-
-            for (variable, purpose) in variables {
-                role = role.child(
-                    div()
-                        .flex()
-                        .gap(px(12.0))
-                        .items_start()
-                        .child(
-                            div().min_w(px(280.0)).child(Code::from_spec(
-                                CodeSpec::new()
-                                    .with_content(*variable)
-                                    .with_inline(true)
-                                    .with_copyable(false),
-                                theme,
-                            )),
-                        )
-                        .child(
-                            div()
-                                .text_xs()
-                                .line_height(relative(1.5))
-                                .text_color(color_to_hsla(text_secondary))
-                                .child((*purpose).to_string()),
-                        ),
-                );
-            }
-
-            role
-        };
-
-        let step = |number: &'static str, title: &'static str, text: &'static str| {
-            div()
-                .flex()
-                .gap(px(12.0))
-                .items_start()
-                .child(
-                    div()
-                        .w(px(28.0))
-                        .h(px(28.0))
-                        .rounded(px(999.0))
-                        .bg(color_to_hsla(accent).opacity(0.16))
-                        .text_color(color_to_hsla(text_primary))
-                        .font_weight(FontWeight::BOLD)
-                        .flex()
-                        .items_center()
-                        .justify_center()
-                        .child(number),
-                )
-                .child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(4.0))
-                        .child(
-                            div()
-                                .text_sm()
-                                .font_weight(FontWeight::SEMIBOLD)
-                                .text_color(color_to_hsla(text_primary))
-                                .child(title),
-                        )
-                        .child(body(text)),
-                )
-        };
-
-        let rule = |title: &'static str, text: &'static str| {
-            div()
-                .p(px(14.0))
-                .rounded(px(8.0))
-                .bg(color_to_hsla(elevated_bg))
-                .border_1()
-                .border_color(color_to_hsla(border_subtle))
-                .flex()
-                .flex_col()
-                .gap(px(6.0))
-                .child(
-                    div()
-                        .text_sm()
-                        .font_weight(FontWeight::SEMIBOLD)
-                        .text_color(color_to_hsla(text_primary))
-                        .child(title),
-                )
-                .child(body(text))
-        };
-
-        div()
-            .w_full()
-            .h(available_h)
-            .child(
-                div()
-                    .id("treatments-section")
-                    .size_full()
-                    .flex()
-                    .flex_col()
-                    .gap(px(16.0))
-                    .p(px(24.0))
-                    .max_w(px(920.0))
-                    .child(
-                        div()
-                            .flex()
-                            .flex_col()
-                            .gap(px(8.0))
-                            .child(
-                                div()
-                                    .text_3xl()
-                                    .font_weight(FontWeight::BOLD)
-                                    .text_color(color_to_hsla(text_primary))
-                                    .child("Treatment system"),
-                            )
-                            .child(body(
-                                "Treatments sit between canonical semantic tokens and app-owned wrappers. They let downstream consumers apply cohesive visual branding across component families without redefining token meaning.",
-                            )),
-                    )
-                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
-                    .child(section_heading("Three-Layer Architecture"))
-                    .child(
-                        div()
-                            .flex()
-                            .gap(px(12.0))
-                            .flex_wrap()
-                            .child(card(
-                                "LAYER 1",
-                                "Canonical Semantic Tokens",
-                                "Typed, narrow values: color, spacing, radius. Never broadened to hold gradients or web-only effects.",
-                                false,
-                            ))
-                            .child(card(
-                                "LAYER 2",
-                                "Appearance Recipes & Treatment Roles",
-                                "Grouped visual overrides scoped to component families. They may include gradients, layered shadows, and other web-only effects.",
-                                true,
-                            ))
-                            .child(card(
-                                "LAYER 3",
-                                "App-Owned Wrappers & Composites",
-                                "Structural brand expression built by composing Poodle primitives without changing core token meaning.",
-                                false,
-                            )),
-                    )
-                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
-                    .child(section_heading("How Components Consume Treatments"))
-                    .child(body(
-                        "Components reference treatment variables using fallback chains. The treatment variable is tried first; if undefined, the semantic token value is used.",
-                    ))
-                    .child(code_panel(
-                        ".text-input {\n  background: var(\n    --poodle-treatment-interactive-subtle-fill,\n    var(--poodle-color-background-surface)\n  );\n}",
-                    ))
-                    .child(body(
-                        "This means components render with standard token values by default, and treatment values take precedence only when explicitly set. Components never need to know which specific treatment is active.",
-                    ))
-                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
-                    .child(section_heading("Treatment Roles"))
-                    .child(body(
-                        "Six family-level roles are defined. Components map these into local aliases rather than inventing per-component treatment vocabularies.",
-                    ))
-                    .child(role_card(
-                        "interactive",
-                        "General interactive surfaces such as secondary buttons, toggles, and menu triggers.",
-                        &[
-                            ("--poodle-treatment-interactive-radius", "Border radius"),
-                            ("--poodle-treatment-interactive-fill", "Resting background"),
-                            ("--poodle-treatment-interactive-fill-active", "Hover or active background"),
-                            ("--poodle-treatment-interactive-border", "Resting border color"),
-                            ("--poodle-treatment-interactive-border-active", "Hover or active border color"),
-                        ],
-                        &[
-                            "Button (secondary)",
-                            "IconButton (secondary)",
-                            "SplitButton",
-                            "ToggleGroup",
-                            "SegmentedControl",
-                        ],
-                    ))
-                    .child(role_card(
-                        "interactive-primary",
-                        "Primary action buttons and more prominent call-to-action surfaces.",
-                        &[
-                            ("--poodle-treatment-interactive-primary-radius", "Border radius"),
-                            ("--poodle-treatment-interactive-primary-fill", "Resting background"),
-                            ("--poodle-treatment-interactive-primary-fill-hover", "Hover background"),
-                            ("--poodle-treatment-interactive-primary-border", "Resting border color"),
-                            ("--poodle-treatment-interactive-primary-text", "Text and icon color"),
-                        ],
-                        &["Button (primary)", "SplitButton (primary)", "IconButton (primary)"],
-                    ))
-                    .child(role_card(
-                        "interactive-subtle",
-                        "Text inputs, selects, and search fields that keep their chrome restrained.",
-                        &[
-                            ("--poodle-treatment-interactive-subtle-radius", "Border radius"),
-                            ("--poodle-treatment-interactive-subtle-fill", "Resting background"),
-                            ("--poodle-treatment-interactive-subtle-fill-hover", "Hover background"),
-                            ("--poodle-treatment-interactive-subtle-fill-focus", "Focus background"),
-                            ("--poodle-treatment-interactive-subtle-border-focus", "Focus border"),
-                        ],
-                        &["TextInput", "Select"],
-                    ))
-                    .child(role_card(
-                        "surface",
-                        "Panel backgrounds, card frames, and general container surfaces.",
-                        &[
-                            ("--poodle-treatment-surface-radius", "Border radius"),
-                            ("--poodle-treatment-surface-fill", "Background"),
-                            ("--poodle-treatment-surface-border", "Border color"),
-                            ("--poodle-treatment-surface-shadow", "Shadow"),
-                            ("--poodle-treatment-surface-divider", "Internal divider color"),
-                        ],
-                        &["Surface", "Card", "MetricTile"],
-                    ))
-                    .child(role_card(
-                        "surface-elevated",
-                        "Elevated surfaces such as dialogs, drawers, popovers, and elevated cards.",
-                        &[
-                            ("--poodle-treatment-surface-elevated-radius", "Border radius"),
-                            ("--poodle-treatment-surface-elevated-fill", "Background"),
-                            ("--poodle-treatment-surface-elevated-border", "Border color"),
-                            ("--poodle-treatment-surface-elevated-shadow", "Shadow"),
-                        ],
-                        &["Dialog", "Drawer", "Popover", "Menu", "HoverCard", "Tooltip"],
-                    ))
-                    .child(role_card(
-                        "focus-ring",
-                        "Focus-state treatment for keyboard indicators. It currently uses accent token posture directly and leaves room for future divergence.",
-                        &[],
-                        &[],
-                    ))
-                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
-                    .child(section_heading("Applying a Treatment"))
-                    .child(body(
-                        "Set a data appearance-treatment attribute on a container element. All descendants inherit treatment values through the scoped override layer.",
-                    ))
-                    .child(code_panel(
-                        "<div data-appearance-treatment=\"brand-raised\">\n  <!-- All Poodle components inside inherit treatment values -->\n</div>",
-                    ))
-                    .child(body(
-                        "Then define scoped overrides for the treatment variables when that attribute is present.",
-                    ))
-                    .child(code_panel(
-                        "[data-appearance-treatment=\"brand-raised\"] {\n  --poodle-treatment-interactive-fill:\n    linear-gradient(180deg, rgba(255,255,255,0.14), transparent),\n    var(--poodle-color-background-elevated);\n  --poodle-treatment-interactive-primary-fill:\n    linear-gradient(180deg, rgba(255,255,255,0.24), transparent),\n    var(--poodle-color-accent-base);\n  --poodle-treatment-surface-fill:\n    linear-gradient(180deg, rgba(255,255,255,0.14), transparent),\n    var(--poodle-color-background-panel);\n  /* ... all other treatment variables */\n}",
-                    ))
-                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
-                    .child(section_heading("Creating a New Treatment"))
-                    .child(step(
-                        "1",
-                        "Define treatment variables",
-                        "Create a scoped override block that sets the treatment variables for every role you want to affect. Unset variables fall through to semantic-token defaults.",
-                    ))
-                    .child(step(
-                        "2",
-                        "Add theme-specific adjustments",
-                        "Treatments may need per-theme tweaks, especially where shadows and contrast behave differently on light and dark backgrounds.",
-                    ))
-                    .child(step(
-                        "3",
-                        "Register in the preview app",
-                        "Keep the treatment selectable in the preview controls so component review can exercise the same shell under different appearance recipes.",
-                    ))
-                    .child(div().h(px(1.0)).w_full().bg(color_to_hsla(border_subtle)))
-                    .child(section_heading("Rules"))
-                    .child(rule(
-                        "Token purity",
-                        "Semantic tokens must remain typed and narrow. Do not broaden a color token to hold a gradient.",
-                    ))
-                    .child(rule(
-                        "Family-level roles",
-                        "Prefer shared treatment roles over per-component treatment variables.",
-                    ))
-                    .child(rule(
-                        "Fallback chain",
-                        "Every treatment variable reference must include a semantic token fallback.",
-                    ))
-                    .child(rule(
-                        "Gradient rule",
-                        "Gradients are valid appearance treatments, not canonical colors.",
-                    ))
-                    .child(rule(
-                        "Safe override boundary",
-                        "Downstream apps may scope recipe overrides to subtrees. They must not redefine semantic token meaning.",
-                    )),
-            )
-    }
 
     /// Render a single specimen for a specific component by slug.
     fn render_component_specimen(&self, slug: &str, cx: &mut Context<Self>) -> Div {
@@ -1452,7 +1046,6 @@ fn parse_cli_args() -> CliArgs {
                             Some(Section::Components)
                         }
                         "tokens" => Some(Section::Tokens),
-                        "treatments" => Some(Section::Treatments),
                         _ => None,
                     };
                     i += 1;
@@ -2364,8 +1957,8 @@ fn main() {
                     let mut root = PreviewRoot::new();
 
                     // Apply CLI overrides — display controls
-                    // Set all values first, then rebuild once so density +
-                    // control-size + treatment are all layered correctly.
+                    // Set all values first, then rebuild once so density and
+                    // control size are layered correctly.
                     if let Some(preset) = cli.theme {
                         root.state.theme_preset = preset;
                     }

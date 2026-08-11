@@ -41,7 +41,7 @@
     "compositeSlugs": "superset (+6 additional composites)",
     "demoScreens": "identical (6 screens)",
     "tokenInspector": "equivalent (same semantic tokens displayed)",
-    "displayControls": "equivalent minus AppearanceTreatment toggle"
+    "displayControls": "equivalent"
   },
   "parityWithSvelte": {
     "componentCoverage": "100% — all 117 renderable components supported",

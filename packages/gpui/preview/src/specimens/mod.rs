@@ -131,6 +131,7 @@ mod media_browse_panel_specimen;
 mod media_picker_specimen;
 mod media_preview_specimen;
 mod media_thumbnail_specimen;
+mod message_center_specimen;
 mod meta_bar;
 mod metric_tile_specimen;
 mod model_picker_specimen;
@@ -603,6 +604,11 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             "ActionDiscoveryPanel",
             theme,
             action_discovery::render(state, cx),
+        ),
+        "message-center" => specimen_card(
+            "MessageCenter",
+            theme,
+            message_center_specimen::render(state, cx),
         ),
 
         // Fallback

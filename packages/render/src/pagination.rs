@@ -352,7 +352,10 @@ pub fn pagination_with_handlers(
 // ── helpers ────────────────────────────────────────────────────────────────────
 
 /// Chevron arrow nav button (prev / next). Square min-width, icon-only.
-#[expect(clippy::too_many_arguments, reason = "navigation button rendering keeps resolved token metrics explicit")]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "navigation button rendering keeps resolved token metrics explicit"
+)]
 fn arrow_button(
     icon: &str,
     is_disabled: bool,
@@ -419,7 +422,10 @@ fn arrow_button(
 
 /// Limit selector: "Show [n ▾] per page" — matches the old GPUI row anatomy.
 /// Fully wired hosts get the shared Select; static callers keep the closed box.
-#[expect(clippy::too_many_arguments, reason = "limit selector rendering keeps pagination state and metrics explicit")]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "limit selector rendering keeps pagination state and metrics explicit"
+)]
 fn build_limit_selector(
     spec: &PaginationSpec,
     theme: &dyn ThemeProvider,

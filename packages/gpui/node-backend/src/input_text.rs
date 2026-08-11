@@ -390,8 +390,7 @@ impl Element for InputText {
                     }
                     entry.0
                 });
-                let phase = now.duration_since(epoch).as_secs_f32()
-                    % BLINK_PERIOD.as_secs_f32();
+                let phase = now.duration_since(epoch).as_secs_f32() % BLINK_PERIOD.as_secs_f32();
                 blinking = true;
                 if phase < BLINK_PERIOD.as_secs_f32() / 2.0 {
                     caret = Some(fill(
@@ -440,12 +439,7 @@ impl Element for InputText {
         let line = prepaint.line.take().expect("prepaint shapes the line");
         let text_top = bounds.top() + (bounds.size.height - window.line_height()) / 2.0;
         let origin_x = prepaint.origin_x;
-        let _ = line.paint(
-            point(origin_x, text_top),
-            window.line_height(),
-            window,
-            cx,
-        );
+        let _ = line.paint(point(origin_x, text_top), window.line_height(), window, cx);
         if let Some(caret) = prepaint.caret.take() {
             window.paint_quad(caret);
         }
@@ -482,7 +476,10 @@ impl Element for InputText {
 }
 
 /// Convenience for the backend: build the element from a node's input kind.
-#[expect(clippy::too_many_arguments, reason = "the backend constructor mirrors the resolved input node contract")]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "the backend constructor mirrors the resolved input node contract"
+)]
 pub(crate) fn input_text(
     id: String,
     display: String,

@@ -229,6 +229,7 @@ export const allComponents: ComponentEntry[] = [
   entry("DockRegion", "workstation", "Collapsible dock container with tabs and drag-and-drop.", true),
   entry("Toolbar", "workstation", "Horizontal action bar with grouped controls.", true),
   entry("ActionDiscoveryPanel", "workstation", "Grouped action list with keyboard navigation.", true),
+  entry("MessageCenter", "workstation", "Popover archive for notifications and durable messages.", true),
   entry("DetailSection", "workstation", "Titled section for grouping detail content.", true),
   entry("DetailSectionGroup", "workstation", "Responsive layout group for multiple peer detail sections.", true),
   entry("DetailShell", "workstation", "Full detail page layout with header and sections.", true),

@@ -3,7 +3,7 @@
 Status: active
 Updated: 2026-07-10
 Depends on: `006-headless-core-and-machine-model.md`
-Supersedes: `005-treatment-system-and-recipe-variables.md` (treatment roles retired 2026-07-13; recipes are the single override surface)
+Supersedes: `005-treatment-system-and-recipe-variables.md` (legacy override layer retired 2026-07-13; Recipes are the single override surface)
 Promoted from: `docs/specs/026-appearance-recipes-and-downstream-override-strategy.md` (g11.005)
 
 ## What A Recipe Is

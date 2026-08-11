@@ -148,26 +148,25 @@ pub fn agent_subagent(
     actions.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
     actions.style.descriptor.layout.spacing.gap = rem_to_px(0.75);
 
-    let action =
-        |label: String, handler: Option<Arc<dyn Fn() + Send + Sync>>| {
-            let mut button = Node::button("");
-            button.a11y.label = Some(label.clone());
-            button.a11y.role = Some(NodeRole::Button);
-            button.style.descriptor.layout.direction = LayoutDirection::Row;
-            button.style.descriptor.background = Some(TRANSPARENT);
-            button.interaction.focusable = true;
+    let action = |label: String, handler: Option<Arc<dyn Fn() + Send + Sync>>| {
+        let mut button = Node::button("");
+        button.a11y.label = Some(label.clone());
+        button.a11y.role = Some(NodeRole::Button);
+        button.style.descriptor.layout.direction = LayoutDirection::Row;
+        button.style.descriptor.background = Some(TRANSPARENT);
+        button.interaction.focusable = true;
 
-            let mut text = Node::text(label);
-            text.style.text_size = Some(font_size);
-            text.style.descriptor.text_color = Some(meta_color);
-            let mut button = button.child(text);
+        let mut text = Node::text(label);
+        text.style.text_size = Some(font_size);
+        text.style.descriptor.text_color = Some(meta_color);
+        let mut button = button.child(text);
 
-            if let Some(handler) = handler {
-                button.interaction.on_activate = Some(Arc::new(move || handler()));
-            }
+        if let Some(handler) = handler {
+            button.interaction.on_activate = Some(Arc::new(move || handler()));
+        }
 
-            button
-        };
+        button
+    };
 
     // The disclosure is pointless without anything to reveal.
     if spec.shows_toggle() {
@@ -177,11 +176,14 @@ pub fn agent_subagent(
         } else {
             spec.expand_label.clone()
         };
-        let toggle = action(toggle_label, handlers.on_toggle.as_ref().map(|handler| {
-            let handler = Arc::clone(handler);
-            let next = next;
-            Arc::new(move || handler(next)) as Arc<dyn Fn() + Send + Sync>
-        }));
+        let toggle = action(
+            toggle_label,
+            handlers.on_toggle.as_ref().map(|handler| {
+                let handler = Arc::clone(handler);
+                let next = next;
+                Arc::new(move || handler(next)) as Arc<dyn Fn() + Send + Sync>
+            }),
+        );
         actions = actions.child(toggle);
     }
 

@@ -45,7 +45,7 @@ theme provider, slots, and handlers into a `poodle-node` tree. GPUI and
 Jetstream backends interpret that tree using runtime-native layout, drawing,
 input, text, focus, and lifecycle facilities.
 
-Shared composition and treatment belong in `poodle-render`. A backend-specific
+Shared composition and appearance belong in `poodle-render`. A backend-specific
 branch is justified only by a runtime capability or limitation, and any
 observable difference must be recorded in the contract or parity register.
 

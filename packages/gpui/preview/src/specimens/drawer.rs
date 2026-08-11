@@ -21,10 +21,7 @@ fn set_toggle_click(
     })
 }
 
-fn set_toggle_open_change(
-    state: &AppState,
-    key: &'static str,
-) -> Arc<dyn Fn(bool) + Send + Sync> {
+fn set_toggle_open_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(bool) + Send + Sync> {
     let events = state.node_events.clone();
     Arc::new(move |value| {
         events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
@@ -150,7 +147,11 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("drawer-cancel")
-                        .on_click(set_toggle_click(state, "drawer-right-open", false)),
+                        .on_click(set_toggle_click(
+                            state,
+                            "drawer-right-open",
+                            false,
+                        )),
                     )
                     .child(
                         Button::from_spec(ButtonSpec::new().with_label("Save"), theme)
@@ -227,7 +228,11 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_id("drawer-bottom-cancel")
-                        .on_click(set_toggle_click(state, "drawer-bottom-open", false)),
+                        .on_click(set_toggle_click(
+                            state,
+                            "drawer-bottom-open",
+                            false,
+                        )),
                     )
                     .child(
                         Button::from_spec(ButtonSpec::new().with_label("Apply"), theme)

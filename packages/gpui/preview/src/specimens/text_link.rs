@@ -1,5 +1,5 @@
-use crate::style_bridge::color_to_hsla;
 use crate::node_compat::TextLink;
+use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;

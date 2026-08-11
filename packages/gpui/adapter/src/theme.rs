@@ -72,8 +72,11 @@ impl GpuiThemeProvider {
     /// Recompute the contrast pivot from the active theme's canvas color.
     fn recompute_contrast_anchor(&mut self) {
         let canvas = self.resolve_color_value_raw("color.background.canvas");
-        self.contrast_anchor_l =
-            poodle_headless::color::oklab_lightness(canvas.0 as f64, canvas.1 as f64, canvas.2 as f64);
+        self.contrast_anchor_l = poodle_headless::color::oklab_lightness(
+            canvas.0 as f64,
+            canvas.1 as f64,
+            canvas.2 as f64,
+        );
     }
 
     /// Apply density overrides on top of the current theme.
@@ -252,7 +255,9 @@ impl GpuiThemeProvider {
             "size.icon.md" => typed::semantic::SIZE_ICON_MD.as_f32(),
             "size.icon.lg" => typed::semantic::SIZE_ICON_LG.as_f32(),
             "size.panel.header" => typed::semantic::SIZE_PANEL_HEADER.as_f32(),
-            "size.list.grid.minItemWidth" => typed::semantic::SIZE_LIST_GRID_MIN_ITEM_WIDTH.as_f32(),
+            "size.list.grid.minItemWidth" => {
+                typed::semantic::SIZE_LIST_GRID_MIN_ITEM_WIDTH.as_f32()
+            }
             "icon.size.default" => typed::semantic::ICON_SIZE_DEFAULT.as_f32(),
             // Typography sizes
             "typography.body.size" => typed::semantic::TYPOGRAPHY_BODY_SIZE.as_f32(),
@@ -441,18 +446,33 @@ mod contrast_tests {
         let surface = theme.resolve_color_value("color.background.surface");
         let full = theme.clone().with_contrast(1.0);
         let literal = full.resolve_color_value("color.background.surface");
-        assert!((literal.0 - 21.0 / 255.0).abs() < 0.002, "k=1 is the literal");
+        assert!(
+            (literal.0 - 21.0 / 255.0).abs() < 0.002,
+            "k=1 is the literal"
+        );
         assert!(surface.0 < literal.0, "toned-down surface is darker");
         // reference value from the shared conformance math
-        assert!((surface.0 - 17.073 / 255.0).abs() < 0.002, "surface r {}", surface.0);
-        assert!((surface.2 - 22.943 / 255.0).abs() < 0.002, "surface b {}", surface.2);
+        assert!(
+            (surface.0 - 17.073 / 255.0).abs() < 0.002,
+            "surface r {}",
+            surface.0
+        );
+        assert!(
+            (surface.2 - 22.943 / 255.0).abs() < 0.002,
+            "surface b {}",
+            surface.2
+        );
     }
 
     #[test]
     fn accent_and_text_are_untouched() {
         let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
         let full = theme.clone().with_contrast(1.0);
-        for token in ["color.accent.base", "color.text.primary", "color.background.overlay"] {
+        for token in [
+            "color.accent.base",
+            "color.text.primary",
+            "color.background.overlay",
+        ] {
             let a = theme.resolve_color_value(token);
             let b = full.resolve_color_value(token);
             assert_eq!(a.0, b.0, "{token}");

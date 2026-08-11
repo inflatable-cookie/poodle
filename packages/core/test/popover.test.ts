@@ -85,6 +85,14 @@ describe("popoverParts", () => {
     expect(trigger["aria-disabled"]).toBe("true");
   });
 
+  test("interactive child mode delegates trigger semantics", () => {
+    const trigger = popoverParts("open", ctx(), { ...props, triggerIsInteractive: true }).trigger;
+    expect(trigger["role"]).toBeUndefined();
+    expect(trigger["tabindex"]).toBeUndefined();
+    expect(trigger["aria-expanded"]).toBeUndefined();
+    expect(trigger["aria-controls"]).toBeUndefined();
+  });
+
   test("surface tabindex follows initialFocus", () => {
     expect(popoverParts("open", ctx({ initialFocus: "content" }), props).surface["tabindex"]).toBe(0);
     expect(popoverParts("open", ctx(), props).surface["tabindex"]).toBe(-1);

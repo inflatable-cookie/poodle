@@ -92,8 +92,7 @@ pub(crate) fn render_meta_item(theme: &GpuiThemeProvider) -> Div {
         .child(specimen_card(
             "Labeled",
             theme,
-            MetaItem::from_spec(MetaItemSpec::new().with_label("Owner"), theme)
-                .with_value("Clay"),
+            MetaItem::from_spec(MetaItemSpec::new().with_label("Owner"), theme).with_value("Clay"),
         ))
         .child(specimen_card(
             "Rich Value",
@@ -108,7 +107,7 @@ pub(crate) fn render_meta_item(theme: &GpuiThemeProvider) -> Div {
                         theme,
                     ))
                     .child("Ready for review"),
-                ),
+            ),
         ))
         .child(specimen_card(
             "Inherit typography",

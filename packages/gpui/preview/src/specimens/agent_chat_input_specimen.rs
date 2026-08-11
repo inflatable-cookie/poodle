@@ -185,9 +185,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 theme,
             )
             .toolbar_child(demo_picker(theme, ControlSize::Md))
-            .footer_child(
-                toolbar_text(theme, "Current checkout"),
-            )
+            .footer_child(toolbar_text(theme, "Current checkout"))
             .footer_child(toolbar_text(theme, "main"))
             .into_any_element(),
         ))

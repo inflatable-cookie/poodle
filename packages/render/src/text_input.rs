@@ -33,7 +33,6 @@ use crate::spinner::spinner;
 /// surfaces use.
 const SELECTION_ALPHA: f32 = 0.30;
 
-
 pub fn text_input(
     spec: &TextInputSpec,
     theme: &dyn ThemeProvider,
@@ -211,8 +210,9 @@ pub fn text_input_with_handlers(
         s.min_width = Some(0.0);
     }
     let mut value_caret = None;
-    let mut value_select: Option<Arc<dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync>> =
-        None;
+    let mut value_select: Option<
+        Arc<dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync>,
+    > = None;
     if !spec.is_disabled {
         let caret_color = if spec.is_read_only {
             // Read-only fields still select and still show where the selection
@@ -235,20 +235,22 @@ pub fn text_input_with_handlers(
             // resolving it needs to know what a word is, which is a text rule
             // and therefore shared, not per-backend.
             let text = spec.current_value().to_string();
-            let handler: Arc<dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync> = Arc::new(
-                move |start: usize, end: usize, granularity: poodle_node::SelectGranularity| {
-                    let (start, end) = match granularity {
-                        poodle_node::SelectGranularity::Character => (start, end),
-                        poodle_node::SelectGranularity::Word => {
-                            let (a, _) = poodle_headless::text_input::word_range_at(&text, start);
-                            let (_, b) = poodle_headless::text_input::word_range_at(&text, end);
-                            (a, b)
-                        }
-                        poodle_node::SelectGranularity::Line => (0, text.chars().count()),
-                    };
-                    on_selection_change(start, end);
-                },
-            );
+            let handler: Arc<dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync> =
+                Arc::new(
+                    move |start: usize, end: usize, granularity: poodle_node::SelectGranularity| {
+                        let (start, end) = match granularity {
+                            poodle_node::SelectGranularity::Character => (start, end),
+                            poodle_node::SelectGranularity::Word => {
+                                let (a, _) =
+                                    poodle_headless::text_input::word_range_at(&text, start);
+                                let (_, b) = poodle_headless::text_input::word_range_at(&text, end);
+                                (a, b)
+                            }
+                            poodle_node::SelectGranularity::Line => (0, text.chars().count()),
+                        };
+                        on_selection_change(start, end);
+                    },
+                );
             value.interaction.on_select_range = Some(Arc::clone(&handler));
             value_select = Some(handler);
         }
@@ -365,9 +367,9 @@ pub fn text_input_with_handlers(
                 anchor: start,
                 head: end,
             };
-            let Some(outcome) =
-                poodle_headless::text_input::edit_transition(&value, state, key, mods.shift, mods.accel)
-            else {
+            let Some(outcome) = poodle_headless::text_input::edit_transition(
+                &value, state, key, mods.shift, mods.accel,
+            ) else {
                 return;
             };
             if let Some(next) = outcome.value {

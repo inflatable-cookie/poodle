@@ -3159,6 +3159,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "dismissOnOutsideInteract", type: "boolean", default: "true", description: "Whether clicking outside dismisses the popover." },
       { name: "initialFocus", type: "PopoverInitialFocus", default: '"first-focusable"', description: "Which element receives focus when the popover opens." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the popover." },
+      { name: "triggerIsInteractive", type: "boolean", default: "false", description: "Delegates trigger semantics and keyboard activation to an interactive child." },
     ],
     slots: [
       { name: "trigger", description: "Trigger element that toggles the popover." },
@@ -3171,7 +3172,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { Popover, Button } from "@inflatable-cookie/poodle-svelte";
 </script>
 
-<Popover placement="bottom-start" onOpenChange={(open) => console.log(open)}>
+<Popover placement="bottom-start" triggerIsInteractive onOpenChange={(open) => console.log(open)}>
   {#snippet trigger()}
     <Button>Open Popover</Button>
   {/snippet}
@@ -4680,6 +4681,44 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 </script>
 
 <TokenInput bind:values={tags} placeholder="Type a tag..." />`,
+  },
+
+  "message-center": {
+    props: [
+      { name: "items", type: "MessageCenterItem[]", default: "[]", description: "Caller-owned durable message archive." },
+      { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
+      { name: "defaultOpen", type: "boolean", default: "false", description: "Initial uncontrolled open state." },
+      { name: "title", type: "string", default: '"Notifications"', description: "Surface heading and default accessible label." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible surface label override." },
+      { name: "triggerLabel", type: "string | null", default: "null", description: "Trigger label override; otherwise includes unread count." },
+      { name: "triggerIcon", type: "IconProp", default: '"bell"', description: "IconButton trigger glyph." },
+      { name: "placement", type: "OverlayPlacement", default: '"bottom-end"', description: "Popover placement hint." },
+      { name: "emptyTitle", type: "string", default: '"No messages"', description: "Empty-state heading." },
+      { name: "emptyMessage", type: "string", default: '"New messages will appear here."', description: "Empty-state copy." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit semantic size override." },
+      { name: "sizeRole", type: "SemanticControlSizeRole", default: '"chrome"', description: "Semantic size role used when inheriting presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override." },
+      { name: "onOpenChange", type: "((open: boolean) => void) | null", default: "null", description: "Open-state request callback." },
+      { name: "onItemSelect", type: "((id: string) => void) | null", default: "null", description: "Makes message bodies actionable." },
+      { name: "onReadChange", type: "((id: string, read: boolean) => void) | null", default: "null", description: "Requests one item's next read state." },
+      { name: "onRemove", type: "((id: string) => void) | null", default: "null", description: "Requests item removal." },
+      { name: "onMarkAllRead", type: "(() => void) | null", default: "null", description: "Adds the mark-all-read header action." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { MessageCenter, type MessageCenterItem } from "@inflatable-cookie/poodle-svelte";
+
+  let items: MessageCenterItem[] = [
+    { id: "render", title: "Render complete", message: "Preview is ready.", read: false, tone: "success" },
+  ];
+</script>
+
+<MessageCenter
+  {items}
+  onReadChange={(id, read) => items = items.map((item) => item.id === id ? { ...item, read } : item)}
+  onRemove={(id) => items = items.filter((item) => item.id !== id)}
+/>`,
   },
 
   "action-discovery-panel": {

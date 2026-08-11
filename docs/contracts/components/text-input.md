@@ -376,13 +376,13 @@ cannot drift between targets.
 
 ## 8. Token Usage — Exact Values
 
-### CSS Custom Properties (treatment system)
+### CSS Custom Properties (Recipe resolution)
 
 | Var | Default Value | Focus Value |
 |-----|---------------|-------------|
-| `--poodle-text-input-radius` | `var(--poodle-treatment-interactive-subtle-radius, var(--poodle-radius-control))` | — |
-| `--poodle-text-input-fill` | `var(--poodle-treatment-interactive-subtle-fill, var(--poodle-color-background-surface))` | `var(--poodle-text-input-fill-focus)` |
-| `--poodle-text-input-border` | `var(--poodle-treatment-interactive-subtle-border, var(--poodle-color-border-default))` | `var(--poodle-text-input-border-focus)` |
+| `--poodle-text-input-radius` | `var(--poodle-radius-control)` | — |
+| `--poodle-text-input-fill` | `var(--poodle-recipe-text-input-fill, var(--poodle-color-background-surface))` | `var(--poodle-text-input-fill-focus)` |
+| `--poodle-text-input-border` | `var(--poodle-recipe-text-input-border, var(--poodle-color-border-default))` | `var(--poodle-text-input-border-focus)` |
 | `--poodle-text-input-shadow` | (none by default) | `var(--poodle-text-input-shadow-focus)` fallback `0 0 0 var(--poodle-border-width-focus) color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)` |
 
 ### Root `.text-input`
@@ -572,8 +572,8 @@ The input control reserves inline padding for leading/trailing adornments so tex
 ## 9. Svelte Notes
 
 - Uses native `<input>` element inside a styled `<div>` wrapper
-- CSS custom properties (`--poodle-text-input-*`) enable treatment-level theming
-- Treatment token chain: `--poodle-treatment-interactive-subtle-radius` falls back
+- CSS custom properties (`--poodle-text-input-*`) resolve component Recipe hooks
+- radius resolves directly from `--poodle-radius-control`
   to `--poodle-radius-control`
 - `data-validation-state` data attribute drives validation border-color via CSS
   attribute selectors
@@ -601,7 +601,7 @@ The input control reserves inline padding for leading/trailing adornments so tex
 - prefix/suffix affixes should be rendered as static text with separator
   treatment but excluded from the editable value
 - character count must be computed from the same value source as the input
-- treatment radius fallback: use treatment token if set, else radius-control
+- radius resolves directly from `--poodle-radius-control`
 
 ## 11a. Jetstream Notes
 
@@ -638,7 +638,7 @@ The input control reserves inline padding for leading/trailing adornments so tex
 
 - [ ] native browser input internals vs GPUI text system internals stay internal
 - [ ] transition timing is platform-owned
-- [ ] treatment token fallback chain (CSS var fallback vs Rust conditional)
+- [ ] Recipe hook fallback chain (CSS custom property vs Rust spec/token override)
 
 ## 12. Known Deltas
 
@@ -647,7 +647,7 @@ The input control reserves inline padding for leading/trailing adornments so tex
 | Jetstream raises no typing or key events | the runtime delivers pointer events only, so `onValueChange`, `onKeyDown`, `onSubmit` and `onCancel` have no route; the host owns the editor and feeds the value back through the spec | accepted, tracked | g12.017 |
 | native text-caret visuals may differ | platform-native text rendering is acceptable | allowed | keep editing semantics strict |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
-| treatment radius fallback chain | CSS var fallback vs Rust conditional | allowed | same visual result required |
+| Recipe fallback chain | CSS custom property vs Rust spec/token override | allowed | same visual result required |
 | affix separator border color | GPUI must achieve same visual result by any means | allowed | verify visual parity (separator is `border-default` solid) |
 
 ## 13. Specimen Definitions

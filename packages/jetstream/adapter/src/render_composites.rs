@@ -10,10 +10,10 @@ use poodle_specs::{
     DockRegionSpec, EditableListSpec, EmbedInputSpec, EmbedPreviewSpec, EmptyStateSpec,
     FilterToolbarSpec, FormShellSpec, InlineRemediationSpec, ListContainerSpec, LogListSpec,
     MarkdownEditorSpec, MediaBrowsePanelSpec, MediaPickerSpec, MediaPreviewSpec,
-    MediaThumbnailSpec, MetricTileSpec, PageHeaderSpec, PageLoadingSpec, PaginationSummarySpec,
-    PickerShellSpec, RelationPickerSpec, RemediationBannerSpec, SelectionSummarySpec,
-    ShellStatusBarSpec, SidebarNavSpec, SplitViewSpec, StateTileSpec, ToastHostSpec,
-    ToastStackSpec, ValidationSummarySpec, VideoPlayerSpec,
+    MediaThumbnailSpec, MessageCenterSpec, MetricTileSpec, PageHeaderSpec, PageLoadingSpec,
+    PaginationSummarySpec, PickerShellSpec, RelationPickerSpec, RemediationBannerSpec,
+    SelectionSummarySpec, ShellStatusBarSpec, SidebarNavSpec, SplitViewSpec, StateTileSpec,
+    ToastHostSpec, ToastStackSpec, ValidationSummarySpec, VideoPlayerSpec,
 };
 use poodle_specs::{
     BreadcrumbsSpec, FilterBuilderSpec, ListCardSpec, NavCardSpec, OrderBySpec, ThemeSelectSpec,
@@ -584,6 +584,24 @@ impl RenderComponent<ActionDiscoveryPanelSpec> for JetstreamAdapter {
     }
 }
 
+impl RenderComponent<MessageCenterSpec> for JetstreamAdapter {
+    type Target = JetstreamTarget;
+    fn render(
+        &self,
+        _spec: &MessageCenterSpec,
+        style: &StyleDescriptor,
+        _theme: &dyn ThemeProvider,
+    ) -> JetstreamNodeHandle {
+        let mapped = map_style(style);
+        JetstreamNodeHandle::new(
+            "message-center",
+            "MessageCenterSpec",
+            WidgetKind::Panel,
+            mapped,
+        )
+    }
+}
+
 impl RenderComponent<AppHeaderSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(
@@ -1047,6 +1065,14 @@ mod tests {
             a().render(&ActionDiscoveryPanelSpec::default(), &s(), &t())
                 .spec_type,
             "ActionDiscoveryPanelSpec"
+        );
+    }
+    #[test]
+    fn message_center() {
+        assert_eq!(
+            a().render(&MessageCenterSpec::default(), &s(), &t())
+                .spec_type,
+            "MessageCenterSpec"
         );
     }
     #[test]

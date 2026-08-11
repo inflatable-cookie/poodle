@@ -663,8 +663,8 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
     kind: "component",
     status: "previewed",
     sectionIds: ["notification-suite"],
-    note: "Notification suite exercises transient toast stack posture alongside banner remediation.",
-    exportNames: ["ToastStack"],
+    note: "Notification suite covers transient toast delivery and durable message-centre exploration.",
+    exportNames: ["MessageCenter", "ToastStack"],
   },
   {
     packageName: "@inflatable-cookie/poodle-svelte",

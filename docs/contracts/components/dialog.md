@@ -254,11 +254,11 @@ and Drawer.
 | `max-height` | `min(80vh, 42rem)` |
 | `overflow` | `auto` |
 | `padding` | `var(--poodle-space-panel-y) var(--poodle-space-panel-x)` |
-| `border` | `0.0625rem solid var(--poodle-treatment-surface-elevated-border, color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent))` |
-| `border-radius` | `var(--poodle-treatment-surface-elevated-radius, var(--poodle-radius-surface))` |
-| `background` | `var(--poodle-treatment-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
-| `--poodle-surface` | `var(--poodle-treatment-surface-elevated-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
-| `box-shadow` | `var(--poodle-treatment-surface-elevated-shadow, var(--poodle-elevation-dialog))` |
+| `border` | `0.0625rem solid color-mix(in srgb, var(--poodle-color-border-default) 78%, transparent)` |
+| `border-radius` | `var(--poodle-radius-surface)` |
+| `background` | `var(--poodle-recipe-dialog-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
+| `--poodle-surface` | `var(--poodle-recipe-dialog-surface-fill, color-mix(in srgb, var(--poodle-color-background-elevated) 98%, var(--poodle-color-background-panel)))` |
+| `box-shadow` | `var(--poodle-recipe-dialog-surface-shadow, var(--poodle-elevation-dialog))` |
 
 ### Surface bare modifier `.dialog__surface--bare`
 
@@ -425,10 +425,10 @@ The close button renders an `IconButton` with `icon="x"`, `variant="ghost"`, `si
 - [ ] all five sizes visually match per size table
 - [ ] all five width presets match (sm/md/lg/xl/full)
 - [ ] backdrop overlay color matches (background-overlay)
-- [ ] surface border uses treatment-surface-elevated-border fallback matches
-- [ ] surface background uses treatment-surface-elevated-fill fallback matches
-- [ ] surface elevation shadow uses treatment-surface-elevated-shadow fallback matches
-- [ ] surface border-radius uses treatment-surface-elevated-radius fallback matches
+- [ ] surface border semantic-token formula matches
+- [ ] surface background Recipe hook and semantic fallback match
+- [ ] surface elevation Recipe hook and elevation fallback match
+- [ ] surface border-radius uses `radius-surface`
 - [ ] surface padding uses space-panel-y and space-panel-x
 - [ ] surface max-height constraint (min(80vh, 42rem)) matches
 - [ ] header gap (0.375rem) and margin-bottom (space-stack-md) match
@@ -459,7 +459,7 @@ The close button renders an `IconButton` with `icon="x"`, `variant="ghost"`, `si
 | CSS color-mix vs GPUI color blending | different color systems per platform | allowed | same visual result required |
 | backdrop as button vs div with click handler | semantic choice for click handling | allowed | backdrop dismissal behavior must match |
 | getFocusableElements utility internals | focus detection mechanism varies | allowed | Tab cycling behavior must match |
-| treatment-surface-elevated tokens with fallbacks | GPUI may resolve tokens differently | allowed | visual result must match reference |
+| Recipe hooks and semantic fallbacks | GPUI may resolve overrides differently | allowed | visual result must match reference |
 
 ## 13. Specimen Definitions
 

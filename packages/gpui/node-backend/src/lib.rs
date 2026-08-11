@@ -27,7 +27,7 @@ use std::sync::atomic::{AtomicU64, Ordering, AtomicUsize};
 use std::time::Duration;
 
 use gpui::{
-    div, img, linear_color_stop, linear_gradient, point, px, relative, svg, AnyElement, App,
+    deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, svg, AnyElement, App,
     AppContext, ClickEvent, CursorStyle, Div, ElementId, Hsla, InteractiveElement, IntoElement,
     KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent, ParentElement,
     SharedString, Stateful, StatefulInteractiveElement,
@@ -345,7 +345,7 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
 /// element state (click, drag, focus) forces a stateful div — gpui 0.2.2
 /// gates its listener model behind `Stateful`.
 fn build_box(node: &Node, base: Div) -> AnyElement {
-    if needs_state(node) {
+    let element = if needs_state(node) {
         let el = base.id(element_id(node));
         let el = apply_shared(el, node);
         let el = apply_listeners(el, node);
@@ -353,6 +353,11 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
     } else {
         let el = apply_shared(base, node);
         maybe_animated(el, node)
+    };
+    if node.style.overlay {
+        deferred(element).with_priority(1).into_any_element()
+    } else {
+        element
     }
 }
 

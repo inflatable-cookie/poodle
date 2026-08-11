@@ -70,7 +70,7 @@ pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHan
     let icon_muted = theme.resolve_color("color.icon.muted");
     let panel_fill = theme.resolve_color(spec.overlay_fill_token());
 
-    // Trigger treatment (the old GPUI tier's interactive-subtle recipe):
+    // Trigger appearance follows the shared Select recipe defaults:
     // surface/border at reduced alpha over the page, not the full-strength
     // tokens.
     let fill = with_alpha(surface, surface.3 * 0.82);
@@ -171,7 +171,10 @@ pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHan
     root
 }
 
-#[expect(clippy::too_many_arguments, reason = "trigger rendering keeps resolved state and token metrics explicit")]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "trigger rendering keeps resolved state and token metrics explicit"
+)]
 fn build_trigger(
     display_text: &str,
     display_color: ColorValue,
@@ -277,7 +280,10 @@ fn build_trigger(
     el
 }
 
-#[expect(clippy::too_many_arguments, reason = "panel rendering keeps resolved state and token metrics explicit")]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "panel rendering keeps resolved state and token metrics explicit"
+)]
 fn build_panel(
     spec: &SelectSpec,
     theme: &dyn ThemeProvider,

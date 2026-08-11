@@ -34,13 +34,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     } else {
                         format!("{h:02}:{m:02}")
                     };
-                    queue
-                        .lock()
-                        .unwrap()
-                        .push(NodeSpecimenEvent::SetText {
-                            key: $key.to_string(),
-                            value,
-                        });
+                    queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                        key: $key.to_string(),
+                        value,
+                    });
                 },
             ))
         }};
@@ -66,19 +63,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex()
                         .flex_col()
                         .gap(px(4.0))
-                        .child(
-                            live_duration!(
-                                DurationInput::from_spec(
-                                    DurationInputSpec::new()
-                                        .with_value(stored("duration-full", "01:30:00"))
-                                        .with_show_seconds(true),
-                                    theme,
-                                )
-                                .with_id("duration-full"),
-                                "duration-full",
-                                true
-                            ),
-                        )
+                        .child(live_duration!(
+                            DurationInput::from_spec(
+                                DurationInputSpec::new()
+                                    .with_value(stored("duration-full", "01:30:00"))
+                                    .with_show_seconds(true),
+                                theme,
+                            )
+                            .with_id("duration-full"),
+                            "duration-full",
+                            true
+                        ))
                         .child(
                             div()
                                 .text_xs()
@@ -97,19 +92,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Hours and minutes only"),
                     theme,
                 ))
-                .child(
-                    live_duration!(
-                        DurationInput::from_spec(
-                            DurationInputSpec::new()
-                                .with_value(stored("duration-hm", "02:45"))
-                                .with_show_seconds(false),
-                            theme,
-                        )
-                        .with_id("duration-hm"),
-                        "duration-hm",
-                        false
-                    ),
-                ),
+                .child(live_duration!(
+                    DurationInput::from_spec(
+                        DurationInputSpec::new()
+                            .with_value(stored("duration-hm", "02:45"))
+                            .with_show_seconds(false),
+                        theme,
+                    )
+                    .with_id("duration-hm"),
+                    "duration-hm",
+                    false
+                )),
         )
         // --- Empty / zero (default zero display) ---
         .child(

@@ -1,7 +1,7 @@
 //! Application state for the preview app.
 //!
 //! Mirrors the current Svelte preview shell: theme, density, control size,
-//! appearance treatment, component search, active section, and component selection.
+//! component search, active section, and component selection.
 
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{reorder_nodes, DropPosition, TreeNode};
@@ -39,7 +39,6 @@ fn remove_node(nodes: Vec<TreeNode>, value: &str) -> Vec<TreeNode> {
 pub enum Section {
     Components,
     Tokens,
-    Treatments,
 }
 
 impl Section {
@@ -47,7 +46,6 @@ impl Section {
         match self {
             Section::Components => "Components",
             Section::Tokens => "Tokens",
-            Section::Treatments => "Treatments",
         }
     }
 }
@@ -304,6 +302,9 @@ impl SpecimenState {
         toggles.insert("accordion-multi-keyboard-shortcuts".to_string(), true);
         // IconButton pin default
         toggles.insert("icon-btn-pinned".to_string(), true);
+        // Keep the MessageCenter surface visible in visual captures; the
+        // trigger can still close and reopen it through the host event queue.
+        toggles.insert("message-center-open".to_string(), true);
         Self {
             toggles,
             selections: HashMap::new(),

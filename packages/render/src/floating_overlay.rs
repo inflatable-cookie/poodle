@@ -6,7 +6,7 @@
 //! of flow and positioned using `anchor_h` / `anchor_w` estimates supplied by
 //! the caller.
 
-use poodle_node::{LayoutDirection, Node, NodePosition};
+use poodle_node::{LayoutDirection, LayoutSizing, Node, NodePosition};
 use poodle_specs::OverlayPlacement;
 
 /// Gap between anchor and floating surface (px).
@@ -29,8 +29,13 @@ pub fn floating_overlay(
     let mut wrapper = Node::container();
     // Explicit Row (see switch.rs).
     wrapper.style.descriptor.layout.direction = LayoutDirection::Row;
+    // A fit-sized GPUI div stretches across a column parent's cross axis.
+    // Pin this box to the supplied anchor estimate so end placements resolve
+    // against the trigger, not the surrounding specimen card.
+    wrapper.style.descriptor.layout.width = LayoutSizing::Fixed(anchor_w);
+    wrapper.style.descriptor.layout.height = LayoutSizing::Fixed(anchor_h);
     wrapper.position = NodePosition::Relative;
-    wrapper.style.flex_shrink_zero = true;
+    wrapper.style.flex_none = true;
     let mut wrapper = wrapper.child(anchor);
 
     if let Some(surface_el) = surface {
@@ -99,4 +104,38 @@ pub fn floating_overlay(
     }
 
     wrapper
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn wrapper_is_pinned_to_the_anchor_for_end_placement() {
+        let node = floating_overlay(
+            Node::container(),
+            Some(Node::container()),
+            OverlayPlacement::BottomEnd,
+            28.0,
+            28.0,
+        );
+
+        assert_eq!(
+            node.style.descriptor.layout.width,
+            LayoutSizing::Fixed(28.0)
+        );
+        assert_eq!(
+            node.style.descriptor.layout.height,
+            LayoutSizing::Fixed(28.0)
+        );
+        assert!(node.style.flex_none);
+        assert!(matches!(
+            node.children[1].position,
+            NodePosition::Absolute {
+                top: Some(32.0),
+                right: Some(0.0),
+                ..
+            }
+        ));
+    }
 }

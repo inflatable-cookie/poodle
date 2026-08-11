@@ -25,6 +25,7 @@
     initialFocus?: PopoverInitialFocus;
     ariaLabel?: string | null;
     block?: boolean;
+    triggerIsInteractive?: boolean;
     disabled?: boolean;
     surfaceWidth?: "content" | "trigger";
     surfaceMinWidth?: string | null;
@@ -44,6 +45,7 @@
     initialFocus = "first-focusable",
     ariaLabel = null,
     block = false,
+    triggerIsInteractive = false,
     disabled = false,
     surfaceWidth = "content",
     surfaceMinWidth = null,
@@ -111,6 +113,7 @@
       surfaceId: popoverId,
       ariaLabel,
       block,
+      triggerIsInteractive,
       placement: resolvedPlacement,
       surfaceWidth,
     }),
@@ -164,7 +167,7 @@
     {...parts.trigger}
     class="poodle-popover__trigger"
     onclick={() => send({ type: "TOGGLE" })}
-    onkeydown={(event) => {
+    onkeydown={triggerIsInteractive ? undefined : (event) => {
       if (disabled) {
         return;
       }

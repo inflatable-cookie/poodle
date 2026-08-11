@@ -125,19 +125,17 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         &ListGridSpec::new().with_min_item_width_em(16.0),
         theme,
         Some(empty_header),
-        vec![
-            div()
-                .flex_row()
-                .items_center()
-                .justify_center()
-                .pt(resolve_px(theme, "space.stack.lg"))
-                .pb(resolve_px(theme, "space.stack.lg"))
-                .child(js_text(
-                    &TextSpec::new("No items yet \u{2014} add one to populate the grid.")
-                        .with_tone(TextTone::Secondary),
-                    theme,
-                )),
-        ],
+        vec![div()
+            .flex_row()
+            .items_center()
+            .justify_center()
+            .pt(resolve_px(theme, "space.stack.lg"))
+            .pb(resolve_px(theme, "space.stack.lg"))
+            .child(js_text(
+                &TextSpec::new("No items yet \u{2014} add one to populate the grid.")
+                    .with_tone(TextTone::Secondary),
+                theme,
+            ))],
     );
 
     div()

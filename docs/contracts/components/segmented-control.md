@@ -253,7 +253,7 @@ Native radio inputs provide keyboard and focus behavior.
   control size
 - Label styling is driven by adjacent sibling selectors (`:checked +`,
   `:focus-visible +`, `:disabled +`)
-- Treatment token: uses `--poodle-radius-control` directly
+- Border radius uses `--poodle-radius-control` directly.
 
 ## 10. GPUI Notes
 

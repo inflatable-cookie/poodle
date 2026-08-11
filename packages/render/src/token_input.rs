@@ -41,7 +41,7 @@ pub fn token_input(
 
     let surface = theme.resolve_color("color.background.surface");
     let border = theme.resolve_color("color.border.subtle");
-    // Field family matches TextInput's interactive-subtle treatment: a
+    // Field family matches TextInput's field appearance: a
     // surface-mix fill behind a subtle border.
     let fill = mix_srgb(surface, TRANSPARENT, 0.96);
     let radius = theme.resolve_radius("radius.control");
