@@ -9,8 +9,7 @@
 use serde_json::Value;
 
 use poodle_headless::agent_subagent::{
-    is_terminal_subagent_status, subagent_status_label, subagent_status_spins,
-    AgentSubagentStatus,
+    is_terminal_subagent_status, subagent_status_label, subagent_status_spins, AgentSubagentStatus,
 };
 
 fn vectors() -> Value {

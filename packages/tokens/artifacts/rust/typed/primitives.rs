@@ -4,24 +4,101 @@ use super::types::{ColorValue, DurationValue, ShadowValue, SpaceValue};
 
 pub const BORDER_WIDTH_SUBTLE: SpaceValue = SpaceValue(1.0);
 pub const BORDER_WIDTH_STRONG: SpaceValue = SpaceValue(2.0);
-pub const COLOR_NEUTRAL_0: ColorValue = ColorValue(0.9882352941176471, 0.9921568627450981, 1.0, 1.0);
-pub const COLOR_NEUTRAL_25: ColorValue = ColorValue(0.9686274509803922, 0.9803921568627451, 0.9921568627450981, 1.0);
-pub const COLOR_NEUTRAL_50: ColorValue = ColorValue(0.9058823529411765, 0.9333333333333333, 0.9607843137254902, 1.0);
-pub const COLOR_NEUTRAL_100: ColorValue = ColorValue(0.8588235294117647, 0.8980392156862745, 0.9372549019607843, 1.0);
-pub const COLOR_NEUTRAL_200: ColorValue = ColorValue(0.788235294117647, 0.8313725490196079, 0.8784313725490196, 1.0);
-pub const COLOR_NEUTRAL_400: ColorValue = ColorValue(0.4588235294117647, 0.5254901960784314, 0.6078431372549019, 1.0);
-pub const COLOR_NEUTRAL_700: ColorValue = ColorValue(0.19215686274509805, 0.25882352941176473, 0.3333333333333333, 1.0);
-pub const COLOR_NEUTRAL_900: ColorValue = ColorValue(0.07450980392156863, 0.10196078431372549, 0.13333333333333333, 1.0);
-pub const COLOR_SLATE_850: ColorValue = ColorValue(0.10196078431372549, 0.12941176470588237, 0.17254901960784313, 1.0);
-pub const COLOR_SLATE_900: ColorValue = ColorValue(0.06666666666666667, 0.08627450980392157, 0.11372549019607843, 1.0);
-pub const COLOR_SLATE_950: ColorValue = ColorValue(0.043137254901960784, 0.058823529411764705, 0.0784313725490196, 1.0);
+pub const COLOR_NEUTRAL_0: ColorValue =
+    ColorValue(0.9882352941176471, 0.9921568627450981, 1.0, 1.0);
+pub const COLOR_NEUTRAL_25: ColorValue = ColorValue(
+    0.9686274509803922,
+    0.9803921568627451,
+    0.9921568627450981,
+    1.0,
+);
+pub const COLOR_NEUTRAL_50: ColorValue = ColorValue(
+    0.9058823529411765,
+    0.9333333333333333,
+    0.9607843137254902,
+    1.0,
+);
+pub const COLOR_NEUTRAL_100: ColorValue = ColorValue(
+    0.8588235294117647,
+    0.8980392156862745,
+    0.9372549019607843,
+    1.0,
+);
+pub const COLOR_NEUTRAL_200: ColorValue = ColorValue(
+    0.788235294117647,
+    0.8313725490196079,
+    0.8784313725490196,
+    1.0,
+);
+pub const COLOR_NEUTRAL_400: ColorValue = ColorValue(
+    0.4588235294117647,
+    0.5254901960784314,
+    0.6078431372549019,
+    1.0,
+);
+pub const COLOR_NEUTRAL_700: ColorValue = ColorValue(
+    0.19215686274509805,
+    0.25882352941176473,
+    0.3333333333333333,
+    1.0,
+);
+pub const COLOR_NEUTRAL_900: ColorValue = ColorValue(
+    0.07450980392156863,
+    0.10196078431372549,
+    0.13333333333333333,
+    1.0,
+);
+pub const COLOR_SLATE_850: ColorValue = ColorValue(
+    0.10196078431372549,
+    0.12941176470588237,
+    0.17254901960784313,
+    1.0,
+);
+pub const COLOR_SLATE_900: ColorValue = ColorValue(
+    0.06666666666666667,
+    0.08627450980392157,
+    0.11372549019607843,
+    1.0,
+);
+pub const COLOR_SLATE_950: ColorValue = ColorValue(
+    0.043137254901960784,
+    0.058823529411764705,
+    0.0784313725490196,
+    1.0,
+);
 pub const COLOR_BLUE_400: ColorValue = ColorValue(0.3411764705882353, 0.6549019607843137, 1.0, 1.0);
-pub const COLOR_BLUE_500: ColorValue = ColorValue(0.17647058823529413, 0.5254901960784314, 0.9529411764705882, 1.0);
-pub const COLOR_GREEN_400: ColorValue = ColorValue(0.6235294117647059, 0.9098039215686274, 0.4392156862745098, 1.0);
-pub const COLOR_GREEN_500: ColorValue = ColorValue(0.4980392156862745, 0.8235294117647058, 0.30196078431372547, 1.0);
-pub const COLOR_AMBER_400: ColorValue = ColorValue(1.0, 0.792156862745098, 0.45098039215686275, 1.0);
-pub const COLOR_AMBER_500: ColorValue = ColorValue(0.9411764705882353, 0.6980392156862745, 0.30196078431372547, 1.0);
-pub const COLOR_RED_500: ColorValue = ColorValue(0.8784313725490196, 0.41568627450980394, 0.37254901960784315, 1.0);
+pub const COLOR_BLUE_500: ColorValue = ColorValue(
+    0.17647058823529413,
+    0.5254901960784314,
+    0.9529411764705882,
+    1.0,
+);
+pub const COLOR_GREEN_400: ColorValue = ColorValue(
+    0.6235294117647059,
+    0.9098039215686274,
+    0.4392156862745098,
+    1.0,
+);
+pub const COLOR_GREEN_500: ColorValue = ColorValue(
+    0.4980392156862745,
+    0.8235294117647058,
+    0.30196078431372547,
+    1.0,
+);
+pub const COLOR_AMBER_400: ColorValue =
+    ColorValue(1.0, 0.792156862745098, 0.45098039215686275, 1.0);
+pub const COLOR_AMBER_500: ColorValue = ColorValue(
+    0.9411764705882353,
+    0.6980392156862745,
+    0.30196078431372547,
+    1.0,
+);
+pub const COLOR_RED_500: ColorValue = ColorValue(
+    0.8784313725490196,
+    0.41568627450980394,
+    0.37254901960784315,
+    1.0,
+);
 pub const SPACE_0: SpaceValue = SpaceValue(0.0);
 pub const SPACE_1: SpaceValue = SpaceValue(4.0);
 pub const SPACE_2: SpaceValue = SpaceValue(8.0);
@@ -45,9 +122,39 @@ pub const SIZE_ICON_XL: SpaceValue = SpaceValue(24.0);
 pub const SIZE_PANEL_HEADER: SpaceValue = SpaceValue(40.0);
 pub const STROKE_HAIRLINE: SpaceValue = SpaceValue(1.0);
 pub const STROKE_FOCUS: SpaceValue = SpaceValue(2.0);
-pub const ELEVATION_SHADOW_SM: ShadowValue = ShadowValue { offset_x: 0.0, offset_y: 4.0, blur: 12.0, color: ColorValue(0.06666666666666667, 0.08627450980392157, 0.11372549019607843, 0.08) };
-pub const ELEVATION_SHADOW_MD: ShadowValue = ShadowValue { offset_x: 0.0, offset_y: 12.0, blur: 32.0, color: ColorValue(0.06666666666666667, 0.08627450980392157, 0.11372549019607843, 0.16) };
-pub const ELEVATION_SHADOW_LG: ShadowValue = ShadowValue { offset_x: 0.0, offset_y: 24.0, blur: 60.0, color: ColorValue(0.043137254901960784, 0.058823529411764705, 0.0784313725490196, 0.32) };
+pub const ELEVATION_SHADOW_SM: ShadowValue = ShadowValue {
+    offset_x: 0.0,
+    offset_y: 4.0,
+    blur: 12.0,
+    color: ColorValue(
+        0.06666666666666667,
+        0.08627450980392157,
+        0.11372549019607843,
+        0.08,
+    ),
+};
+pub const ELEVATION_SHADOW_MD: ShadowValue = ShadowValue {
+    offset_x: 0.0,
+    offset_y: 12.0,
+    blur: 32.0,
+    color: ColorValue(
+        0.06666666666666667,
+        0.08627450980392157,
+        0.11372549019607843,
+        0.16,
+    ),
+};
+pub const ELEVATION_SHADOW_LG: ShadowValue = ShadowValue {
+    offset_x: 0.0,
+    offset_y: 24.0,
+    blur: 60.0,
+    color: ColorValue(
+        0.043137254901960784,
+        0.058823529411764705,
+        0.0784313725490196,
+        0.32,
+    ),
+};
 pub const ICON_SIZE_XS: SpaceValue = SpaceValue(10.0);
 pub const ICON_SIZE_SM: SpaceValue = SpaceValue(12.0);
 pub const ICON_SIZE_MD: SpaceValue = SpaceValue(16.0);
@@ -71,7 +178,8 @@ pub const RADIUS_LG: SpaceValue = SpaceValue(10.0);
 pub const RADIUS_PILL: SpaceValue = SpaceValue(15984.0);
 pub const STATE_OPACITY_DISABLED: f32 = 0.48;
 pub const STATE_OPACITY_MUTED: f32 = 0.72;
-pub const TYPOGRAPHY_FONT_FAMILY_SANS: &str = "\"Inter\", \"SF Pro Display\", system-ui, sans-serif";
+pub const TYPOGRAPHY_FONT_FAMILY_SANS: &str =
+    "\"Inter\", \"SF Pro Display\", system-ui, sans-serif";
 pub const TYPOGRAPHY_FONT_FAMILY_MONO: &str = "\"IBM Plex Mono\", \"SFMono-Regular\", monospace";
 pub const TYPOGRAPHY_FONT_WEIGHT_REGULAR: f32 = 400.0;
 pub const TYPOGRAPHY_FONT_WEIGHT_MEDIUM: f32 = 500.0;

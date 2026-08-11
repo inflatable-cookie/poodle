@@ -11,8 +11,7 @@
 
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_headless::agent_subagent::{
-    is_terminal_subagent_status, subagent_status_label, subagent_status_spins,
-    AgentSubagentItem,
+    is_terminal_subagent_status, subagent_status_label, subagent_status_spins, AgentSubagentItem,
 };
 use poodle_tokens::semantic;
 
@@ -203,7 +202,10 @@ mod tests {
         let with_detail = bare.clone().with_detail_lines(vec!["line one".to_string()]);
         assert!(with_detail.shows_toggle());
         assert_eq!(with_detail.toggle_label(), "Show activity");
-        assert_eq!(with_detail.with_expanded(true).toggle_label(), "Hide activity");
+        assert_eq!(
+            with_detail.with_expanded(true).toggle_label(),
+            "Hide activity"
+        );
     }
 
     #[test]

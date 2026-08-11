@@ -3,13 +3,12 @@
 pub const MANIFEST_NAME: &str = "@inflatable-cookie/poodle-tokens";
 pub const MANIFEST_VERSION: &str = "0.0.0";
 pub const CANONICAL_FORMAT: &str = "W3C DTCG 2025.10";
-pub const ARTIFACT_BASELINE: &str = "Style Dictionary 4.x target shapes with bootstrap local emission script";
+pub const ARTIFACT_BASELINE: &str =
+    "Style Dictionary 4.x target shapes with bootstrap local emission script";
 
 pub const ALIASES: &[(&str, &str)] = &[
     ("color.accent.base", "color.accent.base"),
     ("size.control.height", "size.control.height"),
 ];
 
-pub const DEPRECATIONS: &[(&str, &str)] = &[
-    ("color.border.default", "active"),
-];
+pub const DEPRECATIONS: &[(&str, &str)] = &[("color.border.default", "active")];
