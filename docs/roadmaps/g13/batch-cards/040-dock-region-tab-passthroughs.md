@@ -137,6 +137,42 @@ are deferred to `g13.014`, and `docs:spec-drift` only checks contracts that
 already have a spec — check whether adding a documented prop to `dock-region.md`
 trips it, and if it does, **stop and say so** rather than editing the spec.
 
+### R4a — Ruling: join the existing spec-surface tranche. Do not table them.
+
+Raised as a stop, correctly — R4 named this exact condition. Neither option in
+the question is the right one, because the repo already has a pattern for it
+and `tabVariant` is in it.
+
+`tabVariant` and `showTabs` are implemented in Svelte today and are **not in
+`dock-region.md`'s §Public Props table**. That is why they do not trip
+`docs:spec-drift`. They sit in `contract-prop-drift.ts`'s `BASELINE` as
+`svelteOnly`, with the reason recorded there:
+
+> web-only or spec-surface-pending props the contract deliberately does not
+> table. Tabling them would fail contract-spec-drift until the poodle-specs
+> structs carry the fields.
+
+**Do the same for the five.** Extend the existing `"dock-region"` baseline
+entry to `["showTabs", "tabVariant", "tabActiveEdge", "tabActiveFill",
+"tabBordered", "tabFullWidth", "tabReorderable"]`, and add a comment line
+naming this card and the reason, matching the entries around it.
+
+**Do not touch `contract-spec-drift.ts`'s `OPEN_GAPS`.** It is empty by intent
+and its own comment says why: *"adding one means a prop shipped to the web
+without reaching the shared spec surface, which is the thing this gate exists
+to stop."* These props have not escaped that gate — they are being kept out of
+the table precisely so the gate keeps meaning what it says.
+
+**Contract-first still holds.** Document all five in `dock-region.md` **prose**
+— a section on the tab pass-throughs, alongside the R1a note about what is
+deliberately not forwarded — just not in the §Public Props table. That is the
+same treatment `tabVariant` has, so this adds no new mechanism and no new
+exception, only five names to a list that already exists for this reason.
+
+When `g13.014` gives `DockRegionSpec` its tab fields, the whole entry moves
+into the table together and the baseline line is deleted. Say that in the
+prose so the next reader knows it is a tranche, not a permanent carve-out.
+
 ## Scope
 
 ### In scope
@@ -196,6 +232,8 @@ Both runtimes:
 - `packages/{svelte,react}/preview/src/**/DockRegionSpecimen.*`
 - `docs/contracts/components/dock-region.md`
 - `docs/contracts/components/tabs.md`
+- `packages/svelte/preview/scripts/contract-prop-drift.ts` (R4a — the
+  `dock-region` baseline entry only)
 - `docs/logs/2026-08/<DD>-g13-040-dock-region-tab-passthroughs.md`
 - `PAPERCUTS.md`
 
