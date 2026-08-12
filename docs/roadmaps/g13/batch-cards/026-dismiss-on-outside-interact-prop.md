@@ -1,6 +1,6 @@
 # 026 `dismissOnOutsideInteract` Across The Overlay Family
 
-Status: ready
+Status: merged (`4418eb58` → `c468b434`)
 Milestone: side-quest (component API, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-026-dismiss-outside-interact`
