@@ -508,18 +508,16 @@ export function Select({
               <Icon name="x" size="xs" />
             </button>
           ) : null}
-          {variant !== "ghost" ? (
-            <button
-              type="button"
-              className="poodle-select__indicator-button"
-              aria-label={open ? "Close options" : "Open options"}
-              onClick={() => {
-                if (!disabled) setOpen(!open);
-              }}
-            >
-              <Icon name="chevron-down" />
-            </button>
-          ) : null}
+          <button
+            type="button"
+            className="poodle-select__indicator-button"
+            aria-label={open ? "Close options" : "Open options"}
+            onClick={() => {
+              if (!disabled) setOpen(!open);
+            }}
+          >
+            <Icon name="chevron-down" />
+          </button>
         </div>
       )}
 

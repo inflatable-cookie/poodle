@@ -50,7 +50,9 @@
     opacity: var(--poodle-state-opacity-disabled);
   }
 
-  /* Opener: borderless, transparent; label + optional summary + chevron. */
+  /* Opener: borderless, transparent; label + optional summary. The dropdown
+     affordance lives in the Select primitive (b031), not a per-component
+     character. */
   .poodle-filter-builder__trigger {
     display: inline-flex;
     align-items: center;
@@ -100,11 +102,6 @@
 
   .poodle-filter-builder__summary[data-placeholder="true"] {
     color: var(--poodle-color-text-muted);
-  }
-
-  .poodle-filter-builder__chevron {
-    color: var(--poodle-color-text-secondary);
-    flex-shrink: 0;
   }
 
   /* Inline clause pill: chip visual from SelectionSummary; cap width for long labels. */

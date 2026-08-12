@@ -232,9 +232,6 @@ export function OrderBy({
               <span className="poodle-order-by__summary" data-placeholder={effectiveValue.length === 0}>
                 {triggerText}
               </span>
-              <span className="poodle-order-by__chevron" aria-hidden="true">
-                ▾
-              </span>
             </button>
 
             {showClearButton && effectiveValue.length > 0 ? (

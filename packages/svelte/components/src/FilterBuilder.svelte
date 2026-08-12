@@ -343,7 +343,6 @@
           {summaryText}
         </span>
       {/if}
-      <span class="poodle-filter-builder__chevron" aria-hidden="true">▾</span>
     </button>
 
     {#if showPills && activeCount > 0}

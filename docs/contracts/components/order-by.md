@@ -26,8 +26,7 @@ Updated: 2026-07-19
   │   ├── [Trigger Wrap .order-by__trigger-wrap] <div> (summary variant)
   │   │   ├── [Trigger .order-by__trigger] <button aria-expanded aria-controls>
   │   │       ├── [Label .order-by__label] <span>  (hidden when compact)
-  │   │       ├── [Summary .order-by__summary] <span>
-  │   │       └── [Chevron .order-by__chevron] <span aria-hidden="true">
+  │   │       └── [Summary .order-by__summary] <span>
   │   │   └── [Reset .order-by__reset] <span> (conditional: showClearButton && value non-empty)
   │   │       └── IconButton (icon="x", variant="ghost", ariaLabel="Clear sort")
   │   └── [Icon Trigger] IconButton (icon="arrow-up-down", variant="secondary") (icon variant)
@@ -51,11 +50,10 @@ Updated: 2026-07-19
 | Popover | yes | `position: relative` wrapper anchoring the surface; carries `data-size`, `data-density` |
 | Root | yes | flex container wrapping the selected trigger form; `role="group"`, carries `data-disabled`, `data-compact`, `data-trigger-variant` |
 | Trigger Wrap | no | summary-variant flex-1 wrapper around the trigger button |
-| Trigger | no | summary-variant button that opens the dropdown; displays label, summary, and chevron; carries `aria-expanded` / `aria-controls` |
+| Trigger | no | summary-variant button that opens the dropdown; displays label and summary; carries `aria-expanded` / `aria-controls` |
 | Icon Trigger | no | icon-variant `IconButton icon="arrow-up-down" variant="secondary"`; the only closed-state control |
 | Label | no | summary-variant static "Sort by" uppercase text; hidden when `compact` is true |
 | Summary | no | summary-variant dynamic text summarizing the active sort fields |
-| Chevron | no | summary-variant dropdown indicator arrow (`▾`) |
 | Reset | no | `IconButton icon="x" variant="ghost"` (aria-label `"Clear sort"`), shown inside the summary trigger wrap or icon-variant panel header when `showClearButton` and at least one sort field is active |
 | Panel Header | no | icon-variant header containing the title and optional reset action |
 | Surface | yes | anchored `role="dialog"` dropdown surface (`tabindex="-1"`) containing the sort builder UI |
@@ -377,12 +375,6 @@ treatment to the shared secondary `IconButton` contract.
 |----------|-------|
 | `color` | `var(--poodle-color-text-muted)` |
 
-### Chevron (.order-by__chevron)
-
-| Property | Value |
-|----------|-------|
-| `color` | `var(--poodle-color-text-secondary)` |
-
 ### Reset (.order-by__reset)
 
 In summary mode, the reset is an `IconButton icon="x" variant="ghost"`
@@ -633,7 +625,6 @@ The panel uses the following internal component instances:
 - [ ] label hidden in compact mode
 - [ ] summary font-size matches (0.875rem)
 - [ ] summary placeholder color matches (muted)
-- [ ] chevron color matches (secondary)
 - [ ] reset renders as a ghost IconButton (no bespoke square chrome)
 - [ ] icon trigger renders as a secondary IconButton at the resolved size
 - [ ] item layout matches (single row, padding 0.3125rem 0.5rem, border-subtle, radius control-0.0625rem, surface 90%/elevated bg)

@@ -38,3 +38,14 @@ describe("Select (svelte) dismissOnOutsideInteract", () => {
     expect(listboxOf(container)).not.toBeNull();
   });
 });
+
+describe("Select (svelte) ghost variant", () => {
+  it("keeps the chevron indicator on the non-searchable trigger", () => {
+    const { container } = render(Select, {
+      props: { options, native: false, variant: "ghost" },
+    });
+
+    // b031: ghost drops the border and the fill, not the dropdown signal.
+    expect(container.querySelector(".poodle-select__indicator-button")).not.toBeNull();
+  });
+});

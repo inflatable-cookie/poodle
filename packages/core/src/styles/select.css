@@ -367,6 +367,12 @@
   .poodle-select[data-variant="ghost"] .poodle-select__trigger {
     min-height: 0;
     padding: 0;
+    /* Ghost keeps the chevron (b031), so the trigger still reserves its
+       decoration lane; only the field chrome is stripped. */
+    padding-right: calc(
+      var(--poodle-select-end-decoration-width)
+      + var(--poodle-select-end-gap)
+    );
     line-height: 1;
   }
 

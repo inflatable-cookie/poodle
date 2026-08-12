@@ -31,8 +31,7 @@ evaluation and serialization.
   ├── [Field .filter-builder] <div role="group">  (single bordered block, flex-wrap: opener + inline pills + reset)
   │   ├── [Trigger .filter-builder__trigger] <button aria-expanded aria-controls aria-haspopup="dialog">
   │   │   ├── [Label .filter-builder__label] <span>  (hidden when compact; "Filter", or the live match mode "All"/"Any" — see Label part)
-  │   │   ├── [Summary .filter-builder__summary] <span>  ("Filter" / "N filters"; shown only when pills are NOT shown)
-  │   │   └── [Chevron .filter-builder__chevron] <span aria-hidden="true">
+  │   │   └── [Summary .filter-builder__summary] <span>  ("Filter" / "N filters"; shown only when pills are NOT shown)
   │   ├── [Pill .filter-builder__pill .selection-summary__chip--split] <span> (repeated inline; conditional: showPills && clauses non-empty)
   │   │   ├── [Activate .selection-summary__chip-activate] <button>  (edit clause; aria-label "Edit {clauseLabel}")
   │   │   └── [Remove] IconButton (icon="x", size="xs", ghost; aria-label "Remove {clauseLabel}")
@@ -57,10 +56,9 @@ evaluation and serialization.
 |------|----------|-------------|---------------|
 | Popover | yes | `position: relative` wrapper anchoring the surface; carries `data-size`, `data-density` | — |
 | Field | yes | single bordered `flex-wrap` block holding the opener, inline clause pills, and reset; `role="group"`, carries `data-disabled`, `data-compact`, `data-open` | `--poodle-size-control-height`, `--poodle-radius-control`, `--poodle-color-background-surface`, `--poodle-color-border-default` |
-| Trigger | yes | borderless opener button inside the field; shows label + (conditional) summary + chevron; `aria-expanded` / `aria-controls` / `aria-haspopup="dialog"` | — |
+| Trigger | yes | borderless opener button inside the field; shows label + (conditional) summary; `aria-expanded` / `aria-controls` / `aria-haspopup="dialog"` | — |
 | Label | yes | uppercase text, hidden when `compact`. Reads "Filter" normally; when the combinator is live (`showCombinator` + 2+ clauses) it instead reflects the match mode — "All" (`combinator="and"`) or "Any" (`combinator="or"`) — so the mode is visible without opening the popover. Carries `data-combinator`; the mode form is rendered in `text-primary` (vs `text-secondary`) to read as a live value | `--poodle-color-text-secondary` / `--poodle-color-text-primary` (mode) |
 | Summary | no | "Filter" placeholder / "N filter(s)" — shown only when pills are NOT displayed (empty, or `showPills=false`); avoids duplicating the count the pills already convey | `--poodle-color-text-primary` / `--poodle-color-text-muted` (empty) |
-| Chevron | yes | popover indicator arrow (`▾`) | `--poodle-color-text-secondary` |
 | Pill | no | inline clause chip reusing SelectionSummary's split-chip treatment: a separate activation button (the clause label) + a remove IconButton (no nested buttons); flows inline within the field. The field supplies the SelectionSummary chip CSS variables (font/padding/min-height per size/density) since the chip classes are used outside their usual root | (SelectionSummary chip classes) |
 | Trailing | no | right-aligned (`margin-left:auto`) group holding the count badge + reset; shown when clauses non-empty | — |
 | Count | no | small badge with the active-clause count; the single count indicator, shown when `showPills` (the opener summary text is suppressed to avoid duplicating it) | `--poodle-color-accent-base`, `--poodle-color-text-inverse` |

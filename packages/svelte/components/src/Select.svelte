@@ -442,16 +442,14 @@
             <Icon name="x" size="xs" />
           </button>
         {/if}
-        {#if variant !== "ghost"}
-          <button
-            type="button"
-            class="poodle-select__indicator-button"
-            aria-label={open ? "Close options" : "Open options"}
-            onclick={handleTriggerClick}
-          >
-            <Icon name="chevron-down" />
-          </button>
-        {/if}
+        <button
+          type="button"
+          class="poodle-select__indicator-button"
+          aria-label={open ? "Close options" : "Open options"}
+          onclick={handleTriggerClick}
+        >
+          <Icon name="chevron-down" />
+        </button>
       </div>
     {/if}
 
