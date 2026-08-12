@@ -1,6 +1,6 @@
 # 027 Dismiss Native Parity, And The Drift Gate's Missing Direction
 
-Status: ready
+Status: merged (`2eb94a16` → `ada91cae`)
 Milestone: side-quest (parity + gate integrity, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-027-dismiss-native-and-drift-direction`
