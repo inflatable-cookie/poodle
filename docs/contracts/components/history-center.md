@@ -579,6 +579,8 @@ Semantic roles by default; recipes are the override surface (architecture
 
 | Part | Recipe Hook | Fallback Token |
 |------|-------------|----------------|
+| trigger cluster border | `--poodle-recipe-history-center-trigger-border` | border-subtle 84% mix |
+| trigger cluster fill | `--poodle-recipe-history-center-trigger-fill` | surface 93% mix |
 | entry row | `--poodle-recipe-history-center-item-fill` | transparent |
 | entry row (current) | `--poodle-recipe-history-center-current-fill` | accent 7% mix |
 | entry hover | `--poodle-recipe-history-center-item-hover-fill` | surface 72% mix |

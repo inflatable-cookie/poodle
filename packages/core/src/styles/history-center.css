@@ -14,10 +14,27 @@
 
 .poodle-history-center-popover { display: inline-flex; }
 
+/* Undo, the history trigger, and redo read as one control rather than three
+   loose buttons. The container idiom follows SegmentedControl — a hairline
+   border, a subtle fill, tight padding and a small gap — so the cluster
+   matches the rest of the system rather than inventing a second look.
+   Scoped to HistoryCentre for now; promote to a shared primitive if a second
+   consumer wants it. */
 .poodle-history-center__trigger {
   display: inline-flex;
   align-items: center;
   gap: 0.125rem;
+  padding: 0.125rem;
+  border: 0.0625rem solid
+    var(
+      --poodle-recipe-history-center-trigger-border,
+      color-mix(in srgb, var(--poodle-color-border-subtle) 84%, transparent)
+    );
+  border-radius: var(--poodle-radius-control);
+  background: var(
+    --poodle-recipe-history-center-trigger-fill,
+    color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))
+  );
 }
 
 .poodle-history-center {

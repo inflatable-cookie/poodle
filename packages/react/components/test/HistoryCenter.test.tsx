@@ -366,7 +366,7 @@ describe("HistoryCenter (react)", () => {
       { kind: "entry", entry: "c3", depth: "0" },
     ]);
     expect(document.querySelector('[data-part="picker-select"]')).toBeTruthy();
-    expect(await forkActionItem("Activate without moving")).toBeTruthy();
+    expect(await forkActionItem("Checkout")).toBeTruthy();
 
     // R1: the pencil sits between the Select and checkout, renames the
     // selection, and no "Current" badge marks the trigger (R4a).
@@ -382,7 +382,7 @@ describe("HistoryCenter (react)", () => {
     expect(select.compareDocumentPosition(actions) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
     await openForkMenu();
     const labels = screen.getAllByRole("menuitem").map((el) => el.textContent?.trim());
-    expect(labels).toEqual(["Rename feature/alt", "Activate without moving"]);
+    expect(labels).toEqual(["Rename", "Checkout"]);
     expect(document.querySelector('[data-part="current-badge"]')).toBeNull();
 
     // Opening the select offers exactly the two forks with the same anatomy.
@@ -426,7 +426,7 @@ describe("HistoryCenter (react)", () => {
     );
 
     // R3 selected the current fork (x1): checkout is disabled on it.
-    expect((await forkActionItem("Activate without moving")).hasAttribute("disabled")).toBe(true);
+    expect((await forkActionItem("Checkout")).hasAttribute("disabled")).toBe(true);
 
     // Select the non-preferred fork: the entries below swap to its run and
     // the select stays — the pick commits nothing.
@@ -453,9 +453,9 @@ describe("HistoryCenter (react)", () => {
     ]);
     expect(onCheckoutContinuation).not.toHaveBeenCalled();
     expect(onNavigateEntry).not.toHaveBeenCalled();
-    expect((await forkActionItem("Activate without moving")).hasAttribute("disabled")).toBe(false);
+    expect((await forkActionItem("Checkout")).hasAttribute("disabled")).toBe(false);
 
-    await runForkAction("Activate without moving");
+    await runForkAction("Checkout");
 
     // Checkout makes the fork primary: the command leaves, the disclosure
     // state for the anchor is cleared, and the root list renders again —
@@ -521,13 +521,13 @@ describe("HistoryCenter (react)", () => {
 
     // R3 opened on the current fork (x1, preferred): checkout is disabled on
     // it. The badge is gone (R4a) — the disabled button carries the fact.
-    expect((await forkActionItem("Activate without moving")).hasAttribute("disabled")).toBe(true);
+    expect((await forkActionItem("Checkout")).hasAttribute("disabled")).toBe(true);
     expect(document.querySelector('[data-part="current-badge"]')).toBeNull();
 
     // Picking the other fork enables checkout.
     fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
     fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
-    expect((await forkActionItem("Activate without moving")).hasAttribute("disabled")).toBe(false);
+    expect((await forkActionItem("Checkout")).hasAttribute("disabled")).toBe(false);
   });
 
   it("renames the selected fork from the picker through onRenameBranch", async () => {
@@ -552,7 +552,7 @@ describe("HistoryCenter (react)", () => {
 
     // R3 opened on the current fork (x1): the pencil targets whatever the
     // Select shows — x1's branch, not the anchor's and not some other fork.
-    await runForkAction("Rename feature/alt");
+    await runForkAction("Rename");
 
     // The input replaces the Select while renaming (R3).
     expect(screen.queryByRole("button", { name: "Continuations" })).toBeNull();
@@ -588,7 +588,7 @@ describe("HistoryCenter (react)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
     fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
 
-    await runForkAction("Rename feature/lead");
+    await runForkAction("Rename");
     const input = screen.getByRole("textbox", { name: "Rename branch feature/lead" }) as HTMLInputElement;
     fireEvent.change(input, { target: { value: "feature/lead-v2" } });
     fireEvent.keyDown(input, { key: "Enter" });
@@ -608,11 +608,11 @@ describe("HistoryCenter (react)", () => {
     // Enable checkout by picking the non-preferred fork…
     fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
     fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
-    expect((await forkActionItem("Activate without moving")).hasAttribute("disabled")).toBe(false);
+    expect((await forkActionItem("Checkout")).hasAttribute("disabled")).toBe(false);
 
     // …then a rename opens and checkout goes inert (R3).
-    await runForkAction("Rename feature/lead");
-    expect((await forkActionItem("Activate without moving")).hasAttribute("disabled")).toBe(true);
+    await runForkAction("Rename");
+    expect((await forkActionItem("Checkout")).hasAttribute("disabled")).toBe(true);
   });
 
   it("cancelling a picker rename restores the Select and returns focus to the pencil", async () => {
@@ -624,7 +624,7 @@ describe("HistoryCenter (react)", () => {
       <HistoryCenter pages={twoForkPages} defaultOpen continuationsResult={c2Result} runResult={x1TwoForkRun} />,
     );
 
-    await runForkAction("Rename feature/alt");
+    await runForkAction("Rename");
 
     const input = screen.getByRole("textbox", { name: "Rename branch feature/alt" }) as HTMLInputElement;
     fireEvent.keyDown(input, { key: "Escape" });
@@ -906,7 +906,7 @@ describe("HistoryCenter (react)", () => {
       />,
     );
 
-    await runForkAction("Rename feature/lead");
+    await runForkAction("Rename");
 
     const input = screen.getByRole("textbox", { name: "Rename branch feature/lead" }) as HTMLInputElement;
     fireEvent.change(input, { target: { value: "feature/lead-v2" } });
@@ -915,7 +915,7 @@ describe("HistoryCenter (react)", () => {
     expect(onRenameBranch).toHaveBeenCalledWith("b-l1", "feature/lead-v2");
 
     // Escape cancels without emitting.
-    await runForkAction("Rename feature/lead");
+    await runForkAction("Rename");
     const second = screen.getByRole("textbox", { name: "Rename branch feature/lead" }) as HTMLInputElement;
     fireEvent.keyDown(second, { key: "Escape" });
 
