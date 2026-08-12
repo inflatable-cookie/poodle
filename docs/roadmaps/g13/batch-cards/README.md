@@ -22,16 +22,24 @@ and roadmap closeout.
 | `010` | TextInput focus parity: autofocus + focus() to React | `b1a4a5e7` | merged (`b2aa40ae`) |
 | `011` | `poodle-ir` schema core (**g13.002**) | `003` rulings | merged (`4a22c8d8`) |
 | `012` | IR bounded expression vocabulary | `011` merged | merged (`911fdfd8`) |
-| `013` | Tabs variant consolidation (side-quest) | maintainer ruling | dispatched |
-| `014` | AppHeader element access (side-quest) | maintainer ruling | dispatched |
+| `013` | Tabs variant consolidation (side-quest) | maintainer ruling | merged (`0b347022`) |
+| `014` | AppHeader element access (side-quest) | maintainer ruling | merged (`b47a2580`) |
 | `015` | deterministic emission + drift-gating research (codegen precursor) | supersedes `004` | merged (`7878c537`) |
-| `016` | shared `ActiveFill` type + NavigationMenu switches | Tabs switches merged | dispatched |
-| `017` | AppHeader centre region | `014` merged | dispatched |
+| `016` | shared `ActiveFill` type + NavigationMenu switches | Tabs switches merged | merged (`95c78a61`) |
+| `017` | AppHeader centre region | `014` merged | merged (`e63c7f35`) |
 | `018` | Tabs `bordered` defaults to false | — | retired — folded into `020` |
-| `019` | HistoryCenter — web reference | none | dispatched |
+| `019` | HistoryCenter — web reference | none | merged (`0c31f2f9`) — superseded by v2, then v3 |
 | `020` | ActiveEdge + strip consolidation + Tabs defaults | `016` merged | merged (`2115e5c1`) |
-| `021` | `ActiveFill` gains `none` (strip equivalence) | `020` merged | dispatched |
-| `022` | HistoryCenter — native parity | `019` merged | planned |
+| `021` | `ActiveFill` gains `none` (strip equivalence) | `020` merged | merged (`239e9776`) |
+| `022` | `poodle-codegen` emitter core (**g13.003**) | `b011`/`b012`/`b015` merged | merged (`143c63a1`) |
+| `023` | HistoryCentre v2 — tree stitcher and machine | `019` merged | merged (`0e1bb49a`) — **model superseded by v3** |
+| `024` | HistoryCentre v2 — web rendering and lanes | `023` | merged (`bd341ad2`) — **superseded by v3** |
+| `025` | codegen remaining emitters — closes `g13.003` | `022` merged | merged (`5d9edc9d`) |
+| `026` | `dismissOnOutsideInteract` across the overlay family | none | merged (`4418eb58`) |
+| `027` | dismiss native parity + bidirectional drift gate | `026` merged | merged (`2eb94a16`) |
+| `028` | HistoryCentre v3 — flat list, node-owned forks (core) | `024` merged | dispatched |
+| `029` | HistoryCentre v3 — rendering, picker, nested list | `028` | planned |
+| — | HistoryCentre — native parity | `029` merged | planned (renumbered; `022` was reused for codegen) |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
 evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of
@@ -68,3 +76,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 025](025-codegen-remaining-emitters.md)
 - [Batch 026](026-dismiss-on-outside-interact-prop.md)
 - [Batch 027](027-dismiss-native-parity-and-drift-direction.md)
+- [Batch 028](028-history-center-v3-core.md)
