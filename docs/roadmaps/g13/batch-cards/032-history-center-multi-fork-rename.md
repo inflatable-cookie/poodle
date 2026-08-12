@@ -1,6 +1,6 @@
 # 032 HistoryCentre — Rename The Selected Fork
 
-Status: ready
+Status: merged (`8da4141a` → `321fc790`)
 Milestone: side-quest (component behaviour, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-032-history-center-multi-fork-rename`
