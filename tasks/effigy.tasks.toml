@@ -192,6 +192,11 @@
 # Contract <-> poodle-specs drift. Also runs inside docs:lint; this selector is
 # for standalone/report use (DRIFT_REPORT=1 lists gaps without failing).
 "docs:spec-drift" = "bun packages/svelte/preview/scripts/contract-spec-drift.ts"
+# Focus-ring radius drift (g13.037): a :focus-visible outline must land on an
+# element the corpus gives a border-radius, or the ring renders square. The
+# baseline holds rings that are square by intent, each with a reason. Also runs
+# inside docs:lint; this selector is for standalone/report use.
+"docs:focus-ring-drift" = "bun packages/svelte/preview/scripts/focus-ring-drift.ts"
 # Contract <-> implementation value-domain drift: compares the permitted value
 # set of each enumerated prop (contract union vs Svelte types.ts vs the
 # poodle-specs enum). Report-only — exits 0 unless VALUE_DOMAIN_ENFORCE=1 is

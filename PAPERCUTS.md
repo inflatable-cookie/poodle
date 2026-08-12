@@ -7,6 +7,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-12 — g13-037 measured the other half of the 2026-08-11 focus-ring
+  entry: 56 component stylesheets draw their own focus ring without
+  suppressing the UA `outline: auto` on the same element, so Chrome stacks a
+  second 1px ring. Live in checkbox/radio/switch/tri-state/segmented-control
+  (the hidden native input draws `outline: auto` — invisible on the clipped
+  inputs, so harmless there) and visibly on the `detail-item`/`field`
+  info-trigger wrappers, whose own ring lands on the icon while the UA ring
+  draws on the focusable wrap. The follow-up card owns the sweep; the fix
+  pattern is `outline: none` on the focusable element + the component's own
+  ring on its visible surface.
+
 - 2026-08-12 — g13-036: the scene now owns the control labels in all four
   shells, but the web shells still hardcode accessibility labels: Svelte and
   React `DisplayControls` pass `ariaLabel="Neutral contrast"` (contrast),

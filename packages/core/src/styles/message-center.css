@@ -96,6 +96,11 @@
   gap: var(--poodle-space-stack-md);
   min-width: 0;
   padding: var(--poodle-space-panel-y) var(--poodle-space-stack-sm);
+  /* The interactive row's focus ring is an inset outline, and an outline
+     follows the element's own radius — with none it rendered as a hard square
+     across the full row width inside the rounded surface (same shape as the
+     HistoryCentre rows fixed in 099a265). Rounds the hover fill with it. */
+  border-radius: var(--poodle-radius-control);
   color: inherit;
   text-align: left;
 }
@@ -115,6 +120,9 @@ button.poodle-message-center__content {
 .poodle-message-center__content--interactive:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   outline-offset: -0.125rem;
+  /* The inset ring follows this element's own radius; the base block rounds
+     the row and its hover fill, this rounds the ring with them. */
+  border-radius: var(--poodle-radius-control);
 }
 
 .poodle-message-center__leading {

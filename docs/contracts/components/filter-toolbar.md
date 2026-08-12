@@ -193,6 +193,7 @@ No component-owned callbacks. Child controls keep their own callback contracts, 
 |----------|-------|
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
+| `border-radius` | `var(--poodle-radius-control)` — the button spans the toolbar's full width; without it the ring cornered inside the toolbar's rounded corners |
 
 #### `.filter-toolbar__summary`
 

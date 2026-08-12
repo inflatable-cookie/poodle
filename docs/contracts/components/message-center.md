@@ -120,7 +120,15 @@ targets use `MessageCenterSpec` plus the shared `poodle-render` node tree;
 open/read/remove/select/mark-all state remains host-owned. This component does
 not introduce an Underlay-facing dependency.
 
-## 8. Usage
+## 8. Token Usage
+
+| Property | Token |
+|----------|-------|
+| interactive row fill | `--poodle-recipe-message-center-item-hover-fill` |
+| interactive row radius | `--poodle-radius-control` — the row is full-width inside the rounded surface; the inset focus ring and the hover fill round with it |
+| focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, `-0.125rem` inset offset |
+
+## 9. Usage
 
 ```svelte
 <script lang="ts">

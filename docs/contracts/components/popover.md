@@ -261,6 +261,7 @@ wiring, presence (if open/close animation is added later).
 |----------|-------|
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
+| `border-radius` | `var(--poodle-radius-control)` — without it the ring cornered against the rounded surface the trigger sits on |
 
 ### Trigger disabled — .popover__trigger[data-disabled="true"]
 

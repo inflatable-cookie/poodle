@@ -13,6 +13,9 @@
   .poodle-hover-card__trigger:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
+    /* An outline follows the element's own radius — with none the ring
+       cornered against the rounded surface it sits on. */
+    border-radius: var(--poodle-radius-control);
   }
 
   .poodle-hover-card__surface {

@@ -37,6 +37,10 @@
   .poodle-filter-toolbar__header--button:focus-visible {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: 0.125rem;
+    /* The header button spans the toolbar's full width, and an outline
+       follows the element's own radius — with none the ring cornered inside
+       the toolbar's rounded corners. */
+    border-radius: var(--poodle-radius-control);
   }
 
   .poodle-filter-toolbar__summary {
