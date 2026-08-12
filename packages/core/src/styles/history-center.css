@@ -14,29 +14,39 @@
 
 .poodle-history-center-popover { display: inline-flex; }
 
-/* Undo, the history trigger, and redo read as one control rather than three
-   loose buttons. The container idiom follows SegmentedControl — a hairline
-   border, a subtle fill, tight padding and a small gap — so the cluster
-   matches the rest of the system rather than inventing a second look.
-   Scoped to HistoryCentre for now; promote to a shared primitive if a second
-   consumer wants it. */
 .poodle-history-center__trigger {
   display: inline-flex;
   align-items: center;
   gap: 0.125rem;
-  padding: 0.125rem;
-  border: 0.0625rem solid
-    var(
-      --poodle-recipe-history-center-trigger-border,
-      color-mix(in srgb, var(--poodle-color-border-subtle) 84%, transparent)
-    );
-  border-radius: var(--poodle-radius-control);
-  background: var(
-    --poodle-recipe-history-center-trigger-fill,
-    color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary))
-  );
 }
 
+/* The disclosure between undo and redo is a bare chevron, not an IconButton.
+   It carries no button chrome and almost no horizontal padding, so the two
+   IconButtons stay the visual weight of the cluster and the chevron reads as
+   the small hinge between them. It is still a button, so it keeps a hit area
+   tall enough to press and a focus ring. */
+.poodle-history-center__list-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Full control height, so the press target matches undo and redo even
+     though the glyph is narrow. Stretch cannot do this: Popover wraps the
+     trigger in its own shrink-wrapping element. */
+  height: var(--poodle-size-control-height);
+  padding: 0 0.0625rem;
+  border: 0;
+  border-radius: var(--poodle-radius-control);
+  background: none;
+  color: var(--poodle-color-text-secondary);
+  cursor: pointer;
+}
+.poodle-history-center__list-trigger:hover {
+  color: var(--poodle-color-text-primary);
+}
+.poodle-history-center__list-trigger:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: -0.0625rem;
+}
 .poodle-history-center {
   /* The popover surface owns the width: HistoryCenter passes it
      surfaceMinWidth/surfaceMaxWidth, and the surface adds its own horizontal
