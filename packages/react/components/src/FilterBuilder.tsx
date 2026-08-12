@@ -317,9 +317,6 @@ export function FilterBuilder({
               {summaryText}
             </span>
           ) : null}
-          <span className="poodle-filter-builder__chevron" aria-hidden="true">
-            ▾
-          </span>
         </button>
 
         {showPills && activeCount > 0

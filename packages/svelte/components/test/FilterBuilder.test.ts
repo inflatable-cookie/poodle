@@ -38,4 +38,12 @@ describe("FilterBuilder (svelte) dismissOnOutsideInteract", () => {
     await fireEvent.mouseDown(document.body);
     expect(surfaceOf(container)).not.toBeNull();
   });
+
+  it("renders no hardcoded chevron on the opener trigger", () => {
+    // b031: the ▾ workaround is gone; the dropdown affordance lives in the
+    // ghost Select primitive, not in a per-component character.
+    const { container } = render(FilterBuilder, { props: { fields } });
+
+    expect(container.querySelector(".poodle-filter-builder__chevron")).toBeNull();
+  });
 });

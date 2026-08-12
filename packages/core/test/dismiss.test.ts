@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { resolveDismiss, type DismissLayer } from "../src/dom/dismiss.ts";
+import { registerDismissLayer, resolveDismiss, type DismissLayer } from "../src/dom/dismiss.ts";
 
 function layer(overrides: Partial<DismissLayer> = {}): DismissLayer {
   return {
@@ -88,5 +88,50 @@ describe("resolveDismiss", () => {
     // Esc closes the menu; the dialog stays until the next Esc.
     expect(resolveDismiss([dialog, menu], "escape", null)).toEqual([menu]);
     expect(resolveDismiss([dialog], "escape", null)).toEqual([dialog]);
+  });
+
+  test("a child layer's portalled surface spares the child and its ancestor, but not the ancestor's peer", () => {
+    const peer = layer();
+    const popover = layer();
+    // Select portals its listbox to body; only the listbox contains the target.
+    const select = layer({ contains: () => true, parent: popover });
+
+    expect(resolveDismiss([peer, popover, select], "outside", node)).toEqual([peer]);
+  });
+
+  test("ancestry survives portalling — the parent is the layer on top at registration, not a DOM ancestor", () => {
+    const popover = layer();
+    // The select's portalled surface is not a DOM descendant of the popover,
+    // so DOM-based ancestry could not spare the popover; registration can.
+    const select = layer({ contains: () => true });
+
+    const unregisterPopover = registerDismissLayer(popover);
+    const unregisterSelect = registerDismissLayer(select);
+
+    expect(select.parent).toBe(popover);
+    expect(resolveDismiss([popover, select], "outside", node)).toEqual([]);
+
+    unregisterSelect();
+    unregisterPopover();
+  });
+
+  test("three levels deep: clicking the innermost spares all three", () => {
+    const outer = layer();
+    const middle = layer({ parent: outer });
+    const inner = layer({ contains: () => true, parent: middle });
+
+    expect(resolveDismiss([outer, middle, inner], "outside", node)).toEqual([]);
+  });
+
+  test("a true outside click still dismisses the whole chain in one interaction", () => {
+    const outer = layer();
+    const middle = layer({ parent: outer });
+    const inner = layer({ parent: middle });
+
+    expect(resolveDismiss([outer, middle, inner], "outside", node)).toEqual([
+      inner,
+      middle,
+      outer,
+    ]);
   });
 });

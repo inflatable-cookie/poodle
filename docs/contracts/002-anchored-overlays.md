@@ -47,6 +47,27 @@ Every anchored overlay surface **must**:
    `data-size` / `data-density` / `data-variant` on the surface itself and scope
    the rule to it.
 
+## Dismiss Ancestry
+
+The dismiss layer stack is a tree, not a flat list. `registerDismissLayer`
+records, at registration, the layer that was on top of the stack — the layer
+the new one opened inside — as that layer's parent. Registration order is the
+ancestry, not the DOM: a portalled surface is not a descendant of its host, so
+only the stack sees the relationship.
+
+An outside interaction dismisses every layer it fell outside of, **except** a
+layer that contains the target and **any ancestor of such a layer**. So
+clicking a `Select` option inside a `Popover` spares the Select (it contains
+the click) and the Popover (its ancestor), while a true peer of the Popover —
+a layer with no parent link to the hit layer — still dismisses. One click
+closing every unrelated overlay is the peer behaviour; ancestry just stops a
+nested layer from reading as a peer of its own host.
+
+**A host does not widen its `contains` to reach into whatever a child
+portals.** That would invert ownership — the host would have to know every
+component that might open inside it. Ancestry belongs to the layer stack,
+which already sees every registration.
+
 ## Implementation
 
 | Layer | Surface |

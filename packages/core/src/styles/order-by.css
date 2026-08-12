@@ -100,10 +100,6 @@
     color: var(--poodle-recipe-order-by-summary-text, var(--poodle-color-text-muted));
   }
 
-  .poodle-order-by__chevron {
-    color: var(--poodle-recipe-order-by-chevron-text, var(--poodle-color-text-secondary));
-  }
-
   .poodle-order-by__reset {
     display: inline-flex;
     flex-shrink: 0;

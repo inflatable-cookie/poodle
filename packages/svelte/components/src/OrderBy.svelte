@@ -315,7 +315,6 @@
           <span class="poodle-order-by__summary" data-placeholder={effectiveValue.length === 0}>
             {triggerText}
           </span>
-          <span class="poodle-order-by__chevron" aria-hidden="true">▾</span>
         </button>
 
         {#if showClearButton && effectiveValue.length > 0}

@@ -37,4 +37,12 @@ describe("OrderBy (react) dismissOnOutsideInteract", () => {
     await fireEvent.mouseDown(document.body);
     expect(surfaceOf(container)).not.toBeNull();
   });
+
+  it("renders no hardcoded chevron on the summary trigger", () => {
+    // b031: the ▾ workaround is gone; the dropdown affordance lives in the
+    // ghost Select primitive, not in a per-component character.
+    const { container } = render(<OrderBy fields={fields} />);
+
+    expect(container.querySelector(".poodle-order-by__chevron")).toBeNull();
+  });
 });
