@@ -11,13 +11,15 @@
  *   one keypress at a time — Esc closes the menu, Esc again closes the dialog
  *   it sits in.
  * - **Outside interaction** dismisses *every* layer the interaction fell
- *   outside of. Peer overlays are indistinguishable from nested ones here (a
- *   layer knows whether it contains the target, not whether another layer
- *   contains it), and dismissing only the innermost made sibling overlays
- *   queue: with N open peers, N clicks were needed to get past them, each one
- *   closing a different overlay than the one the user aimed at. Closing
- *   everything the click was outside of is both what a user expects and the
- *   only behaviour that does not depend on registration order.
+ *   outside of, except a layer that contains the target and any ancestor of
+ *   such a layer. The stack is not flat: `registerDismissLayer` records, at
+ *   registration, the layer that was on top of the stack — the layer this one
+ *   opened inside, its parent (portalling does not change that; registration
+ *   order does). A click inside a nested layer therefore spares the whole
+ *   chain back to the host, while true peers — layers with no parent link to
+ *   the hit layer — still all dismiss. Closing everything the click was
+ *   outside of is what the peer-dismissal change was for; ancestry just stops
+ *   a nested layer from reading as a peer of its own host.
  *
  * The stack logic is pure and unit-tested via `resolveDismiss`; the document
  * wiring below is the thin DOM binding.
@@ -30,6 +32,13 @@ export interface DismissLayer {
   onDismiss: (reason: "escape" | "outside") => void;
   /** Guard for outside-interaction dismissal (escape always dismisses). */
   dismissOnOutsideInteract: boolean;
+  /**
+   * The layer that was on top of the stack when this one registered — the
+   * layer this one opened inside. Recorded by `registerDismissLayer`; optional
+   * because callers construct layers before registration and the pure tests
+   * exercise `resolveDismiss` directly.
+   */
+  parent?: DismissLayer | null;
 }
 
 /**
@@ -37,8 +46,8 @@ export interface DismissLayer {
  * policy is testable without a DOM.
  *
  * Escape yields at most the innermost layer. An outside interaction yields
- * every layer that opted into outside dismissal and does not contain the
- * target.
+ * every layer that opted into outside dismissal and neither contains the
+ * target nor is an ancestor of a layer that does.
  */
 export function resolveDismiss(
   layers: readonly DismissLayer[],
@@ -55,15 +64,51 @@ export function resolveDismiss(
     return [top];
   }
 
+  // Layers spared by containment: every layer that contains the target plus
+  // every ancestor of such a layer, walking the parent chain recorded at
+  // registration. Peers — layers with no parent link to the hit layer — are
+  // not in the set and still dismiss, so one click closes every unrelated
+  // overlay.
+  const spared = target === null ? null : sparedByAncestry(layers, target);
+
   // Innermost first, so a layer that closes something beneath it has already
   // run by the time the outer layer is dismissed.
   return layers
     .slice()
     .reverse()
     .filter(
-      (layer) =>
-        layer.dismissOnOutsideInteract && !(target !== null && layer.contains(target)),
+      (layer) => layer.dismissOnOutsideInteract && !(spared !== null && spared.has(layer)),
     );
+}
+
+/**
+ * The set of layers an outside interaction must spare: every layer that
+ * contains the target, plus every ancestor of those layers. Ancestry follows
+ * the `parent` chain recorded at registration, not the DOM — a portalled
+ * surface is not a descendant of its host, so DOM containment cannot express
+ * the relationship.
+ */
+function sparedByAncestry(
+  layers: readonly DismissLayer[],
+  target: Node,
+): Set<DismissLayer> {
+  const spared = new Set<DismissLayer>();
+
+  for (const layer of layers) {
+    if (!layer.contains(target)) {
+      continue;
+    }
+
+    for (
+      let current: DismissLayer | null | undefined = layer;
+      current && !spared.has(current);
+      current = current.parent
+    ) {
+      spared.add(current);
+    }
+  }
+
+  return spared;
 }
 
 /**
@@ -118,8 +163,17 @@ function syncListeners(): void {
   }
 }
 
-/** Register an open overlay. Returns an unregister function; call it on close and on unmount. */
+/**
+ * Register an open overlay. Returns an unregister function; call it on close
+ * and on unmount.
+ *
+ * Records the layer on top of the stack at registration time as `parent` —
+ * the layer this one opened inside. Registration order is the ancestry, not
+ * the DOM: a portalled surface is not a descendant of its host, so the stack
+ * is the only place the relationship is visible.
+ */
 export function registerDismissLayer(layer: DismissLayer): () => void {
+  layer.parent = stack[stack.length - 1] ?? null;
   stack.push(layer);
   syncListeners();
 
