@@ -979,10 +979,33 @@ function deleteContinuation(context: HistoryCenterContext, entryId: string): His
     }
     const forks = historyCenterForksAt(level.continuations, runContext.entries, runContext.index);
     if (forks.some((fork) => fork.entryId === entryId)) {
+      // The level's cached data describes a fork that is about to stop
+      // existing, so it is invalidated here rather than by the stale rule.
+      // Staleness is "the shown fork's run is now on the spine", and a deleted
+      // fork never reaches the spine — its entries simply vanish. Left alone,
+      // the cached run keeps rendering indented under the anchor and clicking
+      // it navigates to an entry the host has deleted ("Entry does not exist").
+      //
+      // Same shape as the stale reconcile: the anchor stays open (disclosure is
+      // UI state, b028 R1), the loaded data goes, and the continuations are
+      // re-requested so the picker re-reads without the deleted fork.
+      const next = new Map(context.open ?? []);
+      const invalidated: HistoryCenterOpenFork = {
+        anchorEntryId: level.anchorEntryId,
+        continuations: null,
+        pick: null,
+        chosen: null,
+        runPages: [],
+        inner: null,
+      };
+      next.set(level.anchorEntryId, invalidated);
       return {
         state: "open",
-        context,
-        effects: [{ type: "deleteContinuation", entryId }],
+        context: { ...context, open: next },
+        effects: [
+          { type: "deleteContinuation", entryId },
+          { type: "loadContinuations", entryId: level.anchorEntryId },
+        ],
       };
     }
   }

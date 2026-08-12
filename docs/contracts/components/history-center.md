@@ -418,6 +418,20 @@ stale levels first (R2, g13-034 — see above): the stale level's
 `loadContinuations` leaves before the event's own effects, and the event then
 runs against the reconciled tree.
 
+**A delete invalidates its anchor's level directly, not through the stale
+rule.** Staleness means "the shown fork's run is now on the root spine", and a
+deleted fork never reaches the spine — its entries simply stop existing. Left
+to the stale rule the level keeps its cache, so the deleted fork's run went on
+rendering indented under the anchor and activating one of its rows asked the
+host to navigate to an entry it had just removed. So `DELETE_CONTINUATION`
+drops that level's `continuations`, `pick`, `chosen`, `runPages` and `inner`,
+keeps the anchor open, and emits `loadContinuations` alongside the delete
+command. The picker then re-reads whatever the host now has.
+
+Poodle does not remove the fork from its own cache and carry on: it has no way
+to know what the delete did to the rest of the history, and guessing is how a
+list ends up disagreeing with its authority.
+
 **The reconcile needs a transition to ride, and a pages prop change dispatches
 none.** The adapter therefore watches `pages` by reference, exactly as it
 watches `rejection`, `continuationsResult` and `runResult`, and sends
@@ -444,7 +458,7 @@ reconcile drops a stale level's data once and then has no shown fork to find.
 | `loadContinuations { entryId }` | Host op 1: the adapter calls the host's continuation loader for the anchor. | None (host-owned). |
 | `loadContinuationRun { fromEntryId }` | Host op 2: the adapter calls the host's run loader starting at the fork's first entry. | None (host-owned). |
 | `checkoutContinuation { entryId }` | Host op 3: the adapter calls the host's checkout handler for the picked fork — the picker's commit. The host maps it onto its own prefer operation (R2a); Poodle never names the host's operation. | None (host-owned). |
-| `deleteContinuation { entryId }` | Host op 4: the adapter calls `onDeleteContinuation(entryId)` for the picked fork, once the operator has confirmed. Poodle does not touch its own pages — the anchor's disclosure state and the rows stand until the host supplies new pages. | None (host-owned). |
+| `deleteContinuation { entryId }` | Host op 4: the adapter calls `onDeleteContinuation(entryId)` for the picked fork, once the operator has confirmed. Poodle does not touch its own pages. It **does** invalidate the anchor's level and re-request its continuations — see below. | None (host-owned). |
 
 The v1 `emitSelectEntry` and `emitCheckout` effects are gone; the v2 index
 `focusRow { index }` is replaced by identity `focusRow { row }`. Effects for

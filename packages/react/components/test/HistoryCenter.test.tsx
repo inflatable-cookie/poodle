@@ -658,6 +658,41 @@ describe("HistoryCenter (react)", () => {
     expect(onCheckoutContinuation).not.toHaveBeenCalled();
   });
 
+  it("re-requests continuations after a delete so the deleted run stops rendering", async () => {
+    // Field report: after a delete the fork's entries stayed in the list,
+    // indented, and clicking one errored until the popover was reopened. The
+    // stale rule cannot catch it — a deleted fork never reaches the spine.
+    const onDeleteContinuation = vi.fn();
+    const onLoadContinuations = vi.fn();
+    const props = { onDeleteContinuation, onLoadContinuations };
+    const { rerender } = render(<HistoryCenter pages={twoForkPages} defaultOpen {...props} />);
+
+    fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    rerender(
+      <HistoryCenter pages={twoForkPages} defaultOpen {...props} continuationsResult={c2Result} />,
+    );
+    rerender(
+      <HistoryCenter
+        pages={twoForkPages}
+        defaultOpen
+        {...props}
+        continuationsResult={c2Result}
+        runResult={x1TwoForkRun}
+      />,
+    );
+    expect(onLoadContinuations).toHaveBeenCalledTimes(1);
+
+    await runForkAction("Delete");
+    const confirm = await screen.findByRole("button", { name: "Delete" });
+    await act(async () => {
+      fireEvent.click(confirm);
+    });
+
+    expect(onDeleteContinuation).toHaveBeenCalledTimes(1);
+    expect(onLoadContinuations).toHaveBeenCalledTimes(2);
+    expect(onLoadContinuations).toHaveBeenLastCalledWith("c2");
+  });
+
   it("cancelling the delete emits nothing and leaves the history list open", async () => {
     const onDeleteContinuation = vi.fn();
     const { rerender } = render(
