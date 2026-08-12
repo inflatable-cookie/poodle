@@ -1,5 +1,10 @@
 /* Styles for HistoryCenter. Extracted from the Svelte component (g12.001
-   shared-styles move). Unique poodle-* selectors; safe as global CSS. */
+   shared-styles move). Unique poodle-* selectors; safe as global CSS.
+
+   v2 (g13-024): renders the stitched history tree — the spine (depth 0) plus
+   fork runs with captions, all drawn with light git-graph lanes. Lane colour
+   and thickness are recipe-themable (`--poodle-recipe-history-center-lane-*`);
+   the geometry (column width, elbow) is internal. */
 
 .poodle-history-center-popover { display: inline-flex; }
 
@@ -17,6 +22,9 @@
      spilled past the rounded edge. With no width here the surface sizes to its
      content between those bounds, which is what the min/max were for. */
   min-width: 0;
+  /* Lane geometry is internal (not part of the recipe contract): one column
+     per depth level, plus the row's own lane column. */
+  --poodle-history-center-lane-width: 0.875rem;
   font-family: var(--poodle-typography-body-family);
   /* Base size for the panel. Without this the entry labels inherited the
      document default (16px) rather than a token, because the row button sets
@@ -82,28 +90,91 @@
   overscroll-behavior: contain;
 }
 
-.poodle-history-center__item {
-  --poodle-history-center-item-fill: var(--poodle-recipe-history-center-item-fill, transparent);
+/* One row of the stitched tree: lane gutter (depth + own lane columns) then
+   the row content. Depth drives the gutter width, so the content inset grows
+   one lane column per depth level and saturates with the row's depth cap. */
+.poodle-history-center__row {
+  display: flex;
+  align-items: stretch;
   border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
-  background: var(--poodle-history-center-item-fill);
 }
 
-.poodle-history-center__item:last-child { border-bottom: 0; }
+.poodle-history-center__row:last-child { border-bottom: 0; }
 
-.poodle-history-center__item[data-position="current"] {
-  --poodle-history-center-item-fill: var(
+.poodle-history-center__row[data-part="entry"] {
+  background: var(--poodle-recipe-history-center-item-fill, transparent);
+}
+
+.poodle-history-center__row[data-part="entry"][data-position="current"] {
+  background: var(
     --poodle-recipe-history-center-current-fill,
     color-mix(in srgb, var(--poodle-color-accent-base) 7%, transparent)
   );
 }
 
-.poodle-history-center__item-row {
+/* Lane gutter — one column per ancestor depth level plus the row's own lane
+   column. Vertical segments sit at column centres; the elbow's horizontal
+   spans from the parent column centre into the row's own lane column. */
+.poodle-history-center__lanes {
   display: flex;
-  align-items: center;
-  gap: 0.25rem;
+  align-items: stretch;
+  flex: none;
 }
 
-.poodle-history-center__item-content {
+.poodle-history-center__lane {
+  position: relative;
+  flex: none;
+  width: var(--poodle-history-center-lane-width);
+  --poodle-history-center-lane-color: var(
+    --poodle-recipe-history-center-lane-color,
+    color-mix(in srgb, var(--poodle-color-text-primary) 25%, transparent)
+  );
+  --poodle-history-center-lane-thickness: var(--poodle-recipe-history-center-lane-thickness, 0.0625rem);
+}
+
+/* Pass-through verticals: ancestor lanes, the spine trunk, and run lanes
+   that continue or end on this row. */
+.poodle-history-center__lane[data-lane="ancestor"],
+.poodle-history-center__lane[data-lane="trunk"],
+.poodle-history-center__lane[data-lane="continue"],
+.poodle-history-center__lane[data-lane="end"] {
+  background: var(--poodle-history-center-lane-color) no-repeat center /
+    var(--poodle-history-center-lane-thickness) 100%;
+}
+
+/* The elbow into a run: a horizontal from the parent lane (half a column
+   left of this cell) into this row's own lane, then the lane turns down.
+   A single-entry run is the elbow plus a short stub (start and end). */
+.poodle-history-center__lane[data-lane="elbow"]::before,
+.poodle-history-center__lane[data-lane="single"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(var(--poodle-history-center-lane-width) / -2);
+  width: var(--poodle-history-center-lane-width);
+  height: var(--poodle-history-center-lane-thickness);
+  background: var(--poodle-history-center-lane-color);
+  transform: translateY(-50%);
+}
+
+.poodle-history-center__lane[data-lane="elbow"]::after,
+.poodle-history-center__lane[data-lane="single"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--poodle-history-center-lane-thickness);
+  height: 50%;
+  background: var(--poodle-history-center-lane-color);
+  transform: translateX(-50%);
+}
+
+.poodle-history-center__lane[data-lane="single"]::after { height: 35%; }
+
+/* Caption rows reserve their own lane column (the run's lane starts at its
+   first entry row) but draw nothing in it. */
+
+.poodle-history-center__entry-content {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
@@ -119,25 +190,25 @@
   cursor: pointer;
 }
 
-.poodle-history-center__item-content:hover {
+.poodle-history-center__entry-content:hover {
   background: var(
     --poodle-recipe-history-center-item-hover-fill,
     color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
   );
 }
 
-.poodle-history-center__item-content:focus-visible {
+.poodle-history-center__entry-content:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   outline-offset: -0.125rem;
 }
 
-.poodle-history-center__item-copy {
+.poodle-history-center__entry-copy {
   display: grid;
   gap: 0.18rem;
   min-width: 0;
 }
 
-.poodle-history-center__item-label {
+.poodle-history-center__entry-label {
   font-size: var(--poodle-typography-label-size);
   line-height: var(--poodle-typography-label-lineHeight);
   overflow: hidden;
@@ -145,7 +216,7 @@
   white-space: nowrap;
 }
 
-.poodle-history-center__item-meta {
+.poodle-history-center__entry-meta {
   color: var(--poodle-color-text-secondary);
   font-size: 0.6875rem;
   line-height: var(--poodle-typography-label-lineHeight);
@@ -175,107 +246,62 @@
   box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-base) 15%, transparent);
 }
 
-/* Fork indicator — expandable affordance on entries with branchCount > 1. */
-.poodle-history-center__fork-indicator {
+/* A fork run's caption — its label, count, and derived relative time.
+   Captions rename and never navigate. */
+.poodle-history-center__caption-copy {
+  display: grid;
+  gap: 0.18rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: calc(var(--poodle-space-panel-y) * 0.85) var(--poodle-space-stack-sm);
+}
+
+.poodle-history-center__caption-name {
+  font-size: var(--poodle-typography-label-size);
+  font-weight: var(--poodle-typography-label-weight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.poodle-history-center__caption-meta {
+  color: var(--poodle-color-text-secondary);
+  font-size: 0.6875rem;
+  line-height: var(--poodle-typography-label-lineHeight);
+}
+
+.poodle-history-center__caption-rename {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: none;
+  align-self: center;
   width: 1.25rem;
   height: 1.25rem;
   margin-right: var(--poodle-space-stack-sm);
   padding: 0;
   border: 0;
   border-radius: var(--poodle-radius-control);
-  background: var(
-    --poodle-recipe-history-center-fork-indicator-fill,
-    color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)
-  );
-  color: var(--poodle-recipe-history-center-fork-indicator-text, var(--poodle-color-accent-base));
+  background: transparent;
+  color: var(--poodle-color-text-secondary);
   cursor: pointer;
 }
 
-.poodle-history-center__fork-indicator:hover {
+.poodle-history-center__caption-rename:hover {
   background: var(
-    --poodle-recipe-history-center-fork-indicator-hover-fill,
-    color-mix(in srgb, var(--poodle-color-accent-base) 22%, transparent)
+    --poodle-recipe-history-center-item-hover-fill,
+    color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
   );
+  color: var(--poodle-color-text-primary);
 }
 
-.poodle-history-center__fork-indicator:focus-visible {
+.poodle-history-center__caption-rename:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   outline-offset: 0.0625rem;
 }
 
-/* Nested branch rows under an expanded fork point. */
-.poodle-history-center__branches {
-  margin: 0;
-  padding: 0 0 0 1.5rem;
-  list-style: none;
-}
-
-.poodle-history-center__branch {
-  --poodle-history-center-branch-fill: var(--poodle-recipe-history-center-branch-fill, transparent);
-  border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
-  background: var(--poodle-history-center-branch-fill);
-}
-
-.poodle-history-center__branch:last-child { border-bottom: 0; }
-
-.poodle-history-center__branch[data-current="true"] {
-  --poodle-history-center-branch-fill: var(
-    --poodle-recipe-history-center-branch-current-fill,
-    color-mix(in srgb, var(--poodle-color-accent-base) 10%, transparent)
-  );
-}
-
-.poodle-history-center__branch-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.125rem;
-  padding-right: var(--poodle-space-stack-sm);
-}
-
-.poodle-history-center__branch-content {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: var(--poodle-space-stack-sm);
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: calc(var(--poodle-space-panel-y) * 0.85) var(--poodle-space-stack-sm);
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.poodle-history-center__branch-content:hover {
-  background: var(
-    --poodle-recipe-history-center-branch-hover-fill,
-    color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
-  );
-}
-
-.poodle-history-center__branch-content:focus-visible {
-  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-  outline-offset: -0.125rem;
-}
-
-.poodle-history-center__branch-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--poodle-typography-label-size);
-}
-
-.poodle-history-center__branch-count {
-  color: var(--poodle-color-text-secondary);
-  font-size: var(--poodle-typography-label-size);
-}
-
 .poodle-history-center__branch-current-badge {
+  justify-self: start;
   padding: 0.05rem 0.35rem;
   border-radius: 999px;
   background: var(
@@ -291,14 +317,9 @@
 }
 
 .poodle-history-center__rename-input {
-  box-sizing: border-box;
-  /* `width: 100%` with horizontal margins overflows: border-box accounts for
-     padding and border but never margin, so the input measured 100% + 2x the
-     inset and spilled past the panel edge. `width: auto` is not an option —
-     an input is a replaced element, so auto resolves to its intrinsic size
-     rather than filling. Subtract the inset the margin adds. */
-  width: calc(100% - (2 * var(--poodle-space-stack-sm)));
+  flex: 1 1 auto;
   min-width: 0;
+  align-self: center;
   margin: calc(var(--poodle-space-panel-y) * 0.4) var(--poodle-space-stack-sm);
   padding: 0.2rem 0.4rem;
   border: 0.0625rem solid var(--poodle-color-border-default);
@@ -334,11 +355,11 @@
   padding: var(--poodle-space-stack-lg) 0;
 }
 
-.poodle-history-center[data-density="compact"] .poodle-history-center__item-content {
+.poodle-history-center[data-density="compact"] .poodle-history-center__entry-content {
   padding-block: calc(var(--poodle-space-panel-y) * 0.7);
 }
 
-.poodle-history-center[data-density="comfortable"] .poodle-history-center__item-content {
+.poodle-history-center[data-density="comfortable"] .poodle-history-center__entry-content {
   padding-block: calc(var(--poodle-space-panel-y) * 1.25);
 }
 
