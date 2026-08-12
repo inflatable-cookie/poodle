@@ -612,13 +612,17 @@ treatment are unaffected — only the fill goes. `block` + `activeFill="none"` +
 | `display` | `flex` |
 | `width` | `100%` |
 | `gap` | `0` |
-| `padding` | `0 var(--poodle-tabs-block-inline-padding)` |
 | `border-bottom` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent)` |
 
-`--poodle-tabs-block-inline-padding` is the block-side custom property that
-inherited the former strip variant's inline padding (value unchanged) — the
-list's outer padding holding the tabs off the bar edge.
+The block list carries **no inline padding**. It inherited some from the
+retired strip variant, to hold the tabs off the bar edge. That reads as an
+unexplained indent wherever a host puts a block bar flush against its own
+chrome, and it cost width rather than only looks: with `box-sizing:
+border-box` the padding comes out of the content box, so a 255px dock strip
+offered 239px, tabs that would have fitted overflowed, and DockRegion's
+overflow detection then compacted them to icon-only. Tabs sit flush; a host
+that wants them inset pads its own container.
 
 ### Item — Block variant
 

@@ -10,7 +10,6 @@
     --poodle-tabs-content-gap: var(--poodle-space-inline-sm);
     --poodle-tabs-list-gap: var(--poodle-space-inline-sm);
     --poodle-tabs-separator-margin: var(--poodle-space-inline-sm);
-    --poodle-tabs-block-inline-padding: var(--poodle-tabs-control-x);
     --poodle-tabs-block-close-margin-end: 0.25rem;
     display: grid;
     gap: var(--poodle-space-stack-md);
@@ -94,7 +93,6 @@
     --poodle-tabs-content-gap: 0.375rem;
     --poodle-tabs-list-gap: 0.25rem;
     --poodle-tabs-separator-margin: 0.375rem;
-    --poodle-tabs-block-inline-padding: 0.5rem;
     --poodle-tabs-block-close-margin-end: 0.25rem;
   }
 
@@ -103,7 +101,6 @@
     --poodle-tabs-content-gap: var(--poodle-space-inline-sm);
     --poodle-tabs-list-gap: var(--poodle-space-inline-sm);
     --poodle-tabs-separator-margin: var(--poodle-space-inline-sm);
-    --poodle-tabs-block-inline-padding: 0.75rem;
     --poodle-tabs-block-close-margin-end: 0.375rem;
   }
 
@@ -112,7 +109,6 @@
     --poodle-tabs-content-gap: 0.625rem;
     --poodle-tabs-list-gap: 0.625rem;
     --poodle-tabs-separator-margin: 0.625rem;
-    --poodle-tabs-block-inline-padding: 0.75rem;
     --poodle-tabs-block-close-margin-end: 0.375rem;
   }
 
@@ -183,13 +179,18 @@
   }
 
   /* Block: full-width tabs with separators, no radius, no outer border chrome.
-     Block absorbed the former strip variant's inline padding — the list's
-     outer padding holding the tabs off the bar edge. */
+
+     No inline padding. Block inherited it from the retired strip variant to
+     hold the tabs off the bar edge, which reads as an unexplained indent in
+     every host that puts a block bar flush against its own chrome — a dock
+     strip most visibly. It also cost real width: `box-sizing: border-box`
+     means the padding comes out of the content box, so a 255px dock strip
+     offered 239px and tabs that would have fitted overflowed, which in a
+     DockRegion then triggered compaction to icon-only. */
   .poodle-tabs[data-variant="block"] .poodle-tabs__list {
     display: flex;
     width: 100%;
     gap: 0;
-    padding: 0 var(--poodle-tabs-block-inline-padding);
     border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
     background: var(--poodle-recipe-tabs-block-list-fill, color-mix(in srgb, var(--poodle-color-background-panel) 90%, transparent));
   }
