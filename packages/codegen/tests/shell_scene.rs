@@ -1,13 +1,17 @@
-//! Tests for the card 035 shell scene: the Rust-authored scene (R1), the
-//! serialized fixture round trip, and the two web shells' shared artifact.
+//! Tests for the card 035/036 shell scene: the Rust-authored scene (R1),
+//! the serialized fixture round trip, and the four shells' shared artifact —
+//! Svelte + React through `shell-scene` (TS), GPUI + Jetstream through its
+//! card-036 Rust sibling `shell-rust` (R2: a sibling target, `shell-scene`'s
+//! output untouched).
 //!
-//! The card's required test — "the two web shells expose the same capability
+//! The card's required test — "the four shells expose the same capability
 //! set and the same label text, derived from the scene rather than a
 //! hand-written list" — is served by
-//! [`both_web_shells_carry_the_same_scene_derived_artifact`]: the expected
-//! artifact is the `shell-scene` target's render of the authored scene, not
-//! a hand-listed expectation, and both committed web artifacts must equal
-//! it byte-exact. A shell that drifts (renders a different control set or
+//! [`both_web_shells_carry_the_same_scene_derived_artifact`] and
+//! [`both_native_shells_carry_the_same_scene_derived_artifact`]: the
+//! expected artifact is the target's render of the authored scene, not a
+//! hand-listed expectation, and each committed artifact must equal it
+//! byte-exact. A shell that drifts (renders a different control set or
 //! label text) fails the comparison. A hand-listed expectation would pass
 //! while the shells drift, which is the failure this card exists to
 //! prevent.
@@ -24,6 +28,10 @@ const SHELL_FIXTURE: &str = "packages/codegen/fixtures/shell-model.json";
 
 const SVELTE_ARTIFACT: &str = "packages/svelte/preview/src/generated/preview-shell.ts";
 const REACT_ARTIFACT: &str = "packages/react/preview/src/generated/preview-shell.ts";
+const GPUI_ARTIFACT: &str = "packages/gpui/preview/src/generated/preview-shell.rs";
+const JETSTREAM_ARTIFACT: &str = "packages/jetstream/preview/src/generated/preview-shell.rs";
+const GPUI_MANIFEST: &str = "packages/gpui/preview/Cargo.toml";
+const JETSTREAM_MANIFEST: &str = "packages/jetstream/preview/Cargo.toml";
 
 fn crate_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -59,6 +67,19 @@ fn render_shell_artifact() -> Vec<GeneratedFile> {
     );
     generate(&model, SHELL_FIXTURE, &targets::shell::ShellSceneTarget)
         .expect("shell target renders the authored model")
+}
+
+/// The shell-rust target's render of the authored shell model (card 036):
+/// the same scene in Rust shape, consumed by the native previews.
+fn render_rust_artifact() -> Vec<GeneratedFile> {
+    let model = models::preview_shell::shell_model();
+    let findings = model.validate();
+    assert!(
+        findings.is_empty(),
+        "the authored shell model validates clean: {findings:?}"
+    );
+    generate(&model, SHELL_FIXTURE, &targets::shell_rust::ShellRustTarget)
+        .expect("shell-rust target renders the authored model")
 }
 
 fn artifact_bytes(path: &str) -> Vec<u8> {
@@ -199,14 +220,49 @@ fn both_web_shells_carry_the_same_scene_derived_artifact() {
     );
 }
 
+/// The card-036 counterpart: both native shells carry the same scene-derived
+/// Rust artifact (R1: self-contained plain data; R2: the `shell-rust`
+/// sibling target). GPUI and Jetstream must equal the render byte-exact.
+#[test]
+fn both_native_shells_carry_the_same_scene_derived_artifact() {
+    let files = render_rust_artifact();
+    assert_eq!(files.len(), 1, "one scene renders one Rust artifact");
+    let rendered = &files[0];
+    assert_eq!(rendered.path, "preview-shell.rs");
+    assert!(
+        !rendered.contents.is_empty(),
+        "the Rust artifact is not an empty stub"
+    );
+    assert!(
+        !rendered.contents.contains("use poodle_ir")
+            && !rendered.contents.contains("use poodle_codegen"),
+        "the Rust artifact imports no Poodle crate (R1 — self-contained)"
+    );
+
+    assert_eq!(
+        artifact_bytes(GPUI_ARTIFACT),
+        rendered.contents.as_bytes(),
+        "the GPUI shell's committed artifact equals the scene's render"
+    );
+    assert_eq!(
+        artifact_bytes(JETSTREAM_ARTIFACT),
+        rendered.contents.as_bytes(),
+        "the Jetstream shell's committed artifact equals the scene's render"
+    );
+}
+
 /// The labels and capability kinds the scene itself carries, surfaced from
 /// the artifact — the R4 reading: label text is a deterministic projection
 /// of the scene's axes and search presence, and the artifact is the single
-/// copy both shells read.
+/// copy both shells read. Both the TS artifact (web) and the Rust artifact
+/// (natives) must carry the same projection (card 036 R2).
 #[test]
 fn artifact_labels_are_a_projection_of_the_scene() {
     let files = render_shell_artifact();
     let contents = &files[0].contents;
+
+    let rust_files = render_rust_artifact();
+    let rust_contents = &rust_files[0].contents;
 
     let model = models::preview_shell::shell_model();
     let scene = model.scene("preview-shell").expect("the one scene");
@@ -221,7 +277,11 @@ fn artifact_labels_are_a_projection_of_the_scene() {
         };
         assert!(
             contents.contains(&format!("kind: \"{kind}\"")),
-            "artifact carries the scene's {kind} control"
+            "TS artifact carries the scene's {kind} control"
+        );
+        assert!(
+            rust_contents.contains(&format!("kind: \"{kind}\"")),
+            "Rust artifact carries the scene's {kind} control"
         );
     }
     assert!(
@@ -230,10 +290,14 @@ fn artifact_labels_are_a_projection_of_the_scene() {
     );
     assert!(
         contents.contains("kind: \"search\""),
-        "artifact carries the search control from the scene's search config"
+        "TS artifact carries the search control from the scene's search config"
+    );
+    assert!(
+        rust_contents.contains("kind: \"search\""),
+        "Rust artifact carries the search control from the scene's search config"
     );
 
-    // Deleting search from the scene removes the control from the artifact
+    // Deleting search from the scene removes the control from the artifacts
     // (R3) — prove the projection, not the current value.
     let mut without_search = model.clone();
     if let Some(scene) = without_search.scenes.first_mut() {
@@ -247,7 +311,17 @@ fn artifact_labels_are_a_projection_of_the_scene() {
     .expect("renders without search");
     assert!(
         !without[0].contents.contains("kind: \"search\""),
-        "removing search from the scene removes the control from the artifact"
+        "removing search from the scene removes the control from the TS artifact"
+    );
+    let without_rust = generate(
+        &without_search,
+        SHELL_FIXTURE,
+        &targets::shell_rust::ShellRustTarget,
+    )
+    .expect("renders without search");
+    assert!(
+        !without_rust[0].contents.contains("kind: \"search\""),
+        "removing search from the scene removes the control from the Rust artifact"
     );
 }
 
@@ -257,41 +331,44 @@ fn artifact_labels_are_a_projection_of_the_scene() {
 
 #[test]
 fn artifact_header_names_the_source_definition_and_generator_version() {
-    let files = render_shell_artifact();
-    let contents = &files[0].contents;
-
-    let header_lines: Vec<&str> = contents
-        .lines()
-        .take_while(|line| line.starts_with("// "))
-        .collect();
-    assert!(
-        header_lines
-            .iter()
-            .any(|line| *line == format!("// Source: {SHELL_FIXTURE}")),
-        "header names the source definition (the serialized authored model): {header_lines:?}"
-    );
-    assert!(
-        header_lines.iter().any(|line| *line
-            == format!(
-                "// Generated by poodle-codegen {GENERATOR_VERSION}. Do not edit manually."
-            )),
-        "header carries the generator version: {header_lines:?}"
-    );
-    assert!(
-        header_lines
-            .iter()
-            .any(|line| *line == format!("// IR schema version: {}", poodle_ir::IR_SCHEMA_VERSION)),
-        "header carries the IR schema version: {header_lines:?}"
-    );
+    for contents in [
+        &render_shell_artifact()[0].contents,
+        &render_rust_artifact()[0].contents,
+    ] {
+        let header_lines: Vec<&str> = contents
+            .lines()
+            .take_while(|line| line.starts_with("// "))
+            .collect();
+        assert!(
+            header_lines
+                .iter()
+                .any(|line| *line == format!("// Source: {SHELL_FIXTURE}")),
+            "header names the source definition (the serialized authored model): {header_lines:?}"
+        );
+        assert!(
+            header_lines.iter().any(|line| *line
+                == format!(
+                    "// Generated by poodle-codegen {GENERATOR_VERSION}. Do not edit manually."
+                )),
+            "header carries the generator version: {header_lines:?}"
+        );
+        assert!(
+            header_lines
+                .iter()
+                .any(|line| *line
+                    == format!("// IR schema version: {}", poodle_ir::IR_SCHEMA_VERSION)),
+            "header carries the IR schema version: {header_lines:?}"
+        );
+    }
 }
 
 // ---------------------------------------------------------------------------
-// One Rust definition change updates both web shells in one `ir:build`
+// One Rust definition change updates all four shells in one `ir:build`
 // (spec 063; the card's acceptance)
 // ---------------------------------------------------------------------------
 
 #[test]
-fn one_scene_change_moves_both_web_artifacts() {
+fn one_scene_change_moves_all_four_artifacts() {
     let mut changed = models::preview_shell::shell_model();
     // One authored value change: contrast default 0.5 -> 0.8.
     changed.scenes[0]
@@ -306,7 +383,7 @@ fn one_scene_change_moves_both_web_artifacts() {
 
     assert!(
         contents.contains("contrast: 0.8"),
-        "the changed value lands in the artifact"
+        "the changed value lands in the TS artifact"
     );
     assert_ne!(
         contents.as_bytes(),
@@ -317,6 +394,29 @@ fn one_scene_change_moves_both_web_artifacts() {
         contents.as_bytes(),
         artifact_bytes(REACT_ARTIFACT).as_slice(),
         "the React artifact would move in one rebuild"
+    );
+
+    let rust_files = generate(
+        &changed,
+        SHELL_FIXTURE,
+        &targets::shell_rust::ShellRustTarget,
+    )
+    .expect("renders the changed scene");
+    let rust_contents = &rust_files[0].contents;
+
+    assert!(
+        rust_contents.contains("contrast: Some(0.8)"),
+        "the changed value lands in the Rust artifact"
+    );
+    assert_ne!(
+        rust_contents.as_bytes(),
+        artifact_bytes(GPUI_ARTIFACT).as_slice(),
+        "the GPUI artifact would move in one rebuild"
+    );
+    assert_ne!(
+        rust_contents.as_bytes(),
+        artifact_bytes(JETSTREAM_ARTIFACT).as_slice(),
+        "the Jetstream artifact would move in one rebuild"
     );
 }
 
@@ -370,6 +470,65 @@ fn shell_web_artifacts_fail_check_on_drift_and_check_never_writes() {
         .status()
         .expect("author runs");
     assert!(status.success(), "authoring writes the fixture");
+}
+
+/// The card-036 counterpart of the web drift test: `ir:check` must fail on
+/// drift in a **Rust** artifact too, and check mode must never write.
+#[test]
+fn shell_rust_artifacts_fail_check_on_drift_and_check_never_writes() {
+    let bin = env!("CARGO_BIN_EXE_poodle-codegen");
+    let out = scratch("rust-artifacts");
+    let root = out.join("generated");
+
+    // A full write into the scratch, mirroring the Effigy selector.
+    let status = Command::new(bin)
+        .args([SHELL_FIXTURE, "--out"])
+        .arg(&out)
+        .args(["--target", "shell-rust"])
+        .current_dir(repo_root())
+        .status()
+        .expect("bin runs");
+    assert!(status.success(), "shell-rust write exits 0");
+    let committed = fs::read_to_string(root.join("preview-shell.rs")).expect("artifact written");
+
+    // Plant drift in the committed Rust artifact, then check: must fail, and
+    // must not mutate the tree.
+    fs::write(
+        root.join("preview-shell.rs"),
+        format!("{committed}\n// planted drift"),
+    )
+    .expect("plant drift");
+    fs::write(root.join("orphan.json"), "{}\n").expect("plant orphan");
+    let before = snapshot(&root);
+
+    let status = Command::new(bin)
+        .args([SHELL_FIXTURE, "--out"])
+        .arg(&out)
+        .args(["--target", "shell-rust", "--check"])
+        .current_dir(repo_root())
+        .status()
+        .expect("check runs");
+    assert!(!status.success(), "drift in a Rust artifact fails ir:check");
+    assert_eq!(snapshot(&root), before, "check mode never mutates the tree");
+}
+
+/// R1 asserted, not just avoided: neither native preview manifest may name
+/// `poodle-ir` or `poodle-codegen`. The artifacts are pulled in by
+/// `#[path]`, so no manifest change was needed — prove the constraint.
+#[test]
+fn native_preview_manifests_carry_no_poodle_ir_or_codegen_dependency() {
+    for manifest in [GPUI_MANIFEST, JETSTREAM_MANIFEST] {
+        let text = fs::read_to_string(repo_root().join(manifest))
+            .unwrap_or_else(|error| panic!("{manifest} is readable: {error}"));
+        assert!(
+            !text.contains("poodle-ir"),
+            "{manifest} must not depend on poodle-ir (card 036 R1)"
+        );
+        assert!(
+            !text.contains("poodle-codegen"),
+            "{manifest} must not depend on poodle-codegen (card 036 R1)"
+        );
+    }
 }
 
 // ---------------------------------------------------------------------------

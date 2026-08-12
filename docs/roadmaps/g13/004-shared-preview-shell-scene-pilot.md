@@ -1,6 +1,6 @@
 # g13.004 Shared Preview Shell Scene Pilot
 
-Status: in progress — part 1 of 2 (card 035, the two web shells) landed; part 2 (card 036, the native shells) closes this milestone
+Status: complete — closed by card 036 (`db4e4510` + `thread/g13-036-shell-scene-native-shells`): all four shells read the one scene; the native shells consume the self-contained Rust artifact
 Owner: Poodle core
 Depends on: `g13.003`
 

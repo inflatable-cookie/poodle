@@ -42,8 +42,9 @@ fn usage() -> String {
      --out    directory committed artifacts are written to / compared against;\n\
               each target owns a subdirectory below it.\n\
      --check  compare instead of write; never mutates the worktree.\n\
-     --target restrict emission to one target id (default: every registered\n\
-              target; the scene-scoped `shell-scene` target is select-only).\n\
+     --target restrict emission to one target id (default: every registered
+              target; the scene-scoped `shell-scene` and `shell-rust`
+              targets are select-only).
      \n\
      usage: poodle-codegen --author-shell <OUT> [--check]\n\
      \n\

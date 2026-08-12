@@ -13,6 +13,12 @@ mod style_bridge;
 mod token_view;
 mod usage_docs_view;
 
+/// The scene's generated Rust artifact (card 036): plain data, no Poodle
+/// crate imports — pulled in via the `poodle-tokens` `#[path]` mechanism
+/// (g13-b003 R1 names it as the shape g13 follows).
+#[path = "generated/preview-shell.rs"]
+mod generated_shell;
+
 use std::borrow::Cow;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
@@ -371,8 +377,19 @@ impl PreviewRoot {
             .child(pill(self.state.control_size.label()))
     }
 
-    /// Display controls bar — theme, density, size, and catalogue search.
-    /// Matches Svelte: 80px height, panel bg, 12px 16px padding, 20px/32px gap.
+    /// Display controls bar — theme, density, size, contrast, and catalogue
+    /// search. Matches Svelte: 80px height, panel bg, 12px 16px padding,
+    /// 20px/32px gap.
+    ///
+    /// The control surface is the scene's (card 036 R4): which controls
+    /// exist and their label text come from the generated artifact
+    /// (`generated/preview-shell.rs` — plain data, no Poodle crate imports,
+    /// per card 036 R1); widget mechanics, value sets, and runtime state
+    /// stay host-owned. Kinds are compared as plain strings so deleting an
+    /// axis or search from the scene removes the control cleanly instead of
+    /// becoming a compile error (the card-035 R3 removal property, repeated
+    /// for the natives). Casing is presentation (R3): this shell renders
+    /// eyebrows uppercase as its house look.
     #[expect(clippy::too_many_arguments, reason = "the preview control bar keeps resolved theme values explicit")]
     fn render_display_controls(
         &self,
@@ -384,7 +401,10 @@ impl PreviewRoot {
         h: Pixels,
         cx: &mut Context<Self>,
     ) -> Div {
-        div()
+        let scene = &generated_shell::PREVIEW_SHELL;
+        let find_control = |kind: &str| scene.controls.iter().find(|c| c.kind == kind);
+
+        let mut bar = div()
             .w_full()
             .h(h)
             .flex()
@@ -397,15 +417,17 @@ impl PreviewRoot {
             .bg(color_to_hsla(panel_bg))
             .border_b_1()
             .border_color(color_to_hsla(border_subtle))
-            .flex_shrink_0()
-            // No `overflow_hidden` here: the ThemeSelect panel paints outside
-            // this bar when open, and clipping it left the swatch grid cut in
-            // half. See the placement note in the g12.019 card — the shared
-            // recipe lays the panel out beside the trigger rather than
-            // portalling it, which the contract asks for.
-            // Theme group — the real ThemeSelect, as the Svelte preview uses,
-            // rather than a row of one button per theme.
-            .child(
+            .flex_shrink_0();
+        // No `overflow_hidden` here: the ThemeSelect panel paints outside
+        // this bar when open, and clipping it left the swatch grid cut in
+        // half. See the placement note in the g12.019 card — the shared
+        // recipe lays the panel out beside the trigger rather than
+        // portalling it, which the contract asks for.
+
+        // Theme group — the real ThemeSelect, as the Svelte preview uses,
+        // rather than a row of one button per theme. Label from the scene.
+        if let Some(control) = find_control("theme") {
+            bar = bar.child(
                 div()
                     .flex()
                     .flex_col()
@@ -415,7 +437,7 @@ impl PreviewRoot {
                             .text_size(px(10.0))
                             .font_weight(FontWeight::SEMIBOLD)
                             .text_color(color_to_hsla(text_secondary))
-                            .child("THEME"),
+                            .child(control.label.to_uppercase()),
                     )
                     .child(deferred(
                         ThemeSelect::from_spec(
@@ -450,35 +472,50 @@ impl PreviewRoot {
                             })
                         }),
                     )),
-            )
-            // Density group
-            .child({
-                let opts: Vec<(&str, bool)> = Density::ALL
-                    .iter()
-                    .map(|d| (d.label(), self.state.density == *d))
-                    .collect();
-                self.render_toggle_group(
-                    "Density",
-                    text_secondary,
-                    &opts,
-                    accent,
-                    border,
-                    "density",
-                    cx,
-                )
-            })
-            // Size group
-            .child({
-                let opts: Vec<(&str, bool)> = ControlSize::ALL
-                    .iter()
-                    .map(|s| (s.label(), self.state.control_size == *s))
-                    .collect();
-                self.render_toggle_group("Size", text_secondary, &opts, accent, border, "size", cx)
-            })
-            // Contrast — a real Slider over the continuous neutral-ramp axis,
-            // matching the web preview's range input and the Jetstream shell.
-            // Four preset buttons could not express the values between them.
-            .child(
+            );
+        }
+
+        // Density group
+        if let Some(control) = find_control("density") {
+            let opts: Vec<(&str, bool)> = Density::ALL
+                .iter()
+                .map(|d| (d.label(), self.state.density == *d))
+                .collect();
+            bar = bar.child(self.render_toggle_group(
+                control.label,
+                text_secondary,
+                &opts,
+                accent,
+                border,
+                "density",
+                cx,
+            ));
+        }
+
+        // Size group
+        if let Some(control) = find_control("size") {
+            let opts: Vec<(&str, bool)> = ControlSize::ALL
+                .iter()
+                .map(|s| (s.label(), self.state.control_size == *s))
+                .collect();
+            bar = bar.child(self.render_toggle_group(
+                control.label,
+                text_secondary,
+                &opts,
+                accent,
+                border,
+                "size",
+                cx,
+            ));
+        }
+
+        // Contrast — a real Slider over the continuous neutral-ramp axis,
+        // matching the web preview's range input and the Jetstream shell.
+        // Four preset buttons could not express the values between them.
+        // Header text is the scene's label, uppercased as house style; the
+        // accessibility label is the scene's word, not a second copy (R3).
+        if let Some(control) = find_control("contrast") {
+            bar = bar.child(
                 div()
                     .flex()
                     .flex_col()
@@ -488,7 +525,11 @@ impl PreviewRoot {
                             .text_size(px(10.0))
                             .font_weight(FontWeight::SEMIBOLD)
                             .text_color(color_to_hsla(text_secondary))
-                            .child(format!("CONTRAST  {:.2}", self.state.contrast)),
+                            .child(format!(
+                                "{}  {:.2}",
+                                control.label.to_uppercase(),
+                                self.state.contrast
+                            )),
                     )
                     .child(
                         // The slider fills its host's width, so the header has
@@ -515,7 +556,7 @@ impl PreviewRoot {
                             &self.state.theme,
                         )
                         .with_id("contrast")
-                        .aria_label("Neutral contrast")
+                        .aria_label(control.label)
                         .on_change({
                             let queue = std::sync::Arc::clone(&self.state.node_events);
                             std::sync::Arc::new(move |value: f64| {
@@ -525,8 +566,12 @@ impl PreviewRoot {
                             })
                         })),
                     ),
-            )
-            .child(
+            );
+        }
+
+        // Search group — filters the component catalogue by name.
+        if let Some(control) = find_control("search") {
+            bar = bar.child(
                 div()
                     .flex()
                     .flex_col()
@@ -538,14 +583,14 @@ impl PreviewRoot {
                             .text_size(px(11.0))
                             .font_weight(FontWeight::SEMIBOLD)
                             .text_color(color_to_hsla(text_secondary))
-                            .child("SEARCH"),
+                            .child(control.label.to_uppercase()),
                     )
                     .child(
                         TextInput::from_spec(
                             TextInputSpec::new()
                                 .with_id("component-search")
                                 .with_input_type("search")
-                                .with_placeholder("Find component...")
+                                .with_placeholder(control.placeholder.unwrap_or("Find component..."))
                                 .with_value(&self.state.component_search)
                                 .with_selection(
                                     self.state.search_selection.0,
@@ -585,7 +630,10 @@ impl PreviewRoot {
                             }
                         }),
                     ),
-            )
+            );
+        }
+
+        bar
     }
 
     /// A labelled toggle group (uppercase eyebrow + row of individual toggle buttons).
