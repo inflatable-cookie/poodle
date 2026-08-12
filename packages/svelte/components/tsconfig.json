@@ -2,11 +2,16 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "strict": true,
-    "types": ["svelte"]
+    "types": [
+      "svelte",
+      "node"
+    ]
   },
   "include": [
     "src/**/*.d.ts",
     "src/**/*.ts",
-    "src/**/*.svelte"
+    "src/**/*.svelte",
+    "test/**/*.ts",
+    "test/**/*.svelte"
   ]
 }

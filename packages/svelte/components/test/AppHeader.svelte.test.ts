@@ -17,7 +17,7 @@ describe("AppHeader (svelte)", () => {
 
   it("renders the header with unchanged anatomy", () => {
     const { container } = render(AppHeader, { props: { title: "Finch", dragRegion: true } });
-    const header = container.querySelector("header.poodle-app-header")!;
+    const header = container.querySelector<HTMLElement>("header.poodle-app-header")!;
     expect(header).toBeTruthy();
     expect(header.getAttribute("data-drag-region")).toBe("true");
     expect(header.getAttribute("aria-label")).toBe("Finch");
@@ -26,7 +26,7 @@ describe("AppHeader (svelte)", () => {
 
   it("renders data-drag-region=false when dragRegion is false (default)", () => {
     const { container } = render(AppHeader, { props: { title: "Finch" } });
-    const header = container.querySelector("header.poodle-app-header")!;
+    const header = container.querySelector<HTMLElement>("header.poodle-app-header")!;
     expect(header.getAttribute("data-drag-region")).toBe("false");
   });
 });
@@ -101,7 +101,7 @@ describe("AppHeader centre region (svelte)", () => {
     const { container } = render(AppHeaderCenterHarness, {
       props: { center: false },
     });
-    const header = container.querySelector("header.poodle-app-header")!;
+    const header = container.querySelector<HTMLElement>("header.poodle-app-header")!;
     expect(header.hasAttribute("data-center")).toBe(false);
     expect(normalizedHtml(header)).toBe(DEFAULT_REGION_MARKUP);
   });
@@ -109,7 +109,7 @@ describe("AppHeader centre region (svelte)", () => {
   it("keeps the default computed grid when center is absent", () => {
     injectAppHeaderStyles();
     const { container } = render(AppHeader, { props: { title: "Finch" } });
-    const header = container.querySelector("header.poodle-app-header")!;
+    const header = container.querySelector<HTMLElement>("header.poodle-app-header")!;
     expect(gridOf(header)).toBe("minmax(0, 1fr) auto auto");
   });
 
@@ -118,7 +118,7 @@ describe("AppHeader centre region (svelte)", () => {
     const { container } = render(AppHeaderCenterHarness, {
       props: { center: true },
     });
-    const header = container.querySelector("header.poodle-app-header")!;
+    const header = container.querySelector<HTMLElement>("header.poodle-app-header")!;
     expect(header.getAttribute("data-center")).toBe("");
     expect(normalizedHtml(header)).toBe(CENTERED_REGION_MARKUP);
     expect(gridOf(header)).toBe(
@@ -130,8 +130,8 @@ describe("AppHeader centre region (svelte)", () => {
     injectAppHeaderStyles(600); // 37.5rem — the media query matches at parse time
     const plain = render(AppHeaderCenterHarness, { props: { center: false } });
     const centred = render(AppHeaderCenterHarness, { props: { center: true } });
-    const plainHeader = plain.container.querySelector("header.poodle-app-header")!;
-    const centredHeader = centred.container.querySelector("header.poodle-app-header")!;
+    const plainHeader = plain.container.querySelector<HTMLElement>("header.poodle-app-header")!;
+    const centredHeader = centred.container.querySelector<HTMLElement>("header.poodle-app-header")!;
     expect(gridOf(plainHeader)).toBe("1fr");
     expect(gridOf(centredHeader)).toBe(
       "auto minmax(0, 1fr) auto",

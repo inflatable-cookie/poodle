@@ -1,4 +1,5 @@
 import { render } from "@testing-library/svelte";
+import type { Component } from "svelte";
 import { describe, expect, it } from "vitest";
 
 import { COMPONENT_PROPS, SMOKE_EXCLUDE } from "../../../../test/fixtures/component-props.ts";
@@ -7,9 +8,12 @@ import { COMPONENT_PROPS, SMOKE_EXCLUDE } from "../../../../test/fixtures/compon
 // components are covered automatically — coverage cannot silently regress.
 // Each component must mount, emit a poodle-* class (proof the Spec/token wiring
 // resolved), and log no console.error (guarded in test/vitest.setup.ts).
+// Typed as a Component rather than `unknown`: the previous `render(Comp as
+// never, …)` erased the component type, which made `render` infer `props` as
+// `undefined` and rejected the fixture props.
 const modules = import.meta.glob("../src/*.svelte", { eager: true }) as Record<
   string,
-  { default: unknown }
+  { default: Component<Record<string, unknown>> }
 >;
 
 const entries = Object.entries(modules)
@@ -24,7 +28,7 @@ describe("svelte component smoke", () => {
 
   for (const [name, Comp] of entries) {
     it(`${name} mounts and emits a poodle- class`, () => {
-      const { container } = render(Comp as never, { props: COMPONENT_PROPS[name] ?? {} });
+      const { container } = render(Comp, { props: COMPONENT_PROPS[name] ?? {} });
       // Overlays (Dialog, Drawer, ToastHost, ...) portal into document.body, so
       // fall back to the document when the render container itself is empty.
       const found =
