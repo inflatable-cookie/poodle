@@ -2,6 +2,8 @@ import { useState, type FocusEvent, type MouseEvent, type ReactNode } from "reac
 
 import "@inflatable-cookie/poodle-core/styles/button.css";
 
+import { buttonDefinition } from "../../preview/src/generated/button";
+
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, resolveSupportingVisualSize, useUiPresentation } from "./presentation";
 import { Spinner } from "./Spinner";
@@ -13,6 +15,25 @@ import type {
   IconProp,
   SemanticControlSizeRole,
 } from "./types";
+
+// The definition owns the rendered vocabulary (card 041 R2): the anatomy's
+// DOM classes and the eleven data-* attribute names. A rename in
+// packages/codegen/src/models/button.rs moves the DOM here with no hand
+// edit; `effigy ir:check` gates drift in the artifact.
+const parts = new Map<string, string>(buttonDefinition.parts.map((part) => [part.id, part.className]));
+const attributes = new Map<string, string>(buttonDefinition.attributes.map((attribute) => [attribute.id, attribute.name]));
+
+function partClass(id: string): string {
+  const className = parts.get(id);
+  if (!className) throw new Error(`Button definition has no part '${id}'`);
+  return className;
+}
+
+function attributeName(id: string): string {
+  const name = attributes.get(id);
+  if (!name) throw new Error(`Button definition has no attribute '${id}'`);
+  return name;
+}
 
 export interface ButtonProps {
   variant?: ButtonVariant;
@@ -95,6 +116,23 @@ export function Button({
   const resolvedDensity = density ?? uiPresentation.density;
   const resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
 
+  // The eleven data-* attributes, emitted from the definition's attribute
+  // names (R2). The value derivation stays here — it is the runtime's
+  // projection (CROSS-14) — but the names come from button.rs.
+  const dataAttributes = {
+    [attributeName("variant")]: variant,
+    [attributeName("tone")]: tone !== "default" ? tone : undefined,
+    [attributeName("size")]: resolvedSize,
+    [attributeName("density")]: resolvedDensity,
+    [attributeName("icon-only")]: iconOnly || undefined,
+    [attributeName("has-leading")]: hasLeading || undefined,
+    [attributeName("has-trailing")]: hasTrailing || undefined,
+    [attributeName("truncate")]: truncate || undefined,
+    [attributeName("fit")]: fit !== "default" ? fit : undefined,
+    [attributeName("loading")]: loading,
+    [attributeName("pressed")]: isToggle ? currentPressed : undefined,
+  };
+
   function handleClick(event: MouseEvent<HTMLButtonElement>): void {
     if (isToggle) {
       const next = !currentPressed;
@@ -111,19 +149,9 @@ export function Button({
       formAction={formAction ?? undefined}
       formNoValidate={formNoValidate || undefined}
       formTarget={formTarget ?? undefined}
-      className={`poodle-button ${className}`.trim()}
+      className={`${partClass("root")} ${className}`.trim()}
       style={maxWidth ? { maxWidth } : undefined}
-      data-variant={variant}
-      data-tone={tone !== "default" ? tone : undefined}
-      data-size={resolvedSize}
-      data-density={resolvedDensity}
-      data-icon-only={iconOnly || undefined}
-      data-has-leading={hasLeading || undefined}
-      data-has-trailing={hasTrailing || undefined}
-      data-truncate={truncate || undefined}
-      data-fit={fit !== "default" ? fit : undefined}
-      data-loading={loading}
-      data-pressed={isToggle ? currentPressed : undefined}
+      {...dataAttributes}
       disabled={isUnavailable}
       aria-label={ariaLabel ?? undefined}
       aria-pressed={isToggle ? currentPressed : undefined}
@@ -135,27 +163,27 @@ export function Button({
       onBlur={(event) => onBlur?.(event)}
     >
       {loading ? (
-        <span className="poodle-button__spinner" aria-hidden="true">
+        <span className={partClass("spinner")} aria-hidden="true">
           <Spinner variant="ring" size={resolvedIconSize} tone="current" />
         </span>
       ) : null}
 
       {leading || leadingIcon ? (
-        <span className="poodle-button__icon" aria-hidden="true">
+        <span className={partClass("leading-icon")} aria-hidden="true">
           {leading ?? (leadingIcon ? <Icon icon={leadingIcon} size={resolvedIconSize} /> : null)}
         </span>
       ) : null}
 
-      {children ? <span className="poodle-button__label">{children}</span> : null}
+      {children ? <span className={partClass("label")}>{children}</span> : null}
 
       {trailing || trailingIcon ? (
-        <span className="poodle-button__icon" aria-hidden="true">
+        <span className={partClass("trailing-icon")} aria-hidden="true">
           {trailing ?? (trailingIcon ? <Icon icon={trailingIcon} size={resolvedIconSize} /> : null)}
         </span>
       ) : null}
 
       {chevron ? (
-        <span className="poodle-button__chevron" aria-hidden="true">
+        <span className={partClass("chevron")} aria-hidden="true">
           <Icon name="chevron-down" size={resolvedIconSize} />
         </span>
       ) : null}

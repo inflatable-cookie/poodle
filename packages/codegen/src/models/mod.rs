@@ -6,4 +6,5 @@
 //! content, not schema, so it lives in `poodle-codegen`, not `poodle-ir`.
 //! Where production models are authored is a `g13.008` decision.
 
+pub mod button;
 pub mod preview_shell;

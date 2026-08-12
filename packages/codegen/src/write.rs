@@ -15,8 +15,12 @@ use crate::error::{CodegenError, Result};
 
 /// Materializes the generated files under `output_root`, mirroring the
 /// icons script's write mode: stale orphans are deleted, every expected
-/// file is written. Orphan deletion walks the whole root recursively so the
-/// write mode and the check mode agree on what "stale" means.
+/// file is written. Orphan deletion walks the output root's **top level**
+/// only: each target owns the top level of its own output root, and a
+/// nested directory is another target's root (card 041: `shell-scene` and
+/// `button-ts` share one physical `generated/` directory inside the web
+/// packages, so a recursive sweep would delete the sibling target's
+/// artifact). Write mode and check mode agree on what "stale" means.
 pub fn write_outputs(output_root: &Path, files: &[GeneratedFile]) -> Result<()> {
     let expected: std::collections::BTreeSet<&str> =
         files.iter().map(|file| file.path.as_str()).collect();
@@ -57,30 +61,24 @@ pub fn write_outputs(output_root: &Path, files: &[GeneratedFile]) -> Result<()> 
     Ok(())
 }
 
-/// Recursively lists every file under `root`, sorted.
+/// Lists the top-level files of `root`, sorted. Directories are skipped:
+/// they are sibling targets' output roots, not this target's files (the
+/// card 041 shared-`generated/` layout).
 fn list_files(root: &Path) -> Result<Vec<std::path::PathBuf>> {
     let mut out = Vec::new();
-    list_files_into(root, &mut out)?;
-    out.sort();
-    Ok(out)
-}
-
-fn list_files_into(dir: &Path, out: &mut Vec<std::path::PathBuf>) -> Result<()> {
-    let entries = fs::read_dir(dir).map_err(|error| CodegenError::Read {
-        path: dir.to_path_buf(),
+    for entry in fs::read_dir(root).map_err(|error| CodegenError::Read {
+        path: root.to_path_buf(),
         source: error,
-    })?;
-    for entry in entries {
+    })? {
         let entry = entry.map_err(|error| CodegenError::Read {
-            path: dir.to_path_buf(),
+            path: root.to_path_buf(),
             source: error,
         })?;
         let path = entry.path();
-        if path.is_dir() {
-            list_files_into(&path, out)?;
-        } else {
+        if !path.is_dir() {
             out.push(path);
         }
     }
-    Ok(())
+    out.sort();
+    Ok(out)
 }

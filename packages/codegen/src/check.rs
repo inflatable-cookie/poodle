@@ -2,9 +2,9 @@
 //!
 //! Structural property: this module contains no filesystem write call. It
 //! reads committed files, compares byte-exact, classifies whitespace-only
-//! differences, and scans the output root for stale orphans — then reports
-//! everything at once. The write path lives in [`crate::write`] and is only
-//! reachable from write mode; the two can never be confused.
+//! differences, and scans the output root's top level for stale orphans —
+//! then reports everything at once. The write path lives in [`crate::write`]
+//! and is only reachable from write mode; the two can never be confused.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -74,8 +74,9 @@ impl CheckReport {
 ///
 /// - every generated file is compared byte-exact (a missing committed file
 ///   is `Missing` drift — b015 failure mode 6),
-/// - every committed file under `output_root` that the emitter does not
-///   produce is reported stale (b015 failure mode 5),
+/// - every committed file at the output root's top level that the emitter
+///   does not produce is reported stale (b015 failure mode 5; nested
+///   directories are sibling targets' roots, card 041),
 /// - all findings are reported at once, never the first.
 ///
 /// Never writes, including on failure. Check mode is structurally incapable
@@ -152,25 +153,21 @@ fn whitespace_equivalent(a: &str, b: &str) -> bool {
     stripped(a) == stripped(b)
 }
 
-/// Recursively lists every file under `root`, sorted, as absolute paths.
+/// Lists the top-level files of `root`, sorted, as absolute paths.
+/// Directories are skipped: they are sibling targets' output roots, not
+/// this target's files (the card 041 shared-`generated/` layout — a
+/// recursive scan would report the sibling target's artifact as stale).
 fn walk_files(root: &Path) -> std::io::Result<Vec<PathBuf>> {
     let mut out = Vec::new();
-    walk_files_into(root, &mut out)?;
-    out.sort();
-    Ok(out)
-}
-
-fn walk_files_into(dir: &Path, out: &mut Vec<PathBuf>) -> std::io::Result<()> {
-    for entry in fs::read_dir(dir)? {
+    for entry in fs::read_dir(root)? {
         let entry = entry?;
         let path = entry.path();
-        if path.is_dir() {
-            walk_files_into(&path, out)?;
-        } else {
+        if !path.is_dir() {
             out.push(path);
         }
     }
-    Ok(())
+    out.sort();
+    Ok(out)
 }
 
 #[cfg(test)]

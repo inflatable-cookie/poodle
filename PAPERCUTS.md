@@ -7,6 +7,15 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-12 — g13-041 put Button's generated artifact in the preview
+  packages (`packages/{svelte,react}/preview/src/generated/button/`) per the
+  card's writable paths, so `Button.svelte`/`Button.tsx` import across the
+  package boundary (`../../preview/src/generated/button`). The packed
+  `poodle-svelte`/`poodle-react` tarballs (files: `src`) do not carry the
+  artifact, so `test:web-pack-install` now fails to resolve that import in
+  its consumer. Not a defect of this card's shape — the artifact location is
+  a g13.008 production-placement question; the log records the consequence.
+
 - 2026-08-12 — g13-038 found a dead focus rule: `.poodle-order-by__item:focus-visible`
   (order-by.css) rings the item row, but the item div is never focusable — no
   `tabindex`, and the only focusable inside is the drag-handle button. The ring

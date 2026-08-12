@@ -371,7 +371,7 @@ fn render_preview_state_literal(state: &poodle_ir::PreviewState) -> String {
 
 /// `preview-shell` → `previewShell`. The artifact's export name; scenes get
 /// one file each, so names cannot collide.
-fn camel_case(value: &str) -> String {
+pub(crate) fn camel_case(value: &str) -> String {
     let mut out = String::new();
     let mut capitalize = false;
     for ch in value.chars() {

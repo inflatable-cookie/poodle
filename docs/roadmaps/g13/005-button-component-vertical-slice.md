@@ -1,6 +1,6 @@
 # g13.005 Button Component Vertical Slice
 
-Status: planned
+Status: in progress
 Owner: Poodle core
 Depends on: `g13.004`
 

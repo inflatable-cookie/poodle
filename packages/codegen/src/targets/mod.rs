@@ -14,6 +14,7 @@ use crate::emit::EmitTarget;
 
 mod json_common;
 
+pub mod button;
 pub mod conformance;
 pub mod docs;
 pub mod json;
@@ -41,6 +42,7 @@ pub fn selectable() -> Vec<&'static dyn EmitTarget> {
     let mut targets = all();
     targets.push(&shell::ShellSceneTarget);
     targets.push(&shell_rust::ShellRustTarget);
+    targets.push(&button::ButtonTarget);
     targets
 }
 
