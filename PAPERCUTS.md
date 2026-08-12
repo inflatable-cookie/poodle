@@ -210,15 +210,20 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   paths at the worktree; it should not need to exist. Consider canonicalizing
   the sibling path or documenting the required checkout layout.
 
-- 2026-08-11 — The docs preview's global `button:focus-visible,
-  input:focus-visible` outline (`packages/svelte/preview/src/app.css`) outranked
-  every component that draws its own focus treatment: a bare element selector
-  plus pseudo-class is (0,1,1) and beats a component class at (0,1,0). 33
-  component stylesheets set `outline: none` for exactly this reason, so all of
-  them were being overridden — TextInput visibly rendered its rounded focus
-  border and the preview's square outline at the same time. Preview chrome
-  styling should not be able to reach into components; consider scoping all
-  docs-site element selectors, not just this one.
+- 2026-08-11 — **Resolved 2026-08-12.** The docs preview's global
+  `button:focus-visible, input:focus-visible` outline
+  (`packages/svelte/preview/src/app.css`) outranked every component that draws
+  its own focus treatment: a bare element selector plus pseudo-class is (0,1,1)
+  and beats a component class at (0,1,0). 33 component stylesheets set
+  `outline: none` for exactly this reason, so all of them were being overridden
+  — TextInput visibly rendered its rounded focus border and the preview's
+  square outline at the same time. The first fix narrowed it with
+  `:not([class*="poodle-"])`, which made it match nothing: every focusable
+  element in the shell is a Poodle component or carries a `poodle-` class
+  (measured 0 matches across four pages). Dead, but still dangerous — a shell
+  copied into a host app takes the rule with it and it starts matching that
+  host's chrome. Now deleted. Chrome that needs a ring gives itself one, keyed
+  to its own class and radius.
 
 - 2026-08-11 — Removing an explicit `border` declaration from a `<button>`-based
   component style leaks the UA default `2px outset buttonborder`, and the two
