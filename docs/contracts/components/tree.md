@@ -120,6 +120,7 @@ Updated: 2026-07-25
 | `onRenameCancel` | Inline rename cancels (Escape) | — | Host clears `editingValue` |
 | `onContextMenu` | Right-click on a row | `(value, x, y)` | Host opens a `ContextMenu` at the pointer |
 | `onReorder` | Drag-drop or Alt+↑/↓ | `(from, to, position)` | `position` is `before` / `after` / `inside`; host applies the move (`reorder_nodes`) |
+| `onActivate` | Row double-click, or the keyboard activate intent | `string` | The node's value. Keyboard activation selects the row first, then fires; a disabled node fires nothing |
 
 ### Type: TreeNode
 

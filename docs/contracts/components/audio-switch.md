@@ -44,8 +44,8 @@ Space, and Enter share these rules. Lamp state never drives behavior.
 
 ## 5. Callbacks
 
-Latch and multi emit change plus commit atomically. Momentary emits change on
-both edges and commits on release.
+Latch and multi emit `onStateChange` plus `onStateCommit` atomically.
+Momentary emits `onStateChange` on both edges and `onStateCommit` on release.
 
 ## 6. Accessibility
 

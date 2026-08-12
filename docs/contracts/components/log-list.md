@@ -89,6 +89,16 @@ Use for admin/activity histories:
 | `getActorHref` | `(actor: LogActor) => string` | `undefined` | Builds actor links. |
 | `getResourceHref` | `(resourceType: string, resourceId: string, action: string) => string \| null` | `undefined` | Builds resource links. |
 
+### Callbacks
+
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onFilterChange` | A filter control changes | `(field: string, value: string)` | The filter's own `field`, plus the next value |
+| `onClearFilters` | The Clear control is pressed | — | Rendered only when a filter is active **and** this callback is supplied |
+| `onPageChange` | Pagination moves | `number` | The next page. Absent callback disables paging entirely — the component does not page itself |
+| `onRefresh` | The Refresh control is pressed | — | The control renders only when supplied |
+| `onExport` | The Export control is pressed | — | The control renders only when supplied, and is disabled while `loading` |
+
 ## 4. Types
 
 ```ts

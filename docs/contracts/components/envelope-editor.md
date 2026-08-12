@@ -52,7 +52,8 @@ supplied to the pure transition.
 ## 5. Callbacks
 
 Live mutations emit `onPointsChange`; add, remove, keyboard edits, curve edits,
-and drag end emit `onPointsCommit`. Gesture callbacks pair around pointer drag.
+and drag end emit `onPointsCommit`. `onGestureBegin` and `onGestureEnd` pair
+around pointer drag.
 
 ## 6. Accessibility
 

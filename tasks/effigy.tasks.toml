@@ -160,6 +160,11 @@
 # Contract <-> Svelte prop-surface drift. Runs inside docs:lint already; this
 # selector is for standalone/report use (DRIFT_REPORT=1 also lists svelte-only).
 "docs:contract-drift" = "bun packages/svelte/preview/scripts/contract-prop-drift.ts"
+# Contract <-> Svelte callback-surface drift: every `on*` function-typed prop a
+# component emits must be named in its contract's Callbacks/Events section.
+# contract-prop-drift deliberately skips `on*` props, so before this nothing
+# checked them. Runs inside docs:lint; this selector is for standalone use.
+"docs:callback-drift" = "bun packages/svelte/preview/scripts/contract-callback-drift.ts"
 # Contract <-> poodle-specs drift. Also runs inside docs:lint; this selector is
 # for standalone/report use (DRIFT_REPORT=1 lists gaps without failing).
 "docs:spec-drift" = "bun packages/svelte/preview/scripts/contract-spec-drift.ts"

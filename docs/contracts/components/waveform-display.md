@@ -55,7 +55,8 @@ No transition edits samples or pyramid data. No renderer chooses a level.
 ## 5. Callbacks
 
 Cursor movement emits `onCursorChange`. Drag and Shift navigation emit live
-selection changes; release or atomic keyboard edits emit selection commit.
+`onSelectionChange`; release or atomic keyboard edits emit `onSelectionCommit`.
+Both carry the whole `WaveformSelection`, or `null` when the selection clears.
 
 ## 6. Accessibility
 

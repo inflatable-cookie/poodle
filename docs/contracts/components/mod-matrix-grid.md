@@ -58,9 +58,10 @@ cell's range and law. Disabling a cell preserves its amount and parameters.
 
 ## 5. Callbacks
 
-Live drags and nudges emit cell change. Drag end and atomic toggle or keyboard
-nudges emit commit. Callbacks include source/destination IDs and the resolved
-parameters used for the change.
+Live drags and nudges emit `onCellChange`. Drag end and atomic toggle or
+keyboard nudges emit `onCellCommit`. Both carry source/destination IDs and the
+resolved parameters used for the change. `onGestureBegin` and `onGestureEnd`
+pair around pointer drag.
 
 ## 6. Accessibility
 
