@@ -6,6 +6,7 @@ import DockRegion from "../src/DockRegion.svelte";
 import NavigationMenu from "../src/NavigationMenu.svelte";
 import Switch from "../src/Switch.svelte";
 import Tabs from "../src/Tabs.svelte";
+import { asSnippet } from "./snippet";
 
 // Interaction wiring: the @inflatable-cookie/poodle-core machines have their own suite; these
 // assert the Svelte binding actually drives a click through to the documented
@@ -195,7 +196,7 @@ describe("svelte interaction", () => {
         showTabs: false,
         items: [{ value: "inspector", label: "Inspector" }],
         value: "inspector",
-        children: () => "body",
+        children: asSnippet(() => "body"),
       },
     });
 

@@ -2,6 +2,7 @@ import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 
 import SplitView from "../src/SplitView.svelte";
+import { asSnippet } from "./snippet";
 
 describe("SplitView collapse toggles", () => {
   it("keeps both expand toggles when both panes are collapsed", () => {
@@ -11,8 +12,8 @@ describe("SplitView collapse toggles", () => {
         showCollapseSecondary: true,
         primaryCollapsed: true,
         secondaryCollapsed: true,
-        primary: () => {},
-        secondary: () => {},
+        primary: asSnippet(() => {}),
+        secondary: asSnippet(() => {}),
       },
     });
 
@@ -25,8 +26,8 @@ describe("SplitView collapse toggles", () => {
       props: {
         showCollapsePrimary: true,
         showCollapseSecondary: true,
-        primary: () => {},
-        secondary: () => {},
+        primary: asSnippet(() => {}),
+        secondary: asSnippet(() => {}),
       },
     });
 
@@ -41,8 +42,8 @@ describe("SplitView collapse toggles", () => {
         showCollapsePrimary: true,
         showCollapseSecondary: true,
         primaryCollapsed: true,
-        primary: () => {},
-        secondary: () => {},
+        primary: asSnippet(() => {}),
+        secondary: asSnippet(() => {}),
       },
     });
 
@@ -56,8 +57,8 @@ describe("SplitView collapse toggles", () => {
         showCollapsePrimary: true,
         showCollapseSecondary: true,
         primaryHidden: true,
-        primary: () => {},
-        secondary: () => {},
+        primary: asSnippet(() => {}),
+        secondary: asSnippet(() => {}),
       },
     });
     const root = container.querySelector(".poodle-split-view")!;
@@ -74,8 +75,8 @@ describe("SplitView toggle visibility", () => {
       props: {
         showCollapsePrimary: true,
         showCollapseSecondary: true,
-        primary: () => {},
-        secondary: () => {},
+        primary: asSnippet(() => {}),
+        secondary: asSnippet(() => {}),
         ...props,
       },
     });
@@ -98,8 +99,8 @@ describe("SplitView toggle visibility", () => {
         showCollapsePrimary: true,
         showCollapseSecondary: true,
         toggleVisibility: "hover",
-        primary: () => {},
-        secondary: () => {},
+        primary: asSnippet(() => {}),
+        secondary: asSnippet(() => {}),
       },
     });
 

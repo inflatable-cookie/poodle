@@ -7,7 +7,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
-- 2026-08-12 — `check:svelte` type-checks `packages/svelte/components/src`
+- 2026-08-12 — RESOLVED 2026-08-12: the include now covers `test/**` and the
+  36 errors are cleared (701 files, 0 errors, up from 449). Verified by
+  reintroducing the stale `rootContinuationCount` — the gate catches it now.
+  The previews are still unchecked and remain open. Original report follows.
+  `check:svelte` type-checks `packages/svelte/components/src`
   only. Its tsconfig `include` is `src/**`, so the 36 files in `test/` are not
   checked, and no task type-checks either preview at all. This is not
   hypothetical: the `rootContinuationCount` → `precedingContinuationCount`

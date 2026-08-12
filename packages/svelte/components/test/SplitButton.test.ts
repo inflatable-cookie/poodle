@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import SplitButton from "../src/SplitButton.svelte";
 import type { MenuItem } from "../src/types";
+import { asSnippet } from "./snippet";
 
 const items: MenuItem[] = [
   { value: "save-as", label: "Save as" },
@@ -18,7 +19,7 @@ describe("SplitButton (svelte) dismissOnOutsideInteract", () => {
   const menuOf = () => document.querySelector(".poodle-split-button__menu") as HTMLElement;
 
   it("dismisses the menu on outside mousedown by default", async () => {
-    const { container } = render(SplitButton, { props: { items, children: () => "Save" } });
+    const { container } = render(SplitButton, { props: { items, children: asSnippet(() => "Save") } });
     await fireEvent.click(toggleOf(container));
     expect(menuOf()).not.toBeNull();
 
@@ -28,7 +29,7 @@ describe("SplitButton (svelte) dismissOnOutsideInteract", () => {
 
   it("keeps the menu open on outside mousedown when dismissOnOutsideInteract=false", async () => {
     const { container } = render(SplitButton, {
-      props: { items, dismissOnOutsideInteract: false, children: () => "Save" },
+      props: { items, dismissOnOutsideInteract: false, children: asSnippet(() => "Save") },
     });
     await fireEvent.click(toggleOf(container));
     expect(menuOf()).not.toBeNull();
