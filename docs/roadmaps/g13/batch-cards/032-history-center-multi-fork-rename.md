@@ -64,6 +64,27 @@ is a different region with its own styling, the user is content with it, and
 changing it is an unrequested visual change. Record the inconsistency in the
 batch log as a follow-up rather than fixing it here.
 
+### R4a — Delete the "Current" badge.
+
+Remove `data-part="current-badge"` from both sites in each runtime — the
+`Select` trigger and the option list — and its CSS.
+
+The badge is wrong, not merely confusing. `historyCenterForksAt` filters out
+the continuation already on the list: by `entryId` when the anchor's successor
+is known, and by `preferred` when it is not
+(`packages/core/src/history-center.ts:256-259`). **So the picker lists
+alternatives only — never the branch the main list is showing.** Marking any of
+them "Current" contradicts what the picker is.
+
+It also misreads on the trigger, where it lands on whichever fork the operator
+just selected to preview, implying the preview is the current branch. The
+current branch is the main list.
+
+`preferred` stays on the record and keeps its job: checkout is disabled when
+the selected fork is already the current one. The state survives; only the
+misleading label goes. The operator still learns the same fact, from a disabled
+button rather than a badge that contradicts the surrounding UI.
+
 ### R5 — Everything v3 holds.
 
 One loop over `historyCenterVisibleRows`. No `svelte:self`, no self-import.
@@ -77,6 +98,7 @@ mirrors exactly.
 - The picker row in both web runtimes: pencil `IconButton` between the `Select`
   and checkout, plus the inline rename state.
 - `history-center.css` for the new control and the rename-in-picker layout.
+- Removing the `Current` badge from both runtimes and its CSS (R4a).
 - Both test suites.
 - Both specimen files — the two-forks group should show a rename in progress,
   since that is the state this card adds.
@@ -96,6 +118,10 @@ mirrors exactly.
 
 - The picker renders a pencil between the `Select` and checkout when
   `forkCount > 1`.
+- No "Current" badge renders anywhere in the picker, in either runtime, in any
+  fork state.
+- Checkout is still disabled when the selected fork is already the current one
+  — the behaviour the badge used to duplicate.
 - Renaming from the picker emits `onRenameBranch` with **the selected fork's**
   branch id, not the anchor's and not the preferred one.
 - Changing the `Select` and then renaming targets the newly selected fork.
@@ -158,6 +184,8 @@ mirrors exactly.
 - [ ] The existing rename machinery is reused; no second rename path exists.
 - [ ] Checkout is disabled during a rename; cancel restores the `Select` and
   the focus.
+- [ ] No `Current` badge remains in either runtime; checkout still disables
+  for the current fork.
 - [ ] The single-fork path is unchanged.
 - [ ] A specimen shows a rename in progress in the two-forks group.
 - [ ] All step-7 commands exit 0; no baseline refreshed.
