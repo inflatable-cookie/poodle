@@ -481,9 +481,18 @@
     const branchId = renamingBranchId;
     renamingBranchId = null;
     tick().then(() => {
-      listElement
-        ?.querySelector<HTMLElement>(`[data-part="run-header-rename"][data-branch="${CSS.escape(branchId ?? "")}"]`)
-        ?.focus();
+      const branch = CSS.escape(branchId ?? "");
+      const runHeaderButton = listElement?.querySelector<HTMLElement>(
+        `[data-part="run-header-rename"][data-branch="${branch}"]`,
+      );
+      // The picker pencil is an IconButton (R4), which forwards no data
+      // attributes — the wrapper carries the part/branch and the button
+      // inside is the focus target. R3: focus returns to the pencil on
+      // commit or cancel, exactly as it returns to the run-header button.
+      const pickerPencil = listElement
+        ?.querySelector<HTMLElement>(`[data-part="picker-rename"][data-branch="${branch}"]`)
+        ?.querySelector<HTMLElement>("button");
+      (runHeaderButton ?? pickerPencil)?.focus();
     });
   }
 
@@ -501,11 +510,18 @@
   }
 
   function handleRenameKeydown(event: KeyboardEvent, branchId: string): void {
+    // The rename input owns its keys end to end. Escape must cancel the
+    // rename, not close the popover: the surface is portalled, so Svelte's
+    // delegated keydown listener and the dismiss layer both sit on
+    // `document`, where `stopPropagation` does not stop same-node listeners
+    // — `stopImmediatePropagation` does.
     if (event.key === "Enter") {
       event.preventDefault();
+      event.stopImmediatePropagation();
       commitRename(branchId);
     } else if (event.key === "Escape") {
       event.preventDefault();
+      event.stopImmediatePropagation();
       cancelRename();
     }
   }
@@ -724,18 +740,39 @@
                   {/if}
                 {:else if row.kind === "picker"}
                   {@const picked = pickedContinuation(row.continuations, row.pickedEntryId)}
+                  {@const renameTarget = picked === undefined ? null : { branchId: picked.branchId, name: picked.branchName ?? picked.branchId }}
                   <div
                     class="poodle-history-center__picker"
                     data-part="picker"
                     data-anchor={row.anchorEntryId}
                     tabindex={rowFocused(row) ? 0 : -1}
                   >
-                    <!-- R4: the picker is Poodle's Select plus a checkout
-                         IconButton. The trigger and the options both carry
-                         the fork label, its branch name and the current
-                         marker, so the persistent select keeps the
-                         screenshot's information visible (R1). -->
+                    <!-- R1: the picker is Poodle's Select, a rename pencil
+                         and a checkout IconButton, in that order. The
+                         pencil renames whichever fork the Select currently
+                         shows through the same machinery as the opened
+                         region (R2); while a rename is open the inline
+                         input takes the Select's place (R3) and checkout
+                         is disabled. The trigger and the options both
+                         carry the fork label and its branch name. -->
                     <div class="poodle-history-center__picker-controls" data-part="picker-select">
+                      {#if renameTarget !== null && renamingBranchId === renameTarget.branchId}
+                        <input
+                          bind:this={renameInputElement}
+                          class="poodle-history-center__rename-input"
+                          data-part="picker-rename-input"
+                          aria-label={`Rename branch ${renameTarget.name}`}
+                          maxlength={maxBranchNameBytes}
+                          bind:value={renameValue}
+                          onkeydown={(event) => handleRenameKeydown(event, renameTarget.branchId)}
+                          onblur={() => {
+                            // Commit the branch currently being renamed; a
+                            // blur fired by the input's own teardown (after
+                            // commit/cancel) is a no-op.
+                            if (renamingBranchId !== null) commitRename(renamingBranchId);
+                          }}
+                        />
+                      {:else}
                       <Select
                         value={row.pickedEntryId}
                         options={row.continuations.map((fork) => ({ value: fork.entryId, label: fork.label }))}
@@ -758,9 +795,6 @@
                                   {fork.branchName ?? fork.branchId}
                                 </span>
                               {/if}
-                              {#if fork?.preferred}
-                                <span class="poodle-history-center__current-badge" data-part="current-badge">Current</span>
-                              {/if}
                             </span>
                           {/if}
                         {/snippet}
@@ -772,11 +806,27 @@
                               {fork?.branchName ?? fork?.branchId}
                             </span>
                           </span>
-                          {#if fork?.preferred}
-                            <span class="poodle-history-center__current-badge" data-part="current-badge">Current</span>
-                          {/if}
                         {/snippet}
                       </Select>
+                      {/if}
+                      <span
+                        class="poodle-history-center__picker-rename"
+                        data-part="picker-rename"
+                        data-branch={renameTarget?.branchId}
+                      >
+                        <IconButton
+                          icon="edit"
+                          ariaLabel={renameTarget === null ? "Rename fork" : `Rename ${renameTarget.name}`}
+                          tooltip="Rename branch"
+                          variant="ghost"
+                          size="xs"
+                          density={resolvedDensity}
+                          disabled={renameTarget === null}
+                          onClick={() => {
+                            if (renameTarget !== null) startRename(renameTarget.branchId, renameTarget.name);
+                          }}
+                        />
+                      </span>
                       <span class="poodle-history-center__picker-checkout" data-part="picker-checkout">
                         <IconButton
                           icon="check"
@@ -785,7 +835,7 @@
                           variant="ghost"
                           size="xs"
                           density={resolvedDensity}
-                          disabled={picked === undefined || picked.preferred}
+                          disabled={picked === undefined || picked.preferred || renamingBranchId !== null}
                           onClick={() => send({ type: "CONFIRM" })}
                         />
                       </span>

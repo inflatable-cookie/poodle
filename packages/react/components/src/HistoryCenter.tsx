@@ -256,14 +256,22 @@ export function HistoryCenter({
   }, [renamingBranchId]);
 
   // After a rename commits or cancels, the input unmounts — return focus to
-  // the run header's rename button so keyboard users stay anchored to the row.
+  // the rename control (the run header's button or the picker's pencil) so
+  // keyboard users stay anchored to the row. The pencil is an IconButton
+  // (R4), which forwards no data attributes — the wrapper carries the
+  // part/branch and the button inside is the focus target (R3).
   useEffect(() => {
     if (pendingFocusRestore.current === null) return;
     const branchId = pendingFocusRestore.current;
     pendingFocusRestore.current = null;
-    listRef.current?.querySelector<HTMLElement>(
-      `[data-part="run-header-rename"][data-branch="${CSS.escape(branchId)}"]`,
-    )?.focus();
+    const branch = CSS.escape(branchId);
+    const runHeaderButton = listRef.current?.querySelector<HTMLElement>(
+      `[data-part="run-header-rename"][data-branch="${branch}"]`,
+    );
+    const pickerPencil = listRef.current
+      ?.querySelector<HTMLElement>(`[data-part="picker-rename"][data-branch="${branch}"]`)
+      ?.querySelector<HTMLElement>("button");
+    (runHeaderButton ?? pickerPencil)?.focus();
   });
 
   // ── Row identity helpers (R1) ─────────────────────────────────────────
@@ -505,11 +513,16 @@ export function HistoryCenter({
   }
 
   function handleRenameKeydown(event: React.KeyboardEvent, branchId: string): void {
+    // The rename input owns its keys end to end: Escape must cancel the
+    // rename, not close the popover — the document-level dismiss layer
+    // ignores `preventDefault`, so the key stops propagating here.
     if (event.key === "Enter") {
       event.preventDefault();
+      event.stopPropagation();
       commitRename(branchId);
     } else if (event.key === "Escape") {
       event.preventDefault();
+      event.stopPropagation();
       cancelRename();
     }
   }
@@ -743,6 +756,10 @@ export function HistoryCenter({
                         ) : row.kind === "picker" ? (
                           (() => {
                             const picked = pickedContinuation(row.continuations, row.pickedEntryId);
+                            const renameTarget =
+                              picked === undefined
+                                ? null
+                                : { branchId: picked.branchId, name: picked.branchName ?? picked.branchId };
                             return (
                               <div
                                 className="poodle-history-center__picker"
@@ -750,67 +767,80 @@ export function HistoryCenter({
                                 data-anchor={row.anchorEntryId}
                                 tabIndex={rowFocused(row) ? 0 : -1}
                               >
-                                {/* R4: the picker is Poodle's Select plus a
-                                    checkout IconButton. The trigger and the
-                                    options both carry the fork label, its
-                                    branch name and the current marker, so the
-                                    persistent select keeps the screenshot's
-                                    information visible (R1). */}
+                                {/* R1: the picker is Poodle's Select, a rename
+                                    pencil and a checkout IconButton, in that
+                                    order. The pencil renames whichever fork the
+                                    Select currently shows through the same
+                                    machinery as the opened region (R2); while a
+                                    rename is open the inline input takes the
+                                    Select's place (R3) and checkout is
+                                    disabled. The trigger and the options both
+                                    carry the fork label and its branch name. */}
                                 <div
                                   className="poodle-history-center__picker-controls"
                                   data-part="picker-select"
                                 >
-                                  <Select
-                                    value={row.pickedEntryId}
-                                    options={row.continuations.map((fork) => ({
-                                      value: fork.entryId,
-                                      label: fork.label,
-                                    }))}
-                                    size="xs"
-                                    density={resolvedDensity}
-                                    variant="ghost"
-                                    ariaLabel="Continuations"
-                                    placeholder="Choose a fork…"
-                                    onValueChange={(entryId) =>
-                                      sendRef.current({ type: "PICK_CONTINUATION", entryId })
-                                    }
-                                    trigger={({ selectedOption, placeholder }) => {
-                                      const fork =
-                                        selectedOption === null
-                                          ? undefined
-                                          : forkForValue(row.continuations, selectedOption.value);
-                                      return selectedOption === null ? (
-                                        <span
-                                          className="poodle-history-center__picker-value"
-                                          data-placeholder="true"
-                                        >
-                                          {placeholder}
-                                        </span>
-                                      ) : (
-                                        <span className="poodle-history-center__picker-value">
-                                          <span className="poodle-history-center__picker-option-name">
-                                            {selectedOption.label}
+                                  {renameTarget !== null && renamingBranchId === renameTarget.branchId ? (
+                                    <input
+                                      ref={renameInputRef}
+                                      className="poodle-history-center__rename-input"
+                                      data-part="picker-rename-input"
+                                      aria-label={`Rename branch ${renameTarget.name}`}
+                                      maxLength={maxBranchNameBytes}
+                                      value={renameValue}
+                                      onChange={(event) => setRenameValue(event.target.value)}
+                                      onKeyDown={(event) => handleRenameKeydown(event, renameTarget.branchId)}
+                                      onBlur={() => {
+                                        // Commit the branch currently being
+                                        // renamed; a blur fired by the input's
+                                        // own teardown (after commit/cancel) is
+                                        // a no-op.
+                                        if (renamingBranchId !== null) commitRename(renamingBranchId);
+                                      }}
+                                    />
+                                  ) : (
+                                    <Select
+                                      value={row.pickedEntryId}
+                                      options={row.continuations.map((fork) => ({
+                                        value: fork.entryId,
+                                        label: fork.label,
+                                      }))}
+                                      size="xs"
+                                      density={resolvedDensity}
+                                      variant="ghost"
+                                      ariaLabel="Continuations"
+                                      placeholder="Choose a fork…"
+                                      onValueChange={(entryId) =>
+                                        sendRef.current({ type: "PICK_CONTINUATION", entryId })
+                                      }
+                                      trigger={({ selectedOption, placeholder }) => {
+                                        const fork =
+                                          selectedOption === null
+                                            ? undefined
+                                            : forkForValue(row.continuations, selectedOption.value);
+                                        return selectedOption === null ? (
+                                          <span
+                                            className="poodle-history-center__picker-value"
+                                            data-placeholder="true"
+                                          >
+                                            {placeholder}
                                           </span>
-                                          {fork !== undefined ? (
-                                            <span className="poodle-history-center__picker-option-branch">
-                                              {fork.branchName ?? fork.branchId}
+                                        ) : (
+                                          <span className="poodle-history-center__picker-value">
+                                            <span className="poodle-history-center__picker-option-name">
+                                              {selectedOption.label}
                                             </span>
-                                          ) : null}
-                                          {fork?.preferred ? (
-                                            <span
-                                              className="poodle-history-center__current-badge"
-                                              data-part="current-badge"
-                                            >
-                                              Current
-                                            </span>
-                                          ) : null}
-                                        </span>
-                                      );
-                                    }}
-                                    option={({ option }) => {
-                                      const fork = forkForValue(row.continuations, option.value);
-                                      return (
-                                        <>
+                                            {fork !== undefined ? (
+                                              <span className="poodle-history-center__picker-option-branch">
+                                                {fork.branchName ?? fork.branchId}
+                                              </span>
+                                            ) : null}
+                                          </span>
+                                        );
+                                      }}
+                                      option={({ option }) => {
+                                        const fork = forkForValue(row.continuations, option.value);
+                                        return (
                                           <span className="poodle-history-center__picker-option-copy">
                                             <span className="poodle-history-center__picker-option-name">
                                               {option.label}
@@ -819,18 +849,32 @@ export function HistoryCenter({
                                               {fork?.branchName ?? fork?.branchId}
                                             </span>
                                           </span>
-                                          {fork?.preferred ? (
-                                            <span
-                                              className="poodle-history-center__current-badge"
-                                              data-part="current-badge"
-                                            >
-                                              Current
-                                            </span>
-                                          ) : null}
-                                        </>
-                                      );
-                                    }}
-                                  />
+                                        );
+                                      }}
+                                    />
+                                  )}
+                                  <span
+                                    className="poodle-history-center__picker-rename"
+                                    data-part="picker-rename"
+                                    data-branch={renameTarget?.branchId}
+                                  >
+                                    <IconButton
+                                      icon="edit"
+                                      ariaLabel={
+                                        renameTarget === null ? "Rename fork" : `Rename ${renameTarget.name}`
+                                      }
+                                      tooltip="Rename branch"
+                                      variant="ghost"
+                                      size="xs"
+                                      density={resolvedDensity}
+                                      disabled={renameTarget === null}
+                                      onClick={() => {
+                                        if (renameTarget !== null) {
+                                          startRename(renameTarget.branchId, renameTarget.name);
+                                        }
+                                      }}
+                                    />
+                                  </span>
                                   <span
                                     className="poodle-history-center__picker-checkout"
                                     data-part="picker-checkout"
@@ -842,7 +886,7 @@ export function HistoryCenter({
                                       variant="ghost"
                                       size="xs"
                                       density={resolvedDensity}
-                                      disabled={picked === undefined || picked.preferred}
+                                      disabled={picked === undefined || picked.preferred || renamingBranchId !== null}
                                       onClick={() => sendRef.current({ type: "CONFIRM" })}
                                     />
                                   </span>

@@ -247,10 +247,10 @@
 }
 
 /* The picker row — the forks at an anchor when `forkCount > 1` (core emits
-   it; the renderer adds no second condition). R4: Poodle's Select plus a
-   checkout IconButton; the trigger and the option rows both carry the fork
-   label, its branch name and the current marker, so the persistent select
-   keeps the screenshot's information visible (R1). */
+   it; the renderer adds no second condition). R1: Poodle's Select, a rename
+   pencil and a checkout IconButton; the trigger and the option rows carry
+   the fork label and its branch name. While a rename is open the inline
+   input takes the Select's place (R3). */
 .poodle-history-center__picker {
   display: grid;
   gap: 0.25rem;
@@ -275,14 +275,24 @@
   min-width: 0;
 }
 
+.poodle-history-center__picker-rename {
+  display: inline-flex;
+  flex: none;
+}
+
 .poodle-history-center__picker-checkout {
   display: inline-flex;
   flex: none;
 }
 
-/* The Select's option rows render the fork copy (label + branch) with the
-   current marker right-aligned — the same anatomy in the trigger and the
-   menu. */
+/* The rename input takes the Select's place (R3); the run-header input's
+   margins belong to its own region, not this row. */
+.poodle-history-center__picker-controls .poodle-history-center__rename-input {
+  margin: 0;
+}
+
+/* The Select's option rows render the fork copy (label + branch) — the same
+   anatomy in the trigger and the menu. */
 .poodle-history-center__picker-controls .poodle-select__option-content {
   display: flex;
   align-items: center;
@@ -323,26 +333,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* The current fork — a redo from the anchor takes this continuation (the
-   authority's `preferred` field, which does not change). Nothing user-facing
-   says "prefer"; the checkout button is disabled while it is the selection
-   (R4). */
-.poodle-history-center__current-badge {
-  flex: none;
-  padding: 0.05rem 0.35rem;
-  border-radius: 999px;
-  background: var(
-    --poodle-recipe-history-center-current-badge-fill,
-    color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)
-  );
-  color: var(--poodle-recipe-history-center-current-badge-text, var(--poodle-color-accent-base));
-  font-size: 0.6rem;
-  font-weight: var(--poodle-typography-label-weight);
-  line-height: 1.4;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
 }
 
 /* The opened region: a run's first entry row carries the chosen fork's name,
