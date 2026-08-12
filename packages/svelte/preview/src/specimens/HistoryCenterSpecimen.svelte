@@ -11,11 +11,11 @@
 
   const T = 1_750_000_000_000;
 
-  function page(entries: HistoryPathPage["entries"], rootContinuationCount = 1): HistoryPathPage {
+  function page(entries: HistoryPathPage["entries"], precedingContinuationCount = 1): HistoryPathPage {
     return {
       entries,
       offset: 0,
-      rootContinuationCount,
+      precedingContinuationCount,
       truncatedBefore: false,
       truncatedAfter: false,
     };

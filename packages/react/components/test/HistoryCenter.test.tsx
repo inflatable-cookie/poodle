@@ -12,11 +12,11 @@ import { HistoryCenter } from "../src";
 // (R4): cc 1 → forkCount 0 (inert), cc 2 → forkCount 1 (icon + chevron, no
 // badge, no picker), cc 3 → forkCount 2 (icon + badge reading 2 + picker).
 
-function page(entries: HistoryPathPage["entries"], rootContinuationCount = 1): HistoryPathPage {
+function page(entries: HistoryPathPage["entries"], precedingContinuationCount = 1): HistoryPathPage {
   return {
     entries,
     offset: 0,
-    rootContinuationCount,
+    precedingContinuationCount,
     truncatedBefore: false,
     truncatedAfter: false,
   };
