@@ -47,7 +47,7 @@ and roadmap closeout.
 | `035` | shell scene: Rust authoring + the two web shells (**g13.004** part 1) | `011`/`012`/`022`/`025` merged | merged (`db4e4510`) |
 | `036` | shell scene: GPUI + Jetstream — closes **g13.004** | `035` merged | merged (`97da7195`) — **g13.004 complete** |
 | `037` | focus rings — square outlines on rounded controls | none | merged (`f7946bec`) |
-| `038` | focus rings — components with no explicit treatment | `037` merged | ready |
+| `038` | focus rings — components with no explicit treatment | `037` merged | merged (`95c9c02a`) |
 | `039` | SettingsShell — new component, designed not ported | none | merged (`3a31a6a3`) |
 | `040` | DockRegion tab pass-throughs + the underline recipe hook | none | merged (`51b0e76c`) |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
