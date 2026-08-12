@@ -3677,6 +3677,53 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <SidebarNav {groups} value={active} ariaLabel="Main navigation" onValueChange={(value) => (active = value)} />`,
   },
 
+  "settings-shell": {
+    props: [
+      { name: "groups", type: "SettingsNavGroup[]", default: "[]", description: "Navigation groups; empty renders the nav empty state." },
+      { name: "activePageId", type: "string | null", default: "null", description: "Currently active page in the navigation rail." },
+      { name: "pageTitle", type: "string | null", default: "null", description: "Current page heading rendered in the page header." },
+      { name: "pageDescription", type: "string | null", default: "null", description: "Current page supporting copy rendered in the page header." },
+      { name: "searchQuery", type: "string", default: '""', description: "Search field value; bindable." },
+      { name: "searchResults", type: "SettingsSearchResult[] | null", default: "null", description: "Search outcome; null means not searching and renders the page. Non-null replaces the page region with the result list." },
+      { name: "open", type: "boolean | null", default: "null", description: "Controlled open state; null means uncontrolled, seeded by defaultOpen." },
+      { name: "defaultOpen", type: "boolean", default: "false", description: "Uncontrolled initial open state." },
+      { name: "title", type: "string | null", default: '"Settings"', description: "Dialog title and accessible name." },
+      { name: "closeLabel", type: "string", default: '"Close settings"', description: "Accessible label for the dialog close button." },
+      { name: "closeRefusedReason", type: "string | null", default: "null", description: "Host-supplied refused-close reason; renders as an announced warning callout and keeps the shell open on close attempts." },
+      { name: "onNavigate", type: "(pageId: string, anchorId?: string | null) => void", default: "undefined", description: "Fired on nav item or search result activation." },
+      { name: "onRequestClose", type: "() => void", default: "undefined", description: "Fired on every close attempt; the host decides." },
+      { name: "onOpenChange", type: "(open: boolean) => void", default: "undefined", description: "Open-state request." },
+      { name: "onSearchQueryChange", type: "(value: string) => void", default: "undefined", description: "Search value change." },
+    ],
+    slots: [{ name: "page", description: "The current page body; always a snippet." }],
+    events: [],
+    usage: `<script lang="ts">
+  import { SettingsShell } from "@inflatable-cookie/poodle-svelte";
+  import type { SettingsNavGroup, SettingsSearchResult } from "@inflatable-cookie/poodle-svelte";
+
+  const groups: SettingsNavGroup[] = [
+    { id: "general", label: "General", items: [{ value: "general", label: "General" }] },
+  ];
+
+  let open = true;
+  let query = "";
+  let results: SettingsSearchResult[] | null = null;
+</script>
+
+<SettingsShell
+  bind:open
+  {groups}
+  activePageId="general"
+  pageTitle="General"
+  bind:searchQuery={query}
+  {searchResults}
+  onNavigate={(pageId, anchorId) => console.log(pageId, anchorId)}
+  onRequestClose={() => console.log("close requested")}
+>
+  <p>Settings page content.</p>
+</SettingsShell>`,
+  },
+
   tree: {
     props: [
       { name: "nodes", type: "TreeNode[]", default: "[]", description: "Root-level tree nodes. Each node may carry recursive children." },

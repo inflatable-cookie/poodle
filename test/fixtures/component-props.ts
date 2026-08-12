@@ -133,6 +133,12 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   RadioGroup: { options: opts },
   SegmentedControl: { options: opts },
   Select: { options: opts, ariaLabel: "Choose" },
+  SettingsShell: {
+    groups: [{ id: "general", label: "General", items: [{ value: "general", label: "General" }] }],
+    activePageId: "general",
+    pageTitle: "General",
+    open: true,
+  },
   SidebarNav: { groups: [{ id: "g1", label: "Group", items: [] }] },
   SplitButton: { items: menuItems, ariaLabel: "Split action" },
   // Exercises all four statuses, because the failed case is the one this

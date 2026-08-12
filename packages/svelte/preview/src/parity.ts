@@ -712,6 +712,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "MetricTile",
       "StateTile",
       "PageLoading",
+      "SettingsShell",
       "SidebarNav",
       "Tree",
       "ToastHost",

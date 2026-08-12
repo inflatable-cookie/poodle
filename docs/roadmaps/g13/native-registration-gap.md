@@ -7,17 +7,18 @@ Governing refs: `docs/roadmaps/g13/014-native-backend-convergence.md`,
 
 ## What This Is
 
-Fifteen Svelte components have no entry in one or both native preview
+Sixteen Svelte components have no entry in one or both native preview
 registries. Nothing gates this, so the set grew unnoticed after the parity
 campaign was declared essentially complete. This file records it so the gap is
 visible while it waits for its owner.
 
 Counted on 2026-08-12 from `packages/svelte/components/src/*.svelte` against
-`display_name:` entries in each native `component_registry.rs`:
+`display_name:` entries in each native `component_registry.rs` (updated the
+same day by card `039`, which added the web-only `SettingsShell`):
 
-- GPUI: 13 missing
-- Jetstream: 14 missing
-- Union: 15 components
+- GPUI: 14 missing
+- Jetstream: 15 missing
+- Union: 16 components
 
 | Component | GPUI | Jetstream |
 |-----------|------|-----------|
@@ -31,6 +32,7 @@ Counted on 2026-08-12 from `packages/svelte/components/src/*.svelte` against
 | `MenuSurface` | — | — |
 | `Radio` | — | yes |
 | `RemediationBanner` | — | — |
+| `SettingsShell` | — | — |
 | `StateTile` | — | — |
 | `ThemeSelect` | yes | — |
 | `ToolCall` | — | — |

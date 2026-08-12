@@ -177,6 +177,7 @@ contract references the rule rather than restating it:
 - `components/select.md`
 - `components/selection-summary.md`
 - `components/separator.md`
+- `components/settings-shell.md`
 - `components/sidebar-nav.md`
 - `components/size-and-density.md`
 - `components/skeleton.md`
