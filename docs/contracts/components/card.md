@@ -46,6 +46,7 @@ Updated: 2026-07-10
 | `selected` | `boolean` | `false` | no | accent border and shadow treatment |
 | `media` | `boolean` | `false` | no | enables media slot region |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name when interactive |
+| `class` | `string` | `""` | no | **Web targets only** — styling passthrough merged onto the root |
 
 ### Snippets
 

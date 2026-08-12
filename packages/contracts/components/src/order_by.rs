@@ -1,16 +1,11 @@
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub enum SortDirection {
+    #[default]
     Asc,
     Desc,
-}
-
-impl Default for SortDirection {
-    fn default() -> Self {
-        Self::Asc
-    }
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -105,6 +100,15 @@ pub struct OrderBySpec {
     pub trigger_variant: OrderByTriggerVariant,
     pub show_clear_button: bool,
     pub is_open: bool,
+    /// Refuses outside-interact dismissal when false. Matches Svelte
+    /// `dismissOnOutsideInteract` (default `true`).
+    pub dismiss_on_outside_interact: bool,
+}
+
+impl Default for OrderBySpec {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl OrderBySpec {
@@ -123,6 +127,7 @@ impl OrderBySpec {
             trigger_variant: OrderByTriggerVariant::Summary,
             show_clear_button: true,
             is_open: false,
+            dismiss_on_outside_interact: true,
         }
     }
 
@@ -173,6 +178,11 @@ impl OrderBySpec {
 
     pub fn with_open(mut self, is_open: bool) -> Self {
         self.is_open = is_open;
+        self
+    }
+
+    pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
+        self.dismiss_on_outside_interact = dismiss_on_outside_interact;
         self
     }
 

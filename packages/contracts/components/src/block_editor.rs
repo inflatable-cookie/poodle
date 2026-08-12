@@ -1,16 +1,11 @@
 use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum BlockEditorMode {
     Single,
+    #[default]
     Multi,
-}
-
-impl Default for BlockEditorMode {
-    fn default() -> Self {
-        Self::Multi
-    }
 }
 
 /// A single block type definition (provided by the consumer).

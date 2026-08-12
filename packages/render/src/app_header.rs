@@ -261,7 +261,7 @@ mod tests {
         ));
 
         // No centre region anywhere in the tree.
-        assert!(!node.texts().iter().any(|t| *t == "centre"));
+        assert!(!node.texts().contains(&"centre"));
     }
 
     #[test]

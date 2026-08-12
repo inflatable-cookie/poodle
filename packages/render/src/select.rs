@@ -139,7 +139,7 @@ pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHan
 
     let panel_top = height + theme.resolve_space("space.stack.sm");
 
-    let panel = build_panel(
+    let mut panel = build_panel(
         spec,
         theme,
         effective_size,
@@ -158,6 +158,15 @@ pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHan
         icon_muted,
         handlers,
     );
+
+    // Contract `dismissOnOutsideInteract` (default `true`): a *refusal* flag —
+    // native overlays dismiss on outside interact by default. The refusal rides
+    // the surface's interaction as an inert activation: a host implementing
+    // outside-dismissal must not dismiss a panel carrying this marker (see
+    // menu.rs for the full contract note).
+    if !spec.dismiss_on_outside_interact {
+        panel.interaction.on_activate = Some(Arc::new(|| {}));
+    }
 
     let mut root = Node::container().child(trigger).child(panel);
     root.style.descriptor.layout.direction = LayoutDirection::Column;
@@ -658,5 +667,25 @@ mod tests {
             .with_open(true);
         let node = select(&spec, &theme(), &SelectHandlers::default());
         assert!(node.has_text("No matches"));
+    }
+
+    #[test]
+    fn outside_interact_refusal_marks_the_open_panel() {
+        // Web default `true` + open: the panel carries no refusal marker.
+        let spec = SelectSpec::new(fruit_options()).with_open(true);
+        let node = select(&spec, &theme(), &SelectHandlers::default());
+        let panel = node
+            .find(&|n| n.a11y.role == Some(poodle_node::NodeRole::ListBox))
+            .expect("open panel");
+        assert!(panel.interaction.on_activate.is_none());
+
+        // Refusal: the open panel carries the inert activation marker a host
+        // keys outside-dismissal on.
+        let refusing = spec.with_dismiss_on_outside_interact(false);
+        let node = select(&refusing, &theme(), &SelectHandlers::default());
+        let panel = node
+            .find(&|n| n.a11y.role == Some(poodle_node::NodeRole::ListBox))
+            .expect("open panel");
+        assert!(panel.interaction.on_activate.is_some());
     }
 }

@@ -3,9 +3,10 @@ use poodle_tokens::semantic;
 use crate::types::{ChoiceOption, ControlDensity, ControlSize, SemanticControlSizeRole};
 
 /// Controls how the Select renders its dropdown.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum SelectMode {
     /// Auto: native unless searchable or custom rendering needed.
+    #[default]
     Auto,
     /// Always native `<select>`.
     Native,
@@ -13,26 +14,15 @@ pub enum SelectMode {
     Custom,
 }
 
-impl Default for SelectMode {
-    fn default() -> Self {
-        Self::Auto
-    }
-}
-
 /// Visual variant for the Select.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum SelectVariant {
     /// Default variant with border, background, padding, and chevron.
+    #[default]
     Default,
     /// Ghost variant strips all field chrome (border, background, shadow,
     /// padding, min-height) and hides the chevron indicator.
     Ghost,
-}
-
-impl Default for SelectVariant {
-    fn default() -> Self {
-        Self::Default
-    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -48,6 +38,9 @@ pub struct SelectSpec {
     pub description_id: Option<String>,
     pub open: Option<bool>,
     pub default_open: bool,
+    /// Refuses outside-interact dismissal when false. Matches Svelte
+    /// `dismissOnOutsideInteract` (default `true`).
+    pub dismiss_on_outside_interact: bool,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -101,6 +94,7 @@ impl Default for SelectSpec {
             description_id: None,
             open: None,
             default_open: false,
+            dismiss_on_outside_interact: true,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
@@ -169,6 +163,11 @@ impl SelectSpec {
 
     pub fn with_default_open(mut self, default_open: bool) -> Self {
         self.default_open = default_open;
+        self
+    }
+
+    pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
+        self.dismiss_on_outside_interact = dismiss_on_outside_interact;
         self
     }
 

@@ -70,6 +70,12 @@ pub struct ToastStackSpec {
     pub aria_label: Option<String>,
 }
 
+impl Default for ToastStackSpec {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ToastStackSpec {
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());

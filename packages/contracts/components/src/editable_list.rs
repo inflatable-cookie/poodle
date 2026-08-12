@@ -78,6 +78,12 @@ pub struct EditableListSpec {
     pub shows_workflow_chrome: bool,
 }
 
+impl Default for EditableListSpec {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EditableListSpec {
     pub fn with_items(mut self, items: Vec<EditableListItem>) -> Self {
         self.item_count = items.len();

@@ -300,6 +300,12 @@ pub struct LogListSpec {
     pub density: ControlDensity,
 }
 
+impl Default for LogListSpec {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl LogListSpec {
     pub fn new() -> Self {
         Self {

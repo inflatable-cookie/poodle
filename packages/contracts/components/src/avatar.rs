@@ -1,40 +1,25 @@
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum AvatarSize {
     Xs,
     Sm,
+    #[default]
     Md,
     Lg,
     Xl,
 }
 
-impl Default for AvatarSize {
-    fn default() -> Self {
-        Self::Md
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum AvatarShape {
+    #[default]
     Circle,
     Rounded,
 }
 
-impl Default for AvatarShape {
-    fn default() -> Self {
-        Self::Circle
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum AvatarTone {
+    #[default]
     Neutral,
     Accent,
-}
-
-impl Default for AvatarTone {
-    fn default() -> Self {
-        Self::Neutral
-    }
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]

@@ -1,15 +1,10 @@
 use crate::ControlDensity;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum DetailSectionGroupLayout {
+    #[default]
     Grid,
     Stack,
-}
-
-impl Default for DetailSectionGroupLayout {
-    fn default() -> Self {
-        Self::Grid
-    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

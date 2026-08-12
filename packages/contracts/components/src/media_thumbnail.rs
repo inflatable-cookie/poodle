@@ -23,17 +23,12 @@ pub enum MediaFit {
 /// Explicit frame width (contract §4 `frameWidth`). `Fill` stretches to the
 /// parent, `Xl` applies the preset wide size (`min(100%, 24rem)`), `Px` sets an
 /// explicit pixel width.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum MediaFrameWidth {
+    #[default]
     Fill,
     Xl,
     Px(f32),
-}
-
-impl Default for MediaFrameWidth {
-    fn default() -> Self {
-        Self::Fill
-    }
 }
 
 impl Eq for MediaFrameWidth {}

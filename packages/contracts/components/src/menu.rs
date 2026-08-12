@@ -10,6 +10,9 @@ pub struct MenuSpec {
     pub open: Option<bool>,
     pub default_open: bool,
     pub placement: OverlayPlacement,
+    /// Refuses outside-interact dismissal when false. Matches Svelte
+    /// `dismissOnOutsideInteract` (default `true`).
+    pub dismiss_on_outside_interact: bool,
     pub aria_label: Option<String>,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
@@ -25,6 +28,7 @@ impl Default for MenuSpec {
             open: None,
             default_open: false,
             placement: OverlayPlacement::BottomStart,
+            dismiss_on_outside_interact: true,
             aria_label: None,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Chrome,
@@ -54,6 +58,11 @@ impl MenuSpec {
 
     pub fn with_placement(mut self, placement: OverlayPlacement) -> Self {
         self.placement = placement;
+        self
+    }
+
+    pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
+        self.dismiss_on_outside_interact = dismiss_on_outside_interact;
         self
     }
 

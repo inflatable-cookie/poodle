@@ -390,6 +390,15 @@ pub fn split_button(
             }
         }
 
+        // Contract `dismissOnOutsideInteract` (default `true`): a *refusal*
+        // flag — native overlays dismiss on outside interact by default. The
+        // refusal rides the surface's interaction as an inert activation: a
+        // host implementing outside-dismissal must not dismiss a menu surface
+        // carrying this marker (see menu.rs for the full contract note).
+        if !spec.dismiss_on_outside_interact {
+            menu.interaction.on_activate = Some(Arc::new(|| {}));
+        }
+
         // Wrap the row + menu in a column so the menu stacks beneath.
         let mut wrapper = Node::container();
         wrapper.style.descriptor.layout.direction = LayoutDirection::Column;
@@ -791,5 +800,28 @@ mod tests {
             (gap_sm, gap_sm, gap_sm, gap_sm)
         );
         assert_eq!(sep.style.descriptor.background, Some(subtle));
+    }
+
+    #[test]
+    fn outside_interact_refusal_marks_the_open_menu() {
+        // Web default `true` + open: the menu surface carries no marker.
+        let node = split_button(
+            &spec().with_open(true),
+            &theme(),
+            SplitButtonHandlers::default(),
+        );
+        let menu_node = node
+            .find(&|n| n.a11y.role == Some(NodeRole::Menu))
+            .expect("open menu");
+        assert!(menu_node.interaction.on_activate.is_none());
+
+        // Refusal: the open menu surface carries the inert activation marker
+        // a host keys outside-dismissal on.
+        let refusing = spec().with_open(true).with_dismiss_on_outside_interact(false);
+        let node = split_button(&refusing, &theme(), SplitButtonHandlers::default());
+        let menu_node = node
+            .find(&|n| n.a11y.role == Some(NodeRole::Menu))
+            .expect("open menu");
+        assert!(menu_node.interaction.on_activate.is_some());
     }
 }

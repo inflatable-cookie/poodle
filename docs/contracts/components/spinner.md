@@ -44,6 +44,8 @@ Updated: 2026-07-10
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `tone` | `"current" \| "accent" \| "muted"` | `"current"` | no | color source for the indicator |
 | `ariaLabel` | `string \| null` | `null` | no | optional announced loading label; decorative when omitted |
+| `class` | `string` | `""` | no | **Web targets only** — styling passthrough merged onto the root |
+| `style` | `string \| null` | `null` | no | **Web targets only** — styling passthrough applied to the root |
 
 ### Controlled And Uncontrolled
 

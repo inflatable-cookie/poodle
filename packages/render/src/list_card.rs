@@ -477,6 +477,18 @@ pub fn list_card(
         }
     }
 
+    // Contract `dismissOnOutsideInteract` (default `true`): a *refusal* flag
+    // for the card's context menu — the card root is the surface a host
+    // hit-tests for outside clicks. The refusal rides the root's interaction
+    // as an inert activation: a host implementing outside-dismissal must not
+    // dismiss a card carrying this marker (see menu.rs for the full contract
+    // note). An interactive card's click handler owns `on_activate`; the
+    // marker yields to it — the host reads `context_menu_items` from the spec
+    // either way.
+    if !spec.dismiss_on_outside_interact && el.interaction.on_activate.is_none() {
+        el.interaction.on_activate = Some(Arc::new(|| {}));
+    }
+
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {
             el.a11y.label = Some(label.to_string());
@@ -524,5 +536,38 @@ mod tests {
         let node = list_card(&disabled, &theme(), ListCardSlots::default(), Some(handler));
         assert!(node.interaction.on_activate.is_none());
         assert_eq!(node.style.descriptor.cursor, CursorHint::NotAllowed);
+    }
+
+    #[test]
+    fn outside_interact_refusal_marks_the_card_root() {
+        // Web default `true`: the card root carries no refusal marker.
+        let node = list_card(&ListCardSpec::default(), &theme(), ListCardSlots::default(), None);
+        assert!(node.interaction.on_activate.is_none());
+
+        // Refusal: the root — the surface a host hit-tests for the context
+        // menu's outside clicks — carries the inert activation marker.
+        let refusing = ListCardSpec::default().with_dismiss_on_outside_interact(false);
+        let node = list_card(&refusing, &theme(), ListCardSlots::default(), None);
+        assert!(node.interaction.on_activate.is_some());
+
+        // An interactive card's click handler owns the single `on_activate`
+        // slot; the marker yields to it (documented in the renderer).
+        let interactive_click = ListCardSpec {
+            is_interactive: true,
+            ..ListCardSpec::default().with_dismiss_on_outside_interact(false)
+        };
+        let clicks = Arc::new(Mutex::new(0));
+        let sink = Arc::clone(&clicks);
+        let handler: Arc<dyn Fn() + Send + Sync> = Arc::new(move || {
+            *sink.lock().unwrap() += 1;
+        });
+        let node = list_card(
+            &interactive_click,
+            &theme(),
+            ListCardSlots::default(),
+            Some(handler),
+        );
+        (node.interaction.on_activate.as_ref().expect("click handler owns the slot"))();
+        assert_eq!(*clicks.lock().unwrap(), 1);
     }
 }

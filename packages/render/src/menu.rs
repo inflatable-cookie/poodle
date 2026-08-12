@@ -214,9 +214,42 @@ pub fn menu(
         }
     }
 
+    // Contract `dismissOnOutsideInteract` (default `true`): a *refusal* flag —
+    // native overlays dismiss on outside interact by default, and `false` tells
+    // the host not to. The node vocabulary has no outside-interact channel for
+    // non-modal overlays, so the refusal rides the surface's interaction as an
+    // inert activation: a host implementing outside-dismissal must not dismiss
+    // a menu surface carrying this marker (the node-tree form of the web
+    // layer's `dismissOnOutsideInteract: false`).
+    if !spec.dismiss_on_outside_interact {
+        el.interaction.on_activate = Some(Arc::new(|| {}));
+    }
+
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
     }
     el.a11y.role = Some(NodeRole::Menu);
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn outside_interact_refusal_marks_the_menu_surface() {
+        // Web default `true`: the surface carries no refusal marker.
+        let node = menu(&MenuSpec::default(), &theme(), None);
+        assert!(node.interaction.on_activate.is_none());
+
+        // Refusal (`dismissOnOutsideInteract: false`): the surface carries
+        // the inert activation marker a host keys outside-dismissal on.
+        let refusing = MenuSpec::default().with_dismiss_on_outside_interact(false);
+        let node = menu(&refusing, &theme(), None);
+        assert!(node.interaction.on_activate.is_some());
+    }
 }

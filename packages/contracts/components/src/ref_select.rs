@@ -139,6 +139,9 @@ pub struct RefSelectSpec {
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
     pub is_open: bool,
+    /// Refuses outside-interact dismissal when false. Matches Svelte
+    /// `dismissOnOutsideInteract` (default `true`).
+    pub dismiss_on_outside_interact: bool,
 }
 
 impl Default for RefSelectSpec {
@@ -170,6 +173,7 @@ impl RefSelectSpec {
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
             is_open: false,
+            dismiss_on_outside_interact: true,
         }
     }
 
@@ -260,6 +264,11 @@ impl RefSelectSpec {
 
     pub fn with_open(mut self, is_open: bool) -> Self {
         self.is_open = is_open;
+        self
+    }
+
+    pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
+        self.dismiss_on_outside_interact = dismiss_on_outside_interact;
         self
     }
 

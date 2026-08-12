@@ -127,7 +127,11 @@ pub fn menubar(
     // ── Open overlay ──
     if let Some(open_menu) = spec.current_menu() {
         if !open_menu.items.is_empty() {
-            let menu_spec = MenuSpec::new(open_menu.items.clone());
+            // Menubar's own `dismissOnOutsideInteract` wins over the composed
+            // menu's (the alert_dialog pattern: the renderer resolves the
+            // composed spec's dismissal from its own spec state).
+            let menu_spec = MenuSpec::new(open_menu.items.clone())
+                .with_dismiss_on_outside_interact(spec.dismiss_on_outside_interact);
             root = root.child(render_menu(&menu_spec, theme, on_select));
         }
     }
@@ -137,4 +141,41 @@ pub fn menubar(
     }
     root.a11y.role = Some(NodeRole::MenuBar);
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn open_spec() -> MenubarSpec {
+        MenubarSpec::new(vec![poodle_specs::MenubarEntry::new(
+            "file",
+            "File",
+            vec![poodle_specs::MenuEntry::new("open", "Open")],
+        )])
+        .with_value("file")
+    }
+
+    #[test]
+    fn refusal_forwarded_into_open_overlay_surface() {
+        // Default `true`: the open menu surface stays marker-free.
+        let node = menubar(&open_spec(), &theme(), None, None);
+        assert!(node
+            .find(&|n| n.a11y.role == Some(NodeRole::Menu))
+            .and_then(|n| n.interaction.on_activate.as_ref())
+            .is_none());
+
+        // Menubar's own refusal wins over the composed MenuSpec default and
+        // reaches the rendered open overlay.
+        let refusing = open_spec().with_dismiss_on_outside_interact(false);
+        let node = menubar(&refusing, &theme(), None, None);
+        let menu_node = node
+            .find(&|n| n.a11y.role == Some(NodeRole::Menu))
+            .expect("open menu overlay");
+        assert!(menu_node.interaction.on_activate.is_some());
+    }
 }

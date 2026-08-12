@@ -1,14 +1,9 @@
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum TextLinkTone {
+    #[default]
     Accent,
     Inherit,
     Secondary,
-}
-
-impl Default for TextLinkTone {
-    fn default() -> Self {
-        Self::Accent
-    }
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]

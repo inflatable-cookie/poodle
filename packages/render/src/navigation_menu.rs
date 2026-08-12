@@ -241,6 +241,15 @@ pub fn navigation_menu(
             viewport = viewport.child(d);
         }
 
+        // Contract `dismissOnOutsideInteract` (default `true`): a *refusal*
+        // flag — native overlays dismiss on outside interact by default. The
+        // refusal rides the surface's interaction as an inert activation: a
+        // host implementing outside-dismissal must not dismiss a viewport
+        // carrying this marker (see menu.rs for the full contract note).
+        if !spec.dismiss_on_outside_interact {
+            viewport.interaction.on_activate = Some(Arc::new(|| {}));
+        }
+
         root = root.child(viewport);
     }
 
@@ -425,5 +434,19 @@ mod tests {
         let closed = trigger_of(&root, "B");
         assert_eq!(closed.style.descriptor.background, Some(idle));
         assert_eq!(closed.style.border_color_bottom, Some(TRANSPARENT));
+    }
+
+    #[test]
+    fn outside_interact_refusal_marks_the_open_viewport() {
+        // Web default `true` + active item: no refusal marker anywhere.
+        let spec = NavigationMenuSpec::new(items()).with_value("a");
+        let node = navigation_menu(&spec, &theme(), None);
+        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
+
+        // Refusal: the open viewport carries the inert activation marker a
+        // host keys outside-dismissal on.
+        let refusing = spec.with_dismiss_on_outside_interact(false);
+        let node = navigation_menu(&refusing, &theme(), None);
+        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
     }
 }

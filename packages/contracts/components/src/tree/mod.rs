@@ -263,10 +263,7 @@ fn insert_relative(
     }
     let mut carried = node;
     for n in nodes.iter_mut() {
-        match insert_relative(&mut n.children, to, carried, position) {
-            None => return None,
-            Some(returned) => carried = returned,
-        }
+        carried = insert_relative(&mut n.children, to, carried, position)?;
     }
     Some(carried)
 }

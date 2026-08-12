@@ -122,28 +122,7 @@ const WEB_ONLY_PROPS = new Set([
  * adding one means a prop shipped to the web without reaching the shared spec
  * surface, which is the thing this gate exists to stop.
  */
-const OPEN_GAPS: Record<string, string[]> = {
-  // g13-026: `dismissOnOutsideInteract` is a *refusal* flag whose default
-  // matches every native platform's standard outside-dismissal behaviour for
-  // these overlays. The specs deliberately model dismissal only where the
-  // default differs (Dialog/Drawer `dismiss_on_*`); a field that always reads
-  // `true` on native would be invented data. Card instruction: note in the log
-  // rather than inventing. Native renderers keep platform outside-dismissal;
-  // revisit if a native host needs to refuse it. See
-  // docs/logs/2026-08/12-g13-026-dismiss-outside-interact.md.
-  "context-menu": ["dismissOnOutsideInteract"],
-  "filter-builder": ["dismissOnOutsideInteract"],
-  "list-card": ["dismissOnOutsideInteract"],
-  menu: ["dismissOnOutsideInteract"],
-  menubar: ["dismissOnOutsideInteract"],
-  "model-picker": ["dismissOnOutsideInteract"],
-  "navigation-menu": ["dismissOnOutsideInteract"],
-  "order-by": ["dismissOnOutsideInteract"],
-  "ref-select": ["dismissOnOutsideInteract"],
-  select: ["dismissOnOutsideInteract"],
-  "split-button": ["dismissOnOutsideInteract"],
-  "theme-select": ["dismissOnOutsideInteract"],
-}
+const OPEN_GAPS: Record<string, string[]> = {};
 
 /**
  * Contract prop -> Spec field, where the two deliberately differ. The prop IS

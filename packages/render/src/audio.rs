@@ -218,6 +218,10 @@ pub fn fader(spec: &FaderSpec, theme: &dyn ThemeProvider) -> Node {
     root.child(thumb)
 }
 
+#[expect(
+    clippy::too_many_arguments,
+    reason = "meter channel rendering keeps resolved state and token metrics explicit"
+)]
 fn meter_channel(
     value: f64,
     segments: usize,

@@ -50,6 +50,9 @@ pub struct SplitButtonSpec {
     pub is_disabled: bool,
     pub is_loading: bool,
     pub is_open: bool,
+    /// Refuses outside-interact dismissal when false. Matches Svelte
+    /// `dismissOnOutsideInteract` (default `true`).
+    pub dismiss_on_outside_interact: bool,
     pub aria_label: Option<String>,
     pub menu_aria_label: String,
     pub size_role: SemanticControlSizeRole,
@@ -67,6 +70,7 @@ impl Default for SplitButtonSpec {
             is_disabled: false,
             is_loading: false,
             is_open: false,
+            dismiss_on_outside_interact: true,
             aria_label: None,
             menu_aria_label: "More actions".to_string(),
             size_role: SemanticControlSizeRole::Control,
@@ -117,6 +121,11 @@ impl SplitButtonSpec {
 
     pub fn with_open(mut self, is_open: bool) -> Self {
         self.is_open = is_open;
+        self
+    }
+
+    pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
+        self.dismiss_on_outside_interact = dismiss_on_outside_interact;
         self
     }
 

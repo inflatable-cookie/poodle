@@ -74,6 +74,9 @@ pub struct ThemeSelectSpec {
     pub columns: usize,
     pub show_label: bool,
     pub is_open: bool,
+    /// Refuses outside-interact dismissal when false. Matches Svelte
+    /// `dismissOnOutsideInteract` (default `true`).
+    pub dismiss_on_outside_interact: bool,
 }
 
 impl ThemeSelectSpec {
@@ -89,6 +92,7 @@ impl ThemeSelectSpec {
             columns: 3,
             show_label: true,
             is_open: false,
+            dismiss_on_outside_interact: true,
         }
     }
 
@@ -139,6 +143,11 @@ impl ThemeSelectSpec {
 
     pub fn with_open(mut self, is_open: bool) -> Self {
         self.is_open = is_open;
+        self
+    }
+
+    pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
+        self.dismiss_on_outside_interact = dismiss_on_outside_interact;
         self
     }
 

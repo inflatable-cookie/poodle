@@ -1,57 +1,37 @@
 use crate::types::{ControlDensity, ControlSize, MenuEntry, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum LeadingShape {
+    #[default]
     Circle,
     RoundedSquare,
 }
 
-impl Default for LeadingShape {
-    fn default() -> Self {
-        Self::Circle
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum LeadingFill {
+    #[default]
     Tint,
     Solid,
 }
 
-impl Default for LeadingFill {
-    fn default() -> Self {
-        Self::Tint
-    }
-}
-
 /// Card layout mode. Contract §3/§4: `compact` is a dense single-line variant;
 /// `stacked` is a square-ish tile with leading on top and a bottom utility rail.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum ListCardLayout {
+    #[default]
     Default,
     Compact,
     Stacked,
 }
 
-impl Default for ListCardLayout {
-    fn default() -> Self {
-        Self::Default
-    }
-}
-
 /// Selection-indicator mode. Contract §3: `Checkbox` renders a checkbox
 /// selection indicator when the card is selectable.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum SelectionIndicator {
+    #[default]
     None,
     Checkbox,
-}
-
-impl Default for SelectionIndicator {
-    fn default() -> Self {
-        Self::None
-    }
 }
 
 /// What opens a ListCard's context menu.
@@ -124,6 +104,9 @@ pub struct ListCardSpec {
     pub context_menu_trigger: ListCardContextMenuTrigger,
     /// Accessible name for the context menu.
     pub context_menu_aria_label: Option<String>,
+    /// Refuses outside-interact dismissal for the context menu when false.
+    /// Matches Svelte `dismissOnOutsideInteract` (default `true`).
+    pub dismiss_on_outside_interact: bool,
 }
 
 impl Default for ListCardSpec {
@@ -156,6 +139,7 @@ impl Default for ListCardSpec {
             context_menu_items: Vec::new(),
             context_menu_trigger: ListCardContextMenuTrigger::Context,
             context_menu_aria_label: None,
+            dismiss_on_outside_interact: true,
         }
     }
 }
@@ -173,6 +157,11 @@ impl ListCardSpec {
 
     pub fn with_context_menu_aria_label(mut self, label: impl Into<String>) -> Self {
         self.context_menu_aria_label = Some(label.into());
+        self
+    }
+
+    pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
+        self.dismiss_on_outside_interact = dismiss_on_outside_interact;
         self
     }
 
