@@ -44,7 +44,8 @@ and roadmap closeout.
 | `032` | HistoryCentre — rename the selected fork | `030` merged | merged (`8da4141a` → `321fc790`) |
 | `033` | HistoryCentre — one fork row, with delete | `031`+`032` merged | merged (`aa0350d2`) |
 | `034` | HistoryCentre — three field defects from Loophole | `033` merged | merged (`6257077f`) |
-| `035` | shell scene: Rust authoring + the two web shells (**g13.004** part 1) | `011`/`012`/`022`/`025` merged | ready |
+| `035` | shell scene: Rust authoring + the two web shells (**g13.004** part 1) | `011`/`012`/`022`/`025` merged | merged (`db4e4510`) |
+| `036` | shell scene: GPUI + Jetstream — closes **g13.004** | `035` merged | planned |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
