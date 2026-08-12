@@ -403,12 +403,12 @@ export function HistoryCenter({
     const items: MenuItem[] = [
       {
         value: "rename",
-        label: renameTarget === null ? "Rename fork" : `Rename ${renameTarget.name}`,
+        label: "Rename",
         disabled: renameTarget === null || renamingBranchId !== null,
       },
       {
         value: "checkout",
-        label: "Activate without moving",
+        label: "Checkout",
         disabled:
           rowDisabled || picked === undefined || picked.preferred || renamingBranchId !== null,
       },
@@ -419,8 +419,7 @@ export function HistoryCenter({
       items.push({ value: "separator", label: "", kind: "separator" });
       items.push({
         value: "delete",
-        label:
-          picked === undefined ? "Delete fork" : `Delete ${picked.branchName ?? picked.branchId}`,
+        label: "Delete",
         tone: "danger",
         disabled: picked === undefined || renamingBranchId !== null,
       });
@@ -886,7 +885,15 @@ export function HistoryCenter({
                                           : `Actions for ${picked.branchName ?? picked.branchId}`
                                       }
                                       onAction={(value) => runPickerAction(value, picked, renameTarget)}
-                                      trigger={<Icon name="ellipsis" size="xs" />}
+                                      trigger={
+                                          <IconButton
+                                            icon="ellipsis"
+                                            ariaLabel="Fork actions"
+                                            variant="ghost"
+                                            size="xs"
+                                            density={resolvedDensity}
+                                          />
+                                        }
                                     />
                                   </span>
                                 </div>

@@ -386,12 +386,12 @@
     const items: MenuItem[] = [
       {
         value: "rename",
-        label: renameTarget === null ? "Rename fork" : `Rename ${renameTarget.name}`,
+        label: "Rename",
         disabled: renameTarget === null || renamingBranchId !== null,
       },
       {
         value: "checkout",
-        label: "Activate without moving",
+        label: "Checkout",
         disabled:
           rowDisabled || picked === undefined || picked.preferred || renamingBranchId !== null,
       },
@@ -403,7 +403,7 @@
       items.push({ value: "separator", label: "", kind: "separator" });
       items.push({
         value: "delete",
-        label: picked === undefined ? "Delete fork" : `Delete ${picked.branchName ?? picked.branchId}`,
+        label: "Delete",
         tone: "danger",
         disabled: picked === undefined || renamingBranchId !== null,
       });
@@ -837,7 +837,13 @@
                           onAction={(value) => runPickerAction(value, picked, renameTarget)}
                         >
                           {#snippet trigger()}
-                            <Icon name="ellipsis" size="xs" />
+                            <IconButton
+                              icon="ellipsis"
+                              ariaLabel="Fork actions"
+                              variant="ghost"
+                              size="xs"
+                              density={resolvedDensity}
+                            />
                           {/snippet}
                         </Menu>
                       </span>
