@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "shared_types": [],
+  "components": [],
+  "conformance_vectors": [],
+  "scenes": [
+    {
+      "id": "preview-shell",
+      "name": "Preview shell",
+      "description": "The shared preview shell of g13.004: theme/size/density/contrast axes (SHELL-01-04), navigation (SHELL-05), search (SHELL-06), specimen tabs (SHELL-07), preview state (SHELL-08), and parity vocabulary (SHELL-09). Rendered by all four runtimes.",
+      "instances": [],
+      "axes": [
+        {
+          "kind": "theme",
+          "values": {
+            "named": [
+              "clay",
+              "cobalt",
+              "eclipse",
+              "forest",
+              "graphite",
+              "hornet",
+              "iceberg",
+              "meadow",
+              "midnight",
+              "nord",
+              "rose",
+              "solarized"
+            ]
+          },
+          "description": "Theme preset selection (SHELL-01; CROSS-09 theme axis)."
+        },
+        {
+          "kind": "size",
+          "values": {
+            "named": [
+              "xs",
+              "sm",
+              "md",
+              "lg",
+              "xl"
+            ]
+          },
+          "description": "Control-size selection xs-xl (SHELL-02; CROSS-07)."
+        },
+        {
+          "kind": "density",
+          "values": {
+            "named": [
+              "compact",
+              "default",
+              "comfortable"
+            ]
+          },
+          "description": "Density selection compact/default/comfortable (SHELL-03; CROSS-08)."
+        },
+        {
+          "kind": "contrast",
+          "values": {
+            "continuous": {
+              "min": 0.4,
+              "max": 1.6,
+              "default": 0.5
+            }
+          },
+          "description": "Continuous neutral-contrast override (SHELL-04; CROSS-10; T §7)."
+        }
+      ],
+      "layout": {
+        "sections": [
+          {
+            "title": "Components",
+            "kind": "components",
+            "groups": []
+          },
+          {
+            "title": "Tokens",
+            "kind": "tokens",
+            "groups": []
+          }
+        ],
+        "route_state": {
+          "persisted": [
+            "theme",
+            "density",
+            "controlSize"
+          ]
+        }
+      },
+      "tabs": {
+        "tabs": [
+          "examples",
+          "sizes",
+          "densities"
+        ]
+      },
+      "search": {
+        "case_insensitive": true,
+        "fields": [
+          "display-name",
+          "description"
+        ]
+      },
+      "preview_state": {
+        "theme": "eclipse",
+        "density": "compact",
+        "control_size": "sm",
+        "contrast": 0.5
+      },
+      "parity": {
+        "defaults": {
+          "theme": "eclipse",
+          "density": "compact",
+          "control_size": "sm",
+          "contrast": 0.5
+        },
+        "review_route_presets": [
+          "components",
+          "tokens"
+        ],
+        "targets": [
+          "svelte",
+          "react",
+          "gpui",
+          "jetstream"
+        ],
+        "visual_gates": [
+          {
+            "tier": "smoke",
+            "axes": []
+          },
+          {
+            "tier": "axis",
+            "axes": [
+              "size",
+              "density",
+              "contrast"
+            ]
+          },
+          {
+            "tier": "sweep",
+            "axes": [
+              "theme"
+            ]
+          }
+        ],
+        "native_visual_baseline": true
+      },
+      "captures": [
+        "shell-theme",
+        "shell-size",
+        "shell-density",
+        "shell-contrast",
+        "shell-search"
+      ]
+    }
+  ],
+  "specimen_registry": null
+}

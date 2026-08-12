@@ -406,3 +406,28 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   unsupported, so routine health checks cannot go green on the checked-in
   manifest. Align the manifest schema or update Effigy's accepted config keys.
 
+
+- 2026-08-12 — Svelte preview's SHELL-08 URL persistence never fires: in
+  `packages/svelte/preview/src/App.svelte`, the `$effect` that writes
+  `theme`/`density`/`controlSize` back into the URL is gated on
+  `hasMounted`, a plain `let` in a runes-mode component — not reactive, so
+  the effect never observes the state it is supposed to re-serialize.
+  Measured live (g13-035): clicking density/size updates the top-bar pills
+  and `data-theme` but `location.href` keeps the pre-change query string,
+  with no console error; the React preview's equivalent `useEffect` does
+  persist (`?theme=forest&density=default&controlSize=lg` after clicks), so
+  the two web shells drift on SHELL-08. Either make `hasMounted` `$state`
+  (or drop the guard and run the write on mount) or route the effect through
+  `$effect` with an explicit reactive flag. Affects the shared-preview-shell
+  parity story once 036 lands.
+
+- 2026-08-12 — Both catalogue-landing grids ignore their filtered component
+  list: `packages/svelte/preview/src/pages/CatalogueLanding.svelte` and the
+  React mirror render `componentsByTag()` (every component) and use the
+  `components` prop only for the count line. With a search query active, the
+  sidebar filters correctly and the header reads "2 components" while the
+  grid still renders ~164 cards (measured live in both previews, g13-035).
+  The search axis itself works — the data flows — but the landing grid
+  defeats the filter's visible result. Fix: derive `groups` from the
+  `components` prop (filter `componentsByTag()` items by the passed set)
+  in both files.

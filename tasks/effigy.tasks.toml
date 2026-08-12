@@ -16,15 +16,33 @@
 # something fails if the tree and the generator disagree -- this is that.
 "audit:tokens" = "bun packages/tokens/scripts/build-tokens.ts --check"
 
-# IR code generation (g13.003). The generated TypeScript under
-# packages/codegen/generated/ is committed for the same reason the token
-# artifacts are: a clean clone packs everything. `ir:check` is the gate --
-# read-only, byte-exact, whitespace-classified, orphan-aware -- and
-# `ir:build` is its write-mode twin. Like `tokens:build`, the write selector
-# never composes into a gate (that composition is the 45caae82 failure);
-# gates may only reach `*:check`.
-"ir:build" = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated"
-"ir:check" = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated --check"
+# IR code generation (g13.003; the shell scene is g13.004 card 035). The
+# generated TypeScript under packages/codegen/generated/ is committed for
+# the same reason the token artifacts are: a clean clone packs everything.
+# `ir:check` is the gate -- read-only, byte-exact, whitespace-classified,
+# orphan-aware -- and `ir:build` is its write-mode twin. Like
+# `tokens:build`, the write selector never composes into a gate (that
+# composition is the 45caae82 failure); gates may only reach `*:check`.
+#
+# Card 035 R1: the shell scene is authored in Rust
+# (packages/codegen/src/models/preview_shell.rs) and serialized to its own
+# fixture by `--author-shell`; the emitter fixture (synthetic-model.json)
+# is untouched. The shell-scene target renders that model into the
+# consuming web packages' generated/ directories (g13-b003 R1); it is not
+# part of the default target set, so a plain run over the synthetic
+# fixture never writes into a web package.
+"ir:build" = [
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/svelte/preview/src --target shell-scene" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/react/preview/src --target shell-scene" },
+]
+"ir:check" = [
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json --check" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated --check" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/svelte/preview/src --target shell-scene --check" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/react/preview/src --target shell-scene --check" },
+]
 
 # Preview (documentation site)
 "svelte:build" = "bun run --cwd packages/svelte/preview build"
