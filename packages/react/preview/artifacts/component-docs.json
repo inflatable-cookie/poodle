@@ -9110,6 +9110,108 @@
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { SidebarNav } from \"@inflatable-cookie/poodle-svelte\";\n\n  const groups = [\n    {\n      id: \"main\",\n      label: \"Navigation\",\n      items: [\n        { value: \"dashboard\", label: \"Dashboard\" },\n        { value: \"projects\", label: \"Projects\", href: \"/projects\" },\n        { value: \"settings\", label: \"Settings\" },\n      ],\n    },\n  ];\n\n  let active = \"dashboard\";\n</script>\n\n<SidebarNav {groups} value={active} ariaLabel=\"Main navigation\" onValueChange={(value) => (active = value)} />"
   },
+  "settings-shell": {
+    "props": [
+      {
+        "name": "groups",
+        "type": "SettingsNavGroup[]",
+        "default": "[]",
+        "description": "Navigation groups; empty renders the nav empty state."
+      },
+      {
+        "name": "activePageId",
+        "type": "string | null",
+        "default": "null",
+        "description": "Currently active page in the navigation rail."
+      },
+      {
+        "name": "pageTitle",
+        "type": "string | null",
+        "default": "null",
+        "description": "Current page heading rendered in the page header."
+      },
+      {
+        "name": "pageDescription",
+        "type": "string | null",
+        "default": "null",
+        "description": "Current page supporting copy rendered in the page header."
+      },
+      {
+        "name": "searchQuery",
+        "type": "string",
+        "default": "\"\"",
+        "description": "Search field value; bindable."
+      },
+      {
+        "name": "searchResults",
+        "type": "SettingsSearchResult[] | null",
+        "default": "null",
+        "description": "Search outcome; null means not searching and renders the page. Non-null replaces the page region with the result list."
+      },
+      {
+        "name": "open",
+        "type": "boolean | null",
+        "default": "null",
+        "description": "Controlled open state; null means uncontrolled, seeded by defaultOpen."
+      },
+      {
+        "name": "defaultOpen",
+        "type": "boolean",
+        "default": "false",
+        "description": "Uncontrolled initial open state."
+      },
+      {
+        "name": "title",
+        "type": "string | null",
+        "default": "\"Settings\"",
+        "description": "Dialog title and accessible name."
+      },
+      {
+        "name": "closeLabel",
+        "type": "string",
+        "default": "\"Close settings\"",
+        "description": "Accessible label for the dialog close button."
+      },
+      {
+        "name": "closeRefusedReason",
+        "type": "string | null",
+        "default": "null",
+        "description": "Host-supplied refused-close reason; renders as an announced warning callout and keeps the shell open on close attempts."
+      },
+      {
+        "name": "onNavigate",
+        "type": "(pageId: string, anchorId?: string | null) => void",
+        "default": "undefined",
+        "description": "Fired on nav item or search result activation."
+      },
+      {
+        "name": "onRequestClose",
+        "type": "() => void",
+        "default": "undefined",
+        "description": "Fired on every close attempt; the host decides."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "(open: boolean) => void",
+        "default": "undefined",
+        "description": "Open-state request."
+      },
+      {
+        "name": "onSearchQueryChange",
+        "type": "(value: string) => void",
+        "default": "undefined",
+        "description": "Search value change."
+      }
+    ],
+    "slots": [
+      {
+        "name": "page",
+        "description": "The current page body; always a snippet."
+      }
+    ],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { SettingsShell } from \"@inflatable-cookie/poodle-svelte\";\n  import type { SettingsNavGroup, SettingsSearchResult } from \"@inflatable-cookie/poodle-svelte\";\n\n  const groups: SettingsNavGroup[] = [\n    { id: \"general\", label: \"General\", items: [{ value: \"general\", label: \"General\" }] },\n  ];\n\n  let open = true;\n  let query = \"\";\n  let results: SettingsSearchResult[] | null = null;\n</script>\n\n<SettingsShell\n  bind:open\n  {groups}\n  activePageId=\"general\"\n  pageTitle=\"General\"\n  bind:searchQuery={query}\n  {searchResults}\n  onNavigate={(pageId, anchorId) => console.log(pageId, anchorId)}\n  onRequestClose={() => console.log(\"close requested\")}\n>\n  <p>Settings page content.</p>\n</SettingsShell>"
+  },
   "tree": {
     "props": [
       {

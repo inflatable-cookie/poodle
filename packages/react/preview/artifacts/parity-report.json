@@ -182,10 +182,10 @@
     "summary": [
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
-        "exportCount": 201,
-        "componentCount": 164,
+        "exportCount": 202,
+        "componentCount": 165,
         "helperCount": 37,
-        "previewedCount": 201,
+        "previewedCount": 202,
         "contractOnlyCount": 0
       }
     ],
@@ -2222,6 +2222,19 @@
         ],
         "sectionTitles": [
           "Headers, dock orchestration, and workspace shell posture"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "SettingsShell",
+        "kind": "component",
+        "status": "previewed",
+        "note": "The catalogue covers the remaining composite exports outside the main suite-specific groupings.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
         ]
       },
       {
