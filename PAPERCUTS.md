@@ -7,6 +7,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-12 — g13-036: the scene now owns the control labels in all four
+  shells, but the web shells still hardcode accessibility labels: Svelte and
+  React `DisplayControls` pass `ariaLabel="Neutral contrast"` (contrast),
+  `ariaLabel="Search components"` (search) and `ariaLabel="Control size"`
+  (size) while the visible label comes from the scene (`Contrast`/`Search`/
+  `Size`). The natives are aligned (GPUI's contrast aria label is now the
+  scene's `Contrast`; Jetstream's was already), so the web pair carries the
+  only remaining second copy of label text — R3's "the scene owns the word"
+  is not complete until the web aria labels read from the artifact too.
+  Out of scope for 036 (web preview sources are not its writable paths).
+
 - 2026-08-12 — RESOLVED 2026-08-12: the include now covers `test/**` and the
   36 errors are cleared (701 files, 0 errors, up from 449). Verified by
   reintroducing the stale `rootContinuationCount` — the gate catches it now.

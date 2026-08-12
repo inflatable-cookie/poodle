@@ -6,7 +6,9 @@
 //! web packages' `generated/` directories (g13-b003 R1 "Generated output
 //! location"), and a plain `ir:build` over the synthetic fixture must never
 //! write into a web package. It is reachable only via `--target
-//! shell-scene`.
+//! shell-scene`. `g13-b036` adds its Rust sibling `shell-rust` (card 036
+//! R2), which renders the same scene into the native previews' `generated/`
+//! directories — same scoping, same select-only reachability.
 
 use crate::emit::EmitTarget;
 
@@ -18,6 +20,7 @@ pub mod json;
 pub mod registry;
 pub mod schema;
 pub mod shell;
+pub mod shell_rust;
 pub mod ts;
 
 /// Every registered target, in stable order — the default set a plain
@@ -37,6 +40,7 @@ pub fn all() -> Vec<&'static dyn EmitTarget> {
 pub fn selectable() -> Vec<&'static dyn EmitTarget> {
     let mut targets = all();
     targets.push(&shell::ShellSceneTarget);
+    targets.push(&shell_rust::ShellRustTarget);
     targets
 }
 

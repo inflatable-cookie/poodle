@@ -70,7 +70,9 @@ pub fn render_scenes(model: &IrModel, source_path: &str) -> Vec<GeneratedFile> {
 
 /// The display label of an axis kind — the scene's label text for the
 /// control (card 035 R4). Casing here is content; a shell may restyle it.
-fn axis_label(kind: SceneAxisKind) -> &'static str {
+/// Shared with the `shell-rust` sibling target (card 036 R2) so the label
+/// projection has exactly one home.
+pub(crate) fn axis_label(kind: SceneAxisKind) -> &'static str {
     match kind {
         SceneAxisKind::Theme => "Theme",
         SceneAxisKind::Size => "Size",
@@ -82,8 +84,9 @@ fn axis_label(kind: SceneAxisKind) -> &'static str {
 
 /// Display form of an identifier, the `theme-options.ts` rule: split on
 /// `-`/`_`, capitalize each word, join with a space (`examples` →
-/// `Examples`, `high-contrast` → `High Contrast`).
-fn humanize(value: &str) -> String {
+/// `Examples`, `high-contrast` → `High Contrast`). Shared with the
+/// `shell-rust` sibling target (card 036 R2).
+pub(crate) fn humanize(value: &str) -> String {
     value
         .split(['-', '_'])
         .map(|word| {
@@ -159,8 +162,9 @@ fn render_controls(scene: &Scene) -> String {
 }
 
 /// The serialized scene-kind name (the IR's serde rename), used as the
-/// control's machine key. The shell discriminates widgets on it.
-fn kind_name(kind: SceneAxisKind) -> &'static str {
+/// control's machine key. The shell discriminates widgets on it. Shared
+/// with the `shell-rust` sibling target (card 036 R2).
+pub(crate) fn kind_name(kind: SceneAxisKind) -> &'static str {
     match kind {
         SceneAxisKind::Theme => "theme",
         SceneAxisKind::Size => "size",

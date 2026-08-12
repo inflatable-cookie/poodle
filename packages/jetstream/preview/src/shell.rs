@@ -31,6 +31,12 @@ use crate::app_state::*;
 use crate::component_registry;
 use crate::specimens;
 
+/// The scene's generated Rust artifact (card 036): plain data, no Poodle
+/// crate imports — pulled in via the `poodle-tokens` `#[path]` mechanism
+/// (g13-b003 R1 names it as the shape g13 follows).
+#[path = "generated/preview-shell.rs"]
+mod generated_shell;
+
 /// Build the entire shell as a pure JsEl tree.
 pub fn build_shell(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
     let bg_panel = resolve_color(theme, "color.background.panel");
@@ -127,6 +133,15 @@ fn build_tab_bar(
 }
 
 /// Controls bar with theme, density, size toggles and state probes.
+///
+/// The control surface is the scene's (card 036 R4): which controls exist
+/// and their label text come from the generated artifact
+/// (`generated/preview-shell.rs`, included below — plain data, no Poodle
+/// crate imports, per card 036 R1); widget mechanics, value sets, and
+/// runtime state stay host-owned. Kinds are compared as plain strings so
+/// deleting an axis or search from the scene removes the control cleanly
+/// instead of becoming a compile error (the card-035 R3 removal property,
+/// repeated for the natives).
 fn build_controls_bar(
     state: &AppState,
     theme: &JetstreamThemeProvider,
@@ -145,6 +160,9 @@ fn build_controls_bar(
         .bg(bg_surface)
         .border_1()
         .border_color(border);
+
+    let scene = &generated_shell::PREVIEW_SHELL;
+    let find_control = |kind: &str| scene.controls.iter().find(|c| c.kind == kind);
 
     // Theme / density / size — real Eyebrow + ToggleGroup components (the
     // Svelte DisplayControls uses exactly these). Option activation routes via
@@ -171,89 +189,111 @@ fn build_controls_bar(
     };
 
     // Theme picker — the real ThemeSelect, matching the Svelte preview, rather
-    // than one toggle button per theme.
-    let theme_group = div()
-        .flex_col()
-        .gap(4.0)
-        .flex_shrink_0()
-        .child(crate::jsx::jel(crate::compat::js_eyebrow(
-            &EyebrowSpec::default().with_content("Theme"),
-            theme,
-        )))
-        .child(crate::jsx::jel(crate::compat::js_theme_select(
-            &poodle_specs::ThemeSelectSpec::new()
-                .with_themes(state.theme_options.clone())
-                .with_value(state.theme_preset.label())
-                .with_open(state.theme_select_open),
-            theme,
-        )));
-    bar = bar.child(theme_group);
+    // than one toggle button per theme. Label from the scene.
+    if let Some(control) = find_control("theme") {
+        let theme_group = div()
+            .flex_col()
+            .gap(4.0)
+            .flex_shrink_0()
+            .child(crate::jsx::jel(crate::compat::js_eyebrow(
+                &EyebrowSpec::default().with_content(control.label),
+                theme,
+            )))
+            .child(crate::jsx::jel(crate::compat::js_theme_select(
+                &poodle_specs::ThemeSelectSpec::new()
+                    .with_themes(state.theme_options.clone())
+                    .with_value(state.theme_preset.label())
+                    .with_open(state.theme_select_open),
+                theme,
+            )));
+        bar = bar.child(theme_group);
+    }
 
-    let density_labels: Vec<&str> = Density::ALL.iter().map(|d| d.label()).collect();
-    bar = bar.child(group("Density", &density_labels, state.density.label()));
+    if let Some(control) = find_control("density") {
+        let density_labels: Vec<&str> = Density::ALL.iter().map(|d| d.label()).collect();
+        bar = bar.child(group(control.label, &density_labels, state.density.label()));
+    }
 
-    let size_labels: Vec<&str> = ControlSize::ALL.iter().map(|s| s.label()).collect();
-    bar = bar.child(group("Size", &size_labels, state.control_size.label()));
+    if let Some(control) = find_control("size") {
+        let size_labels: Vec<&str> = ControlSize::ALL.iter().map(|s| s.label()).collect();
+        bar = bar.child(group(control.label, &size_labels, state.control_size.label()));
+    }
 
     // Contrast group — a real engine slider driving the oklch neutral-contrast
     // axis (mirrors the Svelte preview's CONTRAST control; 0.5 = library default).
-    let contrast_group = div()
-        .flex_col()
-        .gap(4.0)
-        .flex_shrink_0()
-        .child(label("CONTRAST").text_color(text_secondary).text_size(9.0))
-        .child(
-            slider(state.contrast, 0.0, 1.0)
-                .id("contrast")
-                .w(140.0)
-                .h(14.0)
-                .rounded(999.0)
-                // The "CONTRAST" caption beside it is a sibling, not a label,
-                // so a screen reader reaches the slider with nothing to say.
-                .aria_label("Contrast")
-                .focusable(),
-        );
-    bar = bar.child(contrast_group);
+    // Caption is the scene's label, uppercased as this shell's house style.
+    if let Some(control) = find_control("contrast") {
+        let contrast_group = div()
+            .flex_col()
+            .gap(4.0)
+            .flex_shrink_0()
+            .child(
+                label(control.label.to_uppercase())
+                    .text_color(text_secondary)
+                    .text_size(9.0),
+            )
+            .child(
+                slider(state.contrast, 0.0, 1.0)
+                    .id("contrast")
+                    .w(140.0)
+                    .h(14.0)
+                    .rounded(999.0)
+                    // The caption beside it is a sibling, not a label,
+                    // so a screen reader reaches the slider with nothing to say.
+                    .aria_label(control.label)
+                    .focusable(),
+            );
+        bar = bar.child(contrast_group);
+    }
 
     // Search group — filters the sidebar + catalogue by name (Svelte parity).
-    let bg_canvas = resolve_color(theme, "color.background.canvas");
-    let search_group = div()
-        .flex_col()
-        .gap(4.0)
-        .flex_shrink_0()
-        .child(label("SEARCH").text_color(text_secondary).text_size(9.0))
-        .child(
-            div()
-                .flex_row()
-                .items_center()
-                .gap(6.0)
-                .h(28.0)
-                .pl(8.0)
-                .pr(8.0)
-                .bg(bg_canvas)
-                .border_1()
-                .border_color(border)
-                .rounded(8.0)
-                // Decorative: the field beside it is already named "Search",
-                // so announcing this too would just repeat the word.
-                .child(
-                    icon("search")
-                        .w(13.0)
-                        .h(13.0)
-                        .text_color(text_secondary)
-                        .aria_hidden(true),
-                )
-                .child(
-                    text_input(state.search.clone(), "Find component...")
+    if let Some(control) = find_control("search") {
+        let bg_canvas = resolve_color(theme, "color.background.canvas");
+        let search_group = div()
+            .flex_col()
+            .gap(4.0)
+            .flex_shrink_0()
+            .child(
+                label(control.label.to_uppercase())
+                    .text_color(text_secondary)
+                    .text_size(9.0),
+            )
+            .child(
+                div()
+                    .flex_row()
+                    .items_center()
+                    .gap(6.0)
+                    .h(28.0)
+                    .pl(8.0)
+                    .pr(8.0)
+                    .bg(bg_canvas)
+                    .border_1()
+                    .border_color(border)
+                    .rounded(8.0)
+                    // Decorative: the field beside it is already named "Search",
+                    // so announcing this too would just repeat the word.
+                    .child(
+                        icon("search")
+                            .w(13.0)
+                            .h(13.0)
+                            .text_color(text_secondary)
+                            .aria_hidden(true),
+                    )
+                    .child(
+                        text_input(
+                            state.search.clone(),
+                            control.placeholder.unwrap_or("Find component..."),
+                        )
                         .id("search")
                         .aria_label("Search components")
                         .w(160.0)
                         .h(24.0)
                         .bg(Color::TRANSPARENT)
                         .text_size(11.5),
-                ),
-        );
-    bar = bar.child(search_group);
+                    ),
+            );
+        bar = bar.child(search_group);
+    }
 
     // Separator
     bar = bar.child(div().w(1.0).h(28.0).bg(border));
@@ -624,6 +664,55 @@ mod tests {
             "keyed={} direct={direct} recovered-by-walk={recovered} shadowed={shadowed} unreachable={unreachable}",
             keyed.len()
         );
+    }
+
+    /// R4 — the controls bar composes nothing of its own: every control the
+    /// scene carries (via the committed `generated/preview-shell.rs`
+    /// artifact) renders a keyed widget in the shell, and the scene carries
+    /// no kind the shell cannot render. This is the native half of the
+    /// card's removal property: delete an axis from the scene, rebuild, and
+    /// its group vanishes here because the artifact — and only the artifact —
+    /// decides the surface. The host value sets (Density::ALL etc.) stay
+    /// host-owned, so option counts are checked per kind, not against the
+    /// artifact's value lists.
+    #[test]
+    fn the_controls_bar_renders_exactly_the_scene_controls() {
+        let state = AppState::new();
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let mut ui = GameUi::with_text(1500.0, 900.0);
+        ui.render_immediate(&build_shell(&state, &theme));
+
+        let keys: Vec<String> = ui
+            .tree
+            .nodes
+            .iter()
+            .filter(|n| n.alive)
+            .filter_map(|n| n.style.token_key.clone())
+            .collect();
+
+        for control in generated_shell::PREVIEW_SHELL.controls {
+            let present = match control.kind {
+                "theme" => keys.iter().any(|k| k == "theme-select-trigger"),
+                // Host density set is comfortable/compact — a documented
+                // subset of the scene's three values.
+                "density" => {
+                    keys.iter().any(|k| k == "toggle:comfortable")
+                        && keys.iter().any(|k| k == "toggle:compact")
+                }
+                "size" => ["xs", "sm", "md", "lg", "xl"]
+                    .iter()
+                    .all(|v| keys.iter().any(|k| k == &format!("toggle:{v}"))),
+                "contrast" => keys.iter().any(|k| k == "contrast"),
+                "search" => keys.iter().any(|k| k == "search"),
+                other => panic!("the scene carries an unrenderable control kind {other:?}"),
+            };
+            assert!(
+                present,
+                "scene control {:?} renders a keyed widget in the controls bar; chrome keys: {keys:?}",
+                control.kind
+            );
+        }
     }
 
     /// `GameUi` materialisation recurses deep enough to blow a test thread's
