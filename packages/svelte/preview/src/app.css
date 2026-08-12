@@ -37,18 +37,23 @@ input {
   min-height: 0;
 }
 
-/* Focus ring for the docs site's own unstyled chrome only.
-   Poodle components draw their own focus treatment, and 33 of them set
-   `outline: none` to do it. A bare `input:focus-visible` is (0,1,1), which
-   outranks a component class like `.poodle-text-input__control` (0,1,0), so
-   this rule was overriding them — TextInput showed the component's rounded
-   focus border plus this square outline at once. Excluding poodle-classed
-   elements keeps the docs chrome focusable without reaching into components. */
-button:not([class*="poodle-"]):focus-visible,
-input:not([class*="poodle-"]):focus-visible {
-  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-  outline-offset: 0.125rem;
-}
+/* No blanket focus ring here, deliberately.
+
+   There was one — `button:focus-visible, input:focus-visible` — and it
+   outranked every component that draws its own treatment: a bare element
+   selector plus a pseudo-class is (0,1,1) and beats a component class at
+   (0,1,0). TextInput rendered its rounded focus border and this square outline
+   at the same time (PAPERCUTS 2026-08-11). It was then narrowed with
+   `:not([class*="poodle-"])`, which made it match nothing at all: every
+   focusable element in this shell is either a Poodle component or carries a
+   `poodle-`prefixed class.
+
+   So it was dead, and dead in a way that stayed dangerous — a shell copied
+   into a host app takes the rule with it and it starts matching again against
+   that host's own chrome, fighting the components it lands next to.
+
+   Chrome that needs a focus ring gives itself one, keyed to its own class and
+   its own radius. See `.docs-link-chip` / `.docs-section-card` below. */
 
 .sr-only {
   position: absolute;
