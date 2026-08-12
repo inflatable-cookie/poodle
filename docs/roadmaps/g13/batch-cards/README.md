@@ -41,6 +41,7 @@ and roadmap closeout.
 | `029` | HistoryCentre v3 — rendering, picker, nested list | `028` | merged (`16b68e61` → `2a6d3af9`) |
 | `030` | HistoryCentre — persistent fork Select | `029` merged | merged (`61d3f49d` → `c6590823`) |
 | `031` | nested dismiss layers + ghost Select affordance | `030` merged | dispatched |
+| `032` | HistoryCentre — rename the selected fork | `030` merged | dispatched |
 | — | HistoryCentre — native parity | `029` merged | planned (renumbered; `022` was reused for codegen) |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
@@ -82,3 +83,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 029](029-history-center-v3-web.md)
 - [Batch 030](030-history-center-persistent-fork-select.md)
 - [Batch 031](031-nested-dismiss-and-ghost-select-affordance.md)
+- [Batch 032](032-history-center-multi-fork-rename.md)
