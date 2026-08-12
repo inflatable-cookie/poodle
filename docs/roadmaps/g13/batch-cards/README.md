@@ -50,7 +50,7 @@ and roadmap closeout.
 | `038` | focus rings — components with no explicit treatment | `037` merged | merged (`95c9c02a`) |
 | `039` | SettingsShell — new component, designed not ported | none | merged (`3a31a6a3`) |
 | `040` | DockRegion tab pass-throughs + the underline recipe hook | none | merged (`51b0e76c`) |
-| `041` | Button slice: Rust authoring + the two web runtimes (**g13.005** part 1) | `035`/`036` merged | ready |
+| `041` | Button slice: Rust authoring + the two web runtimes (**g13.005** part 1) | `035`/`036` merged | merged (`ff391651`) |
 | `042` | Button slice: GPUI + Jetstream via `poodle-render` — closes **g13.005** | `041` merged | planned |
 | `043` | container queries that query themselves (all 5 stylesheets) | none | ready |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
