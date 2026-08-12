@@ -281,7 +281,8 @@ export function historyCenterVisibleRows(
   if (pages === null || pages.length === 0) {
     return rows;
   }
-  pushRun(rows, historyCenterJoinPages(pages), 0, null, null, null, open);
+  const rootEntries = historyCenterJoinPages(pages);
+  pushRun(rows, rootEntries, 0, null, null, null, open, rootEntries);
   return rows;
 }
 
@@ -293,6 +294,7 @@ function pushRun(
   forkId: string | null,
   branchId: string | null,
   open: ReadonlyMap<string, HistoryCenterOpenFork> | null,
+  rootEntries: readonly HistoryEntry[],
 ): void {
   for (let i = 0; i < entries.length; i += 1) {
     const entry = entries[i];
@@ -308,7 +310,7 @@ function pushRun(
 
     const level = open?.get(entry.id);
     if (level !== undefined) {
-      pushDisclosed(rows, level, entry, entries, i, depth);
+      pushDisclosed(rows, level, entry, entries, i, depth, rootEntries);
     }
   }
 }
@@ -320,9 +322,24 @@ function pushDisclosed(
   runEntries: readonly HistoryEntry[],
   anchorIndex: number,
   depth: number,
+  rootEntries: readonly HistoryEntry[],
 ): void {
   const childDepth = depth + 1;
   const forkCount = historyCenterForkCount(entry.continuationCount);
+  // The run below the select follows the pick (R2): the displayed fork is the
+  // tentative pick, falling back to the auto-chosen single fork.
+  const shown = level.pick ?? level.chosen;
+  // R2 (g13-034): a level is stale when its shown fork's first entry id sits
+  // on the joined root pages — the host navigated into the fork and supplied
+  // root pages that already contain the run. Staleness is a data fact, never
+  // an array-identity fact: a host that rebuilds its pages array each render
+  // cannot loop it. A stale level never splices its cached run — that would
+  // duplicate spine entries — and renders the existing not-yet-loaded row
+  // until the machine drops the level's data and re-requests its
+  // continuations. Its picker renders empty, exactly as it will after the
+  // drop, so the row set does not change shape at the reconcile boundary.
+  const stale =
+    shown !== null && rootEntries.some((rootEntry) => rootEntry.id === shown.entryId);
 
   if (forkCount >= 1) {
     // b033 (R3): the picker row serves every open level — the single fork
@@ -337,15 +354,24 @@ function pushDisclosed(
       depth: childDepth,
       parentEntryId: entry.id,
       forkId: null,
-      continuations: historyCenterForksAt(level.continuations, runEntries, anchorIndex),
-      pickedEntryId: level.pick?.entryId ?? level.chosen?.entryId ?? null,
+      continuations: stale ? [] : historyCenterForksAt(level.continuations, runEntries, anchorIndex),
+      pickedEntryId: stale ? null : level.pick?.entryId ?? level.chosen?.entryId ?? null,
       disabled: forkCount <= 1,
     });
   }
 
-  // The run below the select follows the pick (R2): the displayed fork is the
-  // tentative pick, falling back to the auto-chosen single fork.
-  const shown = level.pick ?? level.chosen;
+  if (stale) {
+    rows.push({
+      kind: "not-yet-loaded",
+      anchorEntryId: entry.id,
+      depth: childDepth,
+      parentEntryId: entry.id,
+      forkId: shown.entryId,
+      branchId: shown.branchId,
+    });
+    return;
+  }
+
   if (shown === null) {
     if (forkCount <= 1) {
       // Single fork (or its continuations still in flight): the run is what
@@ -382,6 +408,7 @@ function pushDisclosed(
     shown.entryId,
     shown.branchId,
     level.inner,
+    rootEntries,
   );
 }
 
@@ -893,9 +920,12 @@ function confirm(context: HistoryCenterContext): HistoryCenterResult {
   // proves it non-null, but narrowing does not survive the assignment.
   let pick: HistoryContinuation | null = null;
   for (const level of walkLevels(context.open)) {
-    if (level.pick !== null) {
+    // The auto-chosen single fork counts as picked (R1, g13-034): CONFIRM
+    // commits the displayed fork — the tentative pick, else the chosen one.
+    const shown = level.pick ?? level.chosen;
+    if (shown !== null) {
       pickedLevel = level;
-      pick = level.pick;
+      pick = shown;
       break;
     }
   }
@@ -970,7 +1000,93 @@ function runLoaded(context: HistoryCenterContext, fromEntryId: string, pages: Hi
 
 // ── Transitions ────────────────────────────────────────────────────────
 
+/**
+ * R2 (g13-034): reconcile open levels against the current root pages before
+ * an open-state event runs. A level whose shown fork's first entry now sits
+ * on the joined root pages is stale — the host navigated into the fork and
+ * supplied root pages that already contain its run. The level drops its
+ * loaded data (continuations, pick, chosen, run pages and the inner subtree:
+ * they describe a run the host already made primary) but stays open at its
+ * anchor — disclosure is UI state and persists (b028 R1); this is not a
+ * close. The re-request rides the existing `loadContinuations` effect so the
+ * picker re-reads its continuations and offers the line just left; until the
+ * result lands the level renders the existing not-yet-loaded row. The check
+ * is data-based and idempotent: once dropped, the level has no shown fork,
+ * so a later transition emits nothing — exactly one re-request, never per
+ * derivation.
+ */
+function reconcileStaleLevels(
+  context: HistoryCenterContext,
+): { context: HistoryCenterContext; effects: HistoryCenterEffect[] } {
+  if (context.pages === null || context.pages.length === 0 || context.open === null) {
+    return { context, effects: [] };
+  }
+  const rootIds = new Set(historyCenterJoinPages(context.pages).map((entry) => entry.id));
+  const effects: HistoryCenterEffect[] = [];
+  const open = dropStaleLevels(context.open, rootIds, effects);
+  if (open === context.open) {
+    return { context, effects: [] };
+  }
+  return { context: { ...context, open }, effects };
+}
+
+function dropStaleLevels(
+  open: ReadonlyMap<string, HistoryCenterOpenFork> | null,
+  rootIds: ReadonlySet<string>,
+  effects: HistoryCenterEffect[],
+): ReadonlyMap<string, HistoryCenterOpenFork> | null {
+  if (open === null) {
+    return null;
+  }
+  let changed = false;
+  const next = new Map<string, HistoryCenterOpenFork>();
+  for (const [id, level] of open) {
+    const shown = level.pick ?? level.chosen;
+    if (shown !== null && rootIds.has(shown.entryId)) {
+      // Stale: drop the level's loaded data and its subtree, keep the anchor
+      // open, re-request the continuations. Same shape as a fresh disclosure
+      // (R5) minus the anchor, so the level renders the not-yet-loaded row.
+      next.set(id, {
+        anchorEntryId: id,
+        continuations: null,
+        pick: null,
+        chosen: null,
+        runPages: [],
+        inner: null,
+      });
+      effects.push({ type: "loadContinuations", entryId: id });
+      changed = true;
+    } else {
+      const inner = dropStaleLevels(level.inner, rootIds, effects);
+      next.set(id, inner === level.inner ? level : { ...level, inner });
+      changed ||= inner !== level.inner;
+    }
+  }
+  return changed ? next : open;
+}
+
 export function historyCenterTransition(
+  state: HistoryCenterState,
+  context: HistoryCenterContext,
+  event: HistoryCenterEvent,
+): HistoryCenterResult {
+  // R2 (g13-034): reconcile before every open-state event except the two that
+  // close the popover — CLOSE and a closing TOGGLE drop the whole tree anyway
+  // and must not emit a re-request on the way out. The caller supplies the
+  // current pages on every transition, so the pass sees the new root as soon
+  // as the host has navigated; the event then runs against the reconciled
+  // state.
+  if (state === "open" && event.type !== "CLOSE" && event.type !== "TOGGLE") {
+    const reconciled = reconcileStaleLevels(context);
+    if (reconciled.context !== context || reconciled.effects.length > 0) {
+      const next = dispatch(state, reconciled.context, event);
+      return { state: next.state, context: next.context, effects: [...reconciled.effects, ...next.effects] };
+    }
+  }
+  return dispatch(state, context, event);
+}
+
+function dispatch(
   state: HistoryCenterState,
   context: HistoryCenterContext,
   event: HistoryCenterEvent,
