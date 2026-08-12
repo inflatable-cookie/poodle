@@ -55,6 +55,10 @@
 .poodle-changed-files__toggle:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   outline-offset: 0.125rem;
+  /* The toggle is the card's full-width header row, and an outline follows
+     the element's own radius — with none the ring's corners sat against the
+     card's rounded corners. */
+  border-radius: var(--poodle-radius-control);
 }
 
 .poodle-changed-files__toggle-icon {

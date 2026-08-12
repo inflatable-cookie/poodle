@@ -162,6 +162,10 @@
 .poodle-stepper__trigger:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   outline-offset: 0.125rem;
+  /* An outline follows the element's own radius — with none the first and
+     last steps' rings cornered inside the track's rounded corners. Rounds
+     on the control radius like the rerun button's ring. */
+  border-radius: var(--poodle-radius-control);
 }
 
 /* Current is composed with status, not exclusive of it: a step can be both the
@@ -302,6 +306,12 @@
   min-height: var(--poodle-stepper-row-height);
   padding: var(--poodle-stepper-pad-y) var(--poodle-stepper-pad-x);
   border: 0;
+  /* The focus ring is an inset outline, and an outline follows the element's
+     own radius — with none it renders as a hard square across the full row
+     width, cornered inside the track's rounded corners (same shape as the
+     HistoryCentre rows fixed in 099a265). Rounds the hover fill with it,
+     which was a square block for the same reason. */
+  border-radius: var(--poodle-radius-control);
   /* Expanded, the summary is a row above the list and needs the same divider
      the steps draw between themselves. Collapsed it is the last row. */
   border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);

@@ -201,6 +201,7 @@ screen boundaries or inside scrollable containers.
 |----------|-------|
 | `outline` | `var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing)` |
 | `outline-offset` | `0.125rem` |
+| `border-radius` | `var(--poodle-radius-control)` — without it the ring cornered against the rounded surface the trigger sits on |
 
 ### Surface `.hover-card__surface`
 

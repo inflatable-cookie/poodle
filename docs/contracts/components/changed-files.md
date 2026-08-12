@@ -168,7 +168,7 @@ expanded view, with a trailing slot for the per-node counts.
 | scope text | `--poodle-color-text-secondary` |
 | chip background | `--poodle-color-background-surface` |
 | chip radius | `--poodle-radius-control` |
-| focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline |
+| focus ring | `--poodle-border-width-focus`, `--poodle-color-accent-focusRing`, offset outline, `--poodle-radius-control` radius — the toggle is the card's full-width header row, so a square ring cornered against the card's rounded corners |
 | numeric font | `--poodle-typography-code-family`, `font-variant-numeric: tabular-nums` |
 
 Counts use tabular figures so the additions and deletions columns line up down

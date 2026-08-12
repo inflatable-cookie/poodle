@@ -302,6 +302,7 @@ expensive to open, so arrow keys must not commit to one.
 | `color` | `var(--poodle-color-text-secondary)` |
 | `font-size` | `var(--poodle-stepper-font-size)` |
 | `text-align` | `left` |
+| focus ring (`:focus-visible`) | `var(--poodle-border-width-focus)` solid `var(--poodle-color-accent-focusRing)`, `0.125rem` offset, radius `var(--poodle-radius-control)` — the first and last steps' rings cornered inside the track's rounded corners without it |
 
 ### Marker `.poodle-stepper__marker`
 
@@ -326,10 +327,12 @@ expensive to open, so arrow keys must not commit to one.
 | `min-height` | `var(--poodle-stepper-row-height)` |
 | `padding` | `var(--poodle-stepper-pad-y) var(--poodle-stepper-pad-x)` |
 | `background` | `transparent` |
+| `border-radius` | `var(--poodle-radius-control)` — rounds the full-width row so the inset focus ring and the hover fill do not render square inside the track's rounded corners |
 | `font-size` | `var(--poodle-stepper-font-size)` |
 | `text-align` | `left` |
 | `border-bottom` (expanded) | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `border-bottom` (collapsed) | `0` |
+| focus ring (`:focus-visible`) | `var(--poodle-border-width-focus)` solid `var(--poodle-color-accent-focusRing)`, `-0.125rem` inset offset |
 
 ### Rail `.poodle-stepper__rail` and `.poodle-stepper__rail-segment`
 

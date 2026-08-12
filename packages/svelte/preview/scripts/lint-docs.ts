@@ -12,6 +12,7 @@ import { accessibilityAuditTargets } from "../src/accessibility";
 import { contractCallbackDrift } from "./contract-callback-drift";
 import { contractPropDrift } from "./contract-prop-drift";
 import { contractSpecDrift } from "./contract-spec-drift";
+import { focusRingDriftErrors } from "./focus-ring-drift";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const previewDir = path.resolve(scriptDir, "..");
@@ -3289,6 +3290,13 @@ for (const f of specDriftResult.findings) {
   errors.push(
     `contract/spec drift: ${f.slug}.md documents prop(s) absent from its poodle-specs Spec: ${f.missing.join(", ")}`,
   );
+}
+
+// Focus-ring radius drift (g13.037 R4): a focus outline follows the element's
+// own border-radius, so a ring element with no radius anywhere renders square.
+// The baseline holds rings that are square by intent, each with a reason.
+for (const f of focusRingDriftErrors()) {
+  errors.push(f);
 }
 
 if (errors.length > 0) {
