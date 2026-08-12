@@ -468,3 +468,28 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   defeats the filter's visible result. Fix: derive `groups` from the
   `components` prop (filter `componentsByTag()` items by the passed set)
   in both files.
+
+- 2026-08-12 — Two findings from the SettingsShell specimen.
+
+  **Poodle's Svelte `Button` silently drops `onclick`.** Its prop is `onClick`;
+  `onclick` falls into `restProps`, which is spread at `Button.svelte:146` —
+  *before* the component sets its own `onclick={handleClick}` at `:172`. The
+  component's handler wins and the consumer's is discarded with no error. The
+  SettingsShell specimen shipped with five dead buttons for exactly this reason
+  and looked, from outside, like a broken component. React is unaffected —
+  `onClick` is its own convention there. Any `on*` prop the component also binds
+  natively has the same shape.
+
+  **`DetailItem`'s responsive rule keys off the wrong box.** It declares
+  `container-type: inline-size` on `.poodle-detail-item` and then writes
+  `@container (max-width: 26rem)` rules targeting `.poodle-detail-item` itself
+  — but an element cannot be matched by its own container query, so the rules
+  resolve against the nearest ancestor container instead. Measured inside
+  SettingsShell: the item is 240px wide, its ancestor container is a page-wide
+  `.poodle-detail-section`, so the 26rem query never fires; the label column
+  takes its `11.25rem` max and the value column resolves to **20px**, at which
+  `word-break: break-word` breaks values character by character ("Da rk",
+  "Co m pa ct"). Any narrow grid cell hits this, not just SettingsShell. The fix
+  is a layout decision on a shared component with three layouts and two
+  presentations, so it wants its own card rather than an improvised column
+  tweak.
