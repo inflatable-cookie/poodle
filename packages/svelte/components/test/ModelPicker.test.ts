@@ -323,3 +323,34 @@ describe("ModelPicker (svelte)", () => {
     expect(surfaceOf(container).querySelector(".poodle-model-picker__axes")).not.toBeNull();
   });
 });
+
+describe("ModelPicker (svelte) dismissOnOutsideInteract", () => {
+  const triggerOf = (container: HTMLElement) =>
+    container.querySelector(".poodle-model-picker__trigger") as HTMLButtonElement;
+  const surfaceOf = (container: HTMLElement) =>
+    document.getElementById(
+      triggerOf(container).getAttribute("aria-controls") ?? "",
+    ) as HTMLElement | null;
+
+  it("dismisses the surface on outside mousedown by default", async () => {
+    const { container } = render(ModelPicker, {
+      props: { models, axes, value: { model: "pro", axes: {} } },
+    });
+    await fireEvent.click(triggerOf(container));
+    expect(surfaceOf(container)).not.toBeNull();
+
+    await fireEvent.mouseDown(document.body);
+    expect(surfaceOf(container)).toBeNull();
+  });
+
+  it("keeps the surface open on outside mousedown when dismissOnOutsideInteract=false", async () => {
+    const { container } = render(ModelPicker, {
+      props: { models, axes, value: { model: "pro", axes: {} }, dismissOnOutsideInteract: false },
+    });
+    await fireEvent.click(triggerOf(container));
+    expect(surfaceOf(container)).not.toBeNull();
+
+    await fireEvent.mouseDown(document.body);
+    expect(surfaceOf(container)).not.toBeNull();
+  });
+});

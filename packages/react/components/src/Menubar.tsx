@@ -24,6 +24,7 @@ export interface MenubarProps {
   sizeRole?: SemanticControlSizeRole;
   size?: ControlSize | null;
   density?: ControlDensity | null;
+  dismissOnOutsideInteract?: boolean;
   onValueChange?: ((value: string | null) => void) | undefined;
   onAction?: ((value: string) => void) | undefined;
 }
@@ -36,6 +37,7 @@ export function Menubar({
   sizeRole = "chrome",
   size = null,
   density = null,
+  dismissOnOutsideInteract = true,
   onValueChange = undefined,
   onAction = undefined,
 }: MenubarProps) {
@@ -136,10 +138,10 @@ export function Menubar({
     return registerDismissLayer({
       // The open menu is portalled out of the bar, so both are "inside".
       contains: (target) => layerContains(target, rootRef.current, overlayRef.current),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => setValue(null),
     });
-  }, [currentValue]);
+  }, [currentValue, dismissOnOutsideInteract]);
 
   return (
     <div ref={rootRef} className="poodle-menubar" data-size={resolvedSize} data-density={resolvedDensity}>

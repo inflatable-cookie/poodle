@@ -7,6 +7,20 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-12 — A contract cannot document a prop the matching `*Spec` struct
+  deliberately lacks without `effigy docs:lint` failing: the contract ↔
+  poodle-specs drift gate (`packages/svelte/preview/scripts/contract-spec-drift.ts`)
+  requires every documented Public Prop to exist on the Spec. g13-026 needed
+  `dismissOnOutsideInteract` documented on twelve specs (`select`, `menu`,
+  `context-menu`, `menubar`, `navigation-menu`, `split-button`, `theme-select`,
+  `ref-select`, `model-picker`, `order-by`, `list-card`, `filter-builder`) that
+  deliberately model no dismissal (default matches every native platform, so a
+  field would be invented data) — carried via `OPEN_GAPS` entries instead,
+  which the card's writable paths exclude. Same decision-shaped hole as the
+  g13.009 `initialFocus` papercut: either the specs gain the fields or the gate
+  needs a sanctioned carve-out for "default-is-platform-standard" props. Decide
+  once, then burn down both gaps (delete the `OPEN_GAPS` entries).
+
 - 2026-08-12 — `contract-prop-drift` only checks that documented props are
   implemented, never that implemented props are documented, so an undocumented
   public prop can never fail the gate. The reverse direction exists behind

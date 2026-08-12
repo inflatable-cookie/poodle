@@ -84,6 +84,7 @@ evaluation and serialization.
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic size role for inherited sizing |
 | `size` | `ControlSize \| null` | `null` | no | explicit size override (`"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"`) |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override (`"compact"`, `"default"`, `"comfortable"`) |
+| `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: a mousedown outside the trigger and surface closes the popover (and drops the draft) |
 | `maxClauses` | `number \| null` | `null` | no | maximum simultaneously active clauses; `null` means no limit; when reached the draft add row is hidden |
 | `compact` | `boolean` | `false` | no | when true, hides the static "Filter" label in the trigger |
 | `showClearButton` | `boolean` | `true` | no | when false the reset `×` IconButton is never rendered |
@@ -219,6 +220,7 @@ differs from the current operand's kind. Incomplete drafts are never emitted.
 Behavior classification: `styled-only (no machine)` — adapter-owned interaction.
 
 Like `OrderBy`, the popover open/dismiss uses the shared dismissable-layer stack
+(outside dismissal guarded by `dismissOnOutsideInteract`, default `true`)
 and the draft/clause logic is plain component state; there is no `@inflatable-cookie/poodle-core`
 state machine and no conformance vectors. The pure model helpers
 (`defaultOperatorsForKind`, `isClauseComplete`, `clauseLabel`, …) are the

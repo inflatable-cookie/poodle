@@ -47,6 +47,7 @@ export interface FilterBuilderProps {
   sizeRole?: SemanticControlSizeRole;
   size?: ControlSize | null;
   density?: ControlDensity | null;
+  dismissOnOutsideInteract?: boolean;
   maxClauses?: number | null;
   compact?: boolean;
   showClearButton?: boolean;
@@ -66,6 +67,7 @@ export function FilterBuilder({
   sizeRole = "control",
   size = null,
   density = null,
+  dismissOnOutsideInteract = true,
   maxClauses = null,
   compact = false,
   showClearButton = true,
@@ -140,13 +142,13 @@ export function FilterBuilder({
     return registerDismissLayer({
       // The surface is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target as Node, rootElement, panelRef.current),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => {
         setOpen(false);
         resetDraft();
       },
     });
-  }, [open]);
+  }, [open, dismissOnOutsideInteract]);
 
   function resetDraft(): void {
     setDraftKey("");

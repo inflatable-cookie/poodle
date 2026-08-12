@@ -14,6 +14,12 @@ pub struct DialogSpec {
     pub role: DialogKind,
     pub dismiss_on_escape: bool,
     pub dismiss_on_backdrop: bool,
+    /// Layer-level outside dismissal. Defaults off: a modal that vanishes on
+    /// an outside click loses work, and the backdrop click (guarded by
+    /// `dismiss_on_backdrop`) is the modal's own dismissal path. When true, a
+    /// document-level outside mousedown dismisses through the layer's escape
+    /// path, still guarded by `dismiss_on_escape`.
+    pub dismiss_on_outside_interact: bool,
     pub aria_label: Option<String>,
     /// Width preset for the dialog surface. Defaults to Md (34rem).
     pub width: DialogWidth,
@@ -39,6 +45,7 @@ impl Default for DialogSpec {
             role: DialogKind::Dialog,
             dismiss_on_escape: true,
             dismiss_on_backdrop: true,
+            dismiss_on_outside_interact: false,
             aria_label: None,
             width: DialogWidth::Md,
             bare: false,
@@ -95,6 +102,11 @@ impl DialogSpec {
 
     pub fn with_dismiss_on_backdrop(mut self, dismiss_on_backdrop: bool) -> Self {
         self.dismiss_on_backdrop = dismiss_on_backdrop;
+        self
+    }
+
+    pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
+        self.dismiss_on_outside_interact = dismiss_on_outside_interact;
         self
     }
 

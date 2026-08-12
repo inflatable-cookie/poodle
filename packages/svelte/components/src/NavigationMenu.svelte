@@ -41,6 +41,7 @@
      * and switches the foreground to `text-inverse` for contrast.
      */
     activeFill?: ActiveFill;
+    dismissOnOutsideInteract?: boolean;
     onValueChange?: ((value: string | null) => void) | undefined;
     children?: Snippet<[string | null, NavigationMenuItem | null]>;
   }
@@ -55,6 +56,7 @@
     density = null,
     activeEdge = "none",
     activeFill = "tint",
+    dismissOnOutsideInteract = true,
     onValueChange = undefined,
     children,
   }: Props = $props();
@@ -157,7 +159,7 @@
 
     return registerDismissLayer({
       contains: (target) => rootElement?.contains(target) ?? false,
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => setValue(null),
     });
   });

@@ -106,6 +106,7 @@ level set behind it changes.
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic size role for inherited sizing |
 | `size` | `ControlSize \| null` | `null` | no | explicit size override |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override |
+| `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: a mousedown outside the trigger and dialog closes it |
 | `onChange` | `((value: ModelSelection) => void) \| null` | `null` | no | fires on every committed change (model or axis) |
 
 ### Naming Rules
@@ -305,7 +306,8 @@ every label truncate at once. Hosts that know better override with `control`.
 Behavior classification: `styled-only (no machine)` — adapter-owned interaction.
 
 Like `FilterBuilder` and `OrderBy`, the popover uses the shared dismissable-layer
-stack and the selection is plain component state; there is no `@inflatable-cookie/poodle-core`
+stack (outside dismissal guarded by `dismissOnOutsideInteract`, default
+`true`) and the selection is plain component state; there is no `@inflatable-cookie/poodle-core`
 machine and no conformance vectors. The pure helpers (`applicableAxes`,
 `resolveSelection`, `axisSummary`, `summaryText`, `modelLabel`,
 `axisControlKind`) live in `model-picker-model.ts` (TS) and as methods on

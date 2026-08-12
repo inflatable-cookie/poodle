@@ -36,6 +36,7 @@ export interface NavigationMenuProps {
    * and switches the foreground to `text-inverse` for contrast.
    */
   activeFill?: ActiveFill;
+  dismissOnOutsideInteract?: boolean;
   onValueChange?: ((value: string | null) => void) | undefined;
   children?: (value: string | null, item: NavigationMenuItem | null) => ReactNode;
 }
@@ -50,6 +51,7 @@ export function NavigationMenu({
   density = null,
   activeEdge = "none",
   activeFill = "tint",
+  dismissOnOutsideInteract = true,
   onValueChange = undefined,
   children,
 }: NavigationMenuProps) {
@@ -132,10 +134,10 @@ export function NavigationMenu({
 
     return registerDismissLayer({
       contains: (target) => rootRef.current?.contains(target) ?? false,
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => setValue(null),
     });
-  }, [currentValue]);
+  }, [currentValue, dismissOnOutsideInteract]);
 
   return (
     <div

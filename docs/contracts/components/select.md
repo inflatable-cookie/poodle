@@ -114,6 +114,7 @@ Updated: 2026-07-10
 | `loadKey` | `string \| null` | `null` | no | invalidates cached lazy options when it changes |
 | `variant` | `"default" \| "ghost"` | `"default"` | no | visual variant; `"ghost"` strips border, background, box-shadow, padding, min-height, and hides the chevron indicator |
 | `menuMinWidth` | `string \| null` | `null` | no | minimum width for the dropdown listbox (e.g. `"12rem"`); when set, listbox uses `width: max-content` instead of matching trigger width, and viewport-aware horizontal anchor flipping occurs (right-anchors if menu would overflow right edge) |
+| `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: clicking outside the trigger and listbox closes the dropdown |
 | `onValueChange` | `((value: string) => void) \| undefined` | `undefined` | no | callback fired when the selected value changes |
 | `onQueryChange` | `((query: string) => void) \| undefined` | `undefined` | no | callback fired when the searchable query changes |
 | `onOpenChange` | `((open: boolean) => void) \| undefined` | `undefined` | no | callback fired when the custom dropdown opens or closes |
@@ -197,7 +198,8 @@ freeform mode, and native-mode delegation stay adapter-side.
 - Open highlight: `selectOpenHighlightIndex` — selected option when
   present, else first
 - Dismissal: escape + outside interaction via the dismissable-layer stack
-  (innermost-first)
+  (innermost-first); the outside-interaction path is guarded by
+  `dismissOnOutsideInteract` (default `true`)
 - Keyboard highlight movement is clamp-based (no wrap) and operates on the
   already-enabled filtered list — adapter-side by current behavior
 

@@ -26,6 +26,7 @@
     role?: "dialog" | "alertdialog";
     dismissOnEscape?: boolean;
     dismissOnBackdrop?: boolean;
+    dismissOnOutsideInteract?: boolean;
     ariaLabel?: string | null;
     contentClassName?: string;
     contentStyle?: string;
@@ -57,6 +58,7 @@
     role = "dialog",
     dismissOnEscape = true,
     dismissOnBackdrop = true,
+    dismissOnOutsideInteract = false,
     ariaLabel = null,
     contentClassName = "",
     contentStyle = "",
@@ -252,8 +254,13 @@
     }
 
     return registerDismissLayer({
-      contains: () => true,
-      dismissOnOutsideInteract: false,
+      // The surface is the inside of the layer; the backdrop and the rest of
+      // the page count as outside so the boolean stays meaningful for a
+      // consumer that opts into outside dismissal. Defaults off: a modal that
+      // vanishes on an outside click loses work (backdrop click stays the
+      // modal's own dismissal path, guarded by `dismissOnBackdrop`).
+      contains: (target) => surfaceElement?.contains(target) ?? false,
+      dismissOnOutsideInteract,
       onDismiss: () => send({ type: "ESCAPE" }),
     });
   });

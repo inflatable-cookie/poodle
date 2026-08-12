@@ -60,6 +60,7 @@ export interface SelectProps {
   emptyMessage?: string;
   variant?: "default" | "ghost";
   menuMinWidth?: string | null;
+  dismissOnOutsideInteract?: boolean;
   ariaLabel?: string | null;
   describedBy?: string | null;
   onValueChange?: (value: string) => void;
@@ -93,6 +94,7 @@ export function Select({
   emptyMessage = "No matches",
   variant = "default",
   menuMinWidth = null,
+  dismissOnOutsideInteract = true,
   ariaLabel = null,
   describedBy = null,
   onValueChange,
@@ -289,10 +291,10 @@ export function Select({
     return registerDismissLayer({
       // The listbox is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target as Node, rootElement, listboxRef.current),
-      dismissOnOutsideInteract: true,
-      onDismiss: () => setOpen(false),
+      dismissOnOutsideInteract,
+      onDismiss: () => setOpenState(false),
     });
-  }, [open, rootElement]);
+  }, [open, rootElement, dismissOnOutsideInteract]);
 
   function renderOption(option: SelectOption, flatIdx: number) {
     return (

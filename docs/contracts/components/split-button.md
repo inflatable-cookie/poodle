@@ -60,6 +60,7 @@ Updated: 2026-07-10
 | `loading` | `boolean` | `false` | no | shows spinner in primary half, disables control |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for primary button |
 | `menuAriaLabel` | `string` | `"More actions"` | no | accessible name for toggle button |
+| `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: a mousedown outside the button and menu closes the menu |
 
 ### MenuItem Type
 
@@ -104,7 +105,9 @@ type MenuItem = {
 
 Behavior classification: adapter-owned interaction (g11.004 sweep)
 
-Menu open/dismiss (now on the dismissable-layer stack); item activation via shared menu-list machinery.
+Menu open/dismiss (now on the dismissable-layer stack); item activation via
+shared menu-list machinery. Outside dismissal is guarded by
+`dismissOnOutsideInteract` (default `true`).
 
 ## 5. Callbacks
 

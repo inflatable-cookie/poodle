@@ -48,6 +48,7 @@ export interface ModelPickerProps {
   sizeRole?: SemanticControlSizeRole;
   size?: ControlSize | null;
   density?: ControlDensity | null;
+  dismissOnOutsideInteract?: boolean;
   onChange?: ((value: ModelSelection) => void) | null;
 }
 
@@ -65,6 +66,7 @@ export function ModelPicker({
   sizeRole = "control",
   size = null,
   density = null,
+  dismissOnOutsideInteract = true,
   onChange = null,
 }: ModelPickerProps) {
   const uiPresentation = useUiPresentation();
@@ -113,10 +115,10 @@ export function ModelPicker({
     return registerDismissLayer({
       // The surface is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target as Node, rootElement, panelRef.current),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => setOpen(false),
     });
-  }, [open, rootElement]);
+  }, [open, rootElement, dismissOnOutsideInteract]);
 
   function sync(next: ModelSelection): void {
     // Every emission is normalised, so a scoped-out axis value never leaks.

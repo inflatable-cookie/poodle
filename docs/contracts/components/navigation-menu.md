@@ -50,6 +50,7 @@ Updated: 2026-07-10
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the nav element |
 | `activeEdge` | `ActiveEdge` | `"none"` | no | selection edge on the open trigger; shared type (see `004-shared-control-types.md`): `"none"` draws no edge, `"outline"` draws the accent border around the open trigger — the border the trigger carried by default before g13.016, `"underline"` draws the accent edge along the trigger's bottom edge |
 | `activeFill` | `ActiveFill` | `"tint"` | no | selection treatment on the open trigger; shared type (see `004-shared-control-types.md`): `none` draws no fill (the open trigger keeps its idle fill; the edge and the selected text colour carry selection alone), `tint` is the accent-tinted open fill, `solid` fills the trigger fully with `accent-base` and swaps the foreground to `text-inverse` for contrast |
+| `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: a mousedown outside the navigation menu closes the active viewport |
 
 ### NavigationMenuItem Type
 
@@ -103,7 +104,8 @@ Behavior classification: machine-backed via shared machinery
 Trigger roving uses `findNextEnabledIndex`/`firstEnabledIndex`; panel
 open/close is single-select-with-deactivation over controllable state;
 dismissal (escape + outside) registers on the dismissable-layer stack while
-a panel is open.
+a panel is open; the outside-interaction path is guarded by
+`dismissOnOutsideInteract` (default `true`).
 
 ## 5. Callbacks
 

@@ -43,6 +43,7 @@
     sizeRole?: SemanticControlSizeRole;
     size?: ControlSize | null;
     density?: ControlDensity | null;
+    dismissOnOutsideInteract?: boolean;
     onChange?: ((value: string) => void) | null;
     onSearchChange?: ((query: string) => void) | null;
   }
@@ -67,6 +68,7 @@
     sizeRole = "control",
     size = null,
     density = null,
+    dismissOnOutsideInteract = true,
     onChange = null,
     onSearchChange = null,
   }: Props = $props();
@@ -108,7 +110,7 @@
     return registerDismissLayer({
       // The surface is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target, rootElement, panelElement),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => {
         open = false;
       },

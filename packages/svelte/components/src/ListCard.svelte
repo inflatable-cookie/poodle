@@ -43,6 +43,7 @@
     contextMenuItems?: MenuItem[] | null;
     contextMenuAriaLabel?: string | null;
     contextMenuTrigger?: "context" | "leading";
+    dismissOnOutsideInteract?: boolean;
     onClick?: ((event: MouseEvent) => void) | null;
     onSelectedChange?: ((selected: boolean) => void) | null;
     onContextAction?: ((value: string) => void) | null;
@@ -86,6 +87,7 @@
     contextMenuItems = null,
     contextMenuAriaLabel = null,
     contextMenuTrigger = "context",
+    dismissOnOutsideInteract = true,
     onClick = null,
     onSelectedChange = null,
     onContextAction = null,
@@ -255,7 +257,7 @@
       // The overlay and the leading trigger area count as inside.
       contains: (target) =>
         (overlayElement?.contains(target) ?? false) || (leadingElement?.contains(target) ?? false),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => closeContextMenu(),
     });
   });
