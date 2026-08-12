@@ -28,6 +28,7 @@ export interface ContextMenuProps {
   sizeRole?: SemanticControlSizeRole;
   size?: ControlSize | null;
   density?: ControlDensity | null;
+  dismissOnOutsideInteract?: boolean;
   onOpenChange?: ((open: boolean) => void) | undefined;
   onAction?: ((value: string) => void) | undefined;
   children?: ReactNode;
@@ -42,6 +43,7 @@ export function ContextMenu({
   sizeRole = "chrome",
   size = null,
   density = null,
+  dismissOnOutsideInteract = true,
   onOpenChange = undefined,
   onAction = undefined,
   children,
@@ -129,10 +131,10 @@ export function ContextMenu({
       // Only the overlay itself counts as inside; clicking the trigger area
       // closes, matching the previous document-listener behavior.
       contains: (target) => surfaceRef.current?.element?.contains(target) ?? false,
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: (reason) => send(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
     });
-  }, [isOpen]);
+  }, [isOpen, dismissOnOutsideInteract]);
 
   return (
     <div

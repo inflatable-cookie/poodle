@@ -50,6 +50,7 @@ Updated: 2026-07-10
 | `description` | `string \| null` | `null` | no | visible supporting text |
 | `dismissOnEscape` | `boolean` | `true` | no | escape dismissal |
 | `dismissOnBackdrop` | `boolean` | `true` | no | backdrop dismissal when modal |
+| `dismissOnOutsideInteract` | `boolean` | `false` | no | layer-level outside dismissal; **defaults off** — a modal that vanishes on an outside click loses work, and the backdrop click (guarded by `dismissOnBackdrop`) is the drawer's own dismissal path. Set `true` to let a document-level mousedown outside the surface dismiss |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -107,7 +108,11 @@ and Drawer.
 - Transitions: user-initiated close paths (`REQUEST_CLOSE`, guarded
   `ESCAPE`, guarded `BACKDROP_CLICK`) emit `emitRequestClose` before
   `emitOpenChange(false)`, preserving the onRequestClose -> onOpenChange
-  ordering; programmatic `CLOSE` skips `emitRequestClose`
+  ordering; programmatic `CLOSE` skips `emitRequestClose`. The layer-level
+  outside axis is registered with `dismissOnOutsideInteract` (default
+  `false`): when opted in, a document-level mousedown outside the surface
+  dismisses through the layer's `ESCAPE` path, still guarded by
+  `dismissOnEscape`
 - Effects on open: `saveFocusAndEnter` (store the previously focused
   element, focus the first focusable in the surface or the surface itself),
   `lockBodyScroll`; on close: `unlockBodyScroll`, `restoreFocus`

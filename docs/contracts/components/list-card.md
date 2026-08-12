@@ -92,6 +92,7 @@ Updated: 2026-07-10
 | `contextMenuItems` | `MenuItem[] \| null` | `null` | no | built-in context menu items; when non-empty, the card opens a menu on right-click (or keyboard `ContextMenu`/`Shift+F10`) without needing an external ContextMenu wrapper |
 | `contextMenuAriaLabel` | `string \| null` | `null` | no | accessible name for the context menu overlay and (for `contextMenuTrigger="leading"`) the leading trigger button |
 | `contextMenuTrigger` | `"context" \| "leading"` | `"context"` | no | `context` opens via right-click/keyboard; `leading` turns the leading area into a click/Enter/Space menu trigger (ignored while selectable) |
+| `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: a mousedown outside the overlay and leading trigger area closes the built-in context menu |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for item spacing; when null, resolves from inherited presentation |
@@ -158,7 +159,8 @@ Behavior classification: machine-backed via shared machinery
 
 Machine-backed via shared machinery (g11 extraction sweep): the context
 menu's escape/outside dismissal registers on the dismissable-layer stack
-(overlay and leading trigger area count as inside), and item navigation
+(overlay and leading trigger area count as inside; outside dismissal guarded
+by `dismissOnOutsideInteract`, default `true`), and item navigation
 already uses the shared menu-list machinery. Selection callbacks are plain
 props.
 

@@ -33,6 +33,7 @@
     loading?: boolean;
     ariaLabel?: string | null;
     menuAriaLabel?: string;
+    dismissOnOutsideInteract?: boolean;
     onClick?: ((event: MouseEvent) => void) | undefined;
     onAction?: ((value: string) => void) | undefined;
     children?: Snippet<[]>;
@@ -50,6 +51,7 @@
     loading = false,
     ariaLabel = null,
     menuAriaLabel = "More actions",
+    dismissOnOutsideInteract = true,
     onClick = undefined,
     onAction = undefined,
     children,
@@ -139,7 +141,7 @@
     return registerDismissLayer({
       // The menu is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target, rootElement, menuElement),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: (reason) => {
         closeMenu();
 

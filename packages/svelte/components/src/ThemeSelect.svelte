@@ -35,6 +35,7 @@
     sizeRole?: SemanticControlSizeRole;
     size?: ControlSize | null;
     density?: ControlDensity | null;
+    dismissOnOutsideInteract?: boolean;
     /** Swatch-tile columns in the popover. */
     columns?: number;
     /** Show the current theme name in the trigger. */
@@ -50,6 +51,7 @@
     sizeRole = "control",
     size = null,
     density = null,
+    dismissOnOutsideInteract = true,
     columns = 3,
     showLabel = true,
   }: Props = $props();
@@ -95,7 +97,7 @@
     return registerDismissLayer({
       // The surface is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target, rootElement, panelElement),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => {
         open = false;
       },

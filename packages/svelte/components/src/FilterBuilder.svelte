@@ -50,6 +50,7 @@
     sizeRole?: SemanticControlSizeRole;
     size?: ControlSize | null;
     density?: ControlDensity | null;
+    dismissOnOutsideInteract?: boolean;
     maxClauses?: number | null;
     compact?: boolean;
     showClearButton?: boolean;
@@ -70,6 +71,7 @@
     sizeRole = "control",
     size = null,
     density = null,
+    dismissOnOutsideInteract = true,
     maxClauses = null,
     compact = false,
     showClearButton = true,
@@ -156,7 +158,7 @@
     return registerDismissLayer({
       // The surface is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target, rootElement, panelElement),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => {
         open = false;
         resetDraft();

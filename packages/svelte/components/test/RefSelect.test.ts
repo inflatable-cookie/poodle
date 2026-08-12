@@ -123,3 +123,32 @@ describe("RefSelect (svelte)", () => {
     expect(groups).toEqual(["Branches", "Tags"]);
   });
 });
+
+describe("RefSelect (svelte) dismissOnOutsideInteract", () => {
+  const triggerOf = (container: HTMLElement) =>
+    container.querySelector(".poodle-ref-select__trigger") as HTMLButtonElement;
+  const surfaceOf = (container: HTMLElement) =>
+    document.getElementById(
+      triggerOf(container).getAttribute("aria-controls") ?? "",
+    ) as HTMLElement | null;
+
+  it("dismisses the surface on outside mousedown by default", async () => {
+    const { container } = render(RefSelect, { props: { refs, value: "main" } });
+    await fireEvent.click(triggerOf(container));
+    expect(surfaceOf(container)).not.toBeNull();
+
+    await fireEvent.mouseDown(document.body);
+    expect(surfaceOf(container)).toBeNull();
+  });
+
+  it("keeps the surface open on outside mousedown when dismissOnOutsideInteract=false", async () => {
+    const { container } = render(RefSelect, {
+      props: { refs, value: "main", dismissOnOutsideInteract: false },
+    });
+    await fireEvent.click(triggerOf(container));
+    expect(surfaceOf(container)).not.toBeNull();
+
+    await fireEvent.mouseDown(document.body);
+    expect(surfaceOf(container)).not.toBeNull();
+  });
+});

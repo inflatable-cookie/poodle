@@ -1,4 +1,4 @@
-import { render } from "@testing-library/svelte";
+import { fireEvent, render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 
 import ListCard from "../src/ListCard.svelte";
@@ -33,5 +33,41 @@ describe("ListCard (svelte)", () => {
 
     expect(div.dataset.size).toBe("lg");
     expect(anchor.dataset.size).toBe("lg");
+  });
+});
+
+describe("ListCard (svelte) dismissOnOutsideInteract", () => {
+  const rootOf = (container: HTMLElement) =>
+    container.querySelector(".poodle-list-card") as HTMLElement;
+
+  // The context menu is portalled to the theme root via the anchored action,
+  // so it is not reachable from the render container.
+  const menuOf = () => document.querySelector(".poodle-list-card__context-menu") as HTMLElement;
+
+  const contextMenuItems = [
+    { value: "rename", label: "Rename" },
+    { value: "delete", label: "Delete" },
+  ];
+
+  it("dismisses the context menu on outside mousedown by default", async () => {
+    const { container } = render(ListCard, {
+      props: { title: "Card", contextMenuItems },
+    });
+    await fireEvent.contextMenu(rootOf(container));
+    expect(menuOf()).not.toBeNull();
+
+    await fireEvent.mouseDown(document.body);
+    expect(menuOf()).toBeNull();
+  });
+
+  it("keeps the context menu open on outside mousedown when dismissOnOutsideInteract=false", async () => {
+    const { container } = render(ListCard, {
+      props: { title: "Card", contextMenuItems, dismissOnOutsideInteract: false },
+    });
+    await fireEvent.contextMenu(rootOf(container));
+    expect(menuOf()).not.toBeNull();
+
+    await fireEvent.mouseDown(document.body);
+    expect(menuOf()).not.toBeNull();
   });
 });

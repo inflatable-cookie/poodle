@@ -67,6 +67,7 @@ Updated: 2026-07-10
 | `bare` | `boolean` | `false` | no | when true, surface has no padding or internal structure; consumers control all layout |
 | `dismissOnEscape` | `boolean` | `true` | no | whether Escape key dismisses the dialog |
 | `dismissOnBackdrop` | `boolean` | `true` | no | whether backdrop click dismisses the dialog |
+| `dismissOnOutsideInteract` | `boolean` | `false` | no | layer-level outside dismissal; **defaults off** — a modal that vanishes on an outside click loses work, and the backdrop click (guarded by `dismissOnBackdrop`) is the modal's own dismissal path. Set `true` to let a document-level mousedown outside the surface dismiss |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible title exists |
 | `contentClassName` | `string` | `""` | no | additional class name added to the dialog surface |
 | `contentStyle` | `string` | `""` | no | additional inline style applied to the dialog surface |
@@ -152,7 +153,11 @@ and Drawer.
 - Transitions: user-initiated close paths (`REQUEST_CLOSE`, guarded
   `ESCAPE`, guarded `BACKDROP_CLICK`) emit `emitRequestClose` before
   `emitOpenChange(false)`, preserving the onRequestClose -> onOpenChange
-  ordering; programmatic `CLOSE` skips `emitRequestClose`
+  ordering; programmatic `CLOSE` skips `emitRequestClose`. The layer-level
+  outside axis is registered with `dismissOnOutsideInteract` (default
+  `false`): when opted in, a document-level mousedown outside the surface
+  dismisses through the layer's `ESCAPE` path, still guarded by
+  `dismissOnEscape`
 - Effects on open: `saveFocusAndEnter` (store the previously focused
   element, then resolve initial focus per the `initialFocus` prop — see
   §6 Focus And Announcement), `lockBodyScroll`; on close:

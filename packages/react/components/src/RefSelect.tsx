@@ -34,6 +34,7 @@ export interface RefSelectProps {
   sizeRole?: SemanticControlSizeRole;
   size?: ControlSize | null;
   density?: ControlDensity | null;
+  dismissOnOutsideInteract?: boolean;
   onChange?: ((value: string) => void) | null;
   onSearchChange?: ((query: string) => void) | null;
 }
@@ -58,6 +59,7 @@ export function RefSelect({
   sizeRole = "control",
   size = null,
   density = null,
+  dismissOnOutsideInteract = true,
   onChange = null,
   onSearchChange = null,
 }: RefSelectProps) {
@@ -101,10 +103,10 @@ export function RefSelect({
     return registerDismissLayer({
       // The surface is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target as Node, rootElement, panelRef.current),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => setOpen(false),
     });
-  }, [open, rootElement]);
+  }, [open, rootElement, dismissOnOutsideInteract]);
 
   function toggleOpen(): void {
     if (disabled) return;

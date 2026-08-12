@@ -51,6 +51,7 @@
     emptyMessage?: string;
     variant?: "default" | "ghost";
     menuMinWidth?: string | null;
+    dismissOnOutsideInteract?: boolean;
     ariaLabel?: string | null;
     describedBy?: string | null;
     onValueChange?: ((value: string) => void) | undefined;
@@ -84,6 +85,7 @@
     emptyMessage = "No matches",
     variant = "default",
     menuMinWidth = null,
+    dismissOnOutsideInteract = true,
     ariaLabel = null,
     describedBy = null,
     onValueChange = undefined,
@@ -339,7 +341,7 @@
     return registerDismissLayer({
       // The listbox is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target, rootElement, listboxElement),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => setOpen(false),
     });
   });

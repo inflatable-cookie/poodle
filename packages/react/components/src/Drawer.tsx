@@ -21,6 +21,7 @@ export interface DrawerProps {
   description?: string | null;
   dismissOnEscape?: boolean;
   dismissOnBackdrop?: boolean;
+  dismissOnOutsideInteract?: boolean;
   ariaLabel?: string | null;
   size?: ControlSize | null;
   sizeRole?: SemanticControlSizeRole;
@@ -40,6 +41,7 @@ export function Drawer({
   description = null,
   dismissOnEscape = true,
   dismissOnBackdrop = true,
+  dismissOnOutsideInteract = false,
   ariaLabel = null,
   size = null,
   sizeRole = "control",
@@ -107,11 +109,16 @@ export function Drawer({
   useEffect(() => {
     if (!isOpen) return;
     return registerDismissLayer({
-      contains: () => true,
-      dismissOnOutsideInteract: false,
+      // The surface is the inside of the layer; the backdrop and the rest of
+      // the page count as outside so the boolean stays meaningful for a
+      // consumer that opts into outside dismissal. Defaults off: a modal that
+      // vanishes on an outside click loses work (backdrop click stays the
+      // modal's own dismissal path, guarded by `dismissOnBackdrop`).
+      contains: (target) => surfaceRef.current?.contains(target as Node) ?? false,
+      dismissOnOutsideInteract,
       onDismiss: () => sendRef.current({ type: "ESCAPE" }),
     });
-  }, [isOpen]);
+  }, [isOpen, dismissOnOutsideInteract]);
 
   if (!isOpen) return null;
 

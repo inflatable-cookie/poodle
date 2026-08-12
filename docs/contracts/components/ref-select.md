@@ -90,6 +90,7 @@ far heavier than a toolbar dropdown.
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic size role |
 | `size` | `ControlSize \| null` | `null` | no | explicit size override |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override |
+| `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: a mousedown outside the trigger and dialog closes it |
 | `onChange` | `((value: string) => void) \| null` | `null` | no | fires when a ref is chosen |
 | `onSearchChange` | `((query: string) => void) \| null` | `null` | no | fires on every keystroke in the search field, for host-driven querying |
 
@@ -151,7 +152,8 @@ type RefOption = {
 ### Behavior Machine
 
 Behavior classification: `styled-only (no machine)` — adapter-owned interaction.
-The popover uses the shared dismissable-layer stack; selection and query are
+The popover uses the shared dismissable-layer stack (outside dismissal guarded
+by `dismissOnOutsideInteract`, default `true`); selection and query are
 plain component state. Pure helpers (`filterRefs`, `refKindIcon`,
 `groupHeadingFor`) live in `ref-select-model.ts` and as methods on
 `RefSelectSpec`.

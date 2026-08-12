@@ -22,6 +22,7 @@
     sizeRole?: SemanticControlSizeRole;
     size?: ControlSize | null;
     density?: ControlDensity | null;
+    dismissOnOutsideInteract?: boolean;
     onOpenChange?: ((open: boolean) => void) | undefined;
     onAction?: ((value: string) => void) | undefined;
     children?: Snippet<[]>;
@@ -36,6 +37,7 @@
     sizeRole = "chrome",
     size = null,
     density = null,
+    dismissOnOutsideInteract = true,
     onOpenChange = undefined,
     onAction = undefined,
     children,
@@ -135,7 +137,7 @@
       // Only the overlay itself counts as inside; clicking the trigger area
       // closes, matching the previous document-listener behavior.
       contains: (target) => overlayElement?.contains(target) ?? false,
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: (reason) => send(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
     });
   });

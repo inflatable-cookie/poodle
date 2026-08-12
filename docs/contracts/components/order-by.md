@@ -80,6 +80,7 @@ Updated: 2026-07-19
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic size role for inherited sizing |
 | `size` | `ControlSize \| null` | `null` | no | explicit size override (`"xs"`, `"sm"`, `"md"`, `"lg"`, `"xl"`) |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override (`"compact"`, `"default"`, `"comfortable"`) |
+| `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: a mousedown outside the trigger and surface closes the popover |
 | `maxFields` | `number \| null` | `null` | no | maximum number of simultaneously active sort fields; `null` means no limit |
 | `compact` | `boolean` | `false` | no | when true, hides the static "Sort by" label and, with more than 2 fields active, truncates the summary to first two plus a count badge |
 | `triggerVariant` | `"summary" \| "icon"` | `"summary"` | no | `"summary"` renders the full text trigger; `"icon"` renders one sort IconButton and keeps reset/editing controls inside the popover |
@@ -177,7 +178,9 @@ When `value` is empty but `activeSort` is provided, the component treats it as a
 
 Behavior classification: adapter-owned interaction (g11.004 sweep)
 
-Dropdown open/dismiss (now on the dismissable-layer stack) plus direction toggling; option logic is plain state.
+Dropdown open/dismiss (now on the dismissable-layer stack, outside dismissal
+guarded by `dismissOnOutsideInteract` with default `true`) plus direction
+toggling; option logic is plain state.
 
 ## 5. Callbacks
 

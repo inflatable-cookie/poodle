@@ -51,6 +51,7 @@ export interface ListCardProps {
   contextMenuItems?: MenuItem[] | null;
   contextMenuAriaLabel?: string | null;
   contextMenuTrigger?: "context" | "leading";
+  dismissOnOutsideInteract?: boolean;
   onClick?: ((event: ReactMouseEvent | MouseEvent) => void) | null;
   onSelectedChange?: ((selected: boolean) => void) | null;
   onContextAction?: ((value: string) => void) | null;
@@ -121,6 +122,7 @@ export function ListCard({
   contextMenuItems = null,
   contextMenuAriaLabel = null,
   contextMenuTrigger = "context",
+  dismissOnOutsideInteract = true,
   onClick = null,
   onSelectedChange = null,
   onContextAction = null,
@@ -279,10 +281,10 @@ export function ListCard({
       // The overlay and the leading trigger area count as inside.
       contains: (target) =>
         (overlayRef.current?.contains(target) ?? false) || (leadingRef.current?.contains(target) ?? false),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => closeContextMenu(),
     });
-  }, [contextMenuOpen]);
+  }, [contextMenuOpen, dismissOnOutsideInteract]);
 
   const rootStyle: CSSProperties | undefined =
     accentColor || sashColor

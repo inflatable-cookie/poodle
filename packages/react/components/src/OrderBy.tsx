@@ -28,6 +28,7 @@ export interface OrderByProps {
   sizeRole?: SemanticControlSizeRole;
   size?: ControlSize | null;
   density?: ControlDensity | null;
+  dismissOnOutsideInteract?: boolean;
   maxFields?: number | null;
   compact?: boolean;
   triggerVariant?: OrderByTriggerVariant;
@@ -45,6 +46,7 @@ export function OrderBy({
   sizeRole = "control",
   size = null,
   density = null,
+  dismissOnOutsideInteract = true,
   maxFields = null,
   compact = false,
   triggerVariant = "summary",
@@ -111,10 +113,10 @@ export function OrderBy({
     return registerDismissLayer({
       // The surface is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target as Node, rootElement, panelRef.current),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => setOpen(false),
     });
-  }, [open]);
+  }, [open, dismissOnOutsideInteract]);
 
   function sync(nextValue: OrderByValue): void {
     if (!hasValueProp && !hasLegacyProp) {

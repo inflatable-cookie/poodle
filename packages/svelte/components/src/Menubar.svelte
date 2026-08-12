@@ -26,6 +26,7 @@
     sizeRole?: SemanticControlSizeRole;
     size?: ControlSize | null;
     density?: ControlDensity | null;
+    dismissOnOutsideInteract?: boolean;
     onValueChange?: ((value: string | null) => void) | undefined;
     onAction?: ((value: string) => void) | undefined;
   }
@@ -38,6 +39,7 @@
     sizeRole = "chrome",
     size = null,
     density = null,
+    dismissOnOutsideInteract = true,
     onValueChange = undefined,
     onAction = undefined,
   }: Props = $props();
@@ -146,7 +148,7 @@
     return registerDismissLayer({
       // The open menu is portalled out of the bar, so both are "inside".
       contains: (target) => layerContains(target, rootElement, overlayElement),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => setValue(null),
     });
   });

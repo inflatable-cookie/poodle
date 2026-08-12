@@ -33,6 +33,7 @@ export interface MenuProps {
   sizeRole?: SemanticControlSizeRole;
   size?: ControlSize | null;
   density?: ControlDensity | null;
+  dismissOnOutsideInteract?: boolean;
   onOpenChange?: (open: boolean) => void;
   onAction?: (value: string) => void;
   onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler;
@@ -49,6 +50,7 @@ export function Menu({
   sizeRole = "chrome",
   size = null,
   density = null,
+  dismissOnOutsideInteract = true,
   onOpenChange,
   onAction,
   onSurfaceGeometryChange,
@@ -93,10 +95,10 @@ export function Menu({
       // The surface is portalled out of the root, so both are "inside".
       contains: (target) =>
         layerContains(target as Node, rootRef.current, surfaceRef.current?.element),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: (reason) => sendRef.current(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
     });
-  }, [isOpen]);
+  }, [isOpen, dismissOnOutsideInteract]);
 
   function handleTriggerClick(event: MouseEvent): void {
     event.preventDefault();

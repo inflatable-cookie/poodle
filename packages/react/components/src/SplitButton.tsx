@@ -35,6 +35,7 @@ export interface SplitButtonProps {
   loading?: boolean;
   ariaLabel?: string | null;
   menuAriaLabel?: string;
+  dismissOnOutsideInteract?: boolean;
   onClick?: ((event: ReactMouseEvent) => void) | undefined;
   onAction?: ((value: string) => void) | undefined;
   children?: ReactNode;
@@ -52,6 +53,7 @@ export function SplitButton({
   loading = false,
   ariaLabel = null,
   menuAriaLabel = "More actions",
+  dismissOnOutsideInteract = true,
   onClick = undefined,
   onAction = undefined,
   children,
@@ -153,7 +155,7 @@ export function SplitButton({
     return registerDismissLayer({
       // The menu is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target, rootElement, menuRef.current),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: (reason) => {
         closeMenu();
 
@@ -162,7 +164,7 @@ export function SplitButton({
         }
       },
     });
-  }, [menuOpen]);
+  }, [menuOpen, dismissOnOutsideInteract]);
 
 
   function handleToggleKeydown(event: ReactKeyboardEvent): void {

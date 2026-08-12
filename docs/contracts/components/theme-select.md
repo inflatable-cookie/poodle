@@ -66,6 +66,7 @@ the full Poodle theme set + DOM application.
 | `size` | `ControlSize \| null` | `null` | no | explicit size override |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | no | semantic size role |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override |
+| `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: a mousedown outside the trigger and popover closes it |
 | `onChange` | `((value: string) => void) \| null` | `null` | no | fired when a theme is selected |
 
 ### Shared Types
@@ -116,7 +117,9 @@ per-app wiring. Consuming apps load the theme CSS layers once — import
 | disabled | `disabled=true` | reduced opacity; non-interactive |
 | unknown value | `value` not in `themes` | trigger label falls back to "Theme"; no swatch |
 
-Escape and outside interaction dismiss the popover (dismissable-layer). Behavior
+Escape and outside interaction dismiss the popover (dismissable-layer);
+outside dismissal is guarded by `dismissOnOutsideInteract` (default `true`).
+Behavior
 classification: styled-only (no machine) — popover open/dismiss on the shared
 dismissable-layer stack; selection is plain state.
 

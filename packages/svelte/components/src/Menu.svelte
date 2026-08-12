@@ -30,6 +30,7 @@
     sizeRole?: SemanticControlSizeRole;
     size?: ControlSize | null;
     density?: ControlDensity | null;
+    dismissOnOutsideInteract?: boolean;
     onOpenChange?: ((open: boolean) => void) | undefined;
     onAction?: ((value: string) => void) | undefined;
     onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler | undefined;
@@ -46,6 +47,7 @@
     sizeRole = "chrome",
     size = null,
     density = null,
+    dismissOnOutsideInteract = true,
     onOpenChange = undefined,
     onAction = undefined,
     onSurfaceGeometryChange = undefined,
@@ -130,7 +132,7 @@
     return registerDismissLayer({
       // The surface is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target, rootElement, overlayElement),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: (reason) => send(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
     });
   });

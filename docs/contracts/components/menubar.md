@@ -53,6 +53,7 @@ Updated: 2026-07-10
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for item spacing; when null, resolves from inherited presentation |
+| `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: a mousedown outside the bar and open menu closes it |
 | `ariaLabel` | `string \| null` | `null` | no | accessible label for the menubar |
 
 ### Type Definitions
@@ -104,7 +105,9 @@ MenuItem: {
 - `focusIndex`: which trigger has keyboard focus (roving tabindex)
 - `highlightIndex`: which item within overlay has keyboard focus
 - `lastOpenValue`: tracks last opened menu for hover-to-switch behavior
-- Outside click: document mousedown listener closes open menu
+- Outside click: document mousedown listener closes open menu; the
+  outside-interaction path is guarded by `dismissOnOutsideInteract`
+  (default `true`)
 
 ### Behavior Machine
 

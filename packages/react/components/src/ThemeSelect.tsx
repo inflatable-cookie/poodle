@@ -18,6 +18,7 @@ export interface ThemeSelectProps {
   sizeRole?: SemanticControlSizeRole;
   size?: ControlSize | null;
   density?: ControlDensity | null;
+  dismissOnOutsideInteract?: boolean;
   columns?: number;
   showLabel?: boolean;
 }
@@ -35,6 +36,7 @@ export function ThemeSelect({
   sizeRole = "control",
   size = null,
   density = null,
+  dismissOnOutsideInteract = true,
   columns = 3,
   showLabel = true,
 }: ThemeSelectProps) {
@@ -69,10 +71,10 @@ export function ThemeSelect({
     return registerDismissLayer({
       // The surface is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target as Node, rootElement, panelRef.current),
-      dismissOnOutsideInteract: true,
+      dismissOnOutsideInteract,
       onDismiss: () => setOpen(false),
     });
-  }, [open]);
+  }, [open, dismissOnOutsideInteract]);
 
   function select(next: string): void {
     if (disabled) return;
