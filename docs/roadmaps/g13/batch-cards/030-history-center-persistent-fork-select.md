@@ -52,21 +52,45 @@ away, not a close-and-reopen.
 `forkCount === 1` still renders no picker. One continuation is nothing to
 choose between — that rule is unchanged.
 
-### R2 — Selection previews. Confirm commits.
+### R2 — Select previews. Checkout swaps the root list.
 
-These are two different actions and the current code conflates them.
+Two different actions, and the merged code does neither correctly.
 
-- `PICK_CONTINUATION` sets the selection **and** shows that fork's entries
-  below the select. It loads the run if it is not loaded. It applies nothing
-  and emits no `preferContinuation`.
-- `CONFIRM` emits `preferContinuation` for the selected fork. It does not
-  change what is displayed.
+- **Select a fork** (`PICK_CONTINUATION`) shows that fork's entries below the
+  select. It loads the run if needed. It commits nothing and emits no host
+  operation. Today the entries appear only after confirm, which is why the
+  interaction feels modal.
+- **Checkout** (`CONFIRM`) makes the selected fork **primary**: the main root
+  list becomes that fork's history, and what was the root list becomes a fork
+  at the same entry. The document does **not** move forward — no delta of the
+  fork is applied. The operator stands at the fork entry afterwards.
 
-Today the run only appears after `CONFIRM`, which is why choosing feels modal.
-The handoff is explicit: the nested list shows "the entries of the selected
-fork".
+An earlier version of this card said checkout "does not change what is
+displayed". That was wrong, and it is the error this revision exists to fix.
+Nothing in v3 ever implemented the swap: merged `confirm()` sets `chosen` on
+the open level and emits the host operation, and the root list never moves.
 
-### R3 — Open selects the preferred fork.
+**Poodle does not perform the swap itself.** It emits the command; the host
+runs it and supplies the new root pages, and Poodle renders whatever root it
+is given. Do not fabricate the post-checkout root locally — the authority may
+also have to undo the operator back to the fork entry, and only it knows the
+result. Clear the disclosure state for that anchor when the command is emitted;
+the fork is becoming the root, so the open level no longer describes anything.
+
+### R2a — Call it checkout, not prefer.
+
+"Prefer" is Longhorn's word for its own operation and it describes the wrong
+thing here. This is a checkout: the operator switches which history is the
+main one. The git metaphor is the one the operator already has, and v2's
+callback was `onCheckoutVersion`, so the vocabulary has precedent in this
+component.
+
+Rename across Poodle's surface: the effect, the callback prop, the contract,
+and any label. Poodle's vocabulary is Poodle's own — the host maps the callback
+onto Longhorn's `preferContinuation`, which is exactly the decoupling `b028`'s
+R2 established. Do not rename anything in Longhorn.
+
+### R3 — Open selects the current fork.
 
 On disclosing an entry with `forkCount > 1`, once continuations arrive, select
 the one with `preferred: true` and show its run. The operator sees the current
@@ -78,15 +102,17 @@ leave the region empty.
 ### R4 — Use `Select` and `IconButton`.
 
 Replace the hand-rolled option list with `Select`, and the "Choose" `Button`
-with a confirm `IconButton` beside it. `Select` takes `value`, `options`,
+with a checkout `IconButton` beside it. `Select` takes `value`, `options`,
 `size`, `density` and `variant` — read
 `packages/svelte/components/src/Select.svelte` for the surface.
 
 Keep the branch name and the `preferred` marker visible in the option labels;
 losing them would lose information the screenshot shows today.
 
-Confirm stays disabled when the selected fork is already `preferred`. That is
-what keeps `AlreadyAtTarget` a race rather than a normal path.
+Checkout stays disabled when the selected fork is already the current one.
+The record's field is `preferred` — that is the authority's name and it does
+not change — but nothing user-facing should say "prefer". Disabling it keeps
+`AlreadyAtTarget` a race rather than a normal path.
 
 ### R5 — Everything else v3 holds.
 
@@ -99,14 +125,14 @@ recursive component. `depth` drives padding only. No Longhorn import, no
 ### In scope
 
 - `packages/core/src/history-center.ts`: the `pushDisclosed` gate (R1), and the
-  `PICK_CONTINUATION` / `CONFIRM` split (R2), and the open-selects-preferred
-  behaviour (R3).
+  select/checkout split (R2), the checkout rename (R2a), and the
+  open-selects-current behaviour (R3).
 - Both web components: `Select` + confirm `IconButton` (R4).
 - `history-center.css`: picker-option styles give way to whatever `Select`
   needs; keep the recipe-hook convention.
 - Both test suites and both specimen files.
-- Contract: the picker section, the row model note on persistence, and the
-  select/confirm split.
+- Contract: the picker section, the row-model note on persistence, the
+  select/checkout split, and the renamed vocabulary.
 
 ### Out of scope — stop conditions if reached
 
@@ -122,13 +148,15 @@ recursive component. `depth` drives padding only. No Longhorn import, no
 - The picker row survives a choice: disclose, pick, and the picker is still
   present with the new selection shown.
 - Picking a different fork swaps the entries below without closing anything.
-- `PICK_CONTINUATION` emits no `preferContinuation`.
-- `CONFIRM` emits `preferContinuation` for the selected fork and does not
-  change the displayed run.
+- Selecting a fork emits no host operation at all.
+- Checkout emits the checkout command for the selected fork.
+- Checkout clears the disclosure state for that anchor.
+- Supplying new root pages after a checkout renders the fork as the root list,
+  with no stale fork state left over.
 - Disclosing selects the preferred fork and shows its run (R3), and falls back
   to the first when none is preferred.
 - `forkCount === 1` still renders no picker.
-- Confirm is disabled when the selection is already `preferred`.
+- Checkout is disabled when the selection is already the current fork.
 - Both runtimes render the same anatomy (the parity suite covers this).
 
 ## Worker Rules
@@ -185,10 +213,12 @@ recursive component. `depth` drives padding only. No Longhorn import, no
 ## Acceptance Criteria
 
 - [ ] The picker persists after a choice, proven by test.
-- [ ] Picking previews; confirm commits. Proven by two separate tests on the
-  effects each emits.
-- [ ] Disclosing selects the preferred fork and shows its run.
-- [ ] The picker is a `Select` with a confirm `IconButton`; no hand-rolled
+- [ ] Selecting previews and emits nothing; checkout emits the command. Proven
+  by two separate tests on the effects each emits.
+- [ ] No `prefer` vocabulary remains on Poodle's surface (effect, prop,
+  contract, labels).
+- [ ] Disclosing selects the current fork and shows its run.
+- [ ] The picker is a `Select` with a checkout `IconButton`; no hand-rolled
   option list remains.
 - [ ] Branch name and preferred marker still visible.
 - [ ] A specimen shows a chosen fork with the select still present.
