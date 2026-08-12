@@ -1,6 +1,6 @@
 # 030 HistoryCentre — Persistent Fork Select
 
-Status: ready
+Status: merged (`61d3f49d` → `c6590823`)
 Milestone: side-quest (component behaviour, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-030-history-center-fork-select`
