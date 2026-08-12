@@ -107,6 +107,13 @@ export function DockRegion({
   isCompactRef.current = isCompact;
   const itemsLengthRef = useRef(items.length);
   itemsLengthRef.current = items.length;
+  /* Compacting to icon-only is only a strategy when there is an icon to fall
+     back to. Every panel needs one: hiding a label on a tab that has no icon
+     leaves an empty 2.25rem square with nothing in it and no way to tell the
+     panels apart. A strip of icon-less tabs overflows and scrolls instead —
+     cramped beats unreadable. */
+  const canCompactRef = useRef(false);
+  canCompactRef.current = items.length > 0 && items.every((item) => item.icon);
 
   // Compact detection: observe the strip and its tablist; keep the natural
   // (uncompacted) label width so expansion re-checks against it.
@@ -116,7 +123,7 @@ export function DockRegion({
 
     function checkCompact(): void {
       const target = stripTabsRef.current;
-      if (!target || itemsLengthRef.current === 0) {
+      if (!target || itemsLengthRef.current === 0 || !canCompactRef.current) {
         setIsCompact(false);
         return;
       }
