@@ -15,6 +15,12 @@ pub struct EmbedPreviewSpec {
     pub empty_message: String,
 }
 
+impl Default for EmbedPreviewSpec {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EmbedPreviewSpec {
     pub fn new() -> Self {
         Self {

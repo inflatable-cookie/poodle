@@ -1,17 +1,12 @@
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum BulkActionTone {
+    #[default]
     Default,
     Warning,
     Danger,
-}
-
-impl Default for BulkActionTone {
-    fn default() -> Self {
-        Self::Default
-    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

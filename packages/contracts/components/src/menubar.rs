@@ -8,6 +8,9 @@ pub struct MenubarSpec {
     pub value: Option<String>,
     pub default_value: Option<String>,
     pub aria_label: Option<String>,
+    /// Refuses outside-interact dismissal when false. Matches Svelte
+    /// `dismissOnOutsideInteract` (default `true`).
+    pub dismiss_on_outside_interact: bool,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -20,6 +23,7 @@ impl Default for MenubarSpec {
             value: None,
             default_value: None,
             aria_label: None,
+            dismiss_on_outside_interact: true,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Chrome,
             density: ControlDensity::Default,
@@ -47,6 +51,11 @@ impl MenubarSpec {
 
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());
+        self
+    }
+
+    pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
+        self.dismiss_on_outside_interact = dismiss_on_outside_interact;
         self
     }
 

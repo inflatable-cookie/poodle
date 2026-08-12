@@ -42,6 +42,12 @@ pub struct PageLoadingSpec {
     pub aria_label: Option<String>,
 }
 
+impl Default for PageLoadingSpec {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PageLoadingSpec {
     pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
         self.aria_label = Some(aria_label.into());

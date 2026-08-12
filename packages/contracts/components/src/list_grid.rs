@@ -4,16 +4,11 @@
 
 use poodle_tokens::semantic;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum ListGridVariant {
+    #[default]
     Default,
     Compact,
-}
-
-impl Default for ListGridVariant {
-    fn default() -> Self {
-        Self::Default
-    }
 }
 
 #[derive(Clone, Debug)]

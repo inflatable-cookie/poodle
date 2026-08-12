@@ -5,6 +5,9 @@ use crate::types::{ControlDensity, ControlSize, MenuEntry, SemanticControlSizeRo
 pub struct ContextMenuSpec {
     pub menu: MenuSpec,
     pub anchor_point: Option<(i32, i32)>,
+    /// Refuses outside-interact dismissal when false. Matches Svelte
+    /// `dismissOnOutsideInteract` (default `true`).
+    pub dismiss_on_outside_interact: bool,
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
@@ -15,6 +18,7 @@ impl Default for ContextMenuSpec {
         Self {
             menu: MenuSpec::default(),
             anchor_point: None,
+            dismiss_on_outside_interact: true,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Chrome,
             density: ControlDensity::Default,
@@ -47,6 +51,11 @@ impl ContextMenuSpec {
 
     pub fn with_anchor_point(mut self, x: i32, y: i32) -> Self {
         self.anchor_point = Some((x, y));
+        self
+    }
+
+    pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
+        self.dismiss_on_outside_interact = dismiss_on_outside_interact;
         self
     }
 

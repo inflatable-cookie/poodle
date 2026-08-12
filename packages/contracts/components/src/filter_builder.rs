@@ -10,16 +10,11 @@
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum FilterCombinator {
+    #[default]
     And,
     Or,
-}
-
-impl Default for FilterCombinator {
-    fn default() -> Self {
-        Self::And
-    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -353,6 +348,9 @@ pub struct FilterBuilderSpec {
     pub show_pills: bool,
     pub show_combinator: bool,
     pub is_open: bool,
+    /// Refuses outside-interact dismissal when false. Matches Svelte
+    /// `dismissOnOutsideInteract` (default `true`).
+    pub dismiss_on_outside_interact: bool,
     /// Active draft in the open popover, if any.
     pub draft: Option<FilterDraft>,
     /// Which nested Select inside the open panel shows its option list.
@@ -390,6 +388,7 @@ impl FilterBuilderSpec {
             show_pills: true,
             show_combinator: false,
             is_open: false,
+            dismiss_on_outside_interact: true,
             draft: None,
             open_picker: None,
         }
@@ -495,6 +494,11 @@ impl FilterBuilderSpec {
 
     pub fn with_open(mut self, is_open: bool) -> Self {
         self.is_open = is_open;
+        self
+    }
+
+    pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
+        self.dismiss_on_outside_interact = dismiss_on_outside_interact;
         self
     }
 

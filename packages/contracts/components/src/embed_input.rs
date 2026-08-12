@@ -19,6 +19,12 @@ pub struct EmbedInputSpec {
     pub density: ControlDensity,
 }
 
+impl Default for EmbedInputSpec {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EmbedInputSpec {
     pub fn with_size(mut self, size: ControlSize) -> Self {
         self.size = size;

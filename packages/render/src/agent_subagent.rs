@@ -180,7 +180,6 @@ pub fn agent_subagent(
             toggle_label,
             handlers.on_toggle.as_ref().map(|handler| {
                 let handler = Arc::clone(handler);
-                let next = next;
                 Arc::new(move || handler(next)) as Arc<dyn Fn() + Send + Sync>
             }),
         );

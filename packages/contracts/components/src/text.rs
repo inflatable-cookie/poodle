@@ -1,18 +1,14 @@
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum TextElement {
+    #[default]
     P,
     Span,
     Div,
 }
 
-impl Default for TextElement {
-    fn default() -> Self {
-        Self::P
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum TextTone {
+    #[default]
     Default,
     Secondary,
     Muted,
@@ -21,64 +17,38 @@ pub enum TextTone {
     Warning,
 }
 
-impl Default for TextTone {
-    fn default() -> Self {
-        Self::Default
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum TextSize {
     Xs,
     Sm,
+    #[default]
     Md,
 }
 
-impl Default for TextSize {
-    fn default() -> Self {
-        Self::Md
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum TextWeight {
+    #[default]
     Normal,
     Medium,
     Semibold,
     Bold,
 }
 
-impl Default for TextWeight {
-    fn default() -> Self {
-        Self::Normal
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum TextLeading {
+    #[default]
     Normal,
     Relaxed,
-}
-
-impl Default for TextLeading {
-    fn default() -> Self {
-        Self::Normal
-    }
 }
 
 /// Compact-grid spacing for child paragraphs (contract §2 `spacing`).
 /// `None` is the default (no gap); `Compact` renders a stacked grid with a
 /// `space.stack.sm` gap between children.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum TextSpacing {
+    #[default]
     None,
     Compact,
-}
-
-impl Default for TextSpacing {
-    fn default() -> Self {
-        Self::None
-    }
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]

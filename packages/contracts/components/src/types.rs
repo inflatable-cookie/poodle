@@ -113,19 +113,14 @@ pub enum Overflow {
     Scroll,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum ControlSize {
     Xs,
     Sm,
+    #[default]
     Md,
     Lg,
     Xl,
-}
-
-impl Default for ControlSize {
-    fn default() -> Self {
-        Self::Md
-    }
 }
 
 impl ControlSize {
@@ -151,17 +146,12 @@ impl ControlSize {
 /// Semantic size role relative to the inherited presentation scale.
 /// `Chrome` resolves one stop smaller, `Prominent` one stop larger,
 /// `Control` maps directly to the inherited size scale.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum SemanticControlSizeRole {
     Chrome,
+    #[default]
     Control,
     Prominent,
-}
-
-impl Default for SemanticControlSizeRole {
-    fn default() -> Self {
-        Self::Control
-    }
 }
 
 /// Resolve a concrete control size from the inherited size scale and a
@@ -196,17 +186,12 @@ pub fn resolve_semantic_control_size(
 
 /// Density mode controlling container padding and sibling gaps.
 /// See docs/contracts/components/size-and-density.md for the global rules.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum ControlDensity {
     Compact,
+    #[default]
     Default,
     Comfortable,
-}
-
-impl Default for ControlDensity {
-    fn default() -> Self {
-        Self::Default
-    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

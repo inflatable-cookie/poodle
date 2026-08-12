@@ -24,6 +24,12 @@ pub struct ToastHostSpec {
     pub density: ControlDensity,
 }
 
+impl Default for ToastHostSpec {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ToastHostSpec {
     pub fn new() -> Self {
         Self {

@@ -14,6 +14,12 @@ pub struct NavCardSpec {
     pub density: ControlDensity,
 }
 
+impl Default for NavCardSpec {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl NavCardSpec {
     pub fn new() -> Self {
         Self {

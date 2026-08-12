@@ -2,17 +2,12 @@ use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
 /// Color input mode for the picker.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum ColorInputMode {
+    #[default]
     Hex,
     Rgb,
     Hsl,
-}
-
-impl Default for ColorInputMode {
-    fn default() -> Self {
-        Self::Hex
-    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

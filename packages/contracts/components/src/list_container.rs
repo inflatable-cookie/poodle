@@ -4,18 +4,13 @@
 /// into a single orchestrated browse surface.
 use crate::composite_types::EmptyStateVariant;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub enum ListContainerState {
+    #[default]
     Ready,
     Loading,
     Error,
     Empty,
-}
-
-impl Default for ListContainerState {
-    fn default() -> Self {
-        Self::Ready
-    }
 }
 
 #[derive(Clone, Debug, Default)]

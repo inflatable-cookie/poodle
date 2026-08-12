@@ -472,6 +472,16 @@ pub fn model_picker(
             pad.bottom = rem_to_px(0.5);
         }
         all_radius(&mut dialog, surface_radius);
+
+        // Contract `dismissOnOutsideInteract` (default `true`): a *refusal*
+        // flag — native overlays dismiss on outside interact by default. The
+        // refusal rides the surface's interaction as an inert activation: a
+        // host implementing outside-dismissal must not dismiss a panel
+        // carrying this marker (see menu.rs for the full contract note).
+        if !spec.dismiss_on_outside_interact {
+            dialog.interaction.on_activate = Some(Arc::new(|| {}));
+        }
+
         root = root.child(dialog.child(panel));
     }
 
@@ -483,4 +493,27 @@ pub fn model_picker(
         root.a11y.label = Some(spec.aria_label.clone());
     }
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn outside_interact_refusal_marks_the_open_surface() {
+        // Web default `true` + open: no refusal marker anywhere in the tree.
+        let spec = ModelPickerSpec::new().with_open(true);
+        let node = model_picker(&spec, &theme(), None);
+        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
+
+        // Refusal: the open surface carries the inert activation marker a
+        // host keys outside-dismissal on.
+        let refusing = spec.with_dismiss_on_outside_interact(false);
+        let node = model_picker(&refusing, &theme(), None);
+        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
+    }
 }
