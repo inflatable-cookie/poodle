@@ -16,6 +16,7 @@ import {
   type HistoryPathPage,
 } from "@inflatable-cookie/poodle-core";
 
+import { AlertDialog } from "./AlertDialog";
 import { EmptyState } from "./EmptyState";
 import { Icon } from "./Icon";
 import { IconButton } from "./IconButton";
@@ -134,6 +135,9 @@ export function HistoryCenter({
   const [focusedRow, setFocusedRow] = useState<HistoryCenterRowId | null>(null);
   const [displayedRejection, setDisplayedRejection] = useState<string | null>(null);
   const [renamingBranchId, setRenamingBranchId] = useState<string | null>(null);
+  /** The fork the operator asked to delete, held while the confirmation is
+   *  open. `null` whenever no confirmation is showing. */
+  const [deleteTarget, setDeleteTarget] = useState<HistoryContinuation | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const sectionRef = useRef<HTMLElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
@@ -141,7 +145,7 @@ export function HistoryCenter({
   const lastRejectionProp = useRef<HistoryCenterRejectionCode | null>(null);
   const lastContinuationsResult = useRef<typeof continuationsResult>(null);
   const lastRunResult = useRef<typeof runResult>(null);
-  const pendingFocusRestore = useRef<string | null>(null);
+  const pendingFocusRestore = useRef(false);
   // Set when the machine emits a focusRow effect; the focusedRow effect below
   // only moves DOM focus then — a clampFocus identity change (e.g. after
   // DISCLOSE) must not steal focus from the disclosure button the user used.
@@ -275,10 +279,8 @@ export function HistoryCenter({
   // target (b032 R3). b033: the run header is gone, so the shared pencil is
   // the only rename control left.
   useEffect(() => {
-    if (pendingFocusRestore.current === null) return;
-    const branchId = pendingFocusRestore.current;
-    pendingFocusRestore.current = null;
-    const branch = CSS.escape(branchId);
+    if (!pendingFocusRestore.current) return;
+    pendingFocusRestore.current = false;
     listRef.current
       ?.querySelector<HTMLElement>('[data-part="picker-actions"] .poodle-menu__trigger')
       ?.focus();
@@ -443,8 +445,27 @@ export function HistoryCenter({
       return;
     }
     if (value === "delete" && picked !== undefined) {
-      sendRef.current({ type: "DELETE_CONTINUATION", entryId: picked.entryId });
+      // Deleting a fork discards work and Poodle cannot undo it, so the
+      // operator confirms before the command leaves. This reverses b033's R4,
+      // which left confirmation to the host: every host would have had to
+      // build the same dialog, and one that forgot would ship a menu item
+      // that destroys history on a single click.
+      setDeleteTarget(picked);
     }
+  }
+
+  function confirmDelete(): void {
+    const target = deleteTarget;
+    setDeleteTarget(null);
+    if (target !== null) {
+      sendRef.current({ type: "DELETE_CONTINUATION", entryId: target.entryId });
+    }
+    pendingFocusRestore.current = true;
+  }
+
+  function cancelDelete(): void {
+    setDeleteTarget(null);
+    pendingFocusRestore.current = true;
   }
 
   /** The picker's tentative pick, for the confirm enablement rule (R4). */
@@ -544,7 +565,7 @@ export function HistoryCenter({
   }
 
   function finishRename(): void {
-    pendingFocusRestore.current = renamingBranchId;
+    pendingFocusRestore.current = true;
     setRenamingBranchId(null);
   }
 
@@ -945,6 +966,32 @@ export function HistoryCenter({
           onClick={onRedo}
         />
       </span>
+
+      {/* One dialog for the whole component, not one per row: only ever a
+          single fork is being deleted. It renders outside the Popover, which
+          is safe — Dialog registers its dismiss layer while the Popover is on
+          top, so the ancestry rule (b031) spares the Popover from its own
+          outside-dismissal and the history list is still there when the
+          operator cancels. */}
+      <AlertDialog
+        open={deleteTarget !== null}
+        tone="danger"
+        title="Delete this fork?"
+        description="The fork and its entries go for good. This cannot be undone."
+        itemLabel="Fork"
+        itemValue={deleteTarget === null ? null : deleteTarget.label}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        onOpenChange={(next) => {
+          if (!next) {
+            cancelDelete();
+          }
+        }}
+        size={resolvedSize}
+        density={resolvedDensity}
+      />
     </div>
   );
 }

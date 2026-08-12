@@ -17,6 +17,7 @@
   import { tick } from "svelte";
 
   import { default as EmptyState } from "./EmptyState.svelte";
+  import { default as AlertDialog } from "./AlertDialog.svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as IconButton } from "./IconButton.svelte";
   import { default as Menu } from "./Menu.svelte";
@@ -135,6 +136,10 @@
   let displayedRejection = $state<string | null>(null);
   let renamingBranchId = $state<string | null>(null);
   let renameValue = $state("");
+
+  /** The fork the operator asked to delete, held while the confirmation is
+   *  open. `null` whenever no confirmation is showing. */
+  let deleteTarget = $state<HistoryContinuation | null>(null);
   let renameInputElement = $state<HTMLInputElement | null>(null);
   let sectionElement = $state<HTMLElement | null>(null);
   let listElement = $state<HTMLUListElement | null>(null);
@@ -427,8 +432,27 @@
       return;
     }
     if (value === "delete" && picked !== undefined) {
-      send({ type: "DELETE_CONTINUATION", entryId: picked.entryId });
+      // Deleting a fork discards work and Poodle cannot undo it, so the
+      // operator confirms before the command leaves. This reverses b033's R4,
+      // which left confirmation to the host: every host would have had to
+      // build the same dialog, and one that forgot would ship a menu item
+      // that destroys history on a single click.
+      deleteTarget = picked;
     }
+  }
+
+  function confirmDelete(): void {
+    const target = deleteTarget;
+    deleteTarget = null;
+    if (target !== null) {
+      send({ type: "DELETE_CONTINUATION", entryId: target.entryId });
+    }
+    focusPickerActions();
+  }
+
+  function cancelDelete(): void {
+    deleteTarget = null;
+    focusPickerActions();
   }
 
   /** The picker's tentative pick, for the confirm enablement rule (R4). */
@@ -527,17 +551,21 @@
     renameValue = name;
   }
 
-  function finishRename(): void {
-    const branchId = renamingBranchId;
-    renamingBranchId = null;
+  /** The three action buttons are one … menu now, so no action has a control
+   *  of its own to return to. Focus goes back to the menu trigger the operator
+   *  opened the action from — for a rename and for a delete alike. */
+  function focusPickerActions(): void {
     tick().then(() => {
-      // The three action buttons are one … menu now, so the pencil is not its
-      // own control any more. Focus returns to the menu trigger the operator
-      // opened the rename from.
       listElement
         ?.querySelector<HTMLElement>('[data-part="picker-actions"] .poodle-menu__trigger')
         ?.focus();
     });
+  }
+
+  function finishRename(): void {
+    const branchId = renamingBranchId;
+    renamingBranchId = null;
+    focusPickerActions();
   }
 
   function commitRename(branchId: string): void {
@@ -892,4 +920,29 @@
       onClick={onRedo}
     />
   </span>
+
+  <!-- One dialog for the whole component, not one per row: only ever a single
+       fork is being deleted. It renders outside the Popover, which is safe —
+       Dialog registers its dismiss layer while the Popover is on top, so the
+       ancestry rule (b031) spares the Popover from its own outside-dismissal
+       and the history list is still there when the operator cancels. -->
+  <AlertDialog
+    open={deleteTarget !== null}
+    tone="danger"
+    title="Delete this fork?"
+    description="The fork and its entries go for good. This cannot be undone."
+    itemLabel="Fork"
+    itemValue={deleteTarget === null ? null : deleteTarget.label}
+    confirmLabel="Delete"
+    cancelLabel="Cancel"
+    onConfirm={confirmDelete}
+    onCancel={cancelDelete}
+    onOpenChange={(next) => {
+      if (!next) {
+        cancelDelete();
+      }
+    }}
+    size={resolvedSize}
+    density={resolvedDensity}
+  />
 </div>

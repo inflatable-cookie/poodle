@@ -359,6 +359,103 @@ describe("HistoryCenter (svelte)", () => {
     expect(document.querySelector("[data-part='current-badge']")).toBeNull();
   });
 
+  it("omits Delete when the host supplies no callback (b033 R4 opt-in)", async () => {
+    render(HistoryCenterHostHarness, {
+      props: {
+        pages: twoForkPages,
+        continuationsByEntry: twoForkContinuations,
+        runsByFork: twoForkRuns,
+        defaultOpen: true,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    await openForkMenu();
+
+    // Absent callback, absent item — never a disabled stand-in.
+    expect(screen.getAllByRole("menuitem").map((el) => el.textContent?.trim())).toEqual([
+      "Rename",
+      "Checkout",
+    ]);
+  });
+
+  it("Delete asks first: the command waits for the confirmation", async () => {
+    const onDeleteContinuation = vi.fn();
+    render(HistoryCenterHostHarness, {
+      props: {
+        pages: twoForkPages,
+        continuationsByEntry: twoForkContinuations,
+        runsByFork: twoForkRuns,
+        defaultOpen: true,
+        onDeleteContinuation,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    await runForkAction("Delete");
+
+    // Picking the menu item opens the dialog and emits nothing on its own:
+    // one click must not destroy history.
+    expect(onDeleteContinuation).not.toHaveBeenCalled();
+    const dialog = await screen.findByRole("alertdialog");
+    expect(dialog.textContent).toContain("Delete this fork?");
+    // It names the fork the Select currently shows, so the operator can see
+    // which one is about to go.
+    expect(dialog.textContent).toContain("Alt intro");
+  });
+
+  it("confirming the delete emits once, for the selected fork", async () => {
+    const onDeleteContinuation = vi.fn();
+    const onCheckoutContinuation = vi.fn();
+    render(HistoryCenterHostHarness, {
+      props: {
+        pages: twoForkPages,
+        continuationsByEntry: twoForkContinuations,
+        runsByFork: twoForkRuns,
+        defaultOpen: true,
+        onDeleteContinuation,
+        onCheckoutContinuation,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+
+    // Move the Select off the current fork, so the assertion proves the
+    // command follows the selection rather than the preferred fork.
+    await fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
+    await fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
+
+    await runForkAction("Delete");
+    await fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+
+    expect(onDeleteContinuation).toHaveBeenCalledTimes(1);
+    expect(onDeleteContinuation).toHaveBeenCalledWith("l1");
+    expect(onCheckoutContinuation).not.toHaveBeenCalled();
+  });
+
+  it("cancelling the delete emits nothing and leaves the history list open", async () => {
+    const onDeleteContinuation = vi.fn();
+    render(HistoryCenterHostHarness, {
+      props: {
+        pages: twoForkPages,
+        continuationsByEntry: twoForkContinuations,
+        runsByFork: twoForkRuns,
+        defaultOpen: true,
+        onDeleteContinuation,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    await runForkAction("Delete");
+    await fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+
+    expect(onDeleteContinuation).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    // The dialog is a nested dismiss layer, so closing it must not take the
+    // popover with it (b031 ancestry).
+    expect(document.querySelector('[data-part="list"]')).not.toBeNull();
+  });
+
   it("selects the non-preferred fork: preview swaps below the select, checkout emits, never navigates", async () => {
     const onNavigateEntry = vi.fn();
     const onCheckoutContinuation = vi.fn();
