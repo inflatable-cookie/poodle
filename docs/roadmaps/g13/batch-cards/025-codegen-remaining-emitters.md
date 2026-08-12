@@ -1,6 +1,6 @@
 # 025 poodle-codegen — Remaining Emitters
 
-Status: ready
+Status: merged
 Milestone: `g13.003`
 Owner: Poodle core
 Branch: `thread/g13-025-codegen-remaining-emitters`

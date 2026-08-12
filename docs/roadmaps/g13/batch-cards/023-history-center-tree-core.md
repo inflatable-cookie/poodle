@@ -1,6 +1,6 @@
 # 023 HistoryCenter v2 — Tree Stitcher And Machine
 
-Status: ready
+Status: merged
 Milestone: side-quest (component architecture, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-023-history-center-tree-core`

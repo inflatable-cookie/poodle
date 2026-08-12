@@ -1,6 +1,6 @@
 # g13.003 Deterministic Codegen And Drift Gate
 
-Status: planned
+Status: complete (`b022` machinery + `b025` targets; merges `9dab52ac`, `945f55d2`)
 Owner: Poodle core
 Depends on: `g13.002`
 

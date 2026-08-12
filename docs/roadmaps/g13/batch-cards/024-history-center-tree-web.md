@@ -1,6 +1,6 @@
 # 024 HistoryCenter v2 — Web Rendering And Lanes
 
-Status: ready
+Status: merged (`bd341ad2` → `3580399d`)
 Milestone: side-quest (component architecture, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-024-history-center-tree-web`
