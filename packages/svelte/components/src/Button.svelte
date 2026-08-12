@@ -1,5 +1,5 @@
 <script module lang="ts">
-  import { buttonDefinition } from "../../preview/src/generated/button";
+  import { buttonDefinition } from "./generated/button";
 
   // The definition owns the rendered vocabulary (card 041 R2): the
   // anatomy's DOM classes and the eleven data-* attribute names. A rename

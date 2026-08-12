@@ -2,7 +2,7 @@ import { useState, type FocusEvent, type MouseEvent, type ReactNode } from "reac
 
 import "@inflatable-cookie/poodle-core/styles/button.css";
 
-import { buttonDefinition } from "../../preview/src/generated/button";
+import { buttonDefinition } from "./generated/button";
 
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, resolveSupportingVisualSize, useUiPresentation } from "./presentation";

@@ -2,7 +2,7 @@ import { render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 
 import Button from "../src/Button.svelte";
-import { buttonDefinition } from "../../preview/src/generated/button";
+import { buttonDefinition } from "../src/generated/button";
 
 // Card 041 R2: the DOM reads the generated artifact — the data-* attribute
 // names and part class names come from button.rs via `button-ts`, never
