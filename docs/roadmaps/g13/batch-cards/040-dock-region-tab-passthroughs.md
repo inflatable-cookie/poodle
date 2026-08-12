@@ -16,28 +16,25 @@ scoped CSS override on `.poodle-tabs__item[data-selected]` — exactly the
 class-targeting tier the recipe contract exists to eliminate. Two Poodle
 changes retire it.
 
-The report asked for one prop. The maintainer's instruction is broader: **a way
-to customise the dock's tabs fully, not just this one prop.** R1 answers that
-by ruling on the whole surface rather than adding `tabActiveEdge` and waiting
-for the next report.
+The report asked for one prop. The maintainer's instruction is broader: **all
+tab variants and style props must be reachable through DockRegion.** R1 answers
+that across the whole 28-prop surface rather than adding `tabActiveEdge` and
+waiting for the next report.
 
 ## Current State — Measured
 
-DockRegion instantiates `Tabs` at three call sites and passes eleven props.
-Sorted by who should own them:
+`Tabs` declares **28 props**. DockRegion instantiates it at three call sites
+and reaches only four of them from outside:
 
-| Prop | Today | Owner |
+| Group | Props | Today |
 |---|---|---|
-| `variant` | forwarded as `tabVariant` | consumer ✅ already |
-| `size` / `sizeRole` / `density` | forwarded | consumer ✅ already |
-| `activeEdge` | **hard-coded `"underline"`** | consumer ❌ the report |
-| `activeFill` | **never passed** — Tabs' default | consumer ❌ |
-| `bordered` | **never passed** — Tabs' default | consumer ❌ |
-| `reorderable` | **hard-coded `true`** | consumer ❌ |
-| `orientation` | per branch | **DockRegion** — it is the layout |
-| `items` / `value` / `onValueChange` / `onClose` / `onReorder` | wired internally | **DockRegion** — it owns the panel model |
-| `ariaLabel` | derived from `edge` | **DockRegion**, with the existing `ariaLabel` prop already overriding |
-| `showTooltips` | derived from `isCompact` | **DockRegion** — compaction is its logic (`g13` dock-tabs fix) |
+| forwarded | `variant` (as `tabVariant`), `size`, `sizeRole`, `density` | consumer can set — 4 |
+| hard-coded | `activeEdge="underline"`, `reorderable={true}` | unreachable — 2 |
+| never passed | `activeFill`, `bordered`, `activationMode`, `fullWidth`, `collapseWhenOverflow`, `overflowStrategy`, `shed`, `collapseLabel`, `historyKey`, `actions` | unreachable, Tabs' defaults apply — 10 |
+| derived | `showTooltips` (from `isCompact`) | unreachable, and the derivation is load-bearing — 1 |
+| DockRegion's own | `items`, `value`, `defaultValue`, `orientation`, `ariaLabel`, `onValueChange`, `onClose`, `onReorder`, `onDragPrepare`, `onDragStart`, `onDragEnd`, `children` | correctly not a consumer's — 11 |
+
+So thirteen of the seventeen a consumer could legitimately set are unreachable.
 
 And the hook gap, which is narrower than "the underline bypasses recipes":
 
@@ -53,28 +50,57 @@ Underline is the only active-edge treatment missing the hook its siblings have.
 
 ## Fixed By Ruling (do not re-decide)
 
-### R1 — Forward the four presentation props. Nothing else.
+### R1 — Forward every Tabs prop DockRegion does not structurally own.
 
-Add, all following the established `tab`-prefix convention that `tabVariant`
-set:
+`Tabs` declares 28 props. Four are already forwarded (`variant` as
+`tabVariant`, `size`, `sizeRole`, `density`). Of the rest, eleven belong to
+DockRegion and **thirteen must become pass-throughs**, all on the `tab` prefix
+`tabVariant` established:
 
-- `tabActiveEdge?: ActiveEdge` — default `"underline"`
-- `tabActiveFill?: ActiveFill` — default matching Tabs' current effective value
-- `tabBordered?: boolean` — default matching Tabs' current effective value
-- `tabReorderable?: boolean` — default `true`
+| New prop | Tabs prop | Default |
+|---|---|---|
+| `tabActiveEdge` | `activeEdge` | `"underline"` (current hard-code) |
+| `tabActiveFill` | `activeFill` | Tabs' current effective value |
+| `tabActivationMode` | `activationMode` | Tabs' current effective value |
+| `tabBordered` | `bordered` | Tabs' current effective value |
+| `tabReorderable` | `reorderable` | `true` (current hard-code) |
+| `tabFullWidth` | `fullWidth` | Tabs' current effective value |
+| `tabCollapseWhenOverflow` | `collapseWhenOverflow` | Tabs' current effective value |
+| `tabOverflowStrategy` | `overflowStrategy` | Tabs' current effective value |
+| `tabShed` | `shed` | Tabs' current effective value |
+| `tabCollapseLabel` | `collapseLabel` | Tabs' current effective value |
+| `tabShowTooltips` | `showTooltips` | **`null` = keep the derived behaviour** (see below) |
+| `tabHistoryKey` | `historyKey` | Tabs' current effective value |
+| `tabActions` | `actions` (Snippet) | absent |
 
-Every default preserves today's rendering exactly. This is additive; no
-existing consumer changes.
+Every default preserves today's rendering exactly. Additive only.
 
-Forward all four at **all three** call sites. `reorderable` being hard-coded
-`true` is a real limitation in its own right — a dock whose panels must not be
-reordered currently has no way to say so.
+**`tabShowTooltips` is a nullable override, not a plain boolean.** DockRegion
+currently derives it from `isCompact`, and that derivation is load-bearing —
+icon-only tabs need tooltips. `null` (the default) keeps the derivation;
+`true`/`false` overrides it. Do not replace the derivation with a plain
+default.
 
-**Do not expose the DockRegion-owned rows in the table above.** `orientation`,
-the panel model, and `showTooltips` are DockRegion's, and handing them to a
-consumer would let it break the dock's own layout and the compaction logic.
-Say so in the contract, so the next report knows the line was drawn on purpose
-rather than missed.
+**The eleven DockRegion owns, and must not forward:**
+
+`items`, `value`, `defaultValue` — DockRegion maps its own panel model.
+`orientation` — this *is* the dock's layout; a consumer setting it could put
+horizontal tabs in a vertical strip. `onValueChange`, `onClose`, `onReorder`,
+`onDragPrepare`, `onDragStart`, `onDragEnd` — DockRegion intercepts these and
+re-emits its own callbacks; forwarding raw would double-fire. `children` —
+Tabs' panel snippet, where DockRegion renders the panel body itself.
+`ariaLabel` — DockRegion already has its own `ariaLabel` prop that overrides
+the derived one.
+
+Record this list in the contract with the reason, so the next report knows the
+line was drawn deliberately rather than missed.
+
+**The overflow trio needs care.** `tabCollapseWhenOverflow`,
+`tabOverflowStrategy` and `tabShed` interact with DockRegion's own `isCompact`
+measurement — the logic behind the icon-only compaction fix. Forward them, and
+prove with a test that DockRegion's compaction still behaves at the defaults.
+If a forwarded value makes the dock's own compaction incoherent, that is a
+finding for the log, not a reason to drop the prop.
 
 ### R2 — Give underline the hook its siblings already have.
 
@@ -110,12 +136,14 @@ trips it, and if it does, **stop and say so** rather than editing the spec.
 
 ### In scope
 
-- `DockRegion` in both web runtimes: four props, forwarded at three call sites.
+- `DockRegion` in both web runtimes: thirteen new pass-throughs, each
+  forwarded at all three call sites.
 - `tabs.css`: the underline hook, both orientations.
 - `dock-region.md` and `tabs.md`: the new props, the new hook, and the
   explicit note about what DockRegion deliberately does not forward.
 - Recipe inventory, if the repo tracks hooks there — check `drift:recipes`.
-- Specimens showing `tabActiveEdge="none"` and a non-reorderable dock.
+- Specimens showing `tabActiveEdge="none"`, a non-reorderable dock, and at
+  least one variant/fill combination that was previously unreachable.
 
 ### Out of scope — stop conditions if reached
 
@@ -131,9 +159,12 @@ trips it, and if it does, **stop and say so** rather than editing the spec.
 Both runtimes:
 
 - `tabActiveEdge="none"` renders no active underline; the default still does.
-- `tabActiveFill` and `tabBordered` reach Tabs.
+- Every one of the thirteen reaches Tabs — assert the forwarded value lands,
+  not merely that the prop exists.
 - `tabReorderable={false}` produces non-reorderable tabs; the default is still
   reorderable.
+- `tabShowTooltips` unset keeps the `isCompact` derivation; set overrides it.
+- DockRegion's own compaction still works at the overflow-trio defaults.
 - All four apply at every call site — including the collapsed icon-strip and
   the vertical-edge strip, not just the main branch. The dock-tabs papercut
   landed because a branch was missed.
@@ -168,7 +199,7 @@ Both runtimes:
 1. Baseline: `effigy test:components`, `check:svelte`, `docs:lint`,
    `drift:recipes`, `git diff --check`. All green.
 2. Read `003-recipe-hooks.md`; choose the hook name.
-3. Svelte: the four props, forwarded at all three call sites.
+3. Svelte: the thirteen pass-throughs, forwarded at all three call sites.
 4. `tabs.css`: the hook, both orientations, current value as fallback.
 5. Mirror React exactly.
 6. Contracts, including the deliberate-non-forwarding note (R1).
