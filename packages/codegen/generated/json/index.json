@@ -1,0 +1,24 @@
+{
+  "components": [
+    {
+      "document": "badge.json",
+      "id": "badge",
+      "name": "Badge"
+    },
+    {
+      "document": "gauge.json",
+      "id": "gauge",
+      "name": "Gauge"
+    },
+    {
+      "document": "search-field.json",
+      "id": "search-field",
+      "name": "SearchField"
+    }
+  ],
+  "generated": {
+    "generator": "poodle-codegen 0.1.0",
+    "ir_schema_version": 1,
+    "source": "packages/codegen/fixtures/synthetic-model.json"
+  }
+}

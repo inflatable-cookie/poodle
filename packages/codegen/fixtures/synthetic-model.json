@@ -209,12 +209,62 @@
         }
       ],
       "controlled_state": [],
-      "events": [],
+      "events": [
+        {
+          "id": "value-change",
+          "name": "onValueChange",
+          "kind": "value-change",
+          "payload": { "name": "value", "kind": "pair" },
+          "timing": {
+            "phase": "during-interaction",
+            "debounce_ms": null,
+            "flush_on_blur": false,
+            "ordering": [
+              {
+                "before": "value-change",
+                "after": "value-commit",
+                "reason": "Change fires during interaction, commit on release (CROSS-06)."
+              }
+            ]
+          },
+          "description": "Reports the [lower, upper] pair during interaction (RNG-11 analogue)."
+        },
+        {
+          "id": "value-commit",
+          "name": "onValueCommit",
+          "kind": "value-commit",
+          "payload": { "name": "value", "kind": "pair" },
+          "timing": { "phase": "on-release", "debounce_ms": null, "flush_on_blur": false, "ordering": [] },
+          "description": "Commits the [lower, upper] pair on release (RNG-11 analogue)."
+        }
+      ],
       "parts": [],
       "attributes": [],
       "axes": {
-        "size": null,
-        "density": null,
+        "size": {
+          "explicit": "sm",
+          "size_role": "control",
+          "fallback": null,
+          "ladder": [
+            {
+              "size": "sm",
+              "metrics": { "min-height": { "rem": 1.5 }, "track-thickness": { "rem": 0.25 } },
+              "description": "Compact gauge ladder rung."
+            }
+          ]
+        },
+        "density": {
+          "explicit": "default",
+          "adjustments": [
+            {
+              "density": "compact",
+              "applies_to": null,
+              "inline": { "rem": -0.125 },
+              "block": null,
+              "description": "Compact inline compression for the gauge surface."
+            }
+          ]
+        },
         "orientation": { "default": "horizontal", "values": ["horizontal", "vertical"] }
       },
       "tokens": [],
@@ -227,10 +277,19 @@
         "native": [],
         "description": "Group role for the composite gauge surface."
       },
-      "capabilities": [],
+      "capabilities": [
+        {
+          "capability": "pointer-capture",
+          "purpose": "Shared-root pointer capture for drag gestures (RNG-15 analogue; CROSS-17)."
+        },
+        {
+          "capability": "scrub-fraction",
+          "purpose": "Pointer fraction reporting on the grab overlay (RNG-13 analogue; CROSS-17)."
+        }
+      ],
       "keyboard": [],
       "visual_state": [],
-      "conformance": [],
+      "conformance": ["gauge-bounds"],
       "extensions": []
     },
     {
@@ -335,7 +394,16 @@
         }
       ],
       "controlled_state": [],
-      "events": [],
+      "events": [
+        {
+          "id": "clear",
+          "name": "onClear",
+          "kind": "clear",
+          "payload": null,
+          "timing": { "phase": "immediate", "debounce_ms": null, "flush_on_blur": false, "ordering": [] },
+          "description": "Fires immediately when the clear affordance is activated (TXT-08 analogue)."
+        }
+      ],
       "parts": [],
       "attributes": [],
       "axes": { "size": null, "density": null, "orientation": null },
@@ -367,7 +435,42 @@
       "extensions": []
     }
   ],
-  "conformance_vectors": [],
+  "conformance_vectors": [
+    {
+      "id": "gauge-bounds",
+      "name": "gauge bounds",
+      "applies_to": ["svelte", "react", "gpui", "jetstream"],
+      "steps": [
+        {
+          "id": "lower-at-most-upper",
+          "name": "lower at most upper",
+          "kind": "invariant",
+          "guard": null,
+          "description": "The lower bound never exceeds the upper bound (RNG-12 analogue; CROSS-18)."
+        },
+        {
+          "id": "input-clamps-to-range",
+          "name": "input clamps to range",
+          "kind": "transition",
+          "guard": {
+            "and": [
+              { "operand": { "literal": { "bool": true } } },
+              { "not": { "operand": { "literal": { "bool": false } } } }
+            ]
+          },
+          "description": "INPUT outside [min, max] clamps to the nearest bound (RNG-02 analogue; CROSS-19)."
+        },
+        {
+          "id": "commit-on-release",
+          "name": "commit on release",
+          "kind": "effect-intent",
+          "guard": null,
+          "description": "A release commits the current value (RNG-11 analogue; CROSS-06)."
+        }
+      ],
+      "description": "Synthetic conformance vector pinning the gauge machine's bounds, clamping, and commit semantics (CROSS-18)."
+    }
+  ],
   "scenes": [],
   "specimen_registry": null
 }

@@ -18,7 +18,15 @@ path = "src/bin/poodle-codegen.rs"
 
 [dependencies]
 poodle-ir = { version = "0.1.0", path = "../contracts/ir" }
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+# Test oracle only: validates emitted JSON-surface documents against the
+# emitted JSON Schema. Not a type-mirroring emitter (ruling R4 — ts-rs,
+# schemars, typeshare, specta stay out); it renders nothing, the crate's
+# dependency posture is unchanged.
+[dev-dependencies]
+jsonschema = "0.33"
 
 [package.metadata.poodle]
 public-intent = false

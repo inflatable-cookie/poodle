@@ -1,0 +1,216 @@
+{
+  "axes": {
+    "density": null,
+    "orientation": null,
+    "size": null
+  },
+  "component": {
+    "contract": {
+      "path": "docs/contracts/components/search-field.md",
+      "section": "§3"
+    },
+    "description": "Synthetic search field exercising null, expression-derived defaults, web-only marks, and one-member subsets.",
+    "id": "search-field",
+    "layer": "foundation",
+    "name": "SearchField"
+  },
+  "events": [
+    {
+      "description": "Fires immediately when the clear affordance is activated (TXT-08 analogue).",
+      "id": "clear",
+      "kind": "clear",
+      "name": "onClear",
+      "payload": null,
+      "timing": {
+        "debounce_ms": null,
+        "flush_on_blur": false,
+        "ordering": [],
+        "phase": "immediate"
+      }
+    }
+  ],
+  "generated": {
+    "generator": "poodle-codegen 0.1.0",
+    "ir_schema_version": 1,
+    "source": "packages/codegen/fixtures/synthetic-model.json"
+  },
+  "props": [
+    {
+      "default": {
+        "kind": "null"
+      },
+      "default_expr": null,
+      "description": "Controlled value; null is the empty controlled state.",
+      "id": "value",
+      "name": "value",
+      "permitted_subset": null,
+      "required": false,
+      "type": {
+        "kind": "string"
+      },
+      "web_only": false
+    },
+    {
+      "default": {
+        "kind": "string",
+        "value": "say \"hi\" \\ now"
+      },
+      "default_expr": null,
+      "description": "Placeholder text shown while empty.",
+      "id": "placeholder",
+      "name": "placeholder",
+      "permitted_subset": null,
+      "required": false,
+      "type": {
+        "kind": "string"
+      },
+      "web_only": false
+    },
+    {
+      "default": {
+        "kind": "boolean",
+        "value": false
+      },
+      "default_expr": null,
+      "description": "Native spellcheck attribute projection.",
+      "id": "spellcheck",
+      "name": "spellcheck",
+      "permitted_subset": null,
+      "required": false,
+      "type": {
+        "kind": "boolean"
+      },
+      "web_only": true
+    },
+    {
+      "default": {
+        "kind": "member",
+        "value": "danger"
+      },
+      "default_expr": null,
+      "description": "Accent tone for the focus ring; only danger is permitted.",
+      "id": "accent",
+      "name": "accent",
+      "permitted_subset": [
+        "danger"
+      ],
+      "required": false,
+      "type": {
+        "kind": "shared",
+        "shared_type": "tone"
+      },
+      "web_only": false
+    },
+    {
+      "default": null,
+      "default_expr": null,
+      "description": "Declared validation outcome.",
+      "id": "validationState",
+      "name": "validationState",
+      "permitted_subset": null,
+      "required": false,
+      "type": {
+        "kind": "shared",
+        "shared_type": "validation-state"
+      },
+      "web_only": false
+    },
+    {
+      "default": {
+        "kind": "list",
+        "values": [
+          {
+            "kind": "string",
+            "value": "alpha"
+          },
+          {
+            "kind": "string",
+            "value": "beta"
+          }
+        ]
+      },
+      "default_expr": null,
+      "description": "Search token list seeded in uncontrolled mode.",
+      "id": "tokens",
+      "name": "tokens",
+      "permitted_subset": null,
+      "required": false,
+      "type": {
+        "kind": "list",
+        "of": {
+          "kind": "string"
+        }
+      },
+      "web_only": false
+    },
+    {
+      "default": null,
+      "default_expr": {
+        "coalesce": [
+          {
+            "operand": {
+              "prop": "placeholder"
+            }
+          },
+          {
+            "operand": {
+              "literal": {
+                "string": "search hint"
+              }
+            }
+          }
+        ]
+      },
+      "description": "Helper text; defaults to the placeholder via a bounded expression.",
+      "id": "hint",
+      "name": "hint",
+      "permitted_subset": null,
+      "required": false,
+      "type": {
+        "kind": "string"
+      },
+      "web_only": false
+    },
+    {
+      "default": null,
+      "default_expr": null,
+      "description": "Accessible name for the search input.",
+      "id": "ariaLabel",
+      "name": "ariaLabel",
+      "permitted_subset": null,
+      "required": false,
+      "type": {
+        "kind": "string"
+      },
+      "web_only": false
+    }
+  ],
+  "shared_types": [
+    {
+      "id": "tone",
+      "members": [
+        "default",
+        "danger",
+        "success",
+        "warning"
+      ],
+      "name": "Tone",
+      "referenced_by": [
+        "accent"
+      ]
+    },
+    {
+      "id": "validation-state",
+      "members": [
+        "none",
+        "error",
+        "warning",
+        "success"
+      ],
+      "name": "ValidationState",
+      "referenced_by": [
+        "validationState"
+      ]
+    }
+  ]
+}

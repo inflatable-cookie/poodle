@@ -339,8 +339,16 @@ fn write_mode_deletes_stale_orphan() {
 
 #[test]
 fn check_leaves_the_tree_unchanged_even_on_drift() {
-    let root = target_root("drift-readonly");
-    let files = write_fixture(&root);
+    // The CLI now checks every registered target, so the scratch `--out`
+    // must hold a complete generation: only the planted ts drift may fire.
+    let out = scratch("drift-readonly");
+    let model = load_and_validate(&fixture_path()).expect("fixture loads and validates");
+    for target in targets::all() {
+        let files = generate(&model, FIXTURE, target).expect("fixture renders");
+        write_outputs(&out.join(target.output_root()), &files).expect("write mode succeeds");
+    }
+    let root = out.join("ts");
+    let files = render_fixture();
 
     // Drift every class: content, whitespace-only, missing, orphan.
     let badge = root.join("badge.ts");
@@ -373,10 +381,6 @@ fn check_leaves_the_tree_unchanged_even_on_drift() {
 
     // And the CLI exits 1 while leaving the tree alone.
     let bin = env!("CARGO_BIN_EXE_poodle-codegen");
-    let out = root
-        .parent()
-        .expect("target root has a scratch parent")
-        .to_path_buf();
     let status = Command::new(bin)
         .args([FIXTURE, "--out"])
         .arg(&out)
@@ -433,7 +437,7 @@ fn invalid_model_is_a_clean_error_not_a_panic() {
     let scratch = scratch("invalid");
     let invalid = scratch.join("invalid.json");
     let model: serde_json::Value =
-        serde_json::from_str(&fs::read_to_string(&fixture_path()).expect("fixture reads"))
+        serde_json::from_str(&fs::read_to_string(fixture_path()).expect("fixture reads"))
             .expect("fixture is JSON");
     let mut invalid_model = model.clone();
     invalid_model["schema_version"] = serde_json::json!(99);

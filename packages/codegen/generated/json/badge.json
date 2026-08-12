@@ -1,0 +1,106 @@
+{
+  "axes": {
+    "density": null,
+    "orientation": null,
+    "size": null
+  },
+  "component": {
+    "contract": {
+      "path": "docs/contracts/components/badge.md",
+      "section": "§3"
+    },
+    "description": "Synthetic badge component exercising the string, number, boolean, and shared-enum prop vocabulary.",
+    "id": "badge",
+    "layer": "foundation",
+    "name": "Badge"
+  },
+  "events": [],
+  "generated": {
+    "generator": "poodle-codegen 0.1.0",
+    "ir_schema_version": 1,
+    "source": "packages/codegen/fixtures/synthetic-model.json"
+  },
+  "props": [
+    {
+      "default": {
+        "kind": "member",
+        "value": "default"
+      },
+      "default_expr": null,
+      "description": "Semantic emphasis tone.",
+      "id": "tone",
+      "name": "tone",
+      "permitted_subset": [
+        "danger",
+        "default",
+        "success"
+      ],
+      "required": false,
+      "type": {
+        "kind": "shared",
+        "shared_type": "tone"
+      },
+      "web_only": false
+    },
+    {
+      "default": null,
+      "default_expr": null,
+      "description": "Text the badge renders.",
+      "id": "label",
+      "name": "label",
+      "permitted_subset": null,
+      "required": true,
+      "type": {
+        "kind": "string"
+      },
+      "web_only": false
+    },
+    {
+      "default": {
+        "kind": "number",
+        "value": 120.5
+      },
+      "default_expr": null,
+      "description": "Maximum rendered width in pixels.",
+      "id": "maxWidth",
+      "name": "maxWidth",
+      "permitted_subset": null,
+      "required": false,
+      "type": {
+        "kind": "number"
+      },
+      "web_only": false
+    },
+    {
+      "default": {
+        "kind": "boolean",
+        "value": false
+      },
+      "default_expr": null,
+      "description": "Renders with fully rounded ends.",
+      "id": "pill",
+      "name": "pill",
+      "permitted_subset": null,
+      "required": false,
+      "type": {
+        "kind": "boolean"
+      },
+      "web_only": false
+    }
+  ],
+  "shared_types": [
+    {
+      "id": "tone",
+      "members": [
+        "default",
+        "danger",
+        "success",
+        "warning"
+      ],
+      "name": "Tone",
+      "referenced_by": [
+        "tone"
+      ]
+    }
+  ]
+}

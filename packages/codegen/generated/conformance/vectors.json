@@ -1,0 +1,62 @@
+{
+  "generated": {
+    "generator": "poodle-codegen 0.1.0",
+    "ir_schema_version": 1,
+    "source": "packages/codegen/fixtures/synthetic-model.json"
+  },
+  "vectors": [
+    {
+      "applies_to": [
+        "svelte",
+        "react",
+        "gpui",
+        "jetstream"
+      ],
+      "declared_by": [
+        "gauge"
+      ],
+      "description": "Synthetic conformance vector pinning the gauge machine's bounds, clamping, and commit semantics (CROSS-18).",
+      "id": "gauge-bounds",
+      "name": "gauge bounds",
+      "steps": [
+        {
+          "description": "The lower bound never exceeds the upper bound (RNG-12 analogue; CROSS-18).",
+          "guard": null,
+          "id": "lower-at-most-upper",
+          "kind": "invariant"
+        },
+        {
+          "description": "INPUT outside [min, max] clamps to the nearest bound (RNG-02 analogue; CROSS-19).",
+          "guard": {
+            "and": [
+              {
+                "operand": {
+                  "literal": {
+                    "bool": true
+                  }
+                }
+              },
+              {
+                "not": {
+                  "operand": {
+                    "literal": {
+                      "bool": false
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "id": "input-clamps-to-range",
+          "kind": "transition"
+        },
+        {
+          "description": "A release commits the current value (RNG-11 analogue; CROSS-06).",
+          "guard": null,
+          "id": "commit-on-release",
+          "kind": "effect-intent"
+        }
+      ]
+    }
+  ]
+}

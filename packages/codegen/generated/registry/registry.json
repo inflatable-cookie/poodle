@@ -1,0 +1,44 @@
+{
+  "components": [
+    {
+      "axes": [],
+      "capabilities": [],
+      "id": "badge",
+      "name": "Badge",
+      "shared_types": [
+        "tone"
+      ]
+    },
+    {
+      "axes": [
+        "size",
+        "density",
+        "orientation"
+      ],
+      "capabilities": [
+        "pointer-capture",
+        "scrub-fraction"
+      ],
+      "id": "gauge",
+      "name": "Gauge",
+      "shared_types": [
+        "orientation"
+      ]
+    },
+    {
+      "axes": [],
+      "capabilities": [],
+      "id": "search-field",
+      "name": "SearchField",
+      "shared_types": [
+        "tone",
+        "validation-state"
+      ]
+    }
+  ],
+  "generated": {
+    "generator": "poodle-codegen 0.1.0",
+    "ir_schema_version": 1,
+    "source": "packages/codegen/fixtures/synthetic-model.json"
+  }
+}
