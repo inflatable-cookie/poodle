@@ -170,10 +170,11 @@ reference stable until a new result replaces it (the same rule v2's
 | `onLoadContinuations` | `(entryId: string) => void` | `null` | Host op 1: load the continuations at the anchor entry. |
 | `onLoadContinuationRun` | `(fromEntryId: string) => void` | `null` | Host op 2: load the run starting at the fork's first entry. |
 | `onCheckoutContinuation` | `(entryId: string) => void` | `null` | Host op 3: checkout the picked continuation — the selected fork becomes the primary history. The host maps the callback onto its own prefer operation (R2a); Longhorn names are never Poodle's. |
+| `onDeleteContinuation` | `(entryId: string) => void` | `null` | Host op 4: delete the picked continuation. Opt-in — absent callback, absent menu item, never a disabled stand-in for "unsupported". Poodle deletes nothing itself and does not guess at the resulting history; the host runs the operation and supplies new pages. Not `prune_to`, which is budget-driven retention. |
 
 ### Command-Only Callbacks
 
-Undo/redo/navigate/rename and the three host operations are **commands out** —
+Undo/redo/navigate/rename and the four host operations are **commands out** —
 the component emits the callback on user activation and does nothing else. It
 never invokes a callback speculatively: no auto-undo, no implicit checkout on
 open, no continuations load ahead of the user's disclosure click. The host
@@ -397,10 +398,11 @@ can never be reported.
 | `loadContinuations { entryId }` | Host op 1: the adapter calls the host's continuation loader for the anchor. | None (host-owned). |
 | `loadContinuationRun { fromEntryId }` | Host op 2: the adapter calls the host's run loader starting at the fork's first entry. | None (host-owned). |
 | `checkoutContinuation { entryId }` | Host op 3: the adapter calls the host's checkout handler for the picked fork — the picker's commit. The host maps it onto its own prefer operation (R2a); Poodle never names the host's operation. | None (host-owned). |
+| `deleteContinuation { entryId }` | Host op 4: the adapter calls `onDeleteContinuation(entryId)` for the picked fork, once the operator has confirmed. Poodle does not touch its own pages — the anchor's disclosure state and the rows stand until the host supplies new pages. | None (host-owned). |
 
 The v1 `emitSelectEntry` and `emitCheckout` effects are gone; the v2 index
 `focusRow { index }` is replaced by identity `focusRow { row }`. Effects for
-the three host operations leave only on user activation or a matching loaded
+the four host operations leave only on user activation or a matching loaded
 event — never speculatively. `PICK_CONTINUATION` emits at most
 `loadContinuationRun` (the preview) and never a host operation; `CONFIRM`
 emits `checkoutContinuation` alone — the fork's run was already previewed by
@@ -462,6 +464,7 @@ composed `Popover`), `createInstanceId` for surface ids.
 | `onRenameBranch` | rename input commit (Enter or blur) in the opened region or the picker | `branchId`, `name` | In the picker, `branchId` is the fork the `Select` currently shows (R1) — never the anchor's own branch or the preferred fork. Escape cancels without emitting. |
 | `onLoadContinuations` | fork disclosure opens an entry with `forkCount >= 1` | `entryId` | Host op 1: the host loads the continuations at the anchor and feeds the result back as `continuationsResult`. |
 | `onLoadContinuationRun` | a single fork is auto-chosen (R3), or a fork is selected in the picker whose run is not loaded (R2) | `fromEntryId` | Host op 2: the host loads the run starting at the fork's first entry and feeds the result back as `runResult`. |
+| `onDeleteContinuation` | the operator confirms the delete dialog | `entryId` | Host op 4: delete the fork the `Select` shows. Emitted once, on confirmation only — picking the menu item emits nothing. Cancelling or dismissing the dialog emits nothing at all. |
 | `onCheckoutContinuation` | the picker's checkout is confirmed on a fork that is not the current one | `entryId` | Host op 3: checkout the picked fork — it becomes the primary history. The host maps the callback onto its own prefer operation (R2a). Emitted alone (the run was previewed by the pick, R2) and never with navigation. The document does not move forward: Poodle clears the anchor's disclosure state and renders whatever root pages the host supplies afterwards. |
 
 The v2 `onLoadMoreEntries`/`onLoadMoreBranches` callbacks are retired with the
@@ -499,7 +502,16 @@ region (R6) and the picker (R1) — one event, both sites.
   While a rename is open the inline input takes the `Select`'s place (R3).
   Checkout is disabled until a fork that is not the current one is selected
   (R4: `AlreadyAtTarget` stays a race, not a normal path) and while a rename
-  is open (R3). Checkout is not the only way to activate a fork — picking any
+  is open (R3).
+- **`Delete` confirms inside Poodle.** Picking the item opens an
+  `AlertDialog` naming the fork; the command leaves only on confirmation.
+  This reverses b033's R4, which made confirmation the host's policy: every
+  host would have had to build the same dialog, and one that forgot would
+  ship a menu item that destroys history on a single click. A host that wants
+  its own additional confirmation still can — it owns the operation — but it
+  is no longer the only thing standing between a click and lost work. One
+  dialog serves the whole component; it renders outside the `Popover` and the
+  dismiss-layer ancestry (b031) keeps the history list open behind it. Checkout is not the only way to activate a fork — picking any
   entry inside the fork's rows navigates to that point; checkout exists to
   make a fork primary **without** moving HEAD.
 - The not-yet-loaded row is a non-interactive roving-focus stop with a

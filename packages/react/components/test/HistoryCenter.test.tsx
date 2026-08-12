@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type {
   HistoryContinuation,
@@ -390,6 +390,148 @@ describe("HistoryCenter (react)", () => {
     expect(screen.getByRole("option", { name: /Lead intro feature\/lead/ })).toBeTruthy();
     expect(screen.getByRole("option", { name: /Alt intro feature\/alt/ })).toBeTruthy();
     expect(document.querySelector('[data-part="current-badge"]')).toBeNull();
+  });
+
+  it("omits Delete when the host supplies no callback (b033 R4 opt-in)", async () => {
+    const { rerender } = render(<HistoryCenter pages={twoForkPages} defaultOpen />);
+
+    fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    rerender(<HistoryCenter pages={twoForkPages} defaultOpen continuationsResult={c2Result} />);
+    rerender(
+      <HistoryCenter
+        pages={twoForkPages}
+        defaultOpen
+        continuationsResult={c2Result}
+        runResult={x1TwoForkRun}
+      />,
+    );
+
+    await openForkMenu();
+
+    // Absent callback, absent item — never a disabled stand-in.
+    expect(screen.getAllByRole("menuitem").map((el) => el.textContent?.trim())).toEqual([
+      "Rename",
+      "Checkout",
+    ]);
+  });
+
+  it("Delete asks first: the command waits for the confirmation", async () => {
+    const onDeleteContinuation = vi.fn();
+    const { rerender } = render(
+      <HistoryCenter pages={twoForkPages} defaultOpen onDeleteContinuation={onDeleteContinuation} />,
+    );
+
+    fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    rerender(
+      <HistoryCenter
+        pages={twoForkPages}
+        defaultOpen
+        onDeleteContinuation={onDeleteContinuation}
+        continuationsResult={c2Result}
+      />,
+    );
+    rerender(
+      <HistoryCenter
+        pages={twoForkPages}
+        defaultOpen
+        onDeleteContinuation={onDeleteContinuation}
+        continuationsResult={c2Result}
+        runResult={x1TwoForkRun}
+      />,
+    );
+
+    await runForkAction("Delete");
+
+    // Picking the menu item opens the dialog and emits nothing on its own:
+    // one click must not destroy history.
+    expect(onDeleteContinuation).not.toHaveBeenCalled();
+    const dialog = await screen.findByRole("alertdialog");
+    expect(dialog.textContent).toContain("Delete this fork?");
+    // It names the fork the Select currently shows, so the operator can see
+    // which one is about to go.
+    expect(dialog.textContent).toContain("Alt intro");
+  });
+
+  it("confirming the delete emits once, for the selected fork", async () => {
+    const onDeleteContinuation = vi.fn();
+    const onCheckoutContinuation = vi.fn();
+    const props = { onDeleteContinuation, onCheckoutContinuation };
+    const { rerender } = render(<HistoryCenter pages={twoForkPages} defaultOpen {...props} />);
+
+    fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    rerender(
+      <HistoryCenter pages={twoForkPages} defaultOpen {...props} continuationsResult={c2Result} />,
+    );
+    rerender(
+      <HistoryCenter
+        pages={twoForkPages}
+        defaultOpen
+        {...props}
+        continuationsResult={c2Result}
+        runResult={x1TwoForkRun}
+      />,
+    );
+
+    // Move the Select off the current fork, so the assertion proves the
+    // command follows the selection rather than the preferred fork.
+    fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
+    fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
+    rerender(
+      <HistoryCenter
+        pages={twoForkPages}
+        defaultOpen
+        {...props}
+        continuationsResult={c2Result}
+        runResult={l1TwoForkRun}
+      />,
+    );
+
+    await runForkAction("Delete");
+    // AlertDialog awaits onConfirm before it closes, so the click leaves state
+    // updates in flight past fireEvent's own act() window.
+    const confirm = await screen.findByRole("button", { name: "Delete" });
+    await act(async () => {
+      fireEvent.click(confirm);
+    });
+
+    expect(onDeleteContinuation).toHaveBeenCalledTimes(1);
+    expect(onDeleteContinuation).toHaveBeenCalledWith("l1");
+    expect(onCheckoutContinuation).not.toHaveBeenCalled();
+  });
+
+  it("cancelling the delete emits nothing and leaves the history list open", async () => {
+    const onDeleteContinuation = vi.fn();
+    const { rerender } = render(
+      <HistoryCenter pages={twoForkPages} defaultOpen onDeleteContinuation={onDeleteContinuation} />,
+    );
+
+    fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    rerender(
+      <HistoryCenter
+        pages={twoForkPages}
+        defaultOpen
+        onDeleteContinuation={onDeleteContinuation}
+        continuationsResult={c2Result}
+      />,
+    );
+    rerender(
+      <HistoryCenter
+        pages={twoForkPages}
+        defaultOpen
+        onDeleteContinuation={onDeleteContinuation}
+        continuationsResult={c2Result}
+        runResult={x1TwoForkRun}
+      />,
+    );
+
+    await runForkAction("Delete");
+    fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+
+    expect(onDeleteContinuation).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    // The dialog is a nested dismiss layer, so closing it must not take the
+    // popover with it (b031 ancestry).
+    expect(document.querySelector('[data-part="list"]')).not.toBeNull();
   });
 
   it("selects the non-preferred fork: preview swaps below the select, checkout emits, never navigates", async () => {
