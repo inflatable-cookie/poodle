@@ -512,3 +512,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   is a layout decision on a shared component with three layouts and two
   presentations, so it wants its own card rather than an improvised column
   tweak.
+
+- 2026-08-13 — `detail-section.css`'s `[data-separated="true"]::before` (a
+  0.125rem separator inset) sits inside the section's own `@container
+  (max-width: 28rem)`, so it resolves against the enclosing
+  `DetailSectionGroup` rather than the section. Plausibly the box you want for
+  a separator inset shared across sibling sections — but **it was not
+  measured**, and it is baselined in `container-query-drift.ts` on that
+  unverified reasoning. Measure it and either delete the baseline entry or
+  restructure; do not leave it indefinitely on a guess.
+

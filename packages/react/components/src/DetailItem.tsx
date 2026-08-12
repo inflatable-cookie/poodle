@@ -53,7 +53,8 @@ export function DetailItem({
       data-span={span ?? undefined}
       aria-label={ariaLabel ?? undefined}
     >
-      <div className="poodle-detail-item__label-block">
+      <div className="poodle-detail-item__grid">
+        <div className="poodle-detail-item__label-block">
         <span className="poodle-detail-item__label">
           {label}
           {description ? (
@@ -80,6 +81,7 @@ export function DetailItem({
       </div>
 
       {action ? <div className="poodle-detail-item__action">{action}</div> : null}
+      </div>
     </div>
   );
 }

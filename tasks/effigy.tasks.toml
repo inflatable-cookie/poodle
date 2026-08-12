@@ -202,6 +202,10 @@
 # contract-prop-drift deliberately skips `on*` props, so before this nothing
 # checked them. Runs inside docs:lint; this selector is for standalone use.
 "docs:callback-drift" = "bun packages/svelte/preview/scripts/contract-callback-drift.ts"
+# Self-referential container queries: an element cannot be matched by its own
+# @container, so such rules resolve against the nearest ancestor instead. Found
+# in 3 of 5 container-query stylesheets (g13-043). Runs inside docs:lint.
+"docs:container-query-drift" = "bun packages/svelte/preview/scripts/container-query-drift.ts"
 # Contract <-> poodle-specs drift. Also runs inside docs:lint; this selector is
 # for standalone/report use (DRIFT_REPORT=1 lists gaps without failing).
 "docs:spec-drift" = "bun packages/svelte/preview/scripts/contract-spec-drift.ts"

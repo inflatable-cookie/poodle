@@ -40,7 +40,7 @@ export function DetailSectionGroup({
       aria-label={ariaLabel ?? undefined}
       style={style}
     >
-      {children}
+      <div className="poodle-detail-section-group__grid">{children}</div>
     </div>
   );
 }

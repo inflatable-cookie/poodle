@@ -39,6 +39,8 @@
   aria-label={ariaLabel ?? undefined}
   style={style}
 >
-  {@render children?.()}
+  <div class="poodle-detail-section-group__grid">
+    {@render children?.()}
+  </div>
 </div>
 

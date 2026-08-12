@@ -1,6 +1,12 @@
 /* Styles for DetailItem. Extracted from the Svelte component (g12.001
    shared-styles move). Unique poodle-* selectors; safe as global CSS. */
 
+/* g13.043: the grid lives on .poodle-detail-item__grid so the container
+   queries below resolve against the ITEM (their nearest ancestor container)
+   instead of a page-wide ancestor. The root keeps container-type and the
+   section-scale rules ([data-span]); the item-scale rules (columns, gaps,
+   padding) target the inner grid. */
+
   .poodle-detail-item {
     --poodle-detail-item-row-gap: 0.25rem;
     --poodle-detail-item-inline-column-gap: var(--poodle-space-inline-md);
@@ -10,12 +16,15 @@
     --poodle-detail-item-surface-padding-x: var(--poodle-space-panel-x);
     --poodle-detail-item-surface-stacked-gap: 0.1875rem;
     --poodle-detail-item-inline-label-column: minmax(8rem, 11.25rem);
-    display: grid;
-    gap: var(--poodle-detail-item-row-gap);
     container-type: inline-size;
   }
 
-  .poodle-detail-item[data-layout="inline"] {
+  .poodle-detail-item__grid {
+    display: grid;
+    gap: var(--poodle-detail-item-row-gap);
+  }
+
+  .poodle-detail-item[data-layout="inline"] .poodle-detail-item__grid {
     grid-template-columns: var(--poodle-detail-item-inline-label-column) minmax(0, 1fr) auto;
     gap: var(--poodle-detail-item-row-gap) var(--poodle-detail-item-inline-column-gap);
     align-items: baseline;
@@ -131,15 +140,18 @@
   }
 
   .poodle-detail-item[data-presentation="surface"] {
-    grid-template-columns: 11.25rem minmax(0, 1fr) auto;
-    gap: var(--poodle-detail-item-surface-gap);
-    align-items: center;
-    padding: var(--poodle-detail-item-surface-padding-y) var(--poodle-detail-item-surface-padding-x);
     border-radius: calc(var(--poodle-radius-surface) - 0.0625rem);
     background: var(--poodle-recipe-detail-item-fill, color-mix(in srgb, var(--poodle-surface) 93%, var(--poodle-color-text-primary)));
   }
 
-  .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] {
+  .poodle-detail-item[data-presentation="surface"] .poodle-detail-item__grid {
+    grid-template-columns: 11.25rem minmax(0, 1fr) auto;
+    gap: var(--poodle-detail-item-surface-gap);
+    align-items: center;
+    padding: var(--poodle-detail-item-surface-padding-y) var(--poodle-detail-item-surface-padding-x);
+  }
+
+  .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] .poodle-detail-item__grid {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
     gap: var(--poodle-detail-item-surface-stacked-gap);
@@ -180,12 +192,18 @@
     --poodle-detail-item-surface-stacked-gap: 0.25rem;
   }
 
+  /* The [data-span] rule below is SECTION-scale by design (g13.043 R2): the
+     item's place in the section's grid collapses when the SECTION — its
+     nearest ancestor container — is narrow. The item-scale collapse rules
+     that follow it target .poodle-detail-item__grid so they resolve against
+     the item itself. */
+
   @container (max-width: 26rem) {
     .poodle-detail-item[data-span] {
       grid-column: 1 / -1;
     }
 
-    .poodle-detail-item[data-layout="inline"] {
+    .poodle-detail-item[data-layout="inline"] .poodle-detail-item__grid {
       grid-template-columns: 1fr;
     }
 
@@ -195,17 +213,17 @@
       grid-row: auto;
     }
 
-    .poodle-detail-item[data-presentation="surface"] {
+    .poodle-detail-item[data-presentation="surface"] .poodle-detail-item__grid {
       grid-template-columns: 1fr;
     }
 
-    .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] {
+    .poodle-detail-item[data-presentation="surface"][data-layout="stacked"] .poodle-detail-item__grid {
       grid-template-columns: 1fr;
     }
   }
 
   @container (max-width: 21rem) {
-    .poodle-detail-item {
+    .poodle-detail-item .poodle-detail-item__grid {
       --poodle-detail-item-inline-column-gap: 0.5rem;
       --poodle-detail-item-surface-gap: 0.5rem;
       --poodle-detail-item-surface-padding-x: 0.75rem;
