@@ -50,6 +50,8 @@ and roadmap closeout.
 | `038` | focus rings — components with no explicit treatment | `037` merged | merged (`95c9c02a`) |
 | `039` | SettingsShell — new component, designed not ported | none | merged (`3a31a6a3`) |
 | `040` | DockRegion tab pass-throughs + the underline recipe hook | none | merged (`51b0e76c`) |
+| `041` | Button slice: Rust authoring + the two web runtimes (**g13.005** part 1) | `035`/`036` merged | ready |
+| `042` | Button slice: GPUI + Jetstream via `poodle-render` — closes **g13.005** | `041` merged | planned |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
@@ -100,3 +102,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 038](038-focus-treatment-coverage.md)
 - [Batch 039](039-settings-shell.md)
 - [Batch 040](040-dock-region-tab-passthroughs.md)
+- [Batch 041](041-button-slice-rust-authoring-and-web.md)

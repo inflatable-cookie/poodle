@@ -1,6 +1,6 @@
 # 039 SettingsShell — A New Component, Designed Not Ported
 
-Status: ready
+Status: merged (`3a31a6a3`)
 Milestone: side-quest (new component, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-039-settings-shell`

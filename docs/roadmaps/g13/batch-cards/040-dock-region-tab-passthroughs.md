@@ -1,13 +1,14 @@
 # 040 DockRegion — Tab Pass-throughs, And The Underline's Missing Hook
 
-Status: dispatched
+Status: merged (`51b0e76c`)
 Milestone: side-quest (component surface, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-040-dock-region-tab-passthroughs`
 Depends on: none. (The feared `tabs.css` contention with `g13-b038` did not materialise: the focus gate reports zero findings there, because Tabs draws its ring as an outline on the focused element itself and is correctly exempt.)
 Governing refs: `docs/contracts/components/dock-region.md`,
 `docs/contracts/components/tabs.md`,
-`docs/contracts/003-recipe-hooks.md` (the hook grammar)
+`docs/architecture/007-appearance-recipe-contract.md` (the hook grammar — the
+originally cited `docs/contracts/003-recipe-hooks.md` does not exist)
 
 ## Goal
 
@@ -115,7 +116,7 @@ Two rules, both orientations:
 - `tabs.css:434` (vertical) — `border-right-color`
 
 One hook covers both; name it per the grammar in
-`docs/contracts/003-recipe-hooks.md` and consistently with
+`docs/architecture/007-appearance-recipe-contract.md` and consistently with
 `--poodle-recipe-tabs-active-outline-border`. Read that contract before
 choosing the name — do not invent a spelling.
 
