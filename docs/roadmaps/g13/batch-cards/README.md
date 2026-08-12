@@ -38,7 +38,7 @@ and roadmap closeout.
 | `026` | `dismissOnOutsideInteract` across the overlay family | none | merged (`4418eb58`) |
 | `027` | dismiss native parity + bidirectional drift gate | `026` merged | merged (`2eb94a16`) |
 | `028` | HistoryCentre v3 — flat list, node-owned forks (core) | `024` merged | dispatched |
-| `029` | HistoryCentre v3 — rendering, picker, nested list | `028` | planned |
+| `029` | HistoryCentre v3 — rendering, picker, nested list | `028` | dispatched |
 | — | HistoryCentre — native parity | `029` merged | planned (renumbered; `022` was reused for codegen) |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
@@ -77,3 +77,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 026](026-dismiss-on-outside-interact-prop.md)
 - [Batch 027](027-dismiss-native-parity-and-drift-direction.md)
 - [Batch 028](028-history-center-v3-core.md)
+- [Batch 029](029-history-center-v3-web.md)
