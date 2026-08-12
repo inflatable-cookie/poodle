@@ -85,3 +85,8 @@
   text-align: center;
   font: inherit;
 }
+
+.poodle-knob__entry:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
+}

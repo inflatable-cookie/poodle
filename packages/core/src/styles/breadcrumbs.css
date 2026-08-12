@@ -30,6 +30,13 @@
     text-decoration: none;
   }
 
+  .poodle-breadcrumbs a:focus-visible,
+  .poodle-breadcrumbs button:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+    border-radius: 0.125rem;
+  }
+
   .poodle-breadcrumbs__separator {
     display: inline-flex;
     opacity: 0.4;

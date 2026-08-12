@@ -62,7 +62,8 @@ Both carry the whole `WaveformSelection`, or `null` when the selection clears.
 
 The root is a labelled slider for the cursor, with screen-reader value text for
 viewport, cursor, and selection sample positions. Keyboard behavior is
-adapter-owned. The dense visual bars are aria-hidden.
+adapter-owned. The dense visual bars are aria-hidden. Focus shows the machine
+ring (inset box-shadow on the visual); the root's UA outline is suppressed.
 
 ## 7. Layout And Scale Ceiling
 

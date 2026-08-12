@@ -11,6 +11,11 @@
     background: var(--poodle-recipe-toolbar-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent));
   }
 
+  .poodle-toolbar:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }
+
   /* Size variants */
   .poodle-toolbar[data-size="xs"] { padding: 0.125rem 0.25rem; gap: 0.25rem; }
   .poodle-toolbar[data-size="sm"] { padding: 0.1875rem 0.3125rem; gap: 0.3125rem; }

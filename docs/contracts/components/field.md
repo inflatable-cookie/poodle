@@ -151,7 +151,8 @@ embedded Popover component.
 
 - Field itself is not focusable
 - Clicking the label focuses the slotted control (native `<label for>`)
-- Info icon is focusable and toggles the popover on click
+- Info icon is focusable and toggles the popover on click; the Popover's own
+  `focus-visible` ring is the indicator (the icon draws no ring of its own)
 - Escape closes the info popover
 
 ## 7. Layout

@@ -66,6 +66,9 @@ settled value — atomic keyboard edits and drag end. `onGestureBegin` and
 
 Root exposes spinbutton role, name, min/max/now, formatted value text, disabled
 state, and arrow/Home/End keyboard operation. Type-in uses a labelled input.
+The root's machine ring (box-shadow on the visual) covers root focus; the entry
+input draws the standard ring (`border-width-focus` solid `accent-focusRing`,
+offset `0.125rem`) while editing.
 
 ## 7. Layout
 

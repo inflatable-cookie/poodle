@@ -123,8 +123,8 @@ No component-owned events are dispatched. All interaction is internal (transport
 ### Focus
 
 - Play and mute buttons: `border-width-focus` solid `accent-focusRing`, offset `0.0625rem`
-- Range sliders: browser-native focus styling
-- Speed select: browser-native focus styling
+- Seek and volume sliders: `border-width-focus` solid `accent-focusRing`, offset `0.125rem`, radius `--poodle-radius-control`
+- Speed select: `border-width-focus` solid `accent-focusRing`, offset `0.125rem`
 
 ## 7. Layout
 

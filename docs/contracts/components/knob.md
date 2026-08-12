@@ -72,7 +72,9 @@ pointer drags.
 
 Root exposes slider role, name, min/max/now, formatted value text, disabled
 state, and keyboard operation. The visual renderer is hidden from assistive
-technology. The entry uses a labelled text input.
+technology. The entry uses a labelled text input drawing the standard ring
+(`border-width-focus` solid `accent-focusRing`, offset `0.125rem`) while
+editing; root focus shows the machine ring (box-shadow on the visual).
 
 ## 7. Layout
 

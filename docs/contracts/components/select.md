@@ -258,7 +258,7 @@ freeform mode, and native-mode delegation stay adapter-side.
 
 ### Focus And Announcement
 
-- focus entry: root receives visible focus treatment (border-color, background, box-shadow changes)
+- focus entry: root receives visible focus treatment (border-color, background, box-shadow changes); option buttons in custom mode draw the standard ring (`border-width-focus` solid `accent-focusRing`, offset `0.125rem`)
 - focus exit: focus treatment clears
 - custom mode: highlight moves via `aria-activedescendant` (no DOM focus change); closing the dropdown keeps focus on the input/trigger
 - live-region behavior: none; native select handles value announcement; custom mode uses `aria-activedescendant`

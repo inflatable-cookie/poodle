@@ -75,6 +75,11 @@
 .poodle-fader-visual[data-focus="true"] .poodle-fader-visual__thumb { box-shadow: var(--poodle-recipe-fader-focus-ring, 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-focusRing) 36%, transparent)); }
 .poodle-fader__entry { position: absolute; z-index: 2; width: 4.5rem; padding: 0.25rem; border: 0.0625rem solid var(--poodle-recipe-fader-entry-border, var(--poodle-color-border-default)); border-radius: 0.25rem; color: var(--poodle-recipe-fader-entry-text, var(--poodle-color-text-primary)); background: var(--poodle-recipe-fader-entry-fill, var(--poodle-color-background-elevated)); text-align: center; font: inherit; }
 
+.poodle-fader__entry:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
+}
+
 .poodle-fader[data-size="xs"] { --poodle-fader-cross: 1.5rem; --poodle-fader-length: 7rem; --poodle-fader-thumb-cross: 1.125rem; }
 .poodle-fader[data-size="sm"] { --poodle-fader-cross: 1.75rem; --poodle-fader-length: 8.5rem; --poodle-fader-thumb-cross: 1.3125rem; }
 .poodle-fader[data-size="lg"] { --poodle-fader-cross: 2.25rem; --poodle-fader-length: 11.5rem; --poodle-fader-thumb-cross: 1.75rem; }

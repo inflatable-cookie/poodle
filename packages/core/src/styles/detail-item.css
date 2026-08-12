@@ -130,15 +130,6 @@
     padding: 0.5rem 0.625rem;
   }
 
-  .poodle-detail-item__label .poodle-popover__trigger:focus-visible {
-    outline: none;
-  }
-
-  .poodle-detail-item__info-trigger:focus-visible .poodle-detail-item__info-icon {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.0625rem;
-  }
-
   .poodle-detail-item[data-presentation="surface"] {
     grid-template-columns: 11.25rem minmax(0, 1fr) auto;
     gap: var(--poodle-detail-item-surface-gap);

@@ -100,6 +100,9 @@ and async validation orchestration stay adapter-side.
   `aria-describedby` linked to validation message
 - keyboard: `ArrowUp` / `ArrowDown` to step, `Home` / `End` for min / max
   when supported
+- focus: the field draws the ring when focus is inside (`box-shadow` 2px
+  `accent-focusRing` @28%); stepper buttons suppress their UA outline so
+  exactly one ring shows
 
 ## Jetstream Notes
 

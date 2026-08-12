@@ -264,6 +264,9 @@ while busy is also dropped (stop is deliberate, not accidental).
 
 - focus entry: the editor is the natural first stop; the component never steals
   focus on mount
+- focus treatment: the field draws the ring when focus is inside (editor,
+  toolbar, action); the action button's UA outline is suppressed so exactly one
+  ring shows
 - the action button keeps its accessible name in sync with `status`, so a screen
   reader announces "Stop" the moment streaming begins
 - the context ring carries its percentage in the accessible name; the ring

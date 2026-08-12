@@ -66,7 +66,9 @@ pointer drags.
 
 Root exposes slider role, orientation, min/max/now, formatted value text,
 disabled state, and full keyboard operation. Input handling and semantics are
-outside the renderer.
+outside the renderer. The root's machine ring (box-shadow on the thumb) covers
+root focus; the entry input draws the standard ring (`border-width-focus` solid
+`accent-focusRing`, offset `0.125rem`) while editing.
 
 ## 7. Layout
 

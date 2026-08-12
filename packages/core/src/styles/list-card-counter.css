@@ -30,3 +30,9 @@
   a.poodle-list-card-counter:hover {
     color: color-mix(in srgb, currentColor 58%, transparent);
   }
+
+  a.poodle-list-card-counter:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+    border-radius: 0.125rem;
+  }

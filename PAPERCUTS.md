@@ -7,16 +7,26 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
-- 2026-08-12 — g13-037 measured the other half of the 2026-08-11 focus-ring
-  entry: 56 component stylesheets draw their own focus ring without
-  suppressing the UA `outline: auto` on the same element, so Chrome stacks a
-  second 1px ring. Live in checkbox/radio/switch/tri-state/segmented-control
-  (the hidden native input draws `outline: auto` — invisible on the clipped
-  inputs, so harmless there) and visibly on the `detail-item`/`field`
-  info-trigger wrappers, whose own ring lands on the icon while the UA ring
-  draws on the focusable wrap. The follow-up card owns the sweep; the fix
-  pattern is `outline: none` on the focusable element + the component's own
-  ring on its visible surface.
+- 2026-08-12 — g13-038 found a dead focus rule: `.poodle-order-by__item:focus-visible`
+  (order-by.css) rings the item row, but the item div is never focusable — no
+  `tabindex`, and the only focusable inside is the drag-handle button. The ring
+  never renders; the drag-handle got its own ring this batch. The dead rule
+  should be deleted or retargeted to the handle.
+
+- 2026-08-12 — RESOLVED 2026-08-12: g13-038 closed the sweep. The 56-sheet
+  stacking is gated by `docs:focus-ring-drift` (absent-treatment + stacked-UA
+  checks with baselines); hidden inputs and machine-driven controls now set
+  `outline: none`, and the detail-item/field info triggers defer to the nested
+  Popover's own ring. Original report follows. g13-037 measured the other half
+  of the 2026-08-11 focus-ring entry: 56 component stylesheets draw their own
+  focus ring without suppressing the UA `outline: auto` on the same element,
+  so Chrome stacks a second 1px ring. Live in checkbox/radio/switch/tri-state/
+  segmented-control (the hidden native input draws `outline: auto` — invisible
+  on the clipped inputs, so harmless there) and visibly on the
+  `detail-item`/`field` info-trigger wrappers, whose own ring lands on the
+  icon while the UA ring draws on the focusable wrap. The follow-up card owns
+  the sweep; the fix pattern is `outline: none` on the focusable element + the
+  component's own ring on its visible surface.
 
 - 2026-08-12 — g13-036: the scene now owns the control labels in all four
   shells, but the web shells still hardcode accessibility labels: Svelte and

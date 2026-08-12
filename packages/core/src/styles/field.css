@@ -162,12 +162,3 @@
     max-width: 22rem;
     padding: 0.5rem 0.625rem;
   }
-
-  .poodle-field__label-row .poodle-popover__trigger:focus-visible {
-    outline: none;
-  }
-
-  .poodle-field__info-trigger-wrap:focus-visible .poodle-field__info-icon {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: 0.0625rem;
-  }

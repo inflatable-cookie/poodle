@@ -130,6 +130,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 ### Focus And Announcement
 
 - focus entry: dismiss button of first toast, or action button if present
+- focus ring: dismiss buttons draw the standard ring (`border-width-focus` solid `accent-focusRing`, offset `0.125rem`)
 - transient notifications announce politely and avoid stealing focus
 - danger toasts escalate to assertive announcement
 - GPUI-native accessibility mapping notes: GPUI must preserve transient

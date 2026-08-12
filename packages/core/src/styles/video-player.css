@@ -36,6 +36,12 @@
     transform: translate(-50%, -50%) scale(1.1);
   }
 
+  .poodle-video-player__big-play:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+    border-radius: 999px;
+  }
+
   .poodle-video-player__big-play svg {
     width: 100%;
     height: 100%;
@@ -114,6 +120,26 @@
 
   .poodle-video-player__btn:hover {
     background: var(--poodle-recipe-video-player-hover-btn-fill, rgba(255, 255, 255, 0.15));
+  }
+
+  .poodle-video-player__btn:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }
+
+  .poodle-video-player__seek:focus-visible {
+    outline: none;
+  }
+
+  .poodle-video-player__progress-bar:has(.poodle-video-player__seek:focus-visible) {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }
+
+  .poodle-video-player__volume:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+    border-radius: 0.125rem;
   }
 
   .poodle-video-player__btn svg {

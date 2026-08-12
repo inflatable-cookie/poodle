@@ -184,3 +184,15 @@
     appearance: none;
     flex-shrink: 0;
   }
+
+  .poodle-audio-player__seek:focus-visible,
+  .poodle-audio-player__volume:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+    border-radius: var(--poodle-radius-control);
+  }
+
+  .poodle-audio-player__speed:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }

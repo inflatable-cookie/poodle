@@ -175,6 +175,12 @@
     cursor: not-allowed;
   }
 
+  .poodle-select__trigger:focus-visible,
+  .poodle-select__clear:focus-visible,
+  .poodle-select__indicator-button:focus-visible {
+    outline: none;
+  }
+
   .poodle-select__trigger-content {
     display: flex;
     align-items: center;
@@ -295,6 +301,11 @@
   .poodle-select__option[data-highlighted="true"],
   .poodle-select__option:hover:not(:disabled) {
     background: var(--poodle-recipe-select-highlighted-hover-option-fill, color-mix(in srgb, var(--poodle-color-accent-base) 14%, transparent));
+  }
+
+  .poodle-select__option:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
   }
 
   .poodle-select__option[aria-selected="true"] {

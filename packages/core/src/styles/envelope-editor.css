@@ -60,6 +60,7 @@
   opacity: 0;
   transform: translate(-50%, -50%);
   cursor: move;
+  outline: none;
 }
 
 .poodle-envelope-editor[data-size="xs"] { min-width: 8rem; height: 6rem; }

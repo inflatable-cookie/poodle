@@ -171,6 +171,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Audit mode uses a labelled region with native form controls and buttons.
 - Pagination, refresh, and export actions must remain keyboard accessible.
 - Actor and resource links are optional; when absent, plain text is rendered instead.
+- Filter and scroll buttons draw the standard ring (`border-width-focus` solid `accent-focusRing`, offset `0.125rem`).
 
 ## 6a. Jetstream Notes
 

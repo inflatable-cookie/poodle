@@ -170,7 +170,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ### Focus
 
-- Tool buttons and type select use standard browser focus
+- Tool buttons and block text input: `border-width-focus` solid `accent-focusRing`, offset `0.125rem`
 - Newly added blocks receive focus via `tick().then()` after insertion
 
 ## 7. Layout
