@@ -59,6 +59,16 @@ MessageCenter
 | `onRemove` | `(id: string) => void` | `null` | Requests removal. |
 | `onMarkAllRead` | `() => void` | `null` | Adds the header action when unread items exist. |
 
+### Callbacks
+
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onOpenChange` | The popover opens or closes | `boolean` | The next open state |
+| `onItemSelect` | A message row is activated | `string` | The item's id. Rows are only interactive when this is supplied |
+| `onReadChange` | The read toggle on a row is pressed | `(id: string, read: boolean)` | The id and the **next** read state, not the current one |
+| `onRemove` | A row's remove control is pressed | `string` | The item's id. The control renders only when supplied |
+| `onMarkAllRead` | The Mark-all-read control is pressed | — | The control renders only when supplied and the unread count is above zero |
+
 ## 4. Item contract
 
 ```ts

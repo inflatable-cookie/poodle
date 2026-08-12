@@ -35,6 +35,13 @@ Updated: 2026-08-11
 | `onNoteOn` | `(note, velocity) => void` | `undefined` | paired gesture start |
 | `onNoteOff` | `(note) => void` | `undefined` | paired gesture end |
 
+### Callbacks
+
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onNoteOn` | A `noteOn` effect leaves the machine | `(note: number, velocity: number)` | Pointer, computer-key, and external sources all route through the same effect, so the host sees one shape |
+| `onNoteOff` | A `noteOff` effect leaves the machine | `number` | The note only. Velocity is a strike property and has no meaning on release |
+
 ## 4. States And Behavior Machine
 
 Classification: machine-backed (`keyboardTransition`). Pointer hit testing

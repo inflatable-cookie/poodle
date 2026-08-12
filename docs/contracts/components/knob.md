@@ -65,7 +65,8 @@ Adapters provide pointer coordinates and modifier facts, then execute effects.
 ## 5. Callbacks
 
 `onValueChange` reports live changes. `onValueCommit` reports atomic changes
-and drag end. Gesture callbacks pair exactly once around pointer drags.
+and drag end. `onGestureBegin` and `onGestureEnd` pair exactly once around
+pointer drags.
 
 ## 6. Accessibility
 

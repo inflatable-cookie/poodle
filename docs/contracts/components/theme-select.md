@@ -90,6 +90,12 @@ Resolution order for the current value and selection sink:
 
 `onChange` always fires on selection, in every mode.
 
+### Callbacks
+
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onChange` | A theme is picked | `string` | The next theme id. Fires after the controller applies the theme (or after the uncontrolled value settles), so the host never sees a value the UI has not taken |
+
 ## 4. Modular Theme Controller
 
 An optional controller serves the available themes, holds the current selection,

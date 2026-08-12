@@ -93,6 +93,12 @@ renders what it is given.
 | `badge` | `decisionLabel ?? planStatusLabel(status)` |
 | `summary` | `planRecordSummary(plan, summaryMaxLength)` |
 
+### Callbacks
+
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onToggle` | The record's disclosure toggles | `boolean` | The next expanded state. The component owns the state and reports it; the host does not have to echo it back |
+
 ## 5. States
 
 | State | Trigger | Expected Result |

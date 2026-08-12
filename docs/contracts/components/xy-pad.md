@@ -48,8 +48,9 @@ Home, and End for independent keyboard edits.
 
 ## 5. Callbacks
 
-Pair values are never emitted separately. Live drags emit change; atomic keys
-and reset plus drag end emit commit. Gesture callbacks pair around drag.
+Pair values are never emitted separately. Live drags emit `onValueChange`;
+atomic keys and reset plus drag end emit `onValueCommit`. `onGestureBegin` and
+`onGestureEnd` pair around drag.
 
 ## 6. Accessibility
 

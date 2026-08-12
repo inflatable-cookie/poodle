@@ -64,6 +64,12 @@ type CardToggleItem = {
 |---------|-------|---------|
 | `card` | `{ item: CardToggleItem, selected: boolean, disabled: boolean }` | Custom content rendered inside each Card, below the description |
 
+### Callbacks
+
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onValueChange` | A card is toggled | `string \| null` | The next value — `null` when the selected card is toggled off. Fires after the internal value settles, so controlled and uncontrolled hosts see the same payload |
+
 ## 4. Behavior
 
 - Selection is single-value.

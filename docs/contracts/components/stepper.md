@@ -183,7 +183,7 @@ mark cannot hold two colour codes — so length is the channel that was free.
 
 | Callback | Signature | Notes |
 |----------|-----------|-------|
-| `onChange` | `(value: string) => void` | fired when a step is selected; not fired for disabled steps |
+| `onValueChange` | `((value: string) => void) \| undefined` | fired when a step is selected; not fired for disabled steps |
 | `onRerun` | `((value: string) => void) \| null` | when supplied, completed steps render a Rerun control; omitted entirely when null |
 | `onCollapsedChange` | `(collapsed: boolean) => void` | fired when the Summary toggles; carries the new state |
 

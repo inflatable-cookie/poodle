@@ -82,6 +82,13 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 - The parent owns visibility and handles `onDismiss`; the banner does not hide itself
 - Actions are command-only; the component does not track which was clicked
 
+### Callbacks
+
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onAction` | Either action button is pressed | `string` | The action's `id`, so one handler serves both slots. A disabled action fires nothing |
+| `onDismiss` | The dismiss control is pressed | — | Rendered only when the banner is dismissible. Poodle does not hide itself — the host decides what dismissal means |
+
 ## 4. States
 
 | State | Trigger | Expected Result |

@@ -58,8 +58,9 @@ are core-owned.
 
 ## 5. Callbacks
 
-Value callbacks split live change from commit. Gesture callbacks pair exactly
-once around pointer drag begin and end.
+`onValueChange` reports live drag movement; `onValueCommit` reports the
+settled value — atomic keyboard edits and drag end. `onGestureBegin` and
+`onGestureEnd` pair exactly once around pointer drag begin and end.
 
 ## 6. Accessibility
 

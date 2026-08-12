@@ -27,6 +27,12 @@ Updated: 2026-07-10
 | `onClick` | `(event: MouseEvent) => void` | `null` | called for enabled activation |
 | `children` | `Snippet` | none | inline link content |
 
+### Callbacks
+
+| Callback | When It Fires | Payload | Notes |
+|----------|---------------|---------|-------|
+| `onClick` | The link is clicked | `MouseEvent` | Suppressed while `disabled`, which also calls `preventDefault()` so the href does not navigate |
+
 ## 3. Behavior Rules
 
 - With `href` and `disabled=false`, root renders as an `<a>`.

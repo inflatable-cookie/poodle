@@ -57,3 +57,12 @@ the fixtures the pilot must preserve.
 Worker execution uses [g13 batch cards](batch-cards/README.md) and the
 orchestrator-owned [dispatch ledger](../dispatch.md). Only dependency-free,
 ready cards may be dispatched.
+
+## Standing Inventories
+
+Report-only, not cards. Each names the roadmap item that owns its fix.
+
+- [Authority inventory](authority-inventory.md)
+- [Value-domain drift inventory](value-domain-drift-inventory.md)
+- [Native registration gap](native-registration-gap.md) — 15 components absent
+  from one or both native registries; `g13.014` closes it as a by-product

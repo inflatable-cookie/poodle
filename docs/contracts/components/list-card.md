@@ -170,6 +170,7 @@ props.
 |----------|--------------|---------|-------|
 | `onClick` | card activated (when interactive) | `MouseEvent` | suppressed while disabled |
 | `onSelectedChange` | selectable card toggled | `boolean` | receives the next selected state; suppressed while disabled |
+| `onContextAction` | a context-menu item is activated | `string` | the item's `value`; separators and disabled items fire nothing, and the menu closes after it fires |
 
 ## 6. Accessibility
 
