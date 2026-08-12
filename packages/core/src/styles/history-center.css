@@ -155,6 +155,12 @@
   min-width: 0;
   padding: var(--poodle-space-panel-y) var(--poodle-space-stack-sm);
   border: 0;
+  /* The focus ring is an inset outline, and an outline follows the element's
+     own radius — with none it renders as a hard square across the full row
+     width. `fork` and `rename-input` in this file already round on the control
+     radius; these full-width rows were the outliers. Rounds the hover fill
+     with it, which was a square block for the same reason. */
+  border-radius: var(--poodle-radius-control);
   background: transparent;
   color: inherit;
   font: inherit;
@@ -293,6 +299,9 @@
   /* Block padding only: the row already owns its inline inset, and a second
      one here pushed the Select in from both edges. */
   padding-block: var(--poodle-space-panel-y);
+  /* Same reason as the entry row: the inset focus outline follows this
+     element's radius, and without one it draws a square. */
+  border-radius: var(--poodle-radius-control);
 }
 
 .poodle-history-center__picker:focus-visible {
@@ -419,6 +428,8 @@
   padding: var(--poodle-space-panel-y) var(--poodle-space-stack-sm);
   color: var(--poodle-color-text-secondary);
   font-size: var(--poodle-typography-label-size);
+  /* Same reason as the entry row. */
+  border-radius: var(--poodle-radius-control);
 }
 
 .poodle-history-center__not-yet-loaded:focus-visible {
