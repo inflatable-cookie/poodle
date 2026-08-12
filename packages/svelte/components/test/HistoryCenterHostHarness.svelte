@@ -23,6 +23,7 @@
     onNavigateEntry = null,
     onRenameBranch = null,
     onCheckoutContinuation = null,
+    onDeleteContinuation = null,
     onOpenChange = null,
   }: {
     pages?: HistoryPathPage[] | null;
@@ -35,6 +36,7 @@
     onNavigateEntry?: ((branchId: string | null, entryId: string) => void) | null;
     onRenameBranch?: ((branchId: string, name: string) => void) | null;
     onCheckoutContinuation?: ((entryId: string) => void) | null;
+    onDeleteContinuation?: ((entryId: string) => void) | null;
     onOpenChange?: ((open: boolean) => void) | null;
   } = $props();
 
@@ -61,6 +63,7 @@
   {onNavigateEntry}
   {onRenameBranch}
   {onCheckoutContinuation}
+  {onDeleteContinuation}
   {onOpenChange}
   onLoadContinuations={loadContinuations}
   onLoadContinuationRun={loadRun}

@@ -271,7 +271,12 @@ describe("HistoryCenter (react)", () => {
       />,
     );
     expect(onLoadContinuationRun).toHaveBeenCalledWith("l1");
-    expect(document.querySelector('[data-part="picker"]')).toBeNull();
+
+    // b033 R3: one row shape serves both fork counts. A single fork still
+    // gets the picker row, with the select disabled.
+    const singlePicker = document.querySelector('[data-part="picker"]');
+    expect(singlePicker).toBeTruthy();
+    expect((singlePicker?.querySelector(".poodle-select__trigger") as HTMLButtonElement | null)?.disabled).toBe(true);
 
     // The run renders at depth 1 once the host feeds its pages back.
     rerender(
@@ -287,6 +292,7 @@ describe("HistoryCenter (react)", () => {
     expect(rowSummary()).toEqual([
       { kind: "entry", entry: "c1", depth: "0" },
       { kind: "entry", entry: "c2", depth: "0" },
+      { kind: "picker", entry: "c2", depth: "1" },
       { kind: "entry", entry: "l1", depth: "1" },
       { kind: "entry", entry: "l2", depth: "1" },
       { kind: "entry", entry: "l3", depth: "1" },
@@ -644,8 +650,10 @@ describe("HistoryCenter (react)", () => {
     expect(rowSummary()).toEqual([
       { kind: "entry", entry: "c1", depth: "0" },
       { kind: "entry", entry: "c2", depth: "0" },
+      { kind: "picker", entry: "c2", depth: "1" },
       { kind: "entry", entry: "l1", depth: "1" },
       { kind: "entry", entry: "l2", depth: "1" },
+      { kind: "picker", entry: "l2", depth: "2" },
       { kind: "entry", entry: "i1", depth: "2" },
       { kind: "entry", entry: "i2", depth: "2" },
       { kind: "entry", entry: "l3", depth: "1" },
@@ -705,10 +713,10 @@ describe("HistoryCenter (react)", () => {
       />,
     );
 
-    const runHeader = rowByEntry("l1").querySelector('[data-part="run-header"]') as HTMLElement;
-    expect(runHeader).toBeTruthy();
-    expect(runHeader.querySelector(".poodle-history-center__run-header-name")?.textContent).toBe("feature/lead");
-    expect(runHeader.querySelector(".poodle-history-center__run-header-meta")?.textContent).toBe("2 entries · 20m ago");
+    const picker = document.querySelector('[data-part="picker"]') as HTMLElement;
+    expect(picker).toBeTruthy();
+    expect(picker.querySelector(".poodle-history-center__picker-option-branch")?.textContent?.trim()).toBe("feature/lead");
+    expect(picker.querySelector(".poodle-history-center__picker-option-meta")?.textContent).toBe("2 entries · 20m ago");
     // The run header belongs to the run's first entry only.
     expect(rowByEntry("l2").querySelector('[data-part="run-header"]')).toBeNull();
   });
@@ -733,9 +741,9 @@ describe("HistoryCenter (react)", () => {
       />,
     );
 
-    const runHeader = rowByEntry("l1").querySelector('[data-part="run-header"]') as HTMLElement;
-    expect(runHeader.querySelector(".poodle-history-center__run-header-meta")?.textContent).toBe("2 entries");
-    expect(runHeader.textContent).not.toContain("ago");
+    const picker = document.querySelector('[data-part="picker"]') as HTMLElement;
+    expect(picker.querySelector(".poodle-history-center__picker-option-meta")?.textContent).toBe("2 entries");
+    expect(picker.textContent).not.toContain("ago");
     expect(document.body.textContent).not.toContain("Invalid Date");
   });
 
@@ -956,6 +964,8 @@ describe("HistoryCenter (react)", () => {
       "1",
       "2",
       "2",
+      "2",
+      "3",
       "3",
       "3",
       "2",

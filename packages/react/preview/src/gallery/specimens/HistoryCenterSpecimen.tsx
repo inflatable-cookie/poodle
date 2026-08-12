@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type {
   HistoryCenterRejectionCode,
   HistoryContinuation,
@@ -171,6 +171,7 @@ export function HistoryCenterSpecimen() {
   const [runTail, setRunTail] = useState<HostFeed>({ continuations: null, run: null });
   const [noTimestamp, setNoTimestamp] = useState<HostFeed>({ continuations: null, run: null });
   const [renameHost, setRenameHost] = useState<HostFeed>({ continuations: null, run: null });
+  const [singleForkOpen, setSingleForkOpen] = useState<HostFeed>({ continuations: null, run: null });
 
   function loadContinuations(
     set: (updater: (current: HostFeed) => HostFeed) => void,
@@ -186,23 +187,18 @@ export function HistoryCenterSpecimen() {
     return (fromEntryId) => set((current) => ({ ...current, run: { fromEntryId, pages: runs[fromEntryId] ?? [] } }));
   }
 
-  // The capture never clicks, so the two-forks group drives its own two
-  // interactions on mount: disclose the fork, then press the rename pencil.
-  // The capture then shows the picker mid-rename — the state this card adds.
-  const renameDemoStartedRef = useRef(false);
-
+  // The capture never clicks, so the single-fork-open group drives its own
+  // single interaction on mount: disclose the fork. The capture then shows
+  // the unified picker row for one fork — the disabled Select with the fork
+  // icon, name, branch, entry count and relative time, the rename pencil,
+  // the opt-in delete button (the host supplies the callback here) and the
+  // disabled checkout. The popover portals to the theme root, so only one
+  // group opens at once.
   useEffect(() => {
     const run = () => {
       const disclosure = document.querySelector<HTMLButtonElement>('[data-part="fork-disclosure"]');
       if (!disclosure) return false;
       disclosure.click();
-      requestAnimationFrame(() => {
-        const pencil = document.querySelector<HTMLButtonElement>('[data-part="picker-rename"] button');
-        if (pencil) {
-          pencil.click();
-          renameDemoStartedRef.current = true;
-        }
-      });
       return true;
     };
 
@@ -224,10 +220,12 @@ export function HistoryCenterSpecimen() {
       sizes={(size) => <HistoryCenter pages={linearPages} size={size} canUndo canRedo />}
       densities={(density) => <HistoryCenter pages={linearPages} density={density} canUndo canRedo />}
     >
-      {/* The two-forks group opens by default so the capture shows the
-          picker with a rename in progress (the mount-time driver discloses
-          the fork and presses the pencil); the popover portals to the theme
-          root, so only one group opens at once. */}
+      {/* The single-fork-open group opens by default so the capture shows
+          the unified picker row for one fork — the disabled Select with the
+          fork icon, name, branch, entry count and relative time, the rename
+          pencil, the opt-in delete and the disabled checkout (the mount-time
+          driver discloses the fork); the popover portals to the theme root,
+          so only one group opens at once. */}
       <div style={{ display: "grid", gap: "2rem", minHeight: "40rem" }}>
         <SpecimenGroup label="linear">
           <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
@@ -239,7 +237,6 @@ export function HistoryCenterSpecimen() {
           <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
             <HistoryCenter
               pages={twoForkPages}
-              defaultOpen
               canUndo
               continuationsResult={twoForks.continuations}
               runResult={twoForks.run}
@@ -279,6 +276,22 @@ export function HistoryCenterSpecimen() {
               runResult={runTail.run}
               onLoadContinuations={loadContinuations(setRunTail, runTailContinuations)}
               onLoadContinuationRun={loadRun(setRunTail, runTailRuns)}
+              onNavigateEntry={navigate}
+            />
+          </div>
+        </SpecimenGroup>
+
+        <SpecimenGroup label="single-fork-open">
+          <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
+            <HistoryCenter
+              pages={runTailPages}
+              defaultOpen
+              canUndo
+              continuationsResult={singleForkOpen.continuations}
+              runResult={singleForkOpen.run}
+              onLoadContinuations={loadContinuations(setSingleForkOpen, runTailContinuations)}
+              onLoadContinuationRun={loadRun(setSingleForkOpen, runTailRuns)}
+              onDeleteContinuation={(entryId) => console.log("delete", entryId)}
               onNavigateEntry={navigate}
             />
           </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import type {
     HistoryCenterRejectionCode,
     HistoryContinuation,
@@ -171,6 +171,7 @@
   let runTail = $state({ ...twoForks });
   let noTimestamp = $state({ ...twoForks });
   let renameHost = $state({ ...twoForks });
+  let singleForkOpen = $state({ ...twoForks });
 
   function loadContinuations(
     state: typeof twoForks,
@@ -188,9 +189,13 @@
     return (fromEntryId) => set({ ...state, run: { fromEntryId, pages: runs[fromEntryId] ?? [] } });
   }
 
-  // The capture never clicks, so the two-forks group drives its own two
-  // interactions on mount: disclose the fork, then press the rename pencil.
-  // The capture then shows the picker mid-rename — the state this card adds.
+  // The capture never clicks, so the single-fork-open group drives its own
+  // single interaction on mount: disclose the fork. The capture then shows
+  // the unified picker row for one fork — the disabled Select with the fork
+  // icon, name, branch, entry count and relative time, the rename pencil,
+  // the opt-in delete button (the host supplies the callback here) and the
+  // disabled checkout. The popover portals to the theme root, so only one
+  // group opens at once.
   onMount(() => {
     const run = (): boolean => {
       const disclosure = document.querySelector<HTMLButtonElement>('[data-part="fork-disclosure"]');
@@ -198,12 +203,6 @@
         return false;
       }
       disclosure.click();
-      void tick().then(() => {
-        const pencil = document.querySelector<HTMLButtonElement>('[data-part="picker-rename"] button');
-        if (pencil !== null) {
-          pencil.click();
-        }
-      });
       return true;
     };
 
@@ -217,10 +216,12 @@
 <SpecimenLayout bareVariants>
   {#snippet children()}
     <div class="poodle-history-center-specimen">
-      <!-- The two-forks group opens by default so the capture shows the
-           picker with a rename in progress (the mount-time driver discloses
-           the fork and presses the pencil); the popover portals to the theme
-           root, so only one group opens at once. -->
+      <!-- The single-fork-open group opens by default so the capture shows
+           the unified picker row for one fork — the disabled Select with the
+           fork icon, name, branch, entry count and relative time, the rename
+           pencil, the opt-in delete and the disabled checkout (the mount-time
+           driver discloses the fork); the popover portals to the theme root,
+           so only one group opens at once. -->
       <SpecimenGroup label="linear">
         <div class="poodle-history-center-specimen__anchor">
           <HistoryCenter
@@ -235,7 +236,6 @@
         <div class="poodle-history-center-specimen__anchor">
           <HistoryCenter
             pages={twoForkPages}
-            defaultOpen
             canUndo
             continuationsResult={twoForks.continuations}
             runResult={twoForks.run}
@@ -279,6 +279,22 @@
             runResult={runTail.run}
             onLoadContinuations={loadContinuations(runTail, (next) => (runTail = next), runTailContinuations)}
             onLoadContinuationRun={loadRun(runTail, (next) => (runTail = next), runTailRuns)}
+            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+          />
+        </div>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="single-fork-open">
+        <div class="poodle-history-center-specimen__anchor">
+          <HistoryCenter
+            pages={runTailPages}
+            defaultOpen
+            canUndo
+            continuationsResult={singleForkOpen.continuations}
+            runResult={singleForkOpen.run}
+            onLoadContinuations={loadContinuations(singleForkOpen, (next) => (singleForkOpen = next), runTailContinuations)}
+            onLoadContinuationRun={loadRun(singleForkOpen, (next) => (singleForkOpen = next), runTailRuns)}
+            onDeleteContinuation={(entryId) => console.log("delete", entryId)}
             onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
           />
         </div>
