@@ -40,7 +40,7 @@ and roadmap closeout.
 | `028` | HistoryCentre v3 — flat list, node-owned forks (core) | `024` merged | merged (`680f3c64`) |
 | `029` | HistoryCentre v3 — rendering, picker, nested list | `028` | merged (`16b68e61` → `2a6d3af9`) |
 | `030` | HistoryCentre — persistent fork Select | `029` merged | merged (`61d3f49d` → `c6590823`) |
-| `031` | nested dismiss layers + ghost Select affordance | `030` merged | dispatched |
+| `031` | nested dismiss layers + ghost Select affordance | `030` merged | merged (`4daf6993` → `ef12a3bf`) |
 | `032` | HistoryCentre — rename the selected fork | `030` merged | dispatched |
 | — | HistoryCentre — native parity | `029` merged | planned (renumbered; `022` was reused for codegen) |
 

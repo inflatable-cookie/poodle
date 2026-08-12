@@ -1,6 +1,6 @@
 # 031 Nested Dismiss Layers, And The Ghost Select Affordance
 
-Status: ready
+Status: merged (`4daf6993` → `ef12a3bf`)
 Milestone: side-quest (shared primitives, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-031-nested-dismiss-and-select-affordance`
