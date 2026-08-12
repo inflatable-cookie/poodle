@@ -21,9 +21,31 @@ card `029`.
 
 v2 stitches branch records plus per-branch paths into one topological row list.
 `childrenOf` is a `Map<entryId, branchId[]>`, so N runs attach at one entry, and
-`emitRun` writes them back to back at the same depth. Two forks at one entry
-therefore produce **byte-identical rows** to a fork off a fork. No renderer can
-tell them apart, so no rendering work can fix it.
+`emitRun` writes them back to back at the same depth.
+
+**Be accurate about the defect.** An earlier statement of it — including in this
+card's first version and in the source handoff — said the two shapes produce
+byte-identical rows. That is too strong, and the Longhorn thread corrected it in
+`db9ac5c7`. Measured on merged main:
+
+| Case | `cap:horns` / `H1` |
+|---|---|
+| Two forks at one entry | `depth=1`, `parentBranchId=main` |
+| `horns` forks off `lead` | `depth=2`, `parentBranchId=lead` |
+
+So the row data *does* separate them. What is true is narrower, and still
+decides the redesign:
+
+- Both cases land at the same position in the array.
+- Only `depth` and `lane.parentBranchId` separate them — one indent step, plus a
+  field indentation never shows.
+- Past `HISTORY_TREE_DEPTH_CAP` the depth saturates and that step disappears
+  too. Measured: a five-deep chain gives `f3` and `f4` both `depth=3`, leaving
+  `parentBranchId` as the only difference.
+
+The encoding is weak. The data is not wrong. The redesign does not rest on that
+claim anyway — it rests on the fact that several forks at one node are ordinary,
+and a tree cannot draw that unambiguously whoever computes the rows.
 
 Two defects found on merged main come from the same attachment logic:
 
@@ -53,6 +75,12 @@ native counterpart, and a flat row list with a depth number already has one.
 
 `packages/core/src/tree.ts` `flattenVisibleTreeRows` is the in-repo precedent.
 Follow its shape.
+
+**Condition on this ruling.** Depth alone is not enough — that is exactly what
+the measurement above shows. Every row must also carry **the entry it hangs off
+and the fork it belongs to**, as identifiers, not as indentation. With the depth
+cap gone and parent identity on every row, the v2 ambiguity cannot return in
+any renderer.
 
 The handoff's requirement still holds, and holds better: the renderer receives
 a depth number and knows nothing about topology. Core knows it, which is core's
@@ -86,6 +114,13 @@ same code.
 
 `continuations` is **not** reversed. It is in stable graph order — a picker,
 not a timeline.
+
+**Page joins follow from this, and the worker must get it right.** `offset`
+stays newest-first, so the page at a higher offset holds **older** entries.
+After the reversal, a later-fetched page therefore renders **before** the first
+page, not after it. Joining pages in fetch order is the obvious mistake and it
+puts history backwards. Cover it with a test that joins two pages and asserts
+the oldest entry is first.
 
 ### R4 — `forkCount = continuationCount - 1`.
 
@@ -169,6 +204,10 @@ cost us once.
 - Traversal survives a disclosure toggle: focus stays on the same row identity,
   not the same index.
 - `recordedAtMs` absent yields no time. Nothing invents a clock.
+- Two pages join with the older page first, and the oldest entry renders first
+  (R3). This is the paging trap.
+- Every row carries its parent entry id and its fork identity, at every depth,
+  including past where a v2 depth cap would have saturated (R1 condition).
 - Determinism: same input, same rows, same order.
 
 ## Worker Rules
@@ -221,7 +260,10 @@ cost us once.
 
 - [ ] The derivation is pure, exported, flat, and carries `depth`. No recursion
   in any renderer-facing shape.
-- [ ] Two forks at one entry differ from a fork off a fork, proven by test.
+- [ ] Two forks at one entry differ from a fork off a fork, proven by test, and
+  the difference survives without any depth cap.
+- [ ] Every row carries parent entry id and fork identity as data, not as depth.
+- [ ] Pages join oldest-first after the reversal, proven by test.
 - [ ] Nothing is ever silently dropped. An unplaceable row is impossible or
   loud.
 - [ ] `historyCenterRows`, `historyCenterRowCount`, `HistoryCenterRow`,
