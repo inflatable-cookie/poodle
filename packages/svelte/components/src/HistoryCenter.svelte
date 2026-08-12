@@ -16,11 +16,11 @@
   } from "@inflatable-cookie/poodle-core";
   import { tick } from "svelte";
 
-  import { default as Button } from "./Button.svelte";
   import { default as EmptyState } from "./EmptyState.svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as IconButton } from "./IconButton.svelte";
   import { default as Popover } from "./Popover.svelte";
+  import { default as Select } from "./Select.svelte";
   import { default as Spinner } from "./Spinner.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
@@ -75,8 +75,10 @@
     onLoadContinuations?: ((entryId: string) => void) | null;
     /** Host op 2: load the run starting at the fork's first entry. */
     onLoadContinuationRun?: ((fromEntryId: string) => void) | null;
-    /** Host op 3: prefer the picked continuation as the redo target. */
-    onPreferContinuation?: ((entryId: string) => void) | null;
+    /** Host op 3: checkout the picked continuation — the selected fork
+     *  becomes the primary history. Poodle's word; the host maps the
+     *  callback onto its own prefer operation (R2a). */
+    onCheckoutContinuation?: ((entryId: string) => void) | null;
   }
 
   let {
@@ -109,7 +111,7 @@
     onRenameBranch = null,
     onLoadContinuations = null,
     onLoadContinuationRun = null,
-    onPreferContinuation = null,
+    onCheckoutContinuation = null,
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
@@ -194,8 +196,8 @@
         case "loadContinuationRun":
           onLoadContinuationRun?.(effect.fromEntryId);
           break;
-        case "preferContinuation":
-          onPreferContinuation?.(effect.entryId);
+        case "checkoutContinuation":
+          onCheckoutContinuation?.(effect.entryId);
           break;
       }
     }
@@ -390,6 +392,13 @@
     return continuations.find((fork) => fork.entryId === pickedEntryId);
   }
 
+  /** The fork behind a Select option value — the option carries only the
+   *  value and label; the branch name and the current marker come from the
+   *  fork record (R4). */
+  function forkForValue(continuations: HistoryContinuation[], entryId: string): HistoryContinuation | undefined {
+    return continuations.find((fork) => fork.entryId === entryId);
+  }
+
   // ── Handlers ──────────────────────────────────────────────────────────
 
   function handleOpenChange(next: boolean): void {
@@ -397,18 +406,22 @@
   }
 
   function handleListKeydown(event: KeyboardEvent): void {
-    // The rename input owns its keys (commit/cancel). Disclosure, picker and
-    // rename buttons keep native Enter/Space activation (they are not row
+    // The rename input owns its keys (commit/cancel). Disclosure and rename
+    // buttons keep native Enter/Space activation (they are not row
     // activation); arrows still drive roving focus from anywhere in the row.
     if (event.target instanceof HTMLInputElement) {
+      return;
+    }
+
+    // The picker's Select owns every key on its trigger (arrows open the
+    // listbox, Enter/Space pick an option); the machine never maps them.
+    if (event.target instanceof HTMLElement && event.target.closest("[data-part=\"picker-select\"]") !== null) {
       return;
     }
 
     if (
       event.target instanceof HTMLElement &&
       (event.target.closest("[data-part=\"fork-disclosure\"]") !== null ||
-        event.target.closest("[data-part=\"picker-option\"]") !== null ||
-        event.target.closest("[data-part=\"picker-confirm\"]") !== null ||
         event.target.closest("[data-part=\"run-header-rename\"]") !== null) &&
       (event.key === "Enter" || event.key === " ")
     ) {
@@ -717,41 +730,65 @@
                     data-anchor={row.anchorEntryId}
                     tabindex={rowFocused(row) ? 0 : -1}
                   >
-                    <div class="poodle-history-center__picker-options" role="group" aria-label="Continuations">
-                      {#each row.continuations as fork (fork.entryId)}
-                        <button
-                          type="button"
-                          class="poodle-history-center__picker-option"
-                          data-part="picker-option"
-                          data-value={fork.entryId}
-                          data-preferred={fork.preferred ? "true" : undefined}
-                          aria-pressed={row.pickedEntryId === fork.entryId}
-                          onclick={() => send({ type: "PICK_CONTINUATION", entryId: fork.entryId })}
-                        >
-                          <span class="poodle-history-center__picker-option-copy">
-                            <span class="poodle-history-center__picker-option-name">{fork.label}</span>
-                            <span class="poodle-history-center__picker-option-branch">
-                              {fork.branchName ?? fork.branchId}
-                            </span>
-                          </span>
-                          {#if fork.preferred}
-                            <span class="poodle-history-center__preferred-badge" data-part="preferred-badge">
-                              Preferred
-                            </span>
-                          {/if}
-                        </button>
-                      {/each}
-                    </div>
-                    <div class="poodle-history-center__picker-actions" data-part="picker-confirm">
-                      <Button
-                        variant="ghost"
+                    <!-- R4: the picker is Poodle's Select plus a checkout
+                         IconButton. The trigger and the options both carry
+                         the fork label, its branch name and the current
+                         marker, so the persistent select keeps the
+                         screenshot's information visible (R1). -->
+                    <div class="poodle-history-center__picker-controls" data-part="picker-select">
+                      <Select
+                        value={row.pickedEntryId}
+                        options={row.continuations.map((fork) => ({ value: fork.entryId, label: fork.label }))}
                         size="xs"
                         density={resolvedDensity}
-                        disabled={picked === undefined || picked.preferred}
-                        onClick={() => send({ type: "CONFIRM" })}
+                        variant="ghost"
+                        ariaLabel="Continuations"
+                        placeholder="Choose a fork…"
+                        onValueChange={(entryId) => send({ type: "PICK_CONTINUATION", entryId })}
                       >
-                        Choose
-                      </Button>
+                        {#snippet trigger({ selectedOption, placeholder })}
+                          {#if selectedOption === null}
+                            <span class="poodle-history-center__picker-value" data-placeholder="true">{placeholder}</span>
+                          {:else}
+                            {@const fork = forkForValue(row.continuations, selectedOption.value)}
+                            <span class="poodle-history-center__picker-value">
+                              <span class="poodle-history-center__picker-option-name">{selectedOption.label}</span>
+                              {#if fork !== undefined}
+                                <span class="poodle-history-center__picker-option-branch">
+                                  {fork.branchName ?? fork.branchId}
+                                </span>
+                              {/if}
+                              {#if fork?.preferred}
+                                <span class="poodle-history-center__current-badge" data-part="current-badge">Current</span>
+                              {/if}
+                            </span>
+                          {/if}
+                        {/snippet}
+                        {#snippet option({ option })}
+                          {@const fork = forkForValue(row.continuations, option.value)}
+                          <span class="poodle-history-center__picker-option-copy">
+                            <span class="poodle-history-center__picker-option-name">{option.label}</span>
+                            <span class="poodle-history-center__picker-option-branch">
+                              {fork?.branchName ?? fork?.branchId}
+                            </span>
+                          </span>
+                          {#if fork?.preferred}
+                            <span class="poodle-history-center__current-badge" data-part="current-badge">Current</span>
+                          {/if}
+                        {/snippet}
+                      </Select>
+                      <span class="poodle-history-center__picker-checkout" data-part="picker-checkout">
+                        <IconButton
+                          icon="check"
+                          ariaLabel="Checkout"
+                          tooltip="Checkout"
+                          variant="ghost"
+                          size="xs"
+                          density={resolvedDensity}
+                          disabled={picked === undefined || picked.preferred}
+                          onClick={() => send({ type: "CONFIRM" })}
+                        />
+                      </span>
                     </div>
                   </div>
                 {:else}

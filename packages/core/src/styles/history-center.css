@@ -247,7 +247,10 @@
 }
 
 /* The picker row — the forks at an anchor when `forkCount > 1` (core emits
-   it; the renderer adds no second condition). */
+   it; the renderer adds no second condition). R4: Poodle's Select plus a
+   checkout IconButton; the trigger and the option rows both carry the fork
+   label, its branch name and the current marker, so the persistent select
+   keeps the screenshot's information visible (R1). */
 .poodle-history-center__picker {
   display: grid;
   gap: 0.25rem;
@@ -261,43 +264,41 @@
   outline-offset: -0.125rem;
 }
 
-.poodle-history-center__picker-options {
-  display: grid;
-  gap: 0.125rem;
-}
-
-.poodle-history-center__picker-option {
+.poodle-history-center__picker-controls {
   display: flex;
   align-items: center;
   gap: var(--poodle-space-stack-sm);
-  width: 100%;
-  padding: 0.3rem var(--poodle-space-stack-sm);
-  border: 0;
-  border-radius: var(--poodle-radius-control);
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
 }
 
-.poodle-history-center__picker-option:hover {
-  background: var(
-    --poodle-recipe-history-center-item-hover-fill,
-    color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
-  );
+.poodle-history-center__picker-controls .poodle-select {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-.poodle-history-center__picker-option:focus-visible {
-  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-  outline-offset: 0.0625rem;
+.poodle-history-center__picker-checkout {
+  display: inline-flex;
+  flex: none;
 }
 
-.poodle-history-center__picker-option[aria-pressed="true"] {
-  background: var(
-    --poodle-recipe-history-center-item-hover-fill,
-    color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
-  );
+/* The Select's option rows render the fork copy (label + branch) with the
+   current marker right-aligned — the same anatomy in the trigger and the
+   menu. */
+.poodle-history-center__picker-controls .poodle-select__option-content {
+  display: flex;
+  align-items: center;
+  gap: var(--poodle-space-stack-sm);
+}
+
+.poodle-history-center__picker-value {
+  display: flex;
+  align-items: center;
+  gap: var(--poodle-space-stack-sm);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.poodle-history-center__picker-value[data-placeholder="true"] {
+  color: var(--poodle-color-text-secondary);
 }
 
 .poodle-history-center__picker-option-copy {
@@ -324,29 +325,24 @@
   white-space: nowrap;
 }
 
-/* The preferred fork — a redo from the anchor takes this continuation. The
-   confirm button is disabled while it is the tentative pick (R4). */
-.poodle-history-center__preferred-badge {
-  justify-self: end;
+/* The current fork — a redo from the anchor takes this continuation (the
+   authority's `preferred` field, which does not change). Nothing user-facing
+   says "prefer"; the checkout button is disabled while it is the selection
+   (R4). */
+.poodle-history-center__current-badge {
   flex: none;
   padding: 0.05rem 0.35rem;
   border-radius: 999px;
   background: var(
-    --poodle-recipe-history-center-preferred-badge-fill,
+    --poodle-recipe-history-center-current-badge-fill,
     color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)
   );
-  color: var(--poodle-recipe-history-center-preferred-badge-text, var(--poodle-color-accent-base));
+  color: var(--poodle-recipe-history-center-current-badge-text, var(--poodle-color-accent-base));
   font-size: 0.6rem;
   font-weight: var(--poodle-typography-label-weight);
   line-height: 1.4;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-}
-
-.poodle-history-center__picker-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 0.125rem;
 }
 
 /* The opened region: a run's first entry row carries the chosen fork's name,

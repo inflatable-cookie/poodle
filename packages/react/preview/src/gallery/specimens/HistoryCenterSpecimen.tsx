@@ -42,8 +42,11 @@ const linearPages = [
   ]),
 ];
 
-// Case 1 — two forks at one entry: the badge reads 2 and the picker offers
-// two options.
+// Case 1 — two forks at one entry: the badge reads 2 and the picker is a
+// persistent Select. R3 opens on the current fork (x1, preferred): the
+// select shows it with a Current marker, checkout stays disabled, and the
+// run renders below the select — the reported defect (picker vanishes after
+// a choice) is what this capture disproves.
 const twoForkPages = [
   page([
     { id: "c3", label: "Current draft", position: "current", continuationCount: 0, recordedAtMs: T + 3_600_000 },
@@ -58,6 +61,12 @@ const twoForkContinuations: Record<string, HistoryContinuation[]> = {
   ],
 };
 const twoForkRuns: Record<string, HistoryPathPage[]> = {
+  x1: [
+    page([
+      { id: "x2", label: "Alt mix", position: "past", continuationCount: 0, recordedAtMs: T + 2_300_000 },
+      { id: "x1", label: "Alt intro", position: "past", continuationCount: 1, recordedAtMs: T + 1_100_000 },
+    ]),
+  ],
   l1: [
     page([
       { id: "l2", label: "Lead mix", position: "past", continuationCount: 0, recordedAtMs: T + 2_400_000 },

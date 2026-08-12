@@ -11,7 +11,7 @@
   // resolve synchronously from fixture maps and feed their results back as
   // `continuationsResult` / `runResult`, exactly as a real host would after
   // its async call. `onLoadContinuations` / `onLoadContinuationRun` are
-  // optional spies; `onPreferContinuation` passes through for assertions.
+  // optional spies; `onCheckoutContinuation` passes through for assertions.
   let {
     pages = null,
     continuationsByEntry = {} as Record<string, HistoryContinuation[]>,
@@ -22,7 +22,7 @@
     onLoadContinuationRun = null,
     onNavigateEntry = null,
     onRenameBranch = null,
-    onPreferContinuation = null,
+    onCheckoutContinuation = null,
     onOpenChange = null,
   }: {
     pages?: HistoryPathPage[] | null;
@@ -34,7 +34,7 @@
     onLoadContinuationRun?: ((fromEntryId: string) => void) | null;
     onNavigateEntry?: ((branchId: string | null, entryId: string) => void) | null;
     onRenameBranch?: ((branchId: string, name: string) => void) | null;
-    onPreferContinuation?: ((entryId: string) => void) | null;
+    onCheckoutContinuation?: ((entryId: string) => void) | null;
     onOpenChange?: ((open: boolean) => void) | null;
   } = $props();
 
@@ -60,7 +60,7 @@
   {runResult}
   {onNavigateEntry}
   {onRenameBranch}
-  {onPreferContinuation}
+  {onCheckoutContinuation}
   {onOpenChange}
   onLoadContinuations={loadContinuations}
   onLoadContinuationRun={loadRun}

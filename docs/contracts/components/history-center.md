@@ -7,8 +7,8 @@ Updated: 2026-08-12
 
 - Component name: `HistoryCenter`
 - Layer: composite
-- Summary: the history counterpart to `MessageCenter` — a compact titlebar-grade trigger cluster (undo / list / redo) plus a popover rendering the flat history list: the spine's entries and each open fork's run at its true depth, with node-owned fork disclosure (a fork icon, a counter badge, a picker for several forks, and an opened region carrying the run's name and inline rename)
-- Composes: `IconButton`, `Popover`, `Button`, `Icon`, `Spinner`, `EmptyState`
+- Summary: the history counterpart to `MessageCenter` — a compact titlebar-grade trigger cluster (undo / list / redo) plus a popover rendering the flat history list: the spine's entries and each open fork's run at its true depth, with node-owned fork disclosure (a fork icon, a counter badge, a persistent `Select` picker for several forks, and an opened region carrying the run's name and inline rename)
+- Composes: `IconButton`, `Popover`, `Select`, `Icon`, `Spinner`, `EmptyState`
 - In scope: undo/redo commands, popover open state, flat list rendering (spine + open fork runs, one loop over the core's visible rows), current-position marker, entry navigation, fork disclosure and picker, inline branch rename (opened region), checkpoint pins, transient rejection display, loading/failed status
 - Out of scope: history storage, authority logic, protocol validation, checkpoint creation, undo/redo semantics, persistence, and any Longhorn knowledge
 
@@ -54,9 +54,10 @@ HistoryCenter
         │   │   │   the opened region
         │   │   └── Fork disclosure (forkCount > 0): fork icon, counter badge
         │   │       (forkCount > 1), chevron; toggles the fork open/closed
-        │   ├── Picker row (an open fork with forkCount > 1): the forks at the
-        │   │   anchor (label + branch name, preferred marked) and a Choose
-        │   │   confirm
+        │   ├── Picker row (an open fork with forkCount > 1): a persistent
+        │   │   `Select` (fork label + branch name, current fork marked) with
+        │   │   a checkout `IconButton` beside it; the selected fork's run
+        │   │   renders below the select
         │   └── Not-yet-loaded row (an open fork whose run has not arrived):
         │       spinner + "Loading…"
         └── EmptyState
@@ -72,8 +73,10 @@ here.
 Card `028` re-declares the record shapes **structurally** (ruling R2): Poodle
 never imports a Longhorn type and no manifest gains one — the dependency runs
 Longhorn → Poodle. The three continuation operations
-(`loadContinuations`, `loadContinuationRun`, `preferContinuation`) are
-caller-supplied callbacks; the machine emits them as effects. The records
+(`loadContinuations`, `loadContinuationRun`, `checkoutContinuation`) are
+caller-supplied callbacks; the machine emits them as effects. Checkout is
+Poodle's own word (R2a): the host maps `onCheckoutContinuation` onto
+Longhorn's `preferContinuation`. The records
 mirror the authority's `ForkEntryRecord`, `ForkPathPageSnapshot` and
 `ForkContinuationRecord` (camelCase, optional fields optional).
 
@@ -168,7 +171,7 @@ reference stable until a new result replaces it (the same rule v2's
 | `onRenameBranch` | `(branchId: string, name: string) => void` | `null` | Committed inline branch rename (opened region). |
 | `onLoadContinuations` | `(entryId: string) => void` | `null` | Host op 1: load the continuations at the anchor entry. |
 | `onLoadContinuationRun` | `(fromEntryId: string) => void` | `null` | Host op 2: load the run starting at the fork's first entry. |
-| `onPreferContinuation` | `(entryId: string) => void` | `null` | Host op 3: prefer the picked continuation as the redo target. |
+| `onCheckoutContinuation` | `(entryId: string) => void` | `null` | Host op 3: checkout the picked continuation — the selected fork becomes the primary history. The host maps the callback onto its own prefer operation (R2a); Longhorn names are never Poodle's. |
 
 ### Command-Only Callbacks
 
@@ -195,7 +198,7 @@ data — the component keeps no second store of entries, branches, or status.
 | busy | `busy` | Undo and redo disabled and visually inert |
 | open | list trigger click / programmatic | Popover anchored to the trigger, focus moved into the surface |
 | list | `pages` supplied | The flat list renders: spine entries at depth 0, open fork runs at their true depth, one loop (R1) |
-| disclosed | a fork disclosure toggled | `forkCount === 1` → the run's not-yet-loaded row, then the run when its pages arrive; `forkCount > 1` → the picker row, then the run after Choose |
+| disclosed | a fork disclosure toggled | `forkCount === 1` → the run's not-yet-loaded row, then the run when its pages arrive; `forkCount > 1` → the picker row (R3 selects the current fork and shows its run under the select; the picker persists) |
 | empty | `pages` null or zero visible rows | No list; empty state (or the status row when loading/failed) |
 | loading | `status === "loading"` | Spinner status row |
 | failed | `status === "failed"` | `statusMessage` status row |
@@ -244,7 +247,7 @@ the picker shows a fork's name and the opened region can rename it; no new
 rename path, no silently dropped capability).
 
 The three continuation operations (`loadContinuations`,
-`loadContinuationRun`, `preferContinuation`) arrive as caller-supplied
+`loadContinuationRun`, `checkoutContinuation`) arrive as caller-supplied
 callbacks and leave as effects (ruling R2) — Poodle cannot call the host's
 controller, so the host wires the callbacks to it, exactly like `MessageCenter`.
 
@@ -313,8 +316,12 @@ with a fork off a fork, at any depth, with no cap):
   `emitNavigateEntry(branchId, entryId)` with the clicked row's **own** branch
   and entry — never an ancestor or another branch's divergence entry.
 - `{ kind: "picker"; anchorEntryId; depth; parentEntryId; forkId; continuations; pickedEntryId }`
-  — appears only when the open entry's `forkCount > 1`: the forks at the
-  anchor, the child already on the list filtered out. Picker rows never
+  — the forks at the anchor, the child already on the list filtered out, and
+  the select's value (the tentative pick; null until `PICK_CONTINUATION` or
+  R3's open-selects-current). **The picker persists for as long as the level
+  is open (R1)**: it is emitted whenever the open entry's `forkCount > 1`,
+  whatever `chosen` holds — the current selection stays visible and a second
+  fork is one interaction away, never a close-and-reopen. Picker rows never
   navigate.
 - `{ kind: "not-yet-loaded"; anchorEntryId; depth; parentEntryId; forkId; branchId }`
   — an open entry whose run has not arrived. Never an empty gap, never a
@@ -362,10 +369,10 @@ identity.
 | open | `FOCUS_MOVE` | row count > 0 | open | move `focusRow` by identity (wrap; first/last land on boundaries); `focusRow(row)` |
 | open | `ACTIVATE_ROW` | row exists | open | entry row → `emitNavigateEntry(branchId, entryId)` for the clicked row's own branch and entry; picker / not-yet-loaded row → focus syncs, no effect |
 | open | `DISCLOSE` | entry visible with `forkCount >= 1` | open | closed fork at the entry opens: add its level, `loadContinuations(entryId)`; open fork closes: drop its subtree (R5), clamp focus |
-| open | `CONTINUATIONS_LOADED` | entry open | open | store continuations; a single fork (`forkCount === 1`) auto-chooses it and emits `loadContinuationRun(fromEntryId)` |
-| open | `PICK_CONTINUATION` | fork offered by a picker | open | set the tentative pick (one at a time) |
-| open | `CONFIRM` | pick set | open | `preferContinuation(entryId)` + `loadContinuationRun(fromEntryId)` — the picker's commit |
-| open | `RUN_LOADED` | level chose `fromEntryId` | open | append run pages (fetch order); the run renders through the same join |
+| open | `CONTINUATIONS_LOADED` | entry open | open | store continuations; a single fork (`forkCount === 1`) auto-chooses it and emits `loadContinuationRun(fromEntryId)`; more than one fork selects the current one — `preferred`, else first in supplied order (R3) — and emits `loadContinuationRun` for it |
+| open | `PICK_CONTINUATION` | fork offered by a picker | open | set the tentative pick (one at a time); when the loaded run belongs to another fork, drop it and emit `loadContinuationRun(fromEntryId)` — the pick previews (R2) and emits no host operation |
+| open | `CONFIRM` | pick set | open | `checkoutContinuation(entryId)` — the picker's commit (R2): the selected fork becomes primary. Poodle does not build the new root: it clears the disclosure state for the anchor and renders whatever root pages the host supplies afterwards |
+| open | `RUN_LOADED` | level's displayed fork (pick, else chosen) is `fromEntryId` | open | append run pages (fetch order); the run renders through the same join |
 | any | `RENAME` | — | stay | `emitRenameBranch(branchId, name)` |
 | any | `SHOW_REJECTION` | mapped message differs from displayed | stay | set `rejection` |
 | any | `DISMISS_REJECTION` | rejection displayed | stay | clear `rejection` |
@@ -391,13 +398,15 @@ can never be reported.
 | `emitRenameBranch { branchId, name }` | Adapter calls `onRenameBranch(branchId, name)`. | None (host-owned). |
 | `loadContinuations { entryId }` | Host op 1: the adapter calls the host's continuation loader for the anchor. | None (host-owned). |
 | `loadContinuationRun { fromEntryId }` | Host op 2: the adapter calls the host's run loader starting at the fork's first entry. | None (host-owned). |
-| `preferContinuation { entryId }` | Host op 3: the adapter calls the host's prefer handler for the picked fork — the picker's commit. | None (host-owned). |
+| `checkoutContinuation { entryId }` | Host op 3: the adapter calls the host's checkout handler for the picked fork — the picker's commit. The host maps it onto its own prefer operation (R2a); Poodle never names the host's operation. | None (host-owned). |
 
 The v1 `emitSelectEntry` and `emitCheckout` effects are gone; the v2 index
 `focusRow { index }` is replaced by identity `focusRow { row }`. Effects for
 the three host operations leave only on user activation or a matching loaded
-event — never speculatively. `CONFIRM` emits `preferContinuation` (the
-commit) and `loadContinuationRun` (the reveal) together.
+event — never speculatively. `PICK_CONTINUATION` emits at most
+`loadContinuationRun` (the preview) and never a host operation; `CONFIRM`
+emits `checkoutContinuation` alone — the fork's run was already previewed by
+the pick (R2).
 
 **Rejection handling.** The machine owns display copy for the two rejections
 it can show, declared structurally (R2): `AlreadyAtTarget` →
@@ -429,9 +438,10 @@ the surface applies `trapFocusKeydown` while open.
 | run header | `data-part` / `data-branch` | `run-header` / the run's branch id — rendered only on a run's first entry row (the opened region) |
 | run-header rename | `data-part` / `data-branch` | `run-header-rename` / the run's branch id |
 | run-header rename input | `data-part` | `run-header-rename-input` |
-| picker | `data-part` / `data-anchor` / roving tabindex | `picker` / the anchor entry id — rendered only when the open entry's `forkCount > 1` |
-| picker option | `data-part` / `data-value` / `data-preferred` / `aria-pressed` | `picker-option` / the fork's first entry id / presence when preferred / tentative-pick state |
-| picker confirm | `data-part` (wrapper) | `picker-confirm` — the Choose button is `disabled` when no fork is picked or the picked fork is already `preferred` (R4) |
+| picker | `data-part` / `data-anchor` / roving tabindex | `picker` / the anchor entry id — rendered whenever the open entry's `forkCount > 1`, persisting across a choice (R1) |
+| picker select | `data-part` (wrapper) | `picker-select` — Poodle's `Select`, its value the tentative pick, options the forks; `PICK_CONTINUATION` on change. The trigger and the option rows carry the fork label, its branch name, and the current marker (`current-badge`) |
+| current badge | `data-part` | `current-badge` — marks the current fork (the record's `preferred` field; nothing user-facing says "prefer", R2a) |
+| picker checkout | `data-part` (the IconButton) | `picker-checkout` — the checkout button is `disabled` when no fork is picked or the picked fork is already the current one (R4) |
 | not-yet-loaded | `data-part` / `data-anchor` / roving tabindex | `not-yet-loaded` / the anchor entry id |
 | rejection | `data-part` / `role` | `rejection` / `status` |
 
@@ -456,8 +466,8 @@ composed `Popover`), `createInstanceId` for surface ids.
 | `onNavigateEntry` | entry row activation (pointer or keyboard) | `branchId`, `entryId` | Always the entry actually clicked, on the branch that owns its run — never an ancestor or another branch's divergence entry. `branchId` is `null` on the spine. Picker and not-yet-loaded rows never fire it. Replaces v1's `onSelectEntry`/`onCheckout` (ruling D1). |
 | `onRenameBranch` | rename input commit (Enter or blur) in the opened region | `branchId`, `name` | Escape cancels without emitting. |
 | `onLoadContinuations` | fork disclosure opens an entry with `forkCount >= 1` | `entryId` | Host op 1: the host loads the continuations at the anchor and feeds the result back as `continuationsResult`. |
-| `onLoadContinuationRun` | a single fork is auto-chosen, or the picker's Choose is confirmed | `fromEntryId` | Host op 2: the host loads the run starting at the fork's first entry and feeds the result back as `runResult`. |
-| `onPreferContinuation` | the picker's Choose is confirmed on a non-preferred fork | `entryId` | Host op 3: prefer the picked fork as the redo target. Fires together with `onLoadContinuationRun` and never with navigation (R4: confirm moves no document). |
+| `onLoadContinuationRun` | a single fork is auto-chosen (R3), or a fork is selected in the picker whose run is not loaded (R2) | `fromEntryId` | Host op 2: the host loads the run starting at the fork's first entry and feeds the result back as `runResult`. |
+| `onCheckoutContinuation` | the picker's checkout is confirmed on a fork that is not the current one | `entryId` | Host op 3: checkout the picked fork — it becomes the primary history. The host maps the callback onto its own prefer operation (R2a). Emitted alone (the run was previewed by the pick, R2) and never with navigation. The document does not move forward: Poodle clears the anchor's disclosure state and renders whatever root pages the host supplies afterwards. |
 
 The v2 `onLoadMoreEntries`/`onLoadMoreBranches` callbacks are retired with the
 v2 paging surface; the machine's `RENAME` event surfaces rename in the opened
@@ -487,11 +497,13 @@ region (R6).
   naming the fork count (`Show 2 continuations` / `Hide 2 continuations`);
   the counter badge is decorative (`aria-hidden` not required — it is inside
   the button's label scope and reads as part of the accessible name).
-- The picker row offers its forks as a labelled option group (`role="group"`,
-  `aria-label="Continuations"`); each option is a button with
-  `aria-pressed` for the tentative pick, and the preferred fork is marked
-  with a visible badge. The Choose confirm is a plain button, disabled until
-  a non-preferred fork is picked (R4).
+- The picker row is Poodle's `Select` (a labelled combobox; its listbox
+  options carry `aria-selected` for the selection) plus a checkout
+  `IconButton`. The trigger and every option carry the fork label, its
+  branch name, and a visible **Current** marker on the current fork — the
+  record's `preferred` field, which never appears in user-facing copy (R2a).
+  Checkout is disabled until a fork that is not the current one is selected
+  (R4: `AlreadyAtTarget` stays a race, not a normal path).
 - The not-yet-loaded row is a non-interactive roving-focus stop with a
   spinner; the loading status is `role="status"`.
 - The checkpoint pin and position marker are decorative; the entry label
@@ -504,12 +516,12 @@ region (R6).
 
 | Key | Behavior |
 |-----|----------|
-| ArrowDown / ArrowUp | Move roving focus to the next/previous visible row, wrapping at the ends. |
-| Home / End | Move focus to the first/last row. |
-| Enter / Space | Activate the focused row: entry → `onNavigateEntry(branchId, entryId)`; picker / not-yet-loaded → focus syncs, nothing navigates. On the fork disclosure, a picker option, the Choose confirm, or a run-header rename button, the key activates that control natively (disclosure toggles the fork, an option sets the tentative pick, Choose confirms, rename opens the input) — never row navigation. |
+| ArrowDown / ArrowUp | Move roving focus to the next/previous visible row, wrapping at the ends. Inside the picker's `Select`, the keys belong to the select (arrows open the listbox and move its highlight) — the machine never maps them. |
+| Home / End | Move focus to the first/last row. Inside the picker's `Select`, the keys belong to the select. |
+| Enter / Space | Activate the focused row: entry → `onNavigateEntry(branchId, entryId)`; picker / not-yet-loaded → focus syncs, nothing navigates. On the fork disclosure, the picker's select trigger, or a run-header rename button, the key activates that control natively (disclosure toggles the fork, the select opens/picks, rename opens the input) — never row navigation. |
 | Enter / Escape | In the rename input: commit (`onRenameBranch`) / cancel. After commit or cancel, focus returns to the run header's rename button. |
-| Tab / Shift+Tab | Trapped within the open surface (wraps first↔last focusable). Within a focused row, Tab moves entry button → run-header rename → fork disclosure in visual order; the picker's options and Choose are tabbable from the picker row. |
-| Escape | Close through `Popover`; focus returns to the trigger. |
+| Tab / Shift+Tab | Trapped within the open surface (wraps first↔last focusable). Within a focused row, Tab moves entry button → run-header rename → fork disclosure in visual order; the picker's select trigger and checkout button are tabbable from the picker row. |
+| Escape | Close through `Popover`; focus returns to the trigger. Inside the picker's `Select`, Escape closes its listbox first. |
 
 ### Focus And Announcement
 
@@ -570,22 +582,22 @@ Semantic roles by default; recipes are the override surface (architecture
 | fork icon | `--poodle-recipe-history-center-fork-color` | text-secondary |
 | fork badge fill | `--poodle-recipe-history-center-fork-badge-fill` | accent 16% mix |
 | fork badge text | `--poodle-recipe-history-center-fork-badge-text` | `--poodle-color-accent-base` |
-| preferred badge fill | `--poodle-recipe-history-center-preferred-badge-fill` | accent 16% mix |
-| preferred badge text | `--poodle-recipe-history-center-preferred-badge-text` | `--poodle-color-accent-base` |
+| current badge fill | `--poodle-recipe-history-center-current-badge-fill` | accent 16% mix |
+| current badge text | `--poodle-recipe-history-center-current-badge-text` | `--poodle-color-accent-base` |
 | rejection border | `--poodle-recipe-history-center-rejection-border` | danger 45% mix |
 | rejection fill | `--poodle-recipe-history-center-rejection-fill` | danger 10% mix |
 | rejection text | `--poodle-recipe-history-center-rejection-text` | `--poodle-color-text-primary` |
 
 The v2 lane hooks (`lane-color`, `lane-thickness`), the caption-row hooks and
 the branch-current-badge hooks are retired with the v2 renderer; the fork and
-preferred badges take over the badge role (R3, picker). Metric variables
+current badges take over the badge role (R3, picker). Metric variables
 (widths, gaps, padding, the depth inset step, font sizes) are internal and not
 part of the recipe contract.
 
 ## 9. Svelte Notes
 
 - expected substrate: `HistoryCenter.svelte` composing `IconButton`,
-  `Popover`, `Button`, `Icon`, `Spinner`; the machine runs through a `send()`
+  `Popover`, `Select`, `Icon`, `Spinner`; the machine runs through a `send()`
   channel exactly like `Popover`/`MessageCenter` do.
 - wrapper strategy: one `poodle-history-center-popover` root; the trigger
   cluster is the `Popover` trigger snippet; the surface is component-owned.
