@@ -1,9 +1,19 @@
 /* Styles for DetailSectionGroup. Extracted from the Svelte component (g12.001
    shared-styles move). Unique poodle-* selectors; safe as global CSS. */
 
+/* g13.043: the grid lives on .poodle-detail-section-group__grid so the 34rem
+   stack below resolves against the GROUP (its nearest ancestor container)
+   instead of whatever container wraps the group — which is none in every
+   current composition, so the stack was dead. The root keeps container-type
+   and the data attributes; the grid rules target the inner element. */
+
   .poodle-detail-section-group {
     --poodle-detail-section-group-gap: var(--poodle-space-stack-lg);
 
+    container-type: inline-size;
+  }
+
+  .poodle-detail-section-group__grid {
     display: grid;
     grid-template-columns: repeat(
       auto-fit,
@@ -11,10 +21,9 @@
     );
     gap: var(--poodle-detail-section-group-gap);
     align-items: start;
-    container-type: inline-size;
   }
 
-  .poodle-detail-section-group[data-max-columns="2"] {
+  .poodle-detail-section-group[data-max-columns="2"] .poodle-detail-section-group__grid {
     grid-template-columns: repeat(
       auto-fit,
       minmax(
@@ -30,7 +39,7 @@
     );
   }
 
-  .poodle-detail-section-group[data-max-columns="3"] {
+  .poodle-detail-section-group[data-max-columns="3"] .poodle-detail-section-group__grid {
     grid-template-columns: repeat(
       auto-fit,
       minmax(
@@ -46,7 +55,7 @@
     );
   }
 
-  .poodle-detail-section-group[data-max-columns="4"] {
+  .poodle-detail-section-group[data-max-columns="4"] .poodle-detail-section-group__grid {
     grid-template-columns: repeat(
       auto-fit,
       minmax(
@@ -62,7 +71,7 @@
     );
   }
 
-  .poodle-detail-section-group[data-max-columns="5"] {
+  .poodle-detail-section-group[data-max-columns="5"] .poodle-detail-section-group__grid {
     grid-template-columns: repeat(
       auto-fit,
       minmax(
@@ -78,7 +87,7 @@
     );
   }
 
-  .poodle-detail-section-group[data-layout="stack"] {
+  .poodle-detail-section-group[data-layout="stack"] .poodle-detail-section-group__grid {
     grid-template-columns: 1fr;
   }
 
@@ -99,7 +108,7 @@
   }
 
   @container (max-width: 34rem) {
-    .poodle-detail-section-group {
+    .poodle-detail-section-group .poodle-detail-section-group__grid {
       grid-template-columns: 1fr;
     }
   }

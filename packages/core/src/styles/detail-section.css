@@ -240,10 +240,13 @@
       column-gap: 0.625rem;
     }
 
-    .poodle-detail-section[data-separated="true"] {
-      padding-top: 0.9375rem;
-    }
-
+    /* The separator inset is a pseudo-element of the section (a child box of
+       the container), so it keys to the section itself — measured at 300px.
+       The g13.043 drop: the former `[data-separated] { padding-top:
+       0.9375rem }` here targeted the section root, so it resolved against
+       the nearest ANCESTOR container instead (dead standalone, wrong-scale
+       inside a group). The separator padding stays density-driven at all
+       widths. */
     .poodle-detail-section[data-separated="true"]::before {
       left: 0.125rem;
       right: 0.125rem;

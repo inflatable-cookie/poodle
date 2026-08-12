@@ -53,7 +53,8 @@
   data-span={span ?? undefined}
   aria-label={ariaLabel ?? undefined}
 >
-  <div class="poodle-detail-item__label-block">
+  <div class="poodle-detail-item__grid">
+    <div class="poodle-detail-item__label-block">
     <span class="poodle-detail-item__label">
       {label}
       {#if description}
@@ -86,5 +87,6 @@
       {@render action()}
     </div>
   {/if}
+  </div>
 </div>
 

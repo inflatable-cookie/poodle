@@ -9,6 +9,7 @@ import {
   parityTargets,
 } from "../src/parity";
 import { accessibilityAuditTargets } from "../src/accessibility";
+import { containerQueryDriftErrors } from "./container-query-drift";
 import { contractCallbackDrift } from "./contract-callback-drift";
 import { contractPropDrift } from "./contract-prop-drift";
 import { contractSpecDrift } from "./contract-spec-drift";
@@ -3274,6 +3275,11 @@ for (const f of contractDriftResult.findings) {
 // Contract <-> Svelte callback drift: every callback a component emits must be
 // named in its contract. contract-prop-drift skips `on*` props by design, so
 // this is the only thing that checks them.
+// Self-referential container queries (g13-043).
+for (const e of containerQueryDriftErrors()) {
+  errors.push(e);
+}
+
 const callbackDriftResult = contractCallbackDrift();
 for (const f of callbackDriftResult.findings) {
   errors.push(
