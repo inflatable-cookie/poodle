@@ -7,7 +7,10 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
-- 2026-08-12 — A contract cannot document a prop the matching `*Spec` struct
+- 2026-08-12 — RESOLVED 2026-08-12 (b027 Part 1, `1331b5e5`: the twelve specs
+  now carry `dismiss_on_outside_interact` — default `true`, matching the web —
+  and `OPEN_GAPS` is `{}` again; each renderer resolves the field). Original
+  report follows. A contract cannot document a prop the matching `*Spec` struct
   deliberately lacks without `effigy docs:lint` failing: the contract ↔
   poodle-specs drift gate (`packages/svelte/preview/scripts/contract-spec-drift.ts`)
   requires every documented Public Prop to exist on the Spec. g13-026 needed
@@ -21,7 +24,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   needs a sanctioned carve-out for "default-is-platform-standard" props. Decide
   once, then burn down both gaps (delete the `OPEN_GAPS` entries).
 
-- 2026-08-12 — `contract-prop-drift` only checks that documented props are
+- 2026-08-12 — RESOLVED 2026-08-12 (b027 Part 2, `c04a9cdc`: the parser no
+  longer reads a comma inside a string literal as a prop boundary — regression
+  test on the exact `placeholder = "Select date, time, and zone"` line —
+  Snippet-typed props are separated from props, and the gate now enforces the
+  reverse direction, exiting non-zero on undocumented props). Original report
+  follows. `contract-prop-drift` only checks that documented props are
   implemented, never that implemented props are documented, so an undocumented
   public prop can never fail the gate. The reverse direction exists behind
   `DRIFT_REPORT=1` but never exits non-zero and mixes snippets (`children`,
