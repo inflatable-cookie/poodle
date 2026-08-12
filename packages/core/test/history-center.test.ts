@@ -438,6 +438,51 @@ describe("visible-row derivation — forks as data (R1)", () => {
     expect(source).not.toMatch(/Date\.now|performance\.now|new Date|setTimeout/);
   });
 
+  test("PAGES_CHANGED is inert on its own and returns the very context it was given", () => {
+    // The event carries nothing; the standing reconcile is the whole point.
+    // Returning the same object is load-bearing — the adapters skip their
+    // state write-back on identity, so a no-op cannot clobber state a sibling
+    // watch effect set in the same flush.
+    const context = {
+      pages: [page([entry("c2"), entry("c1")])],
+      open: null,
+      focusRow: null,
+      rejection: null,
+    } as HistoryCenterContext;
+    const result = historyCenterTransition("open", context, { type: "PAGES_CHANGED" });
+    expect(result.effects).toEqual([]);
+    expect(result.context).toBe(context);
+    expect(result.state).toBe("open");
+  });
+
+  test("PAGES_CHANGED drives the stale-level reconcile exactly once", () => {
+    const level: HistoryCenterOpenFork = {
+      anchorEntryId: "c2",
+      continuations: [continuation("f1", { branchId: "feature/alt" })],
+      pick: null,
+      chosen: continuation("f1", { branchId: "feature/alt" }),
+      runPages: [page([entry("f2"), entry("f1")])],
+      inner: null,
+    } as HistoryCenterOpenFork;
+    const context = {
+      pages: [page([entry("f2"), entry("f1"), entry("c2", 2), entry("c1")])],
+      open: new Map([["c2", level]]),
+      focusRow: null,
+      rejection: null,
+    } as HistoryCenterContext;
+
+    const first = historyCenterTransition("open", context, { type: "PAGES_CHANGED" });
+    expect(first.effects).toEqual([{ type: "loadContinuations", entryId: "c2" }]);
+    // Open at the anchor still — a stale level is not a close (b028 R1).
+    expect(first.context.open?.has("c2")).toBe(true);
+    expect(first.context.open?.get("c2")?.chosen).toBeNull();
+
+    // Idempotent: nothing shown, nothing to re-request.
+    const second = historyCenterTransition("open", first.context, { type: "PAGES_CHANGED" });
+    expect(second.effects).toEqual([]);
+    expect(second.context).toBe(first.context);
+  });
+
   test("a fork run whose entries now sit on the spine emits no duplicate rows", () => {
     const level = {
       anchorEntryId: "c2",

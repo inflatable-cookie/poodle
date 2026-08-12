@@ -395,6 +395,32 @@ describe("HistoryCenter (svelte)", () => {
     expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
   });
 
+  it("re-requests continuations when the host supplies pages containing the open run", async () => {
+    // g13-034 gave the machine a stale-level reconcile but nothing fired it:
+    // the trigger is a pages prop change, which dispatches no event. The level
+    // derived as stale, rendered "not-yet-loaded", and stayed there until the
+    // operator closed and reopened. The sibling test above proves the
+    // duplicates are gone; this one proves the level recovers.
+    const onLoadContinuations = vi.fn();
+    const { rerender } = render(HistoryCenterHostHarness, {
+      props: {
+        pages: twoForkPages,
+        continuationsByEntry: twoForkContinuations,
+        runsByFork: twoForkRuns,
+        defaultOpen: true,
+        onLoadContinuations,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    expect(onLoadContinuations).toHaveBeenCalledTimes(1);
+
+    await rerender({ pages: navigatedIntoForkPages });
+
+    expect(onLoadContinuations).toHaveBeenCalledTimes(2);
+    expect(onLoadContinuations).toHaveBeenLastCalledWith("c2");
+  });
+
   it("renders one badge reading 2 and a persistent Select picker at forkCount 2, distinct from a fork off a fork", async () => {
     const onNavigateEntry = vi.fn();
     render(HistoryCenterHostHarness, {

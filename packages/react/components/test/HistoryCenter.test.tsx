@@ -503,6 +503,54 @@ describe("HistoryCenter (react)", () => {
     expect(document.querySelector('[data-part="current-badge"]')).toBeNull();
   });
 
+  it("re-requests continuations when the host supplies pages containing the open run", async () => {
+    // g13-034 gave the machine a stale-level reconcile but nothing fired it:
+    // the trigger is a pages prop change, which dispatches no event. The
+    // level derived as stale, rendered "not-yet-loaded", and stayed there.
+    const onLoadContinuations = vi.fn();
+    const props = { onLoadContinuations };
+    const { rerender } = render(<HistoryCenter pages={twoForkPages} defaultOpen {...props} />);
+
+    fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    rerender(
+      <HistoryCenter pages={twoForkPages} defaultOpen {...props} continuationsResult={c2Result} />,
+    );
+    rerender(
+      <HistoryCenter
+        pages={twoForkPages}
+        defaultOpen
+        {...props}
+        continuationsResult={c2Result}
+        runResult={x1TwoForkRun}
+      />,
+    );
+    expect(onLoadContinuations).toHaveBeenCalledTimes(1);
+
+    // The host navigates into the fork: x1/x2 are the primary line now.
+    const movedPages = [
+      page([
+        { id: "x2", label: "Alt mix", position: "current", continuationCount: 0 },
+        { id: "x1", label: "Alt intro", position: "past", continuationCount: 1 },
+        { id: "c2", label: "Arranged intro", position: "past", continuationCount: 3 },
+        { id: "c1", label: "Committed mix 1", position: "past", continuationCount: 1 },
+      ]),
+    ];
+    rerender(
+      <HistoryCenter
+        pages={movedPages}
+        defaultOpen
+        {...props}
+        continuationsResult={c2Result}
+        runResult={x1TwoForkRun}
+      />,
+    );
+
+    // The level is stale. It must ask the host for continuations again rather
+    // than sit on "not-yet-loaded" until the operator closes and reopens.
+    expect(onLoadContinuations).toHaveBeenCalledTimes(2);
+    expect(onLoadContinuations).toHaveBeenLastCalledWith("c2");
+  });
+
   it("omits Delete when the host supplies no callback (b033 R4 opt-in)", async () => {
     const { rerender } = render(<HistoryCenter pages={twoForkPages} defaultOpen />);
 

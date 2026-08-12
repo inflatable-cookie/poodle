@@ -457,7 +457,21 @@ export type HistoryCenterEvent =
   | { type: "RUN_LOADED"; fromEntryId: string; pages: HistoryPathPage[] }
   | { type: "RENAME"; branchId: string; name: string }
   | { type: "SHOW_REJECTION"; code: HistoryCenterRejectionCode }
-  | { type: "DISMISS_REJECTION" };
+  | { type: "DISMISS_REJECTION" }
+  /**
+   * The host supplied new root pages. Carries nothing and changes nothing on
+   * its own — its only job is to let the standing stale-level reconcile run
+   * (g13-034 R2), which needs a transition to ride and a pages prop change
+   * dispatches none. Without it the reconcile was correct code that never
+   * fired: a level went stale, rendered `not-yet-loaded`, and sat there until
+   * the operator closed and reopened the popover.
+   *
+   * Idempotent by construction. The reconcile drops a stale level's data once
+   * and then has no shown fork to find, so repeat sends emit nothing. A host
+   * that rebuilds its pages array every render costs one no-op transition, not
+   * a loop — the adapter reference-diffs before sending anyway.
+   */
+  | { type: "PAGES_CHANGED" };
 
 export type HistoryCenterEffect =
   | { type: "emitOpenChange"; open: boolean }
@@ -1092,6 +1106,11 @@ function dispatch(
   event: HistoryCenterEvent,
 ): HistoryCenterResult {
   switch (event.type) {
+    case "PAGES_CHANGED":
+      // Deliberately inert. The reconcile above this call is the whole point;
+      // returning `context` unchanged keeps the adapter's state assignment a
+      // no-op when nothing was stale.
+      return { state, context, effects: [] };
     case "TOGGLE":
       return state === "closed" ? openResult(context) : closeResult(context);
     case "OPEN":

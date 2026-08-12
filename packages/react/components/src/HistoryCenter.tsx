@@ -145,6 +145,7 @@ export function HistoryCenter({
   const lastRejectionProp = useRef<HistoryCenterRejectionCode | null>(null);
   const lastContinuationsResult = useRef<typeof continuationsResult>(null);
   const lastRunResult = useRef<typeof runResult>(null);
+  const lastPages = useRef<typeof pages>(null);
   const pendingFocusRestore = useRef(false);
   // Set when the machine emits a focusRow effect; the focusedRow effect below
   // only moves DOM focus then — a clampFocus identity change (e.g. after
@@ -178,9 +179,16 @@ export function HistoryCenter({
   const sendRef = useRef<(event: HistoryCenterEvent) => void>(() => {});
   sendRef.current = (event: HistoryCenterEvent) => {
     const result = historyCenterTransition(isOpen ? "open" : "closed", machineContext, event);
-    setOpenForks(result.context.open);
-    setFocusedRow(result.context.focusRow);
-    setDisplayedRejection(result.context.rejection);
+    // A transition that changed nothing returns the very context it was
+    // given. Writing that back is not merely wasteful: sibling watch effects
+    // run in the same flush, so a no-op event landing after one of them
+    // restores the snapshot taken before it — PAGES_CHANGED wiped a rejection
+    // SHOW_REJECTION had just set.
+    if (result.context !== machineContext) {
+      setOpenForks(result.context.open);
+      setFocusedRow(result.context.focusRow);
+      setDisplayedRejection(result.context.rejection);
+    }
 
     for (const effect of result.effects) {
       switch (effect.type) {
@@ -284,6 +292,17 @@ export function HistoryCenter({
     listRef.current
       ?.querySelector<HTMLElement>('[data-part="picker-actions"] .poodle-menu__trigger')
       ?.focus();
+  });
+
+  // The fourth watcher, and the one g13-034 needed but did not have. The
+  // stale-level reconcile rides a transition, and a pages prop change
+  // dispatches none — so a level went stale, rendered "not-yet-loaded", and
+  // stayed there until the operator closed and reopened. Reference-diffed like
+  // its three siblings: a host that hands back the same array sends nothing.
+  useEffect(() => {
+    if (pages === lastPages.current) return;
+    lastPages.current = pages;
+    sendRef.current({ type: "PAGES_CHANGED" });
   });
 
   // ── Row identity helpers (R1) ─────────────────────────────────────────
