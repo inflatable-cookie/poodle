@@ -45,7 +45,7 @@ and roadmap closeout.
 | `033` | HistoryCentre — one fork row, with delete | `031`+`032` merged | merged (`aa0350d2`) |
 | `034` | HistoryCentre — three field defects from Loophole | `033` merged | merged (`6257077f`) |
 | `035` | shell scene: Rust authoring + the two web shells (**g13.004** part 1) | `011`/`012`/`022`/`025` merged | merged (`db4e4510`) |
-| `036` | shell scene: GPUI + Jetstream — closes **g13.004** | `035` merged | ready — dispatched |
+| `036` | shell scene: GPUI + Jetstream — closes **g13.004** | `035` merged | merged (`97da7195`) — **g13.004 complete** |
 | `037` | focus rings — square outlines on rounded controls | none | ready |
 | `038` | focus rings — components with no explicit treatment | `037` merged | planned |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
