@@ -59,8 +59,8 @@ function open(levels: HistoryCenterOpenFork[]): Map<string, HistoryCenterOpenFor
 /**
  * Renders rows as compact strings. Entry rows carry their depth, parent and
  * fork identity so the R1 condition is asserted in the strings themselves:
- * `entry:id@depth:parent:fork:forkCount`. Picker rows carry their forks and
- * the tentative pick (the select's value).
+ * `entry:id@depth:parent:fork:forkCount`. Picker rows carry their forks, the
+ * tentative pick (the select's value) and the disabled signal (b033 R3).
  */
 function render(rows: HistoryCenterRow[]): string[] {
   return rows.map((row) => {
@@ -68,7 +68,7 @@ function render(rows: HistoryCenterRow[]): string[] {
       case "entry":
         return `entry:${row.entry.id}@${row.depth}:${row.parentEntryId ?? "-"}:${row.forkId ?? "-"}:${row.forkCount}`;
       case "picker":
-        return `picker:${row.anchorEntryId}@${row.depth}:${row.continuations.map((fork) => fork.entryId).join(",")}:${row.pickedEntryId ?? "-"}`;
+        return `picker:${row.anchorEntryId}@${row.depth}:${row.continuations.map((fork) => fork.entryId).join(",")}:${row.pickedEntryId ?? "-"}:${row.disabled ? "disabled" : "enabled"}`;
       case "not-yet-loaded":
         return `not-yet-loaded:${row.anchorEntryId}@${row.depth}:${row.forkId ?? "-"}`;
     }
@@ -103,7 +103,7 @@ describe("fork count — R4", () => {
     expect(e1).toMatchObject({ kind: "entry", forkCount: 0 });
   });
 
-  test("forkCount > 1 yields a picker row; forkCount === 1 yields none", () => {
+  test("forkCount >= 1 yields a picker row; forkCount === 1 disables it (b033 R3)", () => {
     const pageWithTwoForks = [page([entry("e2", 0), entry("e1", 3)])];
     const twoForks = historyCenterVisibleRows(pageWithTwoForks, open([level("e1")]));
     expect(twoForks.some((row) => row.kind === "picker")).toBe(true);
@@ -111,7 +111,39 @@ describe("fork count — R4", () => {
 
     const pageWithOneFork = [page([entry("e2", 0), entry("e1", 2)])];
     const oneFork = historyCenterVisibleRows(pageWithOneFork, open([level("e1")]));
-    expect(oneFork.some((row) => row.kind === "picker")).toBe(false);
+    expect(oneFork.some((row) => row.kind === "picker")).toBe(true);
+  });
+
+  test("a single fork emits the picker row disabled, showing the auto-chosen fork (b033 R3)", () => {
+    // cc 2 → forkCount 1: the same picker row serves the single fork, with
+    // the Select disabled because there is nothing to choose between. The
+    // disable signal rides the row itself — never inferred from
+    // `continuations.length`.
+    const rows = historyCenterVisibleRows(
+      [page([entry("e2", 0), entry("e1", 2)])],
+      open([level("e1", { continuations: [continuation("e2", { preferred: true }), continuation("l1")], chosen: continuation("l1") })]),
+    );
+
+    const picker = rows.find((row) => row.kind === "picker");
+    expect(picker).toBeDefined();
+    expect(picker?.kind === "picker" && picker.disabled).toBe(true);
+    expect(picker?.kind === "picker" && picker.continuations.map((fork) => fork.entryId)).toEqual(["l1"]);
+    // The select's value is the shown fork — the auto-chosen single fork.
+    expect(picker?.kind === "picker" && picker.pickedEntryId).toBe("l1");
+    // While the chosen fork's run has not arrived, the not-yet-loaded row
+    // still fills the gap below the picker.
+    expect(rows.some((row) => row.kind === "not-yet-loaded")).toBe(true);
+  });
+
+  test("two forks emit the picker row enabled, value null until the pick (b033 R3)", () => {
+    const rows = historyCenterVisibleRows(
+      [page([entry("e2", 0), entry("e1", 3)])],
+      open([level("e1", { continuations: [continuation("f1"), continuation("e2", { preferred: true }), continuation("f2")] })]),
+    );
+
+    const picker = rows.find((row) => row.kind === "picker");
+    expect(picker?.kind === "picker" && picker.disabled).toBe(false);
+    expect(picker?.kind === "picker" && picker.pickedEntryId).toBeNull();
   });
 });
 
@@ -147,6 +179,9 @@ describe("display order — R3", () => {
 
     expect(render(rows)).toEqual([
       "entry:e1@0:-:-:1",
+      // b033 R3: the single-fork picker row renders above the run (chosen but
+      // continuations not supplied in this fixture — the select shows l1).
+      "picker:e1@1::l1:disabled",
       "entry:l1a@1:e1:l1:0",
       "entry:l1b@1:l1a:l1:0",
       "entry:e2@0:e1:-:0",
@@ -222,19 +257,24 @@ describe("visible-row derivation — forks as data (R1)", () => {
     expect(render(twoAtOne)).not.toEqual(render(forkOffFork));
 
     // Case A rows carry parentEntryId e1 for both forks' runs — and the
-    // picker persists (R1) above the run of the chosen fork.
+    // picker persists (R1) above the run of the chosen fork. The fixture
+    // sets `chosen` on a multi-fork level (the real machine never does), so
+    // the select's value follows the shown fork — here the chosen f1.
     expect(render(twoAtOne)).toEqual([
       "entry:e1@0:-:-:2",
-      "picker:e1@1:f1,f2:-",
+      "picker:e1@1:f1,f2:f1:enabled",
       "entry:f1a@1:e1:f1:0",
       "entry:f1b@1:f1a:f1:0",
       "entry:e2@0:e1:-:0",
     ]);
 
-    // Case B: the depth-2 rows hang off l1 (not e1) and belong to fork h1.
+    // Case B: the depth-2 rows hang off l1 (not e1) and belong to fork h1;
+    // each single-fork level renders its own disabled picker row (b033 R3).
     expect(render(forkOffFork)).toEqual([
       "entry:e1@0:-:-:1",
+      "picker:e1@1:l1:l1:disabled",
       "entry:l1a@1:e1:l1:1",
+      "picker:l1a@2:h1:h1:disabled",
       "entry:h1a@2:l1a:h1:0",
       "entry:h1b@2:h1a:h1:0",
       "entry:l1b@1:l1a:l1:0",
@@ -289,8 +329,11 @@ describe("visible-row derivation — forks as data (R1)", () => {
       open([level("e1", { chosen: continuation("f1", { branchId: "b-f1" }), runPages: [] })]),
     );
 
+    // b033 R3: the single-fork picker row (disabled, showing the chosen fork)
+    // renders above the not-yet-loaded gap until the run arrives.
     expect(render(rows)).toEqual([
       "entry:e1@0:-:-:1",
+      "picker:e1@1::f1:disabled",
       "not-yet-loaded:e1@1:f1",
       "entry:e2@0:e1:-:0",
     ]);
@@ -336,10 +379,15 @@ describe("visible-row derivation — forks as data (R1)", () => {
     const rendered = render(rows);
     expect(rendered).toEqual([
       "entry:s1@0:-:-:1",
+      "picker:s1@1::a1:disabled",
       "entry:a1@1:s1:a1:1",
+      "picker:a1@2::b1:disabled",
       "entry:b1@2:a1:b1:1",
+      "picker:b1@3::c1:disabled",
       "entry:c1@3:b1:c1:1",
+      "picker:c1@4::d1:disabled",
       "entry:d1@4:c1:d1:1",
+      "picker:d1@5::e1:disabled",
       "entry:e1@5:d1:e1:0",
       "entry:e2@5:e1:e1:0",
       "entry:d2@4:d1:d1:0",
@@ -574,7 +622,7 @@ describe("machine — disclosure flow", () => {
     // selected fork's entries render below it.
     expect(render(historyCenterVisibleRows(context.pages, context.open))).toEqual([
       "entry:e1@0:-:-:2",
-      "picker:e1@1:f1,f2:f2",
+      "picker:e1@1:f1,f2:f2:enabled",
       "entry:f2a@1:e1:f2:0",
       "entry:f2b@1:f2a:f2:0",
       "entry:e2@0:e1:-:0",
@@ -653,6 +701,61 @@ describe("machine — disclosure flow", () => {
     expect(result.effects).toEqual([]);
   });
 
+  test("DELETE_CONTINUATION emits the delete command for a fork an open picker offers (b033 R4)", () => {
+    const afterDisclose = historyCenterTransition("open", ctx({ pages: forkedPages(3) }), {
+      type: "DISCLOSE",
+      entryId: "e1",
+    });
+    const loaded = historyCenterTransition("open", afterDisclose.context, {
+      type: "CONTINUATIONS_LOADED",
+      entryId: "e1",
+      continuations: [continuation("f1"), continuation("e2", { preferred: true }), continuation("f2")],
+    });
+
+    const deleted = historyCenterTransition("open", loaded.context, { type: "DELETE_CONTINUATION", entryId: "f2" });
+    // The command names the selected fork and nothing else — no checkout, no
+    // navigation, no state change: the host runs the operation and supplies
+    // new pages. Poodle shows no confirmation of its own.
+    expect(deleted.effects).toEqual([{ type: "deleteContinuation", entryId: "f2" }]);
+    expect(deleted.context.open).toEqual(loaded.context.open);
+  });
+
+  test("DELETE_CONTINUATION works on the single-fork row — the auto-chosen fork (b033 R4)", () => {
+    const afterDisclose = historyCenterTransition("open", ctx({ pages: forkedPages(2) }), {
+      type: "DISCLOSE",
+      entryId: "e1",
+    });
+    const loaded = historyCenterTransition("open", afterDisclose.context, {
+      type: "CONTINUATIONS_LOADED",
+      entryId: "e1",
+      continuations: [continuation("e2", { preferred: true }), continuation("l1")],
+    });
+
+    const deleted = historyCenterTransition("open", loaded.context, { type: "DELETE_CONTINUATION", entryId: "l1" });
+    expect(deleted.effects).toEqual([{ type: "deleteContinuation", entryId: "l1" }]);
+  });
+
+  test("DELETE_CONTINUATION is inert for a fork no open picker offers, and while closed", () => {
+    const afterDisclose = historyCenterTransition("open", ctx({ pages: forkedPages(3) }), {
+      type: "DISCLOSE",
+      entryId: "e1",
+    });
+    const loaded = historyCenterTransition("open", afterDisclose.context, {
+      type: "CONTINUATIONS_LOADED",
+      entryId: "e1",
+      continuations: [continuation("f1"), continuation("e2", { preferred: true }), continuation("f2")],
+    });
+
+    // The anchor's own continuation (e2) was filtered from the picker and is
+    // not deletable through it; a fork at a closed anchor is equally inert.
+    expect(historyCenterTransition("open", loaded.context, { type: "DELETE_CONTINUATION", entryId: "e2" }).effects).toEqual([]);
+    expect(historyCenterTransition("open", loaded.context, { type: "DELETE_CONTINUATION", entryId: "ghost" }).effects).toEqual([]);
+    expect(
+      historyCenterTransition("closed", ctx({ pages: forkedPages(2) }), { type: "DELETE_CONTINUATION", entryId: "l1" })
+        .effects,
+    ).toEqual([]);
+  });
+
   test("RUN_LOADED appends pages to the matching level and the run renders", () => {
     const afterDisclose = historyCenterTransition("open", ctx({ pages: forkedPages(2) }), {
       type: "DISCLOSE",
@@ -672,6 +775,7 @@ describe("machine — disclosure flow", () => {
     expect(result.effects).toEqual([]);
     expect(render(historyCenterVisibleRows(result.context.pages, result.context.open))).toEqual([
       "entry:e1@0:-:-:1",
+      "picker:e1@1:l1:l1:disabled",
       "entry:l1a@1:e1:l1:0",
       "entry:l1b@1:l1a:l1:0",
       "entry:e2@0:e1:-:0",
@@ -701,6 +805,7 @@ describe("machine — disclosure flow", () => {
 
     expect(render(historyCenterVisibleRows(second.context.pages, second.context.open))).toEqual([
       "entry:e1@0:-:-:1",
+      "picker:e1@1:l1:l1:disabled",
       "entry:l1@1:e1:l1:0",
       "entry:l2@1:l1:l1:0",
       "entry:l3@1:l2:l1:0",

@@ -79,6 +79,13 @@
      *  becomes the primary history. Poodle's word; the host maps the
      *  callback onto its own prefer operation (R2a). */
     onCheckoutContinuation?: ((entryId: string) => void) | null;
+    /** Host op 4 (opt-in, b033 R4): delete the selected fork. The delete
+     *  IconButton renders only when this callback is supplied — absent
+     *  callback, absent button; no disabled stand-in. Poodle deletes nothing
+     *  itself, shows no confirmation of its own (that is the host's call),
+     *  and does not guess at the resulting history: the host runs the
+     *  operation and supplies new pages. */
+    onDeleteContinuation?: ((entryId: string) => void) | null;
   }
 
   let {
@@ -112,6 +119,7 @@
     onLoadContinuations = null,
     onLoadContinuationRun = null,
     onCheckoutContinuation = null,
+    onDeleteContinuation = null,
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
@@ -146,8 +154,8 @@
   const entryRows = $derived(rows.filter((row): row is Extract<HistoryCenterRow, { kind: "entry" }> => row.kind === "entry"));
   const entryTotal = $derived(`${entryRows.length} ${entryRows.length === 1 ? "entry" : "entries"}`);
   // The data's own "present": the newest authority-supplied timestamp. The
-  // run-header relative time is derived from supplied data only (ruling D2) —
-  // there is no clock and no `Date.now()` anywhere.
+  // picker trigger's relative time is derived from supplied data only (ruling
+  // D2) — there is no clock and no `Date.now()` anywhere.
   const newestRecordedAt = $derived(
     entryRows.reduce<number | undefined>((newest, row) => {
       const at = row.entry.recordedAtMs;
@@ -198,6 +206,9 @@
           break;
         case "checkoutContinuation":
           onCheckoutContinuation?.(effect.entryId);
+          break;
+        case "deleteContinuation":
+          onDeleteContinuation?.(effect.entryId);
           break;
       }
     }
@@ -303,39 +314,6 @@
     return false;
   }
 
-  /** The open level whose chosen fork is the given run's first entry. */
-  function levelForFork(forkId: string): HistoryCenterOpenFork | null {
-    for (const level of walkLevels(openForks)) {
-      if (level.chosen?.entryId === forkId) {
-        return level;
-      }
-    }
-    return null;
-  }
-
-  /** The run's first entry row doubles as the opened region: it carries the
-   *  chosen fork's branch name, run entry count and rename affordance (R6). */
-  function isFirstRunRow(row: Extract<HistoryCenterRow, { kind: "entry" }>): boolean {
-    return row.forkId !== null && row.entry.id === row.forkId;
-  }
-
-  function runHeaderFor(
-    row: Extract<HistoryCenterRow, { kind: "entry" }>,
-  ): { branchId: string; name: string; entryCount: number } | null {
-    if (!isFirstRunRow(row) || row.branchId === null) {
-      return null;
-    }
-    const chosen = levelForFork(row.forkId!)?.chosen;
-    if (chosen === null || chosen === undefined) {
-      return null;
-    }
-    return {
-      branchId: chosen.branchId,
-      name: chosen.branchName ?? chosen.branchId,
-      entryCount: chosen.entryCount,
-    };
-  }
-
   // Short-form relative time, derived purely from supplied timestamps. The
   // reference is the data's newest recordedAtMs — stable across renders and
   // runtimes, no clock (D2).
@@ -381,6 +359,15 @@
     return formatRelativeTime(newestRecordedAt - at);
   }
 
+  /** The picker trigger's meta line: the shown fork's entry count, plus the
+   *  run's derived relative time when its rows are visible (b033 R3 — the
+   *  run header's count and time survive inside the trigger). */
+  function pickerMeta(fork: HistoryContinuation): string {
+    const count = `${fork.entryCount} ${fork.entryCount === 1 ? "entry" : "entries"}`;
+    const time = runHeadTime(fork.entryId);
+    return time === null ? count : `${count} · ${time}`;
+  }
+
   /** The picker's tentative pick, for the confirm enablement rule (R4). */
   function pickedContinuation(
     continuations: HistoryContinuation[],
@@ -406,9 +393,9 @@
   }
 
   function handleListKeydown(event: KeyboardEvent): void {
-    // The rename input owns its keys (commit/cancel). Disclosure and rename
-    // buttons keep native Enter/Space activation (they are not row
-    // activation); arrows still drive roving focus from anywhere in the row.
+    // The rename input owns its keys (commit/cancel). Disclosure buttons
+    // keep native Enter/Space activation (they are not row activation);
+    // arrows still drive roving focus from anywhere in the row.
     if (event.target instanceof HTMLInputElement) {
       return;
     }
@@ -421,8 +408,7 @@
 
     if (
       event.target instanceof HTMLElement &&
-      (event.target.closest("[data-part=\"fork-disclosure\"]") !== null ||
-        event.target.closest("[data-part=\"run-header-rename\"]") !== null) &&
+      event.target.closest("[data-part=\"fork-disclosure\"]") !== null &&
       (event.key === "Enter" || event.key === " ")
     ) {
       return;
@@ -470,7 +456,8 @@
     send({ type: "DISMISS_REJECTION" });
   }
 
-  // ── Inline rename (opened region, R6) ────────────────────────────────
+  // ── Inline rename (picker row; b033 R3 — the run header is gone, the
+  //    shared pencil serves both fork counts) ───────────────────────────
 
   function startRename(branchId: string, name: string): void {
     renamingBranchId = branchId;
@@ -482,17 +469,15 @@
     renamingBranchId = null;
     tick().then(() => {
       const branch = CSS.escape(branchId ?? "");
-      const runHeaderButton = listElement?.querySelector<HTMLElement>(
-        `[data-part="run-header-rename"][data-branch="${branch}"]`,
-      );
       // The picker pencil is an IconButton (R4), which forwards no data
       // attributes — the wrapper carries the part/branch and the button
-      // inside is the focus target. R3: focus returns to the pencil on
-      // commit or cancel, exactly as it returns to the run-header button.
-      const pickerPencil = listElement
+      // inside is the focus target (b032 R3). b033: the run header is gone,
+      // so the shared pencil is the only rename control left. Focus returns
+      // to it on commit or cancel.
+      listElement
         ?.querySelector<HTMLElement>(`[data-part="picker-rename"][data-branch="${branch}"]`)
-        ?.querySelector<HTMLElement>("button");
-      (runHeaderButton ?? pickerPencil)?.focus();
+        ?.querySelector<HTMLElement>("button")
+        ?.focus();
     });
   }
 
@@ -647,7 +632,6 @@
                 style={`--poodle-history-center-depth: ${depth}`}
               >
                 {#if row.kind === "entry"}
-                  {@const header = runHeaderFor(row)}
                   {@const openAt = hasLevel(row.entry.id)}
                   <button
                     type="button"
@@ -670,51 +654,6 @@
                       {/if}
                     </span>
                   </button>
-
-                  {#if header !== null}
-                    {@const headTime = runHeadTime(row.forkId!)}
-                    <!-- The opened region: the run's first entry row carries
-                         the chosen fork's name, count and rename (R6). -->
-                    <div class="poodle-history-center__run-header" data-part="run-header" data-branch={header.branchId}>
-                      {#if renamingBranchId === header.branchId}
-                        <input
-                          bind:this={renameInputElement}
-                          class="poodle-history-center__rename-input"
-                          data-part="run-header-rename-input"
-                          aria-label={`Rename branch ${header.name}`}
-                          maxlength={maxBranchNameBytes}
-                          bind:value={renameValue}
-                          onkeydown={(event) => handleRenameKeydown(event, header.branchId)}
-                          onblur={() => {
-                            // Commit the branch currently being renamed; a
-                            // blur fired by the input's own teardown (after
-                            // commit/cancel) is a no-op.
-                            if (renamingBranchId !== null) commitRename(renamingBranchId);
-                          }}
-                        />
-                      {:else}
-                        <span class="poodle-history-center__run-header-copy">
-                          <span class="poodle-history-center__run-header-name">{header.name}</span>
-                          <span class="poodle-history-center__run-header-meta">
-                            {header.entryCount} {header.entryCount === 1 ? "entry" : "entries"}{headTime !== null ? ` · ${headTime}` : ""}
-                          </span>
-                        </span>
-                        <button
-                          type="button"
-                          class="poodle-history-center__run-header-rename"
-                          data-part="run-header-rename"
-                          data-rename-button="true"
-                          data-branch={header.branchId}
-                          aria-label={`Rename ${header.name}`}
-                          title="Rename branch"
-                          tabindex={rowFocused(row) ? 0 : -1}
-                          onclick={() => startRename(header.branchId, header.name)}
-                        >
-                          <Icon name="edit" size="xs" />
-                        </button>
-                      {/if}
-                    </div>
-                  {/if}
 
                   {#if row.forkCount > 0}
                     <button
@@ -745,16 +684,25 @@
                     class="poodle-history-center__picker"
                     data-part="picker"
                     data-anchor={row.anchorEntryId}
+                    data-disabled={row.disabled ? "true" : undefined}
                     tabindex={rowFocused(row) ? 0 : -1}
                   >
-                    <!-- R1: the picker is Poodle's Select, a rename pencil
-                         and a checkout IconButton, in that order. The
-                         pencil renames whichever fork the Select currently
-                         shows through the same machinery as the opened
-                         region (R2); while a rename is open the inline
-                         input takes the Select's place (R3) and checkout
-                         is disabled. The trigger and the options both
-                         carry the fork label and its branch name. -->
+                    <!-- b033: one picker row serves every open level
+                         (forkCount >= 1). The Select is disabled on the
+                         row's signal when a single fork leaves nothing to
+                         choose between (R3); its trigger carries the fork
+                         icon, name, branch name, entry count and derived
+                         relative time (R1, R3 — the run header's facts
+                         survive in the trigger). The row is Select, rename
+                         pencil, opt-in delete, checkout (R1, R4): the
+                         pencil renames whichever fork the Select shows,
+                         the delete IconButton renders only when the host
+                         supplies its callback and emits a command for the
+                         selected fork — no confirmation inside Poodle —
+                         and while a rename is open the inline input takes
+                         the Select's place (b032 R3). The trigger and the
+                         options both carry the fork label and its branch
+                         name. -->
                     <div class="poodle-history-center__picker-controls" data-part="picker-select">
                       {#if renameTarget !== null && renamingBranchId === renameTarget.branchId}
                         <input
@@ -778,7 +726,8 @@
                         options={row.continuations.map((fork) => ({ value: fork.entryId, label: fork.label }))}
                         size="xs"
                         density={resolvedDensity}
-                        variant="ghost"
+                        variant="default"
+                        disabled={row.disabled}
                         ariaLabel="Continuations"
                         placeholder="Choose a fork…"
                         onValueChange={(entryId) => send({ type: "PICK_CONTINUATION", entryId })}
@@ -789,12 +738,16 @@
                           {:else}
                             {@const fork = forkForValue(row.continuations, selectedOption.value)}
                             <span class="poodle-history-center__picker-value">
-                              <span class="poodle-history-center__picker-option-name">{selectedOption.label}</span>
-                              {#if fork !== undefined}
-                                <span class="poodle-history-center__picker-option-branch">
-                                  {fork.branchName ?? fork.branchId}
-                                </span>
-                              {/if}
+                              <Icon name="git-branch" size={resolvedSize} />
+                              <span class="poodle-history-center__picker-option-copy">
+                                <span class="poodle-history-center__picker-option-name">{selectedOption.label}</span>
+                                {#if fork !== undefined}
+                                  <span class="poodle-history-center__picker-option-branch">
+                                    {fork.branchName ?? fork.branchId}
+                                  </span>
+                                  <span class="poodle-history-center__picker-option-meta">{pickerMeta(fork)}</span>
+                                {/if}
+                              </span>
                             </span>
                           {/if}
                         {/snippet}
@@ -827,6 +780,25 @@
                           }}
                         />
                       </span>
+                      {#if onDeleteContinuation !== null}
+                        <span class="poodle-history-center__picker-delete" data-part="picker-delete">
+                          <IconButton
+                            icon="trash-2"
+                            ariaLabel={picked === undefined ? "Delete fork" : `Delete ${picked.branchName ?? picked.branchId}`}
+                            tooltip="Delete fork"
+                            variant="ghost"
+                            tone="danger"
+                            size="xs"
+                            density={resolvedDensity}
+                            disabled={picked === undefined}
+                            onClick={() => {
+                              if (picked !== undefined) {
+                                send({ type: "DELETE_CONTINUATION", entryId: picked.entryId });
+                              }
+                            }}
+                          />
+                        </span>
+                      {/if}
                       <span class="poodle-history-center__picker-checkout" data-part="picker-checkout">
                         <IconButton
                           icon="check"
@@ -835,7 +807,7 @@
                           variant="ghost"
                           size="xs"
                           density={resolvedDensity}
-                          disabled={picked === undefined || picked.preferred || renamingBranchId !== null}
+                          disabled={row.disabled || picked === undefined || picked.preferred || renamingBranchId !== null}
                           onClick={() => send({ type: "CONFIRM" })}
                         />
                       </span>

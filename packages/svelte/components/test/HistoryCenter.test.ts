@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/svelte";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/svelte";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
   HistoryContinuation,
   HistoryPathPage,
@@ -184,6 +184,10 @@ function rowByEntry(entryId: string): HTMLElement {
 
 /** Open the fork at an entry with a harness that feeds results synchronously. */
 describe("HistoryCenter (svelte)", () => {
+  // The helpers query `document` globally, so a test that fails before its
+  // own unmount() leaves rows behind and poisons the next one. Isolate.
+  afterEach(cleanup);
+
   it("renders the undo/list/redo cluster with enablement from canUndo/canRedo and busy", async () => {
     render(HistoryCenter, { props: { canUndo: true, canRedo: false, busy: false } });
 
@@ -252,14 +256,22 @@ describe("HistoryCenter (svelte)", () => {
     await fireEvent.click(disclosure);
 
     expect(onLoadContinuations).toHaveBeenCalledWith("c2");
-    // The single fork is auto-chosen — no picker row ever appears.
     expect(onLoadContinuationRun).toHaveBeenCalledWith("l1");
-    expect(document.querySelector("[data-part='picker']")).toBeNull();
+
+    // b033 R3: one row shape serves both fork counts. A single fork still gets
+    // the picker row, with the select disabled because there is nothing to
+    // choose between.
+    const picker = document.querySelector("[data-part='picker']");
+    expect(picker).toBeTruthy();
+    const trigger = picker?.querySelector(".poodle-select__trigger") as HTMLButtonElement | null;
+    expect(trigger).toBeTruthy();
+    expect(trigger?.disabled).toBe(true);
 
     // The run renders at depth 1 once the host feeds its pages back.
     expect(rowSummary()).toEqual([
       { kind: "entry", entry: "c1", depth: "0" },
       { kind: "entry", entry: "c2", depth: "0" },
+      { kind: "picker", entry: "c2", depth: "1" },
       { kind: "entry", entry: "l1", depth: "1" },
       { kind: "entry", entry: "l2", depth: "1" },
       { kind: "entry", entry: "l3", depth: "1" },
@@ -539,8 +551,10 @@ describe("HistoryCenter (svelte)", () => {
     expect(rowSummary()).toEqual([
       { kind: "entry", entry: "c1", depth: "0" },
       { kind: "entry", entry: "c2", depth: "0" },
+      { kind: "picker", entry: "c2", depth: "1" },
       { kind: "entry", entry: "l1", depth: "1" },
       { kind: "entry", entry: "l2", depth: "1" },
+      { kind: "picker", entry: "l2", depth: "2" },
       { kind: "entry", entry: "i1", depth: "2" },
       { kind: "entry", entry: "i2", depth: "2" },
       { kind: "entry", entry: "l3", depth: "1" },
@@ -584,12 +598,17 @@ describe("HistoryCenter (svelte)", () => {
 
     await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
 
-    const runHeader = rowByEntry("l1").querySelector("[data-part='run-header']") as HTMLElement;
-    expect(runHeader).toBeTruthy();
-    expect(runHeader.querySelector(".poodle-history-center__run-header-name")?.textContent).toBe("feature/lead");
-    expect(runHeader.querySelector(".poodle-history-center__run-header-meta")?.textContent).toBe("2 entries · 20m ago");
-    // The run header belongs to the run's first entry only.
-    expect(rowByEntry("l2").querySelector("[data-part='run-header']")).toBeNull();
+    // b033 R3: the run header is gone. Its branch name and its
+    // "N entries · time" meta now live in the picker trigger.
+    const picker = document.querySelector("[data-part='picker']") as HTMLElement;
+    expect(picker).toBeTruthy();
+    expect(picker.querySelector(".poodle-history-center__picker-option-branch")?.textContent?.trim()).toBe("feature/lead");
+    expect(picker.querySelector(".poodle-history-center__picker-option-meta")?.textContent).toBe("2 entries · 20m ago");
+    // The picker is one row anchored at the forked entry, not a header
+    // repeated per run entry.
+    // `data-part="picker"` is on the row <li> as well as the inner control,
+    // so assert the row's own entry rather than the inner data-anchor.
+    expect(picker.getAttribute("data-row-entry")).toBe("c2");
 
     unmount();
   });
@@ -606,9 +625,11 @@ describe("HistoryCenter (svelte)", () => {
 
     await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
 
-    const runHeader = rowByEntry("l1").querySelector("[data-part='run-header']") as HTMLElement;
-    expect(runHeader.querySelector(".poodle-history-center__run-header-meta")?.textContent).toBe("2 entries");
-    expect(runHeader.textContent).not.toContain("ago");
+    // b033 R3: the run header is gone. Its branch name and its
+    // "N entries · time" meta now live in the picker trigger.
+    const picker = document.querySelector("[data-part='picker']") as HTMLElement;
+    expect(picker.querySelector(".poodle-history-center__picker-option-meta")?.textContent).toBe("2 entries");
+    expect(picker.textContent).not.toContain("ago");
     expect(document.body.textContent).not.toContain("Invalid Date");
   });
 
@@ -778,6 +799,8 @@ describe("HistoryCenter (svelte)", () => {
       "1",
       "2",
       "2",
+      "2",
+      "3",
       "3",
       "3",
       "2",

@@ -6,9 +6,11 @@
    (g13-028). No lanes: depth drives a padding inset and nothing else, with no
    depth cap (v2's saturating gutter is gone and must not return in CSS).
    Affordances follow `forkCount` exactly (R3): no forks → inert row; one fork
-   → icon + chevron, no badge, no picker; several → icon + counter badge +
-   chevron, picker on open. The opened region (a run's first entry row) shows
-   the chosen fork's name, entry count and inline rename (R6). */
+   → icon + chevron, no badge; several → icon + counter badge + chevron.
+   b033 (R3): one picker row serves every open level — a single fork renders
+   it with the Select disabled (nothing to choose between); the trigger
+   carries the fork icon, name, branch and the run's entry count and derived
+   relative time. The run header is retired with b033 — the row owns it all. */
 
 .poodle-history-center-popover { display: inline-flex; }
 
@@ -246,11 +248,16 @@
   text-align: center;
 }
 
-/* The picker row — the forks at an anchor when `forkCount > 1` (core emits
-   it; the renderer adds no second condition). R1: Poodle's Select, a rename
-   pencil and a checkout IconButton; the trigger and the option rows carry
-   the fork label and its branch name. While a rename is open the inline
-   input takes the Select's place (R3). */
+/* The picker row — the forks at an anchor whenever the level is open
+   (`forkCount >= 1`, core emits it; the renderer adds no second condition).
+   b033 R3: a single fork renders the same row with the Select disabled —
+   the row carries the disable signal; the renderer never infers it from
+   the continuation count. R1: Poodle's Select, a rename pencil, an opt-in
+   delete IconButton and a checkout IconButton — Select, pencil, delete,
+   checkout; the trigger and the option rows carry the fork label and its
+   branch name, and the trigger adds the fork icon and the run's entry
+   count and derived relative time. While a rename is open the inline input
+   takes the Select's place (R3). */
 .poodle-history-center__picker {
   display: grid;
   gap: 0.25rem;
@@ -275,18 +282,14 @@
   min-width: 0;
 }
 
-.poodle-history-center__picker-rename {
-  display: inline-flex;
-  flex: none;
-}
-
+.poodle-history-center__picker-rename,
+.poodle-history-center__picker-delete,
 .poodle-history-center__picker-checkout {
   display: inline-flex;
   flex: none;
 }
 
-/* The rename input takes the Select's place (R3); the run-header input's
-   margins belong to its own region, not this row. */
+/* The rename input takes the Select's place (R3) inside the controls row. */
 .poodle-history-center__picker-controls .poodle-history-center__rename-input {
   margin: 0;
 }
@@ -335,68 +338,16 @@
   white-space: nowrap;
 }
 
-/* The opened region: a run's first entry row carries the chosen fork's name,
-   entry count and inline rename (R6). */
-.poodle-history-center__run-header {
-  display: flex;
-  align-items: center;
-  gap: var(--poodle-space-stack-sm);
-  flex: 0 1 auto;
-  min-width: 0;
-  padding: calc(var(--poodle-space-panel-y) * 0.85) var(--poodle-space-stack-sm);
-  border-left: 0.125rem solid var(--poodle-color-border-default);
+/* The trigger's meta line — the shown fork's entry count and derived
+   relative time, the run header's facts carried into the unified row
+   (b033 R3). */
+.poodle-history-center__picker-option-meta {
   color: var(--poodle-color-text-secondary);
-}
-
-.poodle-history-center__run-header-copy {
-  display: grid;
-  gap: 0.12rem;
-  min-width: 0;
-}
-
-.poodle-history-center__run-header-name {
-  font-size: var(--poodle-typography-label-size);
-  font-weight: var(--poodle-typography-label-weight);
-  color: var(--poodle-color-text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.poodle-history-center__run-header-meta {
   font-size: 0.6875rem;
   line-height: var(--poodle-typography-label-lineHeight);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.poodle-history-center__run-header-rename {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  width: 1.25rem;
-  height: 1.25rem;
-  padding: 0;
-  border: 0;
-  border-radius: var(--poodle-radius-control);
-  background: transparent;
-  color: var(--poodle-color-text-secondary);
-  cursor: pointer;
-}
-
-.poodle-history-center__run-header-rename:hover {
-  background: var(
-    --poodle-recipe-history-center-item-hover-fill,
-    color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
-  );
-  color: var(--poodle-color-text-primary);
-}
-
-.poodle-history-center__run-header-rename:focus-visible {
-  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-  outline-offset: 0.0625rem;
 }
 
 .poodle-history-center__rename-input {

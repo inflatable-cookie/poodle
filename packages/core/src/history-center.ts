@@ -159,12 +159,20 @@ export type HistoryCenterRow =
       /** Forks at the anchor, the child already on the list filtered out (R4). Empty while loading. */
       continuations: HistoryContinuation[];
       /**
-       * The select's value — the tentative pick (its first entry id); null
-       * until PICK_CONTINUATION or R3's open-selects-current. The picker
+       * The select's value — the shown fork: the tentative pick (its first
+       * entry id), else the auto-chosen single fork (b033 R3). Null only
+       * while the level's continuations are still in flight. The picker
        * persists for as long as the level is open (R1), so the current
        * selection stays visible and reachable.
        */
       pickedEntryId: string | null;
+      /**
+       * The renderer disables the Select on this signal — it never infers it
+       * from `continuations.length`. True when the level has exactly one
+       * fork: there is nothing to choose between (b033 R3). The row still
+       * carries the pencil, the opt-in delete and checkout.
+       */
+      disabled: boolean;
     }
   | {
       kind: "not-yet-loaded";
@@ -314,12 +322,15 @@ function pushDisclosed(
   depth: number,
 ): void {
   const childDepth = depth + 1;
+  const forkCount = historyCenterForkCount(entry.continuationCount);
 
-  if (historyCenterForkCount(entry.continuationCount) > 1) {
-    // R1: the picker persists for as long as the level is open, whatever
-    // `chosen` holds — a second fork is one interaction away, never a
-    // close-and-reopen. One continuation is nothing to choose between;
-    // `forkCount > 1` is unchanged.
+  if (forkCount >= 1) {
+    // b033 (R3): the picker row serves every open level — the single fork
+    // included. The renderer disables the Select on the row's `disabled`
+    // signal (nothing to choose between); it never infers it from
+    // `continuations.length`. The picker persists for as long as the level
+    // is open, whatever `chosen` holds (R1) — a second fork is one
+    // interaction away, never a close-and-reopen.
     rows.push({
       kind: "picker",
       anchorEntryId: entry.id,
@@ -327,7 +338,8 @@ function pushDisclosed(
       parentEntryId: entry.id,
       forkId: null,
       continuations: historyCenterForksAt(level.continuations, runEntries, anchorIndex),
-      pickedEntryId: level.pick?.entryId ?? null,
+      pickedEntryId: level.pick?.entryId ?? level.chosen?.entryId ?? null,
+      disabled: forkCount <= 1,
     });
   }
 
@@ -335,7 +347,7 @@ function pushDisclosed(
   // tentative pick, falling back to the auto-chosen single fork.
   const shown = level.pick ?? level.chosen;
   if (shown === null) {
-    if (historyCenterForkCount(entry.continuationCount) <= 1) {
+    if (forkCount <= 1) {
       // Single fork (or its continuations still in flight): the run is what
       // will show, so mark it not-yet-loaded rather than leaving a gap.
       rows.push({
@@ -414,6 +426,7 @@ export type HistoryCenterEvent =
   | { type: "CONTINUATIONS_LOADED"; entryId: string; continuations: HistoryContinuation[] }
   | { type: "PICK_CONTINUATION"; entryId: string }
   | { type: "CONFIRM" }
+  | { type: "DELETE_CONTINUATION"; entryId: string }
   | { type: "RUN_LOADED"; fromEntryId: string; pages: HistoryPathPage[] }
   | { type: "RENAME"; branchId: string; name: string }
   | { type: "SHOW_REJECTION"; code: HistoryCenterRejectionCode }
@@ -426,7 +439,8 @@ export type HistoryCenterEffect =
   | { type: "emitRenameBranch"; branchId: string; name: string }
   | { type: "loadContinuations"; entryId: string }
   | { type: "loadContinuationRun"; fromEntryId: string }
-  | { type: "checkoutContinuation"; entryId: string };
+  | { type: "checkoutContinuation"; entryId: string }
+  | { type: "deleteContinuation"; entryId: string };
 
 export type HistoryCenterResult = TransitionResult<HistoryCenterState, HistoryCenterContext, HistoryCenterEffect>;
 
@@ -901,6 +915,36 @@ function confirm(context: HistoryCenterContext): HistoryCenterResult {
   };
 }
 
+/**
+ * b033 (R4): delete is a host command for the selected fork — the fork the
+ * level's picker shows, exactly as checkout would commit. Poodle deletes
+ * nothing itself and does not guess at the resulting history: the effect
+ * leaves, the host runs the operation and supplies new pages. No
+ * confirmation inside Poodle — that is the host's call. The fork must be
+ * offered by an open level's picker (the auto-chosen single fork included);
+ * unknown forks are inert.
+ */
+function deleteContinuation(context: HistoryCenterContext, entryId: string): HistoryCenterResult {
+  for (const level of walkLevels(context.open)) {
+    if (level.continuations === null) {
+      continue;
+    }
+    const runContext = anchorRunContext(context, level.anchorEntryId);
+    if (runContext === null) {
+      continue;
+    }
+    const forks = historyCenterForksAt(level.continuations, runContext.entries, runContext.index);
+    if (forks.some((fork) => fork.entryId === entryId)) {
+      return {
+        state: "open",
+        context,
+        effects: [{ type: "deleteContinuation", entryId }],
+      };
+    }
+  }
+  return stay("open", context);
+}
+
 function runLoaded(context: HistoryCenterContext, fromEntryId: string, pages: HistoryPathPage[]): HistoryCenterResult {
   let updated: HistoryCenterOpenFork | null = null;
   for (const level of walkLevels(context.open)) {
@@ -952,6 +996,8 @@ export function historyCenterTransition(
       return state === "open" ? pickContinuation(context, event.entryId) : stay(state, context);
     case "CONFIRM":
       return state === "open" ? confirm(context) : stay(state, context);
+    case "DELETE_CONTINUATION":
+      return state === "open" ? deleteContinuation(context, event.entryId) : stay(state, context);
     case "RUN_LOADED":
       return state === "open" ? runLoaded(context, event.fromEntryId, event.pages) : stay(state, context);
     case "RENAME":
