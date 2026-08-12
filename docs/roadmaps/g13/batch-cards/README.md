@@ -44,6 +44,7 @@ and roadmap closeout.
 | `032` | HistoryCentre — rename the selected fork | `030` merged | merged (`8da4141a` → `321fc790`) |
 | `033` | HistoryCentre — one fork row, with delete | `031`+`032` merged | merged (`aa0350d2`) |
 | `034` | HistoryCentre — three field defects from Loophole | `033` merged | ready — dispatched |
+| `035` | shell scene: Rust authoring + the two web shells (**g13.004** part 1) | `011`/`012`/`022`/`025` merged | ready |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
@@ -88,3 +89,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 032](032-history-center-multi-fork-rename.md)
 - [Batch 033](033-history-center-unified-fork-row.md)
 - [Batch 034](034-history-center-field-defects.md)
+- [Batch 035](035-shell-scene-rust-authoring-and-web.md)
