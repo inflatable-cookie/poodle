@@ -738,16 +738,18 @@
                           {:else}
                             {@const fork = forkForValue(row.continuations, selectedOption.value)}
                             <span class="poodle-history-center__picker-value">
-                              <Icon name="git-branch" size={resolvedSize} />
+                              <Icon name="git-branch" size="sm" />
                               <span class="poodle-history-center__picker-option-copy">
                                 <span class="poodle-history-center__picker-option-name">{selectedOption.label}</span>
                                 {#if fork !== undefined}
                                   <span class="poodle-history-center__picker-option-branch">
                                     {fork.branchName ?? fork.branchId}
                                   </span>
-                                  <span class="poodle-history-center__picker-option-meta">{pickerMeta(fork)}</span>
                                 {/if}
                               </span>
+                              {#if fork !== undefined}
+                                <span class="poodle-history-center__picker-option-meta">{pickerMeta(fork)}</span>
+                              {/if}
                             </span>
                           {/if}
                         {/snippet}

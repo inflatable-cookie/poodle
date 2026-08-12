@@ -773,7 +773,7 @@ export function HistoryCenter({
                                           </span>
                                         ) : (
                                           <span className="poodle-history-center__picker-value">
-                                            <Icon name="git-branch" size={resolvedSize} />
+                                            <Icon name="git-branch" size="sm" />
                                             <span className="poodle-history-center__picker-option-copy">
                                               <span className="poodle-history-center__picker-option-name">
                                                 {selectedOption.label}
@@ -783,12 +783,14 @@ export function HistoryCenter({
                                                   <span className="poodle-history-center__picker-option-branch">
                                                     {fork.branchName ?? fork.branchId}
                                                   </span>
-                                                  <span className="poodle-history-center__picker-option-meta">
-                                                    {pickerMeta(fork)}
-                                                  </span>
                                                 </>
                                               ) : null}
                                             </span>
+                                            {fork !== undefined ? (
+                                                  <span className="poodle-history-center__picker-option-meta">
+                                                    {pickerMeta(fork)}
+                                                  </span>
+                                            ) : null}
                                           </span>
                                         );
                                       }}
