@@ -43,7 +43,8 @@ and roadmap closeout.
 | `031` | nested dismiss layers + ghost Select affordance | `030` merged | merged (`4daf6993` → `ef12a3bf`) |
 | `032` | HistoryCentre — rename the selected fork | `030` merged | merged (`8da4141a` → `321fc790`) |
 | `033` | HistoryCentre — one fork row, with delete | `031`+`032` merged | merged (`aa0350d2`) |
-| — | HistoryCentre — native parity | `029` merged | planned (renumbered; `022` was reused for codegen) |
+| `034` | HistoryCentre — three field defects from Loophole | `033` merged | ready — dispatched |
+| — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
 evidence in `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`. All of
@@ -86,3 +87,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 031](031-nested-dismiss-and-ghost-select-affordance.md)
 - [Batch 032](032-history-center-multi-fork-rename.md)
 - [Batch 033](033-history-center-unified-fork-row.md)
+- [Batch 034](034-history-center-field-defects.md)
