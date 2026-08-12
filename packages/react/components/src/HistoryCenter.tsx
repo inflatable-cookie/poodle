@@ -19,6 +19,7 @@ import {
 import { EmptyState } from "./EmptyState";
 import { Icon } from "./Icon";
 import { IconButton } from "./IconButton";
+import { Menu } from "./Menu";
 import { Popover } from "./Popover";
 import { Select } from "./Select";
 import { Spinner } from "./Spinner";
@@ -27,6 +28,7 @@ import type {
   ControlDensity,
   ControlSize,
   HistoryStatus,
+  MenuItem,
   OverlayPlacement,
   SemanticControlSizeRole,
 } from "./types";
@@ -278,8 +280,7 @@ export function HistoryCenter({
     pendingFocusRestore.current = null;
     const branch = CSS.escape(branchId);
     listRef.current
-      ?.querySelector<HTMLElement>(`[data-part="picker-rename"][data-branch="${branch}"]`)
-      ?.querySelector<HTMLElement>("button")
+      ?.querySelector<HTMLElement>('[data-part="picker-actions"] .poodle-menu__trigger')
       ?.focus();
   });
 
@@ -385,6 +386,66 @@ export function HistoryCenter({
     const count = `${fork.entryCount} ${fork.entryCount === 1 ? "entry" : "entries"}`;
     const time = runHeadTime(fork.entryId);
     return time === null ? count : `${count} · ${time}`;
+  }
+
+  /**
+   * The fork row's actions, as one menu.
+   *
+   * Checkout is not the primary way to switch fork — clicking any entry in the
+   * run navigates to it and checks that fork out. This item is the narrower
+   * case: make the fork primary *without* moving the current position.
+   */
+  function pickerActions(
+    picked: HistoryContinuation | undefined,
+    renameTarget: { branchId: string; name: string } | null,
+    rowDisabled: boolean,
+  ): MenuItem[] {
+    const items: MenuItem[] = [
+      {
+        value: "rename",
+        label: renameTarget === null ? "Rename fork" : `Rename ${renameTarget.name}`,
+        disabled: renameTarget === null || renamingBranchId !== null,
+      },
+      {
+        value: "checkout",
+        label: "Activate without moving",
+        disabled:
+          rowDisabled || picked === undefined || picked.preferred || renamingBranchId !== null,
+      },
+    ];
+
+    // Opt-in (b033 R4): absent callback, absent item.
+    if (onDeleteContinuation !== null) {
+      items.push({ value: "separator", label: "", kind: "separator" });
+      items.push({
+        value: "delete",
+        label:
+          picked === undefined ? "Delete fork" : `Delete ${picked.branchName ?? picked.branchId}`,
+        tone: "danger",
+        disabled: picked === undefined || renamingBranchId !== null,
+      });
+    }
+
+    return items;
+  }
+
+  /** Routes a menu selection to the action it names. */
+  function runPickerAction(
+    value: string,
+    picked: HistoryContinuation | undefined,
+    renameTarget: { branchId: string; name: string } | null,
+  ): void {
+    if (value === "rename" && renameTarget !== null) {
+      startRename(renameTarget.branchId, renameTarget.name);
+      return;
+    }
+    if (value === "checkout") {
+      sendRef.current({ type: "CONFIRM" });
+      return;
+    }
+    if (value === "delete" && picked !== undefined) {
+      sendRef.current({ type: "DELETE_CONTINUATION", entryId: picked.entryId });
+    }
   }
 
   /** The picker's tentative pick, for the confirm enablement rule (R4). */
@@ -809,72 +870,23 @@ export function HistoryCenter({
                                       }}
                                     />
                                   )}
-                                  <span
-                                    className="poodle-history-center__picker-rename"
-                                    data-part="picker-rename"
-                                    data-branch={renameTarget?.branchId}
-                                  >
-                                    <IconButton
-                                      icon="edit"
-                                      ariaLabel={
-                                        renameTarget === null ? "Rename fork" : `Rename ${renameTarget.name}`
-                                      }
-                                      tooltip="Rename branch"
-                                      variant="ghost"
+                                  {/* One actions menu, not three buttons. Clicking any entry in a fork's
+                                      run already navigates and checks that fork out, so none of these is
+                                      the row's primary action — checkout here exists only to activate a
+                                      fork without moving the current position. */}
+                                  <span className="poodle-history-center__picker-actions" data-part="picker-actions">
+                                    <Menu
+                                      items={pickerActions(picked, renameTarget, row.disabled)}
                                       size="xs"
                                       density={resolvedDensity}
-                                      disabled={renameTarget === null}
-                                      onClick={() => {
-                                        if (renameTarget !== null) {
-                                          startRename(renameTarget.branchId, renameTarget.name);
-                                        }
-                                      }}
-                                    />
-                                  </span>
-                                  {onDeleteContinuation !== null ? (
-                                    <span
-                                      className="poodle-history-center__picker-delete"
-                                      data-part="picker-delete"
-                                    >
-                                      <IconButton
-                                        icon="trash-2"
-                                        ariaLabel={
-                                          picked === undefined
-                                            ? "Delete fork"
-                                            : `Delete ${picked.branchName ?? picked.branchId}`
-                                        }
-                                        tooltip="Delete fork"
-                                        variant="ghost"
-                                        tone="danger"
-                                        size="xs"
-                                        density={resolvedDensity}
-                                        disabled={picked === undefined}
-                                        onClick={() => {
-                                          if (picked !== undefined) {
-                                            sendRef.current({ type: "DELETE_CONTINUATION", entryId: picked.entryId });
-                                          }
-                                        }}
-                                      />
-                                    </span>
-                                  ) : null}
-                                  <span
-                                    className="poodle-history-center__picker-checkout"
-                                    data-part="picker-checkout"
-                                  >
-                                    <IconButton
-                                      icon="check"
-                                      ariaLabel="Checkout"
-                                      tooltip="Checkout"
-                                      variant="ghost"
-                                      size="xs"
-                                      density={resolvedDensity}
-                                      disabled={
-                                        row.disabled ||
-                                        picked === undefined ||
-                                        picked.preferred ||
-                                        renamingBranchId !== null
+                                      ariaLabel="Fork actions"
+                                      triggerAriaLabel={
+                                        picked === undefined
+                                          ? "Fork actions"
+                                          : `Actions for ${picked.branchName ?? picked.branchId}`
                                       }
-                                      onClick={() => sendRef.current({ type: "CONFIRM" })}
+                                      onAction={(value) => runPickerAction(value, picked, renameTarget)}
+                                      trigger={<Icon name="ellipsis" size="xs" />}
                                     />
                                   </span>
                                 </div>

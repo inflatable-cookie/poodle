@@ -284,9 +284,9 @@
   min-width: 0;
 }
 
-.poodle-history-center__picker-rename,
-.poodle-history-center__picker-delete,
-.poodle-history-center__picker-checkout {
+/* The three action buttons are one … menu now; the rename/delete/checkout
+   wrappers are gone with them. */
+.poodle-history-center__picker-actions {
   display: inline-flex;
   flex: none;
 }
