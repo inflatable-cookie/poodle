@@ -104,6 +104,38 @@ verified. Use them. A hand-rolled equivalent of any of them is a failed card.
 If a primitive is genuinely missing something this needs, that is a finding:
 say which primitive and what it lacks, rather than working around it locally.
 
+### R4a — Ruling: SidebarNav gains a `title` on its group heading.
+
+Raised as a stop by the first run, correctly — R4 says a missing primitive
+capability is a finding, not something to work around locally. Answered here so
+the card can continue.
+
+**Approved.** `SidebarNav` may set `title={group.label}` on its
+`.poodle-sidebar-nav__group-title` heading in both web runtimes, plus a
+contract note. Scope: that one attribute. Nothing else in `SidebarNav` moves.
+
+Why native `title` and not the `Tooltip` component or a bespoke one:
+
+- It is the dominant house idiom. **13 components already use native
+  `title=`** — `PageHeader`, `SegmentedControl`, `Pill`, `ThemeSelect`,
+  `HistoryCenter` among them. Only 2 use `<Tooltip>`, and `Tabs` rolls its own
+  timer-driven one for its vertical icon-only case.
+- Assistive tech is already served without it: the group `<section>` carries
+  `aria-label={group.label}` (`SidebarNav.svelte:51`), so the full label
+  reaches AT whether or not the visible text is clipped. The `title` exists for
+  the sighted pointer user looking at a truncated heading — that is the whole
+  job, and native `title` does it.
+- Putting a `Tooltip` inside a shared navigation primitive to serve one
+  consumer is disproportionate, and would be the larger change this card is
+  meant to avoid.
+
+Set it unconditionally rather than trying to detect truncation. CSS knows the
+text is clipped; the component does not, and the other 13 do not gate it
+either.
+
+No Rust spec change — `sidebar_nav.rs` stays as it is. This is a web
+presentation affordance, and R5 keeps the whole card off the native tier.
+
 ### R5 — Web only, and record the native gap.
 
 Svelte first, React mirrors exactly. **No Rust spec, no native
@@ -184,6 +216,9 @@ Both runtimes:
 
 - `packages/{svelte,react}/components/src/SettingsShell.{svelte,tsx}`
 - `packages/{svelte,react}/components/src/index.ts`
+- `packages/{svelte,react}/components/src/SidebarNav.{svelte,tsx}` (R4a — the
+  `title` attribute only)
+- `docs/contracts/components/sidebar-nav.md` (R4a — the contract note only)
 - `packages/{svelte,react}/components/test/SettingsShell.test.*`
 - `packages/core/src/styles/settings-shell.css`
 - `packages/svelte/preview/src/component-registry.ts`
