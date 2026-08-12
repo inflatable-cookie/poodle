@@ -437,6 +437,52 @@ describe("visible-row derivation — forks as data (R1)", () => {
     const source = readFileSync(join(import.meta.dir, "..", "src", "history-center.ts"), "utf8");
     expect(source).not.toMatch(/Date\.now|performance\.now|new Date|setTimeout/);
   });
+
+  test("a fork run whose entries now sit on the spine emits no duplicate rows", () => {
+    const level = {
+      anchorEntryId: "c2",
+      continuations: [continuation("f1", { branchId: "feature/alt" }),
+                      continuation("g1", { branchId: "feature/lead", preferred: true })],
+      pick: null,
+      chosen: continuation("f1", { branchId: "feature/alt" }),
+      runPages: [page([entry("f2"), entry("f1")])],
+      inner: null,
+    } as HistoryCenterOpenFork;
+
+    // The host navigated into the fork: f1/f2 are the primary line now and
+    // arrive in new root pages. The open level is untouched.
+    const pagesAfter = [page([entry("f2"), entry("f1"), entry("c2", 2), entry("c1")])];
+    const rows = historyCenterVisibleRows(pagesAfter, new Map([["c2", level]]));
+    const ids = rows.filter((r) => r.kind === "entry").map((r) => r.entry.id);
+    expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
+  });
+
+  test("a stale level renders the not-yet-loaded row, never the spliced run (R2)", () => {
+    // Same fixture as the duplicate-row test: the level's shown fork (f1)
+    // now sits on the root spine. The derivation renders the picker empty
+    // and the not-yet-loaded row — the same row set the machine's reconcile
+    // produces after dropping the level's data — so the list does not change
+    // shape at the reconcile boundary, and no new row kind is invented.
+    const staleLevel = {
+      anchorEntryId: "c2",
+      continuations: [continuation("f1", { branchId: "feature/alt" }),
+                      continuation("g1", { branchId: "feature/lead", preferred: true })],
+      pick: null,
+      chosen: continuation("f1", { branchId: "feature/alt" }),
+      runPages: [page([entry("f2"), entry("f1")])],
+      inner: null,
+    } as HistoryCenterOpenFork;
+    const pagesAfter = [page([entry("f2"), entry("f1"), entry("c2", 2), entry("c1")])];
+
+    expect(render(historyCenterVisibleRows(pagesAfter, new Map([["c2", staleLevel]])))).toEqual([
+      "entry:c1@0:-:-:0",
+      "entry:c2@0:c1:-:1",
+      "picker:c2@1::-:disabled",
+      "not-yet-loaded:c2@1:f1",
+      "entry:f1@0:c2:-:0",
+      "entry:f2@0:f1:-:0",
+    ]);
+  });
 });
 
 describe("machine — popover open state", () => {
@@ -701,6 +747,25 @@ describe("machine — disclosure flow", () => {
     expect(result.effects).toEqual([]);
   });
 
+  test("CONFIRM commits the auto-chosen single fork — it counts as picked (R1, g13-034)", () => {
+    const afterDisclose = historyCenterTransition("open", ctx({ pages: forkedPages(2) }), {
+      type: "DISCLOSE",
+      entryId: "e1",
+    });
+    const loaded = historyCenterTransition("open", afterDisclose.context, {
+      type: "CONTINUATIONS_LOADED",
+      entryId: "e1",
+      continuations: [continuation("e2", { preferred: true }), continuation("l1")],
+    });
+
+    // The single fork lives in `chosen`, never in `pick` — but the
+    // auto-chosen fork counts as picked: checkout commits it and clears the
+    // disclosure state, exactly as a multi-fork pick would.
+    const confirmed = historyCenterTransition("open", loaded.context, { type: "CONFIRM" });
+    expect(confirmed.effects).toEqual([{ type: "checkoutContinuation", entryId: "l1" }]);
+    expect(confirmed.context.open).toBeNull();
+  });
+
   test("DELETE_CONTINUATION emits the delete command for a fork an open picker offers (b033 R4)", () => {
     const afterDisclose = historyCenterTransition("open", ctx({ pages: forkedPages(3) }), {
       type: "DISCLOSE",
@@ -871,6 +936,106 @@ describe("machine — disclosure flow", () => {
     const nested = historyCenterTransition("open", context, { type: "DISCLOSE", entryId: "l1a" });
     expect(nested.effects).toEqual([{ type: "loadContinuations", entryId: "l1a" }]);
     expect(nested.context.open?.get("e1")?.inner?.get("l1a")).toBeDefined();
+  });
+});
+
+describe("machine — stale levels (R2, g13-034)", () => {
+  // The level open at c2 with f1's run loaded; the host then navigated into
+  // the fork — the new root pages contain f1 and f2, the open level
+  // untouched.
+  const staleLevel = level("c2", {
+    continuations: [
+      continuation("f1", { branchId: "feature/alt" }),
+      continuation("g1", { branchId: "feature/lead", preferred: true }),
+    ],
+    chosen: continuation("f1", { branchId: "feature/alt" }),
+    runPages: [page([entry("f2"), entry("f1")])],
+  });
+  const navigatedPages = [page([entry("f2"), entry("f1"), entry("c2", 2), entry("c1")])];
+
+  test("a stale level stays open at its anchor — dropping the data is not a close (b028 R1)", () => {
+    const result = historyCenterTransition(
+      "open",
+      ctx({ pages: navigatedPages, open: open([staleLevel]) }),
+      { type: "FOCUS_MOVE", direction: "next" },
+    );
+
+    // The anchor is still open, its loaded data dropped, and the re-request
+    // left once.
+    const dropped = result.context.open?.get("c2");
+    expect(dropped).toBeDefined();
+    expect(dropped?.anchorEntryId).toBe("c2");
+    expect(dropped?.continuations).toBeNull();
+    expect(dropped?.pick).toBeNull();
+    expect(dropped?.chosen).toBeNull();
+    expect(dropped?.runPages).toEqual([]);
+    expect(result.effects.filter((effect) => effect.type === "loadContinuations")).toEqual([
+      { type: "loadContinuations", entryId: "c2" },
+    ]);
+
+    // Until the re-requested data lands, the level renders the existing
+    // not-yet-loaded row — no new row kind.
+    expect(render(historyCenterVisibleRows(result.context.pages, result.context.open))).toContain(
+      "not-yet-loaded:c2@1:-",
+    );
+  });
+
+  test("the re-request leaves exactly once, not on every derivation", () => {
+    const context = ctx({ pages: navigatedPages, open: open([staleLevel]) });
+
+    const first = historyCenterTransition("open", context, { type: "FOCUS_MOVE", direction: "next" });
+    expect(first.effects.filter((effect) => effect.type === "loadContinuations")).toEqual([
+      { type: "loadContinuations", entryId: "c2" },
+    ]);
+
+    // Dropped, the level has no shown fork: the same pages re-derive and
+    // later transitions emit nothing more.
+    const second = historyCenterTransition("open", first.context, { type: "FOCUS_MOVE", direction: "next" });
+    expect(second.effects.filter((effect) => effect.type === "loadContinuations")).toEqual([]);
+    const third = historyCenterTransition("open", second.context, { type: "ACTIVATE_ROW" });
+    expect(third.effects.filter((effect) => effect.type === "loadContinuations")).toEqual([]);
+  });
+
+  test("a level whose run is not on the spine is untouched — no invalidation, no load", () => {
+    const context = ctx({
+      pages: [page([entry("e2", 0), entry("e1", 2)])],
+      open: open([
+        level("e1", {
+          continuations: [continuation("l1")],
+          chosen: continuation("l1"),
+          runPages: [page([entry("l1b"), entry("l1a", 0)])],
+        }),
+      ]),
+    });
+
+    const result = historyCenterTransition("open", context, { type: "FOCUS_MOVE", direction: "next" });
+
+    // l1 is not on the spine: the level keeps its data, no load leaves, and
+    // the open map is the same reference.
+    expect(result.effects).toEqual([{ type: "focusRow", row: { kind: "entry", entryId: "e1" } }]);
+    expect(result.context.open).toBe(context.open);
+    expect(render(historyCenterVisibleRows(result.context.pages, result.context.open))).toEqual([
+      "entry:e1@0:-:-:1",
+      "picker:e1@1:l1:l1:disabled",
+      "entry:l1a@1:e1:l1:0",
+      "entry:l1b@1:l1a:l1:0",
+      "entry:e2@0:e1:-:0",
+    ]);
+  });
+
+  test("a fed-back run for a stale level is inert — the drop precedes the result", () => {
+    const context = ctx({ pages: navigatedPages, open: open([staleLevel]) });
+
+    const result = historyCenterTransition("open", context, {
+      type: "RUN_LOADED",
+      fromEntryId: "f1",
+      pages: [page([entry("f2"), entry("f1")])],
+    });
+
+    // Reconcile dropped the level before the result ran; with no shown fork
+    // the run pages are not re-added.
+    expect(result.effects).toEqual([{ type: "loadContinuations", entryId: "c2" }]);
+    expect(result.context.open?.get("c2")?.runPages).toEqual([]);
   });
 });
 

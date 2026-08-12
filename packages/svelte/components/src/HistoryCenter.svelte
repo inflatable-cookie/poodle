@@ -382,11 +382,17 @@
    * run navigates to it and checks that fork out. This item is the narrower
    * case: make the fork primary *without* moving the current position. Its
    * label says so, because "Checkout" alone would read as the only route.
+   *
+   * R1 (g13-034): the row's `disabled` signal governs the Select alone — the
+   * menu never inherits it. With one fork there is nothing to choose between
+   * (the Select is disabled), but the auto-chosen single fork still counts as
+   * picked: checkout and rename live on their own gates. Checkout is disabled
+   * only when nothing is picked, when the picked fork is already the current
+   * line (`preferred`), or while a rename is open.
    */
   function pickerActions(
     picked: HistoryContinuation | undefined,
     renameTarget: { branchId: string; name: string } | null,
-    rowDisabled: boolean,
   ): MenuItem[] {
     const items: MenuItem[] = [
       {
@@ -397,8 +403,7 @@
       {
         value: "checkout",
         label: "Checkout",
-        disabled:
-          rowDisabled || picked === undefined || picked.preferred || renamingBranchId !== null,
+        disabled: picked === undefined || picked.preferred || renamingBranchId !== null,
       },
     ];
 
@@ -864,7 +869,7 @@
                            fork without moving the current position. -->
                       <span class="poodle-history-center__picker-actions" data-part="picker-actions">
                         <Menu
-                          items={pickerActions(picked, renameTarget, row.disabled)}
+                          items={pickerActions(picked, renameTarget)}
                           size="xs"
                           density={resolvedDensity}
                           ariaLabel="Fork actions"

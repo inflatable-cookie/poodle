@@ -82,6 +82,23 @@ const singleForkContinuations: Record<string, HistoryContinuation[]> = {
   l2: [continuation("i1", { label: "Inner intro", branchName: "feature/inner", preferred: true, entryCount: 2 })],
 };
 
+// A single NON-preferred fork: forkCount 1 auto-chooses it, and it is not
+// the current line, so checkout is legal (R1, g13-034).
+const singleForkNonPreferredContinuations: Record<string, HistoryContinuation[]> = {
+  c2: [continuation("l1", { label: "Lead intro", branchName: "feature/lead", entryCount: 2 })],
+};
+
+// The host navigated into the x1 fork: its entries are the primary line now
+// and arrive on the new root spine (R2, g13-034).
+const navigatedIntoForkPages = [
+  page([
+    { id: "x2", label: "Alt mix", position: "past", continuationCount: 0 },
+    { id: "x1", label: "Alt intro", position: "past", continuationCount: 1 },
+    { id: "c2", label: "Arranged intro", position: "past", continuationCount: 2 },
+    { id: "c1", label: "Committed mix 1", position: "past", continuationCount: 1 },
+  ]),
+];
+
 // A two-entry run variant used by the run-header time tests.
 const twoEntryContinuations: Record<string, HistoryContinuation[]> = {
   c2: [continuation("l1", { label: "Lead intro", branchName: "feature/lead", preferred: true, entryCount: 2 })],
@@ -301,6 +318,81 @@ describe("HistoryCenter (svelte)", () => {
       { kind: "entry", entry: "l3", depth: "1" },
       { kind: "entry", entry: "c3", depth: "0" },
     ]);
+  });
+
+  it("single fork: the Select is disabled but Checkout and Rename stay live on their own gates (R1)", async () => {
+    const onCheckoutContinuation = vi.fn();
+    render(HistoryCenterHostHarness, {
+      props: {
+        pages: singleForkPages,
+        continuationsByEntry: singleForkNonPreferredContinuations,
+        runsByFork: twoEntryRuns,
+        defaultOpen: true,
+        onCheckoutContinuation,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
+
+    // Nothing to choose between: the Select is disabled.
+    const picker = document.querySelector("[data-part='picker']") as HTMLElement;
+    const trigger = picker?.querySelector(".poodle-select__trigger") as HTMLButtonElement | null;
+    expect(trigger?.disabled).toBe(true);
+
+    // The actions menu lives on its own gates (R1): the auto-chosen single
+    // fork counts as picked, so a non-preferred one can be checked out and
+    // renamed — the row's disabled signal never reaches the menu.
+    expect((await forkActionItem("Checkout")).hasAttribute("disabled")).toBe(false);
+    expect((await forkActionItem("Rename")).hasAttribute("disabled")).toBe(false);
+
+    // And checkout is real, not decorative: the command names the
+    // auto-chosen fork and clears the disclosure.
+    await runForkAction("Checkout");
+    expect(onCheckoutContinuation).toHaveBeenCalledWith("l1");
+    expect(document.querySelector("[data-part='picker']")).toBeNull();
+  });
+
+  it("single fork: checkout stays disabled when the auto-chosen fork is the preferred one (R1)", async () => {
+    render(HistoryCenterHostHarness, {
+      props: {
+        pages: singleForkPages,
+        continuationsByEntry: singleForkContinuations,
+        runsByFork: nestedRuns,
+        defaultOpen: true,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
+
+    // The picked.preferred gate, not the row gate: the single fork is the
+    // current line, so checkout stays disabled — rename is still live.
+    expect((await forkActionItem("Checkout")).hasAttribute("disabled")).toBe(true);
+    expect((await forkActionItem("Rename")).hasAttribute("disabled")).toBe(false);
+  });
+
+  it("supplies root pages containing an open level's run without duplicating any row (R2)", async () => {
+    const { rerender } = render(HistoryCenterHostHarness, {
+      props: {
+        pages: twoForkPages,
+        continuationsByEntry: twoForkContinuations,
+        runsByFork: twoForkRuns,
+        defaultOpen: true,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
+
+    // R3 selected the current fork (x1); its run renders below the picker.
+    expect(rowByEntry("x1")).toBeTruthy();
+
+    // The host navigated into the fork: x1/x2 arrive on the new root spine,
+    // the open level untouched. The stale level's run must not splice again.
+    await rerender({ pages: navigatedIntoForkPages });
+
+    const ids = [...document.querySelectorAll("[data-row-kind=\"entry\"]")].map(
+      (el) => el.getAttribute("data-row-entry"),
+    );
+    expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
   });
 
   it("renders one badge reading 2 and a persistent Select picker at forkCount 2, distinct from a fork off a fork", async () => {
