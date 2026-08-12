@@ -9,7 +9,7 @@ Updated: 2026-08-12
 - Layer: composite
 - Summary: the history counterpart to `MessageCenter` — a compact titlebar-grade trigger cluster (undo / list / redo) plus a popover rendering the flat history list: the spine's entries and each open fork's run at its true depth, with node-owned fork disclosure (a fork icon, a counter badge, a persistent `Select` picker for several forks, and an opened region carrying the run's name and inline rename)
 - Composes: `IconButton`, `Popover`, `Select`, `Icon`, `Spinner`, `EmptyState`
-- In scope: undo/redo commands, popover open state, flat list rendering (spine + open fork runs, one loop over the core's visible rows), current-position marker, entry navigation, fork disclosure and picker, inline branch rename (opened region), checkpoint pins, transient rejection display, loading/failed status
+- In scope: undo/redo commands, popover open state, flat list rendering (spine + open fork runs, one loop over the core's visible rows), current-position marker, entry navigation, fork disclosure and picker, inline branch rename (opened region and picker), checkpoint pins, transient rejection display, loading/failed status
 - Out of scope: history storage, authority logic, protocol validation, checkpoint creation, undo/redo semantics, persistence, and any Longhorn knowledge
 
 `HistoryCenter` is **authority-agnostic**. Data arrives through props; commands
@@ -55,9 +55,11 @@ HistoryCenter
         │   │   └── Fork disclosure (forkCount > 0): fork icon, counter badge
         │   │       (forkCount > 1), chevron; toggles the fork open/closed
         │   ├── Picker row (an open fork with forkCount > 1): a persistent
-        │   │   `Select` (fork label + branch name, current fork marked) with
-        │   │   a checkout `IconButton` beside it; the selected fork's run
-        │   │   renders below the select
+        │   │   `Select` (fork label + branch name) with a rename pencil and a
+        │   │   checkout `IconButton` beside it — Select, pencil, checkout (R1);
+        │   │   the pencil renames whichever fork the `Select` currently shows, the
+        │   │   inline input taking the `Select`'s place while a rename is open
+        │   │   (R3); the selected fork's run renders below the select
         │   └── Not-yet-loaded row (an open fork whose run has not arrived):
         │       spinner + "Loading…"
         └── EmptyState
@@ -168,7 +170,7 @@ reference stable until a new result replaces it (the same rule v2's
 | `onRedo` | `() => void` | `null` | Redo command. |
 | `onOpenChange` | `(open: boolean) => void` | `null` | Open-state request. |
 | `onNavigateEntry` | `(branchId: string \| null, entryId: string) => void` | `null` | Entry row activation — always the entry actually clicked, on the branch that owns its run. `null` branch on the spine: the host knows its own branch. Replaces v1's `onSelectEntry`/`onCheckout` (ruling D1). |
-| `onRenameBranch` | `(branchId: string, name: string) => void` | `null` | Committed inline branch rename (opened region). |
+| `onRenameBranch` | `(branchId: string, name: string) => void` | `null` | Committed inline branch rename (opened region or picker). |
 | `onLoadContinuations` | `(entryId: string) => void` | `null` | Host op 1: load the continuations at the anchor entry. |
 | `onLoadContinuationRun` | `(fromEntryId: string) => void` | `null` | Host op 2: load the run starting at the fork's first entry. |
 | `onCheckoutContinuation` | `(entryId: string) => void` | `null` | Host op 3: checkout the picked continuation — the selected fork becomes the primary history. The host maps the callback onto its own prefer operation (R2a); Longhorn names are never Poodle's. |
@@ -242,9 +244,9 @@ The v2 stitcher surface is deleted with this card: `historyCenterRows`,
 There is **no depth cap** (v2 had one and it hid nesting): depth is a number
 the renderer uses and is never saturated. `emitRenameBranch` and
 `maxBranchNameBytes` survive unchanged (ruling R6: rename is a client-side
-affordance that enforces no protocol rule, surfaced in the opened region —
-the picker shows a fork's name and the opened region can rename it; no new
-rename path, no silently dropped capability).
+affordance that enforces no protocol rule, surfaced in the opened region and
+the picker (R1) — both through the same machinery, no second rename path, no
+silently dropped capability).
 
 The three continuation operations (`loadContinuations`,
 `loadContinuationRun`, `checkoutContinuation`) arrive as caller-supplied
@@ -439,9 +441,10 @@ the surface applies `trapFocusKeydown` while open.
 | run-header rename | `data-part` / `data-branch` | `run-header-rename` / the run's branch id |
 | run-header rename input | `data-part` | `run-header-rename-input` |
 | picker | `data-part` / `data-anchor` / roving tabindex | `picker` / the anchor entry id — rendered whenever the open entry's `forkCount > 1`, persisting across a choice (R1) |
-| picker select | `data-part` (wrapper) | `picker-select` — Poodle's `Select`, its value the tentative pick, options the forks; `PICK_CONTINUATION` on change. The trigger and the option rows carry the fork label, its branch name, and the current marker (`current-badge`) |
-| current badge | `data-part` | `current-badge` — marks the current fork (the record's `preferred` field; nothing user-facing says "prefer", R2a) |
-| picker checkout | `data-part` (the IconButton) | `picker-checkout` — the checkout button is `disabled` when no fork is picked or the picked fork is already the current one (R4) |
+| picker select | `data-part` (wrapper) | `picker-select` — Poodle's `Select`, its value the tentative pick, options the forks; `PICK_CONTINUATION` on change. The trigger and the option rows carry the fork label and its branch name. Replaced by the rename input while a rename is open (R3) |
+| picker rename | `data-part` / `data-branch` (wrapper) | `picker-rename` / the selected fork's branch id — the pencil `IconButton` between the `Select` and checkout (R1), renames whichever fork the `Select` currently shows through the same machinery as the run-header rename (R2); focus returns here after commit or cancel (R3) |
+| picker rename input | `data-part` | `picker-rename-input` — the inline input that takes the `Select`'s place while a rename is open, seeded with the selected fork's current name (R3) |
+| picker checkout | `data-part` (the IconButton) | `picker-checkout` — the checkout button is `disabled` when no fork is picked, the picked fork is already the current one, or a rename is open (R4, R3) |
 | not-yet-loaded | `data-part` / `data-anchor` / roving tabindex | `not-yet-loaded` / the anchor entry id |
 | rejection | `data-part` / `role` | `rejection` / `status` |
 
@@ -464,14 +467,14 @@ composed `Popover`), `createInstanceId` for surface ids.
 | `onRedo` | redo trigger click while `canRedo && !busy` | — | Plain command; host decides what redo means. |
 | `onOpenChange` | open state actually changes | `boolean` | Never emitted speculatively. |
 | `onNavigateEntry` | entry row activation (pointer or keyboard) | `branchId`, `entryId` | Always the entry actually clicked, on the branch that owns its run — never an ancestor or another branch's divergence entry. `branchId` is `null` on the spine. Picker and not-yet-loaded rows never fire it. Replaces v1's `onSelectEntry`/`onCheckout` (ruling D1). |
-| `onRenameBranch` | rename input commit (Enter or blur) in the opened region | `branchId`, `name` | Escape cancels without emitting. |
+| `onRenameBranch` | rename input commit (Enter or blur) in the opened region or the picker | `branchId`, `name` | In the picker, `branchId` is the fork the `Select` currently shows (R1) — never the anchor's own branch or the preferred fork. Escape cancels without emitting. |
 | `onLoadContinuations` | fork disclosure opens an entry with `forkCount >= 1` | `entryId` | Host op 1: the host loads the continuations at the anchor and feeds the result back as `continuationsResult`. |
 | `onLoadContinuationRun` | a single fork is auto-chosen (R3), or a fork is selected in the picker whose run is not loaded (R2) | `fromEntryId` | Host op 2: the host loads the run starting at the fork's first entry and feeds the result back as `runResult`. |
 | `onCheckoutContinuation` | the picker's checkout is confirmed on a fork that is not the current one | `entryId` | Host op 3: checkout the picked fork — it becomes the primary history. The host maps the callback onto its own prefer operation (R2a). Emitted alone (the run was previewed by the pick, R2) and never with navigation. The document does not move forward: Poodle clears the anchor's disclosure state and renders whatever root pages the host supplies afterwards. |
 
 The v2 `onLoadMoreEntries`/`onLoadMoreBranches` callbacks are retired with the
 v2 paging surface; the machine's `RENAME` event surfaces rename in the opened
-region (R6).
+region (R6) and the picker (R1) — one event, both sites.
 
 ## 6. Accessibility
 
@@ -498,12 +501,14 @@ region (R6).
   the counter badge is decorative (`aria-hidden` not required — it is inside
   the button's label scope and reads as part of the accessible name).
 - The picker row is Poodle's `Select` (a labelled combobox; its listbox
-  options carry `aria-selected` for the selection) plus a checkout
-  `IconButton`. The trigger and every option carry the fork label, its
-  branch name, and a visible **Current** marker on the current fork — the
-  record's `preferred` field, which never appears in user-facing copy (R2a).
-  Checkout is disabled until a fork that is not the current one is selected
-  (R4: `AlreadyAtTarget` stays a race, not a normal path).
+  options carry `aria-selected` for the selection) plus a rename pencil and
+  a checkout `IconButton` — Select, pencil, checkout (R1). The pencil is a
+  labelled `IconButton` (`Rename <branch>`) that renames whichever fork the
+  `Select` currently shows; while a rename is open the inline input takes
+  the `Select`'s place (R3). The trigger and every option carry the fork
+  label and its branch name. Checkout is disabled until a fork that is not
+  the current one is selected (R4: `AlreadyAtTarget` stays a race, not a
+  normal path) and while a rename is open (R3).
 - The not-yet-loaded row is a non-interactive roving-focus stop with a
   spinner; the loading status is `role="status"`.
 - The checkpoint pin and position marker are decorative; the entry label
@@ -518,9 +523,9 @@ region (R6).
 |-----|----------|
 | ArrowDown / ArrowUp | Move roving focus to the next/previous visible row, wrapping at the ends. Inside the picker's `Select`, the keys belong to the select (arrows open the listbox and move its highlight) — the machine never maps them. |
 | Home / End | Move focus to the first/last row. Inside the picker's `Select`, the keys belong to the select. |
-| Enter / Space | Activate the focused row: entry → `onNavigateEntry(branchId, entryId)`; picker / not-yet-loaded → focus syncs, nothing navigates. On the fork disclosure, the picker's select trigger, or a run-header rename button, the key activates that control natively (disclosure toggles the fork, the select opens/picks, rename opens the input) — never row navigation. |
-| Enter / Escape | In the rename input: commit (`onRenameBranch`) / cancel. After commit or cancel, focus returns to the run header's rename button. |
-| Tab / Shift+Tab | Trapped within the open surface (wraps first↔last focusable). Within a focused row, Tab moves entry button → run-header rename → fork disclosure in visual order; the picker's select trigger and checkout button are tabbable from the picker row. |
+| Enter / Space | Activate the focused row: entry → `onNavigateEntry(branchId, entryId)`; picker / not-yet-loaded → focus syncs, nothing navigates. On the fork disclosure, the picker's select trigger, or a rename button (run header or picker pencil), the key activates that control natively (disclosure toggles the fork, the select opens/picks, rename opens the input) — never row navigation. |
+| Enter / Escape | In the rename input: commit (`onRenameBranch`) / cancel. After commit or cancel, focus returns to the rename control — the run header's rename button or the picker's pencil. |
+| Tab / Shift+Tab | Trapped within the open surface (wraps first↔last focusable). Within a focused row, Tab moves entry button → run-header rename → fork disclosure in visual order; the picker's select trigger, rename pencil and checkout button are tabbable from the picker row. |
 | Escape | Close through `Popover`; focus returns to the trigger. Inside the picker's `Select`, Escape closes its listbox first. |
 
 ### Focus And Announcement
@@ -582,17 +587,17 @@ Semantic roles by default; recipes are the override surface (architecture
 | fork icon | `--poodle-recipe-history-center-fork-color` | text-secondary |
 | fork badge fill | `--poodle-recipe-history-center-fork-badge-fill` | accent 16% mix |
 | fork badge text | `--poodle-recipe-history-center-fork-badge-text` | `--poodle-color-accent-base` |
-| current badge fill | `--poodle-recipe-history-center-current-badge-fill` | accent 16% mix |
-| current badge text | `--poodle-recipe-history-center-current-badge-text` | `--poodle-color-accent-base` |
 | rejection border | `--poodle-recipe-history-center-rejection-border` | danger 45% mix |
 | rejection fill | `--poodle-recipe-history-center-rejection-fill` | danger 10% mix |
 | rejection text | `--poodle-recipe-history-center-rejection-text` | `--poodle-color-text-primary` |
 
 The v2 lane hooks (`lane-color`, `lane-thickness`), the caption-row hooks and
-the branch-current-badge hooks are retired with the v2 renderer; the fork and
-current badges take over the badge role (R3, picker). Metric variables
-(widths, gaps, padding, the depth inset step, font sizes) are internal and not
-part of the recipe contract.
+the branch-current-badge hooks are retired with the v2 renderer; the fork
+badge takes over the badge role (R3, picker). The `current-badge` hooks from
+g13-030 are retired with the badge itself (R4a): `preferred` stays on the
+record and keeps its job — checkout is disabled when the selected fork is
+already the current one. Metric variables (widths, gaps, padding, the depth
+inset step, font sizes) are internal and not part of the recipe contract.
 
 ## 9. Svelte Notes
 
@@ -608,7 +613,7 @@ part of the recipe contract.
   openForks)` in ONE `{#each}` keyed by row identity — no `svelte:self`, no
   recursion (R1); the run header's relative time is derived from supplied
   `recordedAtMs` values only — there is no clock (ruling D2); rename is
-  surfaced in the opened region (R6).
+  surfaced in the opened region (R6) and the picker (R1).
 - known browser-specific deltas: none.
 
 ## 10. GPUI Notes

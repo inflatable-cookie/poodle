@@ -299,16 +299,25 @@ describe("HistoryCenter (svelte)", () => {
     expect(document.querySelector("[data-part='picker-select']")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Checkout" })).toBeTruthy();
 
-    // The trigger shows the current selection: label, branch, current marker.
+    // R1: the pencil sits between the Select and checkout, renames the
+    // selection, and no "Current" badge marks the trigger (R4a).
     const trigger = screen.getByRole("button", { name: "Continuations" });
     expect(trigger.textContent).toContain("Alt intro");
     expect(trigger.textContent).toContain("feature/alt");
-    expect(trigger.textContent).toContain("Current");
+    expect(trigger.textContent).not.toContain("Current");
+
+    const select = document.querySelector("[data-part='picker-select'] .poodle-select") as HTMLElement;
+    const pencil = screen.getByRole("button", { name: "Rename feature/alt" });
+    const checkout = screen.getByRole("button", { name: "Checkout" });
+    expect(select.compareDocumentPosition(pencil) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
+    expect(pencil.compareDocumentPosition(checkout) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
+    expect(document.querySelector("[data-part='current-badge']")).toBeNull();
 
     // Opening the select offers exactly the two forks with the same anatomy.
     await fireEvent.click(trigger);
     expect(screen.getByRole("option", { name: /Lead intro feature\/lead/ })).toBeTruthy();
-    expect(screen.getByRole("option", { name: /Alt intro feature\/alt Current/ })).toBeTruthy();
+    expect(screen.getByRole("option", { name: /Alt intro feature\/alt/ })).toBeTruthy();
+    expect(document.querySelector("[data-part='current-badge']")).toBeNull();
   });
 
   it("selects the non-preferred fork: preview swaps below the select, checkout emits, never navigates", async () => {
@@ -403,15 +412,113 @@ describe("HistoryCenter (svelte)", () => {
 
     await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
 
-    // R3 opened on the current fork (x1, preferred) — nothing user-facing
-    // says "prefer": the trigger and the option carry a Current marker.
+    // R3 opened on the current fork (x1, preferred): checkout is disabled on
+    // it. The badge is gone (R4a) — the disabled button carries the fact.
     expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(true);
-    expect(document.querySelector("[data-part='current-badge']")?.textContent).toBe("Current");
+    expect(document.querySelector("[data-part='current-badge']")).toBeNull();
 
     // Picking the other fork enables checkout.
     await fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
     await fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
     expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(false);
+  });
+
+  it("renames the selected fork from the picker through onRenameBranch", async () => {
+    const onRenameBranch = vi.fn();
+    render(HistoryCenterHostHarness, {
+      props: {
+        pages: twoForkPages,
+        continuationsByEntry: twoForkContinuations,
+        runsByFork: twoForkRuns,
+        defaultOpen: true,
+        onRenameBranch,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
+
+    // R3 opened on the current fork (x1): the pencil targets whatever the
+    // Select shows — x1's branch, not the anchor's and not some other fork.
+    await fireEvent.click(screen.getByRole("button", { name: "Rename feature/alt" }));
+
+    // The input replaces the Select while renaming (R3).
+    expect(screen.queryByRole("button", { name: "Continuations" })).toBeNull();
+    const input = screen.getByRole("textbox", { name: "Rename branch feature/alt" }) as HTMLInputElement;
+    await fireEvent.input(input, { target: { value: "feature/alt-v2" } });
+    await fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(onRenameBranch).toHaveBeenCalledWith("b-x1", "feature/alt-v2");
+  });
+
+  it("changing the Select then renaming targets the newly selected fork", async () => {
+    const onRenameBranch = vi.fn();
+    render(HistoryCenterHostHarness, {
+      props: {
+        pages: twoForkPages,
+        continuationsByEntry: twoForkContinuations,
+        runsByFork: twoForkRuns,
+        defaultOpen: true,
+        onRenameBranch,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
+
+    // Preview the non-preferred fork, then rename it: the pencil follows the
+    // selection — b-l1, not the preferred fork (b-x1) and not the anchor's.
+    await fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
+    await fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
+
+    await fireEvent.click(screen.getByRole("button", { name: "Rename feature/lead" }));
+    const input = screen.getByRole("textbox", { name: "Rename branch feature/lead" }) as HTMLInputElement;
+    await fireEvent.input(input, { target: { value: "feature/lead-v2" } });
+    await fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(onRenameBranch).toHaveBeenCalledWith("b-l1", "feature/lead-v2");
+  });
+
+  it("disables checkout while a rename is open", async () => {
+    render(HistoryCenterHostHarness, {
+      props: {
+        pages: twoForkPages,
+        continuationsByEntry: twoForkContinuations,
+        runsByFork: twoForkRuns,
+        defaultOpen: true,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
+
+    // Enable checkout by picking the non-preferred fork…
+    await fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
+    await fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
+    expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(false);
+
+    // …then a rename opens and checkout goes inert (R3).
+    await fireEvent.click(screen.getByRole("button", { name: "Rename feature/lead" }));
+    expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(true);
+  });
+
+  it("cancelling a picker rename restores the Select and returns focus to the pencil", async () => {
+    render(HistoryCenterHostHarness, {
+      props: {
+        pages: twoForkPages,
+        continuationsByEntry: twoForkContinuations,
+        runsByFork: twoForkRuns,
+        defaultOpen: true,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
+    await fireEvent.click(screen.getByRole("button", { name: "Rename feature/alt" }));
+
+    const input = screen.getByRole("textbox", { name: "Rename branch feature/alt" }) as HTMLInputElement;
+    await fireEvent.keyDown(input, { key: "Escape" });
+
+    // The Select is back and focus sits on the pencil (R3).
+    expect(screen.getByRole("button", { name: "Continuations" })).toBeTruthy();
+    expect(screen.queryByRole("textbox", { name: "Rename branch feature/alt" })).toBeNull();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Rename feature/alt" }));
   });
 
   it("renders a fork off a fork at the inner depth, never confusable with a picker", async () => {

@@ -7,6 +7,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-12 — g13-032's picker pencil is an `IconButton`, which forwards no
+  data attributes (explicit props only, no rest spread): the pencil's
+  `data-part="picker-rename"`/`data-branch` markers had to live on a wrapper
+  span, and the rename focus-restore targets the wrapper's inner button. Any
+  composite that needs a `data-part`/`data-branch` on an `IconButton` hits
+  the same wall; a rest-prop pass on `IconButton` (forward `data-*`/`aria-*`
+  to the inner button) would remove the wrapper pattern.
+
 - 2026-08-12 — g13-030's picker puts Poodle's `Select` inside the
   `HistoryCenter` popover, and Select portals its listbox to the document
   body — so Tab from an open listbox is outside `Popover`'s focus trap

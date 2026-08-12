@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
   HistoryCenterRejectionCode,
   HistoryContinuation,
@@ -186,6 +186,32 @@ export function HistoryCenterSpecimen() {
     return (fromEntryId) => set((current) => ({ ...current, run: { fromEntryId, pages: runs[fromEntryId] ?? [] } }));
   }
 
+  // The capture never clicks, so the two-forks group drives its own two
+  // interactions on mount: disclose the fork, then press the rename pencil.
+  // The capture then shows the picker mid-rename — the state this card adds.
+  const renameDemoStartedRef = useRef(false);
+
+  useEffect(() => {
+    const run = () => {
+      const disclosure = document.querySelector<HTMLButtonElement>('[data-part="fork-disclosure"]');
+      if (!disclosure) return false;
+      disclosure.click();
+      requestAnimationFrame(() => {
+        const pencil = document.querySelector<HTMLButtonElement>('[data-part="picker-rename"] button');
+        if (pencil) {
+          pencil.click();
+          renameDemoStartedRef.current = true;
+        }
+      });
+      return true;
+    };
+
+    if (!run()) {
+      const timer = setTimeout(run, 60);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   const navigate = (branchId: string | null, entryId: string) => console.log("navigate", branchId, entryId);
 
   return (
@@ -198,9 +224,10 @@ export function HistoryCenterSpecimen() {
       sizes={(size) => <HistoryCenter pages={linearPages} size={size} canUndo canRedo />}
       densities={(density) => <HistoryCenter pages={linearPages} density={density} canUndo canRedo />}
     >
-      {/* The two-forks group opens by default so the capture shows the flat
-          list with the counter badge; the popover portals to the theme root,
-          so only one group opens at once. */}
+      {/* The two-forks group opens by default so the capture shows the
+          picker with a rename in progress (the mount-time driver discloses
+          the fork and presses the pencil); the popover portals to the theme
+          root, so only one group opens at once. */}
       <div style={{ display: "grid", gap: "2rem", minHeight: "40rem" }}>
         <SpecimenGroup label="linear">
           <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount, tick } from "svelte";
   import type {
     HistoryCenterRejectionCode,
     HistoryContinuation,
@@ -186,14 +187,40 @@
   ): (fromEntryId: string) => void {
     return (fromEntryId) => set({ ...state, run: { fromEntryId, pages: runs[fromEntryId] ?? [] } });
   }
+
+  // The capture never clicks, so the two-forks group drives its own two
+  // interactions on mount: disclose the fork, then press the rename pencil.
+  // The capture then shows the picker mid-rename — the state this card adds.
+  onMount(() => {
+    const run = (): boolean => {
+      const disclosure = document.querySelector<HTMLButtonElement>('[data-part="fork-disclosure"]');
+      if (disclosure === null) {
+        return false;
+      }
+      disclosure.click();
+      void tick().then(() => {
+        const pencil = document.querySelector<HTMLButtonElement>('[data-part="picker-rename"] button');
+        if (pencil !== null) {
+          pencil.click();
+        }
+      });
+      return true;
+    };
+
+    if (!run()) {
+      const timer = setTimeout(() => run(), 60);
+      return () => clearTimeout(timer);
+    }
+  });
 </script>
 
 <SpecimenLayout bareVariants>
   {#snippet children()}
     <div class="poodle-history-center-specimen">
-      <!-- The two-forks group opens by default so the capture shows the flat
-           list with the counter badge; the popover portals to the theme root,
-           so only one group opens at once. -->
+      <!-- The two-forks group opens by default so the capture shows the
+           picker with a rename in progress (the mount-time driver discloses
+           the fork and presses the pencil); the popover portals to the theme
+           root, so only one group opens at once. -->
       <SpecimenGroup label="linear">
         <div class="poodle-history-center-specimen__anchor">
           <HistoryCenter
