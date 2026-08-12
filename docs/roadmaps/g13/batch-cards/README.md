@@ -37,8 +37,8 @@ and roadmap closeout.
 | `025` | codegen remaining emitters — closes `g13.003` | `022` merged | merged (`5d9edc9d`) |
 | `026` | `dismissOnOutsideInteract` across the overlay family | none | merged (`4418eb58`) |
 | `027` | dismiss native parity + bidirectional drift gate | `026` merged | merged (`2eb94a16`) |
-| `028` | HistoryCentre v3 — flat list, node-owned forks (core) | `024` merged | dispatched |
-| `029` | HistoryCentre v3 — rendering, picker, nested list | `028` | dispatched |
+| `028` | HistoryCentre v3 — flat list, node-owned forks (core) | `024` merged | merged (`680f3c64`) |
+| `029` | HistoryCentre v3 — rendering, picker, nested list | `028` | merged (`16b68e61` → `2a6d3af9`) |
 | — | HistoryCentre — native parity | `029` merged | planned (renumbered; `022` was reused for codegen) |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;

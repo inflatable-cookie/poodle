@@ -1,6 +1,6 @@
 # 028 HistoryCentre v3 — Flat List, Node-Owned Forks (Core)
 
-Status: ready
+Status: merged (`680f3c64` → `2a6d3af9`)
 Milestone: side-quest (component architecture, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-028-history-center-v3-core`

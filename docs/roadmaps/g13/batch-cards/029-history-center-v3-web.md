@@ -1,6 +1,6 @@
 # 029 HistoryCentre v3 — Rendering, Picker, Nested List
 
-Status: ready
+Status: merged (`16b68e61` → `2a6d3af9`)
 Milestone: side-quest (component architecture, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-029-history-center-v3-web`
