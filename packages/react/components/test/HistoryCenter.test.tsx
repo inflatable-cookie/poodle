@@ -185,6 +185,30 @@ function rowSummary(): Array<{ kind: string; entry: string; depth: string }> {  
   }));
 }
 
+/**
+ * The fork row's three actions live behind one … menu now, so a test cannot
+ * click them directly. These open the menu if it is closed — calling twice in
+ * a row must not toggle it shut — and resolve an item by label.
+ */
+async function openForkMenu(): Promise<void> {
+  if (document.querySelector('[role="menu"]') !== null) {
+    return;
+  }
+  const trigger = screen.getAllByRole("button", { name: /^(Fork actions|Actions for )/ })[0];
+  await fireEvent.click(trigger);
+}
+
+/** The menu item, without activating it — for enabled/disabled assertions. */
+async function forkActionItem(name: string | RegExp): Promise<HTMLElement> {
+  await openForkMenu();
+  return screen.findByRole("menuitem", { name });
+}
+
+/** Opens the menu and activates the named action. */
+async function runForkAction(name: string | RegExp): Promise<void> {
+  await fireEvent.click(await forkActionItem(name));
+}
+
 function rowByEntry(entryId: string): HTMLElement {
   const row = document.querySelector(`[data-row-kind="entry"][data-row-entry="${entryId}"]`) as HTMLElement;
   if (row === null) {
@@ -300,7 +324,7 @@ describe("HistoryCenter (react)", () => {
     ]);
   });
 
-  it("renders one badge reading 2 and a persistent Select picker at forkCount 2, distinct from a fork off a fork", () => {
+  it("renders one badge reading 2 and a persistent Select picker at forkCount 2, distinct from a fork off a fork", async () => {
     const onNavigateEntry = vi.fn();
     const { rerender } = render(
       <HistoryCenter pages={twoForkPages} defaultOpen onNavigateEntry={onNavigateEntry} />,
@@ -342,7 +366,7 @@ describe("HistoryCenter (react)", () => {
       { kind: "entry", entry: "c3", depth: "0" },
     ]);
     expect(document.querySelector('[data-part="picker-select"]')).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Checkout" })).toBeTruthy();
+    expect(await forkActionItem("Activate without moving")).toBeTruthy();
 
     // R1: the pencil sits between the Select and checkout, renames the
     // selection, and no "Current" badge marks the trigger (R4a).
@@ -352,10 +376,13 @@ describe("HistoryCenter (react)", () => {
     expect(trigger.textContent).not.toContain("Current");
 
     const select = document.querySelector('[data-part="picker-select"] .poodle-select') as HTMLElement;
-    const pencil = screen.getByRole("button", { name: "Rename feature/alt" });
-    const checkout = screen.getByRole("button", { name: "Checkout" });
-    expect(select.compareDocumentPosition(pencil) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
-    expect(pencil.compareDocumentPosition(checkout) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
+    // The three buttons are one … menu now, so the row order is Select then
+    // menu; the action order lives inside the menu instead.
+    const actions = document.querySelector("[data-part='picker-actions']") as HTMLElement;
+    expect(select.compareDocumentPosition(actions) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
+    await openForkMenu();
+    const labels = screen.getAllByRole("menuitem").map((el) => el.textContent?.trim());
+    expect(labels).toEqual(["Rename feature/alt", "Activate without moving"]);
     expect(document.querySelector('[data-part="current-badge"]')).toBeNull();
 
     // Opening the select offers exactly the two forks with the same anatomy.
@@ -365,7 +392,7 @@ describe("HistoryCenter (react)", () => {
     expect(document.querySelector('[data-part="current-badge"]')).toBeNull();
   });
 
-  it("selects the non-preferred fork: preview swaps below the select, checkout emits, never navigates", () => {
+  it("selects the non-preferred fork: preview swaps below the select, checkout emits, never navigates", async () => {
     const onNavigateEntry = vi.fn();
     const onCheckoutContinuation = vi.fn();
     const { rerender } = render(
@@ -399,7 +426,7 @@ describe("HistoryCenter (react)", () => {
     );
 
     // R3 selected the current fork (x1): checkout is disabled on it.
-    expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(true);
+    expect((await forkActionItem("Activate without moving")).hasAttribute("disabled")).toBe(true);
 
     // Select the non-preferred fork: the entries below swap to its run and
     // the select stays — the pick commits nothing.
@@ -426,9 +453,9 @@ describe("HistoryCenter (react)", () => {
     ]);
     expect(onCheckoutContinuation).not.toHaveBeenCalled();
     expect(onNavigateEntry).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(false);
+    expect((await forkActionItem("Activate without moving")).hasAttribute("disabled")).toBe(false);
 
-    fireEvent.click(screen.getByRole("button", { name: "Checkout" }));
+    await runForkAction("Activate without moving");
 
     // Checkout makes the fork primary: the command leaves, the disclosure
     // state for the anchor is cleared, and the root list renders again —
@@ -480,7 +507,7 @@ describe("HistoryCenter (react)", () => {
     expect(onNavigateEntry).not.toHaveBeenCalled();
   });
 
-  it("disables checkout while the selection is already the current fork", () => {
+  it("disables checkout while the selection is already the current fork", async () => {
     const { rerender } = render(<HistoryCenter pages={twoForkPages} defaultOpen />);
 
     fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
@@ -494,16 +521,16 @@ describe("HistoryCenter (react)", () => {
 
     // R3 opened on the current fork (x1, preferred): checkout is disabled on
     // it. The badge is gone (R4a) — the disabled button carries the fact.
-    expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(true);
+    expect((await forkActionItem("Activate without moving")).hasAttribute("disabled")).toBe(true);
     expect(document.querySelector('[data-part="current-badge"]')).toBeNull();
 
     // Picking the other fork enables checkout.
     fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
     fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
-    expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(false);
+    expect((await forkActionItem("Activate without moving")).hasAttribute("disabled")).toBe(false);
   });
 
-  it("renames the selected fork from the picker through onRenameBranch", () => {
+  it("renames the selected fork from the picker through onRenameBranch", async () => {
     const onRenameBranch = vi.fn();
     const { rerender } = render(
       <HistoryCenter pages={twoForkPages} defaultOpen onRenameBranch={onRenameBranch} />,
@@ -525,7 +552,7 @@ describe("HistoryCenter (react)", () => {
 
     // R3 opened on the current fork (x1): the pencil targets whatever the
     // Select shows — x1's branch, not the anchor's and not some other fork.
-    fireEvent.click(screen.getByRole("button", { name: "Rename feature/alt" }));
+    await runForkAction("Rename feature/alt");
 
     // The input replaces the Select while renaming (R3).
     expect(screen.queryByRole("button", { name: "Continuations" })).toBeNull();
@@ -536,7 +563,7 @@ describe("HistoryCenter (react)", () => {
     expect(onRenameBranch).toHaveBeenCalledWith("b-x1", "feature/alt-v2");
   });
 
-  it("changing the Select then renaming targets the newly selected fork", () => {
+  it("changing the Select then renaming targets the newly selected fork", async () => {
     const onRenameBranch = vi.fn();
     const { rerender } = render(
       <HistoryCenter pages={twoForkPages} defaultOpen onRenameBranch={onRenameBranch} />,
@@ -561,7 +588,7 @@ describe("HistoryCenter (react)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
     fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Rename feature/lead" }));
+    await runForkAction("Rename feature/lead");
     const input = screen.getByRole("textbox", { name: "Rename branch feature/lead" }) as HTMLInputElement;
     fireEvent.change(input, { target: { value: "feature/lead-v2" } });
     fireEvent.keyDown(input, { key: "Enter" });
@@ -569,7 +596,7 @@ describe("HistoryCenter (react)", () => {
     expect(onRenameBranch).toHaveBeenCalledWith("b-l1", "feature/lead-v2");
   });
 
-  it("disables checkout while a rename is open", () => {
+  it("disables checkout while a rename is open", async () => {
     const { rerender } = render(<HistoryCenter pages={twoForkPages} defaultOpen />);
 
     fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
@@ -581,14 +608,14 @@ describe("HistoryCenter (react)", () => {
     // Enable checkout by picking the non-preferred fork…
     fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
     fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
-    expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(false);
+    expect((await forkActionItem("Activate without moving")).hasAttribute("disabled")).toBe(false);
 
     // …then a rename opens and checkout goes inert (R3).
-    fireEvent.click(screen.getByRole("button", { name: "Rename feature/lead" }));
-    expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(true);
+    await runForkAction("Rename feature/lead");
+    expect((await forkActionItem("Activate without moving")).hasAttribute("disabled")).toBe(true);
   });
 
-  it("cancelling a picker rename restores the Select and returns focus to the pencil", () => {
+  it("cancelling a picker rename restores the Select and returns focus to the pencil", async () => {
     const { rerender } = render(<HistoryCenter pages={twoForkPages} defaultOpen />);
 
     fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
@@ -597,7 +624,7 @@ describe("HistoryCenter (react)", () => {
       <HistoryCenter pages={twoForkPages} defaultOpen continuationsResult={c2Result} runResult={x1TwoForkRun} />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Rename feature/alt" }));
+    await runForkAction("Rename feature/alt");
 
     const input = screen.getByRole("textbox", { name: "Rename branch feature/alt" }) as HTMLInputElement;
     fireEvent.keyDown(input, { key: "Escape" });
@@ -605,7 +632,13 @@ describe("HistoryCenter (react)", () => {
     // The Select is back and focus sits on the pencil (R3).
     expect(screen.getByRole("button", { name: "Continuations" })).toBeTruthy();
     expect(screen.queryByRole("textbox", { name: "Rename branch feature/alt" })).toBeNull();
-    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Rename feature/alt" }));
+    // Focus returns to the actions menu trigger — the control the rename was
+    // opened from, now that the pencil is a menu item.
+    const trigger = document.querySelector(
+      "[data-part='picker-actions'] .poodle-menu__trigger",
+    );
+    expect(trigger).toBeTruthy();
+    expect(document.activeElement).toBe(trigger);
   });
 
   it("renders a fork off a fork at the inner depth, never confusable with a picker", () => {
@@ -848,7 +881,7 @@ describe("HistoryCenter (react)", () => {
     expect(screen.getByRole("option", { name: /Lead intro feature\/lead/ })).toBeTruthy();
   });
 
-  it("commits inline rename through onRenameBranch and cancels on Escape", () => {
+  it("commits inline rename through onRenameBranch and cancels on Escape", async () => {
     const onRenameBranch = vi.fn();
     const { rerender } = render(
       <HistoryCenter pages={singleForkPages} defaultOpen onRenameBranch={onRenameBranch} />,
@@ -873,7 +906,7 @@ describe("HistoryCenter (react)", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Rename feature/lead" }));
+    await runForkAction("Rename feature/lead");
 
     const input = screen.getByRole("textbox", { name: "Rename branch feature/lead" }) as HTMLInputElement;
     fireEvent.change(input, { target: { value: "feature/lead-v2" } });
@@ -882,7 +915,7 @@ describe("HistoryCenter (react)", () => {
     expect(onRenameBranch).toHaveBeenCalledWith("b-l1", "feature/lead-v2");
 
     // Escape cancels without emitting.
-    fireEvent.click(screen.getByRole("button", { name: "Rename feature/lead" }));
+    await runForkAction("Rename feature/lead");
     const second = screen.getByRole("textbox", { name: "Rename branch feature/lead" }) as HTMLInputElement;
     fireEvent.keyDown(second, { key: "Escape" });
 
