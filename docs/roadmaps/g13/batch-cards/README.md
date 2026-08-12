@@ -52,7 +52,7 @@ and roadmap closeout.
 | `040` | DockRegion tab pass-throughs + the underline recipe hook | none | merged (`51b0e76c`) |
 | `041` | Button slice: Rust authoring + the two web runtimes (**g13.005** part 1) | `035`/`036` merged | merged (`ff391651`) |
 | `042` | Button slice: GPUI + Jetstream via `poodle-render` — closes **g13.005** | `041` merged | planned |
-| `043` | container queries that query themselves (all 5 stylesheets) | none | ready |
+| `043` | container queries that query themselves (3 genuine of 5) | none | merged (`9bba0956`) |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
