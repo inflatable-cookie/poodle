@@ -600,15 +600,22 @@ export function HistoryCenter({
           surfaceMaxWidth="min(38rem, calc(100vw - 2rem))"
           onOpenChange={handleOpenChange}
           trigger={
-            <IconButton
-              icon="list"
-              ariaLabel={listLabel}
-              tooltip={listLabel}
-              variant="ghost"
-              size={resolvedSize}
-              density={resolvedDensity}
-              expanded={isOpen}
-            />
+            /* A bare glyph, not an IconButton. The disclosure sits between
+               undo and redo, and it must read narrower than them rather than
+               as a third control of equal weight. It stays a real button, so
+               the keyboard and assistive tech still reach it; only the button
+               chrome and its padding go away. */
+            <button
+              type="button"
+              className="poodle-history-center__list-trigger"
+              data-part="list-trigger"
+              data-size={resolvedSize}
+              aria-label={listLabel}
+              aria-expanded={isOpen}
+              title={listLabel}
+            >
+              <Icon name="chevron-down" size={resolvedSize} density={resolvedDensity} />
+            </button>
           }
         >
           <section

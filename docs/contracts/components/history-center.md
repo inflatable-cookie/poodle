@@ -37,7 +37,7 @@ lives in the picker and the opened region (ruling R6).
 HistoryCenter
 ├── Trigger cluster
 │   ├── IconButton undo (icon `undo`; enabled from canUndo, busy)
-│   ├── IconButton list (opens the popover)
+│   ├── Chevron glyph (a bare button, not an IconButton; opens the popover)
 │   └── IconButton redo (icon `redo`; enabled from canRedo, busy)
 └── Popover
     └── Surface
@@ -45,13 +45,9 @@ HistoryCenter
         ├── Rejection notice (transient, dismissible)
         ├── Status row (loading spinner / failed message)
         ├── History list (the flat visible rows, one loop)
-        │   ├── Entry row (depth inset; row button + optional run header +
-        │   │   fork disclosure)
+        │   ├── Entry row (depth inset; row button + fork disclosure)
         │   │   ├── Entry button: checkpoint pin or position marker, label,
         │   │   │   group meta; navigates
-        │   │   ├── Run header (first row of an open run only): fork name,
-        │   │   │   run entry count + derived relative time, inline rename —
-        │   │   │   the opened region
         │   │   └── Fork disclosure (forkCount > 0): fork icon, counter badge
         │   │       (forkCount > 1), chevron; toggles the fork open/closed
         │   ├── Picker row (an open fork with forkCount > 1): a persistent
@@ -429,7 +425,7 @@ the surface applies `trapFocusKeydown` while open.
 | root | `data-scope` / `data-part` | `history-center` / `root` |
 | trigger cluster | `data-part` | `trigger` |
 | undo/redo trigger | `disabled` | `!canUndo \|\| busy` / `!canRedo \|\| busy` |
-| list trigger | `aria-expanded` | `true` / `false` from open state |
+| list trigger | `data-part` / `data-size` / `aria-expanded` / `aria-label` | `list-trigger` / the resolved control size / `true` \| `false` from open state / `listLabel`. A bare `chevron-down` glyph in a plain `button`, not an `IconButton`: undo and redo carry the cluster's weight and the disclosure reads narrower between them. It keeps its accessible name, its focus ring and a full-height hit area. |
 | surface | `data-part` / `data-state` | `surface` / `open` \| `closed` |
 | list | `data-part` / `aria-label` | `list` / `listLabel` |
 | row (all kinds) | `data-part` / `data-row-kind` / `data-row-entry` / `data-depth` / `aria-level` | the row's kind (`entry` \| `picker` \| `not-yet-loaded`) / kind / entry id (the anchor's for non-entry rows) / depth (0-based) / `depth + 1` |
@@ -437,14 +433,10 @@ the surface applies `trapFocusKeydown` while open.
 | entry button | `data-open` | `true` when a fork is open at the row's entry |
 | fork disclosure | `data-part` / `data-open` / `aria-expanded` / `aria-label` | `fork-disclosure` / `true` when open / open state / `Show\|Hide N continuation(s)` — rendered only when `forkCount > 0` |
 | fork badge | `data-part` | `fork-badge` — rendered only when `forkCount > 1`, reads `forkCount` |
-| run header | `data-part` / `data-branch` | `run-header` / the run's branch id — rendered only on a run's first entry row (the opened region) |
-| run-header rename | `data-part` / `data-branch` | `run-header-rename` / the run's branch id |
-| run-header rename input | `data-part` | `run-header-rename-input` |
-| picker | `data-part` / `data-anchor` / roving tabindex | `picker` / the anchor entry id — rendered whenever the open entry's `forkCount > 1`, persisting across a choice (R1) |
+| picker | `data-part` / `data-anchor` / roving tabindex | `picker` / the anchor entry id — rendered whenever the open entry's `forkCount >= 1`, persisting across a choice (R1) |
 | picker select | `data-part` (wrapper) | `picker-select` — Poodle's `Select`, its value the tentative pick, options the forks; `PICK_CONTINUATION` on change. The trigger and the option rows carry the fork label and its branch name. Replaced by the rename input while a rename is open (R3) |
-| picker rename | `data-part` / `data-branch` (wrapper) | `picker-rename` / the selected fork's branch id — the pencil `IconButton` between the `Select` and checkout (R1), renames whichever fork the `Select` currently shows through the same machinery as the run-header rename (R2); focus returns here after commit or cancel (R3) |
+| picker actions | `data-part` (wrapper) | `picker-actions` — an ellipsis `Menu` after the `Select`, holding `Rename`, `Checkout` and `Delete`. Every item acts on whichever fork the `Select` currently shows. `Delete` appears only when the host supplies its callback. `Checkout` is disabled when no fork is picked, when the picked fork is already the current one, or while a rename is open. Focus returns to the menu trigger after a rename commits or cancels. |
 | picker rename input | `data-part` | `picker-rename-input` — the inline input that takes the `Select`'s place while a rename is open, seeded with the selected fork's current name (R3) |
-| picker checkout | `data-part` (the IconButton) | `picker-checkout` — the checkout button is `disabled` when no fork is picked, the picked fork is already the current one, or a rename is open (R4, R3) |
 | not-yet-loaded | `data-part` / `data-anchor` / roving tabindex | `not-yet-loaded` / the anchor entry id |
 | rejection | `data-part` / `role` | `rejection` / `status` |
 
@@ -486,10 +478,9 @@ region (R6) and the picker (R1) — one event, both sites.
 - The popover surface is a labelled dialog (`ariaLabel ?? title`) and receives
   initial focus through `Popover`.
 - The list is a labelled list region (`ul` with `listLabel`); every row is an
-  `li`. Entry rows are native buttons; the run header's rename button and the
-  fork disclosure button are their row's secondary controls — siblings, never
-  nested inside the entry button (no interactive element nests inside another
-  interactive element).
+  `li`. Entry rows are native buttons; the fork disclosure button is its
+  row's secondary control — a sibling, never nested inside the entry button
+  (no interactive element nests inside another interactive element).
 - **Depth reaches assistive tech through `aria-level`** on every row
   (1-based, `depth + 1`), with `data-depth` carrying the raw 0-based depth for
   styling and tests. A `tree` role was considered and rejected: the machine's
@@ -501,14 +492,16 @@ region (R6) and the picker (R1) — one event, both sites.
   the counter badge is decorative (`aria-hidden` not required — it is inside
   the button's label scope and reads as part of the accessible name).
 - The picker row is Poodle's `Select` (a labelled combobox; its listbox
-  options carry `aria-selected` for the selection) plus a rename pencil and
-  a checkout `IconButton` — Select, pencil, checkout (R1). The pencil is a
-  labelled `IconButton` (`Rename <branch>`) that renames whichever fork the
-  `Select` currently shows; while a rename is open the inline input takes
-  the `Select`'s place (R3). The trigger and every option carry the fork
-  label and its branch name. Checkout is disabled until a fork that is not
-  the current one is selected (R4: `AlreadyAtTarget` stays a race, not a
-  normal path) and while a rename is open (R3).
+  options carry `aria-selected` for the selection) followed by one ellipsis
+  `Menu`. The trigger and every option carry the fork label, its branch name,
+  its entry count and its derived relative time. The menu holds `Rename`,
+  `Checkout` and `Delete`, each acting on whichever fork the `Select` shows.
+  While a rename is open the inline input takes the `Select`'s place (R3).
+  Checkout is disabled until a fork that is not the current one is selected
+  (R4: `AlreadyAtTarget` stays a race, not a normal path) and while a rename
+  is open (R3). Checkout is not the only way to activate a fork — picking any
+  entry inside the fork's rows navigates to that point; checkout exists to
+  make a fork primary **without** moving HEAD.
 - The not-yet-loaded row is a non-interactive roving-focus stop with a
   spinner; the loading status is `role="status"`.
 - The checkpoint pin and position marker are decorative; the entry label
@@ -523,9 +516,9 @@ region (R6) and the picker (R1) — one event, both sites.
 |-----|----------|
 | ArrowDown / ArrowUp | Move roving focus to the next/previous visible row, wrapping at the ends. Inside the picker's `Select`, the keys belong to the select (arrows open the listbox and move its highlight) — the machine never maps them. |
 | Home / End | Move focus to the first/last row. Inside the picker's `Select`, the keys belong to the select. |
-| Enter / Space | Activate the focused row: entry → `onNavigateEntry(branchId, entryId)`; picker / not-yet-loaded → focus syncs, nothing navigates. On the fork disclosure, the picker's select trigger, or a rename button (run header or picker pencil), the key activates that control natively (disclosure toggles the fork, the select opens/picks, rename opens the input) — never row navigation. |
-| Enter / Escape | In the rename input: commit (`onRenameBranch`) / cancel. After commit or cancel, focus returns to the rename control — the run header's rename button or the picker's pencil. |
-| Tab / Shift+Tab | Trapped within the open surface (wraps first↔last focusable). Within a focused row, Tab moves entry button → run-header rename → fork disclosure in visual order; the picker's select trigger, rename pencil and checkout button are tabbable from the picker row. |
+| Enter / Space | Activate the focused row: entry → `onNavigateEntry(branchId, entryId)`; picker / not-yet-loaded → focus syncs, nothing navigates. On the fork disclosure, the picker's select trigger, or the picker's actions menu, the key activates that control natively (disclosure toggles the fork, the select opens/picks, the menu opens) — never row navigation. |
+| Enter / Escape | In the rename input: commit (`onRenameBranch`) / cancel. After commit or cancel, focus returns to the picker's actions-menu trigger, which is what opened the rename. |
+| Tab / Shift+Tab | Trapped within the open surface (wraps first↔last focusable). Within a focused row, Tab moves entry button → fork disclosure in visual order; the picker's select trigger and its actions-menu trigger are tabbable from the picker row. |
 | Escape | Close through `Popover`; focus returns to the trigger. Inside the picker's `Select`, Escape closes its listbox first. |
 
 ### Focus And Announcement
@@ -579,8 +572,6 @@ Semantic roles by default; recipes are the override surface (architecture
 
 | Part | Recipe Hook | Fallback Token |
 |------|-------------|----------------|
-| trigger cluster border | `--poodle-recipe-history-center-trigger-border` | border-subtle 84% mix |
-| trigger cluster fill | `--poodle-recipe-history-center-trigger-fill` | surface 93% mix |
 | entry row | `--poodle-recipe-history-center-item-fill` | transparent |
 | entry row (current) | `--poodle-recipe-history-center-current-fill` | accent 7% mix |
 | entry hover | `--poodle-recipe-history-center-item-hover-fill` | surface 72% mix |
@@ -613,9 +604,9 @@ inset step, font sizes) are internal and not part of the recipe contract.
   `SHOW_REJECTION` / `CONTINUATIONS_LOADED` / `RUN_LOADED` on new values
   (diffed by reference); rows come from `historyCenterVisibleRows(pages,
   openForks)` in ONE `{#each}` keyed by row identity — no `svelte:self`, no
-  recursion (R1); the run header's relative time is derived from supplied
+  recursion (R1); the picker's relative time is derived from supplied
   `recordedAtMs` values only — there is no clock (ruling D2); rename is
-  surfaced in the opened region (R6) and the picker (R1).
+  surfaced from the picker's actions menu.
 - known browser-specific deltas: none.
 
 ## 10. GPUI Notes
