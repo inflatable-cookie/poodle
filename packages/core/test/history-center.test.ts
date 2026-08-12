@@ -823,11 +823,62 @@ describe("machine — disclosure flow", () => {
     });
 
     const deleted = historyCenterTransition("open", loaded.context, { type: "DELETE_CONTINUATION", entryId: "f2" });
-    // The command names the selected fork and nothing else — no checkout, no
-    // navigation, no state change: the host runs the operation and supplies
-    // new pages. Poodle shows no confirmation of its own.
-    expect(deleted.effects).toEqual([{ type: "deleteContinuation", entryId: "f2" }]);
-    expect(deleted.context.open).toEqual(loaded.context.open);
+    // The command names the selected fork and nothing else — no checkout and no
+    // navigation: the host runs the operation and supplies new pages, and
+    // Poodle shows no confirmation of its own.
+    //
+    // It does invalidate the anchor's level. This assertion previously required
+    // `open` to come through untouched, which is what left a deleted fork's run
+    // rendering indented until the popover was closed and reopened; a deleted
+    // fork never reaches the spine, so the stale rule cannot catch it.
+    expect(deleted.effects).toEqual([
+      { type: "deleteContinuation", entryId: "f2" },
+      { type: "loadContinuations", entryId: "e1" },
+    ]);
+    expect(deleted.context.open?.has("e1")).toBe(true);
+    expect(deleted.context.open?.get("e1")?.continuations).toBeNull();
+  });
+
+  test("DELETE_CONTINUATION invalidates the anchor's level so the deleted run stops rendering", () => {
+    const afterDisclose = historyCenterTransition("open", ctx({ pages: forkedPages(3) }), {
+      type: "DISCLOSE",
+      entryId: "e1",
+    });
+    const loaded = historyCenterTransition("open", afterDisclose.context, {
+      type: "CONTINUATIONS_LOADED",
+      entryId: "e1",
+      continuations: [continuation("f1"), continuation("e2", { preferred: true }), continuation("f2")],
+    });
+    const picked = historyCenterTransition("open", loaded.context, {
+      type: "PICK_CONTINUATION",
+      entryId: "f1",
+    });
+    const withRun = historyCenterTransition("open", picked.context, {
+      type: "RUN_LOADED",
+      fromEntryId: "f1",
+      pages: [page([entry("f1b"), entry("f1")])],
+    });
+    expect(withRun.context.open?.get("e1")?.runPages.length).toBe(1);
+
+    const deleted = historyCenterTransition("open", withRun.context, {
+      type: "DELETE_CONTINUATION",
+      entryId: "f1",
+    });
+
+    // The fork is gone, so its entries never reach the spine and the stale
+    // rule cannot see them. Without invalidating here the cached run keeps
+    // rendering indented under the anchor, and clicking it navigates to an
+    // entry the host has deleted.
+    const level = deleted.context.open?.get("e1");
+    expect(level).toBeDefined();
+    expect(level?.runPages).toEqual([]);
+    expect(level?.chosen).toBeNull();
+    expect(level?.pick).toBeNull();
+    expect(level?.continuations).toBeNull();
+    expect(deleted.effects).toEqual([
+      { type: "deleteContinuation", entryId: "f1" },
+      { type: "loadContinuations", entryId: "e1" },
+    ]);
   });
 
   test("DELETE_CONTINUATION works on the single-fork row — the auto-chosen fork (b033 R4)", () => {
@@ -842,7 +893,10 @@ describe("machine — disclosure flow", () => {
     });
 
     const deleted = historyCenterTransition("open", loaded.context, { type: "DELETE_CONTINUATION", entryId: "l1" });
-    expect(deleted.effects).toEqual([{ type: "deleteContinuation", entryId: "l1" }]);
+    expect(deleted.effects).toEqual([
+      { type: "deleteContinuation", entryId: "l1" },
+      { type: "loadContinuations", entryId: "e1" },
+    ]);
   });
 
   test("DELETE_CONTINUATION is inert for a fork no open picker offers, and while closed", () => {

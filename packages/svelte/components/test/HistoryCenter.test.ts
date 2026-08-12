@@ -551,6 +551,49 @@ describe("HistoryCenter (svelte)", () => {
     expect(onCheckoutContinuation).not.toHaveBeenCalled();
   });
 
+  it("stops rendering a deleted fork's run and re-requests its continuations", async () => {
+    // Field report: after a delete the fork's entries stayed in the list,
+    // indented, and clicking one errored "Entry does not exist" until the
+    // popover was closed and reopened. The stale rule cannot catch it — a
+    // deleted fork never reaches the spine.
+    const onDeleteContinuation = vi.fn();
+    const onLoadContinuations = vi.fn();
+    const { rerender } = render(HistoryCenterHostHarness, {
+      props: {
+        pages: twoForkPages,
+        continuationsByEntry: twoForkContinuations,
+        runsByFork: twoForkRuns,
+        defaultOpen: true,
+        onDeleteContinuation,
+        onLoadContinuations,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    expect(onLoadContinuations).toHaveBeenCalledTimes(1);
+    // The chosen fork's run is spliced in below the picker.
+    expect(rowByEntry("x1")).toBeTruthy();
+
+    await runForkAction("Delete");
+    await fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+
+    expect(onDeleteContinuation).toHaveBeenCalledTimes(1);
+    // The machine's half: the anchor asks the host again rather than sitting on
+    // a cache that describes a fork which no longer exists.
+    expect(onLoadContinuations).toHaveBeenCalledTimes(2);
+    expect(onLoadContinuations).toHaveBeenLastCalledWith("c2");
+
+    // The host's half: it answers without the deleted fork, and the run goes.
+    // The harness re-feeds its fixture verbatim, so the swap is explicit here —
+    // it is what a real host does after the delete lands.
+    await rerender({
+      continuationsByEntry: { c2: twoForkContinuations.c2.filter((f) => f.entryId !== "x1") },
+    });
+    await fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    await fireEvent.click(rowByEntry("c2").querySelector('[data-part="fork-disclosure"]') as HTMLElement);
+    expect(document.querySelector('[data-row-entry="x1"]')).toBeNull();
+  });
+
   it("cancelling the delete emits nothing and leaves the history list open", async () => {
     const onDeleteContinuation = vi.fn();
     render(HistoryCenterHostHarness, {
