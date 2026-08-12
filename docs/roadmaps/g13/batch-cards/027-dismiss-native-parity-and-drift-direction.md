@@ -14,8 +14,8 @@ Governing refs: `docs/contracts/001-working-rules.md` §Runtime Parity Authority
 Two debts, both incurred by discovering that a gate was not looking where we
 assumed. They share a root cause and belong together.
 
-1. `dismissOnOutsideInteract` reached the web on fifteen components and the
-   shared spec surface on none, parked in `OPEN_GAPS`.
+1. `dismissOnOutsideInteract` reached the web on fifteen components. Only
+   `PopoverSpec` models it; twelve are parked in `OPEN_GAPS`.
 2. `contract-prop-drift` never checks that an implemented prop is documented,
    which is why `b026`'s whole gap went unseen for as long as it did.
 
@@ -31,34 +31,45 @@ permanently, and refusing outside dismissal is a genuine behavioural capability
 a native overlay could want, not a web-platform artifact like `as` or
 `scrollTarget`. But debt recorded is not debt discharged.
 
-### The decision this card must make and record
+### Ruling — do not re-decide
+
+**Add `dismiss_on_outside_interact: bool` to the twelve specs and empty
+`OPEN_GAPS`.**
 
 `b026`'s reasoning was that native platforms have standard outside-dismissal,
-so a spec field always reading `true` would be invented data. Test that against
-the specs as they actually are:
+so a spec field always reading `true` would be invented data. The codebase
+refutes that. `PopoverSpec` already carries exactly this field
+(`packages/contracts/components/src/popover.rs:18`), defaulted `true` (`:43`),
+with a builder (`:80`). Popover is a non-modal overlay, the field is not
+invented there, and Popover is already the precedent this whole family follows
+on the web side.
 
-- `Dialog` and `Drawer` already model dismissal (`dismiss_on_*`), and their
-  defaults are `false`. So the spec surface *does* model this concept where the
-  default is interesting — the twelve are excused only because their default is
-  uniform.
-- A uniform default is not the same as an inexpressible one. If a native host
-  ever needs to refuse dismissal on a `Menu`, the field's absence is a wall.
+So the shape is settled and copyable:
 
-Rule it one way and write the ruling into `contract-spec-drift.ts` beside the
-register:
+```rust
+pub dismiss_on_outside_interact: bool,          // default matches the web default
+pub fn with_dismiss_on_outside_interact(mut self, v: bool) -> Self
+```
 
-- **Add the field** to the twelve specs and empty `OPEN_GAPS` — or
-- **Keep the carve-out**, and then say precisely what distinguishes these
-  twelve from `Dialog`/`Drawer`, in the code, not in a log.
+Defaults must equal each component's web default, which `b026` already fixed
+and verified: `true` everywhere except `Dialog` and `Drawer`, which are
+`false`. Read the Svelte default; do not assume.
 
-Do not leave twelve entries with a "revisit if" comment. That is the state this
-card exists to end.
+The twelve: `context-menu`, `filter-builder`, `list-card`, `menu`, `menubar`,
+`model-picker`, `navigation-menu`, `order-by`, `ref-select`, `select`,
+`split-button`, `theme-select`.
 
-### If the ruling is "add the field"
+`OPEN_GAPS` must be `{}` when you are done. If a specific spec genuinely cannot
+take the field, that is a stop condition — report it rather than leaving a
+partial list.
 
-Field, renderer resolution, and a Rust test per spec. Native adapters consume
-`poodle-render` output, so the field must reach a real decision, not just the
-struct.
+### Reaching a real decision
+
+Native adapters consume `poodle-render` output, so the field must reach one.
+`AlertDialog` shows the pattern: `render/src/alert_dialog.rs:139-140` resolves
+`with_dismiss_on_escape` / `with_dismiss_on_backdrop` from spec state. Mirror
+that. A field that lands in the struct and is never read is the "type-checks
+but does nothing" defect `b026` was written to avoid.
 
 ## Part 2 — Make the drift gate bidirectional
 
@@ -108,8 +119,9 @@ for string literals containing commas, they are not.
 
 - Execute this card exactly. You have no planning or status authority.
 - Do not spawn sub-agents. Read sources directly.
-- Read `b026`'s batch log and `contract-spec-drift.ts`'s register comments
-  before ruling Part 1.
+- Read `b026`'s batch log, `contract-spec-drift.ts`'s register comments, and
+  `packages/contracts/components/src/popover.rs` before starting Part 1.
+  Popover is the template; the ruling is already made.
 - Part 1 and Part 2 are independent — commit them separately so either can be
   reverted alone.
 - Run `cargo clippy --all-targets -- -D warnings`, not bare `cargo clippy`.
@@ -137,7 +149,8 @@ for string literals containing commas, they are not.
    `test:components`, `test:parity`,
    `cargo test --manifest-path packages/contracts/components/Cargo.toml`,
    `git diff --check`. Record exit states.
-2. Part 1: rule, implement, empty or justify `OPEN_GAPS`. Commit.
+2. Part 1: add the field to the twelve specs, resolve it in the renderer,
+   empty `OPEN_GAPS`. Commit.
 3. Part 2: fix the parser with its regression test, separate snippets, enforce,
    burn down or tranche the backlog. Commit separately.
 4. Validate:
@@ -156,10 +169,9 @@ for string literals containing commas, they are not.
 
 ## Acceptance Criteria
 
-- [ ] `OPEN_GAPS` is either empty, or carries a ruling in code stating what
-  distinguishes these twelve from `Dialog`/`Drawer`.
-- [ ] If the field was added: every one of the twelve specs has it, resolved by
-  the renderer, with a Rust test.
+- [ ] `OPEN_GAPS` is `{}`.
+- [ ] All twelve specs carry `dismiss_on_outside_interact` with a default equal
+  to the component's web default, resolved by the renderer, with a Rust test.
 - [ ] `contract-prop-drift` no longer reports `and`/`time` for
   `date-time-zone-picker`, proven by a test using that exact line.
 - [ ] The gate enforces the reverse direction and exits non-zero on an
@@ -169,8 +181,8 @@ for string literals containing commas, they are not.
 
 ## Stop Conditions
 
-- The twelve specs cannot carry the field without inventing native behaviour —
-  say which spec and why, and take the carve-out branch instead.
+- A specific spec cannot carry the field. Name it and say why; do not leave a
+  partial `OPEN_GAPS`.
 - Enforcing the reverse direction reveals a backlog too large to document here.
   Enforce anyway, tranche the documentation, and say exactly what remains.
 
