@@ -418,6 +418,21 @@ stale levels first (R2, g13-034 — see above): the stale level's
 `loadContinuations` leaves before the event's own effects, and the event then
 runs against the reconciled tree.
 
+**The reconcile needs a transition to ride, and a pages prop change dispatches
+none.** The adapter therefore watches `pages` by reference, exactly as it
+watches `rejection`, `continuationsResult` and `runResult`, and sends
+`PAGES_CHANGED` when the host hands back a different array. Without that
+watcher the reconcile was correct code that never ran: a level went stale,
+rendered `not-yet-loaded`, and stayed there until the operator closed and
+reopened the popover.
+
+`PAGES_CHANGED` carries no payload and changes nothing itself — it returns the
+very context it was given. That identity is load-bearing, not an optimisation:
+adapters skip their state write-back when the returned context is the one they
+passed in, so a no-op transition cannot restore a snapshot taken before a
+sibling watch effect ran in the same flush. Sending it repeatedly is safe; the
+reconcile drops a stale level's data once and then has no shown fork to find.
+
 #### Effects
 
 | Effect | What It Does | Cleanup |

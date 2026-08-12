@@ -179,9 +179,16 @@
 
   function send(event: HistoryCenterEvent): void {
     const result = historyCenterTransition(isOpen ? "open" : "closed", machineContext, event);
-    openForks = result.context.open;
-    focusedRow = result.context.focusRow;
-    displayedRejection = result.context.rejection;
+    // A transition that changed nothing returns the very context it was
+    // given. Writing that back is not merely wasteful: sibling watch effects
+    // run in the same flush, so a no-op event landing after one of them
+    // restores the snapshot taken before it — PAGES_CHANGED wiped a rejection
+    // SHOW_REJECTION had just set.
+    if (result.context !== machineContext) {
+      openForks = result.context.open;
+      focusedRow = result.context.focusRow;
+      displayedRejection = result.context.rejection;
+    }
 
     for (const effect of result.effects) {
       switch (effect.type) {
@@ -273,6 +280,22 @@
     if (runResult !== null) {
       send({ type: "RUN_LOADED", fromEntryId: runResult.fromEntryId, pages: runResult.pages });
     }
+  });
+
+  // The fourth watcher, and the one g13-034 needed but did not have. The
+  // stale-level reconcile rides a transition, and a pages prop change
+  // dispatches none — so a level went stale, rendered "not-yet-loaded", and
+  // stayed there until the operator closed and reopened. Reference-diffed like
+  // its three siblings: a host that hands back the same array sends nothing.
+  let lastPages: typeof pages = null;
+
+  $effect(() => {
+    if (pages === lastPages) {
+      return;
+    }
+
+    lastPages = pages;
+    send({ type: "PAGES_CHANGED" });
   });
 
   // ── Row identity helpers (R1) ─────────────────────────────────────────
