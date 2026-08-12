@@ -49,6 +49,7 @@ and roadmap closeout.
 | `037` | focus rings — square outlines on rounded controls | none | merged (`f7946bec`) |
 | `038` | focus rings — components with no explicit treatment | `037` merged | ready |
 | `039` | SettingsShell — new component, designed not ported | none | merged (`3a31a6a3`) |
+| `040` | DockRegion tab pass-throughs + the underline recipe hook | `038` (file contention on `tabs.css`) | ready — hold until `038` merges |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
@@ -98,3 +99,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 037](037-focus-ring-radius-audit.md)
 - [Batch 038](038-focus-treatment-coverage.md)
 - [Batch 039](039-settings-shell.md)
+- [Batch 040](040-dock-region-tab-passthroughs.md)
