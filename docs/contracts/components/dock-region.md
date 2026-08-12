@@ -110,8 +110,10 @@ type PanelTabItem = {
 };
 ```
 
-All items should have `icon` set when used in flexible docks, as collapsed/compact
-modes render icon-only tabs.
+All items should have `icon` set when used in flexible docks, as collapsed and
+compact modes render icon-only tabs. **This is advisory, not load-bearing.** A
+dock whose items have no icon does not compact at all — see Compact Mode. It
+used to obey the "should" literally and render a row of empty squares.
 
 ### Controlled And Uncontrolled
 
@@ -136,7 +138,7 @@ modes render icon-only tabs.
 | collapsed icon-strip (top/bottom) | `collapsed=true`, `collapsedPosture="icon-strip"`, top/bottom edge | horizontal icon-only tabs + collapse toggle, body hidden |
 | collapsed hidden | `collapsed=true`, `collapsedPosture="hidden"` | only collapse toggle visible |
 | static | `sizing="static"` | stacked panels, no tabs or collapse |
-| compact | auto-detected | horizontal tabs collapse to icon-only when strip overflows |
+| compact | auto-detected | horizontal tabs collapse to icon-only when the strip overflows **and every item has an icon** |
 | drag-over | cross-region drag enters | dashed accent border overlay |
 | emphasis quiet | `emphasis="quiet"` | transparent border and background |
 | emphasis strong | `emphasis="strong"` | accent-tinted border |
@@ -146,6 +148,14 @@ modes render icon-only tabs.
 When horizontal tabs overflow their container, DockRegion automatically hides labels
 and close buttons, showing icon-only tabs with bottom-positioned tooltips on hover.
 Uses `ResizeObserver` with overflow detection and hysteresis to prevent oscillation.
+
+**Compaction requires that every item carries an icon.** Falling back to
+icon-only is only a strategy when there is an icon to fall back to: hiding the
+label of a tab that has none leaves an empty `2.25rem` square with no way to
+tell the panels apart, and no tooltip target a pointer would think to visit.
+When any item lacks an icon the strip stays full-width and overflows — cramped
+beats unreadable. Measured on the icon-less specimen: without the rule, three
+labelled panels rendered as three identical 36×28 squares.
 
 ### Click-to-Expand
 

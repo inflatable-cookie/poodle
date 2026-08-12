@@ -116,8 +116,15 @@
   let resizeObserver = $state<ResizeObserver | null>(null);
   let fullLabelScrollWidth = $state(0);
 
+  /** Compacting to icon-only is only a strategy when there is an icon to fall
+   *  back to. Every panel needs one: hiding a label on a tab that has no icon
+   *  leaves an empty 2.25rem square with nothing in it and no way to tell the
+   *  panels apart. A strip of icon-less tabs overflows and scrolls instead —
+   *  cramped beats unreadable. */
+  const canCompact = $derived(items.length > 0 && items.every((item) => item.icon));
+
   function checkCompact(el: HTMLElement): void {
-    if (!el || items.length === 0) {
+    if (!el || items.length === 0 || !canCompact) {
       isCompact = false;
       return;
     }

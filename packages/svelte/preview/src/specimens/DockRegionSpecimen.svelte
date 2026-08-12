@@ -31,6 +31,14 @@
   let flexActivePanel = $state("explorer");
   let flexCollapsed = false;
 
+  // Icon-less panels — the case that shipped broken. Compacting to icon-only
+  // has nothing to fall back to here, so the labels must survive the squeeze.
+  const iconlessItems: PanelTabItem[] = [
+    { value: "inspector", label: "Inspector", closable: false },
+    { value: "browser", label: "Media Browser", closable: false },
+    { value: "clips", label: "Clip Editor", closable: false },
+  ];
+
   const flexItems: PanelTabItem[] = [
     { value: "explorer", label: "Explorer", icon: folder, closable: true },
     { value: "search", label: "Search", icon: "search", closable: true },
@@ -135,6 +143,21 @@
           <div class="poodle-specimen__flex-main">
             Main content area
           </div>
+        </div>
+      </SpecimenGroup>
+
+      <!-- 1b. Icon-less panels in a narrow dock -->
+      <SpecimenGroup label="Flexible dock — icon-less panels, narrow (left edge)" bare>
+        <div class="poodle-specimen__frame poodle-specimen__frame--flex">
+          <DockRegion edge="left" sizing="flexible" items={iconlessItems} value="inspector">
+            {#snippet children()}
+              <div class="poodle-specimen__panel-content">
+                <strong>Inspector</strong>
+                <p>Panels without icons keep their labels when the strip is squeezed.</p>
+              </div>
+            {/snippet}
+          </DockRegion>
+          <div class="poodle-specimen__flex-main">Main content area</div>
         </div>
       </SpecimenGroup>
 
