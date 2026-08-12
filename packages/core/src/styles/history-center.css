@@ -263,7 +263,9 @@
   gap: 0.25rem;
   flex: 1 1 auto;
   min-width: 0;
-  padding: var(--poodle-space-panel-y) var(--poodle-space-stack-sm);
+  /* Block padding only: the row already owns its inline inset, and a second
+     one here pushed the Select in from both edges. */
+  padding-block: var(--poodle-space-panel-y);
 }
 
 .poodle-history-center__picker:focus-visible {
@@ -305,9 +307,13 @@
 .poodle-history-center__picker-value {
   display: flex;
   align-items: center;
-  gap: var(--poodle-space-stack-sm);
+  /* The fork icon sits away from the Select's own edge, and the meta line is
+     pushed to the opposite end rather than stacked under the branch name. */
+  gap: var(--poodle-space-inline-sm);
+  padding-inline-start: var(--poodle-space-inline-xs);
   flex: 1 1 auto;
   min-width: 0;
+  width: 100%;
 }
 
 .poodle-history-center__picker-value[data-placeholder="true"] {
@@ -348,6 +354,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* Opposite the name and branch, not beneath them: the name column takes the
+     slack, the meta keeps its intrinsic width and hugs the trailing edge. */
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  padding-inline-start: var(--poodle-space-inline-sm);
+  text-align: end;
 }
 
 .poodle-history-center__rename-input {
