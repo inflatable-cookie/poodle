@@ -48,7 +48,7 @@ and roadmap closeout.
 | `036` | shell scene: GPUI + Jetstream — closes **g13.004** | `035` merged | merged (`97da7195`) — **g13.004 complete** |
 | `037` | focus rings — square outlines on rounded controls | none | merged (`f7946bec`) |
 | `038` | focus rings — components with no explicit treatment | `037` merged | ready |
-| `039` | SettingsShell — new component, designed not ported | none | ready |
+| `039` | SettingsShell — new component, designed not ported | none | merged (`3a31a6a3`) |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
