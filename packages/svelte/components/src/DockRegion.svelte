@@ -7,6 +7,8 @@
   import { default as Tabs } from "./Tabs.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
+    ActiveEdge,
+    ActiveFill,
     ControlDensity,
     ControlSize,
     DockCollapsedPosture,
@@ -40,6 +42,17 @@
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
     tabVariant?: TabVariant;
+    /** Selection edge on the active tab, forwarded to Tabs. Defaults to the
+     * former strip indicator (`"underline"`). */
+    tabActiveEdge?: ActiveEdge;
+    /** Selection fill on the active tab, forwarded to Tabs. */
+    tabActiveFill?: ActiveFill;
+    /** Draw the strip border around the tab list, forwarded to Tabs. */
+    tabBordered?: boolean;
+    /** Stretch tabs to fill the strip, forwarded to Tabs. */
+    tabFullWidth?: boolean;
+    /** Allow dragging tabs to reorder; forwarded to Tabs. */
+    tabReorderable?: boolean;
     items?: PanelTabItem[];
     value?: string | null;
     ariaLabel?: string | null;
@@ -70,6 +83,11 @@
     sizeRole = "chrome",
     density = null,
     tabVariant = "block",
+    tabActiveEdge = "underline",
+    tabActiveFill = "tint",
+    tabBordered = false,
+    tabFullWidth = false,
+    tabReorderable = true,
     items = [],
     value = null,
     ariaLabel = null,
@@ -433,14 +451,17 @@
       {#if showTabs}
         <Tabs
           variant={tabVariant}
-          activeEdge="underline"
+          activeEdge={tabActiveEdge}
+          activeFill={tabActiveFill}
+          bordered={tabBordered}
+          fullWidth={tabFullWidth}
           orientation="vertical"
           {size}
           {sizeRole}
           {density}
           items={tabItems}
           value={activeItem?.value ?? ""}
-          reorderable={true}
+          reorderable={tabReorderable}
           ariaLabel={ariaLabel ?? `${edge} dock panels`}
           onValueChange={handleValueChange}
           onReorder={handleReorder}
@@ -461,7 +482,10 @@
         <div class="poodle-dock-region__tabs" use:observeStrip>
           <Tabs
             variant={tabVariant}
-            activeEdge="underline"
+            activeEdge={tabActiveEdge}
+            activeFill={tabActiveFill}
+            bordered={tabBordered}
+            fullWidth={tabFullWidth}
             orientation="horizontal"
             {size}
             {sizeRole}
@@ -469,7 +493,7 @@
             showTooltips={isCompact}
             items={tabItems}
             value={activeItem?.value ?? ""}
-            reorderable={true}
+            reorderable={tabReorderable}
             ariaLabel={ariaLabel ?? `${edge} dock panels`}
             onValueChange={handleValueChange}
             onReorder={handleReorder}
@@ -499,7 +523,10 @@
         <div class="poodle-dock-region__tabs" use:observeStrip>
           <Tabs
             variant={tabVariant}
-            activeEdge="underline"
+            activeEdge={tabActiveEdge}
+            activeFill={tabActiveFill}
+            bordered={tabBordered}
+            fullWidth={tabFullWidth}
             orientation="horizontal"
             {size}
             {sizeRole}
@@ -507,7 +534,7 @@
             showTooltips={isCompact}
             items={tabItems}
             value={activeItem?.value ?? ""}
-            reorderable={true}
+            reorderable={tabReorderable}
             ariaLabel={ariaLabel ?? `${edge} dock panels`}
             onValueChange={handleValueChange}
             onReorder={handleReorder}

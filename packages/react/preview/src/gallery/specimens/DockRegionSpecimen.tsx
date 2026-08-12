@@ -220,6 +220,69 @@ export function DockRegionSpecimen() {
           </div>
         </SpecimenGroup>
 
+        {/* 1c. Tab pass-throughs (g13-040) */}
+        <SpecimenGroup label="Tab pass-throughs — no underline, no reorder, solid fill (g13-040)" bare>
+          <div style={dndLayout}>
+            <div style={frameDnd}>
+              <DockRegion
+                edge="left"
+                sizing="flexible"
+                items={flexItems}
+                value={flexActivePanel}
+                tabActiveEdge="none"
+                onValueChange={(value) => setFlexActivePanel(value)}
+              >
+                {() => (
+                  <div style={panelContent}>
+                    <strong style={panelStrong}>{flexActivePanel}</strong>
+                    <p style={{ margin: 0 }}>
+                      tabActiveEdge="none" — no active underline; the tint fill alone marks selection.
+                    </p>
+                  </div>
+                )}
+              </DockRegion>
+            </div>
+            <div style={frameDnd}>
+              <DockRegion
+                edge="left"
+                sizing="flexible"
+                items={flexItems}
+                value={flexActivePanel}
+                tabReorderable={false}
+                onValueChange={(value) => setFlexActivePanel(value)}
+              >
+                {() => (
+                  <div style={panelContent}>
+                    <strong style={panelStrong}>{flexActivePanel}</strong>
+                    <p style={{ margin: 0 }}>tabReorderable={false} — tabs cannot be dragged out of order.</p>
+                  </div>
+                )}
+              </DockRegion>
+            </div>
+            <div style={frameDnd}>
+              <DockRegion
+                edge="left"
+                sizing="flexible"
+                items={flexItems}
+                value={flexActivePanel}
+                tabVariant="pill"
+                tabActiveFill="solid"
+                onValueChange={(value) => setFlexActivePanel(value)}
+              >
+                {() => (
+                  <div style={panelContent}>
+                    <strong style={panelStrong}>{flexActivePanel}</strong>
+                    <p style={{ margin: 0 }}>
+                      tabVariant="pill" + tabActiveFill="solid" — a fill combination that was previously
+                      unreachable through DockRegion.
+                    </p>
+                  </div>
+                )}
+              </DockRegion>
+            </div>
+          </div>
+        </SpecimenGroup>
+
         {/* 2. Flexible dock (collapsed icon-strip) */}
         <SpecimenGroup label="Flexible dock — collapsed icon-strip (left edge)" bare>
           <div style={frameFlex}>

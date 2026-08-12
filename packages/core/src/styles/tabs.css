@@ -420,7 +420,7 @@
   }
 
   .poodle-tabs[data-active-edge="underline"] .poodle-tabs__item[data-selected="true"] {
-    border-bottom-color: var(--poodle-color-accent-base);
+    border-bottom-color: var(--poodle-recipe-tabs-active-underline-border, var(--poodle-color-accent-base));
   }
 
   .poodle-tabs[data-active-edge="underline"][data-orientation="vertical"] .poodle-tabs__item {
@@ -431,7 +431,7 @@
   }
 
   .poodle-tabs[data-active-edge="underline"][data-orientation="vertical"] .poodle-tabs__item[data-selected="true"] {
-    border-right-color: var(--poodle-color-accent-base);
+    border-right-color: var(--poodle-recipe-tabs-active-underline-border, var(--poodle-color-accent-base));
   }
 
   /* activeFill="solid": fully accent-filled active tab. The foreground uses

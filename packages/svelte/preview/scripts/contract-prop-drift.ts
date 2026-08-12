@@ -38,7 +38,21 @@ const BASELINE: Record<string, { contractOnly?: string[]; svelteOnly?: string[] 
   dialog: { svelteOnly: ["closeButtonSize", "overlayStyle"] },
   // dock-region `showTabs` / `tabVariant` — cross-target strip controls;
   //   DockRegionSpec models `tabs_placement` only — spec-surface tranche.
-  "dock-region": { svelteOnly: ["showTabs", "tabVariant"] },
+  // dock-region `tabActiveEdge` / `tabActiveFill` / `tabBordered` /
+  //   `tabFullWidth` / `tabReorderable` — g13-040 tab pass-throughs; the
+  //   whole `tabs_placement`-adjacent surface moves into the table when
+  //   g13.014 gives DockRegionSpec its tab fields — spec-surface tranche.
+  "dock-region": {
+    svelteOnly: [
+      "showTabs",
+      "tabVariant",
+      "tabActiveEdge",
+      "tabActiveFill",
+      "tabBordered",
+      "tabFullWidth",
+      "tabReorderable",
+    ],
+  },
   // popover `triggerIsInteractive` — DOM-only switch (documented in contract
   //   prose §TriggerIsInteractive); native composes its trigger directly and
   //   has no equivalent.

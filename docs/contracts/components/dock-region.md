@@ -99,6 +99,48 @@ Updated: 2026-07-29
 | `externalDropTarget` | `DockExternalDropTarget \| null` | `null` | no | synchronously decides external eligibility and receives an accepted external drop |
 | `dragZoneId` | `string \| null` | `null` | no | exact drop-zone identity for the same-zone drop guard; defaults to `edge`. Hosts mapping several regions onto one edge must pass a per-region id, or cross-region drops read as same-zone and are ignored |
 
+### Tab Pass-throughs
+
+DockRegion composes Tabs at three call sites — the expanded horizontal strip,
+the collapsed horizontal icon-strip, and the collapsed vertical icon-strip.
+Five Tabs props are forwarded through DockRegion under the `tab` prefix that
+`tabVariant` established:
+
+| DockRegion prop | Forwarded Tabs prop | Default | Notes |
+|-----------------|---------------------|---------|-------|
+| `tabActiveEdge` | `activeEdge` | `"underline"` | the dock's active-tab edge; `"none"` draws no edge, `"outline"` draws the accent border around the active item |
+| `tabActiveFill` | `activeFill` | `"tint"` | the active tab's selection fill |
+| `tabBordered` | `bordered` | `false` | strip border around the tab list |
+| `tabFullWidth` | `fullWidth` | `false` | stretch tabs across the strip |
+| `tabReorderable` | `reorderable` | `true` | drag-to-reorder within the strip |
+
+Every default is the value the dock passed before the pass-through existed, so
+rendering is unchanged unless a host opts in. All five apply at all three call
+sites, including the collapsed icon-strips.
+
+**What DockRegion deliberately does not forward.** Tabs' remaining props stay
+unexposed on purpose, so the next report can tell a deliberate line from an
+oversight:
+
+- `activationMode`, `historyKey`, `actions` — behaviour and slots with no
+  requested dock use, and each is a surface to support forever once added.
+- `showTooltips` — DockRegion derives it from its own `isCompact` measurement;
+  the derivation is load-bearing: icon-only tabs are unreadable without
+  tooltips.
+- `collapseWhenOverflow`, `overflowStrategy`, `shed`, `collapseLabel` — the
+  dock's overflow story is the `isCompact` compaction (labels hidden, icon-only
+  tabs), which is on by default. Tabs' `collapseWhenOverflow` would collapse
+  the whole strip into a dropdown menu on the same overflow, putting two
+  overflow mechanisms on one strip. It reads like an omission and is not one.
+
+These props are deliberately not in the §Public Props table, matching the
+treatment of `tabVariant` and `showTabs`: they are `svelteOnly` entries in
+`packages/svelte/preview/scripts/contract-prop-drift.ts`'s `BASELINE`, which
+keeps them off the table until the shared spec surface carries them. This is a
+tranche, not a permanent carve-out — when `g13.014` gives `DockRegionSpec` its
+tab fields, the whole entry moves into the table together and the baseline
+line is deleted.
+
 ### PanelTabItem
 
 ```ts
