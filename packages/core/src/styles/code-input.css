@@ -17,6 +17,7 @@
     cursor: text;
     pointer-events: none;
     z-index: 1;
+    outline: none;
   }
 
   .poodle-code-input__slot {

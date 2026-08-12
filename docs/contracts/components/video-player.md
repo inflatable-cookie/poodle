@@ -134,6 +134,10 @@ volume/fullscreen).
 - Fullscreen button: `aria-label` toggles between `"Exit fullscreen"` and `"Fullscreen"`
 - All SVG icons are `aria-hidden="true"`
 - Control bar click events use `stopPropagation` to avoid triggering play/pause on root
+- Focus rings: big play, control-bar buttons, and volume draw the standard ring
+  (`border-width-focus` solid `accent-focusRing`, offset `0.125rem`; big play
+  radius `999px`, volume radius `0.125rem`); the seek input suppresses its
+  outline and the progress bar draws the ring via `:has()`
 
 ## 7. Layout
 

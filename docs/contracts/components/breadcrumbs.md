@@ -123,6 +123,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 - focus entry: only interactive path items (links, buttons) participate in tab order
 - focus exit: current-page item is not focusable (it is a `<span>`)
+- focus ring: interactive items draw the standard ring (`border-width-focus` solid `accent-focusRing`, offset `0.125rem`, radius `0.125rem`)
 - live-region behavior: none
 
 ## 7. Layout

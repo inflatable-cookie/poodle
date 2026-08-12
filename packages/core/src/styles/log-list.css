@@ -68,6 +68,11 @@
     color: var(--poodle-recipe-log-list-active-filter-btn-text, var(--poodle-color-text-primary));
   }
 
+  .poodle-log-list__filter-btn:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }
+
   .poodle-log-list__search {
     flex: 1;
     min-width: 10rem;
@@ -293,4 +298,9 @@
     font-size: 0.75rem;
     cursor: pointer;
     box-shadow: var(--poodle-recipe-log-list-scroll-btn-shadow, var(--poodle-elevation-overlay));
+  }
+
+  .poodle-log-list__scroll-btn:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
   }

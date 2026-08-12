@@ -8,7 +8,7 @@
 .poodle-mod-matrix-grid-visual__cell.poodle-slider[data-negative="true"] .poodle-slider__fill { background: var(--poodle-recipe-mod-matrix-grid-amount-negative, var(--poodle-color-status-danger)); }
 .poodle-mod-matrix-grid-visual__cell .poodle-slider__center { background: var(--poodle-recipe-mod-matrix-grid-zero, var(--poodle-color-border-strong)); }
 .poodle-mod-matrix-grid-visual__cell[data-focused="true"] { outline: .125rem solid var(--poodle-recipe-mod-matrix-grid-focus-ring, var(--poodle-color-accent-focusRing)); outline-offset: .0625rem; }
-.poodle-mod-matrix-grid__control { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.poodle-mod-matrix-grid__control { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); outline: none; }
 .poodle-mod-matrix-grid__controls, .poodle-mod-matrix-grid__row { display: contents; }
 .poodle-mod-matrix-grid { --poodle-mod-cell-height: 1.75rem; }
 .poodle-mod-matrix-grid[data-size="xs"] { font-size: .6875rem; --poodle-mod-cell: 1.75rem; --poodle-mod-cell-height: 1.25rem; }

@@ -21,4 +21,9 @@
 }
 .poodle-validation-summary__entry { color: var(--poodle-color-text-secondary); font-size: var(--poodle-typography-body-size); }
 .poodle-validation-summary__entry a { margin-inline-end: var(--poodle-space-inline-sm); color: inherit; font-weight: 600; }
+.poodle-validation-summary__entry a:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.125rem;
+  border-radius: 0.125rem;
+}
 .poodle-validation-summary__entry[data-state="invalid"] a { color: var(--poodle-color-status-danger); }

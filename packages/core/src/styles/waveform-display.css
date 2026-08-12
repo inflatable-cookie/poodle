@@ -1,4 +1,5 @@
 .poodle-waveform-display { position: relative; display: inline-block; width: 22rem; height: 7rem; touch-action: none; border: .0625rem solid var(--poodle-recipe-waveform-display-border, var(--poodle-color-border-default)); border-radius: .375rem; background: var(--poodle-recipe-waveform-display-fill, var(--poodle-color-background-surface)); }
+.poodle-waveform-display:focus-visible { outline: none; }
 .poodle-waveform-display[aria-disabled="true"] { opacity: var(--poodle-recipe-waveform-display-disabled-opacity, var(--poodle-state-opacity-disabled)); }
 .poodle-waveform-display-visual { position: absolute; inset: 0; display: flex; align-items: stretch; overflow: hidden; border-radius: inherit; }
 .poodle-waveform-display-visual::before { content: ""; position: absolute; inset: 50% 0 auto; height: .0625rem; background: var(--poodle-recipe-waveform-display-center-line, var(--poodle-color-border-default)); }

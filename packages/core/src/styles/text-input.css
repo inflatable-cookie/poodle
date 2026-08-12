@@ -207,6 +207,10 @@
     padding: 0;
   }
 
+  .poodle-text-input__clear:focus-visible {
+    outline: none;
+  }
+
   .poodle-text-input__validation-indicator {
     inset-inline-end: 0.5rem;
   }

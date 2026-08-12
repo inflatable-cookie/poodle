@@ -124,8 +124,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
   is invalid HTML, so the label and value render as `<span>` and `<div>`
 - `ariaLabel` prop sets `aria-label` on the root element when provided
 - Info icon Popover has `ariaLabel="More information"` on both the Popover and the icon span
-- Info icon trigger receives keyboard focus; `focus-visible` shows focus ring
-- Popover trigger `focus-visible` outline is suppressed (the info icon handles its own ring)
+- Info popover trigger receives keyboard focus; the Popover's own `focus-visible` ring is the indicator (the icon draws no ring of its own)
 
 ## 7. Layout
 

@@ -8,7 +8,7 @@
 .poodle-keyboard-visual__key[data-held="true"][data-kind="black"] { background: var(--poodle-recipe-keyboard-black-key-held, var(--poodle-color-accent-base)); }
 .poodle-keyboard-visual__key[data-external="true"] { box-shadow: inset 0 0 0 .125rem var(--poodle-recipe-keyboard-external-ring, var(--poodle-color-accent-base)); }
 .poodle-keyboard-visual__key[data-focused="true"] { outline: .125rem solid var(--poodle-recipe-keyboard-focus-ring, var(--poodle-color-accent-focusRing)); outline-offset: -.1875rem; }
-.poodle-keyboard__key-control { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.poodle-keyboard__key-control { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); outline: none; }
 .poodle-keyboard[data-orientation="vertical"] { width: 7rem; height: 22rem; }
 .poodle-keyboard[data-size="xs"] { width: 14rem; height: 4rem; }
 .poodle-keyboard[data-size="sm"] { width: 18rem; height: 5.5rem; }

@@ -75,6 +75,11 @@
     background: var(--poodle-recipe-toast-stack-hover-dismiss-fill, color-mix(in srgb, var(--poodle-color-background-surface) 60%, transparent));
   }
 
+  .poodle-toast__dismiss:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }
+
   .poodle-toast__copy {
     display: grid;
     gap: 0.25rem;

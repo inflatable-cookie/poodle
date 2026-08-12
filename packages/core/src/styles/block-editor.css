@@ -191,6 +191,11 @@
     color: var(--poodle-recipe-block-editor-hover-tool-btn-text, var(--poodle-color-text-primary));
   }
 
+  .poodle-block-editor__tool-btn:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+  }
+
   .poodle-block-editor__tool-btn:disabled {
     opacity: 0.3;
     cursor: default;
@@ -222,4 +227,10 @@
     line-height: 1.6;
     outline: none;
     resize: vertical;
+  }
+
+  .poodle-block-editor__input:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.125rem;
+    border-radius: 0.1875rem;
   }

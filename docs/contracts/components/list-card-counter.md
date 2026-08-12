@@ -82,7 +82,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Icon is decorative (inherits meaning from tooltip or surrounding context)
 - `Tab` focuses linked counters (native `<a>` behavior)
 - `Enter` activates the link (native `<a>` behavior)
-- Focus ring: browser default for `<a>` elements
+- Focus ring: `border-width-focus` solid `accent-focusRing`, offset `0.125rem`, radius `0.125rem`
 
 ## 7. Layout
 

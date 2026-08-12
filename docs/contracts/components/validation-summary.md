@@ -94,6 +94,8 @@ type AnnouncementMode = "none" | "polite" | "assertive";
   `announceMode`. A silent host may use `<aside>` instead.
 - Each entry renders as `<li>` containing an `<a href="#field-id">` that jumps
   focus to the referenced field when activated
+- Entry links draw the standard ring (`border-width-focus` solid
+  `accent-focusRing`, offset `0.125rem`, radius `0.125rem`)
 - Component is typically announced once after failed submission; a subsequent
   fix should move it back to a polite or silent mode
 

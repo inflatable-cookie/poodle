@@ -101,6 +101,7 @@ Keyboard handling delegated to focused children; no owned machine state.
 
 - focus entry: Tab into toolbar focuses the roving-active item (last focused or first)
 - focus exit: Tab out of toolbar moves to next focusable element outside
+- focus ring: the toolbar wrapper (`tabindex="0"`) draws the standard ring (`border-width-focus` solid `accent-focusRing`, offset `0.125rem`)
 - roving focus: uses `getFocusableElements()` to discover slotted focusable children
 - live-region behavior: none
 - GPUI-native accessibility mapping notes: GPUI must expose toolbar role with orientation and roving focus semantics through native accessibility tree

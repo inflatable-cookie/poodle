@@ -211,6 +211,12 @@
     flex-shrink: 0;
   }
 
+  .poodle-order-by__drag-handle:focus-visible {
+    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+    outline-offset: 0.0625rem;
+    border-radius: var(--poodle-radius-control);
+  }
+
   .poodle-order-by__drag-handle:disabled {
     cursor: not-allowed;
   }

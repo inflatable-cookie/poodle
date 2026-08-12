@@ -84,6 +84,10 @@
     overflow: hidden;
   }
 
+  .poodle-number-input__steppers button:focus-visible {
+    outline: none;
+  }
+
   .poodle-number-input__field[data-disabled="true"] {
     opacity: var(--poodle-state-opacity-disabled);
     cursor: not-allowed;
