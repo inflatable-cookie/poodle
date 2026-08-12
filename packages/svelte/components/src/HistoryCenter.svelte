@@ -4,11 +4,12 @@
     historyCenterKeydownEvent,
     historyCenterRows,
     historyCenterTransition,
-    isForkPoint,
     trapFocusKeydown,
+    type HistoryBranch,
     type HistoryCenterContext,
     type HistoryCenterEvent,
     type HistoryCenterRow,
+    type HistoryEntry,
   } from "@inflatable-cookie/poodle-core";
   import { tick } from "svelte";
 
@@ -22,19 +23,21 @@
   import type {
     ControlDensity,
     ControlSize,
-    HistoryBranch,
-    HistoryEntry,
     HistoryStatus,
     OverlayPlacement,
     SemanticControlSizeRole,
   } from "./types";
 
   interface Props {
-    entries?: HistoryEntry[];
-    totalEntries?: number;
-    hasMoreEntries?: boolean;
+    /** Branch records in supplied order. `null` disables the tree (no rows,
+     *  every row event inert). */
     branches?: HistoryBranch[] | null;
+    /** Per-branch entry path (`branchId` -> root-to-head entries). `null`
+     *  when `branches` is null. */
+    paths?: Record<string, HistoryEntry[]> | null;
+    totalEntries?: number;
     totalBranches?: number;
+    hasMoreEntries?: boolean;
     hasMoreBranches?: boolean;
     canUndo?: boolean;
     canRedo?: boolean;
@@ -58,19 +61,20 @@
     onUndo?: (() => void) | null;
     onRedo?: (() => void) | null;
     onOpenChange?: ((open: boolean) => void) | null;
-    onSelectEntry?: ((id: string) => void) | null;
-    onCheckout?: ((branchId: string, entryId: string) => void) | null;
+    /** Entry activation; always the entry actually clicked, on the branch
+     *  that owns its run. */
+    onNavigateEntry?: ((branchId: string, entryId: string) => void) | null;
     onRenameBranch?: ((branchId: string, name: string) => void) | null;
     onLoadMoreEntries?: ((offset: number) => void) | null;
     onLoadMoreBranches?: ((offset: number) => void) | null;
   }
 
   let {
-    entries = [],
-    totalEntries = 0,
-    hasMoreEntries = false,
     branches = null,
+    paths = null,
+    totalEntries = 0,
     totalBranches = 0,
+    hasMoreEntries = false,
     hasMoreBranches = false,
     canUndo = false,
     canRedo = false,
@@ -94,8 +98,7 @@
     onUndo = null,
     onRedo = null,
     onOpenChange = null,
-    onSelectEntry = null,
-    onCheckout = null,
+    onNavigateEntry = null,
     onRenameBranch = null,
     onLoadMoreEntries = null,
     onLoadMoreBranches = null,
@@ -105,9 +108,9 @@
   let uncontrolledOpen = $state(false);
   let seededDefaultOpen = $state(false);
   let focusIndex = $state(0);
-  let expandedBranchIds = $state<string[]>([]);
   let displayedRejection = $state<string | null>(null);
   let renamingBranchId = $state<string | null>(null);
+  let renamingIndex = $state(-1);
   let renameValue = $state("");
   let renameInputElement = $state<HTMLInputElement | null>(null);
   let sectionElement = $state<HTMLElement | null>(null);
@@ -122,15 +125,25 @@
 
   const isOpen = $derived(open === null ? uncontrolledOpen : open);
   const hasBranches = $derived(branches !== null);
-  const branchList = $derived(branches ?? []);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  const rows = $derived.by(() => historyCenterRows(entries, branches, expandedBranchIds));
+  const rows = $derived(historyCenterRows(branches, paths));
+  type EntryRow = Extract<HistoryCenterRow, { kind: "entry" }>;
+  const entryRows = $derived(rows.filter((row): row is EntryRow => row.kind === "entry"));
+  const entryRowCount = $derived(entryRows.length);
+  // The data's own "present": the newest authority-supplied timestamp. The
+  // caption relative time is derived from supplied data (ruling D2) — there
+  // is no clock and no `Date.now()` anywhere.
+  const newestRecordedAt = $derived(
+    entryRows.reduce<number | undefined>((newest, row) => {
+      const at = row.entry.recordedAtMs;
+      return at !== undefined && (newest === undefined || at > newest) ? at : newest;
+    }, undefined),
+  );
 
   const machineContext = $derived<HistoryCenterContext>({
-    entries,
     branches,
-    expandedBranchIds,
+    paths,
     focusIndex,
     rejection: displayedRejection,
   });
@@ -138,7 +151,6 @@
   function send(event: HistoryCenterEvent): void {
     const result = historyCenterTransition(isOpen ? "open" : "closed", machineContext, event);
     focusIndex = result.context.focusIndex;
-    expandedBranchIds = result.context.expandedBranchIds;
     displayedRejection = result.context.rejection;
 
     for (const effect of result.effects) {
@@ -155,11 +167,8 @@
             (rowEl?.querySelector<HTMLElement>("button, input") ?? rowEl)?.focus();
           });
           break;
-        case "emitSelectEntry":
-          onSelectEntry?.(effect.id);
-          break;
-        case "emitCheckout":
-          onCheckout?.(effect.branchId, effect.entryId);
+        case "emitNavigateEntry":
+          onNavigateEntry?.(effect.branchId, effect.entryId);
           break;
         case "emitRenameBranch":
           onRenameBranch?.(effect.branchId, effect.name);
@@ -192,7 +201,18 @@
   }
 
   function handleListKeydown(event: KeyboardEvent): void {
+    // The rename input owns its keys (commit/cancel). The caption rename
+    // button keeps native activation for Enter/Space (start a rename instead
+    // of roving-row activation), but arrows still drive roving focus.
     if (event.target instanceof HTMLInputElement) {
+      return;
+    }
+
+    if (
+      event.target instanceof HTMLElement &&
+      event.target.closest("[data-rename-button]") !== null &&
+      (event.key === "Enter" || event.key === " ")
+    ) {
       return;
     }
 
@@ -225,17 +245,23 @@
     send({ type: "ACTIVATE_ROW", index });
   }
 
-  function toggleFork(entryId: string): void {
-    send({ type: "TOGGLE_BRANCHES", entryId });
-  }
-
   function dismissRejection(): void {
     send({ type: "DISMISS_REJECTION" });
   }
 
-  function startRename(branch: HistoryBranch): void {
+  function startRename(branch: HistoryBranch, index: number): void {
     renamingBranchId = branch.id;
+    renamingIndex = index;
     renameValue = branch.name ?? branch.id;
+  }
+
+  function finishRename(): void {
+    const index = renamingIndex;
+    renamingBranchId = null;
+    renamingIndex = -1;
+    tick().then(() => {
+      listElement?.querySelector<HTMLElement>(`[data-row-index="${index}"] [data-rename-button]`)?.focus();
+    });
   }
 
   function commitRename(branchId: string): void {
@@ -244,11 +270,11 @@
     }
 
     send({ type: "RENAME", branchId, name: renameValue });
-    renamingBranchId = null;
+    finishRename();
   }
 
   function cancelRename(): void {
-    renamingBranchId = null;
+    finishRename();
   }
 
   function handleRenameKeydown(event: KeyboardEvent, branchId: string): void {
@@ -263,17 +289,88 @@
 
   $effect(() => {
     if (renamingBranchId !== null && renameInputElement) {
-      renameInputElement.focus();
-      renameInputElement.select();
+      // Defer past the Popover's open-focus microtask: focusing inside the
+      // same flush as the mount lets the popover's initial focus land on the
+      // input's focus window, blur it, and spuriously blur-commit the rename.
+      tick().then(() => {
+        renameInputElement?.focus();
+        renameInputElement?.select();
+      });
     }
   });
 
   function rowKey(row: HistoryCenterRow): string {
-    return row.kind === "entry" ? `entry:${row.entry.id}` : `branch:${row.branch.id}`;
+    return row.kind === "entry" ? `entry:${row.entry.id}` : `caption:${row.branch.id}`;
   }
 
-  function branchRowIndex(rows: HistoryCenterRow[], branch: HistoryBranch): number {
-    return rows.findIndex((candidate) => candidate.kind === "branch" && candidate.branch.id === branch.id);
+  // The run's own lane shape (drawn by the renderer from the row's lane
+  // metadata; the stitcher's flags are always true, only depth saturates).
+  function laneKind(row: EntryRow): string {
+    if (row.depth === 0) {
+      return "trunk";
+    }
+    if (row.lane.start && row.lane.end) {
+      return "single";
+    }
+    if (row.lane.start) {
+      return "elbow";
+    }
+    if (row.lane.end) {
+      return "end";
+    }
+    return "continue";
+  }
+
+  // Short-form relative time, derived purely from supplied timestamps. The
+  // reference is the data's newest recordedAtMs — stable across renders and
+  // runtimes, no clock.
+  function formatRelativeTime(diffMs: number): string {
+    const seconds = Math.round(Math.max(0, diffMs) / 1000);
+
+    if (seconds < 60) {
+      return "just now";
+    }
+
+    const minutes = Math.round(seconds / 60);
+
+    if (minutes < 60) {
+      return `${minutes}m ago`;
+    }
+
+    const hours = Math.round(minutes / 60);
+
+    if (hours < 24) {
+      return `${hours}h ago`;
+    }
+
+    const days = Math.round(hours / 24);
+
+    if (days < 7) {
+      return `${days}d ago`;
+    }
+
+    return `${Math.round(days / 7)}w ago`;
+  }
+
+  // A run caption takes its relative time from its own run's most recent
+  // entry — the run's head (its last stitched entry row) — and renders no
+  // time at all when the field is absent (ruling D2).
+  function captionMeta(row: Extract<HistoryCenterRow, { kind: "caption" }>): { count: number; time: string | null } {
+    let count = 0;
+    let runHead: EntryRow | undefined;
+
+    for (const candidate of entryRows) {
+      if (candidate.branchId === row.branch.id) {
+        count += 1;
+        runHead = candidate;
+      }
+    }
+
+    const at = runHead?.entry.recordedAtMs;
+    const time =
+      at !== undefined && newestRecordedAt !== undefined ? formatRelativeTime(newestRecordedAt - at) : null;
+
+    return { count, time };
   }
 
   const entryTotal = $derived(`${totalEntries} ${totalEntries === 1 ? "entry" : "entries"}`);
@@ -346,7 +443,7 @@
           </div>
         {/if}
 
-        {#if entries.length === 0}
+        {#if rows.length === 0}
           {#if status === "loading"}
             <div class="poodle-history-center__loading" role="status">
               <Spinner variant="ring" size="sm" tone="muted" />
@@ -358,7 +455,6 @@
             </div>
           {/if}
         {:else}
-          <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
           <ul
             class="poodle-history-center__list"
             aria-label={listLabel}
@@ -368,103 +464,88 @@
             {#each rows as row (rowKey(row))}
               {#if row.kind === "entry"}
                 <li
+                  class="poodle-history-center__row"
                   data-row-index={row.index}
                   data-part="entry"
+                  data-depth={row.depth}
                   data-position={row.entry.position}
-                  data-checkpoint={hasBranches && row.entry.checkpoint === true ? "true" : undefined}
-                  data-fork={hasBranches && isForkPoint(row.entry) ? "true" : undefined}
+                  data-checkpoint={row.entry.checkpoint === true ? "true" : undefined}
+                  aria-level={row.depth + 1}
                 >
-                  <div class="poodle-history-center__item-row">
+                  <span class="poodle-history-center__lanes" aria-hidden="true">
+                    {#each Array(row.depth) as _, level (level)}
+                      <span class="poodle-history-center__lane" data-lane="ancestor"></span>
+                    {/each}
+                    <span class="poodle-history-center__lane" data-lane={laneKind(row)}></span>
+                  </span>
+                  <button
+                    type="button"
+                    class="poodle-history-center__entry-content"
+                    tabindex={focusIndex === row.index ? 0 : -1}
+                    onclick={() => handleRowClick(row.index)}
+                  >
+                    {#if row.entry.checkpoint === true}
+                      <span class="poodle-history-center__pin">
+                        <Icon icon="git-commit-horizontal" size={resolvedSize} />
+                      </span>
+                    {:else}
+                      <span class="poodle-history-center__position-marker" data-position={row.entry.position}></span>
+                    {/if}
+                    <span class="poodle-history-center__entry-copy">
+                      <span class="poodle-history-center__entry-label">{row.entry.label}</span>
+                      {#if row.entry.groupId}
+                        <span class="poodle-history-center__entry-meta">{row.entry.groupId}</span>
+                      {/if}
+                    </span>
+                  </button>
+                </li>
+              {:else}
+                {@const meta = captionMeta(row)}
+                <li
+                  class="poodle-history-center__row"
+                  data-row-index={row.index}
+                  data-part="caption"
+                  data-depth={row.depth}
+                  data-current={row.branch.current ? "true" : undefined}
+                  aria-level={row.depth + 1}
+                >
+                  <span class="poodle-history-center__lanes" aria-hidden="true">
+                    {#each Array(row.depth) as _, level (level)}
+                      <span class="poodle-history-center__lane" data-lane="ancestor"></span>
+                    {/each}
+                    <span class="poodle-history-center__lane" data-lane="caption"></span>
+                  </span>
+                  {#if renamingBranchId === row.branch.id}
+                    <input
+                      bind:this={renameInputElement}
+                      class="poodle-history-center__rename-input"
+                      aria-label={`Rename branch ${row.branch.name ?? row.branch.id}`}
+                      maxlength={maxBranchNameBytes}
+                      bind:value={renameValue}
+                      onkeydown={(event) => handleRenameKeydown(event, row.branch.id)}
+                      onblur={() => commitRename(row.branch.id)}
+                    />
+                  {:else}
+                    <span class="poodle-history-center__caption-copy">
+                      <span class="poodle-history-center__caption-name">{row.branch.name ?? row.branch.id}</span>
+                      <span class="poodle-history-center__caption-meta">
+                        {meta.count} {meta.count === 1 ? "entry" : "entries"}{meta.time !== null ? ` · ${meta.time}` : ""}
+                      </span>
+                      {#if row.branch.current}
+                        <span class="poodle-history-center__branch-current-badge">Current</span>
+                      {/if}
+                    </span>
                     <button
                       type="button"
-                      class="poodle-history-center__item-content"
+                      class="poodle-history-center__caption-rename"
+                      data-rename-button="true"
+                      aria-label={`Rename ${row.branch.name ?? row.branch.id}`}
+                      title="Rename branch"
                       tabindex={focusIndex === row.index ? 0 : -1}
-                      onclick={() => handleRowClick(row.index)}
+                      onclick={() => startRename(row.branch, row.index)}
                     >
-                      {#if hasBranches && row.entry.checkpoint}
-                        <span class="poodle-history-center__pin">
-                          <Icon icon="git-commit-horizontal" size={resolvedSize} />
-                        </span>
-                      {:else}
-                        <span class="poodle-history-center__position-marker" data-position={row.entry.position}></span>
-                      {/if}
-                      <span class="poodle-history-center__item-copy">
-                        <span class="poodle-history-center__item-label">{row.entry.label}</span>
-                        {#if row.entry.groupId}
-                          <span class="poodle-history-center__item-meta">{row.entry.groupId}</span>
-                        {/if}
-                      </span>
+                      <Icon icon="edit" size="xs" />
                     </button>
-
-                    {#if hasBranches && isForkPoint(row.entry)}
-                      <button
-                        type="button"
-                        class="poodle-history-center__fork-indicator"
-                        aria-label={expandedBranchIds.includes(row.entry.id)
-                          ? `Collapse branches at ${row.entry.label}`
-                          : `Show branches at ${row.entry.label}`}
-                        aria-expanded={expandedBranchIds.includes(row.entry.id)}
-                        tabindex={focusIndex === row.index ? 0 : -1}
-                        onclick={() => toggleFork(row.entry.id)}
-                      >
-                        <Icon
-                          icon={expandedBranchIds.includes(row.entry.id) ? "chevron-down" : "chevron-right"}
-                          size="xs"
-                        />
-                      </button>
-                    {/if}
-                  </div>
-
-                  {#if expandedBranchIds.includes(row.entry.id)}
-                    <ul class="poodle-history-center__branches">
-                      {#each branchList as branch (branch.id)}
-                        <li
-                          data-row-index={branchRowIndex(rows, branch)}
-                          data-part="branch"
-                          data-current={branch.current ? "true" : undefined}
-                        >
-                          {#if renamingBranchId === branch.id}
-                            <input
-                              bind:this={renameInputElement}
-                              class="poodle-history-center__rename-input"
-                              aria-label={`Rename branch ${branch.name ?? branch.id}`}
-                              maxlength={maxBranchNameBytes}
-                              bind:value={renameValue}
-                              onkeydown={(event) => handleRenameKeydown(event, branch.id)}
-                              onblur={() => commitRename(branch.id)}
-                            />
-                          {:else}
-                            <div class="poodle-history-center__branch-actions">
-                              <button
-                                type="button"
-                                class="poodle-history-center__branch-content"
-                                tabindex={focusIndex === branchRowIndex(rows, branch) ? 0 : -1}
-                                onclick={() => handleRowClick(branchRowIndex(rows, branch))}
-                              >
-                                <span class="poodle-history-center__branch-name">{branch.name ?? branch.id}</span>
-                                {#if branch.entryCount !== undefined}
-                                  <span class="poodle-history-center__branch-count">
-                                    {branch.entryCount} {branch.entryCount === 1 ? "entry" : "entries"}
-                                  </span>
-                                {/if}
-                                {#if branch.current}
-                                  <span class="poodle-history-center__branch-current-badge">Current</span>
-                                {/if}
-                              </button>
-                              <IconButton
-                                icon="edit"
-                                ariaLabel={`Rename ${branch.name ?? branch.id}`}
-                                tooltip="Rename branch"
-                                variant="ghost"
-                                size="xs"
-                                density={resolvedDensity}
-                                onClick={() => startRename(branch)}
-                              />
-                            </div>
-                          {/if}
-                        </li>
-                      {/each}
-                    </ul>
                   {/if}
                 </li>
               {/if}
@@ -484,7 +565,7 @@
                 variant="ghost"
                 size="xs"
                 density={resolvedDensity}
-                onClick={() => onLoadMoreEntries?.(entries.length)}
+                onClick={() => onLoadMoreEntries?.(entryRowCount)}
               >
                 Load more entries
               </Button>
@@ -497,7 +578,7 @@
                 variant="ghost"
                 size="xs"
                 density={resolvedDensity}
-                onClick={() => onLoadMoreBranches?.(branchList.length)}
+                onClick={() => onLoadMoreBranches?.(branches?.length ?? 0)}
               >
                 Load more branches
               </Button>

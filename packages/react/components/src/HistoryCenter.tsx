@@ -5,11 +5,12 @@ import {
   historyCenterKeydownEvent,
   historyCenterRows,
   historyCenterTransition,
-  isForkPoint,
   trapFocusKeydown,
+  type HistoryBranch,
   type HistoryCenterContext,
   type HistoryCenterEvent,
   type HistoryCenterRow,
+  type HistoryEntry,
 } from "@inflatable-cookie/poodle-core";
 
 import { Button } from "./Button";
@@ -22,19 +23,21 @@ import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type {
   ControlDensity,
   ControlSize,
-  HistoryBranch,
-  HistoryEntry,
   HistoryStatus,
   OverlayPlacement,
   SemanticControlSizeRole,
 } from "./types";
 
 export interface HistoryCenterProps {
-  entries?: HistoryEntry[];
-  totalEntries?: number;
-  hasMoreEntries?: boolean;
+  /** Branch records in supplied order. `null` disables the tree (no rows,
+   *  every row event inert). */
   branches?: HistoryBranch[] | null;
+  /** Per-branch entry path (`branchId` -> root-to-head entries). `null`
+   *  when `branches` is null. */
+  paths?: Record<string, HistoryEntry[]> | null;
+  totalEntries?: number;
   totalBranches?: number;
+  hasMoreEntries?: boolean;
   hasMoreBranches?: boolean;
   canUndo?: boolean;
   canRedo?: boolean;
@@ -58,19 +61,23 @@ export interface HistoryCenterProps {
   onUndo?: (() => void) | null;
   onRedo?: (() => void) | null;
   onOpenChange?: ((open: boolean) => void) | null;
-  onSelectEntry?: ((id: string) => void) | null;
-  onCheckout?: ((branchId: string, entryId: string) => void) | null;
+  /** Entry activation; always the entry actually clicked, on the branch
+   *  that owns its run. */
+  onNavigateEntry?: ((branchId: string, entryId: string) => void) | null;
   onRenameBranch?: ((branchId: string, name: string) => void) | null;
   onLoadMoreEntries?: ((offset: number) => void) | null;
   onLoadMoreBranches?: ((offset: number) => void) | null;
 }
 
+type EntryRow = Extract<HistoryCenterRow, { kind: "entry" }>;
+type CaptionRow = Extract<HistoryCenterRow, { kind: "caption" }>;
+
 export function HistoryCenter({
-  entries = [],
-  totalEntries = 0,
-  hasMoreEntries = false,
   branches = null,
+  paths = null,
+  totalEntries = 0,
   totalBranches = 0,
+  hasMoreEntries = false,
   hasMoreBranches = false,
   canUndo = false,
   canRedo = false,
@@ -94,8 +101,7 @@ export function HistoryCenter({
   onUndo = null,
   onRedo = null,
   onOpenChange = null,
-  onSelectEntry = null,
-  onCheckout = null,
+  onNavigateEntry = null,
   onRenameBranch = null,
   onLoadMoreEntries = null,
   onLoadMoreBranches = null,
@@ -103,26 +109,34 @@ export function HistoryCenter({
   const uiPresentation = useUiPresentation();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const [focusIndex, setFocusIndex] = useState(0);
-  const [expandedBranchIds, setExpandedBranchIds] = useState<string[]>([]);
   const [displayedRejection, setDisplayedRejection] = useState<string | null>(null);
   const [renamingBranchId, setRenamingBranchId] = useState<string | null>(null);
+  const [renamingIndex, setRenamingIndex] = useState(-1);
   const [renameValue, setRenameValue] = useState("");
   const sectionRef = useRef<HTMLElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
   const renameInputRef = useRef<HTMLInputElement | null>(null);
   const lastRejectionProp = useRef<string | null>(null);
+  const pendingFocusRestore = useRef<number | null>(null);
 
   const isOpen = open === null ? uncontrolledOpen : open;
   const hasBranches = branches !== null;
-  const branchList = branches ?? [];
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
-  const rows = historyCenterRows(entries, branches, expandedBranchIds);
+  const rows = historyCenterRows(branches, paths);
+  const entryRows = rows.filter((row): row is EntryRow => row.kind === "entry");
+  const entryRowCount = entryRows.length;
+  // The data's own "present": the newest authority-supplied timestamp. The
+  // caption relative time is derived from supplied data (ruling D2) — there
+  // is no clock and no `Date.now()` anywhere.
+  const newestRecordedAt = entryRows.reduce<number | undefined>((newest, row) => {
+    const at = row.entry.recordedAtMs;
+    return at !== undefined && (newest === undefined || at > newest) ? at : newest;
+  }, undefined);
 
   const machineContext: HistoryCenterContext = {
-    entries,
     branches,
-    expandedBranchIds,
+    paths,
     focusIndex,
     rejection: displayedRejection,
   };
@@ -131,7 +145,6 @@ export function HistoryCenter({
   sendRef.current = (event: HistoryCenterEvent) => {
     const result = historyCenterTransition(isOpen ? "open" : "closed", machineContext, event);
     setFocusIndex(result.context.focusIndex);
-    setExpandedBranchIds(result.context.expandedBranchIds);
     setDisplayedRejection(result.context.rejection);
 
     for (const effect of result.effects) {
@@ -143,11 +156,8 @@ export function HistoryCenter({
         case "focusRow":
           // Executed by the focusIndex effect below, which runs after commit.
           break;
-        case "emitSelectEntry":
-          onSelectEntry?.(effect.id);
-          break;
-        case "emitCheckout":
-          onCheckout?.(effect.branchId, effect.entryId);
+        case "emitNavigateEntry":
+          onNavigateEntry?.(effect.branchId, effect.entryId);
           break;
         case "emitRenameBranch":
           onRenameBranch?.(effect.branchId, effect.name);
@@ -172,19 +182,46 @@ export function HistoryCenter({
   }, [focusIndex]);
 
   // Inline rename input takes focus and selects its content when it appears.
+  // Deferred a microtask past the Popover's open-focus effect: focusing inside
+  // the same commit lets the popover's initial focus land on the input's
+  // focus window, blur it, and spuriously blur-commit the rename.
   useEffect(() => {
     if (renamingBranchId !== null && renameInputRef.current) {
-      renameInputRef.current.focus();
-      renameInputRef.current.select();
+      const input = renameInputRef.current;
+      const frame = requestAnimationFrame(() => {
+        input.focus();
+        input.select();
+      });
+      return () => cancelAnimationFrame(frame);
     }
   }, [renamingBranchId]);
+
+  // After a rename commits or cancels, the input unmounts — return focus to
+  // the caption's rename button so keyboard users stay anchored to the row.
+  useEffect(() => {
+    if (pendingFocusRestore.current === null) return;
+    const index = pendingFocusRestore.current;
+    pendingFocusRestore.current = null;
+    listRef.current?.querySelector<HTMLElement>(`[data-row-index="${index}"] [data-rename-button]`)?.focus();
+  });
 
   function handleOpenChange(next: boolean): void {
     sendRef.current(next ? { type: "OPEN" } : { type: "CLOSE" });
   }
 
   function handleListKeydown(event: React.KeyboardEvent): void {
+    // The rename input owns its keys (commit/cancel). The caption rename
+    // button keeps native activation for Enter/Space (start a rename instead
+    // of roving-row activation), but arrows still drive roving focus.
     if (event.target instanceof HTMLInputElement) {
+      return;
+    }
+
+    if (
+      event.target instanceof HTMLElement &&
+      event.target.closest("[data-rename-button]") !== null &&
+      (event.key === "Enter" || event.key === " ")
+    ) {
       return;
     }
 
@@ -217,17 +254,20 @@ export function HistoryCenter({
     sendRef.current({ type: "ACTIVATE_ROW", index });
   }
 
-  function toggleFork(entryId: string): void {
-    sendRef.current({ type: "TOGGLE_BRANCHES", entryId });
-  }
-
   function dismissRejection(): void {
     sendRef.current({ type: "DISMISS_REJECTION" });
   }
 
-  function startRename(branch: HistoryBranch): void {
+  function startRename(branch: HistoryBranch, index: number): void {
     setRenamingBranchId(branch.id);
+    setRenamingIndex(index);
     setRenameValue(branch.name ?? branch.id);
+  }
+
+  function finishRename(): void {
+    pendingFocusRestore.current = renamingIndex;
+    setRenamingBranchId(null);
+    setRenamingIndex(-1);
   }
 
   function commitRename(branchId: string): void {
@@ -236,11 +276,11 @@ export function HistoryCenter({
     }
 
     sendRef.current({ type: "RENAME", branchId, name: renameValue });
-    setRenamingBranchId(null);
+    finishRename();
   }
 
   function cancelRename(): void {
-    setRenamingBranchId(null);
+    finishRename();
   }
 
   function handleRenameKeydown(event: React.KeyboardEvent, branchId: string): void {
@@ -254,11 +294,77 @@ export function HistoryCenter({
   }
 
   function rowKey(row: HistoryCenterRow): string {
-    return row.kind === "entry" ? `entry:${row.entry.id}` : `branch:${row.branch.id}`;
+    return row.kind === "entry" ? `entry:${row.entry.id}` : `caption:${row.branch.id}`;
   }
 
-  function branchRowIndex(rows: HistoryCenterRow[], branch: HistoryBranch): number {
-    return rows.findIndex((candidate) => candidate.kind === "branch" && candidate.branch.id === branch.id);
+  // The run's own lane shape (drawn by the renderer from the row's lane
+  // metadata; the stitcher's flags are always true, only depth saturates).
+  function laneKind(row: EntryRow): string {
+    if (row.depth === 0) {
+      return "trunk";
+    }
+    if (row.lane.start && row.lane.end) {
+      return "single";
+    }
+    if (row.lane.start) {
+      return "elbow";
+    }
+    if (row.lane.end) {
+      return "end";
+    }
+    return "continue";
+  }
+
+  // Short-form relative time, derived purely from supplied timestamps. The
+  // reference is the data's newest recordedAtMs — stable across renders and
+  // runtimes, no clock.
+  function formatRelativeTime(diffMs: number): string {
+    const seconds = Math.round(Math.max(0, diffMs) / 1000);
+
+    if (seconds < 60) {
+      return "just now";
+    }
+
+    const minutes = Math.round(seconds / 60);
+
+    if (minutes < 60) {
+      return `${minutes}m ago`;
+    }
+
+    const hours = Math.round(minutes / 60);
+
+    if (hours < 24) {
+      return `${hours}h ago`;
+    }
+
+    const days = Math.round(hours / 24);
+
+    if (days < 7) {
+      return `${days}d ago`;
+    }
+
+    return `${Math.round(days / 7)}w ago`;
+  }
+
+  // A run caption takes its relative time from its own run's most recent
+  // entry — the run's head (its last stitched entry row) — and renders no
+  // time at all when the field is absent (ruling D2).
+  function captionMeta(row: CaptionRow): { count: number; time: string | null } {
+    let count = 0;
+    let runHead: EntryRow | undefined;
+
+    for (const candidate of entryRows) {
+      if (candidate.branchId === row.branch.id) {
+        count += 1;
+        runHead = candidate;
+      }
+    }
+
+    const at = runHead?.entry.recordedAtMs;
+    const time =
+      at !== undefined && newestRecordedAt !== undefined ? formatRelativeTime(newestRecordedAt - at) : null;
+
+    return { count, time };
   }
 
   const entryTotal = `${totalEntries} ${totalEntries === 1 ? "entry" : "entries"}`;
@@ -329,7 +435,7 @@ export function HistoryCenter({
               </div>
             ) : null}
 
-            {entries.length === 0 ? (
+            {rows.length === 0 ? (
               status === "loading" ? (
                 <div className="poodle-history-center__loading" role="status">
                   <Spinner variant="ring" size="sm" tone="muted" />
@@ -352,110 +458,102 @@ export function HistoryCenter({
                     row.kind === "entry" ? (
                       <li
                         key={rowKey(row)}
+                        className="poodle-history-center__row"
                         data-row-index={row.index}
                         data-part="entry"
+                        data-depth={row.depth}
                         data-position={row.entry.position}
-                        data-checkpoint={hasBranches && row.entry.checkpoint === true ? "true" : undefined}
-                        data-fork={hasBranches && isForkPoint(row.entry) ? "true" : undefined}
+                        data-checkpoint={row.entry.checkpoint === true ? "true" : undefined}
+                        aria-level={row.depth + 1}
                       >
-                        <div className="poodle-history-center__item-row">
-                          <button
-                            type="button"
-                            className="poodle-history-center__item-content"
-                            tabIndex={focusIndex === row.index ? 0 : -1}
-                            onClick={() => handleRowClick(row.index)}
-                          >
-                            {hasBranches && row.entry.checkpoint ? (
-                              <span className="poodle-history-center__pin">
-                                <Icon icon="git-commit-horizontal" size={resolvedSize} />
-                              </span>
-                            ) : (
-                              <span className="poodle-history-center__position-marker" data-position={row.entry.position} />
-                            )}
-                            <span className="poodle-history-center__item-copy">
-                              <span className="poodle-history-center__item-label">{row.entry.label}</span>
-                              {row.entry.groupId ? (
-                                <span className="poodle-history-center__item-meta">{row.entry.groupId}</span>
-                              ) : null}
+                        <span className="poodle-history-center__lanes" aria-hidden="true">
+                          {Array.from({ length: row.depth }, (_, level) => (
+                            <span key={level} className="poodle-history-center__lane" data-lane="ancestor" />
+                          ))}
+                          <span className="poodle-history-center__lane" data-lane={laneKind(row)} />
+                        </span>
+                        <button
+                          type="button"
+                          className="poodle-history-center__entry-content"
+                          tabIndex={focusIndex === row.index ? 0 : -1}
+                          onClick={() => handleRowClick(row.index)}
+                        >
+                          {row.entry.checkpoint === true ? (
+                            <span className="poodle-history-center__pin">
+                              <Icon icon="git-commit-horizontal" size={resolvedSize} />
                             </span>
-                          </button>
-
-                          {hasBranches && isForkPoint(row.entry) ? (
-                            <button
-                              type="button"
-                              className="poodle-history-center__fork-indicator"
-                              aria-label={
-                                expandedBranchIds.includes(row.entry.id)
-                                  ? `Collapse branches at ${row.entry.label}`
-                                  : `Show branches at ${row.entry.label}`
-                              }
-                              aria-expanded={expandedBranchIds.includes(row.entry.id)}
-                              tabIndex={focusIndex === row.index ? 0 : -1}
-                              onClick={() => toggleFork(row.entry.id)}
-                            >
-                              <Icon
-                                icon={expandedBranchIds.includes(row.entry.id) ? "chevron-down" : "chevron-right"}
-                                size="xs"
-                              />
-                            </button>
-                          ) : null}
-                        </div>
-
-                        {expandedBranchIds.includes(row.entry.id) ? (
-                          <ul className="poodle-history-center__branches">
-                            {branchList.map((branch) => (
-                              <li
-                                key={branch.id}
-                                data-row-index={branchRowIndex(rows, branch)}
-                                data-part="branch"
-                                data-current={branch.current ? "true" : undefined}
-                              >
-                                {renamingBranchId === branch.id ? (
-                                  <input
-                                    ref={renameInputRef}
-                                    className="poodle-history-center__rename-input"
-                                    aria-label={`Rename branch ${branch.name ?? branch.id}`}
-                                    maxLength={maxBranchNameBytes}
-                                    value={renameValue}
-                                    onChange={(event) => setRenameValue(event.target.value)}
-                                    onKeyDown={(event) => handleRenameKeydown(event, branch.id)}
-                                    onBlur={() => commitRename(branch.id)}
-                                  />
-                                ) : (
-                                  <div className="poodle-history-center__branch-actions">
-                                    <button
-                                      type="button"
-                                      className="poodle-history-center__branch-content"
-                                      tabIndex={focusIndex === branchRowIndex(rows, branch) ? 0 : -1}
-                                      onClick={() => handleRowClick(branchRowIndex(rows, branch))}
-                                    >
-                                      <span className="poodle-history-center__branch-name">{branch.name ?? branch.id}</span>
-                                      {branch.entryCount !== undefined ? (
-                                        <span className="poodle-history-center__branch-count">
-                                          {branch.entryCount} {branch.entryCount === 1 ? "entry" : "entries"}
-                                        </span>
-                                      ) : null}
-                                      {branch.current ? (
-                                        <span className="poodle-history-center__branch-current-badge">Current</span>
-                                      ) : null}
-                                    </button>
-                                    <IconButton
-                                      icon="edit"
-                                      ariaLabel={`Rename ${branch.name ?? branch.id}`}
-                                      tooltip="Rename branch"
-                                      variant="ghost"
-                                      size="xs"
-                                      density={resolvedDensity}
-                                      onClick={() => startRename(branch)}
-                                    />
-                                  </div>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        ) : null}
+                          ) : (
+                            <span className="poodle-history-center__position-marker" data-position={row.entry.position} />
+                          )}
+                          <span className="poodle-history-center__entry-copy">
+                            <span className="poodle-history-center__entry-label">{row.entry.label}</span>
+                            {row.entry.groupId ? (
+                              <span className="poodle-history-center__entry-meta">{row.entry.groupId}</span>
+                            ) : null}
+                          </span>
+                        </button>
                       </li>
-                    ) : null,
+                    ) : (
+                      (() => {
+                        const meta = captionMeta(row);
+                        return (
+                          <li
+                            key={rowKey(row)}
+                            className="poodle-history-center__row"
+                            data-row-index={row.index}
+                            data-part="caption"
+                            data-depth={row.depth}
+                            data-current={row.branch.current ? "true" : undefined}
+                            aria-level={row.depth + 1}
+                          >
+                            <span className="poodle-history-center__lanes" aria-hidden="true">
+                              {Array.from({ length: row.depth }, (_, level) => (
+                                <span key={level} className="poodle-history-center__lane" data-lane="ancestor" />
+                              ))}
+                              <span className="poodle-history-center__lane" data-lane="caption" />
+                            </span>
+                            {renamingBranchId === row.branch.id ? (
+                              <input
+                                ref={renameInputRef}
+                                className="poodle-history-center__rename-input"
+                                aria-label={`Rename branch ${row.branch.name ?? row.branch.id}`}
+                                maxLength={maxBranchNameBytes}
+                                value={renameValue}
+                                onChange={(event) => setRenameValue(event.target.value)}
+                                onKeyDown={(event) => handleRenameKeydown(event, row.branch.id)}
+                                onBlur={() => commitRename(row.branch.id)}
+                              />
+                            ) : (
+                              <>
+                                <span className="poodle-history-center__caption-copy">
+                                  <span className="poodle-history-center__caption-name">
+                                    {row.branch.name ?? row.branch.id}
+                                  </span>
+                                  <span className="poodle-history-center__caption-meta">
+                                    {meta.count} {meta.count === 1 ? "entry" : "entries"}
+                                    {meta.time !== null ? ` · ${meta.time}` : ""}
+                                  </span>
+                                  {row.branch.current ? (
+                                    <span className="poodle-history-center__branch-current-badge">Current</span>
+                                  ) : null}
+                                </span>
+                                <button
+                                  type="button"
+                                  className="poodle-history-center__caption-rename"
+                                  data-rename-button="true"
+                                  aria-label={`Rename ${row.branch.name ?? row.branch.id}`}
+                                  title="Rename branch"
+                                  tabIndex={focusIndex === row.index ? 0 : -1}
+                                  onClick={() => startRename(row.branch, row.index)}
+                                >
+                                  <Icon icon="edit" size="xs" />
+                                </button>
+                              </>
+                            )}
+                          </li>
+                        );
+                      })()
+                    ),
                   )}
                 </ul>
 
@@ -472,7 +570,7 @@ export function HistoryCenter({
                       variant="ghost"
                       size="xs"
                       density={resolvedDensity}
-                      onClick={() => onLoadMoreEntries?.(entries.length)}
+                      onClick={() => onLoadMoreEntries?.(entryRowCount)}
                     >
                       Load more entries
                     </Button>
@@ -485,7 +583,7 @@ export function HistoryCenter({
                       variant="ghost"
                       size="xs"
                       density={resolvedDensity}
-                      onClick={() => onLoadMoreBranches?.(branchList.length)}
+                      onClick={() => onLoadMoreBranches?.(branches?.length ?? 0)}
                     >
                       Load more branches
                     </Button>

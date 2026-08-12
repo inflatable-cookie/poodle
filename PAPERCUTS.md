@@ -33,6 +33,21 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   mode wired into `docs:check`. Affects every gate run after a component
   lands.
 
+- 2026-08-11 — (the `isForkPoint` instance was fixed in b023 review; the
+  structural point stands and is why it recurs.)
+  `packages/core/src/index.ts` hard-lists every per-module
+  export (`export { historyCenterTransition, …, isForkPoint } from
+  "./history-center"`), so a card that deletes a core export (g13-023's D1
+  dropped `isForkPoint`) cannot remove it: `index.ts` is outside the card's
+  writable set. Plain bun/Node ESM validates re-export bindings at link time
+  (`export 'missing' not found`, probe-verified), so any consumer importing
+  the package index crashes until the follow-up card edits `index.ts`;
+  vitest is lenient, which is why the component gate showed only the
+  HistoryCenter suites red. Same wall recurs for any future export deletion.
+  Either make `index.ts` writable on export-deleting cards, or switch these
+  blocks to wildcard re-exports (`export * from "./history-center"`) so
+  deletions stop breaking the package index.
+
 - 2026-08-11 — RESOLVED 2026-08-12 (`761f81d8`: added the tsconfig and the
   `*.css` ambient declaration, wired `check:svelte-components` into
   `check:svelte`; coverage went from 1 file to 449, and the two real errors it
