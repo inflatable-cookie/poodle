@@ -46,6 +46,8 @@ and roadmap closeout.
 | `034` | HistoryCentre — three field defects from Loophole | `033` merged | merged (`6257077f`) |
 | `035` | shell scene: Rust authoring + the two web shells (**g13.004** part 1) | `011`/`012`/`022`/`025` merged | merged (`db4e4510`) |
 | `036` | shell scene: GPUI + Jetstream — closes **g13.004** | `035` merged | ready — dispatched |
+| `037` | focus rings — square outlines on rounded controls | none | ready |
+| `038` | focus rings — components with no explicit treatment | `037` merged | planned |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
@@ -92,3 +94,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 034](034-history-center-field-defects.md)
 - [Batch 035](035-shell-scene-rust-authoring-and-web.md)
 - [Batch 036](036-shell-scene-native-shells.md)
+- [Batch 037](037-focus-ring-radius-audit.md)
