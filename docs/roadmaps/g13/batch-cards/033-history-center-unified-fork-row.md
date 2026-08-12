@@ -1,6 +1,6 @@
 # 033 HistoryCentre — One Fork Row, With Delete
 
-Status: ready
+Status: merged (`aa0350d2`)
 Milestone: side-quest (component behaviour, outside the g13 IR lane)
 Owner: Poodle core
 Branch: `thread/g13-033-history-center-unified-fork-row`

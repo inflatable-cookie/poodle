@@ -42,7 +42,7 @@ and roadmap closeout.
 | `030` | HistoryCentre — persistent fork Select | `029` merged | merged (`61d3f49d` → `c6590823`) |
 | `031` | nested dismiss layers + ghost Select affordance | `030` merged | merged (`4daf6993` → `ef12a3bf`) |
 | `032` | HistoryCentre — rename the selected fork | `030` merged | merged (`8da4141a` → `321fc790`) |
-| `033` | HistoryCentre — one fork row, with delete | `031`+`032` merged | dispatched |
+| `033` | HistoryCentre — one fork row, with delete | `031`+`032` merged | merged (`aa0350d2`) |
 | — | HistoryCentre — native parity | `029` merged | planned (renumbered; `022` was reused for codegen) |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
