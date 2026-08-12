@@ -16,11 +16,11 @@ import {
   type HistoryPathPage,
 } from "@inflatable-cookie/poodle-core";
 
-import { Button } from "./Button";
 import { EmptyState } from "./EmptyState";
 import { Icon } from "./Icon";
 import { IconButton } from "./IconButton";
 import { Popover } from "./Popover";
+import { Select } from "./Select";
 import { Spinner } from "./Spinner";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type {
@@ -75,8 +75,10 @@ export interface HistoryCenterProps {
   onLoadContinuations?: ((entryId: string) => void) | null;
   /** Host op 2: load the run starting at the fork's first entry. */
   onLoadContinuationRun?: ((fromEntryId: string) => void) | null;
-  /** Host op 3: prefer the picked continuation as the redo target. */
-  onPreferContinuation?: ((entryId: string) => void) | null;
+  /** Host op 3: checkout the picked continuation — the selected fork
+   *  becomes the primary history. Poodle's word; the host maps the
+   *  callback onto its own prefer operation (R2a). */
+  onCheckoutContinuation?: ((entryId: string) => void) | null;
 }
 
 type EntryRow = Extract<HistoryCenterRow, { kind: "entry" }>;
@@ -111,7 +113,7 @@ export function HistoryCenter({
   onRenameBranch = null,
   onLoadContinuations = null,
   onLoadContinuationRun = null,
-  onPreferContinuation = null,
+  onCheckoutContinuation = null,
 }: HistoryCenterProps) {
   const uiPresentation = useUiPresentation();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
@@ -187,8 +189,8 @@ export function HistoryCenter({
         case "loadContinuationRun":
           onLoadContinuationRun?.(effect.fromEntryId);
           break;
-        case "preferContinuation":
-          onPreferContinuation?.(effect.entryId);
+        case "checkoutContinuation":
+          onCheckoutContinuation?.(effect.entryId);
           break;
       }
     }
@@ -399,6 +401,13 @@ export function HistoryCenter({
     return continuations.find((fork) => fork.entryId === pickedEntryId);
   }
 
+  /** The fork behind a Select option value — the option carries only the
+   *  value and label; the branch name and the current marker come from the
+   *  fork record (R4). */
+  function forkForValue(continuations: HistoryContinuation[], entryId: string): HistoryContinuation | undefined {
+    return continuations.find((fork) => fork.entryId === entryId);
+  }
+
   // ── Handlers ──────────────────────────────────────────────────────────
 
   function handleOpenChange(next: boolean): void {
@@ -406,19 +415,23 @@ export function HistoryCenter({
   }
 
   function handleListKeydown(event: React.KeyboardEvent): void {
-    // The rename input owns its keys (commit/cancel). Disclosure, picker and
-    // rename buttons keep native Enter/Space activation (they are not row
+    // The rename input owns its keys (commit/cancel). Disclosure and rename
+    // buttons keep native Enter/Space activation (they are not row
     // activation); arrows still drive roving focus from anywhere in the row.
     if (event.target instanceof HTMLInputElement) {
       return;
     }
 
+    // The picker's Select owns every key on its trigger (arrows open the
+    // listbox, Enter/Space pick an option); the machine never maps them.
+    if (event.target instanceof HTMLElement && event.target.closest('[data-part="picker-select"]') !== null) {
+      return;
+    }
+
     if (
       event.target instanceof HTMLElement &&
-      (event.target.closest("[data-part=\"fork-disclosure\"]") !== null ||
-        event.target.closest("[data-part=\"picker-option\"]") !== null ||
-        event.target.closest("[data-part=\"picker-confirm\"]") !== null ||
-        event.target.closest("[data-part=\"run-header-rename\"]") !== null) &&
+      (event.target.closest('[data-part="fork-disclosure"]') !== null ||
+        event.target.closest('[data-part="run-header-rename"]') !== null) &&
       (event.key === "Enter" || event.key === " ")
     ) {
       return;
@@ -737,44 +750,102 @@ export function HistoryCenter({
                                 data-anchor={row.anchorEntryId}
                                 tabIndex={rowFocused(row) ? 0 : -1}
                               >
-                                <div className="poodle-history-center__picker-options" role="group" aria-label="Continuations">
-                                  {row.continuations.map((fork) => (
-                                    <button
-                                      key={fork.entryId}
-                                      type="button"
-                                      className="poodle-history-center__picker-option"
-                                      data-part="picker-option"
-                                      data-value={fork.entryId}
-                                      data-preferred={fork.preferred ? "true" : undefined}
-                                      aria-pressed={row.pickedEntryId === fork.entryId}
-                                      onClick={() =>
-                                        sendRef.current({ type: "PICK_CONTINUATION", entryId: fork.entryId })
-                                      }
-                                    >
-                                      <span className="poodle-history-center__picker-option-copy">
-                                        <span className="poodle-history-center__picker-option-name">{fork.label}</span>
-                                        <span className="poodle-history-center__picker-option-branch">
-                                          {fork.branchName ?? fork.branchId}
-                                        </span>
-                                      </span>
-                                      {fork.preferred ? (
-                                        <span className="poodle-history-center__preferred-badge" data-part="preferred-badge">
-                                          Preferred
-                                        </span>
-                                      ) : null}
-                                    </button>
-                                  ))}
-                                </div>
-                                <div className="poodle-history-center__picker-actions" data-part="picker-confirm">
-                                  <Button
-                                    variant="ghost"
+                                {/* R4: the picker is Poodle's Select plus a
+                                    checkout IconButton. The trigger and the
+                                    options both carry the fork label, its
+                                    branch name and the current marker, so the
+                                    persistent select keeps the screenshot's
+                                    information visible (R1). */}
+                                <div
+                                  className="poodle-history-center__picker-controls"
+                                  data-part="picker-select"
+                                >
+                                  <Select
+                                    value={row.pickedEntryId}
+                                    options={row.continuations.map((fork) => ({
+                                      value: fork.entryId,
+                                      label: fork.label,
+                                    }))}
                                     size="xs"
                                     density={resolvedDensity}
-                                    disabled={picked === undefined || picked.preferred}
-                                    onClick={() => sendRef.current({ type: "CONFIRM" })}
+                                    variant="ghost"
+                                    ariaLabel="Continuations"
+                                    placeholder="Choose a fork…"
+                                    onValueChange={(entryId) =>
+                                      sendRef.current({ type: "PICK_CONTINUATION", entryId })
+                                    }
+                                    trigger={({ selectedOption, placeholder }) => {
+                                      const fork =
+                                        selectedOption === null
+                                          ? undefined
+                                          : forkForValue(row.continuations, selectedOption.value);
+                                      return selectedOption === null ? (
+                                        <span
+                                          className="poodle-history-center__picker-value"
+                                          data-placeholder="true"
+                                        >
+                                          {placeholder}
+                                        </span>
+                                      ) : (
+                                        <span className="poodle-history-center__picker-value">
+                                          <span className="poodle-history-center__picker-option-name">
+                                            {selectedOption.label}
+                                          </span>
+                                          {fork !== undefined ? (
+                                            <span className="poodle-history-center__picker-option-branch">
+                                              {fork.branchName ?? fork.branchId}
+                                            </span>
+                                          ) : null}
+                                          {fork?.preferred ? (
+                                            <span
+                                              className="poodle-history-center__current-badge"
+                                              data-part="current-badge"
+                                            >
+                                              Current
+                                            </span>
+                                          ) : null}
+                                        </span>
+                                      );
+                                    }}
+                                    option={({ option }) => {
+                                      const fork = forkForValue(row.continuations, option.value);
+                                      return (
+                                        <>
+                                          <span className="poodle-history-center__picker-option-copy">
+                                            <span className="poodle-history-center__picker-option-name">
+                                              {option.label}
+                                            </span>
+                                            <span className="poodle-history-center__picker-option-branch">
+                                              {fork?.branchName ?? fork?.branchId}
+                                            </span>
+                                          </span>
+                                          {fork?.preferred ? (
+                                            <span
+                                              className="poodle-history-center__current-badge"
+                                              data-part="current-badge"
+                                            >
+                                              Current
+                                            </span>
+                                          ) : null}
+                                        </>
+                                      );
+                                    }}
+                                  />
+                                  <span
+                                    className="poodle-history-center__picker-checkout"
+                                    data-part="picker-checkout"
                                   >
-                                    Choose
-                                  </Button>
+                                    <IconButton
+                                      icon="check"
+                                      ariaLabel="Checkout"
+                                      tooltip="Checkout"
+                                      variant="ghost"
+                                      size="xs"
+                                      density={resolvedDensity}
+                                      disabled={picked === undefined || picked.preferred}
+                                      onClick={() => sendRef.current({ type: "CONFIRM" })}
+                                    />
+                                  </span>
                                 </div>
                               </div>
                             );

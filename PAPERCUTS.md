@@ -7,6 +7,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-12 — g13-030's picker puts Poodle's `Select` inside the
+  `HistoryCenter` popover, and Select portals its listbox to the document
+  body — so Tab from an open listbox is outside `Popover`'s focus trap
+  (`trapFocusKeydown` only intercepts keys whose target is inside the
+  surface; the portalled menu's Tab bubbles to body instead). The Select's
+  own arrows/Enter/Escape work and roving traversal is unaffected; the
+  escape is a Select-in-Popover composite concern that predates the
+  component-level fix. Either trap on a `contains()` that includes the
+  Select's portalled layer, or have Select stop Tab from its open listbox.
+  Affects any composite that puts a Select inside a trap (HistoryCenter
+  first instance).
+
 - 2026-08-12 — g13-029 hit this: b028's `packages/core/src/history-center.ts`
   does not type-check as committed, and `effigy check:svelte` (a card
   acceptance gate) cannot exit 0 until it is fixed. `HistoryCenterOpenFork.inner`

@@ -53,10 +53,18 @@ const twoForkContinuations: Record<string, HistoryContinuation[]> = {
 };
 
 const twoForkRuns: Record<string, HistoryPathPage[]> = {
-  l1: [page([
-    { id: "l2", label: "Lead mix", position: "past", continuationCount: 0 },
-    { id: "l1", label: "Lead intro", position: "past", continuationCount: 1 },
-  ])],
+  x1: [
+    page([
+      { id: "x2", label: "Alt mix", position: "past", continuationCount: 0 },
+      { id: "x1", label: "Alt intro", position: "past", continuationCount: 1 },
+    ]),
+  ],
+  l1: [
+    page([
+      { id: "l2", label: "Lead mix", position: "past", continuationCount: 0 },
+      { id: "l1", label: "Lead intro", position: "past", continuationCount: 1 },
+    ]),
+  ],
 };
 
 // c2 carries continuationCount 2 → forkCount 1: one fork, auto-chosen, never
@@ -259,7 +267,7 @@ describe("HistoryCenter (svelte)", () => {
     ]);
   });
 
-  it("renders one badge reading 2 and one picker with two options at forkCount 2, distinct from a fork off a fork", async () => {
+  it("renders one badge reading 2 and a persistent Select picker at forkCount 2, distinct from a fork off a fork", async () => {
     const onNavigateEntry = vi.fn();
     render(HistoryCenterHostHarness, {
       props: {
@@ -278,23 +286,34 @@ describe("HistoryCenter (svelte)", () => {
 
     await fireEvent.click(c2.querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
 
-    // Exactly one picker row at depth 1, offering exactly the two forks —
-    // asserted on the rendered rows, not the row data.
+    // R3 selects the current fork (x1, preferred) and shows its run; the
+    // picker row persists above it (R1) — a Select plus a checkout button.
     expect(rowSummary()).toEqual([
       { kind: "entry", entry: "c1", depth: "0" },
       { kind: "entry", entry: "c2", depth: "0" },
       { kind: "picker", entry: "c2", depth: "1" },
+      { kind: "entry", entry: "x1", depth: "1" },
+      { kind: "entry", entry: "x2", depth: "1" },
       { kind: "entry", entry: "c3", depth: "0" },
     ]);
-    const options = [...document.querySelectorAll("[data-part='picker-option']")];
-    expect(options).toHaveLength(2);
-    expect(screen.getByRole("button", { name: /Lead intro feature\/lead/ })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /Alt intro feature\/alt/ })).toBeTruthy();
+    expect(document.querySelector("[data-part='picker-select']")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Checkout" })).toBeTruthy();
+
+    // The trigger shows the current selection: label, branch, current marker.
+    const trigger = screen.getByRole("button", { name: "Continuations" });
+    expect(trigger.textContent).toContain("Alt intro");
+    expect(trigger.textContent).toContain("feature/alt");
+    expect(trigger.textContent).toContain("Current");
+
+    // Opening the select offers exactly the two forks with the same anatomy.
+    await fireEvent.click(trigger);
+    expect(screen.getByRole("option", { name: /Lead intro feature\/lead/ })).toBeTruthy();
+    expect(screen.getByRole("option", { name: /Alt intro feature\/alt Current/ })).toBeTruthy();
   });
 
-  it("picks the non-preferred fork and confirms: prefers it, reveals its run, never navigates", async () => {
+  it("selects the non-preferred fork: preview swaps below the select, checkout emits, never navigates", async () => {
     const onNavigateEntry = vi.fn();
-    const onPreferContinuation = vi.fn();
+    const onCheckoutContinuation = vi.fn();
     render(HistoryCenterHostHarness, {
       props: {
         pages: twoForkPages,
@@ -302,32 +321,77 @@ describe("HistoryCenter (svelte)", () => {
         runsByFork: twoForkRuns,
         defaultOpen: true,
         onNavigateEntry,
-        onPreferContinuation,
+        onCheckoutContinuation,
       },
     });
 
     await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
-    await fireEvent.click(screen.getByRole("button", { name: /Lead intro feature\/lead/ }));
 
-    expect(screen.getByRole("button", { name: "Choose" }).hasAttribute("disabled")).toBe(false);
+    // R3 selected the current fork (x1): checkout is disabled on it.
+    expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(true);
 
-    await fireEvent.click(screen.getByRole("button", { name: "Choose" }));
-
-    // Confirm = the picker's commit: prefer the picked future and reveal its
-    // run — and never navigates anywhere.
-    expect(onPreferContinuation).toHaveBeenCalledWith("l1");
-    expect(onNavigateEntry).not.toHaveBeenCalled();
+    // Select the non-preferred fork: the entries below swap to its run and
+    // the select stays — the pick commits nothing.
+    await fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
+    await fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
 
     expect(rowSummary()).toEqual([
       { kind: "entry", entry: "c1", depth: "0" },
       { kind: "entry", entry: "c2", depth: "0" },
+      { kind: "picker", entry: "c2", depth: "1" },
       { kind: "entry", entry: "l1", depth: "1" },
       { kind: "entry", entry: "l2", depth: "1" },
       { kind: "entry", entry: "c3", depth: "0" },
     ]);
+    expect(onCheckoutContinuation).not.toHaveBeenCalled();
+    expect(onNavigateEntry).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(false);
+
+    await fireEvent.click(screen.getByRole("button", { name: "Checkout" }));
+
+    // Checkout makes the fork primary: the command leaves, the disclosure
+    // state for the anchor is cleared, and the root list renders again —
+    // no fabrication, no navigation.
+    expect(onCheckoutContinuation).toHaveBeenCalledWith("l1");
+    expect(onNavigateEntry).not.toHaveBeenCalled();
+    expect(rowSummary()).toEqual([
+      { kind: "entry", entry: "c1", depth: "0" },
+      { kind: "entry", entry: "c2", depth: "0" },
+      { kind: "entry", entry: "c3", depth: "0" },
+    ]);
+    expect(document.querySelector("[data-part='picker']")).toBeNull();
   });
 
-  it("disables confirm while the picked continuation is already preferred", async () => {
+  it("selecting a fork emits no host operation — only the preview run loads", async () => {
+    const onCheckoutContinuation = vi.fn();
+    const onLoadContinuationRun = vi.fn();
+    const onNavigateEntry = vi.fn();
+    render(HistoryCenterHostHarness, {
+      props: {
+        pages: twoForkPages,
+        continuationsByEntry: twoForkContinuations,
+        runsByFork: twoForkRuns,
+        defaultOpen: true,
+        onCheckoutContinuation,
+        onLoadContinuationRun,
+        onNavigateEntry,
+      },
+    });
+
+    await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
+    onLoadContinuationRun.mockClear();
+
+    await fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
+    await fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
+
+    // The pick loaded l1's run (R2) and committed nothing: no checkout, no
+    // navigation, no open-change.
+    expect(onLoadContinuationRun).toHaveBeenCalledWith("l1");
+    expect(onCheckoutContinuation).not.toHaveBeenCalled();
+    expect(onNavigateEntry).not.toHaveBeenCalled();
+  });
+
+  it("disables checkout while the selection is already the current fork", async () => {
     render(HistoryCenterHostHarness, {
       props: {
         pages: twoForkPages,
@@ -339,14 +403,15 @@ describe("HistoryCenter (svelte)", () => {
 
     await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
 
-    const preferredOption = screen.getByRole("button", { name: /Alt intro feature\/alt/ });
-    expect(preferredOption.querySelector("[data-part='preferred-badge']")?.textContent).toBe("Preferred");
+    // R3 opened on the current fork (x1, preferred) — nothing user-facing
+    // says "prefer": the trigger and the option carry a Current marker.
+    expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(true);
+    expect(document.querySelector("[data-part='current-badge']")?.textContent).toBe("Current");
 
-    await fireEvent.click(preferredOption);
-    expect(preferredOption.getAttribute("aria-pressed")).toBe("true");
-
-    // Already at the requested target — a race, not a normal path (R4).
-    expect(screen.getByRole("button", { name: "Choose" }).hasAttribute("disabled")).toBe(true);
+    // Picking the other fork enables checkout.
+    await fireEvent.click(screen.getByRole("button", { name: "Continuations" }));
+    await fireEvent.click(screen.getByRole("option", { name: /Lead intro feature\/lead/ }));
+    expect(screen.getByRole("button", { name: "Checkout" }).hasAttribute("disabled")).toBe(false);
   });
 
   it("renders a fork off a fork at the inner depth, never confusable with a picker", async () => {
@@ -480,7 +545,8 @@ describe("HistoryCenter (svelte)", () => {
     await fireEvent.click(rowByEntry("c2").querySelector("[data-part=\"fork-disclosure\"]") as HTMLElement);
 
     // DISCLOSE clamps machine focus to the anchor; Home starts the traversal
-    // from the first visible row.
+    // from the first visible row. R3 loaded the current fork's run, so the
+    // rows are c1, c2, picker, x1, x2, c3.
     await fireEvent.keyDown(document.activeElement as HTMLElement, { key: "Home" });
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Committed mix 1" }));
 
@@ -493,6 +559,12 @@ describe("HistoryCenter (svelte)", () => {
     expect(document.activeElement?.getAttribute("data-part")).toBe("picker");
 
     await fireEvent.keyDown(document.activeElement as HTMLElement, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Alt intro" }));
+
+    await fireEvent.keyDown(screen.getByRole("button", { name: "Alt intro" }), { key: "ArrowDown" });
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Alt mix" }));
+
+    await fireEvent.keyDown(screen.getByRole("button", { name: "Alt mix" }), { key: "ArrowDown" });
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Current draft" }));
 
     // Wraps back to the first row.
@@ -504,6 +576,14 @@ describe("HistoryCenter (svelte)", () => {
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Current draft" }));
     await fireEvent.keyDown(screen.getByRole("button", { name: "Current draft" }), { key: "Home" });
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Committed mix 1" }));
+
+    // The Select owns its keys: ArrowDown on the picker's trigger opens its
+    // listbox and never moves roving focus.
+    const selectTrigger = screen.getByRole("button", { name: "Continuations" });
+    selectTrigger.focus();
+    await fireEvent.keyDown(selectTrigger, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(selectTrigger);
+    expect(screen.getByRole("option", { name: /Lead intro feature\/lead/ })).toBeTruthy();
   });
 
   it("commits inline rename through onRenameBranch and cancels on Escape", async () => {

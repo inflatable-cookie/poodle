@@ -17,8 +17,10 @@
  * The record types below are structural mirrors of the authority's shapes
  * (ruling R2): Poodle never imports a Longhorn type and no manifest gains one.
  * The three continuation operations — load the continuations at an anchor,
- * load a continuation run, prefer a continuation — arrive as caller-supplied
- * callbacks and leave as effects.
+ * load a continuation run, checkout a continuation — arrive as caller-supplied
+ * callbacks and leave as effects. Checkout is Poodle's own word: the host
+ * maps the callback onto Longhorn's `preferContinuation`, which is exactly
+ * the decoupling ruling R2 established (b028).
  *
  * Display order is core-owned and reversed exactly once (ruling R3): pages
  * arrive newest-first and display oldest-first, so a page at a higher offset
@@ -156,7 +158,12 @@ export type HistoryCenterRow =
       forkId: string | null;
       /** Forks at the anchor, the child already on the list filtered out (R4). Empty while loading. */
       continuations: HistoryContinuation[];
-      /** Tentatively picked fork (its first entry id); null until PICK_CONTINUATION. */
+      /**
+       * The select's value — the tentative pick (its first entry id); null
+       * until PICK_CONTINUATION or R3's open-selects-current. The picker
+       * persists for as long as the level is open (R1), so the current
+       * selection stays visible and reachable.
+       */
       pickedEntryId: string | null;
     }
   | {
@@ -184,12 +191,14 @@ export interface HistoryCenterOpenFork {
    * already on the list is filtered by the derivation, never here.
    */
   continuations: HistoryContinuation[] | null;
-  /** Tentatively picked fork (picker highlight); null until PICK_CONTINUATION. */
+  /** Tentatively picked fork (the select's value); null until the pick or
+   *  R3's open-selects-current. One tentative pick at a time across levels. */
   pick: HistoryContinuation | null;
   /**
-   * The chosen fork — auto for a single fork, confirmed in the picker for
-   * more; null until chosen. Its `entryId` is the run's first entry, which is
-   * also every run row's `forkId`.
+   * The chosen fork — the auto-chosen single fork (`forkCount === 1`), which
+   * is also every run row's `forkId`. The multi-fork picker never commits a
+   * `chosen`: checkout (CONFIRM) clears the level and the host supplies the
+   * new root (R2).
    */
   chosen: HistoryContinuation | null;
   /** The chosen fork's run pages in fetch order (newest page first); empty until loaded. */
@@ -306,20 +315,27 @@ function pushDisclosed(
 ): void {
   const childDepth = depth + 1;
 
-  if (level.chosen === null) {
-    if (historyCenterForkCount(entry.continuationCount) > 1) {
-      // More than one fork: a picker, never an assumption about which is the
-      // run's own continuation.
-      rows.push({
-        kind: "picker",
-        anchorEntryId: entry.id,
-        depth: childDepth,
-        parentEntryId: entry.id,
-        forkId: null,
-        continuations: historyCenterForksAt(level.continuations, runEntries, anchorIndex),
-        pickedEntryId: level.pick?.entryId ?? null,
-      });
-    } else {
+  if (historyCenterForkCount(entry.continuationCount) > 1) {
+    // R1: the picker persists for as long as the level is open, whatever
+    // `chosen` holds — a second fork is one interaction away, never a
+    // close-and-reopen. One continuation is nothing to choose between;
+    // `forkCount > 1` is unchanged.
+    rows.push({
+      kind: "picker",
+      anchorEntryId: entry.id,
+      depth: childDepth,
+      parentEntryId: entry.id,
+      forkId: null,
+      continuations: historyCenterForksAt(level.continuations, runEntries, anchorIndex),
+      pickedEntryId: level.pick?.entryId ?? null,
+    });
+  }
+
+  // The run below the select follows the pick (R2): the displayed fork is the
+  // tentative pick, falling back to the auto-chosen single fork.
+  const shown = level.pick ?? level.chosen;
+  if (shown === null) {
+    if (historyCenterForkCount(entry.continuationCount) <= 1) {
       // Single fork (or its continuations still in flight): the run is what
       // will show, so mark it not-yet-loaded rather than leaving a gap.
       rows.push({
@@ -340,8 +356,8 @@ function pushDisclosed(
       anchorEntryId: entry.id,
       depth: childDepth,
       parentEntryId: entry.id,
-      forkId: level.chosen.entryId,
-      branchId: level.chosen.branchId,
+      forkId: shown.entryId,
+      branchId: shown.branchId,
     });
     return;
   }
@@ -351,8 +367,8 @@ function pushDisclosed(
     historyCenterJoinPages(level.runPages),
     childDepth,
     entry.id,
-    level.chosen.entryId,
-    level.chosen.branchId,
+    shown.entryId,
+    shown.branchId,
     level.inner,
   );
 }
@@ -410,7 +426,7 @@ export type HistoryCenterEffect =
   | { type: "emitRenameBranch"; branchId: string; name: string }
   | { type: "loadContinuations"; entryId: string }
   | { type: "loadContinuationRun"; fromEntryId: string }
-  | { type: "preferContinuation"; entryId: string };
+  | { type: "checkoutContinuation"; entryId: string };
 
 export type HistoryCenterResult = TransitionResult<HistoryCenterState, HistoryCenterContext, HistoryCenterEffect>;
 
@@ -755,12 +771,23 @@ function continuationsLoaded(
   const runContext = anchorRunContext(context, entryId);
   if (runContext !== null) {
     const anchor = runContext.entries[runContext.index];
-    if (historyCenterForkCount(anchor.continuationCount) === 1) {
+    const forkCount = historyCenterForkCount(anchor.continuationCount);
+    if (forkCount === 1) {
       // Exactly one fork: no picker needed — choose it and request its run.
       const forks = historyCenterForksAt(continuations, runContext.entries, runContext.index);
       if (forks.length >= 1) {
         updated = { ...updated, chosen: forks[0] };
         effects.push({ type: "loadContinuationRun", fromEntryId: forks[0].entryId });
+      }
+    } else if (forkCount > 1) {
+      // R3: more than one fork — select the current one (preferred; first in
+      // supplied order when none is preferred) and show its run. The select
+      // previews; checkout is CONFIRM's job (R2).
+      const forks = historyCenterForksAt(continuations, runContext.entries, runContext.index);
+      const initial = forks.find((fork) => fork.preferred) ?? forks[0] ?? null;
+      if (initial !== null) {
+        updated = { ...updated, pick: initial };
+        effects.push({ type: "loadContinuationRun", fromEntryId: initial.entryId });
       }
     }
   }
@@ -799,8 +826,9 @@ function replaceLevel(
 function pickContinuation(context: HistoryCenterContext, entryId: string): HistoryCenterResult {
   // The tentative pick lands on the level whose picker offers this fork.
   let picked: HistoryCenterOpenFork | null = null;
+  let match: HistoryContinuation | null = null;
   for (const level of walkLevels(context.open)) {
-    if (level.chosen !== null || level.continuations === null) {
+    if (level.continuations === null) {
       continue;
     }
     const runContext = anchorRunContext(context, level.anchorEntryId);
@@ -812,63 +840,74 @@ function pickContinuation(context: HistoryCenterContext, entryId: string): Histo
       continue;
     }
     const forks = historyCenterForksAt(level.continuations, runContext.entries, runContext.index);
-    const match = forks.find((fork) => fork.entryId === entryId);
-    if (match !== undefined) {
-      picked = { ...level, pick: match };
+    const candidate = forks.find((fork) => fork.entryId === entryId);
+    if (candidate !== undefined) {
+      picked = level;
+      match = candidate;
       break;
     }
   }
-  if (picked === null) {
+  if (picked === null || match === null) {
     return stay("open", context);
   }
 
+  // R2: the entries below the select follow the pick. When the loaded run
+  // belongs to another fork, drop it and load the picked fork's run; the
+  // pick itself commits nothing and emits no host operation — checkout is
+  // CONFIRM's job.
+  const previous = picked.pick ?? picked.chosen;
+  const switching = previous === null || previous.entryId !== match.entryId;
+  const updated = { ...picked, pick: match, ...(switching ? { runPages: [] } : {}) };
+
   // One tentative pick at a time: clear any other level's pick.
-  let open = replaceLevel(context.open, picked);
+  let open = replaceLevel(context.open, updated);
   for (const level of walkLevels(open)) {
-    if (level !== picked && level.pick !== null) {
+    if (level !== updated && level.pick !== null) {
       open = replaceLevel(open, { ...level, pick: null });
     }
   }
   return {
     state: "open",
     context: clampFocus({ ...context, open }, null),
-    effects: [],
+    effects: switching ? [{ type: "loadContinuationRun", fromEntryId: match.entryId }] : [],
   };
 }
 
 function confirm(context: HistoryCenterContext): HistoryCenterResult {
-  let chosen: HistoryCenterOpenFork | null = null;
-  // Captured in the loop rather than re-read from `chosen`: the guard below
-  // proves both non-null, but narrowing does not survive the assignment.
+  let pickedLevel: HistoryCenterOpenFork | null = null;
+  // Captured in the loop rather than re-read from `pick`: the guard below
+  // proves it non-null, but narrowing does not survive the assignment.
   let pick: HistoryContinuation | null = null;
   for (const level of walkLevels(context.open)) {
     if (level.pick !== null) {
-      chosen = level;
+      pickedLevel = level;
       pick = level.pick;
       break;
     }
   }
-  if (chosen === null || pick === null) {
+  if (pickedLevel === null || pick === null) {
     return stay("open", context);
   }
-  const updated = { ...chosen, chosen: pick };
-  const open = replaceLevel(context.open, updated);
+
+  // R2: checkout makes the selected fork primary. Poodle does not build the
+  // new root — it emits the command and renders whatever root pages the host
+  // supplies afterwards. The fork is becoming the root, so the open level no
+  // longer describes anything: clear the disclosure state for the anchor.
+  const open = withoutLevel(context.open, pickedLevel.anchorEntryId);
   return {
     state: "open",
-    context: clampFocus({ ...context, open }, null),
-    effects: [
-      // Confirm = the picker's commit: prefer the picked future (host op) and
-      // reveal its run (host op).
-      { type: "preferContinuation", entryId: pick.entryId },
-      { type: "loadContinuationRun", fromEntryId: pick.entryId },
-    ],
+    context: clampFocus({ ...context, open }, pickedLevel.anchorEntryId),
+    effects: [{ type: "checkoutContinuation", entryId: pick.entryId }],
   };
 }
 
 function runLoaded(context: HistoryCenterContext, fromEntryId: string, pages: HistoryPathPage[]): HistoryCenterResult {
   let updated: HistoryCenterOpenFork | null = null;
   for (const level of walkLevels(context.open)) {
-    if (level.chosen !== null && level.chosen.entryId === fromEntryId) {
+    // The run below the select follows the displayed fork — the pick, or the
+    // auto-chosen single fork (R2, R3).
+    const shown = level.pick ?? level.chosen;
+    if (shown !== null && shown.entryId === fromEntryId) {
       // Pages arrive in fetch order; append so the join can reverse once.
       updated = { ...level, runPages: [...level.runPages, ...pages] };
       break;
