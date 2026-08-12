@@ -27,7 +27,7 @@
  * same join. `continuations` is not reversed: it is stable graph order, a
  * picker, not a timeline.
  *
- * `forkCount = continuationCount - 1` (ruling R4): continuationCount counts
+ * `forkCount = max(0, continuationCount - 1)` (ruling R4): continuationCount counts
  * every continuation including the run's own next row, so a run's last entry
  * carries 0 and one fork reads 2. The continuations page also returns the
  * child already on the list; the derivation filters it out by id and never
@@ -85,7 +85,7 @@ export interface HistoryPathPage {
    * count is one less. Carried on the record for the host and the renderer;
    * the derivation emits no root-level row for it.
    */
-  rootContinuationCount: number;
+  precedingContinuationCount: number;
   /** Whether newer records precede this page. */
   truncatedBefore: boolean;
   /** Whether older records follow this page. */
@@ -195,7 +195,7 @@ export interface HistoryCenterOpenFork {
   /** The chosen fork's run pages in fetch order (newest page first); empty until loaded. */
   runPages: HistoryPathPage[];
   /** Forks open inside this run, keyed by anchor entry id; null when none. */
-  inner: HistoryCenterOpenFork | null;
+  inner: ReadonlyMap<string, HistoryCenterOpenFork> | null;
 }
 
 // ── Derivation helpers (R3, R4) ────────────────────────────────────────
@@ -838,16 +838,19 @@ function pickContinuation(context: HistoryCenterContext, entryId: string): Histo
 
 function confirm(context: HistoryCenterContext): HistoryCenterResult {
   let chosen: HistoryCenterOpenFork | null = null;
+  // Captured in the loop rather than re-read from `chosen`: the guard below
+  // proves both non-null, but narrowing does not survive the assignment.
+  let pick: HistoryContinuation | null = null;
   for (const level of walkLevels(context.open)) {
     if (level.pick !== null) {
       chosen = level;
+      pick = level.pick;
       break;
     }
   }
-  if (chosen === null) {
+  if (chosen === null || pick === null) {
     return stay("open", context);
   }
-  const pick = chosen.pick;
   const updated = { ...chosen, chosen: pick };
   const open = replaceLevel(context.open, updated);
   return {

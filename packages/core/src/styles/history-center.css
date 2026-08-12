@@ -1,10 +1,14 @@
 /* Styles for HistoryCenter. Extracted from the Svelte component (g12.001
    shared-styles move). Unique poodle-* selectors; safe as global CSS.
 
-   v2 (g13-024): renders the stitched history tree — the spine (depth 0) plus
-   fork runs with captions, all drawn with light git-graph lanes. Lane colour
-   and thickness are recipe-themable (`--poodle-recipe-history-center-lane-*`);
-   the geometry (column width, elbow) is internal. */
+   v3 (g13-029): renders the flat visible-row list — entry rows with depth,
+   picker rows and the not-yet-loaded row — over `historyCenterVisibleRows`
+   (g13-028). No lanes: depth drives a padding inset and nothing else, with no
+   depth cap (v2's saturating gutter is gone and must not return in CSS).
+   Affordances follow `forkCount` exactly (R3): no forks → inert row; one fork
+   → icon + chevron, no badge, no picker; several → icon + counter badge +
+   chevron, picker on open. The opened region (a run's first entry row) shows
+   the chosen fork's name, entry count and inline rename (R6). */
 
 .poodle-history-center-popover { display: inline-flex; }
 
@@ -22,9 +26,9 @@
      spilled past the rounded edge. With no width here the surface sizes to its
      content between those bounds, which is what the min/max were for. */
   min-width: 0;
-  /* Lane geometry is internal (not part of the recipe contract): one column
-     per depth level, plus the row's own lane column. */
-  --poodle-history-center-lane-width: 0.875rem;
+  /* Depth inset: one step per row depth level. Internal metric — never
+     recipe-themable, and never clamped (v2's cap is gone). */
+  --poodle-history-center-inset-step: 1rem;
   font-family: var(--poodle-typography-body-family);
   /* Base size for the panel. Without this the entry labels inherited the
      document default (16px) rather than a token, because the row button sets
@@ -90,12 +94,13 @@
   overscroll-behavior: contain;
 }
 
-/* One row of the stitched tree: lane gutter (depth + own lane columns) then
-   the row content. Depth drives the gutter width, so the content inset grows
-   one lane column per depth level and saturates with the row's depth cap. */
+/* One row of the flat list. Depth drives the left inset and nothing else —
+   no lane gutter, no clamp (v2's HISTORY_TREE_DEPTH_CAP is gone). */
 .poodle-history-center__row {
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  gap: 0.125rem;
+  padding-left: calc(var(--poodle-history-center-inset-step) * var(--poodle-history-center-depth, 0));
   border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
 }
 
@@ -111,68 +116,6 @@
     color-mix(in srgb, var(--poodle-color-accent-base) 7%, transparent)
   );
 }
-
-/* Lane gutter — one column per ancestor depth level plus the row's own lane
-   column. Vertical segments sit at column centres; the elbow's horizontal
-   spans from the parent column centre into the row's own lane column. */
-.poodle-history-center__lanes {
-  display: flex;
-  align-items: stretch;
-  flex: none;
-}
-
-.poodle-history-center__lane {
-  position: relative;
-  flex: none;
-  width: var(--poodle-history-center-lane-width);
-  --poodle-history-center-lane-color: var(
-    --poodle-recipe-history-center-lane-color,
-    color-mix(in srgb, var(--poodle-color-text-primary) 25%, transparent)
-  );
-  --poodle-history-center-lane-thickness: var(--poodle-recipe-history-center-lane-thickness, 0.0625rem);
-}
-
-/* Pass-through verticals: ancestor lanes, the spine trunk, and run lanes
-   that continue or end on this row. */
-.poodle-history-center__lane[data-lane="ancestor"],
-.poodle-history-center__lane[data-lane="trunk"],
-.poodle-history-center__lane[data-lane="continue"],
-.poodle-history-center__lane[data-lane="end"] {
-  background: var(--poodle-history-center-lane-color) no-repeat center /
-    var(--poodle-history-center-lane-thickness) 100%;
-}
-
-/* The elbow into a run: a horizontal from the parent lane (half a column
-   left of this cell) into this row's own lane, then the lane turns down.
-   A single-entry run is the elbow plus a short stub (start and end). */
-.poodle-history-center__lane[data-lane="elbow"]::before,
-.poodle-history-center__lane[data-lane="single"]::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: calc(var(--poodle-history-center-lane-width) / -2);
-  width: var(--poodle-history-center-lane-width);
-  height: var(--poodle-history-center-lane-thickness);
-  background: var(--poodle-history-center-lane-color);
-  transform: translateY(-50%);
-}
-
-.poodle-history-center__lane[data-lane="elbow"]::after,
-.poodle-history-center__lane[data-lane="single"]::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: var(--poodle-history-center-lane-thickness);
-  height: 50%;
-  background: var(--poodle-history-center-lane-color);
-  transform: translateX(-50%);
-}
-
-.poodle-history-center__lane[data-lane="single"]::after { height: 35%; }
-
-/* Caption rows reserve their own lane column (the run's lane starts at its
-   first entry row) but draw nothing in it. */
 
 .poodle-history-center__entry-content {
   display: grid;
@@ -246,39 +189,209 @@
   box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--poodle-color-accent-base) 15%, transparent);
 }
 
-/* A fork run's caption — its label, count, and derived relative time.
-   Captions rename and never navigate. */
-.poodle-history-center__caption-copy {
-  display: grid;
-  gap: 0.18rem;
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: calc(var(--poodle-space-panel-y) * 0.85) var(--poodle-space-stack-sm);
+/* Fork disclosure affordance (R3): icon + optional counter badge + chevron.
+   Absent entirely when `forkCount` is 0 — the row is inert. */
+.poodle-history-center__fork {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  flex: none;
+  align-self: center;
+  min-width: 1.75rem;
+  height: 1.5rem;
+  padding: 0 0.3rem;
+  border: 0;
+  border-radius: var(--poodle-radius-control);
+  background: transparent;
+  color: var(--poodle-recipe-history-center-fork-color, var(--poodle-color-text-secondary));
+  cursor: pointer;
 }
 
-.poodle-history-center__caption-name {
-  font-size: var(--poodle-typography-label-size);
+.poodle-history-center__fork:hover {
+  background: var(
+    --poodle-recipe-history-center-item-hover-fill,
+    color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
+  );
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-history-center__fork:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.0625rem;
+}
+
+.poodle-history-center__fork-chevron {
+  display: inline-flex;
+  transition: transform 120ms ease;
+}
+
+.poodle-history-center__fork[data-open="true"] .poodle-history-center__fork-chevron {
+  transform: rotate(90deg);
+}
+
+/* The counter badge: `forkCount` when more than one fork exists. */
+.poodle-history-center__fork-badge {
+  min-width: 1rem;
+  padding: 0.05rem 0.3rem;
+  border-radius: 999px;
+  background: var(
+    --poodle-recipe-history-center-fork-badge-fill,
+    color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)
+  );
+  color: var(--poodle-recipe-history-center-fork-badge-text, var(--poodle-color-accent-base));
+  font-size: 0.65rem;
   font-weight: var(--poodle-typography-label-weight);
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* The picker row — the forks at an anchor when `forkCount > 1` (core emits
+   it; the renderer adds no second condition). */
+.poodle-history-center__picker {
+  display: grid;
+  gap: 0.25rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--poodle-space-panel-y) var(--poodle-space-stack-sm);
+}
+
+.poodle-history-center__picker:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: -0.125rem;
+}
+
+.poodle-history-center__picker-options {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.poodle-history-center__picker-option {
+  display: flex;
+  align-items: center;
+  gap: var(--poodle-space-stack-sm);
+  width: 100%;
+  padding: 0.3rem var(--poodle-space-stack-sm);
+  border: 0;
+  border-radius: var(--poodle-radius-control);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.poodle-history-center__picker-option:hover {
+  background: var(
+    --poodle-recipe-history-center-item-hover-fill,
+    color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
+  );
+}
+
+.poodle-history-center__picker-option:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: 0.0625rem;
+}
+
+.poodle-history-center__picker-option[aria-pressed="true"] {
+  background: var(
+    --poodle-recipe-history-center-item-hover-fill,
+    color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
+  );
+}
+
+.poodle-history-center__picker-option-copy {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.poodle-history-center__picker-option-name {
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.poodle-history-center__caption-meta {
+.poodle-history-center__picker-option-branch {
   color: var(--poodle-color-text-secondary);
   font-size: 0.6875rem;
   line-height: var(--poodle-typography-label-lineHeight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.poodle-history-center__caption-rename {
+/* The preferred fork — a redo from the anchor takes this continuation. The
+   confirm button is disabled while it is the tentative pick (R4). */
+.poodle-history-center__preferred-badge {
+  justify-self: end;
+  flex: none;
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  background: var(
+    --poodle-recipe-history-center-preferred-badge-fill,
+    color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)
+  );
+  color: var(--poodle-recipe-history-center-preferred-badge-text, var(--poodle-color-accent-base));
+  font-size: 0.6rem;
+  font-weight: var(--poodle-typography-label-weight);
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.poodle-history-center__picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.125rem;
+}
+
+/* The opened region: a run's first entry row carries the chosen fork's name,
+   entry count and inline rename (R6). */
+.poodle-history-center__run-header {
+  display: flex;
+  align-items: center;
+  gap: var(--poodle-space-stack-sm);
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: calc(var(--poodle-space-panel-y) * 0.85) var(--poodle-space-stack-sm);
+  border-left: 0.125rem solid var(--poodle-color-border-default);
+  color: var(--poodle-color-text-secondary);
+}
+
+.poodle-history-center__run-header-copy {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.poodle-history-center__run-header-name {
+  font-size: var(--poodle-typography-label-size);
+  font-weight: var(--poodle-typography-label-weight);
+  color: var(--poodle-color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.poodle-history-center__run-header-meta {
+  font-size: 0.6875rem;
+  line-height: var(--poodle-typography-label-lineHeight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.poodle-history-center__run-header-rename {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: none;
-  align-self: center;
   width: 1.25rem;
   height: 1.25rem;
-  margin-right: var(--poodle-space-stack-sm);
   padding: 0;
   border: 0;
   border-radius: var(--poodle-radius-control);
@@ -287,7 +400,7 @@
   cursor: pointer;
 }
 
-.poodle-history-center__caption-rename:hover {
+.poodle-history-center__run-header-rename:hover {
   background: var(
     --poodle-recipe-history-center-item-hover-fill,
     color-mix(in srgb, var(--poodle-color-background-surface) 72%, transparent)
@@ -295,25 +408,9 @@
   color: var(--poodle-color-text-primary);
 }
 
-.poodle-history-center__caption-rename:focus-visible {
+.poodle-history-center__run-header-rename:focus-visible {
   outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
   outline-offset: 0.0625rem;
-}
-
-.poodle-history-center__branch-current-badge {
-  justify-self: start;
-  padding: 0.05rem 0.35rem;
-  border-radius: 999px;
-  background: var(
-    --poodle-recipe-history-center-branch-current-badge-fill,
-    color-mix(in srgb, var(--poodle-color-accent-base) 16%, transparent)
-  );
-  color: var(--poodle-recipe-history-center-branch-current-badge-text, var(--poodle-color-accent-base));
-  font-size: 0.6rem;
-  font-weight: var(--poodle-typography-label-weight);
-  line-height: 1.4;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
 }
 
 .poodle-history-center__rename-input {
@@ -335,10 +432,22 @@
   outline-offset: 0.0625rem;
 }
 
-.poodle-history-center__load-more {
+/* The not-yet-loaded row — an open entry whose run has not arrived. Never an
+   empty gap, never a dropped entry. */
+.poodle-history-center__not-yet-loaded {
   display: flex;
-  justify-content: center;
-  padding-top: var(--poodle-space-stack-sm);
+  align-items: center;
+  gap: var(--poodle-space-stack-sm);
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--poodle-space-panel-y) var(--poodle-space-stack-sm);
+  color: var(--poodle-color-text-secondary);
+  font-size: var(--poodle-typography-label-size);
+}
+
+.poodle-history-center__not-yet-loaded:focus-visible {
+  outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
+  outline-offset: -0.125rem;
 }
 
 .poodle-history-center__loading {

@@ -7,7 +7,30 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
-- 2026-08-12 — R4's `forkCount = continuationCount - 1` makes a **single fork
+- 2026-08-12 — g13-029 hit this: b028's `packages/core/src/history-center.ts`
+  does not type-check as committed, and `effigy check:svelte` (a card
+  acceptance gate) cannot exit 0 until it is fixed. `HistoryCenterOpenFork.inner`
+  is declared `HistoryCenterOpenFork | null` (line 198) but every use site
+  treats it as `ReadonlyMap<string, HistoryCenterOpenFork> | null`
+  (`withAddedLevel`, `new Map(level.inner)`, `findLevel`, `walkLevels`), plus
+  strict-null gaps in the machine (`pick` possibly null in `confirm`, `anchor`/
+  `entry` possibly undefined). Type-only — `effigy test:core` passes 482/0 —
+  but the declaration contradicts the code. Core has no type gate in effigy
+  (`test:core` is vitest, which strips types), so the error ships silently.
+  Fix: one declaration line + the strict-null guards; a `tsc --noEmit` gate on
+  core would have caught it at b028.
+
+- 2026-08-12 — RESOLVED 2026-08-12 by Longhorn `777de887`. The mechanism in
+  this report was wrong: `record_applied` always installs the new entry as its
+  parent's preferred continuation, so a run's terminal entry has **no**
+  children and its `continuationCount` is 0, not 1. Poodle's implementation
+  saturates at 0 and was never affected. The report did surface a real hole
+  the other way round — `ForkHistory::from_state` accepted a parent with
+  children and no preference, and two Longhorn fixtures were already in that
+  state, including an anchor whose 64 alternates were unreachable. Longhorn
+  added a two-half guard: one child needs no preference, two or more without
+  one is `MissingPreferredChild`. Original report follows.
+  R4's `forkCount = continuationCount - 1` makes a **single fork
   off a run's last entry invisible**: the authority defines
   `continuation_count` as all children ("this page's own next entry included…
   a run's last entry is always zero", `ForkEntryRecord` doc), so a last entry

@@ -2,14 +2,17 @@
   import "@inflatable-cookie/poodle-core/styles/history-center.css";
   import {
     historyCenterKeydownEvent,
-    historyCenterRows,
     historyCenterTransition,
+    historyCenterVisibleRows,
     trapFocusKeydown,
-    type HistoryBranch,
     type HistoryCenterContext,
     type HistoryCenterEvent,
+    type HistoryCenterOpenFork,
+    type HistoryCenterRejectionCode,
     type HistoryCenterRow,
-    type HistoryEntry,
+    type HistoryCenterRowId,
+    type HistoryContinuation,
+    type HistoryPathPage,
   } from "@inflatable-cookie/poodle-core";
   import { tick } from "svelte";
 
@@ -29,22 +32,25 @@
   } from "./types";
 
   interface Props {
-    /** Branch records in supplied order. `null` disables the tree (no rows,
-     *  every row event inert). */
-    branches?: HistoryBranch[] | null;
-    /** Per-branch entry path (`branchId` -> root-to-head entries). `null`
-     *  when `branches` is null. */
-    paths?: Record<string, HistoryEntry[]> | null;
-    totalEntries?: number;
-    totalBranches?: number;
-    hasMoreEntries?: boolean;
-    hasMoreBranches?: boolean;
+    /** Root path pages in fetch order (newest page first). `null` disables
+     *  the list: no rows render and every row event is inert. */
+    pages?: HistoryPathPage[] | null;
     canUndo?: boolean;
     canRedo?: boolean;
     busy?: boolean;
     status?: HistoryStatus;
     statusMessage?: string | null;
-    rejection?: string | null;
+    /** A rejection code the host's bridge mapped from the protocol; the
+     *  component owns the display copy. `null` clears the notice. */
+    rejection?: HistoryCenterRejectionCode | null;
+    /** Host op 1 result: the continuations at an anchor, fed back after
+     *  `onLoadContinuations`. Diffed by reference; a new non-null value
+     *  dispatches CONTINUATIONS_LOADED. */
+    continuationsResult?: { entryId: string; continuations: HistoryContinuation[] } | null;
+    /** Host op 2 result: a continuation run's pages (fetch order), fed back
+     *  after `onLoadContinuationRun`. Diffed by reference; a new non-null
+     *  value dispatches RUN_LOADED. */
+    runResult?: { fromEntryId: string; pages: HistoryPathPage[] } | null;
     maxBranchNameBytes?: number;
     open?: boolean | null;
     defaultOpen?: boolean;
@@ -62,26 +68,27 @@
     onRedo?: (() => void) | null;
     onOpenChange?: ((open: boolean) => void) | null;
     /** Entry activation; always the entry actually clicked, on the branch
-     *  that owns its run. */
-    onNavigateEntry?: ((branchId: string, entryId: string) => void) | null;
+     *  that owns its run (`null` on the spine — the host's own branch). */
+    onNavigateEntry?: ((branchId: string | null, entryId: string) => void) | null;
     onRenameBranch?: ((branchId: string, name: string) => void) | null;
-    onLoadMoreEntries?: ((offset: number) => void) | null;
-    onLoadMoreBranches?: ((offset: number) => void) | null;
+    /** Host op 1: load the continuations at the anchor entry. */
+    onLoadContinuations?: ((entryId: string) => void) | null;
+    /** Host op 2: load the run starting at the fork's first entry. */
+    onLoadContinuationRun?: ((fromEntryId: string) => void) | null;
+    /** Host op 3: prefer the picked continuation as the redo target. */
+    onPreferContinuation?: ((entryId: string) => void) | null;
   }
 
   let {
-    branches = null,
-    paths = null,
-    totalEntries = 0,
-    totalBranches = 0,
-    hasMoreEntries = false,
-    hasMoreBranches = false,
+    pages = null,
     canUndo = false,
     canRedo = false,
     busy = false,
     status = "idle",
     statusMessage = null,
     rejection = null,
+    continuationsResult = null,
+    runResult = null,
     maxBranchNameBytes = 256,
     open = $bindable<boolean | null>(null),
     defaultOpen = false,
@@ -100,17 +107,21 @@
     onOpenChange = null,
     onNavigateEntry = null,
     onRenameBranch = null,
-    onLoadMoreEntries = null,
-    onLoadMoreBranches = null,
+    onLoadContinuations = null,
+    onLoadContinuationRun = null,
+    onPreferContinuation = null,
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
   let uncontrolledOpen = $state(false);
   let seededDefaultOpen = $state(false);
-  let focusIndex = $state(0);
+  // Machine-owned disclosure tree: holds only what is open (R5); dropped on
+  // close by the machine's CLOSE transition.
+  let openForks = $state<ReadonlyMap<string, HistoryCenterOpenFork> | null>(null);
+  // Machine-owned roving focus identity over the visible rows.
+  let focusedRow = $state<HistoryCenterRowId | null>(null);
   let displayedRejection = $state<string | null>(null);
   let renamingBranchId = $state<string | null>(null);
-  let renamingIndex = $state(-1);
   let renameValue = $state("");
   let renameInputElement = $state<HTMLInputElement | null>(null);
   let sectionElement = $state<HTMLElement | null>(null);
@@ -124,16 +135,17 @@
   });
 
   const isOpen = $derived(open === null ? uncontrolledOpen : open);
-  const hasBranches = $derived(branches !== null);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  const rows = $derived(historyCenterRows(branches, paths));
-  type EntryRow = Extract<HistoryCenterRow, { kind: "entry" }>;
-  const entryRows = $derived(rows.filter((row): row is EntryRow => row.kind === "entry"));
-  const entryRowCount = $derived(entryRows.length);
+
+  // R1: ONE loop over the flat visible-row derivation. No recursion, no
+  // nested component, no svelte:self. depth drives padding and nothing else.
+  const rows = $derived(historyCenterVisibleRows(pages, openForks));
+  const entryRows = $derived(rows.filter((row): row is Extract<HistoryCenterRow, { kind: "entry" }> => row.kind === "entry"));
+  const entryTotal = $derived(`${entryRows.length} ${entryRows.length === 1 ? "entry" : "entries"}`);
   // The data's own "present": the newest authority-supplied timestamp. The
-  // caption relative time is derived from supplied data (ruling D2) — there
-  // is no clock and no `Date.now()` anywhere.
+  // run-header relative time is derived from supplied data only (ruling D2) —
+  // there is no clock and no `Date.now()` anywhere.
   const newestRecordedAt = $derived(
     entryRows.reduce<number | undefined>((newest, row) => {
       const at = row.entry.recordedAtMs;
@@ -142,15 +154,16 @@
   );
 
   const machineContext = $derived<HistoryCenterContext>({
-    branches,
-    paths,
-    focusIndex,
+    pages,
+    open: openForks,
+    focusRow: focusedRow,
     rejection: displayedRejection,
   });
 
   function send(event: HistoryCenterEvent): void {
     const result = historyCenterTransition(isOpen ? "open" : "closed", machineContext, event);
-    focusIndex = result.context.focusIndex;
+    openForks = result.context.open;
+    focusedRow = result.context.focusRow;
     displayedRejection = result.context.rejection;
 
     for (const effect of result.effects) {
@@ -163,8 +176,10 @@
         }
         case "focusRow":
           tick().then(() => {
-            const rowEl = listElement?.querySelector<HTMLElement>(`[data-row-index="${effect.index}"]`);
-            (rowEl?.querySelector<HTMLElement>("button, input") ?? rowEl)?.focus();
+            const rowEl = listElement?.querySelector<HTMLElement>(rowSelector(effect.row));
+            (rowEl?.querySelector<HTMLElement>(
+              ".poodle-history-center__entry-content, .poodle-history-center__picker, .poodle-history-center__not-yet-loaded",
+            ) ?? rowEl)?.focus();
           });
           break;
         case "emitNavigateEntry":
@@ -173,6 +188,15 @@
         case "emitRenameBranch":
           onRenameBranch?.(effect.branchId, effect.name);
           break;
+        case "loadContinuations":
+          onLoadContinuations?.(effect.entryId);
+          break;
+        case "loadContinuationRun":
+          onLoadContinuationRun?.(effect.fromEntryId);
+          break;
+        case "preferContinuation":
+          onPreferContinuation?.(effect.entryId);
+          break;
       }
     }
   }
@@ -180,7 +204,7 @@
   // Transient rejection: a *new* non-null prop value displays; dismissal is
   // local and never re-shows the same value. The host clearing the prop
   // clears the notice.
-  let lastRejectionProp: string | null = null;
+  let lastRejectionProp: HistoryCenterRejectionCode | null = null;
 
   $effect(() => {
     if (rejection === lastRejectionProp) {
@@ -192,25 +216,200 @@
     if (rejection === null) {
       send({ type: "DISMISS_REJECTION" });
     } else {
-      send({ type: "SHOW_REJECTION", message: rejection });
+      send({ type: "SHOW_REJECTION", code: rejection });
     }
   });
+
+  // Host op results: the host resolves a callback and feeds the result back.
+  // Diffed by reference — a *new* non-null value dispatches the matching
+  // loaded event; null or the same reference does nothing.
+  let lastContinuationsResult: typeof continuationsResult = null;
+
+  $effect(() => {
+    if (continuationsResult === lastContinuationsResult) {
+      return;
+    }
+
+    lastContinuationsResult = continuationsResult;
+
+    if (continuationsResult !== null) {
+      send({
+        type: "CONTINUATIONS_LOADED",
+        entryId: continuationsResult.entryId,
+        continuations: continuationsResult.continuations,
+      });
+    }
+  });
+
+  let lastRunResult: typeof runResult = null;
+
+  $effect(() => {
+    if (runResult === lastRunResult) {
+      return;
+    }
+
+    lastRunResult = runResult;
+
+    if (runResult !== null) {
+      send({ type: "RUN_LOADED", fromEntryId: runResult.fromEntryId, pages: runResult.pages });
+    }
+  });
+
+  // ── Row identity helpers (R1) ─────────────────────────────────────────
+
+  function rowIdOf(row: HistoryCenterRow): HistoryCenterRowId {
+    return row.kind === "entry"
+      ? { kind: "entry", entryId: row.entry.id }
+      : { kind: row.kind, entryId: row.anchorEntryId };
+  }
+
+  function sameRowId(a: HistoryCenterRowId, b: HistoryCenterRowId): boolean {
+    return a.kind === b.kind && a.entryId === b.entryId;
+  }
+
+  function rowKey(row: HistoryCenterRow): string {
+    return row.kind === "entry" ? `entry:${row.entry.id}` : `${row.kind}:${row.anchorEntryId}`;
+  }
+
+  function rowSelector(id: HistoryCenterRowId): string {
+    return `[data-row-kind="${id.kind}"][data-row-entry="${CSS.escape(id.entryId)}"]`;
+  }
+
+  function rowFocused(row: HistoryCenterRow): boolean {
+    return focusedRow !== null && sameRowId(focusedRow, rowIdOf(row));
+  }
+
+  // ── Disclosure tree lookups (display only; topology stays in core) ────
+
+  function* walkLevels(open: ReadonlyMap<string, HistoryCenterOpenFork> | null): Generator<HistoryCenterOpenFork> {
+    if (open === null) {
+      return;
+    }
+    for (const level of open.values()) {
+      yield level;
+      yield* walkLevels(level.inner);
+    }
+  }
+
+  /** Whether a fork is open at the entry, at any depth (aria-expanded). */
+  function hasLevel(entryId: string): boolean {
+    for (const level of walkLevels(openForks)) {
+      if (level.anchorEntryId === entryId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** The open level whose chosen fork is the given run's first entry. */
+  function levelForFork(forkId: string): HistoryCenterOpenFork | null {
+    for (const level of walkLevels(openForks)) {
+      if (level.chosen?.entryId === forkId) {
+        return level;
+      }
+    }
+    return null;
+  }
+
+  /** The run's first entry row doubles as the opened region: it carries the
+   *  chosen fork's branch name, run entry count and rename affordance (R6). */
+  function isFirstRunRow(row: Extract<HistoryCenterRow, { kind: "entry" }>): boolean {
+    return row.forkId !== null && row.entry.id === row.forkId;
+  }
+
+  function runHeaderFor(
+    row: Extract<HistoryCenterRow, { kind: "entry" }>,
+  ): { branchId: string; name: string; entryCount: number } | null {
+    if (!isFirstRunRow(row) || row.branchId === null) {
+      return null;
+    }
+    const chosen = levelForFork(row.forkId!)?.chosen;
+    if (chosen === null || chosen === undefined) {
+      return null;
+    }
+    return {
+      branchId: chosen.branchId,
+      name: chosen.branchName ?? chosen.branchId,
+      entryCount: chosen.entryCount,
+    };
+  }
+
+  // Short-form relative time, derived purely from supplied timestamps. The
+  // reference is the data's newest recordedAtMs — stable across renders and
+  // runtimes, no clock (D2).
+  function formatRelativeTime(diffMs: number): string {
+    const seconds = Math.round(Math.max(0, diffMs) / 1000);
+
+    if (seconds < 60) {
+      return "just now";
+    }
+
+    const minutes = Math.round(seconds / 60);
+
+    if (minutes < 60) {
+      return `${minutes}m ago`;
+    }
+
+    const hours = Math.round(minutes / 60);
+
+    if (hours < 24) {
+      return `${hours}h ago`;
+    }
+
+    const days = Math.round(hours / 24);
+
+    if (days < 7) {
+      return `${days}d ago`;
+    }
+
+    return `${Math.round(days / 7)}w ago`;
+  }
+
+  /** The run's head — its last visible row — supplies the relative time. */
+  function runHeadTime(forkId: string): string | null {
+    let at: number | undefined;
+    for (const row of entryRows) {
+      if (row.forkId === forkId) {
+        at = row.entry.recordedAtMs;
+      }
+    }
+    if (at === undefined || newestRecordedAt === undefined) {
+      return null;
+    }
+    return formatRelativeTime(newestRecordedAt - at);
+  }
+
+  /** The picker's tentative pick, for the confirm enablement rule (R4). */
+  function pickedContinuation(
+    continuations: HistoryContinuation[],
+    pickedEntryId: string | null,
+  ): HistoryContinuation | undefined {
+    if (pickedEntryId === null) {
+      return undefined;
+    }
+    return continuations.find((fork) => fork.entryId === pickedEntryId);
+  }
+
+  // ── Handlers ──────────────────────────────────────────────────────────
 
   function handleOpenChange(next: boolean): void {
     send(next ? { type: "OPEN" } : { type: "CLOSE" });
   }
 
   function handleListKeydown(event: KeyboardEvent): void {
-    // The rename input owns its keys (commit/cancel). The caption rename
-    // button keeps native activation for Enter/Space (start a rename instead
-    // of roving-row activation), but arrows still drive roving focus.
+    // The rename input owns its keys (commit/cancel). Disclosure, picker and
+    // rename buttons keep native Enter/Space activation (they are not row
+    // activation); arrows still drive roving focus from anywhere in the row.
     if (event.target instanceof HTMLInputElement) {
       return;
     }
 
     if (
       event.target instanceof HTMLElement &&
-      event.target.closest("[data-rename-button]") !== null &&
+      (event.target.closest("[data-part=\"fork-disclosure\"]") !== null ||
+        event.target.closest("[data-part=\"picker-option\"]") !== null ||
+        event.target.closest("[data-part=\"picker-confirm\"]") !== null ||
+        event.target.closest("[data-part=\"run-header-rename\"]") !== null) &&
       (event.key === "Enter" || event.key === " ")
     ) {
       return;
@@ -225,10 +424,15 @@
     event.preventDefault();
 
     if (machineEvent.type === "ACTIVATE_ROW") {
-      const rowEl = (event.target as HTMLElement).closest<HTMLElement>("[data-row-index]");
+      const rowEl = (event.target as HTMLElement).closest<HTMLElement>("[data-row-kind]");
 
       if (rowEl) {
-        send({ type: "ACTIVATE_ROW", index: Number(rowEl.dataset.rowIndex) });
+        const kind = rowEl.dataset.rowKind as HistoryCenterRowId["kind"] | undefined;
+        const entryId = rowEl.dataset.rowEntry;
+
+        if (kind && entryId) {
+          send({ type: "ACTIVATE_ROW", row: { kind, entryId } });
+        }
       }
 
       return;
@@ -241,26 +445,32 @@
     trapFocusKeydown(sectionElement, event);
   }
 
-  function handleRowClick(index: number): void {
-    send({ type: "ACTIVATE_ROW", index });
+  function handleRowClick(row: HistoryCenterRow): void {
+    send({ type: "ACTIVATE_ROW", row: rowIdOf(row) });
+  }
+
+  function disclose(entryId: string): void {
+    send({ type: "DISCLOSE", entryId });
   }
 
   function dismissRejection(): void {
     send({ type: "DISMISS_REJECTION" });
   }
 
-  function startRename(branch: HistoryBranch, index: number): void {
-    renamingBranchId = branch.id;
-    renamingIndex = index;
-    renameValue = branch.name ?? branch.id;
+  // ── Inline rename (opened region, R6) ────────────────────────────────
+
+  function startRename(branchId: string, name: string): void {
+    renamingBranchId = branchId;
+    renameValue = name;
   }
 
   function finishRename(): void {
-    const index = renamingIndex;
+    const branchId = renamingBranchId;
     renamingBranchId = null;
-    renamingIndex = -1;
     tick().then(() => {
-      listElement?.querySelector<HTMLElement>(`[data-row-index="${index}"] [data-rename-button]`)?.focus();
+      listElement
+        ?.querySelector<HTMLElement>(`[data-part="run-header-rename"][data-branch="${CSS.escape(branchId ?? "")}"]`)
+        ?.focus();
     });
   }
 
@@ -298,88 +508,10 @@
       });
     }
   });
-
-  function rowKey(row: HistoryCenterRow): string {
-    return row.kind === "entry" ? `entry:${row.entry.id}` : `caption:${row.branch.id}`;
-  }
-
-  // The run's own lane shape (drawn by the renderer from the row's lane
-  // metadata; the stitcher's flags are always true, only depth saturates).
-  function laneKind(row: EntryRow): string {
-    if (row.depth === 0) {
-      return "trunk";
-    }
-    if (row.lane.start && row.lane.end) {
-      return "single";
-    }
-    if (row.lane.start) {
-      return "elbow";
-    }
-    if (row.lane.end) {
-      return "end";
-    }
-    return "continue";
-  }
-
-  // Short-form relative time, derived purely from supplied timestamps. The
-  // reference is the data's newest recordedAtMs — stable across renders and
-  // runtimes, no clock.
-  function formatRelativeTime(diffMs: number): string {
-    const seconds = Math.round(Math.max(0, diffMs) / 1000);
-
-    if (seconds < 60) {
-      return "just now";
-    }
-
-    const minutes = Math.round(seconds / 60);
-
-    if (minutes < 60) {
-      return `${minutes}m ago`;
-    }
-
-    const hours = Math.round(minutes / 60);
-
-    if (hours < 24) {
-      return `${hours}h ago`;
-    }
-
-    const days = Math.round(hours / 24);
-
-    if (days < 7) {
-      return `${days}d ago`;
-    }
-
-    return `${Math.round(days / 7)}w ago`;
-  }
-
-  // A run caption takes its relative time from its own run's most recent
-  // entry — the run's head (its last stitched entry row) — and renders no
-  // time at all when the field is absent (ruling D2).
-  function captionMeta(row: Extract<HistoryCenterRow, { kind: "caption" }>): { count: number; time: string | null } {
-    let count = 0;
-    let runHead: EntryRow | undefined;
-
-    for (const candidate of entryRows) {
-      if (candidate.branchId === row.branch.id) {
-        count += 1;
-        runHead = candidate;
-      }
-    }
-
-    const at = runHead?.entry.recordedAtMs;
-    const time =
-      at !== undefined && newestRecordedAt !== undefined ? formatRelativeTime(newestRecordedAt - at) : null;
-
-    return { count, time };
-  }
-
-  const entryTotal = $derived(`${totalEntries} ${totalEntries === 1 ? "entry" : "entries"}`);
-  const branchTotal = $derived(`${totalBranches} ${totalBranches === 1 ? "branch" : "branches"}`);
-  const summary = $derived(hasBranches ? `${entryTotal} · ${branchTotal}` : entryTotal);
 </script>
 
-<div class="poodle-history-center-popover">
-  <span class="poodle-history-center__trigger">
+<div class="poodle-history-center-popover" data-scope="history-center" data-part="root">
+  <span class="poodle-history-center__trigger" data-part="trigger">
     <IconButton
       icon="undo"
       ariaLabel={undoLabel}
@@ -416,6 +548,8 @@
       <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
       <section
         class="poodle-history-center"
+        data-part="surface"
+        data-state={isOpen ? "open" : "closed"}
         data-size={resolvedSize}
         data-density={resolvedDensity}
         aria-label={ariaLabel ?? title}
@@ -424,11 +558,11 @@
       >
         <header class="poodle-history-center__header">
           <h2>{title}</h2>
-          <p>{summary}</p>
+          <p>{entryTotal}</p>
         </header>
 
         {#if displayedRejection !== null}
-          <div class="poodle-history-center__rejection" role="status">
+          <div class="poodle-history-center__rejection" data-part="rejection" role="status">
             <p>{displayedRejection}</p>
             <IconButton
               icon="circle-x"
@@ -449,6 +583,10 @@
               <Spinner variant="ring" size="sm" tone="muted" />
               <span>{statusMessage ?? "Loading history…"}</span>
             </div>
+          {:else if status === "failed"}
+            <div class="poodle-history-center__loading" role="status">
+              <span>{statusMessage ?? "History failed to load."}</span>
+            </div>
           {:else}
             <div class="poodle-history-center__empty">
               <EmptyState title={title} message={emptyMessage} size="compact" />
@@ -457,36 +595,41 @@
         {:else}
           <ul
             class="poodle-history-center__list"
+            data-part="list"
             aria-label={listLabel}
             bind:this={listElement}
             onkeydown={handleListKeydown}
           >
             {#each rows as row (rowKey(row))}
-              {#if row.kind === "entry"}
-                <li
-                  class="poodle-history-center__row"
-                  data-row-index={row.index}
-                  data-part="entry"
-                  data-depth={row.depth}
-                  data-position={row.entry.position}
-                  data-checkpoint={row.entry.checkpoint === true ? "true" : undefined}
-                  aria-level={row.depth + 1}
-                >
-                  <span class="poodle-history-center__lanes" aria-hidden="true">
-                    {#each Array(row.depth) as _, level (level)}
-                      <span class="poodle-history-center__lane" data-lane="ancestor"></span>
-                    {/each}
-                    <span class="poodle-history-center__lane" data-lane={laneKind(row)}></span>
-                  </span>
+              {@const rowId = rowIdOf(row)}
+              {@const depth = row.depth}
+              <li
+                class="poodle-history-center__row"
+                data-part={row.kind}
+                data-row-kind={row.kind}
+                data-row-entry={rowId.entryId}
+                data-depth={depth}
+                data-position={row.kind === "entry" ? row.entry.position : undefined}
+                data-checkpoint={row.kind === "entry" && row.entry.checkpoint === true ? "true" : undefined}
+                data-fork-count={row.kind === "entry" ? row.forkCount : undefined}
+                data-parent-entry={row.kind === "entry" ? (row.parentEntryId ?? undefined) : undefined}
+                data-fork-id={row.kind === "entry" ? (row.forkId ?? undefined) : undefined}
+                aria-level={depth + 1}
+                style={`--poodle-history-center-depth: ${depth}`}
+              >
+                {#if row.kind === "entry"}
+                  {@const header = runHeaderFor(row)}
+                  {@const openAt = hasLevel(row.entry.id)}
                   <button
                     type="button"
                     class="poodle-history-center__entry-content"
-                    tabindex={focusIndex === row.index ? 0 : -1}
-                    onclick={() => handleRowClick(row.index)}
+                    data-open={openAt ? "true" : undefined}
+                    tabindex={rowFocused(row) ? 0 : -1}
+                    onclick={() => handleRowClick(row)}
                   >
                     {#if row.entry.checkpoint === true}
                       <span class="poodle-history-center__pin">
-                        <Icon icon="git-commit-horizontal" size={resolvedSize} />
+                        <Icon name="git-commit-horizontal" size={resolvedSize} />
                       </span>
                     {:else}
                       <span class="poodle-history-center__position-marker" data-position={row.entry.position}></span>
@@ -498,57 +641,131 @@
                       {/if}
                     </span>
                   </button>
-                </li>
-              {:else}
-                {@const meta = captionMeta(row)}
-                <li
-                  class="poodle-history-center__row"
-                  data-row-index={row.index}
-                  data-part="caption"
-                  data-depth={row.depth}
-                  data-current={row.branch.current ? "true" : undefined}
-                  aria-level={row.depth + 1}
-                >
-                  <span class="poodle-history-center__lanes" aria-hidden="true">
-                    {#each Array(row.depth) as _, level (level)}
-                      <span class="poodle-history-center__lane" data-lane="ancestor"></span>
-                    {/each}
-                    <span class="poodle-history-center__lane" data-lane="caption"></span>
-                  </span>
-                  {#if renamingBranchId === row.branch.id}
-                    <input
-                      bind:this={renameInputElement}
-                      class="poodle-history-center__rename-input"
-                      aria-label={`Rename branch ${row.branch.name ?? row.branch.id}`}
-                      maxlength={maxBranchNameBytes}
-                      bind:value={renameValue}
-                      onkeydown={(event) => handleRenameKeydown(event, row.branch.id)}
-                      onblur={() => commitRename(row.branch.id)}
-                    />
-                  {:else}
-                    <span class="poodle-history-center__caption-copy">
-                      <span class="poodle-history-center__caption-name">{row.branch.name ?? row.branch.id}</span>
-                      <span class="poodle-history-center__caption-meta">
-                        {meta.count} {meta.count === 1 ? "entry" : "entries"}{meta.time !== null ? ` · ${meta.time}` : ""}
-                      </span>
-                      {#if row.branch.current}
-                        <span class="poodle-history-center__branch-current-badge">Current</span>
+
+                  {#if header !== null}
+                    {@const headTime = runHeadTime(row.forkId!)}
+                    <!-- The opened region: the run's first entry row carries
+                         the chosen fork's name, count and rename (R6). -->
+                    <div class="poodle-history-center__run-header" data-part="run-header" data-branch={header.branchId}>
+                      {#if renamingBranchId === header.branchId}
+                        <input
+                          bind:this={renameInputElement}
+                          class="poodle-history-center__rename-input"
+                          data-part="run-header-rename-input"
+                          aria-label={`Rename branch ${header.name}`}
+                          maxlength={maxBranchNameBytes}
+                          bind:value={renameValue}
+                          onkeydown={(event) => handleRenameKeydown(event, header.branchId)}
+                          onblur={() => {
+                            // Commit the branch currently being renamed; a
+                            // blur fired by the input's own teardown (after
+                            // commit/cancel) is a no-op.
+                            if (renamingBranchId !== null) commitRename(renamingBranchId);
+                          }}
+                        />
+                      {:else}
+                        <span class="poodle-history-center__run-header-copy">
+                          <span class="poodle-history-center__run-header-name">{header.name}</span>
+                          <span class="poodle-history-center__run-header-meta">
+                            {header.entryCount} {header.entryCount === 1 ? "entry" : "entries"}{headTime !== null ? ` · ${headTime}` : ""}
+                          </span>
+                        </span>
+                        <button
+                          type="button"
+                          class="poodle-history-center__run-header-rename"
+                          data-part="run-header-rename"
+                          data-rename-button="true"
+                          data-branch={header.branchId}
+                          aria-label={`Rename ${header.name}`}
+                          title="Rename branch"
+                          tabindex={rowFocused(row) ? 0 : -1}
+                          onclick={() => startRename(header.branchId, header.name)}
+                        >
+                          <Icon name="edit" size="xs" />
+                        </button>
                       {/if}
-                    </span>
+                    </div>
+                  {/if}
+
+                  {#if row.forkCount > 0}
                     <button
                       type="button"
-                      class="poodle-history-center__caption-rename"
-                      data-rename-button="true"
-                      aria-label={`Rename ${row.branch.name ?? row.branch.id}`}
-                      title="Rename branch"
-                      tabindex={focusIndex === row.index ? 0 : -1}
-                      onclick={() => startRename(row.branch, row.index)}
+                      class="poodle-history-center__fork"
+                      data-part="fork-disclosure"
+                      data-open={openAt ? "true" : undefined}
+                      aria-label={openAt
+                        ? `Hide ${row.forkCount} ${row.forkCount === 1 ? "continuation" : "continuations"}`
+                        : `Show ${row.forkCount} ${row.forkCount === 1 ? "continuation" : "continuations"}`}
+                      aria-expanded={openAt}
+                      tabindex={rowFocused(row) ? 0 : -1}
+                      onclick={() => disclose(row.entry.id)}
                     >
-                      <Icon icon="edit" size="xs" />
+                      <Icon name="git-branch" size={resolvedSize} />
+                      {#if row.forkCount > 1}
+                        <span class="poodle-history-center__fork-badge" data-part="fork-badge">{row.forkCount}</span>
+                      {/if}
+                      <span class="poodle-history-center__fork-chevron" aria-hidden="true">
+                        <Icon name="chevron-right" size={resolvedSize} />
+                      </span>
                     </button>
                   {/if}
-                </li>
-              {/if}
+                {:else if row.kind === "picker"}
+                  {@const picked = pickedContinuation(row.continuations, row.pickedEntryId)}
+                  <div
+                    class="poodle-history-center__picker"
+                    data-part="picker"
+                    data-anchor={row.anchorEntryId}
+                    tabindex={rowFocused(row) ? 0 : -1}
+                  >
+                    <div class="poodle-history-center__picker-options" role="group" aria-label="Continuations">
+                      {#each row.continuations as fork (fork.entryId)}
+                        <button
+                          type="button"
+                          class="poodle-history-center__picker-option"
+                          data-part="picker-option"
+                          data-value={fork.entryId}
+                          data-preferred={fork.preferred ? "true" : undefined}
+                          aria-pressed={row.pickedEntryId === fork.entryId}
+                          onclick={() => send({ type: "PICK_CONTINUATION", entryId: fork.entryId })}
+                        >
+                          <span class="poodle-history-center__picker-option-copy">
+                            <span class="poodle-history-center__picker-option-name">{fork.label}</span>
+                            <span class="poodle-history-center__picker-option-branch">
+                              {fork.branchName ?? fork.branchId}
+                            </span>
+                          </span>
+                          {#if fork.preferred}
+                            <span class="poodle-history-center__preferred-badge" data-part="preferred-badge">
+                              Preferred
+                            </span>
+                          {/if}
+                        </button>
+                      {/each}
+                    </div>
+                    <div class="poodle-history-center__picker-actions" data-part="picker-confirm">
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        density={resolvedDensity}
+                        disabled={picked === undefined || picked.preferred}
+                        onClick={() => send({ type: "CONFIRM" })}
+                      >
+                        Choose
+                      </Button>
+                    </div>
+                  </div>
+                {:else}
+                  <div
+                    class="poodle-history-center__not-yet-loaded"
+                    data-part="not-yet-loaded"
+                    data-anchor={row.anchorEntryId}
+                    tabindex={rowFocused(row) ? 0 : -1}
+                  >
+                    <Spinner variant="ring" size="xs" tone="muted" />
+                    <span>Loading…</span>
+                  </div>
+                {/if}
+              </li>
             {/each}
           </ul>
 
@@ -556,32 +773,6 @@
             <div class="poodle-history-center__loading" role="status">
               <Spinner variant="ring" size="sm" tone="muted" />
               <span>{statusMessage ?? "Loading history…"}</span>
-            </div>
-          {/if}
-
-          {#if hasMoreEntries && onLoadMoreEntries}
-            <div class="poodle-history-center__load-more">
-              <Button
-                variant="ghost"
-                size="xs"
-                density={resolvedDensity}
-                onClick={() => onLoadMoreEntries?.(entryRowCount)}
-              >
-                Load more entries
-              </Button>
-            </div>
-          {/if}
-
-          {#if hasBranches && hasMoreBranches && onLoadMoreBranches}
-            <div class="poodle-history-center__load-more">
-              <Button
-                variant="ghost"
-                size="xs"
-                density={resolvedDensity}
-                onClick={() => onLoadMoreBranches?.(branches?.length ?? 0)}
-              >
-                Load more branches
-              </Button>
             </div>
           {/if}
         {/if}

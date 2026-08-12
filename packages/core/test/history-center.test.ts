@@ -28,7 +28,7 @@ function page(entries: HistoryEntry[], overrides: Partial<HistoryPathPage> = {})
   return {
     entries,
     offset: 0,
-    rootContinuationCount: 0,
+    precedingContinuationCount: 0,
     truncatedBefore: false,
     truncatedAfter: false,
     ...overrides,
