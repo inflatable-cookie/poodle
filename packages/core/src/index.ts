@@ -367,18 +367,24 @@ export {
 export {
   historyCenterTransition,
   historyCenterKeydownEvent,
-  historyCenterRows,
-  historyCenterRowCount,
   historyCenterDefaultContext,
+  historyCenterVisibleRows,
+  historyCenterJoinPages,
+  historyCenterForkCount,
+  historyCenterRejectionMessage,
   type HistoryEntry,
   type HistoryEntryPosition,
-  type HistoryBranch,
+  type HistoryPathPage,
+  type HistoryContinuation,
   type HistoryCenterState,
   type HistoryCenterContext,
   type HistoryCenterEvent,
   type HistoryCenterEffect,
   type HistoryCenterResult,
   type HistoryCenterRow,
+  type HistoryCenterRowId,
+  type HistoryCenterOpenFork,
+  type HistoryCenterRejectionCode,
 } from "./history-center";
 
 export {

@@ -1,120 +1,211 @@
 <script lang="ts">
-  import type { HistoryBranch, HistoryEntry } from "@inflatable-cookie/poodle-core";
+  import type {
+    HistoryCenterRejectionCode,
+    HistoryContinuation,
+    HistoryPathPage,
+  } from "@inflatable-cookie/poodle-core";
   import { HistoryCenter } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const T = 1_750_000_000_000;
 
-  const linearBranches: HistoryBranch[] = [{ id: "b-main", name: "main", current: true }];
-  const linearPaths: Record<string, HistoryEntry[]> = {
-    "b-main": [
-      { id: "e1", label: "Committed mix 1", position: "past" },
-      { id: "e2", label: "Arranged intro", position: "past" },
-      { id: "e3", label: "Current draft", position: "current" },
-    ],
-  };
+  function page(entries: HistoryPathPage["entries"], rootContinuationCount = 1): HistoryPathPage {
+    return {
+      entries,
+      offset: 0,
+      rootContinuationCount,
+      truncatedBefore: false,
+      truncatedAfter: false,
+    };
+  }
 
-  const forkBranches: HistoryBranch[] = [
-    { id: "b-main", name: "main", current: true },
-    { id: "b-lead", name: "feature/lead" },
+  const continuation = (
+    entryId: string,
+    overrides: Partial<HistoryContinuation> = {},
+  ): HistoryContinuation => ({
+    entryId,
+    label: entryId,
+    preferred: false,
+    entryCount: 2,
+    branchId: `b-${entryId}`,
+    branchName: null,
+    ...overrides,
+  });
+
+  // Baseline: a linear spine, every entry inert (continuationCount 1/1/0).
+  const linearPages = [
+    page([
+      { id: "e3", label: "Current draft", position: "current", continuationCount: 0, recordedAtMs: T + 3_600_000 },
+      { id: "e2", label: "Arranged intro", position: "past", continuationCount: 1, recordedAtMs: T + 600_000 },
+      { id: "e1", label: "Committed mix 1", position: "past", continuationCount: 1, recordedAtMs: T },
+    ]),
   ];
-  const forkPaths: Record<string, HistoryEntry[]> = {
-    "b-main": [
-      { id: "e1", label: "Committed mix 1", position: "past", recordedAtMs: T },
-      { id: "e2", label: "Arranged intro", position: "past", recordedAtMs: T + 600_000 },
-      { id: "e3", label: "Current draft", position: "current", recordedAtMs: T + 3_600_000 },
-    ],
-    "b-lead": [
-      { id: "e1", label: "Committed mix 1", position: "past", recordedAtMs: T },
-      { id: "e2", label: "Arranged intro", position: "past", recordedAtMs: T + 600_000 },
-      { id: "l1", label: "Lead intro", position: "past", recordedAtMs: T + 1_200_000 },
-      { id: "l2", label: "Lead mix", position: "past", recordedAtMs: T + 2_400_000 },
-    ],
-  };
 
-  const nestedBranches: HistoryBranch[] = [
-    { id: "b-main", name: "main", current: true },
-    { id: "b-outer", name: "feature/outer" },
-    { id: "b-inner", name: "feature/inner" },
+  // Case 1 — two forks at one entry: the badge reads 2 and the picker offers
+  // two options.
+  const twoForkPages = [
+    page([
+      { id: "c3", label: "Current draft", position: "current", continuationCount: 0, recordedAtMs: T + 3_600_000 },
+      { id: "c2", label: "Arranged intro", position: "past", continuationCount: 3, recordedAtMs: T + 600_000 },
+      { id: "c1", label: "Committed mix 1", position: "past", continuationCount: 1, recordedAtMs: T },
+    ]),
   ];
-  const nestedPaths: Record<string, HistoryEntry[]> = {
-    "b-main": [
-      { id: "e1", label: "Committed mix 1", position: "past" },
-      { id: "e2", label: "Arranged intro", position: "past" },
-      { id: "e3", label: "Bridge midi", position: "past" },
-      { id: "e4", label: "Current draft", position: "current" },
+  const twoForkContinuations: Record<string, HistoryContinuation[]> = {
+    c2: [
+      continuation("l1", { label: "Lead intro", branchName: "feature/lead", entryCount: 2 }),
+      continuation("x1", { label: "Alt intro", branchName: "feature/alt", preferred: true, entryCount: 1 }),
     ],
-    "b-outer": [
-      { id: "e1", label: "Committed mix 1", position: "past" },
-      { id: "e2", label: "Arranged intro", position: "past" },
-      { id: "o1", label: "Outer intro", position: "past" },
-      { id: "o2", label: "Outer mix", position: "past" },
-    ],
-    "b-inner": [
-      { id: "e1", label: "Committed mix 1", position: "past" },
-      { id: "e2", label: "Arranged intro", position: "past" },
-      { id: "o1", label: "Outer intro", position: "past" },
-      { id: "i1", label: "Inner intro", position: "past" },
-      { id: "i2", label: "Inner mix", position: "past" },
+  };
+  const twoForkRuns: Record<string, HistoryPathPage[]> = {
+    l1: [
+      page([
+        { id: "l2", label: "Lead mix", position: "past", continuationCount: 0, recordedAtMs: T + 2_400_000 },
+        { id: "l1", label: "Lead intro", position: "past", continuationCount: 1, recordedAtMs: T + 1_200_000 },
+      ]),
     ],
   };
 
-  const manyBranches: HistoryBranch[] = [
-    { id: "b-main", name: "main", current: true },
-    { id: "b-1", name: "take/session-1" },
-    { id: "b-2", name: "take/session-2" },
-    { id: "b-3", name: "take/session-3" },
-    { id: "b-4", name: "take/session-4" },
-    { id: "b-5", name: "take/session-5" },
-    { id: "b-6", name: "take/session-6" },
+  // Case 2 — a fork off a fork: the outer run [l1, l2, l3] forks off l2 into
+  // the inner run [i1, i2], rendered at depth 2 in the same flat list.
+  const nestedPages = [
+    page([
+      { id: "c3", label: "Current draft", position: "current", continuationCount: 0, recordedAtMs: T + 3_600_000 },
+      { id: "c2", label: "Arranged intro", position: "past", continuationCount: 2, recordedAtMs: T + 600_000 },
+      { id: "c1", label: "Committed mix 1", position: "past", continuationCount: 1, recordedAtMs: T },
+    ]),
   ];
-  const manyPaths: Record<string, HistoryEntry[]> = {
-    "b-main": [
-      { id: "r1", label: "Root edit", position: "past" },
-      { id: "r2", label: "Current draft", position: "current" },
+  const nestedContinuations: Record<string, HistoryContinuation[]> = {
+    c2: [continuation("l1", { label: "Lead intro", branchName: "feature/lead", preferred: true, entryCount: 3 })],
+    l2: [continuation("i1", { label: "Inner intro", branchName: "feature/inner", preferred: true, entryCount: 2 })],
+  };
+  const nestedRuns: Record<string, HistoryPathPage[]> = {
+    l1: [
+      page([
+        { id: "l3", label: "Lead outro", position: "past", continuationCount: 0, recordedAtMs: T + 3_000_000 },
+        { id: "l2", label: "Lead bridge", position: "past", continuationCount: 2, recordedAtMs: T + 2_400_000 },
+        { id: "l1", label: "Lead intro", position: "past", continuationCount: 1, recordedAtMs: T + 1_200_000 },
+      ]),
     ],
-    "b-1": [{ id: "r1", label: "Root edit", position: "past" }, { id: "t1", label: "Take 1", position: "past" }],
-    "b-2": [{ id: "r1", label: "Root edit", position: "past" }, { id: "t2", label: "Take 2", position: "past" }],
-    "b-3": [{ id: "r1", label: "Root edit", position: "past" }, { id: "t3", label: "Take 3", position: "past" }],
-    "b-4": [{ id: "r1", label: "Root edit", position: "past" }, { id: "t4", label: "Take 4", position: "past" }],
-    "b-5": [{ id: "r1", label: "Root edit", position: "past" }, { id: "t5", label: "Take 5", position: "past" }],
-    "b-6": [{ id: "r1", label: "Root edit", position: "past" }, { id: "t6", label: "Take 6", position: "past" }],
+    i1: [
+      page([
+        { id: "i2", label: "Inner mix", position: "past", continuationCount: 0, recordedAtMs: T + 2_700_000 },
+        { id: "i1", label: "Inner intro", position: "past", continuationCount: 1, recordedAtMs: T + 2_500_000 },
+      ]),
+    ],
   };
 
-  let renameBranches = $state<HistoryBranch[]>(forkBranches);
+  // Case 3 — a single continuation (continuationCount 1 → forkCount 0): the
+  // entry is inert — no fork icon, no badge, no chevron.
+  const singleContinuationPages = [
+    page([
+      { id: "c3", label: "Current draft", position: "current", continuationCount: 0, recordedAtMs: T + 3_600_000 },
+      { id: "c2", label: "Arranged intro", position: "past", continuationCount: 1, recordedAtMs: T + 600_000 },
+      { id: "c1", label: "Committed mix 1", position: "past", continuationCount: 1, recordedAtMs: T },
+    ]),
+  ];
+
+  // Case 4 — a run's last entry: continuationCount 0 → no fork affordance.
+  const runTailPages = [
+    page([
+      { id: "c3", label: "Current draft", position: "current", continuationCount: 0, recordedAtMs: T + 3_600_000 },
+      { id: "c2", label: "Arranged intro", position: "past", continuationCount: 2, recordedAtMs: T + 600_000 },
+      { id: "c1", label: "Committed mix 1", position: "past", continuationCount: 1, recordedAtMs: T },
+    ]),
+  ];
+  const runTailContinuations: Record<string, HistoryContinuation[]> = {
+    c2: [continuation("l1", { label: "Lead intro", branchName: "feature/lead", preferred: true, entryCount: 3 })],
+  };
+  const runTailRuns: Record<string, HistoryPathPage[]> = {
+    l1: [
+      page([
+        { id: "l3", label: "Lead outro", position: "past", continuationCount: 0, recordedAtMs: T + 3_000_000 },
+        { id: "l2", label: "Lead bridge", position: "past", continuationCount: 1, recordedAtMs: T + 2_400_000 },
+        { id: "l1", label: "Lead intro", position: "past", continuationCount: 1, recordedAtMs: T + 1_200_000 },
+      ]),
+    ],
+  };
+
+  // Case 5 — a rejection notice: the machine owns the display copy for the
+  // code the host's bridge maps ("Already at the requested target").
+  const rejectionPages = twoForkPages;
+
+  // Case 6 — recordedAtMs null: the opened region shows a caption with the
+  // entry count and no time — never "Invalid Date".
+  const noTimestampPages = [
+    page([
+      { id: "c3", label: "Current draft", position: "current", continuationCount: 0 },
+      { id: "c2", label: "Arranged intro", position: "past", continuationCount: 2 },
+      { id: "c1", label: "Committed mix 1", position: "past", continuationCount: 1 },
+    ]),
+  ];
+  const noTimestampContinuations: Record<string, HistoryContinuation[]> = {
+    c2: [continuation("l1", { label: "Lead intro", branchName: "feature/lead", preferred: true, entryCount: 2 })],
+  };
+  const noTimestampRuns: Record<string, HistoryPathPage[]> = {
+    l1: [
+      page([
+        { id: "l2", label: "Lead mix", position: "past", continuationCount: 0 },
+        { id: "l1", label: "Lead intro", position: "past", continuationCount: 1 },
+      ]),
+    ],
+  };
+
+  // Host simulation: each group's two result feeds resolve synchronously from
+  // the fixtures above, exactly as a real host resolves the three operations.
+  let twoForks = $state<{ continuations: { entryId: string; continuations: HistoryContinuation[] } | null; run: { fromEntryId: string; pages: HistoryPathPage[] } | null }>({
+    continuations: null,
+    run: null,
+  });
+  let nested = $state({ ...twoForks });
+  let runTail = $state({ ...twoForks });
+  let noTimestamp = $state({ ...twoForks });
+  let renameHost = $state({ ...twoForks });
+
+  function loadContinuations(
+    state: typeof twoForks,
+    set: (next: typeof twoForks) => void,
+    continuations: Record<string, HistoryContinuation[]>,
+  ): (entryId: string) => void {
+    return (entryId) => set({ ...state, continuations: { entryId, continuations: continuations[entryId] ?? [] } });
+  }
+
+  function loadRun(
+    state: typeof twoForks,
+    set: (next: typeof twoForks) => void,
+    runs: Record<string, HistoryPathPage[]>,
+  ): (fromEntryId: string) => void {
+    return (fromEntryId) => set({ ...state, run: { fromEntryId, pages: runs[fromEntryId] ?? [] } });
+  }
 </script>
 
 <SpecimenLayout bareVariants>
   {#snippet children()}
     <div class="poodle-history-center-specimen">
-      <!-- Only the fork group opens by default so the capture shows the lane
-           rendering. The popover portals to the theme root, so several open
-           at once would stack on top of each other. -->
+      <!-- The two-forks group opens by default so the capture shows the flat
+           list with the counter badge; the popover portals to the theme root,
+           so only one group opens at once. -->
       <SpecimenGroup label="linear">
         <div class="poodle-history-center-specimen__anchor">
           <HistoryCenter
-            branches={linearBranches}
-            paths={linearPaths}
-            totalEntries={3}
+            pages={linearPages}
             canUndo
             onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
           />
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="fork">
+      <SpecimenGroup label="two-forks">
         <div class="poodle-history-center-specimen__anchor">
           <HistoryCenter
-            branches={forkBranches}
-            paths={forkPaths}
-            totalEntries={5}
-            totalBranches={2}
+            pages={twoForkPages}
             defaultOpen
             canUndo
+            continuationsResult={twoForks.continuations}
+            runResult={twoForks.run}
+            onLoadContinuations={loadContinuations(twoForks, (next) => (twoForks = next), twoForkContinuations)}
+            onLoadContinuationRun={loadRun(twoForks, (next) => (twoForks = next), twoForkRuns)}
             onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
-            onRenameBranch={(branchId, name) =>
-              renameBranches = renameBranches.map((branch) => (branch.id === branchId ? { ...branch, name } : branch))}
           />
         </div>
       </SpecimenGroup>
@@ -122,24 +213,36 @@
       <SpecimenGroup label="fork-off-fork">
         <div class="poodle-history-center-specimen__anchor">
           <HistoryCenter
-            branches={nestedBranches}
-            paths={nestedPaths}
-            totalEntries={7}
-            totalBranches={3}
+            pages={nestedPages}
+            canUndo
+            continuationsResult={nested.continuations}
+            runResult={nested.run}
+            onLoadContinuations={loadContinuations(nested, (next) => (nested = next), nestedContinuations)}
+            onLoadContinuationRun={loadRun(nested, (next) => (nested = next), nestedRuns)}
+            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+          />
+        </div>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="single-continuation">
+        <div class="poodle-history-center-specimen__anchor">
+          <HistoryCenter
+            pages={singleContinuationPages}
             canUndo
             onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
           />
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="many-forks">
+      <SpecimenGroup label="run-tail">
         <div class="poodle-history-center-specimen__anchor">
           <HistoryCenter
-            branches={manyBranches}
-            paths={manyPaths}
-            totalEntries={8}
-            totalBranches={7}
+            pages={runTailPages}
             canUndo
+            continuationsResult={runTail.continuations}
+            runResult={runTail.run}
+            onLoadContinuations={loadContinuations(runTail, (next) => (runTail = next), runTailContinuations)}
+            onLoadContinuationRun={loadRun(runTail, (next) => (runTail = next), runTailRuns)}
             onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
           />
         </div>
@@ -148,11 +251,24 @@
       <SpecimenGroup label="rejection">
         <div class="poodle-history-center-specimen__anchor">
           <HistoryCenter
-            branches={forkBranches}
-            paths={forkPaths}
-            totalEntries={5}
-            totalBranches={2}
-            rejection="Branch name is already taken on the authority"
+            pages={rejectionPages}
+            rejection={"AlreadyAtTarget" satisfies HistoryCenterRejectionCode}
+            canUndo
+            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+          />
+        </div>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="no-timestamp">
+        <div class="poodle-history-center-specimen__anchor">
+          <HistoryCenter
+            pages={noTimestampPages}
+            canUndo
+            continuationsResult={noTimestamp.continuations}
+            runResult={noTimestamp.run}
+            onLoadContinuations={loadContinuations(noTimestamp, (next) => (noTimestamp = next), noTimestampContinuations)}
+            onLoadContinuationRun={loadRun(noTimestamp, (next) => (noTimestamp = next), noTimestampRuns)}
+            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
           />
         </div>
       </SpecimenGroup>
@@ -160,14 +276,14 @@
       <SpecimenGroup label="rename">
         <div class="poodle-history-center-specimen__anchor">
           <HistoryCenter
-            branches={renameBranches}
-            paths={forkPaths}
-            totalEntries={5}
-            totalBranches={2}
+            pages={nestedPages}
             canUndo
+            continuationsResult={renameHost.continuations}
+            runResult={renameHost.run}
+            onLoadContinuations={loadContinuations(renameHost, (next) => (renameHost = next), nestedContinuations)}
+            onLoadContinuationRun={loadRun(renameHost, (next) => (renameHost = next), nestedRuns)}
             onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
-            onRenameBranch={(branchId, name) =>
-              renameBranches = renameBranches.map((branch) => (branch.id === branchId ? { ...branch, name } : branch))}
+            onRenameBranch={(branchId, name) => console.log("rename", branchId, name)}
           />
         </div>
       </SpecimenGroup>
@@ -179,11 +295,11 @@
        omits these renders empty Sizes and Densities tabs. Triggers stay closed
        here: several open popovers would stack in one place. -->
   {#snippet sizes(size)}
-    <HistoryCenter branches={linearBranches} paths={linearPaths} totalEntries={3} {size} canUndo canRedo />
+    <HistoryCenter pages={linearPages} {size} canUndo canRedo />
   {/snippet}
 
   {#snippet densities(density)}
-    <HistoryCenter branches={linearBranches} paths={linearPaths} totalEntries={3} {density} canUndo canRedo />
+    <HistoryCenter pages={linearPages} {density} canUndo canRedo />
   {/snippet}
 </SpecimenLayout>
 
