@@ -1,7 +1,7 @@
 # HistoryCenter
 
 Status: active contract
-Updated: 2026-08-11
+Updated: 2026-08-12
 
 ## 1. Purpose
 
@@ -27,6 +27,12 @@ prop shapes below are structurally compatible with the authority's
 `ForkEntryRecord`/`ForkBranchRecord` so that bridge is a plain mapping.
 
 ## 2. Anatomy
+
+> `029`-owned: this anatomy describes the v2 rendering (stitched tree with
+> caption rows). v3 renders the flat row list — entry rows with depth, picker
+> rows and the not-yet-loaded row — and drops captions from the main list
+> (a fork's name lives in the picker and the opened region, ruling R6). The
+> rendering card rewrites this section.
 
 ```text
 HistoryCenter
@@ -60,6 +66,14 @@ here.
 
 ### Data Shapes
 
+Card `028` re-declares the record shapes **structurally** (ruling R2): Poodle
+never imports a Longhorn type and no manifest gains one — the dependency runs
+Longhorn → Poodle. The three continuation operations
+(`loadContinuations`, `loadContinuationRun`, `preferContinuation`) are
+caller-supplied callbacks; the machine emits them as effects. The records
+mirror the authority's `ForkEntryRecord`, `ForkPathPageSnapshot` and
+`ForkContinuationRecord` (camelCase, optional fields optional).
+
 ```ts
 type HistoryEntryPosition = "past" | "current" | "future";
 
@@ -71,29 +85,48 @@ type HistoryEntry = {
   groupId?: string | null;
   recordedAtMs?: number;     // authority-supplied; absent → render nothing.
                              // Never invented client-side (ruling D2).
+  continuationCount: number; // how many entries continue from this one, the
+                             // run's own next row included. A fork count is
+                             // one less (R4); a run's last entry is always 0.
 };
 
-type HistoryBranch = {
-  id: string;
-  name: string | null;       // auto-named by the authority; null → show id
-  annotation?: string | null;
-  headEntryId?: string;      // branch head; absent when the branch has no entries
-  divergedAfterEntryId?: string; // entry on the current branch after which this
-                             // branch diverged; absent at root. Carried for
-                             // host/bridge use and structural compatibility
-                             // with the authority's `divergence_entry_id` —
-                             // the stitcher never attaches to it (see row
-                             // model).
-                             // No `recordedAtMs` here, deliberately: the agreed
-                             // upstream shape puts `recorded_at` on entry
-                             // metadata only, with no branch-level equivalent
-                             // proposed. A run caption takes its relative time
-                             // from its own run's most recent entry (ruling D2).
-  entryCount?: number;
-  current?: boolean;
-  pinned?: boolean;
+// One bounded page of a path — the root path or a continuation run — newest
+// first (R3). offset counts from the newest entry, so the page at a higher
+// offset holds older entries.
+type HistoryPathPage = {
+  entries: HistoryEntry[];
+  offset: number;
+  rootContinuationCount: number; // continuations at the root, the default
+                                 // path's own first entry included (R4). A
+                                 // root fork count is one less. Carried for
+                                 // the host and renderer; the derivation
+                                 // emits no root-level row for it.
+  truncatedBefore: boolean;      // newer records precede this page
+  truncatedAfter: boolean;       // older records follow this page
+};
+
+// One continuation at an anchor: the operator's fork. The continuations page
+// returns every child of the anchor, including the child already rendered on
+// the list — the derivation filters that one out by id and never assumes its
+// position (R4).
+type HistoryContinuation = {
+  entryId: string;         // stable identity of the continuing entry — the
+                           // run's first entry
+  label: string;
+  recordedAtMs?: number;   // never invented client-side
+  preferred: boolean;      // whether a redo from the anchor takes this
+                           // continuation
+  entryCount: number;      // entries in the run starting here, this one included
+  branchId: string;        // branch a consumer lands on by taking this continuation
+  branchName: string | null;
 };
 ```
+
+> `029`-owned: the public props table below still describes the v2 surface
+> (`branches` / `paths` and the record types they used). The props migrate to
+> the v3 shapes — path pages, open forks, and the three continuation
+> callbacks — with the rendering card; this card changed the core records,
+> the row model and the machine only.
 
 ### Public Props
 
@@ -151,6 +184,9 @@ data — the component keeps no second store of entries, branches, or status.
 
 ### Visual States
 
+> `029`-owned: the visual states below describe the v2 tree; v3 renders the
+> flat list with disclosure (picker / not-yet-loaded / open run) states.
+
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | default | — | Trigger cluster renders undo/list/redo; undo/redo disabled without `canUndo`/`canRedo` |
@@ -166,109 +202,127 @@ data — the component keeps no second store of entries, branches, or status.
 
 ### Component States
 
-The tree is **presence-driven**: when `branches` is not supplied the machine
-has no rows and the popover shows the empty state — absence is the signal,
-matching `AppHeader`'s `center` region. There is no `mode` prop. A single
-current branch degrades the tree to the spine alone (linear); checkpoint pins
-render on checkpoint entries wherever they sit.
+The list is **presence-driven**: when `pages` is not supplied the machine has
+no rows and the popover shows the empty state — absence is the signal,
+matching `AppHeader`'s `center` region. There is no `mode` prop. The root
+path alone is the linear spine; forks appear on entries as disclosure
+affordances (a picker when `forkCount > 1`, the run when one fork is open).
 
 Behavior classification: `machine-backed`.
 
 ### Behavior Machine
 
-Contract: `packages/core/src/history-center.ts`. The machine owns popover open
-state, linear keyboard traversal over the stitched history tree, and transient
-rejection display. Branch records and per-branch entry paths are part of
-context, supplied by the caller on every transition; the tree is re-stitched
-per transition. Undo/redo/load-more are plain button commands the adapter
-forwards directly — they carry no machine state and are never invoked
-speculatively.
+Contract: `packages/core/src/history-center.ts`. Card `028` replaces the v2
+stitcher with a **flat list that owns forks on the entry** (ruling R1): core
+derives one flat array of visible rows, each with a `depth` number plus the
+entry it hangs off and the fork it belongs to as identifiers — no renderer
+recurses, no `svelte:self`, no self-import, no recursive React component.
+`flattenVisibleTreeRows` in `packages/core/src/tree.ts` is the in-repo
+precedent; the flat `depth`-carrying row list already has a native counterpart
+(`packages/render/src/tree.rs`), which is what the GPUI/Jetstream port
+consumes. Depth alone is not enough — every row also carries its parent entry
+id and its fork identity as data, so the v2 ambiguity cannot return in any
+renderer (R1 condition).
 
-v2 renders the **actual tree** (card `023`): every entry in the fork graph,
-exactly once, at its true position, in topological order. A fork run's
-content is its entries — branch names are captions, not rows pinned to a
-divergence id (the v1 model, where divergence ids computed relative to the
-current branch collapsed genuinely different forks onto one entry).
+The machine owns popover open state, roving focus over the visible rows keyed
+by **row identity** (never index — a disclosure toggle changes the list shape
+underneath an index), the disclosure tree, and transient rejection display.
+Path pages and the open-forks state are part of context, supplied by the
+caller on every transition; rows are re-derived per transition. Undo/redo are
+plain button commands the adapter forwards directly — they carry no machine
+state and are never invoked speculatively.
+
+The v2 stitcher surface is deleted with this card: `historyCenterRows`,
+`historyCenterRowCount`, the v2 `HistoryCenterRow`, `HistoryRowLane`,
+`HISTORY_TREE_DEPTH_CAP`, `HistoryBranch`, and the `paths` context field.
+There is **no depth cap** (v2 had one and it hid nesting): depth is a number
+the renderer uses and is never saturated. `emitRenameBranch` and
+`maxBranchNameBytes` survive unchanged (ruling R6: rename is a client-side
+affordance that enforces no protocol rule, surfaced in the opened region —
+the picker shows a fork's name and the opened region can rename it; no new
+rename path, no silently dropped capability).
+
+The three continuation operations (`loadContinuations`,
+`loadContinuationRun`, `preferContinuation`) arrive as caller-supplied
+callbacks and leave as effects (ruling R2) — Poodle cannot call the host's
+controller, so the host wires the callbacks to it, exactly like `MessageCenter`.
 
 #### Context
 
 | Field | Type | Initial | Controllable | Meaning |
 |-------|------|---------|--------------|---------|
-| `branches` | `HistoryBranch[] \| null` | `null` | no (host-supplied) | Branch records in supplied order. `null` disables the tree: the machine has no rows and every row event is inert. |
-| `paths` | `Record<string, HistoryEntry[]> \| null` | `null` | no (host-supplied) | Per-branch entry path (`branchId` → root-to-head entries). `null` when `branches` is null. |
-| `focusIndex` | `number` | `0` | no | Roving focus index over the stitched row list. |
+| `pages` | `HistoryPathPage[] \| null` | `null` | no (host-supplied) | Root path pages in fetch order (newest page first). `null` disables the list: the machine has no rows and every row event is inert. |
+| `open` | `Map<string, HistoryCenterOpenFork> \| null` | `null` | no (machine-owned) | The disclosure tree: open forks keyed by anchor entry id, with `inner` levels for forks open inside runs. Holds only what is open (R5); dropped on close — nothing is cached across a close/reopen and pages are not cached or refreshed. |
+| `focusRow` | `HistoryCenterRowId \| null` | `null` | no | Roving focus identity over the visible rows. |
 | `rejection` | `string \| null` | `null` | no | Currently displayed rejection message. |
 
 #### Row Model
 
-`historyCenterRows(branches, paths)` is the **stitcher** — a pure, exported
-function (ruling D5: it never fetches; it knows nothing of Longhorn, ports,
-or paging). It returns every row of the history tree in topological order;
-each row's `index` equals its position in the returned array and keyboard
-traversal is linear in visual order. The spine is the branch marked `current`
-(fallback: the first supplied branch); its path renders at depth 0. Each
-other branch's run — a caption row plus its unique entries — attaches
-immediately after the deepest entry its path shares with the already-stitched
-tree, in supplied order (ruling D4: order is supplied, not invented; the
-outer run of a fork-off-fork must precede the inner one, which is the
-authority's natural listing order). Shared prefixes render once (dedupe by
-`entryId`); a run never re-emits entries that belong to the spine or an outer
-run. The authority's `divergedAfterEntryId` is carried on the record but
-never used for attachment — attachment comes from the paths, which is exactly
-what fixes the v1 collapse.
+`historyCenterVisibleRows(pages, open)` is the **visible-row derivation** — a
+pure, exported function (ruling D5: it never fetches; it knows nothing of
+Longhorn, ports, or paging). It returns one flat array of rows in **display
+order** (oldest entry first, newest last), each with a `depth` number. The
+renderer receives the depth number and knows nothing about topology — core
+knows it, which is core's job (R1).
+
+**Ordering (ruling R3).** Path pages — the root and each nested run — arrive
+**newest-first**: `entries[0]` is newest and `offset` counts from the newest,
+so a page at a higher offset holds older entries. Display is **newest last**.
+Core performs that reversal exactly once, in `historyCenterJoinPages`, and
+every level — the root and each nested run — reverses by the same code.
+Joining pages in fetch order is the paging trap and puts history backwards:
+after the reversal, the later-fetched (older) page renders **before** the
+first page. Overlapping page seams dedupe by `entryId`. `continuations` is
+**not** reversed — it is stable graph order, a picker, not a timeline.
+
+**Forks (ruling R4).** `forkCount = continuationCount - 1`:
+`continuationCount` counts every continuation **including** the one that is
+the next row, a run's last entry carries `0`, and `rootContinuationCount` is
+the same fact one level above the first entry. A single fork off a run's last
+entry therefore reads as zero forks. The continuations page also returns the
+child already on the list; the derivation filters it out **by id** — the
+anchor's successor in the run, which is also the preferred continuation when
+the successor is not on a loaded page — and never assumes its position.
 
 ```text
-entry e1                    ← spine, depth 0
-entry e2                    ← last shared entry; the run attaches right after it
-  caption feature/audio     ← run label, focusable for rename, never navigates
-  entry a1                  ← run entry, depth 1
-    caption fork-of-fork    ← inner run, depth 2, attaches to the outer run
-    entry b1
-  entry a2                  ← outer run continues past the inner run
+entry e1                    ← spine, depth 0, parent -, fork -
+entry e2                    ← depth 0, hangs off e1
+  picker                    ← e2 has forkCount > 1: its forks, own continuation filtered
+  entry f1a                 ← opened fork run, depth 1, parent e2, fork f1a
+  entry f1b                 ← depth 1, parent f1a, fork f1a
 entry e3                    ← spine continues
 ```
 
-Rows:
+Rows (every row carries `depth`, `parentEntryId` and `forkId` as data, not as
+indentation — the R1 condition: two forks at one entry are never confusable
+with a fork off a fork, at any depth, with no cap):
 
-- `{ kind: "entry"; index; branchId; entry; depth; lane }` — an entry of the
-  tree, owned by the branch whose run it sits in (the spine's rows carry the
-  current branch id). Activation emits `emitNavigateEntry(branchId, entryId)`
-  with the clicked row's **own** branch and entry — never an ancestor or a
-  divergence entry belonging to another branch.
-- `{ kind: "caption"; index; branch; depth }` — a fork run's label, at the
-  run's depth before its first entry. Focusable for rename; activation never
-  navigates.
+- `{ kind: "entry"; entry; depth; parentEntryId; forkId; branchId; forkCount }`
+  — one entry of the list. Spine rows carry `parentEntryId: null` and
+  `forkId: null` (the trunk is not a fork); run rows carry their anchor and
+  run identity, where `forkId` is the run's first entry (the continuation's
+  stable identity). `branchId` is the run's continuation branch, `null` on the
+  spine (the host knows its own branch). Activation emits
+  `emitNavigateEntry(branchId, entryId)` with the clicked row's **own** branch
+  and entry — never an ancestor or another branch's divergence entry.
+- `{ kind: "picker"; anchorEntryId; depth; parentEntryId; forkId; continuations; pickedEntryId }`
+  — appears only when the open entry's `forkCount > 1`: the forks at the
+  anchor, the child already on the list filtered out. Picker rows never
+  navigate.
+- `{ kind: "not-yet-loaded"; anchorEntryId; depth; parentEntryId; forkId; branchId }`
+  — an open entry whose run has not arrived. Never an empty gap, never a
+  dropped entry.
 
-Depth saturates at `HISTORY_TREE_DEPTH_CAP` (3) — ruling D3: past depth 3 a
-chain keeps rendering flat at depth 3 rather than indenting further. Only
-indentation saturates: the row keeps its true `branchId` and lane structure,
-so navigation is unaffected.
-
-Lane metadata (`HistoryRowLane`, on every entry row) is sufficient for a
-renderer to draw the git-graph lanes without re-deriving structure:
-`branchId`, `parentBranchId` (the run this run attaches to; null for the
-spine and root-attached runs), `start` (the run's first entry row — the
-elbow, except depth 0 where the spine's run is the trunk), `continue` (the
-lane passes through this row), `end` (the run's last entry row). A
-single-entry run is both `start` and `end`. Card `024` draws the graph from
-this; lane columns, crossing lines, and elbow geometry are derived there, not
-here.
-
-A branch with **no unique entries** — an empty path, or a path fully shared
-with the already-stitched tree — is **omitted** (no caption, no entry rows):
-attachment is defined by path prefix sharing, so an empty path has no
-position, and attaching to the divergence id would reintroduce the v1
-collapse bug. (This is the recorded empty-branch-head decision; a page for
-the branch can arrive later and the run stitches in.)
-
-`historyCenterRowCount(branches, paths)` returns the stitched row count.
+Rows are keyed by identity (`HistoryCenterRowId`: kind + entry id) for roving
+focus; traversal is linear over the flat array in visual order and survives a
+disclosure toggle because the focus is the row, not an index.
 
 #### States
 
 | State | Description |
 |-------|-------------|
 | `closed` | Popover closed; trigger cluster interactive, undo/redo per `canUndo`/`canRedo`/`busy`. |
-| `open` | Popover open; list navigable and rejection events live. |
+| `open` | Popover open; list navigable, disclosure and rejection events live. |
 
 #### Events
 
@@ -276,49 +330,74 @@ the branch can arrive later and the run stitches in.)
 |-------|---------|--------|
 | `TOGGLE` / `OPEN` / `CLOSE` | — | trigger / programmatic / dismiss |
 | `FOCUS_MOVE` | `direction: "next" \| "prev" \| "first" \| "last"` | keyboard |
-| `ACTIVATE_ROW` | `index?` (default: focused) | keyboard / pointer |
+| `ACTIVATE_ROW` | `row?` (default: focused row identity) | keyboard / pointer |
+| `DISCLOSE` | `entryId` | fork disclosure affordance (toggles open/closed) |
+| `CONTINUATIONS_LOADED` | `entryId`, `continuations` | adapter (host callback result) |
+| `PICK_CONTINUATION` | `entryId` (the fork's first entry) | picker selection |
+| `CONFIRM` | — | picker confirm |
+| `RUN_LOADED` | `fromEntryId`, `pages` | adapter (host callback result) |
 | `RENAME` | `branchId`, `name` | rename input commit |
-| `SHOW_REJECTION` | `message` | adapter (rejection prop change) |
+| `SHOW_REJECTION` | `code: "AlreadyAtTarget" \| "UnknownEntry"` | adapter (rejection prop change) |
 | `DISMISS_REJECTION` | — | notice dismiss button |
 
 The v1 expansion events (`TOGGLE_BRANCHES`, `EXPAND_BRANCHES`,
-`COLLAPSE_BRANCHES`) and `CHECKOUT` are retired (ruling D1); the tree always
-renders fully and no fork needs expanding.
+`COLLAPSE_BRANCHES`) and `CHECKOUT` are retired (ruling D1); the v2 events
+were index-based (`ACTIVATE_ROW` carried `index`), replaced here by row
+identity.
 
 #### Transitions
 
 | State | Event | Guard | Target | Actions / Effects |
 |-------|-------|-------|--------|-------------------|
 | closed | `TOGGLE` / `OPEN` | — | open | `emitOpenChange(true)` |
-| open | `TOGGLE` / `CLOSE` | — | closed | `emitOpenChange(false)` |
+| open | `TOGGLE` / `CLOSE` | — | closed | `emitOpenChange(false)`; drop the disclosure tree and focus (R5) |
 | open | `OPEN` / closed | — | stay | — |
-| open | `FOCUS_MOVE` | row count > 0 | open | move `focusIndex` (wrap; first/last land on boundaries); `focusRow(index)` |
-| open | `ACTIVATE_ROW` | row exists at index | open | entry row → `emitNavigateEntry(branchId, entryId)` for the clicked row's own branch and entry; caption row → focus syncs, no effect |
+| open | `FOCUS_MOVE` | row count > 0 | open | move `focusRow` by identity (wrap; first/last land on boundaries); `focusRow(row)` |
+| open | `ACTIVATE_ROW` | row exists | open | entry row → `emitNavigateEntry(branchId, entryId)` for the clicked row's own branch and entry; picker / not-yet-loaded row → focus syncs, no effect |
+| open | `DISCLOSE` | entry visible with `forkCount >= 1` | open | closed fork at the entry opens: add its level, `loadContinuations(entryId)`; open fork closes: drop its subtree (R5), clamp focus |
+| open | `CONTINUATIONS_LOADED` | entry open | open | store continuations; a single fork (`forkCount === 1`) auto-chooses it and emits `loadContinuationRun(fromEntryId)` |
+| open | `PICK_CONTINUATION` | fork offered by a picker | open | set the tentative pick (one at a time) |
+| open | `CONFIRM` | pick set | open | `preferContinuation(entryId)` + `loadContinuationRun(fromEntryId)` — the picker's commit |
+| open | `RUN_LOADED` | level chose `fromEntryId` | open | append run pages (fetch order); the run renders through the same join |
 | any | `RENAME` | — | stay | `emitRenameBranch(branchId, name)` |
-| any | `SHOW_REJECTION` | message differs from displayed | stay | set `rejection` |
+| any | `SHOW_REJECTION` | mapped message differs from displayed | stay | set `rejection` |
 | any | `DISMISS_REJECTION` | rejection displayed | stay | clear `rejection` |
-| closed | `FOCUS_MOVE` / `ACTIVATE_ROW` | — | stay | — |
+| closed | row / disclosure events | — | stay | — |
 
-Guards are pure predicates over context + payload. Out-of-range activation,
-empty row lists (including `branches: null`), and closed-state row events are
-all inert (stay with no effects). `emitNavigateEntry` always reports the
-entry actually clicked — the clicked row carries its own `branchId` and
-`entry`, so an ancestor or another branch's divergence entry can never be
-reported.
+Guards are pure predicates over context + payload. Out-of-list activation,
+empty row lists (including `pages: null`), entries with `forkCount < 1`,
+stale responses for entries that are not open, and closed-state row events are
+all inert (stay with no effects). Focus is re-clamped after any disclosure
+toggle: the focused row stays focused when it still exists, else focus falls
+to the toggled anchor's entry row, else the first row. `emitNavigateEntry`
+always reports the entry actually clicked — the clicked row carries its own
+`branchId` and `entry`, so an ancestor or another branch's divergence entry
+can never be reported.
 
 #### Effects
 
 | Effect | What It Does | Cleanup |
 |--------|--------------|---------|
 | `emitOpenChange { open }` | Adapter syncs the bindable `open` and calls `onOpenChange`. | None (host-owned). |
-| `focusRow { index }` | Adapter moves roving focus to the row element and scrolls it into view. | Overridden by the next `focusRow`. |
-| `emitNavigateEntry { branchId, entryId }` | Adapter calls the host's navigate handler with the clicked row's branch and entry. | None (host-owned). |
+| `focusRow { row }` | Adapter moves roving focus to the row element identified by `row` and scrolls it into view. | Overridden by the next `focusRow`. |
+| `emitNavigateEntry { branchId, entryId }` | Adapter calls the host's navigate handler with the clicked row's branch (null on the spine — the host's own branch) and entry. | None (host-owned). |
 | `emitRenameBranch { branchId, name }` | Adapter calls `onRenameBranch(branchId, name)`. | None (host-owned). |
+| `loadContinuations { entryId }` | Host op 1: the adapter calls the host's continuation loader for the anchor. | None (host-owned). |
+| `loadContinuationRun { fromEntryId }` | Host op 2: the adapter calls the host's run loader starting at the fork's first entry. | None (host-owned). |
+| `preferContinuation { entryId }` | Host op 3: the adapter calls the host's prefer handler for the picked fork — the picker's commit. | None (host-owned). |
 
-The v1 `emitSelectEntry` and `emitCheckout` effects are gone: `emitSelectEntry`
-collapses into `emitNavigateEntry` (every entry row carries the branch that
-owns its run) and `emitCheckout` is retired with the expansion model (ruling
-D1).
+The v1 `emitSelectEntry` and `emitCheckout` effects are gone; the v2 index
+`focusRow { index }` is replaced by identity `focusRow { row }`. Effects for
+the three host operations leave only on user activation or a matching loaded
+event — never speculatively. `CONFIRM` emits `preferContinuation` (the
+commit) and `loadContinuationRun` (the reveal) together.
+
+**Rejection handling.** The machine owns display copy for the two rejections
+it can show, declared structurally (R2): `AlreadyAtTarget` →
+`"Already at the requested target"` (the picked fork is already the preferred
+future), `UnknownEntry` → `"Entry does not exist"` (a continuation or run
+anchor no longer exists). The host's bridge maps protocol rejections onto
+these two codes; `SHOW_REJECTION` stores the mapped message.
 
 Open/close focus management (focus the surface on open, restore trigger focus
 on close, dismiss-on-outside, focus trap) is adapter-owned: the composed
@@ -326,6 +405,11 @@ on close, dismiss-on-outside, focus trap) is adapter-owned: the composed
 the surface applies `trapFocusKeydown` while open.
 
 #### Part Attribute Output
+
+> `029`-owned: the part attributes below describe the v2 rendering (stitched
+> rows, captions, lanes) and are superseded by the v3 row model — flat rows
+> with `depth`, picker rows and the not-yet-loaded row. The rendering card
+> rewrites this table; until then the v2 table is frozen.
 
 | Part | Attribute | Value |
 |------|-----------|-------|
@@ -351,10 +435,18 @@ styling and tests, and depth reaches assistive tech through `aria-level`
 #### Machinery Dependencies
 
 Focus trap (`trapFocusKeydown`), roving row navigation (machine-owned
-`focusIndex`), dismissable layer + anchor positioning + initial focus (via the
+`focusRow` identity), dismissable layer + anchor positioning + initial focus (via the
 composed `Popover`), `createInstanceId` for surface ids.
 
 ## 5. Events
+
+> `029`-owned: the public callback surface below is the v2 props (branches /
+> paths based). The callbacks migrate to the v3 shapes — path pages, open
+> forks, and the three continuation operations (`loadContinuations`,
+> `loadContinuationRun`, `preferContinuation`) — with the rendering card.
+> `onNavigateEntry` keeps its semantics: the entry actually clicked, on the
+> branch that owns its run (null branch on the spine). `onRenameBranch` and
+> `maxBranchNameBytes` survive unchanged (R6).
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
@@ -479,6 +571,11 @@ Metric variables (widths, gaps, padding, font sizes) are internal and not part
 of the recipe contract.
 
 ## 9. Svelte Notes
+
+> `029`-owned: the implementation notes below describe the v2 rendering
+> (`historyCenterRows(branches, paths)`, lane cells, caption relative time).
+> v3 renders one loop over `historyCenterVisibleRows(pages, open)` — no
+> `svelte:self`, no recursion (R1).
 
 - expected substrate: `HistoryCenter.svelte` composing `IconButton`,
   `Popover`, `Button`, `Icon`, `Spinner`; the machine runs through a `send()`

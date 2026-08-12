@@ -7,6 +7,19 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-12 — R4's `forkCount = continuationCount - 1` makes a **single fork
+  off a run's last entry invisible**: the authority defines
+  `continuation_count` as all children ("this page's own next entry included…
+  a run's last entry is always zero", `ForkEntryRecord` doc), so a last entry
+  with one divergent child carries 1 → `forkCount 0` → no disclosure
+  affordance, no way to open the fork. Verified in the Longhorn prototype
+  (`projection/project.rs`: `continuation_count = child_ids(entry).len()`);
+  the v3 disclosure model therefore cannot reach such a fork at all, while the
+  authority's own doc line claims the case never occurs. Either the authority
+  forbids recording a fork at the preferred chain's leaf (making the doc line
+  a true invariant), or v3 needs a head-fork affordance. Affects g13.029
+  rendering and the Longhorn thread.
+
 - 2026-08-12 — RESOLVED 2026-08-12 (b027 Part 1, `1331b5e5`: the twelve specs
   now carry `dismiss_on_outside_interact` — default `true`, matching the web —
   and `OPEN_GAPS` is `{}` again; each renderer resolves the field). Original

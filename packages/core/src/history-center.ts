@@ -1,29 +1,54 @@
 /**
- * HistoryCenter v2 behavior machine and history-tree stitcher.
+ * HistoryCentre v3 (card g13-028) — flat visible-row derivation and behavior
+ * machine over path pages and continuations.
+ *
  * Contract: docs/contracts/components/history-center.md, "Behavior Machine".
  *
- * v2 (card g13-023) replaces the v1 fork-expander model with a unified
- * history tree. `historyCenterRows` is a pure stitcher: it takes branch
- * records plus a per-branch entry path and returns the ordered rows — every
- * entry in the fork graph exactly once, at its true position, in topological
- * order. Each run attaches at the deepest entry its path shares with the
- * already-stitched tree; the authority's divergence id is never used for
- * attachment (v1 pinned rows to divergence ids computed relative to the
- * current branch, which collapsed genuinely different forks onto one entry).
+ * v3 replaces the v2 stitcher (historyCenterRows, historyCenterRowCount,
+ * HistoryCenterRow, HistoryRowLane, HISTORY_TREE_DEPTH_CAP, HistoryBranch and
+ * the `paths` context field — all deleted with this card) with a flat list
+ * that owns forks on the entry (ruling R1). The derivation walks the open
+ * forks and emits ONE flat array of rows, each with a `depth` number, the
+ * entry it hangs off (`parentEntryId`) and the fork it belongs to (`forkId`)
+ * as data — never as indentation. No renderer recurses; core knows the
+ * topology, which is core's job. `flattenVisibleTreeRows` in `tree.ts` is the
+ * in-repo precedent; `packages/render/src/tree.rs` the native one.
  *
- * The machine owns popover open state, linear keyboard traversal over the
- * stitched rows, and transient rejection display. Branches and paths are part
- * of context and are supplied by the caller on every transition (the styled
- * layer owns rendering and paging). Commands go out as effects — the machine
- * never validates protocol rules and never invokes a callback speculatively.
+ * The record types below are structural mirrors of the authority's shapes
+ * (ruling R2): Poodle never imports a Longhorn type and no manifest gains one.
+ * The three continuation operations — load the continuations at an anchor,
+ * load a continuation run, prefer a continuation — arrive as caller-supplied
+ * callbacks and leave as effects.
+ *
+ * Display order is core-owned and reversed exactly once (ruling R3): pages
+ * arrive newest-first and display oldest-first, so a page at a higher offset
+ * (older) renders before the first page — joining in fetch order puts history
+ * backwards. Every level — the root and each nested run — reverses by the
+ * same join. `continuations` is not reversed: it is stable graph order, a
+ * picker, not a timeline.
+ *
+ * `forkCount = continuationCount - 1` (ruling R4): continuationCount counts
+ * every continuation including the run's own next row, so a run's last entry
+ * carries 0 and one fork reads 2. The continuations page also returns the
+ * child already on the list; the derivation filters it out by id and never
+ * assumes its position.
+ *
+ * Core holds only what is open (ruling R5): the loaded continuations and the
+ * loaded run belong to the currently open entries and are dropped on close —
+ * nothing is cached across a close/reopen; pages are not cached and not
+ * refreshed.
+ *
+ * Rename survives (ruling R6): `emitRenameBranch` stays a pass-through
+ * client-side affordance (it enforces no protocol rule) surfaced in the opened
+ * region.
  *
  * No clocks: `recordedAtMs` is modelled on the record types so the data can
- * arrive later, but nothing here invents timestamps (ruling D2). Branch UI is
- * presence-driven: when `branches` is null the machine has no rows and every
- * row event is inert.
+ * arrive later, but nothing here invents timestamps and no clock is ever read.
  */
 
 import type { TransitionResult } from "./machine";
+
+// ── Record types (structural mirrors of the authority's shapes; R2) ─────
 
 export type HistoryEntryPosition = "past" | "current" | "future";
 
@@ -34,39 +59,331 @@ export interface HistoryEntry {
   /** Renders as a named pin. */
   checkpoint?: boolean;
   groupId?: string | null;
-  /** Optional recorded-at timestamp supplied by the authority; never invented here (D2). */
+  /** Optional recorded-at timestamp supplied by the authority; never invented here. */
   recordedAtMs?: number;
+  /**
+   * How many entries continue from this one, the run's own next row included
+   * (the authority's `ForkEntryRecord.continuation_count`). A fork count is
+   * one less (R4); a run's last entry is always zero.
+   */
+  continuationCount: number;
 }
 
 /**
- * A branch record. Deliberately has no `recordedAtMs`: the agreed upstream
- * shape puts `recorded_at` on entry metadata only, with no branch-level
- * equivalent proposed, so a field here would be one nothing ever populates.
- * A run caption derives its relative time from its own run's most recent
- * entry — derivation from supplied data, not an invented clock (D2).
+ * One bounded page of a path, newest first (the authority's
+ * `ForkPathPageSnapshot`). `offset` counts from the newest entry, so the page
+ * at a higher offset holds older entries (R3).
  */
-export interface HistoryBranch {
-  id: string;
-  /** Auto-named by the authority; null means the id is displayed. */
-  name: string | null;
-  annotation?: string | null;
-  /** Head entry of this branch; absent when the branch has no entries. */
-  headEntryId?: string;
-  /** Entry on the current branch after which this branch diverged; absent at root. */
-  divergedAfterEntryId?: string;
-  entryCount?: number;
-  current?: boolean;
-  pinned?: boolean;
+export interface HistoryPathPage {
+  /** Bounded records, newest first. */
+  entries: HistoryEntry[];
+  /** Newest-first offset of this page. */
+  offset: number;
+  /**
+   * How many entries continue from the root — the same fact as an entry's
+   * `continuationCount`, one level above the first entry (R4). A root fork
+   * count is one less. Carried on the record for the host and the renderer;
+   * the derivation emits no root-level row for it.
+   */
+  rootContinuationCount: number;
+  /** Whether newer records precede this page. */
+  truncatedBefore: boolean;
+  /** Whether older records follow this page. */
+  truncatedAfter: boolean;
 }
+
+/**
+ * One continuation at an anchor (the authority's `ForkContinuationRecord`):
+ * the operator's fork. The continuations page returns every child of the
+ * anchor, including the child already rendered on the list — the derivation
+ * filters that one out by id and never assumes its position (R4).
+ */
+export interface HistoryContinuation {
+  /** Stable identity of the continuing entry — the run's first entry. */
+  entryId: string;
+  /** Consumer-owned label. */
+  label: string;
+  /** Optional host-supplied recorded-at stamp; never invented here. */
+  recordedAtMs?: number;
+  /** Whether a redo from the anchor takes this continuation. */
+  preferred: boolean;
+  /** Entries in the run starting here, this one included. */
+  entryCount: number;
+  /** Branch a consumer lands on by taking this continuation. */
+  branchId: string;
+  /** That branch's optional name. */
+  branchName: string | null;
+}
+
+// ── Visible-row model (R1) ─────────────────────────────────────────────
+
+/**
+ * Stable identity of one visible row, used for roving focus. Keyed by kind
+ * plus entry id, never by array position: a disclosure toggle changes the
+ * list shape underneath an index, which is the bug v3 exists to avoid.
+ */
+export type HistoryCenterRowId =
+  | { kind: "entry"; entryId: string }
+  | { kind: "picker"; entryId: string }
+  | { kind: "not-yet-loaded"; entryId: string };
+
+/**
+ * One row of the flat visible list. Every row carries `depth` (indentation
+ * only), `parentEntryId` (the entry it hangs off; null at the root) and
+ * `forkId` (the run's first entry — the fork it belongs to; null on the spine
+ * and before a run is chosen) as identifiers, not as indentation (R1
+ * condition: two forks at one entry are never confusable with a fork off a
+ * fork, at any depth, with no cap).
+ */
+export type HistoryCenterRow =
+  | {
+      kind: "entry";
+      entry: HistoryEntry;
+      depth: number;
+      parentEntryId: string | null;
+      forkId: string | null;
+      /** Branch this row's run lands on; null on the spine (the host knows its own branch). */
+      branchId: string | null;
+      /** Forks at this entry (continuationCount - 1, floored at 0; R4). */
+      forkCount: number;
+    }
+  | {
+      kind: "picker";
+      /** Entry whose forks are offered. */
+      anchorEntryId: string;
+      depth: number;
+      parentEntryId: string | null;
+      forkId: string | null;
+      /** Forks at the anchor, the child already on the list filtered out (R4). Empty while loading. */
+      continuations: HistoryContinuation[];
+      /** Tentatively picked fork (its first entry id); null until PICK_CONTINUATION. */
+      pickedEntryId: string | null;
+    }
+  | {
+      kind: "not-yet-loaded";
+      /** Open entry whose run has not arrived — never an empty gap, never a dropped entry. */
+      anchorEntryId: string;
+      depth: number;
+      parentEntryId: string | null;
+      forkId: string | null;
+      branchId: string | null;
+    };
+
+/**
+ * One level of the disclosure tree: a fork open at an entry. Levels nest
+ * because forks fork (R1) — a fork open inside an open run is that level's
+ * `inner` — and multiple entries can be open at any level, keyed by anchor
+ * entry id. Core holds only what is open (R5): closing a level drops its
+ * continuations, pick, chosen fork, run pages and everything inner.
+ */
+export interface HistoryCenterOpenFork {
+  /** Entry the fork hangs off. */
+  anchorEntryId: string;
+  /**
+   * Forks at the anchor in supplied order; null until loaded. The child
+   * already on the list is filtered by the derivation, never here.
+   */
+  continuations: HistoryContinuation[] | null;
+  /** Tentatively picked fork (picker highlight); null until PICK_CONTINUATION. */
+  pick: HistoryContinuation | null;
+  /**
+   * The chosen fork — auto for a single fork, confirmed in the picker for
+   * more; null until chosen. Its `entryId` is the run's first entry, which is
+   * also every run row's `forkId`.
+   */
+  chosen: HistoryContinuation | null;
+  /** The chosen fork's run pages in fetch order (newest page first); empty until loaded. */
+  runPages: HistoryPathPage[];
+  /** Forks open inside this run, keyed by anchor entry id; null when none. */
+  inner: HistoryCenterOpenFork | null;
+}
+
+// ── Derivation helpers (R3, R4) ────────────────────────────────────────
+
+/** Forks at an entry: one less than its continuation count, floored at 0 (R4). */
+export function historyCenterForkCount(continuationCount: number): number {
+  return continuationCount <= 1 ? 0 : continuationCount - 1;
+}
+
+/**
+ * Join path pages — the root or a run — into display order (oldest entry
+ * first). Pages arrive newest-first in fetch order and display oldest-first,
+ * so the later-fetched (older) page renders before the first page (R3). This
+ * is the only reversal and every level reverses by this same code. Overlapping
+ * page seams dedupe by entry id; entries are immutable graph nodes, so an id
+ * names exactly one entry.
+ */
+export function historyCenterJoinPages(pages: readonly HistoryPathPage[]): HistoryEntry[] {
+  const newestFirst: HistoryEntry[] = [];
+  const seen = new Set<string>();
+  for (const page of pages) {
+    for (const entry of page.entries) {
+      if (!seen.has(entry.id)) {
+        seen.add(entry.id);
+        newestFirst.push(entry);
+      }
+    }
+  }
+  newestFirst.reverse();
+  return newestFirst;
+}
+
+/**
+ * The forks at an anchor: the loaded continuations minus the child already on
+ * the list (R4). That child is the anchor's successor in the run — filter by
+ * id, never by array position. When the successor is not on a loaded page
+ * (truncated paging), the preferred flag identifies the same record: the run
+ * follows preferred children, so the child already on the list is the
+ * preferred continuation.
+ */
+export function historyCenterForksAt(
+  continuations: HistoryContinuation[] | null,
+  runEntries: readonly HistoryEntry[],
+  anchorIndex: number,
+): HistoryContinuation[] {
+  if (continuations === null) {
+    return [];
+  }
+  const ownId = anchorIndex + 1 < runEntries.length ? runEntries[anchorIndex + 1].id : null;
+  return continuations.filter((continuation) =>
+    ownId === null ? !continuation.preferred : continuation.entryId !== ownId,
+  );
+}
+
+/**
+ * The visible-row derivation (pure, exported): one flat array of rows in
+ * display order over the root path pages plus the open forks. The renderer
+ * receives a depth number and knows nothing about topology — core knows it,
+ * which is core's job (R1).
+ */
+export function historyCenterVisibleRows(
+  pages: readonly HistoryPathPage[] | null,
+  open: ReadonlyMap<string, HistoryCenterOpenFork> | null,
+): HistoryCenterRow[] {
+  const rows: HistoryCenterRow[] = [];
+  if (pages === null || pages.length === 0) {
+    return rows;
+  }
+  pushRun(rows, historyCenterJoinPages(pages), 0, null, null, null, open);
+  return rows;
+}
+
+function pushRun(
+  rows: HistoryCenterRow[],
+  entries: readonly HistoryEntry[],
+  depth: number,
+  parentOfFirst: string | null,
+  forkId: string | null,
+  branchId: string | null,
+  open: ReadonlyMap<string, HistoryCenterOpenFork> | null,
+): void {
+  for (let i = 0; i < entries.length; i += 1) {
+    const entry = entries[i];
+    rows.push({
+      kind: "entry",
+      entry,
+      depth,
+      parentEntryId: i === 0 ? parentOfFirst : entries[i - 1].id,
+      forkId,
+      branchId,
+      forkCount: historyCenterForkCount(entry.continuationCount),
+    });
+
+    const level = open?.get(entry.id);
+    if (level !== undefined) {
+      pushDisclosed(rows, level, entry, entries, i, depth);
+    }
+  }
+}
+
+function pushDisclosed(
+  rows: HistoryCenterRow[],
+  level: HistoryCenterOpenFork,
+  entry: HistoryEntry,
+  runEntries: readonly HistoryEntry[],
+  anchorIndex: number,
+  depth: number,
+): void {
+  const childDepth = depth + 1;
+
+  if (level.chosen === null) {
+    if (historyCenterForkCount(entry.continuationCount) > 1) {
+      // More than one fork: a picker, never an assumption about which is the
+      // run's own continuation.
+      rows.push({
+        kind: "picker",
+        anchorEntryId: entry.id,
+        depth: childDepth,
+        parentEntryId: entry.id,
+        forkId: null,
+        continuations: historyCenterForksAt(level.continuations, runEntries, anchorIndex),
+        pickedEntryId: level.pick?.entryId ?? null,
+      });
+    } else {
+      // Single fork (or its continuations still in flight): the run is what
+      // will show, so mark it not-yet-loaded rather than leaving a gap.
+      rows.push({
+        kind: "not-yet-loaded",
+        anchorEntryId: entry.id,
+        depth: childDepth,
+        parentEntryId: entry.id,
+        forkId: null,
+        branchId: null,
+      });
+    }
+    return;
+  }
+
+  if (level.runPages.length === 0) {
+    rows.push({
+      kind: "not-yet-loaded",
+      anchorEntryId: entry.id,
+      depth: childDepth,
+      parentEntryId: entry.id,
+      forkId: level.chosen.entryId,
+      branchId: level.chosen.branchId,
+    });
+    return;
+  }
+
+  pushRun(
+    rows,
+    historyCenterJoinPages(level.runPages),
+    childDepth,
+    entry.id,
+    level.chosen.entryId,
+    level.chosen.branchId,
+    level.inner,
+  );
+}
+
+// ── Machine ────────────────────────────────────────────────────────────
 
 export type HistoryCenterState = "closed" | "open";
 
+/**
+ * Rejections the machine can display, structurally declared (R2 — no Longhorn
+ * type reaches Poodle). The host's bridge maps protocol rejections onto these
+ * two; the machine owns the display copy.
+ */
+export type HistoryCenterRejectionCode = "AlreadyAtTarget" | "UnknownEntry";
+
+export function historyCenterRejectionMessage(code: HistoryCenterRejectionCode): string {
+  switch (code) {
+    case "AlreadyAtTarget":
+      return "Already at the requested target";
+    case "UnknownEntry":
+      return "Entry does not exist";
+  }
+}
+
 export interface HistoryCenterContext {
-  /** Branch records in supplied order; null disables the tree entirely (presence-driven). */
-  branches: HistoryBranch[] | null;
-  /** Per-branch entry path (branchId -> root-to-head entries); null when branches is null. */
-  paths: Record<string, HistoryEntry[]> | null;
-  focusIndex: number;
+  /** Root path pages in fetch order (newest page first); null disables the list. */
+  pages: HistoryPathPage[] | null;
+  /** Open forks at root entries, keyed by anchor entry id; null when none is open. */
+  open: ReadonlyMap<string, HistoryCenterOpenFork> | null;
+  /** Currently focused visible row identity; null when nothing is focused. */
+  focusRow: HistoryCenterRowId | null;
   /** Currently displayed rejection message; null when none. */
   rejection: string | null;
 }
@@ -76,233 +393,34 @@ export type HistoryCenterEvent =
   | { type: "OPEN" }
   | { type: "CLOSE" }
   | { type: "FOCUS_MOVE"; direction: "next" | "prev" | "first" | "last" }
-  | { type: "ACTIVATE_ROW"; index?: number }
+  | { type: "ACTIVATE_ROW"; row?: HistoryCenterRowId }
+  | { type: "DISCLOSE"; entryId: string }
+  | { type: "CONTINUATIONS_LOADED"; entryId: string; continuations: HistoryContinuation[] }
+  | { type: "PICK_CONTINUATION"; entryId: string }
+  | { type: "CONFIRM" }
+  | { type: "RUN_LOADED"; fromEntryId: string; pages: HistoryPathPage[] }
   | { type: "RENAME"; branchId: string; name: string }
-  | { type: "SHOW_REJECTION"; message: string }
+  | { type: "SHOW_REJECTION"; code: HistoryCenterRejectionCode }
   | { type: "DISMISS_REJECTION" };
 
 export type HistoryCenterEffect =
   | { type: "emitOpenChange"; open: boolean }
-  | { type: "focusRow"; index: number }
-  | { type: "emitNavigateEntry"; branchId: string; entryId: string }
-  | { type: "emitRenameBranch"; branchId: string; name: string };
+  | { type: "focusRow"; row: HistoryCenterRowId }
+  | { type: "emitNavigateEntry"; branchId: string | null; entryId: string }
+  | { type: "emitRenameBranch"; branchId: string; name: string }
+  | { type: "loadContinuations"; entryId: string }
+  | { type: "loadContinuationRun"; fromEntryId: string }
+  | { type: "preferContinuation"; entryId: string };
 
 export type HistoryCenterResult = TransitionResult<HistoryCenterState, HistoryCenterContext, HistoryCenterEffect>;
-
-/**
- * Visual depth cap (ruling D3): runs deeper than this keep rendering flat at
- * the cap rather than indenting further. The row still carries its true
- * `branchId` and lane structure — only indentation saturates.
- */
-export const HISTORY_TREE_DEPTH_CAP = 3;
-
-/**
- * Lane metadata for one entry row — sufficient for a renderer to draw a
- * git-graph lane without re-deriving structure. The flags describe the run's
- * shape within the supplied data: `start` is the run's first entry row (the
- * elbow, except at depth 0 where the spine's run is the trunk), `end` its
- * last, `continue` any row in between. A single-entry run is both `start`
- * and `end`. Lane structure is always true; only the row `depth` saturates.
- */
-export interface HistoryRowLane {
-  /** Branch whose run this row belongs to (same as the row's branchId). */
-  branchId: string;
-  /** Branch whose run this run attaches to; null for the spine and root-attached runs. */
-  parentBranchId: string | null;
-  /** First entry row of the run. */
-  start: boolean;
-  /** The run's lane passes through this row (any row that is not the run's first). */
-  continue: boolean;
-  /** Last entry row of the run. */
-  end: boolean;
-}
-
-/**
- * One navigable row of the stitched history tree.
- *
- * - `entry`: a row in the fork graph, owned by the branch whose run it sits
- *   in — the spine's rows carry the current branch id. Activation navigates
- *   to exactly this row's branch and entry.
- * - `caption`: a fork run's label (branch name / description), rendered at
- *   the run's depth before its first entry row. Captions are focusable for
- *   rename but never navigate.
- *
- * `index` always equals the row's position in the returned array; keyboard
- * traversal is linear over the array in visual order.
- */
-export type HistoryCenterRow =
-  | { kind: "entry"; index: number; branchId: string; entry: HistoryEntry; depth: number; lane: HistoryRowLane }
-  | { kind: "caption"; index: number; branch: HistoryBranch; depth: number };
-
-/**
- * The stitcher (pure, exported): takes branch records plus a per-branch
- * entry path and returns the ordered rows. The spine is the branch marked
- * `current` (fallback: the first supplied branch); its path renders at depth
- * 0. Every other branch attaches its run — caption plus unique entries —
- * immediately after the deepest entry its path shares with the already
- * stitched tree, in supplied order (ruling D4: order is supplied, not
- * invented). Runs never re-emit shared entries (dedupe by entryId) and never
- * fetch anything (ruling D5). A branch with no unique entries (empty path,
- * or a path fully shared with the already stitched tree) is omitted — there
- * is no path-derived position to attach it at.
- */
-export function historyCenterRows(
-  branches: HistoryBranch[] | null,
-  paths: Record<string, HistoryEntry[]> | null,
-): HistoryCenterRow[] {
-  const rows: HistoryCenterRow[] = [];
-
-  if (branches === null || paths === null || branches.length === 0) {
-    return rows;
-  }
-
-  const byId = new Map(branches.map((branch) => [branch.id, branch] as const));
-  const spine = branches.find((candidate) => candidate.current === true) ?? branches[0];
-  const spinePath = paths[spine.id] ?? [];
-
-  // Entry ids already placed, and the branch whose run emitted each.
-  const stitched = new Set<string>();
-  const ownerOf = new Map<string, string>();
-  for (const entry of spinePath) {
-    stitched.add(entry.id);
-    ownerOf.set(entry.id, spine.id);
-  }
-
-  // Runs in supplied order: run depth, unique suffix, parent, attach entry.
-  const runDepth = new Map<string, number>([[spine.id, 0]]);
-  const runSuffix = new Map<string, HistoryEntry[]>();
-  const runParent = new Map<string, string | null>();
-  const childrenOf = new Map<string, string[]>();
-  const topRuns: string[] = [];
-
-  for (const candidate of branches) {
-    if (candidate.id === spine.id) {
-      continue;
-    }
-
-    const path = paths[candidate.id];
-    if (path === undefined || path.length === 0) {
-      // Empty branch head: no entries, so no shared prefix and no attach
-      // point. The branch is omitted entirely (no caption, no rows).
-      continue;
-    }
-
-    // Deepest entry of this path already placed. Computing attachment against
-    // the already-stitched set (never against the divergence id or other
-    // unstitched paths) is what keeps fork-off-fork runs nested: the outer
-    // run is stitched first, so the inner run's attach entry is its entry.
-    let attachIndex = -1;
-    for (let i = path.length - 1; i >= 0; i -= 1) {
-      if (stitched.has(path[i].id)) {
-        attachIndex = i;
-        break;
-      }
-    }
-
-    // Unique suffix, deduped by entry id so a paged path whose pages overlap
-    // at the seam never doubles an entry.
-    const suffix: HistoryEntry[] = [];
-    const seen = new Set<string>();
-    for (let i = attachIndex + 1; i < path.length; i += 1) {
-      const entry = path[i];
-      if (seen.has(entry.id)) {
-        continue;
-      }
-      seen.add(entry.id);
-      suffix.push(entry);
-    }
-
-    // A branch with no unique entries has nothing to render.
-    if (suffix.length === 0) {
-      continue;
-    }
-
-    const attachEntry = attachIndex < 0 ? null : path[attachIndex];
-    const parent = attachEntry === null ? null : ownerOf.get(attachEntry.id) ?? null;
-
-    runSuffix.set(candidate.id, suffix);
-    runParent.set(candidate.id, parent);
-    // A run attached to the spine or an outer run nests one level deeper; a
-    // root-attached run is a peer of the spine at depth 0.
-    runDepth.set(candidate.id, parent === null ? 0 : (runDepth.get(parent) ?? 0) + 1);
-
-    for (const entry of suffix) {
-      stitched.add(entry.id);
-      ownerOf.set(entry.id, candidate.id);
-    }
-
-    if (attachEntry === null) {
-      // Shares nothing with the placed structure: attach at the root, before
-      // the spine (the authority's "or root" case, e.g. a spine page that
-      // starts below this branch's divergence).
-      topRuns.push(candidate.id);
-    } else {
-      const siblings = childrenOf.get(attachEntry.id) ?? [];
-      siblings.push(candidate.id);
-      childrenOf.set(attachEntry.id, siblings);
-    }
-  }
-
-  const emitRun = (branchId: string, isSpine: boolean): void => {
-    const entries = isSpine ? spinePath : (runSuffix.get(branchId) ?? []);
-    const depth = isSpine ? 0 : (runDepth.get(branchId) ?? 0);
-    const renderedDepth = Math.min(depth, HISTORY_TREE_DEPTH_CAP);
-
-    if (!isSpine) {
-      const branch = byId.get(branchId);
-      if (branch === undefined) {
-        return;
-      }
-      rows.push({ kind: "caption", index: rows.length, branch, depth: renderedDepth });
-    }
-
-    for (let i = 0; i < entries.length; i += 1) {
-      rows.push({
-        kind: "entry",
-        index: rows.length,
-        branchId,
-        entry: entries[i],
-        depth: renderedDepth,
-        lane: {
-          branchId,
-          parentBranchId: isSpine ? null : (runParent.get(branchId) ?? null),
-          start: i === 0,
-          continue: i > 0,
-          end: i === entries.length - 1,
-        },
-      });
-
-      const children = childrenOf.get(entries[i].id);
-      if (children !== undefined) {
-        for (const child of children) {
-          emitRun(child, false);
-        }
-      }
-    }
-  };
-
-  for (const branchId of topRuns) {
-    emitRun(branchId, false);
-  }
-  emitRun(spine.id, true);
-
-  return rows;
-}
-
-export function historyCenterRowCount(
-  branches: HistoryBranch[] | null,
-  paths: Record<string, HistoryEntry[]> | null,
-): number {
-  return historyCenterRows(branches, paths).length;
-}
 
 export function historyCenterDefaultContext(
   overrides: Partial<HistoryCenterContext> = {},
 ): HistoryCenterContext {
   return {
-    branches: null,
-    paths: null,
-    focusIndex: 0,
+    pages: null,
+    open: null,
+    focusRow: null,
     rejection: null,
     ...overrides,
   };
@@ -312,7 +430,7 @@ function stay(state: HistoryCenterState, context: HistoryCenterContext): History
   return { state, context, effects: [] };
 }
 
-function open(context: HistoryCenterContext): HistoryCenterResult {
+function openResult(context: HistoryCenterContext): HistoryCenterResult {
   return {
     state: "open",
     context,
@@ -320,60 +438,451 @@ function open(context: HistoryCenterContext): HistoryCenterResult {
   };
 }
 
-function close(context: HistoryCenterContext): HistoryCenterResult {
+function closeResult(context: HistoryCenterContext): HistoryCenterResult {
+  // R5: nothing is cached across a close/reopen — the disclosure tree and the
+  // loaded pages it holds are dropped with the popover.
   return {
     state: "closed",
-    context,
+    context: { ...context, open: null, focusRow: null },
     effects: [{ type: "emitOpenChange", open: false }],
   };
 }
 
-function moveFocus(context: HistoryCenterContext, direction: "next" | "prev" | "first" | "last"): HistoryCenterResult {
-  const count = historyCenterRowCount(context.branches, context.paths);
+// ── Row identity and focus ─────────────────────────────────────────────
 
-  if (count === 0) {
+function rowIdOf(row: HistoryCenterRow): HistoryCenterRowId {
+  return row.kind === "entry"
+    ? { kind: "entry", entryId: row.entry.id }
+    : { kind: row.kind, entryId: row.anchorEntryId };
+}
+
+function indexOfRow(rows: readonly HistoryCenterRow[], id: HistoryCenterRowId | null): number {
+  if (id === null) {
+    return -1;
+  }
+  return rows.findIndex((row) => {
+    const candidate = rowIdOf(row);
+    return candidate.kind === id.kind && candidate.entryId === id.entryId;
+  });
+}
+
+/**
+ * Keep focus on the same row identity after a disclosure toggle. If the
+ * focused row vanished (its level closed), fall back to the toggled anchor's
+ * entry row, then the first row — never a stale identity into a list that
+ * changed shape (R1: identity, not index).
+ */
+function clampFocus(context: HistoryCenterContext, anchorEntryId: string | null): HistoryCenterContext {
+  const rows = historyCenterVisibleRows(context.pages, context.open);
+  if (rows.length === 0) {
+    return { ...context, focusRow: null };
+  }
+  if (context.focusRow !== null && indexOfRow(rows, context.focusRow) !== -1) {
+    return context;
+  }
+  if (anchorEntryId !== null) {
+    const anchor = rows.findIndex((row) => row.kind === "entry" && row.entry.id === anchorEntryId);
+    if (anchor !== -1) {
+      return { ...context, focusRow: rowIdOf(rows[anchor]) };
+    }
+  }
+  return { ...context, focusRow: rowIdOf(rows[0]) };
+}
+
+function moveFocus(context: HistoryCenterContext, direction: "next" | "prev" | "first" | "last"): HistoryCenterResult {
+  const rows = historyCenterVisibleRows(context.pages, context.open);
+  if (rows.length === 0) {
     return stay("open", context);
   }
 
-  let next = context.focusIndex;
-
-  if (direction === "first") {
+  const current = indexOfRow(rows, context.focusRow);
+  let next: number;
+  if (current === -1) {
+    // No focus yet (or the focused row is gone): land on a boundary.
+    next = direction === "prev" || direction === "last" ? rows.length - 1 : 0;
+  } else if (direction === "first") {
     next = 0;
   } else if (direction === "last") {
-    next = count - 1;
+    next = rows.length - 1;
   } else if (direction === "next") {
-    next = (context.focusIndex + 1) % count;
+    next = (current + 1) % rows.length;
   } else {
-    next = (context.focusIndex - 1 + count) % count;
+    next = (current - 1 + rows.length) % rows.length;
   }
 
+  const row = rowIdOf(rows[next]);
   return {
     state: "open",
-    context: { ...context, focusIndex: next },
-    effects: [{ type: "focusRow", index: next }],
+    context: { ...context, focusRow: row },
+    effects: [{ type: "focusRow", row }],
   };
 }
 
-function activateRow(context: HistoryCenterContext, index: number): HistoryCenterResult {
-  const row = historyCenterRows(context.branches, context.paths)[index];
-
+function activateRow(context: HistoryCenterContext, rowId: HistoryCenterRowId | null): HistoryCenterResult {
+  if (rowId === null) {
+    return stay("open", context);
+  }
+  const rows = historyCenterVisibleRows(context.pages, context.open);
+  const index = indexOfRow(rows, rowId);
+  const row = index === -1 ? undefined : rows[index];
   if (row === undefined) {
     return stay("open", context);
   }
 
-  if (row.kind === "caption") {
-    // Captions are focusable for rename but never navigate.
-    return { state: "open", context: { ...context, focusIndex: index }, effects: [] };
+  // Sync focus to the activated row; only entry rows navigate.
+  if (row.kind === "entry") {
+    return {
+      state: "open",
+      context: { ...context, focusRow: rowId },
+      effects: [{ type: "emitNavigateEntry", branchId: row.branchId, entryId: row.entry.id }],
+    };
+  }
+  return { state: "open", context: { ...context, focusRow: rowId }, effects: [] };
+}
+
+// ── Disclosure tree helpers ────────────────────────────────────────────
+
+function anchorEntryRow(
+  rows: readonly HistoryCenterRow[],
+  entryId: string,
+): Extract<HistoryCenterRow, { kind: "entry" }> | null {
+  const row = rows.find((candidate) => candidate.kind === "entry" && candidate.entry.id === entryId);
+  return row !== undefined && row.kind === "entry" ? row : null;
+}
+
+function runContains(pages: readonly HistoryPathPage[], entryId: string): boolean {
+  return pages.some((page) => page.entries.some((entry) => entry.id === entryId));
+}
+
+/** The level whose run contains the entry, deepest first; null when none does. */
+function containingLevel(
+  open: ReadonlyMap<string, HistoryCenterOpenFork> | null,
+  entryId: string,
+): HistoryCenterOpenFork | null {
+  if (open === null) {
+    return null;
+  }
+  for (const level of open.values()) {
+    const inner = containingLevel(level.inner, entryId);
+    if (inner !== null) {
+      return inner;
+    }
+    if (runContains(level.runPages, entryId)) {
+      return level;
+    }
+  }
+  return null;
+}
+
+/** The level anchored at the entry, at any depth; null when none. */
+function findLevel(
+  open: ReadonlyMap<string, HistoryCenterOpenFork> | null,
+  entryId: string,
+): HistoryCenterOpenFork | null {
+  if (open === null) {
+    return null;
+  }
+  const own = open.get(entryId);
+  if (own !== undefined) {
+    return own;
+  }
+  for (const level of open.values()) {
+    const found = findLevel(level.inner, entryId);
+    if (found !== null) {
+      return found;
+    }
+  }
+  return null;
+}
+
+/** Remove the level anchored at the entry, dropping its whole subtree (R5). */
+function withoutLevel(
+  open: ReadonlyMap<string, HistoryCenterOpenFork> | null,
+  entryId: string,
+): ReadonlyMap<string, HistoryCenterOpenFork> | null {
+  if (open === null) {
+    return null;
+  }
+  if (open.has(entryId)) {
+    const next = new Map(open);
+    next.delete(entryId);
+    return next.size === 0 ? null : next;
+  }
+  let changed = false;
+  const next = new Map<string, HistoryCenterOpenFork>();
+  for (const [id, level] of open) {
+    const inner = withoutLevel(level.inner, entryId);
+    next.set(id, inner === level.inner ? level : { ...level, inner });
+    changed ||= inner !== level.inner;
+  }
+  return changed ? next : open;
+}
+
+/**
+ * Add a level to the tree: under the level whose run contains the entry
+ * (inner), or at the root when `container` is null. The container is always
+ * found — DISCLOSE only fires when the anchor's entry row is visible, which
+ * means its containing run is loaded.
+ */
+function withAddedLevel(
+  open: ReadonlyMap<string, HistoryCenterOpenFork> | null,
+  container: HistoryCenterOpenFork | null,
+  level: HistoryCenterOpenFork,
+): ReadonlyMap<string, HistoryCenterOpenFork> {
+  if (container === null) {
+    const next = new Map(open ?? []);
+    next.set(level.anchorEntryId, level);
+    return next;
+  }
+  // The container level must already be in the tree; rebuild it with the new
+  // inner level. Unreachable when DISCLOSE's visibility guard held.
+  const base = new Map(open ?? []);
+  for (const [id, candidate] of base) {
+    if (candidate === container) {
+      base.set(id, { ...candidate, inner: withAddedLevel(candidate.inner, null, level) });
+      return base;
+    }
+    base.set(id, replaceContainer(candidate, container, level));
+  }
+  return base;
+}
+
+function replaceContainer(
+  level: HistoryCenterOpenFork,
+  container: HistoryCenterOpenFork,
+  added: HistoryCenterOpenFork,
+): HistoryCenterOpenFork {
+  if (level === container) {
+    return { ...level, inner: withAddedLevel(level.inner, null, added) };
+  }
+  if (level.inner === null) {
+    return level;
+  }
+  const inner = new Map(level.inner);
+  let changed = false;
+  for (const [id, candidate] of inner) {
+    const replaced = replaceContainer(candidate, container, added);
+    if (replaced !== candidate) {
+      inner.set(id, replaced);
+      changed = true;
+    }
+  }
+  return changed ? { ...level, inner } : level;
+}
+
+/** The anchor's run context (display-ordered entries and its index there). */
+function anchorRunContext(
+  context: HistoryCenterContext,
+  entryId: string,
+): { entries: HistoryEntry[]; index: number } | null {
+  const root = historyCenterJoinPages(context.pages ?? []);
+  const rootIndex = root.findIndex((entry) => entry.id === entryId);
+  if (rootIndex !== -1) {
+    return { entries: root, index: rootIndex };
+  }
+  for (const level of walkLevels(context.open)) {
+    const run = historyCenterJoinPages(level.runPages);
+    const index = run.findIndex((entry) => entry.id === entryId);
+    if (index !== -1) {
+      return { entries: run, index };
+    }
+  }
+  return null;
+}
+
+function* walkLevels(open: ReadonlyMap<string, HistoryCenterOpenFork> | null): Generator<HistoryCenterOpenFork> {
+  if (open === null) {
+    return;
+  }
+  for (const level of open.values()) {
+    yield level;
+    yield* walkLevels(level.inner);
+  }
+}
+
+function disclose(context: HistoryCenterContext, entryId: string): HistoryCenterResult {
+  const rows = historyCenterVisibleRows(context.pages, context.open);
+  const anchor = anchorEntryRow(rows, entryId);
+  if (anchor === null) {
+    return stay("open", context);
   }
 
-  // Always the entry actually clicked, on the branch that owns its run —
-  // never an ancestor or a divergence entry belonging to another branch.
+  // Toggle: a fork already open at this entry closes, dropping its subtree (R5).
+  if (findLevel(context.open, entryId) !== null) {
+    const open = withoutLevel(context.open, entryId);
+    return {
+      state: "open",
+      context: clampFocus({ ...context, open }, entryId),
+      effects: [],
+    };
+  }
+
+  if (historyCenterForkCount(anchor.entry.continuationCount) < 1) {
+    return stay("open", context);
+  }
+
+  const level: HistoryCenterOpenFork = {
+    anchorEntryId: entryId,
+    continuations: null,
+    pick: null,
+    chosen: null,
+    runPages: [],
+    inner: null,
+  };
+  const container = containingLevel(context.open, entryId);
+  const open = withAddedLevel(context.open, container, level);
   return {
     state: "open",
-    context: { ...context, focusIndex: index },
-    effects: [{ type: "emitNavigateEntry", branchId: row.branchId, entryId: row.entry.id }],
+    context: clampFocus({ ...context, open }, entryId),
+    effects: [{ type: "loadContinuations", entryId }],
   };
 }
+
+function continuationsLoaded(
+  context: HistoryCenterContext,
+  entryId: string,
+  continuations: HistoryContinuation[],
+): HistoryCenterResult {
+  const level = findLevel(context.open, entryId);
+  if (level === null) {
+    // A response for an entry that is not open: stale, drop it.
+    return stay("open", context);
+  }
+
+  let updated: HistoryCenterOpenFork = { ...level, continuations };
+  const effects: HistoryCenterEffect[] = [];
+
+  const runContext = anchorRunContext(context, entryId);
+  if (runContext !== null) {
+    const anchor = runContext.entries[runContext.index];
+    if (historyCenterForkCount(anchor.continuationCount) === 1) {
+      // Exactly one fork: no picker needed — choose it and request its run.
+      const forks = historyCenterForksAt(continuations, runContext.entries, runContext.index);
+      if (forks.length >= 1) {
+        updated = { ...updated, chosen: forks[0] };
+        effects.push({ type: "loadContinuationRun", fromEntryId: forks[0].entryId });
+      }
+    }
+  }
+
+  const open = replaceLevel(context.open, updated);
+  return {
+    state: "open",
+    context: clampFocus({ ...context, open }, entryId),
+    effects,
+  };
+}
+
+function replaceLevel(
+  open: ReadonlyMap<string, HistoryCenterOpenFork> | null,
+  updated: HistoryCenterOpenFork,
+): ReadonlyMap<string, HistoryCenterOpenFork> | null {
+  if (open === null) {
+    return null;
+  }
+  const own = open.get(updated.anchorEntryId);
+  if (own !== undefined) {
+    const next = new Map(open);
+    next.set(updated.anchorEntryId, updated);
+    return next;
+  }
+  let changed = false;
+  const next = new Map<string, HistoryCenterOpenFork>();
+  for (const [id, level] of open) {
+    const inner = replaceLevel(level.inner, updated);
+    next.set(id, inner === level.inner ? level : { ...level, inner });
+    changed ||= inner !== level.inner;
+  }
+  return changed ? next : open;
+}
+
+function pickContinuation(context: HistoryCenterContext, entryId: string): HistoryCenterResult {
+  // The tentative pick lands on the level whose picker offers this fork.
+  let picked: HistoryCenterOpenFork | null = null;
+  for (const level of walkLevels(context.open)) {
+    if (level.chosen !== null || level.continuations === null) {
+      continue;
+    }
+    const runContext = anchorRunContext(context, level.anchorEntryId);
+    if (runContext === null) {
+      continue;
+    }
+    const anchor = runContext.entries[runContext.index];
+    if (historyCenterForkCount(anchor.continuationCount) <= 1) {
+      continue;
+    }
+    const forks = historyCenterForksAt(level.continuations, runContext.entries, runContext.index);
+    const match = forks.find((fork) => fork.entryId === entryId);
+    if (match !== undefined) {
+      picked = { ...level, pick: match };
+      break;
+    }
+  }
+  if (picked === null) {
+    return stay("open", context);
+  }
+
+  // One tentative pick at a time: clear any other level's pick.
+  let open = replaceLevel(context.open, picked);
+  for (const level of walkLevels(open)) {
+    if (level !== picked && level.pick !== null) {
+      open = replaceLevel(open, { ...level, pick: null });
+    }
+  }
+  return {
+    state: "open",
+    context: clampFocus({ ...context, open }, null),
+    effects: [],
+  };
+}
+
+function confirm(context: HistoryCenterContext): HistoryCenterResult {
+  let chosen: HistoryCenterOpenFork | null = null;
+  for (const level of walkLevels(context.open)) {
+    if (level.pick !== null) {
+      chosen = level;
+      break;
+    }
+  }
+  if (chosen === null) {
+    return stay("open", context);
+  }
+  const pick = chosen.pick;
+  const updated = { ...chosen, chosen: pick };
+  const open = replaceLevel(context.open, updated);
+  return {
+    state: "open",
+    context: clampFocus({ ...context, open }, null),
+    effects: [
+      // Confirm = the picker's commit: prefer the picked future (host op) and
+      // reveal its run (host op).
+      { type: "preferContinuation", entryId: pick.entryId },
+      { type: "loadContinuationRun", fromEntryId: pick.entryId },
+    ],
+  };
+}
+
+function runLoaded(context: HistoryCenterContext, fromEntryId: string, pages: HistoryPathPage[]): HistoryCenterResult {
+  let updated: HistoryCenterOpenFork | null = null;
+  for (const level of walkLevels(context.open)) {
+    if (level.chosen !== null && level.chosen.entryId === fromEntryId) {
+      // Pages arrive in fetch order; append so the join can reverse once.
+      updated = { ...level, runPages: [...level.runPages, ...pages] };
+      break;
+    }
+  }
+  if (updated === null) {
+    return stay("open", context);
+  }
+  const open = replaceLevel(context.open, updated);
+  return {
+    state: "open",
+    context: clampFocus({ ...context, open }, null),
+    effects: [],
+  };
+}
+
+// ── Transitions ────────────────────────────────────────────────────────
 
 export function historyCenterTransition(
   state: HistoryCenterState,
@@ -382,27 +891,39 @@ export function historyCenterTransition(
 ): HistoryCenterResult {
   switch (event.type) {
     case "TOGGLE":
-      return state === "closed" ? open(context) : close(context);
+      return state === "closed" ? openResult(context) : closeResult(context);
     case "OPEN":
-      return state === "closed" ? open(context) : stay(state, context);
+      return state === "closed" ? openResult(context) : stay(state, context);
     case "CLOSE":
-      return state === "open" ? close(context) : stay(state, context);
+      return state === "open" ? closeResult(context) : stay(state, context);
     case "FOCUS_MOVE":
       return state === "open" ? moveFocus(context, event.direction) : stay(state, context);
     case "ACTIVATE_ROW":
+      return state === "open" ? activateRow(context, event.row ?? context.focusRow) : stay(state, context);
+    case "DISCLOSE":
+      return state === "open" ? disclose(context, event.entryId) : stay(state, context);
+    case "CONTINUATIONS_LOADED":
       return state === "open"
-        ? activateRow(context, event.index ?? context.focusIndex)
+        ? continuationsLoaded(context, event.entryId, event.continuations)
         : stay(state, context);
+    case "PICK_CONTINUATION":
+      return state === "open" ? pickContinuation(context, event.entryId) : stay(state, context);
+    case "CONFIRM":
+      return state === "open" ? confirm(context) : stay(state, context);
+    case "RUN_LOADED":
+      return state === "open" ? runLoaded(context, event.fromEntryId, event.pages) : stay(state, context);
     case "RENAME":
       return {
         state,
         context,
         effects: [{ type: "emitRenameBranch", branchId: event.branchId, name: event.name }],
       };
-    case "SHOW_REJECTION":
-      return event.message === context.rejection
+    case "SHOW_REJECTION": {
+      const message = historyCenterRejectionMessage(event.code);
+      return message === context.rejection
         ? stay(state, context)
-        : { state, context: { ...context, rejection: event.message }, effects: [] };
+        : { state, context: { ...context, rejection: message }, effects: [] };
+    }
     case "DISMISS_REJECTION":
       return context.rejection === null
         ? stay(state, context)
