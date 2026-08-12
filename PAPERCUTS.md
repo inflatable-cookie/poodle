@@ -7,6 +7,25 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-12 — RESOLVED at review. `g13-b041` had `Button.svelte`/`Button.tsx`
+  import the generated definition across a package boundary
+  (`../../preview/src/generated/button`), so the packed `poodle-svelte` /
+  `poodle-react` tarballs (`files: src`) did not carry it and
+  `test:web-pack-install` failed to resolve the import in its consumer. Green
+  on `main`, red on the branch — a real regression, not a pre-existing gap.
+
+  **Cause was the card, not the worker.** `041`'s Writable Paths named
+  `packages/{svelte,react}/preview/src/**/generated/**` as the artifact
+  location, copied from `b035` where the consumer *was* the preview. A
+  component's artifact has to live in the package that ships it. Fixed at
+  review: the `button-ts` target now emits into
+  `packages/{svelte,react}/components/src/generated/button/`, the four imports
+  point there, and `test:web-pack-install` is green again.
+
+  **`test:web-pack-install` is not in `ci:web`.** Every gate the card listed
+  passed while the packaged build was broken. A card that moves where code is
+  emitted must run it; better, it belongs in `ci:web`.
+
 - 2026-08-12 — g13-038 found a dead focus rule: `.poodle-order-by__item:focus-visible`
   (order-by.css) rings the item row, but the item div is never focusable — no
   `tabindex`, and the only focusable inside is the drag-handle button. The ring

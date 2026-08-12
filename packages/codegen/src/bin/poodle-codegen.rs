@@ -4,6 +4,7 @@
 //! ```text
 //! poodle-codegen <FIXTURE> --out <DIR> [--check] [--target <ID>]
 //! poodle-codegen --author-shell <OUT> [--check]
+//! poodle-codegen --author-button <OUT> [--check]
 //! ```
 //!
 //! Fixture mode runs the registered targets over one serialized `IrModel`.
@@ -16,11 +17,12 @@
 //! `shell-scene`, which renders into the consuming web packages and is not
 //! part of the default set).
 //!
-//! Author mode (card 035 R1) serializes the Rust-authored shell model —
-//! [`poodle_codegen::models::preview_shell::shell_model`] — to the JSON
-//! fixture the pipeline consumes, after a validate round trip: the emitted
-//! bytes are parsed and validated before they are written or compared, so
-//! the committed fixture can never be invalid IR. `--check` byte-compares
+//! Author mode (card 035 R1; card 041 R1) serializes the Rust-authored
+//! shell/Button model — [`poodle_codegen::models::preview_shell::shell_model`]
+//! / [`poodle_codegen::models::button::button_model`] — to the JSON fixture
+//! the pipeline consumes, after a validate round trip: the emitted bytes are
+//! parsed and validated before they are written or compared, so the
+//! committed fixture can never be invalid IR. `--check` byte-compares
 //! against the committed fixture without writing.
 //!
 //! Exit codes: 0 clean, 1 drift/validation/IO failure, 2 usage error.
@@ -47,10 +49,15 @@ fn usage() -> String {
               targets are select-only).
      \n\
      usage: poodle-codegen --author-shell <OUT> [--check]\n\
+     usage: poodle-codegen --author-button <OUT> [--check]\n\
      \n\
      --author-shell  serialize the Rust-authored shell model\n\
               (packages/codegen/src/models/preview_shell.rs) to OUT — the\n\
               fixture the pipeline consumes — after a validate round trip;\n\
+              with --check, byte-compare instead of write.\n\
+     --author-button serialize the Rust-authored Button model\n\
+              (packages/codegen/src/models/button.rs) to OUT — the fixture\n\
+              the button-ts target consumes — after a validate round trip;\n\
               with --check, byte-compare instead of write."
         .to_owned()
 }
@@ -59,6 +66,7 @@ struct Args {
     fixture: Option<PathBuf>,
     out: Option<PathBuf>,
     author_shell: Option<PathBuf>,
+    author_button: Option<PathBuf>,
     target: Option<String>,
     check: bool,
 }
@@ -66,6 +74,7 @@ struct Args {
 fn parse_args() -> Result<Args, String> {
     let mut out = None;
     let mut author_shell = None;
+    let mut author_button = None;
     let mut target = None;
     let mut check = false;
     let mut positional = Vec::new();
@@ -85,6 +94,12 @@ fn parse_args() -> Result<Args, String> {
                         .ok_or("--author-shell requires an output path")?,
                 ));
             }
+            "--author-button" => {
+                author_button = Some(PathBuf::from(
+                    args.next()
+                        .ok_or("--author-button requires an output path")?,
+                ));
+            }
             "--target" => {
                 target = Some(
                     args.next()
@@ -97,25 +112,31 @@ fn parse_args() -> Result<Args, String> {
         }
     }
 
-    let fixture = match (author_shell.is_some(), positional.len()) {
+    if author_shell.is_some() && author_button.is_some() {
+        return Err("--author-shell and --author-button are mutually exclusive".to_owned());
+    }
+
+    let author_mode = author_shell.is_some() || author_button.is_some();
+
+    let fixture = match (author_mode, positional.len()) {
         (true, 0) => None,
         (true, _) => {
             return Err(
-                "--author-shell takes no positional FIXTURE argument; run author mode alone"
+                "author mode takes no positional FIXTURE argument; run author mode alone"
                     .to_owned(),
             );
         }
         (false, 1) => Some(positional.pop().expect("length checked above")),
-        (false, 0) => return Err("expected a FIXTURE argument or --author-shell".to_owned()),
+        (false, 0) => return Err("expected a FIXTURE argument or --author-*".to_owned()),
         (false, _) => return Err("expected exactly one FIXTURE argument".to_owned()),
     };
 
-    if author_shell.is_some() {
+    if author_mode {
         if out.is_some() {
-            return Err("--out is not valid with --author-shell".to_owned());
+            return Err("--out is not valid with --author-*".to_owned());
         }
         if target.is_some() {
-            return Err("--target is not valid with --author-shell".to_owned());
+            return Err("--target is not valid with --author-*".to_owned());
         }
     } else if out.is_none() {
         return Err("--out is required".to_owned());
@@ -125,6 +146,7 @@ fn parse_args() -> Result<Args, String> {
         fixture,
         out,
         author_shell,
+        author_button,
         target,
         check,
     })
@@ -136,6 +158,13 @@ fn run(args: &Args) -> Result<(), CodegenError> {
             check_author_shell(out_path)
         } else {
             write_author_shell(out_path)
+        };
+    }
+    if let Some(out_path) = &args.author_button {
+        return if args.check {
+            check_author_button(out_path)
+        } else {
+            write_author_button(out_path)
         };
     }
     run_emit(
@@ -205,6 +234,73 @@ fn check_author_shell(out_path: &Path) -> Result<(), CodegenError> {
             message: format!(
                 "authored shell model is stale under {}: the committed fixture differs from \
                  `packages/codegen/src/models/preview_shell.rs`; run `effigy ir:build`",
+                out_path.display()
+            ),
+        })
+    }
+}
+
+/// Serializes the Rust-authored Button model to the fixture after a
+/// validate round trip (card 041 R1): the bytes written are exactly the
+/// bytes the pipeline's `load_and_validate` will accept.
+fn author_button_document() -> Result<String, CodegenError> {
+    let model = models::button::button_model();
+    let document = serde_json::to_string_pretty(&model).map_err(|error| CodegenError::Gate {
+        message: format!("cannot serialize the authored Button model: {error}"),
+    })?;
+    // Validate the serialized form, not just the in-memory model: the
+    // fixture is the pipeline's input, and it must pass `load_and_validate`.
+    let round_tripped: poodle_ir::IrModel =
+        serde_json::from_str(&document).map_err(|error| CodegenError::Gate {
+            message: format!("authored Button model does not round-trip as JSON: {error}"),
+        })?;
+    let findings = round_tripped.validate();
+    if !findings.is_empty() {
+        return Err(CodegenError::Invalid {
+            path: PathBuf::from("packages/codegen/fixtures/button-model.json"),
+            findings,
+        });
+    }
+    Ok(format!("{document}\n"))
+}
+
+fn write_author_button(out_path: &Path) -> Result<(), CodegenError> {
+    let document = author_button_document()?;
+    if let Some(parent) = out_path.parent() {
+        fs::create_dir_all(parent).map_err(|error| CodegenError::Write {
+            path: parent.to_path_buf(),
+            source: error,
+        })?;
+    }
+    fs::write(out_path, &document).map_err(|error| CodegenError::Write {
+        path: out_path.to_path_buf(),
+        source: error,
+    })?;
+    println!(
+        "Authored Button model ({} bytes, IR schema {}).",
+        document.len(),
+        poodle_ir::IR_SCHEMA_VERSION
+    );
+    Ok(())
+}
+
+/// Read-only twin of [`write_author_button`]: regenerate in memory and
+/// byte-compare against the committed fixture. No write call exists on this
+/// path.
+fn check_author_button(out_path: &Path) -> Result<(), CodegenError> {
+    let document = author_button_document()?;
+    let committed = fs::read_to_string(out_path).map_err(|error| CodegenError::Read {
+        path: out_path.to_path_buf(),
+        source: error,
+    })?;
+    if committed == document {
+        println!("Authored Button model is current.");
+        Ok(())
+    } else {
+        Err(CodegenError::Gate {
+            message: format!(
+                "authored Button model is stale under {}: the committed fixture differs from \
+                 `packages/codegen/src/models/button.rs`; run `effigy ir:build`",
                 out_path.display()
             ),
         })
