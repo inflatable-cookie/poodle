@@ -1,6 +1,6 @@
 # g13.004 Shared Preview Shell Scene Pilot
 
-Status: planned
+Status: in progress — part 1 of 2 (card 035, the two web shells) landed; part 2 (card 036, the native shells) closes this milestone
 Owner: Poodle core
 Depends on: `g13.003`
 

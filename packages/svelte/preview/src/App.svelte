@@ -21,16 +21,19 @@
   import ComponentsSection from "./sections/ComponentsSection.svelte";
   import TokensSection from "./sections/TokensSection.svelte";
   import { parseRoute, type Route, type SectionId } from "./router";
+  import { previewShell } from "./generated/preview-shell";
 
   type ThemeName = keyof typeof themes;
   type DensityName = keyof typeof densityModes;
   type ControlSizeName = keyof typeof controlSizes;
   type SemanticTokenPath = keyof typeof cssVars;
 
-  const topTabs: TabItem[] = [
-    { value: "components", label: "Components" },
-    { value: "tokens", label: "Tokens" },
-  ];
+  // Navigation labels come from the scene (card 035 R4): the shell's top
+  // tabs are the scene's layout sections, never authored text here.
+  const topTabs: TabItem[] = previewShell.layout.sections.map((section) => ({
+    value: section.kind,
+    label: section.title,
+  }));
 
   const semanticPaths = Object.keys(cssVars) as SemanticTokenPath[];
 

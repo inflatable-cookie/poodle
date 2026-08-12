@@ -224,7 +224,7 @@ fn shared_type_name<'a>(model: &'a IrModel, id: &Identifier) -> Result<&'a str> 
 
 /// A JSON-escaped TS string literal — locale-independent, the same escaping
 /// the token emitter uses (`JSON.stringify`).
-fn ts_string_literal(value: &str) -> String {
+pub(crate) fn ts_string_literal(value: &str) -> String {
     serde_json::to_string(value).expect("string serialization cannot fail")
 }
 
@@ -254,7 +254,7 @@ fn ts_value_literal(value: &Value) -> String {
 /// Fixed number formatting: integral values print without a fractional
 /// part, everything else shortest round-trip — never exponent notation,
 /// never locale-dependent.
-fn format_number(n: f64) -> String {
+pub(crate) fn format_number(n: f64) -> String {
     if n.fract() == 0.0 && n.abs() < 1e15 {
         format!("{}", n as i64)
     } else {

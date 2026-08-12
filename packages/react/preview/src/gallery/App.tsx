@@ -6,6 +6,7 @@ import iconNodes from "lucide-static/icon-nodes.json";
 import { DisplayControls } from "./DisplayControls";
 import { ComponentsSection } from "./ComponentsSection";
 import { TokensSection } from "./TokensSection";
+import { previewShell } from "../generated/preview-shell";
 
 type ThemeName = keyof typeof themes;
 type DensityName = keyof typeof densityModes;
@@ -17,10 +18,12 @@ interface Route {
   component?: string;
 }
 
-const topTabs: TabItem[] = [
-  { value: "components", label: "Components" },
-  { value: "tokens", label: "Tokens" },
-];
+// Navigation labels come from the scene (card 035 R4): the shell's top
+// tabs are the scene's layout sections, never authored text here.
+const topTabs: TabItem[] = previewShell.layout.sections.map((section) => ({
+  value: section.kind,
+  label: section.title,
+}));
 
 const semanticPaths = Object.keys(cssVars) as Array<keyof typeof cssVars>;
 

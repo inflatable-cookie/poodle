@@ -12,6 +12,8 @@
     controlSizes,
     themeOptions,
   } from "@inflatable-cookie/poodle-core/tokens";
+  import { previewShell } from "../generated/preview-shell";
+
   let {
     theme,
     density,
@@ -35,79 +37,120 @@
     contrast?: number;
     onContrastChange?: (value: number) => void;
   } = $props();
+
   type DensityName = keyof typeof densityModes;
   type ControlSizeName = keyof typeof controlSizes;
 
-  const densityOrder: DensityName[] = ["compact", "default", "comfortable"];
-  const controlSizeOrder: ControlSizeName[] = ["xs", "sm", "md", "lg", "xl"];
+  // The control surface is the scene's (card 035 R3/R4): the capability set
+  // and label text come from the generated artifact, never authored here.
+  // Widget mechanics (which control renders each kind) are this shell's
+  // idiom. Kinds are compared as plain strings on purpose: deleting an axis
+  // or search from the scene removes the control cleanly — a literal-typed
+  // comparison would be a compile error, not a removal.
+  type ShellControl = (typeof previewShell)["controls"][number];
+  type NamedControl = ShellControl & { values: readonly string[] };
+  type RangeControl = ShellControl & { min: number; max: number; default: number };
+  type SearchControl = ShellControl & { placeholder: string };
 
-  const densityEntries = Object.entries(densityModes) as [DensityName, (typeof densityModes)[DensityName]][];
-  const controlSizeEntries = Object.entries(controlSizes) as [ControlSizeName, (typeof controlSizes)[ControlSizeName]][];
+  const themeControl = previewShell.controls.find(
+    (control): control is NamedControl => (control.kind as string) === "theme",
+  );
+  const sizeControl = previewShell.controls.find(
+    (control): control is NamedControl => (control.kind as string) === "size",
+  );
+  const densityControl = previewShell.controls.find(
+    (control): control is NamedControl => (control.kind as string) === "density",
+  );
+  const contrastControl = previewShell.controls.find(
+    (control): control is RangeControl => (control.kind as string) === "contrast",
+  );
+  const searchControl = previewShell.controls.find(
+    (control): control is SearchControl => (control.kind as string) === "search",
+  );
 
   const themeCatalogue = themeOptions();
-  const densityOptions: ToggleGroupOption[] = densityOrder
-    .filter((name) => densityEntries.some(([entryName]) => entryName === name))
-    .map((name) => ({ value: name, label: name }));
-  const controlSizeOptions: ToggleGroupOption[] = controlSizeOrder
-    .filter((name) => controlSizeEntries.some(([entryName]) => entryName === name))
-    .map((name) => ({ value: name, label: name }));
+  const themeList = themeControl
+    ? themeCatalogue.filter((option) =>
+        (themeControl.values as readonly string[]).includes(option.value),
+      )
+    : [];
+  const densityOptions: ToggleGroupOption[] = densityControl
+    ? densityControl.values
+        .filter((name): name is DensityName => name in densityModes)
+        .map((name) => ({ value: name, label: name }))
+    : [];
+  const controlSizeOptions: ToggleGroupOption[] = sizeControl
+    ? sizeControl.values
+        .filter((name): name is ControlSizeName => name in controlSizes)
+        .map((name) => ({ value: name, label: name }))
+    : [];
 </script>
 
 <div class="poodle-display-controls">
-  <div class="poodle-display-controls__group">
-    <Eyebrow>Theme</Eyebrow>
-    <ThemeSelect
-      themes={themeCatalogue}
-      value={theme}
-      ariaLabel="Theme"
-      onChange={(value) => onThemeChange(value)}
-    />
-  </div>
+  {#if themeControl}
+    <div class="poodle-display-controls__group">
+      <Eyebrow>{themeControl.label}</Eyebrow>
+      <ThemeSelect
+        themes={themeList}
+        value={theme}
+        ariaLabel={themeControl.label}
+        onChange={(value) => onThemeChange(value)}
+      />
+    </div>
+  {/if}
 
-  <div class="poodle-display-controls__group">
-    <Eyebrow>Density</Eyebrow>
-    <ToggleGroup
-      value={density}
-      options={densityOptions}
-      ariaLabel="Density"
-      onValueChange={(value) => onDensityChange(value as string)}
-    />
-  </div>
+  {#if densityControl}
+    <div class="poodle-display-controls__group">
+      <Eyebrow>{densityControl.label}</Eyebrow>
+      <ToggleGroup
+        value={density}
+        options={densityOptions}
+        ariaLabel={densityControl.label}
+        onValueChange={(value) => onDensityChange(value as string)}
+      />
+    </div>
+  {/if}
 
-  <div class="poodle-display-controls__group">
-    <Eyebrow>Size</Eyebrow>
-    <ToggleGroup
-      value={controlSize}
-      options={controlSizeOptions}
-      ariaLabel="Control size"
-      onValueChange={(value) => onControlSizeChange(value as string)}
-    />
-  </div>
+  {#if sizeControl}
+    <div class="poodle-display-controls__group">
+      <Eyebrow>{sizeControl.label}</Eyebrow>
+      <ToggleGroup
+        value={controlSize}
+        options={controlSizeOptions}
+        ariaLabel="Control size"
+        onValueChange={(value) => onControlSizeChange(value as string)}
+      />
+    </div>
+  {/if}
 
-  <div class="poodle-display-controls__group">
-    <Eyebrow>Contrast</Eyebrow>
-    <Slider
-      value={contrast}
-      min={0.4}
-      max={1.6}
-      step={0.05}
-      ariaLabel="Neutral contrast"
-      valueText={`${contrast.toFixed(2)}x`}
-      onValueChange={(value) => onContrastChange(value)}
-    />
-  </div>
+  {#if contrastControl}
+    <div class="poodle-display-controls__group">
+      <Eyebrow>{contrastControl.label}</Eyebrow>
+      <Slider
+        value={contrast}
+        min={contrastControl.min}
+        max={contrastControl.max}
+        step={0.05}
+        ariaLabel="Neutral contrast"
+        valueText={`${contrast.toFixed(2)}x`}
+        onValueChange={(value) => onContrastChange(value)}
+      />
+    </div>
+  {/if}
 
-  <div class="poodle-display-controls__group poodle-display-controls__group--search">
-    <Eyebrow>Search</Eyebrow>
-    <TextInput
-      type="search"
-      placeholder="Find component..."
-      value={search}
-      ariaLabel="Search components"
-      onValueChange={onSearchChange}
-      onClear={() => onSearchChange("")}
-    />
-  </div>
+  {#if searchControl}
+    <div class="poodle-display-controls__group poodle-display-controls__group--search">
+      <Eyebrow>{searchControl.label}</Eyebrow>
+      <TextInput
+        type="search"
+        placeholder={searchControl.placeholder}
+        value={search}
+        ariaLabel="Search components"
+        onValueChange={onSearchChange}
+        onClear={() => onSearchChange("")}
+      />
+    </div>
+  {/if}
 </div>
 
 <style>
