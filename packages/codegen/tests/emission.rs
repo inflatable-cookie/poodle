@@ -437,7 +437,7 @@ fn invalid_model_is_a_clean_error_not_a_panic() {
     let scratch = scratch("invalid");
     let invalid = scratch.join("invalid.json");
     let model: serde_json::Value =
-        serde_json::from_str(&fs::read_to_string(&fixture_path()).expect("fixture reads"))
+        serde_json::from_str(&fs::read_to_string(fixture_path()).expect("fixture reads"))
             .expect("fixture is JSON");
     let mut invalid_model = model.clone();
     invalid_model["schema_version"] = serde_json::json!(99);

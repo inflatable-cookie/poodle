@@ -626,7 +626,7 @@ fn added_status_light() -> serde_json::Value {
 /// The fixture with exactly one change: `status-light` appended to
 /// `components`. Validates clean against the IR.
 fn fixture_with_added_component() -> poodle_ir::IrModel {
-    let source = fs::read_to_string(&fixture_path()).expect("fixture reads");
+    let source = fs::read_to_string(fixture_path()).expect("fixture reads");
     let mut doc: serde_json::Value = serde_json::from_str(&source).expect("fixture is JSON");
     doc["components"]
         .as_array_mut()
@@ -736,7 +736,7 @@ fn every_emitted_json_document_validates_against_the_emitted_schema() {
             result.is_ok(),
             "{} does not validate against the emitted schema: {}",
             file.path,
-            result.err().expect("err on failure")
+            result.expect_err("err on failure")
         );
     }
 }
