@@ -510,6 +510,23 @@ becomes visible.
 |----------|-------|
 | `border-right-color` | `var(--poodle-color-accent-base)` |
 
+### Recipe hooks — the active axis
+
+The selection edge and fill resolve through recipe hooks, one per treatment,
+per the grammar in `docs/architecture/007-appearance-recipe-contract.md`
+(`--poodle-recipe-<component>[-<variant>]-<slot>[-<state>]`). Each falls back
+to the semantic token, so with no override active rendering is identical.
+
+| Hook | Applies To | Fallback |
+|------|------------|----------|
+| `--poodle-recipe-tabs-active-outline-border` | `activeEdge="outline"` selected item border | `color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))` |
+| `--poodle-recipe-tabs-active-underline-border` | `activeEdge="underline"` selected item edge, both orientations (horizontal `border-bottom-color`, vertical `border-right-color`) | `var(--poodle-color-accent-base)` |
+| `--poodle-recipe-tabs-active-solid-fill` | `activeFill="solid"` selected item background | `var(--poodle-color-accent-base)` |
+| `--poodle-recipe-tabs-active-solid-text` | `activeFill="solid"` selected tab/close foreground | `var(--poodle-color-text-inverse)` |
+
+The underline hook is the same property family in both orientations — the
+inline-end border colour — so one variable covers horizontal and vertical.
+
 ### Tab button (all variants)
 
 | Property | Value |

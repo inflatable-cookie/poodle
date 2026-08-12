@@ -14,6 +14,8 @@ import { createDockExternalDragController } from "@inflatable-cookie/poodle-core
 import { CollapseToggle } from "./CollapseToggle";
 import { Tabs } from "./Tabs";
 import type {
+  ActiveEdge,
+  ActiveFill,
   ControlDensity,
   ControlSize,
   DockCollapsedPosture,
@@ -40,6 +42,17 @@ export interface DockRegionProps {
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
   tabVariant?: TabVariant;
+  /** Selection edge on the active tab, forwarded to Tabs. Defaults to the
+   * former strip indicator (`"underline"`). */
+  tabActiveEdge?: ActiveEdge;
+  /** Selection fill on the active tab, forwarded to Tabs. */
+  tabActiveFill?: ActiveFill;
+  /** Draw the strip border around the tab list, forwarded to Tabs. */
+  tabBordered?: boolean;
+  /** Stretch tabs to fill the strip, forwarded to Tabs. */
+  tabFullWidth?: boolean;
+  /** Allow dragging tabs to reorder; forwarded to Tabs. */
+  tabReorderable?: boolean;
   items?: PanelTabItem[];
   value?: string | null;
   ariaLabel?: string | null;
@@ -70,6 +83,11 @@ export function DockRegion({
   sizeRole = "chrome",
   density = null,
   tabVariant = "block",
+  tabActiveEdge = "underline",
+  tabActiveFill = "tint",
+  tabBordered = false,
+  tabFullWidth = false,
+  tabReorderable = true,
   items = [],
   value = null,
   ariaLabel = null,
@@ -346,7 +364,10 @@ export function DockRegion({
   const stripTabs = (orientation: "horizontal" | "vertical", withTooltips: boolean) => (
     <Tabs
       variant={tabVariant}
-      activeEdge="underline"
+      activeEdge={tabActiveEdge}
+      activeFill={tabActiveFill}
+      bordered={tabBordered}
+      fullWidth={tabFullWidth}
       orientation={orientation}
       size={size}
       sizeRole={sizeRole}
@@ -354,7 +375,7 @@ export function DockRegion({
       showTooltips={withTooltips}
       items={tabItems}
       value={activeItem?.value ?? ""}
-      reorderable={true}
+      reorderable={tabReorderable}
       ariaLabel={ariaLabel ?? `${edge} dock panels`}
       onValueChange={handleValueChange}
       onReorder={(next) => onReorder?.(next)}

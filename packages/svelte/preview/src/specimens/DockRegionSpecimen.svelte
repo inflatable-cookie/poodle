@@ -161,6 +161,64 @@
         </div>
       </SpecimenGroup>
 
+      <!-- 1c. Tab pass-throughs (g13-040) -->
+      <SpecimenGroup label="Tab pass-throughs — no underline, no reorder, solid fill (g13-040)" bare>
+        <div class="poodle-specimen__dnd-layout">
+          <div class="poodle-specimen__frame poodle-specimen__dnd-region">
+            <DockRegion
+              edge="left"
+              sizing="flexible"
+              items={flexItems}
+              value={flexActivePanel}
+              tabActiveEdge="none"
+              onValueChange={(value) => (flexActivePanel = value)}
+            >
+              {#snippet children()}
+                <div class="poodle-specimen__panel-content">
+                  <strong>{flexActivePanel}</strong>
+                  <p>tabActiveEdge="none" — no active underline; the tint fill alone marks selection.</p>
+                </div>
+              {/snippet}
+            </DockRegion>
+          </div>
+          <div class="poodle-specimen__frame poodle-specimen__dnd-region">
+            <DockRegion
+              edge="left"
+              sizing="flexible"
+              items={flexItems}
+              value={flexActivePanel}
+              tabReorderable={false}
+              onValueChange={(value) => (flexActivePanel = value)}
+            >
+              {#snippet children()}
+                <div class="poodle-specimen__panel-content">
+                  <strong>{flexActivePanel}</strong>
+                  <p>tabReorderable={false} — tabs cannot be dragged out of order.</p>
+                </div>
+              {/snippet}
+            </DockRegion>
+          </div>
+          <div class="poodle-specimen__frame poodle-specimen__dnd-region">
+            <DockRegion
+              edge="left"
+              sizing="flexible"
+              items={flexItems}
+              value={flexActivePanel}
+              tabVariant="pill"
+              tabActiveFill="solid"
+              onValueChange={(value) => (flexActivePanel = value)}
+            >
+              {#snippet children()}
+                <div class="poodle-specimen__panel-content">
+                  <strong>{flexActivePanel}</strong>
+                  <p>tabVariant="pill" + tabActiveFill="solid" — a fill combination that was previously unreachable through DockRegion.</p>
+                </div>
+              {/snippet}
+            </DockRegion>
+          </div>
+        </div>
+      </SpecimenGroup>
+
       <!-- 2. Flexible dock (collapsed icon-strip) -->
       <SpecimenGroup label="Flexible dock — collapsed icon-strip (left edge)" bare>
         <div class="poodle-specimen__frame poodle-specimen__frame--flex">
