@@ -119,6 +119,7 @@ import { SegmentedControlSpecimen } from "./specimens/SegmentedControlSpecimen";
 import { SelectionSummarySpecimen } from "./specimens/SelectionSummarySpecimen";
 import { SelectSpecimen } from "./specimens/SelectSpecimen";
 import { SeparatorSpecimen } from "./specimens/SeparatorSpecimen";
+import { SettingsShellSpecimen } from "./specimens/SettingsShellSpecimen";
 import { SidebarNavSpecimen } from "./specimens/SidebarNavSpecimen";
 import { SkeletonSpecimen } from "./specimens/SkeletonSpecimen";
 import { SliderSpecimen } from "./specimens/SliderSpecimen";
@@ -286,6 +287,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "select": SelectSpecimen,
   "selection-summary": SelectionSummarySpecimen,
   "separator": SeparatorSpecimen,
+  "settings-shell": SettingsShellSpecimen,
   "sidebar-nav": SidebarNavSpecimen,
   "skeleton": SkeletonSpecimen,
   "slider": SliderSpecimen,

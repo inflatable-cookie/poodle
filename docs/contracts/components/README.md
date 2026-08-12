@@ -137,6 +137,7 @@ primitives and layout surfaces through higher-order application components.
 - `select.md`
 - `selection-summary.md`
 - `separator.md`
+- `settings-shell.md`
 - `sidebar-nav.md`
 - `size-and-density.md`
 - `skeleton.md`

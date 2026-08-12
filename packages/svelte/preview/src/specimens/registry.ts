@@ -99,6 +99,7 @@ import RegionSpecimen from "./RegionSpecimen.svelte";
 import RelationPickerSpecimen from "./RelationPickerSpecimen.svelte";
 import ScrollShellSpecimen from "./ScrollShellSpecimen.svelte";
 import SegmentedControlSpecimen from "./SegmentedControlSpecimen.svelte";
+import SettingsShellSpecimen from "./SettingsShellSpecimen.svelte";
 import StepperSpecimen from "./StepperSpecimen.svelte";
 import AgentMessageSpecimen from "./AgentMessageSpecimen.svelte";
 import AgentPlanSpecimen from "./AgentPlanSpecimen.svelte";
@@ -287,6 +288,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "tool-call-group": ToolCallGroupSpecimen,
   select: SelectSpecimen,
   "selection-summary": SelectionSummarySpecimen,
+  "settings-shell": SettingsShellSpecimen,
   "sidebar-nav": SidebarNavSpecimen,
   tree: TreeSpecimen,
   separator: SeparatorSpecimen,

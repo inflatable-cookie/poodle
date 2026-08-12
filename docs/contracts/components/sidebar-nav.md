@@ -33,7 +33,7 @@ Updated: 2026-07-10
 |------|---------|-------|
 | Root | `<nav>` | Class `poodle-sidebar-nav`, `data-size`, `data-density`, `data-size-role`, optional `aria-label` |
 | Group | `<section>` | Class `poodle-sidebar-nav__group`, `data-separated` attribute, optional `aria-label` from group label |
-| GroupTitle | `<h2>` | Class `poodle-sidebar-nav__group-title`, uppercase label, accent color |
+| GroupTitle | `<h2>` | Class `poodle-sidebar-nav__group-title`, uppercase label, accent color. Carries `title={label}` **unconditionally** (R4a, g13-039): group labels render on one line — a host's long label is clipped by CSS, never wrapped — and the native `title` gives the sighted pointer user the full label on hover. The group `<section>` already carries `aria-label={label}`, so assistive tech is served without the `title`; the attribute exists for the clipped-visible-text case and is set without detecting truncation, matching the 13 components that already use native `title=` |
 | ItemList | `<ul>` | Class `poodle-sidebar-nav__list`, unstyled list container |
 | Item | `<li>` | List item wrapper |
 | ItemLink | `<a>` | Class `poodle-sidebar-nav__item`, rendered when `item.href` is set and item is not disabled |

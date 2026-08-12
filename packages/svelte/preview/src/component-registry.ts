@@ -234,6 +234,7 @@ export const allComponents: ComponentEntry[] = [
   entry("DetailSection", "workstation", "Titled section for grouping detail content.", true),
   entry("DetailSectionGroup", "workstation", "Responsive layout group for multiple peer detail sections.", true),
   entry("DetailShell", "workstation", "Full detail page layout with header and sections.", true),
+  entry("SettingsShell", "workstation", "Settings dialog shell: search, grouped navigation rail, and scrolling page region.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
 export const tagLabels: Record<ComponentTag, string> = {

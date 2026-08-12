@@ -51,7 +51,7 @@
       aria-label={group.label ?? undefined}
     >
       {#if group.label}
-        <h2 class="poodle-sidebar-nav__group-title">{group.label}</h2>
+        <h2 class="poodle-sidebar-nav__group-title" title={group.label}>{group.label}</h2>
       {/if}
 
       <ul class="poodle-sidebar-nav__list">

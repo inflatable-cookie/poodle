@@ -27,8 +27,8 @@
     "packages": [
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
-        "exportCount": 201,
-        "previewedCount": 201,
+        "exportCount": 202,
+        "previewedCount": 202,
         "contractOnlyCount": 0,
         "priorityMissingExports": []
       }

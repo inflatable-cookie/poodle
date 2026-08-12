@@ -197,6 +197,7 @@ export { default as PageHeader } from "./PageHeader.svelte";
 export { default as PickerShell } from "./PickerShell.svelte";
 export { default as RelationPicker } from "./RelationPicker.svelte";
 export { default as SelectionSummary } from "./SelectionSummary.svelte";
+export { default as SettingsShell } from "./SettingsShell.svelte";
 export { default as SidebarNav } from "./SidebarNav.svelte";
 export { default as Tree } from "./Tree.svelte";
 export { default as SplitView } from "./SplitView.svelte";

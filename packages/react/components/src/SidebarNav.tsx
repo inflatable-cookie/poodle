@@ -63,7 +63,7 @@ export function SidebarNav({
           data-separated={visibleGroups.length > 1}
           aria-label={group.label ?? undefined}
         >
-          {group.label ? <h2 className="poodle-sidebar-nav__group-title">{group.label}</h2> : null}
+          {group.label ? <h2 className="poodle-sidebar-nav__group-title" title={group.label}>{group.label}</h2> : null}
 
           <ul className="poodle-sidebar-nav__list">
             {group.items.map((item) => (
