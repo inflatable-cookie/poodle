@@ -50,11 +50,11 @@
 
 <Surface tone="panel" border="subtle" padding="md">
   <div class="poodle-settings-shell-specimen__triggers">
-    <Button onclick={() => (normalOpen = true)}>Settings</Button>
-    <Button variant="secondary" onclick={() => (searchingOpen = true)}>Searching</Button>
-    <Button variant="secondary" onclick={() => (noGroupsOpen = true)}>No groups</Button>
-    <Button variant="secondary" onclick={() => (noResultsOpen = true)}>No results</Button>
-    <Button variant="secondary" onclick={() => (refusedOpen = true)}>Refused close</Button>
+    <Button onClick={() => (normalOpen = true)}>Settings</Button>
+    <Button variant="secondary" onClick={() => (searchingOpen = true)}>Searching</Button>
+    <Button variant="secondary" onClick={() => (noGroupsOpen = true)}>No groups</Button>
+    <Button variant="secondary" onClick={() => (noResultsOpen = true)}>No results</Button>
+    <Button variant="secondary" onClick={() => (refusedOpen = true)}>Refused close</Button>
   </div>
   <p class="poodle-settings-shell-specimen__hint">
     The rail has its own surface and scroll; the page header stays put while the page
