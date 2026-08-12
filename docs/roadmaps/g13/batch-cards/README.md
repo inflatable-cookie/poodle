@@ -48,6 +48,7 @@ and roadmap closeout.
 | `036` | shell scene: GPUI + Jetstream — closes **g13.004** | `035` merged | merged (`97da7195`) — **g13.004 complete** |
 | `037` | focus rings — square outlines on rounded controls | none | ready |
 | `038` | focus rings — components with no explicit treatment | `037` merged | planned |
+| `039` | SettingsShell — new component, designed not ported | none | ready |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
 
 `001`, `005`, and `002` were reviewed, validated, and merged on 2026-08-11;
@@ -95,3 +96,4 @@ must rule before `003` can be compiled into a dispatchable card.
 - [Batch 035](035-shell-scene-rust-authoring-and-web.md)
 - [Batch 036](036-shell-scene-native-shells.md)
 - [Batch 037](037-focus-ring-radius-audit.md)
+- [Batch 039](039-settings-shell.md)
