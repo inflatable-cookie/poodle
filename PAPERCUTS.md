@@ -7,6 +7,15 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-13 — g13-047's R4a depth inventory (see its log) found the
+  conformance vectors for menu (3 cases) and popover (4 cases) cover
+  open/action paths only: CLOSE/ESCAPE/OUTSIDE_INTERACT dismissal events
+  are unpinned on both machines, and popover's initialFocus strategies are
+  untested. The pinning mechanism is carrying roughly a quarter of the
+  machine surfaces at full depth (4 of 13 inventoried machines exercise
+  their whole surface). Follow-up card: deepen the dismissal-event vectors
+  first — that is the surface the dismissable-layer machinery exists for.
+
 - 2026-08-13 — the Jetstream `snap -- specimens` bin overwrites
   `/tmp/poodle-specimens/{slug}.png` in place with no warning, so a
   before/after comparison (g13-046's renamed-vs-restored proof) silently

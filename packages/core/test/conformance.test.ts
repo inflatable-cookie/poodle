@@ -16,6 +16,7 @@ import { modalTransition } from "../src/modal.ts";
 import { popoverTransition } from "../src/popover.ts";
 import { singleSelectTransition } from "../src/single-select.ts";
 import { sliderTransition } from "../src/slider.ts";
+import { switchTransition } from "../src/switch.ts";
 import { tabsTransition } from "../src/tabs.ts";
 import { toggleGroupTransition } from "../src/toggle-group.ts";
 
@@ -68,6 +69,12 @@ function runMachine(machine: string, vector: VectorCase): void {
     }
     case "disclosure": {
       const result = disclosureTransition(context, event);
+      checkContextSubset(result.context as never, vector.expect.context);
+      expect(result.effects).toEqual(vector.expect.effects as never);
+      return;
+    }
+    case "switch": {
+      const result = switchTransition(context, event);
       checkContextSubset(result.context as never, vector.expect.context);
       expect(result.effects).toEqual(vector.expect.effects as never);
       return;

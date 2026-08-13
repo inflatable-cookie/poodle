@@ -283,5 +283,37 @@
       "event": { "type": "CLOSE", "value": "a" },
       "expect": { "context": { "value": "a" }, "effects": [{ "type": "emitClose", "value": "a" }] }
     }
+  ],
+  "switch": [
+    {
+      "name": "toggle emits checked change",
+      "context": { "checked": false, "disabled": false, "readOnly": false },
+      "event": { "type": "TOGGLE", "nextChecked": true },
+      "expect": { "context": { "checked": true }, "effects": [{ "type": "emitCheckedChange", "checked": true }] }
+    },
+    {
+      "name": "disabled is inert",
+      "context": { "checked": false, "disabled": true, "readOnly": false },
+      "event": { "type": "TOGGLE", "nextChecked": true },
+      "expect": { "context": { "checked": false }, "effects": [] }
+    },
+    {
+      "name": "readOnly reverts without callback",
+      "context": { "checked": false, "disabled": false, "readOnly": true },
+      "event": { "type": "TOGGLE", "nextChecked": true },
+      "expect": { "context": { "checked": false }, "effects": [{ "type": "revertNativeChecked" }] }
+    },
+    {
+      "name": "SET_CHECKED is silent",
+      "context": { "checked": false, "disabled": false, "readOnly": false },
+      "event": { "type": "SET_CHECKED", "checked": true },
+      "expect": { "context": { "checked": true }, "effects": [] }
+    },
+    {
+      "name": "toggle off emits checked change",
+      "context": { "checked": true, "disabled": false, "readOnly": false },
+      "event": { "type": "TOGGLE", "nextChecked": false },
+      "expect": { "context": { "checked": false }, "effects": [{ "type": "emitCheckedChange", "checked": false }] }
+    }
   ]
 }
