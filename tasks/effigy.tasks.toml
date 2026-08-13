@@ -280,6 +280,11 @@
   { task = "drift:recipes" },
   { task = "test:core" },
   { task = "test:components" },
+  # The packaged counterpart of test:components. Cheap (~4s against ci:web's
+  # ~21s) and it catches a class nothing else here can see: g13-b041 had a
+  # component import its generated artifact from the preview package, which
+  # every other gate accepted while the published tarball could not resolve it.
+  { task = "test:web-pack-install" },
   { task = "svelte:surface-audit" },
   { task = "check:svelte" },
   { task = "docs:lint" },
