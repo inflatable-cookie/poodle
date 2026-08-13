@@ -7,6 +7,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-13 — `contract-role-drift.ts` in a g13/g14 worktree dies before the
+  census: Cargo reports a lockfile package collision between
+  `/Users/tom/.t3/worktrees/poodle/poodle/packages/contracts/layout` and the
+  worktree's own `poodle-layout`. Distinct from the missing
+  `jetstream-input` sibling (2026-08-11). A leftover `poodle` checkout/symlink
+  next to the worktrees makes Jetstream's path-dep resolve a second copy of
+  the same crates. Run the census from the main checkout, or remove the extra
+  tree. Hit by g14-b003; the census for that card was taken on main at the
+  same SHA.
+
 - 2026-08-13 — the React preview is dead on this branch: the Svelte
   canonical registry lists `update-center`/`update-status` as standalone
   specimens (the UpdateCenter PR `b433498d` added them) but the React
