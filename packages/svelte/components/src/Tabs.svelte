@@ -651,12 +651,9 @@
           data-selected={currentValue === item.value}
           data-drag-source={dragSourceIndex === index || undefined}
           data-drop-target={dropTargetIndex === index && dropTargetIndex !== dragSourceIndex || undefined}
-          draggable={reorderable && !item.disabled}
-          ondragstart={(event) => handleDragStart(event, index)}
           ondragover={(event) => handleDragOver(event, index)}
           ondragleave={handleDragLeave}
           ondrop={(event) => handleDrop(event, index)}
-          ondragend={handleDragEnd}
           onmouseenter={() => hasTooltips && scheduleTooltip(index)}
           onmouseleave={() => hasTooltips && dismissTooltip()}
         >
@@ -665,6 +662,9 @@
             type="button"
             class="poodle-tabs__tab"
             disabled={item.disabled === true}
+            draggable={reorderable && !item.disabled}
+            ondragstart={(event) => handleDragStart(event, index)}
+            ondragend={handleDragEnd}
             id={`poodle-tab-${tabsId}-${item.value}`}
             role="tab"
             tabindex={focusIndex === index ? 0 : -1}

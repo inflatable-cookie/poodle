@@ -44,11 +44,10 @@ describe("DockRegion external drag source", () => {
       },
     });
     const tab = getByRole("tab", { name: "Explorer" });
-    const dragItem = tab.parentElement!;
     const dataTransfer = new DataTransfer();
 
     await fireEvent.pointerDown(tab, { button: 0 });
-    await fireEvent.dragStart(dragItem, { dataTransfer });
+    await fireEvent.dragStart(tab, { dataTransfer });
 
     expect(start).toHaveBeenCalledOnce();
     expect(dataTransfer.getData("application/x-host-panel")).toBe("explorer");
@@ -56,8 +55,8 @@ describe("DockRegion external drag source", () => {
       "application/x-poodle-panel-drag",
     );
 
-    await fireEvent.dragEnd(dragItem, { dataTransfer });
-    await fireEvent.dragEnd(dragItem, { dataTransfer });
+    await fireEvent.dragEnd(tab, { dataTransfer });
+    await fireEvent.dragEnd(tab, { dataTransfer });
 
     expect(end).toHaveBeenCalledOnce();
     expect(cancel).not.toHaveBeenCalled();
@@ -84,7 +83,7 @@ describe("DockRegion external drag source", () => {
     const dataTransfer = new DataTransfer();
 
     await fireEvent.pointerDown(tab, { button: 0 });
-    await fireEvent.dragStart(tab.parentElement!, { dataTransfer });
+    await fireEvent.dragStart(tab, { dataTransfer });
 
     expect(signal?.aborted).toBe(true);
     expect(signal?.reason).toBe("not-ready");
@@ -195,12 +194,11 @@ describe("DockRegion external drag source", () => {
       },
     });
     const [firstTab, secondTab] = getAllByRole("tab");
-    const firstItem = firstTab.parentElement!;
     const secondItem = secondTab.parentElement!;
     const dataTransfer = new DataTransfer();
 
     await fireEvent.pointerDown(firstTab, { button: 0 });
-    await fireEvent.dragStart(firstItem, { dataTransfer });
+    await fireEvent.dragStart(firstTab, { dataTransfer });
     await fireEvent.dragOver(secondItem, { dataTransfer });
     await fireEvent.drop(secondItem, { dataTransfer });
 

@@ -30,7 +30,7 @@ describe("DockRegion tab pass-throughs (svelte)", () => {
     expect(tabs.getAttribute("data-active-fill")).toBe("tint");
     expect(tabs.getAttribute("data-bordered")).toBe("false");
     expect(tabs.hasAttribute("data-full-width")).toBe(false);
-    const item = tabs.querySelector(".poodle-tabs__item")!;
+    const item = tabs.querySelector(".poodle-tabs__tab")!;
     expect(item.getAttribute("draggable")).toBe("true");
   });
 
@@ -51,7 +51,7 @@ describe("DockRegion tab pass-throughs (svelte)", () => {
     expect(tabs.getAttribute("data-active-fill")).toBe("solid");
     expect(tabs.getAttribute("data-bordered")).toBe("true");
     expect(tabs.hasAttribute("data-full-width")).toBe(true);
-    const item = tabs.querySelector(".poodle-tabs__item")!;
+    const item = tabs.querySelector(".poodle-tabs__tab")!;
     expect(item.getAttribute("draggable")).toBe("false");
   });
 
@@ -71,13 +71,13 @@ describe("DockRegion tab pass-throughs (svelte)", () => {
     const locked = render(DockRegion, {
       props: { items, value: "explorer", tabReorderable: false },
     });
-    const lockedItem = tabsOf(locked.container).querySelector(".poodle-tabs__item")!;
+    const lockedItem = tabsOf(locked.container).querySelector(".poodle-tabs__tab")!;
     expect(lockedItem.getAttribute("draggable")).toBe("false");
 
     const defaulted = render(DockRegion, {
       props: { items, value: "explorer" },
     });
-    const defaultItem = tabsOf(defaulted.container).querySelector(".poodle-tabs__item")!;
+    const defaultItem = tabsOf(defaulted.container).querySelector(".poodle-tabs__tab")!;
     expect(defaultItem.getAttribute("draggable")).toBe("true");
   });
 
@@ -106,7 +106,7 @@ describe("DockRegion tab pass-throughs (svelte)", () => {
     expect(vTabs.getAttribute("data-active-fill")).toBe("solid");
     expect(vTabs.getAttribute("data-bordered")).toBe("true");
     expect(vTabs.hasAttribute("data-full-width")).toBe(true);
-    expect(vTabs.querySelector(".poodle-tabs__item")!.getAttribute("draggable")).toBe("false");
+    expect(vTabs.querySelector(".poodle-tabs__tab")!.getAttribute("draggable")).toBe("false");
 
     // Top/bottom-edge collapsed strip keeps horizontal tabs.
     const horizontal = render(DockRegion, {
@@ -132,7 +132,7 @@ describe("DockRegion tab pass-throughs (svelte)", () => {
     expect(hTabs.getAttribute("data-active-fill")).toBe("solid");
     expect(hTabs.getAttribute("data-bordered")).toBe("true");
     expect(hTabs.hasAttribute("data-full-width")).toBe(true);
-    expect(hTabs.querySelector(".poodle-tabs__item")!.getAttribute("draggable")).toBe("false");
+    expect(hTabs.querySelector(".poodle-tabs__tab")!.getAttribute("draggable")).toBe("false");
   });
 
   it("does not disturb the tab strip or turn on collapseWhenOverflow (R1a)", () => {
