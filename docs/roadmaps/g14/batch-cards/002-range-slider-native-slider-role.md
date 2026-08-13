@@ -38,13 +38,15 @@ path so GPUI and Jetstream both inherit the projection.
   `audio.rs` asserts `knob.a11y.role == Some(NodeRole::Slider)`).
 - The gate proven green from a clean baseline: run
   `bun packages/svelte/preview/scripts/contract-role-drift.ts` before
-  (exit 1, range-slider) and after (exit 0).
+  (exit 1, range-slider) and after (exit 0). The Effigy selector is
+  `drift:roles` — there is no `docs:contract-role-drift` selector
+  (baseline manifest §6).
 - The census re-run: `cargo run --bin a11y -- --json` in
   `packages/jetstream/preview` shows `Slider` for range-slider.
 
 ## Acceptance
 
-- [ ] `effigy docs:contract-role-drift` exits 0.
+- [ ] `effigy drift:roles` exits 0.
 - [ ] `effigy ci:native` exits 0 in the main checkout (not the worktree —
   the Jetstream sibling path-dep does not resolve there).
 - [ ] No web file, contract, or adapter changed.
@@ -74,10 +76,10 @@ path so GPUI and Jetstream both inherit the projection.
 2. Read the contract's role section and the three precedents
    (`audio.rs`, `color_picker.rs`, `range_slider.rs`'s label site).
 3. Project the role; add the render test; run `ci:rust` and
-   `docs:contract-role-drift`.
+   `effigy drift:roles`.
 4. Census check via `cargo run --bin a11y -- --json` in the jetstream
    preview.
-5. Full validation: `effigy ci:rust`, `effigy docs:contract-role-drift`,
+5. Full validation: `effigy ci:rust`, `effigy drift:roles`,
    `effigy test:core`, `effigy test:components`, `git diff --check`.
    (`ci:native` runs at review in the main checkout.)
 6. Write the batch log; push with
