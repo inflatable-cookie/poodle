@@ -106,6 +106,24 @@ repo.
 already matches, rather than renaming exports to fit a naming rule. Any change
 to a public export is a **stop** — say which consumer would break.
 
+### R4a — Presence is not coverage. `b045` proved it.
+
+Amended after `b045`. `slider` counts as *pinned* in the table above because it
+is a key in `machines.json`. Its vector has **3 cases**, and — measured — zero
+mentions of thumb, pair, crossing, bipolar or origin. It pins single-thumb
+transitions only, while the entire two-thumb surface goes unchecked.
+
+So **the nine are the floor of the gap, not the whole of it.** For each of the
+12 already-"pinned" machines, state in the log whether its vector actually
+exercises the machine's real surface or just its happy path. That inventory is
+worth more than the nine new vectors, because it says how much the mechanism
+the roadmap depends on is actually carrying.
+
+Do not fix thin vectors for the 12 in this card unless one is trivially thin —
+scope it, record it, and let the inventory drive a follow-up. **`slider` is
+excluded entirely**: `b046` is running against it with the vector as a fixed
+target.
+
 ### R4 — Pin the nine. The vector is the deliverable, not the shape change.
 
 Extend `packages/contracts/headless/vectors/` so the nine unpinned machines are
@@ -217,6 +235,7 @@ Wire as `effigy docs:machine-shape-drift` beside the other drift gates.
   `g11.002` rather than invented.
 - [ ] Every candidate classified into one of R1's three buckets.
 - [ ] The nine are pinned, and each vector runs on both implementations.
+- [ ] The depth inventory for the 12 already-pinned machines exists (R4a).
 - [ ] Any vector that failed on first run is reported as a divergence finding.
 - [ ] No public export renamed; no behaviour changed.
 - [ ] The gate fails on each half independently and passes clean.
