@@ -17,62 +17,6 @@
     ValidationResult,
     ValidationState,
   } from "./types";
-  // Card 048 R2: the DOM reads the generated definition — the data-*
-  // attribute names, the part class names, and the TXT-16 padding custom
-  // properties come from text_input.rs via `text-input-ts`, never from
-  // hand-written literals in this component. A rename in the definition
-  // moves the DOM; `effigy ir:check` gates drift in the artifact.
-  import { textInputDefinition } from "./generated/text-input";
-
-  const parts: Record<string, string> = Object.fromEntries(
-    textInputDefinition.parts.map((part) => [part.id, part.className]),
-  );
-  const attributes: Record<string, string> = Object.fromEntries(
-    textInputDefinition.attributes.map((attribute) => [attribute.id, attribute.name]),
-  );
-  const styleProps: Record<string, string> = Object.fromEntries(
-    textInputDefinition.styleProps.map((prop) => [prop.id, prop.name]),
-  );
-
-  function partClass(id: string): string {
-    const className = parts[id];
-    if (!className) throw new Error(`definition lacks part '${id}'`);
-    return className;
-  }
-
-  function attributeName(id: string): string {
-    const name = attributes[id];
-    if (!name) throw new Error(`definition lacks attribute '${id}'`);
-    return name;
-  }
-
-  function stylePropName(id: string): string {
-    const name = styleProps[id];
-    if (!name) throw new Error(`definition lacks style prop '${id}'`);
-    return name;
-  }
-
-  // The anatomy classes (T §2) — the definition names them; the markup
-  // renders them. The input-control and clear-button base classes are the
-  // one Svelte literal: the focus-coverage gate (focus-ring-drift.ts)
-  // resolves focusable-element classes by literal source scan, and
-  // text-input.css draws a stacked :focus-within wrapper ring whose
-  // focusables must show outline coverage (recorded in the R7 inventory).
-  const rootClass = partClass("root");
-  const prefixClass = partClass("prefix");
-  const fieldClass = partClass("field");
-  const leadingAffordanceClass = partClass("leading-affordance");
-  const trailingAffordanceClass = partClass("trailing-affordance");
-  const indicatorClass = partClass("validation-indicator");
-  const suffixClass = partClass("suffix");
-  const charCountClass = partClass("char-count");
-
-  // The state-derived attribute names (TXT-18) — the definition names
-  // them; the values stay runtime-derived (CROSS-13).
-  const dataValidationState = attributeName("validation-state");
-  const dataSize = attributeName("size");
-  const dataDensity = attributeName("density");
-  const dataType = attributeName("type");
 
   interface Props {
     id?: string;
@@ -251,14 +195,6 @@
   const isOverLimit = $derived(maxLength !== null && charCount > maxLength);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  // The root attribute emission (TXT-18): the names come from the
-  // definition, the values stay runtime-derived (CROSS-13).
-  const rootAttributes = $derived({
-    [dataValidationState]: effectiveValidationState,
-    [dataSize]: resolvedSize,
-    [dataDensity]: resolvedDensity,
-    [dataType]: type,
-  });
   const autocorrectAttributes = $derived(autocorrect ? { autocorrect } : {});
   const showValidationIndicator = $derived(showValidationStatus && effectiveValidationState !== "none");
   const validationIcon = $derived(
@@ -580,21 +516,25 @@
 </script>
 
 <div
-  {...rootAttributes}
-  class={`${rootClass}${isMultiline ? ` ${rootClass}--multiline` : ""}`}
-  style={`${stylePropName("control-padding-start")}: ${controlPaddingStart}; ${stylePropName("control-padding-end")}: ${controlPaddingEnd}; ${stylePropName("multiline-padding-end")}: ${multilineBottomPadding}; ${stylePropName("clear-inset-inline-end")}: ${clearInsetInlineEnd}; ${stylePropName("trailing-inset-inline-end")}: ${trailingInsetInlineEnd};`}
+  class="poodle-text-input"
+  class:poodle-text-input--multiline={isMultiline}
+  data-validation-state={effectiveValidationState}
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
+  data-type={type}
+  style={`--poodle-text-input-control-padding-start: ${controlPaddingStart}; --poodle-text-input-control-padding-end: ${controlPaddingEnd}; --poodle-text-input-multiline-padding-end: ${multilineBottomPadding}; --poodle-text-input-clear-inset-inline-end: ${clearInsetInlineEnd}; --poodle-text-input-trailing-inset-inline-end: ${trailingInsetInlineEnd};`}
 >
   {#if prefix}
-    <span class={prefixClass}>{prefix}</span>
+    <span class="poodle-text-input__affix poodle-text-input__affix--prefix">{prefix}</span>
   {/if}
 
-  <div class={fieldClass}>
+  <div class="poodle-text-input__field">
     {#if leadingSnippet}
-      <span class={leadingAffordanceClass}>
+      <span class="poodle-text-input__affordance poodle-text-input__affordance--leading">
         {@render leadingSnippet()}
       </span>
     {:else if isSearch}
-      <span class={leadingAffordanceClass} aria-hidden="true">
+      <span class="poodle-text-input__affordance poodle-text-input__affordance--leading" aria-hidden="true">
         <Icon icon="search" />
       </span>
     {/if}
@@ -672,7 +612,7 @@
     {/if}
 
     {#if trailingSnippet}
-      <span class={trailingAffordanceClass}>
+      <span class="poodle-text-input__affordance poodle-text-input__affordance--trailing">
         {@render trailingSnippet()}
       </span>
     {/if}
@@ -690,7 +630,10 @@
 
     {#if showValidationIndicator}
       <span
-        class={`${indicatorClass}${effectiveValidationState === "pending" ? ` ${indicatorClass}--pending` : ""}${effectiveValidationState === "valid" ? ` ${indicatorClass}--valid` : ""}${effectiveValidationState === "invalid" ? ` ${indicatorClass}--invalid` : ""}`}
+        class="poodle-text-input__validation-indicator"
+        class:poodle-text-input__validation-indicator--pending={effectiveValidationState === "pending"}
+        class:poodle-text-input__validation-indicator--valid={effectiveValidationState === "valid"}
+        class:poodle-text-input__validation-indicator--invalid={effectiveValidationState === "invalid"}
         aria-hidden="true"
       >
         {#if effectiveValidationState === "pending"}
@@ -703,11 +646,11 @@
   </div>
 
   {#if suffix}
-    <span class={suffixClass}>{suffix}</span>
+    <span class="poodle-text-input__affix poodle-text-input__affix--suffix">{suffix}</span>
   {/if}
 
   {#if showCharCount}
-    <span class={`${charCountClass}${isOverLimit ? ` ${charCountClass}--over` : ""}`} aria-live="polite">
+    <span class="poodle-text-input__char-count" class:poodle-text-input__char-count--over={isOverLimit} aria-live="polite">
       {charCountText}
     </span>
   {/if}

@@ -32,87 +32,23 @@
 # sibling (shell-rust) into the native previews' generated/ directories
 # (g13-b003 R1; card 036 R2); neither is part of the default target set,
 # so a plain run over the synthetic fixture never writes into a consumer
-# package.
-#
-# Card 041 R1/R2: the Button definition is authored in Rust
-# (packages/codegen/src/models/button.rs) and serialized to its own fixture
-# by `--author-button`; the button-ts target renders its rendered
-# vocabulary (parts, state attributes and value domains, recipe hooks)
-# into both web packages' generated/ directories — one authored change
-# moves both web artifacts in one build. Card 042 R1a/R2: the button-rust
-# sibling renders the same definition into poodle-render's generated/
-# directory — the consumer of the native route — so one authored change
-# moves all three artifacts (two web + one render).
-#
-# Card 045 R1/R2: the RangeSlider definition is authored in Rust
-# (packages/codegen/src/models/range_slider.rs) and serialized to its own
-# fixture by `--author-range-slider`; the range-slider-ts target renders
-# its rendered vocabulary (parts, data-* attributes, the RNG-17 geometry
-# styleProps, recipe hooks) into both web component packages' generated/
-# directories — the stateful proof: repeated anatomy, value-dependent fill
-# geometry, and gesture effects all declared, with the slider machine left
-# hand-written and pinned by its conformance vector (R1/R5).
-#
-# Card 048 R1/R2: the TextInput definition is authored in Rust
-# (packages/codegen/src/models/text_input.rs) and serialized to its own
-# fixture by `--author-text-input`; the text-input-ts target renders its
-# rendered vocabulary (parts, data-* attributes, the TXT-16 styleProps,
-# recipe hooks) into both web component packages' generated/ directories —
-# the environment-boundary proof: a typed capability boundary for
-# focus/selection/IME/clipboard/measurement/text-editing declared, with the
-# editing model left hand-written and declared by its conformance vector
-# (R1/R2/R5). Web only; the natives are card 049's.
+# package. Component models were unwound in g13-053; only the shell scene
+# remains.
 "ir:build" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-button packages/codegen/fixtures/button-model.json" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-range-slider packages/codegen/fixtures/range-slider-model.json" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-text-input packages/codegen/fixtures/text-input-model.json" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/svelte/preview/src --target shell-scene" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/react/preview/src --target shell-scene" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/gpui/preview/src --target shell-rust" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/jetstream/preview/src --target shell-rust" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/svelte/components/src --target button-ts" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/react/components/src --target button-ts" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/range-slider-model.json --out packages/svelte/components/src --target range-slider-ts" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/range-slider-model.json --out packages/react/components/src --target range-slider-ts" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/text-input-model.json --out packages/svelte/components/src --target text-input-ts" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/text-input-model.json --out packages/react/components/src --target text-input-ts" },
-  # Card 042 R1a: Button's Rust artifact lives in the package that ships it —
-  # poodle-render is the consumer, so the artifact lands in
-  # packages/render/src/generated/ (not a preview, not codegen; a crate
-  # cannot depend on the tool that generates it).
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/render/src --target button-rust" },
-  # Card 046 R1a: same route for RangeSlider — the range-slider-rust
-  # sibling renders the same definition into poodle-render's generated/
-  # directory, so one authored change moves all four artifacts (two web +
-  # this one).
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/range-slider-model.json --out packages/render/src --target range-slider-rust" },
-  # Card 049 R1a: same route for TextInput — the text-input-rust sibling
-  # renders the same definition into poodle-render's generated/ directory,
-  # so one authored change moves all four artifacts (two web + this one).
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/text-input-model.json --out packages/render/src --target text-input-rust" },
 ]
 "ir:check" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-button packages/codegen/fixtures/button-model.json --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-range-slider packages/codegen/fixtures/range-slider-model.json --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-text-input packages/codegen/fixtures/text-input-model.json --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/svelte/preview/src --target shell-scene --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/react/preview/src --target shell-scene --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/gpui/preview/src --target shell-rust --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/jetstream/preview/src --target shell-rust --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/svelte/components/src --target button-ts --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/react/components/src --target button-ts --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/range-slider-model.json --out packages/svelte/components/src --target range-slider-ts --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/range-slider-model.json --out packages/react/components/src --target range-slider-ts --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/text-input-model.json --out packages/svelte/components/src --target text-input-ts --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/text-input-model.json --out packages/react/components/src --target text-input-ts --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/render/src --target button-rust --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/range-slider-model.json --out packages/render/src --target range-slider-rust --check" },
-  # Card 049: TextInput's Rust artifact is gated the same way.
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/text-input-model.json --out packages/render/src --target text-input-rust --check" },
 ]
 
 # Preview (documentation site)

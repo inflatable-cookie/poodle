@@ -22,41 +22,10 @@ use poodle_specs::{
 };
 
 use crate::color::{mix_srgb, with_alpha, BLACK, TRANSPARENT, WHITE};
-use crate::generated::button::BUTTON_DEFINITION;
 use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_min_width_rem,
     size_padding_x_offset_rem,
 };
-
-/// The state treatments this render implements, keyed on the definition's
-/// state attributes (card 042 R3): each treatment applies while the
-/// definition declares the state's attribute under the name the render
-/// implements it by — the same words the web DOM emits (card 041 R2). A
-/// rename in `packages/codegen/src/models/button.rs` moves every runtime in
-/// one `ir:build`: the web previews emit the new name; this render's
-/// treatment follows the definition.
-fn state_declared(id: &str, name: &str) -> bool {
-    BUTTON_DEFINITION
-        .attributes
-        .iter()
-        .any(|attribute| attribute.id == id && attribute.name == name)
-}
-
-/// The definition's word for a variant (card 042 R3): the frozen
-/// poodle-specs enum resolved to the name the definition's `button-variant`
-/// shared type declares — the render's projection of the vocabulary, the
-/// same role the web components' value derivation plays (CROSS-14). The
-/// legacy `Danger` variant resolves to `danger`, which the definition's
-/// variant vocabulary does not declare — exactly the fall-through the old
-/// tier had.
-fn variant_name(variant: ButtonVariant) -> &'static str {
-    match variant {
-        ButtonVariant::Primary => "primary",
-        ButtonVariant::Secondary => "secondary",
-        ButtonVariant::Ghost => "ghost",
-        ButtonVariant::Danger => "danger",
-    }
-}
 
 /// The old tier's `color_mix_black`: scales RGB toward black at `ratio` while
 /// preserving alpha (`mix_srgb(c, BLACK, r)` would lerp alpha toward opaque).
@@ -88,20 +57,11 @@ pub fn button(
     // resolve the family colour once and match on its presence. The match is
     // on (variant, tone), NOT effective_tone: the legacy Danger variant falls
     // through to the default arms exactly like the old GPUI tier.
-    // The status tones are the definition's tone vocabulary (card 042 R3):
-    // each arm applies while the definition still declares the tone.
     let status = match spec.tone {
-        ButtonTone::Danger if BUTTON_DEFINITION.tones.contains(&"danger") => {
-            Some(theme.resolve_color("color.status.danger"))
-        }
-        ButtonTone::Success if BUTTON_DEFINITION.tones.contains(&"success") => {
-            Some(theme.resolve_color("color.status.success"))
-        }
-        ButtonTone::Warning if BUTTON_DEFINITION.tones.contains(&"warning") => {
-            Some(theme.resolve_color("color.status.warning"))
-        }
+        ButtonTone::Danger => Some(theme.resolve_color("color.status.danger")),
+        ButtonTone::Success => Some(theme.resolve_color("color.status.success")),
+        ButtonTone::Warning => Some(theme.resolve_color("color.status.warning")),
         ButtonTone::Default => None,
-        _ => None,
     };
 
     // ── Axis-faithful metrics (g12.019 recipe correction): the axis-layered
@@ -112,35 +72,21 @@ pub fn button(
     let height = theme.resolve_space(spec.control_height_token())
         + rem_to_px(size_height_offset_rem(effective_size));
     let min_width = rem_to_px(size_min_width_rem(effective_size));
-    // The density treatments are the definition's density vocabulary (card
-    // 042 R3): each offset applies while the definition still declares the
-    // density; a renamed or removed member falls back to the default rung.
+    // Svelte: compact -0.125rem, comfortable +0.125rem density offset on padding.
     let density_pad_offset = rem_to_px(match spec.density {
-        ControlDensity::Compact if BUTTON_DEFINITION.densities.contains(&"compact") => -0.125,
-        ControlDensity::Default if BUTTON_DEFINITION.densities.contains(&"default") => 0.0,
-        ControlDensity::Comfortable if BUTTON_DEFINITION.densities.contains(&"comfortable") => {
-            0.125
-        }
-        _ => 0.0,
+        ControlDensity::Compact => -0.125,
+        ControlDensity::Default => 0.0,
+        ControlDensity::Comfortable => 0.125,
     });
     let pad_x = theme.resolve_space(spec.horizontal_padding_token())
         + rem_to_px(size_padding_x_offset_rem(effective_size))
         + density_pad_offset;
     let label_size = rem_to_px(size_font_rem(effective_size));
-    // The content gap ladders on density, not size; the rungs are the
-    // definition's density vocabulary (card 042 R3), same fallback as the
-    // padding offset.
+    // The content gap ladders on density, not size.
     let gap = match spec.density {
-        ControlDensity::Compact if BUTTON_DEFINITION.densities.contains(&"compact") => {
-            theme.resolve_space("space.inline.xs")
-        }
-        ControlDensity::Default if BUTTON_DEFINITION.densities.contains(&"default") => {
-            theme.resolve_space(ButtonSpec::content_gap_token())
-        }
-        ControlDensity::Comfortable if BUTTON_DEFINITION.densities.contains(&"comfortable") => {
-            theme.resolve_space("space.inline.md")
-        }
-        _ => theme.resolve_space(ButtonSpec::content_gap_token()),
+        ControlDensity::Compact => theme.resolve_space("space.inline.xs"),
+        ControlDensity::Default => theme.resolve_space(ButtonSpec::content_gap_token()),
+        ControlDensity::Comfortable => theme.resolve_space("space.inline.md"),
     };
     // Icons are always the sm icon token (the old GPUI tier's `IconSize::Sm`),
     // not a per-control-size ladder stop.
@@ -150,13 +96,9 @@ pub fn button(
     let spinner_size = SpinnerSpec::new().with_size(SpinnerSize::Sm).size_px();
 
     // Icon padding adjustment (contract §8): reduce padding on icon side by 0.125rem.
-    // The side-content states are the definition's `has-leading` /
-    // `has-trailing` attributes (card 042 R3).
     let icon_inset = theme.resolve_space(ButtonSpec::icon_side_inset_token());
-    let has_leading = (spec.leading_icon.is_some() || spec.is_loading)
-        && state_declared("has-leading", "data-has-leading");
-    let has_trailing = (spec.trailing_icon.is_some() || spec.chevron)
-        && state_declared("has-trailing", "data-has-trailing");
+    let has_leading = spec.leading_icon.is_some() || spec.is_loading;
+    let has_trailing = spec.trailing_icon.is_some() || spec.chevron;
     let pad_left = if has_leading {
         pad_x - icon_inset
     } else {
@@ -168,25 +110,12 @@ pub fn button(
         pad_x
     };
 
-    // The loading state is the definition's `loading` attribute (card 042
-    // R3); the ghost variant treatment is the definition's variant
-    // vocabulary. Both gates are current today; a renamed definition value
-    // drops the treatment until restored.
-    let is_loading = spec.is_loading && state_declared("loading", "data-loading");
-    let is_disabled = spec.is_disabled || is_loading;
-    let is_ghost = matches!(spec.variant, ButtonVariant::Ghost)
-        && BUTTON_DEFINITION
-            .variants
-            .contains(&variant_name(spec.variant));
+    let is_disabled = spec.is_disabled || spec.is_loading;
+    let is_ghost = matches!(spec.variant, ButtonVariant::Ghost);
 
     // ── Variant × tone colours (contract §8) ──
-    // The variant arms are the definition's variant vocabulary (card 042
-    // R3): each treatment applies while the definition still declares the
-    // variant; a renamed or removed member falls through to the default.
     let (fill, border_color, text_color) = match (spec.variant, status) {
-        (ButtonVariant::Secondary, Some(status_color))
-            if BUTTON_DEFINITION.variants.contains(&"secondary") =>
-        {
+        (ButtonVariant::Secondary, Some(status_color)) => {
             // Status-tinted secondary: color-mix(status 16%, surface); the
             // idle border stays plain border-default.
             (
@@ -195,13 +124,11 @@ pub fn button(
                 base_text,
             )
         }
-        (ButtonVariant::Primary, _) if BUTTON_DEFINITION.variants.contains(&"primary") => {
+        (ButtonVariant::Primary, _) => {
             // Border: the primary fill darkened toward black.
             (base_fill, mix_black(base_fill, 0.86), base_text)
         }
-        (ButtonVariant::Ghost, Some(status_color))
-            if BUTTON_DEFINITION.variants.contains(&"ghost") =>
-        {
+        (ButtonVariant::Ghost, Some(status_color)) => {
             // Ghost × status: text takes the status colour.
             (base_fill, base_border, status_color)
         }
@@ -216,11 +143,8 @@ pub fn button(
     };
 
     // Pressed/toggle state (contract §8 Pressed/toggle state): non-primary
-    // variants get accent fill, darkened accent border, inverse text. The
-    // toggle state is the definition's `pressed` attribute (card 042 R3).
-    let is_pressed = spec.is_toggle_mode()
-        && spec.current_pressed()
-        && state_declared("pressed", "data-pressed");
+    // variants get accent fill, darkened accent border, inverse text.
+    let is_pressed = spec.is_toggle_mode() && spec.current_pressed();
     let (fill, border_color, text_color) =
         if is_pressed && !matches!(spec.variant, ButtonVariant::Primary) {
             let accent = theme.resolve_color("color.accent.base");
@@ -232,31 +156,19 @@ pub fn button(
 
     // ── Hover/active colours (contract §8 Hover/Active) ──
     // Computed after the ghost/pressed overrides: the default arm mixes from
-    // the FINAL fill and border, exactly like the old GPUI tier. The arms
-    // are the definition's variant vocabulary (card 042 R3), same gates as
-    // the idle colours.
+    // the FINAL fill and border, exactly like the old GPUI tier.
     let (hover_fill, active_fill, hover_border) = match (spec.variant, status) {
-        (ButtonVariant::Ghost, Some(status_color))
-            if BUTTON_DEFINITION.variants.contains(&"ghost") =>
-        {
-            (
-                with_alpha(status_color, 0.12),
-                with_alpha(status_color, 0.18),
-                with_alpha(status_color, 0.28),
-            )
-        }
-        (ButtonVariant::Secondary, Some(status_color))
-            if BUTTON_DEFINITION.variants.contains(&"secondary") =>
-        {
-            (
-                mix_srgb(status_color, surface, 0.24),
-                mix_srgb(status_color, surface, 0.32),
-                mix_srgb(status_color, border_default, 0.62),
-            )
-        }
-        (ButtonVariant::Primary, Some(status_color))
-            if BUTTON_DEFINITION.variants.contains(&"primary") =>
-        {
+        (ButtonVariant::Ghost, Some(status_color)) => (
+            with_alpha(status_color, 0.12),
+            with_alpha(status_color, 0.18),
+            with_alpha(status_color, 0.28),
+        ),
+        (ButtonVariant::Secondary, Some(status_color)) => (
+            mix_srgb(status_color, surface, 0.24),
+            mix_srgb(status_color, surface, 0.32),
+            mix_srgb(status_color, border_default, 0.62),
+        ),
+        (ButtonVariant::Primary, Some(status_color)) => {
             let hover = mix_srgb(status_color, WHITE, 0.88);
             (
                 hover,
@@ -282,10 +194,8 @@ pub fn button(
     let label_text = spec.label.clone().unwrap_or_default();
 
     // Icon-only (contract §8 Icon-only): square — width = height, no
-    // min-width, no horizontal padding. The state is the definition's
-    // `icon-only` attribute (card 042 R3).
-    let is_icon_only =
-        label_text.is_empty() && !spec.chevron && state_declared("icon-only", "data-icon-only");
+    // min-width, no horizontal padding.
+    let is_icon_only = label_text.is_empty() && !spec.chevron;
 
     // With icons: button root with empty label, children carry the content.
     // Without: the root carries the label directly.
@@ -357,7 +267,7 @@ pub fn button(
 
     // ── Children (only when icons/spinner present) ──
     if has_icons {
-        if is_loading {
+        if spec.is_loading {
             let mut spinner = Node::icon("spinner", spinner_size);
             spinner.style.descriptor.text_color = Some(text_color);
             spinner.style.animation = Some(NodeAnimation::spin("poodle-spinner-ring", 0.8));

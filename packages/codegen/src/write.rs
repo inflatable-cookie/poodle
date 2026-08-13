@@ -17,10 +17,10 @@ use crate::error::{CodegenError, Result};
 /// icons script's write mode: stale orphans are deleted, every expected
 /// file is written. Orphan deletion walks the output root's **top level**
 /// only: each target owns the top level of its own output root, and a
-/// nested directory is another target's root (card 041: `shell-scene` and
-/// `button-ts` share one physical `generated/` directory inside the web
-/// packages, so a recursive sweep would delete the sibling target's
-/// artifact). Write mode and check mode agree on what "stale" means.
+/// nested directory is another target's root (card 041: `shell-scene`
+/// owns the top level of `generated/` inside the web preview packages,
+/// so a recursive sweep would delete a sibling target's artifact). Write
+/// mode and check mode agree on what "stale" means.
 pub fn write_outputs(output_root: &Path, files: &[GeneratedFile]) -> Result<()> {
     let expected: std::collections::BTreeSet<&str> =
         files.iter().map(|file| file.path.as_str()).collect();
