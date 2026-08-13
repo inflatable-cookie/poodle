@@ -11,6 +11,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::conformance::RuntimeTarget;
+
 /// The named adapter capability inventory (`CROSS-17`; spec 063 "adapter
 /// capability" list: focus, measurement, pointer capture, text editing,
 /// portal placement, timers, announcements).
@@ -58,6 +60,13 @@ pub enum Capability {
 
 /// A declared capability requirement of a component (`CROSS-17`; `IR-08`
 /// "capabilities are named, typed, and visible in the definition").
+///
+/// Since `g13.018` the requirement also declares, per runtime, whether the
+/// capability is provided, delegated, or absent — the two gaps the pilot
+/// verdict named (assumption 3: *"which runtime owns a capability"* was
+/// untyped prose, and *"whether a runtime has it at all"* could not be
+/// said at all). Absence is explicit and reasoned, never inferred from a
+/// runtime being unlisted (`g13.018` R3).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CapabilityRequirement {
     /// The capability the component requires.
@@ -65,4 +74,47 @@ pub struct CapabilityRequirement {
     /// Why the component requires it, naming the corpus requirement and
     /// contract section, e.g. "caret/selection ownership — `T §6` (`TXT-21`)".
     pub purpose: String,
+    /// Per-runtime provision of the capability (`IR-08`; `g13.018` R3):
+    /// which of the four runtimes provide it and which do not, each with
+    /// a reason. When declared, validation requires every runtime to be
+    /// listed — "not listed" must never silently mean "absent". Pre-`g13.018`
+    /// requirements (capability + purpose only) stay valid and serialize
+    /// without the field.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub runtimes: Vec<CapabilityRuntimeStatus>,
+}
+
+/// How one runtime relates to a declared capability (`IR-08`; `g13.018`
+/// R3): it provides it through its own implementation, it delegates it to
+/// the host platform (e.g. the browser DOM owns text editing on web), or
+/// it is absent — the component renders without it and the reason says
+/// what that means.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CapabilityProvision {
+    /// The runtime implements the capability itself.
+    #[serde(rename = "provided")]
+    Provided,
+    /// The runtime relies on the host platform for the capability.
+    #[serde(rename = "delegated")]
+    Delegated,
+    /// The runtime does not provide the capability; the component renders
+    /// without it. The reason is mandatory (`g13.018` R3).
+    #[serde(rename = "absent")]
+    Absent,
+}
+
+/// One runtime's declared relationship to a capability (`IR-08`; `g13.018`
+/// R3): explicit provision or explicit, reasoned absence.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CapabilityRuntimeStatus {
+    /// The runtime this row describes. Reuses [`RuntimeTarget`] — the four
+    /// pilot runtimes (`Svelte`, `React`, `Gpui`, `Jetstream`); there is
+    /// deliberately no second runtime list (`g13.018` R2).
+    pub runtime: RuntimeTarget,
+    /// Whether the runtime provides, delegates, or lacks the capability.
+    pub provision: CapabilityProvision,
+    /// Why — for `Absent`, what the runtime does instead and what the
+    /// component degrades to; for `Provided`/`Delegated`, how the runtime
+    /// satisfies it.
+    pub reason: String,
 }

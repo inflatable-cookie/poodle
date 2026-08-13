@@ -15,11 +15,11 @@
 //! attribute and a geometry style prop; both artifacts move in one build)
 //! and proven live in the card's step 6 with both previews running.
 //!
-//! R2.1's negative finding — the IR's `Repeated` part kind requires a
-//! `List` prop and yields identical instances, so the two thumbs are
-//! recorded as distinct parts and the renderer hard-codes "two" — is
-//! asserted here structurally: the parts are distinct, and no part uses
-//! `PartKind::Repeated`.
+//! R2.1's finding — the IR's `Repeated` part kind could not express the
+//! two thumbs — is fixed by `g13.018`: the `control` part is an
+//! identified family naming its two instances, each its own part with its
+//! own identity and declared semantics, and the count and identities come
+//! from the definition. The shape is asserted here structurally.
 
 use std::fs;
 use std::path::PathBuf;
@@ -159,17 +159,36 @@ fn range_slider_definition_authors_the_full_contract_surface() {
     );
     assert_eq!(
         component.parts.len(),
-        9,
-        "root + track + 2 fill segments + center + 2 controls + 2 embedded controls (R §2)"
+        10,
+        "root + track + 2 fill segments + center + the identified control family + 2 control \
+         instances + 2 embedded controls (R §2)"
+    );
+    // The g13.018 R5 shape: the standard variant's two thumbs are the
+    // identified `control` family — one family part naming its instances,
+    // each instance its own part with its own identity and declared
+    // semantics. The count and the identities come from the definition.
+    let control = component
+        .parts
+        .iter()
+        .find(|part| part.id.as_str() == "control")
+        .expect("the standard pair is the identified control family");
+    let instances: Vec<String> = match &control.kind {
+        poodle_ir::PartKind::Identified { instances, .. } => {
+            instances.iter().map(ToString::to_string).collect()
+        }
+        other => panic!("control must be Identified, got {other:?}"),
+    };
+    assert_eq!(
+        instances,
+        vec!["control-lower".to_owned(), "control-upper".to_owned()],
+        "the identified control pair, lower then upper (R §2, RNG-14/15)"
     );
     assert!(
-        component
-            .parts
-            .iter()
-            .all(|part| !matches!(part.kind, poodle_ir::PartKind::Repeated { .. })),
-        "R2.1: the two thumbs are NOT one Repeated part — the IR's Repeated kind needs a List \
-         prop and yields identical instances, so the anatomy records distinct parts and the \
-         renderer hard-codes two (finding for g13.008)"
+        component.parts.iter().all(|part| {
+            !matches!(part.kind, poodle_ir::PartKind::Identified { .. })
+                || part.id.as_str() == "control"
+        }),
+        "the control family is the only identified part"
     );
     assert_eq!(
         component.recipe_hooks.len(),

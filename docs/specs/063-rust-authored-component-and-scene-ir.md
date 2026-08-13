@@ -55,18 +55,29 @@ additive. Measured: the nine pilot files grew 3,672 → 4,637 lines while
 removing zero duplication. Any future claim that generation will shrink a
 component needs new evidence, not this spec.
 
-**Amendments the pilot named**, both vocabulary rather than behaviour, owned by
-`g13.018`:
+**Amendments the pilot named** — both vocabulary rather than behaviour, both
+**delivered** by `g13.018` (batch card 051) and recorded in
+`../roadmaps/g13/018-capability-and-anatomy-amendments.md`:
 
-1. Per-runtime capability expression, **including absence**.
-   `CapabilityRequirement` currently carries only `capability` and a prose
-   `purpose`, so ownership is untyped and "this runtime does not have it"
-   cannot be said at all — Jetstream renders a text field nobody can type into,
-   declared identically to GPUI, which implements the whole editing model.
-2. Repeated anatomy with per-item identity. `PartKind::Repeated` requires a
-   `List` prop and yields identical instances; its own doc comment names the
-   two RangeSlider thumbs as the example it cannot serve, and both web and
-   native renderers hard-code "two".
+1. Per-runtime capability expression, **including absence** — delivered.
+   `CapabilityRequirement` now carries per-runtime `runtimes` rows
+   (`CapabilityRuntimeStatus`): provided, delegated, or absent, each with a
+   reason, reusing the four `RuntimeTarget`s (no second runtime list).
+   Absence is declared and reasoned, never inferred from a runtime being
+   unlisted; validation requires every runtime to appear whenever any row
+   is declared. TextInput declares the measured three-way split (web
+   delegates, GPUI implements, Jetstream absent); the capability drift gate
+   (`docs:capability-drift`, in `ci:web`) fails when a declared absence
+   stops being true or a declared provision has no trace in the runtime
+   sources.
+2. Repeated anatomy with per-item identity — delivered.
+   `PartKind::Repeated` is **removed** (no model used it) and replaced by
+   `PartKind::Identified { instances }`: a fixed set of identified
+   instances, each its own part with its own identity and declared
+   semantics; the count and the identities come from the definition, and
+   `poodle-render`'s RangeSlider derives the thumb pair from the instance
+   list instead of hard-coding "two". The generated artifacts carry the
+   instance list in every part row.
 
 The pass conditions and stop conditions below are retained **as the pilot's
 record**. Condition 5 failed; condition 6 was never tested. They are not a

@@ -19,10 +19,14 @@
 //! The definition declares the six environment capabilities the milestone
 //! names — focus, selection, composition/IME, clipboard, measurement, and
 //! native text editing — plus the component-owned timers. Each is a typed
-//! [`Capability`] with a `purpose` naming what it means and which runtime
-//! owns it. The boundary is **declared, never implemented**: no runtime may
-//! read machine state from drawing code (`IR-06`), and the adapters keep
-//! focus/IME/selection/clipboard/measurement (`IR-05`).
+//! [`Capability`] with a `purpose` naming what it means, and per-runtime
+//! provision rows naming which of the four runtimes provide, delegate, or
+//! lack it — the three-way split the pilot measured (web delegates, GPUI
+//! implements, Jetstream is absent) is now typed vocabulary, not prose
+//! (`g13.018` R3; b049's R3 answer). The boundary is **declared, never
+//! implemented**: no runtime may read machine state from drawing code
+//! (`IR-06`), and the adapters keep focus/IME/selection/clipboard/
+//! measurement (`IR-05`).
 //!
 //! - **focus** → [`Capability::Focus`]: the web DOM owns focus on the
 //!   native input (`autofocus`, the imperative `focus()` method); the Rust
@@ -37,9 +41,10 @@
 //!   `selectionEnd` controlled props, `onSelectionChange`), the backend owns
 //!   drawing it (glyph measurement), and the shared edit model owns the
 //!   semantics (`edit_transition`, `word_range_at`, `selected_text`). The
-//!   capability is typed (the two enums); the per-runtime ownership is
-//!   prose in `purpose` — there is no typed per-runtime ownership field in
-//!   the IR. Recorded for `g13.008` (R3 question 2).
+//!   capability is typed (the two enums) and the per-runtime split is the
+//!   typed `runtimes` rows (delegate/implement/absent) added by `g13.018` —
+//!   the gap b049 recorded ("no per-runtime expression anywhere in the
+//!   pipeline") is closed.
 //! - **composition/IME** → [`Capability::Ime`]: the web DOM owns composition
 //!   natively (no composition listeners in the components — a composition
 //!   sequence must not fire intermediate `onValueChange`; the runtime
@@ -59,6 +64,18 @@
 //!   machine — see R5); the Rust targets drive the shared headless edit
 //!   model from key events (`edit_transition`) and insertions
 //!   (`insert_transition`).
+//!
+//! # The three-way split (g13.018, delivered)
+//!
+//! The pilot's R3 answer — "the IR cannot express that a runtime lacks a
+//! declared capability" — is fixed by the per-runtime `runtimes` rows on
+//! every requirement: web `Delegated` (the browser owns the capability),
+//! GPUI `Provided` (the node-backend implements it), Jetstream `Absent`
+//! (renders without it, with the reason). Absence is declared and carries
+//! a reason; nothing is inferred from silence (`g13.018` R3), and the
+//! capability drift gate (`docs:capability-drift`) fails if a declared
+//! absence stops being true or a declared provision has no trace
+//! (`g13.018` R4).
 //!
 //! The web half records the boundary now; card 049 consumes it for the
 //! natives. No stop condition was reached: every capability has a typed
@@ -144,14 +161,15 @@
 //!   R2.2) generalizes to: *no text vector exists at all*.
 
 use poodle_ir::{
-    A11yRole, Accessibility, AriaMapping, AttributeForm, Axes, Capability, CapabilityRequirement,
-    ComponentDefinition, ConformanceVector, ContractRef, ControlDensity, ControlSize,
-    DensityAdjustment, DensityAxis, EmissionPolicy, Event, EventKind, EventPayload, EventTiming,
-    Extension, FiringPhase, Identifier, IrModel, KeyChord, KeyboardCommand, Layer,
-    MetricValue, Modifier, NameRule, NameSource, NativeAttr, Part, PartKind, PayloadKind,
-    PermittedSubset, Prop, PropType, RecipeHookRef, RecipeLink, RecipeLinkKind, RuntimeTarget,
-    SharedEnumMember, SharedType, SizeAxis, SizeRole, SizeStep, StateAttribute, TokenGroup,
-    TokenRef, Value, VectorStep, VectorStepKind, VisualFieldKind, VisualState, VisualStateField,
+    A11yRole, Accessibility, AriaMapping, AttributeForm, Axes, Capability, CapabilityProvision,
+    CapabilityRequirement, CapabilityRuntimeStatus, ComponentDefinition, ConformanceVector,
+    ContractRef, ControlDensity, ControlSize, DensityAdjustment, DensityAxis, EmissionPolicy,
+    Event, EventKind, EventPayload, EventTiming, Extension, FiringPhase, Identifier, IrModel,
+    KeyChord, KeyboardCommand, Layer, MetricValue, Modifier, NameRule, NameSource, NativeAttr,
+    Part, PartKind, PayloadKind, PermittedSubset, Prop, PropType, RecipeHookRef, RecipeLink,
+    RecipeLinkKind, RuntimeTarget, SharedEnumMember, SharedType, SizeAxis, SizeRole, SizeStep,
+    StateAttribute, TokenGroup, TokenRef, Value, VectorStep, VectorStepKind, VisualFieldKind,
+    VisualState, VisualStateField,
 };
 
 /// The governing contract, cited by the component and every definition row.
@@ -1423,6 +1441,38 @@ pub fn text_input_definition() -> ComponentDefinition {
                           and caret drawing, with isFocused a host-driven prop that does \
                           not drive the caret (T §6 Caret Ownership, TXT-21)."
                     .to_owned(),
+                runtimes: vec![
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Svelte,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The component's imperative focus() and the native input's \
+                                 autofocus own focus delivery (TXT-21)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::React,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The imperative focus() handle and the native input's \
+                                 autoFocus own focus delivery (TXT-21)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Gpui,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The node-backend owns a real focus handle, observes gain \
+                                 and loss, and fires on_focus_change (interaction.rs; TXT-21)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Jetstream,
+                        provision: CapabilityProvision::Absent,
+                        reason: "Jetstream never observes focus for poodle fields — no \
+                                 on_focus_change route, and the adapter's text element has \
+                                 no meaningful poodle focus; the field renders unfocusable \
+                                 for editing (b049 R2, measured)."
+                            .to_owned(),
+                    },
+                ],
             },
             CapabilityRequirement {
                 capability: Capability::TextEditing,
@@ -1435,6 +1485,43 @@ pub fn text_input_definition() -> ComponentDefinition {
                           onSelectionChange) — selection is not a first-class capability \
                           name, recorded as a finding (T §6, TXT-21/22/23; IR-05)."
                     .to_owned(),
+                runtimes: vec![
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Svelte,
+                        provision: CapabilityProvision::Delegated,
+                        reason: "The browser's editing model IS the editing — the component \
+                                 wires the native input and owns no text machine (b048, \
+                                 measured)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::React,
+                        provision: CapabilityProvision::Delegated,
+                        reason: "The browser's editing model IS the editing — the component \
+                                 wires the native input and owns no text machine (b048, \
+                                 measured)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Gpui,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The node-backend implements the full editing model: \
+                                 ime.rs (218 lines), input_text.rs (574 lines), and the \
+                                 on_edit_key/on_edit_insert/on_select_range wiring in \
+                                 interaction.rs and lib.rs (b049, measured)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Jetstream,
+                        provision: CapabilityProvision::Absent,
+                        reason: "Jetstream has zero on_edit_key/on_select_range/\
+                                 on_edit_insert references and no ime.rs — the adapter \
+                                 renders a display-only text element with no caret, no \
+                                 selection, and no key path; the field cannot be typed \
+                                 into. Declared, not fixed (b049 R3; TXT-31)."
+                            .to_owned(),
+                    },
+                ],
             },
             CapabilityRequirement {
                 capability: Capability::Ime,
@@ -1445,6 +1532,40 @@ pub fn text_input_definition() -> ComponentDefinition {
                           a platform text input handler with a UTF-16 boundary and a \
                           backend-owned marked range (T §6, TXT-24)."
                     .to_owned(),
+                runtimes: vec![
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Svelte,
+                        provision: CapabilityProvision::Delegated,
+                        reason: "The browser owns composition; the component filters input \
+                                 events by isComposing and intercepts no composition events \
+                                 (TXT-24; b048 measured)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::React,
+                        provision: CapabilityProvision::Delegated,
+                        reason: "The browser owns composition; the component filters input \
+                                 events by isComposing and intercepts no composition events \
+                                 (TXT-24; b048 measured)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Gpui,
+                        provision: CapabilityProvision::Provided,
+                        reason: "ime.rs is a direct gpui InputHandler implementation with \
+                                 explicit UTF-16 conversions and a backend-owned marked \
+                                 range (TXT-24; b049 measured)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Jetstream,
+                        provision: CapabilityProvision::Absent,
+                        reason: "No ime.rs anywhere and no input handler is ever registered \
+                                 for a poodle field — composition has no route (b049 R2, \
+                                 measured; TXT-24)."
+                            .to_owned(),
+                    },
+                ],
             },
             CapabilityRequirement {
                 capability: Capability::Clipboard,
@@ -1455,6 +1576,37 @@ pub fn text_input_definition() -> ComponentDefinition {
                           (selected_text); copying an empty selection leaves the \
                           clipboard alone (T §6, TXT-23)."
                     .to_owned(),
+                runtimes: vec![
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Svelte,
+                        provision: CapabilityProvision::Delegated,
+                        reason: "The browser owns the clipboard on the native input — the \
+                                 component implements no clipboard path (TXT-23)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::React,
+                        provision: CapabilityProvision::Delegated,
+                        reason: "The browser owns the clipboard on the native input — the \
+                                 component implements no clipboard path (TXT-23)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Gpui,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The node-backend owns the platform clipboard; paste/cut \
+                                 land through the shared edit model via on_edit_insert and \
+                                 selected_text (lib.rs, TXT-23; b049 measured)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Jetstream,
+                        provision: CapabilityProvision::Absent,
+                        reason: "No clipboard path exists for poodle fields — copy/cut/\
+                                 paste have no route (b049 R2, measured; TXT-23)."
+                            .to_owned(),
+                    },
+                ],
             },
             CapabilityRequirement {
                 capability: Capability::Measurement,
@@ -1464,6 +1616,38 @@ pub fn text_input_definition() -> ComponentDefinition {
                           answer the reverse question (closest_index_for_x makes \
                           click-to-position and drag-to-select possible) (T §6, TXT-21/22)."
                     .to_owned(),
+                runtimes: vec![
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Svelte,
+                        provision: CapabilityProvision::Delegated,
+                        reason: "The browser measures the native input's text natively — \
+                                 the component implements no measurement (TXT-21/22)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::React,
+                        provision: CapabilityProvision::Delegated,
+                        reason: "The browser measures the native input's text natively — \
+                                 the component implements no measurement (TXT-21/22)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Gpui,
+                        provision: CapabilityProvision::Provided,
+                        reason: "input_text.rs shapes and measures the value line and \
+                                 answers clicks with x_for_index/closest_index_for_x on \
+                                 the measured ShapedLine (TXT-21/22; b049 measured)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Jetstream,
+                        provision: CapabilityProvision::Absent,
+                        reason: "No shaped-line measurement, no caret placement, no \
+                                 click-to-index — the field is display-only (b049 R2, \
+                                 measured; TXT-21/22)."
+                            .to_owned(),
+                    },
+                ],
             },
             CapabilityRequirement {
                 capability: Capability::Timers,
@@ -1473,6 +1657,36 @@ pub fn text_input_definition() -> ComponentDefinition {
                           have no timer surface today — the host drives timing (T §5, \
                           TXT-11/12/28; CROSS-17)."
                     .to_owned(),
+                runtimes: vec![
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Svelte,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The component owns its setTimeout debounce and validation \
+                                 timers with cleanup on destroy (TXT-11/12/28)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::React,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The component owns its setTimeout debounce and validation \
+                                 timers with cleanup on unmount (TXT-11/12/28)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Gpui,
+                        provision: CapabilityProvision::Absent,
+                        reason: "No timer surface — the host drives timing (b049 measured: \
+                                 neither native has a timer surface)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Jetstream,
+                        provision: CapabilityProvision::Absent,
+                        reason: "No timer surface — the host drives timing (b049 measured: \
+                                 neither native has a timer surface)."
+                            .to_owned(),
+                    },
+                ],
             },
         ],
 

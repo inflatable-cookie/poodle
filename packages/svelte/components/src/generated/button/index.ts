@@ -6,12 +6,12 @@ export const buttonDefinition = {
   id: "button",
   name: "Button",
   parts: [
-    { id: "root", name: "Root", className: "poodle-button", parent: null },
-    { id: "spinner", name: "Spinner", className: "poodle-button__spinner", parent: "root" },
-    { id: "leading-icon", name: "Leading Icon", className: "poodle-button__icon", parent: "root" },
-    { id: "label", name: "Label", className: "poodle-button__label", parent: "root" },
-    { id: "trailing-icon", name: "Trailing Icon", className: "poodle-button__icon", parent: "root" },
-    { id: "chevron", name: "Chevron", className: "poodle-button__chevron", parent: "root" },
+    { id: "root", name: "Root", className: "poodle-button", parent: null, instances: null },
+    { id: "spinner", name: "Spinner", className: "poodle-button__spinner", parent: "root", instances: null },
+    { id: "leading-icon", name: "Leading Icon", className: "poodle-button__icon", parent: "root", instances: null },
+    { id: "label", name: "Label", className: "poodle-button__label", parent: "root", instances: null },
+    { id: "trailing-icon", name: "Trailing Icon", className: "poodle-button__icon", parent: "root", instances: null },
+    { id: "chevron", name: "Chevron", className: "poodle-button__chevron", parent: "root", instances: null },
   ],
   attributes: [
     { id: "variant", name: "data-variant", form: "valued", emission: "always", values: ["primary", "secondary", "ghost"] },

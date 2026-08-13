@@ -143,6 +143,38 @@ pub(crate) fn source_prop<'a>(
         .and_then(|source| component.props.iter().find(|p| &p.id == source))
 }
 
+/// The identified instances of a part (g13.018 R5): the `instances` list
+/// of [`poodle_ir::PartKind::Identified`], or `None` for any other kind.
+/// Every part-emitting target emits this so the artifacts carry the count
+/// and the identities from the definition — a runtime derives the pair
+/// from the list instead of hard-coding the count.
+pub(crate) fn part_instances(part: &poodle_ir::Part) -> Option<Vec<String>> {
+    match &part.kind {
+        poodle_ir::PartKind::Identified { instances, .. } => {
+            Some(instances.iter().map(ToString::to_string).collect())
+        }
+        _ => None,
+    }
+}
+
+/// The TypeScript literal for a part's identified-instance list: the
+/// instance ids as a string-array literal, or `null` when the part is not
+/// an identified family. Emitted uniformly so the artifact's part rows
+/// share one shape.
+pub(crate) fn part_instances_ts(part: &poodle_ir::Part) -> String {
+    match part_instances(part) {
+        Some(instances) => {
+            let entries = instances
+                .iter()
+                .map(|instance| ts_string_literal(instance))
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("[{entries}]")
+        }
+        None => "null".to_owned(),
+    }
+}
+
 /// The visual field an attribute's source names, if any. `source` is the
 /// plain identifier form of what was once a `value` expression wrapping a
 /// Visual reference (g13.017 R1 bucket 2: vocabulary kept, tree gone).
@@ -256,17 +288,20 @@ fn render_component_file(
     ));
 
     // Parts — the anatomy with the DOM class each part renders under.
+    // Identified families (g13.018 R5) also carry their instance list, so
+    // the count and the identities come from the definition.
     out.push_str("  parts: [\n");
     for part in &component.parts {
         out.push_str(&format!(
-            "    {{ id: {}, name: {}, className: {}, parent: {} }},\n",
+            "    {{ id: {}, name: {}, className: {}, parent: {}, instances: {} }},\n",
             ts_string_literal(part.id.as_str()),
             ts_string_literal(&part.name),
             ts_string_literal(&part_class_name(part.id.as_str())),
             part.parent
                 .as_ref()
                 .map(|parent| ts_string_literal(parent.as_str()))
-                .unwrap_or_else(|| "null".to_owned())
+                .unwrap_or_else(|| "null".to_owned()),
+            part_instances_ts(part)
         ));
     }
     out.push_str("  ],\n");

@@ -17,13 +17,17 @@
 //! change moves every artifact and every runtime in one `ir:build`.
 
 /// One anatomy part: id, display name, the DOM class the web markup
-/// renders it under, and its parent part. The class projection is shared
-/// with the `button-ts` artifact (`part_class_name`).
+/// renders it under, its parent part, and — for an identified family
+/// (g13.018 R5) — the ids of its instances. The class projection is
+/// shared with the `button-ts` artifact (`part_class_name`).
 pub struct ButtonPart {
     pub id: &'static str,
     pub name: &'static str,
     pub dom_class: &'static str,
     pub parent: Option<&'static str>,
+    /// The instance ids of an identified family, or `None` for any other
+    /// part kind. The count and the identities come from the definition.
+    pub instances: Option<&'static [&'static str]>,
 }
 
 /// One state attribute: id, the `data-*` name the DOM carries, its form
@@ -80,36 +84,42 @@ pub static BUTTON_DEFINITION: ButtonDefinition = ButtonDefinition {
             name: "Root",
             dom_class: "poodle-button",
             parent: None,
+            instances: None,
         },
         ButtonPart {
             id: "spinner",
             name: "Spinner",
             dom_class: "poodle-button__spinner",
             parent: Some("root"),
+            instances: None,
         },
         ButtonPart {
             id: "leading-icon",
             name: "Leading Icon",
             dom_class: "poodle-button__icon",
             parent: Some("root"),
+            instances: None,
         },
         ButtonPart {
             id: "label",
             name: "Label",
             dom_class: "poodle-button__label",
             parent: Some("root"),
+            instances: None,
         },
         ButtonPart {
             id: "trailing-icon",
             name: "Trailing Icon",
             dom_class: "poodle-button__icon",
             parent: Some("root"),
+            instances: None,
         },
         ButtonPart {
             id: "chevron",
             name: "Chevron",
             dom_class: "poodle-button__chevron",
             parent: Some("root"),
+            instances: None,
         },
     ],
     attributes: &[
