@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { createDockExternalDragController } from "@inflatable-cookie/poodle-core";
+import { createDockExternalDragController, dockPanelDragSession } from "@inflatable-cookie/poodle-core";
 
 import { CollapseToggle } from "./CollapseToggle";
 import { Tabs } from "./Tabs";
@@ -225,10 +225,14 @@ export function DockRegion({
     };
     event.dataTransfer.setData(PANEL_DRAG_TYPE, JSON.stringify(data));
     event.dataTransfer.effectAllowed = "move";
+    // The payload is unreadable during dragover, so hovered regions learn
+    // which panel is in flight from this session instead of the event.
+    dockPanelDragSession.announce({ panelId, sourceEdge: edge });
   }
 
   function handleTabDragEnd(panelId: string, event: ReactDragEvent): void {
     externalDrag.end(panelId, event.nativeEvent);
+    dockPanelDragSession.clear();
   }
 
   function canAcceptExternalDrop(phase: "over" | "drop", event: ReactDragEvent): boolean {
@@ -243,6 +247,19 @@ export function DockRegion({
 
   function handleRegionDragOver(event: ReactDragEvent): void {
     const hasPoodlePanel = event.dataTransfer?.types.includes(PANEL_DRAG_TYPE) === true;
+
+    if (hasPoodlePanel) {
+      const session = dockPanelDragSession.current();
+      if (
+        session &&
+        canAcceptPanel &&
+        canAcceptPanel(session.panelId, session.sourceEdge as DockEdge) === false
+      ) {
+        setIsDragOver(false);
+        return;
+      }
+    }
+
     const acceptsExternal = !hasPoodlePanel && canAcceptExternalDrop("over", event);
     if (!hasPoodlePanel && !acceptsExternal) return;
 
@@ -311,10 +328,25 @@ export function DockRegion({
     };
     event.dataTransfer.setData(PANEL_DRAG_TYPE, JSON.stringify(data));
     event.dataTransfer.effectAllowed = "move";
+    dockPanelDragSession.announce({ panelId: items[index].value, sourceEdge: edge });
   }
 
   function handleStackItemDragOver(event: ReactDragEvent, index: number): void {
     if (!event.dataTransfer?.types.includes(PANEL_DRAG_TYPE)) return;
+
+    const isLocalReorder = dragSourceIndex.current >= 0;
+    if (!isLocalReorder) {
+      const session = dockPanelDragSession.current();
+      if (
+        session &&
+        canAcceptPanel &&
+        canAcceptPanel(session.panelId, session.sourceEdge as DockEdge) === false
+      ) {
+        setDropInsertIndex(-1);
+        return;
+      }
+    }
+
     event.preventDefault();
     setDropInsertIndex(index);
     event.dataTransfer.dropEffect = "move";
@@ -355,6 +387,7 @@ export function DockRegion({
     if (panelId) {
       externalDrag.end(panelId, event.nativeEvent);
     }
+    dockPanelDragSession.clear();
     setIsDragOver(false);
     dragSourceIndex.current = -1;
     setDragSourceState(-1);

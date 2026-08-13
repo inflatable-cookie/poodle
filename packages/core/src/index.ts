@@ -525,8 +525,10 @@ export {
 
 export {
   createDockExternalDragController,
+  dockPanelDragSession,
   type DockEdgeLike,
   type DockPanelLike,
+  type DockPanelDragSessionEntry,
   type DockExternalDragAccessors,
   type DockExternalDragCancelContext,
   type DockExternalDragCancelReason,
