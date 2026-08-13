@@ -51,7 +51,7 @@ and roadmap closeout.
 | `039` | SettingsShell — new component, designed not ported | none | merged (`3a31a6a3`) |
 | `040` | DockRegion tab pass-throughs + the underline recipe hook | none | merged (`51b0e76c`) |
 | `041` | Button slice: Rust authoring + the two web runtimes (**g13.005** part 1) | `035`/`036` merged | merged (`ff391651`) |
-| `042` | Button slice: GPUI + Jetstream via `poodle-render` — closes **g13.005** | `041` merged | ready |
+| `042` | Button slice: GPUI + Jetstream via `poodle-render` — closes **g13.005** | `041` merged | merged (`c5fa2f85`) — **g13.005 complete** |
 | `043` | container queries that query themselves (3 genuine of 5) | none | merged (`9bba0956`) |
 | `044` | two preview-shell defects `b035` measured | none | merged (`18be4a67`) |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
