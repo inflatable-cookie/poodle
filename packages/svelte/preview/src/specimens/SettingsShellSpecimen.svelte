@@ -57,9 +57,10 @@
     <Button variant="secondary" onClick={() => (refusedOpen = true)}>Refused close</Button>
   </div>
   <p class="poodle-settings-shell-specimen__hint">
-    The rail has its own surface and scroll; the page header stays put while the page
-    body scrolls. A query replaces the page with a flat result list. A refused close
-    is a warning callout, not an error.
+    Search sits in the dialog header bar; the rail has its own surface and scroll,
+    and the page body scrolls independently. The shell draws no page heading — the
+    page owns its own. A query replaces the page with a flat result list. A refused
+    close is a warning callout, not an error.
   </p>
 </Surface>
 
@@ -68,7 +69,6 @@
   {groups}
   activePageId="general"
   pageTitle="General"
-  pageDescription="Appearance and behaviour for this workspace."
 >
   {#snippet page()}
     <DetailSection title="Appearance">
@@ -98,7 +98,6 @@
   {groups}
   activePageId="storage"
   pageTitle="Storage"
-  pageDescription="Disks, backups, and recovery."
   bind:searchQuery={searchingQuery}
   searchResults={results}
 >
@@ -113,7 +112,6 @@
   bind:open={noGroupsOpen}
   groups={[]}
   pageTitle="General"
-  pageDescription="Nothing to navigate to yet."
 >
   {#snippet page()}
     <DetailSection title="General">
@@ -142,7 +140,6 @@
   {groups}
   activePageId="keymap"
   pageTitle="Keymap"
-  pageDescription="Bindings for this workspace."
   closeRefusedReason="Apply or discard this page before leaving."
   onRequestClose={() => {
     /* The host decides: the reason above keeps the shell open. */

@@ -7,10 +7,10 @@ Updated: 2026-08-12
 
 - Component name: `SettingsShell`
 - Layer: `composites`
-- Summary: the settings frame — a modal dialog with a search field, a grouped
+- Summary: the settings frame — a modal dialog with search in its header bar, a grouped
   navigation rail, and a page region that search replaces — hosting host-owned
   settings pages as snippets
-- Composes: `Dialog`, `SidebarNav`, `PageHeader`, `Surface`, `ScrollShell`,
+- Composes: `Dialog`, `SidebarNav`, `Surface`, `ScrollShell`,
   `TextInput`, `Callout`, `EmptyState`
 - In scope: dialog posture, search-over-page replacement, grouped navigation
   with its own scroll and surface, page header + scrolling page body, refused
@@ -58,7 +58,14 @@ and section labels (that produced the `STORAGE · STORAGE & BACKUPS` wrap).
 ## 3. Anatomy
 
 ```text
-Dialog (width="lg", title, showCloseButton, closeLabel "Close settings")
+Dialog (width="xl", title, ariaLabel=title, showCloseButton,
+        closeLabel "Close settings")
+├── header snippet/node — one bar, left of the dialog's own close (R1.5):
+│   └── [.poodle-settings-shell__dialog-header]  <div>  flex
+│       ├── [.poodle-settings-shell__dialog-title]  <strong> title
+│       └── [.poodle-settings-shell__search]  <div>   fills the span
+│           └── TextInput (type="search", placeholder/ariaLabel
+│                 "Search settings", showClearButton)
 └── [.poodle-settings-shell]  <div>   grid: 14rem / minmax(0, 1fr)
     ├── [.poodle-settings-shell__nav]  <aside>
     │   └── Surface (tone="panel", border="subtle", padding="none")
@@ -67,10 +74,7 @@ Dialog (width="lg", title, showCloseButton, closeLabel "Close settings")
     │           │     "No settings pages")
     │           └── (groups present) SidebarNav (ariaLabel "Settings pages",
     │                 value=activePageId)
-    └── [.poodle-settings-shell__page]  <div>   grid rows: auto auto minmax(0, 1fr)
-        ├── [.poodle-settings-shell__search]  <div>
-        │   └── TextInput (type="search", placeholder/ariaLabel "Search settings",
-        │         showClearButton)
+    └── [.poodle-settings-shell__page]  <div>   flex column
         ├── [.poodle-settings-shell__notice]  <div>   (when closeRefusedReason)
         │   └── Callout (tone="warning", announceMode="polite",
         │         message=closeRefusedReason)
@@ -88,9 +92,8 @@ Dialog (width="lg", title, showCloseButton, closeLabel "Close settings")
             │                         └── [.poodle-settings-shell__result-anchor]
             │                               <span> anchorLabel  (optional)
             └── (searchResults === null)
-                └── [.poodle-settings-shell__page-stack]  <div>  rows: auto minmax(0, 1fr)
-                    ├── [.poodle-settings-shell__page-header]  <div>
-                    │   └── PageHeader (title=pageTitle, subtitle=pageDescription)
+                └── [.poodle-settings-shell__page-stack]
+                      <section aria-label=pageTitle>  flex column
                     └── ScrollShell (direction="vertical", padding="md")
                         └── page snippet
 ```
@@ -100,11 +103,12 @@ Dialog (width="lg", title, showCloseButton, closeLabel "Close settings")
 | Dialog | `Dialog` | Owns modal semantics, focus trap, body scroll lock, and the **only** close affordance (R1.4). |
 | Nav | `<aside>` | Region: Surface + border + own scroll — never text floating on the dialog background (R1.1). |
 | Nav ScrollShell | `ScrollShell` | Independent vertical scroll owner for navigation. |
-| Page | `<div>` | Right column: search, notice, then either results or the page stack. |
-| Search | `TextInput` | Confined to the page column, never the full dialog width (R1.5). |
+| Dialog header | `<div>` | Title, search and the dialog's own close on one bar; the shell renders only the span left of close (R1.5). |
+| Page | `<div>` | Right column: notice, then either results or the page stack. Flex column — the notice is optional, so a fixed row template would strand the content. |
+| Search | `TextInput` | In the dialog header bar, filling the span between title and close (R1.5, reversed — see §9). |
 | Notice | `Callout` | Refused-close notice, warning tone, polite announcement — not an error treatment (R1.7). |
 | Results | `<ul>` | Flat result list replacing the page while a query is active (R1.6); no dropdown, no overlay. |
-| Page stack | `<div>` | Page header (fixed) above the scrolling snippet body (R1.3). |
+| Page stack | `<section>` | The scrolling snippet body, named by `pageTitle`. The shell draws no heading or description of its own (R1.3, reversed — see §9). |
 
 ## 4. Props And Inputs
 
@@ -118,8 +122,7 @@ Shapes per §2. Search results carry the anchor only when the result has one.
 |------|------|---------|----------|-------|
 | `groups` | `SettingsNavGroup[]` | `[]` | no | Navigation groups; empty renders the nav empty state |
 | `activePageId` | `string \| null` | `null` | no | Currently active page in the navigation rail |
-| `pageTitle` | `string \| null` | `null` | no | Current page heading (`PageHeader` title) |
-| `pageDescription` | `string \| null` | `null` | no | Current page supporting copy (`PageHeader` subtitle) |
+| `pageTitle` | `string \| null` | `null` | no | Accessible name of the page region. **Not drawn** — the nav rail already names the page (R1.3, reversed) |
 | `searchQuery` | `string` | `""` | no | Search field value; two-way bindable in Svelte, `onSearchQueryChange` in React |
 | `searchResults` | `SettingsSearchResult[] \| null` | `null` | no | Search outcome; `null` means **not searching** — the page region renders the page. Non-null (including `[]`) replaces the page region with the flat result list / no-results state. The host decides when a query is active; the shell never derives it from the query text |
 | `open` | `boolean \| null` | `null` | no | Controlled open state; `null` = uncontrolled, seeded by `defaultOpen`; Svelte supports binding |
@@ -233,20 +236,22 @@ only exist on search results.
 
 ### Sizing
 
-- Dialog width: `lg` — `min(48rem, 100%)`; never the oversized dialog of the
-  ported design (R1.5)
+- Dialog width: `xl` — `min(64rem, 100%)`. `lg` left too little room once
+  search moved onto the header bar
 - Shell height: `var(--poodle-recipe-settings-shell-height, min(68vh, 36rem))`
   — bounded so the inner regions own their scroll; the dialog surface's own
   max-height is a safety net, not the scroll owner
-- Grid: `grid-template-columns: 14rem minmax(0, 1fr)`; page column
-  `grid-template-rows: auto auto minmax(0, 1fr)`
+- Grid: `grid-template-columns: 14rem minmax(0, 1fr)`. The page column and
+  the page stack are **flex columns**, not grids: the notice and (formerly)
+  the page header are optional, and a fixed row template strands the scroller
+  in an `auto` row whenever the optional child is absent
 
 ### Scroll Ownership (R1.3)
 
 - The nav rail scrolls **independently** (its own `ScrollShell`)
 - The page body scrolls **independently** (its own `ScrollShell`)
-- The search field and the page header sit **outside both** scroll regions —
-  they stay put
+- The search field sits in the dialog header bar, outside both scroll regions
+- There is no page header to keep out of the scroll region (R1.3, reversed)
 - The results list scrolls in the page region's scroll shell
 - Every scroll boundary has `min-height: 0` / `min-width: 0` so the grid can
   shrink instead of pushing past the dialog
@@ -259,6 +264,22 @@ only exist on search results.
   the host needs); never shell chrome
 - Resizing rules: the nav rail is fixed at 14rem; the page column takes the
   remainder; the whole shell height is bounded by the recipe hook
+
+### Reversals
+
+Two `039` rulings were reversed in use, both on the author's call after seeing
+the built component:
+
+- **R1.5 — search placement.** `039` confined search to the page column. It now
+  sits in the dialog header bar between the title and the dialog's own close,
+  so the three read as one row. `Dialog` drops `aria-labelledby` when given a
+  custom header (`Dialog.svelte:116`), so the shell passes `ariaLabel={title}`
+  to keep the dialog named.
+- **R1.3 — page header.** `039` put a fixed `PageHeader` above the scrolling
+  body. The shell no longer draws a page heading or description at all: the nav
+  rail already names the current page, and the page snippet owns its own intro.
+  `pageDescription` was removed; `pageTitle` survives only as the page region's
+  accessible name.
 
 ## 10. Token Usage
 

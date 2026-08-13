@@ -5,7 +5,6 @@
   import Callout from "./Callout.svelte";
   import Dialog from "./Dialog.svelte";
   import EmptyState from "./EmptyState.svelte";
-  import PageHeader from "./PageHeader.svelte";
   import ScrollShell from "./ScrollShell.svelte";
   import SidebarNav from "./SidebarNav.svelte";
   import Surface from "./Surface.svelte";
@@ -33,7 +32,6 @@
     groups?: SettingsNavGroup[];
     activePageId?: string | null;
     pageTitle?: string | null;
-    pageDescription?: string | null;
     searchQuery?: string;
     searchResults?: SettingsSearchResult[] | null;
     open?: boolean | null;
@@ -52,7 +50,6 @@
     groups = [],
     activePageId = null,
     pageTitle = null,
-    pageDescription = null,
     searchQuery = $bindable(""),
     searchResults = null,
     open = $bindable<boolean | null>(null),
@@ -128,12 +125,32 @@
 <Dialog
   bind:open={dialogOpen}
   title={title}
-  width="lg"
+  ariaLabel={title}
+  width="xl"
   showCloseButton
   closeLabel={closeLabel}
   onRequestClose={onRequestClose}
   onOpenChange={handleOpenChange}
 >
+  {#snippet header()}
+    <!-- Title, search and the dialog's own close read as one bar. Dialog's
+         `__header-row` is the flex container and its close button is our
+         sibling, so this snippet owns only the left-of-close span. -->
+    <div class="poodle-settings-shell__dialog-header">
+      <strong class="poodle-settings-shell__dialog-title">{title}</strong>
+      <div class="poodle-settings-shell__search">
+        <TextInput
+          id={searchId}
+          type="search"
+          placeholder="Search settings"
+          ariaLabel="Search settings"
+          value={searchQuery}
+          showClearButton
+          onValueChange={handleSearchChange}
+        />
+      </div>
+    </div>
+  {/snippet}
   <div class="poodle-settings-shell">
     <aside class="poodle-settings-shell__nav">
       <Surface tone="panel" border="subtle" padding="none">
@@ -158,18 +175,6 @@
     </aside>
 
     <div class="poodle-settings-shell__page">
-      <div class="poodle-settings-shell__search">
-        <TextInput
-          id={searchId}
-          type="search"
-          placeholder="Search settings"
-          ariaLabel="Search settings"
-          value={searchQuery}
-          showClearButton
-          onValueChange={handleSearchChange}
-        />
-      </div>
-
       {#if closeRefusedReason}
         <div class="poodle-settings-shell__notice">
           <Callout tone="warning" announceMode="polite" message={closeRefusedReason} />
@@ -207,14 +212,15 @@
           {/if}
         </div>
       {:else}
-        <div class="poodle-settings-shell__page-stack">
-          <div class="poodle-settings-shell__page-header">
-            <PageHeader title={pageTitle} subtitle={pageDescription} />
-          </div>
+        <!-- No visible page heading or description: the nav rail already names
+             the current page, and the page snippet owns its own intro.
+             `pageTitle` becomes this region's accessible name instead, so the
+             name survives for screen readers without being drawn. -->
+        <section class="poodle-settings-shell__page-stack" aria-label={pageTitle}>
           <ScrollShell direction="vertical" padding="md">
             {@render page?.()}
           </ScrollShell>
-        </div>
+        </section>
       {/if}
     </div>
   </div>

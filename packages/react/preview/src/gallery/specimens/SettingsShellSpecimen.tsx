@@ -61,9 +61,10 @@ export function SettingsShellSpecimen() {
           className="poodle-settings-shell-specimen__hint"
           style={{ margin: "0.75rem 0 0", color: "var(--poodle-color-text-secondary)", fontSize: "0.8125rem", lineHeight: 1.5 }}
         >
-          The rail has its own surface and scroll; the page header stays put while the page
-          body scrolls. A query replaces the page with a flat result list. A refused close
-          is a warning callout, not an error.
+          Search sits in the dialog header bar; the rail has its own surface and scroll,
+          and the page body scrolls independently. The shell draws no page heading — the
+          page owns its own. A query replaces the page with a flat result list. A refused
+          close is a warning callout, not an error.
         </p>
       </Surface>
 
@@ -73,7 +74,6 @@ export function SettingsShellSpecimen() {
         groups={groups}
         activePageId="general"
         pageTitle="General"
-        pageDescription="Appearance and behaviour for this workspace."
         page={
           <>
             <DetailSection title="Appearance">
@@ -105,7 +105,6 @@ export function SettingsShellSpecimen() {
         groups={groups}
         activePageId="storage"
         pageTitle="Storage"
-        pageDescription="Disks, backups, and recovery."
         searchQuery={searchingQuery}
         onSearchQueryChange={setSearchingQuery}
         searchResults={results}
@@ -121,7 +120,6 @@ export function SettingsShellSpecimen() {
         onOpenChange={setNoGroupsOpen}
         groups={[]}
         pageTitle="General"
-        pageDescription="Nothing to navigate to yet."
         page={
           <DetailSection title="General">
             <DetailItem label="Theme" value="Dark" />
@@ -150,7 +148,6 @@ export function SettingsShellSpecimen() {
         groups={groups}
         activePageId="keymap"
         pageTitle="Keymap"
-        pageDescription="Bindings for this workspace."
         closeRefusedReason="Apply or discard this page before leaving."
         page={
           <DetailSection title="Keymap">
