@@ -63,6 +63,13 @@ pub struct ComponentInstance {
     pub bindings: Vec<PropBinding>,
     /// Optional caption shown next to the instance.
     pub caption: Option<String>,
+    /// Optional specimen-section heading the instance belongs to (spec 063
+    /// Scene IR "groups" — added by `g14-b005` tranche one, which measured
+    /// the static tier against the scene and found grouped sections missing).
+    /// Consecutive instances in the same group render under one heading;
+    /// validation rejects an empty string.
+    #[serde(default)]
+    pub group: Option<String>,
 }
 
 /// A typed prop binding inside a scene (`CROSS-02`; spec 063 "typed prop

@@ -4,7 +4,7 @@ import AccordionSpecimen from "./AccordionSpecimen.svelte";
 import AudioPlayerSpecimen from "./AudioPlayerSpecimen.svelte";
 import AudioMeterSpecimen from "./AudioMeterSpecimen.svelte";
 import AudioSwitchSpecimen from "./AudioSwitchSpecimen.svelte";
-import AvatarSpecimen from "./AvatarSpecimen.svelte";
+import SceneSpecimen from "../components/SceneSpecimen.svelte";
 import EditableListSpecimen from "./EditableListSpecimen.svelte";
 import DragNumberFieldSpecimen from "./DragNumberFieldSpecimen.svelte";
 import EnvelopeEditorSpecimen from "./EnvelopeEditorSpecimen.svelte";
@@ -20,7 +20,7 @@ import BreadcrumbsSpecimen from "./BreadcrumbsSpecimen.svelte";
 import BulkActionBarSpecimen from "./BulkActionBarSpecimen.svelte";
 import ButtonSpecimen from "./ButtonSpecimen.svelte";
 import CalendarSpecimen from "./CalendarSpecimen.svelte";
-import CalloutSpecimen from "./CalloutSpecimen.svelte";
+
 import RemediationBannerSpecimen from "./RemediationBannerSpecimen.svelte";
 import CodeSpecimen from "./CodeSpecimen.svelte";
 import ColorPickerSpecimen from "./ColorPickerSpecimen.svelte";
@@ -45,7 +45,7 @@ import DurationInputSpecimen from "./DurationInputSpecimen.svelte";
 import EditableLabelSpecimen from "./EditableLabelSpecimen.svelte";
 import EmbedInputSpecimen from "./EmbedInputSpecimen.svelte";
 import EmbedPreviewSpecimen from "./EmbedPreviewSpecimen.svelte";
-import EmptyStateSpecimen from "./EmptyStateSpecimen.svelte";
+
 import EyebrowSpecimen from "./EyebrowSpecimen.svelte";
 import FieldSpecimen from "./FieldSpecimen.svelte";
 import FieldSetSpecimen from "./FieldSetSpecimen.svelte";
@@ -87,7 +87,7 @@ import PaginationSpecimen from "./PaginationSpecimen.svelte";
 import PaginationSummarySpecimen from "./PaginationSummarySpecimen.svelte";
 import PasswordRequirementsSpecimen from "./PasswordRequirementsSpecimen.svelte";
 import PickerShellSpecimen from "./PickerShellSpecimen.svelte";
-import PillSpecimen from "./PillSpecimen.svelte";
+
 import CodeInputSpecimen from "./CodeInputSpecimen.svelte";
 import PopoverSpecimen from "./PopoverSpecimen.svelte";
 import ProgressSpecimen from "./ProgressSpecimen.svelte";
@@ -118,7 +118,7 @@ import TreeSpecimen from "./TreeSpecimen.svelte";
 import SeparatorSpecimen from "./SeparatorSpecimen.svelte";
 import SkeletonSpecimen from "./SkeletonSpecimen.svelte";
 import SliderSpecimen from "./SliderSpecimen.svelte";
-import SpinnerSpecimen from "./SpinnerSpecimen.svelte";
+
 import SpacerSpecimen from "./SpacerSpecimen.svelte";
 import SplitButtonSpecimen from "./SplitButtonSpecimen.svelte";
 import StackSpecimen from "./StackSpecimen.svelte";
@@ -187,7 +187,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "waveform-display": WaveformDisplaySpecimen,
   accordion: AccordionSpecimen,
   "audio-player": AudioPlayerSpecimen,
-  avatar: AvatarSpecimen,
+  avatar: SceneSpecimen,
   "editable-list": EditableListSpecimen,
   "alert-dialog": AlertDialogSpecimen,
   "block-editor": BlockEditorSpecimen,
@@ -196,7 +196,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "bulk-action-bar": BulkActionBarSpecimen,
   button: ButtonSpecimen,
   calendar: CalendarSpecimen,
-  callout: CalloutSpecimen,
+  callout: SceneSpecimen,
   "remediation-banner": RemediationBannerSpecimen,
   code: CodeSpecimen,
   "color-picker": ColorPickerSpecimen,
@@ -221,7 +221,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "editable-label": EditableLabelSpecimen,
   "embed-input": EmbedInputSpecimen,
   "embed-preview": EmbedPreviewSpecimen,
-  "empty-state": EmptyStateSpecimen,
+  "empty-state": SceneSpecimen,
   eyebrow: EyebrowSpecimen,
   field: FieldSpecimen,
   "field-set": FieldSetSpecimen,
@@ -264,7 +264,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "pagination-summary": PaginationSummarySpecimen,
   "password-requirements": PasswordRequirementsSpecimen,
   "picker-shell": PickerShellSpecimen,
-  pill: PillSpecimen,
+  pill: SceneSpecimen,
   "code-input": CodeInputSpecimen,
   popover: PopoverSpecimen,
   progress: ProgressSpecimen,
@@ -296,7 +296,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   separator: SeparatorSpecimen,
   skeleton: SkeletonSpecimen,
   slider: SliderSpecimen,
-  spinner: SpinnerSpecimen,
+  spinner: SceneSpecimen,
   spacer: SpacerSpecimen,
   "split-button": SplitButtonSpecimen,
   stack: StackSpecimen,

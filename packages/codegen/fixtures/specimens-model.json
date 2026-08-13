@@ -1,0 +1,2796 @@
+{
+  "schema_version": 1,
+  "shared_types": [
+    {
+      "id": "status-tone",
+      "name": "StatusTone",
+      "description": "StatusTone — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/callout.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "neutral",
+          "name": "Neutral",
+          "description": "Neutral member."
+        },
+        {
+          "id": "info",
+          "name": "Info",
+          "description": "Info member."
+        },
+        {
+          "id": "success",
+          "name": "Success",
+          "description": "Success member."
+        },
+        {
+          "id": "warning",
+          "name": "Warning",
+          "description": "Warning member."
+        },
+        {
+          "id": "danger",
+          "name": "Danger",
+          "description": "Danger member."
+        },
+        {
+          "id": "pending",
+          "name": "Pending",
+          "description": "Pending member."
+        }
+      ]
+    },
+    {
+      "id": "pill-tone",
+      "name": "PillTone",
+      "description": "PillTone — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/pill.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "neutral",
+          "name": "Neutral",
+          "description": "Neutral member."
+        },
+        {
+          "id": "info",
+          "name": "Info",
+          "description": "Info member."
+        },
+        {
+          "id": "success",
+          "name": "Success",
+          "description": "Success member."
+        },
+        {
+          "id": "warning",
+          "name": "Warning",
+          "description": "Warning member."
+        },
+        {
+          "id": "danger",
+          "name": "Danger",
+          "description": "Danger member."
+        }
+      ]
+    },
+    {
+      "id": "control-size",
+      "name": "ControlSize",
+      "description": "ControlSize — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/slider.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "xs",
+          "name": "Xs",
+          "description": "Xs member."
+        },
+        {
+          "id": "sm",
+          "name": "Sm",
+          "description": "Sm member."
+        },
+        {
+          "id": "md",
+          "name": "Md",
+          "description": "Md member."
+        },
+        {
+          "id": "lg",
+          "name": "Lg",
+          "description": "Lg member."
+        },
+        {
+          "id": "xl",
+          "name": "Xl",
+          "description": "Xl member."
+        }
+      ]
+    },
+    {
+      "id": "control-density",
+      "name": "ControlDensity",
+      "description": "ControlDensity — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/slider.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "compact",
+          "name": "Compact",
+          "description": "Compact member."
+        },
+        {
+          "id": "default",
+          "name": "Default",
+          "description": "Default member."
+        },
+        {
+          "id": "comfortable",
+          "name": "Comfortable",
+          "description": "Comfortable member."
+        }
+      ]
+    },
+    {
+      "id": "semantic-size-role",
+      "name": "SemanticControlSizeRole",
+      "description": "SemanticControlSizeRole — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/pill.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "chrome",
+          "name": "Chrome",
+          "description": "Chrome member."
+        },
+        {
+          "id": "control",
+          "name": "Control",
+          "description": "Control member."
+        },
+        {
+          "id": "prominent",
+          "name": "Prominent",
+          "description": "Prominent member."
+        }
+      ]
+    },
+    {
+      "id": "pill-appearance",
+      "name": "PillAppearance",
+      "description": "PillAppearance — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/pill.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "solid",
+          "name": "Solid",
+          "description": "Solid member."
+        },
+        {
+          "id": "subtle",
+          "name": "Subtle",
+          "description": "Subtle member."
+        },
+        {
+          "id": "badge",
+          "name": "Badge",
+          "description": "Badge member."
+        }
+      ]
+    },
+    {
+      "id": "pill-font",
+      "name": "PillFont",
+      "description": "PillFont — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/pill.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "normal",
+          "name": "Normal",
+          "description": "Normal member."
+        },
+        {
+          "id": "mono",
+          "name": "Mono",
+          "description": "Mono member."
+        }
+      ]
+    },
+    {
+      "id": "pill-typography",
+      "name": "PillTypography",
+      "description": "PillTypography — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/pill.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "label",
+          "name": "Label",
+          "description": "Label member."
+        },
+        {
+          "id": "inherit",
+          "name": "Inherit",
+          "description": "Inherit member."
+        }
+      ]
+    },
+    {
+      "id": "avatar-tone",
+      "name": "AvatarTone",
+      "description": "AvatarTone — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/avatar.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "neutral",
+          "name": "Neutral",
+          "description": "Neutral member."
+        },
+        {
+          "id": "accent",
+          "name": "Accent",
+          "description": "Accent member."
+        }
+      ]
+    },
+    {
+      "id": "avatar-shape",
+      "name": "AvatarShape",
+      "description": "AvatarShape — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/avatar.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "circle",
+          "name": "Circle",
+          "description": "Circle member."
+        },
+        {
+          "id": "rounded",
+          "name": "Rounded",
+          "description": "Rounded member."
+        }
+      ]
+    },
+    {
+      "id": "spinner-variant",
+      "name": "SpinnerVariant",
+      "description": "SpinnerVariant — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/spinner.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "ring",
+          "name": "Ring",
+          "description": "Ring member."
+        },
+        {
+          "id": "grid",
+          "name": "Grid",
+          "description": "Grid member."
+        },
+        {
+          "id": "dots",
+          "name": "Dots",
+          "description": "Dots member."
+        }
+      ]
+    },
+    {
+      "id": "spinner-tone",
+      "name": "SpinnerTone",
+      "description": "SpinnerTone — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/spinner.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "current",
+          "name": "Current",
+          "description": "Current member."
+        },
+        {
+          "id": "accent",
+          "name": "Accent",
+          "description": "Accent member."
+        },
+        {
+          "id": "muted",
+          "name": "Muted",
+          "description": "Muted member."
+        }
+      ]
+    },
+    {
+      "id": "empty-state-variant",
+      "name": "EmptyStateVariant",
+      "description": "EmptyStateVariant — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/empty-state.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "neutral",
+          "name": "Neutral",
+          "description": "Neutral member."
+        },
+        {
+          "id": "search",
+          "name": "Search",
+          "description": "Search member."
+        },
+        {
+          "id": "firstRun",
+          "name": "FirstRun",
+          "description": "FirstRun member."
+        }
+      ]
+    },
+    {
+      "id": "empty-state-size",
+      "name": "EmptyStateSize",
+      "description": "EmptyStateSize — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/empty-state.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "default",
+          "name": "Default",
+          "description": "Default member."
+        },
+        {
+          "id": "compact",
+          "name": "Compact",
+          "description": "Compact member."
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "id": "callout",
+      "name": "Callout",
+      "layer": "foundation",
+      "contract": {
+        "path": "docs/contracts/components/callout.md",
+        "section": "§3 Public Props"
+      },
+      "description": "Semantic status callout; fixture definition for the callout specimen scene.",
+      "props": [
+        {
+          "id": "tone",
+          "name": "tone",
+          "prop_type": {
+            "Shared": "status-tone"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "semantic tone and coloring",
+          "permitted_subset": {
+            "shared_type": "status-tone",
+            "members": [
+              "danger",
+              "info",
+              "neutral",
+              "pending",
+              "success",
+              "warning"
+            ]
+          }
+        },
+        {
+          "id": "title",
+          "name": "title",
+          "prop_type": "String",
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "bold heading text",
+          "permitted_subset": null
+        },
+        {
+          "id": "message",
+          "name": "message",
+          "prop_type": "String",
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "body text rendered as a paragraph",
+          "permitted_subset": null
+        },
+        {
+          "id": "content",
+          "name": "content",
+          "prop_type": "String",
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "fixture content prop (g14-b005): projected to children on web, the native spec content field on GPUI/Jetstream",
+          "permitted_subset": null
+        },
+        {
+          "id": "dismissible",
+          "name": "dismissible",
+          "prop_type": "Bool",
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "shows the dismiss control",
+          "permitted_subset": null
+        },
+        {
+          "id": "size",
+          "name": "size",
+          "prop_type": {
+            "Shared": "control-size"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "explicit control-size override",
+          "permitted_subset": {
+            "shared_type": "control-size",
+            "members": [
+              "lg",
+              "md",
+              "sm",
+              "xl",
+              "xs"
+            ]
+          }
+        },
+        {
+          "id": "density",
+          "name": "density",
+          "prop_type": {
+            "Shared": "control-density"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "explicit density override",
+          "permitted_subset": {
+            "shared_type": "control-density",
+            "members": [
+              "comfortable",
+              "compact",
+              "default"
+            ]
+          }
+        }
+      ],
+      "controlled_state": [],
+      "events": [],
+      "parts": [],
+      "attributes": [],
+      "axes": {
+        "size": null,
+        "density": null,
+        "orientation": null
+      },
+      "tokens": [],
+      "recipe_hooks": [],
+      "accessibility": {
+        "role": "group",
+        "name_rule": "from-content",
+        "name_source": null,
+        "aria": [],
+        "native": [],
+        "description": "Fixture definition (g14-b005): no accessibility claims authored."
+      },
+      "capabilities": [],
+      "keyboard": [],
+      "visual_state": [],
+      "conformance": [],
+      "extensions": []
+    },
+    {
+      "id": "pill",
+      "name": "Pill",
+      "layer": "foundation",
+      "contract": {
+        "path": "docs/contracts/components/pill.md",
+        "section": "§3 Public Props"
+      },
+      "description": "Status pill; fixture definition for the pill specimen scene.",
+      "props": [
+        {
+          "id": "tone",
+          "name": "tone",
+          "prop_type": {
+            "Shared": "pill-tone"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "semantic tone controlling fill/border/text color",
+          "permitted_subset": {
+            "shared_type": "pill-tone",
+            "members": [
+              "danger",
+              "info",
+              "neutral",
+              "success",
+              "warning"
+            ]
+          }
+        },
+        {
+          "id": "appearance",
+          "name": "appearance",
+          "prop_type": {
+            "Shared": "pill-appearance"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "fill opacity variant",
+          "permitted_subset": {
+            "shared_type": "pill-appearance",
+            "members": [
+              "badge",
+              "solid",
+              "subtle"
+            ]
+          }
+        },
+        {
+          "id": "sizeRole",
+          "name": "sizeRole",
+          "prop_type": {
+            "Shared": "semantic-size-role"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "semantic size offset",
+          "permitted_subset": {
+            "shared_type": "semantic-size-role",
+            "members": [
+              "chrome",
+              "control",
+              "prominent"
+            ]
+          }
+        },
+        {
+          "id": "font",
+          "name": "font",
+          "prop_type": {
+            "Shared": "pill-font"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "content font variant",
+          "permitted_subset": {
+            "shared_type": "pill-font",
+            "members": [
+              "mono",
+              "normal"
+            ]
+          }
+        },
+        {
+          "id": "typography",
+          "name": "typography",
+          "prop_type": {
+            "Shared": "pill-typography"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "label typography or inherited",
+          "permitted_subset": {
+            "shared_type": "pill-typography",
+            "members": [
+              "inherit",
+              "label"
+            ]
+          }
+        },
+        {
+          "id": "muted",
+          "name": "muted",
+          "prop_type": "Bool",
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "visual de-emphasis",
+          "permitted_subset": null
+        },
+        {
+          "id": "accent",
+          "name": "accent",
+          "prop_type": "String",
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "custom accent color",
+          "permitted_subset": null
+        },
+        {
+          "id": "content",
+          "name": "content",
+          "prop_type": "String",
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "fixture content prop (g14-b005): projected to children on web, the native spec label field on GPUI/Jetstream",
+          "permitted_subset": null
+        },
+        {
+          "id": "size",
+          "name": "size",
+          "prop_type": {
+            "Shared": "control-size"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "explicit size override",
+          "permitted_subset": {
+            "shared_type": "control-size",
+            "members": [
+              "lg",
+              "md",
+              "sm",
+              "xl",
+              "xs"
+            ]
+          }
+        },
+        {
+          "id": "density",
+          "name": "density",
+          "prop_type": {
+            "Shared": "control-density"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "explicit density override",
+          "permitted_subset": {
+            "shared_type": "control-density",
+            "members": [
+              "comfortable",
+              "compact",
+              "default"
+            ]
+          }
+        }
+      ],
+      "controlled_state": [],
+      "events": [],
+      "parts": [],
+      "attributes": [],
+      "axes": {
+        "size": null,
+        "density": null,
+        "orientation": null
+      },
+      "tokens": [],
+      "recipe_hooks": [],
+      "accessibility": {
+        "role": "group",
+        "name_rule": "from-content",
+        "name_source": null,
+        "aria": [],
+        "native": [],
+        "description": "Fixture definition (g14-b005): no accessibility claims authored."
+      },
+      "capabilities": [],
+      "keyboard": [],
+      "visual_state": [],
+      "conformance": [],
+      "extensions": []
+    },
+    {
+      "id": "spinner",
+      "name": "Spinner",
+      "layer": "foundation",
+      "contract": {
+        "path": "docs/contracts/components/spinner.md",
+        "section": "§3 Public Props"
+      },
+      "description": "Loading indicator; fixture definition for the spinner specimen scene.",
+      "props": [
+        {
+          "id": "variant",
+          "name": "variant",
+          "prop_type": {
+            "Shared": "spinner-variant"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "loader visual",
+          "permitted_subset": {
+            "shared_type": "spinner-variant",
+            "members": [
+              "dots",
+              "grid",
+              "ring"
+            ]
+          }
+        },
+        {
+          "id": "tone",
+          "name": "tone",
+          "prop_type": {
+            "Shared": "spinner-tone"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "color source for the indicator",
+          "permitted_subset": {
+            "shared_type": "spinner-tone",
+            "members": [
+              "accent",
+              "current",
+              "muted"
+            ]
+          }
+        },
+        {
+          "id": "size",
+          "name": "size",
+          "prop_type": {
+            "Shared": "control-size"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "explicit size override",
+          "permitted_subset": {
+            "shared_type": "control-size",
+            "members": [
+              "lg",
+              "md",
+              "sm",
+              "xl",
+              "xs"
+            ]
+          }
+        },
+        {
+          "id": "density",
+          "name": "density",
+          "prop_type": {
+            "Shared": "control-density"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "explicit density override",
+          "permitted_subset": {
+            "shared_type": "control-density",
+            "members": [
+              "comfortable",
+              "compact",
+              "default"
+            ]
+          }
+        }
+      ],
+      "controlled_state": [],
+      "events": [],
+      "parts": [],
+      "attributes": [],
+      "axes": {
+        "size": null,
+        "density": null,
+        "orientation": null
+      },
+      "tokens": [],
+      "recipe_hooks": [],
+      "accessibility": {
+        "role": "group",
+        "name_rule": "from-content",
+        "name_source": null,
+        "aria": [],
+        "native": [],
+        "description": "Fixture definition (g14-b005): no accessibility claims authored."
+      },
+      "capabilities": [],
+      "keyboard": [],
+      "visual_state": [],
+      "conformance": [],
+      "extensions": []
+    },
+    {
+      "id": "avatar",
+      "name": "Avatar",
+      "layer": "foundation",
+      "contract": {
+        "path": "docs/contracts/components/avatar.md",
+        "section": "§3 Public Props"
+      },
+      "description": "Image or initials avatar; fixture definition for the avatar specimen scene.",
+      "props": [
+        {
+          "id": "initials",
+          "name": "initials",
+          "prop_type": "String",
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "initials fallback content",
+          "permitted_subset": null
+        },
+        {
+          "id": "src",
+          "name": "src",
+          "prop_type": "String",
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "image source",
+          "permitted_subset": null
+        },
+        {
+          "id": "alt",
+          "name": "alt",
+          "prop_type": "String",
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "image alt text",
+          "permitted_subset": null
+        },
+        {
+          "id": "size",
+          "name": "size",
+          "prop_type": {
+            "Shared": "control-size"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "explicit size override",
+          "permitted_subset": {
+            "shared_type": "control-size",
+            "members": [
+              "lg",
+              "md",
+              "sm",
+              "xl",
+              "xs"
+            ]
+          }
+        },
+        {
+          "id": "tone",
+          "name": "tone",
+          "prop_type": {
+            "Shared": "avatar-tone"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "semantic tone",
+          "permitted_subset": {
+            "shared_type": "avatar-tone",
+            "members": [
+              "accent",
+              "neutral"
+            ]
+          }
+        },
+        {
+          "id": "shape",
+          "name": "shape",
+          "prop_type": {
+            "Shared": "avatar-shape"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "silhouette shape",
+          "permitted_subset": {
+            "shared_type": "avatar-shape",
+            "members": [
+              "circle",
+              "rounded"
+            ]
+          }
+        }
+      ],
+      "controlled_state": [],
+      "events": [],
+      "parts": [],
+      "attributes": [],
+      "axes": {
+        "size": null,
+        "density": null,
+        "orientation": null
+      },
+      "tokens": [],
+      "recipe_hooks": [],
+      "accessibility": {
+        "role": "group",
+        "name_rule": "from-content",
+        "name_source": null,
+        "aria": [],
+        "native": [],
+        "description": "Fixture definition (g14-b005): no accessibility claims authored."
+      },
+      "capabilities": [],
+      "keyboard": [],
+      "visual_state": [],
+      "conformance": [],
+      "extensions": []
+    },
+    {
+      "id": "empty-state",
+      "name": "EmptyState",
+      "layer": "foundation",
+      "contract": {
+        "path": "docs/contracts/components/empty-state.md",
+        "section": "§3 Public Props"
+      },
+      "description": "Empty-data placeholder; fixture definition for the empty-state specimen scene.",
+      "props": [
+        {
+          "id": "variant",
+          "name": "variant",
+          "prop_type": {
+            "Shared": "empty-state-variant"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "semantic posture",
+          "permitted_subset": {
+            "shared_type": "empty-state-variant",
+            "members": [
+              "firstRun",
+              "neutral",
+              "search"
+            ]
+          }
+        },
+        {
+          "id": "title",
+          "name": "title",
+          "prop_type": "String",
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "primary message",
+          "permitted_subset": null
+        },
+        {
+          "id": "message",
+          "name": "message",
+          "prop_type": "String",
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "supporting explanation",
+          "permitted_subset": null
+        },
+        {
+          "id": "size",
+          "name": "size",
+          "prop_type": {
+            "Shared": "empty-state-size"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "visual and copy sizing",
+          "permitted_subset": {
+            "shared_type": "empty-state-size",
+            "members": [
+              "compact",
+              "default"
+            ]
+          }
+        },
+        {
+          "id": "density",
+          "name": "density",
+          "prop_type": {
+            "Shared": "control-density"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "explicit density override",
+          "permitted_subset": {
+            "shared_type": "control-density",
+            "members": [
+              "comfortable",
+              "compact",
+              "default"
+            ]
+          }
+        }
+      ],
+      "controlled_state": [],
+      "events": [],
+      "parts": [],
+      "attributes": [],
+      "axes": {
+        "size": null,
+        "density": null,
+        "orientation": null
+      },
+      "tokens": [],
+      "recipe_hooks": [],
+      "accessibility": {
+        "role": "group",
+        "name_rule": "from-content",
+        "name_source": null,
+        "aria": [],
+        "native": [],
+        "description": "Fixture definition (g14-b005): no accessibility claims authored."
+      },
+      "capabilities": [],
+      "keyboard": [],
+      "visual_state": [],
+      "conformance": [],
+      "extensions": []
+    }
+  ],
+  "conformance_vectors": [],
+  "scenes": [
+    {
+      "id": "callout-specimen",
+      "name": "Callout",
+      "description": "Callout specimen (contract §13): the full tone set, message prop, dismissible, and title-less variants.",
+      "instances": [
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "neutral"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Neutral callout"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "A general informational message with no specific severity."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Neutral",
+          "group": "Tones"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "info"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Info"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Your changes have been saved and will take effect on next deploy."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Info",
+          "group": "Tones"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "success"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Success"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "All tests passed. The build is ready for production."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Success",
+          "group": "Tones"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "warning"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Warning"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "This API key expires in 7 days. Rotate it to avoid service interruption."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Warning",
+          "group": "Tones"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "danger"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Error"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Unable to connect to the database. Check your credentials and try again."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Danger",
+          "group": "Tones"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "pending"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Pending"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Provisioning resources. This may take a moment."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Pending",
+          "group": "Tones"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "info"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Information"
+              },
+              "description": null
+            },
+            {
+              "prop": "message",
+              "value": {
+                "String": "This is an informational callout using the message prop instead of slot content."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Information",
+          "group": "Message prop"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "info"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "A simple inline callout without a title for brief contextual notes."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Info",
+          "group": "Without title"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "info"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Dismissible callout"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "This callout can be dismissed by the user."
+              },
+              "description": null
+            },
+            {
+              "prop": "dismissible",
+              "value": {
+                "Bool": true
+              },
+              "description": null
+            }
+          ],
+          "caption": "Dismissible",
+          "group": "Dismissible"
+        }
+      ],
+      "axes": [
+        {
+          "kind": "size",
+          "values": {
+            "named": [
+              "xs",
+              "sm",
+              "md",
+              "lg",
+              "xl"
+            ]
+          },
+          "description": "Control-size axis the Sizes matrix iterates (SHELL-02; CROSS-07)."
+        },
+        {
+          "kind": "density",
+          "values": {
+            "named": [
+              "compact",
+              "default",
+              "comfortable"
+            ]
+          },
+          "description": "Density axis the Densities matrix iterates (SHELL-03; CROSS-08)."
+        }
+      ],
+      "layout": null,
+      "tabs": {
+        "tabs": [
+          "examples",
+          "sizes",
+          "densities"
+        ]
+      },
+      "search": null,
+      "preview_state": null,
+      "parity": null,
+      "captures": []
+    },
+    {
+      "id": "pill-specimen",
+      "name": "Pill",
+      "description": "Pill specimen (contract §13): tones, code font, muted, badge, inherited typography, and custom accents.",
+      "instances": [
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "neutral"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Neutral"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Neutral",
+          "group": "Tones"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "info"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Info"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Info",
+          "group": "Tones"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "success"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Success"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Success",
+          "group": "Tones"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "warning"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Warning"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Warning",
+          "group": "Tones"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "danger"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Danger"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Danger",
+          "group": "Tones"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "font",
+              "value": {
+                "Member": "mono"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "v2.4.1"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Mono",
+          "group": "Code font"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "font",
+              "value": {
+                "Member": "mono"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "success"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "stable"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Mono success",
+          "group": "Code font"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "font",
+              "value": {
+                "Member": "mono"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "warning"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "beta"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Mono warning",
+          "group": "Code font"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "muted",
+              "value": {
+                "Bool": true
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Muted neutral"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Muted neutral",
+          "group": "Muted"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "muted",
+              "value": {
+                "Bool": true
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "success"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Muted success"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Muted success",
+          "group": "Muted"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "muted",
+              "value": {
+                "Bool": true
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "danger"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Muted danger"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Muted danger",
+          "group": "Muted"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "appearance",
+              "value": {
+                "Member": "badge"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "3"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Badge 3",
+          "group": "Badge"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "appearance",
+              "value": {
+                "Member": "badge"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "12"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Badge 12",
+          "group": "Badge"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "appearance",
+              "value": {
+                "Member": "badge"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "99+"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Badge 99+",
+          "group": "Badge"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "appearance",
+              "value": {
+                "Member": "badge"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "New"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Badge New",
+          "group": "Badge"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "appearance",
+              "value": {
+                "Member": "badge"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "neutral"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Draft"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Badge Draft",
+          "group": "Badge"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "appearance",
+              "value": {
+                "Member": "badge"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "success"
+              },
+              "description": null
+            },
+            {
+              "prop": "typography",
+              "value": {
+                "Member": "inherit"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Active"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Active",
+          "group": "Inherited typography"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "accent",
+              "value": {
+                "String": "#3b82f6"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Info-ish"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Info-ish",
+          "group": "Custom accent"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "accent",
+              "value": {
+                "String": "#22c55e"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Positive-ish"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Positive-ish",
+          "group": "Custom accent"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "accent",
+              "value": {
+                "String": "#f59e0b"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Caution-ish"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Caution-ish",
+          "group": "Custom accent"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "accent",
+              "value": {
+                "String": "#ef4444"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Danger-ish"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Danger-ish",
+          "group": "Custom accent"
+        }
+      ],
+      "axes": [
+        {
+          "kind": "size",
+          "values": {
+            "named": [
+              "xs",
+              "sm",
+              "md",
+              "lg",
+              "xl"
+            ]
+          },
+          "description": "Control-size axis the Sizes matrix iterates (SHELL-02; CROSS-07)."
+        },
+        {
+          "kind": "density",
+          "values": {
+            "named": [
+              "compact",
+              "default",
+              "comfortable"
+            ]
+          },
+          "description": "Density axis the Densities matrix iterates (SHELL-03; CROSS-08)."
+        }
+      ],
+      "layout": null,
+      "tabs": {
+        "tabs": [
+          "examples",
+          "sizes",
+          "densities"
+        ]
+      },
+      "search": null,
+      "preview_state": null,
+      "parity": null,
+      "captures": []
+    },
+    {
+      "id": "spinner-specimen",
+      "name": "Spinner",
+      "description": "Spinner specimen (contract §13): ring and CLI-grid variants across sizes, and context tones.",
+      "instances": [
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "ring"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "xs"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Ring xs",
+          "group": "Ring"
+        },
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "ring"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "sm"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Ring sm",
+          "group": "Ring"
+        },
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "ring"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "md"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Ring md",
+          "group": "Ring"
+        },
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "ring"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "lg"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Ring lg",
+          "group": "Ring"
+        },
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "ring"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "xl"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Ring xl",
+          "group": "Ring"
+        },
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "grid"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "xs"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "muted"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Grid xs",
+          "group": "CLI grid"
+        },
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "grid"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "sm"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "current"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Grid sm",
+          "group": "CLI grid"
+        },
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "grid"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "md"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "accent"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Grid md",
+          "group": "CLI grid"
+        },
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "grid"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "lg"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "current"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Grid lg",
+          "group": "CLI grid"
+        },
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "grid"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "xl"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "current"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Grid xl",
+          "group": "CLI grid"
+        },
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "ring"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "current"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Ring current",
+          "group": "Context tones"
+        },
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "ring"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "accent"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Ring accent",
+          "group": "Context tones"
+        },
+        {
+          "component": "spinner",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "grid"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "muted"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Grid muted",
+          "group": "Context tones"
+        }
+      ],
+      "axes": [
+        {
+          "kind": "size",
+          "values": {
+            "named": [
+              "xs",
+              "sm",
+              "md",
+              "lg",
+              "xl"
+            ]
+          },
+          "description": "Control-size axis the Sizes matrix iterates (SHELL-02; CROSS-07)."
+        },
+        {
+          "kind": "density",
+          "values": {
+            "named": [
+              "compact",
+              "default",
+              "comfortable"
+            ]
+          },
+          "description": "Density axis the Densities matrix iterates (SHELL-03; CROSS-08)."
+        }
+      ],
+      "layout": null,
+      "tabs": {
+        "tabs": [
+          "examples",
+          "sizes",
+          "densities"
+        ]
+      },
+      "search": null,
+      "preview_state": null,
+      "parity": null,
+      "captures": []
+    },
+    {
+      "id": "avatar-specimen",
+      "name": "Avatar",
+      "description": "Avatar specimen (contract §13): initials sizes, tone and shape, and an image avatar.",
+      "instances": [
+        {
+          "component": "avatar",
+          "bindings": [
+            {
+              "prop": "initials",
+              "value": {
+                "String": "TA"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "xs"
+              },
+              "description": null
+            }
+          ],
+          "caption": "TA xs",
+          "group": "Initials"
+        },
+        {
+          "component": "avatar",
+          "bindings": [
+            {
+              "prop": "initials",
+              "value": {
+                "String": "TA"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "sm"
+              },
+              "description": null
+            }
+          ],
+          "caption": "TA sm",
+          "group": "Initials"
+        },
+        {
+          "component": "avatar",
+          "bindings": [
+            {
+              "prop": "initials",
+              "value": {
+                "String": "TA"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "md"
+              },
+              "description": null
+            }
+          ],
+          "caption": "TA md",
+          "group": "Initials"
+        },
+        {
+          "component": "avatar",
+          "bindings": [
+            {
+              "prop": "initials",
+              "value": {
+                "String": "TA"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "lg"
+              },
+              "description": null
+            }
+          ],
+          "caption": "TA lg",
+          "group": "Initials"
+        },
+        {
+          "component": "avatar",
+          "bindings": [
+            {
+              "prop": "initials",
+              "value": {
+                "String": "TA"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "xl"
+              },
+              "description": null
+            }
+          ],
+          "caption": "TA xl",
+          "group": "Initials"
+        },
+        {
+          "component": "avatar",
+          "bindings": [
+            {
+              "prop": "initials",
+              "value": {
+                "String": "AC"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "neutral"
+              },
+              "description": null
+            }
+          ],
+          "caption": "AC neutral",
+          "group": "Tone and shape"
+        },
+        {
+          "component": "avatar",
+          "bindings": [
+            {
+              "prop": "initials",
+              "value": {
+                "String": "AC"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "accent"
+              },
+              "description": null
+            }
+          ],
+          "caption": "AC accent",
+          "group": "Tone and shape"
+        },
+        {
+          "component": "avatar",
+          "bindings": [
+            {
+              "prop": "initials",
+              "value": {
+                "String": "AC"
+              },
+              "description": null
+            },
+            {
+              "prop": "shape",
+              "value": {
+                "Member": "rounded"
+              },
+              "description": null
+            },
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "accent"
+              },
+              "description": null
+            }
+          ],
+          "caption": "AC rounded",
+          "group": "Tone and shape"
+        },
+        {
+          "component": "avatar",
+          "bindings": [
+            {
+              "prop": "src",
+              "value": {
+                "String": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%232563eb'/%3E%3Ccircle cx='40' cy='30' r='16' fill='%23fff'/%3E%3Cpath d='M14 74c5-18 17-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E"
+              },
+              "description": null
+            },
+            {
+              "prop": "alt",
+              "value": {
+                "String": "Example user"
+              },
+              "description": null
+            },
+            {
+              "prop": "size",
+              "value": {
+                "Member": "lg"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Example user",
+          "group": "Image"
+        }
+      ],
+      "axes": [
+        {
+          "kind": "size",
+          "values": {
+            "named": [
+              "xs",
+              "sm",
+              "md",
+              "lg",
+              "xl"
+            ]
+          },
+          "description": "Control-size axis the Sizes matrix iterates (SHELL-02; CROSS-07)."
+        },
+        {
+          "kind": "density",
+          "values": {
+            "named": [
+              "compact",
+              "default",
+              "comfortable"
+            ]
+          },
+          "description": "Density axis the Densities matrix iterates (SHELL-03; CROSS-08)."
+        }
+      ],
+      "layout": null,
+      "tabs": {
+        "tabs": [
+          "examples",
+          "sizes",
+          "densities"
+        ]
+      },
+      "search": null,
+      "preview_state": null,
+      "parity": null,
+      "captures": []
+    },
+    {
+      "id": "empty-state-specimen",
+      "name": "EmptyState",
+      "description": "EmptyState specimen (contract §13): neutral, search, first-run, and compact postures.",
+      "instances": [
+        {
+          "component": "empty-state",
+          "bindings": [
+            {
+              "prop": "title",
+              "value": {
+                "String": "No projects yet"
+              },
+              "description": null
+            },
+            {
+              "prop": "message",
+              "value": {
+                "String": "Create your first project to get started."
+              },
+              "description": null
+            }
+          ],
+          "caption": "No projects yet",
+          "group": "Neutral"
+        },
+        {
+          "component": "empty-state",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "search"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "No results found"
+              },
+              "description": null
+            },
+            {
+              "prop": "message",
+              "value": {
+                "String": "Try adjusting your search terms or clearing filters."
+              },
+              "description": null
+            }
+          ],
+          "caption": "No results found",
+          "group": "Search"
+        },
+        {
+          "component": "empty-state",
+          "bindings": [
+            {
+              "prop": "variant",
+              "value": {
+                "Member": "firstRun"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Welcome to your workspace"
+              },
+              "description": null
+            },
+            {
+              "prop": "message",
+              "value": {
+                "String": "This is where your team's components will appear once you start building."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Welcome",
+          "group": "First run"
+        },
+        {
+          "component": "empty-state",
+          "bindings": [
+            {
+              "prop": "size",
+              "value": {
+                "Member": "compact"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "No captured emails found"
+              },
+              "description": null
+            },
+            {
+              "prop": "message",
+              "value": {
+                "String": "Emails will appear here when sent in development mode."
+              },
+              "description": null
+            }
+          ],
+          "caption": "No captured emails",
+          "group": "Compact custom visual"
+        }
+      ],
+      "axes": [
+        {
+          "kind": "size",
+          "values": {
+            "named": [
+              "xs",
+              "sm",
+              "md",
+              "lg",
+              "xl"
+            ]
+          },
+          "description": "Control-size axis the Sizes matrix iterates (SHELL-02; CROSS-07)."
+        },
+        {
+          "kind": "density",
+          "values": {
+            "named": [
+              "compact",
+              "default",
+              "comfortable"
+            ]
+          },
+          "description": "Density axis the Densities matrix iterates (SHELL-03; CROSS-08)."
+        }
+      ],
+      "layout": null,
+      "tabs": {
+        "tabs": [
+          "examples",
+          "sizes",
+          "densities"
+        ]
+      },
+      "search": null,
+      "preview_state": null,
+      "parity": null,
+      "captures": []
+    }
+  ],
+  "specimen_registry": null
+}

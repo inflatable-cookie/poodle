@@ -4,7 +4,6 @@
 //! ```text
 //! poodle-codegen <FIXTURE> --out <DIR> [--check] [--target <ID>]
 //! poodle-codegen --author-shell <OUT> [--check]
-//! poodle-codegen --machine-interfaces <FILE> --out <DIR> --target <machine-ts|machine-rust> [--check]
 //! ```
 //!
 //! Fixture mode runs the registered targets over one serialized `IrModel`.
@@ -24,11 +23,6 @@
 //! the committed fixture can never be invalid IR. `--check` byte-compares
 //! against the committed fixture without writing.
 //!
-//! Machine-interface mode (g14-b004, spec 064 mechanism 1) loads
-//! `machine-interfaces.json` and emits TypeScript or Rust type declarations.
-//! It is not an `IrModel` path: `--target machine-ts` / `machine-rust` are
-//! select-only and unreachable from fixture mode.
-//!
 //! Exit codes: 0 clean, 1 drift/validation/IO failure, 2 usage error.
 
 use std::env;
@@ -37,8 +31,8 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use poodle_codegen::{
-    check_outputs, generate, load_and_validate, machine_interfaces, models, targets, write_outputs,
-    CodegenError,
+    check_outputs, generate, load_and_validate, machine_interfaces, models, targets,
+    write_outputs, CodegenError,
 };
 
 fn usage() -> String {
@@ -60,12 +54,19 @@ fn usage() -> String {
               fixture the pipeline consumes — after a validate round trip;\n\
               with --check, byte-compare instead of write.\n\
      \n\
-     usage: poodle-codegen --machine-interfaces <FILE> --out <DIR> --target <ID> [--check]\n\
+     usage: poodle-codegen --author-specimens <OUT> [--check]\n\
+     \n\
+     --author-specimens  serialize the Rust-authored display-specimen\n\
+              scenes (packages/codegen/src/models/display_specimens.rs) to\n\
+              OUT — the fixture the specimen targets consume — after a\n\
+              validate round trip; with --check, byte-compare instead of\n\
+              write.\n\
+     \n\
+     usage: poodle-codegen --machine-interfaces <FILE> --out <DIR> --target <machine-ts|machine-rust> [--check]\n\
      \n\
      --machine-interfaces  schema of machine states, events, effects, and\n\
-              context types (spec 064 mechanism 1). Not an IrModel.\n\
-     --target machine-ts or machine-rust (required in this mode); artifacts\n\
-              land under DIR/generated/machines/."
+              context types (spec 064 mechanism 1). Not an IrModel; the\n\
+              machine targets are select-only."
         .to_owned()
 }
 
@@ -73,6 +74,7 @@ struct Args {
     fixture: Option<PathBuf>,
     out: Option<PathBuf>,
     author_shell: Option<PathBuf>,
+    author_specimens: Option<PathBuf>,
     machine_interfaces: Option<PathBuf>,
     target: Option<String>,
     check: bool,
@@ -81,6 +83,7 @@ struct Args {
 fn parse_args() -> Result<Args, String> {
     let mut out = None;
     let mut author_shell = None;
+    let mut author_specimens = None;
     let mut machine_interfaces = None;
     let mut target = None;
     let mut check = false;
@@ -101,6 +104,12 @@ fn parse_args() -> Result<Args, String> {
                         .ok_or("--author-shell requires an output path")?,
                 ));
             }
+            "--author-specimens" => {
+                author_specimens = Some(PathBuf::from(
+                    args.next()
+                        .ok_or("--author-specimens requires an output path")?,
+                ));
+            }
             "--machine-interfaces" => {
                 machine_interfaces = Some(PathBuf::from(
                     args.next()
@@ -119,11 +128,11 @@ fn parse_args() -> Result<Args, String> {
         }
     }
 
-    let author_mode = author_shell.is_some();
+    let author_mode = author_shell.is_some() || author_specimens.is_some();
     let machine_mode = machine_interfaces.is_some();
 
     if author_mode && machine_mode {
-        return Err("run --author-shell and --machine-interfaces separately".to_owned());
+        return Err("run --author-* and --machine-interfaces separately".to_owned());
     }
 
     if machine_mode {
@@ -153,17 +162,11 @@ fn parse_args() -> Result<Args, String> {
             fixture: None,
             out,
             author_shell: None,
+            author_specimens: None,
             machine_interfaces,
             target,
             check,
         });
-    }
-
-    if matches!(
-        target.as_deref(),
-        Some(targets::machine_ts::ID) | Some(targets::machine_rust::ID)
-    ) {
-        return Err("--target machine-ts / machine-rust requires --machine-interfaces".to_owned());
     }
 
     let fixture = match (author_mode, positional.len()) {
@@ -194,7 +197,8 @@ fn parse_args() -> Result<Args, String> {
         fixture,
         out,
         author_shell,
-        machine_interfaces: None,
+        author_specimens,
+        machine_interfaces,
         target,
         check,
     })
@@ -202,10 +206,19 @@ fn parse_args() -> Result<Args, String> {
 
 fn run(args: &Args) -> Result<(), CodegenError> {
     if let Some(out_path) = &args.author_shell {
+        let model = models::preview_shell::shell_model();
         return if args.check {
-            check_author_shell(out_path)
+            check_author_model(out_path, &model, "shell")
         } else {
-            write_author_shell(out_path)
+            write_author_model(out_path, &model, "shell")
+        };
+    }
+    if let Some(out_path) = &args.author_specimens {
+        let model = models::display_specimens::display_specimens_model();
+        return if args.check {
+            check_author_model(out_path, &model, "display-specimens")
+        } else {
+            write_author_model(out_path, &model, "display-specimens")
         };
     }
     if let Some(schema) = &args.machine_interfaces {
@@ -273,32 +286,30 @@ fn run_machine_interfaces(schema: &Path, args: &Args) -> Result<(), CodegenError
     Ok(())
 }
 
-/// Serializes the Rust-authored shell model to the fixture after a validate
-/// round trip (card 035 R1): the bytes written are exactly the bytes the
+/// Serializes a Rust-authored model to the fixture after a validate round
+/// trip (card 035 R1): the bytes written are exactly the bytes the
 /// pipeline's `load_and_validate` will accept.
-fn author_shell_document() -> Result<String, CodegenError> {
-    let model = models::preview_shell::shell_model();
-    let document = serde_json::to_string_pretty(&model).map_err(|error| CodegenError::Gate {
-        message: format!("cannot serialize the authored shell model: {error}"),
+fn author_document(model: &poodle_ir::IrModel, label: &str) -> Result<String, CodegenError> {    let document = serde_json::to_string_pretty(model).map_err(|error| CodegenError::Gate {
+        message: format!("cannot serialize the authored {label} model: {error}"),
     })?;
     // Validate the serialized form, not just the in-memory model: the
     // fixture is the pipeline's input, and it must pass `load_and_validate`.
     let round_tripped: poodle_ir::IrModel =
         serde_json::from_str(&document).map_err(|error| CodegenError::Gate {
-            message: format!("authored shell model does not round-trip as JSON: {error}"),
+            message: format!("authored {label} model does not round-trip as JSON: {error}"),
         })?;
     let findings = round_tripped.validate();
     if !findings.is_empty() {
         return Err(CodegenError::Invalid {
-            path: PathBuf::from("packages/codegen/fixtures/shell-model.json"),
+            path: PathBuf::from(format!("packages/codegen/fixtures/{label}-model.json")),
             findings,
         });
     }
     Ok(format!("{document}\n"))
 }
 
-fn write_author_shell(out_path: &Path) -> Result<(), CodegenError> {
-    let document = author_shell_document()?;
+fn write_author_model(out_path: &Path, model: &poodle_ir::IrModel, label: &str) -> Result<(), CodegenError> {
+    let document = author_document(model, label)?;
     if let Some(parent) = out_path.parent() {
         fs::create_dir_all(parent).map_err(|error| CodegenError::Write {
             path: parent.to_path_buf(),
@@ -310,30 +321,30 @@ fn write_author_shell(out_path: &Path) -> Result<(), CodegenError> {
         source: error,
     })?;
     println!(
-        "Authored shell model ({} bytes, IR schema {}).",
+        "Authored {label} model ({} bytes, IR schema {}).",
         document.len(),
         poodle_ir::IR_SCHEMA_VERSION
     );
     Ok(())
 }
 
-/// Read-only twin of [`write_author_shell`]: regenerate in memory and
+/// Read-only twin of [`write_author_model`]: regenerate in memory and
 /// byte-compare against the committed fixture. No write call exists on this
 /// path.
-fn check_author_shell(out_path: &Path) -> Result<(), CodegenError> {
-    let document = author_shell_document()?;
+fn check_author_model(out_path: &Path, model: &poodle_ir::IrModel, label: &str) -> Result<(), CodegenError> {
+    let document = author_document(model, label)?;
     let committed = fs::read_to_string(out_path).map_err(|error| CodegenError::Read {
         path: out_path.to_path_buf(),
         source: error,
     })?;
     if committed == document {
-        println!("Authored shell model is current.");
+        println!("Authored {label} model is current.");
         Ok(())
     } else {
         Err(CodegenError::Gate {
             message: format!(
-                "authored shell model is stale under {}: the committed fixture differs from \
-                 `packages/codegen/src/models/preview_shell.rs`; run `effigy ir:build`",
+                "authored {label} model is stale under {}: the committed fixture differs from \
+                 the model source; run `effigy ir:build`",
                 out_path.display()
             ),
         })

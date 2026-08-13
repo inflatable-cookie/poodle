@@ -18,7 +18,7 @@ let { entry, specimenComponent = null }: { entry: ComponentEntry; specimenCompon
   {#if specimenComponent}
     {@const Specimen = specimenComponent}
     <section class="poodle-component-page__section">
-      <Specimen />
+      <Specimen slug={entry.slug} />
     </section>
   {:else}
     <section class="poodle-component-page__section">

@@ -9,7 +9,6 @@ pub mod agent_chat_input;
 pub mod alert_dialog;
 pub mod app_header;
 pub mod audio_player;
-pub mod avatar;
 pub mod badge;
 pub mod banner;
 pub mod block_editor;
@@ -18,7 +17,6 @@ pub mod bulk_action_bar;
 pub mod button;
 pub mod bx;
 pub mod calendar;
-pub mod callout;
 pub mod card;
 pub mod card_radio_group;
 pub mod card_toggle_group;
@@ -49,7 +47,6 @@ pub mod editable_label;
 pub mod editable_list;
 pub mod embed_input;
 pub mod embed_preview;
-pub mod empty_state;
 pub mod error_boundary;
 pub mod eyebrow;
 pub mod field;
@@ -97,12 +94,12 @@ pub mod pagination;
 pub mod pagination_summary;
 pub mod password_requirements;
 pub mod picker_shell;
-pub mod pill;
 pub mod popover;
 pub mod progress;
 pub mod radio_group;
 pub mod range_slider;
 pub mod rating;
+pub mod scene_specimen;
 pub mod ref_select;
 pub mod region;
 pub mod relation_picker;
@@ -125,7 +122,6 @@ pub mod sidebar_nav;
 pub mod skeleton;
 pub mod slider;
 pub mod spacer;
-pub mod spinner;
 pub mod split_button;
 pub mod split_view;
 pub mod stack;
@@ -360,7 +356,7 @@ pub fn render_specimen(
         "alert-dialog" => Some(el(alert_dialog::render(theme))),
         "app-header" => Some(el(app_header::render(theme))),
         "audio-player" => Some(el(audio_player::render(theme))),
-        "avatar" => Some(el(avatar::render(theme))),
+        "avatar" => scene_specimen::render("avatar", theme).map(el),
         "badge" => Some(el(badge::render(theme))),
         "banner" => Some(el(banner::render(theme))),
         "block-editor" => Some(el(block_editor::render(theme))),
@@ -369,7 +365,7 @@ pub fn render_specimen(
         "bulk-action-bar" => Some(el(bulk_action_bar::render(theme))),
         "button" => Some(el(button::render(theme))),
         "calendar" => Some(el(calendar::render(theme))),
-        "callout" => Some(el(callout::render(theme))),
+        "callout" => scene_specimen::render("callout", theme).map(el),
         "card" => Some(el(card::render(theme))),
         "card-radio-group" => Some(el(card_radio_group::render(theme))),
         "card-toggle-group" => Some(el(card_toggle_group::render(theme))),
@@ -399,7 +395,7 @@ pub fn render_specimen(
         "editable-list" => Some(el(editable_list::render(theme))),
         "embed-input" => Some(el(embed_input::render(theme))),
         "embed-preview" => Some(el(embed_preview::render(theme))),
-        "empty-state" => Some(el(empty_state::render(theme))),
+        "empty-state" => scene_specimen::render("empty-state", theme).map(el),
         "error-boundary" => Some(el(error_boundary::render(theme))),
         "eyebrow" => Some(el(eyebrow::render(theme))),
         "field" => Some(el(field::render(theme))),
@@ -449,7 +445,7 @@ pub fn render_specimen(
         "pagination-summary" => Some(el(pagination_summary::render(theme))),
         "password-requirements" => Some(el(password_requirements::render(theme))),
         "picker-shell" => Some(el(picker_shell::render(theme))),
-        "pill" => Some(el(pill::render(theme))),
+        "pill" => scene_specimen::render("pill", theme).map(el),
         "code-input" => Some(el(code_input::render(theme))),
         "popover" => Some(el(popover::render(theme))),
         "progress" => Some(el(progress::render(theme))),
@@ -483,7 +479,7 @@ pub fn render_specimen(
         "waveform-display" => Some(el(audio_controls::waveform_display(theme))),
         "mod-matrix-grid" => Some(el(audio_controls::mod_matrix_grid(theme))),
         "spacer" => Some(el(spacer::render(theme))),
-        "spinner" => Some(el(spinner::render(theme))),
+        "spinner" => scene_specimen::render("spinner", theme).map(el),
         "split-button" => Some(el(split_button::render(theme))),
         "split-view" => Some(el(split_view::render(theme))),
         "stack" => Some(el(stack::render(theme))),

@@ -72,6 +72,10 @@ pub enum FindingKind {
     /// (g13-b003 R6.2).
     #[serde(rename = "permitted-subset-violation")]
     PermittedSubsetViolation,
+    /// A text field that must carry content is empty, e.g. a scene
+    /// instance's specimen-section group (added `g14-b005`).
+    #[serde(rename = "empty-string")]
+    EmptyString,
 }
 
 impl Finding {
@@ -1075,6 +1079,15 @@ fn validate_scenes(model: &IrModel, findings: &mut Vec<Finding>) {
                 continue;
             };
             validate_instance_bindings(model, component, instance, &instance_id, scene, findings);
+            if let Some(group) = &instance.group {
+                if group.trim().is_empty() {
+                    findings.push(Finding::new(
+                        FindingKind::EmptyString,
+                        instance_id.clone(),
+                        "instance group must not be empty (spec 063 Scene IR groups)",
+                    ));
+                }
+            }
         }
         validate_scene_axes(scene, findings);
         validate_scene_layout(model, scene, findings);
