@@ -102,6 +102,18 @@
     return () => unsubscribe?.();
   });
 
+  /* `presence` gates the whole component, so it must be re-read on notify like
+     everything else. Svelte 5 props are lazy getters: re-reading inside a
+     notify-tracked derived re-evaluates the host's expression, which is what
+     lets a host pass plain reads off a non-reactive controller. Read straight
+     in the template it is captured once at first render, and a component that
+     starts hidden never appears — a failure indistinguishable from working,
+     since "no icon" is the expected state most of the time. */
+  const currentPresence = $derived.by(() => {
+    void notify;
+    return presence;
+  });
+
   const isOpen = $derived(open === null ? uncontrolledOpen : open);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
@@ -118,7 +130,7 @@
   }
 </script>
 
-{#if presence !== "hidden"}
+{#if currentPresence !== "hidden"}
   <div class="poodle-update-center">
     <Popover
       open={isOpen}
@@ -131,7 +143,7 @@
       onOpenChange={handleOpenChange}
     >
       {#snippet trigger()}
-        <span class="poodle-update-center__trigger" data-presence={presence}>
+        <span class="poodle-update-center__trigger" data-presence={currentPresence}>
           <IconButton
             icon="download"
             ariaLabel={downloadingLabel}
@@ -169,7 +181,7 @@
               {/if}
             {/snippet}
           </IconButton>
-          {#if presence === "attention"}
+          {#if currentPresence === "attention"}
             <span class="poodle-update-center__indicator" aria-hidden="true"></span>
           {/if}
         </span>

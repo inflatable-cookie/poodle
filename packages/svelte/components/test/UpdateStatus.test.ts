@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/svelte";
+import { tick } from "svelte";
 import { describe, expect, it, vi } from "vitest";
 
 import UpdateStatus from "../src/UpdateStatus.svelte";
@@ -13,6 +14,40 @@ const offer = {
 } as const;
 
 describe("UpdateStatus (svelte)", () => {
+  // `pending` is authority-driven but sits outside `updateStatusView`, so it
+  // needs the same notify re-read as everything else. Narrower than
+  // UpdateCenter's `presence` — both uses are inside `view`-dependent blocks —
+  // so this pins the case where `pending` moves and `view` does not.
+  it("disables its actions when pending flips under observe alone", async () => {
+    const observers: Array<() => void> = [];
+    const controller = { pending: false };
+
+    render(UpdateStatus, {
+      props: {
+        status: ready,
+        availability: offer,
+        get pending() {
+          return controller.pending;
+        },
+        observe: (fn: () => void) => {
+          observers.push(fn);
+          return () => observers.splice(observers.indexOf(fn), 1);
+        },
+      } as never,
+    });
+
+    const install = screen.getByRole("button", { name: "Install and restart" });
+    expect(install.hasAttribute("disabled")).toBe(false);
+
+    controller.pending = true;
+    observers.forEach((fn) => fn());
+    await tick();
+
+    expect(
+      screen.getByRole("button", { name: "Install and restart" }).hasAttribute("disabled"),
+    ).toBe(true);
+  });
+
   it("renders the offer with version, notes, and both actions", () => {
     render(UpdateStatus, {
       props: {

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/svelte";
+import { tick } from "svelte";
 import { describe, expect, it } from "vitest";
 
 import UpdateCenter from "../src/UpdateCenter.svelte";
@@ -10,6 +11,39 @@ const offer = {
 } as const;
 
 describe("UpdateCenter (svelte)", () => {
+  // A host is invited to pass plain reads off a non-reactive controller plus
+  // `observe`. Svelte 5 props are lazy getters, so anything re-read inside a
+  // notify-tracked derived picks up fresh values. Anything read straight in
+  // the template does not — and `presence` gates the whole component, so the
+  // failure mode is "the icon never appears", indistinguishable from working.
+  it("renders the trigger once the authority notifies, having started hidden", async () => {
+    const observers: Array<() => void> = [];
+    const controller = { presence: "hidden" as string };
+
+    const { container } = render(UpdateCenter, {
+      props: {
+        ...offer,
+        get presence() {
+          return controller.presence;
+        },
+        observe: (fn: () => void) => {
+          observers.push(fn);
+          return () => observers.splice(observers.indexOf(fn), 1);
+        },
+      } as never,
+    });
+
+    expect(container.querySelector(".poodle-update-center")).toBeNull();
+
+    // The authority finds an update and notifies. Nothing else changes.
+    controller.presence = "attention";
+    observers.forEach((fn) => fn());
+    await tick();
+
+    expect(container.querySelector(".poodle-update-center")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Updates" })).toBeTruthy();
+  });
+
   it("renders nothing at all when presence is hidden", () => {
     const { container } = render(UpdateCenter, { props: { presence: "hidden" } });
 

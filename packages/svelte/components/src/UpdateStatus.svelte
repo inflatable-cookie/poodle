@@ -96,6 +96,16 @@
     });
   });
 
+  /* `pending` is authority-driven but is not part of `updateStatusView`, so it
+     needs the same notify re-read. Narrower than UpdateCenter's `presence`:
+     both its uses sit inside `view`-dependent blocks, so it only goes stale
+     when `pending` flips without `view` changing. Routed anyway — one
+     mechanism for every prop that can move under `observe`. */
+  const currentPending = $derived.by(() => {
+    void notify;
+    return pending;
+  });
+
   const actionLabels = $derived<Record<UpdateStatusAction["type"], string>>({
     install: installLabel,
     defer: deferLabel,
@@ -152,7 +162,7 @@
           variant="ghost"
           size="xs"
           density={resolvedDensity}
-          disabled={pending}
+          disabled={currentPending}
           onClick={() => dispatch(retry)}
         >
           {retryLabel}
@@ -168,7 +178,7 @@
           variant={action.type === "install" ? "primary" : "secondary"}
           size="sm"
           density={resolvedDensity}
-          disabled={pending}
+          disabled={currentPending}
           onClick={() => dispatch(action)}
         >
           {actionLabels[action.type]}

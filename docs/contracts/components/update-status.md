@@ -105,6 +105,27 @@ type UpdateRejectionCode =
 | `retryLabel` | `string` | `"Try again"` | Retry action label (deferral or rejection notices). |
 | `confirmInstall` | `boolean` | `true` | Whether install-and-restart confirms before emitting. It closes the application. |
 
+### `observe` and prop freshness — a real runtime difference
+
+`observe` lets a host pass **plain reads off a non-reactive controller** and
+have the component refresh when the authority notifies. That works in Svelte
+and **cannot work in React**, and the difference is structural rather than a
+defect in either component:
+
+- **Svelte 5** compiles props to lazy getters. Re-reading a prop inside a
+  `notify`-tracked `$derived` re-evaluates the host's expression, so the fresh
+  value arrives. Every prop that can move under `observe` must therefore be
+  read through that derived — a prop read straight in the template is captured
+  once at first render and never updates.
+- **React** passes props by value. A child re-render triggered by `observe`
+  re-runs with the *same* props the parent last rendered, so no amount of
+  internal forcing produces a fresh `presence`. A React host must drive its own
+  re-render — `useSyncExternalStore` over the same authority is the direct
+  equivalent — and `observe` there only serves the nested component.
+
+Measured 2026-08-13: the identical scenario (mount hidden, authority notifies,
+expect the trigger) passes in Svelte and fails in React.
+
 ## 5. Callbacks
 
 | Callback | When It Fires | Payload | Notes |
