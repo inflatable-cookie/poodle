@@ -55,7 +55,7 @@ and roadmap closeout.
 | `043` | container queries that query themselves (3 genuine of 5) | none | merged (`9bba0956`) |
 | `044` | two preview-shell defects `b035` measured | none | merged (`18be4a67`) |
 | `045` | RangeSlider slice: Rust authoring + the two web runtimes (**g13.006** part 1) | `041`/`042` merged | merged (`db4e587a`) |
-| `046` | RangeSlider slice: natives — closes **g13.006** | `045` merged | ready |
+| `046` | RangeSlider slice: natives — closes **g13.006** | `045` merged | merged (`9621d119`) — **g13.006 complete** |
 | `047` | one machine shape per runtime + pin the unpinned nine | none | ready |
 | — | HistoryCentre — native parity | `029` merged | deferred — see [native registration gap](../native-registration-gap.md); `g13.014` owns it |
 
