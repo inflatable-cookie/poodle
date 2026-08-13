@@ -1,7 +1,7 @@
 # DockRegion
 
 Status: active contract
-Updated: 2026-07-29
+Updated: 2026-08-13
 
 ## 1. Purpose
 
@@ -401,7 +401,8 @@ writes `DataTransfer`; it runs synchronously inside the browser's native
   method owns the external payload write during native `dragstart`
 - If preparation is absent or pending at `dragstart`, no external payload is
   written. Tabs' own same-region reorder payload and visual state remain active
-- Poodle-local drop validation uses `canAcceptPanel` (checked on `drop`)
+- Poodle-local drop validation uses `canAcceptPanel`, consulted on `dragover`
+  (through the drag session, when one is announced) and again on `drop`
 - A drop back onto the source zone is ignored in flexible sizing (same-strip
   reorder owns it). Zone identity is `dragZoneId` when set, else the edge;
   the payload carries `sourceZone` so two regions on one edge stay distinct
@@ -410,6 +411,28 @@ writes `DataTransfer`; it runs synchronously inside the browser's native
 - Visual feedback: dashed accent-colored border overlay during drag-over
 - Drop zone overlay: absolute-positioned, `pointer-events: none`
 
+### Drag Session
+
+HTML5 makes the `dataTransfer` payload unreadable during `dragover` — only the
+types list is visible — so a hovered region cannot learn which panel is in
+flight from the event, and `canAcceptPanel(panelId, sourceEdge)` would be
+uncallable at hover time. Poodle therefore tracks the in-flight panel in a
+shared per-window drag session (`dockPanelDragSession` from
+`@inflatable-cookie/poodle-core`):
+
+- Whoever stamps the `application/x-poodle-panel-drag` payload at `dragstart`
+  announces it: DockRegion's native dragstart, the external-drag controller's
+  `start`, or a host dragging from outside DockRegion (e.g. a strip region
+  stamping the same wire format). Each calls `announce({ panelId, sourceEdge })`.
+- `dragend` clears it: DockRegion's own dragend handlers and the controller's
+  `end` call `clear`.
+- During `dragover`, a region with a session entry consults
+  `canAcceptPanel(session.panelId, session.sourceEdge)`. A `false` result
+  suppresses the drop-zone affordance and the static stack's insert indicator,
+  and the region stays inert (no `preventDefault`). A drag with no session
+  entry — a foreign writer nobody announced — keeps the permissive behaviour
+  and is still validated at `drop` from the payload itself.
+
 ### Event Order
 
 | Order | Poodle Action | Extension Observation |
@@ -417,9 +440,10 @@ writes `DataTransfer`; it runs synchronously inside the browser's native
 | 1 | enabled tab or stack item receives primary `pointerdown` | `prepare(context)` starts with a fresh `AbortSignal` |
 | 2 | a later pointerdown supersedes an unfinished source | old signal aborts with `"superseded"`; a ready old result receives `cancel` |
 | 3 | native `dragstart` begins local Poodle reorder | a matching ready result receives `start`; a pending result aborts with `"not-ready"` |
-| 4 | target receives `dragover` | `canDrop({ phase: "over" })` drives preventDefault, drop effect, and affordance |
-| 5 | target receives `drop` | `canDrop({ phase: "drop" })` is rechecked, then `drop` runs |
-| 6 | source receives native `dragend` | a started result receives `end` exactly once |
+| 4 | `dragstart` announces the in-flight panel | `dockPanelDragSession.announce({ panelId, sourceEdge })` runs from the native path, controller `start`, or the host |
+| 5 | target receives `dragover` | `canDrop({ phase: "over" })` drives preventDefault, drop effect, and affordance; a Poodle panel drag also consults `canAcceptPanel` via the session |
+| 6 | target receives `drop` | `canDrop({ phase: "drop" })` is rechecked, then `drop` runs |
+| 7 | source receives native `dragend` | a started result receives `end` exactly once; the drag session is cleared |
 
 ### Preparation Race And Cancellation Matrix
 

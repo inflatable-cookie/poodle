@@ -140,6 +140,37 @@ export type DockExternalDragController = {
   activePanelId: () => string | null;
 };
 
+/**
+ * The in-flight Poodle panel drag, shared across every DockRegion in the
+ * window.
+ *
+ * HTML5 makes `dataTransfer` payload unreadable during `dragover` — only the
+ * types list is visible — so a region being hovered cannot learn which panel
+ * is in flight from the event alone. `canAcceptPanel(panelId, sourceEdge)`
+ * would be uncallable at hover time without this side channel. Whoever stamps
+ * the `application/x-poodle-panel-drag` payload at `dragstart` announces it
+ * here (DockRegion's native path, the external-drag controller's `start`, or
+ * a host dragging from outside DockRegion), and clears it at `dragend`.
+ */
+export type DockPanelDragSessionEntry = {
+  panelId: string;
+  sourceEdge: string;
+};
+
+let activePanelDrag: DockPanelDragSessionEntry | null = null;
+
+export const dockPanelDragSession = {
+  announce(entry: DockPanelDragSessionEntry): void {
+    activePanelDrag = entry;
+  },
+  clear(): void {
+    activePanelDrag = null;
+  },
+  current(): DockPanelDragSessionEntry | null {
+    return activePanelDrag;
+  },
+};
+
 function isPromiseLike<T>(value: T | Promise<T>): value is Promise<T> {
   return typeof (value as Promise<T> | null)?.then === "function";
 }
@@ -309,6 +340,10 @@ export function createDockExternalDragController<
       event,
       dataTransfer: event.dataTransfer,
     });
+    dockPanelDragSession.announce({
+      panelId: current.panel.value,
+      sourceEdge: current.sourceEdge,
+    });
     return true;
   }
 
@@ -325,6 +360,7 @@ export function createDockExternalDragController<
 
     state = null;
     current.removePointerListeners();
+    dockPanelDragSession.clear();
     void current.preparation.end?.({
       panel: current.panel,
       sourceEdge: current.sourceEdge,

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import {
   createDockExternalDragController,
+  dockPanelDragSession,
   type DockExternalDragCancelReason,
   type DockExternalDragPreparation,
 } from "../src/dock-external-drag.ts";
@@ -86,8 +87,7 @@ function dragEvent(dropEffect: DataTransfer["dropEffect"] = "move"): DragEvent {
 }
 
 describe("createDockExternalDragController", () => {
-  test("a synchronous preparation starts, then ends with the drop effect", () => {
-    const rec = recorder();
+  test("a synchronous preparation starts, then ends with the drop effect", () => {    const rec = recorder();
     const drag = harness(() => rec.preparation);
 
     drag.prepare(panel.value, pointerDown());
@@ -205,5 +205,42 @@ describe("createDockExternalDragController", () => {
     drag.prepare(panel.value, pointerDown());
     expect(drag.activePanelId()).toBeNull();
     expect(drag.start(panel.value, dragEvent())).toBe(false);
+  });
+});
+
+describe("dockPanelDragSession", () => {
+  test("a started external drag announces the in-flight panel and end clears it", () => {
+    const drag = harness(() => recorder().preparation);
+
+    drag.prepare(panel.value, pointerDown());
+    expect(dockPanelDragSession.current()).toBeNull();
+
+    drag.start(panel.value, dragEvent());
+    expect(dockPanelDragSession.current()).toEqual({
+      panelId: "inspector",
+      sourceEdge: "left",
+    });
+
+    drag.end(panel.value, dragEvent("copy"));
+    expect(dockPanelDragSession.current()).toBeNull();
+  });
+
+  test("a start that never reached ready announces nothing", () => {
+    const drag = harness(() => null);
+
+    drag.prepare(panel.value, pointerDown());
+    expect(drag.start(panel.value, dragEvent())).toBe(false);
+    expect(dockPanelDragSession.current()).toBeNull();
+  });
+
+  test("a host can announce and clear a drag started outside the controller", () => {
+    dockPanelDragSession.announce({ panelId: "transport", sourceEdge: "bottom" });
+    expect(dockPanelDragSession.current()).toEqual({
+      panelId: "transport",
+      sourceEdge: "bottom",
+    });
+
+    dockPanelDragSession.clear();
+    expect(dockPanelDragSession.current()).toBeNull();
   });
 });
