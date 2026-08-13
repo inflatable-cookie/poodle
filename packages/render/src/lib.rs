@@ -20,6 +20,8 @@ pub mod generated {
     // enclosing module's directory (`src/generated/`).
     #[path = "button.rs"]
     pub mod button;
+    #[path = "range-slider/index.rs"]
+    pub mod range_slider;
 }
 
 pub mod accordion;

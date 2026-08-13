@@ -1,6 +1,6 @@
 # g13.006 RangeSlider Stateful-control Proof
 
-Status: planned
+Status: complete — closed by card 046 (`thread/g13-046-range-slider-slice-native-runtimes`): both natives consume the self-contained `range-slider-rust` artifact through `poodle-render`; b045's two findings re-tested natively and both generalise (the two-thumb limitation is structural, the vector thinness is shared); one definition change reaches all four previews
 Owner: Poodle core
 Depends on: `g13.005`
 

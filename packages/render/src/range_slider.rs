@@ -20,6 +20,7 @@ use poodle_node::{
 use poodle_specs::{ControlSize, RangeSliderSpec, SliderVariant};
 
 use crate::color::with_alpha;
+use crate::generated::range_slider::RANGE_SLIDER_DEFINITION;
 use crate::presentation::{rem_to_px, resolve_semantic_size};
 
 /// Host callbacks: continuous change + end-of-drag commit, both `(low, high)`.
@@ -29,25 +30,81 @@ pub struct RangeSliderHandlers {
     pub on_value_commit: Option<Arc<dyn Fn(f64, f64) + Send + Sync>>,
 }
 
+// Card 046 R3 — the render takes its vocabulary from the generated
+// definition instead of its own literals. The node tree carries no
+// attribute channel (the `Node` vocabulary is frozen), so the names gate
+// the treatments rather than flowing into a DOM: a rename in the definition
+// drops the treatment until restored, which is the drift direction the
+// proof demonstrates (the same shape as Button's `state_declared`, card
+// 042).
+
+/// The definition's state-attribute names gate the treatments. `data-variant`
+/// gates the variant anatomy; `data-fill-split` gates the corner-squaring
+/// treatment.
+fn state_declared(id: &str, name: &str) -> bool {
+    RANGE_SLIDER_DEFINITION
+        .attributes
+        .iter()
+        .any(|attribute| attribute.id == id && attribute.name == name)
+}
+
+/// The definition's anatomy parts gate the nodes the render builds: the
+/// two thumbs render only while the definition declares both control parts
+/// (card 046 R2.1 — the render still hard-codes the count two, but it is
+/// anchored to the declared pair rather than an assumption).
+fn part_declared(id: &str) -> bool {
+    RANGE_SLIDER_DEFINITION
+        .parts
+        .iter()
+        .any(|part| part.id == id)
+}
+
+/// The definition's RNG-17 geometry hooks gate the fill treatments: the
+/// negative segment's danger role renders while the definition declares
+/// `--poodle-range-negative-span`, the positive segment's accent role
+/// while it declares `--poodle-range-positive-span`.
+fn style_prop_declared(id: &str, name: &str) -> bool {
+    RANGE_SLIDER_DEFINITION
+        .style_props
+        .iter()
+        .any(|prop| prop.id == id && prop.name == name)
+}
+
+/// The frozen `poodle-specs` variant enum projected onto the definition's
+/// words (CROSS-14 — the native counterpart of the web components' value
+/// derivation).
+fn variant_name(variant: SliderVariant) -> &'static str {
+    match variant {
+        SliderVariant::Standard => "standard",
+        SliderVariant::Embedded => "embedded",
+    }
+}
+
 /// Thumb diameter in rem per the contract §8 size table (same as Slider).
+/// Each rung applies while the definition's size ladder declares it (card
+/// 046 R3); a rung the definition does not declare falls back to the
+/// default rung — the same fall-through shape as Button's density arms
+/// (card 042).
 fn thumb_diameter_rem(size: ControlSize) -> f32 {
     match size {
-        ControlSize::Xs => 0.75,
-        ControlSize::Sm => 0.875,
-        ControlSize::Md => 1.0,
-        ControlSize::Lg => 1.125,
-        ControlSize::Xl => 1.25,
+        ControlSize::Xs if RANGE_SLIDER_DEFINITION.sizes.contains(&"xs") => 0.75,
+        ControlSize::Sm if RANGE_SLIDER_DEFINITION.sizes.contains(&"sm") => 0.875,
+        ControlSize::Md if RANGE_SLIDER_DEFINITION.sizes.contains(&"md") => 1.0,
+        ControlSize::Lg if RANGE_SLIDER_DEFINITION.sizes.contains(&"lg") => 1.125,
+        ControlSize::Xl if RANGE_SLIDER_DEFINITION.sizes.contains(&"xl") => 1.25,
+        _ => 1.0,
     }
 }
 
 /// Visible track thickness in rem per the contract §8 size table.
 fn track_thickness_rem(size: ControlSize) -> f32 {
     match size {
-        ControlSize::Xs => 0.1875,
-        ControlSize::Sm => 0.25,
-        ControlSize::Md => 0.375,
-        ControlSize::Lg => 0.5,
-        ControlSize::Xl => 0.625,
+        ControlSize::Xs if RANGE_SLIDER_DEFINITION.sizes.contains(&"xs") => 0.1875,
+        ControlSize::Sm if RANGE_SLIDER_DEFINITION.sizes.contains(&"sm") => 0.25,
+        ControlSize::Md if RANGE_SLIDER_DEFINITION.sizes.contains(&"md") => 0.375,
+        ControlSize::Lg if RANGE_SLIDER_DEFINITION.sizes.contains(&"lg") => 0.5,
+        ControlSize::Xl if RANGE_SLIDER_DEFINITION.sizes.contains(&"xl") => 0.625,
+        _ => 0.375,
     }
 }
 
@@ -106,9 +163,21 @@ pub fn range_slider(
         seg
     };
 
+    // The fill segments' roles are gated on the declared RNG-17 geometry
+    // hooks (card 046 R3): the negative segment carries the danger role
+    // while the definition declares `--poodle-range-negative-span`, the
+    // positive segment the accent role while it declares
+    // `--poodle-range-positive-span`. The spans themselves stay
+    // machine-computed (R1); the hooks declare which VisualState fields
+    // feed them (CROSS-14).
+    let negative_role = style_prop_declared("range-negative-span", "--poodle-range-negative-span")
+        .then_some(negative);
+    let positive_role = style_prop_declared("range-positive-span", "--poodle-range-positive-span")
+        .then_some(accent);
+
     let seg_lo = segment(lo, None);
-    let mut seg_negative = segment(visual.negative_fill_span_norm as f32, Some(negative));
-    let mut seg_positive = segment(visual.positive_fill_span_norm as f32, Some(accent));
+    let mut seg_negative = segment(visual.negative_fill_span_norm as f32, negative_role);
+    let mut seg_positive = segment(visual.positive_fill_span_norm as f32, positive_role);
     let seg_hi = segment((1.0 - hi).max(0.0), None);
     for fill in [&mut seg_negative, &mut seg_positive] {
         let fill_corners = &mut fill.style.descriptor.corner_radii;
@@ -117,7 +186,7 @@ pub fn range_slider(
         fill_corners.bottom_right = pill;
         fill_corners.bottom_left = pill;
     }
-    if visual.fill_split_at_center {
+    if visual.fill_split_at_center && state_declared("fill-split", "data-fill-split") {
         seg_negative.style.descriptor.corner_radii.top_right = 0.0;
         seg_negative.style.descriptor.corner_radii.bottom_right = 0.0;
         seg_positive.style.descriptor.corner_radii.top_left = 0.0;
@@ -321,9 +390,31 @@ pub fn range_slider(
         .child(seg_negative)
         .child(seg_positive)
         .child(seg_hi);
-    if spec.variant == SliderVariant::Standard {
+    // The variant anatomy is the definition's vocabulary (card 046 R3):
+    // the standard two-thumb rendering applies while the definition
+    // declares the `standard` variant, the `data-variant` attribute, and
+    // both control parts — the two thumbs the definition records as
+    // distinct parts (R2.1, the native answer: the count two is still
+    // hard-coded here, but it renders only while the declared pair exists).
+    let standard_declared = matches!(spec.variant, SliderVariant::Standard)
+        && RANGE_SLIDER_DEFINITION
+            .variants
+            .contains(&variant_name(spec.variant))
+        && state_declared("variant", "data-variant")
+        && part_declared("control-lower")
+        && part_declared("control-upper");
+    // The embedded variant's center reference marker renders while the
+    // definition declares the `embedded` variant, the `data-variant`
+    // attribute, and the `center` part.
+    let embedded_declared = matches!(spec.variant, SliderVariant::Embedded)
+        && RANGE_SLIDER_DEFINITION
+            .variants
+            .contains(&variant_name(spec.variant))
+        && state_declared("variant", "data-variant")
+        && part_declared("center");
+    if standard_declared {
         track = track.child(low_thumb_layer).child(high_thumb_layer);
-    } else {
+    } else if embedded_declared {
         let mut marker = Node::container();
         marker.style.descriptor.layout.width = LayoutSizing::Fixed(border_w);
         marker.style.descriptor.layout.height = LayoutSizing::Fixed(track_h * 3.0);
@@ -384,7 +475,7 @@ pub fn range_slider(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_specs::RangeSliderSpec;
+    use poodle_specs::{RangeSliderSpec, SliderPolarity};
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -493,5 +584,82 @@ mod tests {
         assert_eq!(track_thickness_rem(ControlSize::Md), 0.375);
         assert_eq!(track_thickness_rem(ControlSize::Lg), 0.5);
         assert_eq!(track_thickness_rem(ControlSize::Xl), 0.625);
+    }
+
+    /// The native answer to b045 R2.1, encoded: the standard render builds
+    /// exactly two thumbs. The node path has no repetition mechanism either
+    /// — the count is hard-coded, anchored to the two control parts the
+    /// definition declares (card 046 R3 gates the block on
+    /// `control-lower`/`control-upper`). The finding is structural, not
+    /// web-specific.
+    #[test]
+    fn the_standard_render_builds_exactly_two_thumbs() {
+        let (node, _) = armed();
+        assert_eq!(
+            count_shadowed(&node),
+            2,
+            "standard renders exactly two thumbs — the hard-coded pair"
+        );
+    }
+
+    /// The embedded variant renders no thumbs: the center reference marker
+    /// carries no drop shadow (the `center` part, hidden in standard).
+    #[test]
+    fn the_embedded_render_builds_no_thumbs() {
+        let embedded = spec().with_embedded_control(SliderPolarity::Unipolar);
+        let node = range_slider(&embedded, &theme(), RangeSliderHandlers::default());
+        assert_eq!(
+            count_shadowed(&node),
+            0,
+            "embedded renders the center marker, not thumbs"
+        );
+    }
+
+    /// R5's clamped state at the render level: a crossed spec (low > high)
+    /// is ordered by the machine's normalize path before display, so the
+    /// render shows the ordered pair — the thumbs can never visually cross
+    /// (RNG-12, `normalize_range_value`).
+    #[test]
+    fn a_crossed_spec_renders_the_ordered_clamped_pair() {
+        let mut crossed = spec();
+        crossed.low = 80.0;
+        crossed.high = 20.0;
+        let node = range_slider(&crossed, &theme(), RangeSliderHandlers::default());
+        assert_eq!(
+            thumb_anchor_fractions(&node),
+            vec![0.2, 0.8],
+            "crossed (80, 20) displays as the ordered pair (20, 80)"
+        );
+    }
+
+    /// Thumb anchors are the relative width-percentage segments whose child
+    /// is the shadowed thumb; their fractions are the thumb positions.
+    fn thumb_anchor_fractions(node: &Node) -> Vec<f32> {
+        fn carries_shadow(node: &Node) -> bool {
+            node.children
+                .iter()
+                .any(|child| child.style.descriptor.shadow.is_some())
+        }
+        fn walk(node: &Node, out: &mut Vec<f32>) {
+            if let Some(fraction) = node.style.width_pct {
+                if carries_shadow(node) {
+                    out.push(fraction);
+                }
+            }
+            for child in &node.children {
+                walk(child, out);
+            }
+        }
+        let mut out = Vec::new();
+        walk(node, &mut out);
+        out.sort_by(|a, b| a.partial_cmp(b).expect("fractions are finite"));
+        out
+    }
+
+    /// The thumbs are the only shadowed nodes (the grab overlay carries no
+    /// shadow).
+    fn count_shadowed(node: &Node) -> usize {
+        usize::from(node.style.descriptor.shadow.is_some())
+            + node.children.iter().map(count_shadowed).sum::<usize>()
     }
 }

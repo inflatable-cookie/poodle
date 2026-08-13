@@ -13,6 +13,11 @@
 //! renders Button's rendered vocabulary into both web packages; `g13-b042`
 //! adds its Rust sibling `button-rust` (card 042 R2), which renders the
 //! same definition into `poodle-render`'s `generated/` directory — same
+//! scoping, same select-only reachability. `g13-b045` adds the
+//! component-scoped `range-slider-ts` target, which renders RangeSlider's
+//! rendered vocabulary into both web packages; `g13-b046` adds its Rust
+//! sibling `range-slider-rust` (card 046 R2), which renders the same
+//! definition into `poodle-render`'s `generated/` directory — same
 //! scoping, same select-only reachability.
 
 use crate::emit::EmitTarget;
@@ -25,6 +30,7 @@ pub mod conformance;
 pub mod docs;
 pub mod json;
 pub mod range_slider;
+pub mod range_slider_rust;
 pub mod registry;
 pub mod schema;
 pub mod shell;
@@ -52,6 +58,7 @@ pub fn selectable() -> Vec<&'static dyn EmitTarget> {
     targets.push(&button::ButtonTarget);
     targets.push(&button_rust::ButtonRustTarget);
     targets.push(&range_slider::RangeSliderTarget);
+    targets.push(&range_slider_rust::RangeSliderRustTarget);
     targets
 }
 
