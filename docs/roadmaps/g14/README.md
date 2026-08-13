@@ -52,8 +52,9 @@ g14 does not open until g13 is capped. Closeout sequence:
      branch deleted per `053` R3, numbers preserved in the `g13.020`
      reassessment.
    - `docs:capability-drift` declaration home rehomed out of the codegen
-     models (`053` R2); the gate survives. Spec 063's scene half is
-     promoted at `g14.001`; the component half retires.
+     models into `contracts/headless/capabilities/` (`053` R2); the gate
+     survives. Spec 063's scene half is promoted at `g14.001`; the
+     component half retires.
    - Watcher guards diff `main...HEAD` only; a dead worker makes them
      trivially clean. Guards must check the working tree. Ledger rows are
      written before dispatch, not after.

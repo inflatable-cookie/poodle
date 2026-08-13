@@ -86,7 +86,6 @@ already built.
 
 ## Next
 
-On signature: rule the `053` R2 destination (capability declaration table
-rehomed into the gate itself, or `packages/contracts/headless/`), dispatch
-card `053` (unwind), run the g13 closeout checklist in `../g14/README.md`,
-then open g14 with `g14.001`.
+On signature: dispatch card `053` (unwind — R1 and R2 recorded), run the
+g13 closeout checklist in `../g14/README.md`, then open g14 with
+`g14.001`.

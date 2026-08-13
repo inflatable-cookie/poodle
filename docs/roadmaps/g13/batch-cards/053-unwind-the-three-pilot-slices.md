@@ -1,7 +1,6 @@
 # 053 Unwind The Three Pilot Slices
 
-Status: drafted — R1 recorded (scene kept); R2 destination ruling required
-before dispatch
+Status: ready — R1 recorded (scene kept), R2 recorded (headless home)
 Milestone: g13 closeout (executes the `g13.020` verdict)
 Owner: Poodle core
 Branch: `thread/g13-053-unwind-pilot-slices`
@@ -36,13 +35,27 @@ proven across all four runtimes (b035/b036). `poodle-ir` and
 component models, their targets, fixtures, and generated artifacts only.
 Specimen migration onto the scene system is `g14.003`, not this card.
 
-### R2 — `docs:capability-drift` declaration home
+### R2 — `docs:capability-drift` declaration home (recorded:
+`packages/contracts/headless/`)
 
 The gate (`packages/svelte/preview/scripts/capability-drift.ts`) reads its
-declaration table from generated JSON produced by the codegen models. Before
-the models are deleted, the declaration table must be rehomed into the gate
-itself or `packages/contracts/headless/` — the gate is a g13.018 deliverable
-the verdict keeps, and its source must not die with the generator.
+declaration table from generated JSON in `packages/codegen/fixtures/`, which
+dies with the three models. The declarations — capability, runtimes with
+provision (`provided`/`delegated`/`absent`) and reason per row — are
+runtime-parity contract data, the same class as `machines.json` and
+`vectors/`. Rehome them there:
+
+- New `packages/contracts/headless/capabilities/capabilities.json`, same
+  serialized shape the gate already reads
+  (`{ components: [{ id, capabilities: [{ capability, runtimes: [{ runtime, provision, reason }] }] }] }`),
+  carrying every declared row from `button-model.json`,
+  `range-slider-model.json`, and `text-input-model.json`. Drop no rows
+  silently.
+- The gate's reader switches from `FIXTURES_DIR` to the headless file. The
+  `PROBES` table stays in the script — implementation trace vocabulary is
+  deliberately gate-local.
+- The file is hand-authored, git-versioned contract data from here on; the
+  gate itself is the drift check.
 
 ### R3 — b052 thread branch
 
@@ -94,7 +107,7 @@ No other disposition is available.
 
 - Execute this card exactly. You have no planning or status authority.
 - Do not spawn sub-agents. Read sources directly.
-- R1/R2 are maintainer rulings; if they are absent, do not dispatch.
+- R1 and R2 are recorded above; do not re-decide them.
 - Restore current semantics, not pre-pilot semantics: for each file, diff
   against `0dd58b80`, keep every post-slice change that is not IR wiring,
   remove only the artifact consumption.
@@ -116,7 +129,9 @@ No other disposition is available.
 - `packages/render/src/generated/**`
 - `packages/codegen/**` (shell targets, `preview_shell.rs`, and shell
   fixtures excluded)
-- `packages/svelte/preview/scripts/capability-drift.ts` (R2 rehome only)
+- `packages/svelte/preview/scripts/capability-drift.ts` (R2 reader switch
+  only — `PROBES` untouched)
+- `packages/contracts/headless/capabilities/**` (R2 new home)
 - `packages/release-manifest.json`
 - `tasks/effigy.tasks.toml`
 - `docs/logs/2026-08/<DD>-g13-053-unwind-pilot-slices.md`
@@ -126,9 +141,11 @@ No other disposition is available.
 
 1. Baseline: `effigy test:core`, `effigy test:components`, `effigy ci:rust`,
    `effigy ci:web`, `effigy docs:lint`, `git diff --check`. All green.
-2. R2 first: rehome the capability declaration table; prove
+2. R2 first: carry every declared capability row from the three model
+   fixtures into `packages/contracts/headless/capabilities/capabilities.json`;
+   switch the gate's reader off `packages/codegen/fixtures/`; prove
    `docs:capability-drift` still fails on a planted absence and passes
-   clean.
+   clean, with the row count unchanged.
 3. Per component (Button, then RangeSlider, then TextInput): restore the
    three consumer files against `0dd58b80`, run the component tests, then
    delete the generated dir and the codegen model/targets/fixtures/tests.
@@ -155,7 +172,8 @@ No other disposition is available.
   unchanged (component tests pass unedited).
 - [ ] Generated dirs, models, targets, and fixtures for the three
   components are gone.
-- [ ] R2 rehomed; the capability gate passes clean and fails on a plant.
+- [ ] R2 rehomed to `contracts/headless/capabilities/` with no rows
+  dropped; the capability gate passes clean and fails on a plant.
 - [ ] Shell artifacts byte-identical after `ir:build`; component targets
   gone, shell targets intact.
 - [ ] LOC delta reported against the pilot ledger.
