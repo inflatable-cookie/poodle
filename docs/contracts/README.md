@@ -131,6 +131,9 @@ contract references the rule rather than restating it:
 - `components/inline-remediation.md`
 - `components/keyboard.md`
 - `components/knob.md`
+- `components/licence-activation.md`
+- `components/licence-seats.md`
+- `components/licence-status.md`
 - `components/list-card-counter.md`
 - `components/list-card.md`
 - `components/list-container.md`

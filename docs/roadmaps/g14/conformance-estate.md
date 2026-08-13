@@ -60,10 +60,25 @@ No experimental surface is architecture merely because it merged.
 | native registration and snapshot tooling | repair and feed completion evidence | g14.002 / g14.014 |
 | stale specs 063–065 and old roadmap | archived/retired | done |
 
+## Staged Licence Intake
+
+The licence surface enters through a bounded web-reference tranche while the
+conformance kernel is still under proof. Web delivery is not completion.
+
+| Component | Web reference | Native/shared cases | Completion state |
+| --- | --- | --- | --- |
+| `LicenceStatus` | g14.015 | g14.016 after adopt | incomplete |
+| `LicenceActivation` | g14.015 | g14.016 after adopt | incomplete |
+| `LicenceSeats` | g14.015 | g14.016 after adopt | incomplete |
+
+`LicenceCentre` is an explicit non-goal. The downstream comparison between
+Poodle's structural field mirrors and Longhorn's generated field maps remains
+Longhorn-owned; g14.015 exports the Poodle side but cannot claim that gate.
+
 ## Cleanup Rule
 
 Every active claim ends with one canonical gate. A legacy gate may stay while
 coverage migrates, but it needs an owner and retirement condition. Generated
 artifacts stay out of hand-edited source roots where possible. Known
-generated-source and god-file health findings are owned by g14.015 rather than
+generated-source and god-file health findings are owned by g14.017 rather than
 normalized as permanent warnings.

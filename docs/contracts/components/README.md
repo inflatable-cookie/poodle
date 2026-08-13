@@ -105,6 +105,9 @@ primitives and layout surfaces through higher-order application components.
 - `meter.md`
 - `knob.md`
 - `keyboard.md`
+- `licence-activation.md`
+- `licence-seats.md`
+- `licence-status.md`
 - `fader.md`
 - `gain-reduction-meter.md`
 - `metric-tile.md`

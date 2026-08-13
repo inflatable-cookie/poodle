@@ -6,7 +6,7 @@ Updated: 2026-08-14
 
 - `g14`
   - Status: active
-  - Range: `001` to `016`
+  - Range: `001` to `018`
   - Governing architecture:
     `docs/architecture/009-cross-runtime-component-conformance.md`
   - Governing spec: `docs/specs/066-executable-component-conformance.md`
@@ -14,8 +14,11 @@ Updated: 2026-08-14
     One portable interface and case/specimen corpus; two implementation
     substrates; four executed observations; strict completion.
   - Runway: `001`–`007` prove increasing component profiles; `008` records
-    adopt/revise/reject. `009`–`016` remain blocked until adopt.
-  - Next: `g14.001` conformance kernel and Button proof.
+    adopt/revise/reject. `009`–`014` remain blocked until adopt. `015` is a
+    parallel licence web-reference intake; `016` completes it through the
+    adopted conformance path; `017`–`018` clean up and close.
+  - Next: `g14.001` conformance kernel and Button proof plus independent
+    `g14.015` licence web reference in separate worktrees.
 
 ## Latest Completed Track
 

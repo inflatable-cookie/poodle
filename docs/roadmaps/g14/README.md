@@ -35,8 +35,12 @@ the same pipeline across increasing component profiles. `008` records an
 adopt/revise/reject verdict.
 
 Rollout cards `009`–`013` stay blocked until `008` records **adopt**. `014`
-makes the workflow mandatory for new components. `015` deletes superseded
-experiments and gates. `016` closes the generation.
+makes the workflow mandatory for new components.
+
+`015` is an independent Svelte/React reference tranche for the new licence
+surface and may run beside `001`. Its native and shared-case completion stays
+blocked under `016` until `008` records **adopt**. `017` deletes superseded
+experiments and gates. `018` closes the generation.
 
 ## Runway
 
@@ -54,8 +58,10 @@ experiments and gates. `016` closes the generation.
 12. [012 — Overlays and input rollout](012-overlays-input-rollout.md)
 13. [013 — Composite and workstation rollout](013-composite-workstation-rollout.md)
 14. [014 — Completion gate and component factory](014-completion-gate-and-component-factory.md)
-15. [015 — Experimental cleanup and gate consolidation](015-experimental-cleanup-and-gate-consolidation.md)
-16. [016 — Generation closeout](016-generation-closeout.md)
+15. [015 — Licence web reference](015-licence-web-reference.md) — ready; may run beside 001
+16. [016 — Licence four-runtime completion](016-licence-four-runtime-completion.md)
+17. [017 — Experimental cleanup and gate consolidation](017-experimental-cleanup-and-gate-consolidation.md)
+18. [018 — Generation closeout](018-generation-closeout.md)
 
 ## Dispatch Rule
 
@@ -65,10 +71,14 @@ to a fresh thread/worktree when its dependencies are met. Workers do not write
 records evidence, merges, then opens the next file.
 
 No batch-card layer. No parallel work on the conformance kernel before the
-prior profile settles its vocabulary.
+prior profile settles its vocabulary. The bounded web-reference intake in
+`015` is the only current parallel exception; it cannot edit kernel, native,
+or roadmap surfaces.
 
 ## First Task
 
-`g14.001` is ready. It must prove one authored Button interface and case can
-drive all four implementations, observations, tests, and specimen structure
-without becoming a behaviour compiler or additive mirror.
+`g14.001` and `g14.015` are ready in separate worktrees. `001` must prove one
+authored Button interface and case can drive all four implementations,
+observations, tests, and specimen structure without becoming a behaviour
+compiler or additive mirror. `015` builds only the Svelte/React licence
+reference and leaves native/conformance completion visibly open.
