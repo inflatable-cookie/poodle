@@ -8,41 +8,20 @@
 //! write into a web package. It is reachable only via `--target
 //! shell-scene`. `g13-b036` adds its Rust sibling `shell-rust` (card 036
 //! R2), which renders the same scene into the native previews' `generated/`
-//! directories — same scoping, same select-only reachability. `g13-b041`
-//! adds the component-scoped `button-ts` target (card 041 R2), which
-//! renders Button's rendered vocabulary into both web packages; `g13-b042`
-//! adds its Rust sibling `button-rust` (card 042 R2), which renders the
-//! same definition into `poodle-render`'s `generated/` directory — same
-//! same scoping, same select-only reachability. `g13-b045` adds the
-//! component-scoped `range-slider-ts` target, which renders RangeSlider's
-//! rendered vocabulary into both web packages; `g13-b046` adds its Rust
-//! sibling `range-slider-rust` (card 046 R2), which renders the same
-//! definition into `poodle-render`'s `generated/` directory — same
-//! scoping, same select-only reachability. `g13-b048` adds the
-//! component-scoped `text-input-ts` target, which renders TextInput's
-//! rendered vocabulary into both web packages — same scoping, same
-//! select-only reachability. `g13-b049` adds its Rust sibling
-//! `text-input-rust` (card 049 R1), which renders the same definition
-//! into `poodle-render`'s `generated/` directory — same scoping, same
-//! select-only reachability.
+//! directories — same scoping, same select-only reachability. The three
+//! component targets were unwound in g13-053.
 
 use crate::emit::EmitTarget;
 
 mod json_common;
 
-pub mod button;
-pub mod button_rust;
 pub mod conformance;
 pub mod docs;
 pub mod json;
-pub mod range_slider;
-pub mod range_slider_rust;
 pub mod registry;
 pub mod schema;
 pub mod shell;
 pub mod shell_rust;
-pub mod text_input;
-pub mod text_input_rust;
 pub mod ts;
 
 /// Every registered target, in stable order — the default set a plain
@@ -63,12 +42,6 @@ pub fn selectable() -> Vec<&'static dyn EmitTarget> {
     let mut targets = all();
     targets.push(&shell::ShellSceneTarget);
     targets.push(&shell_rust::ShellRustTarget);
-    targets.push(&button::ButtonTarget);
-    targets.push(&button_rust::ButtonRustTarget);
-    targets.push(&range_slider::RangeSliderTarget);
-    targets.push(&range_slider_rust::RangeSliderRustTarget);
-    targets.push(&text_input::TextInputTarget);
-    targets.push(&text_input_rust::TextInputRustTarget);
     targets
 }
 

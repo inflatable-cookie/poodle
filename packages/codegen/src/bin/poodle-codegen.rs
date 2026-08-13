@@ -4,9 +4,6 @@
 //! ```text
 //! poodle-codegen <FIXTURE> --out <DIR> [--check] [--target <ID>]
 //! poodle-codegen --author-shell <OUT> [--check]
-//! poodle-codegen --author-button <OUT> [--check]
-//! poodle-codegen --author-range-slider <OUT> [--check]
-//! poodle-codegen --author-text-input <OUT> [--check]
 //! ```
 //!
 //! Fixture mode runs the registered targets over one serialized `IrModel`.
@@ -19,12 +16,11 @@
 //! `shell-scene`, which renders into the consuming web packages and is not
 //! part of the default set).
 //!
-//! Author mode (card 035 R1; card 041 R1) serializes the Rust-authored
-//! shell/Button model — [`poodle_codegen::models::preview_shell::shell_model`]
-//! / [`poodle_codegen::models::button::button_model`] — to the JSON fixture
-//! the pipeline consumes, after a validate round trip: the emitted bytes are
-//! parsed and validated before they are written or compared, so the
-//! committed fixture can never be invalid IR. `--check` byte-compares
+//! Author mode (card 035 R1) serializes the Rust-authored shell model —
+//! [`poodle_codegen::models::preview_shell::shell_model`] — to the JSON
+//! fixture the pipeline consumes, after a validate round trip: the emitted
+//! bytes are parsed and validated before they are written or compared, so
+//! the committed fixture can never be invalid IR. `--check` byte-compares
 //! against the committed fixture without writing.
 //!
 //! Exit codes: 0 clean, 1 drift/validation/IO failure, 2 usage error.
@@ -51,25 +47,11 @@ fn usage() -> String {
               targets are select-only).
      \n\
      usage: poodle-codegen --author-shell <OUT> [--check]\n\
-     usage: poodle-codegen --author-button <OUT> [--check]\n\
-     usage: poodle-codegen --author-range-slider <OUT> [--check]\n\
      \n\
      --author-shell  serialize the Rust-authored shell model\n\
               (packages/codegen/src/models/preview_shell.rs) to OUT — the\n\
               fixture the pipeline consumes — after a validate round trip;\n\
-              with --check, byte-compare instead of write.\n\
-     --author-button serialize the Rust-authored Button model\n\
-              (packages/codegen/src/models/button.rs) to OUT — the fixture\n\
-              the button-ts target consumes — after a validate round trip;\n\
-              with --check, byte-compare instead of write.\n\
-     --author-range-slider serialize the Rust-authored RangeSlider model\n\
-              (packages/codegen/src/models/range_slider.rs) to OUT — the\n\
-              fixture the range-slider-ts target consumes — after a validate\n\
-              round trip; with --check, byte-compare instead of write.\n\
-     --author-text-input serialize the Rust-authored TextInput model\n\
-              (packages/codegen/src/models/text_input.rs) to OUT — the\n\
-              fixture the text-input-ts target consumes — after a validate\n\
-              round trip; with --check, byte-compare instead of write."
+              with --check, byte-compare instead of write."
         .to_owned()
 }
 
@@ -77,9 +59,6 @@ struct Args {
     fixture: Option<PathBuf>,
     out: Option<PathBuf>,
     author_shell: Option<PathBuf>,
-    author_button: Option<PathBuf>,
-    author_range_slider: Option<PathBuf>,
-    author_text_input: Option<PathBuf>,
     target: Option<String>,
     check: bool,
 }
@@ -87,9 +66,6 @@ struct Args {
 fn parse_args() -> Result<Args, String> {
     let mut out = None;
     let mut author_shell = None;
-    let mut author_button = None;
-    let mut author_range_slider = None;
-    let mut author_text_input = None;
     let mut target = None;
     let mut check = false;
     let mut positional = Vec::new();
@@ -109,24 +85,6 @@ fn parse_args() -> Result<Args, String> {
                         .ok_or("--author-shell requires an output path")?,
                 ));
             }
-            "--author-button" => {
-                author_button = Some(PathBuf::from(
-                    args.next()
-                        .ok_or("--author-button requires an output path")?,
-                ));
-            }
-            "--author-range-slider" => {
-                author_range_slider = Some(PathBuf::from(
-                    args.next()
-                        .ok_or("--author-range-slider requires an output path")?,
-                ));
-            }
-            "--author-text-input" => {
-                author_text_input = Some(PathBuf::from(
-                    args.next()
-                        .ok_or("--author-text-input requires an output path")?,
-                ));
-            }
             "--target" => {
                 target = Some(
                     args.next()
@@ -139,30 +97,7 @@ fn parse_args() -> Result<Args, String> {
         }
     }
 
-    if author_shell.is_some() && author_button.is_some() {
-        return Err("--author-shell and --author-button are mutually exclusive".to_owned());
-    }
-    if author_range_slider.is_some() && (author_shell.is_some() || author_button.is_some()) {
-        return Err(
-            "--author-range-slider is mutually exclusive with --author-shell and \
-                    --author-button"
-                .to_owned(),
-        );
-    }
-    if author_text_input.is_some()
-        && (author_shell.is_some() || author_button.is_some() || author_range_slider.is_some())
-    {
-        return Err(
-            "--author-text-input is mutually exclusive with --author-shell, \
-                    --author-button and --author-range-slider"
-                .to_owned(),
-        );
-    }
-
-    let author_mode = author_shell.is_some()
-        || author_button.is_some()
-        || author_range_slider.is_some()
-        || author_text_input.is_some();
+    let author_mode = author_shell.is_some();
 
     let fixture = match (author_mode, positional.len()) {
         (true, 0) => None,
@@ -192,9 +127,6 @@ fn parse_args() -> Result<Args, String> {
         fixture,
         out,
         author_shell,
-        author_button,
-        author_range_slider,
-        author_text_input,
         target,
         check,
     })
@@ -206,27 +138,6 @@ fn run(args: &Args) -> Result<(), CodegenError> {
             check_author_shell(out_path)
         } else {
             write_author_shell(out_path)
-        };
-    }
-    if let Some(out_path) = &args.author_button {
-        return if args.check {
-            check_author_button(out_path)
-        } else {
-            write_author_button(out_path)
-        };
-    }
-    if let Some(out_path) = &args.author_range_slider {
-        return if args.check {
-            check_author_range_slider(out_path)
-        } else {
-            write_author_range_slider(out_path)
-        };
-    }
-    if let Some(out_path) = &args.author_text_input {
-        return if args.check {
-            check_author_text_input(out_path)
-        } else {
-            write_author_text_input(out_path)
         };
     }
     run_emit(
@@ -296,207 +207,6 @@ fn check_author_shell(out_path: &Path) -> Result<(), CodegenError> {
             message: format!(
                 "authored shell model is stale under {}: the committed fixture differs from \
                  `packages/codegen/src/models/preview_shell.rs`; run `effigy ir:build`",
-                out_path.display()
-            ),
-        })
-    }
-}
-
-/// Serializes the Rust-authored Button model to the fixture after a
-/// validate round trip (card 041 R1): the bytes written are exactly the
-/// bytes the pipeline's `load_and_validate` will accept.
-fn author_button_document() -> Result<String, CodegenError> {
-    let model = models::button::button_model();
-    let document = serde_json::to_string_pretty(&model).map_err(|error| CodegenError::Gate {
-        message: format!("cannot serialize the authored Button model: {error}"),
-    })?;
-    // Validate the serialized form, not just the in-memory model: the
-    // fixture is the pipeline's input, and it must pass `load_and_validate`.
-    let round_tripped: poodle_ir::IrModel =
-        serde_json::from_str(&document).map_err(|error| CodegenError::Gate {
-            message: format!("authored Button model does not round-trip as JSON: {error}"),
-        })?;
-    let findings = round_tripped.validate();
-    if !findings.is_empty() {
-        return Err(CodegenError::Invalid {
-            path: PathBuf::from("packages/codegen/fixtures/button-model.json"),
-            findings,
-        });
-    }
-    Ok(format!("{document}\n"))
-}
-
-fn write_author_button(out_path: &Path) -> Result<(), CodegenError> {
-    let document = author_button_document()?;
-    if let Some(parent) = out_path.parent() {
-        fs::create_dir_all(parent).map_err(|error| CodegenError::Write {
-            path: parent.to_path_buf(),
-            source: error,
-        })?;
-    }
-    fs::write(out_path, &document).map_err(|error| CodegenError::Write {
-        path: out_path.to_path_buf(),
-        source: error,
-    })?;
-    println!(
-        "Authored Button model ({} bytes, IR schema {}).",
-        document.len(),
-        poodle_ir::IR_SCHEMA_VERSION
-    );
-    Ok(())
-}
-
-/// Read-only twin of [`write_author_button`]: regenerate in memory and
-/// byte-compare against the committed fixture. No write call exists on this
-/// path.
-fn check_author_button(out_path: &Path) -> Result<(), CodegenError> {
-    let document = author_button_document()?;
-    let committed = fs::read_to_string(out_path).map_err(|error| CodegenError::Read {
-        path: out_path.to_path_buf(),
-        source: error,
-    })?;
-    if committed == document {
-        println!("Authored Button model is current.");
-        Ok(())
-    } else {
-        Err(CodegenError::Gate {
-            message: format!(
-                "authored Button model is stale under {}: the committed fixture differs from \
-                 `packages/codegen/src/models/button.rs`; run `effigy ir:build`",
-                out_path.display()
-            ),
-        })
-    }
-}
-
-/// Serializes the Rust-authored RangeSlider model to the fixture after a
-/// validate round trip (card 045 R1): the bytes written are exactly the
-/// bytes the pipeline's `load_and_validate` will accept.
-fn author_range_slider_document() -> Result<String, CodegenError> {
-    let model = models::range_slider::range_slider_model();
-    let document = serde_json::to_string_pretty(&model).map_err(|error| CodegenError::Gate {
-        message: format!("cannot serialize the authored RangeSlider model: {error}"),
-    })?;
-    // Validate the serialized form, not just the in-memory model: the
-    // fixture is the pipeline's input, and it must pass `load_and_validate`.
-    let round_tripped: poodle_ir::IrModel =
-        serde_json::from_str(&document).map_err(|error| CodegenError::Gate {
-            message: format!("authored RangeSlider model does not round-trip as JSON: {error}"),
-        })?;
-    let findings = round_tripped.validate();
-    if !findings.is_empty() {
-        return Err(CodegenError::Invalid {
-            path: PathBuf::from("packages/codegen/fixtures/range-slider-model.json"),
-            findings,
-        });
-    }
-    Ok(format!("{document}\n"))
-}
-
-fn write_author_range_slider(out_path: &Path) -> Result<(), CodegenError> {
-    let document = author_range_slider_document()?;
-    if let Some(parent) = out_path.parent() {
-        fs::create_dir_all(parent).map_err(|error| CodegenError::Write {
-            path: parent.to_path_buf(),
-            source: error,
-        })?;
-    }
-    fs::write(out_path, &document).map_err(|error| CodegenError::Write {
-        path: out_path.to_path_buf(),
-        source: error,
-    })?;
-    println!(
-        "Authored RangeSlider model ({} bytes, IR schema {}).",
-        document.len(),
-        poodle_ir::IR_SCHEMA_VERSION
-    );
-    Ok(())
-}
-
-/// Read-only twin of [`write_author_range_slider`]: regenerate in memory
-/// and byte-compare against the committed fixture. No write call exists on
-/// this path.
-fn check_author_range_slider(out_path: &Path) -> Result<(), CodegenError> {
-    let document = author_range_slider_document()?;
-    let committed = fs::read_to_string(out_path).map_err(|error| CodegenError::Read {
-        path: out_path.to_path_buf(),
-        source: error,
-    })?;
-    if committed == document {
-        println!("Authored RangeSlider model is current.");
-        Ok(())
-    } else {
-        Err(CodegenError::Gate {
-            message: format!(
-                "authored RangeSlider model is stale under {}: the committed fixture differs \
-                 from `packages/codegen/src/models/range_slider.rs`; run `effigy ir:build`",
-                out_path.display()
-            ),
-        })
-    }
-}
-
-/// Serializes the Rust-authored TextInput model to the fixture after a
-/// validate round trip (card 048 R1): the bytes written are exactly the
-/// bytes the pipeline's `load_and_validate` will accept.
-fn author_text_input_document() -> Result<String, CodegenError> {
-    let model = models::text_input::text_input_model();
-    let document = serde_json::to_string_pretty(&model).map_err(|error| CodegenError::Gate {
-        message: format!("cannot serialize the authored TextInput model: {error}"),
-    })?;
-    // Validate the serialized form, not just the in-memory model: the
-    // fixture is the pipeline's input, and it must pass `load_and_validate`.
-    let round_tripped: poodle_ir::IrModel =
-        serde_json::from_str(&document).map_err(|error| CodegenError::Gate {
-            message: format!("authored TextInput model does not round-trip as JSON: {error}"),
-        })?;
-    let findings = round_tripped.validate();
-    if !findings.is_empty() {
-        return Err(CodegenError::Invalid {
-            path: PathBuf::from("packages/codegen/fixtures/text-input-model.json"),
-            findings,
-        });
-    }
-    Ok(format!("{document}\n"))
-}
-
-fn write_author_text_input(out_path: &Path) -> Result<(), CodegenError> {
-    let document = author_text_input_document()?;
-    if let Some(parent) = out_path.parent() {
-        fs::create_dir_all(parent).map_err(|error| CodegenError::Write {
-            path: parent.to_path_buf(),
-            source: error,
-        })?;
-    }
-    fs::write(out_path, &document).map_err(|error| CodegenError::Write {
-        path: out_path.to_path_buf(),
-        source: error,
-    })?;
-    println!(
-        "Authored TextInput model ({} bytes, IR schema {}).",
-        document.len(),
-        poodle_ir::IR_SCHEMA_VERSION
-    );
-    Ok(())
-}
-
-/// Read-only twin of [`write_author_text_input`]: regenerate in memory
-/// and byte-compare against the committed fixture. No write call exists on
-/// this path.
-fn check_author_text_input(out_path: &Path) -> Result<(), CodegenError> {
-    let document = author_text_input_document()?;
-    let committed = fs::read_to_string(out_path).map_err(|error| CodegenError::Read {
-        path: out_path.to_path_buf(),
-        source: error,
-    })?;
-    if committed == document {
-        println!("Authored TextInput model is current.");
-        Ok(())
-    } else {
-        Err(CodegenError::Gate {
-            message: format!(
-                "authored TextInput model is stale under {}: the committed fixture differs \
-                 from `packages/codegen/src/models/text_input.rs`; run `effigy ir:build`",
                 out_path.display()
             ),
         })

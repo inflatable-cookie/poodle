@@ -18,99 +18,11 @@ use poodle_specs::{
 };
 
 use crate::color::with_alpha;
-use crate::generated::text_input::TEXT_INPUT_DEFINITION;
 use crate::icon::icon;
 use crate::presentation::{
     rem_to_px, resolve_semantic_size, size_height_offset_rem, size_padding_x_offset_rem,
 };
 use crate::spinner::spinner;
-
-// Card 049 R3 — the render takes its vocabulary from the generated
-// definition instead of its own literals. The node tree carries no
-// attribute channel (the `Node` vocabulary is frozen), so the names gate
-// the treatments rather than flowing into a DOM: a rename in the definition
-// drops the treatment until restored, which is the drift direction the
-// proof demonstrates (the same shape as RangeSlider's `state_declared`,
-// card 046). The capability gates are the boundary honoured: the render
-// wires the edit handlers the definition declares it owns, component-wide —
-// the same list for every runtime, which is the R3 finding this card
-// records (the IR cannot express that Jetstream lacks a declared
-// capability).
-
-/// The definition's state-attribute names gate the treatments. The
-/// `data-validation-state` attribute gates the validation treatment
-/// (border + indicator): a rename in the definition drops the treatment
-/// until restored.
-fn state_declared(id: &str, name: &str) -> bool {
-    TEXT_INPUT_DEFINITION
-        .attributes
-        .iter()
-        .any(|attribute| attribute.id == id && attribute.name == name)
-}
-
-/// The definition's anatomy parts gate the nodes the render builds: the
-/// affixes, the affordance icons, the char count, and the validation
-/// indicator render only while the definition declares their parts.
-fn part_declared(id: &str) -> bool {
-    TEXT_INPUT_DEFINITION
-        .parts
-        .iter()
-        .any(|part| part.id == id)
-}
-
-/// The declared capability boundary gates the edit-handler wiring (R2/R3):
-/// the shared edit model while `text-editing` is declared (key events,
-/// paste/cut content, the undo selection channel), glyph measurement while
-/// `measurement` is declared (the caret and pointer selection), focus
-/// observation while `focus` is declared. The list is component-scoped —
-/// every runtime sees the same wiring.
-fn capability_declared(name: &str) -> bool {
-    TEXT_INPUT_DEFINITION
-        .capabilities
-        .iter()
-        .any(|capability| *capability == name)
-}
-
-/// The definition's validation-state domain gates the border arms: each
-/// treatment applies while its member is declared (card 049 R3).
-fn validation_member_declared(member: &str) -> bool {
-    TEXT_INPUT_DEFINITION
-        .validation_states
-        .iter()
-        .any(|declared| *declared == member)
-}
-
-/// Body font size in rem per the contract §8 size table (TXT-15). Each
-/// rung applies while the definition's size ladder declares it (card 049
-/// R3); a rung the definition does not declare falls back to the default
-/// rung — the same fall-through shape as RangeSlider's metric rungs (card
-/// 046).
-fn body_size_rem(size: ControlSize) -> f32 {
-    match size {
-        ControlSize::Xs if TEXT_INPUT_DEFINITION.sizes.contains(&"xs") => 0.75,
-        ControlSize::Sm if TEXT_INPUT_DEFINITION.sizes.contains(&"sm") => 0.8125,
-        ControlSize::Md if TEXT_INPUT_DEFINITION.sizes.contains(&"md") => 0.875,
-        ControlSize::Lg if TEXT_INPUT_DEFINITION.sizes.contains(&"lg") => 0.9375,
-        ControlSize::Xl if TEXT_INPUT_DEFINITION.sizes.contains(&"xl") => 1.0,
-        _ => 0.875,
-    }
-}
-
-/// Inline padding offset in rem per the density axis (T §8, TXT-15). Each
-/// adjustment applies while the definition's density domain declares its
-/// member (card 049 R3).
-fn density_inline_offset_rem(density: ControlDensity) -> f32 {
-    match density {
-        ControlDensity::Compact if TEXT_INPUT_DEFINITION.densities.contains(&"compact") => -0.125,
-        ControlDensity::Default if TEXT_INPUT_DEFINITION.densities.contains(&"default") => 0.0,
-        ControlDensity::Comfortable
-            if TEXT_INPUT_DEFINITION.densities.contains(&"comfortable") =>
-        {
-            0.125
-        }
-        _ => 0.0,
-    }
-}
 
 /// Render a text input without an editing callback.
 ///
@@ -172,12 +84,22 @@ pub fn text_input_with_handlers(
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let control_height = theme.resolve_space(spec.control_height_token())
         + rem_to_px(size_height_offset_rem(effective_size));
-    let density_offset_rem = density_inline_offset_rem(spec.density);
+    let density_offset_rem = match spec.density {
+        ControlDensity::Compact => -0.125,
+        ControlDensity::Default => 0.0,
+        ControlDensity::Comfortable => 0.125,
+    };
     let inline_padding = theme.resolve_space(spec.horizontal_padding_token())
         + rem_to_px(size_padding_x_offset_rem(effective_size) + density_offset_rem);
     let inline_gap = theme.resolve_space(spec.inline_gap_token());
     let radius = theme.resolve_radius(spec.radius_token());
-    let body_size = rem_to_px(body_size_rem(effective_size));
+    let body_size = rem_to_px(match effective_size {
+        ControlSize::Xs => 0.75,
+        ControlSize::Sm => 0.8125,
+        ControlSize::Md => 0.875,
+        ControlSize::Lg => 0.9375,
+        ControlSize::Xl => 1.0,
+    });
     let body_line_height = theme.resolve_space(spec.body_line_height_token()) / body_size;
     let selection_fill = theme.resolve_color("color.accent.base");
 
@@ -186,25 +108,11 @@ pub fn text_input_with_handlers(
     let surface_bg = with_alpha(surface_raw, surface_raw.3 * 0.82);
     let border = with_alpha(border_default, border_default.3 * 0.72);
     let hover_border = with_alpha(border_default, border_default.3 * 0.92);
-    // The validation treatment applies while the definition declares the
-    // `data-validation-state` attribute and the member's treatment (card
-    // 049 R3): a rename drops the border until restored.
-    let effective_border = if state_declared("validation-state", "data-validation-state") {
-        match spec.validation_state {
-            ValidationState::Invalid if validation_member_declared("invalid") => {
-                theme.resolve_color("color.status.danger")
-            }
-            ValidationState::Valid if validation_member_declared("valid") => {
-                theme.resolve_color("color.status.success")
-            }
-            ValidationState::Pending if validation_member_declared("pending") => {
-                theme.resolve_color("color.accent.base")
-            }
-            ValidationState::None => border,
-            _ => border,
-        }
-    } else {
-        border
+    let effective_border = match spec.validation_state {
+        ValidationState::Invalid => theme.resolve_color("color.status.danger"),
+        ValidationState::Valid => theme.resolve_color("color.status.success"),
+        ValidationState::Pending => theme.resolve_color("color.accent.base"),
+        ValidationState::None => border,
     };
     let text_primary = theme.resolve_color(spec.text_color_token());
     let text_secondary = theme.resolve_color(spec.placeholder_color_token());
@@ -228,17 +136,13 @@ pub fn text_input_with_handlers(
     }
 
     if let Some(prefix) = &spec.prefix {
-        if part_declared("prefix") {
-            inner = inner.child(affix(prefix, true, inline_gap, spec, theme));
-        }
+        inner = inner.child(affix(prefix, true, inline_gap, spec, theme));
     }
 
     if let Some(name) = &spec.leading_icon {
-        if part_declared("leading-affordance") {
-            let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
-            glyph.style.descriptor.text_color = Some(icon_color);
-            inner = inner.child(glyph);
-        }
+        let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
+        glyph.style.descriptor.text_color = Some(icon_color);
+        inner = inner.child(glyph);
     }
 
     // A STABLE, distinct id per field. Backends key element state by it —
@@ -309,12 +213,7 @@ pub fn text_input_with_handlers(
     let mut value_select: Option<
         Arc<dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync>,
     > = None;
-    // The caret and pointer selection are the measurement half of the
-    // boundary (TXT-21/22): the backend draws the caret and resolves
-    // clicks at *measured* glyph positions. The render attaches the
-    // channel while the definition declares the `measurement` capability
-    // (card 049 R3).
-    if !spec.is_disabled && capability_declared("measurement") {
+    if !spec.is_disabled {
         let caret_color = if spec.is_read_only {
             // Read-only fields still select and still show where the selection
             // is; what they do not do is show an insertion point.
@@ -358,7 +257,7 @@ pub fn text_input_with_handlers(
     }
     inner = inner.child(value);
 
-    if spec.show_char_count && part_declared("char-count") {
+    if spec.show_char_count {
         let len = current_value.len();
         let over = spec.max_length.is_some_and(|max| len > max);
         let mut count = Node::text(match spec.max_length {
@@ -375,13 +274,7 @@ pub fn text_input_with_handlers(
         inner = inner.child(count);
     }
 
-    // The validation indicator is the anatomy's `validation-indicator`
-    // part, gated on the declared `data-validation-state` attribute (card
-    // 049 R3).
-    if spec.shows_validation_status
-        && state_declared("validation-state", "data-validation-state")
-        && part_declared("validation-indicator")
-    {
+    if spec.shows_validation_status {
         match spec.validation_state {
             ValidationState::Valid | ValidationState::Invalid => {
                 let name = if spec.validation_state == ValidationState::Valid {
@@ -411,17 +304,13 @@ pub fn text_input_with_handlers(
     }
 
     if let Some(name) = &spec.trailing_icon {
-        if part_declared("trailing-affordance") {
-            let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
-            glyph.style.descriptor.text_color = Some(icon_color);
-            inner = inner.child(glyph);
-        }
+        let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
+        glyph.style.descriptor.text_color = Some(icon_color);
+        inner = inner.child(glyph);
     }
 
     if let Some(suffix) = &spec.suffix {
-        if part_declared("suffix") {
-            inner = inner.child(affix(suffix, false, inline_gap, spec, theme));
-        }
+        inner = inner.child(affix(suffix, false, inline_gap, spec, theme));
     }
 
     let mut root = Node::input(current_value, spec.placeholder.as_deref().unwrap_or(""));
@@ -466,35 +355,48 @@ pub fn text_input_with_handlers(
         });
     }
     if !spec.is_disabled && !spec.is_read_only {
-        // The boundary, honoured (card 049 R3): the render wires each
-        // channel while the definition declares the capability that owns
-        // it — the shared edit model for keys and paste/cut content
-        // (`text-editing`, TXT-20/23/25), the undo/selection channel for
-        // the same model (`root.caret`/`on_select_range` ride the edit
-        // path: undo restores a caret, and copy/cut need the selection),
-        // and backend focus observation (`focus`, TXT-21). The declaration
-        // is component-scoped — the same wiring for every runtime, which
-        // is exactly the R3 finding: nothing can drop it for Jetstream
-        // alone.
-        if capability_declared("text-editing") {
-            // Keys go through the shared editing model rather than the
-            // backend's: the caret lives in this spec, so only the
-            // component can say what a keystroke means. Backends just
-            // report which key arrived.
+        // Keys go through the shared editing model rather than the backend's:
+        // the caret lives in this spec, so only the component can say what a
+        // keystroke means. Backends just report which key arrived.
+        let value = spec.current_value().to_string();
+        let (start, end) = spec.selection_range();
+        let on_selection = handlers.on_selection_change.clone();
+        let change = on_change.clone();
+        root.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
+            let state = poodle_headless::text_input::EditState {
+                anchor: start,
+                head: end,
+            };
+            let Some(outcome) = poodle_headless::text_input::edit_transition(
+                &value, state, key, mods.shift, mods.accel,
+            ) else {
+                return;
+            };
+            if let Some(next) = outcome.value {
+                if let Some(change) = &change {
+                    change(&next);
+                }
+            }
+            if let Some(on_selection) = &on_selection {
+                on_selection(outcome.state.anchor, outcome.state.head);
+            }
+        }));
+        // Paste and cut arrive as content, not as a keystroke, so they go
+        // through the same edit model by a different door.
+        {
             let value = spec.current_value().to_string();
             let (start, end) = spec.selection_range();
             let on_selection = handlers.on_selection_change.clone();
             let change = on_change.clone();
-            root.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
-                let state = poodle_headless::text_input::EditState {
-                    anchor: start,
-                    head: end,
-                };
-                let Some(outcome) = poodle_headless::text_input::edit_transition(
-                    &value, state, key, mods.shift, mods.accel,
-                ) else {
-                    return;
-                };
+            root.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
+                let outcome = poodle_headless::text_input::insert_transition(
+                    &value,
+                    poodle_headless::text_input::EditState {
+                        anchor: start,
+                        head: end,
+                    },
+                    text,
+                );
                 if let Some(next) = outcome.value {
                     if let Some(change) = &change {
                         change(&next);
@@ -504,52 +406,22 @@ pub fn text_input_with_handlers(
                     on_selection(outcome.state.anchor, outcome.state.head);
                 }
             }));
-            // Paste and cut arrive as content, not as a keystroke, so they go
-            // through the same edit model by a different door.
-            {
-                let value = spec.current_value().to_string();
-                let (start, end) = spec.selection_range();
-                let on_selection = handlers.on_selection_change.clone();
-                let change = on_change.clone();
-                root.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
-                    let outcome = poodle_headless::text_input::insert_transition(
-                        &value,
-                        poodle_headless::text_input::EditState {
-                            anchor: start,
-                            head: end,
-                        },
-                        text,
-                    );
-                    if let Some(next) = outcome.value {
-                        if let Some(change) = &change {
-                            change(&next);
-                        }
-                    }
-                    if let Some(on_selection) = &on_selection {
-                        on_selection(outcome.state.anchor, outcome.state.head);
-                    }
-                }));
-            }
-            // The root carries the caret too. It never *draws* one — it has
-            // children, so the backend does not render its intrinsic value —
-            // but key events arrive at the focusable root, and copy/cut need
-            // to know what is selected without hunting through the subtree
-            // for it.
-            root.caret = value_caret;
-            // The root also reports selection, which the pointer path never
-            // uses (it has no measured text of its own) — undo does, because
-            // restoring a snapshot moves the caret as well as the value, and
-            // undo arrives as a keystroke at the focusable root.
-            root.interaction.on_select_range = value_select.clone();
         }
+        // The root carries the caret too. It never *draws* one — it has
+        // children, so the backend does not render its intrinsic value — but
+        // key events arrive at the focusable root, and copy/cut need to know
+        // what is selected without hunting through the subtree for it.
+        root.caret = value_caret;
+        // The root also reports selection, which the pointer path never uses
+        // (it has no measured text of its own) — undo does, because restoring a
+        // snapshot moves the caret as well as the value, and undo arrives as a
+        // keystroke at the focusable root.
+        root.interaction.on_select_range = value_select.clone();
         root.interaction.on_text_change = on_change;
-        // Focus is reported by the backend, which is the only thing that
-        // knows it. An earlier pass latched this on activation, so it could
-        // report a gain and never a loss — a field kept its caret after
-        // focus moved on.
-        if capability_declared("focus") {
-            root.interaction.on_focus_change = handlers.on_focus_change.clone();
-        }
+        // Focus is reported by the backend, which is the only thing that knows
+        // it. An earlier pass latched this on activation, so it could report a
+        // gain and never a loss — a field kept its caret after focus moved on.
+        root.interaction.on_focus_change = handlers.on_focus_change.clone();
     }
     if spec.is_disabled {
         root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
@@ -749,164 +621,5 @@ mod tests {
         let children = &node.children[0].children;
         assert_eq!(children[0].style.border_right_width, Some(1.0));
         assert_eq!(children[2].style.border_left_width, Some(1.0));
-    }
-
-    // Card 049 R3 — the render takes its vocabulary from the generated
-    // definition (R4: the gates all hold today, so pixels do not move; a
-    // definition edit that drops the vocabulary fails these tests, making
-    // the drift direction visible rather than silent).
-
-    #[test]
-    fn the_definition_declares_every_gate_the_render_consumes() {
-        for part in [
-            "root",
-            "prefix",
-            "field",
-            "leading-affordance",
-            "input-control",
-            "trailing-affordance",
-            "clear-button",
-            "validation-indicator",
-            "suffix",
-            "char-count",
-        ] {
-            assert!(
-                part_declared(part),
-                "the committed definition declares the '{part}' part the render gates on"
-            );
-        }
-        assert!(
-            state_declared("validation-state", "data-validation-state"),
-            "the committed definition declares the validation-state attribute"
-        );
-        for member in ["none", "invalid", "valid", "pending"] {
-            assert!(
-                validation_member_declared(member),
-                "the committed definition declares the '{member}' validation state"
-            );
-        }
-        for size in ["xs", "sm", "md", "lg", "xl"] {
-            assert!(
-                TEXT_INPUT_DEFINITION.sizes.contains(&size),
-                "the committed definition declares the '{size}' size rung"
-            );
-        }
-        for density in ["compact", "default", "comfortable"] {
-            assert!(
-                TEXT_INPUT_DEFINITION.densities.contains(&density),
-                "the committed definition declares the '{density}' density"
-            );
-        }
-        for capability in ["focus", "text-editing", "measurement"] {
-            assert!(
-                capability_declared(capability),
-                "the committed definition declares the '{capability}' capability"
-            );
-        }
-    }
-
-    #[test]
-    fn the_edit_handlers_wire_while_the_definition_declares_the_capabilities() {
-        // The card's R4 required test at the render level: GPUI's edit
-        // handlers behave as they do today — the editable wiring follows
-        // the declared boundary (text-editing, measurement, focus all
-        // declared in the committed definition).
-        let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
-        let sink = std::sync::Arc::clone(&seen);
-        let node = text_input_with_handlers(
-            &TextInputSpec::new()
-                .with_id("stock")
-                .with_value("hello")
-                .with_selection(1, 4),
-            &theme(),
-            TextInputHandlers {
-                on_selection_change: Some(Arc::new(move |a, b| sink.lock().unwrap().push((a, b)))),
-                on_focus_change: Some(Arc::new(|_| {})),
-                ..TextInputHandlers::default()
-            },
-        );
-        let value = node
-            .find(&|n| n.id.as_deref() == Some("poodle-input-stock-value"))
-            .expect("value node");
-
-        assert!(
-            node.interaction.on_edit_key.is_some(),
-            "on_edit_key wires while the definition declares text-editing"
-        );
-        assert!(
-            node.interaction.on_edit_insert.is_some(),
-            "on_edit_insert wires while the definition declares text-editing"
-        );
-        assert!(
-            node.interaction.on_focus_change.is_some(),
-            "on_focus_change wires while the definition declares focus"
-        );
-        assert!(
-            value.caret.is_some() && node.caret.is_some(),
-            "the caret wires while the definition declares measurement (value) and \
-             text-editing (root)"
-        );
-
-        // The channels behave: an insertion replaces the selection through
-        // the shared edit model, and reports the moved caret. Each handler
-        // sees the spec state captured at render time — the host re-renders
-        // with the new value between events, so chaining two events on one
-        // render is not the runtime contract.
-        let insert = node.interaction.on_edit_insert.as_ref().expect("insert");
-        insert("!");
-        assert_eq!(
-            *seen.lock().unwrap(),
-            vec![(2, 2)],
-            "the shared edit model lands the insertion at the selection and reports the caret"
-        );
-
-        let key = node.interaction.on_edit_key.as_ref().expect("edit key");
-        key("end", poodle_node::NodeModifiers::default());
-        assert_eq!(
-            seen.lock().unwrap().last().copied(),
-            Some((5, 5)),
-            "a key goes through the shared edit model too — 'hello' at its render-time state"
-        );
-    }
-
-    #[test]
-    fn anatomy_nodes_render_while_their_parts_are_declared() {
-        let node = text_input(
-            &TextInputSpec::new()
-                .with_id("full")
-                .with_value("hello")
-                .with_prefix("$")
-                .with_suffix("/mo")
-                .with_leading_icon("search")
-                .with_trailing_icon("x-circle")
-                .with_max_length(100)
-                .with_show_char_count(true)
-                .with_validation_state(ValidationState::Valid),
-            &theme(),
-            None,
-        );
-        let row = &node.children[0];
-        let kinds: Vec<&str> = row
-            .children
-            .iter()
-            .map(|child| match child.kind {
-                NodeKind::Text { .. } => "text",
-                NodeKind::Icon { .. } => "icon",
-                _ => "container",
-            })
-            .collect();
-        assert_eq!(
-            kinds,
-            vec![
-                "container", // prefix affix (separator + wrapped text)
-                "icon",      // leading affordance
-                "text",      // the value
-                "text",      // char count
-                "icon",      // validation indicator (valid check)
-                "icon",      // trailing affordance
-                "container", // suffix affix
-            ],
-            "the anatomy renders in row order while every part is declared"
-        );
     }
 }

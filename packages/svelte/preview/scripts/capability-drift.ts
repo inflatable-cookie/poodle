@@ -44,7 +44,10 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 // packages/svelte/preview/scripts -> repo root
 const ROOT = resolve(here, "../../../..");
-const FIXTURES_DIR = join(ROOT, "packages/codegen/fixtures");
+const CAPABILITIES_PATH = join(
+  ROOT,
+  "packages/contracts/headless/capabilities/capabilities.json",
+);
 
 /** The serialized runtime names the fixtures carry (the four RuntimeTargets). */
 type RuntimeName = "svelte" | "react" | "gpui" | "jetstream";
@@ -344,22 +347,20 @@ function checkRows(component: string, capability: string, rows: Array<Record<str
   }
 }
 
-for (const fixture of readdirSync(FIXTURES_DIR).filter((file) => /-model\.json$/.test(file))) {
-  const model = JSON.parse(readFileSync(join(FIXTURES_DIR, fixture), "utf8")) as {
-    components: Array<{
-      id: string;
-      capabilities?: Array<{
-        capability: string;
-        runtimes?: Array<Record<string, unknown>>;
-      }>;
+const model = JSON.parse(readFileSync(CAPABILITIES_PATH, "utf8")) as {
+  components: Array<{
+    id: string;
+    capabilities?: Array<{
+      capability: string;
+      runtimes?: Array<Record<string, unknown>>;
     }>;
-  };
-  for (const component of model.components ?? []) {
-    for (const requirement of component.capabilities ?? []) {
-      const rows = requirement.runtimes ?? [];
-      if (rows.length === 0) continue; // pre-g13.018 shape: nothing declared, nothing checked
-      checkRows(component.id, requirement.capability, rows);
-    }
+  }>;
+};
+for (const component of model.components ?? []) {
+  for (const requirement of component.capabilities ?? []) {
+    const rows = requirement.runtimes ?? [];
+    if (rows.length === 0) continue; // pre-g13.018 shape: nothing declared, nothing checked
+    checkRows(component.id, requirement.capability, rows);
   }
 }
 

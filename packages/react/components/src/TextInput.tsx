@@ -27,60 +27,6 @@ import type {
   ValidationResult,
   ValidationState,
 } from "./types";
-// Card 048 R2: the DOM reads the generated definition — the data-*
-// attribute names, the part class names, and the TXT-16 padding custom
-// properties come from text_input.rs via `text-input-ts`, never from
-// hand-written literals in this component. A rename in the definition
-// moves the DOM; `effigy ir:check` gates drift in the artifact.
-import { textInputDefinition } from "./generated/text-input";
-
-const parts: Record<string, string> = Object.fromEntries(
-  textInputDefinition.parts.map((part) => [part.id, part.className]),
-);
-const attributes: Record<string, string> = Object.fromEntries(
-  textInputDefinition.attributes.map((attribute) => [attribute.id, attribute.name]),
-);
-const styleProps: Record<string, string> = Object.fromEntries(
-  textInputDefinition.styleProps.map((prop) => [prop.id, prop.name]),
-);
-
-function partClass(id: string): string {
-  const className = parts[id];
-  if (!className) throw new Error(`definition lacks part '${id}'`);
-  return className;
-}
-
-function attributeName(id: string): string {
-  const name = attributes[id];
-  if (!name) throw new Error(`definition lacks attribute '${id}'`);
-  return name;
-}
-
-function stylePropName(id: string): string {
-  const name = styleProps[id];
-  if (!name) throw new Error(`definition lacks style prop '${id}'`);
-  return name;
-}
-
-// The anatomy classes (T §2) — the definition names them; the markup
-// renders them.
-const rootClass = partClass("root");
-const prefixClass = partClass("prefix");
-const fieldClass = partClass("field");
-const leadingAffordanceClass = partClass("leading-affordance");
-const controlClass = partClass("input-control");
-const trailingAffordanceClass = partClass("trailing-affordance");
-const clearButtonClass = partClass("clear-button");
-const indicatorClass = partClass("validation-indicator");
-const suffixClass = partClass("suffix");
-const charCountClass = partClass("char-count");
-
-// The state-derived attribute names (TXT-18) — the definition names
-// them; the values stay runtime-derived (CROSS-13).
-const dataValidationState = attributeName("validation-state");
-const dataSize = attributeName("size");
-const dataDensity = attributeName("density");
-const dataType = attributeName("type");
 
 export interface TextInputProps {
   id?: string;
@@ -491,38 +437,29 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
     focus: () => controlRef.current?.focus(),
   }));
 
-  // The root attribute emission (TXT-18): the names come from the
-  // definition, the values stay runtime-derived (CROSS-13).
-  const rootAttributes: Record<string, string> = {
-    [dataValidationState]: effectiveValidationState,
-    [dataSize]: resolvedSize,
-    [dataDensity]: resolvedDensity,
-    [dataType]: type,
-  };
-
-  // The TXT-16 padding reservations: React emits the three shared style
-  // props (the two overlay insets are Svelte-only emissions whose CSS
-  // fallbacks cover React — recorded in the batch log's R7 inventory).
   const rootStyle = {
-    [stylePropName("control-padding-start")]: controlPaddingStart,
-    [stylePropName("control-padding-end")]: controlPaddingEnd,
-    [stylePropName("multiline-padding-end")]: multilineBottomPadding,
+    "--poodle-text-input-control-padding-start": controlPaddingStart,
+    "--poodle-text-input-control-padding-end": controlPaddingEnd,
+    "--poodle-text-input-multiline-padding-end": multilineBottomPadding,
   } as CSSProperties;
 
   return (
     <>
       <div
-        {...rootAttributes}
-        className={`${rootClass}${isMultiline ? ` ${rootClass}--multiline` : ""}`}
+        className={`poodle-text-input${isMultiline ? " poodle-text-input--multiline" : ""}`}
+        data-validation-state={effectiveValidationState}
+        data-size={resolvedSize}
+        data-density={resolvedDensity}
+        data-type={type}
         style={rootStyle}
       >
-        {prefix ? <span className={prefixClass}>{prefix}</span> : null}
+        {prefix ? <span className="poodle-text-input__affix poodle-text-input__affix--prefix">{prefix}</span> : null}
 
-        <div className={fieldClass}>
+        <div className="poodle-text-input__field">
           {leadingSlot ? (
-            <span className={leadingAffordanceClass}>{leadingSlot}</span>
+            <span className="poodle-text-input__affordance poodle-text-input__affordance--leading">{leadingSlot}</span>
           ) : isSearch ? (
-            <span className={leadingAffordanceClass} aria-hidden="true">
+            <span className="poodle-text-input__affordance poodle-text-input__affordance--leading" aria-hidden="true">
               <Icon icon="search" />
             </span>
           ) : null}
@@ -532,7 +469,7 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
               ref={controlRef}
               id={id || undefined}
               name={name}
-              className={`${controlClass} ${controlClass}--multiline`}
+              className="poodle-text-input__control poodle-text-input__control--multiline"
               value={currentValue}
               placeholder={placeholder ?? undefined}
               autoComplete={autoComplete}
@@ -567,7 +504,7 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
               list={list ?? undefined}
               type={nativeInputType}
               inputMode={(isSlug ? "text" : inputMode) ?? undefined}
-              className={controlClass}
+              className="poodle-text-input__control"
               value={currentValue}
               placeholder={placeholder ?? undefined}
               autoComplete={autoComplete}
@@ -598,18 +535,25 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
           )}
 
           {trailingSlot ? (
-            <span className={trailingAffordanceClass}>{trailingSlot}</span>
+            <span className="poodle-text-input__affordance poodle-text-input__affordance--trailing">{trailingSlot}</span>
           ) : null}
 
           {canClear ? (
-            <button className={clearButtonClass} type="button" aria-label="Clear search query" onClick={handleClear}>
+            <button className="poodle-text-input__clear" type="button" aria-label="Clear search query" onClick={handleClear}>
               <Icon icon="x" />
             </button>
           ) : null}
 
           {showValidationIndicator ? (
             <span
-              className={`${indicatorClass}${effectiveValidationState === "pending" ? ` ${indicatorClass}--pending` : ""}${effectiveValidationState === "valid" ? ` ${indicatorClass}--valid` : ""}${effectiveValidationState === "invalid" ? ` ${indicatorClass}--invalid` : ""}`}
+              className={[
+                "poodle-text-input__validation-indicator",
+                effectiveValidationState === "pending" ? "poodle-text-input__validation-indicator--pending" : "",
+                effectiveValidationState === "valid" ? "poodle-text-input__validation-indicator--valid" : "",
+                effectiveValidationState === "invalid" ? "poodle-text-input__validation-indicator--invalid" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
               aria-hidden="true"
             >
               {effectiveValidationState === "pending" ? (
@@ -621,11 +565,11 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
           ) : null}
         </div>
 
-        {suffix ? <span className={suffixClass}>{suffix}</span> : null}
+        {suffix ? <span className="poodle-text-input__affix poodle-text-input__affix--suffix">{suffix}</span> : null}
 
         {showCharCount ? (
           <span
-            className={`${charCountClass}${isOverLimit ? ` ${charCountClass}--over` : ""}`}
+            className={`poodle-text-input__char-count${isOverLimit ? " poodle-text-input__char-count--over" : ""}`}
             aria-live="polite"
           >
             {charCountText}

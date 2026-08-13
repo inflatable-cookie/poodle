@@ -4,9 +4,7 @@
 //!
 //! Placement is **pilot-scoped** (g13-b003 R1): an authored *instance* is
 //! content, not schema, so it lives in `poodle-codegen`, not `poodle-ir`.
-//! Where production models are authored is a `g13.008` decision.
+//! The three component models were unwound in g13-053; only the preview
+//! shell scene remains (R1-keep).
 
-pub mod button;
 pub mod preview_shell;
-pub mod range_slider;
-pub mod text_input;

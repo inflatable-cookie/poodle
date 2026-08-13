@@ -1,44 +1,3 @@
-<script module lang="ts">
-  import { buttonDefinition } from "./generated/button";
-
-  // The definition owns the rendered vocabulary (card 041 R2): the
-  // anatomy's DOM classes and the eleven data-* attribute names. A rename
-  // in packages/codegen/src/models/button.rs moves the DOM here with no
-  // hand edit; `effigy ir:check` gates drift in the artifact.
-  const parts = new Map<string, string>(buttonDefinition.parts.map((part) => [part.id, part.className]));
-  const attributes = new Map<string, string>(buttonDefinition.attributes.map((attribute) => [attribute.id, attribute.name]));
-
-  function partClass(id: string): string {
-    const className = parts.get(id);
-    if (!className) throw new Error(`Button definition has no part '${id}'`);
-    return className;
-  }
-
-  function attributeName(id: string): string {
-    const name = attributes.get(id);
-    if (!name) throw new Error(`Button definition has no attribute '${id}'`);
-    return name;
-  }
-
-  const rootClass = partClass("root");
-  const spinnerClass = partClass("spinner");
-  const iconClass = partClass("leading-icon");
-  const labelClass = partClass("label");
-  const chevronClass = partClass("chevron");
-
-  const dataVariant = attributeName("variant");
-  const dataTone = attributeName("tone");
-  const dataSize = attributeName("size");
-  const dataDensity = attributeName("density");
-  const dataIconOnly = attributeName("icon-only");
-  const dataHasLeading = attributeName("has-leading");
-  const dataHasTrailing = attributeName("has-trailing");
-  const dataTruncate = attributeName("truncate");
-  const dataFit = attributeName("fit");
-  const dataLoading = attributeName("loading");
-  const dataPressed = attributeName("pressed");
-</script>
-
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/button.css";
   import type { Snippet } from "svelte";
@@ -170,23 +129,6 @@
       .join("; ")
   );
 
-  // The eleven data-* attributes, emitted from the definition's attribute
-  // names (R2). The value derivation stays here — it is the runtime's
-  // projection (CROSS-14) — but the names come from button.rs.
-  const dataAttributes = $derived({
-    [dataVariant]: variant,
-    [dataTone]: tone !== "default" ? tone : undefined,
-    [dataSize]: resolvedSize,
-    [dataDensity]: resolvedDensity,
-    [dataIconOnly]: iconOnly || undefined,
-    [dataHasLeading]: hasLeading || undefined,
-    [dataHasTrailing]: hasTrailing || undefined,
-    [dataTruncate]: truncate || undefined,
-    [dataFit]: fit !== "default" ? fit : undefined,
-    [dataLoading]: loading,
-    [dataPressed]: isToggle ? currentPressed : undefined,
-  });
-
   /**
    * `{...restProps}` is spread onto the button *before* the three handlers
    * below bind their own, so a consumer passing the DOM spelling — `onclick`
@@ -229,9 +171,19 @@
   formmethod={formmethod ?? undefined}
   formnovalidate={formnovalidate || undefined}
   formtarget={formtarget ?? undefined}
-  class={`${rootClass} ${className}`.trim()}
+  class={`poodle-button ${className}`.trim()}
   style={resolvedStyle || undefined}
-  {...dataAttributes}
+  data-variant={variant}
+  data-tone={tone !== "default" ? tone : undefined}
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
+  data-icon-only={iconOnly || undefined}
+  data-has-leading={hasLeading || undefined}
+  data-has-trailing={hasTrailing || undefined}
+  data-truncate={truncate || undefined}
+  data-fit={fit !== "default" ? fit : undefined}
+  data-loading={loading}
+  data-pressed={isToggle ? currentPressed : undefined}
   disabled={isUnavailable}
   aria-label={ariaLabel ?? undefined}
   aria-pressed={isToggle ? (currentPressed ? "true" : "false") : undefined}
@@ -252,13 +204,13 @@
   }}
 >
   {#if loading}
-    <span class={spinnerClass} aria-hidden="true">
+    <span class="poodle-button__spinner" aria-hidden="true">
       <Spinner variant="ring" size={resolvedIconSize} tone="current" />
     </span>
   {/if}
 
   {#if leading || leadingIcon}
-    <span class={iconClass} aria-hidden="true">
+    <span class="poodle-button__icon" aria-hidden="true">
       {#if leading}
         {@render leading()}
       {:else if leadingIcon}
@@ -268,13 +220,13 @@
   {/if}
 
   {#if children}
-    <span class={labelClass}>
+    <span class="poodle-button__label">
       {@render children()}
     </span>
   {/if}
 
   {#if trailing || trailingIcon}
-    <span class={iconClass} aria-hidden="true">
+    <span class="poodle-button__icon" aria-hidden="true">
       {#if trailing}
         {@render trailing()}
       {:else if trailingIcon}
@@ -284,7 +236,7 @@
   {/if}
 
   {#if chevron}
-    <span class={chevronClass} aria-hidden="true">
+    <span class="poodle-button__chevron" aria-hidden="true">
       <Icon name="chevron-down" size={resolvedIconSize} />
     </span>
   {/if}

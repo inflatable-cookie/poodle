@@ -1,0 +1,248 @@
+{
+  "components": [
+    {
+      "id": "button",
+      "capabilities": [
+        {
+          "capability": "focus",
+          "runtimes": []
+        }
+      ]
+    },
+    {
+      "id": "range-slider",
+      "capabilities": [
+        {
+          "capability": "pointer-capture",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "provided",
+              "reason": "The component's root calls setPointerCapture for the embedded variant and holds the gesture on the shared root (RNG-15)."
+            },
+            {
+              "runtime": "react",
+              "provision": "provided",
+              "reason": "The component's root calls setPointerCapture for the embedded variant and holds the gesture on the shared root (RNG-15)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "The render's scrub overlay + the node-backend's drag system keep the gesture on the shared root for the whole drag (RNG-15; interaction.rs scrub handling)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "Jetstream dispatches pointer presses to the render's scrub overlay but has no capture semantics — the embedded variant renders without a held gesture (RNG-15; measured g13.018: no capture vocabulary in the Jetstream sources)."
+            }
+          ]
+        },
+        {
+          "capability": "focus",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "provided",
+              "reason": "The two native range inputs (standard) and the two slider focus stops (embedded) each carry their own tabindex (RNG-18/20)."
+            },
+            {
+              "runtime": "react",
+              "provision": "provided",
+              "reason": "The two native range inputs (standard) and the two slider focus stops (embedded) each carry their own tabIndex (RNG-18/20)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "The render marks the root focusable and the node-backend observes focus and drives key dispatch for the focused element (interaction.rs; RNG-18/20)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "provided",
+              "reason": "The preview's focus system hit-tests and focuses the render's focusable root, and the adapter projects focus rings (main.rs focus handling, adapter render_structural.rs; RNG-18/20)."
+            }
+          ]
+        },
+        {
+          "capability": "scrub-fraction",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "provided",
+              "reason": "The shared root's pointer handlers report the position as a fraction and drive the machine's POINTER_BEGIN/MOVE/END (RNG-13)."
+            },
+            {
+              "runtime": "react",
+              "provision": "provided",
+              "reason": "The shared root's pointer handlers report the position as a fraction and drive the machine's POINTER_BEGIN/MOVE/END (RNG-13)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "The render attaches on_scrub to the grab overlay and the node-backend reports the fraction across it, pressing and dragging (interaction.rs; RNG-13)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "Jetstream renders the grab overlay but no pointer-fraction reporting reaches it — the component renders without scrub interaction (RNG-13; measured g13.018: no scrub vocabulary in the Jetstream sources)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "text-input",
+      "capabilities": [
+        {
+          "capability": "focus",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "provided",
+              "reason": "The component's imperative focus() and the native input's autofocus own focus delivery (TXT-21)."
+            },
+            {
+              "runtime": "react",
+              "provision": "provided",
+              "reason": "The imperative focus() handle and the native input's autoFocus own focus delivery (TXT-21)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "The node-backend owns a real focus handle, observes gain and loss, and fires on_focus_change (interaction.rs; TXT-21)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "Jetstream never observes focus for poodle fields — no on_focus_change route, and the adapter's text element has no meaningful poodle focus; the field renders unfocusable for editing (b049 R2, measured)."
+            }
+          ]
+        },
+        {
+          "capability": "text-editing",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "delegated",
+              "reason": "The browser's editing model IS the editing — the component wires the native input and owns no text machine (b048, measured)."
+            },
+            {
+              "runtime": "react",
+              "provision": "delegated",
+              "reason": "The browser's editing model IS the editing — the component wires the native input and owns no text machine (b048, measured)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "The node-backend implements the full editing model: ime.rs (218 lines), input_text.rs (574 lines), and the on_edit_key/on_edit_insert/on_select_range wiring in interaction.rs and lib.rs (b049, measured)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "Jetstream has zero on_edit_key/on_select_range/on_edit_insert references and no ime.rs — the adapter renders a display-only text element with no caret, no selection, and no key path; the field cannot be typed into. Declared, not fixed (b049 R3; TXT-31)."
+            }
+          ]
+        },
+        {
+          "capability": "ime",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "delegated",
+              "reason": "The browser owns composition; the component filters input events by isComposing and intercepts no composition events (TXT-24; b048 measured)."
+            },
+            {
+              "runtime": "react",
+              "provision": "delegated",
+              "reason": "The browser owns composition; the component filters input events by isComposing and intercepts no composition events (TXT-24; b048 measured)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "ime.rs is a direct gpui InputHandler implementation with explicit UTF-16 conversions and a backend-owned marked range (TXT-24; b049 measured)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "No ime.rs anywhere and no input handler is ever registered for a poodle field — composition has no route (b049 R2, measured; TXT-24)."
+            }
+          ]
+        },
+        {
+          "capability": "clipboard",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "delegated",
+              "reason": "The browser owns the clipboard on the native input — the component implements no clipboard path (TXT-23)."
+            },
+            {
+              "runtime": "react",
+              "provision": "delegated",
+              "reason": "The browser owns the clipboard on the native input — the component implements no clipboard path (TXT-23)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "The node-backend owns the platform clipboard; paste/cut land through the shared edit model via on_edit_insert and selected_text (lib.rs, TXT-23; b049 measured)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "No clipboard path exists for poodle fields — copy/cut/paste have no route (b049 R2, measured; TXT-23)."
+            }
+          ]
+        },
+        {
+          "capability": "measurement",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "delegated",
+              "reason": "The browser measures the native input's text natively — the component implements no measurement (TXT-21/22)."
+            },
+            {
+              "runtime": "react",
+              "provision": "delegated",
+              "reason": "The browser measures the native input's text natively — the component implements no measurement (TXT-21/22)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "input_text.rs shapes and measures the value line and answers clicks with x_for_index/closest_index_for_x on the measured ShapedLine (TXT-21/22; b049 measured)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "No shaped-line measurement, no caret placement, no click-to-index — the field is display-only (b049 R2, measured; TXT-21/22)."
+            }
+          ]
+        },
+        {
+          "capability": "timers",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "provided",
+              "reason": "The component owns its setTimeout debounce and validation timers with cleanup on destroy (TXT-11/12/28)."
+            },
+            {
+              "runtime": "react",
+              "provision": "provided",
+              "reason": "The component owns its setTimeout debounce and validation timers with cleanup on unmount (TXT-11/12/28)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "absent",
+              "reason": "No timer surface — the host drives timing (b049 measured: neither native has a timer surface)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "No timer surface — the host drives timing (b049 measured: neither native has a timer surface)."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
