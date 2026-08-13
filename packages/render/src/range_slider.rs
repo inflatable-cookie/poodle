@@ -14,8 +14,8 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, ScrubPhase,
-    ShadowValue,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, NodeRole,
+    ScrubPhase, ShadowValue,
 };
 use poodle_specs::{ControlSize, RangeSliderSpec, SliderVariant};
 
@@ -373,9 +373,15 @@ pub fn range_slider(
         el.interaction.focusable = true;
     }
 
+    // Contract §6: the control node exposes the slider role on the shared
+    // native path — same shape as audio.rs's knob and color_picker.rs's
+    // channel wrap. The role lands only on a node that already carries an
+    // accessible name (the ruling's requirement): an unnamed slider is
+    // worse than an unnamed container, and the audit fails on one.
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {
             el.a11y.label = Some(label.to_string());
+            el.a11y.role = Some(NodeRole::Slider);
         }
     }
     el
@@ -493,5 +499,38 @@ mod tests {
         assert_eq!(track_thickness_rem(ControlSize::Md), 0.375);
         assert_eq!(track_thickness_rem(ControlSize::Lg), 0.5);
         assert_eq!(track_thickness_rem(ControlSize::Xl), 0.625);
+    }
+
+    /// Contract §6: the shared native path projects the slider role, and it
+    /// lands on the node that carries the accessible name (the control node),
+    /// so a screen reader describes the slider, not a container. An unnamed
+    /// control stays roleless — an unnamed slider is worse than an unnamed
+    /// container, and the a11y audit fails on one.
+    #[test]
+    fn the_control_node_exposes_the_slider_role() {
+        let named = spec().with_aria_label("Price range");
+        let node = range_slider(&named, &theme(), RangeSliderHandlers::default());
+        let named_slider = node
+            .find(&|n| n.a11y.role == Some(NodeRole::Slider))
+            .expect("the role persists when a label is provided");
+        assert_eq!(named_slider.a11y.label.as_deref(), Some("Price range"));
+        assert_eq!(
+            named_slider.a11y.role,
+            Some(NodeRole::Slider),
+            "the role and the name sit on the same node"
+        );
+        assert!(
+            named_slider.interaction.focusable,
+            "the slider is a focusable control"
+        );
+    }
+
+    #[test]
+    fn an_unnamed_control_stays_roleless() {
+        let (node, _) = armed();
+        assert!(
+            node.find(&|n| n.a11y.role == Some(NodeRole::Slider)).is_none(),
+            "no slider role without an accessible name"
+        );
     }
 }

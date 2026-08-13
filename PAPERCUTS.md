@@ -7,6 +7,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-13 — the documented g13-036 symlink workaround for the Jetstream
+  sibling path-dep no longer works: a `poodle` symlink next to a real
+  worktree makes cargo fail with a lockfile collision ("packages
+  poodle-layout … are different, but only one can be written to lockfile
+  unambiguously") because the preview's own deps and jetstream-poodle's
+  deps land on two textual paths to the same crates. Working recipe
+  (g14-b002, log §2): branch clone of poodle at
+  `/Users/tom/.t3/worktrees/poodle/poodle` + sources-only copy of jetstream
+  at `/Users/tom/.t3/worktrees/poodle/jetstream` + `CARGO_TARGET_DIR` set to
+  the main checkout's jetstream `target/` (rsync -a preserves mtimes, so the
+  warm cache hits). Any Jetstream-touching card needs this.
+
 - 2026-08-13 — the React preview is dead on this branch: the Svelte
   canonical registry lists `update-center`/`update-status` as standalone
   specimens (the UpdateCenter PR `b433498d` added them) but the React
