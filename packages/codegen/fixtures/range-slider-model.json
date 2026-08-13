@@ -1,0 +1,1611 @@
+{
+  "schema_version": 1,
+  "shared_types": [
+    {
+      "id": "slider-variant",
+      "name": "SliderVariant",
+      "description": "The RangeSlider treatment (R §3; the TS SliderVariant union).",
+      "canonical_ref": {
+        "path": "docs/contracts/components/range-slider.md",
+        "section": "§3"
+      },
+      "members": [
+        {
+          "id": "standard",
+          "name": "standard",
+          "description": "Two overlapping native range inputs."
+        },
+        {
+          "id": "embedded",
+          "name": "embedded",
+          "description": "Dense composite control with adapter-owned focus stops."
+        }
+      ]
+    },
+    {
+      "id": "slider-polarity",
+      "name": "SliderPolarity",
+      "description": "The fill-geometry polarity (R §3; the TS SliderPolarity union).",
+      "canonical_ref": {
+        "path": "docs/contracts/components/range-slider.md",
+        "section": "§3"
+      },
+      "members": [
+        {
+          "id": "unipolar",
+          "name": "unipolar",
+          "description": "Ordinary range; no explicit center reference."
+        },
+        {
+          "id": "bipolar",
+          "name": "bipolar",
+          "description": "Range with an explicit bipolar center reference."
+        }
+      ]
+    },
+    {
+      "id": "slider-thumb",
+      "name": "SliderThumb",
+      "description": "Thumb identity — which thumb a gesture holds (R §4 component states).",
+      "canonical_ref": {
+        "path": "docs/contracts/components/range-slider.md",
+        "section": "§3"
+      },
+      "members": [
+        {
+          "id": "lower",
+          "name": "lower",
+          "description": "The lower bound thumb."
+        },
+        {
+          "id": "upper",
+          "name": "upper",
+          "description": "The upper bound thumb."
+        }
+      ]
+    },
+    {
+      "id": "control-size",
+      "name": "ControlSize",
+      "description": "The xs-xl control-size ladder (CROSS-07; the TS ControlSize union).",
+      "canonical_ref": {
+        "path": "docs/contracts/004-shared-control-types.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "xs",
+          "name": "xs",
+          "description": "Extra-small rung."
+        },
+        {
+          "id": "sm",
+          "name": "sm",
+          "description": "Small rung."
+        },
+        {
+          "id": "md",
+          "name": "md",
+          "description": "Default rung."
+        },
+        {
+          "id": "lg",
+          "name": "lg",
+          "description": "Large rung."
+        },
+        {
+          "id": "xl",
+          "name": "xl",
+          "description": "Extra-large rung."
+        }
+      ]
+    },
+    {
+      "id": "control-density",
+      "name": "ControlDensity",
+      "description": "The compact/default/comfortable density ladder (CROSS-08; the TS ControlDensity union).",
+      "canonical_ref": {
+        "path": "docs/contracts/004-shared-control-types.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "compact",
+          "name": "compact",
+          "description": "Tighter spacing."
+        },
+        {
+          "id": "default",
+          "name": "default",
+          "description": "Standard spacing."
+        },
+        {
+          "id": "comfortable",
+          "name": "comfortable",
+          "description": "Relaxed spacing."
+        }
+      ]
+    },
+    {
+      "id": "control-size-role",
+      "name": "SemanticControlSizeRole",
+      "description": "Semantic size offset from inherited presentation (CROSS-07; the TS SemanticControlSizeRole union).",
+      "canonical_ref": {
+        "path": "docs/contracts/004-shared-control-types.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "chrome",
+          "name": "chrome",
+          "description": "Shell chrome size role."
+        },
+        {
+          "id": "control",
+          "name": "control",
+          "description": "Standard control size role (default)."
+        },
+        {
+          "id": "prominent",
+          "name": "prominent",
+          "description": "Prominent size role."
+        }
+      ]
+    },
+    {
+      "id": "orientation",
+      "name": "Orientation",
+      "description": "The orientation axis (CROSS-11, RNG-07; the TS Orientation union).",
+      "canonical_ref": {
+        "path": "docs/contracts/004-shared-control-types.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "horizontal",
+          "name": "horizontal",
+          "description": "Layout and interaction along the inline axis."
+        },
+        {
+          "id": "vertical",
+          "name": "vertical",
+          "description": "Layout and interaction along the block axis."
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "id": "range-slider",
+      "name": "RangeSlider",
+      "layer": "foundation",
+      "contract": {
+        "path": "docs/contracts/components/range-slider.md",
+        "section": "§3"
+      },
+      "description": "A dual-thumb range control representing lower and upper numeric bounds, built on two overlapping native range inputs with a custom track and fill visualization (R §1). g13.006's stateful proof: 18 web props, 8 data-* attributes, two-thumb anatomy, unipolar/bipolar fill geometry, and a machine pinned by the shared slider conformance vector (RNG-01..29).",
+      "props": [
+        {
+          "id": "value",
+          "name": "value",
+          "prop_type": {
+            "Pair": "Number"
+          },
+          "default": {
+            "Pair": [
+              {
+                "Number": 0.0
+              },
+              {
+                "Number": 100.0
+              }
+            ]
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Controlled lower/upper pair (R §3, RNG-01).",
+          "permitted_subset": null
+        },
+        {
+          "id": "min",
+          "name": "min",
+          "prop_type": "Number",
+          "default": {
+            "Number": 0.0
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Lower bound (R §3, RNG-02).",
+          "permitted_subset": null
+        },
+        {
+          "id": "max",
+          "name": "max",
+          "prop_type": "Number",
+          "default": {
+            "Number": 100.0
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Upper bound (R §3, RNG-02).",
+          "permitted_subset": null
+        },
+        {
+          "id": "step",
+          "name": "step",
+          "prop_type": "Number",
+          "default": {
+            "Number": 1.0
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Increment size (R §3, RNG-02).",
+          "permitted_subset": null
+        },
+        {
+          "id": "variant",
+          "name": "variant",
+          "prop_type": {
+            "Shared": "slider-variant"
+          },
+          "default": {
+            "Member": "standard"
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Native-input control or dense composite control (R §3, RNG-03).",
+          "permitted_subset": {
+            "shared_type": "slider-variant",
+            "members": [
+              "embedded",
+              "standard"
+            ]
+          }
+        },
+        {
+          "id": "polarity",
+          "name": "polarity",
+          "prop_type": {
+            "Shared": "slider-polarity"
+          },
+          "default": {
+            "Member": "unipolar"
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Ordinary range or an explicit bipolar center reference (R §3, RNG-04).",
+          "permitted_subset": {
+            "shared_type": "slider-polarity",
+            "members": [
+              "bipolar",
+              "unipolar"
+            ]
+          }
+        },
+        {
+          "id": "centerValue",
+          "name": "centerValue",
+          "prop_type": "Number",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Bipolar reference; null defaults to zero when zero is inside the range, otherwise the midpoint (R §3, RNG-05).",
+          "permitted_subset": null
+        },
+        {
+          "id": "law",
+          "name": "law",
+          "prop_type": "Opaque",
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Embedded-variant value mapping; default { type: \"linear\" } — an opaque payload whose default object literal no Value variant can carry, so the default is recorded as None and named here (R §3; b041 vocabulary-note pattern).",
+          "permitted_subset": null
+        },
+        {
+          "id": "orientation",
+          "name": "orientation",
+          "prop_type": {
+            "Shared": "orientation"
+          },
+          "default": {
+            "Member": "horizontal"
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Layout and interaction axis (R §3/§7, RNG-07; CROSS-11).",
+          "permitted_subset": {
+            "shared_type": "orientation",
+            "members": [
+              "horizontal",
+              "vertical"
+            ]
+          }
+        },
+        {
+          "id": "disabled",
+          "name": "disabled",
+          "prop_type": "Bool",
+          "default": {
+            "Bool": false
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Disables interaction and applies disabled opacity (R §3, RNG-08).",
+          "permitted_subset": null
+        },
+        {
+          "id": "ariaLabel",
+          "name": "ariaLabel",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Base accessible name; per-thumb labels append \"minimum\"/\"maximum\" (R §3/§6, RNG-10).",
+          "permitted_subset": null
+        },
+        {
+          "id": "lowerValueText",
+          "name": "lowerValueText",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Human-readable text for the lower thumb (aria-valuetext) (R §3, RNG-10).",
+          "permitted_subset": null
+        },
+        {
+          "id": "upperValueText",
+          "name": "upperValueText",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Human-readable text for the upper thumb (aria-valuetext) (R §3, RNG-10).",
+          "permitted_subset": null
+        },
+        {
+          "id": "size",
+          "name": "size",
+          "prop_type": {
+            "Shared": "control-size"
+          },
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Explicit control-size override; default null — resolves from inherited presentation plus sizeRole (R §3, RNG-06; CROSS-07).",
+          "permitted_subset": {
+            "shared_type": "control-size",
+            "members": [
+              "lg",
+              "md",
+              "sm",
+              "xl",
+              "xs"
+            ]
+          }
+        },
+        {
+          "id": "sizeRole",
+          "name": "sizeRole",
+          "prop_type": {
+            "Shared": "control-size-role"
+          },
+          "default": {
+            "Member": "control"
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Semantic size offset from inherited presentation (R §3, RNG-06; CROSS-07).",
+          "permitted_subset": {
+            "shared_type": "control-size-role",
+            "members": [
+              "chrome",
+              "control",
+              "prominent"
+            ]
+          }
+        },
+        {
+          "id": "density",
+          "name": "density",
+          "prop_type": {
+            "Shared": "control-density"
+          },
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Explicit density override; default null — inherited from presentation (R §3, RNG-09; CROSS-08).",
+          "permitted_subset": {
+            "shared_type": "control-density",
+            "members": [
+              "comfortable",
+              "compact",
+              "default"
+            ]
+          }
+        },
+        {
+          "id": "defaultValue",
+          "name": "defaultValue",
+          "prop_type": {
+            "Pair": "Number"
+          },
+          "default": {
+            "Pair": [
+              {
+                "Number": 0.0
+              },
+              {
+                "Number": 100.0
+              }
+            ]
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "React uncontrolled seed; the value pair is controlled-wins (value !== undefined), so the pair is recorded through the props rather than the DoNotMix controlled_state (R §3 controlled/uncontrolled; CROSS-03 web-only idiom, CROSS-04).",
+          "permitted_subset": null
+        }
+      ],
+      "controlled_state": [],
+      "events": [
+        {
+          "id": "value-change",
+          "name": "onValueChange",
+          "kind": "value-change",
+          "payload": {
+            "name": "[lower, upper]",
+            "kind": "pair"
+          },
+          "timing": {
+            "phase": "during-interaction",
+            "debounce_ms": null,
+            "flush_on_blur": false,
+            "ordering": []
+          },
+          "description": "Either thumb changes value during interaction; the pair is reported together and lower <= upper is preserved (R §5, RNG-11)."
+        },
+        {
+          "id": "value-commit",
+          "name": "onValueCommit",
+          "kind": "value-commit",
+          "payload": {
+            "name": "[lower, upper]",
+            "kind": "pair"
+          },
+          "timing": {
+            "phase": "on-release",
+            "debounce_ms": null,
+            "flush_on_blur": false,
+            "ordering": []
+          },
+          "description": "Interaction finishes on either thumb (mouseup/touchend/keyup commit) (R §5, RNG-11)."
+        }
+      ],
+      "parts": [
+        {
+          "id": "root",
+          "name": "Root",
+          "parent": null,
+          "kind": "static",
+          "description": "Range slider host with relative positioning; role=\"group\" (R §2, RNG-14)."
+        },
+        {
+          "id": "track",
+          "name": "Track",
+          "parent": "root",
+          "kind": "static",
+          "description": "Full available range background bar (R §2, RNG-14)."
+        },
+        {
+          "id": "fill-negative",
+          "name": "Negative Fill",
+          "parent": "track",
+          "kind": "static",
+          "description": "Bipolar selected-fill segment on the negative side of the center reference; empty in unipolar (R §2/§8, RNG-16)."
+        },
+        {
+          "id": "fill-positive",
+          "name": "Positive Fill",
+          "parent": "track",
+          "kind": "static",
+          "description": "Selected-fill segment on the positive side of the center reference — the whole window in unipolar (R §2/§8, RNG-16)."
+        },
+        {
+          "id": "center",
+          "name": "Center",
+          "parent": "track",
+          "kind": "static",
+          "description": "Bipolar center reference marker; hidden in unipolar and in the standard variant (R §2/§8)."
+        },
+        {
+          "id": "control-lower",
+          "name": "Lower Control",
+          "parent": "root",
+          "kind": {
+            "conditional-expr": {
+              "when": {
+                "eq": [
+                  {
+                    "operand": {
+                      "prop": "variant"
+                    }
+                  },
+                  {
+                    "operand": {
+                      "literal": {
+                        "member": {
+                          "shared_type": "slider-variant",
+                          "member": "standard"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "description": "Native range input for the lower thumb; standard variant only (R §2, RNG-14/15)."
+            }
+          },
+          "description": "Lower bound thumb input (R §2)."
+        },
+        {
+          "id": "control-upper",
+          "name": "Upper Control",
+          "parent": "root",
+          "kind": {
+            "conditional-expr": {
+              "when": {
+                "eq": [
+                  {
+                    "operand": {
+                      "prop": "variant"
+                    }
+                  },
+                  {
+                    "operand": {
+                      "literal": {
+                        "member": {
+                          "shared_type": "slider-variant",
+                          "member": "standard"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "description": "Native range input for the upper thumb; standard variant only (R §2, RNG-14/15)."
+            }
+          },
+          "description": "Upper bound thumb input (R §2)."
+        },
+        {
+          "id": "embedded-lower",
+          "name": "Embedded Lower Control",
+          "parent": "root",
+          "kind": {
+            "conditional-expr": {
+              "when": {
+                "eq": [
+                  {
+                    "operand": {
+                      "prop": "variant"
+                    }
+                  },
+                  {
+                    "operand": {
+                      "literal": {
+                        "member": {
+                          "shared_type": "slider-variant",
+                          "member": "embedded"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "description": "Adapter-owned slider focus stop for the lower thumb; embedded variant only (R §2/§6, RNG-15)."
+            }
+          },
+          "description": "Embedded lower bound focus stop (R §2)."
+        },
+        {
+          "id": "embedded-upper",
+          "name": "Embedded Upper Control",
+          "parent": "root",
+          "kind": {
+            "conditional-expr": {
+              "when": {
+                "eq": [
+                  {
+                    "operand": {
+                      "prop": "variant"
+                    }
+                  },
+                  {
+                    "operand": {
+                      "literal": {
+                        "member": {
+                          "shared_type": "slider-variant",
+                          "member": "embedded"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "description": "Adapter-owned slider focus stop for the upper thumb; embedded variant only (R §2/§6, RNG-15)."
+            }
+          },
+          "description": "Embedded upper bound focus stop (R §2)."
+        }
+      ],
+      "attributes": [
+        {
+          "id": "orientation",
+          "name": "data-orientation",
+          "form": "valued",
+          "emission": "always",
+          "source": "orientation",
+          "condition": null,
+          "value": null,
+          "description": "The orientation value; always emitted; styling hook only, not exposed to assistive technology (R §9, RNG-17)."
+        },
+        {
+          "id": "disabled",
+          "name": "data-disabled",
+          "form": "valued",
+          "emission": "always",
+          "source": "disabled",
+          "condition": null,
+          "value": null,
+          "description": "The disabled boolean; always emitted (R §9, RNG-17)."
+        },
+        {
+          "id": "variant",
+          "name": "data-variant",
+          "form": "valued",
+          "emission": "always",
+          "source": "variant",
+          "condition": null,
+          "value": null,
+          "description": "The variant value; always emitted (R §9, RNG-17)."
+        },
+        {
+          "id": "polarity",
+          "name": "data-polarity",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "polarity"
+            }
+          },
+          "description": "The polarity from the machine's visual state; always emitted (R §9, RNG-17)."
+        },
+        {
+          "id": "fill-split",
+          "name": "data-fill-split",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "fillSplitAtCenter"
+            }
+          },
+          "description": "Whether both fill segments meet at the center, so renderers square only the touching corners; always emitted (R §4/§8, RNG-16/17)."
+        },
+        {
+          "id": "state",
+          "name": "data-state",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "if": {
+              "condition": {
+                "operand": {
+                  "visual": "pointerActive"
+                }
+              },
+              "then": {
+                "operand": {
+                  "literal": {
+                    "string": "active"
+                  }
+                }
+              },
+              "else": {
+                "operand": {
+                  "literal": {
+                    "string": "idle"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Interaction state — active while a gesture is in progress; always emitted (R §4, RNG-17)."
+        },
+        {
+          "id": "size",
+          "name": "data-size",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "resolvedSize"
+            }
+          },
+          "description": "The resolved control size (explicit or sizeRole-derived); always emitted (R §9, RNG-17; CROSS-07)."
+        },
+        {
+          "id": "density",
+          "name": "data-density",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "resolvedDensity"
+            }
+          },
+          "description": "The resolved density (explicit or inherited); always emitted (R §9, RNG-17; CROSS-08)."
+        },
+        {
+          "id": "range-start",
+          "name": "--poodle-range-start",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "lowerNorm"
+            }
+          },
+          "description": "Fill start position, from the lower thumb's normalized value (R §3, RNG-17)."
+        },
+        {
+          "id": "range-end",
+          "name": "--poodle-range-end",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "upperNorm"
+            }
+          },
+          "description": "Fill end position, from the upper thumb's normalized value (R §3, RNG-17)."
+        },
+        {
+          "id": "range-center",
+          "name": "--poodle-range-center",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "centerNorm"
+            }
+          },
+          "description": "Center reference position (R §3, RNG-17)."
+        },
+        {
+          "id": "range-negative-start",
+          "name": "--poodle-range-negative-start",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "negativeFillStartNorm"
+            }
+          },
+          "description": "Negative segment start — which side of the origin the negative fill grows from (R §3, RNG-17)."
+        },
+        {
+          "id": "range-negative-span",
+          "name": "--poodle-range-negative-span",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "negativeFillSpanNorm"
+            }
+          },
+          "description": "Negative segment width — how negative fill is expressed (R §3, RNG-17)."
+        },
+        {
+          "id": "range-positive-start",
+          "name": "--poodle-range-positive-start",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "positiveFillStartNorm"
+            }
+          },
+          "description": "Positive segment start (R §3, RNG-17)."
+        },
+        {
+          "id": "range-positive-span",
+          "name": "--poodle-range-positive-span",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "positiveFillSpanNorm"
+            }
+          },
+          "description": "Positive segment width (R §3, RNG-17)."
+        }
+      ],
+      "axes": {
+        "size": {
+          "explicit": null,
+          "size_role": "control",
+          "fallback": {
+            "coalesce": [
+              {
+                "operand": {
+                  "prop": "size"
+                }
+              },
+              {
+                "operand": {
+                  "axis": "size"
+                }
+              }
+            ]
+          },
+          "ladder": [
+            {
+              "size": "xs",
+              "metrics": {
+                "min-height": {
+                  "rem": 1.25
+                },
+                "thumb-diameter": {
+                  "rem": 0.75
+                },
+                "track-thickness": {
+                  "rem": 0.1875
+                }
+              },
+              "description": "Extra-small rung: min-height 1.25rem, track 0.1875rem, thumb 0.75rem (R §8, RNG-09)."
+            },
+            {
+              "size": "sm",
+              "metrics": {
+                "min-height": {
+                  "rem": 1.375
+                },
+                "thumb-diameter": {
+                  "rem": 0.875
+                },
+                "track-thickness": {
+                  "rem": 0.25
+                }
+              },
+              "description": "Small rung: min-height 1.375rem, track 0.25rem, thumb 0.875rem (R §8, RNG-09)."
+            },
+            {
+              "size": "md",
+              "metrics": {
+                "min-height": {
+                  "rem": 1.5
+                },
+                "thumb-diameter": {
+                  "rem": 1.0
+                },
+                "track-thickness": {
+                  "rem": 0.375
+                }
+              },
+              "description": "Default rung: min-height 1.5rem, track 0.375rem, thumb 1rem (R §8, RNG-09)."
+            },
+            {
+              "size": "lg",
+              "metrics": {
+                "min-height": {
+                  "rem": 1.625
+                },
+                "thumb-diameter": {
+                  "rem": 1.125
+                },
+                "track-thickness": {
+                  "rem": 0.5
+                }
+              },
+              "description": "Large rung: min-height 1.625rem, track 0.5rem, thumb 1.125rem (R §8, RNG-09)."
+            },
+            {
+              "size": "xl",
+              "metrics": {
+                "min-height": {
+                  "rem": 1.75
+                },
+                "thumb-diameter": {
+                  "rem": 1.25
+                },
+                "track-thickness": {
+                  "rem": 0.625
+                }
+              },
+              "description": "Extra-large rung: min-height 1.75rem, track 0.625rem, thumb 1.25rem (R §8, RNG-09)."
+            }
+          ]
+        },
+        "density": {
+          "explicit": null,
+          "adjustments": [
+            {
+              "density": "compact",
+              "applies_to": "root",
+              "inline": null,
+              "block": {
+                "rem": 0.25
+              },
+              "description": "Compact adds 0.25rem vertical hit-area padding to the root — the documented §8 exception: density grows the grabbable margin without changing track, thumb, or visual min-height (R §8, RNG-09)."
+            },
+            {
+              "density": "comfortable",
+              "applies_to": "root",
+              "inline": null,
+              "block": {
+                "rem": 0.75
+              },
+              "description": "Comfortable adds 0.75rem vertical hit-area padding to the root (R §8, RNG-09)."
+            }
+          ]
+        },
+        "orientation": {
+          "default": "horizontal",
+          "values": [
+            "horizontal",
+            "vertical"
+          ]
+        }
+      },
+      "tokens": [
+        {
+          "path": "color.background.surface",
+          "group": "semantic",
+          "description": "Track fill color-mix base (R §8)."
+        },
+        {
+          "path": "color.accent.base",
+          "group": "semantic",
+          "description": "Positive fill segment (R §8)."
+        },
+        {
+          "path": "color.status.danger",
+          "group": "semantic",
+          "description": "Negative fill segment — the bipolar side of the origin (R §8)."
+        },
+        {
+          "path": "color.border.default",
+          "group": "semantic",
+          "description": "Track border and thumb border (R §8)."
+        },
+        {
+          "path": "color.background.canvas",
+          "group": "semantic",
+          "description": "Standard-variant control fill (R §8)."
+        },
+        {
+          "path": "color.border.strong",
+          "group": "semantic",
+          "description": "Center reference marker (R §8)."
+        },
+        {
+          "path": "color.accent.focusRing",
+          "group": "semantic",
+          "description": "Focus rings (R §8)."
+        },
+        {
+          "path": "color.background.elevated",
+          "group": "semantic",
+          "description": "Thumb fill (R §8)."
+        },
+        {
+          "path": "state.opacity.disabled",
+          "group": "semantic",
+          "description": "Disabled opacity on the root (R §8)."
+        }
+      ],
+      "recipe_hooks": [
+        {
+          "hook": "--poodle-recipe-range-slider-track-fill",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-range-slider-track-fill"
+            },
+            {
+              "kind": "token",
+              "target": "color.background.surface"
+            }
+          ],
+          "description": "Track background; surface 88% color-mix base (R §8, RNG-21)."
+        },
+        {
+          "hook": "--poodle-recipe-range-slider-fill-fill",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-range-slider-fill-fill"
+            },
+            {
+              "kind": "token",
+              "target": "color.accent.base"
+            }
+          ],
+          "description": "Positive selected-fill segment (R §8, RNG-21)."
+        },
+        {
+          "hook": "--poodle-recipe-range-slider-fill-negative",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-range-slider-fill-negative"
+            },
+            {
+              "kind": "token",
+              "target": "color.status.danger"
+            }
+          ],
+          "description": "Negative selected-fill segment — the bipolar side of the origin (R §8, RNG-21; the acceptance line 'negative/positive fill geometry and recipe roles remain exact')."
+        },
+        {
+          "hook": "--poodle-recipe-range-slider-track-border",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-range-slider-track-border"
+            },
+            {
+              "kind": "token",
+              "target": "color.border.default"
+            }
+          ],
+          "description": "Control border (R §8, RNG-21)."
+        },
+        {
+          "hook": "--poodle-recipe-range-slider-center-fill",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-range-slider-center-fill"
+            },
+            {
+              "kind": "token",
+              "target": "color.border.strong"
+            }
+          ],
+          "description": "Bipolar center reference marker (R §8, RNG-21)."
+        },
+        {
+          "hook": "--poodle-recipe-range-slider-control-fill",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-range-slider-control-fill"
+            },
+            {
+              "kind": "token",
+              "target": "color.background.canvas"
+            }
+          ],
+          "description": "Standard-variant control fill; transparent in the embedded variant (R §8, RNG-21)."
+        },
+        {
+          "hook": "--poodle-recipe-range-slider-control-track-fill",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-range-slider-control-track-fill"
+            },
+            {
+              "kind": "token",
+              "target": "color.background.canvas"
+            }
+          ],
+          "description": "Native input runnable-track fill; transparent (R §8, RNG-21)."
+        },
+        {
+          "hook": "--poodle-recipe-range-slider-control-thumb-fill",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-range-slider-control-thumb-fill"
+            },
+            {
+              "kind": "token",
+              "target": "color.background.elevated"
+            }
+          ],
+          "description": "Thumb fill (R §8, RNG-21)."
+        },
+        {
+          "hook": "--poodle-recipe-range-slider-control-thumb-shadow",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-range-slider-control-thumb-shadow"
+            },
+            {
+              "kind": "token",
+              "target": "color.background.elevated"
+            }
+          ],
+          "description": "Thumb shadow — a black 18% color-mix with no single semantic token; the elevated fallback names the family (R §8, RNG-21)."
+        },
+        {
+          "hook": "--poodle-recipe-range-slider-focus-ring",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-range-slider-focus-ring"
+            },
+            {
+              "kind": "token",
+              "target": "color.accent.focusRing"
+            }
+          ],
+          "description": "Focus ring for controls and embedded stops (R §8, RNG-21)."
+        },
+        {
+          "hook": "--poodle-recipe-range-slider-focus-control-thumb-shadow",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-range-slider-focus-control-thumb-shadow"
+            },
+            {
+              "kind": "token",
+              "target": "color.accent.focusRing"
+            }
+          ],
+          "description": "Compound focus ring on the native thumb; focusRing 32% color-mix (R §8, RNG-21)."
+        }
+      ],
+      "accessibility": {
+        "role": "group",
+        "name_rule": {
+          "from-prop": "ariaLabel"
+        },
+        "name_source": {
+          "prop": "ariaLabel"
+        },
+        "aria": [
+          {
+            "aria_attr": "aria-label",
+            "source": "ariaLabel",
+            "description": "Per-thumb accessible names append \"minimum\"/\"maximum\" to the base label, or default to \"Minimum value\"/\"Maximum value\" (R §6, RNG-10)."
+          },
+          {
+            "aria_attr": "aria-valuemin",
+            "source": "min",
+            "description": "Lower bound on both inputs (R §6, RNG-10)."
+          },
+          {
+            "aria_attr": "aria-valuemax",
+            "source": "max",
+            "description": "Upper bound on both inputs (R §6, RNG-10)."
+          },
+          {
+            "aria_attr": "aria-valuenow",
+            "source": "value",
+            "description": "Lower value on the lower thumb, upper value on the upper thumb (R §6, RNG-10)."
+          },
+          {
+            "aria_attr": "aria-valuetext",
+            "source": "lowerValueText",
+            "description": "Human-readable lower value (R §6, RNG-10)."
+          },
+          {
+            "aria_attr": "aria-valuetext",
+            "source": "upperValueText",
+            "description": "Human-readable upper value (R §6, RNG-10)."
+          },
+          {
+            "aria_attr": "aria-orientation",
+            "source": "orientation",
+            "description": "Required on the embedded slider focus stops — custom widgets with no implicit orientation; NOT set on the native range inputs (R §6, RNG-10)."
+          },
+          {
+            "aria_attr": "aria-disabled",
+            "source": "disabled",
+            "description": "Disabled state on the embedded focus stops (R §6, RNG-10)."
+          }
+        ],
+        "native": [
+          {
+            "name": "disabled",
+            "description": "Native disabled attribute on both inputs (R §6, RNG-10)."
+          },
+          {
+            "name": "type",
+            "description": "Native range input type on both controls (R §6, RNG-14)."
+          },
+          {
+            "name": "min",
+            "description": "Native min on both inputs; the lower input's max clamps to the upper value (R §3/§6, RNG-12)."
+          },
+          {
+            "name": "max",
+            "description": "Native max on both inputs; the upper input's min clamps to the lower value (R §3/§6, RNG-12)."
+          },
+          {
+            "name": "step",
+            "description": "Native step on both inputs (R §6, RNG-02)."
+          }
+        ],
+        "description": "Group root with two related slider semantics; each thumb is individually focusable and distinguishable as lower or upper bound (R §6, RNG-10/14/15)."
+      },
+      "capabilities": [
+        {
+          "capability": "pointer-capture",
+          "purpose": "Embedded-variant shared-root pointer capture — the full root is the pointer target and the gesture never transfers thumbs (R §3/§4, RNG-15)."
+        },
+        {
+          "capability": "focus",
+          "purpose": "Per-thumb focus stops — Tab cycles lower, upper, and out (R §6, RNG-18/20)."
+        },
+        {
+          "capability": "scrub-fraction",
+          "purpose": "Native grab overlay reports the pointer position as a fraction (Interaction::on_scrub); the component picks the nearer thumb on the press (R §3, RNG-13)."
+        }
+      ],
+      "keyboard": [
+        {
+          "id": "decrement-step",
+          "keys": [
+            {
+              "key": "ArrowLeft",
+              "modifiers": []
+            },
+            {
+              "key": "ArrowDown",
+              "modifiers": []
+            }
+          ],
+          "action": "decrement-step",
+          "effect": "Decrements the focused thumb by step through the machine — INPUT then COMMIT, preserving lower <= upper (R §6, RNG-18).",
+          "requires": null,
+          "description": "Arrow Left/Down decrements the focused thumb (R §6, RNG-18)."
+        },
+        {
+          "id": "increment-step",
+          "keys": [
+            {
+              "key": "ArrowRight",
+              "modifiers": []
+            },
+            {
+              "key": "ArrowUp",
+              "modifiers": []
+            }
+          ],
+          "action": "increment-step",
+          "effect": "Increments the focused thumb by step through the machine — INPUT then COMMIT, preserving lower <= upper (R §6, RNG-18).",
+          "requires": null,
+          "description": "Arrow Right/Up increments the focused thumb (R §6, RNG-18)."
+        },
+        {
+          "id": "move-to-min",
+          "keys": [
+            {
+              "key": "Home",
+              "modifiers": []
+            }
+          ],
+          "action": "move-to-min",
+          "effect": "Moves the focused thumb to min (lower thumb) or to the lower value (upper thumb) — the per-thumb Home bound (R §6, RNG-18).",
+          "requires": null,
+          "description": "Home moves the focused thumb to its lower bound (R §6, RNG-18)."
+        },
+        {
+          "id": "move-to-max",
+          "keys": [
+            {
+              "key": "End",
+              "modifiers": []
+            }
+          ],
+          "action": "move-to-max",
+          "effect": "Moves the focused thumb to the upper value (lower thumb) or to max (upper thumb) — the per-thumb End bound (R §6, RNG-18).",
+          "requires": null,
+          "description": "End moves the focused thumb to its upper bound (R §6, RNG-18)."
+        },
+        {
+          "id": "move-focus-next",
+          "keys": [
+            {
+              "key": "Tab",
+              "modifiers": []
+            }
+          ],
+          "action": "move-focus",
+          "effect": "Moves focus from the lower thumb to the upper thumb and onward (R §6, RNG-18/20).",
+          "requires": "focus",
+          "description": "Tab moves focus between thumbs and out of the control (R §6, RNG-18)."
+        },
+        {
+          "id": "move-focus-previous",
+          "keys": [
+            {
+              "key": "Tab",
+              "modifiers": [
+                "shift"
+              ]
+            }
+          ],
+          "action": "move-focus",
+          "effect": "Moves focus from the upper thumb to the lower thumb and backward (R §6, RNG-18/20).",
+          "requires": "focus",
+          "description": "Shift+Tab moves focus backward through the thumbs (R §6, RNG-18)."
+        }
+      ],
+      "visual_state": [
+        {
+          "id": "range-slider-visual-state",
+          "name": "RangeSliderVisualState",
+          "fields": [
+            {
+              "id": "value",
+              "name": "value",
+              "kind": "pair",
+              "description": "The ordered, clamped display pair (R §4, RNG-16)."
+            },
+            {
+              "id": "lowerNorm",
+              "name": "lowerNorm",
+              "kind": "number",
+              "description": "Lower thumb position normalized to [0, 1] through the law (R §4, RNG-16)."
+            },
+            {
+              "id": "upperNorm",
+              "name": "upperNorm",
+              "kind": "number",
+              "description": "Upper thumb position normalized to [0, 1] through the law (R §4, RNG-16)."
+            },
+            {
+              "id": "centerNorm",
+              "name": "centerNorm",
+              "kind": "number",
+              "description": "Center reference normalized to [0, 1] (R §4, RNG-16)."
+            },
+            {
+              "id": "fillStartNorm",
+              "name": "fillStartNorm",
+              "kind": "number",
+              "description": "Fill start = lowerNorm (R §4, RNG-16)."
+            },
+            {
+              "id": "fillSpanNorm",
+              "name": "fillSpanNorm",
+              "kind": "number",
+              "description": "Fill span = upperNorm - lowerNorm — the low-to-high selected window (R §4, RNG-16)."
+            },
+            {
+              "id": "negativeFillStartNorm",
+              "name": "negativeFillStartNorm",
+              "kind": "number",
+              "description": "Negative segment start — the bipolar side of the origin (R §4, RNG-16)."
+            },
+            {
+              "id": "negativeFillSpanNorm",
+              "name": "negativeFillSpanNorm",
+              "kind": "number",
+              "description": "Negative segment width; zero in unipolar (R §4, RNG-16)."
+            },
+            {
+              "id": "positiveFillStartNorm",
+              "name": "positiveFillStartNorm",
+              "kind": "number",
+              "description": "Positive segment start (R §4, RNG-16)."
+            },
+            {
+              "id": "positiveFillSpanNorm",
+              "name": "positiveFillSpanNorm",
+              "kind": "number",
+              "description": "Positive segment width; the whole window in unipolar (R §4, RNG-16)."
+            },
+            {
+              "id": "fillSplitAtCenter",
+              "name": "fillSplitAtCenter",
+              "kind": "boolean",
+              "description": "Both segments meet at the center — renderers square only the touching corners (R §4, RNG-16/23)."
+            },
+            {
+              "id": "polarity",
+              "name": "polarity",
+              "kind": {
+                "enum": "slider-polarity"
+              },
+              "description": "The declared polarity (R §4, RNG-16)."
+            },
+            {
+              "id": "pointerActive",
+              "name": "pointerActive",
+              "kind": "boolean",
+              "description": "A gesture is in progress (R §4, RNG-16)."
+            },
+            {
+              "id": "activeThumb",
+              "name": "activeThumb",
+              "kind": {
+                "enum": "slider-thumb"
+              },
+              "description": "Which thumb the gesture holds — selected on begin, held for the gesture (R §4, RNG-12/16)."
+            },
+            {
+              "id": "enabled",
+              "name": "enabled",
+              "kind": "boolean",
+              "description": "!disabled (R §4, RNG-16)."
+            },
+            {
+              "id": "resolvedSize",
+              "name": "resolvedSize",
+              "kind": {
+                "enum": "control-size"
+              },
+              "description": "Explicit size or sizeRole resolution (R §7, RNG-06; CROSS-07)."
+            },
+            {
+              "id": "resolvedDensity",
+              "name": "resolvedDensity",
+              "kind": {
+                "enum": "control-density"
+              },
+              "description": "Explicit density or inherited presentation (R §8, RNG-09; CROSS-08)."
+            }
+          ],
+          "description": "The projection the shared machine computes (rangeSliderVisualState in core slider.ts; RangeSliderVisualState in contracts/headless slider.rs), which drawing consumes — geometry and gesture state, never machine internals (R §4; CROSS-14, RNG-16, IR-06)."
+        }
+      ],
+      "conformance": [
+        "slider"
+      ],
+      "extensions": [
+        {
+          "id": "gpui-native-vertical",
+          "owning_runtime": "gpui",
+          "reason": "Vertical orientation is implemented natively rather than via CSS rotation (R §10/§12; RNG-26).",
+          "parity_effect": "Same visual and interaction result by native means.",
+          "evidence_surface": "docs/contracts/components/range-slider.md §12",
+          "removal_condition": "None — the difference is intentional.",
+          "description": "RNG-26 GPUI native vertical."
+        },
+        {
+          "id": "jetstream-pair-reporting",
+          "owning_runtime": "jetstream",
+          "reason": "The pair is the value; a host told about one thumb alone would have to remember the other, so Jetstream reports (low, high) together (R §10a; RNG-27).",
+          "parity_effect": "Jetstream on_change/on_value_commit carry the pair, matching the web events' pair payload.",
+          "evidence_surface": "docs/contracts/components/range-slider.md §10a",
+          "removal_condition": "None — the difference is intentional.",
+          "description": "RNG-27 Jetstream pair reporting."
+        },
+        {
+          "id": "web-overlapping-inputs",
+          "owning_runtime": "react",
+          "reason": "Two overlapping native range inputs is the web DOM pattern; the native targets use a single grab overlay (R §12).",
+          "parity_effect": "Same interaction and accessibility result from a different DOM pattern.",
+          "evidence_surface": "docs/contracts/components/range-slider.md §12",
+          "removal_condition": "None — the difference is intentional.",
+          "description": "R §12 two-overlapping-inputs delta (web side)."
+        },
+        {
+          "id": "native-embedded-orientation-gap",
+          "owning_runtime": "gpui",
+          "reason": "poodle-node carries no orientation channel in its accessibility vocabulary, so neither native adapter can project the embedded aria-orientation today (R §12).",
+          "parity_effect": "Embedded aria-orientation is absent on the native targets; a vertical embedded control announces as horizontal.",
+          "evidence_surface": "docs/contracts/components/range-slider.md §12",
+          "removal_condition": "Lands with the orientation a11y field and native vertical orientation.",
+          "description": "R §12 embedded orientation-channel delta."
+        }
+      ]
+    }
+  ],
+  "conformance_vectors": [
+    {
+      "id": "slider",
+      "name": "slider",
+      "applies_to": [
+        "svelte",
+        "react"
+      ],
+      "steps": [
+        {
+          "id": "input-snaps-and-clamps",
+          "name": "INPUT snaps and clamps",
+          "kind": "transition",
+          "guard": null,
+          "description": "INPUT normalizes the raw value — snap to step anchored at min, then clamp into [min, safeSliderMax] — and emits value-change (R §3/§5; machines.json slider entry 0)."
+        },
+        {
+          "id": "commit-clamps-and-emits",
+          "name": "COMMIT clamps and emits",
+          "kind": "transition",
+          "guard": null,
+          "description": "COMMIT normalizes the same way and emits value-commit on release (R §3/§5; machines.json slider entry 1)."
+        },
+        {
+          "id": "set-value-orders-pair",
+          "name": "SET_VALUE orders the pair",
+          "kind": "transition",
+          "guard": null,
+          "description": "SET_VALUE normalizes through normalizeRangeValue — the display pair is ordered and clamped (R §3, RNG-12)."
+        },
+        {
+          "id": "thumb-crossing-guard",
+          "name": "a thumb cannot cross its sibling",
+          "kind": "invariant",
+          "guard": null,
+          "description": "Lower clamps to [min, upper], upper to [lower, max]; lower <= upper always holds (R §3, RNG-12)."
+        },
+        {
+          "id": "begin-selects-nearer-thumb",
+          "name": "POINTER_BEGIN selects the nearer thumb",
+          "kind": "transition",
+          "guard": null,
+          "description": "Begin picks the thumb nearer the press fraction, holds it for the gesture, and the gesture never transfers (R §3/§4, RNG-12/13)."
+        },
+        {
+          "id": "end-commits-pair",
+          "name": "POINTER_END commits the pair",
+          "kind": "effect-intent",
+          "guard": null,
+          "description": "End emits value-commit with the pair and clears the active thumb (R §5, RNG-11)."
+        },
+        {
+          "id": "emit-change-commit-split",
+          "name": "change during interaction, commit on release",
+          "kind": "effect-intent",
+          "guard": null,
+          "description": "INPUT emits value-change; COMMIT/POINTER_END emits value-commit — the change/commit callback split (R §5, RNG-11)."
+        }
+      ],
+      "description": "The two-thumb slider machine semantics both web runtimes honor through the shared hand-written machines (slider.ts / slider.rs). Executable evidence: the `slider` key of packages/contracts/headless/vectors/machines.json — a fixed target that must pass unedited (R5)."
+    }
+  ],
+  "scenes": [],
+  "specimen_registry": null
+}

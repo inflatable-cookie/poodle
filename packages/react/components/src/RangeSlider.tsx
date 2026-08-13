@@ -15,6 +15,61 @@ import "@inflatable-cookie/poodle-core/styles/range-slider.css";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 import type { Orientation } from "./Separator";
+import { rangeSliderDefinition } from "./generated/range-slider";
+
+// The definition owns the rendered vocabulary (card 045 R2): the anatomy's
+// DOM classes, the eight data-* attribute names, and the seven
+// fill-geometry custom properties. A rename in
+// packages/codegen/src/models/range_slider.rs moves the DOM here with no
+// hand edit; `effigy ir:check` gates drift in the artifact.
+const parts = new Map<string, string>(rangeSliderDefinition.parts.map((part) => [part.id, part.className]));
+const attributes = new Map<string, string>(rangeSliderDefinition.attributes.map((attribute) => [attribute.id, attribute.name]));
+const styleProps = new Map<string, string>(rangeSliderDefinition.styleProps.map((prop) => [prop.id, prop.name]));
+
+function partClass(id: string): string {
+  const className = parts.get(id);
+  if (!className) throw new Error(`RangeSlider definition has no part '${id}'`);
+  return className;
+}
+
+function attributeName(id: string): string {
+  const name = attributes.get(id);
+  if (!name) throw new Error(`RangeSlider definition has no attribute '${id}'`);
+  return name;
+}
+
+function stylePropName(id: string): string {
+  const name = styleProps.get(id);
+  if (!name) throw new Error(`RangeSlider definition has no style prop '${id}'`);
+  return name;
+}
+
+const rootClass = partClass("root");
+const trackClass = partClass("track");
+const fillNegativeClass = partClass("fill-negative");
+const fillPositiveClass = partClass("fill-positive");
+const centerClass = partClass("center");
+const controlLowerClass = partClass("control-lower");
+const controlUpperClass = partClass("control-upper");
+const embeddedLowerClass = partClass("embedded-lower");
+const embeddedUpperClass = partClass("embedded-upper");
+
+const dataOrientation = attributeName("orientation");
+const dataDisabled = attributeName("disabled");
+const dataVariant = attributeName("variant");
+const dataPolarity = attributeName("polarity");
+const dataFillSplit = attributeName("fill-split");
+const dataState = attributeName("state");
+const dataSize = attributeName("size");
+const dataDensity = attributeName("density");
+
+const styleRangeStart = stylePropName("range-start");
+const styleRangeEnd = stylePropName("range-end");
+const styleRangeCenter = stylePropName("range-center");
+const styleNegativeStart = stylePropName("range-negative-start");
+const styleNegativeSpan = stylePropName("range-negative-span");
+const stylePositiveStart = stylePropName("range-positive-start");
+const stylePositiveSpan = stylePropName("range-positive-span");
 
 export interface RangeSliderProps {
   size?: ControlSize | null;
@@ -78,14 +133,29 @@ export function RangeSlider({
   const [displayLower, displayUpper] = normalizeRangeValue(machineContext);
   const lowerPercent = visualState.lowerNorm * 100;
   const upperPercent = visualState.upperNorm * 100;
+  // The eight data-* attributes: names come from the definition's
+  // attributes, values are the runtime's projection (CROSS-13).
+  const dataAttributes: Record<string, unknown> = {
+    [dataOrientation]: orientation,
+    [dataDisabled]: disabled,
+    [dataVariant]: variant,
+    [dataPolarity]: visualState.polarity,
+    [dataFillSplit]: visualState.fillSplitAtCenter,
+    [dataState]: visualState.pointerActive ? "active" : "idle",
+    [dataSize]: resolvedSize,
+    [dataDensity]: resolvedDensity,
+  };
+  // The fill geometry (RNG-17): the property names come from the
+  // definition's styleProps; the values are the machine's visual-state
+  // numbers projected to percentages (CROSS-14, IR-06).
   const rangeStyle = {
-    "--poodle-range-start": `${lowerPercent}%`,
-    "--poodle-range-end": `${upperPercent}%`,
-    "--poodle-range-center": `${visualState.centerNorm * 100}%`,
-    "--poodle-range-negative-start": `${visualState.negativeFillStartNorm * 100}%`,
-    "--poodle-range-negative-span": `${visualState.negativeFillSpanNorm * 100}%`,
-    "--poodle-range-positive-start": `${visualState.positiveFillStartNorm * 100}%`,
-    "--poodle-range-positive-span": `${visualState.positiveFillSpanNorm * 100}%`,
+    [styleRangeStart]: `${lowerPercent}%`,
+    [styleRangeEnd]: `${upperPercent}%`,
+    [styleRangeCenter]: `${visualState.centerNorm * 100}%`,
+    [styleNegativeStart]: `${visualState.negativeFillStartNorm * 100}%`,
+    [styleNegativeSpan]: `${visualState.negativeFillSpanNorm * 100}%`,
+    [stylePositiveStart]: `${visualState.positiveFillStartNorm * 100}%`,
+    [stylePositiveSpan]: `${visualState.positiveFillSpanNorm * 100}%`,
   } as CSSProperties;
 
   function send(type: "INPUT" | "COMMIT", thumb: "lower" | "upper", event: FormEvent<HTMLInputElement>): void {
@@ -134,23 +204,19 @@ export function RangeSlider({
 
   return (
     <div ref={root}
-      className="poodle-range-slider"
-      data-orientation={orientation}
-      data-disabled={disabled}
+      className={rootClass}
+      {...dataAttributes}
       style={rangeStyle}
-      data-size={resolvedSize}
-      data-density={resolvedDensity}
-      data-variant={variant} data-polarity={visualState.polarity} data-fill-split={visualState.fillSplitAtCenter} data-state={visualState.pointerActive ? "active" : "idle"}
       onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd}
     >
-      <span className="poodle-range-slider__track" aria-hidden="true">
-        <span className="poodle-range-slider__fill poodle-range-slider__fill--negative" />
-        <span className="poodle-range-slider__fill poodle-range-slider__fill--positive" />
-        <span className="poodle-range-slider__center" />
+      <span className={trackClass} aria-hidden="true">
+        <span className={fillNegativeClass} />
+        <span className={fillPositiveClass} />
+        <span className={centerClass} />
       </span>
 
       {variant === "standard" && <><input
-        className="poodle-range-slider__control poodle-range-slider__control--lower"
+        className={controlLowerClass}
         type="range"
         min={min}
         max={safeMax}
@@ -164,7 +230,7 @@ export function RangeSlider({
       />
 
       <input
-        className="poodle-range-slider__control poodle-range-slider__control--upper"
+        className={controlUpperClass}
         type="range"
         min={min}
         max={safeMax}
@@ -177,8 +243,8 @@ export function RangeSlider({
         onChange={(event) => send("COMMIT", "upper", event)}
       /></>}
       {variant === "embedded" && <>
-        <div className="poodle-range-slider__embedded-control poodle-range-slider__embedded-control--lower" role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => embeddedKey(event, "lower")} />
-        <div className="poodle-range-slider__embedded-control poodle-range-slider__embedded-control--upper" role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"} aria-valuemin={displayLower} aria-valuemax={safeMax} aria-valuenow={displayUpper} aria-valuetext={upperValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => embeddedKey(event, "upper")} />
+        <div className={embeddedLowerClass} role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => embeddedKey(event, "lower")} />
+        <div className={embeddedUpperClass} role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"} aria-valuemin={displayLower} aria-valuemax={safeMax} aria-valuenow={displayUpper} aria-valuetext={upperValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => embeddedKey(event, "upper")} />
       </>}
     </div>
   );

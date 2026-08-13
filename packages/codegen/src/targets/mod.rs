@@ -24,6 +24,7 @@ pub mod button_rust;
 pub mod conformance;
 pub mod docs;
 pub mod json;
+pub mod range_slider;
 pub mod registry;
 pub mod schema;
 pub mod shell;
@@ -50,6 +51,7 @@ pub fn selectable() -> Vec<&'static dyn EmitTarget> {
     targets.push(&shell_rust::ShellRustTarget);
     targets.push(&button::ButtonTarget);
     targets.push(&button_rust::ButtonRustTarget);
+    targets.push(&range_slider::RangeSliderTarget);
     targets
 }
 
