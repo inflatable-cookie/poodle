@@ -7,6 +7,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-13 — the Jetstream `snap -- specimens` bin overwrites
+  `/tmp/poodle-specimens/{slug}.png` in place with no warning, so a
+  before/after comparison (g13-046's renamed-vs-restored proof) silently
+  destroys the first capture if you do not copy it before re-running.
+  Either write `{slug}-{timestamp}.png`, or print the previous file's mtime
+  when overwriting. Any card doing a live state proof through the snap
+  should copy each output before the next render.
+
 - 2026-08-13 — g13-042 classified the GPUI visual baselines
   (`packages/gpui/preview/baselines/button-eclipse-compact-sm.png` et al.,
   local-only in the main checkout) as **stale**, not moved: the top chrome
