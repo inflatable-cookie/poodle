@@ -7,15 +7,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
-- 2026-08-13 — `contract-role-drift.ts` in a g13/g14 worktree dies before the
-  census: Cargo reports a lockfile package collision between
-  `/Users/tom/.t3/worktrees/poodle/poodle/packages/contracts/layout` and the
-  worktree's own `poodle-layout`. Distinct from the missing
-  `jetstream-input` sibling (2026-08-11). A leftover `poodle` checkout/symlink
-  next to the worktrees makes Jetstream's path-dep resolve a second copy of
-  the same crates. Run the census from the main checkout, or remove the extra
-  tree. Hit by g14-b003; the census for that card was taken on main at the
-  same SHA.
+- 2026-08-13 — the documented g13-036 symlink workaround for the Jetstream
+  sibling path-dep no longer works: a `poodle` symlink next to a real
+  worktree makes cargo fail with a lockfile collision ("packages
+  poodle-layout … are different, but only one can be written to lockfile
+  unambiguously") because the preview's own deps and jetstream-poodle's
+  deps land on two textual paths to the same crates. Working recipe
+  (g14-b002, log §2): branch clone of poodle at
+  `/Users/tom/.t3/worktrees/poodle/poodle` + sources-only copy of jetstream
+  at `/Users/tom/.t3/worktrees/poodle/jetstream` + `CARGO_TARGET_DIR` set to
+  the main checkout's jetstream `target/` (rsync -a preserves mtimes, so the
+  warm cache hits). Any Jetstream-touching card needs this. Supersedes the
+  b003 entry that only diagnosed the collision.
 
 - 2026-08-13 — the React preview is dead on this branch: the Svelte
   canonical registry lists `update-center`/`update-status` as standalone
