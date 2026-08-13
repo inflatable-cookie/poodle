@@ -22,6 +22,8 @@ pub mod generated {
     pub mod button;
     #[path = "range-slider/index.rs"]
     pub mod range_slider;
+    #[path = "text-input/index.rs"]
+    pub mod text_input;
 }
 
 pub mod accordion;

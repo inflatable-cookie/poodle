@@ -1,8 +1,10 @@
 # g13.007 TextInput Environment-boundary Proof
 
-Status: planned
+Status: complete
 Owner: Poodle core
 Depends on: `g13.006`
+Closed by: `g13-b048` (web half) + `g13-b049` (natives, this card closes
+the milestone)
 
 ## Objective
 
@@ -25,6 +27,20 @@ without generating lifecycle code or weakening input semantics.
 - Capability gaps are visible and typed; none are silently ignored.
 - Existing public APIs remain stable through the pilot.
 
+## Outcome
+
+The milestone's acceptance line — *"capability gaps are visible and typed;
+none are silently ignored"* — is answered honestly: the boundary is typed as
+an *existence* claim, the ownership split is prose, and the first real test
+of the line (a component one runtime delegates, one implements, and one
+does not have at all) fails it: **the IR cannot express that a runtime
+lacks a declared capability.** Jetstream renders a text field that cannot
+be typed into and nothing in the model says so; the `text-input` vector's
+`applies_to` even lists Jetstream as conforming. That finding is
+`g13.008`'s decision input, recorded in
+`docs/logs/2026-08/13-g13-049-text-input-slice-native-runtimes.md` (R2/R3).
+
 ## Next
 
-`g13.008` decides whether the IR is adopted, revised, or rejected.
+`g13.008` decides whether the IR is adopted, revised, or rejected — with
+the per-runtime capability gap as the revision candidate.

@@ -7,6 +7,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-13 — the React preview is dead on this branch: the Svelte
+  canonical registry lists `update-center`/`update-status` as standalone
+  specimens (the UpdateCenter PR `b433498d` added them) but the React
+  gallery has no specimens for them, and `gallery/specimen-map.ts` throws
+  at module load ("Missing React specimens"), so `#root` never mounts and
+  no React DOM observation is possible. g13-b049 hit this trying to
+  re-prove the four-runtime web half live; it fell back to the jsdom
+  component test (which shows the renamed attribute) plus the
+  artifact-parity test. Either add the two React specimens or drop them
+  from the canonical registry's specimen list. Affects every card that
+  needs a live React preview on this lineage.
+
 - 2026-08-13 — g13-047's R4a depth inventory (see its log) found the
   conformance vectors for menu (3 cases) and popover (4 cases) cover
   open/action paths only: CLOSE/ESCAPE/OUTSIDE_INTERACT dismissal events

@@ -88,6 +88,10 @@
   # directory, so one authored change moves all four artifacts (two web +
   # this one).
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/range-slider-model.json --out packages/render/src --target range-slider-rust" },
+  # Card 049 R1a: same route for TextInput — the text-input-rust sibling
+  # renders the same definition into poodle-render's generated/ directory,
+  # so one authored change moves all four artifacts (two web + this one).
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/text-input-model.json --out packages/render/src --target text-input-rust" },
 ]
 "ir:check" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json --check" },
@@ -107,6 +111,8 @@
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/text-input-model.json --out packages/react/components/src --target text-input-ts --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/render/src --target button-rust --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/range-slider-model.json --out packages/render/src --target range-slider-rust --check" },
+  # Card 049: TextInput's Rust artifact is gated the same way.
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/text-input-model.json --out packages/render/src --target text-input-rust --check" },
 ]
 
 # Preview (documentation site)
