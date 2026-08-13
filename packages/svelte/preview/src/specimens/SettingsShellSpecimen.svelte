@@ -41,26 +41,34 @@
     },
   ];
 
-  const results = [
-    { pageId: "storage", pageLabel: "Storage", anchorId: "disks", anchorLabel: "Disks" },
-    { pageId: "backup", pageLabel: "Backup" },
-    { pageId: "restore", pageLabel: "Restore", anchorId: "recovery", anchorLabel: "Recovery" },
+  // The host filters. Only it knows a query can match an anchor inside a page,
+  // so the shell never derives this — it just renders the groups it is given.
+  const narrowedGroups = [
+    {
+      id: "storage",
+      label: "Storage & Backups",
+      items: [
+        { value: "storage", label: "Storage" },
+        { value: "backup", label: "Backup" },
+      ],
+    },
   ];
 </script>
 
 <Surface tone="panel" border="subtle" padding="md">
   <div class="poodle-settings-shell-specimen__triggers">
     <Button onClick={() => (normalOpen = true)}>Settings</Button>
-    <Button variant="secondary" onClick={() => (searchingOpen = true)}>Searching</Button>
+    <Button variant="secondary" onClick={() => (searchingOpen = true)}>Narrowed by search</Button>
     <Button variant="secondary" onClick={() => (noGroupsOpen = true)}>No groups</Button>
-    <Button variant="secondary" onClick={() => (noResultsOpen = true)}>No results</Button>
+    <Button variant="secondary" onClick={() => (noResultsOpen = true)}>No matches</Button>
     <Button variant="secondary" onClick={() => (refusedOpen = true)}>Refused close</Button>
   </div>
   <p class="poodle-settings-shell-specimen__hint">
     Search sits in the dialog header bar; the rail has its own surface and scroll,
     and the page body scrolls independently. The shell draws no page heading — the
-    page owns its own. A query replaces the page with a flat result list. A refused
-    close is a warning callout, not an error.
+    page owns its own. A query narrows the rail and the page stays put; the host
+    supplies the filtered groups. A refused close is a warning callout, not an
+    error.
   </p>
 </Surface>
 
@@ -95,11 +103,11 @@
 
 <SettingsShell
   bind:open={searchingOpen}
-  {groups}
+  groups={narrowedGroups}
   activePageId="storage"
   pageTitle="Storage"
+  ariaLabel="Soundcheck settings"
   bind:searchQuery={searchingQuery}
-  searchResults={results}
 >
   {#snippet page()}
     <DetailSection title="Storage">
@@ -122,11 +130,10 @@
 
 <SettingsShell
   bind:open={noResultsOpen}
-  {groups}
+  groups={[]}
   activePageId="general"
   pageTitle="General"
   searchQuery="xyzzy"
-  searchResults={[]}
 >
   {#snippet page()}
     <DetailSection title="General">

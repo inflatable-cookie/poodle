@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -80,26 +80,23 @@ describe("SettingsShell (react)", () => {
     expect(screen.queryByRole("button", { name: "Close" })).toBeNull();
   });
 
-  it("replaces the page region with results while searching and restores it when cleared", () => {
-    const results = [
-      { pageId: "storage", pageLabel: "Storage", anchorId: "disks", anchorLabel: "Disks" },
-      { pageId: "backup", pageLabel: "Backup" },
+  it("keeps the page rendered while a query is live — search narrows the rail, it does not replace the page", () => {
+    const narrowed = [
+      { id: "storage", label: "Storage & Backups", items: [{ value: "storage", label: "Storage" }] },
     ];
     const page = <p className="settings-page-marker">Page content</p>;
 
-    const { rerender } = render(<SettingsShell {...baseProps({ page, searchResults: null })} />);
+    const { rerender } = render(<SettingsShell {...baseProps({ page, searchQuery: "" })} />);
     expect(document.querySelector(".settings-page-marker")).not.toBeNull();
-    expect(document.querySelector(".poodle-settings-shell__results")).toBeNull();
+    expect(screen.getByRole("button", { name: "General" })).not.toBeNull();
 
-    rerender(<SettingsShell {...baseProps({ page, searchResults: results })} />);
-    expect(document.querySelector(".poodle-settings-shell__results")).not.toBeNull();
-    expect(document.querySelector(".settings-page-marker")).toBeNull();
-    expect(screen.getByRole("button", { name: /Storage/ })).not.toBeNull();
-    expect(screen.getByRole("button", { name: /Backup/ })).not.toBeNull();
-
-    rerender(<SettingsShell {...baseProps({ page, searchResults: null })} />);
+    rerender(<SettingsShell {...baseProps({ page, searchQuery: "stor", groups: narrowed })} />);
     expect(document.querySelector(".settings-page-marker")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Storage" })).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "General" })).toBeNull();
+
     expect(document.querySelector(".poodle-settings-shell__results")).toBeNull();
+    expect(document.querySelector(".poodle-settings-shell__result-list")).toBeNull();
   });
 
   it("keeps navigation and page in separately scrollable regions, outside the search and header", () => {
@@ -118,32 +115,18 @@ describe("SettingsShell (react)", () => {
     expect(getComputedStyle(pageViewport).overflowY).toBe("auto");
     expect(navViewport).not.toBe(pageViewport);
 
+    // Search lives in the dialog header bar, outside both scroll regions.
     const searchInput = document.querySelector(".poodle-settings-shell__search input") as HTMLElement;
-    const pageHeader = document.querySelector(".poodle-settings-shell__page-header") as HTMLElement;
     expect(navViewport.contains(searchInput)).toBe(false);
     expect(pageViewport.contains(searchInput)).toBe(false);
-    expect(navViewport.contains(pageHeader)).toBe(false);
-    expect(pageViewport.contains(pageHeader)).toBe(false);
   });
 
-  it("fires onNavigate with the page id, and with the anchor id when a result carries one", () => {
+  it("fires onNavigate with the page id from the rail", () => {
     const onNavigate = vi.fn();
-    const { rerender } = render(<SettingsShell {...baseProps({ onNavigate })} />);
+    render(<SettingsShell {...baseProps({ onNavigate })} />);
 
     fireEvent.click(screen.getByRole("button", { name: "General" }));
     expect(onNavigate).toHaveBeenCalledWith("general");
-
-    const results = [
-      { pageId: "storage", pageLabel: "Storage", anchorId: "disks", anchorLabel: "Disks" },
-    ];
-    rerender(<SettingsShell {...baseProps({ onNavigate, searchResults: results })} />);
-    fireEvent.click(screen.getByRole("button", { name: /Storage/ }));
-    expect(onNavigate).toHaveBeenCalledWith("storage", "disks");
-
-    const anchorless = [{ pageId: "backup", pageLabel: "Backup" }];
-    rerender(<SettingsShell {...baseProps({ onNavigate, searchResults: anchorless })} />);
-    fireEvent.click(screen.getByRole("button", { name: "Backup" }));
-    expect(onNavigate).toHaveBeenCalledWith("backup", null);
   });
 
   it("fires onRequestClose on a close attempt and stays open against a refusal", () => {
@@ -187,15 +170,25 @@ describe("SettingsShell (react)", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
-  it("renders the designed empty states for empty groups and empty results", () => {
-    render(<SettingsShell {...baseProps({ groups: [] })} />);
+  it("distinguishes an empty scope from a query that matched nothing", () => {
+    render(<SettingsShell {...baseProps({ groups: [], searchQuery: "" })} />);
     expect(screen.getByText("No settings pages")).toBeTruthy();
-    expect(document.querySelector(".poodle-empty-state")).not.toBeNull();
+    expect(screen.getByText("This scope has no settings pages yet.")).toBeTruthy();
     expect(document.querySelector(".poodle-sidebar-nav")).toBeNull();
 
-    render(<SettingsShell {...baseProps({ searchResults: [] })} />);
-    expect(screen.getByText("No results")).toBeTruthy();
+    cleanup();
+
+    render(<SettingsShell {...baseProps({ groups: [], searchQuery: "xyzzy" })} />);
+    expect(screen.getByText("No matches")).toBeTruthy();
     expect(screen.getByText("No settings match your search.")).toBeTruthy();
-    expect(document.querySelector(".poodle-settings-shell__result-list")).toBeNull();
+    expect(screen.queryByText("No settings pages")).toBeNull();
+  });
+
+  it("defaults the dialog's accessible name to the title, and lets a host override it", () => {
+    const { rerender } = render(<SettingsShell {...baseProps()} />);
+    expect(screen.getByRole("dialog").getAttribute("aria-label")).toBe("Settings");
+
+    rerender(<SettingsShell {...baseProps({ ariaLabel: "Nucleus settings" })} />);
+    expect(screen.getByRole("dialog").getAttribute("aria-label")).toBe("Nucleus settings");
   });
 });

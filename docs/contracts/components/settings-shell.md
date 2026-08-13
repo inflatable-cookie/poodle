@@ -8,7 +8,7 @@ Updated: 2026-08-12
 - Component name: `SettingsShell`
 - Layer: `composites`
 - Summary: the settings frame — a modal dialog with search in its header bar, a grouped
-  navigation rail, and a page region that search replaces — hosting host-owned
+  navigation rail that search narrows, and a page region that always renders — hosting host-owned
   settings pages as snippets
 - Composes: `Dialog`, `SidebarNav`, `Surface`, `ScrollShell`,
   `TextInput`, `Callout`, `EmptyState`
@@ -43,12 +43,6 @@ interface SettingsNavGroup {
   items: { value: string; label: string }[];
 }
 
-interface SettingsSearchResult {
-  pageId: string;
-  pageLabel: string;
-  anchorId?: string;
-  anchorLabel?: string;
-}
 ```
 
 Group labels are **section labels, not compositions**. A host that wants its
@@ -70,32 +64,20 @@ Dialog (width="xl", title, ariaLabel=title, showCloseButton,
     ├── [.poodle-settings-shell__nav]  <aside>
     │   └── Surface (tone="panel", border="subtle", padding="none")
     │       └── ScrollShell (direction="vertical")
-    │           ├── (groups empty) EmptyState (variant="neutral", size="compact",
-    │           │     "No settings pages")
+    │           ├── (groups empty, query live) EmptyState (variant="search",
+    │           │     size="compact", "No matches")
+    │           ├── (groups empty, no query) EmptyState (variant="neutral",
+    │           │     size="compact", "No settings pages")
     │           └── (groups present) SidebarNav (ariaLabel "Settings pages",
     │                 value=activePageId)
     └── [.poodle-settings-shell__page]  <div>   flex column
         ├── [.poodle-settings-shell__notice]  <div>   (when closeRefusedReason)
         │   └── Callout (tone="warning", announceMode="polite",
         │         message=closeRefusedReason)
-        └── content region — search **replaces** the page (R1.6):
-            ├── (searchResults !== null)
-            │   └── [.poodle-settings-shell__results]  <div data-empty>
-            │       ├── (no results) EmptyState (variant="search", size="compact",
-            │       │     "No results")
-            │       └── (results) ScrollShell (direction="vertical", padding="md")
-            │           └── [.poodle-settings-shell__result-list]  <ul aria-label>
-            │               └── [.poodle-settings-shell__result]  <li>
-            │                     └── <button type="button">  (activates the page)
-            │                         ├── [.poodle-settings-shell__result-label]
-            │                         │     <span> pageLabel
-            │                         └── [.poodle-settings-shell__result-anchor]
-            │                               <span> anchorLabel  (optional)
-            └── (searchResults === null)
-                └── [.poodle-settings-shell__page-stack]
-                      <section aria-label=pageTitle>  flex column
-                    └── ScrollShell (direction="vertical", padding="md")
-                        └── page snippet
+        └── [.poodle-settings-shell__page-stack]
+              <section aria-label=pageTitle>  flex column
+            └── ScrollShell (direction="vertical", padding="md")
+                └── page snippet   (always rendered — R1.6, reversed)
 ```
 
 | Part | Element | Notes |
@@ -104,10 +86,9 @@ Dialog (width="xl", title, ariaLabel=title, showCloseButton,
 | Nav | `<aside>` | Region: Surface + border + own scroll — never text floating on the dialog background (R1.1). |
 | Nav ScrollShell | `ScrollShell` | Independent vertical scroll owner for navigation. |
 | Dialog header | `<div>` | Title, search and the dialog's own close on one bar; the shell renders only the span left of close (R1.5). |
-| Page | `<div>` | Right column: notice, then either results or the page stack. Flex column — the notice is optional, so a fixed row template would strand the content. |
-| Search | `TextInput` | In the dialog header bar, filling the span between title and close (R1.5, reversed — see §9). |
+| Page | `<div>` | Right column: optional notice above the page stack. Flex column — the notice is optional, so a fixed row template would strand the content. |
+| Search | `TextInput` | In the dialog header bar, filling the span between title and close (R1.5, reversed — see §9). Narrows the rail; **the host filters `groups`** (R1.6, reversed). |
 | Notice | `Callout` | Refused-close notice, warning tone, polite announcement — not an error treatment (R1.7). |
-| Results | `<ul>` | Flat result list replacing the page while a query is active (R1.6); no dropdown, no overlay. |
 | Page stack | `<section>` | The scrolling snippet body, named by `pageTitle`. The shell draws no heading or description of its own (R1.3, reversed — see §9). |
 
 ## 4. Props And Inputs
@@ -123,8 +104,8 @@ Shapes per §2. Search results carry the anchor only when the result has one.
 | `groups` | `SettingsNavGroup[]` | `[]` | no | Navigation groups; empty renders the nav empty state |
 | `activePageId` | `string \| null` | `null` | no | Currently active page in the navigation rail |
 | `pageTitle` | `string \| null` | `null` | no | Accessible name of the page region. **Not drawn** — the nav rail already names the page (R1.3, reversed) |
-| `searchQuery` | `string` | `""` | no | Search field value; two-way bindable in Svelte, `onSearchQueryChange` in React |
-| `searchResults` | `SettingsSearchResult[] \| null` | `null` | no | Search outcome; `null` means **not searching** — the page region renders the page. Non-null (including `[]`) replaces the page region with the flat result list / no-results state. The host decides when a query is active; the shell never derives it from the query text |
+| `searchQuery` | `string` | `""` | no | Search field value; two-way bindable in Svelte, `onSearchQueryChange` in React. The shell reads it only to tell an empty scope from a query that matched nothing — **it never filters `groups` itself** |
+| `ariaLabel` | `string \| null` | `null` | no | The dialog's accessible name; falls back to `title`. Hosts set them differently: the visible title is "Settings" in every app, while a screen-reader user with several windows open needs "Nucleus settings" to tell them apart |
 | `open` | `boolean \| null` | `null` | no | Controlled open state; `null` = uncontrolled, seeded by `defaultOpen`; Svelte supports binding |
 | `defaultOpen` | `boolean` | `false` | no | Uncontrolled initial open state |
 | `title` | `string \| null` | `"Settings"` | no | Dialog title; also the dialog's accessible name (via `aria-labelledby`) |
@@ -156,8 +137,9 @@ shell keeps no second store of groups, results, or pages.
 |-------|---------|-----------------|
 | closed | `open=false` / uncontrolled close | Entire dialog unmounted |
 | open | open with groups | Surface'd nav with own scroll + page column with search, fixed header, scrolling snippet body |
-| searching | `searchResults !== null` | Page region shows the flat result list; the page snippet does not render (R1.6) |
-| no results | `searchResults === []` | Search empty state in the page region |
+| filtering | `searchQuery` non-empty | The host narrows `groups`; the rail shrinks and **the page keeps rendering** (R1.6, reversed) |
+| no matches | `groups === []` with a query live | "No matches" search empty state **in the rail**, not the page region |
+| empty scope | `groups === []` with no query | "No settings pages" neutral empty state in the rail |
 | no groups | `groups === []` | Nav empty state in the navigation rail |
 | refused | `closeRefusedReason` set | Warning `Callout` under the search field, polite-announced; a close attempt keeps the dialog open |
 | empty page body | no `page` snippet | The page scroll region renders empty (the host supplies content) |
@@ -275,6 +257,15 @@ the built component:
   so the three read as one row. `Dialog` drops `aria-labelledby` when given a
   custom header (`Dialog.svelte:116`), so the shell passes `ariaLabel={title}`
   to keep the dialog named.
+- **R1.6 — search replaces the page.** `039` had a live query draw a flat
+  result list over the page region. Reversed: search now **narrows the nav
+  rail** and the page always renders. The results panel was the rail twice —
+  a list of destinations beside an existing list of destinations — and it cost
+  you the page you were reading in order to show it. `searchResults` and
+  `SettingsSearchResult` are removed; **the host filters `groups`**, because
+  only the host knows a query can match an anchor inside a page. The rail's
+  empty state gained a second message so `groups === []` with a live query
+  reads "No matches" rather than "No settings pages".
 - **R1.3 — page header.** `039` put a fixed `PageHeader` above the scrolling
   body. The shell no longer draws a page heading or description at all: the nav
   rail already names the current page, and the page snippet owns its own intro.
@@ -303,9 +294,9 @@ the built component:
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
 | Normal | two groups with long labels, active page, page snippet | Dialog with surface'd nav rail (own scroll), page column with search, fixed header, scrolling page body |
-| Searching | `searchResults` with a mix of plain and anchored results | Flat result list replacing the page; no page header, no page snippet |
+| Narrowed by search | host-filtered `groups` plus a live `searchQuery` and a distinct `ariaLabel` | Shrunken rail, page still rendered |
 | No groups | `groups=[]` | Nav empty state inside the surface'd rail |
-| No results | `searchResults=[]` | Search empty state in the page region |
+| No matches | `groups=[]` with `searchQuery="xyzzy"` | "No matches" empty state in the rail |
 | Refused close | `closeRefusedReason` set | Warning callout under the search field, dialog still open |
 
 ## 12. Required Tests
@@ -316,7 +307,7 @@ Both runtimes:
   (`white-space: nowrap`, `overflow: hidden`, `text-overflow: ellipsis`) and
   carries a `title` tooltip
 - Exactly one close affordance in the whole shell
-- A non-null `searchResults` replaces the page region; the page snippet does
+- The page snippet renders whether or not a query is live; the removed results
   not render; clearing the query (null again) restores it
 - Navigation and page are separately scrollable regions; the search field and
   page header are outside both
@@ -338,7 +329,7 @@ recorded in the native registration gap inventory so the gap stays counted.
 ### Tier 1: Strict Parity
 
 - [ ] all props have the same meaning and defaults
-- [ ] search replace semantics match (non-null `searchResults` replaces the page)
+- [ ] search narrowing semantics match (the page renders regardless of query)
 - [ ] open controlled/uncontrolled semantics match
 - [ ] close refusal behavior matches (reason set → close attempts keep open)
 - [ ] anatomy classes match (nav, page, search, results, page-stack)

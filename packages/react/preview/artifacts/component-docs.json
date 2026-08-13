@@ -9128,25 +9128,13 @@
         "name": "pageTitle",
         "type": "string | null",
         "default": "null",
-        "description": "Current page heading rendered in the page header."
-      },
-      {
-        "name": "pageDescription",
-        "type": "string | null",
-        "default": "null",
-        "description": "Current page supporting copy rendered in the page header."
+        "description": "Accessible name of the page region. Not drawn — the nav rail already names the page."
       },
       {
         "name": "searchQuery",
         "type": "string",
         "default": "\"\"",
-        "description": "Search field value; bindable."
-      },
-      {
-        "name": "searchResults",
-        "type": "SettingsSearchResult[] | null",
-        "default": "null",
-        "description": "Search outcome; null means not searching and renders the page. Non-null replaces the page region with the result list."
+        "description": "Search field value; bindable. Narrows the rail via host-filtered groups; the shell never filters."
       },
       {
         "name": "open",
@@ -9164,7 +9152,13 @@
         "name": "title",
         "type": "string | null",
         "default": "\"Settings\"",
-        "description": "Dialog title and accessible name."
+        "description": "Visible dialog title."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Dialog accessible name; falls back to title. Set it per app so several open windows are distinguishable."
       },
       {
         "name": "closeLabel",
@@ -9182,7 +9176,7 @@
         "name": "onNavigate",
         "type": "(pageId: string, anchorId?: string | null) => void",
         "default": "undefined",
-        "description": "Fired on nav item or search result activation."
+        "description": "Fired on nav item activation."
       },
       {
         "name": "onRequestClose",
@@ -9210,7 +9204,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { SettingsShell } from \"@inflatable-cookie/poodle-svelte\";\n  import type { SettingsNavGroup, SettingsSearchResult } from \"@inflatable-cookie/poodle-svelte\";\n\n  const groups: SettingsNavGroup[] = [\n    { id: \"general\", label: \"General\", items: [{ value: \"general\", label: \"General\" }] },\n  ];\n\n  let open = true;\n  let query = \"\";\n  let results: SettingsSearchResult[] | null = null;\n</script>\n\n<SettingsShell\n  bind:open\n  {groups}\n  activePageId=\"general\"\n  pageTitle=\"General\"\n  bind:searchQuery={query}\n  {searchResults}\n  onNavigate={(pageId, anchorId) => console.log(pageId, anchorId)}\n  onRequestClose={() => console.log(\"close requested\")}\n>\n  <p>Settings page content.</p>\n</SettingsShell>"
+    "usage": "<script lang=\"ts\">\n  import { SettingsShell } from \"@inflatable-cookie/poodle-svelte\";\n  import type { SettingsNavGroup } from \"@inflatable-cookie/poodle-svelte\";\n\n  const allGroups: SettingsNavGroup[] = [\n    { id: \"general\", label: \"General\", items: [{ value: \"general\", label: \"General\" }] },\n  ];\n\n  let open = true;\n  let query = \"\";\n\n  // The host filters: only it knows a query can match an anchor inside a page.\n  $: groups = query ? allGroups.filter((g) => matches(g, query)) : allGroups;\n</script>\n\n<SettingsShell\n  bind:open\n  {groups}\n  activePageId=\"general\"\n  pageTitle=\"General\"\n  ariaLabel=\"Nucleus settings\"\n  bind:searchQuery={query}\n  onNavigate={(pageId) => console.log(pageId)}\n  onRequestClose={() => console.log(\"close requested\")}\n>\n  <p>Settings page content.</p>\n</SettingsShell>"
   },
   "tree": {
     "props": [

@@ -37,7 +37,7 @@ export { FilterToolbar, type FilterToolbarProps } from "./FilterToolbar";
 export { MetaBar, type MetaBarProps } from "./MetaBar";
 export { PageLoading, type PageLoadingProps, type PageLoadingPresentation } from "./PageLoading";
 export { SelectionSummary, type SelectionSummaryProps, type SelectionSummaryItem } from "./SelectionSummary";
-export { SettingsShell, type SettingsShellProps, type SettingsNavGroup, type SettingsSearchResult } from "./SettingsShell";
+export { SettingsShell, type SettingsShellProps, type SettingsNavGroup } from "./SettingsShell";
 export { Toolbar, type ToolbarProps } from "./Toolbar";
 export { Callout, type CalloutProps } from "./Callout";
 export { RemediationBanner, type RemediationBannerProps } from "./RemediationBanner";

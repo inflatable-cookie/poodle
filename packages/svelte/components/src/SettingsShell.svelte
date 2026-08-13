@@ -19,13 +19,6 @@
     items: { value: string; label: string }[];
   }
 
-  interface SettingsSearchResult {
-    pageId: string;
-    pageLabel: string;
-    anchorId?: string;
-    anchorLabel?: string;
-  }
-
   let nextSearchId = 0;
 
   interface Props {
@@ -33,10 +26,14 @@
     activePageId?: string | null;
     pageTitle?: string | null;
     searchQuery?: string;
-    searchResults?: SettingsSearchResult[] | null;
     open?: boolean | null;
     defaultOpen?: boolean;
     title?: string | null;
+    /* The dialog's accessible name. Defaults to `title`, but hosts want them
+       different: every app's visible title is "Settings", while a screen-reader
+       user with several windows open needs "Nucleus settings" to tell them
+       apart. */
+    ariaLabel?: string | null;
     closeLabel?: string;
     closeRefusedReason?: string | null;
     page?: Snippet;
@@ -51,10 +48,10 @@
     activePageId = null,
     pageTitle = null,
     searchQuery = $bindable(""),
-    searchResults = null,
     open = $bindable<boolean | null>(null),
     defaultOpen = false,
     title = "Settings",
+    ariaLabel = null,
     closeLabel = "Close settings",
     closeRefusedReason = null,
     page,
@@ -89,8 +86,11 @@
   $effect(() => {
     dialogOpen = isOpen;
   });
-  const isSearching = $derived(searchResults !== null);
-  const hasResults = $derived(isSearching && (searchResults?.length ?? 0) > 0);
+  const dialogName = $derived(ariaLabel ?? title);
+  /* Search narrows the rail; the host filters `groups` (only it knows that a
+     query can match an anchor inside a page). The shell just needs to know a
+     query is live, so an empty rail reads as "no matches" not "no pages". */
+  const isFiltering = $derived(searchQuery.trim().length > 0);
 
   function handleSearchChange(value: string): void {
     searchQuery = value;
@@ -117,15 +117,12 @@
     onNavigate?.(pageId);
   }
 
-  function handleResultActivation(result: SettingsSearchResult): void {
-    onNavigate?.(result.pageId, result.anchorId ?? null);
-  }
 </script>
 
 <Dialog
   bind:open={dialogOpen}
   title={title}
-  ariaLabel={title}
+  ariaLabel={dialogName}
   width="xl"
   showCloseButton
   closeLabel={closeLabel}
@@ -155,7 +152,16 @@
     <aside class="poodle-settings-shell__nav">
       <Surface tone="panel" border="subtle" padding="none">
         <ScrollShell direction="vertical">
-          {#if groups.length === 0}
+          {#if groups.length === 0 && isFiltering}
+            <!-- A query is live and nothing matched. "No settings pages" would
+                 be wrong here — there are pages, none match. -->
+            <EmptyState
+              variant="search"
+              size="compact"
+              title="No matches"
+              message="No settings match your search."
+            />
+          {:else if groups.length === 0}
             <EmptyState
               variant="neutral"
               size="compact"
@@ -181,47 +187,16 @@
         </div>
       {/if}
 
-      {#if isSearching}
-        <div class="poodle-settings-shell__results" data-empty={!hasResults}>
-          {#if hasResults}
-            <ScrollShell direction="vertical" padding="md">
-              <ul class="poodle-settings-shell__result-list" aria-label="Settings search results">
-                {#each searchResults ?? [] as result}
-                  <li>
-                    <button
-                      type="button"
-                      class="poodle-settings-shell__result"
-                      onclick={() => handleResultActivation(result)}
-                    >
-                      <span class="poodle-settings-shell__result-label">{result.pageLabel}</span>
-                      {#if result.anchorLabel}
-                        <span class="poodle-settings-shell__result-anchor">{result.anchorLabel}</span>
-                      {/if}
-                    </button>
-                  </li>
-                {/each}
-              </ul>
-            </ScrollShell>
-          {:else}
-            <EmptyState
-              variant="search"
-              size="compact"
-              title="No results"
-              message="No settings match your search."
-            />
-          {/if}
-        </div>
-      {:else}
-        <!-- No visible page heading or description: the nav rail already names
-             the current page, and the page snippet owns its own intro.
-             `pageTitle` becomes this region's accessible name instead, so the
-             name survives for screen readers without being drawn. -->
-        <section class="poodle-settings-shell__page-stack" aria-label={pageTitle}>
-          <ScrollShell direction="vertical" padding="md">
-            {@render page?.()}
-          </ScrollShell>
-        </section>
-      {/if}
+      <!-- The page always renders. Search narrows the rail rather than
+           replacing the page, so what you were reading stays put while you
+           filter. No visible page heading either: the rail already names the
+           current page, and the snippet owns its own intro. `pageTitle` is
+           this region's accessible name only. -->
+      <section class="poodle-settings-shell__page-stack" aria-label={pageTitle}>
+        <ScrollShell direction="vertical" padding="md">
+          {@render page?.()}
+        </ScrollShell>
+      </section>
     </div>
   </div>
 </Dialog>

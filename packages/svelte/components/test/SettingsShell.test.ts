@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/svelte";
+import { cleanup, fireEvent, render, screen } from "@testing-library/svelte";
 import { readFileSync } from "node:fs";
 import { createRawSnippet } from "svelte";
 import { describe, expect, it, vi } from "vitest";
@@ -71,30 +71,27 @@ describe("SettingsShell (svelte)", () => {
     expect(screen.queryByRole("button", { name: "Close" })).toBeNull();
   });
 
-  it("replaces the page region with results while searching and restores it when cleared", async () => {
-    const results = [
-      { pageId: "storage", pageLabel: "Storage", anchorId: "disks", anchorLabel: "Disks" },
-      { pageId: "backup", pageLabel: "Backup" },
+  it("keeps the page rendered while a query is live — search narrows the rail, it does not replace the page", async () => {
+    const narrowed = [
+      { id: "storage", label: "Storage & Backups", items: [{ value: "storage", label: "Storage" }] },
     ];
     const { rerender } = render(SettingsShell, {
-      props: baseProps({ page: pageSnippet, searchResults: null }),
+      props: baseProps({ page: pageSnippet, searchQuery: "" }),
     });
 
-    // Not searching: the page snippet renders, no results region.
+    // No query: full rail, page renders.
     expect(document.querySelector(".settings-page-marker")).not.toBeNull();
-    expect(document.querySelector(".poodle-settings-shell__results")).toBeNull();
+    expect(screen.getByRole("button", { name: "General" })).not.toBeNull();
 
-    // Searching: results replace the page; the snippet does not render.
-    await rerender(baseProps({ page: pageSnippet, searchResults: results }));
-    expect(document.querySelector(".poodle-settings-shell__results")).not.toBeNull();
-    expect(document.querySelector(".settings-page-marker")).toBeNull();
-    expect(screen.getByRole("button", { name: /Storage/ })).not.toBeNull();
-    expect(screen.getByRole("button", { name: /Backup/ })).not.toBeNull();
-
-    // Cleared (host sets searchResults back to null): the page returns.
-    await rerender(baseProps({ page: pageSnippet, searchResults: null }));
+    // Query live and the host narrowed the groups: the page is STILL there.
+    await rerender(baseProps({ page: pageSnippet, searchQuery: "stor", groups: narrowed }));
     expect(document.querySelector(".settings-page-marker")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Storage" })).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "General" })).toBeNull();
+
+    // The removed results panel must not come back.
     expect(document.querySelector(".poodle-settings-shell__results")).toBeNull();
+    expect(document.querySelector(".poodle-settings-shell__result-list")).toBeNull();
   });
 
   it("keeps navigation and page in separately scrollable regions, outside the search and header", () => {
@@ -113,32 +110,18 @@ describe("SettingsShell (svelte)", () => {
     expect(getComputedStyle(pageViewport).overflowY).toBe("auto");
     expect(navViewport).not.toBe(pageViewport);
 
+    // Search lives in the dialog header bar, outside both scroll regions.
     const searchInput = document.querySelector(".poodle-settings-shell__search input") as HTMLElement;
-    const pageHeader = document.querySelector(".poodle-settings-shell__page-header") as HTMLElement;
     expect(navViewport.contains(searchInput)).toBe(false);
     expect(pageViewport.contains(searchInput)).toBe(false);
-    expect(navViewport.contains(pageHeader)).toBe(false);
-    expect(pageViewport.contains(pageHeader)).toBe(false);
   });
 
-  it("fires onNavigate with the page id, and with the anchor id when a result carries one", async () => {
+  it("fires onNavigate with the page id from the rail", async () => {
     const onNavigate = vi.fn();
-    const { rerender } = render(SettingsShell, { props: baseProps({ onNavigate }) });
+    render(SettingsShell, { props: baseProps({ onNavigate }) });
 
     await fireEvent.click(screen.getByRole("button", { name: "General" }));
     expect(onNavigate).toHaveBeenCalledWith("general");
-
-    const results = [
-      { pageId: "storage", pageLabel: "Storage", anchorId: "disks", anchorLabel: "Disks" },
-    ];
-    await rerender(baseProps({ onNavigate, searchResults: results }));
-    await fireEvent.click(screen.getByRole("button", { name: /Storage/ }));
-    expect(onNavigate).toHaveBeenCalledWith("storage", "disks");
-
-    const anchorless = [{ pageId: "backup", pageLabel: "Backup" }];
-    await rerender(baseProps({ onNavigate, searchResults: anchorless }));
-    await fireEvent.click(screen.getByRole("button", { name: "Backup" }));
-    expect(onNavigate).toHaveBeenCalledWith("backup", null);
   });
 
   it("fires onRequestClose on a close attempt and stays open against a refusal", async () => {
@@ -179,15 +162,27 @@ describe("SettingsShell (svelte)", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
-  it("renders the designed empty states for empty groups and empty results", () => {
-    render(SettingsShell, { props: baseProps({ groups: [] }) });
+  it("distinguishes an empty scope from a query that matched nothing", () => {
+    // No pages at all, no query: the scope is empty.
+    render(SettingsShell, { props: baseProps({ groups: [], searchQuery: "" }) });
     expect(screen.getByText("No settings pages")).toBeTruthy();
-    expect(document.querySelector(".poodle-empty-state")).not.toBeNull();
+    expect(screen.getByText("This scope has no settings pages yet.")).toBeTruthy();
     expect(document.querySelector(".poodle-sidebar-nav")).toBeNull();
 
-    render(SettingsShell, { props: baseProps({ searchResults: [] }) });
-    expect(screen.getByText("No results")).toBeTruthy();
+    cleanup();
+
+    // Pages exist but the host's filter removed them all: say so instead.
+    render(SettingsShell, { props: baseProps({ groups: [], searchQuery: "xyzzy" }) });
+    expect(screen.getByText("No matches")).toBeTruthy();
     expect(screen.getByText("No settings match your search.")).toBeTruthy();
-    expect(document.querySelector(".poodle-settings-shell__result-list")).toBeNull();
+    expect(screen.queryByText("No settings pages")).toBeNull();
+  });
+
+  it("defaults the dialog's accessible name to the title, and lets a host override it", async () => {
+    const { rerender } = render(SettingsShell, { props: baseProps() });
+    expect(screen.getByRole("dialog").getAttribute("aria-label")).toBe("Settings");
+
+    await rerender(baseProps({ ariaLabel: "Nucleus settings" }));
+    expect(screen.getByRole("dialog").getAttribute("aria-label")).toBe("Nucleus settings");
   });
 });
