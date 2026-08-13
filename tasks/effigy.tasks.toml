@@ -39,7 +39,10 @@
 # by `--author-button`; the button-ts target renders its rendered
 # vocabulary (parts, state attributes and value domains, recipe hooks)
 # into both web packages' generated/ directories — one authored change
-# moves both web artifacts in one build.
+# moves both web artifacts in one build. Card 042 R1a/R2: the button-rust
+# sibling renders the same definition into poodle-render's generated/
+# directory — the consumer of the native route — so one authored change
+# moves all three artifacts (two web + one render).
 "ir:build" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-button packages/codegen/fixtures/button-model.json" },
@@ -50,6 +53,11 @@
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/jetstream/preview/src --target shell-rust" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/svelte/components/src --target button-ts" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/react/components/src --target button-ts" },
+  # Card 042 R1a: Button's Rust artifact lives in the package that ships it —
+  # poodle-render is the consumer, so the artifact lands in
+  # packages/render/src/generated/ (not a preview, not codegen; a crate
+  # cannot depend on the tool that generates it).
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/render/src --target button-rust" },
 ]
 "ir:check" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json --check" },
@@ -61,6 +69,7 @@
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/jetstream/preview/src --target shell-rust --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/svelte/components/src --target button-ts --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/react/components/src --target button-ts --check" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/render/src --target button-rust --check" },
 ]
 
 # Preview (documentation site)

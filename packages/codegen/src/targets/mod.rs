@@ -8,13 +8,19 @@
 //! write into a web package. It is reachable only via `--target
 //! shell-scene`. `g13-b036` adds its Rust sibling `shell-rust` (card 036
 //! R2), which renders the same scene into the native previews' `generated/`
-//! directories — same scoping, same select-only reachability.
+//! directories — same scoping, same select-only reachability. `g13-b041`
+//! adds the component-scoped `button-ts` target (card 041 R2), which
+//! renders Button's rendered vocabulary into both web packages; `g13-b042`
+//! adds its Rust sibling `button-rust` (card 042 R2), which renders the
+//! same definition into `poodle-render`'s `generated/` directory — same
+//! scoping, same select-only reachability.
 
 use crate::emit::EmitTarget;
 
 mod json_common;
 
 pub mod button;
+pub mod button_rust;
 pub mod conformance;
 pub mod docs;
 pub mod json;
@@ -43,6 +49,7 @@ pub fn selectable() -> Vec<&'static dyn EmitTarget> {
     targets.push(&shell::ShellSceneTarget);
     targets.push(&shell_rust::ShellRustTarget);
     targets.push(&button::ButtonTarget);
+    targets.push(&button_rust::ButtonRustTarget);
     targets
 }
 

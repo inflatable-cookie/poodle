@@ -25,8 +25,12 @@ use poodle_codegen::{generate, models, targets, GeneratedFile, GENERATOR_VERSION
 /// source path the artifact headers carry.
 const BUTTON_FIXTURE: &str = "packages/codegen/fixtures/button-model.json";
 
-const SVELTE_ARTIFACT: &str = "packages/svelte/preview/src/generated/button/index.ts";
-const REACT_ARTIFACT: &str = "packages/react/preview/src/generated/button/index.ts";
+// The committed artifacts, at the post-review locations: b041's review
+// moved emission from the preview packages to the component packages (the
+// published tarball carries `src` only, so the consumer must be able to
+// resolve the import inside its own package — see PAPERCUTS 2026-08-12).
+const SVELTE_ARTIFACT: &str = "packages/svelte/components/src/generated/button/index.ts";
+const REACT_ARTIFACT: &str = "packages/react/components/src/generated/button/index.ts";
 
 fn crate_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))

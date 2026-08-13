@@ -11,6 +11,17 @@
 //! history and parity evidence live in
 //! `docs/roadmaps/g12/019-gpui-node-backend.md`.
 
+/// The generated Button definition (card 042 R1a): the authored definition
+/// as plain Rust data, self-contained — no Poodle crate imports, pulled in
+/// by `#[path]` like the native previews' shell artifacts (card 036).
+/// Regenerate with `effigy ir:build`; drift is gated by `effigy ir:check`.
+pub mod generated {
+    // Inside this inline module the `#[path]` resolves relative to the
+    // enclosing module's directory (`src/generated/`).
+    #[path = "button.rs"]
+    pub mod button;
+}
+
 pub mod accordion;
 pub mod action_discovery_panel;
 pub mod agent_chat_input;

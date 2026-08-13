@@ -7,6 +7,37 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-13 — g13-042 classified the GPUI visual baselines
+  (`packages/gpui/preview/baselines/button-eclipse-compact-sm.png` et al.,
+  local-only in the main checkout) as **stale**, not moved: the top chrome
+  of the current preview matches the baseline 99-100%, while the specimen
+  content region below differs systematically (~45% agreement). The
+  saturated-color histogram is near-identical (same palette features),
+  which fits an older preview layout rather than a render change — and the
+  Jetstream counterpart is a true zero against its baseline (deterministic
+  renderer, same `poodle-render` crate). No baseline refreshed. The gate's
+  own axis flag is also inert: `test/native-visual/capture.ts` passes
+  `--control-size`, but the preview parses `--size` — every GPUI gate
+  capture since the flag rename ran at the default size. Either fix the
+  harness flag or drop the axis claim; then regenerate the baselines.
+
+- 2026-08-13 — the Jetstream `snap -- specimens` scene is a fixed
+  900×640, and Button's States row (disabled/loading) sits below the fold:
+  only the upper specimen rows are pixel-demonstrable through the snap.
+  The `data-loading` rename was therefore invisible in the Jetstream snap
+  (the loading treatment is in the clipped row) while the
+  `data-has-leading` rename (icons row, mid-page) was visible. A card that
+  needs to pixel-prove a bottom-row state in Jetstream either scrolls the
+  snap scene or captures per-section.
+
+- 2026-08-13 — RESOLVED in g13-042. b041's review moved the `button-ts`
+  artifact from the preview packages to the component packages
+  (`packages/{svelte,react}/components/src/generated/button/`) but never
+  moved the two path constants in `packages/codegen/tests/button.rs`, so
+  `cargo test` for `poodle-codegen` was red on the branch (`No such file
+  or directory`) until 042 corrected them. A review that moves where
+  generated code lands must update the tests that byte-compare it.
+
 - 2026-08-12 — RESOLVED at review. `g13-b041` had `Button.svelte`/`Button.tsx`
   import the generated definition across a package boundary
   (`../../preview/src/generated/button`), so the packed `poodle-svelte` /
