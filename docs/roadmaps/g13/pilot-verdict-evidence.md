@@ -1,6 +1,6 @@
 # g13.008 Pilot Verdict — Evidence
 
-Status: evidence complete, **verdict not yet recorded**
+Status: **verdict recorded — revise** (2026-08-13)
 Milestone: `g13.008`
 Owner: Poodle maintainer (the verdict is the maintainer's to record — see
 `docs/roadmaps/g13/008-pilot-verdict-and-architecture-promotion.md`)
@@ -11,8 +11,8 @@ Governing refs: `docs/specs/063-rust-authored-component-and-scene-ir.md`
 (the frozen baseline), and the six slice logs `b041`/`b042`, `b045`/`b046`,
 `b048`/`b049`
 
-Broad migration stays locked until **adopt** is recorded here. Nothing in this
-document unlocks `009`–`016`.
+The verdict is **revise** (§7). Broad component migration is locked
+permanently under it, and `009`–`016` are closed rather than deferred (§8).
 
 ## 1. What the pilot proved
 
@@ -172,5 +172,46 @@ with per-item identity.
 
 ## 7. Verdict
 
-Not yet recorded. The maintainer records **adopt**, **revise** or **reject**
-here, and `009`–`016` are recompiled or closed to match. They remain locked.
+**REVISE.** Recorded by the maintainer, 2026-08-13.
+
+The reasoning, in the maintainer's terms: *"one source for cross-runtime
+vocabulary with drift gating"* is the valuable half and is worth keeping. It is
+also the right place to consolidate — once every component's vocabulary lives
+in one authority, the corpus can be reassessed from there rather than from
+four hand-maintained copies.
+
+So the IR survives with its ambition cut to what it demonstrably does:
+
+- **Kept** — cross-runtime vocabulary (part names, `data-*` names, value
+  domains, axes, recipe hooks) as one authority, emitted to four runtimes, with
+  `ir:check` drift gating.
+- **Dropped** — the behavioural ambition. The IR does not describe transitions,
+  effects, derivation or lifecycle, and will not grow an evaluator. `expr.rs`
+  and the unused expression vocabulary go.
+- **Amended** — the two gaps the pilot named: per-runtime capability
+  expression *including absence*, and repeated anatomy with per-item identity.
+- **Not adopted** — `009`–`016` as written. Family-by-family migration to a
+  generative model is closed; see §8.
+
+Adopt was not available on this evidence (pass condition 5 fails). Reject was
+defensible and was declined because the propagation and drift machinery works
+and is cheap per component at the vocabulary scope.
+
+## 8. The revised runway
+
+`009`–`016` are **closed, not deferred** — they describe migration to a
+generative model that the verdict declines. They are retained as evidence and
+must not be treated as executable.
+
+The replacement runway is deliberately short, and its last step is the
+reassessment the maintainer asked for:
+
+| Step | Purpose |
+|---|---|
+| `g13.017` | Narrow the IR to the vocabulary scope. Remove `expr.rs` and the unused emitter surface; state the scope boundary in spec 063 so it cannot creep back. |
+| `g13.018` | Apply the two amendments: per-runtime capability expression including absence, and repeated anatomy with per-item identity. Both are vocabulary, not behaviour. |
+| `g13.019` | Extend vocabulary coverage across the corpus, family by family, additively — no component rewrites. |
+| `g13.020` | Consolidate and reassess from the single vocabulary authority. |
+
+Broad *component* migration stays locked permanently under this verdict.
+Vocabulary coverage is not component migration and is not gated by it.

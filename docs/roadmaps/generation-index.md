@@ -8,10 +8,14 @@ Updated: 2026-08-11
   - Status: active
   - Range: `001` to `016`
   - Governing spec: `docs/specs/063-rust-authored-component-and-scene-ir.md`
-  - Notes: Rust-authored component and scene IR. Cards `001`–`008` form a
-    bounded pilot through Button, RangeSlider, and TextInput. Cards `009`–`016`
-    are gated on an explicit adopt verdict in `g13.008`.
-  - Next: `g13.001` authority inventory and fixture baseline.
+  - Notes: Rust-authored component and scene IR. The bounded pilot `001`–`008`
+    is complete and `g13.008` recorded **revise** on 2026-08-13
+    (`docs/roadmaps/g13/pilot-verdict-evidence.md`). The IR is narrowed to
+    cross-runtime vocabulary with drift gating; the behavioural ambition is
+    dropped. Cards `009`–`016` are **closed, not deferred** — they describe a
+    generative migration the verdict declines.
+  - Next: `g13.017` narrow the IR to the vocabulary scope; the runway ends at
+    `g13.020`, consolidate and reassess.
 
 ## Latest Completed Track
 
@@ -61,7 +65,9 @@ When roadmap files disagree:
 1. Treat this index as the top-level status source.
 2. Treat `docs/roadmaps/README.md` as the front door.
 3. Treat `g12` as closed and `g13` as the only active generation.
-4. Treat `g13.009`–`016` as non-executable until `g13.008` records **adopt**.
+4. Treat `g13.009`–`016` as closed and non-executable. `g13.008` recorded
+   **revise**, so the adopt gate they waited on will not open. The live runway
+   is `g13.017`–`020`.
 
 ## Rollover Policy
 
@@ -80,6 +86,8 @@ Before rollover:
 
 The implementation baseline remains the current dual path until the pilot
 passes: shared TypeScript behavior/styles for Svelte and React; shared Rust
-spec/render/node composition for GPUI and Jetstream. Spec 063 proposes a
-Rust-authored declarative authority above both paths. It cannot silently
-replace stable architecture before `g13.008`.
+spec/render/node composition for GPUI and Jetstream. Spec 063 proposed a
+Rust-authored declarative authority above both paths; after the `g13.008`
+**revise** verdict it is narrowed to cross-runtime vocabulary with drift
+gating. Architecture 001/006 were deliberately **not** amended — nothing is
+promoted to stable while the model stays provisional at vocabulary scope.

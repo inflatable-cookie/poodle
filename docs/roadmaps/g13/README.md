@@ -15,9 +15,18 @@ the same definitions directly through the shared native renderer path.
 `001`–`008` are the runway. They establish the schema, compiler, preview shell,
 and three proof components, then force an adopt/revise/reject decision.
 
-`009`–`016` are gated on an **adopt** verdict in `008`. Do not begin family
-migration early. Existing contracts and implementations remain authoritative
-until their migration card closes.
+**`008` recorded `revise` on 2026-08-13**
+([evidence](pilot-verdict-evidence.md)). `001`–`008` are complete.
+
+`009`–`016` are **closed, not deferred**. They describe family-by-family
+migration to a generative model the verdict declines; they are retained as
+evidence and are not executable. Existing contracts and implementations stay
+authoritative, permanently under this verdict.
+
+The live runway is `017`–`020`: narrow the IR to cross-runtime vocabulary with
+drift gating, apply the two amendments the pilot named, extend vocabulary
+coverage across the corpus additively, then consolidate and reassess from the
+single authority. See [the verdict evidence](pilot-verdict-evidence.md) §8.
 
 ## Runway
 
@@ -40,6 +49,16 @@ until their migration card closes.
 14. [014 — Native backend convergence](014-native-backend-convergence.md)
 15. [015 — Generated contracts, registries, and parity evidence](015-generated-contracts-registries-and-parity-evidence.md)
 16. [016 — Consumer proof and generation closeout](016-consumer-proof-and-generation-closeout.md)
+
+## Revised Runway (live)
+
+After the `008` **revise** verdict. `009`–`016` above are closed; these are the
+executable ones.
+
+17. [017 — Narrow the IR to vocabulary](017-narrow-the-ir-to-vocabulary.md)
+18. [018 — Capability and anatomy amendments](018-capability-and-anatomy-amendments.md)
+19. [019 — Vocabulary coverage across the corpus](019-vocabulary-coverage.md)
+20. [020 — Consolidate and reassess](020-consolidate-and-reassess.md)
 
 ## Non-goals
 

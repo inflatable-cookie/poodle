@@ -8,8 +8,10 @@ Roadmaps record Poodle's executable milestone work. `g13` is active.
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary.
-- `g13` is the Rust-authored component and scene IR program. Its first eight
-  cards are a gated pilot; broad migration requires an explicit adopt verdict.
+- `g13` is the Rust-authored component and scene IR program. Its bounded pilot
+  (`001`–`008`) is complete and recorded **revise**: the IR is kept as one
+  source for cross-runtime vocabulary with drift gating, the behavioural
+  ambition is dropped, and broad component migration (`009`–`016`) is closed.
 - The former single-card g13–g15 audio generations are consolidated into
   `g12.025`–`027`. `g12` is closed.
 - `g09`, `g10`, `g11`, and `g12` are complete.

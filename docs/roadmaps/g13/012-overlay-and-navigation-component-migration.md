@@ -1,6 +1,10 @@
 # g13.012 Overlay And Navigation Component Migration
 
-Status: gated on g13.008 adopt verdict
+Status: closed — superseded by the `g13.008` **revise** verdict
+(`docs/roadmaps/g13/pilot-verdict-evidence.md` §7–8). This milestone describes
+family-by-family migration to a generative model the verdict declines. It is
+retained as evidence and is **not executable**. The replacement runway is
+`g13.017`–`g13.020`.
 Owner: Poodle core
 Depends on: `g13.009`, `g13.011`
 

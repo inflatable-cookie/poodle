@@ -1,12 +1,52 @@
 # 063 Rust-authored Component And Scene IR
 
-Status: provisional — governed by the g13 pilot
-Updated: 2026-08-11
+Status: amended — narrowed to vocabulary by the `g13.008` **revise** verdict
+Updated: 2026-08-13
 Owner: Poodle core
 Depends on: `062-headless-core-and-dual-layer-strategy.md`,
 `../architecture/001-poodle-system-shape.md`,
 `../architecture/006-headless-core-and-machine-model.md`,
 `../architecture/007-appearance-recipe-contract.md`
+
+## Scope, after the g13.008 revise verdict
+
+The pilot ran to completion and the verdict is **revise**
+(`../roadmaps/g13/pilot-verdict-evidence.md`). This spec is narrowed
+accordingly, and the narrowing is the point — the original scope was measured
+and did not hold.
+
+**In scope — cross-runtime vocabulary, with drift gating.** Part names,
+`data-*` attribute names, value domains, axes, recipe hooks, and capability
+declarations: authored once in Rust, emitted to all four runtimes, and pinned
+by `ir:check`. This is what the pilot demonstrably delivered.
+
+**Out of scope — behaviour.** The IR does not describe transitions, effects,
+derived values, per-attribute derivation, or framework lifecycle, and **will
+not grow an evaluator**. `expr.rs` and the unused expression vocabulary are
+removed by `g13.017`. Across three components of rising difficulty the IR
+executed nothing: every prop was declared, zero were executed.
+
+**Out of scope — replacing implementations.** Consuming a definition is
+additive. Measured: the nine pilot files grew 3,672 → 4,637 lines while
+removing zero duplication. Any future claim that generation will shrink a
+component needs new evidence, not this spec.
+
+**Amendments the pilot named**, both vocabulary rather than behaviour, owned by
+`g13.018`:
+
+1. Per-runtime capability expression, **including absence**.
+   `CapabilityRequirement` currently carries only `capability` and a prose
+   `purpose`, so ownership is untyped and "this runtime does not have it"
+   cannot be said at all — Jetstream renders a text field nobody can type into,
+   declared identically to GPUI, which implements the whole editing model.
+2. Repeated anatomy with per-item identity. `PartKind::Repeated` requires a
+   `List` prop and yields identical instances; its own doc comment names the
+   two RangeSlider thumbs as the example it cannot serve, and both web and
+   native renderers hard-code "two".
+
+The pass conditions and stop conditions below are retained **as the pilot's
+record**. Condition 5 failed; condition 6 was never tested. They are not a
+live checklist.
 
 ## Purpose
 
@@ -301,13 +341,18 @@ Record the missing capability or revise the IR.
 
 ## Promotion
 
-`g13.008` records the evidence and one verdict:
+`g13.008` recorded **revise** on 2026-08-13. Evidence:
+`../roadmaps/g13/pilot-verdict-evidence.md`.
 
-- **adopt** — promote the durable authority and lowering model into
-  architecture 001/006 and working rules, then unlock the rollout cards
-- **revise** — amend this spec and run another bounded pilot
-- **reject** — retain the evidence, close the compiler runway, and recompile
-  the remaining parity plan without IR codegen
+- ~~**adopt**~~ — not available: pass condition 5 failed.
+- **revise** — *recorded.* This spec is narrowed to vocabulary (see "Scope,
+  after the g13.008 revise verdict" above). The runway is `g13.017`–`g13.020`.
+- ~~**reject**~~ — defensible on the same evidence, declined because the
+  propagation and drift machinery works and is cheap at the vocabulary scope.
+
+`g13.009`–`g13.016` are closed, not deferred. Architecture 001/006 were **not**
+amended: nothing here is promoted to stable while the model stays provisional
+at vocabulary scope.
 
 Spec 062 remains correct for arbitrary framework behavior and for its Mitosis
 rejection. This spec supersedes only its assumption that declarative codegen
