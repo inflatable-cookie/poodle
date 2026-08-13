@@ -22,7 +22,7 @@
 
 export type Channel = "production" | "beta" | "nightly";
 
-export type OfferReason = "staged" | "below-minimum-version" | "user-initiated";
+export type OfferReason = "staged" | "belowMinimumVersion" | "userInitiated";
 
 export type InstallManager =
   | "macAppStore"

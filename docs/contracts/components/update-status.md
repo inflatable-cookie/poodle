@@ -50,7 +50,7 @@ the drift assertion is the bridge's job, not a contract of tolerance.
 ```ts
 type Channel = "production" | "beta" | "nightly";
 
-type OfferReason = "staged" | "below-minimum-version" | "user-initiated";
+type OfferReason = "staged" | "belowMinimumVersion" | "userInitiated";
 
 type InstallManager =
   | "macAppStore" | "homebrewCask" | "flatpak"

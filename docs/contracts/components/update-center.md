@@ -41,12 +41,33 @@ UpdateCenter            (absent entirely when presence is "hidden")
 See `update-status.md` §3. `UpdateCenter` passes the same reads through without
 interpretation. `presence` is the authority's predicate:
 
-- `hidden` — nothing to do. Includes `withheldByRollout`, `aheadOfChannel` and
-  `managedElsewhere` (each has a newer version none is an install this
-  application can perform). The icon collapses; the states still render inside
-  `UpdateStatus`.
-- `quiet` — work in flight, or an offer the operator already postponed.
+- `hidden` — **the operator cannot act.** `withheldByRollout` (not staged to
+  them) and `aheadOfChannel` (nothing to install). The icon collapses; the
+  states still render inside `UpdateStatus`.
+- `quiet` — something exists but no press is expected now: work in flight, an
+  offer the operator already postponed, or `managedElsewhere`.
 - `attention` — an offer, or an artifact downloaded and waiting.
+
+### Why `managedElsewhere` is `quiet`, not `hidden`
+
+The discriminator is **"can the operator act?"**, not "can this application
+perform the install?". A Homebrew or App Store install has a real newer version
+and a real thing the operator can do — just not through us. Hiding it withholds
+news the operator wants and can only otherwise reach by opening settings.
+
+The objection — that an icon promises a button that installs — describes
+`attention`, not `quiet`. `quiet` is the unremarkable trigger with no indicator
+dot, and it already covers "an offer the operator already postponed", which is
+likewise a state where no press is expected. `managedElsewhere` fits that
+meaning exactly.
+
+Nothing needs building for it: `updateStatusView` already returns an
+install-free variant for this state — `tone: "info"`, "Version X is available",
+"Managed by <manager>", and **`actions: []`**. Hosts should pair it with
+`DeferralCause.externallyManaged`, whose notice carries the upgrade command
+("Upgrade with: `brew upgrade finch`"). Without that pairing the popover still
+names the version and the manager, but the operator has to know the command
+themselves.
 
 ## 4. Public Props
 
