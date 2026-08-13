@@ -196,7 +196,6 @@ fn prop_def() -> serde_json::Value {
                 ]
             },
             "default": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/value" }] },
-            "default_expr": { "oneOf": [{ "type": "null" }, { "type": "object" }] },
             "required": { "type": "boolean" },
             "web_only": { "type": "boolean" },
             "description": { "type": "string" },
@@ -274,11 +273,10 @@ fn axes_def() -> serde_json::Value {
                     { "type": "null" },
                     {
                         "type": "object",
-                        "required": ["explicit", "size_role", "fallback", "ladder"],
+                        "required": ["explicit", "size_role", "ladder"],
                         "properties": {
                             "explicit": { "oneOf": [{ "type": "null" }, { "enum": ["xs", "sm", "md", "lg", "xl"] }] },
                             "size_role": { "enum": ["chrome", "control", "prominent"] },
-                            "fallback": { "oneOf": [{ "type": "null" }, { "type": "object" }] },
                             "ladder": {
                                 "type": "array",
                                 "items": {

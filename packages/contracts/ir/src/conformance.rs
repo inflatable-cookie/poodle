@@ -10,7 +10,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{Expr, Identifier};
+use crate::Identifier;
 
 /// The runtime machines a conformance vector or extension targets. These are
 /// vocabulary names for the four pilot shells (the corpus's `SHELL-*` rows),
@@ -61,20 +61,12 @@ pub struct VectorStep {
     pub name: String,
     /// Step kind.
     pub kind: VectorStepKind,
-    /// Optional boolean guard condition on the step — the expression form of
-    /// a guard on a transition/effect-intent (spec 063 "guard conditions on
-    /// transitions and effect-intents"; card 012 sanctioned slots).
-    ///
-    /// Vectors are shared machine semantics and name no component state, so
-    /// reference operands inside a vector guard are unresolved findings:
-    /// guards over machine state (`safeSliderMax`, `normalizeRangeValue`,
-    /// `slugify`) are conformance-vector machines (`CROSS-19`, `RNG-02`,
-    /// `TXT-09`), not expressions. `validate` still type-checks the
-    /// expression's operator typing and boolean result.
-    #[serde(default)]
-    pub guard: Option<Expr>,
     /// The machine behavior this step pins, citing the contract note, e.g.
-    /// `R §3` step snapping anchored at `min` (`CROSS-19`).
+    /// `R §3` step snapping anchored at `min` (`CROSS-19`). Input
+    /// conditions were guard expressions (g13.017 R1 bucket 1: dead weight
+    /// — no vector step in any authored model carried one) and are gone:
+    /// guards over machine state are vector machines (`CROSS-19`, `RNG-02`,
+    /// `TXT-09`), never expressions.
     pub description: String,
 }
 

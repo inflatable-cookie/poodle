@@ -1,6 +1,6 @@
 # g13.017 Narrow The IR To Vocabulary
 
-Status: ready
+Status: **complete — closed by card 050** (`thread/g13-050-narrow-the-ir-to-vocabulary`): the expression vocabulary is gone (46 authored trees classified, 4 recorded as behaviour, 7 dead weight, 35 kept as plain vocabulary); artifacts byte-identical or every moved byte justified; spec 063 names the removed constructs and the new-verdict bar
 Owner: Poodle core
 Depends on: `g13.008` (verdict **revise**, recorded 2026-08-13)
 

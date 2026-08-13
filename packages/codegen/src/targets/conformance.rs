@@ -10,13 +10,13 @@
 //! - `vectors.json` — `vectors` sorted by id. Each vector carries its
 //!   `applies_to` runtime targets and `steps` in authoring order — step
 //!   order is execution order, exactly as `machines.json` says ("Effects
-//!   are order-significant"), so it is never re-sorted. Each step pins the
+//!   order, so it is never re-sorted. Each step pins the
 //!   (input condition → expected machine behavior) pair the corpus `CV`
 //!   rows describe: `kind` names the behavior class (transition, guard,
-//!   effect-intent, invariant), `guard` the input condition when declared
-//!   (a bounded expression, spec 063), and `description` what the step
-//!   proves. `declared_by` lists the components whose `conformance`
-//!   declares reliance on the vector, sorted by id.
+//!   effect-intent, invariant) and `description` what the step proves.
+//!   Guard conditions were expressions and are gone (g13.017 R1 bucket 1:
+//!   no vector step carried one). `declared_by` lists the components whose
+//!   `conformance` declares reliance on the vector, sorted by id.
 //!
 //! Emission rules (the emitter owns every byte, ruling R2): the `IR-07`
 //! header is the `generated` object; vectors sort by id, `declared_by`
@@ -93,15 +93,7 @@ fn vector_entry(model: &IrModel, vector: &ConformanceVector) -> serde_json::Valu
         "steps": vector.steps.iter().map(|step| serde_json::json!({
             "id": step.id.as_str(),
             "kind": step.kind,
-            "guard": step.guard.as_ref().map(serialize),
             "description": step.description,
         })).collect::<Vec<_>>(),
     })
-}
-
-/// Serializes a serde value — deterministic for the vector-step kinds and
-/// the bounded guard expressions (both round-trip from the validated
-/// model; serde_json maps sort their keys).
-fn serialize<T: serde::Serialize>(value: T) -> serde_json::Value {
-    serde_json::to_value(value).expect("IR values are always serializable")
 }

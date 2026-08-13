@@ -430,7 +430,7 @@ fn registry_lists_every_component_with_capabilities_axes_and_shared_types() {
 // ---------------------------------------------------------------------------
 
 #[test]
-fn conformance_vectors_carry_steps_guards_and_declared_by() {
+fn conformance_vectors_carry_steps_kinds_and_declared_by() {
     let files = render_target("conformance");
     let vectors = files
         .iter()
@@ -461,17 +461,14 @@ fn conformance_vectors_carry_steps_guards_and_declared_by() {
     let steps = vector["steps"].as_array().expect("steps");
     assert_eq!(steps.len(), 3, "the three fixture steps survive in order");
     assert_eq!(steps[0]["kind"], "invariant");
-    assert!(steps[0]["guard"].is_null());
     assert_eq!(steps[1]["kind"], "transition");
-    assert_eq!(
-        steps[1]["guard"]["and"]
-            .as_array()
-            .expect("and operands")
-            .len(),
-        2,
-        "the bounded guard expression survives as JSON"
-    );
     assert_eq!(steps[2]["kind"], "effect-intent");
+    assert!(
+        steps
+            .iter()
+            .all(|step| step.get("guard").is_none()),
+        "guard expressions are gone (g13.017)"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -537,8 +534,8 @@ fn docs_fragments_render_contract_style_props_tables() {
     assert!(
         search
             .contents
-            .contains("| `hint` | `string` | `derived` | no |"),
-        "expression-derived defaults render as derived"
+            .contains("| `hint` | `string` | `—` | no |"),
+        "a prop without a default renders the em dash; expression defaults are gone (g13.017)"
     );
     assert!(
         search
@@ -571,7 +568,6 @@ fn added_status_light() -> serde_json::Value {
                 "name": "tone",
                 "prop_type": { "Shared": "tone" },
                 "default": { "Member": "success" },
-                "default_expr": null,
                 "required": false,
                 "web_only": false,
                 "description": "Semantic status tone.",
@@ -582,7 +578,6 @@ fn added_status_light() -> serde_json::Value {
                 "name": "label",
                 "prop_type": "String",
                 "default": null,
-                "default_expr": null,
                 "required": true,
                 "web_only": false,
                 "description": "Accessible label for the light.",

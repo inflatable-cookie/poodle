@@ -21,38 +21,16 @@
       "steps": [
         {
           "description": "The lower bound never exceeds the upper bound (RNG-12 analogue; CROSS-18).",
-          "guard": null,
           "id": "lower-at-most-upper",
           "kind": "invariant"
         },
         {
           "description": "INPUT outside [min, max] clamps to the nearest bound (RNG-02 analogue; CROSS-19).",
-          "guard": {
-            "and": [
-              {
-                "operand": {
-                  "literal": {
-                    "bool": true
-                  }
-                }
-              },
-              {
-                "not": {
-                  "operand": {
-                    "literal": {
-                      "bool": false
-                    }
-                  }
-                }
-              }
-            ]
-          },
           "id": "input-clamps-to-range",
           "kind": "transition"
         },
         {
           "description": "A release commits the current value (RNG-11 analogue; CROSS-06).",
-          "guard": null,
           "id": "commit-on-release",
           "kind": "effect-intent"
         }

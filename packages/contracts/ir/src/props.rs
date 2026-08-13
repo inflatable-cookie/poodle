@@ -9,7 +9,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{Expr, Identifier, PermittedSubset};
+use crate::{Identifier, PermittedSubset};
 
 /// A public prop on a component (`CROSS-02`; `B/R/T §3` portable-spec
 /// tables). The declaration is portable: name, type, default, and required
@@ -27,16 +27,9 @@ pub struct Prop {
     pub prop_type: PropType,
     /// Default value when the prop is not bound (`CROSS-02` "every public
     /// prop with default and type"). Validation checks a member-valued
-    /// default against the permitted subset. Mutually exclusive with
-    /// [`Self::default_expr`].
+    /// default against the permitted subset. Expression defaults were
+    /// removed with the expression vocabulary (g13.017).
     pub default: Option<Value>,
-    /// Optional expression computing the default when the prop is unbound —
-    /// the expression form of a prop default (spec 063 "prop default and
-    /// axis fallback resolution"; `CROSS-02`). `validate` type-checks the
-    /// expression against the prop's declared type and rejects a prop that
-    /// carries both `default` and `default_expr`.
-    #[serde(default)]
-    pub default_expr: Option<Expr>,
     /// Whether the prop is required for the component to be valid.
     pub required: bool,
     /// Web-only surface excluded from the portable spec (`CROSS-03`): the

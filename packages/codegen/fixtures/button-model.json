@@ -266,7 +266,6 @@
           "default": {
             "Member": "secondary"
           },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Visual treatment — primary/secondary/ghost (B §3).",
@@ -288,7 +287,6 @@
           "default": {
             "Member": "default"
           },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Intent modifier; every tone composes with every variant (B §3; 004-shared-control-types ButtonTone).",
@@ -309,7 +307,6 @@
             "Shared": "control-size"
           },
           "default": null,
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Explicit control-size override; default null — resolves from inherited presentation plus sizeRole (B §3, BTN-03; CROSS-07).",
@@ -333,7 +330,6 @@
           "default": {
             "Member": "control"
           },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Semantic size offset from inherited presentation (B §3, BTN-04; CROSS-07).",
@@ -353,7 +349,6 @@
             "Shared": "control-density"
           },
           "default": null,
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Explicit density override; default null — inherited from presentation (B §3, BTN-05; CROSS-08).",
@@ -375,7 +370,6 @@
           "default": {
             "Member": "button"
           },
-          "default_expr": null,
           "required": false,
           "web_only": true,
           "description": "HTML button type (B §3; CROSS-03 web-only).",
@@ -393,7 +387,6 @@
           "name": "form",
           "prop_type": "String",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": true,
           "description": "External form id to associate with (B §3; CROSS-03 web-only).",
@@ -404,7 +397,6 @@
           "name": "formaction",
           "prop_type": "String",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": true,
           "description": "Per-button form submission URL override (B §3; CROSS-03 web-only).",
@@ -417,7 +409,6 @@
             "Shared": "button-form-enc-type"
           },
           "default": null,
-          "default_expr": null,
           "required": false,
           "web_only": true,
           "description": "Per-button encoding override; default null (B §3; CROSS-03 web-only).",
@@ -437,7 +428,6 @@
             "Shared": "button-form-method"
           },
           "default": null,
-          "default_expr": null,
           "required": false,
           "web_only": true,
           "description": "Per-button form method override; default null (B §3; CROSS-03 web-only).",
@@ -457,7 +447,6 @@
           "default": {
             "Bool": false
           },
-          "default_expr": null,
           "required": false,
           "web_only": true,
           "description": "Skips form validation for this submit action (B §3; CROSS-03 web-only).",
@@ -468,7 +457,6 @@
           "name": "formtarget",
           "prop_type": "String",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": true,
           "description": "Per-button browsing context override (B §3; CROSS-03 web-only).",
@@ -481,7 +469,6 @@
           "default": {
             "Bool": false
           },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Suppresses activation (B §3, BTN-07).",
@@ -494,7 +481,6 @@
           "default": {
             "Bool": false
           },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Shows the spinner, suppresses activation, always emits data-loading (B §3, BTN-08).",
@@ -505,7 +491,6 @@
           "name": "leadingIcon",
           "prop_type": "Opaque",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Icon registry identifier for the leading icon; the component carries it without interpreting the registry (B §3; opaque payload).",
@@ -516,7 +501,6 @@
           "name": "trailingIcon",
           "prop_type": "Opaque",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Icon registry identifier for the trailing icon (B §3; opaque payload).",
@@ -529,7 +513,6 @@
           "default": {
             "Bool": false
           },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Renders the trailing disclosure chevron indicator (B §3).",
@@ -542,7 +525,6 @@
           "default": {
             "Bool": false
           },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Emits data-truncate; clips an overlong label with ellipsis (B §3, BTN-13).",
@@ -557,7 +539,6 @@
           "default": {
             "Member": "default"
           },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Width mode — default or content shrink-wrap; content emits data-fit (B §3, BTN-13).",
@@ -574,7 +555,6 @@
           "name": "maxWidth",
           "prop_type": "String",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Composed into the inline style as max-width when provided (B §3, BTN-13).",
@@ -585,7 +565,6 @@
           "name": "pressed",
           "prop_type": "Bool",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Controlled toggle state; non-null activates toggle mode with aria-pressed (B §3, BTN-14).",
@@ -596,7 +575,6 @@
           "name": "defaultPressed",
           "prop_type": "Bool",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Initial pressed state for uncontrolled toggle mode (B §3, BTN-14).",
@@ -607,7 +585,6 @@
           "name": "ariaLabel",
           "prop_type": "String",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Accessible name; required when no visible label (B §3, BTN-15/21).",
@@ -618,7 +595,6 @@
           "name": "ariaExpanded",
           "prop_type": "Bool",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Disclosure-state hint for menu and accordion triggers; None omits the attribute (B §3/§6, BTN-15; portable Option<bool>).",
@@ -629,7 +605,6 @@
           "name": "describedBy",
           "prop_type": "String",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "aria-describedby target (B §3/§6, BTN-15).",
@@ -642,7 +617,6 @@
           "default": {
             "String": ""
           },
-          "default_expr": null,
           "required": false,
           "web_only": true,
           "description": "Additional CSS classes on the root (B §3; CROSS-03 web-only DOM-node prop).",
@@ -653,7 +627,6 @@
           "name": "style",
           "prop_type": "String",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": true,
           "description": "Inline style passthrough for dynamic sizing and CSS-variable overrides (B §3/§6; CROSS-03 web-only DOM-node prop).",
@@ -664,7 +637,6 @@
           "name": "children",
           "prop_type": "Opaque",
           "default": null,
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Label content snippet; absence triggers icon-only mode (B §3, BTN-16).",
@@ -675,7 +647,6 @@
           "name": "leading",
           "prop_type": "Opaque",
           "default": null,
-          "default_expr": null,
           "required": false,
           "web_only": true,
           "description": "Custom leading content snippet, overrides leadingIcon (B §3, BTN-16; CROSS-03 web-only snippet slot).",
@@ -686,7 +657,6 @@
           "name": "trailing",
           "prop_type": "Opaque",
           "default": null,
-          "default_expr": null,
           "required": false,
           "web_only": true,
           "description": "Custom trailing content snippet, overrides trailingIcon (B §3, BTN-16; CROSS-03 web-only snippet slot).",
@@ -782,13 +752,9 @@
           "name": "Leading Icon",
           "parent": "root",
           "kind": {
-            "conditional-expr": {
-              "when": {
-                "operand": {
-                  "visual": "leadingContent"
-                }
-              },
-              "description": "Leading icon span — present when the leading snippet or leadingIcon prop is provided (B §2, BTN-16/17)."
+            "conditional-documented": {
+              "condition": "present when the leading snippet or leadingIcon prop is provided",
+              "description": "Leading icon span (B §2, BTN-16/17)."
             }
           },
           "description": "Icon before the label (B §2)."
@@ -798,15 +764,9 @@
           "name": "Label",
           "parent": "root",
           "kind": {
-            "conditional-expr": {
-              "when": {
-                "not": {
-                  "operand": {
-                    "visual": "iconOnly"
-                  }
-                }
-              },
-              "description": "Label content span — present when children content exists; absence triggers icon-only mode (B §2, BTN-09/16/17)."
+            "conditional-documented": {
+              "condition": "present when children content exists; absence triggers icon-only mode",
+              "description": "Label content span (B §2, BTN-09/16/17)."
             }
           },
           "description": "Text content (B §2)."
@@ -816,13 +776,9 @@
           "name": "Trailing Icon",
           "parent": "root",
           "kind": {
-            "conditional-expr": {
-              "when": {
-                "operand": {
-                  "visual": "trailingContent"
-                }
-              },
-              "description": "Trailing icon span — present when the trailing snippet or trailingIcon prop is provided (B §2, BTN-16/17)."
+            "conditional-documented": {
+              "condition": "present when the trailing snippet or trailingIcon prop is provided",
+              "description": "Trailing icon span (B §2, BTN-16/17)."
             }
           },
           "description": "Icon after the label (B §2)."
@@ -847,8 +803,6 @@
           "form": "valued",
           "emission": "always",
           "source": "variant",
-          "condition": null,
-          "value": null,
           "description": "The variant value; always emitted (B §9, BTN-18)."
         },
         {
@@ -857,26 +811,6 @@
           "form": "valued",
           "emission": "omit-when-default",
           "source": "tone",
-          "condition": {
-            "ne": [
-              {
-                "operand": {
-                  "prop": "tone"
-                }
-              },
-              {
-                "operand": {
-                  "literal": {
-                    "member": {
-                      "shared_type": "button-tone",
-                      "member": "default"
-                    }
-                  }
-                }
-              }
-            ]
-          },
-          "value": null,
           "description": "The tone value, omitted when the tone is default (B §9, BTN-18)."
         },
         {
@@ -884,13 +818,7 @@
           "name": "data-size",
           "form": "valued",
           "emission": "always",
-          "source": null,
-          "condition": null,
-          "value": {
-            "operand": {
-              "visual": "resolvedSize"
-            }
-          },
+          "source": "resolvedSize",
           "description": "The resolved control size (explicit or sizeRole-derived); always emitted (B §9, BTN-18; CROSS-07)."
         },
         {
@@ -898,13 +826,7 @@
           "name": "data-density",
           "form": "valued",
           "emission": "always",
-          "source": null,
-          "condition": null,
-          "value": {
-            "operand": {
-              "visual": "resolvedDensity"
-            }
-          },
+          "source": "resolvedDensity",
           "description": "The resolved density (explicit or inherited); always emitted (B §9, BTN-18; CROSS-08)."
         },
         {
@@ -913,12 +835,6 @@
           "form": "presence-only",
           "emission": "always",
           "source": null,
-          "condition": {
-            "operand": {
-              "visual": "iconOnly"
-            }
-          },
-          "value": null,
           "description": "Presence-only; emitted when there is no label content (B §9, BTN-09/18)."
         },
         {
@@ -927,12 +843,6 @@
           "form": "presence-only",
           "emission": "always",
           "source": null,
-          "condition": {
-            "operand": {
-              "visual": "hasLeading"
-            }
-          },
-          "value": null,
           "description": "Presence-only; emitted when a leading icon/snippet is present or loading (B §9, BTN-17/18)."
         },
         {
@@ -941,12 +851,6 @@
           "form": "presence-only",
           "emission": "always",
           "source": null,
-          "condition": {
-            "operand": {
-              "visual": "hasTrailing"
-            }
-          },
-          "value": null,
           "description": "Presence-only; emitted when a trailing icon/snippet or the chevron is present (B §9, BTN-17/18)."
         },
         {
@@ -955,12 +859,6 @@
           "form": "presence-only",
           "emission": "always",
           "source": null,
-          "condition": {
-            "operand": {
-              "prop": "truncate"
-            }
-          },
-          "value": null,
           "description": "Presence-only; emitted when truncate is true (B §9, BTN-18)."
         },
         {
@@ -969,26 +867,6 @@
           "form": "valued",
           "emission": "omit-when-default",
           "source": "fit",
-          "condition": {
-            "ne": [
-              {
-                "operand": {
-                  "prop": "fit"
-                }
-              },
-              {
-                "operand": {
-                  "literal": {
-                    "member": {
-                      "shared_type": "button-fit",
-                      "member": "default"
-                    }
-                  }
-                }
-              }
-            ]
-          },
-          "value": null,
           "description": "The fit value, emitted only when fit is content (B §9, BTN-18)."
         },
         {
@@ -997,8 +875,6 @@
           "form": "valued",
           "emission": "always",
           "source": "loading",
-          "condition": null,
-          "value": null,
           "description": "The loading boolean; always emitted, even as false (B §9, BTN-08/18)."
         },
         {
@@ -1006,38 +882,14 @@
           "name": "data-pressed",
           "form": "valued",
           "emission": "always",
-          "source": null,
-          "condition": {
-            "operand": {
-              "visual": "isToggle"
-            }
-          },
-          "value": {
-            "operand": {
-              "visual": "currentPressed"
-            }
-          },
-          "description": "The current pressed boolean, emitted only in toggle mode (B §9, BTN-14/18; CROSS-04 currentPressed selection)."
+          "source": "currentPressed",
+          "description": "The current pressed boolean, emitted only in toggle mode (B §9, BTN-14/18)."
         }
       ],
       "axes": {
         "size": {
           "explicit": null,
           "size_role": "control",
-          "fallback": {
-            "coalesce": [
-              {
-                "operand": {
-                  "prop": "size"
-                }
-              },
-              {
-                "operand": {
-                  "axis": "size"
-                }
-              }
-            ]
-          },
           "ladder": [
             {
               "size": "xs",

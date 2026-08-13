@@ -114,7 +114,7 @@ pub struct RangeSliderPart {
 /// One state attribute: id, the `data-*` name the DOM carries, its form
 /// and emission policy, and its value domain. The value domain is the
 /// emitter's projection of the source's declared type (a shared prop, a
-/// boolean, or a VisualState enum field); expression-valued attributes
+/// boolean, or a VisualState enum field); source-less attributes
 /// (e.g. `data-state`) carry no domain.
 pub struct RangeSliderAttribute {
     pub id: &'static str,

@@ -8,7 +8,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{Expr, Identifier};
+use crate::Identifier;
 
 /// A state-derived attribute on a component (`CROSS-13`; `B §9`, `R §9`,
 /// `T §9`).
@@ -37,27 +37,14 @@ pub struct StateAttribute {
     /// from, e.g. `loading` for `data-loading` (`BTN-08`), `pressed` for
     /// `data-pressed` (`BTN-14`), or `lowerNorm` for the fill-geometry
     /// custom properties (`RNG-17`). `validate` checks the reference
-    /// resolves. Mutually exclusive with [`Self::value`].
+    /// resolves. `None` marks a runtime-derived value (e.g. `data-state`
+    /// `active`/`idle`) whose domain the description documents.
     pub source: Option<Identifier>,
-    /// Optional boolean expression gating emission — the expression form of
-    /// an emission condition (spec 063 "state-derived attribute emission
-    /// conditions"; `CROSS-13`; `BTN-18` `data-tone` omitted when default,
-    /// `BTN-14` `data-pressed` emitted only when the button is a toggle,
-    /// `CROSS-20` `isUnavailable = disabled || loading` as a condition).
-    /// The attribute is emitted only when the expression evaluates true;
-    /// `validate` type-checks it as boolean.
-    #[serde(default)]
-    pub condition: Option<Expr>,
-    /// Optional expression deriving the emitted value — the expression form
-    /// of a valued attribute (spec 063 "state-derived attribute emission
-    /// conditions and values"; `CROSS-13`; `RNG-17`/`TXT-16` computed custom
-    /// properties as expressions; `CROSS-04` `currentPressed` selection).
-    /// Mutually exclusive with [`Self::source`] and meaningless on a
-    /// presence-only attribute; `validate` rejects both contradictions.
-    #[serde(default)]
-    pub value: Option<Expr>,
     /// What the attribute conveys and when it is emitted, citing the
-    /// contract section.
+    /// contract section. The description is the emission condition's home:
+    /// e.g. `data-tone` "omitted when the tone is default" is documented
+    /// here and in the [`EmissionPolicy`] — there is no expression tree
+    /// (g13.017).
     pub description: String,
 }
 

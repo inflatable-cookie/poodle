@@ -23,7 +23,6 @@
     },
     "size": {
       "explicit": "sm",
-      "fallback": null,
       "ladder": [
         {
           "description": "Compact gauge ladder rung.",
@@ -102,7 +101,6 @@
         "kind": "number",
         "value": 0.0
       },
-      "default_expr": null,
       "description": "Minimum value of the gauge range.",
       "id": "min",
       "name": "min",
@@ -118,7 +116,6 @@
         "kind": "number",
         "value": 100.0
       },
-      "default_expr": null,
       "description": "Maximum value of the gauge range.",
       "id": "max",
       "name": "max",
@@ -143,7 +140,6 @@
           }
         ]
       },
-      "default_expr": null,
       "description": "Controlled [lower, upper] value pair.",
       "id": "value",
       "name": "value",
@@ -162,7 +158,6 @@
         "kind": "member",
         "value": "horizontal"
       },
-      "default_expr": null,
       "description": "Layout orientation of the gauge.",
       "id": "orientation",
       "name": "orientation",
@@ -176,7 +171,6 @@
     },
     {
       "default": null,
-      "default_expr": null,
       "description": "Tick positions as fractions of the range.",
       "id": "tickValues",
       "name": "tickValues",
@@ -195,7 +189,6 @@
         "kind": "boolean",
         "value": true
       },
-      "default_expr": null,
       "description": "Whether value labels render at the ends.",
       "id": "showLabels",
       "name": "showLabels",
@@ -208,7 +201,6 @@
     },
     {
       "default": null,
-      "default_expr": null,
       "description": "Unit suffix for the value labels.",
       "id": "unit",
       "name": "unit",

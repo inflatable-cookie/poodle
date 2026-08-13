@@ -152,8 +152,6 @@ fn render_component_file(
         ));
         if let Some(default) = &prop.default {
             out.push_str(&format!("   * Default: {}\n", ts_value_literal(default)));
-        } else if prop.default_expr.is_some() {
-            out.push_str("   * Default: derived from a bounded expression (spec 063).\n");
         }
         if prop.web_only {
             out.push_str("   * Web-only (CROSS-03): excluded from the portable spec surface.\n");
