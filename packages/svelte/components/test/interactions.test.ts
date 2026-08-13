@@ -149,14 +149,13 @@ describe("svelte interaction", () => {
       },
     });
     const [firstTab, secondTab] = getAllByRole("tab");
-    const firstItem = firstTab.parentElement!;
     const secondItem = secondTab.parentElement!;
     const dataTransfer = new DataTransfer();
 
-    await fireEvent.dragStart(firstItem, { dataTransfer });
+    await fireEvent.dragStart(firstTab, { dataTransfer });
     await fireEvent.dragOver(secondItem, { dataTransfer });
     await fireEvent.drop(secondItem, { dataTransfer });
-    await fireEvent.dragEnd(firstItem, { dataTransfer });
+    await fireEvent.dragEnd(firstTab, { dataTransfer });
 
     expect(dataTransfer.types).toContain("application/x-poodle-panel-drag");
     expect(onReorder).toHaveBeenCalledWith(["surface-2", "surface-1"]);
@@ -174,7 +173,7 @@ describe("svelte interaction", () => {
     });
     const dataTransfer = new DataTransfer();
 
-    await fireEvent.dragStart(getByRole("tab").parentElement!, {
+    await fireEvent.dragStart(getByRole("tab"), {
       dataTransfer,
     });
 

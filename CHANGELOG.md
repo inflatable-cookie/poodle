@@ -7,6 +7,16 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Tabs drag dead in WebKit hosts.** `draggable` and `dragstart` sat on the
+  `__item` chip div wrapping the `__tab` button; WebKit does not initiate a
+  native drag when the press target is a form control inside a draggable
+  ancestor, so WKWebView (Tauri) hosts could not drag any tab. The drag source
+  moved onto `.poodle-tabs__tab` itself (Svelte and React); drop-target
+  handling stays on the item. Consumers styling `[draggable]` on
+  `.poodle-tabs__item` should target `.poodle-tabs__tab` instead.
+
 ### Removed
 
 - **Breaking — Tabs `variant`.** The five-member `TabVariant` union is now three

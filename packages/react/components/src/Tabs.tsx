@@ -609,12 +609,9 @@ export function Tabs({
                 data-selected={currentValue === item.value}
                 data-drag-source={dragSourceIndex === index || undefined}
                 data-drop-target={(dropTargetIndex === index && dropTargetIndex !== dragSourceIndex) || undefined}
-                draggable={reorderable && !item.disabled}
-                onDragStart={(e) => handleDragStart(e, index)}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDragLeave={() => setDropTargetIndex(null)}
                 onDrop={(e) => handleDrop(e, index)}
-                onDragEnd={handleDragEnd}
                 onMouseEnter={() => hasTooltips && scheduleTooltip(index)}
                 onMouseLeave={() => hasTooltips && dismissTooltip()}
               >
@@ -626,6 +623,8 @@ export function Tabs({
                   className="poodle-tabs__tab"
                   disabled={item.disabled === true}
                   draggable={reorderable && !item.disabled}
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragEnd={handleDragEnd}
                   id={`poodle-tab-${tabsId}-${item.value}`}
                   role="tab"
                   tabIndex={effectiveFocusIndex === index ? 0 : -1}
