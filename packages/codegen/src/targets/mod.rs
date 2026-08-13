@@ -13,12 +13,15 @@
 //! renders Button's rendered vocabulary into both web packages; `g13-b042`
 //! adds its Rust sibling `button-rust` (card 042 R2), which renders the
 //! same definition into `poodle-render`'s `generated/` directory — same
-//! scoping, same select-only reachability. `g13-b045` adds the
+//! same scoping, same select-only reachability. `g13-b045` adds the
 //! component-scoped `range-slider-ts` target, which renders RangeSlider's
 //! rendered vocabulary into both web packages; `g13-b046` adds its Rust
 //! sibling `range-slider-rust` (card 046 R2), which renders the same
 //! definition into `poodle-render`'s `generated/` directory — same
-//! scoping, same select-only reachability.
+//! scoping, same select-only reachability. `g13-b048` adds the
+//! component-scoped `text-input-ts` target, which renders TextInput's
+//! rendered vocabulary into both web packages — same scoping, same
+//! select-only reachability; its native sibling is card 049's.
 
 use crate::emit::EmitTarget;
 
@@ -35,6 +38,7 @@ pub mod registry;
 pub mod schema;
 pub mod shell;
 pub mod shell_rust;
+pub mod text_input;
 pub mod ts;
 
 /// Every registered target, in stable order — the default set a plain
@@ -59,6 +63,7 @@ pub fn selectable() -> Vec<&'static dyn EmitTarget> {
     targets.push(&button_rust::ButtonRustTarget);
     targets.push(&range_slider::RangeSliderTarget);
     targets.push(&range_slider_rust::RangeSliderRustTarget);
+    targets.push(&text_input::TextInputTarget);
     targets
 }
 

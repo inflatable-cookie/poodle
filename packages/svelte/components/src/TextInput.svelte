@@ -17,6 +17,62 @@
     ValidationResult,
     ValidationState,
   } from "./types";
+  // Card 048 R2: the DOM reads the generated definition — the data-*
+  // attribute names, the part class names, and the TXT-16 padding custom
+  // properties come from text_input.rs via `text-input-ts`, never from
+  // hand-written literals in this component. A rename in the definition
+  // moves the DOM; `effigy ir:check` gates drift in the artifact.
+  import { textInputDefinition } from "./generated/text-input";
+
+  const parts: Record<string, string> = Object.fromEntries(
+    textInputDefinition.parts.map((part) => [part.id, part.className]),
+  );
+  const attributes: Record<string, string> = Object.fromEntries(
+    textInputDefinition.attributes.map((attribute) => [attribute.id, attribute.name]),
+  );
+  const styleProps: Record<string, string> = Object.fromEntries(
+    textInputDefinition.styleProps.map((prop) => [prop.id, prop.name]),
+  );
+
+  function partClass(id: string): string {
+    const className = parts[id];
+    if (!className) throw new Error(`definition lacks part '${id}'`);
+    return className;
+  }
+
+  function attributeName(id: string): string {
+    const name = attributes[id];
+    if (!name) throw new Error(`definition lacks attribute '${id}'`);
+    return name;
+  }
+
+  function stylePropName(id: string): string {
+    const name = styleProps[id];
+    if (!name) throw new Error(`definition lacks style prop '${id}'`);
+    return name;
+  }
+
+  // The anatomy classes (T §2) — the definition names them; the markup
+  // renders them. The input-control and clear-button base classes are the
+  // one Svelte literal: the focus-coverage gate (focus-ring-drift.ts)
+  // resolves focusable-element classes by literal source scan, and
+  // text-input.css draws a stacked :focus-within wrapper ring whose
+  // focusables must show outline coverage (recorded in the R7 inventory).
+  const rootClass = partClass("root");
+  const prefixClass = partClass("prefix");
+  const fieldClass = partClass("field");
+  const leadingAffordanceClass = partClass("leading-affordance");
+  const trailingAffordanceClass = partClass("trailing-affordance");
+  const indicatorClass = partClass("validation-indicator");
+  const suffixClass = partClass("suffix");
+  const charCountClass = partClass("char-count");
+
+  // The state-derived attribute names (TXT-18) — the definition names
+  // them; the values stay runtime-derived (CROSS-13).
+  const dataValidationState = attributeName("validation-state");
+  const dataSize = attributeName("size");
+  const dataDensity = attributeName("density");
+  const dataType = attributeName("type");
 
   interface Props {
     id?: string;
@@ -88,6 +144,16 @@
   }
 
   let control = $state<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  // Card 048: IME composition stays browser-native, but the value path is
+  // gated — the browser fires `input` events with the partial buffer during
+  // composition, and none of them may reach onValueChange. The buffer is
+  // recorded while composing and committed exactly once on compositionend
+  // (per the UI Events spec, the final committed input event fires before
+  // compositionend, so the end handler is the single commit point). The
+  // composition's text editing itself is never intercepted (TXT-24's web
+  // half).
+  let composing = $state(false);
+  let compositionBuffer: string | null = $state(null);
 
   let {
     id = "",
@@ -185,6 +251,14 @@
   const isOverLimit = $derived(maxLength !== null && charCount > maxLength);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  // The root attribute emission (TXT-18): the names come from the
+  // definition, the values stay runtime-derived (CROSS-13).
+  const rootAttributes = $derived({
+    [dataValidationState]: effectiveValidationState,
+    [dataSize]: resolvedSize,
+    [dataDensity]: resolvedDensity,
+    [dataType]: type,
+  });
   const autocorrectAttributes = $derived(autocorrect ? { autocorrect } : {});
   const showValidationIndicator = $derived(showValidationStatus && effectiveValidationState !== "none");
   const validationIcon = $derived(
@@ -370,9 +444,27 @@
     control?.focus();
   }
 
+  function handleCompositionStart(): void {
+    composing = true;
+  }
+
+  function handleCompositionEnd(): void {
+    composing = false;
+    if (compositionBuffer !== null) {
+      commitValue(normalizeInputValue(compositionBuffer), { markSlugEdited: isSlug });
+      compositionBuffer = null;
+    }
+  }
+
   function handleInput(event: Event): void {
-    const nextValue = normalizeInputValue((event.currentTarget as HTMLInputElement).value);
-    commitValue(nextValue, { markSlugEdited: isSlug });
+    const value = (event.currentTarget as HTMLInputElement).value;
+    if (composing) {
+      // A composition is in progress: buffer the current text and do not
+      // fire onValueChange — the commit lands once on compositionend.
+      compositionBuffer = value;
+      return;
+    }
+    commitValue(normalizeInputValue(value), { markSlugEdited: isSlug });
   }
 
   function handleSubmit(): void {
@@ -488,25 +580,21 @@
 </script>
 
 <div
-  class="poodle-text-input"
-  class:poodle-text-input--multiline={isMultiline}
-  data-validation-state={effectiveValidationState}
-  data-size={resolvedSize}
-  data-density={resolvedDensity}
-  data-type={type}
-  style={`--poodle-text-input-control-padding-start: ${controlPaddingStart}; --poodle-text-input-control-padding-end: ${controlPaddingEnd}; --poodle-text-input-multiline-padding-end: ${multilineBottomPadding}; --poodle-text-input-clear-inset-inline-end: ${clearInsetInlineEnd}; --poodle-text-input-trailing-inset-inline-end: ${trailingInsetInlineEnd};`}
+  {...rootAttributes}
+  class={`${rootClass}${isMultiline ? ` ${rootClass}--multiline` : ""}`}
+  style={`${stylePropName("control-padding-start")}: ${controlPaddingStart}; ${stylePropName("control-padding-end")}: ${controlPaddingEnd}; ${stylePropName("multiline-padding-end")}: ${multilineBottomPadding}; ${stylePropName("clear-inset-inline-end")}: ${clearInsetInlineEnd}; ${stylePropName("trailing-inset-inline-end")}: ${trailingInsetInlineEnd};`}
 >
   {#if prefix}
-    <span class="poodle-text-input__affix poodle-text-input__affix--prefix">{prefix}</span>
+    <span class={prefixClass}>{prefix}</span>
   {/if}
 
-  <div class="poodle-text-input__field">
+  <div class={fieldClass}>
     {#if leadingSnippet}
-      <span class="poodle-text-input__affordance poodle-text-input__affordance--leading">
+      <span class={leadingAffordanceClass}>
         {@render leadingSnippet()}
       </span>
     {:else if isSearch}
-      <span class="poodle-text-input__affordance poodle-text-input__affordance--leading" aria-hidden="true">
+      <span class={leadingAffordanceClass} aria-hidden="true">
         <Icon icon="search" />
       </span>
     {/if}
@@ -533,6 +621,8 @@
         aria-invalid={ariaInvalid}
         aria-busy={ariaBusy}
         oninput={handleInput}
+        oncompositionstart={handleCompositionStart}
+        oncompositionend={handleCompositionEnd}
         onkeydown={(event) => {
           onKeyDown?.(event);
           if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
@@ -573,6 +663,8 @@
         aria-invalid={ariaInvalid}
         aria-busy={ariaBusy}
         oninput={handleInput}
+        oncompositionstart={handleCompositionStart}
+        oncompositionend={handleCompositionEnd}
         onkeydown={handleKeydown}
         onfocus={onFocus}
         onblur={handleBlurEvent}
@@ -580,7 +672,7 @@
     {/if}
 
     {#if trailingSnippet}
-      <span class="poodle-text-input__affordance poodle-text-input__affordance--trailing">
+      <span class={trailingAffordanceClass}>
         {@render trailingSnippet()}
       </span>
     {/if}
@@ -598,10 +690,7 @@
 
     {#if showValidationIndicator}
       <span
-        class="poodle-text-input__validation-indicator"
-        class:poodle-text-input__validation-indicator--pending={effectiveValidationState === "pending"}
-        class:poodle-text-input__validation-indicator--valid={effectiveValidationState === "valid"}
-        class:poodle-text-input__validation-indicator--invalid={effectiveValidationState === "invalid"}
+        class={`${indicatorClass}${effectiveValidationState === "pending" ? ` ${indicatorClass}--pending` : ""}${effectiveValidationState === "valid" ? ` ${indicatorClass}--valid` : ""}${effectiveValidationState === "invalid" ? ` ${indicatorClass}--invalid` : ""}`}
         aria-hidden="true"
       >
         {#if effectiveValidationState === "pending"}
@@ -614,11 +703,11 @@
   </div>
 
   {#if suffix}
-    <span class="poodle-text-input__affix poodle-text-input__affix--suffix">{suffix}</span>
+    <span class={suffixClass}>{suffix}</span>
   {/if}
 
   {#if showCharCount}
-    <span class="poodle-text-input__char-count" class:poodle-text-input__char-count--over={isOverLimit} aria-live="polite">
+    <span class={`${charCountClass}${isOverLimit ? ` ${charCountClass}--over` : ""}`} aria-live="polite">
       {charCountText}
     </span>
   {/if}
