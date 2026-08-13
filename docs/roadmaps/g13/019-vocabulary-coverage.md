@@ -1,7 +1,8 @@
 # g13.019 Vocabulary Coverage Across The Corpus
 
-Status: **blocked on a maintainer decision** — the first tranche was measured
-and both numbers argue against the sweep. See "Measured, 2026-08-13" below.
+Status: **closed by the g13.020 verdict** (2026-08-13) — the first tranche
+was measured and both numbers argue against the sweep; the maintainer closed
+it rather than sweeping. See "Measured, 2026-08-13" below.
 Owner: Poodle core
 Depends on: `g13.018`
 

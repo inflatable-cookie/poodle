@@ -1,6 +1,7 @@
 # g13.020 Consolidate And Reassess
 
-Status: verdict drafted — awaiting maintainer signature
+Status: **verdict recorded — retire the authority, unwind the three pilots,
+scene kept** (2026-08-13, maintainer)
 Owner: Poodle maintainer
 Depends on: `g13.019` (closed by this ruling), b052 measurement
 
