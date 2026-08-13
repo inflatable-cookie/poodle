@@ -6,7 +6,10 @@ export interface CatalogueLandingProps {
 }
 
 export function CatalogueLanding({ components = [] }: CatalogueLandingProps) {
-  const groups = componentsByTag();
+  const componentSlugs = new Set(components.map((c) => c.slug));
+  const groups = componentsByTag()
+    .map((group) => ({ ...group, items: group.items.filter((c) => componentSlugs.has(c.slug)) }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <div className="poodle-catalogue-landing">

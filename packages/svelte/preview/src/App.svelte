@@ -48,7 +48,7 @@
   let route: Route = $state({ section: "components" });
   let liveTokenValues: Partial<Record<SemanticTokenPath, string>> = $state({});
   let appliedPreviewModeKey = "";
-  let hasMounted = false;
+  let hasMounted = $state(false);
 
   let activeSection = $derived(route.section);
   // ── Theme application ───────────────────────────────────────────────
