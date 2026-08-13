@@ -388,6 +388,32 @@ export {
 } from "./history-center";
 
 export {
+  installManagerLabel,
+  updateDownloadLabel,
+  updateErrorMessage,
+  updateRejectionMessage,
+  updateRejectionRetry,
+  updateStatusView,
+  type Channel,
+  type DeferralCause,
+  type InstallManager,
+  type OfferReason,
+  type UpdateAheadOfChannel,
+  type UpdateAvailabilityProjection,
+  type UpdateControllerStatus,
+  type UpdateDeferral,
+  type UpdatePresence,
+  type UpdateProgressProjection,
+  type UpdateRejectionCode,
+  type UpdateStatusAction,
+  type UpdateStatusInput,
+  type UpdateStatusNotice,
+  type UpdateStatusTone,
+  type UpdateStatusView,
+  type UpdateStatusViewState,
+} from "./update";
+
+export {
   sliderTransition,
   rangeSliderTransition,
   normalizeSliderValue,

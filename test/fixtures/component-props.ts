@@ -198,6 +198,19 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   Tree: { nodes: [{ value: "n1", label: "Node" }] },
   TriStateSwitch: { ariaLabel: "Toggle" },
   VideoPlayer: { src: "/video.mp4" },
+  // Renders the installable offer: title, notes, install + defer actions.
+  UpdateStatus: {
+    status: { kind: "ready" },
+    availability: { state: "offer", version: "1.4.0", reason: "staged", notes: null },
+  },
+  // The centre collapses to nothing while `presence` is hidden, so attention
+  // with an offer keeps the trigger + indicator (and the popover, once open)
+  // in the anatomy sweep.
+  UpdateCenter: {
+    presence: "attention",
+    status: { kind: "ready" },
+    availability: { state: "offer", version: "1.4.0", reason: "staged", notes: null },
+  },
 };
 
 // Components excluded from the auto-scaling smoke sweep, with the reason. Keep

@@ -215,6 +215,8 @@ contract references the rule rather than restating it:
 - `components/tree.md`
 - `components/tri-state-switch.md`
 - `components/ui-presentation-provider.md`
+- `components/update-center.md`
+- `components/update-status.md`
 - `components/validation-summary.md`
 - `components/value-readout.md`
 - `components/video-player.md`
