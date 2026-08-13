@@ -1,35 +1,8 @@
 //! Modal machine (Dialog, AlertDialog, Drawer). Mirror of core `modal.ts`.
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ModalState {
-    Closed,
-    Open,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct ModalContext {
-    pub dismiss_on_escape: bool,
-    pub dismiss_on_backdrop: bool,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ModalEvent {
-    Open,
-    Close,
-    RequestClose,
-    Escape,
-    BackdropClick,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ModalEffect {
-    EmitOpenChange { open: bool },
-    EmitRequestClose,
-    SaveFocusAndEnter,
-    LockBodyScroll,
-    UnlockBodyScroll,
-    RestoreFocus,
-}
+#[path = "generated/machines/modal.rs"]
+mod modal_interface;
+pub use modal_interface::*;
 
 fn open() -> (ModalState, Vec<ModalEffect>) {
     (

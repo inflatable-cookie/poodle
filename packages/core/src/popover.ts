@@ -9,28 +9,21 @@
  */
 
 import type { PartAttrs, TransitionResult } from "./machine";
+import type {
+  PopoverState,
+  PopoverInitialFocus,
+  PopoverContext,
+  PopoverEvent,
+  PopoverEffect,
+} from "./generated/machines/popover";
 
-export type PopoverState = "closed" | "open";
-
-export type PopoverInitialFocus = "first-focusable" | "content" | "none";
-
-export interface PopoverContext {
-  disabled: boolean;
-  dismissOnOutsideInteract: boolean;
-  initialFocus: PopoverInitialFocus;
-}
-
-export type PopoverEvent =
-  | { type: "TOGGLE" }
-  | { type: "OPEN" }
-  | { type: "CLOSE" }
-  | { type: "ESCAPE" }
-  | { type: "OUTSIDE_INTERACT" };
-
-export type PopoverEffect =
-  | { type: "emitOpenChange"; open: boolean }
-  | { type: "focusOnOpen"; strategy: PopoverInitialFocus }
-  | { type: "restoreTriggerFocus" };
+export type {
+  PopoverState,
+  PopoverInitialFocus,
+  PopoverContext,
+  PopoverEvent,
+  PopoverEffect,
+};
 
 export type PopoverResult = TransitionResult<PopoverState, PopoverContext, PopoverEffect>;
 

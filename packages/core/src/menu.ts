@@ -10,25 +10,19 @@
  */
 
 import type { TransitionResult } from "./machine";
+import type {
+  MenuState,
+  MenuContext,
+  MenuEvent,
+  MenuEffect,
+} from "./generated/machines/menu";
 
-export type MenuState = "closed" | "open";
-
-export interface MenuContext {
-  disabled?: boolean;
-}
-
-export type MenuEvent =
-  | { type: "TOGGLE" }
-  | { type: "OPEN" }
-  | { type: "CLOSE" }
-  | { type: "ESCAPE" }
-  | { type: "OUTSIDE_INTERACT" }
-  | { type: "ACTION"; value: string };
-
-export type MenuEffect =
-  | { type: "emitOpenChange"; open: boolean }
-  | { type: "emitAction"; value: string }
-  | { type: "focusFirstItem" };
+export type {
+  MenuState,
+  MenuContext,
+  MenuEvent,
+  MenuEffect,
+};
 
 export type MenuResult = TransitionResult<MenuState, MenuContext, MenuEffect>;
 

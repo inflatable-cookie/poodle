@@ -1,40 +1,8 @@
 //! Popover machine. Mirror of core `popover.ts`.
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PopoverState {
-    Closed,
-    Open,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PopoverInitialFocus {
-    FirstFocusable,
-    Content,
-    None,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PopoverContext {
-    pub disabled: bool,
-    pub dismiss_on_outside_interact: bool,
-    pub initial_focus: PopoverInitialFocus,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PopoverEvent {
-    Toggle,
-    Open,
-    Close,
-    Escape,
-    OutsideInteract,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PopoverEffect {
-    EmitOpenChange { open: bool },
-    FocusOnOpen { strategy: PopoverInitialFocus },
-    RestoreTriggerFocus,
-}
+#[path = "generated/machines/popover.rs"]
+mod popover_interface;
+pub use popover_interface::*;
 
 fn open(context: PopoverContext) -> (PopoverState, Vec<PopoverEffect>) {
     (

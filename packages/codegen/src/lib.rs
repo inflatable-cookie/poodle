@@ -19,9 +19,12 @@
 //! - [`write`] — write mode: materializes [`GeneratedFile`]s and deletes
 //!   stale orphans.
 //! - [`model`] — load and validate a serialized `IrModel`.
+//! - [`machine_interfaces`] — load and validate the machine-interface schema
+//!   (spec 064 mechanism 1). Parallel to [`model`], not an `IrModel`.
 //! - [`targets`] — the target registry (TypeScript is the one target this
 //!   card ships; JSON schema, registry, conformance vectors, and docs
-//!   fragments are a follow-up card).
+//!   fragments are a follow-up card). Machine-interface targets are
+//!   select-only, like the shell.
 //!
 //! Determinism is the acceptance criterion: every ordering decision is fixed
 //! (top-level collections sorted by id; prop and member order preserved as
@@ -32,13 +35,14 @@
 pub mod check;
 pub mod emit;
 pub mod error;
+pub mod machine_interfaces;
 pub mod model;
 pub mod models;
 pub mod targets;
 pub mod write;
 
 pub use check::{check_outputs, CheckReport, DriftKind};
-pub use emit::{generate, header, EmitTarget, GeneratedFile};
+pub use emit::{generate, header, machine_header, EmitTarget, GeneratedFile};
 pub use error::{CodegenError, Result};
 pub use model::load_and_validate;
 pub use write::write_outputs;
