@@ -2,7 +2,12 @@
   import { Eyebrow } from "@inflatable-cookie/poodle-svelte";
   import { componentsByTag, type ComponentEntry } from "../component-registry";
 let { components = [] }: { components?: ComponentEntry[] } = $props();
-  let groups = $derived(componentsByTag());</script>
+  let filteredSlugs = $derived(new Set(components.map((c) => c.slug)));
+  let groups = $derived(
+    componentsByTag()
+      .map((group) => ({ ...group, items: group.items.filter((c) => filteredSlugs.has(c.slug)) }))
+      .filter((group) => group.items.length > 0),
+  );</script>
 
 <div class="poodle-catalogue-landing">
   <div class="poodle-catalogue-landing__header">

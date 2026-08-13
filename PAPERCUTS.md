@@ -463,7 +463,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   manifest. Align the manifest schema or update Effigy's accepted config keys.
 
 
-- 2026-08-12 — Svelte preview's SHELL-08 URL persistence never fires: in
+- 2026-08-12 — RESOLVED 2026-08-13 (g13-044): `hasMounted` is now `$state`,
+  so the persistence `$effect` re-runs on mount and on every preview-mode
+  change; the Svelte preview writes `?theme=…&density=…&controlSize=…` back
+  to the URL exactly like React's `useEffect` (browser-verified, incoming
+  params preserved). Original report follows.
+  Svelte preview's SHELL-08 URL persistence never fires: in
   `packages/svelte/preview/src/App.svelte`, the `$effect` that writes
   `theme`/`density`/`controlSize` back into the URL is gated on
   `hasMounted`, a plain `let` in a runes-mode component — not reactive, so
@@ -477,7 +482,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   `$effect` with an explicit reactive flag. Affects the shared-preview-shell
   parity story once 036 lands.
 
-- 2026-08-12 — Both catalogue-landing grids ignore their filtered component
+- 2026-08-12 — RESOLVED 2026-08-13 (g13-044): both `CatalogueLanding`
+  surfaces now derive their grid groups from the `components` prop, so the
+  grid card count equals the header count under any query
+  (browser-verified: 6/6 with query `date`). Original report follows.
+  Both catalogue-landing grids ignore their filtered component
   list: `packages/svelte/preview/src/pages/CatalogueLanding.svelte` and the
   React mirror render `componentsByTag()` (every component) and use the
   `components` prop only for the count line. With a search query active, the
