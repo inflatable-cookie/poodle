@@ -15,6 +15,7 @@ use poodle_headless::modal::*;
 use poodle_headless::popover::*;
 use poodle_headless::single_select::*;
 use poodle_headless::slider::*;
+use poodle_headless::switch::*;
 use poodle_headless::tabs::*;
 use poodle_headless::toggle_group::*;
 
@@ -466,6 +467,46 @@ fn disclosure_conformance() {
             effects,
             None,
             Some(json!({ "open": next.open })),
+        );
+    }
+}
+
+#[test]
+fn switch_conformance() {
+    for case in vectors()["switch"].as_array().unwrap() {
+        let ctx = &case["context"];
+        let context = SwitchContext {
+            checked: b(ctx, "checked"),
+            disabled: b(ctx, "disabled"),
+            read_only: b(ctx, "readOnly"),
+        };
+        let event = match s(&case["event"], "type") {
+            "TOGGLE" => SwitchEvent::Toggle {
+                next_checked: b(&case["event"], "nextChecked"),
+            },
+            "SET_CHECKED" => SwitchEvent::SetChecked {
+                checked: b(&case["event"], "checked"),
+            },
+            other => panic!("unknown switch event {other}"),
+        };
+
+        let (next, effects) = switch_transition(context, event);
+        let effects = effects
+            .iter()
+            .map(|effect| match effect {
+                SwitchEffect::RevertNativeChecked => json!({ "type": "revertNativeChecked" }),
+                SwitchEffect::EmitCheckedChange { checked } => {
+                    json!({ "type": "emitCheckedChange", "checked": checked })
+                }
+            })
+            .collect();
+
+        assert_case(
+            "switch",
+            case,
+            effects,
+            None,
+            Some(json!({ "checked": next.checked })),
         );
     }
 }

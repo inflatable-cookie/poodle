@@ -454,3 +454,113 @@ fn tree_conformance() {
         }
     }
 }
+
+// ── Duration ──
+
+#[test]
+fn duration_conformance() {
+    use poodle_headless::duration::*;
+
+    fn duration_value_from(value: &Value) -> DurationValue {
+        DurationValue {
+            hours: value["hours"].as_u64().unwrap_or(0) as u32,
+            minutes: value["minutes"].as_u64().unwrap_or(0) as u32,
+            seconds: value["seconds"].as_u64().unwrap_or(0) as u32,
+        }
+    }
+
+    fn duration_value_to_json(value: DurationValue) -> Value {
+        json!({
+            "hours": value.hours,
+            "minutes": value.minutes,
+            "seconds": value.seconds,
+        })
+    }
+
+    for case in vectors()["duration"].as_array().unwrap() {
+        let op = s(case, "op");
+        let expect = &case["expect"];
+
+        match op {
+            "totalSeconds" => {
+                let result = duration_total_seconds(duration_value_from(&case["value"]));
+                assert_eq!(result, expect.as_u64().unwrap() as u32, "totalSeconds {case}");
+            }
+            "adjust" => {
+                let segment = match s(case, "segment") {
+                    "hours" => DurationSegment::Hours,
+                    "minutes" => DurationSegment::Minutes,
+                    _ => DurationSegment::Seconds,
+                };
+                let result = adjust_duration_segment(
+                    duration_value_from(&case["value"]),
+                    segment,
+                    case["delta"].as_i64().unwrap(),
+                    case["maxHours"].as_u64().unwrap() as u32,
+                );
+                assert_eq!(
+                    duration_value_to_json(result),
+                    *expect,
+                    "adjust {case}"
+                );
+            }
+            "set" => {
+                let segment = match s(case, "segment") {
+                    "hours" => DurationSegment::Hours,
+                    "minutes" => DurationSegment::Minutes,
+                    _ => DurationSegment::Seconds,
+                };
+                let result = set_duration_segment(
+                    duration_value_from(&case["value"]),
+                    segment,
+                    case["raw"].as_i64().unwrap(),
+                    case["maxHours"].as_u64().unwrap() as u32,
+                );
+                assert_eq!(
+                    duration_value_to_json(result),
+                    *expect,
+                    "set {case}"
+                );
+            }
+            "pad" => {
+                let result = pad_duration_segment(case["value"].as_u64().unwrap() as u32);
+                assert_eq!(result, expect.as_str().unwrap(), "pad {case}");
+            }
+            other => panic!("unknown duration op {other}"),
+        }
+    }
+}
+
+// ── Nav ──
+
+#[test]
+fn nav_conformance() {
+    use poodle_headless::nav::*;
+
+    for case in vectors()["nav"].as_array().unwrap() {
+        let op = s(case, "op");
+        let expect = &case["expect"];
+        let disabled: Vec<bool> = case["disabled"]
+            .as_array()
+            .map(|entries| entries.iter().map(|entry| entry.as_bool().unwrap_or(false)).collect())
+            .unwrap_or_default();
+
+        match op {
+            "findNext" => {
+                let result = find_next_enabled_index(
+                    &disabled,
+                    case["startIndex"].as_u64().unwrap_or(0) as usize,
+                    case["direction"].as_i64().unwrap_or(1) as i32,
+                );
+                let actual = result.map(|index| json!(index)).unwrap_or(Value::Null);
+                assert_eq!(actual, *expect, "findNext {case}");
+            }
+            "firstEnabled" => {
+                let result = first_enabled_index(&disabled);
+                let actual = result.map(|index| json!(index)).unwrap_or(Value::Null);
+                assert_eq!(actual, *expect, "firstEnabled {case}");
+            }
+            other => panic!("unknown nav op {other}"),
+        }
+    }
+}

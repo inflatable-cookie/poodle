@@ -1855,5 +1855,323 @@
         "totalHeight": 28000
       }
     }
+  ],
+  "duration": [
+    {
+      "op": "totalSeconds",
+      "name": "plain",
+      "value": {
+        "hours": 1,
+        "minutes": 2,
+        "seconds": 3
+      },
+      "expect": 3723
+    },
+    {
+      "op": "totalSeconds",
+      "name": "zero",
+      "value": {
+        "hours": 0,
+        "minutes": 0,
+        "seconds": 0
+      },
+      "expect": 0
+    },
+    {
+      "op": "adjust",
+      "name": "seconds carry into minutes and hours",
+      "value": {
+        "hours": 0,
+        "minutes": 59,
+        "seconds": 59
+      },
+      "segment": "seconds",
+      "delta": 1,
+      "maxHours": 99,
+      "expect": {
+        "hours": 1,
+        "minutes": 0,
+        "seconds": 0
+      }
+    },
+    {
+      "op": "adjust",
+      "name": "minutes carry into hours",
+      "value": {
+        "hours": 0,
+        "minutes": 59,
+        "seconds": 0
+      },
+      "segment": "minutes",
+      "delta": 1,
+      "maxHours": 99,
+      "expect": {
+        "hours": 1,
+        "minutes": 0,
+        "seconds": 0
+      }
+    },
+    {
+      "op": "adjust",
+      "name": "seconds borrow through minutes and hours",
+      "value": {
+        "hours": 1,
+        "minutes": 0,
+        "seconds": 0
+      },
+      "segment": "seconds",
+      "delta": -1,
+      "maxHours": 99,
+      "expect": {
+        "hours": 0,
+        "minutes": 59,
+        "seconds": 59
+      }
+    },
+    {
+      "op": "adjust",
+      "name": "minutes borrow into hours",
+      "value": {
+        "hours": 0,
+        "minutes": 1,
+        "seconds": 0
+      },
+      "segment": "minutes",
+      "delta": -1,
+      "maxHours": 99,
+      "expect": {
+        "hours": 0,
+        "minutes": 0,
+        "seconds": 0
+      }
+    },
+    {
+      "op": "adjust",
+      "name": "minutes carry swallowed at max hours",
+      "value": {
+        "hours": 9,
+        "minutes": 59,
+        "seconds": 0
+      },
+      "segment": "minutes",
+      "delta": 1,
+      "maxHours": 9,
+      "expect": {
+        "hours": 9,
+        "minutes": 0,
+        "seconds": 0
+      }
+    },
+    {
+      "op": "adjust",
+      "name": "seconds borrow clamps hours at floor",
+      "value": {
+        "hours": 0,
+        "minutes": 0,
+        "seconds": 0
+      },
+      "segment": "seconds",
+      "delta": -1,
+      "maxHours": 9,
+      "expect": {
+        "hours": 0,
+        "minutes": 59,
+        "seconds": 59
+      }
+    },
+    {
+      "op": "adjust",
+      "name": "hours clamp at zero",
+      "value": {
+        "hours": 0,
+        "minutes": 0,
+        "seconds": 0
+      },
+      "segment": "hours",
+      "delta": -1,
+      "maxHours": 9,
+      "expect": {
+        "hours": 0,
+        "minutes": 0,
+        "seconds": 0
+      }
+    },
+    {
+      "op": "adjust",
+      "name": "hours clamp at max",
+      "value": {
+        "hours": 9,
+        "minutes": 0,
+        "seconds": 0
+      },
+      "segment": "hours",
+      "delta": 1,
+      "maxHours": 9,
+      "expect": {
+        "hours": 9,
+        "minutes": 0,
+        "seconds": 0
+      }
+    },
+    {
+      "op": "set",
+      "name": "minutes clamp to 59",
+      "value": {
+        "hours": 0,
+        "minutes": 0,
+        "seconds": 0
+      },
+      "segment": "minutes",
+      "raw": 99,
+      "maxHours": 9,
+      "expect": {
+        "hours": 0,
+        "minutes": 59,
+        "seconds": 0
+      }
+    },
+    {
+      "op": "set",
+      "name": "hours clamp to max",
+      "value": {
+        "hours": 0,
+        "minutes": 0,
+        "seconds": 0
+      },
+      "segment": "hours",
+      "raw": 50,
+      "maxHours": 9,
+      "expect": {
+        "hours": 9,
+        "minutes": 0,
+        "seconds": 0
+      }
+    },
+    {
+      "op": "set",
+      "name": "seconds clamp to 59",
+      "value": {
+        "hours": 0,
+        "minutes": 0,
+        "seconds": 0
+      },
+      "segment": "seconds",
+      "raw": 75,
+      "maxHours": 9,
+      "expect": {
+        "hours": 0,
+        "minutes": 0,
+        "seconds": 59
+      }
+    },
+    {
+      "op": "pad",
+      "name": "single digit padded",
+      "value": 7,
+      "expect": "07"
+    },
+    {
+      "op": "pad",
+      "name": "two digits unchanged",
+      "value": 42,
+      "expect": "42"
+    }
+  ],
+  "nav": [
+    {
+      "op": "findNext",
+      "name": "wraps to first enabled",
+      "disabled": [
+        true,
+        true,
+        false
+      ],
+      "startIndex": 2,
+      "direction": 1,
+      "expect": 2
+    },
+    {
+      "op": "findNext",
+      "name": "skips disabled forward",
+      "disabled": [
+        false,
+        true,
+        false
+      ],
+      "startIndex": 0,
+      "direction": 1,
+      "expect": 2
+    },
+    {
+      "op": "findNext",
+      "name": "wraps from end to first enabled",
+      "disabled": [
+        false,
+        true,
+        true
+      ],
+      "startIndex": 2,
+      "direction": 1,
+      "expect": 0
+    },
+    {
+      "op": "findNext",
+      "name": "moves backward",
+      "disabled": [
+        false,
+        true,
+        false
+      ],
+      "startIndex": 2,
+      "direction": -1,
+      "expect": 0
+    },
+    {
+      "op": "findNext",
+      "name": "empty list yields null",
+      "disabled": [],
+      "startIndex": 0,
+      "direction": 1,
+      "expect": null
+    },
+    {
+      "op": "findNext",
+      "name": "only disabled yields start",
+      "disabled": [
+        true,
+        true
+      ],
+      "startIndex": 1,
+      "direction": 1,
+      "expect": 1
+    },
+    {
+      "op": "firstEnabled",
+      "name": "first enabled index",
+      "disabled": [
+        true,
+        false,
+        true
+      ],
+      "expect": 1
+    },
+    {
+      "op": "firstEnabled",
+      "name": "all enabled starts at zero",
+      "disabled": [
+        false,
+        false
+      ],
+      "expect": 0
+    },
+    {
+      "op": "firstEnabled",
+      "name": "none enabled yields null",
+      "disabled": [
+        true,
+        true
+      ],
+      "expect": null
+    }
   ]
 }

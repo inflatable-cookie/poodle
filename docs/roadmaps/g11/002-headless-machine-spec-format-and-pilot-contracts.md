@@ -82,6 +82,59 @@ a package exists.
 - Convention adopted: `data-scope`/`data-part`/`data-state` emission is
   additive during the core swap; existing attributes unchanged.
 
+## Machine Shape Convention (recorded by g13-047)
+
+Written down here because g11.002 left it implicit. Read off the four machines
+canonical in both runtimes — `hover`, `menu`, `modal`, `popover` — and the
+section list above. Not a new design; a statement of what the references
+already agree on. Enforced by `effigy docs:machine-shape-drift`.
+
+### TypeScript (`packages/core/src`)
+
+A behavior machine module exports:
+
+- `XState` — string-literal union of the machine's states
+- `XContext` — interface of externally-ownable / long-lived values
+- `XEvent` — discriminated union on `type` (user, programmatic, timer)
+- `XEffect` — discriminated union on `type` (named side-effect intents)
+- `XResult = TransitionResult<XState, XContext, XEffect>`
+  (`import type { TransitionResult } from "./machine"`)
+- `xTransition(state, context, event): XResult` — pure; effects as data
+
+### Rust (`packages/contracts/headless/src`)
+
+The mirror of the same machine exports:
+
+- `XState` — enum
+- `XContext` — struct
+- `XEvent` — enum
+- `XEffect` — enum
+- `x_transition(state, context, event) -> (XState, Vec<XEffect>)` — pure;
+  effects as data. Context is input-only; the returned state carries the
+  transition.
+
+### Single-state machines (the trivial case)
+
+g11.002's `checkbox` pilot documents the trivial case: *single state, value in
+context*. A machine with exactly one implicit state may omit `XState` (and the
+`state` field of its result), keeping the value in context:
+
+- TS: `xTransition(context, event): XResult` where
+  `XResult = { context: XContext; effects: XEffect[] }`
+- Rust: `x_transition(context, event) -> (XContext, Vec<XEffect>)`
+
+This is canonical, not drift. Do not invent a state to satisfy the stateful
+shape. `checkbox`, `disclosure`, `single-select`, `switch`, `toggle-group`
+(both runtimes) and Rust `tabs` are this shape.
+
+### Machinery modules
+
+Modules that export behavior machinery rather than a state machine —
+`tree` (flatten, cascade, intents, windowing), `nav`, `select`, `toast`,
+`rating`, `position`, domain math (`date`, `color`, `duration`, `pagination`)
+— are not machines and carry no machine-shape requirement. The gate's
+transition rule applies only to modules that declare a transition function.
+
 ## Next Task
 
 `g11.003` — build the core package, shared machinery, and pilot machines, and
