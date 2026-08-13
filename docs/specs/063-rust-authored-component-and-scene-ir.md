@@ -1,8 +1,7 @@
 # 063 Rust-authored Component And Scene IR
 
-Status: retired — pilot record (g14.001); scene half promoted to `065`,
-component half retired per the g13.020 verdict
-Updated: 2026-08-13
+Status: retired — g13 pilot record; superseded by architecture 009/spec 066
+Updated: 2026-08-14
 Owner: Poodle core
 Depends on: `062-headless-core-and-dual-layer-strategy.md`,
 `../architecture/001-poodle-system-shape.md`,
@@ -16,13 +15,11 @@ This spec is the pilot's record, not a live contract. The g13.020 verdict
 authority as a corpus mechanism and unwound the three pilot slices; the
 drift-gate estate is the corpus-wide authority.
 
-- The **scene half** promotes to
-  `065-scene-authoring-and-specimen-fixtures.md` — fixture authority, four
-  runtimes, no evaluator, no application framework.
-- The **component half** retires. Its durable lessons are the pinning
-  doctrine, normative in `064-cross-runtime-machine-pinning.md`, architecture
-  001/006, and working rules 001: capability absence is declared with a
-  reason, never silent; a native hole is a failing gate, not a sweep finding.
+- The scene-only promotion was later retired. Its one-authored-fixture result
+  now belongs to component cases in spec 066.
+- The machine-pinning promotion was later retired. Generated interfaces,
+  vectors, and capability evidence are provisional inputs to component
+  conformance, not independent proof of parity.
 
 Everything below is retained as the pilot's record — including the g13.008
 revise narrowing and the delivered `g13.018` amendments. Do not build from

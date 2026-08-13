@@ -1,0 +1,108 @@
+# g14.001 — Conformance Kernel And Button Proof
+
+Status: ready
+Depends on: none
+Governing spec: `../../specs/066-executable-component-conformance.md`
+
+## Outcome
+
+Deliver the smallest complete conformance loop through Button:
+
+```text
+one portable interface + one typed case corpus
+  -> Svelte / React / GPUI / Jetstream execution
+  -> normalized observations
+  -> four specimen views
+  -> one failing completion gate
+```
+
+This is a replacement proof, not a platform build. Keep the generic surface
+as small as Button needs while preserving extension points named by spec 066.
+
+## Scope
+
+1. Inventory Button's contract, Svelte/React props, `ButtonSpec`, renderer,
+   both backends, current tests, and four specimens. Record exact before LOC
+   and contradictions.
+2. Add the constrained portable interface module for Button. Svelte and React
+   consume its portable types; generated Rust replaces the equivalent
+   `ButtonSpec` declaration surface. Keep platform extensions explicit.
+3. Add a typed Button case corpus with fixture, specimen metadata, actions,
+   and assertions. Emit deterministic neutral JSON for Rust.
+4. Implement thin harnesses for all four runtimes. Exercise the real Button
+   implementation and backend event path; no mock renderer may satisfy native.
+5. Emit `component-observation.v1` from each runtime and compare exact Button
+   part, role/name/state, token role, focusability, event order, and bounded
+   geometry.
+6. Make all four Button specimen pages project the same case structure. Keep
+   runtime chrome outside the case.
+7. Add `conformance:build`, `conformance:check`, selected
+   `conformance:test`, `conformance:complete`, and `conformance:cost` Effigy
+   selectors. Wire read-only enforcement into the applicable standing gates.
+8. Classify old machine-interface, scene, capability, and Button-specific
+   evidence as keep/adapt/replace/retire in `conformance-estate.md`. Delete
+   only surfaces fully replaced by this proof.
+
+## Required Button Cases
+
+- default labelled button
+- every contract variant and tone
+- disabled and loading
+- leading/trailing icon regions
+- press by pointer and keyboard
+- focus-visible state
+- theme, density, and control-size specimen axes
+
+Case coverage may use matrices, but the serialized artifact must enumerate
+stable case and capture IDs.
+
+## Acceptance
+
+- Changing one portable prop name fails TypeScript/Rust generation or compile.
+- Changing a fixture/group/caption changes all four specimen projections.
+- A planted event, role, token-role, part, or geometry divergence fails and
+  names runtime, case, step, and field.
+- Removing Button from either native registry fails completion.
+- Replacing a real handler with an inert one fails an executed case.
+- Double generation is byte-identical; check mode never mutates the tree and
+  catches orphans.
+- Existing hand-written portable declarations and duplicate specimen fixture
+  content are removed, not left beside the new authority.
+- Full cost report shows every mechanism line and what it replaced.
+- `conformance:complete --component button` passes all four runtimes.
+
+## Stop Conditions
+
+- The interface or case schema needs transitions, guards, derivations, or
+  arbitrary callback bodies.
+- Generic runners need Button-specific branches.
+- Native success can be obtained without exercising GPUI and Jetstream backend
+  output.
+- Total mechanism grows without deleting equivalent declarations/specimens.
+- The worker must redesign another component to make Button pass.
+
+Stop with evidence and options. Do not widen the model around the finding.
+
+## Writable Scope
+
+- conformance package or module chosen from existing package ownership
+- Button sources, tests, contracts, generated artifacts, and specimens
+- preview harnesses/registries needed for Button
+- `tasks/effigy.tasks.toml`
+- `docs/roadmaps/g14/conformance-estate.md`
+- one August batch log and append-only `PAPERCUTS.md`
+
+Do not edit other component implementations, architecture/specs, generation
+status, dispatch ledger, release workflows, or external repositories.
+
+## Validation
+
+Use `effigy test --plan` before choosing the test shape. Run the new selectors,
+the narrow Button suites, `ci:web`, `ci:rust`, `ci:native` from the main
+checkout where required, `docs:check`, and `git diff --check`. Record known
+baseline failures separately from branch regressions.
+
+## Handoff
+
+Open a PR with the before/after cost table, planted-failure evidence, exact
+runtime results, retained/retired experiment list, and any schema pressure.

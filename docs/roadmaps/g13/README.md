@@ -1,6 +1,6 @@
 # g13 — Rust-authored Cross-runtime IR
 
-Status: active
+Status: completed 2026-08-13
 Opened: 2026-08-11
 Governing spec: `docs/specs/063-rust-authored-component-and-scene-ir.md`
 
@@ -23,10 +23,10 @@ migration to a generative model the verdict declines; they are retained as
 evidence and are not executable. Existing contracts and implementations stay
 authoritative, permanently under this verdict.
 
-The live runway is `017`–`020`: narrow the IR to cross-runtime vocabulary with
-drift gating, apply the two amendments the pilot named, extend vocabulary
-coverage across the corpus additively, then consolidate and reassess from the
-single authority. See [the verdict evidence](pilot-verdict-evidence.md) §8.
+The closing runway `017`–`020` narrowed the IR, tested the remaining
+vocabulary proposition, and retired it as a corpus authority. The three pilot
+component slices were unwound. g14 carries the evidence forward; nothing in
+this generation remains executable.
 
 ## Runway
 
@@ -50,10 +50,10 @@ single authority. See [the verdict evidence](pilot-verdict-evidence.md) §8.
 15. [015 — Generated contracts, registries, and parity evidence](015-generated-contracts-registries-and-parity-evidence.md)
 16. [016 — Consumer proof and generation closeout](016-consumer-proof-and-generation-closeout.md)
 
-## Revised Runway (live)
+## Revised Runway (completed)
 
-After the `008` **revise** verdict. `009`–`016` above are closed; these are the
-executable ones.
+After the `008` **revise** verdict. `009`–`016` above are closed; `017`–`020`
+completed the reassessment and unwind.
 
 17. [017 — Narrow the IR to vocabulary](017-narrow-the-ir-to-vocabulary.md)
 18. [018 — Capability and anatomy amendments](018-capability-and-anatomy-amendments.md)
@@ -68,7 +68,7 @@ executable ones.
 - changing component semantics during mechanical migration
 - adding new frameworks before the four current targets converge
 
-## First Task
+## Historical First Task
 
 `g13.001` freezes the authority map, measures current duplication, and captures
 the fixtures the pilot must preserve.

@@ -1,7 +1,7 @@
 # 006 Headless Core And Machine Model
 
 Status: active
-Updated: 2026-08-13
+Updated: 2026-08-14
 Promoted from: `docs/specs/062-headless-core-and-dual-layer-strategy.md` (g11.004)
 
 ## Shape
@@ -54,26 +54,13 @@ Core unit tests double as conformance vectors for the Rust mirror
 (`g11.006`): pure transitions and pure math port mechanically; adapters map
 part-attribute output to native accessibility exposure.
 
-## Pinning Contract
+Machine traces remain useful evidence for components that expose a portable
+state machine. They are not the cross-runtime contract by themselves. A
+component can drift in interface shape, composition, accessibility, renderer
+output, focus, or specimen structure while its machine trace stays green.
 
-Promoted from the g13 pilot verdict and the g13.020 reassessment
-(`../roadmaps/g13/pilot-verdict-evidence.md`,
-`../roadmaps/g13/020-consolidate-and-reassess.md`), 2026-08-13. The
-dual-layer shape and the pure-machine model above are unchanged; the machine
-model additionally holds:
-
-- **Machine interfaces are generated, not hand-mirrored.** Each machine's
-  states, events, effects, and context types are declared once in the
-  machine-interface schema and generated into TypeScript and Rust. Interface
-  only — no transitions, guards, or derivation.
-- **Differential traces are the cross-pair equivalence check.** The TS and
-  Rust implementations run identical event traces and must produce identical
-  `(state, context, effects)`. Prose contracts define intent; traces define
-  equivalence, by execution.
-- **Vector completeness is a gate.** A machine's conformance vector must
-  exercise every state, transition, and effect in both implementations; a
-  thin vector fails CI.
-
-The full mechanism set — including the capability absence registry and the
-specimen evidence gates, which sit at the pair level rather than the machine
-level — is normative in `../specs/064-cross-runtime-machine-pinning.md`.
+The component conformance system therefore exercises machines through shared
+component cases and compares their normalized observable results. Generated
+machine interfaces and existing vectors are provisional inputs to that system
+until g14 classifies them. See
+[009 Cross-Runtime Component Conformance](009-cross-runtime-component-conformance.md).

@@ -1,5 +1,8 @@
 # g14 Orchestrator Handoff — 2026-08-13
 
+Status: superseded 2026-08-14 by `../../roadmaps/g14/README.md` and
+`../../roadmaps/archive/2026-08-14-g14-machine-pinning-false-start.md`
+
 You are the new orchestrator for the Poodle repository's g14 runway, taking
 over mid-programme. The maintainer drives execution through t3code worker
 threads; your job is planning, review, and merge. Work from the main checkout

@@ -1,7 +1,7 @@
 # 001 Working Rules
 
 Status: active
-Updated: 2026-08-13
+Updated: 2026-08-14
 Owner: Poodle core
 Depends on: [Product Guardrails](../architecture/product-guardrails.md)
 
@@ -36,9 +36,8 @@ prefer the narrower current authority and repair the stale document.
   lifecycle, and drawing concerns.
 - Extend the shared node vocabulary only for reusable rendering capabilities.
 - Capability absence is declared with a reason, never inferred from a runtime
-  being silent. A native hole is a failing gate, not a sweep finding: port the
-  capability or declare the absence and its observable consequence
-  (verdict: `../roadmaps/g13/020-consolidate-and-reassess.md`).
+  being silent. A declared absence records debt; it does not count as parity
+  or component completion.
 
 ## Runtime Parity Authority
 
@@ -47,8 +46,8 @@ Poodle has four runtimes: Svelte, React, GPUI, and Jetstream.
 - **Svelte is the reference implementation.** Where runtimes disagree on what a
   component can do, Svelte is what the others are brought up to.
 - A capability present in Svelte and absent elsewhere is a **gap to port**, not
-  an accepted delta — and a failing gate until it is ported or declared absent
-  with a reason. Port it to React, GPUI, and Jetstream.
+  an accepted delta. It remains a failing completion condition even when the
+  absence is declared and explained.
 - A capability present in another runtime and absent from Svelte is a
   **candidate for inclusion**, not an automatic port. Evaluate it, then either
   add it to Svelte and the contract, or record why it stays runtime-specific.

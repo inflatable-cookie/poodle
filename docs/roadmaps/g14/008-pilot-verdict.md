@@ -1,0 +1,41 @@
+# g14.008 — Pilot Verdict
+
+Status: planned
+Depends on: `g14.001`–`g14.007`
+
+## Outcome
+
+Record **adopt**, **revise**, or **reject** from measured evidence. Do not
+open corpus rollout by momentum.
+
+## Evidence
+
+- full mechanism LOC and per-component marginal cost
+- duplicate declarations/specimens/vectors removed
+- defects existing gates missed and the new system caught
+- schema/action/assertion growth by profile
+- four-runtime execution time and reliability
+- primitive/backend gaps fixed and still missing
+- component-specific branches in generic tooling; target zero
+- standing gate integration and planted-failure results
+- worker/operator friction and snapshot review quality
+
+## Verdict Rules
+
+Adopt only if one pipeline covers all six profiles, required absence remains
+red, generic tooling stays component-neutral, and ongoing cost is lower than
+the duplication removed. Revise only with a bounded correction and a named
+second verdict. Reject removes pilot machinery while retaining component fixes
+and evidence.
+
+## Acceptance
+
+- Verdict and evidence live in one roadmap artifact.
+- Architecture/spec status changes match the verdict.
+- Every experimental surface has a disposition.
+- Exactly one next task is ready; blocked rollout never opens implicitly.
+
+## Validation
+
+Run the complete conformance board, docs gates, `git diff --check`, and verify
+all figures from source rather than worker summaries.

@@ -1,7 +1,7 @@
 # 001 Poodle System Shape
 
 Status: active
-Updated: 2026-08-13
+Updated: 2026-08-14
 
 ## Purpose
 
@@ -67,25 +67,24 @@ An implementation difference is acceptable only when the contract permits it
 or the runtime cannot express the same mechanism. Known differences must be
 documented, not silently embedded in an adapter.
 
-## Authority Pairs
+## Implementation Pairs And Conformance
 
-Promoted from the g13 pilot verdict and the g13.020 reassessment
-(`../roadmaps/g13/pilot-verdict-evidence.md`,
-`../roadmaps/g13/020-consolidate-and-reassess.md`), 2026-08-13. The durable
-authority shape is pair-wise, not corpus-wide:
+The durable implementation shape is pair-wise:
 
 - **Web pair** — `poodle-core` is the single behavior source for Svelte and
   React; the shells stay idiomatic and thin.
 - **Native pair** — `poodle-render` is the single component implementation
   for GPUI and Jetstream; backends interpret, they do not reimplement.
 
-The cross-language authority ambition is **closed**. One source authoring
-component behaviour for all four runtimes was measured and retired by the
-verdict: ≈31,400 lines of machinery, +965 consumer lines, zero duplication
-removed. The drift-gate estate is the corpus-wide authority. The two pairs
-stay two, pinned to each other by execution rather than described from one
-source — the pinning contract is normative in
-`../specs/064-cross-runtime-machine-pinning.md`.
+The pairs do not maintain four independent component implementations. They
+also do not share executable behaviour across the TypeScript/Rust boundary.
+
+A separate conformance plane binds both pairs to the component contracts. It
+owns portable interface declarations, shared cases and specimen structure,
+and normalized observations. It may generate types and serialized fixtures;
+it must not generate component behaviour or become a renderer. Runtime-owned
+mechanisms may differ, but their observable result must satisfy the same case.
+See [009 Cross-Runtime Component Conformance](009-cross-runtime-component-conformance.md).
 
 ## Web Architecture
 

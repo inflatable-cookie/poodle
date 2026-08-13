@@ -1,7 +1,7 @@
 # Specs
 
 Status: active
-Updated: 2026-08-13
+Updated: 2026-08-14
 
 Specs define repository-wide rules that are broader than one component:
 tokens, artifact generation, parity evidence, accessibility, packaging,
@@ -32,14 +32,14 @@ Important current cross-cutting references include:
 - `024-token-evolution-migration-and-compatibility-policy.md`
 - `044-deprecation-change-control-and-release-channel-operations.md`
 - `062-headless-core-and-dual-layer-strategy.md`
-- `063-rust-authored-component-and-scene-ir.md` — retired pilot record
-  (g14.001); scene half promoted to `065`, component half retired per the
-  g13.020 verdict
-- `064-cross-runtime-machine-pinning.md` — the pinning contract: generated
-  machine interfaces, differential traces, vector completeness, capability
-  absence registry, specimen evidence gates
-- `065-scene-authoring-and-specimen-fixtures.md` — scene IR as the one
-  fixture authority, four runtimes, no evaluator, no application framework
+- `063-rust-authored-component-and-scene-ir.md` — retired g13 pilot record;
+  superseded by architecture 009/spec 066
+- `064-cross-runtime-machine-pinning.md` — retired g14 false-start record;
+  superseded by `066`
+- `065-scene-authoring-and-specimen-fixtures.md` — retired scene-fixture
+  contract; its one-authored-structure requirement moves to `066`
+- `066-executable-component-conformance.md` — provisional g14 contract for
+  portable interfaces, shared cases/specimens, observations, and completion
 
 Specs are normative constraints, not task queues. Current execution status
 belongs in the roadmap.
