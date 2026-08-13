@@ -1,7 +1,7 @@
 # Specs
 
 Status: active
-Updated: 2026-08-11
+Updated: 2026-08-13
 
 Specs define repository-wide rules that are broader than one component:
 tokens, artifact generation, parity evidence, accessibility, packaging,
@@ -32,8 +32,14 @@ Important current cross-cutting references include:
 - `024-token-evolution-migration-and-compatibility-policy.md`
 - `044-deprecation-change-control-and-release-channel-operations.md`
 - `062-headless-core-and-dual-layer-strategy.md`
-- `063-rust-authored-component-and-scene-ir.md` — provisional g13 authority
-  for the Rust-authored cross-runtime IR pilot
+- `063-rust-authored-component-and-scene-ir.md` — retired pilot record
+  (g14.001); scene half promoted to `065`, component half retired per the
+  g13.020 verdict
+- `064-cross-runtime-machine-pinning.md` — the pinning contract: generated
+  machine interfaces, differential traces, vector completeness, capability
+  absence registry, specimen evidence gates
+- `065-scene-authoring-and-specimen-fixtures.md` — scene IR as the one
+  fixture authority, four runtimes, no evaluator, no application framework
 
 Specs are normative constraints, not task queues. Current execution status
 belongs in the roadmap.
