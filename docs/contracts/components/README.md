@@ -176,6 +176,8 @@ primitives and layout surfaces through higher-order application components.
 - `tree.md`
 - `tri-state-switch.md`
 - `ui-presentation-provider.md`
+- `update-center.md`
+- `update-status.md`
 - `validation-summary.md`
 - `value-readout.md`
 - `video-player.md`

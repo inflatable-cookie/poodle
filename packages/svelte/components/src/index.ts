@@ -207,6 +207,8 @@ export { default as ValidationSummary } from "./ValidationSummary.svelte";
 export { default as ModelPicker } from "./ModelPicker.svelte";
 export { default as MessageCenter } from "./MessageCenter.svelte";
 export { default as HistoryCenter } from "./HistoryCenter.svelte";
+export { default as UpdateStatus } from "./UpdateStatus.svelte";
+export { default as UpdateCenter } from "./UpdateCenter.svelte";
 export { default as ToastStack } from "./ToastStack.svelte";
 export { default as ToastHost } from "./ToastHost.svelte";
 export {

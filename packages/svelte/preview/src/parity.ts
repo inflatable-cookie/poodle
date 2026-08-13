@@ -716,6 +716,8 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "SidebarNav",
       "Tree",
       "ToastHost",
+      "UpdateCenter",
+      "UpdateStatus",
     ],
   },
   {

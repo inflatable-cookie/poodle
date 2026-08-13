@@ -4874,6 +4874,91 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 />`,
   },
 
+  "update-status": {
+    props: [
+      { name: "status", type: "UpdateControllerStatus", default: '{ kind: "idle" }', description: "The check lifecycle: idle, loading, ready, or failed." },
+      { name: "availability", type: "UpdateAvailabilityProjection | undefined", default: "undefined", description: "The resolved availability, when the check is ready." },
+      { name: "progress", type: "UpdateProgressProjection | undefined", default: "undefined", description: "Install progress; non-idle progress supersedes the availability line." },
+      { name: "channel", type: "Channel | undefined", default: "undefined", description: "The channel the install follows." },
+      { name: "installedVersion", type: "string | undefined", default: "undefined", description: "The running version." },
+      { name: "deferral", type: "UpdateDeferral | undefined", default: "undefined", description: "A postponed install and its reason, rendered neutrally." },
+      { name: "lastRejection", type: "UpdateRejectionCode | undefined", default: "undefined", description: "The last rejection code; the only fault, in danger styling." },
+      { name: "aheadOfChannel", type: "UpdateAheadOfChannel | undefined", default: "undefined", description: "Preferred source for the ahead-of-channel message." },
+      { name: "pending", type: "boolean", default: "false", description: "Disables actions while a command is in flight." },
+      { name: "observe", type: "((observer: () => void) => () => void) | null", default: "null", description: "The authority's subscription; re-derives on each notification." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit semantic size override." },
+      { name: "sizeRole", type: "SemanticControlSizeRole", default: '"control"', description: "Semantic size role used when inheriting presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override." },
+      { name: "installLabel", type: "string", default: '"Install and restart"', description: "Install action label." },
+      { name: "deferLabel", type: "string", default: '"Later"', description: "Defer action label." },
+      { name: "checkLabel", type: "string", default: '"Check for updates"', description: "Check action label." },
+      { name: "retryLabel", type: "string", default: '"Try again"', description: "Retry action label." },
+      { name: "confirmInstall", type: "boolean", default: "true", description: "Whether install-and-restart confirms before emitting." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { UpdateStatus } from "@inflatable-cookie/poodle-svelte";
+
+  let status = { kind: "ready" } as const;
+  let availability = {
+    state: "offer", version: "1.4.0", reason: "staged", notes: "Bug fixes and improvements.",
+  } as const;
+</script>
+
+<UpdateStatus
+  {status}
+  {availability}
+  onInstall={startInstall}
+  onDefer={postpone}
+  onCheck={checkNow}
+/>`,
+  },
+
+  "update-center": {
+    props: [
+      { name: "presence", type: "UpdatePresence", description: "Required. 'hidden' collapses the component entirely." },
+      { name: "status", type: "UpdateControllerStatus", default: '{ kind: "idle" }', description: "Passed to UpdateStatus." },
+      { name: "availability", type: "UpdateAvailabilityProjection | undefined", default: "undefined", description: "Passed to UpdateStatus." },
+      { name: "progress", type: "UpdateProgressProjection | undefined", default: "undefined", description: "Passed to UpdateStatus." },
+      { name: "channel", type: "Channel | undefined", default: "undefined", description: "Passed to UpdateStatus." },
+      { name: "installedVersion", type: "string | undefined", default: "undefined", description: "Passed to UpdateStatus." },
+      { name: "deferral", type: "UpdateDeferral | undefined", default: "undefined", description: "Passed to UpdateStatus." },
+      { name: "lastRejection", type: "UpdateRejectionCode | undefined", default: "undefined", description: "Passed to UpdateStatus." },
+      { name: "aheadOfChannel", type: "UpdateAheadOfChannel | undefined", default: "undefined", description: "Passed to UpdateStatus." },
+      { name: "pending", type: "boolean", default: "false", description: "Passed to UpdateStatus." },
+      { name: "observe", type: "((observer: () => void) => () => void) | null", default: "null", description: "The authority's subscription." },
+      { name: "open", type: "boolean | null", default: "null", description: "Controlled popover open state." },
+      { name: "defaultOpen", type: "boolean", default: "false", description: "Initial uncontrolled open state." },
+      { name: "placement", type: "OverlayPlacement", default: '"bottom-end"', description: "Popover placement hint." },
+      { name: "title", type: "string", default: '"Updates"', description: "Surface heading and trigger accessible name." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Overrides the surface label." },
+      { name: "triggerLabel", type: "string | null", default: "null", description: "Overrides the trigger accessible name." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit semantic size override." },
+      { name: "sizeRole", type: "SemanticControlSizeRole", default: '"chrome"', description: "Semantic size role used when inheriting presentation scale." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override." },
+      { name: "installLabel", type: "string", default: '"Install and restart"', description: "Passed to UpdateStatus." },
+      { name: "deferLabel", type: "string", default: '"Later"', description: "Passed to UpdateStatus." },
+      { name: "checkLabel", type: "string", default: '"Check for updates"', description: "Passed to UpdateStatus." },
+      { name: "retryLabel", type: "string", default: '"Try again"', description: "Passed to UpdateStatus." },
+      { name: "confirmInstall", type: "boolean", default: "true", description: "Passed to UpdateStatus." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { UpdateCenter } from "@inflatable-cookie/poodle-svelte";
+
+  let presence = "attention" as const;
+</script>
+
+<UpdateCenter
+  {presence}
+  status={{ kind: "ready" }}
+  availability={{ state: "offer", version: "1.4.0", reason: "staged", notes: null }}
+  onInstall={startInstall}
+/>`,
+  },
+
   "action-discovery-panel": {
     props: [
       { name: "items", type: "CommandActionItem[]", default: "[]", description: "Array of discoverable action items." },

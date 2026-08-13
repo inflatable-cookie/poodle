@@ -231,6 +231,8 @@ export const allComponents: ComponentEntry[] = [
   entry("ActionDiscoveryPanel", "workstation", "Grouped action list with keyboard navigation.", true),
   entry("MessageCenter", "workstation", "Popover archive for notifications and durable messages.", true),
   entry("HistoryCenter", "workstation", "History popover with undo/redo cluster and fork branches.", true),
+  entry("UpdateStatus", "workstation", "Update availability and install-and-restart mechanism, embeddable anywhere.", true),
+  entry("UpdateCenter", "workstation", "Update popover trigger with presence-driven visibility and attention.", true),
   entry("DetailSection", "workstation", "Titled section for grouping detail content.", true),
   entry("DetailSectionGroup", "workstation", "Responsive layout group for multiple peer detail sections.", true),
   entry("DetailShell", "workstation", "Full detail page layout with header and sections.", true),
