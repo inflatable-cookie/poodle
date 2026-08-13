@@ -9,3 +9,4 @@
 pub mod button;
 pub mod preview_shell;
 pub mod range_slider;
+pub mod text_input;

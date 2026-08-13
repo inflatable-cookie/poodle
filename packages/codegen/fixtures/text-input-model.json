@@ -1,0 +1,2281 @@
+{
+  "schema_version": 1,
+  "shared_types": [
+    {
+      "id": "text-input-type",
+      "name": "TextInputType",
+      "description": "The TextInput type modes (T §3, TXT-06; the TS type union). Other native HTML input types pass through web-only.",
+      "canonical_ref": {
+        "path": "docs/contracts/components/text-input.md",
+        "section": "§3"
+      },
+      "members": [
+        {
+          "id": "text",
+          "name": "text",
+          "description": "Plain single-line input (default)."
+        },
+        {
+          "id": "multiline",
+          "name": "multiline",
+          "description": "Multiline editing — renders a native textarea."
+        },
+        {
+          "id": "search",
+          "name": "search",
+          "description": "Search mode — automatic leading search icon and clear button."
+        },
+        {
+          "id": "slug",
+          "name": "slug",
+          "description": "Semantic slug entry rendered as a native text input."
+        }
+      ]
+    },
+    {
+      "id": "validation-state",
+      "name": "ValidationState",
+      "description": "The validation-state ladder (T §3/§4, TXT-12; the TS ValidationState union).",
+      "canonical_ref": {
+        "path": "docs/contracts/components/text-input.md",
+        "section": "§3"
+      },
+      "members": [
+        {
+          "id": "none",
+          "name": "none",
+          "description": "No validation emphasis (default)."
+        },
+        {
+          "id": "invalid",
+          "name": "invalid",
+          "description": "Invalid — status-danger border and cross indicator."
+        },
+        {
+          "id": "valid",
+          "name": "valid",
+          "description": "Valid — status-success border and check indicator."
+        },
+        {
+          "id": "pending",
+          "name": "pending",
+          "description": "Pending — accent border and ring spinner indicator."
+        }
+      ]
+    },
+    {
+      "id": "input-mode",
+      "name": "InputMode",
+      "description": "The inputMode value domain (T §3, TXT-04; the TS inputMode union).",
+      "canonical_ref": {
+        "path": "docs/contracts/components/text-input.md",
+        "section": "§3"
+      },
+      "members": [
+        {
+          "id": "none",
+          "name": "none",
+          "description": "No virtual keyboard hint."
+        },
+        {
+          "id": "search",
+          "name": "search",
+          "description": "Search keyboard."
+        },
+        {
+          "id": "text",
+          "name": "text",
+          "description": "Text keyboard."
+        },
+        {
+          "id": "tel",
+          "name": "tel",
+          "description": "Telephone keyboard."
+        },
+        {
+          "id": "url",
+          "name": "url",
+          "description": "URL keyboard."
+        },
+        {
+          "id": "email",
+          "name": "email",
+          "description": "Email keyboard."
+        },
+        {
+          "id": "numeric",
+          "name": "numeric",
+          "description": "Numeric keyboard."
+        },
+        {
+          "id": "decimal",
+          "name": "decimal",
+          "description": "Decimal keyboard."
+        }
+      ]
+    },
+    {
+      "id": "resize-direction",
+      "name": "ResizeDirection",
+      "description": "The multiline resize domain (T §3, TXT-07; the TS resize union).",
+      "canonical_ref": {
+        "path": "docs/contracts/components/text-input.md",
+        "section": "§3"
+      },
+      "members": [
+        {
+          "id": "vertical",
+          "name": "vertical",
+          "description": "Resize handle on the vertical axis (default)."
+        },
+        {
+          "id": "horizontal",
+          "name": "horizontal",
+          "description": "Resize handle on the horizontal axis."
+        },
+        {
+          "id": "both",
+          "name": "both",
+          "description": "Resize handle on both axes."
+        },
+        {
+          "id": "none",
+          "name": "none",
+          "description": "No resize handle."
+        }
+      ]
+    },
+    {
+      "id": "enter-key-hint",
+      "name": "EnterKeyHint",
+      "description": "The enterkeyhint value domain (T §3, TXT-04; the TS enterKeyHint union).",
+      "canonical_ref": {
+        "path": "docs/contracts/components/text-input.md",
+        "section": "§3"
+      },
+      "members": [
+        {
+          "id": "enter",
+          "name": "enter",
+          "description": "Enter key."
+        },
+        {
+          "id": "done",
+          "name": "done",
+          "description": "Done."
+        },
+        {
+          "id": "go",
+          "name": "go",
+          "description": "Go."
+        },
+        {
+          "id": "next",
+          "name": "next",
+          "description": "Next."
+        },
+        {
+          "id": "previous",
+          "name": "previous",
+          "description": "Previous."
+        },
+        {
+          "id": "search",
+          "name": "search",
+          "description": "Search."
+        },
+        {
+          "id": "send",
+          "name": "send",
+          "description": "Send."
+        }
+      ]
+    },
+    {
+      "id": "autocorrect-mode",
+      "name": "AutocorrectMode",
+      "description": "The autocorrect value domain (T §3, TXT-04; the TS autocorrect union).",
+      "canonical_ref": {
+        "path": "docs/contracts/components/text-input.md",
+        "section": "§3"
+      },
+      "members": [
+        {
+          "id": "on",
+          "name": "on",
+          "description": "Native autocorrection enabled."
+        },
+        {
+          "id": "off",
+          "name": "off",
+          "description": "Native autocorrection disabled."
+        }
+      ]
+    },
+    {
+      "id": "control-size",
+      "name": "ControlSize",
+      "description": "The xs-xl control-size ladder (CROSS-07; the TS ControlSize union).",
+      "canonical_ref": {
+        "path": "docs/contracts/004-shared-control-types.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "xs",
+          "name": "xs",
+          "description": "Extra-small rung."
+        },
+        {
+          "id": "sm",
+          "name": "sm",
+          "description": "Small rung."
+        },
+        {
+          "id": "md",
+          "name": "md",
+          "description": "Default rung."
+        },
+        {
+          "id": "lg",
+          "name": "lg",
+          "description": "Large rung."
+        },
+        {
+          "id": "xl",
+          "name": "xl",
+          "description": "Extra-large rung."
+        }
+      ]
+    },
+    {
+      "id": "control-density",
+      "name": "ControlDensity",
+      "description": "The compact/default/comfortable density ladder (CROSS-08; the TS ControlDensity union).",
+      "canonical_ref": {
+        "path": "docs/contracts/004-shared-control-types.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "compact",
+          "name": "compact",
+          "description": "Tighter spacing."
+        },
+        {
+          "id": "default",
+          "name": "default",
+          "description": "Standard spacing."
+        },
+        {
+          "id": "comfortable",
+          "name": "comfortable",
+          "description": "Relaxed spacing."
+        }
+      ]
+    },
+    {
+      "id": "control-size-role",
+      "name": "SemanticControlSizeRole",
+      "description": "Semantic size offset from inherited presentation (CROSS-07; the TS SemanticControlSizeRole union).",
+      "canonical_ref": {
+        "path": "docs/contracts/004-shared-control-types.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "chrome",
+          "name": "chrome",
+          "description": "Shell chrome size role."
+        },
+        {
+          "id": "control",
+          "name": "control",
+          "description": "Standard control size role (default)."
+        },
+        {
+          "id": "prominent",
+          "name": "prominent",
+          "description": "Prominent size role."
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "id": "text-input",
+      "name": "TextInput",
+      "layer": "foundation",
+      "contract": {
+        "path": "docs/contracts/components/text-input.md",
+        "section": "§3"
+      },
+      "description": "A single-line text entry control with explicit value, validation, focus, and submission semantics; prefix/suffix affixes, character counting, built-in async validation status indicators, and leading/trailing affordance slots; multiline/search/slug modes (T §1). g13.007's environment-boundary proof: 49 web props against 3 contract-documented data attributes, a typed capability boundary for focus/selection/IME/clipboard/measurement/text-editing, and a hand-written editing model declared but not absorbed (TXT-01..32).",
+      "props": [
+        {
+          "id": "id",
+          "name": "id",
+          "prop_type": "String",
+          "default": {
+            "String": ""
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Element id for label association; the contract marks it required while the Svelte interface defaults it to \"\" — the generated fallback id covers the missing case (T §3/§6, TXT-01).",
+          "permitted_subset": null
+        },
+        {
+          "id": "value",
+          "name": "value",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Host-owned value when supplied; null remains a valid controlled empty state (T §3, TXT-02).",
+          "permitted_subset": null
+        },
+        {
+          "id": "defaultValue",
+          "name": "defaultValue",
+          "prop_type": "String",
+          "default": {
+            "String": ""
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Uncontrolled initial value; the pair is do-not-mix (T §3, TXT-02).",
+          "permitted_subset": null
+        },
+        {
+          "id": "placeholder",
+          "name": "placeholder",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Hint text when empty; placeholder never counts as the accessible name (T §3/§6, TXT-03).",
+          "permitted_subset": null
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Form submission name; native passthrough (T §3, TXT-04).",
+          "permitted_subset": null
+        },
+        {
+          "id": "autocomplete",
+          "name": "autocomplete",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Native autocomplete attribute (T §3/§6, TXT-04).",
+          "permitted_subset": null
+        },
+        {
+          "id": "disabled",
+          "name": "disabled",
+          "prop_type": "Bool",
+          "default": {
+            "Bool": false
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Disables editing and interaction; native attribute plus disabled opacity (T §3/§4/§6, TXT-05).",
+          "permitted_subset": null
+        },
+        {
+          "id": "readOnly",
+          "name": "readOnly",
+          "prop_type": "Bool",
+          "default": {
+            "Bool": false
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Allows selection without editing; native readonly (not aria-readonly) (T §3/§6, TXT-05).",
+          "permitted_subset": null
+        },
+        {
+          "id": "autofocus",
+          "name": "autofocus",
+          "prop_type": "Bool",
+          "default": {
+            "Bool": false
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Web-only native autofocus attribute; falsy omits the attribute. Excluded from TextInputSpec alongside the other native attributes (T §3, TXT-04; CROSS-03).",
+          "permitted_subset": null
+        },
+        {
+          "id": "selectionStart",
+          "name": "selectionStart",
+          "prop_type": "Number",
+          "default": {
+            "Number": 0.0
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Caret/selection start, in characters. RUST TARGETS ONLY — the web DOM owns selection and the web components have no such prop (T §3/§6, TXT-21).",
+          "permitted_subset": null
+        },
+        {
+          "id": "selectionEnd",
+          "name": "selectionEnd",
+          "prop_type": "Number",
+          "default": {
+            "Number": 0.0
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Caret/selection end; equal to selectionStart means a plain caret. RUST TARGETS ONLY (T §3/§6, TXT-21).",
+          "permitted_subset": null
+        },
+        {
+          "id": "isFocused",
+          "name": "isFocused",
+          "prop_type": "Bool",
+          "default": {
+            "Bool": false
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Whether the field holds focus, so the caret is drawn. RUST TARGETS ONLY — the backend draws a caret only in the field that actually holds focus (T §3/§6, TXT-21).",
+          "permitted_subset": null
+        },
+        {
+          "id": "required",
+          "name": "required",
+          "prop_type": "Bool",
+          "default": {
+            "Bool": false
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Native required attribute (T §3/§6, TXT-04).",
+          "permitted_subset": null
+        },
+        {
+          "id": "pattern",
+          "name": "pattern",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Native pattern attribute (T §3/§6, TXT-04).",
+          "permitted_subset": null
+        },
+        {
+          "id": "spellcheck",
+          "name": "spellcheck",
+          "prop_type": "Bool",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Native spellcheck attribute; web-only surface (T §3/§6, TXT-04; CROSS-03).",
+          "permitted_subset": null
+        },
+        {
+          "id": "autocapitalize",
+          "name": "autocapitalize",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Native autocapitalize attribute; web-only surface (T §3/§6, TXT-04; CROSS-03).",
+          "permitted_subset": null
+        },
+        {
+          "id": "autocorrect",
+          "name": "autocorrect",
+          "prop_type": {
+            "Shared": "autocorrect-mode"
+          },
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Native autocorrection attribute; web-only surface. OBS-03: React's surface omits autocorrect entirely — recorded as an extension (T §3, TXT-04; CROSS-03).",
+          "permitted_subset": {
+            "shared_type": "autocorrect-mode",
+            "members": [
+              "off",
+              "on"
+            ]
+          }
+        },
+        {
+          "id": "enterKeyHint",
+          "name": "enterKeyHint",
+          "prop_type": {
+            "Shared": "enter-key-hint"
+          },
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Native enterkeyhint attribute; web-only surface (T §3, TXT-04; CROSS-03).",
+          "permitted_subset": {
+            "shared_type": "enter-key-hint",
+            "members": [
+              "done",
+              "enter",
+              "go",
+              "next",
+              "previous",
+              "search",
+              "send"
+            ]
+          }
+        },
+        {
+          "id": "debounce",
+          "name": "debounce",
+          "prop_type": "Number",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Delays onValueChange while typing; flush on blur; immediate for clear and slug source regeneration (T §3/§5, TXT-11/28; debounce_ms).",
+          "permitted_subset": null
+        },
+        {
+          "id": "validate",
+          "name": "validate",
+          "prop_type": "Opaque",
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Optional validator function; async validation orchestration is web-component-owned — TextInputSpec carries no validator (T §3, TXT-12; CROSS-03).",
+          "permitted_subset": null
+        },
+        {
+          "id": "validationContext",
+          "name": "validationContext",
+          "prop_type": "Opaque",
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "App-owned opaque context passed to validate (T §3, TXT-12; CROSS-03).",
+          "permitted_subset": null
+        },
+        {
+          "id": "validationKey",
+          "name": "validationKey",
+          "prop_type": "Opaque",
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Stable value merged into the validation context so validation re-runs after identity changes (T §3, TXT-12; CROSS-03).",
+          "permitted_subset": null
+        },
+        {
+          "id": "validationDebounce",
+          "name": "validationDebounce",
+          "prop_type": "Number",
+          "default": {
+            "Number": 300.0
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Delay before validation runs while typing; web-only (T §3, TXT-12; CROSS-03).",
+          "permitted_subset": null
+        },
+        {
+          "id": "validateOnBlur",
+          "name": "validateOnBlur",
+          "prop_type": "Bool",
+          "default": {
+            "Bool": true
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Whether blur triggers immediate validation; web-only (T §3, TXT-12; CROSS-03).",
+          "permitted_subset": null
+        },
+        {
+          "id": "showValidationStatus",
+          "name": "showValidationStatus",
+          "prop_type": "Bool",
+          "default": {
+            "Bool": true
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Whether built-in validation status chrome is shown (T §3/§4, TXT-12; shows_validation_status).",
+          "permitted_subset": null
+        },
+        {
+          "id": "validationState",
+          "name": "validationState",
+          "prop_type": {
+            "Shared": "validation-state"
+          },
+          "default": {
+            "Member": "none"
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Caller-owned visual and assistive validation state; built-in validation maps idle→caller/validating→pending/valid→valid/invalid→invalid (T §3/§4, TXT-12).",
+          "permitted_subset": {
+            "shared_type": "validation-state",
+            "members": [
+              "invalid",
+              "none",
+              "pending",
+              "valid"
+            ]
+          }
+        },
+        {
+          "id": "ariaLabel",
+          "name": "ariaLabel",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Accessible name; required when no external label exists (T §3/§6, TXT-26).",
+          "permitted_subset": null
+        },
+        {
+          "id": "describedBy",
+          "name": "describedBy",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "aria-describedby target; the built-in validation-message id joins it (T §3/§6, TXT-12/26).",
+          "permitted_subset": null
+        },
+        {
+          "id": "inputMode",
+          "name": "inputMode",
+          "prop_type": {
+            "Shared": "input-mode"
+          },
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Virtual keyboard hint (T §3/§6, TXT-04; input_mode).",
+          "permitted_subset": {
+            "shared_type": "input-mode",
+            "members": [
+              "decimal",
+              "email",
+              "none",
+              "numeric",
+              "search",
+              "tel",
+              "text",
+              "url"
+            ]
+          }
+        },
+        {
+          "id": "list",
+          "name": "list",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Datalist id for native suggestion lists; passed as the native list attribute; web-only surface (T §3/§6, TXT-04; CROSS-03).",
+          "permitted_subset": null
+        },
+        {
+          "id": "type",
+          "name": "type",
+          "prop_type": {
+            "Shared": "text-input-type"
+          },
+          "default": {
+            "Member": "text"
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Input type attribute; \"multiline\" renders a textarea, \"search\" search mode, \"slug\" semantic slug entry rendered as a native text input; other native HTML types pass through web-only (T §3, TXT-06; input_type).",
+          "permitted_subset": {
+            "shared_type": "text-input-type",
+            "members": [
+              "multiline",
+              "search",
+              "slug",
+              "text"
+            ]
+          }
+        },
+        {
+          "id": "rows",
+          "name": "rows",
+          "prop_type": "Number",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Visible text rows; > 1 with the default type auto-switches to multiline; textarea defaults to 4 rows (T §3, TXT-06/07).",
+          "permitted_subset": null
+        },
+        {
+          "id": "resize",
+          "name": "resize",
+          "prop_type": {
+            "Shared": "resize-direction"
+          },
+          "default": {
+            "Member": "vertical"
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Native resize handle direction in multiline mode (T §3, TXT-07).",
+          "permitted_subset": {
+            "shared_type": "resize-direction",
+            "members": [
+              "both",
+              "horizontal",
+              "none",
+              "vertical"
+            ]
+          }
+        },
+        {
+          "id": "source",
+          "name": "source",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Slug source text for auto-generation until the user meaningfully edits (T §3, TXT-09).",
+          "permitted_subset": null
+        },
+        {
+          "id": "showClearButton",
+          "name": "showClearButton",
+          "prop_type": "Bool",
+          "default": {
+            "Bool": true
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Search-mode clear button visibility; default true (T §3, TXT-08; show_clear_button).",
+          "permitted_subset": null
+        },
+        {
+          "id": "prefix",
+          "name": "prefix",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Static non-editable text before the input, excluded from the editable value (T §2/§3/§6/§8, TXT-10).",
+          "permitted_subset": null
+        },
+        {
+          "id": "suffix",
+          "name": "suffix",
+          "prop_type": "String",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Static non-editable text after the input, excluded from the editable value (T §2/§3/§6/§8, TXT-10).",
+          "permitted_subset": null
+        },
+        {
+          "id": "maxLength",
+          "name": "maxLength",
+          "prop_type": "Number",
+          "default": "Null",
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Maximum character count (T §3, TXT-14; max_length).",
+          "permitted_subset": null
+        },
+        {
+          "id": "showCharCount",
+          "name": "showCharCount",
+          "prop_type": "Bool",
+          "default": {
+            "Bool": false
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Live character counter (T §3, TXT-14; show_char_count).",
+          "permitted_subset": null
+        },
+        {
+          "id": "size",
+          "name": "size",
+          "prop_type": {
+            "Shared": "control-size"
+          },
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Explicit control-size override; when null resolves from inherited presentation plus sizeRole (T §3, TXT-15; CROSS-07).",
+          "permitted_subset": {
+            "shared_type": "control-size",
+            "members": [
+              "lg",
+              "md",
+              "sm",
+              "xl",
+              "xs"
+            ]
+          }
+        },
+        {
+          "id": "sizeRole",
+          "name": "sizeRole",
+          "prop_type": {
+            "Shared": "control-size-role"
+          },
+          "default": {
+            "Member": "control"
+          },
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Semantic size offset from inherited presentation (T §3, TXT-15; CROSS-07).",
+          "permitted_subset": {
+            "shared_type": "control-size-role",
+            "members": [
+              "chrome",
+              "control",
+              "prominent"
+            ]
+          }
+        },
+        {
+          "id": "density",
+          "name": "density",
+          "prop_type": {
+            "Shared": "control-density"
+          },
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": false,
+          "description": "Explicit density override; when null inherited from presentation (T §3, TXT-15; CROSS-08).",
+          "permitted_subset": {
+            "shared_type": "control-density",
+            "members": [
+              "comfortable",
+              "compact",
+              "default"
+            ]
+          }
+        },
+        {
+          "id": "leading",
+          "name": "leading",
+          "prop_type": "Opaque",
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Leading affordance snippet — web slot only; the Rust spec's leading affordance is an icon name, a different surface (T §3, TXT-17; CROSS-03).",
+          "permitted_subset": null
+        },
+        {
+          "id": "trailing",
+          "name": "trailing",
+          "prop_type": "Opaque",
+          "default": null,
+          "default_expr": null,
+          "required": false,
+          "web_only": true,
+          "description": "Trailing affordance snippet — web slot only (T §3, TXT-17; CROSS-03).",
+          "permitted_subset": null
+        }
+      ],
+      "controlled_state": [
+        {
+          "id": "value",
+          "controlled": "value",
+          "seed": "defaultValue",
+          "rule": "do-not-mix",
+          "description": "Controlled `value` + onValueChange, or `defaultValue` seeding the uncontrolled mode; do not mix modes simultaneously (T §3, TXT-02; CROSS-04)."
+        }
+      ],
+      "events": [
+        {
+          "id": "value-change",
+          "name": "onValueChange",
+          "kind": "value-change",
+          "payload": {
+            "name": "value",
+            "kind": "string"
+          },
+          "timing": {
+            "phase": "during-interaction",
+            "debounce_ms": null,
+            "flush_on_blur": true,
+            "ordering": [
+              {
+                "before": "value-change",
+                "after": "blur",
+                "reason": "Blur flushes a pending debounced value-change before the blur passthrough fires (T §5, TXT-11/28)."
+              }
+            ]
+          },
+          "description": "Fires per input change respecting debounce; flush on blur; immediate for clear and slug source regeneration (T §5, TXT-11/13/28)."
+        },
+        {
+          "id": "submit",
+          "name": "onSubmit",
+          "kind": "submit",
+          "payload": {
+            "name": "value",
+            "kind": "string"
+          },
+          "timing": {
+            "phase": "during-interaction",
+            "debounce_ms": null,
+            "flush_on_blur": false,
+            "ordering": []
+          },
+          "description": "Fires on Enter, or Cmd/Ctrl+Enter in multiline mode, with the current value (T §5, TXT-13/20)."
+        },
+        {
+          "id": "cancel",
+          "name": "onCancel",
+          "kind": "cancel",
+          "payload": null,
+          "timing": {
+            "phase": "during-interaction",
+            "debounce_ms": null,
+            "flush_on_blur": false,
+            "ordering": []
+          },
+          "description": "Fires on Escape with no payload (T §5, TXT-13/20)."
+        },
+        {
+          "id": "clear",
+          "name": "onClear",
+          "kind": "clear",
+          "payload": null,
+          "timing": {
+            "phase": "immediate",
+            "debounce_ms": null,
+            "flush_on_blur": false,
+            "ordering": []
+          },
+          "description": "Fires when the built-in search clear button is used; the value commits immediately (T §5, TXT-08/13)."
+        },
+        {
+          "id": "focus",
+          "name": "onFocus",
+          "kind": "focus-change",
+          "payload": null,
+          "timing": {
+            "phase": "during-interaction",
+            "debounce_ms": null,
+            "flush_on_blur": false,
+            "ordering": []
+          },
+          "description": "Native focus passthrough (T §5, TXT-13)."
+        },
+        {
+          "id": "blur",
+          "name": "onBlur",
+          "kind": "focus-change",
+          "payload": null,
+          "timing": {
+            "phase": "on-blur",
+            "debounce_ms": null,
+            "flush_on_blur": false,
+            "ordering": []
+          },
+          "description": "Native blur passthrough; flushes a pending debounce and runs immediate validation when validateOnBlur (T §5, TXT-11/13/28)."
+        },
+        {
+          "id": "selection-change",
+          "name": "onSelectionChange",
+          "kind": "selection-change",
+          "payload": {
+            "name": "[anchor, head]",
+            "kind": "pair"
+          },
+          "timing": {
+            "phase": "during-interaction",
+            "debounce_ms": null,
+            "flush_on_blur": false,
+            "ordering": []
+          },
+          "description": "Caret/selection reported on Rust targets only — the host stores it like TreeSpec::focused_value; the web DOM owns selection and reports nothing (T §6, TXT-21)."
+        }
+      ],
+      "parts": [
+        {
+          "id": "root",
+          "name": "Root",
+          "parent": null,
+          "kind": "static",
+          "description": "Field chrome container with flex layout (T §2, TXT-17)."
+        },
+        {
+          "id": "prefix",
+          "name": "Prefix",
+          "parent": "root",
+          "kind": {
+            "conditional-expr": {
+              "when": {
+                "and": [
+                  {
+                    "is_present": {
+                      "operand": {
+                        "prop": "prefix"
+                      }
+                    }
+                  },
+                  {
+                    "not": {
+                      "is_empty": {
+                        "operand": {
+                          "prop": "prefix"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "description": "Non-editable text prefix with separator border; present when the prefix prop holds a non-empty value (T §2, TXT-10/17)."
+            }
+          },
+          "description": "Static prefix text (T §2)."
+        },
+        {
+          "id": "field",
+          "name": "Field",
+          "parent": "root",
+          "kind": "static",
+          "description": "Relative positioning layer for the editable surface and overlaid chrome (T §2, TXT-17)."
+        },
+        {
+          "id": "leading-affordance",
+          "name": "Leading Affordance",
+          "parent": "field",
+          "kind": {
+            "conditional-expr": {
+              "when": {
+                "or": [
+                  {
+                    "operand": {
+                      "visual": "leadingContent"
+                    }
+                  },
+                  {
+                    "eq": [
+                      {
+                        "operand": {
+                          "prop": "type"
+                        }
+                      },
+                      {
+                        "operand": {
+                          "literal": {
+                            "member": {
+                              "shared_type": "text-input-type",
+                              "member": "search"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "description": "Icon or adornment inside the editable field's leading edge; present when the leading slot is provided or the type is search (automatic search icon) (T §2, TXT-08/17)."
+            }
+          },
+          "description": "Leading affordance slot (T §2)."
+        },
+        {
+          "id": "input-control",
+          "name": "Input Control",
+          "parent": "field",
+          "kind": "static",
+          "description": "Native input element — <input> single-line or <textarea> multiline; the element switch and the --multiline modifier class are a hand-written runtime branch (T §2, TXT-06/07/17)."
+        },
+        {
+          "id": "trailing-affordance",
+          "name": "Trailing Affordance",
+          "parent": "field",
+          "kind": {
+            "conditional-expr": {
+              "when": {
+                "operand": {
+                  "visual": "trailingContent"
+                }
+              },
+              "description": "Icon or action inside the editable field's trailing edge; present when the trailing slot is provided (T §2, TXT-17)."
+            }
+          },
+          "description": "Trailing affordance slot (T §2)."
+        },
+        {
+          "id": "clear-button",
+          "name": "Clear Button",
+          "parent": "field",
+          "kind": {
+            "conditional-expr": {
+              "when": {
+                "and": [
+                  {
+                    "and": [
+                      {
+                        "and": [
+                          {
+                            "eq": [
+                              {
+                                "operand": {
+                                  "prop": "type"
+                                }
+                              },
+                              {
+                                "operand": {
+                                  "literal": {
+                                    "member": {
+                                      "shared_type": "text-input-type",
+                                      "member": "search"
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "operand": {
+                              "prop": "showClearButton"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "not": {
+                          "operand": {
+                            "prop": "disabled"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "and": [
+                      {
+                        "not": {
+                          "operand": {
+                            "prop": "readOnly"
+                          }
+                        }
+                      },
+                      {
+                        "not": {
+                          "is_empty": {
+                            "operand": {
+                              "visual": "currentValue"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "description": "Search clear action inside the field's trailing edge; present in search mode with a value when not disabled/read-only (T §2, TXT-08/17)."
+            }
+          },
+          "description": "Search-mode clear button (T §2)."
+        },
+        {
+          "id": "validation-indicator",
+          "name": "Validation Indicator",
+          "parent": "field",
+          "kind": {
+            "conditional-expr": {
+              "when": {
+                "and": [
+                  {
+                    "operand": {
+                      "prop": "showValidationStatus"
+                    }
+                  },
+                  {
+                    "ne": [
+                      {
+                        "operand": {
+                          "visual": "effectiveValidationState"
+                        }
+                      },
+                      {
+                        "operand": {
+                          "literal": {
+                            "member": {
+                              "shared_type": "validation-state",
+                              "member": "none"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "description": "Pending spinner or valid/invalid status icon overlaid inside the field; present when validation chrome is enabled and the effective state is not none (T §2, TXT-12/17/19)."
+            }
+          },
+          "description": "Built-in validation indicator (T §2)."
+        },
+        {
+          "id": "suffix",
+          "name": "Suffix",
+          "parent": "root",
+          "kind": {
+            "conditional-expr": {
+              "when": {
+                "and": [
+                  {
+                    "is_present": {
+                      "operand": {
+                        "prop": "suffix"
+                      }
+                    }
+                  },
+                  {
+                    "not": {
+                      "is_empty": {
+                        "operand": {
+                          "prop": "suffix"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "description": "Non-editable text suffix with separator border; present when the suffix prop holds a non-empty value (T §2, TXT-10/17)."
+            }
+          },
+          "description": "Static suffix text (T §2)."
+        },
+        {
+          "id": "char-count",
+          "name": "Character Count",
+          "parent": "root",
+          "kind": {
+            "conditional": {
+              "when": "showCharCount",
+              "description": "Live character count, optionally with max; present when showCharCount (T §2, TXT-14/17)."
+            }
+          },
+          "description": "Live character counter (T §2)."
+        }
+      ],
+      "attributes": [
+        {
+          "id": "validation-state",
+          "name": "data-validation-state",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "effectiveValidationState"
+            }
+          },
+          "description": "The effective validation state — the validationStatusToState mapping when a validator is present, otherwise the caller-owned validationState; always emitted (T §9, TXT-18/19)."
+        },
+        {
+          "id": "size",
+          "name": "data-size",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "resolvedSize"
+            }
+          },
+          "description": "The resolved control size (explicit or sizeRole-derived); always emitted (T §9, TXT-15/18; CROSS-07)."
+        },
+        {
+          "id": "density",
+          "name": "data-density",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "resolvedDensity"
+            }
+          },
+          "description": "The resolved density (explicit or inherited); always emitted (T §9, TXT-15/18; CROSS-08)."
+        },
+        {
+          "id": "type",
+          "name": "data-type",
+          "form": "valued",
+          "emission": "always",
+          "source": "type",
+          "condition": null,
+          "value": null,
+          "description": "The type prop value; always emitted — documented in the corpus row TXT-18, not in the contract prose (T §9 counting note, TXT-18)."
+        },
+        {
+          "id": "control-padding-start",
+          "name": "--poodle-text-input-control-padding-start",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "controlPaddingStart"
+            }
+          },
+          "description": "Start padding reservation so text never runs under the leading affordance (T §8, TXT-16)."
+        },
+        {
+          "id": "control-padding-end",
+          "name": "--poodle-text-input-control-padding-end",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "controlPaddingEnd"
+            }
+          },
+          "description": "End padding reservation for the trailing adornment count (T §8, TXT-16)."
+        },
+        {
+          "id": "multiline-padding-end",
+          "name": "--poodle-text-input-multiline-padding-end",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "multilineBottomPadding"
+            }
+          },
+          "description": "Multiline bottom padding reservation so typed text never runs under the overlaid char count (T §8, TXT-07/16)."
+        },
+        {
+          "id": "clear-inset-inline-end",
+          "name": "--poodle-text-input-clear-inset-inline-end",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "clearInsetInlineEnd"
+            }
+          },
+          "description": "Clear button inline-end inset, pushed left of the validation indicator when both render (T §8, TXT-16)."
+        },
+        {
+          "id": "trailing-inset-inline-end",
+          "name": "--poodle-text-input-trailing-inset-inline-end",
+          "form": "valued",
+          "emission": "always",
+          "source": null,
+          "condition": null,
+          "value": {
+            "operand": {
+              "visual": "trailingInsetInlineEnd"
+            }
+          },
+          "description": "Trailing affordance inline-end inset (T §8, TXT-16)."
+        }
+      ],
+      "axes": {
+        "size": {
+          "explicit": null,
+          "size_role": "control",
+          "fallback": {
+            "coalesce": [
+              {
+                "operand": {
+                  "prop": "size"
+                }
+              },
+              {
+                "operand": {
+                  "axis": "size"
+                }
+              }
+            ]
+          },
+          "ladder": [
+            {
+              "size": "xs",
+              "metrics": {
+                "font-size": {
+                  "rem": 0.75
+                },
+                "min-height": {
+                  "text": "calc(control-height - 0.5rem)"
+                },
+                "padding": {
+                  "text": "0 calc(space-control-x - 0.125rem)"
+                }
+              },
+              "description": "Extra-small rung (T §8, TXT-15)."
+            },
+            {
+              "size": "sm",
+              "metrics": {
+                "font-size": {
+                  "text": "typography-body-size"
+                },
+                "min-height": {
+                  "text": "calc(control-height - 0.375rem)"
+                },
+                "padding": {
+                  "text": "0 calc(space-control-x - 0.0625rem)"
+                }
+              },
+              "description": "Small rung (T §8, TXT-15)."
+            },
+            {
+              "size": "md",
+              "metrics": {
+                "font-size": {
+                  "text": "typography-body-size"
+                },
+                "min-height": {
+                  "text": "control-height"
+                },
+                "padding": {
+                  "text": "0 space-control-x"
+                }
+              },
+              "description": "Default rung (T §8, TXT-15)."
+            },
+            {
+              "size": "lg",
+              "metrics": {
+                "font-size": {
+                  "rem": 0.9375
+                },
+                "min-height": {
+                  "text": "calc(control-height + 0.375rem)"
+                },
+                "padding": {
+                  "text": "0 calc(space-control-x + 0.125rem)"
+                }
+              },
+              "description": "Large rung (T §8, TXT-15)."
+            },
+            {
+              "size": "xl",
+              "metrics": {
+                "font-size": {
+                  "rem": 1.0
+                },
+                "min-height": {
+                  "text": "calc(control-height + 0.5rem)"
+                },
+                "padding": {
+                  "text": "0 calc(space-control-x + 0.1875rem)"
+                }
+              },
+              "description": "Extra-large rung (T §8, TXT-15)."
+            }
+          ]
+        },
+        "density": {
+          "explicit": null,
+          "adjustments": [
+            {
+              "density": "compact",
+              "applies_to": "root",
+              "inline": {
+                "rem": -0.125
+              },
+              "block": {
+                "rem": -0.0625
+              },
+              "description": "Compact shifts inline and block padding via the density adjustment vars — the documented §8 orthogonality exception: block padding changes the effective vertical text inset on the control (T §8, TXT-15)."
+            },
+            {
+              "density": "comfortable",
+              "applies_to": "root",
+              "inline": {
+                "rem": 0.125
+              },
+              "block": {
+                "rem": 0.0625
+              },
+              "description": "Comfortable shifts inline and block padding the other way (T §8, TXT-15)."
+            }
+          ]
+        },
+        "orientation": null
+      },
+      "tokens": [
+        {
+          "path": "color.background.surface",
+          "group": "semantic",
+          "description": "Field fill (T §8)."
+        },
+        {
+          "path": "color.border.default",
+          "group": "semantic",
+          "description": "Field border and affix separator (T §8)."
+        },
+        {
+          "path": "color.accent.focusRing",
+          "group": "semantic",
+          "description": "Focus border and focus shadow (T §8)."
+        },
+        {
+          "path": "color.accent.base",
+          "group": "semantic",
+          "description": "Pending validation border and indicator (T §4/§8)."
+        },
+        {
+          "path": "color.status.danger",
+          "group": "semantic",
+          "description": "Invalid border and indicator (T §4/§8)."
+        },
+        {
+          "path": "color.status.success",
+          "group": "semantic",
+          "description": "Valid border and indicator (T §4/§8)."
+        },
+        {
+          "path": "color.text.primary",
+          "group": "semantic",
+          "description": "Editable value text (T §8)."
+        },
+        {
+          "path": "color.text.secondary",
+          "group": "semantic",
+          "description": "Placeholder text (T §8)."
+        },
+        {
+          "path": "color.text.tertiary",
+          "group": "semantic",
+          "description": "Character count text — text-input.css references --poodle-color-text-muted, which does not resolve against the semantic registry (a pre-existing token gap); the tertiary family is the intended record (T §8, TXT-27; finding for g13.008)."
+        },
+        {
+          "path": "color.icon.muted",
+          "group": "semantic",
+          "description": "Affordance icons (T §8)."
+        },
+        {
+          "path": "state.opacity.muted",
+          "group": "semantic",
+          "description": "Placeholder and affix opacity (T §8)."
+        },
+        {
+          "path": "state.opacity.disabled",
+          "group": "semantic",
+          "description": "Disabled opacity on the root (T §4/§8)."
+        },
+        {
+          "path": "radius.control",
+          "group": "semantic",
+          "description": "Field radius — resolves directly from --poodle-radius-control (T §8/§9/§10, TXT-27)."
+        }
+      ],
+      "recipe_hooks": [
+        {
+          "hook": "--poodle-recipe-text-input-fill",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-text-input-fill"
+            },
+            {
+              "kind": "token",
+              "target": "color.background.surface"
+            }
+          ],
+          "description": "Field fill; surface 88% color-mix base (T §8, TXT-27)."
+        },
+        {
+          "hook": "--poodle-recipe-text-input-fill-focus",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-text-input-fill-focus"
+            },
+            {
+              "kind": "component-variable",
+              "target": "--poodle-text-input-fill"
+            },
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-text-input-fill"
+            },
+            {
+              "kind": "token",
+              "target": "color.background.surface"
+            }
+          ],
+          "description": "Focus fill; falls back through the component variable to the fill recipe (T §8, TXT-27)."
+        },
+        {
+          "hook": "--poodle-recipe-text-input-border",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-text-input-border"
+            },
+            {
+              "kind": "token",
+              "target": "color.border.default"
+            }
+          ],
+          "description": "Field border (T §8, TXT-27)."
+        },
+        {
+          "hook": "--poodle-recipe-text-input-border-focus",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-text-input-border-focus"
+            },
+            {
+              "kind": "token",
+              "target": "color.accent.focusRing"
+            }
+          ],
+          "description": "Focus border (T §8, TXT-27)."
+        },
+        {
+          "hook": "--poodle-recipe-text-input-shadow",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-text-input-shadow"
+            }
+          ],
+          "description": "Resting shadow; the fallback is the literal `none` — no semantic token exists, so the chain records the hook alone (T §8, TXT-27)."
+        },
+        {
+          "hook": "--poodle-recipe-text-input-shadow-focus",
+          "chain": [
+            {
+              "kind": "recipe-hook",
+              "target": "--poodle-recipe-text-input-shadow-focus"
+            },
+            {
+              "kind": "token",
+              "target": "color.accent.focusRing"
+            }
+          ],
+          "description": "Focus shadow — `0 0 0 var(--poodle-border-width-focus) color-mix(... focusRing 28%, transparent)`; the focusRing path names the family (T §8, TXT-27)."
+        }
+      ],
+      "accessibility": {
+        "role": "textbox",
+        "name_rule": {
+          "from-prop": "ariaLabel"
+        },
+        "name_source": {
+          "prop": "ariaLabel"
+        },
+        "aria": [
+          {
+            "aria_attr": "aria-label",
+            "source": "ariaLabel",
+            "description": "Accessible name from the prop; required when no external label exists; placeholder never counts as the name (T §6, TXT-26)."
+          },
+          {
+            "aria_attr": "aria-describedby",
+            "source": "describedBy",
+            "description": "Described-by target; the built-in validation-message id joins it so the invalid message is announced (T §6, TXT-12/26)."
+          },
+          {
+            "aria_attr": "aria-invalid",
+            "source": "validationState",
+            "description": "\"true\" when the effective validation state is invalid — the runtime emits from the effective state, which may be the built-in mapping (T §6, TXT-12/26)."
+          },
+          {
+            "aria_attr": "aria-busy",
+            "source": "validationState",
+            "description": "\"true\" when the effective validation state is pending (T §6, TXT-12/26)."
+          }
+        ],
+        "native": [
+          {
+            "name": "id",
+            "description": "Element id for external label association (T §6, TXT-01)."
+          },
+          {
+            "name": "name",
+            "description": "Form submission name (T §6, TXT-04)."
+          },
+          {
+            "name": "type",
+            "description": "Native input type; \"multiline\" renders a textarea, \"slug\" renders type=\"text\" (T §6, TXT-06/09)."
+          },
+          {
+            "name": "autocomplete",
+            "description": "Native autocomplete passthrough (T §6, TXT-04)."
+          },
+          {
+            "name": "disabled",
+            "description": "Native disabled attribute (T §6, TXT-05)."
+          },
+          {
+            "name": "readonly",
+            "description": "Native readonly — NOT aria-readonly (T §6, TXT-05)."
+          },
+          {
+            "name": "required",
+            "description": "Native required attribute (T §6, TXT-04)."
+          },
+          {
+            "name": "pattern",
+            "description": "Native pattern attribute (T §6, TXT-04)."
+          },
+          {
+            "name": "maxlength",
+            "description": "Native maxlength from the maxLength prop (T §6, TXT-14)."
+          },
+          {
+            "name": "inputmode",
+            "description": "Native inputmode (\"text\" in slug mode) (T §6, TXT-04/09)."
+          },
+          {
+            "name": "list",
+            "description": "Native list attribute for datalist association (T §6, TXT-04)."
+          },
+          {
+            "name": "autocapitalize",
+            "description": "Native autocapitalize (\"off\" in slug mode) (T §6, TXT-04/09)."
+          },
+          {
+            "name": "spellcheck",
+            "description": "Native spellcheck (false in slug mode) (T §6, TXT-04/09)."
+          },
+          {
+            "name": "autocorrect",
+            "description": "Native autocorrect (\"off\" in slug mode; React omits autocorrect entirely — OBS-03) (T §6, TXT-04/09)."
+          },
+          {
+            "name": "enterkeyhint",
+            "description": "Native enterkeyhint (T §6, TXT-04)."
+          },
+          {
+            "name": "autofocus",
+            "description": "Web-only native autofocus; falsy omits the attribute (T §3, TXT-04)."
+          }
+        ],
+        "description": "Native input role; aria-label from the ariaLabel prop (required without an external label), aria-describedby joined with the validation-message id, aria-invalid/aria-busy from the effective validation state; native readonly rather than aria-readonly; placeholder never counts as the name; the validation indicator is decorative and aria-hidden (T §6, TXT-26)."
+      },
+      "capabilities": [
+        {
+          "capability": "focus",
+          "purpose": "Caret focus ownership: the web DOM owns focus on the native input (autofocus, the imperative focus()); the Rust backends own focus observation (on_focus_change — only they can see a blur) and caret drawing, with isFocused a host-driven prop that does not drive the caret (T §6 Caret Ownership, TXT-21)."
+        },
+        {
+          "capability": "text-editing",
+          "purpose": "Selection and editing semantics: the web runtime's editing model IS the browser (no TS text machine); the Rust targets drive the shared headless model (edit_transition, insert_transition, selected_text, word_range_at) from key events and insertions. The DOM owns selection on web; the host owns the caret position on Rust (selectionStart/selectionEnd, onSelectionChange) — selection is not a first-class capability name, recorded as a finding (T §6, TXT-21/22/23; IR-05)."
+        },
+        {
+          "capability": "ime",
+          "purpose": "Composition: the web DOM owns composition natively — the components intercept no composition events, and a composition sequence must not fire intermediate onValueChange (the runtime filters input events by isComposing); the Rust backends register a platform text input handler with a UTF-16 boundary and a backend-owned marked range (T §6, TXT-24)."
+        },
+        {
+          "capability": "clipboard",
+          "purpose": "Copy/cut/paste: the web DOM owns the clipboard natively; the Rust backends own the platform clipboard (the text comes from outside the tree) while the shared edit model owns where a paste lands (insert_transition) and what a copy/cut reads (selected_text); copying an empty selection leaves the clipboard alone (T §6, TXT-23)."
+        },
+        {
+          "capability": "measurement",
+          "purpose": "Glyph measurement for caret placement: the browser measures natively; the Rust backends measure shaped glyphs (shape_line/x_for_index) to draw the caret at character n and answer the reverse question (closest_index_for_x makes click-to-position and drag-to-select possible) (T §6, TXT-21/22)."
+        },
+        {
+          "capability": "timers",
+          "purpose": "Debounce and validation timing owned by the component: the web components own their setTimeout lifecycle (debounce, validationDebounce) with cleanup on destroy; the Rust targets have no timer surface today — the host drives timing (T §5, TXT-11/12/28; CROSS-17)."
+        }
+      ],
+      "keyboard": [
+        {
+          "id": "insert-character",
+          "keys": [
+            {
+              "key": "Character",
+              "modifiers": []
+            }
+          ],
+          "action": "insert-text",
+          "effect": "A printable character replaces the selection at the caret (T §6, TXT-20).",
+          "requires": "text-editing",
+          "description": "Character input inserts text (T §6, TXT-20)."
+        },
+        {
+          "id": "move-caret-left",
+          "keys": [
+            {
+              "key": "ArrowLeft",
+              "modifiers": []
+            }
+          ],
+          "action": "move-caret",
+          "effect": "Moves the caret left; a plain arrow collapses a selection to its edge; accel moves to the start (T §6, TXT-20).",
+          "requires": "text-editing",
+          "description": "ArrowLeft moves the caret (T §6, TXT-20)."
+        },
+        {
+          "id": "move-caret-right",
+          "keys": [
+            {
+              "key": "ArrowRight",
+              "modifiers": []
+            }
+          ],
+          "action": "move-caret",
+          "effect": "Moves the caret right (T §6, TXT-20).",
+          "requires": "text-editing",
+          "description": "ArrowRight moves the caret (T §6, TXT-20)."
+        },
+        {
+          "id": "move-to-start",
+          "keys": [
+            {
+              "key": "Home",
+              "modifiers": []
+            }
+          ],
+          "action": "move-caret",
+          "effect": "Moves the caret to the start of the value (T §6, TXT-20).",
+          "requires": "text-editing",
+          "description": "Home moves to the start (T §6, TXT-20)."
+        },
+        {
+          "id": "move-to-end",
+          "keys": [
+            {
+              "key": "End",
+              "modifiers": []
+            }
+          ],
+          "action": "move-caret",
+          "effect": "Moves the caret to the end of the value (T §6, TXT-20).",
+          "requires": "text-editing",
+          "description": "End moves to the end (T §6, TXT-20)."
+        },
+        {
+          "id": "extend-selection-left",
+          "keys": [
+            {
+              "key": "ArrowLeft",
+              "modifiers": [
+                "shift"
+              ]
+            }
+          ],
+          "action": "extend-selection",
+          "effect": "Shift+ArrowLeft extends the selection leftward, keeping the anchor (T §6, TXT-20).",
+          "requires": "text-editing",
+          "description": "Shift+Arrow extends selection (T §6, TXT-20)."
+        },
+        {
+          "id": "extend-selection-right",
+          "keys": [
+            {
+              "key": "ArrowRight",
+              "modifiers": [
+                "shift"
+              ]
+            }
+          ],
+          "action": "extend-selection",
+          "effect": "Shift+ArrowRight extends the selection rightward (T §6, TXT-20).",
+          "requires": "text-editing",
+          "description": "Shift+Arrow extends selection (T §6, TXT-20)."
+        },
+        {
+          "id": "copy",
+          "keys": [
+            {
+              "key": "c",
+              "modifiers": [
+                "meta"
+              ]
+            }
+          ],
+          "action": "copy",
+          "effect": "Copies the selected text; an empty selection leaves the clipboard alone (T §6, TXT-20/23).",
+          "requires": "clipboard",
+          "description": "Platform copy shortcut (T §6, TXT-20/23)."
+        },
+        {
+          "id": "cut",
+          "keys": [
+            {
+              "key": "x",
+              "modifiers": [
+                "meta"
+              ]
+            }
+          ],
+          "action": "cut",
+          "effect": "Copies then deletes the selection through the shared edit model (T §6, TXT-20/23).",
+          "requires": "clipboard",
+          "description": "Platform cut shortcut (T §6, TXT-20/23)."
+        },
+        {
+          "id": "paste",
+          "keys": [
+            {
+              "key": "v",
+              "modifiers": [
+                "meta"
+              ]
+            }
+          ],
+          "action": "paste",
+          "effect": "Inserts clipboard text at the caret through insert_transition; a multi-line paste collapses to one line (T §6, TXT-20/23).",
+          "requires": "clipboard",
+          "description": "Platform paste shortcut (T §6, TXT-20/23)."
+        },
+        {
+          "id": "select-all",
+          "keys": [
+            {
+              "key": "a",
+              "modifiers": [
+                "meta"
+              ]
+            }
+          ],
+          "action": "select-all",
+          "effect": "Selects the whole value; typing after replaces it (T §6, TXT-20).",
+          "requires": "text-editing",
+          "description": "Platform select-all shortcut (T §6, TXT-20)."
+        },
+        {
+          "id": "undo",
+          "keys": [
+            {
+              "key": "z",
+              "modifiers": [
+                "meta"
+              ]
+            }
+          ],
+          "action": "undo",
+          "effect": "Steps back one undoable step; a continuous run of typing is one step (coalesces); editing after undo discards the redo tail; history is ephemeral backend-owned state (T §6, TXT-25).",
+          "requires": "text-editing",
+          "description": "accel+Z undoes (T §6, TXT-25)."
+        },
+        {
+          "id": "redo",
+          "keys": [
+            {
+              "key": "z",
+              "modifiers": [
+                "shift",
+                "meta"
+              ]
+            }
+          ],
+          "action": "redo",
+          "effect": "Steps forward one undoable step (T §6, TXT-25).",
+          "requires": "text-editing",
+          "description": "accel+shift+Z redoes (T §6, TXT-25)."
+        },
+        {
+          "id": "submit",
+          "keys": [
+            {
+              "key": "Enter",
+              "modifiers": []
+            }
+          ],
+          "action": "submit",
+          "effect": "Calls onSubmit with the current value; Cmd/Ctrl+Enter in multiline mode (T §5/§6, TXT-13/20).",
+          "requires": null,
+          "description": "Enter submits (T §6, TXT-20)."
+        },
+        {
+          "id": "cancel",
+          "keys": [
+            {
+              "key": "Escape",
+              "modifiers": []
+            }
+          ],
+          "action": "cancel",
+          "effect": "Calls onCancel (T §5/§6, TXT-13/20).",
+          "requires": null,
+          "description": "Escape cancels (T §6, TXT-20)."
+        },
+        {
+          "id": "move-focus-next",
+          "keys": [
+            {
+              "key": "Tab",
+              "modifiers": []
+            }
+          ],
+          "action": "move-focus",
+          "effect": "Moves focus out of the control; text-focused shortcut suppression while focused (T §6, TXT-20).",
+          "requires": "focus",
+          "description": "Tab moves focus out (T §6, TXT-20)."
+        },
+        {
+          "id": "move-focus-previous",
+          "keys": [
+            {
+              "key": "Tab",
+              "modifiers": [
+                "shift"
+              ]
+            }
+          ],
+          "action": "move-focus",
+          "effect": "Shift+Tab moves focus backward out of the control (T §6, TXT-20).",
+          "requires": "focus",
+          "description": "Shift+Tab moves focus backward (T §6, TXT-20)."
+        }
+      ],
+      "visual_state": [
+        {
+          "id": "text-input-visual-state",
+          "name": "TextInputVisualState",
+          "fields": [
+            {
+              "id": "currentValue",
+              "name": "currentValue",
+              "kind": "string",
+              "description": "The merged value — controlled value ?? \"\", or the uncontrolled state (T §3, TXT-02)."
+            },
+            {
+              "id": "effectiveValidationState",
+              "name": "effectiveValidationState",
+              "kind": {
+                "enum": "validation-state"
+              },
+              "description": "The validationStatusToState mapping when a validator is present, otherwise the caller-owned validationState (T §4, TXT-12)."
+            },
+            {
+              "id": "resolvedSize",
+              "name": "resolvedSize",
+              "kind": {
+                "enum": "control-size"
+              },
+              "description": "Explicit size or sizeRole resolution (T §7, TXT-15; CROSS-07)."
+            },
+            {
+              "id": "resolvedDensity",
+              "name": "resolvedDensity",
+              "kind": {
+                "enum": "control-density"
+              },
+              "description": "Explicit density or inherited presentation (T §8, TXT-15; CROSS-08)."
+            },
+            {
+              "id": "leadingContent",
+              "name": "leadingContent",
+              "kind": "boolean",
+              "description": "A leading affordance snippet is provided (T §2, TXT-17)."
+            },
+            {
+              "id": "trailingContent",
+              "name": "trailingContent",
+              "kind": "boolean",
+              "description": "A trailing affordance snippet is provided (T §2, TXT-17)."
+            },
+            {
+              "id": "charCount",
+              "name": "charCount",
+              "kind": "number",
+              "description": "currentValue length; the over-limit modifier (charCount > maxLength) is a value-dependent class the vocabulary cannot express (T §8, TXT-14)."
+            },
+            {
+              "id": "controlPaddingStart",
+              "name": "controlPaddingStart",
+              "kind": "string",
+              "description": "Start padding reservation calc() string (T §8, TXT-16)."
+            },
+            {
+              "id": "controlPaddingEnd",
+              "name": "controlPaddingEnd",
+              "kind": "string",
+              "description": "End padding reservation calc() string (T §8, TXT-16)."
+            },
+            {
+              "id": "multilineBottomPadding",
+              "name": "multilineBottomPadding",
+              "kind": "string",
+              "description": "Multiline bottom padding calc() string (T §8, TXT-07/16)."
+            },
+            {
+              "id": "clearInsetInlineEnd",
+              "name": "clearInsetInlineEnd",
+              "kind": "string",
+              "description": "Clear button inset calc() string (T §8, TXT-16)."
+            },
+            {
+              "id": "trailingInsetInlineEnd",
+              "name": "trailingInsetInlineEnd",
+              "kind": "string",
+              "description": "Trailing affordance inset calc() string (T §8, TXT-16)."
+            }
+          ],
+          "description": "The projection the runtime derives, which drawing consumes — value, validation state, resolved axes, and the TXT-16 padding strings; never machine internals (T §4; CROSS-14, TXT-19, IR-06)."
+        }
+      ],
+      "conformance": [
+        "text-input"
+      ],
+      "extensions": [
+        {
+          "id": "jetstream-clear-only",
+          "owning_runtime": "jetstream",
+          "reason": "Jetstream delivers pointer events only: the clear button is the only part of a field a pointer can reach, so it is the only wired event; the host owns the editor and feeds the value back through the spec (T §10a/§12, TXT-31).",
+          "parity_effect": "onValueChange, onKeyDown, onSubmit and onCancel have no route on Jetstream; disabled/read-only fields do not clear.",
+          "evidence_surface": "docs/contracts/components/text-input.md §10a/§12",
+          "removal_condition": "None — the difference is intentional.",
+          "description": "TXT-31 Jetstream clear-only events."
+        },
+        {
+          "id": "react-omits-autocorrect",
+          "owning_runtime": "react",
+          "reason": "React's TextInputProps surface omits the autocorrect prop the Svelte surface carries (OBS-03); the DOM asymmetry is pre-existing and unchanged (T §3, TXT-04).",
+          "parity_effect": "React never emits the native autocorrect attribute; Svelte does when the prop is set.",
+          "evidence_surface": "docs/roadmaps/g13/pilot-expressiveness-corpus.md TXT-04 (OBS-03)",
+          "removal_condition": "Add autocorrect to the React surface (a prop-surface change, outside this card's scope).",
+          "description": "OBS-03 React omits autocorrect."
+        }
+      ]
+    }
+  ],
+  "conformance_vectors": [
+    {
+      "id": "text-input",
+      "name": "text-input",
+      "applies_to": [
+        "gpui",
+        "jetstream"
+      ],
+      "steps": [
+        {
+          "id": "insert-at-caret",
+          "name": "character input inserts at the caret",
+          "kind": "transition",
+          "guard": null,
+          "description": "A printable character replaces the selection at the caret, not appended at the end (T §6; EDIT_MODEL edit_transition tests)."
+        },
+        {
+          "id": "selection-replaces",
+          "name": "typing replaces the selection",
+          "kind": "transition",
+          "guard": null,
+          "description": "Typing over a selection replaces the whole range; the caret lands after the inserted text (T §6; edit_transition shift-arrow tests)."
+        },
+        {
+          "id": "deletion-semantics",
+          "name": "backspace/delete at the caret",
+          "kind": "transition",
+          "guard": null,
+          "description": "Backspace removes before the caret, delete removes at it; at the edges both are inert but consumed — a key that is ours but changes nothing must not fall through (T §6; edit_transition tests)."
+        },
+        {
+          "id": "caret-moves-do-not-edit",
+          "name": "arrows, Home and End move without editing",
+          "kind": "invariant",
+          "guard": null,
+          "description": "Left/right/home/end move the caret (or collapse a selection to its edge) and never change the value (T §6; edit_transition tests)."
+        },
+        {
+          "id": "shift-extends-selection",
+          "name": "Shift+Arrow extends the selection",
+          "kind": "transition",
+          "guard": null,
+          "description": "Shift keeps the anchor and moves the head; the following keystroke replaces the extended selection (T §6; edit_transition tests)."
+        },
+        {
+          "id": "select-all-replaces",
+          "name": "select-all then type replaces everything",
+          "kind": "transition",
+          "guard": null,
+          "description": "Accel+A selects the whole value; typing after replaces it (T §6; edit_transition tests)."
+        },
+        {
+          "id": "paste-lands-at-caret",
+          "name": "paste lands at the caret",
+          "kind": "transition",
+          "guard": null,
+          "description": "insert_transition places clipboard text at the caret, replacing any selection; multi-line collapse is backend-owned (T §6, TXT-23; insert_transition tests)."
+        },
+        {
+          "id": "word-boundaries",
+          "name": "a word is a run of alphanumerics or underscore",
+          "kind": "guard",
+          "guard": null,
+          "description": "word_range_at defines double-click selection: a run of alphanumerics/_ is a word; punctuation is its own run; the trailing caret belongs to the word before it (T §6, TXT-22; word_range_at tests)."
+        },
+        {
+          "id": "undo-coalesces-typing-runs",
+          "name": "a continuous typing run is one undo step",
+          "kind": "transition",
+          "guard": null,
+          "description": "coalesces collapses consecutive single-character insertions at the caret into one step; a deletion, a paste, or a caret that jumped breaks the run; replacing a selection begins its own step (T §6, TXT-25; coalesces tests)."
+        },
+        {
+          "id": "submit-cancel-tab-fall-through",
+          "name": "Enter, Escape and Tab are not edit-model keys",
+          "kind": "guard",
+          "guard": null,
+          "description": "edit_transition returns None for keys the model does not own — Enter (submit), Escape (cancel), Tab (focus out) — so they reach the host handlers (T §6, TXT-20; edit_transition tests)."
+        }
+      ],
+      "description": "The shared hand-written edit model's semantics, implemented by the Rust targets from packages/contracts/headless/src/text_input.rs — a machine that stays hand-written (R5) and is pinned by its own unit tests. Executable vector evidence: **none** — packages/contracts/headless/vectors/machines.json carries no `text` key (GAP-01) and the vectors are a fixed target (R5); the b045 slider-vector thinness finding generalizes: the text machine is unit-test-pinned only, in both runtimes."
+    }
+  ],
+  "scenes": [],
+  "specimen_registry": null
+}
