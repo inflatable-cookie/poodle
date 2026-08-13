@@ -11,28 +11,19 @@
  */
 
 import type { TransitionResult } from "./machine";
+import type {
+  ModalState,
+  ModalContext,
+  ModalEvent,
+  ModalEffect,
+} from "./generated/machines/modal";
 
-export type ModalState = "closed" | "open";
-
-export interface ModalContext {
-  dismissOnEscape: boolean;
-  dismissOnBackdrop: boolean;
-}
-
-export type ModalEvent =
-  | { type: "OPEN" }
-  | { type: "CLOSE" }
-  | { type: "REQUEST_CLOSE" }
-  | { type: "ESCAPE" }
-  | { type: "BACKDROP_CLICK" };
-
-export type ModalEffect =
-  | { type: "emitOpenChange"; open: boolean }
-  | { type: "emitRequestClose" }
-  | { type: "saveFocusAndEnter" }
-  | { type: "restoreFocus" }
-  | { type: "lockBodyScroll" }
-  | { type: "unlockBodyScroll" };
+export type {
+  ModalState,
+  ModalContext,
+  ModalEvent,
+  ModalEffect,
+};
 
 export type ModalResult = TransitionResult<ModalState, ModalContext, ModalEffect>;
 

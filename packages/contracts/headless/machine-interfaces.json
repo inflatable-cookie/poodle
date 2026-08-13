@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "machines": [
+    {
+      "id": "hover",
+      "prefix": "Hover",
+      "states": [
+        { "ts": "closed", "rs": "Closed" },
+        { "ts": "opening", "rs": "Opening" },
+        { "ts": "open", "rs": "Open" },
+        { "ts": "closing", "rs": "Closing" }
+      ],
+      "context": {
+        "copy": true,
+        "eq": false,
+        "fields": [
+          { "tsName": "openDelayMs", "rsName": "open_delay_ms", "type": "number" },
+          { "tsName": "closeDelayMs", "rsName": "close_delay_ms", "type": "number" }
+        ]
+      },
+      "events": {
+        "copy": true,
+        "eq": true,
+        "variants": [
+          { "tsType": "ENTER", "rsVariant": "Enter" },
+          { "tsType": "LEAVE", "rsVariant": "Leave" },
+          { "tsType": "TIMER_FIRE", "rsVariant": "TimerFire" },
+          { "tsType": "DISMISS", "rsVariant": "Dismiss" },
+          {
+            "tsType": "SET_OPEN",
+            "rsVariant": "SetOpen",
+            "fields": [
+              { "tsName": "open", "rsName": "open", "type": "boolean" }
+            ]
+          }
+        ]
+      },
+      "effects": {
+        "copy": true,
+        "eq": false,
+        "variants": [
+          {
+            "tsType": "startTimer",
+            "rsVariant": "StartTimer",
+            "fields": [
+              { "tsName": "ms", "rsName": "ms", "type": "number" }
+            ]
+          },
+          { "tsType": "clearTimer", "rsVariant": "ClearTimer" },
+          {
+            "tsType": "emitOpenChange",
+            "rsVariant": "EmitOpenChange",
+            "fields": [
+              { "tsName": "open", "rsName": "open", "type": "boolean" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "menu",
+      "prefix": "Menu",
+      "states": [
+        { "ts": "closed", "rs": "Closed" },
+        { "ts": "open", "rs": "Open" }
+      ],
+      "context": {
+        "copy": true,
+        "eq": true,
+        "default": true,
+        "fields": [
+          {
+            "tsName": "disabled",
+            "rsName": "disabled",
+            "type": "boolean",
+            "tsOptional": true
+          }
+        ]
+      },
+      "events": {
+        "copy": false,
+        "eq": true,
+        "variants": [
+          { "tsType": "TOGGLE", "rsVariant": "Toggle" },
+          { "tsType": "OPEN", "rsVariant": "Open" },
+          { "tsType": "CLOSE", "rsVariant": "Close" },
+          { "tsType": "ESCAPE", "rsVariant": "Escape" },
+          { "tsType": "OUTSIDE_INTERACT", "rsVariant": "OutsideInteract" },
+          {
+            "tsType": "ACTION",
+            "rsVariant": "Action",
+            "fields": [
+              { "tsName": "value", "rsName": "value", "type": "string" }
+            ]
+          }
+        ]
+      },
+      "effects": {
+        "copy": false,
+        "eq": true,
+        "variants": [
+          {
+            "tsType": "emitOpenChange",
+            "rsVariant": "EmitOpenChange",
+            "fields": [
+              { "tsName": "open", "rsName": "open", "type": "boolean" }
+            ]
+          },
+          {
+            "tsType": "emitAction",
+            "rsVariant": "EmitAction",
+            "fields": [
+              { "tsName": "value", "rsName": "value", "type": "string" }
+            ]
+          },
+          { "tsType": "focusFirstItem", "rsVariant": "FocusFirstItem" }
+        ]
+      }
+    },
+    {
+      "id": "modal",
+      "prefix": "Modal",
+      "states": [
+        { "ts": "closed", "rs": "Closed" },
+        { "ts": "open", "rs": "Open" }
+      ],
+      "context": {
+        "copy": true,
+        "eq": true,
+        "fields": [
+          {
+            "tsName": "dismissOnEscape",
+            "rsName": "dismiss_on_escape",
+            "type": "boolean"
+          },
+          {
+            "tsName": "dismissOnBackdrop",
+            "rsName": "dismiss_on_backdrop",
+            "type": "boolean"
+          }
+        ]
+      },
+      "events": {
+        "copy": true,
+        "eq": true,
+        "variants": [
+          { "tsType": "OPEN", "rsVariant": "Open" },
+          { "tsType": "CLOSE", "rsVariant": "Close" },
+          { "tsType": "REQUEST_CLOSE", "rsVariant": "RequestClose" },
+          { "tsType": "ESCAPE", "rsVariant": "Escape" },
+          { "tsType": "BACKDROP_CLICK", "rsVariant": "BackdropClick" }
+        ]
+      },
+      "effects": {
+        "copy": true,
+        "eq": true,
+        "variants": [
+          {
+            "tsType": "emitOpenChange",
+            "rsVariant": "EmitOpenChange",
+            "fields": [
+              { "tsName": "open", "rsName": "open", "type": "boolean" }
+            ]
+          },
+          { "tsType": "emitRequestClose", "rsVariant": "EmitRequestClose" },
+          { "tsType": "saveFocusAndEnter", "rsVariant": "SaveFocusAndEnter" },
+          { "tsType": "restoreFocus", "rsVariant": "RestoreFocus" },
+          { "tsType": "lockBodyScroll", "rsVariant": "LockBodyScroll" },
+          { "tsType": "unlockBodyScroll", "rsVariant": "UnlockBodyScroll" }
+        ]
+      }
+    },
+    {
+      "id": "popover",
+      "prefix": "Popover",
+      "namedTypes": [
+        {
+          "name": "PopoverInitialFocus",
+          "copy": true,
+          "eq": true,
+          "variants": [
+            { "ts": "first-focusable", "rs": "FirstFocusable" },
+            { "ts": "content", "rs": "Content" },
+            { "ts": "none", "rs": "None" }
+          ]
+        }
+      ],
+      "states": [
+        { "ts": "closed", "rs": "Closed" },
+        { "ts": "open", "rs": "Open" }
+      ],
+      "context": {
+        "copy": true,
+        "eq": true,
+        "fields": [
+          { "tsName": "disabled", "rsName": "disabled", "type": "boolean" },
+          {
+            "tsName": "dismissOnOutsideInteract",
+            "rsName": "dismiss_on_outside_interact",
+            "type": "boolean"
+          },
+          {
+            "tsName": "initialFocus",
+            "rsName": "initial_focus",
+            "type": "PopoverInitialFocus"
+          }
+        ]
+      },
+      "events": {
+        "copy": true,
+        "eq": true,
+        "variants": [
+          { "tsType": "TOGGLE", "rsVariant": "Toggle" },
+          { "tsType": "OPEN", "rsVariant": "Open" },
+          { "tsType": "CLOSE", "rsVariant": "Close" },
+          { "tsType": "ESCAPE", "rsVariant": "Escape" },
+          { "tsType": "OUTSIDE_INTERACT", "rsVariant": "OutsideInteract" }
+        ]
+      },
+      "effects": {
+        "copy": true,
+        "eq": true,
+        "variants": [
+          {
+            "tsType": "emitOpenChange",
+            "rsVariant": "EmitOpenChange",
+            "fields": [
+              { "tsName": "open", "rsName": "open", "type": "boolean" }
+            ]
+          },
+          {
+            "tsType": "focusOnOpen",
+            "rsVariant": "FocusOnOpen",
+            "fields": [
+              {
+                "tsName": "strategy",
+                "rsName": "strategy",
+                "type": "PopoverInitialFocus"
+              }
+            ]
+          },
+          { "tsType": "restoreTriggerFocus", "rsVariant": "RestoreTriggerFocus" }
+        ]
+      }
+    }
+  ]
+}

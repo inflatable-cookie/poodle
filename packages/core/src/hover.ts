@@ -11,25 +11,19 @@
  */
 
 import type { TransitionResult } from "./machine";
+import type {
+  HoverState,
+  HoverContext,
+  HoverEvent,
+  HoverEffect,
+} from "./generated/machines/hover";
 
-export type HoverState = "closed" | "opening" | "open" | "closing";
-
-export interface HoverContext {
-  openDelayMs: number;
-  closeDelayMs: number;
-}
-
-export type HoverEvent =
-  | { type: "ENTER" }
-  | { type: "LEAVE" }
-  | { type: "TIMER_FIRE" }
-  | { type: "DISMISS" }
-  | { type: "SET_OPEN"; open: boolean };
-
-export type HoverEffect =
-  | { type: "startTimer"; ms: number }
-  | { type: "clearTimer" }
-  | { type: "emitOpenChange"; open: boolean };
+export type {
+  HoverState,
+  HoverContext,
+  HoverEvent,
+  HoverEffect,
+};
 
 export type HoverResult = TransitionResult<HoverState, HoverContext, HoverEffect>;
 

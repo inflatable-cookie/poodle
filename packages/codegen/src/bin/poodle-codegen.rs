@@ -4,6 +4,7 @@
 //! ```text
 //! poodle-codegen <FIXTURE> --out <DIR> [--check] [--target <ID>]
 //! poodle-codegen --author-shell <OUT> [--check]
+//! poodle-codegen --machine-interfaces <FILE> --out <DIR> --target <machine-ts|machine-rust> [--check]
 //! ```
 //!
 //! Fixture mode runs the registered targets over one serialized `IrModel`.
@@ -23,6 +24,11 @@
 //! the committed fixture can never be invalid IR. `--check` byte-compares
 //! against the committed fixture without writing.
 //!
+//! Machine-interface mode (g14-b004, spec 064 mechanism 1) loads
+//! `machine-interfaces.json` and emits TypeScript or Rust type declarations.
+//! It is not an `IrModel` path: `--target machine-ts` / `machine-rust` are
+//! select-only and unreachable from fixture mode.
+//!
 //! Exit codes: 0 clean, 1 drift/validation/IO failure, 2 usage error.
 
 use std::env;
@@ -31,7 +37,8 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use poodle_codegen::{
-    check_outputs, generate, load_and_validate, models, targets, write_outputs, CodegenError,
+    check_outputs, generate, load_and_validate, machine_interfaces, models, targets, write_outputs,
+    CodegenError,
 };
 
 fn usage() -> String {
@@ -51,7 +58,14 @@ fn usage() -> String {
      --author-shell  serialize the Rust-authored shell model\n\
               (packages/codegen/src/models/preview_shell.rs) to OUT — the\n\
               fixture the pipeline consumes — after a validate round trip;\n\
-              with --check, byte-compare instead of write."
+              with --check, byte-compare instead of write.\n\
+     \n\
+     usage: poodle-codegen --machine-interfaces <FILE> --out <DIR> --target <ID> [--check]\n\
+     \n\
+     --machine-interfaces  schema of machine states, events, effects, and\n\
+              context types (spec 064 mechanism 1). Not an IrModel.\n\
+     --target machine-ts or machine-rust (required in this mode); artifacts\n\
+              land under DIR/generated/machines/."
         .to_owned()
 }
 
@@ -59,6 +73,7 @@ struct Args {
     fixture: Option<PathBuf>,
     out: Option<PathBuf>,
     author_shell: Option<PathBuf>,
+    machine_interfaces: Option<PathBuf>,
     target: Option<String>,
     check: bool,
 }
@@ -66,6 +81,7 @@ struct Args {
 fn parse_args() -> Result<Args, String> {
     let mut out = None;
     let mut author_shell = None;
+    let mut machine_interfaces = None;
     let mut target = None;
     let mut check = false;
     let mut positional = Vec::new();
@@ -85,6 +101,12 @@ fn parse_args() -> Result<Args, String> {
                         .ok_or("--author-shell requires an output path")?,
                 ));
             }
+            "--machine-interfaces" => {
+                machine_interfaces = Some(PathBuf::from(
+                    args.next()
+                        .ok_or("--machine-interfaces requires a schema path")?,
+                ));
+            }
             "--target" => {
                 target = Some(
                     args.next()
@@ -98,6 +120,51 @@ fn parse_args() -> Result<Args, String> {
     }
 
     let author_mode = author_shell.is_some();
+    let machine_mode = machine_interfaces.is_some();
+
+    if author_mode && machine_mode {
+        return Err("run --author-shell and --machine-interfaces separately".to_owned());
+    }
+
+    if machine_mode {
+        if !positional.is_empty() {
+            return Err(
+                "machine-interface mode takes no positional FIXTURE argument".to_owned(),
+            );
+        }
+        if out.is_none() {
+            return Err("--out is required with --machine-interfaces".to_owned());
+        }
+        match target.as_deref() {
+            Some(targets::machine_ts::ID) | Some(targets::machine_rust::ID) => {}
+            Some(id) => {
+                return Err(format!(
+                    "machine-interface --target must be machine-ts or machine-rust, not '{id}'"
+                ));
+            }
+            None => {
+                return Err(
+                    "--target is required with --machine-interfaces (machine-ts or machine-rust)"
+                        .to_owned(),
+                );
+            }
+        }
+        return Ok(Args {
+            fixture: None,
+            out,
+            author_shell: None,
+            machine_interfaces,
+            target,
+            check,
+        });
+    }
+
+    if matches!(
+        target.as_deref(),
+        Some(targets::machine_ts::ID) | Some(targets::machine_rust::ID)
+    ) {
+        return Err("--target machine-ts / machine-rust requires --machine-interfaces".to_owned());
+    }
 
     let fixture = match (author_mode, positional.len()) {
         (true, 0) => None,
@@ -127,6 +194,7 @@ fn parse_args() -> Result<Args, String> {
         fixture,
         out,
         author_shell,
+        machine_interfaces: None,
         target,
         check,
     })
@@ -140,10 +208,69 @@ fn run(args: &Args) -> Result<(), CodegenError> {
             write_author_shell(out_path)
         };
     }
+    if let Some(schema) = &args.machine_interfaces {
+        return run_machine_interfaces(schema, args);
+    }
     run_emit(
         args.fixture.as_ref().expect("emit mode carries a fixture"),
         args,
     )
+}
+
+fn run_machine_interfaces(schema: &Path, args: &Args) -> Result<(), CodegenError> {
+    let document = machine_interfaces::load_and_validate(schema)?;
+    let source_path = schema.to_string_lossy().into_owned();
+    let target_id = args
+        .target
+        .as_deref()
+        .expect("parse requires --target in machine-interface mode");
+    let (files, output_root) = match target_id {
+        targets::machine_ts::ID => (
+            targets::machine_ts::render(&document, &source_path),
+            targets::machine_ts::OUTPUT_ROOT,
+        ),
+        targets::machine_rust::ID => (
+            targets::machine_rust::render(&document, &source_path),
+            targets::machine_rust::OUTPUT_ROOT,
+        ),
+        other => {
+            return Err(CodegenError::UnknownTarget {
+                id: other.to_owned(),
+                known: vec![
+                    targets::machine_ts::ID.to_owned(),
+                    targets::machine_rust::ID.to_owned(),
+                ],
+            });
+        }
+    };
+    let out = args.out.as_ref().expect("parse requires --out");
+    let root = out.join(output_root);
+
+    if args.check {
+        let report = check_outputs(&root, &files)?;
+        if !report.is_clean() {
+            return Err(CodegenError::Gate {
+                message: format!(
+                    "generated machine-interface artifacts are stale under {} (target {target_id}):\n{}",
+                    root.display(),
+                    report.message()
+                ),
+            });
+        }
+        println!(
+            "Verified {} files (target: {target_id}, machine interface schema {}).",
+            files.len(),
+            document.schema_version
+        );
+    } else {
+        write_outputs(&root, &files)?;
+        println!(
+            "Generated {} files (target: {target_id}, machine interface schema {}).",
+            files.len(),
+            document.schema_version
+        );
+    }
+    Ok(())
 }
 
 /// Serializes the Rust-authored shell model to the fixture after a validate

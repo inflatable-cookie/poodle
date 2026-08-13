@@ -1,34 +1,8 @@
 //! Hover-intent machine (Tooltip, HoverCard). Mirror of core `hover.ts`.
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum HoverState {
-    Closed,
-    Opening,
-    Open,
-    Closing,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct HoverContext {
-    pub open_delay_ms: f64,
-    pub close_delay_ms: f64,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum HoverEvent {
-    Enter,
-    Leave,
-    TimerFire,
-    Dismiss,
-    SetOpen { open: bool },
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum HoverEffect {
-    StartTimer { ms: f64 },
-    ClearTimer,
-    EmitOpenChange { open: bool },
-}
+#[path = "generated/machines/hover.rs"]
+mod hover_interface;
+pub use hover_interface::*;
 
 fn close_now() -> (HoverState, Vec<HoverEffect>) {
     (

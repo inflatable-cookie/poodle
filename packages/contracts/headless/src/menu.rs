@@ -1,33 +1,9 @@
 //! Menu machine (Menu, ContextMenu) and menu-list navigation machinery.
 //! Mirror of core `menu.ts`.
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum MenuState {
-    Closed,
-    Open,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub struct MenuContext {
-    pub disabled: bool,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum MenuEvent {
-    Toggle,
-    Open,
-    Close,
-    Escape,
-    OutsideInteract,
-    Action { value: String },
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum MenuEffect {
-    EmitOpenChange { open: bool },
-    EmitAction { value: String },
-    FocusFirstItem,
-}
+#[path = "generated/machines/menu.rs"]
+mod menu_interface;
+pub use menu_interface::*;
 
 fn open() -> (MenuState, Vec<MenuEffect>) {
     (

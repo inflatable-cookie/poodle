@@ -9,7 +9,10 @@
 //! shell-scene`. `g13-b036` adds its Rust sibling `shell-rust` (card 036
 //! R2), which renders the same scene into the native previews' `generated/`
 //! directories — same scoping, same select-only reachability. The three
-//! component targets were unwound in g13-053.
+//! component targets were unwound in g13-053. `g14-b004` adds `machine-ts` /
+//! `machine-rust`, also select-only, but they consume the machine-interface
+//! schema rather than an `IrModel` and are not registered here — the CLI
+//! reaches them via `--machine-interfaces`.
 
 use crate::emit::EmitTarget;
 
@@ -18,6 +21,8 @@ mod json_common;
 pub mod conformance;
 pub mod docs;
 pub mod json;
+pub mod machine_rust;
+pub mod machine_ts;
 pub mod registry;
 pub mod schema;
 pub mod shell;

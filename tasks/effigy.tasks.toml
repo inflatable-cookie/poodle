@@ -33,7 +33,9 @@
 # (g13-b003 R1; card 036 R2); neither is part of the default target set,
 # so a plain run over the synthetic fixture never writes into a consumer
 # package. Component models were unwound in g13-053; only the shell scene
-# remains.
+# remains. g14-b004 adds machine-interface targets (select-only, like the
+# shell) from packages/contracts/headless/machine-interfaces.json into the
+# core and headless generated/machines/ directories.
 "ir:build" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated" },
@@ -41,6 +43,8 @@
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/react/preview/src --target shell-scene" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/gpui/preview/src --target shell-rust" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/jetstream/preview/src --target shell-rust" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --machine-interfaces packages/contracts/headless/machine-interfaces.json --out packages/core/src --target machine-ts" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --machine-interfaces packages/contracts/headless/machine-interfaces.json --out packages/contracts/headless/src --target machine-rust" },
 ]
 "ir:check" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json --check" },
@@ -49,6 +53,8 @@
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/react/preview/src --target shell-scene --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/gpui/preview/src --target shell-rust --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/jetstream/preview/src --target shell-rust --check" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --machine-interfaces packages/contracts/headless/machine-interfaces.json --out packages/core/src --target machine-ts --check" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --machine-interfaces packages/contracts/headless/machine-interfaces.json --out packages/contracts/headless/src --target machine-rust --check" },
 ]
 
 # Preview (documentation site)
