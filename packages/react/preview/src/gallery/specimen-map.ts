@@ -153,6 +153,8 @@ import { ValueReadoutSpecimen } from "./specimens/ValueReadoutSpecimen";
 import { TriStateSwitchSpecimen } from "./specimens/TriStateSwitchSpecimen";
 import { UiPresentationProviderSpecimen } from "./specimens/UiPresentationProviderSpecimen";
 import { VideoPlayerSpecimen } from "./specimens/VideoPlayerSpecimen";
+import { UpdateCenterSpecimen } from "./specimens/UpdateCenterSpecimen";
+import { UpdateStatusSpecimen } from "./specimens/UpdateStatusSpecimen";
 import { XYPadSpecimen } from "./specimens/XYPadSpecimen";
 import { KeyboardSpecimen } from "./specimens/KeyboardSpecimen";
 import { ModMatrixGridSpecimen } from "./specimens/ModMatrixGridSpecimen";
@@ -322,6 +324,8 @@ export const specimenMap: Record<string, ComponentType> = {
   "value-readout": ValueReadoutSpecimen,
   "video-player": VideoPlayerSpecimen,
   "waveform-display": WaveformDisplaySpecimen,
+  "update-center": UpdateCenterSpecimen,
+  "update-status": UpdateStatusSpecimen,
   "xy-pad": XYPadSpecimen,
 };
 

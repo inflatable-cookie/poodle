@@ -252,6 +252,12 @@
 # @container, so such rules resolve against the nearest ancestor instead. Found
 # in 3 of 5 container-query stylesheets (g13-043). Runs inside docs:lint.
 "docs:container-query-drift" = "bun packages/svelte/preview/scripts/container-query-drift.ts"
+# React gallery specimen coverage. specimen-map.ts already asserts this, but by
+# throwing at module load — which only happens in a browser. ci:web builds the
+# React preview and never runs it, so on 2026-08-13 the gallery shipped fatally
+# broken on main (update-center, update-status): the whole preview rendered
+# zero characters with every gate green. This moves the check to build time.
+"docs:react-specimen-drift" = "bun packages/svelte/preview/scripts/react-specimen-drift.ts"
 # Contract <-> poodle-specs drift. Also runs inside docs:lint; this selector is
 # for standalone/report use (DRIFT_REPORT=1 lists gaps without failing).
 "docs:spec-drift" = "bun packages/svelte/preview/scripts/contract-spec-drift.ts"
@@ -340,6 +346,7 @@
   { task = "svelte:surface-audit" },
   { task = "check:svelte" },
   { task = "docs:lint" },
+  { task = "docs:react-specimen-drift" },
   { task = "react:docs" },
   { task = "report:parity" },
   { task = "report:accessibility" },
