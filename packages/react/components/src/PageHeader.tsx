@@ -92,9 +92,11 @@ export function PageHeader({
   const showSubtitleText =
     Boolean(resolvedSubtitle || subtitleContent) &&
     (!isEntityDetailPosture || !breadcrumbs || showSubtitleWithBreadcrumbs);
-  const hasSecondaryContent = showSubtitleText || Boolean(breadcrumbs) || Boolean(meta) || Boolean(children);
   const isCompactSubtitleHeader =
     !hasPrimaryHeading && Boolean(resolvedSubtitle) && !eyebrow && !showTopBreadcrumbs && !meta && !children;
+  const showSecondarySubtitleText = showSubtitleText && !isCompactSubtitleHeader;
+  const hasSecondaryContent =
+    showSecondarySubtitleText || Boolean(breadcrumbs) || Boolean(meta) || Boolean(children);
 
   const resolvedSize =
     size ?? (sizeRole ? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole) : uiPresentation.sizeScale);
@@ -118,6 +120,14 @@ export function PageHeader({
       )
     : null;
 
+  const compactSubtitleHeading = isCompactSubtitleHeader
+    ? createElement(
+        `h${level}`,
+        { className: "poodle-page-header__subtitle" },
+        subtitleContent ?? resolvedSubtitle,
+      )
+    : null;
+
   return (
     <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
       <header
@@ -137,6 +147,7 @@ export function PageHeader({
               <p className="poodle-page-header__section">{section}</p>
             ) : null}
             {heading}
+            {compactSubtitleHeading}
           </div>
 
           {backHref || actions ? (
@@ -174,7 +185,7 @@ export function PageHeader({
 
         {hasSecondaryContent ? (
           <div className="poodle-page-header__content poodle-page-header__content--secondary">
-            {showSubtitleText ? (
+            {showSecondarySubtitleText ? (
               <div className="poodle-page-header__subtitle">{subtitleContent ?? resolvedSubtitle}</div>
             ) : null}
             {showTopBreadcrumbs && breadcrumbs ? (

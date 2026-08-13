@@ -79,9 +79,6 @@
     Boolean(resolvedSubtitle || subtitleContent) &&
       (!isEntityDetailPosture || !breadcrumbs || showSubtitleWithBreadcrumbs)
   );
-  const hasSecondaryContent = $derived(
-    showSubtitleText || Boolean(breadcrumbs) || Boolean(meta) || Boolean(children)
-  );
   const isCompactSubtitleHeader = $derived(
     !hasPrimaryHeading &&
       Boolean(resolvedSubtitle) &&
@@ -89,6 +86,10 @@
       !showTopBreadcrumbs &&
       !meta &&
       !children
+  );
+  const showSecondarySubtitleText = $derived(showSubtitleText && !isCompactSubtitleHeader);
+  const hasSecondaryContent = $derived(
+    showSecondarySubtitleText || Boolean(breadcrumbs) || Boolean(meta) || Boolean(children)
   );
   const headingTag = $derived(`h${level}` as `h${1 | 2 | 3 | 4 | 5 | 6}`);
   const uiPresentation = getUiPresentation();
@@ -149,6 +150,11 @@
             {/if}
           </svelte:element>
         {/if}
+        {#if isCompactSubtitleHeader}
+          <svelte:element this={headingTag} class="poodle-page-header__subtitle">
+            {#if subtitleContent}{@render subtitleContent()}{:else}{resolvedSubtitle}{/if}
+          </svelte:element>
+        {/if}
       </div>
 
       {#if backHref || actions}
@@ -185,7 +191,7 @@
 
     {#if hasSecondaryContent}
       <div class="poodle-page-header__content poodle-page-header__content--secondary">
-        {#if showSubtitleText}
+        {#if showSecondarySubtitleText}
           <div class="poodle-page-header__subtitle">
             {#if subtitleContent}{@render subtitleContent()}{:else}{resolvedSubtitle}{/if}
           </div>
