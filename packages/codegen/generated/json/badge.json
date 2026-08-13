@@ -26,7 +26,6 @@
         "kind": "member",
         "value": "default"
       },
-      "default_expr": null,
       "description": "Semantic emphasis tone.",
       "id": "tone",
       "name": "tone",
@@ -44,7 +43,6 @@
     },
     {
       "default": null,
-      "default_expr": null,
       "description": "Text the badge renders.",
       "id": "label",
       "name": "label",
@@ -60,7 +58,6 @@
         "kind": "number",
         "value": 120.5
       },
-      "default_expr": null,
       "description": "Maximum rendered width in pixels.",
       "id": "maxWidth",
       "name": "maxWidth",
@@ -76,7 +73,6 @@
         "kind": "boolean",
         "value": false
       },
-      "default_expr": null,
       "description": "Renders with fully rounded ends.",
       "id": "pill",
       "name": "pill",

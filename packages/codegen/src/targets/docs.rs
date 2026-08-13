@@ -21,8 +21,8 @@
 //!   subset it renders the shared type name (`ButtonTone` style);
 //! - defaults render like the contract tables: JSON-quoted strings and
 //!   members, `format_number` integers (`0`, never `0.0`), pairs and lists
-//!   inline; `—` when no default and no expression, `derived` when the
-//!   default is a bounded expression (spec 063);
+//!   inline; `—` when there is no default (expression defaults were
+//!   removed with the expression vocabulary, g13.017);
 //! - web-only props are included and marked in the Notes column, matching
 //!   the TypeScript target's include-and-mark decision (CROSS-03's
 //!   exclusion is a portable-spec-surface rule aimed at the Rust spec
@@ -98,10 +98,9 @@ fn render_component_fragment(
     out.push_str("|------|------|---------|----------|-------|\n");
     for prop in &component.props {
         let ty = render_prop_type(model, &prop.prop_type, prop.permitted_subset.as_ref())?;
-        let default = match (&prop.default, &prop.default_expr) {
-            (Some(value), _) => md_value_literal(value),
-            (None, Some(_)) => "derived".to_owned(),
-            (None, None) => "—".to_owned(),
+        let default = match &prop.default {
+            Some(value) => md_value_literal(value),
+            None => "—".to_owned(),
         };
         let mut notes = collapse_whitespace(&prop.description);
         if prop.web_only {

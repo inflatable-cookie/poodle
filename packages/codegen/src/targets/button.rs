@@ -34,8 +34,8 @@
 //! package; reachable via `--target button-ts`.
 
 use poodle_ir::{
-    AttributeForm, ComponentDefinition, EmissionPolicy, Expr, ExprOperand, Identifier, IrModel,
-    PropType, RecipeLinkKind, StateAttribute, Value, VisualFieldKind,
+    AttributeForm, ComponentDefinition, EmissionPolicy, Identifier, IrModel, PropType,
+    RecipeLinkKind, StateAttribute, Value, VisualFieldKind,
 };
 
 use crate::emit::{header, sort_by_id, EmitTarget, GeneratedFile};
@@ -143,20 +143,24 @@ pub(crate) fn source_prop<'a>(
         .and_then(|source| component.props.iter().find(|p| &p.id == source))
 }
 
-/// The visual field an attribute's value expression references, if any.
+/// The visual field an attribute's source names, if any. `source` is the
+/// plain identifier form of what was once a `value` expression wrapping a
+/// Visual reference (g13.017 R1 bucket 2: vocabulary kept, tree gone).
 /// Shared with the `button-rust` sibling target (card 042 R2).
 pub(crate) fn value_visual_field<'a>(
     component: &'a ComponentDefinition,
     attribute: &StateAttribute,
 ) -> Option<&'a poodle_ir::VisualStateField> {
-    match attribute.value.as_ref() {
-        Some(Expr::Operand(ExprOperand::Visual(field_id))) => component
-            .visual_state
-            .iter()
-            .flat_map(|state| state.fields.iter())
-            .find(|field| &field.id == field_id),
-        _ => None,
-    }
+    attribute
+        .source
+        .as_ref()
+        .and_then(|source| {
+            component
+                .visual_state
+                .iter()
+                .flat_map(|state| state.fields.iter())
+                .find(|field| &field.id == source)
+        })
 }
 
 /// The value domain of an attribute — the emitter's deterministic

@@ -147,7 +147,7 @@ use poodle_ir::{
     A11yRole, Accessibility, AriaMapping, AttributeForm, Axes, Capability, CapabilityRequirement,
     ComponentDefinition, ConformanceVector, ContractRef, ControlDensity, ControlSize,
     DensityAdjustment, DensityAxis, EmissionPolicy, Event, EventKind, EventPayload, EventTiming,
-    Expr, Extension, FiringPhase, Identifier, IrModel, KeyChord, KeyboardCommand, Layer,
+    Extension, FiringPhase, Identifier, IrModel, KeyChord, KeyboardCommand, Layer,
     MetricValue, Modifier, NameRule, NameSource, NativeAttr, Part, PartKind, PayloadKind,
     PermittedSubset, Prop, PropType, RecipeHookRef, RecipeLink, RecipeLinkKind, RuntimeTarget,
     SharedEnumMember, SharedType, SizeAxis, SizeRole, SizeStep, StateAttribute, TokenGroup,
@@ -239,7 +239,6 @@ fn prop(
         name: id.to_owned(),
         prop_type,
         default,
-        default_expr: None,
         required: false,
         web_only,
         description: description.to_owned(),
@@ -281,13 +280,15 @@ fn bool_prop(id: &str, description: &str) -> Prop {
     )
 }
 
-/// A valued state attribute deriving from a prop (`CROSS-13`).
+/// A valued state attribute deriving from a prop or VisualState field
+/// (`CROSS-13`). `source` names the field the value derives from; the
+/// emitted vocabulary is the attribute row itself, never an expression
+/// tree (g13.017).
 fn valued_attribute(
     id: &str,
     name: &str,
     source: &str,
     emission: EmissionPolicy,
-    condition: Option<Expr>,
     description: &str,
 ) -> StateAttribute {
     StateAttribute {
@@ -296,29 +297,6 @@ fn valued_attribute(
         form: AttributeForm::Valued,
         emission,
         source: Some(ident(source)),
-        condition,
-        value: None,
-        description: description.to_owned(),
-    }
-}
-
-/// A valued attribute whose value is an expression (`CROSS-13`; spec 063
-/// "state-derived attribute emission conditions and values").
-fn expr_valued_attribute(
-    id: &str,
-    name: &str,
-    value: Expr,
-    condition: Option<Expr>,
-    description: &str,
-) -> StateAttribute {
-    StateAttribute {
-        id: ident(id),
-        name: name.to_owned(),
-        form: AttributeForm::Valued,
-        emission: EmissionPolicy::Always,
-        source: None,
-        condition,
-        value: Some(value),
         description: description.to_owned(),
     }
 }
@@ -950,10 +928,11 @@ pub fn text_input_definition() -> ComponentDefinition {
         ],
 
         // The anatomy (T §2 + the rendered DOM): the contract's ten parts.
-        // The optional parts carry their render conditions as expressions
-        // (spec 063 "part render conditions"); the input control is ONE
-        // part that renders <input> or <textarea> — the multiline element
-        // variant and its modifier class are a hand-written runtime branch
+        // The optional parts carry their render conditions as documented
+        // prose on the conditional part kind (g13.017 R1 bucket 2: anatomy
+        // kept, expression tree gone); the input control is ONE part that
+        // renders <input> or <textarea> — the multiline element variant
+        // and its modifier class are a hand-written runtime branch
         // (recorded in the R7 inventory).
         parts: vec![
             Part {
@@ -967,14 +946,11 @@ pub fn text_input_definition() -> ComponentDefinition {
                 id: ident("prefix"),
                 name: "Prefix".to_owned(),
                 parent: Some(ident("root")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::and(
-                        Expr::is_present(Expr::prop("prefix")),
-                        Expr::not(Expr::is_empty(Expr::prop("prefix"))),
-                    ),
-                    description: "Non-editable text prefix with separator border; present \
-                                  when the prefix prop holds a non-empty value (T §2, \
-                                  TXT-10/17)."
+                kind: PartKind::ConditionalDocumented {
+                    condition: "present when the prefix prop holds a non-empty value"
+                        .to_owned(),
+                    description: "Non-editable text prefix with separator border \
+                                  (T §2, TXT-10/17)."
                         .to_owned(),
                 },
                 description: "Static prefix text (T §2).".to_owned(),
@@ -992,17 +968,12 @@ pub fn text_input_definition() -> ComponentDefinition {
                 id: ident("leading-affordance"),
                 name: "Leading Affordance".to_owned(),
                 parent: Some(ident("field")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::or(
-                        Expr::visual("leadingContent"),
-                        Expr::eq(
-                            Expr::prop("type"),
-                            Expr::member("text-input-type", "search"),
-                        ),
-                    ),
-                    description: "Icon or adornment inside the editable field's leading \
-                                  edge; present when the leading slot is provided or the \
-                                  type is search (automatic search icon) (T §2, TXT-08/17)."
+                kind: PartKind::ConditionalDocumented {
+                    condition: "present when the leading slot is provided or the type is \
+                                search (automatic search icon)"
+                        .to_owned(),
+                    description: "Icon or adornment inside the editable field's leading edge \
+                                  (T §2, TXT-08/17)."
                         .to_owned(),
                 },
                 description: "Leading affordance slot (T §2).".to_owned(),
@@ -1021,10 +992,10 @@ pub fn text_input_definition() -> ComponentDefinition {
                 id: ident("trailing-affordance"),
                 name: "Trailing Affordance".to_owned(),
                 parent: Some(ident("field")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::visual("trailingContent"),
-                    description: "Icon or action inside the editable field's trailing edge; \
-                                  present when the trailing slot is provided (T §2, TXT-17)."
+                kind: PartKind::ConditionalDocumented {
+                    condition: "present when the trailing slot is provided".to_owned(),
+                    description: "Icon or action inside the editable field's trailing edge \
+                                  (T §2, TXT-17)."
                         .to_owned(),
                 },
                 description: "Trailing affordance slot (T §2).".to_owned(),
@@ -1033,26 +1004,12 @@ pub fn text_input_definition() -> ComponentDefinition {
                 id: ident("clear-button"),
                 name: "Clear Button".to_owned(),
                 parent: Some(ident("field")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::and(
-                        Expr::and(
-                            Expr::and(
-                                Expr::eq(
-                                    Expr::prop("type"),
-                                    Expr::member("text-input-type", "search"),
-                                ),
-                                Expr::prop("showClearButton"),
-                            ),
-                            Expr::not(Expr::prop("disabled")),
-                        ),
-                        Expr::and(
-                            Expr::not(Expr::prop("readOnly")),
-                            Expr::not(Expr::is_empty(Expr::visual("currentValue"))),
-                        ),
-                    ),
-                    description: "Search clear action inside the field's trailing edge; \
-                                  present in search mode with a value when not \
-                                  disabled/read-only (T §2, TXT-08/17)."
+                kind: PartKind::ConditionalDocumented {
+                    condition: "present in search mode with a value when not \
+                                disabled/read-only"
+                        .to_owned(),
+                    description: "Search clear action inside the field's trailing edge \
+                                  (T §2, TXT-08/17)."
                         .to_owned(),
                 },
                 description: "Search-mode clear button (T §2).".to_owned(),
@@ -1061,18 +1018,12 @@ pub fn text_input_definition() -> ComponentDefinition {
                 id: ident("validation-indicator"),
                 name: "Validation Indicator".to_owned(),
                 parent: Some(ident("field")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::and(
-                        Expr::prop("showValidationStatus"),
-                        Expr::ne(
-                            Expr::visual("effectiveValidationState"),
-                            Expr::member("validation-state", "none"),
-                        ),
-                    ),
+                kind: PartKind::ConditionalDocumented {
+                    condition: "present when validation chrome is enabled and the effective \
+                                state is not none"
+                        .to_owned(),
                     description: "Pending spinner or valid/invalid status icon overlaid \
-                                  inside the field; present when validation chrome is \
-                                  enabled and the effective state is not none (T §2, \
-                                  TXT-12/17/19)."
+                                  inside the field (T §2, TXT-12/17/19)."
                         .to_owned(),
                 },
                 description: "Built-in validation indicator (T §2).".to_owned(),
@@ -1081,14 +1032,11 @@ pub fn text_input_definition() -> ComponentDefinition {
                 id: ident("suffix"),
                 name: "Suffix".to_owned(),
                 parent: Some(ident("root")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::and(
-                        Expr::is_present(Expr::prop("suffix")),
-                        Expr::not(Expr::is_empty(Expr::prop("suffix"))),
-                    ),
-                    description: "Non-editable text suffix with separator border; present \
-                                  when the suffix prop holds a non-empty value (T §2, \
-                                  TXT-10/17)."
+                kind: PartKind::ConditionalDocumented {
+                    condition: "present when the suffix prop holds a non-empty value"
+                        .to_owned(),
+                    description: "Non-editable text suffix with separator border \
+                                  (T §2, TXT-10/17)."
                         .to_owned(),
                 },
                 description: "Static suffix text (T §2).".to_owned(),
@@ -1115,28 +1063,28 @@ pub fn text_input_definition() -> ComponentDefinition {
         // carries (R2); the style props are emitted as styleProps, not DOM
         // attributes.
         attributes: vec![
-            expr_valued_attribute(
+            valued_attribute(
                 "validation-state",
                 "data-validation-state",
-                Expr::visual("effectiveValidationState"),
-                None,
+                "effectiveValidationState",
+                EmissionPolicy::Always,
                 "The effective validation state — the validationStatusToState mapping \
                  when a validator is present, otherwise the caller-owned validationState; \
                  always emitted (T §9, TXT-18/19).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "size",
                 "data-size",
-                Expr::visual("resolvedSize"),
-                None,
+                "resolvedSize",
+                EmissionPolicy::Always,
                 "The resolved control size (explicit or sizeRole-derived); always emitted \
                  (T §9, TXT-15/18; CROSS-07).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "density",
                 "data-density",
-                Expr::visual("resolvedDensity"),
-                None,
+                "resolvedDensity",
+                EmissionPolicy::Always,
                 "The resolved density (explicit or inherited); always emitted (T §9, \
                  TXT-15/18; CROSS-08).",
             ),
@@ -1145,52 +1093,51 @@ pub fn text_input_definition() -> ComponentDefinition {
                 "data-type",
                 "type",
                 EmissionPolicy::Always,
-                None,
                 "The type prop value; always emitted — documented in the corpus row \
                  TXT-18, not in the contract prose (T §9 counting note, TXT-18).",
             ),
             // The TXT-16 adornment-padding reservation: computed custom
             // properties fed by the runtime's derived strings (the calc()
-            // arithmetic stays out of the expression vocabulary by design;
-            // spec 063). Svelte emits all five; React emits the three shared
+            // arithmetic is not vocabulary); `source` names the runtime
+            // field. Svelte emits all five; React emits the three shared
             // ones (the overlay insets fall back to 0.5rem in the
             // stylesheet — see the module notes and the R7 inventory).
-            expr_valued_attribute(
+            valued_attribute(
                 "control-padding-start",
                 "--poodle-text-input-control-padding-start",
-                Expr::visual("controlPaddingStart"),
-                None,
+                "controlPaddingStart",
+                EmissionPolicy::Always,
                 "Start padding reservation so text never runs under the leading \
                  affordance (T §8, TXT-16).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "control-padding-end",
                 "--poodle-text-input-control-padding-end",
-                Expr::visual("controlPaddingEnd"),
-                None,
+                "controlPaddingEnd",
+                EmissionPolicy::Always,
                 "End padding reservation for the trailing adornment count (T §8, TXT-16).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "multiline-padding-end",
                 "--poodle-text-input-multiline-padding-end",
-                Expr::visual("multilineBottomPadding"),
-                None,
+                "multilineBottomPadding",
+                EmissionPolicy::Always,
                 "Multiline bottom padding reservation so typed text never runs under the \
                  overlaid char count (T §8, TXT-07/16).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "clear-inset-inline-end",
                 "--poodle-text-input-clear-inset-inline-end",
-                Expr::visual("clearInsetInlineEnd"),
-                None,
+                "clearInsetInlineEnd",
+                EmissionPolicy::Always,
                 "Clear button inline-end inset, pushed left of the validation indicator \
                  when both render (T §8, TXT-16).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "trailing-inset-inline-end",
                 "--poodle-text-input-trailing-inset-inline-end",
-                Expr::visual("trailingInsetInlineEnd"),
-                None,
+                "trailingInsetInlineEnd",
+                EmissionPolicy::Always,
                 "Trailing affordance inline-end inset (T §8, TXT-16).",
             ),
         ],
@@ -1203,10 +1150,6 @@ pub fn text_input_definition() -> ComponentDefinition {
             size: Some(SizeAxis {
                 explicit: None,
                 size_role: SizeRole::Control,
-                fallback: Some(Expr::Coalesce(
-                    Box::new(Expr::prop("size")),
-                    Box::new(Expr::axis("size")),
-                )),
                 ladder: vec![
                     SizeStep {
                         size: ControlSize::Xs,
@@ -2051,7 +1994,6 @@ pub fn text_input_model() -> IrModel {
                     id: ident("insert-at-caret"),
                     name: "character input inserts at the caret".to_owned(),
                     kind: VectorStepKind::Transition,
-                    guard: None,
                     description: "A printable character replaces the selection at the \
                                   caret, not appended at the end (T §6; EDIT_MODEL \
                                   edit_transition tests)."
@@ -2061,7 +2003,6 @@ pub fn text_input_model() -> IrModel {
                     id: ident("selection-replaces"),
                     name: "typing replaces the selection".to_owned(),
                     kind: VectorStepKind::Transition,
-                    guard: None,
                     description: "Typing over a selection replaces the whole range; the \
                                   caret lands after the inserted text (T §6; edit_transition \
                                   shift-arrow tests)."
@@ -2071,7 +2012,6 @@ pub fn text_input_model() -> IrModel {
                     id: ident("deletion-semantics"),
                     name: "backspace/delete at the caret".to_owned(),
                     kind: VectorStepKind::Transition,
-                    guard: None,
                     description: "Backspace removes before the caret, delete removes at it; \
                                   at the edges both are inert but consumed — a key that is \
                                   ours but changes nothing must not fall through (T §6; \
@@ -2082,7 +2022,6 @@ pub fn text_input_model() -> IrModel {
                     id: ident("caret-moves-do-not-edit"),
                     name: "arrows, Home and End move without editing".to_owned(),
                     kind: VectorStepKind::Invariant,
-                    guard: None,
                     description: "Left/right/home/end move the caret (or collapse a \
                                   selection to its edge) and never change the value (T §6; \
                                   edit_transition tests)."
@@ -2092,7 +2031,6 @@ pub fn text_input_model() -> IrModel {
                     id: ident("shift-extends-selection"),
                     name: "Shift+Arrow extends the selection".to_owned(),
                     kind: VectorStepKind::Transition,
-                    guard: None,
                     description: "Shift keeps the anchor and moves the head; the following \
                                   keystroke replaces the extended selection (T §6; \
                                   edit_transition tests)."
@@ -2102,7 +2040,6 @@ pub fn text_input_model() -> IrModel {
                     id: ident("select-all-replaces"),
                     name: "select-all then type replaces everything".to_owned(),
                     kind: VectorStepKind::Transition,
-                    guard: None,
                     description: "Accel+A selects the whole value; typing after replaces \
                                   it (T §6; edit_transition tests)."
                         .to_owned(),
@@ -2111,7 +2048,6 @@ pub fn text_input_model() -> IrModel {
                     id: ident("paste-lands-at-caret"),
                     name: "paste lands at the caret".to_owned(),
                     kind: VectorStepKind::Transition,
-                    guard: None,
                     description: "insert_transition places clipboard text at the caret, \
                                   replacing any selection; multi-line collapse is \
                                   backend-owned (T §6, TXT-23; insert_transition tests)."
@@ -2121,7 +2057,6 @@ pub fn text_input_model() -> IrModel {
                     id: ident("word-boundaries"),
                     name: "a word is a run of alphanumerics or underscore".to_owned(),
                     kind: VectorStepKind::Guard,
-                    guard: None,
                     description: "word_range_at defines double-click selection: a run of \
                                   alphanumerics/_ is a word; punctuation is its own run; \
                                   the trailing caret belongs to the word before it (T §6, \
@@ -2132,7 +2067,6 @@ pub fn text_input_model() -> IrModel {
                     id: ident("undo-coalesces-typing-runs"),
                     name: "a continuous typing run is one undo step".to_owned(),
                     kind: VectorStepKind::Transition,
-                    guard: None,
                     description: "coalesces collapses consecutive single-character \
                                   insertions at the caret into one step; a deletion, a \
                                   paste, or a caret that jumped breaks the run; replacing \
@@ -2144,7 +2078,6 @@ pub fn text_input_model() -> IrModel {
                     id: ident("submit-cancel-tab-fall-through"),
                     name: "Enter, Escape and Tab are not edit-model keys".to_owned(),
                     kind: VectorStepKind::Guard,
-                    guard: None,
                     description: "edit_transition returns None for keys the model does not \
                                   own — Enter (submit), Escape (cancel), Tab (focus out) — \
                                   so they reach the host handlers (T §6, TXT-20; \

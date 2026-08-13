@@ -6,9 +6,9 @@
 //!
 //! - `<component-id>.json` — one document per component: identity,
 //!   `props` (in declaration order, each with its tagged type, permitted
-//!   subset when constrained, default/default-expr, required and web-only
-//!   marks, and description), `shared_types` (the shared enumerated types
-//!   the component's props reference, sorted by id, members in authoring
+//!   subset when constrained, default, required and web-only marks, and
+//!   description), `shared_types` (the shared enumerated types the
+//!   component's props reference, sorted by id, members in authoring
 //!   order, `referenced_by` naming the referencing props), `events`
 //!   (declaration order, with payload and timing), and `axes` (size,
 //!   density, orientation).
@@ -146,8 +146,7 @@ fn component_document(
 }
 
 /// Renders one prop: identity, tagged type, permitted subset (R6.2),
-/// default and expression default, required and web-only marks, and the
-/// description.
+/// default, required and web-only marks, and the description.
 fn prop_json(prop: &Prop) -> serde_json::Value {
     serde_json::json!({
         "id": prop.id.as_str(),
@@ -161,7 +160,6 @@ fn prop_json(prop: &Prop) -> serde_json::Value {
                 .collect::<Vec<_>>()
         }),
         "default": prop.default.as_ref().map(value_json),
-        "default_expr": prop.default_expr.as_ref().map(serialize),
         "required": prop.required,
         "web_only": prop.web_only,
         "description": prop.description,
@@ -243,7 +241,6 @@ fn axes_json(axes: &Axes) -> serde_json::Value {
         serde_json::json!({
             "explicit": size.explicit.map(serialize),
             "size_role": serialize(size.size_role),
-            "fallback": size.fallback.as_ref().map(serialize),
             "ladder": size.ladder.iter().map(|step| serde_json::json!({
                 "size": serialize(step.size),
                 "metrics": serialize(&step.metrics),
@@ -276,8 +273,8 @@ fn axes_json(axes: &Axes) -> serde_json::Value {
     serde_json::json!({ "size": size, "density": density, "orientation": orientation })
 }
 
-/// Serializes a serde value — deterministic for the enums, expressions,
-/// and metric maps this target emits (serde_json maps sort their keys).
+/// Serializes a serde value — deterministic for the enums and metric maps
+/// this target emits (serde_json maps sort their keys).
 fn serialize<T: serde::Serialize>(value: T) -> serde_json::Value {
     serde_json::to_value(value).expect("IR values are always serializable")
 }

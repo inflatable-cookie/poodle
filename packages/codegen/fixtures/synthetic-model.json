@@ -62,7 +62,6 @@
           "name": "tone",
           "prop_type": { "Shared": "tone" },
           "default": { "Member": "default" },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Semantic emphasis tone.",
@@ -73,7 +72,6 @@
           "name": "label",
           "prop_type": "String",
           "default": null,
-          "default_expr": null,
           "required": true,
           "web_only": false,
           "description": "Text the badge renders.",
@@ -84,7 +82,6 @@
           "name": "maxWidth",
           "prop_type": "Number",
           "default": { "Number": 120.5 },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Maximum rendered width in pixels.",
@@ -95,7 +92,6 @@
           "name": "pill",
           "prop_type": "Bool",
           "default": { "Bool": false },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Renders with fully rounded ends.",
@@ -135,7 +131,6 @@
           "name": "min",
           "prop_type": "Number",
           "default": { "Number": 0 },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Minimum value of the gauge range.",
@@ -146,7 +141,6 @@
           "name": "max",
           "prop_type": "Number",
           "default": { "Number": 100 },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Maximum value of the gauge range.",
@@ -157,7 +151,6 @@
           "name": "value",
           "prop_type": { "Pair": "Number" },
           "default": { "Pair": [{ "Number": 0 }, { "Number": 100 }] },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Controlled [lower, upper] value pair.",
@@ -168,7 +161,6 @@
           "name": "orientation",
           "prop_type": { "Shared": "orientation" },
           "default": { "Member": "horizontal" },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Layout orientation of the gauge.",
@@ -179,7 +171,6 @@
           "name": "tickValues",
           "prop_type": { "List": "Number" },
           "default": null,
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Tick positions as fractions of the range.",
@@ -190,7 +181,6 @@
           "name": "showLabels",
           "prop_type": "Bool",
           "default": { "Bool": true },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Whether value labels render at the ends.",
@@ -201,7 +191,6 @@
           "name": "unit",
           "prop_type": "String",
           "default": null,
-          "default_expr": null,
           "required": true,
           "web_only": false,
           "description": "Unit suffix for the value labels.",
@@ -244,7 +233,6 @@
         "size": {
           "explicit": "sm",
           "size_role": "control",
-          "fallback": null,
           "ladder": [
             {
               "size": "sm",
@@ -304,7 +292,6 @@
           "name": "value",
           "prop_type": "String",
           "default": "Null",
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Controlled value; null is the empty controlled state.",
@@ -315,7 +302,6 @@
           "name": "placeholder",
           "prop_type": "String",
           "default": { "String": "say \"hi\" \\ now" },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Placeholder text shown while empty.",
@@ -326,7 +312,6 @@
           "name": "spellcheck",
           "prop_type": "Bool",
           "default": { "Bool": false },
-          "default_expr": null,
           "required": false,
           "web_only": true,
           "description": "Native spellcheck attribute projection.",
@@ -337,7 +322,6 @@
           "name": "accent",
           "prop_type": { "Shared": "tone" },
           "default": { "Member": "danger" },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Accent tone for the focus ring; only danger is permitted.",
@@ -348,7 +332,6 @@
           "name": "validationState",
           "prop_type": { "Shared": "validation-state" },
           "default": null,
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Declared validation outcome.",
@@ -359,7 +342,6 @@
           "name": "tokens",
           "prop_type": { "List": "String" },
           "default": { "List": [{ "String": "alpha" }, { "String": "beta" }] },
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Search token list seeded in uncontrolled mode.",
@@ -370,15 +352,9 @@
           "name": "hint",
           "prop_type": "String",
           "default": null,
-          "default_expr": {
-            "coalesce": [
-              { "operand": { "prop": "placeholder" } },
-              { "operand": { "literal": { "string": "search hint" } } }
-            ]
-          },
           "required": false,
           "web_only": false,
-          "description": "Helper text; defaults to the placeholder via a bounded expression.",
+          "description": "Helper text; defaults to the placeholder when unset.",
           "permitted_subset": null
         },
         {
@@ -386,7 +362,6 @@
           "name": "ariaLabel",
           "prop_type": "String",
           "default": null,
-          "default_expr": null,
           "required": false,
           "web_only": false,
           "description": "Accessible name for the search input.",
@@ -445,26 +420,18 @@
           "id": "lower-at-most-upper",
           "name": "lower at most upper",
           "kind": "invariant",
-          "guard": null,
           "description": "The lower bound never exceeds the upper bound (RNG-12 analogue; CROSS-18)."
         },
         {
           "id": "input-clamps-to-range",
           "name": "input clamps to range",
           "kind": "transition",
-          "guard": {
-            "and": [
-              { "operand": { "literal": { "bool": true } } },
-              { "not": { "operand": { "literal": { "bool": false } } } }
-            ]
-          },
           "description": "INPUT outside [min, max] clamps to the nearest bound (RNG-02 analogue; CROSS-19)."
         },
         {
           "id": "commit-on-release",
           "name": "commit on release",
           "kind": "effect-intent",
-          "guard": null,
           "description": "A release commits the current value (RNG-11 analogue; CROSS-06)."
         }
       ],

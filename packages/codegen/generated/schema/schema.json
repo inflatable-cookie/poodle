@@ -146,16 +146,6 @@
                     }
                   ]
                 },
-                "fallback": {
-                  "oneOf": [
-                    {
-                      "type": "null"
-                    },
-                    {
-                      "type": "object"
-                    }
-                  ]
-                },
                 "ladder": {
                   "items": {
                     "additionalProperties": false,
@@ -196,7 +186,6 @@
               "required": [
                 "explicit",
                 "size_role",
-                "fallback",
                 "ladder"
               ],
               "type": "object"
@@ -525,16 +514,6 @@
             },
             {
               "$ref": "#/$defs/value"
-            }
-          ]
-        },
-        "default_expr": {
-          "oneOf": [
-            {
-              "type": "null"
-            },
-            {
-              "type": "object"
             }
           ]
         },

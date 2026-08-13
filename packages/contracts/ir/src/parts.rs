@@ -11,7 +11,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{Expr, Identifier};
+use crate::Identifier;
 
 /// One part of a component's anatomy (`CROSS-12`; `B §2`, `R §2`, `T §2`).
 ///
@@ -55,17 +55,19 @@ pub enum PartKind {
         /// Why the part is conditional, citing the contract.
         description: String,
     },
-    /// Present only when the boolean expression evaluates true — the
-    /// expression form of a part render condition (spec 063 "part render
-    /// conditions"; `TXT-08` `canClear` gates the clear button, `TXT-12`
-    /// the validation indicator, `TXT-06` the multiline input control).
-    /// `validate` type-checks the expression as boolean.
-    #[serde(rename = "conditional-expr")]
-    ConditionalExpr {
-        /// Expression gating the part; must type-check as boolean
-        /// (spec 063 expression vocabulary).
-        #[serde(rename = "when")]
-        when: Expr,
+    /// Present only under a documented condition — the condition is prose
+    /// vocabulary, not an expression tree (g13.017 R1 bucket 2: the
+    /// anatomy fact "this part renders only when X" is kept, the
+    /// expression form is gone). No runtime evaluates a part condition;
+    /// every runtime renders the part from its own logic and reads only
+    /// the anatomy names from the artifact.
+    #[serde(rename = "conditional-documented")]
+    ConditionalDocumented {
+        /// The documented condition under which the part renders, e.g.
+        /// "standard variant only" — prose kept from the removed
+        /// expression tree.
+        #[serde(rename = "condition")]
+        condition: String,
         /// Why the part is conditional, citing the contract.
         description: String,
     },

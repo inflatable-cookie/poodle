@@ -104,7 +104,7 @@ use poodle_ir::{
     A11yRole, Accessibility, AriaMapping, AttributeForm, Axes, Capability, CapabilityRequirement,
     ComponentDefinition, ConformanceVector, ContractRef, ControlDensity, ControlSize,
     DensityAdjustment, DensityAxis, EmissionPolicy, Event, EventKind, EventPayload, EventTiming,
-    Expr, Extension, FiringPhase, Identifier, IrModel, KeyChord, KeyboardCommand, Layer,
+    Extension, FiringPhase, Identifier, IrModel, KeyChord, KeyboardCommand, Layer,
     MetricValue, Modifier, NameRule, NameSource, NativeAttr, Orientation, OrientationAxis, Part,
     PartKind, PayloadKind, PermittedSubset, Prop, PropType, RecipeHookRef, RecipeLink,
     RecipeLinkKind, RuntimeTarget, SharedEnumMember, SharedType, SizeAxis, SizeRole, SizeStep,
@@ -190,7 +190,6 @@ fn prop(
         name: id.to_owned(),
         prop_type,
         default,
-        default_expr: None,
         required: false,
         web_only,
         description: description.to_owned(),
@@ -228,13 +227,15 @@ fn bool_prop(id: &str, description: &str) -> Prop {
     )
 }
 
-/// A valued state attribute deriving from a prop (`CROSS-13`).
+/// A valued state attribute deriving from a prop or VisualState field
+/// (`CROSS-13`). `source` names the field the value derives from; the
+/// emitted vocabulary is the attribute row itself, never an expression
+/// tree (g13.017).
 fn valued_attribute(
     id: &str,
     name: &str,
     source: &str,
     emission: EmissionPolicy,
-    condition: Option<Expr>,
     description: &str,
 ) -> StateAttribute {
     StateAttribute {
@@ -243,31 +244,6 @@ fn valued_attribute(
         form: AttributeForm::Valued,
         emission,
         source: Some(ident(source)),
-        condition,
-        value: None,
-        description: description.to_owned(),
-    }
-}
-
-/// A valued attribute whose value is an expression (`CROSS-13`; spec 063
-/// "state-derived attribute emission conditions and values"). Used for the
-/// `data-*` values that derive from a VisualState field and for the seven
-/// `--poodle-range-*` geometry custom properties (RNG-17).
-fn expr_valued_attribute(
-    id: &str,
-    name: &str,
-    value: Expr,
-    condition: Option<Expr>,
-    description: &str,
-) -> StateAttribute {
-    StateAttribute {
-        id: ident(id),
-        name: name.to_owned(),
-        form: AttributeForm::Valued,
-        emission: EmissionPolicy::Always,
-        source: None,
-        condition,
-        value: Some(value),
         description: description.to_owned(),
     }
 }
@@ -654,13 +630,9 @@ pub fn range_slider_definition() -> ComponentDefinition {
                 id: ident("control-lower"),
                 name: "Lower Control".to_owned(),
                 parent: Some(ident("root")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::eq(
-                        Expr::prop("variant"),
-                        Expr::member("slider-variant", "standard"),
-                    ),
-                    description: "Native range input for the lower thumb; standard variant \
-                                  only (R §2, RNG-14/15)."
+                kind: PartKind::ConditionalDocumented {
+                    condition: "standard variant only".to_owned(),
+                    description: "Native range input for the lower thumb (R §2, RNG-14/15)."
                         .to_owned(),
                 },
                 description: "Lower bound thumb input (R §2).".to_owned(),
@@ -669,13 +641,9 @@ pub fn range_slider_definition() -> ComponentDefinition {
                 id: ident("control-upper"),
                 name: "Upper Control".to_owned(),
                 parent: Some(ident("root")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::eq(
-                        Expr::prop("variant"),
-                        Expr::member("slider-variant", "standard"),
-                    ),
-                    description: "Native range input for the upper thumb; standard variant \
-                                  only (R §2, RNG-14/15)."
+                kind: PartKind::ConditionalDocumented {
+                    condition: "standard variant only".to_owned(),
+                    description: "Native range input for the upper thumb (R §2, RNG-14/15)."
                         .to_owned(),
                 },
                 description: "Upper bound thumb input (R §2).".to_owned(),
@@ -684,13 +652,10 @@ pub fn range_slider_definition() -> ComponentDefinition {
                 id: ident("embedded-lower"),
                 name: "Embedded Lower Control".to_owned(),
                 parent: Some(ident("root")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::eq(
-                        Expr::prop("variant"),
-                        Expr::member("slider-variant", "embedded"),
-                    ),
-                    description: "Adapter-owned slider focus stop for the lower thumb; \
-                                  embedded variant only (R §2/§6, RNG-15)."
+                kind: PartKind::ConditionalDocumented {
+                    condition: "embedded variant only".to_owned(),
+                    description: "Adapter-owned slider focus stop for the lower thumb \
+                                  (R §2/§6, RNG-15)."
                         .to_owned(),
                 },
                 description: "Embedded lower bound focus stop (R §2).".to_owned(),
@@ -699,13 +664,10 @@ pub fn range_slider_definition() -> ComponentDefinition {
                 id: ident("embedded-upper"),
                 name: "Embedded Upper Control".to_owned(),
                 parent: Some(ident("root")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::eq(
-                        Expr::prop("variant"),
-                        Expr::member("slider-variant", "embedded"),
-                    ),
-                    description: "Adapter-owned slider focus stop for the upper thumb; \
-                                  embedded variant only (R §2/§6, RNG-15)."
+                kind: PartKind::ConditionalDocumented {
+                    condition: "embedded variant only".to_owned(),
+                    description: "Adapter-owned slider focus stop for the upper thumb \
+                                  (R §2/§6, RNG-15)."
                         .to_owned(),
                 },
                 description: "Embedded upper bound focus stop (R §2).".to_owned(),
@@ -723,7 +685,6 @@ pub fn range_slider_definition() -> ComponentDefinition {
                 "data-orientation",
                 "orientation",
                 EmissionPolicy::Always,
-                None,
                 "The orientation value; always emitted; styling hook only, not exposed to \
                  assistive technology (R §9, RNG-17).",
             ),
@@ -732,7 +693,6 @@ pub fn range_slider_definition() -> ComponentDefinition {
                 "data-disabled",
                 "disabled",
                 EmissionPolicy::Always,
-                None,
                 "The disabled boolean; always emitted (R §9, RNG-17).",
             ),
             valued_attribute(
@@ -740,104 +700,106 @@ pub fn range_slider_definition() -> ComponentDefinition {
                 "data-variant",
                 "variant",
                 EmissionPolicy::Always,
-                None,
                 "The variant value; always emitted (R §9, RNG-17).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "polarity",
                 "data-polarity",
-                Expr::visual("polarity"),
-                None,
+                "polarity",
+                EmissionPolicy::Always,
                 "The polarity from the machine's visual state; always emitted (R §9, RNG-17).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "fill-split",
                 "data-fill-split",
-                Expr::visual("fillSplitAtCenter"),
-                None,
+                "fillSplitAtCenter",
+                EmissionPolicy::Always,
                 "Whether both fill segments meet at the center, so renderers square only the \
                  touching corners; always emitted (R §4/§8, RNG-16/17).",
             ),
-            expr_valued_attribute(
-                "state",
-                "data-state",
-                Expr::if_then_else(
-                    Expr::visual("pointerActive"),
-                    Expr::string("active"),
-                    Expr::string("idle"),
-                ),
-                None,
-                "Interaction state — active while a gesture is in progress; always emitted \
-                 (R §4, RNG-17).",
-            ),
-            expr_valued_attribute(
+            // data-state is runtime-derived: active while a gesture is in
+            // progress (R §4, RNG-17). The `pointerActive ? "active" :
+            // "idle"` selection was an expression and is gone (g13.017 R1
+            // bucket 3: derivation); the domain {active, idle} is this
+            // description's prose and the runtime's own projection.
+            StateAttribute {
+                id: ident("state"),
+                name: "data-state".to_owned(),
+                form: AttributeForm::Valued,
+                emission: EmissionPolicy::Always,
+                source: None,
+                description: "Interaction state — active while a gesture is in progress; \
+                              always emitted (R §4, RNG-17)."
+                    .to_owned(),
+            },
+            valued_attribute(
                 "size",
                 "data-size",
-                Expr::visual("resolvedSize"),
-                None,
+                "resolvedSize",
+                EmissionPolicy::Always,
                 "The resolved control size (explicit or sizeRole-derived); always emitted \
                  (R §9, RNG-17; CROSS-07).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "density",
                 "data-density",
-                Expr::visual("resolvedDensity"),
-                None,
+                "resolvedDensity",
+                EmissionPolicy::Always,
                 "The resolved density (explicit or inherited); always emitted (R §9, RNG-17; \
                  CROSS-08).",
             ),
             // The fill geometry (RNG-17): computed custom properties fed by
             // the machine's visual state fields. The runtime computes the
-            // values (`norm * 100%` — arithmetic stays out of the expression
-            // vocabulary by design; spec 063) and emits them as inline style.
-            expr_valued_attribute(
+            // values (`norm * 100%` — arithmetic is not vocabulary) and
+            // emits them as inline style; `source` names the field.
+            valued_attribute(
                 "range-start",
                 "--poodle-range-start",
-                Expr::visual("lowerNorm"),
-                None,
+                "lowerNorm",
+                EmissionPolicy::Always,
                 "Fill start position, from the lower thumb's normalized value (R §3, RNG-17).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "range-end",
                 "--poodle-range-end",
-                Expr::visual("upperNorm"),
-                None,
+                "upperNorm",
+                EmissionPolicy::Always,
                 "Fill end position, from the upper thumb's normalized value (R §3, RNG-17).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "range-center",
                 "--poodle-range-center",
-                Expr::visual("centerNorm"),
-                None,
+                "centerNorm",
+                EmissionPolicy::Always,
                 "Center reference position (R §3, RNG-17).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "range-negative-start",
                 "--poodle-range-negative-start",
-                Expr::visual("negativeFillStartNorm"),
-                None,
+                "negativeFillStartNorm",
+                EmissionPolicy::Always,
                 "Negative segment start — which side of the origin the negative fill grows \
                  from (R §3, RNG-17).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "range-negative-span",
                 "--poodle-range-negative-span",
-                Expr::visual("negativeFillSpanNorm"),
-                None,
+                "negativeFillSpanNorm",
+                EmissionPolicy::Always,
                 "Negative segment width — how negative fill is expressed (R §3, RNG-17).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "range-positive-start",
                 "--poodle-range-positive-start",
-                Expr::visual("positiveFillStartNorm"),
-                None,
+                "positiveFillStartNorm",
+                EmissionPolicy::Always,
                 "Positive segment start (R §3, RNG-17).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "range-positive-span",
                 "--poodle-range-positive-span",
-                Expr::visual("positiveFillSpanNorm"),
-                None,
+                "positiveFillSpanNorm",
+                EmissionPolicy::Always,
                 "Positive segment width (R §3, RNG-17).",
             ),
         ],
@@ -850,10 +812,6 @@ pub fn range_slider_definition() -> ComponentDefinition {
             size: Some(SizeAxis {
                 explicit: None,
                 size_role: SizeRole::Control,
-                fallback: Some(Expr::Coalesce(
-                    Box::new(Expr::prop("size")),
-                    Box::new(Expr::axis("size")),
-                )),
                 ladder: vec![
                     SizeStep {
                         size: ControlSize::Xs,
@@ -1465,7 +1423,6 @@ pub fn range_slider_model() -> IrModel {
                     id: ident("input-snaps-and-clamps"),
                     name: "INPUT snaps and clamps".to_owned(),
                     kind: VectorStepKind::Transition,
-                    guard: None,
                     description: "INPUT normalizes the raw value — snap to step anchored at \
                                   min, then clamp into [min, safeSliderMax] — and emits \
                                   value-change (R §3/§5; machines.json slider entry 0)."
@@ -1475,7 +1432,6 @@ pub fn range_slider_model() -> IrModel {
                     id: ident("commit-clamps-and-emits"),
                     name: "COMMIT clamps and emits".to_owned(),
                     kind: VectorStepKind::Transition,
-                    guard: None,
                     description: "COMMIT normalizes the same way and emits value-commit on \
                                   release (R §3/§5; machines.json slider entry 1)."
                         .to_owned(),
@@ -1484,7 +1440,6 @@ pub fn range_slider_model() -> IrModel {
                     id: ident("set-value-orders-pair"),
                     name: "SET_VALUE orders the pair".to_owned(),
                     kind: VectorStepKind::Transition,
-                    guard: None,
                     description: "SET_VALUE normalizes through normalizeRangeValue — the \
                                   display pair is ordered and clamped (R §3, RNG-12)."
                         .to_owned(),
@@ -1493,7 +1448,6 @@ pub fn range_slider_model() -> IrModel {
                     id: ident("thumb-crossing-guard"),
                     name: "a thumb cannot cross its sibling".to_owned(),
                     kind: VectorStepKind::Invariant,
-                    guard: None,
                     description: "Lower clamps to [min, upper], upper to [lower, max]; \
                                   lower <= upper always holds (R §3, RNG-12)."
                         .to_owned(),
@@ -1502,7 +1456,6 @@ pub fn range_slider_model() -> IrModel {
                     id: ident("begin-selects-nearer-thumb"),
                     name: "POINTER_BEGIN selects the nearer thumb".to_owned(),
                     kind: VectorStepKind::Transition,
-                    guard: None,
                     description: "Begin picks the thumb nearer the press fraction, holds it \
                                   for the gesture, and the gesture never transfers (R §3/§4, \
                                   RNG-12/13)."
@@ -1512,7 +1465,6 @@ pub fn range_slider_model() -> IrModel {
                     id: ident("end-commits-pair"),
                     name: "POINTER_END commits the pair".to_owned(),
                     kind: VectorStepKind::EffectIntent,
-                    guard: None,
                     description: "End emits value-commit with the pair and clears the active \
                                   thumb (R §5, RNG-11)."
                         .to_owned(),
@@ -1521,7 +1473,6 @@ pub fn range_slider_model() -> IrModel {
                     id: ident("emit-change-commit-split"),
                     name: "change during interaction, commit on release".to_owned(),
                     kind: VectorStepKind::EffectIntent,
-                    guard: None,
                     description: "INPUT emits value-change; COMMIT/POINTER_END emits \
                                   value-commit — the change/commit callback split (R §5, \
                                   RNG-11)."

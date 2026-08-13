@@ -22,9 +22,33 @@ by `ir:check`. This is what the pilot demonstrably delivered.
 
 **Out of scope — behaviour.** The IR does not describe transitions, effects,
 derived values, per-attribute derivation, or framework lifecycle, and **will
-not grow an evaluator**. `expr.rs` and the unused expression vocabulary are
-removed by `g13.017`. Across three components of rising difficulty the IR
+not grow an evaluator**. Across three components of rising difficulty the IR
 executed nothing: every prop was declared, zero were executed.
+
+**Removed by `g13.017`, explicitly and by name.** The following constructs no
+longer exist in this crate and must not be reintroduced by a card:
+
+- the expression vocabulary — `Expr`, `ExprOperand`, `ExprLiteral` in
+  `packages/contracts/ir/src/expr.rs` (deleted), and the type checker in
+  `validation.rs` with its `FindingKind::ExpressionTypeError` /
+  `UnresolvedExpressionReference` findings;
+- every expression-typed field — `StateAttribute::condition` and
+  `StateAttribute::value`, `Prop::default_expr`, `SizeAxis::fallback`,
+  `VectorStep::guard`, and `PartKind::ConditionalExpr`;
+- the authoring side — the `Expr` constructions across the three pilot
+  models (115 references) and `packages/contracts/ir/tests/expressions.rs`
+  (deleted).
+
+Vocabulary the pilot measured as real survived in plain form: part render
+conditions are prose on `PartKind::ConditionalDocumented` or a declared
+boolean prop (`PartKind::Conditional`); attribute→source mappings are the
+plain `StateAttribute::source` identifier; emission conditions live in the
+attribute description and `EmissionPolicy`.
+
+**The new-verdict bar.** Re-introducing an expression tree, an evaluator, or
+a conditional-render construct — including `when`/`guard`/`fallback`/`value`
+fields carrying logic — requires a new pilot verdict, not a card. The
+`g13.008` verdict is the last word on behaviour in the IR.
 
 **Out of scope — replacing implementations.** Consuming a definition is
 additive. Measured: the nine pilot files grew 3,672 → 4,637 lines while
@@ -82,22 +106,30 @@ web receives generated typed data, not a second hand-maintained model.
 
 ## Hard Boundary: Data, Not Rust Transpilation
 
-The shared source may contain only typed, serializable declarations and a
-bounded expression vocabulary. Arbitrary Rust functions, closures, trait
-objects, runtime borrowing, and backend calls are not cross-compiled to
-TypeScript.
+The shared source contains only typed, serializable declarations. Arbitrary
+Rust functions, closures, trait objects, runtime borrowing, and backend
+calls are not cross-compiled to TypeScript. (The "bounded expression
+vocabulary" this section once allowed was removed by `g13.017` — see the
+scope section above; the vocabulary subsection below is retained as the
+pilot's record.)
 
 Cross-runtime behavior must be represented as one of:
 
-- a declarative transition, guard, or effect-intent expression in the IR
 - shared conformance vectors implemented by each runtime machine
 - a named adapter capability such as focus, measurement, pointer capture,
   text editing, portal placement, timers, or announcements
 - an explicit runtime extension with a documented parity consequence
 
-This narrows the compiler problem enough to keep generated output dependable.
+There is no expression representation slot. This narrows the compiler
+problem enough to keep generated output dependable.
 
-### The bounded expression vocabulary (normative)
+### The bounded expression vocabulary (normative) — removed by g13.017
+
+**This subsection is the pilot's record, not a live contract.** `g13.017`
+removed the expression vocabulary in full — the crate has no `Expr` type,
+no evaluator, and no expression-typed field (see the scope section above).
+It is retained so the narrowing is measurable: this was the bounded
+language, and it is gone.
 
 Added 2026-08-11. The spec asked for "a bounded expression vocabulary" without
 bounding it; `g13-b011` hit the gap on `CROSS-20`

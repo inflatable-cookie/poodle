@@ -44,7 +44,7 @@
 use poodle_ir::{
     A11yRole, Accessibility, AriaMapping, AttributeForm, Axes, Capability, CapabilityRequirement,
     ComponentDefinition, ContractRef, ControlSize, DensityAxis, EmissionPolicy, Event, EventKind,
-    EventPayload, EventTiming, Expr, Extension, FiringPhase, Identifier, IrModel, KeyChord,
+    EventPayload, EventTiming, Extension, FiringPhase, Identifier, IrModel, KeyChord,
     KeyboardCommand, Layer, MetricValue, Modifier, NameRule, NameSource, NativeAttr,
     OrderingConstraint, Part, PartKind, PayloadKind, PermittedSubset, Prop, PropType,
     RecipeHookRef, RecipeLink, RecipeLinkKind, RuntimeTarget, SharedEnumMember, SharedType,
@@ -117,7 +117,6 @@ fn prop(
         name: id.to_owned(),
         prop_type,
         default,
-        default_expr: None,
         required: false,
         web_only,
         description: description.to_owned(),
@@ -163,13 +162,16 @@ fn bool_prop(id: &str, description: &str) -> Prop {
     )
 }
 
-/// A valued state attribute deriving from a prop (`CROSS-13`).
+/// A valued state attribute deriving from a prop or VisualState field
+/// (`CROSS-13`). `source` names the prop, controlled state, or VisualState
+/// field the value derives from; the emitted vocabulary is the attribute
+/// row itself (name, form, emission, value domain), never an expression
+/// tree (g13.017).
 fn valued_attribute(
     id: &str,
     name: &str,
     source: &str,
     emission: EmissionPolicy,
-    condition: Option<Expr>,
     description: &str,
 ) -> StateAttribute {
     StateAttribute {
@@ -178,44 +180,21 @@ fn valued_attribute(
         form: AttributeForm::Valued,
         emission,
         source: Some(ident(source)),
-        condition,
-        value: None,
         description: description.to_owned(),
     }
 }
 
-/// A presence-only state attribute gated by an emission condition
-/// (`CROSS-13`; `BTN-18`).
-fn presence_attribute(id: &str, name: &str, condition: Expr, description: &str) -> StateAttribute {
+/// A presence-only state attribute (`CROSS-13`; `BTN-18`). When the
+/// presence is emitted is documented in the description — the emission
+/// condition was an expression and is gone (g13.017 R1 bucket 1; the
+/// information survives as prose).
+fn presence_attribute(id: &str, name: &str, description: &str) -> StateAttribute {
     StateAttribute {
         id: ident(id),
         name: name.to_owned(),
         form: AttributeForm::PresenceOnly,
         emission: EmissionPolicy::Always,
         source: None,
-        condition: Some(condition),
-        value: None,
-        description: description.to_owned(),
-    }
-}
-
-/// A valued attribute whose value is an expression (`CROSS-13`; spec 063
-/// "state-derived attribute emission conditions and values").
-fn expr_valued_attribute(
-    id: &str,
-    name: &str,
-    value: Expr,
-    condition: Option<Expr>,
-    description: &str,
-) -> StateAttribute {
-    StateAttribute {
-        id: ident(id),
-        name: name.to_owned(),
-        form: AttributeForm::Valued,
-        emission: EmissionPolicy::Always,
-        source: None,
-        condition,
-        value: Some(value),
         description: description.to_owned(),
     }
 }
@@ -702,9 +681,10 @@ pub fn button_definition() -> ComponentDefinition {
         ],
 
         // The anatomy (B §2): root plus the five conditional/static parts.
-        // Slot-presence and derived-content conditions are declared as
-        // VisualState projections (CROSS-14) because the snippet and icon
-        // props are opaque payloads the vocabulary cannot test directly.
+        // Slot-presence and derived-content conditions are documented
+        // prose on the conditional parts (g13.017 R1 bucket 2: anatomy
+        // kept, expression tree gone); the snippet and icon props are
+        // opaque payloads the vocabulary cannot test directly.
         parts: vec![
             Part {
                 id: ident("root"),
@@ -729,11 +709,11 @@ pub fn button_definition() -> ComponentDefinition {
                 id: ident("leading-icon"),
                 name: "Leading Icon".to_owned(),
                 parent: Some(ident("root")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::visual("leadingContent"),
-                    description: "Leading icon span — present when the leading snippet or \
-                                  leadingIcon prop is provided (B §2, BTN-16/17)."
+                kind: PartKind::ConditionalDocumented {
+                    condition: "present when the leading snippet or leadingIcon prop is \
+                                provided"
                         .to_owned(),
+                    description: "Leading icon span (B §2, BTN-16/17).".to_owned(),
                 },
                 description: "Icon before the label (B §2).".to_owned(),
             },
@@ -741,11 +721,11 @@ pub fn button_definition() -> ComponentDefinition {
                 id: ident("label"),
                 name: "Label".to_owned(),
                 parent: Some(ident("root")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::not(Expr::visual("iconOnly")),
-                    description: "Label content span — present when children content exists; \
-                                  absence triggers icon-only mode (B §2, BTN-09/16/17)."
+                kind: PartKind::ConditionalDocumented {
+                    condition: "present when children content exists; absence triggers \
+                                icon-only mode"
                         .to_owned(),
+                    description: "Label content span (B §2, BTN-09/16/17).".to_owned(),
                 },
                 description: "Text content (B §2).".to_owned(),
             },
@@ -753,11 +733,11 @@ pub fn button_definition() -> ComponentDefinition {
                 id: ident("trailing-icon"),
                 name: "Trailing Icon".to_owned(),
                 parent: Some(ident("root")),
-                kind: PartKind::ConditionalExpr {
-                    when: Expr::visual("trailingContent"),
-                    description: "Trailing icon span — present when the trailing snippet or \
-                                  trailingIcon prop is provided (B §2, BTN-16/17)."
+                kind: PartKind::ConditionalDocumented {
+                    condition: "present when the trailing snippet or trailingIcon prop is \
+                                provided"
                         .to_owned(),
+                    description: "Trailing icon span (B §2, BTN-16/17).".to_owned(),
                 },
                 description: "Icon after the label (B §2).".to_owned(),
             },
@@ -784,7 +764,6 @@ pub fn button_definition() -> ComponentDefinition {
                 "data-variant",
                 "variant",
                 EmissionPolicy::Always,
-                None,
                 "The variant value; always emitted (B §9, BTN-18).",
             ),
             valued_attribute(
@@ -792,52 +771,44 @@ pub fn button_definition() -> ComponentDefinition {
                 "data-tone",
                 "tone",
                 EmissionPolicy::OmitWhenDefault,
-                Some(Expr::ne(
-                    Expr::prop("tone"),
-                    Expr::member("button-tone", "default"),
-                )),
                 "The tone value, omitted when the tone is default (B §9, BTN-18).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "size",
                 "data-size",
-                Expr::visual("resolvedSize"),
-                None,
+                "resolvedSize",
+                EmissionPolicy::Always,
                 "The resolved control size (explicit or sizeRole-derived); always emitted \
                  (B §9, BTN-18; CROSS-07).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "density",
                 "data-density",
-                Expr::visual("resolvedDensity"),
-                None,
+                "resolvedDensity",
+                EmissionPolicy::Always,
                 "The resolved density (explicit or inherited); always emitted (B §9, BTN-18; \
                  CROSS-08).",
             ),
             presence_attribute(
                 "icon-only",
                 "data-icon-only",
-                Expr::visual("iconOnly"),
                 "Presence-only; emitted when there is no label content (B §9, BTN-09/18).",
             ),
             presence_attribute(
                 "has-leading",
                 "data-has-leading",
-                Expr::visual("hasLeading"),
                 "Presence-only; emitted when a leading icon/snippet is present or loading \
                  (B §9, BTN-17/18).",
             ),
             presence_attribute(
                 "has-trailing",
                 "data-has-trailing",
-                Expr::visual("hasTrailing"),
                 "Presence-only; emitted when a trailing icon/snippet or the chevron is \
                  present (B §9, BTN-17/18).",
             ),
             presence_attribute(
                 "truncate",
                 "data-truncate",
-                Expr::prop("truncate"),
                 "Presence-only; emitted when truncate is true (B §9, BTN-18).",
             ),
             valued_attribute(
@@ -845,10 +816,6 @@ pub fn button_definition() -> ComponentDefinition {
                 "data-fit",
                 "fit",
                 EmissionPolicy::OmitWhenDefault,
-                Some(Expr::ne(
-                    Expr::prop("fit"),
-                    Expr::member("button-fit", "default"),
-                )),
                 "The fit value, emitted only when fit is content (B §9, BTN-18).",
             ),
             valued_attribute(
@@ -856,16 +823,14 @@ pub fn button_definition() -> ComponentDefinition {
                 "data-loading",
                 "loading",
                 EmissionPolicy::Always,
-                None,
                 "The loading boolean; always emitted, even as false (B §9, BTN-08/18).",
             ),
-            expr_valued_attribute(
+            valued_attribute(
                 "pressed",
                 "data-pressed",
-                Expr::visual("currentPressed"),
-                Some(Expr::visual("isToggle")),
-                "The current pressed boolean, emitted only in toggle mode (B §9, BTN-14/18; \
-                 CROSS-04 currentPressed selection).",
+                "currentPressed",
+                EmissionPolicy::Always,
+                "The current pressed boolean, emitted only in toggle mode (B §9, BTN-14/18).",
             ),
         ],
 
@@ -876,10 +841,6 @@ pub fn button_definition() -> ComponentDefinition {
             size: Some(SizeAxis {
                 explicit: None,
                 size_role: SizeRole::Control,
-                fallback: Some(Expr::Coalesce(
-                    Box::new(Expr::prop("size")),
-                    Box::new(Expr::axis("size")),
-                )),
                 ladder: vec![
                     SizeStep {
                         size: ControlSize::Xs,

@@ -39,7 +39,6 @@
       "default": {
         "kind": "null"
       },
-      "default_expr": null,
       "description": "Controlled value; null is the empty controlled state.",
       "id": "value",
       "name": "value",
@@ -55,7 +54,6 @@
         "kind": "string",
         "value": "say \"hi\" \\ now"
       },
-      "default_expr": null,
       "description": "Placeholder text shown while empty.",
       "id": "placeholder",
       "name": "placeholder",
@@ -71,7 +69,6 @@
         "kind": "boolean",
         "value": false
       },
-      "default_expr": null,
       "description": "Native spellcheck attribute projection.",
       "id": "spellcheck",
       "name": "spellcheck",
@@ -87,7 +84,6 @@
         "kind": "member",
         "value": "danger"
       },
-      "default_expr": null,
       "description": "Accent tone for the focus ring; only danger is permitted.",
       "id": "accent",
       "name": "accent",
@@ -103,7 +99,6 @@
     },
     {
       "default": null,
-      "default_expr": null,
       "description": "Declared validation outcome.",
       "id": "validationState",
       "name": "validationState",
@@ -129,7 +124,6 @@
           }
         ]
       },
-      "default_expr": null,
       "description": "Search token list seeded in uncontrolled mode.",
       "id": "tokens",
       "name": "tokens",
@@ -145,23 +139,7 @@
     },
     {
       "default": null,
-      "default_expr": {
-        "coalesce": [
-          {
-            "operand": {
-              "prop": "placeholder"
-            }
-          },
-          {
-            "operand": {
-              "literal": {
-                "string": "search hint"
-              }
-            }
-          }
-        ]
-      },
-      "description": "Helper text; defaults to the placeholder via a bounded expression.",
+      "description": "Helper text; defaults to the placeholder when unset.",
       "id": "hint",
       "name": "hint",
       "permitted_subset": null,
@@ -173,7 +151,6 @@
     },
     {
       "default": null,
-      "default_expr": null,
       "description": "Accessible name for the search input.",
       "id": "ariaLabel",
       "name": "ariaLabel",

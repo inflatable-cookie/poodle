@@ -36,8 +36,7 @@ export type SearchFieldProps = Readonly<{
    */
   tokens?: Array<string>;
   /**
-   * Helper text; defaults to the placeholder via a bounded expression.
-   * Default: derived from a bounded expression (spec 063).
+   * Helper text; defaults to the placeholder when unset.
    */
   hint?: string;
   /**

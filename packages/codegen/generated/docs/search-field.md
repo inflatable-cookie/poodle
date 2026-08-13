@@ -12,5 +12,5 @@
 | `accent` | `"danger"` | `"danger"` | no | Accent tone for the focus ring; only danger is permitted. |
 | `validationState` | `ValidationState` | `—` | no | Declared validation outcome. |
 | `tokens` | `Array<string>` | `["alpha", "beta"]` | no | Search token list seeded in uncontrolled mode. |
-| `hint` | `string` | `derived` | no | Helper text; defaults to the placeholder via a bounded expression. |
+| `hint` | `string` | `—` | no | Helper text; defaults to the placeholder when unset. |
 | `ariaLabel` | `string` | `—` | no | Accessible name for the search input. |

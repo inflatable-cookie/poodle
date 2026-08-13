@@ -130,7 +130,7 @@ pub struct TextInputPart {
 /// One state attribute: id, the `data-*` name the DOM carries, its form
 /// and emission policy, and its value domain. The value domain is the
 /// emitter's projection of the source's declared type (a shared prop or a
-/// VisualState enum field); expression-valued attributes carry no domain.
+/// VisualState enum field); source-less attributes carry no domain.
 pub struct TextInputAttribute {
     pub id: &'static str,
     pub name: &'static str,
@@ -141,9 +141,9 @@ pub struct TextInputAttribute {
 
 /// One TXT-16 padding hook: the computed custom property the web markup
 /// emits as inline style, and the VisualState field that feeds it. The
-/// values are runtime-derived strings (`calc()` arithmetic stays out of
-/// the expression vocabulary by design) — the names and their source
-/// fields are the declared vocabulary.
+/// values are runtime-derived strings (`calc()` arithmetic is not
+/// vocabulary) — the names and their source fields are the declared
+/// vocabulary.
 pub struct TextInputStyleProp {
     pub id: &'static str,
     pub name: &'static str,
