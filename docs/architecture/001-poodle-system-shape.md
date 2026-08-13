@@ -1,7 +1,7 @@
 # 001 Poodle System Shape
 
 Status: active
-Updated: 2026-08-09
+Updated: 2026-08-13
 
 ## Purpose
 
@@ -66,6 +66,26 @@ Parity is evaluated in this order:
 An implementation difference is acceptable only when the contract permits it
 or the runtime cannot express the same mechanism. Known differences must be
 documented, not silently embedded in an adapter.
+
+## Authority Pairs
+
+Promoted from the g13 pilot verdict and the g13.020 reassessment
+(`../roadmaps/g13/pilot-verdict-evidence.md`,
+`../roadmaps/g13/020-consolidate-and-reassess.md`), 2026-08-13. The durable
+authority shape is pair-wise, not corpus-wide:
+
+- **Web pair** — `poodle-core` is the single behavior source for Svelte and
+  React; the shells stay idiomatic and thin.
+- **Native pair** — `poodle-render` is the single component implementation
+  for GPUI and Jetstream; backends interpret, they do not reimplement.
+
+The cross-language authority ambition is **closed**. One source authoring
+component behaviour for all four runtimes was measured and retired by the
+verdict: ≈31,400 lines of machinery, +965 consumer lines, zero duplication
+removed. The drift-gate estate is the corpus-wide authority. The two pairs
+stay two, pinned to each other by execution rather than described from one
+source — the pinning contract is normative in
+`../specs/064-cross-runtime-machine-pinning.md`.
 
 ## Web Architecture
 
