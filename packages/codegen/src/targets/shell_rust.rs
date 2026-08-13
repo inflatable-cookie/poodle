@@ -153,8 +153,9 @@ pub struct ShellScene {
 
 /// A Rust string literal. JSON escaping is not valid Rust (`\u00XX` and
 /// `\b`/`\f` are JSON-isms), so this is its own function — not a reuse of
-/// the TS target's.
-fn rust_string_literal(value: &str) -> String {
+/// the TS target's. Shared with the `button-rust` sibling target (card 042
+/// R2).
+pub(crate) fn rust_string_literal(value: &str) -> String {
     let mut out = String::with_capacity(value.len() + 2);
     out.push('"');
     for ch in value.chars() {
@@ -175,8 +176,9 @@ fn rust_string_literal(value: &str) -> String {
 }
 
 /// `preview-shell` → `PREVIEW_SHELL`. The artifact's static name; scenes
-/// get one file each, so names cannot collide.
-fn static_name(scene_id: &str) -> String {
+/// get one file each, so names cannot collide. Shared with the
+/// `button-rust` sibling target (card 042 R2).
+pub(crate) fn static_name(scene_id: &str) -> String {
     scene_id
         .split(['-', '_'])
         .filter(|part| !part.is_empty())

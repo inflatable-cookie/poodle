@@ -92,7 +92,10 @@ pub fn render_components(model: &IrModel, source_path: &str) -> Vec<GeneratedFil
 /// the same icon span for leading and trailing content (B §2). The
 /// projection is authored exactly once here; the components read the
 /// result from the artifact.
-fn part_class_name(part_id: &str) -> String {
+///
+/// Shared with the `button-rust` sibling target (card 042 R2): one home
+/// for the anatomy projection, like `shell.rs`'s label helpers in 036.
+pub(crate) fn part_class_name(part_id: &str) -> String {
     match part_id {
         "root" => "poodle-button".to_owned(),
         "leading-icon" | "trailing-icon" => "poodle-button__icon".to_owned(),
@@ -100,24 +103,27 @@ fn part_class_name(part_id: &str) -> String {
     }
 }
 
-/// The serialized emission-policy name (the IR's serde rename).
-fn emission_name(policy: EmissionPolicy) -> &'static str {
+/// The serialized emission-policy name (the IR's serde rename). Shared
+/// with the `button-rust` sibling target (card 042 R2).
+pub(crate) fn emission_name(policy: EmissionPolicy) -> &'static str {
     match policy {
         EmissionPolicy::OmitWhenDefault => "omit-when-default",
         EmissionPolicy::Always => "always",
     }
 }
 
-/// The serialized attribute-form name (the IR's serde rename).
-fn form_name(form: AttributeForm) -> &'static str {
+/// The serialized attribute-form name (the IR's serde rename). Shared
+/// with the `button-rust` sibling target (card 042 R2).
+pub(crate) fn form_name(form: AttributeForm) -> &'static str {
     match form {
         AttributeForm::PresenceOnly => "presence-only",
         AttributeForm::Valued => "valued",
     }
 }
 
-/// The serialized recipe-link-kind name (the IR's serde rename).
-fn link_kind_name(kind: RecipeLinkKind) -> &'static str {
+/// The serialized recipe-link-kind name (the IR's serde rename). Shared
+/// with the `button-rust` sibling target (card 042 R2).
+pub(crate) fn link_kind_name(kind: RecipeLinkKind) -> &'static str {
     match kind {
         RecipeLinkKind::RecipeHook => "recipe-hook",
         RecipeLinkKind::ComponentVariable => "component-variable",
@@ -125,8 +131,9 @@ fn link_kind_name(kind: RecipeLinkKind) -> &'static str {
     }
 }
 
-/// The prop an attribute's source references, if any.
-fn source_prop<'a>(
+/// The prop an attribute's source references, if any. Shared with the
+/// `button-rust` sibling target (card 042 R2).
+pub(crate) fn source_prop<'a>(
     component: &'a ComponentDefinition,
     attribute: &StateAttribute,
 ) -> Option<&'a poodle_ir::Prop> {
@@ -137,7 +144,8 @@ fn source_prop<'a>(
 }
 
 /// The visual field an attribute's value expression references, if any.
-fn value_visual_field<'a>(
+/// Shared with the `button-rust` sibling target (card 042 R2).
+pub(crate) fn value_visual_field<'a>(
     component: &'a ComponentDefinition,
     attribute: &StateAttribute,
 ) -> Option<&'a poodle_ir::VisualStateField> {
@@ -161,7 +169,7 @@ fn value_visual_field<'a>(
 ///   domain (the DOM never carries it, e.g. `data-tone` is never
 ///   `"default"`);
 /// - presence-only attributes carry no domain.
-fn attribute_values(
+pub(crate) fn attribute_values(
     model: &IrModel,
     component: &ComponentDefinition,
     attribute: &StateAttribute,
@@ -190,8 +198,9 @@ fn attribute_values(
     Some(domain)
 }
 
-/// The domain a declared prop type carries.
-fn prop_domain(model: &IrModel, prop_type: &PropType) -> Option<Vec<String>> {
+/// The domain a declared prop type carries. Shared with the `button-rust`
+/// sibling target (card 042 R2).
+pub(crate) fn prop_domain(model: &IrModel, prop_type: &PropType) -> Option<Vec<String>> {
     match prop_type {
         PropType::Shared(shared_id) => shared_member_names(model, shared_id),
         PropType::Bool => Some(vec!["true".to_owned(), "false".to_owned()]),
@@ -199,8 +208,9 @@ fn prop_domain(model: &IrModel, prop_type: &PropType) -> Option<Vec<String>> {
     }
 }
 
-/// The domain a VisualState field kind carries.
-fn field_domain(model: &IrModel, kind: &VisualFieldKind) -> Option<Vec<String>> {
+/// The domain a VisualState field kind carries. Shared with the
+/// `button-rust` sibling target (card 042 R2).
+pub(crate) fn field_domain(model: &IrModel, kind: &VisualFieldKind) -> Option<Vec<String>> {
     match kind {
         VisualFieldKind::Enum(shared_id) => shared_member_names(model, shared_id),
         VisualFieldKind::Bool => Some(vec!["true".to_owned(), "false".to_owned()]),
@@ -208,8 +218,9 @@ fn field_domain(model: &IrModel, kind: &VisualFieldKind) -> Option<Vec<String>> 
     }
 }
 
-/// The member ids of a shared type, in authoring order.
-fn shared_member_names(model: &IrModel, shared_id: &Identifier) -> Option<Vec<String>> {
+/// The member ids of a shared type, in authoring order. Shared with the
+/// `button-rust` sibling target (card 042 R2).
+pub(crate) fn shared_member_names(model: &IrModel, shared_id: &Identifier) -> Option<Vec<String>> {
     let shared = model.shared_type(shared_id.as_str())?;
     Some(
         shared
