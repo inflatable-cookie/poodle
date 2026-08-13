@@ -519,9 +519,24 @@
           "description": "Bipolar center reference marker; hidden in unipolar and in the standard variant (R §2/§8)."
         },
         {
+          "id": "control",
+          "name": "Control",
+          "parent": "root",
+          "kind": {
+            "identified": {
+              "instances": [
+                "control-lower",
+                "control-upper"
+              ],
+              "description": "The two standard-variant thumbs, each with its own identity and declared semantics (R §2, RNG-14/15)."
+            }
+          },
+          "description": "The identified pair of standard-variant thumb controls; the count and the identities come from the definition (g13.018 R5)."
+        },
+        {
           "id": "control-lower",
           "name": "Lower Control",
-          "parent": "root",
+          "parent": "control",
           "kind": {
             "conditional-documented": {
               "condition": "standard variant only",
@@ -533,7 +548,7 @@
         {
           "id": "control-upper",
           "name": "Upper Control",
-          "parent": "root",
+          "parent": "control",
           "kind": {
             "conditional-documented": {
               "condition": "standard variant only",
@@ -1082,15 +1097,81 @@
       "capabilities": [
         {
           "capability": "pointer-capture",
-          "purpose": "Embedded-variant shared-root pointer capture — the full root is the pointer target and the gesture never transfers thumbs (R §3/§4, RNG-15)."
+          "purpose": "Embedded-variant shared-root pointer capture — the full root is the pointer target and the gesture never transfers thumbs (R §3/§4, RNG-15).",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "provided",
+              "reason": "The component's root calls setPointerCapture for the embedded variant and holds the gesture on the shared root (RNG-15)."
+            },
+            {
+              "runtime": "react",
+              "provision": "provided",
+              "reason": "The component's root calls setPointerCapture for the embedded variant and holds the gesture on the shared root (RNG-15)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "The render's scrub overlay + the node-backend's drag system keep the gesture on the shared root for the whole drag (RNG-15; interaction.rs scrub handling)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "Jetstream dispatches pointer presses to the render's scrub overlay but has no capture semantics — the embedded variant renders without a held gesture (RNG-15; measured g13.018: no capture vocabulary in the Jetstream sources)."
+            }
+          ]
         },
         {
           "capability": "focus",
-          "purpose": "Per-thumb focus stops — Tab cycles lower, upper, and out (R §6, RNG-18/20)."
+          "purpose": "Per-thumb focus stops — Tab cycles lower, upper, and out (R §6, RNG-18/20).",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "provided",
+              "reason": "The two native range inputs (standard) and the two slider focus stops (embedded) each carry their own tabindex (RNG-18/20)."
+            },
+            {
+              "runtime": "react",
+              "provision": "provided",
+              "reason": "The two native range inputs (standard) and the two slider focus stops (embedded) each carry their own tabIndex (RNG-18/20)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "The render marks the root focusable and the node-backend observes focus and drives key dispatch for the focused element (interaction.rs; RNG-18/20)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "provided",
+              "reason": "The preview's focus system hit-tests and focuses the render's focusable root, and the adapter projects focus rings (main.rs focus handling, adapter render_structural.rs; RNG-18/20)."
+            }
+          ]
         },
         {
           "capability": "scrub-fraction",
-          "purpose": "Native grab overlay reports the pointer position as a fraction (Interaction::on_scrub); the component picks the nearer thumb on the press (R §3, RNG-13)."
+          "purpose": "Native grab overlay reports the pointer position as a fraction (Interaction::on_scrub); the component picks the nearer thumb on the press (R §3, RNG-13).",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "provided",
+              "reason": "The shared root's pointer handlers report the position as a fraction and drive the machine's POINTER_BEGIN/MOVE/END (RNG-13)."
+            },
+            {
+              "runtime": "react",
+              "provision": "provided",
+              "reason": "The shared root's pointer handlers report the position as a fraction and drive the machine's POINTER_BEGIN/MOVE/END (RNG-13)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "The render attaches on_scrub to the grab overlay and the node-backend reports the fraction across it, pressing and dragging (interaction.rs; RNG-13)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "Jetstream renders the grab overlay but no pointer-fraction reporting reaches it — the component renders without scrub interaction (RNG-13; measured g13.018: no scrub vocabulary in the Jetstream sources)."
+            }
+          ]
         }
       ],
       "keyboard": [

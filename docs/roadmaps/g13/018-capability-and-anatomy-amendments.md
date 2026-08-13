@@ -1,8 +1,9 @@
 # g13.018 Capability And Anatomy Amendments
 
-Status: ready
+Status: complete
 Owner: Poodle core
 Depends on: `g13.017`
+Delivered by: `g13-b051` (batch card 051, `thread/g13-051-capability-and-anatomy-amendments`)
 
 ## Objective
 

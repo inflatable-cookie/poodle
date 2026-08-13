@@ -264,6 +264,14 @@
 # broken on main (update-center, update-status): the whole preview rendered
 # zero characters with every gate green. This moves the check to build time.
 "docs:react-specimen-drift" = "bun packages/svelte/preview/scripts/react-specimen-drift.ts"
+# The g13.018 capability gate: every declared per-runtime capability row —
+# provided, delegated, or absent with a reason — must be true against the
+# runtime sources. Absence must stay true (Jetstream gains an edit handler
+# while still declared as lacking text editing → fail) and a provision must
+# have a trace (a runtime claiming a capability it does not implement →
+# fail). Both directions proven live by card 051. Runs inside ci:web; this
+# selector is for standalone/report use.
+"docs:capability-drift" = "bun packages/svelte/preview/scripts/capability-drift.ts"
 # Contract <-> poodle-specs drift. Also runs inside docs:lint; this selector is
 # for standalone/report use (DRIFT_REPORT=1 lists gaps without failing).
 "docs:spec-drift" = "bun packages/svelte/preview/scripts/contract-spec-drift.ts"
@@ -353,6 +361,7 @@
   { task = "check:svelte" },
   { task = "docs:lint" },
   { task = "docs:react-specimen-drift" },
+  { task = "docs:capability-drift" },
   { task = "react:docs" },
   { task = "report:parity" },
   { task = "report:accessibility" },

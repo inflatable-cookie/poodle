@@ -54,7 +54,8 @@ use crate::emit::{header, sort_by_id, EmitTarget, GeneratedFile};
 use crate::error::Result;
 
 use super::button::{
-    attribute_values, emission_name, form_name, link_kind_name, value_visual_field,
+    attribute_values, emission_name, form_name, link_kind_name, part_instances_ts,
+    value_visual_field,
 };
 use super::shell::camel_case;
 use super::ts::ts_string_literal;
@@ -148,18 +149,21 @@ fn render_component_file(
     ));
 
     // Parts — the anatomy with the DOM class (or classes) each part
-    // renders under.
+    // renders under. Identified families (g13.018 R5) also carry their
+    // instance list, so the count and the identities come from the
+    // definition.
     out.push_str("  parts: [\n");
     for part in &component.parts {
         out.push_str(&format!(
-            "    {{ id: {}, name: {}, className: {}, parent: {} }},\n",
+            "    {{ id: {}, name: {}, className: {}, parent: {}, instances: {} }},\n",
             ts_string_literal(part.id.as_str()),
             ts_string_literal(&part.name),
             ts_string_literal(&part_class_name(part.id.as_str())),
             part.parent
                 .as_ref()
                 .map(|parent| ts_string_literal(parent.as_str()))
-                .unwrap_or_else(|| "null".to_owned())
+                .unwrap_or_else(|| "null".to_owned()),
+            part_instances_ts(part)
         ));
     }
     out.push_str("  ],\n");

@@ -280,8 +280,8 @@ fn text_input_definition_authors_the_full_contract_surface() {
         component
             .parts
             .iter()
-            .all(|part| !matches!(part.kind, poodle_ir::PartKind::Repeated { .. })),
-        "no Repeated part — the anatomy is one part per contract row"
+            .all(|part| !matches!(part.kind, poodle_ir::PartKind::Identified { .. })),
+        "no identified family — the anatomy is one part per contract row (g13.018 R5)"
     );
     assert_eq!(
         component.recipe_hooks.len(),
@@ -313,6 +313,97 @@ fn text_input_definition_authors_the_full_contract_surface() {
             "Timers".to_owned(),
         ],
         "the typed capability boundary (R2) — selection rides on TextEditing + Measurement"
+    );
+
+    // The g13.018 three-way split (R3): every requirement declares all
+    // four runtimes explicitly, web delegates (or provides), GPUI
+    // implements, Jetstream is absent where it has no implementation —
+    // absence is declared and reasoned, never inferred from silence.
+    // The card's required test: TextInput states that Jetstream lacks
+    // text editing.
+    let split = |capability: poodle_ir::Capability| {
+        let requirement = component
+            .capabilities
+            .iter()
+            .find(|requirement| requirement.capability == capability)
+            .unwrap_or_else(|| panic!("capability {capability:?} declared"));
+        assert_eq!(
+            requirement.runtimes.len(),
+            4,
+            "{capability:?}: every runtime listed explicitly (g13.018 R3)"
+        );
+        let rows = |provision: poodle_ir::CapabilityProvision| {
+            requirement
+                .runtimes
+                .iter()
+                .filter(|status| status.provision == provision)
+                .map(|status| status.runtime)
+                .collect::<Vec<_>>()
+        };
+        rows
+    };
+    let jetstream = poodle_ir::RuntimeTarget::Jetstream;
+    let gpui = poodle_ir::RuntimeTarget::Gpui;
+    // The card's headline: Jetstream lacks text editing, declared with a
+    // reason.
+    let text_editing_absent = split(poodle_ir::Capability::TextEditing)(
+        poodle_ir::CapabilityProvision::Absent,
+    );
+    assert_eq!(
+        text_editing_absent,
+        vec![jetstream],
+        "Jetstream lacks text editing — declared, not inferred (the card's required test)"
+    );
+    let text_editing_absent_row = component
+        .capabilities
+        .iter()
+        .find(|requirement| requirement.capability == poodle_ir::Capability::TextEditing)
+        .unwrap()
+        .runtimes
+        .iter()
+        .find(|status| status.provision == poodle_ir::CapabilityProvision::Absent)
+        .unwrap();
+    assert!(
+        !text_editing_absent_row.reason.trim().is_empty(),
+        "the Jetstream absence carries a reason (g13.018 R3)"
+    );
+    // The rest of the split: web delegates editing/IME/clipboard/
+    // measurement, GPUI provides them, Jetstream is absent; timers are
+    // web-provided and native-absent.
+    for capability in [
+        poodle_ir::Capability::TextEditing,
+        poodle_ir::Capability::Ime,
+        poodle_ir::Capability::Clipboard,
+        poodle_ir::Capability::Measurement,
+    ] {
+        let rows = split(capability);
+        assert_eq!(
+            rows(poodle_ir::CapabilityProvision::Delegated),
+            vec![poodle_ir::RuntimeTarget::Svelte, poodle_ir::RuntimeTarget::React],
+            "{capability:?}: the web runtimes delegate to the browser"
+        );
+        assert_eq!(
+            rows(poodle_ir::CapabilityProvision::Provided),
+            vec![gpui],
+            "{capability:?}: GPUI implements it"
+        );
+        assert_eq!(
+            rows(poodle_ir::CapabilityProvision::Absent),
+            vec![jetstream],
+            "{capability:?}: Jetstream is absent — the silent gap is declared"
+        );
+    }
+    assert_eq!(
+        split(poodle_ir::Capability::Timers)(poodle_ir::CapabilityProvision::Provided)
+            .len(),
+        2,
+        "timers: both web runtimes own their setTimeout lifecycle"
+    );
+    assert_eq!(
+        split(poodle_ir::Capability::Timers)(poodle_ir::CapabilityProvision::Absent)
+            .len(),
+        2,
+        "timers: neither native has a timer surface (b049 measured)"
     );
 
     // Key prop defaults, byte-stable against the contract (R4).

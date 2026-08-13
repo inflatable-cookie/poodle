@@ -12,18 +12,18 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use poodle_ir::{
     validate, A11yRole, Accessibility, AriaMapping, AttributeForm, Axes, AxisValues, Capability,
-    CapabilityRequirement, ComponentDefinition, ComponentGroup, ComponentInstance,
-    ConformanceVector, ContractRef, ControlDensity, ControlRule, ControlSize, ControlledState,
-    DensityAdjustment, DensityAxis, EmissionPolicy, Event, EventKind, EventPayload, EventTiming,
-    Extension, Finding, FindingKind, FiringPhase, GateTier, Identifier, IrModel, KeyChord,
-    KeyboardCommand, Layer, MetricValue, Modifier, NameRule, NameSource, NativeAttr, NavSection,
-    NavSectionKind, OrderingConstraint, Orientation, OrientationAxis, ParityHarness, Part,
-    PartKind, PayloadKind, PermittedSubset, PreviewState, Prop, PropBinding, PropType,
-    RecipeHookRef, RecipeLink, RecipeLinkKind, RouteState, RuntimeTarget, Scene, SceneAxis,
-    SceneAxisKind, SceneLayout, SearchConfig, SearchField, SharedEnumMember, SharedType, SizeAxis,
-    SizeRole, SizeStep, SpecimenEntry, SpecimenRegistry, SpecimenTabs, StateAttribute, TokenGroup,
-    TokenRef, Value, VectorStep, VectorStepKind, VisualFieldKind, VisualGate, VisualState,
-    VisualStateField, IR_SCHEMA_VERSION,
+    CapabilityProvision, CapabilityRequirement, CapabilityRuntimeStatus, ComponentDefinition,
+    ComponentGroup, ComponentInstance, ConformanceVector, ContractRef, ControlDensity, ControlRule,
+    ControlSize, ControlledState, DensityAdjustment, DensityAxis, EmissionPolicy, Event, EventKind,
+    EventPayload, EventTiming, Extension, Finding, FindingKind, FiringPhase, GateTier, Identifier,
+    IrModel, KeyChord, KeyboardCommand, Layer, MetricValue, Modifier, NameRule, NameSource,
+    NativeAttr, NavSection, NavSectionKind, OrderingConstraint, Orientation, OrientationAxis,
+    ParityHarness, Part, PartKind, PayloadKind, PermittedSubset, PreviewState, Prop, PropBinding,
+    PropType, RecipeHookRef, RecipeLink, RecipeLinkKind, RouteState, RuntimeTarget, Scene,
+    SceneAxis, SceneAxisKind, SceneLayout, SearchConfig, SearchField, SharedEnumMember, SharedType,
+    SizeAxis, SizeRole, SizeStep, SpecimenEntry, SpecimenRegistry, SpecimenTabs, StateAttribute,
+    TokenGroup, TokenRef, Value, VectorStep, VectorStepKind, VisualFieldKind, VisualGate,
+    VisualState, VisualStateField, IR_SCHEMA_VERSION,
 };
 
 // ---------------------------------------------------------------------------
@@ -320,10 +320,13 @@ fn sample_model() -> IrModel {
             CapabilityRequirement {
                 capability: Capability::Focus,
                 purpose: "Activation delivery is adapter-owned (BTN-20, CROSS-17).".to_owned(),
+                // Pre-g13.018 shape: no per-runtime provision rows.
+                runtimes: Vec::new(),
             },
             CapabilityRequirement {
                 capability: Capability::Timers,
                 purpose: "Timing for debounced effects (TXT-11, CROSS-17).".to_owned(),
+                runtimes: Vec::new(),
             },
         ],
         keyboard: vec![KeyboardCommand {
@@ -864,5 +867,171 @@ fn reports_all_findings_at_once_not_first() {
         findings.len() >= 3,
         "expected at least three findings, got {}",
         findings.len()
+    );
+}
+
+// ---------------------------------------------------------------------------
+// g13.018 — the identified-instance anatomy and the per-runtime capability
+// provisions (both amendments are vocabulary; these are the validation
+// rules that keep the vocabulary honest)
+// ---------------------------------------------------------------------------
+
+/// A complete per-runtime provision list: all four runtimes, each with a
+/// provision and a reason.
+fn four_runtime_status() -> Vec<CapabilityRuntimeStatus> {
+    vec![
+        CapabilityRuntimeStatus {
+            runtime: RuntimeTarget::Svelte,
+            provision: CapabilityProvision::Provided,
+            reason: "svelte provides it".to_owned(),
+        },
+        CapabilityRuntimeStatus {
+            runtime: RuntimeTarget::React,
+            provision: CapabilityProvision::Delegated,
+            reason: "react delegates it".to_owned(),
+        },
+        CapabilityRuntimeStatus {
+            runtime: RuntimeTarget::Gpui,
+            provision: CapabilityProvision::Provided,
+            reason: "gpui provides it".to_owned(),
+        },
+        CapabilityRuntimeStatus {
+            runtime: RuntimeTarget::Jetstream,
+            provision: CapabilityProvision::Absent,
+            reason: "jetstream lacks it, with a reason".to_owned(),
+        },
+    ]
+}
+
+#[test]
+fn accepts_the_g13_018_vocabulary() {
+    let mut model = sample_model();
+    // The identified-instance family: the label part names the spinner as
+    // its instance (both parts exist in the sample anatomy).
+    for part in &mut model.components[0].parts {
+        if part.id.as_str() == "label" {
+            part.kind = PartKind::Identified {
+                instances: vec![Identifier::new("spinner")],
+                description: "the identified label instance".to_owned(),
+            };
+        }
+    }
+    // A complete per-runtime provision on the Focus requirement.
+    model.components[0].capabilities[0].runtimes = four_runtime_status();
+
+    let findings = validate(&model);
+    assert!(
+        findings.is_empty(),
+        "the g13.018 vocabulary must validate clean, got: {findings:#?}"
+    );
+}
+
+#[test]
+fn rejects_identified_instance_that_is_not_a_part() {
+    let mut model = sample_model();
+    for part in &mut model.components[0].parts {
+        if part.id.as_str() == "label" {
+            part.kind = PartKind::Identified {
+                instances: vec![Identifier::new("ghost-instance")],
+                description: "an instance that is not a part".to_owned(),
+            };
+        }
+    }
+
+    let findings = validate(&model);
+    let invalid = findings
+        .iter()
+        .filter(|f| f.kind == FindingKind::InvalidReference)
+        .collect::<Vec<_>>();
+    assert!(
+        !invalid.is_empty(),
+        "an identified instance must be a part in the same component: {findings:#?}"
+    );
+    assert!(
+        invalid
+            .iter()
+            .any(|f| f.message.contains("ghost-instance")),
+        "the finding must name the missing instance: {findings:#?}"
+    );
+}
+
+#[test]
+fn rejects_an_empty_identified_instance_list() {
+    let mut model = sample_model();
+    for part in &mut model.components[0].parts {
+        if part.id.as_str() == "label" {
+            part.kind = PartKind::Identified {
+                instances: Vec::new(),
+                description: "a fixed set of zero instances".to_owned(),
+            };
+        }
+    }
+
+    let findings = validate(&model);
+    assert!(
+        findings
+            .iter()
+            .any(|f| f.kind == FindingKind::ImpossibleBinding),
+        "a fixed set of identified instances must name at least one: {findings:#?}"
+    );
+}
+
+#[test]
+fn rejects_an_omitted_runtime_in_a_declared_provision() {
+    let mut model = sample_model();
+    let mut statuses = four_runtime_status();
+    statuses.pop(); // Jetstream unlisted — silence must not mean absent.
+    model.components[0].capabilities[0].runtimes = statuses;
+
+    let findings = validate(&model);
+    let incomplete = findings
+        .iter()
+        .filter(|f| f.kind == FindingKind::IncompleteCapabilityProvision)
+        .collect::<Vec<_>>();
+    assert!(
+        !incomplete.is_empty(),
+        "a declared provision must list every runtime: {findings:#?}"
+    );
+    assert!(
+        incomplete
+            .iter()
+            .any(|f| f.message.contains("Jetstream")),
+        "the finding must name the omitted runtime: {findings:#?}"
+    );
+}
+
+#[test]
+fn rejects_an_absent_runtime_without_a_reason() {
+    let mut model = sample_model();
+    let mut statuses = four_runtime_status();
+    for status in &mut statuses {
+        if status.provision == CapabilityProvision::Absent {
+            status.reason = "   ".to_owned();
+        }
+    }
+    model.components[0].capabilities[0].runtimes = statuses;
+
+    let findings = validate(&model);
+    assert!(
+        findings
+            .iter()
+            .any(|f| f.kind == FindingKind::IncompleteCapabilityProvision),
+        "an absence must carry a reason (g13.018 R3): {findings:#?}"
+    );
+}
+
+#[test]
+fn rejects_a_duplicate_runtime_in_a_declared_provision() {
+    let mut model = sample_model();
+    let mut statuses = four_runtime_status();
+    statuses.push(statuses[0].clone()); // Svelte listed twice.
+    model.components[0].capabilities[0].runtimes = statuses;
+
+    let findings = validate(&model);
+    assert!(
+        findings
+            .iter()
+            .any(|f| f.kind == FindingKind::DuplicateId),
+        "one row per runtime: {findings:#?}"
     );
 }

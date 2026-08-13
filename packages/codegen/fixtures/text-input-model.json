@@ -1550,27 +1550,159 @@
       "capabilities": [
         {
           "capability": "focus",
-          "purpose": "Caret focus ownership: the web DOM owns focus on the native input (autofocus, the imperative focus()); the Rust backends own focus observation (on_focus_change — only they can see a blur) and caret drawing, with isFocused a host-driven prop that does not drive the caret (T §6 Caret Ownership, TXT-21)."
+          "purpose": "Caret focus ownership: the web DOM owns focus on the native input (autofocus, the imperative focus()); the Rust backends own focus observation (on_focus_change — only they can see a blur) and caret drawing, with isFocused a host-driven prop that does not drive the caret (T §6 Caret Ownership, TXT-21).",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "provided",
+              "reason": "The component's imperative focus() and the native input's autofocus own focus delivery (TXT-21)."
+            },
+            {
+              "runtime": "react",
+              "provision": "provided",
+              "reason": "The imperative focus() handle and the native input's autoFocus own focus delivery (TXT-21)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "The node-backend owns a real focus handle, observes gain and loss, and fires on_focus_change (interaction.rs; TXT-21)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "Jetstream never observes focus for poodle fields — no on_focus_change route, and the adapter's text element has no meaningful poodle focus; the field renders unfocusable for editing (b049 R2, measured)."
+            }
+          ]
         },
         {
           "capability": "text-editing",
-          "purpose": "Selection and editing semantics: the web runtime's editing model IS the browser (no TS text machine); the Rust targets drive the shared headless model (edit_transition, insert_transition, selected_text, word_range_at) from key events and insertions. The DOM owns selection on web; the host owns the caret position on Rust (selectionStart/selectionEnd, onSelectionChange) — selection is not a first-class capability name, recorded as a finding (T §6, TXT-21/22/23; IR-05)."
+          "purpose": "Selection and editing semantics: the web runtime's editing model IS the browser (no TS text machine); the Rust targets drive the shared headless model (edit_transition, insert_transition, selected_text, word_range_at) from key events and insertions. The DOM owns selection on web; the host owns the caret position on Rust (selectionStart/selectionEnd, onSelectionChange) — selection is not a first-class capability name, recorded as a finding (T §6, TXT-21/22/23; IR-05).",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "delegated",
+              "reason": "The browser's editing model IS the editing — the component wires the native input and owns no text machine (b048, measured)."
+            },
+            {
+              "runtime": "react",
+              "provision": "delegated",
+              "reason": "The browser's editing model IS the editing — the component wires the native input and owns no text machine (b048, measured)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "The node-backend implements the full editing model: ime.rs (218 lines), input_text.rs (574 lines), and the on_edit_key/on_edit_insert/on_select_range wiring in interaction.rs and lib.rs (b049, measured)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "Jetstream has zero on_edit_key/on_select_range/on_edit_insert references and no ime.rs — the adapter renders a display-only text element with no caret, no selection, and no key path; the field cannot be typed into. Declared, not fixed (b049 R3; TXT-31)."
+            }
+          ]
         },
         {
           "capability": "ime",
-          "purpose": "Composition: the web DOM owns composition natively — the components intercept no composition events, and a composition sequence must not fire intermediate onValueChange (the runtime filters input events by isComposing); the Rust backends register a platform text input handler with a UTF-16 boundary and a backend-owned marked range (T §6, TXT-24)."
+          "purpose": "Composition: the web DOM owns composition natively — the components intercept no composition events, and a composition sequence must not fire intermediate onValueChange (the runtime filters input events by isComposing); the Rust backends register a platform text input handler with a UTF-16 boundary and a backend-owned marked range (T §6, TXT-24).",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "delegated",
+              "reason": "The browser owns composition; the component filters input events by isComposing and intercepts no composition events (TXT-24; b048 measured)."
+            },
+            {
+              "runtime": "react",
+              "provision": "delegated",
+              "reason": "The browser owns composition; the component filters input events by isComposing and intercepts no composition events (TXT-24; b048 measured)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "ime.rs is a direct gpui InputHandler implementation with explicit UTF-16 conversions and a backend-owned marked range (TXT-24; b049 measured)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "No ime.rs anywhere and no input handler is ever registered for a poodle field — composition has no route (b049 R2, measured; TXT-24)."
+            }
+          ]
         },
         {
           "capability": "clipboard",
-          "purpose": "Copy/cut/paste: the web DOM owns the clipboard natively; the Rust backends own the platform clipboard (the text comes from outside the tree) while the shared edit model owns where a paste lands (insert_transition) and what a copy/cut reads (selected_text); copying an empty selection leaves the clipboard alone (T §6, TXT-23)."
+          "purpose": "Copy/cut/paste: the web DOM owns the clipboard natively; the Rust backends own the platform clipboard (the text comes from outside the tree) while the shared edit model owns where a paste lands (insert_transition) and what a copy/cut reads (selected_text); copying an empty selection leaves the clipboard alone (T §6, TXT-23).",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "delegated",
+              "reason": "The browser owns the clipboard on the native input — the component implements no clipboard path (TXT-23)."
+            },
+            {
+              "runtime": "react",
+              "provision": "delegated",
+              "reason": "The browser owns the clipboard on the native input — the component implements no clipboard path (TXT-23)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "The node-backend owns the platform clipboard; paste/cut land through the shared edit model via on_edit_insert and selected_text (lib.rs, TXT-23; b049 measured)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "No clipboard path exists for poodle fields — copy/cut/paste have no route (b049 R2, measured; TXT-23)."
+            }
+          ]
         },
         {
           "capability": "measurement",
-          "purpose": "Glyph measurement for caret placement: the browser measures natively; the Rust backends measure shaped glyphs (shape_line/x_for_index) to draw the caret at character n and answer the reverse question (closest_index_for_x makes click-to-position and drag-to-select possible) (T §6, TXT-21/22)."
+          "purpose": "Glyph measurement for caret placement: the browser measures natively; the Rust backends measure shaped glyphs (shape_line/x_for_index) to draw the caret at character n and answer the reverse question (closest_index_for_x makes click-to-position and drag-to-select possible) (T §6, TXT-21/22).",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "delegated",
+              "reason": "The browser measures the native input's text natively — the component implements no measurement (TXT-21/22)."
+            },
+            {
+              "runtime": "react",
+              "provision": "delegated",
+              "reason": "The browser measures the native input's text natively — the component implements no measurement (TXT-21/22)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "provided",
+              "reason": "input_text.rs shapes and measures the value line and answers clicks with x_for_index/closest_index_for_x on the measured ShapedLine (TXT-21/22; b049 measured)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "No shaped-line measurement, no caret placement, no click-to-index — the field is display-only (b049 R2, measured; TXT-21/22)."
+            }
+          ]
         },
         {
           "capability": "timers",
-          "purpose": "Debounce and validation timing owned by the component: the web components own their setTimeout lifecycle (debounce, validationDebounce) with cleanup on destroy; the Rust targets have no timer surface today — the host drives timing (T §5, TXT-11/12/28; CROSS-17)."
+          "purpose": "Debounce and validation timing owned by the component: the web components own their setTimeout lifecycle (debounce, validationDebounce) with cleanup on destroy; the Rust targets have no timer surface today — the host drives timing (T §5, TXT-11/12/28; CROSS-17).",
+          "runtimes": [
+            {
+              "runtime": "svelte",
+              "provision": "provided",
+              "reason": "The component owns its setTimeout debounce and validation timers with cleanup on destroy (TXT-11/12/28)."
+            },
+            {
+              "runtime": "react",
+              "provision": "provided",
+              "reason": "The component owns its setTimeout debounce and validation timers with cleanup on unmount (TXT-11/12/28)."
+            },
+            {
+              "runtime": "gpui",
+              "provision": "absent",
+              "reason": "No timer surface — the host drives timing (b049 measured: neither native has a timer surface)."
+            },
+            {
+              "runtime": "jetstream",
+              "provision": "absent",
+              "reason": "No timer surface — the host drives timing (b049 measured: neither native has a timer surface)."
+            }
+          ]
         }
       ],
       "keyboard": [

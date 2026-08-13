@@ -23,13 +23,17 @@
 //! cannot express that Jetstream lacks a declared capability.
 
 /// One anatomy part: id, display name, the DOM class the web markup
-/// renders it under, and its parent part. The class projection is shared
+/// renders it under, its parent part, and — for an identified family
+/// (g13.018 R5) — the ids of its instances. The class projection is shared
 /// with the `text-input-ts` artifact (`part_class_name`).
 pub struct TextInputPart {
     pub id: &'static str,
     pub name: &'static str,
     pub dom_class: &'static str,
     pub parent: Option<&'static str>,
+    /// The instance ids of an identified family, or `None` for any other
+    /// part kind. The count and the identities come from the definition.
+    pub instances: Option<&'static [&'static str]>,
 }
 
 /// One state attribute: id, the `data-*` name the DOM carries, its form
@@ -75,9 +79,11 @@ pub struct TextInputDefinition {
     /// The `text-input-type` shared-type members — the `data-type` value
     /// domain.
     pub types: &'static [&'static str],
-    /// The `validation-state` shared-type members — the
-    /// `data-validation-state` value domain, and the validation treatments
-    /// the render discriminates on.
+    /// The `validation-state` shared-type members — the `data-*` value
+    /// domain for validation (the exact attribute name is carried in the
+    /// `attributes` rows below, so a rename never leaves a stale name in
+    /// this doc), and the validation treatments the render discriminates
+    /// on.
     pub validation_states: &'static [&'static str],
     /// The `control-size` shared-type members — the `data-size` value
     /// domain, and the size ladder the render's metric treatments
@@ -119,60 +125,70 @@ pub static TEXT_INPUT_DEFINITION: TextInputDefinition = TextInputDefinition {
             name: "Root",
             dom_class: "poodle-text-input",
             parent: None,
+            instances: None,
         },
         TextInputPart {
             id: "prefix",
             name: "Prefix",
             dom_class: "poodle-text-input__affix poodle-text-input__affix--prefix",
             parent: Some("root"),
+            instances: None,
         },
         TextInputPart {
             id: "field",
             name: "Field",
             dom_class: "poodle-text-input__field",
             parent: Some("root"),
+            instances: None,
         },
         TextInputPart {
             id: "leading-affordance",
             name: "Leading Affordance",
             dom_class: "poodle-text-input__affordance poodle-text-input__affordance--leading",
             parent: Some("field"),
+            instances: None,
         },
         TextInputPart {
             id: "input-control",
             name: "Input Control",
             dom_class: "poodle-text-input__control",
             parent: Some("field"),
+            instances: None,
         },
         TextInputPart {
             id: "trailing-affordance",
             name: "Trailing Affordance",
             dom_class: "poodle-text-input__affordance poodle-text-input__affordance--trailing",
             parent: Some("field"),
+            instances: None,
         },
         TextInputPart {
             id: "clear-button",
             name: "Clear Button",
             dom_class: "poodle-text-input__clear",
             parent: Some("field"),
+            instances: None,
         },
         TextInputPart {
             id: "validation-indicator",
             name: "Validation Indicator",
             dom_class: "poodle-text-input__validation-indicator",
             parent: Some("field"),
+            instances: None,
         },
         TextInputPart {
             id: "suffix",
             name: "Suffix",
             dom_class: "poodle-text-input__affix poodle-text-input__affix--suffix",
             parent: Some("root"),
+            instances: None,
         },
         TextInputPart {
             id: "char-count",
             name: "Character Count",
             dom_class: "poodle-text-input__char-count",
             parent: Some("root"),
+            instances: None,
         },
     ],
     attributes: &[

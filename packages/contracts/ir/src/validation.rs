@@ -62,6 +62,12 @@ pub enum FindingKind {
     /// declare (`CROSS-17`, IR-08).
     #[serde(rename = "undeclared-capability")]
     UndeclaredCapability,
+    /// A per-runtime capability provision that is incomplete: a runtime
+    /// omitted from a declared provision list, or an absence without a
+    /// reason (`g13.018` R3 — "not listed" must never silently mean
+    /// "absent", and absence must carry a reason).
+    #[serde(rename = "incomplete-capability-provision")]
+    IncompleteCapabilityProvision,
     /// A value outside a component's permitted subset of a shared type
     /// (g13-b003 R6.2).
     #[serde(rename = "permitted-subset-violation")]
@@ -549,28 +555,44 @@ fn validate_component_parts(
                     ));
                 }
             }
-            PartKind::Repeated { over, .. } => {
-                let prop = prop_by_id(component, over.as_str());
-                match prop {
-                    None => findings.push(Finding::new(
-                        FindingKind::InvalidReference,
+            PartKind::Identified { instances, .. } => {
+                if instances.is_empty() {
+                    findings.push(Finding::new(
+                        FindingKind::ImpossibleBinding,
                         scope("part", &part.id),
                         format!(
-                            "repeated part iterates over prop '{over}' which does not exist; add \
-                             the prop or fix the reference (CROSS-12)"
+                            "identified part '{}' declares an empty instance list; a fixed set \
+                             of identified instances must name at least one instance (g13.018 \
+                             R5)",
+                            part.id
                         ),
-                    )),
-                    Some(prop) if !matches!(prop.prop_type, PropType::List(_)) => {
+                    ));
+                }
+                let mut seen_instances = BTreeSet::new();
+                for instance in instances {
+                    if !seen_instances.insert(instance.clone()) {
                         findings.push(Finding::new(
-                            FindingKind::ImpossibleBinding,
+                            FindingKind::DuplicateId,
                             scope("part", &part.id),
                             format!(
-                                "repeated part iterates over prop '{over}' which is not a list; \
-                                 a repeated node needs a list source (CROSS-12)"
+                                "identified part '{}' lists instance '{}' more than once; each \
+                                 identified instance must be unique (CROSS-12)",
+                                part.id, instance
                             ),
                         ));
                     }
-                    _ => {}
+                    if !part_ids.contains(&instance.to_string()) {
+                        findings.push(Finding::new(
+                            FindingKind::InvalidReference,
+                            scope("part", &part.id),
+                            format!(
+                                "identified part '{}' lists instance '{}' which is not a part in \
+                                 this component; each identified instance must be its own part \
+                                 with its own identity and declared semantics (g13.018 R5)",
+                                part.id, instance
+                            ),
+                        ));
+                    }
                 }
             }
             PartKind::Static => {}
@@ -846,6 +868,69 @@ fn validate_component_capabilities(
                     requirement.capability
                 ),
             ));
+        }
+        // Per-runtime provision (g13.018 R3): when a requirement declares
+        // any runtime row, it must declare every runtime — "not listed"
+        // must never silently mean "absent". Absent rows must carry a
+        // reason (R3: make the absent case explicit and make it carry a
+        // reason).
+        if !requirement.runtimes.is_empty() {
+            let mut seen = BTreeSet::new();
+            for status in &requirement.runtimes {
+                if !seen.insert(status.runtime) {
+                    findings.push(Finding::new(
+                        FindingKind::DuplicateId,
+                        scope(
+                            "capability",
+                            &Identifier::new(format!("{:?}", requirement.capability)),
+                        ),
+                        format!(
+                            "capability '{:?}' declares runtime '{:?}' more than once; one row \
+                             per runtime (g13.018 R3)",
+                            requirement.capability, status.runtime
+                        ),
+                    ));
+                }
+                if status.provision == crate::CapabilityProvision::Absent
+                    && status.reason.trim().is_empty()
+                {
+                    findings.push(Finding::new(
+                        FindingKind::IncompleteCapabilityProvision,
+                        scope(
+                            "capability",
+                            &Identifier::new(format!("{:?}", requirement.capability)),
+                        ),
+                        format!(
+                            "capability '{:?}' declares runtime '{:?}' absent without a reason; \
+                             an absence must say what the runtime does instead and what the \
+                             component degrades to (g13.018 R3)",
+                            requirement.capability, status.runtime
+                        ),
+                    ));
+                }
+            }
+            for runtime in [
+                crate::RuntimeTarget::Svelte,
+                crate::RuntimeTarget::React,
+                crate::RuntimeTarget::Gpui,
+                crate::RuntimeTarget::Jetstream,
+            ] {
+                if !seen.contains(&runtime) {
+                    findings.push(Finding::new(
+                        FindingKind::IncompleteCapabilityProvision,
+                        scope(
+                            "capability",
+                            &Identifier::new(format!("{:?}", requirement.capability)),
+                        ),
+                        format!(
+                            "capability '{:?}' declares per-runtime provision but omits \
+                             runtime '{:?}'; every runtime must be listed explicitly — absence \
+                             is declared, never inferred from silence (g13.018 R3)",
+                            requirement.capability, runtime
+                        ),
+                    ));
+                }
+            }
         }
     }
     // Undeclared capabilities: a keyboard command whose delivery needs a

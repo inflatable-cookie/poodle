@@ -1002,12 +1002,16 @@ pub fn button_definition() -> ComponentDefinition {
         },
 
         // The only declared adapter capability is keyboard focus delivery
-        // (BTN-20); everything else is native button behavior.
+        // (BTN-20); everything else is native button behavior. This
+        // requirement predates the g13.018 per-runtime provision rows and
+        // carries none — per-runtime capability vocabulary for Button is
+        // g13.019's job, not this card's.
         capabilities: vec![CapabilityRequirement {
             capability: Capability::Focus,
             purpose: "Tab/Shift+Tab focus movement and focus-ring delivery (B §6, BTN-20; \
                       CROSS-17)."
                 .to_owned(),
+            runtimes: Vec::new(),
         }],
 
         // BTN-20 keyboard table (CROSS-16).

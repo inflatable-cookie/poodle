@@ -28,23 +28,20 @@
 //!
 //! # R2 — the three things Button could not test
 //!
-//! 1. **Repeated anatomy.** The IR's only repetition mechanism is
-//!    `PartKind::Repeated { over }`, and validation requires `over` to be a
-//!    `List`-typed prop ("a repeated node needs a list source"). The
-//!    RangeSlider value is a `Pair`, not a `List` — the two thumbs are a
-//!    fixed `[lower, upper]` pair, and the contract's own anatomy (§2)
-//!    defines Lower Control and Upper Control as distinct parts with
-//!    distinct semantics (per-thumb aria labels, clamp bounds, Home/End
-//!    behavior). Even over a list, a `Repeated` part yields **identical
-//!    instances** — the expression vocabulary has no per-item index or
-//!    identity operand, so "first repetition is lower, second is upper"
-//!    cannot be declared. The two thumbs are therefore recorded as two
-//!    distinct parts here, and the renderer hard-codes "two". The
-//!    `Repeated` kind's own doc comment names "the two RangeSlider thumbs"
-//!    as its motivating example; that example does not apply — the kind
-//!    needs a list source the component does not have, and per-instance
-//!    identity is not expressible. This is the finding `g13.006` exists to
-//!    produce; it is recorded in the batch log for `g13.008`.
+//! 1. **Identified anatomy.** The pilot's negative finding was that the
+//!    IR's only repetition mechanism — `PartKind::Repeated { over }`,
+//!    which requires a `List`-typed prop and yields identical instances —
+//!    could not express the two RangeSlider thumbs: a fixed `[lower,
+//!    upper]` pair whose contract anatomy (§2) defines Lower Control and
+//!    Upper Control as distinct parts with distinct semantics (per-thumb
+//!    aria labels, clamp bounds, Home/End behavior). `g13.018` retires
+//!    `Repeated` outright (no model used it) and replaces it with
+//!    [`PartKind::Identified`]: the `control` part names its two
+//!    instances — `control-lower` and `control-upper` — each its own part
+//!    with its own identity and declared semantics. The count and the
+//!    identities come from the definition; `poodle-render` derives the
+//!    pair from the instance list instead of hard-coding the count
+//!    (`g13.018` R5).
 //! 2. **Value-dependent geometry.** Fill geometry is arithmetic over the
 //!    value pair (`norm * 100`, negative/positive span splits) — excluded
 //!    from the expression vocabulary by design. Spec 063's sanctioned
@@ -101,15 +98,15 @@
 //!   DOM attributes; the components read them into `rangeStyle`.
 
 use poodle_ir::{
-    A11yRole, Accessibility, AriaMapping, AttributeForm, Axes, Capability, CapabilityRequirement,
-    ComponentDefinition, ConformanceVector, ContractRef, ControlDensity, ControlSize,
-    DensityAdjustment, DensityAxis, EmissionPolicy, Event, EventKind, EventPayload, EventTiming,
-    Extension, FiringPhase, Identifier, IrModel, KeyChord, KeyboardCommand, Layer,
-    MetricValue, Modifier, NameRule, NameSource, NativeAttr, Orientation, OrientationAxis, Part,
-    PartKind, PayloadKind, PermittedSubset, Prop, PropType, RecipeHookRef, RecipeLink,
-    RecipeLinkKind, RuntimeTarget, SharedEnumMember, SharedType, SizeAxis, SizeRole, SizeStep,
-    StateAttribute, TokenGroup, TokenRef, Value, VectorStep, VectorStepKind, VisualFieldKind,
-    VisualState, VisualStateField,
+    A11yRole, Accessibility, AriaMapping, AttributeForm, Axes, Capability, CapabilityProvision,
+    CapabilityRequirement, CapabilityRuntimeStatus, ComponentDefinition, ConformanceVector,
+    ContractRef, ControlDensity, ControlSize, DensityAdjustment, DensityAxis, EmissionPolicy,
+    Event, EventKind, EventPayload, EventTiming, Extension, FiringPhase, Identifier, IrModel,
+    KeyChord, KeyboardCommand, Layer, MetricValue, Modifier, NameRule, NameSource, NativeAttr,
+    Orientation, OrientationAxis, Part, PartKind, PayloadKind, PermittedSubset, Prop, PropType,
+    RecipeHookRef, RecipeLink, RecipeLinkKind, RuntimeTarget, SharedEnumMember, SharedType,
+    SizeAxis, SizeRole, SizeStep, StateAttribute, TokenGroup, TokenRef, Value, VectorStep,
+    VectorStepKind, VisualFieldKind, VisualState, VisualStateField,
 };
 
 /// The governing contract, cited by the component and every definition row.
@@ -578,10 +575,12 @@ pub fn range_slider_definition() -> ComponentDefinition {
         ],
 
         // The anatomy (R §2 + the rendered DOM): the contract's five parts
-        // split into the DOM's nine — the fill renders as negative/positive
+        // split into the DOM's ten — the fill renders as negative/positive
         // segments plus a center marker, and each variant's controls are
-        // distinct parts (see the module notes for why the two thumbs are
-        // not one Repeated part: R2.1).
+        // distinct parts. The standard variant's two thumbs are the
+        // identified `control` pair (g13.018 R5 — see the module notes):
+        // the family part names its instances, and each instance is its
+        // own part with its own identity and semantics.
         parts: vec![
             Part {
                 id: ident("root"),
@@ -627,9 +626,23 @@ pub fn range_slider_definition() -> ComponentDefinition {
                     .to_owned(),
             },
             Part {
+                id: ident("control"),
+                name: "Control".to_owned(),
+                parent: Some(ident("root")),
+                kind: PartKind::Identified {
+                    instances: vec![ident("control-lower"), ident("control-upper")],
+                    description: "The two standard-variant thumbs, each with its own identity \
+                                  and declared semantics (R §2, RNG-14/15)."
+                        .to_owned(),
+                },
+                description: "The identified pair of standard-variant thumb controls; the \
+                              count and the identities come from the definition (g13.018 R5)."
+                    .to_owned(),
+            },
+            Part {
                 id: ident("control-lower"),
                 name: "Lower Control".to_owned(),
-                parent: Some(ident("root")),
+                parent: Some(ident("control")),
                 kind: PartKind::ConditionalDocumented {
                     condition: "standard variant only".to_owned(),
                     description: "Native range input for the lower thumb (R §2, RNG-14/15)."
@@ -640,7 +653,7 @@ pub fn range_slider_definition() -> ComponentDefinition {
             Part {
                 id: ident("control-upper"),
                 name: "Upper Control".to_owned(),
-                parent: Some(ident("root")),
+                parent: Some(ident("control")),
                 kind: PartKind::ConditionalDocumented {
                     condition: "standard variant only".to_owned(),
                     description: "Native range input for the upper thumb (R §2, RNG-14/15)."
@@ -1004,8 +1017,10 @@ pub fn range_slider_definition() -> ComponentDefinition {
         },
 
         // Adapter-owned environment work (R3; RNG-13/15/20; CROSS-17): the
-        // definition declares that these exist and what they mean; each
-        // runtime's adapter owns the implementation.
+        // definition declares that these exist, what they mean, and which
+        // runtime provides each (g13.018 R3 — provision is declared, never
+        // inferred). Each runtime's adapter owns the implementation
+        // (IR-05).
         capabilities: vec![
             CapabilityRequirement {
                 capability: Capability::PointerCapture,
@@ -1013,12 +1028,80 @@ pub fn range_slider_definition() -> ComponentDefinition {
                           pointer target and the gesture never transfers thumbs (R §3/§4, \
                           RNG-15)."
                     .to_owned(),
+                runtimes: vec![
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Svelte,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The component's root calls setPointerCapture for the embedded \
+                                 variant and holds the gesture on the shared root (RNG-15)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::React,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The component's root calls setPointerCapture for the embedded \
+                                 variant and holds the gesture on the shared root (RNG-15)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Gpui,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The render's scrub overlay + the node-backend's drag system \
+                                 keep the gesture on the shared root for the whole drag \
+                                 (RNG-15; interaction.rs scrub handling)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Jetstream,
+                        provision: CapabilityProvision::Absent,
+                        reason: "Jetstream dispatches pointer presses to the render's scrub \
+                                 overlay but has no capture semantics — the embedded variant \
+                                 renders without a held gesture (RNG-15; measured g13.018: no \
+                                 capture vocabulary in the Jetstream sources)."
+                            .to_owned(),
+                    },
+                ],
             },
             CapabilityRequirement {
                 capability: Capability::Focus,
                 purpose: "Per-thumb focus stops — Tab cycles lower, upper, and out (R §6, \
                           RNG-18/20)."
                     .to_owned(),
+                runtimes: vec![
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Svelte,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The two native range inputs (standard) and the two slider \
+                                 focus stops (embedded) each carry their own tabindex \
+                                 (RNG-18/20)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::React,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The two native range inputs (standard) and the two slider \
+                                 focus stops (embedded) each carry their own tabIndex \
+                                 (RNG-18/20)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Gpui,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The render marks the root focusable and the node-backend \
+                                 observes focus and drives key dispatch for the focused \
+                                 element (interaction.rs; RNG-18/20)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Jetstream,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The preview's focus system hit-tests and focuses the render's \
+                                 focusable root, and the adapter projects focus rings \
+                                 (main.rs focus handling, adapter render_structural.rs; \
+                                 RNG-18/20)."
+                            .to_owned(),
+                    },
+                ],
             },
             CapabilityRequirement {
                 capability: Capability::ScrubFraction,
@@ -1026,6 +1109,41 @@ pub fn range_slider_definition() -> ComponentDefinition {
                           (Interaction::on_scrub); the component picks the nearer thumb on \
                           the press (R §3, RNG-13)."
                     .to_owned(),
+                runtimes: vec![
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Svelte,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The shared root's pointer handlers report the position as a \
+                                 fraction and drive the machine's POINTER_BEGIN/MOVE/END \
+                                 (RNG-13)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::React,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The shared root's pointer handlers report the position as a \
+                                 fraction and drive the machine's POINTER_BEGIN/MOVE/END \
+                                 (RNG-13)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Gpui,
+                        provision: CapabilityProvision::Provided,
+                        reason: "The render attaches on_scrub to the grab overlay and the \
+                                 node-backend reports the fraction across it, pressing and \
+                                 dragging (interaction.rs; RNG-13)."
+                            .to_owned(),
+                    },
+                    CapabilityRuntimeStatus {
+                        runtime: RuntimeTarget::Jetstream,
+                        provision: CapabilityProvision::Absent,
+                        reason: "Jetstream renders the grab overlay but no pointer-fraction \
+                                 reporting reaches it — the component renders without scrub \
+                                 interaction (RNG-13; measured g13.018: no scrub vocabulary in \
+                                 the Jetstream sources)."
+                            .to_owned(),
+                    },
+                ],
             },
         ],
 

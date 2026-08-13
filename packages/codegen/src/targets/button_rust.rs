@@ -26,7 +26,9 @@ use poodle_ir::{ComponentDefinition, Identifier, IrModel};
 use crate::emit::{header, sort_by_id, EmitTarget, GeneratedFile};
 use crate::error::Result;
 
-use super::button::{attribute_values, emission_name, form_name, link_kind_name, part_class_name};
+use super::button::{
+    attribute_values, emission_name, form_name, link_kind_name, part_class_name, part_instances,
+};
 use super::shell_rust::{rust_string_literal, static_name};
 
 /// The button-rust target. Scoped to the authored Button model: not in
@@ -82,13 +84,17 @@ const STRUCT_PRELUDE: &str = r#"#![allow(dead_code)]
 //! change moves every artifact and every runtime in one `ir:build`.
 
 /// One anatomy part: id, display name, the DOM class the web markup
-/// renders it under, and its parent part. The class projection is shared
-/// with the `button-ts` artifact (`part_class_name`).
+/// renders it under, its parent part, and — for an identified family
+/// (g13.018 R5) — the ids of its instances. The class projection is
+/// shared with the `button-ts` artifact (`part_class_name`).
 pub struct ButtonPart {
     pub id: &'static str,
     pub name: &'static str,
     pub dom_class: &'static str,
     pub parent: Option<&'static str>,
+    /// The instance ids of an identified family, or `None` for any other
+    /// part kind. The count and the identities come from the definition.
+    pub instances: Option<&'static [&'static str]>,
 }
 
 /// One state attribute: id, the `data-*` name the DOM carries, its form
@@ -183,18 +189,30 @@ fn render_component_file(
 
     // Parts — the anatomy with the DOM class projection, shared with the
     // `button-ts` artifact (R2). Each entry is multi-line so the emitted
-    // artifact is rustfmt-clean (the shell-rust precedent).
+    // artifact is rustfmt-clean (the shell-rust precedent). Identified
+    // families (g13.018 R5) also carry their instance list.
     out.push_str("    parts: &[\n");
     for part in &component.parts {
         out.push_str(&format!(
-            "        ButtonPart {{\n            id: {},\n            name: {},\n            dom_class: {},\n            parent: {},\n        }},\n",
+            "        ButtonPart {{\n            id: {},\n            name: {},\n            dom_class: {},\n            parent: {},\n            instances: {},\n        }},\n",
             rust_string_literal(part.id.as_str()),
             rust_string_literal(&part.name),
             rust_string_literal(&part_class_name(part.id.as_str())),
             part.parent
                 .as_ref()
                 .map(|parent| format!("Some({})", rust_string_literal(parent.as_str())))
-                .unwrap_or_else(|| "None".to_owned())
+                .unwrap_or_else(|| "None".to_owned()),
+            match part_instances(part) {
+                Some(instances) => {
+                    let entries = instances
+                        .iter()
+                        .map(|instance| rust_string_literal(instance))
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    format!("Some(&[{entries}])")
+                }
+                None => "None".to_owned(),
+            }
         ));
     }
     out.push_str("    ],\n");

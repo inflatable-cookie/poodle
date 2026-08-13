@@ -18,13 +18,17 @@
 //! runtime in one `ir:build`.
 
 /// One anatomy part: id, display name, the DOM class the web markup
-/// renders it under, and its parent part. The class projection is shared
+/// renders it under, its parent part, and — for an identified family
+/// (g13.018 R5) — the ids of its instances. The class projection is shared
 /// with the `range-slider-ts` artifact (`part_class_name`).
 pub struct RangeSliderPart {
     pub id: &'static str,
     pub name: &'static str,
     pub dom_class: &'static str,
     pub parent: Option<&'static str>,
+    /// The instance ids of an identified family, or `None` for any other
+    /// part kind. The count and the identities come from the definition.
+    pub instances: Option<&'static [&'static str]>,
 }
 
 /// One state attribute: id, the `data-*` name the DOM carries, its form
@@ -100,42 +104,56 @@ pub static RANGE_SLIDER_DEFINITION: RangeSliderDefinition = RangeSliderDefinitio
             name: "Root",
             dom_class: "poodle-range-slider",
             parent: None,
+            instances: None,
         },
         RangeSliderPart {
             id: "track",
             name: "Track",
             dom_class: "poodle-range-slider__track",
             parent: Some("root"),
+            instances: None,
         },
         RangeSliderPart {
             id: "fill-negative",
             name: "Negative Fill",
             dom_class: "poodle-range-slider__fill poodle-range-slider__fill--negative",
             parent: Some("track"),
+            instances: None,
         },
         RangeSliderPart {
             id: "fill-positive",
             name: "Positive Fill",
             dom_class: "poodle-range-slider__fill poodle-range-slider__fill--positive",
             parent: Some("track"),
+            instances: None,
         },
         RangeSliderPart {
             id: "center",
             name: "Center",
             dom_class: "poodle-range-slider__center",
             parent: Some("track"),
+            instances: None,
+        },
+        RangeSliderPart {
+            id: "control",
+            name: "Control",
+            dom_class: "poodle-range-slider__control",
+            parent: Some("root"),
+            instances: Some(&["control-lower", "control-upper"]),
         },
         RangeSliderPart {
             id: "control-lower",
             name: "Lower Control",
             dom_class: "poodle-range-slider__control poodle-range-slider__control--lower",
-            parent: Some("root"),
+            parent: Some("control"),
+            instances: None,
         },
         RangeSliderPart {
             id: "control-upper",
             name: "Upper Control",
             dom_class: "poodle-range-slider__control poodle-range-slider__control--upper",
-            parent: Some("root"),
+            parent: Some("control"),
+            instances: None,
         },
         RangeSliderPart {
             id: "embedded-lower",
@@ -143,6 +161,7 @@ pub static RANGE_SLIDER_DEFINITION: RangeSliderDefinition = RangeSliderDefinitio
             dom_class: "poodle-range-slider__embedded-control \
          poodle-range-slider__embedded-control--lower",
             parent: Some("root"),
+            instances: None,
         },
         RangeSliderPart {
             id: "embedded-upper",
@@ -150,6 +169,7 @@ pub static RANGE_SLIDER_DEFINITION: RangeSliderDefinition = RangeSliderDefinitio
             dom_class: "poodle-range-slider__embedded-control \
          poodle-range-slider__embedded-control--upper",
             parent: Some("root"),
+            instances: None,
         },
     ],
     attributes: &[
