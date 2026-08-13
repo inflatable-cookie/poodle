@@ -43,9 +43,19 @@
 # sibling renders the same definition into poodle-render's generated/
 # directory — the consumer of the native route — so one authored change
 # moves all three artifacts (two web + one render).
+#
+# Card 045 R1/R2: the RangeSlider definition is authored in Rust
+# (packages/codegen/src/models/range_slider.rs) and serialized to its own
+# fixture by `--author-range-slider`; the range-slider-ts target renders
+# its rendered vocabulary (parts, data-* attributes, the RNG-17 geometry
+# styleProps, recipe hooks) into both web component packages' generated/
+# directories — the stateful proof: repeated anatomy, value-dependent fill
+# geometry, and gesture effects all declared, with the slider machine left
+# hand-written and pinned by its conformance vector (R1/R5).
 "ir:build" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-button packages/codegen/fixtures/button-model.json" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-range-slider packages/codegen/fixtures/range-slider-model.json" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/svelte/preview/src --target shell-scene" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/react/preview/src --target shell-scene" },
@@ -53,6 +63,8 @@
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/jetstream/preview/src --target shell-rust" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/svelte/components/src --target button-ts" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/react/components/src --target button-ts" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/range-slider-model.json --out packages/svelte/components/src --target range-slider-ts" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/range-slider-model.json --out packages/react/components/src --target range-slider-ts" },
   # Card 042 R1a: Button's Rust artifact lives in the package that ships it —
   # poodle-render is the consumer, so the artifact lands in
   # packages/render/src/generated/ (not a preview, not codegen; a crate
@@ -62,6 +74,7 @@
 "ir:check" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-shell packages/codegen/fixtures/shell-model.json --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-button packages/codegen/fixtures/button-model.json --check" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --author-range-slider packages/codegen/fixtures/range-slider-model.json --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/synthetic-model.json --out packages/codegen/generated --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/svelte/preview/src --target shell-scene --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/react/preview/src --target shell-scene --check" },
@@ -69,6 +82,8 @@
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/shell-model.json --out packages/jetstream/preview/src --target shell-rust --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/svelte/components/src --target button-ts --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/react/components/src --target button-ts --check" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/range-slider-model.json --out packages/svelte/components/src --target range-slider-ts --check" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/range-slider-model.json --out packages/react/components/src --target range-slider-ts --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/button-model.json --out packages/render/src --target button-rust --check" },
 ]
 

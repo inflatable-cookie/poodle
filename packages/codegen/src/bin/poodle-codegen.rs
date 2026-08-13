@@ -5,6 +5,7 @@
 //! poodle-codegen <FIXTURE> --out <DIR> [--check] [--target <ID>]
 //! poodle-codegen --author-shell <OUT> [--check]
 //! poodle-codegen --author-button <OUT> [--check]
+//! poodle-codegen --author-range-slider <OUT> [--check]
 //! ```
 //!
 //! Fixture mode runs the registered targets over one serialized `IrModel`.
@@ -50,6 +51,7 @@ fn usage() -> String {
      \n\
      usage: poodle-codegen --author-shell <OUT> [--check]\n\
      usage: poodle-codegen --author-button <OUT> [--check]\n\
+     usage: poodle-codegen --author-range-slider <OUT> [--check]\n\
      \n\
      --author-shell  serialize the Rust-authored shell model\n\
               (packages/codegen/src/models/preview_shell.rs) to OUT — the\n\
@@ -58,7 +60,11 @@ fn usage() -> String {
      --author-button serialize the Rust-authored Button model\n\
               (packages/codegen/src/models/button.rs) to OUT — the fixture\n\
               the button-ts target consumes — after a validate round trip;\n\
-              with --check, byte-compare instead of write."
+              with --check, byte-compare instead of write.\n\
+     --author-range-slider serialize the Rust-authored RangeSlider model\n\
+              (packages/codegen/src/models/range_slider.rs) to OUT — the\n\
+              fixture the range-slider-ts target consumes — after a validate\n\
+              round trip; with --check, byte-compare instead of write."
         .to_owned()
 }
 
@@ -67,6 +73,7 @@ struct Args {
     out: Option<PathBuf>,
     author_shell: Option<PathBuf>,
     author_button: Option<PathBuf>,
+    author_range_slider: Option<PathBuf>,
     target: Option<String>,
     check: bool,
 }
@@ -75,6 +82,7 @@ fn parse_args() -> Result<Args, String> {
     let mut out = None;
     let mut author_shell = None;
     let mut author_button = None;
+    let mut author_range_slider = None;
     let mut target = None;
     let mut check = false;
     let mut positional = Vec::new();
@@ -100,6 +108,12 @@ fn parse_args() -> Result<Args, String> {
                         .ok_or("--author-button requires an output path")?,
                 ));
             }
+            "--author-range-slider" => {
+                author_range_slider = Some(PathBuf::from(
+                    args.next()
+                        .ok_or("--author-range-slider requires an output path")?,
+                ));
+            }
             "--target" => {
                 target = Some(
                     args.next()
@@ -115,8 +129,16 @@ fn parse_args() -> Result<Args, String> {
     if author_shell.is_some() && author_button.is_some() {
         return Err("--author-shell and --author-button are mutually exclusive".to_owned());
     }
+    if author_range_slider.is_some() && (author_shell.is_some() || author_button.is_some()) {
+        return Err(
+            "--author-range-slider is mutually exclusive with --author-shell and \
+                    --author-button"
+                .to_owned(),
+        );
+    }
 
-    let author_mode = author_shell.is_some() || author_button.is_some();
+    let author_mode =
+        author_shell.is_some() || author_button.is_some() || author_range_slider.is_some();
 
     let fixture = match (author_mode, positional.len()) {
         (true, 0) => None,
@@ -147,6 +169,7 @@ fn parse_args() -> Result<Args, String> {
         out,
         author_shell,
         author_button,
+        author_range_slider,
         target,
         check,
     })
@@ -165,6 +188,13 @@ fn run(args: &Args) -> Result<(), CodegenError> {
             check_author_button(out_path)
         } else {
             write_author_button(out_path)
+        };
+    }
+    if let Some(out_path) = &args.author_range_slider {
+        return if args.check {
+            check_author_range_slider(out_path)
+        } else {
+            write_author_range_slider(out_path)
         };
     }
     run_emit(
@@ -301,6 +331,73 @@ fn check_author_button(out_path: &Path) -> Result<(), CodegenError> {
             message: format!(
                 "authored Button model is stale under {}: the committed fixture differs from \
                  `packages/codegen/src/models/button.rs`; run `effigy ir:build`",
+                out_path.display()
+            ),
+        })
+    }
+}
+
+/// Serializes the Rust-authored RangeSlider model to the fixture after a
+/// validate round trip (card 045 R1): the bytes written are exactly the
+/// bytes the pipeline's `load_and_validate` will accept.
+fn author_range_slider_document() -> Result<String, CodegenError> {
+    let model = models::range_slider::range_slider_model();
+    let document = serde_json::to_string_pretty(&model).map_err(|error| CodegenError::Gate {
+        message: format!("cannot serialize the authored RangeSlider model: {error}"),
+    })?;
+    // Validate the serialized form, not just the in-memory model: the
+    // fixture is the pipeline's input, and it must pass `load_and_validate`.
+    let round_tripped: poodle_ir::IrModel =
+        serde_json::from_str(&document).map_err(|error| CodegenError::Gate {
+            message: format!("authored RangeSlider model does not round-trip as JSON: {error}"),
+        })?;
+    let findings = round_tripped.validate();
+    if !findings.is_empty() {
+        return Err(CodegenError::Invalid {
+            path: PathBuf::from("packages/codegen/fixtures/range-slider-model.json"),
+            findings,
+        });
+    }
+    Ok(format!("{document}\n"))
+}
+
+fn write_author_range_slider(out_path: &Path) -> Result<(), CodegenError> {
+    let document = author_range_slider_document()?;
+    if let Some(parent) = out_path.parent() {
+        fs::create_dir_all(parent).map_err(|error| CodegenError::Write {
+            path: parent.to_path_buf(),
+            source: error,
+        })?;
+    }
+    fs::write(out_path, &document).map_err(|error| CodegenError::Write {
+        path: out_path.to_path_buf(),
+        source: error,
+    })?;
+    println!(
+        "Authored RangeSlider model ({} bytes, IR schema {}).",
+        document.len(),
+        poodle_ir::IR_SCHEMA_VERSION
+    );
+    Ok(())
+}
+
+/// Read-only twin of [`write_author_range_slider`]: regenerate in memory
+/// and byte-compare against the committed fixture. No write call exists on
+/// this path.
+fn check_author_range_slider(out_path: &Path) -> Result<(), CodegenError> {
+    let document = author_range_slider_document()?;
+    let committed = fs::read_to_string(out_path).map_err(|error| CodegenError::Read {
+        path: out_path.to_path_buf(),
+        source: error,
+    })?;
+    if committed == document {
+        println!("Authored RangeSlider model is current.");
+        Ok(())
+    } else {
+        Err(CodegenError::Gate {
+            message: format!(
+                "authored RangeSlider model is stale under {}: the committed fixture differs \
+                 from `packages/codegen/src/models/range_slider.rs`; run `effigy ir:build`",
                 out_path.display()
             ),
         })
