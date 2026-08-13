@@ -57,7 +57,8 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   passed while the packaged build was broken. A card that moves where code is
   emitted must run it; better, it belongs in `ci:web`.
 
-- 2026-08-12 — g13-038 found a dead focus rule: `.poodle-order-by__item:focus-visible`
+- 2026-08-12 — RESOLVED 2026-08-13: rule deleted; the drag-handle keeps the ring
+  b038 gave it. g13-038 found a dead focus rule: `.poodle-order-by__item:focus-visible`
   (order-by.css) rings the item row, but the item div is never focusable — no
   `tabindex`, and the only focusable inside is the drag-handle button. The ring
   never renders; the drag-handle got its own ring this batch. The dead rule
@@ -530,7 +531,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 - 2026-08-12 — Two findings from the SettingsShell specimen.
 
-  **Poodle's Svelte `Button` silently drops `onclick`.** Its prop is `onClick`;
+  **RESOLVED 2026-08-13. Poodle's Svelte `Button` silently drops `onclick`.**
+  Button now composes the DOM-spelled handler alongside its own for the three
+  it binds (`onclick`, `onfocus`, `onblur`) rather than overwriting it, with a
+  mutation-checked test. Button is the only component with this shape — 1 of
+  166 spreads `restProps` *and* binds a native handler — so the fix is
+  targeted, not a pattern. Original report follows. Its prop is `onClick`;
   `onclick` falls into `restProps`, which is spread at `Button.svelte:146` —
   *before* the component sets its own `onclick={handleClick}` at `:172`. The
   component's handler wins and the consumer's is discarded with no error. The
@@ -557,8 +563,15 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   0.125rem separator inset) sits inside the section's own `@container
   (max-width: 28rem)`, so it resolves against the enclosing
   `DetailSectionGroup` rather than the section. Plausibly the box you want for
-  a separator inset shared across sibling sections — but **it was not
-  measured**, and it is baselined in `container-query-drift.ts` on that
-  unverified reasoning. Measure it and either delete the baseline entry or
-  restructure; do not leave it indefinitely on a guess.
+  a separator inset shared across sibling sections.
+
+  **Measured 2026-08-13, and the guess above was wrong.** A `DetailSection` has
+  **no ancestor container at all** in the preview, so the query never fires and
+  the narrow-width inset is simply unreachable; only when nested in a
+  `DetailSectionGroup` would it answer to the group. Either way it never
+  follows the section's own width. Left in place: the effect is a hairline
+  inset staying at its default, and fixing it means relocating the
+  pseudo-element onto a child, in a component whose other `@container` rules
+  correctly target `__body` and `__header`. The baseline entry now records the
+  measurement instead of the guess.
 

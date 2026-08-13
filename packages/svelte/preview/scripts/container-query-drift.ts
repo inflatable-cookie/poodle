@@ -37,7 +37,7 @@ const BASELINE: Record<string, string> = {
   "detail-item.css: .poodle-detail-item":
     "g13-043 R2 — the surviving self-target is `[data-span] { grid-column: 1 / -1 }`, which is about the item's place in the SECTION's grid and is deliberately section-keyed. The item-scale rules moved to `__grid`. Resolving against the section is what this rule wants.",
   "detail-section.css: .poodle-detail-section":
-    "UNVERIFIED — `[data-separated=\"true\"]::before`, a 0.125rem separator inset. A section's nearest ancestor container is its enclosing DetailSectionGroup, so this follows the group's width rather than its own. Plausibly the box you want for a shared separator inset, but it was not measured; see PAPERCUTS 2026-08-13. Delete this entry once someone checks it.",
+    "MEASURED 2026-08-13, and it is dead rather than merely mis-scaled. `[data-separated=\"true\"]::before` is a separator inset inside the section's own `@container (max-width: 28rem)`. Measured in the preview: a DetailSection has NO ancestor container at all, so the query never fires and the narrow-width inset is unreachable; inside a DetailSectionGroup it would answer to the group instead. Either way it never follows the section's own width. Kept rather than fixed because the effect is a hairline inset that simply stays at its default, and moving it would mean relocating the pseudo-element onto a child of a component whose other `@container` rules correctly target `__body`/`__header`. Tracked in PAPERCUTS 2026-08-13.",
 };
 
 /** Class tokens in a selector, underscores included. `[a-z0-9-]+` would stop

@@ -187,6 +187,25 @@
     [dataPressed]: isToggle ? currentPressed : undefined,
   });
 
+  /**
+   * `{...restProps}` is spread onto the button *before* the three handlers
+   * below bind their own, so a consumer passing the DOM spelling — `onclick`
+   * rather than `onClick` — had it silently overwritten: no type error, no
+   * warning, and a dead button. The SettingsShell specimen shipped with five
+   * of them for exactly this reason and read, from outside, as a broken
+   * component.
+   *
+   * Button is the only component with this shape (1 of 166: the rest either
+   * do not spread `restProps` or do not bind a native handler), so composing
+   * here is a targeted fix rather than a pattern to spread.
+   */
+  function forwardNative(name: "onclick" | "onfocus" | "onblur", event: Event): void {
+    const handler = (restProps as Record<string, unknown>)[name];
+    if (typeof handler === "function") {
+      (handler as (event: Event) => void)(event);
+    }
+  }
+
   function handleClick(event: MouseEvent): void {
     if (isToggle) {
       const next = !currentPressed;
@@ -219,12 +238,17 @@
   aria-expanded={ariaExpanded === null ? undefined : ariaExpanded ? "true" : "false"}
   aria-describedby={describedBy ?? undefined}
   aria-busy={loading ? "true" : undefined}
-  onclick={handleClick}
+  onclick={(event) => {
+    handleClick(event);
+    forwardNative("onclick", event);
+  }}
   onfocus={(event) => {
     onFocus?.(event);
+    forwardNative("onfocus", event);
   }}
   onblur={(event) => {
     onBlur?.(event);
+    forwardNative("onblur", event);
   }}
 >
   {#if loading}

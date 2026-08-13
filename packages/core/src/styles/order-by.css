@@ -171,11 +171,6 @@
     border-color: var(--poodle-recipe-order-by-hover-item-border, color-mix(in srgb, var(--poodle-color-border-default) 60%, transparent));
   }
 
-  .poodle-order-by__item:focus-visible {
-    outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
-    outline-offset: -0.0625rem;
-  }
-
   .poodle-order-by__item--dragging {
     opacity: 0.65;
   }
