@@ -7,4 +7,5 @@
 //! The three component models were unwound in g13-053; only the preview
 //! shell scene remains (R1-keep).
 
+pub mod display_specimens;
 pub mod preview_shell;

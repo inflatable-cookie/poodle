@@ -1,0 +1,351 @@
+//! The scene-driven specimen renderer (g14-b005 tranche one) — reads the
+//! generated display-specimen fixture (`generated/specimens.rs`, plain data
+//! with no Poodle imports) and renders the five display specimens from it.
+//! The hand-written callout/pill/spinner/avatar/empty-state specimens are
+//! replaced by this interpreter; the fixture is the one definition.
+
+use poodle_jetstream::JetstreamThemeProvider;
+use poodle_specs::{
+    AvatarShape, AvatarSize, AvatarSpec, AvatarTone, CallOutSpec, ControlDensity, ControlSize,
+    EmptyStateSpec, EmptyStateVariant, InlineTypographyMode, PillAppearance,
+    PillFont, PillSize, PillSpec, PillTone, SemanticControlSizeRole, SpinnerSize, SpinnerSpec,
+    SpinnerTone, SpinnerVariant, StatusTone,
+};
+
+use crate::compat::{js_avatar, js_callout, js_empty_state, js_pill, js_spinner};
+use crate::nel::{div, label, resolve_color, El};
+
+#[path = "../generated/specimens/specimens.rs"]
+mod fixture;
+
+use fixture::{SpecimenGroup, SpecimenInstance, SpecimenProp, SPECIMEN_SCENES};
+
+/// Looks up the scene for a component slug (`callout` → `callout-specimen`).
+fn scene_for(slug: &str) -> Option<&'static fixture::SpecimenScene<'static>> {
+    SPECIMEN_SCENES
+        .iter()
+        .find(|scene| scene.id == format!("{slug}-specimen"))
+}
+
+fn prop<'a>(instance: &'a SpecimenInstance, name: &str) -> Option<&'a str> {
+    instance
+        .props
+        .iter()
+        .find(|p: &&SpecimenProp| p.prop == name)
+        .map(|p| p.value)
+}
+
+fn status_tone(value: &str) -> StatusTone {
+    match value {
+        "info" => StatusTone::Info,
+        "success" => StatusTone::Success,
+        "warning" => StatusTone::Warning,
+        "danger" => StatusTone::Danger,
+        "pending" => StatusTone::Pending,
+        _ => StatusTone::Neutral,
+    }
+}
+
+fn pill_tone(value: &str) -> PillTone {
+    match value {
+        "info" => PillTone::Info,
+        "success" => PillTone::Success,
+        "warning" => PillTone::Warning,
+        "danger" => PillTone::Danger,
+        _ => PillTone::Neutral,
+    }
+}
+
+fn pill_appearance(value: &str) -> PillAppearance {
+    match value {
+        "subtle" => PillAppearance::Subtle,
+        "badge" => PillAppearance::Badge,
+        _ => PillAppearance::Solid,
+    }
+}
+
+fn pill_size(value: &str) -> PillSize {
+    match value {
+        "xs" => PillSize::Xs,
+        "sm" => PillSize::Sm,
+        "lg" => PillSize::Lg,
+        "xl" => PillSize::Xl,
+        _ => PillSize::Md,
+    }
+}
+
+fn pill_font(value: &str) -> PillFont {
+    match value {
+        "mono" => PillFont::Mono,
+        _ => PillFont::Normal,
+    }
+}
+
+fn typography(value: &str) -> InlineTypographyMode {
+    match value {
+        "inherit" => InlineTypographyMode::Inherit,
+        _ => InlineTypographyMode::Default,
+    }
+}
+
+fn size_role(value: &str) -> SemanticControlSizeRole {
+    match value {
+        "control" => SemanticControlSizeRole::Control,
+        "prominent" => SemanticControlSizeRole::Prominent,
+        _ => SemanticControlSizeRole::Chrome,
+    }
+}
+
+fn control_size(value: &str) -> ControlSize {
+    match value {
+        "xs" => ControlSize::Xs,
+        "sm" => ControlSize::Sm,
+        "lg" => ControlSize::Lg,
+        "xl" => ControlSize::Xl,
+        _ => ControlSize::Md,
+    }
+}
+
+fn control_density(value: &str) -> ControlDensity {
+    match value {
+        "compact" => ControlDensity::Compact,
+        "comfortable" => ControlDensity::Comfortable,
+        _ => ControlDensity::Default,
+    }
+}
+
+fn avatar_size(value: &str) -> AvatarSize {
+    match value {
+        "xs" => AvatarSize::Xs,
+        "sm" => AvatarSize::Sm,
+        "lg" => AvatarSize::Lg,
+        "xl" => AvatarSize::Xl,
+        _ => AvatarSize::Md,
+    }
+}
+
+fn avatar_shape(value: &str) -> AvatarShape {
+    match value {
+        "rounded" => AvatarShape::Rounded,
+        _ => AvatarShape::Circle,
+    }
+}
+
+fn avatar_tone(value: &str) -> AvatarTone {
+    match value {
+        "accent" => AvatarTone::Accent,
+        _ => AvatarTone::Neutral,
+    }
+}
+
+fn spinner_variant(value: &str) -> SpinnerVariant {
+    match value {
+        "grid" => SpinnerVariant::Grid,
+        "dots" => SpinnerVariant::Dots,
+        _ => SpinnerVariant::Ring,
+    }
+}
+
+fn spinner_size(value: &str) -> SpinnerSize {
+    match value {
+        "xs" => SpinnerSize::Xs,
+        "sm" => SpinnerSize::Sm,
+        "lg" => SpinnerSize::Lg,
+        "xl" => SpinnerSize::Xl,
+        _ => SpinnerSize::Md,
+    }
+}
+
+fn spinner_tone(value: &str) -> SpinnerTone {
+    match value {
+        "accent" => SpinnerTone::Accent,
+        "muted" => SpinnerTone::Muted,
+        _ => SpinnerTone::Current,
+    }
+}
+
+fn empty_state_variant(value: &str) -> EmptyStateVariant {
+    match value {
+        "search" => EmptyStateVariant::Search,
+        "firstRun" => EmptyStateVariant::FirstRun,
+        _ => EmptyStateVariant::Neutral,
+    }
+}
+
+
+
+/// Renders one fixture instance through the shared native renderer.
+fn render_instance(instance: &SpecimenInstance, theme: &JetstreamThemeProvider) -> El {
+    match instance.component {
+        "callout" => {
+            let mut spec = CallOutSpec::new()
+                .with_tone(status_tone(prop(instance, "tone").unwrap_or("neutral")))
+                .dismissible(prop(instance, "dismissible") == Some("true"));
+            if let Some(title) = prop(instance, "title") {
+                spec = spec.with_title(title);
+            }
+            if let Some(message) = prop(instance, "message") {
+                spec = spec.with_content(message);
+            } else if let Some(content) = prop(instance, "content") {
+                spec = spec.with_content(content);
+            }
+            if let Some(size) = prop(instance, "size") {
+                spec = spec.with_size(control_size(size));
+            }
+            if let Some(density) = prop(instance, "density") {
+                spec = spec.with_density(control_density(density));
+            }
+            js_callout(&spec, theme)
+        }
+        "pill" => {
+            let mut spec = PillSpec::new()
+                .with_label(prop(instance, "content").unwrap_or(""))
+                .with_tone(pill_tone(prop(instance, "tone").unwrap_or("neutral")))
+                .with_appearance(pill_appearance(prop(instance, "appearance").unwrap_or("solid")));
+            if let Some(role) = prop(instance, "sizeRole") {
+                spec = spec.with_size_role(size_role(role));
+            }
+            if let Some(font) = prop(instance, "font") {
+                spec = spec.with_font(pill_font(font));
+            }
+            if let Some(typography_mode) = prop(instance, "typography") {
+                spec = spec.with_typography(typography(typography_mode));
+            }
+            if let Some(accent) = prop(instance, "accent") {
+                spec = spec.with_accent_color(accent);
+            }
+            if let Some(size) = prop(instance, "size") {
+                spec = spec.with_size(pill_size(size));
+            }
+            if let Some(density) = prop(instance, "density") {
+                spec = spec.with_density(control_density(density));
+            }
+            if prop(instance, "muted") == Some("true") {
+                spec = spec.with_muted(true);
+            }
+            js_pill(&spec, theme)
+        }
+        "spinner" => {
+            let spec = SpinnerSpec::new()
+                .with_variant(spinner_variant(prop(instance, "variant").unwrap_or("ring")))
+                .with_size(spinner_size(prop(instance, "size").unwrap_or("md")))
+                .with_tone(spinner_tone(prop(instance, "tone").unwrap_or("current")));
+            let spec = if let Some(density) = prop(instance, "density") {
+                spec.with_density(control_density(density))
+            } else {
+                spec
+            };
+            js_spinner(&spec, theme)
+        }
+        "avatar" => {
+            let mut spec = AvatarSpec::new();
+            if let Some(initials) = prop(instance, "initials") {
+                spec = spec.with_initials(initials);
+            }
+            if let Some(src) = prop(instance, "src") {
+                spec = spec.with_src(src);
+            }
+            if let Some(alt) = prop(instance, "alt") {
+                spec = spec.with_alt(alt);
+            }
+            if let Some(size) = prop(instance, "size") {
+                spec = spec.with_size(avatar_size(size));
+            }
+            if let Some(tone) = prop(instance, "tone") {
+                spec = spec.with_tone(avatar_tone(tone));
+            }
+            if let Some(shape) = prop(instance, "shape") {
+                spec = spec.with_shape(avatar_shape(shape));
+            }
+            js_avatar(&spec, theme)
+        }
+        "empty-state" => {
+            let mut spec = EmptyStateSpec::new(prop(instance, "title").unwrap_or(""))
+                .with_variant(empty_state_variant(prop(instance, "variant").unwrap_or("neutral")));
+            if let Some(message) = prop(instance, "message") {
+                spec = spec.with_message(message);
+            }
+            if prop(instance, "size") == Some("compact") {
+                spec = spec.with_compact(true);
+            }
+            if let Some(density) = prop(instance, "density") {
+                spec = spec.with_density(control_density(density));
+            }
+            js_empty_state(&spec, theme)
+        }
+        other => {
+            let _ = other;
+            div().child(label("unhandled component"))
+        }
+    }
+}
+
+/// One fixture group as a labelled section (the interpreter owns the group
+/// chrome; the fixture owns the text).
+fn render_group(group: &SpecimenGroup, theme: &JetstreamThemeProvider) -> El {
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let mut content = div().flex_col().gap(12.0);
+    for instance in group.instances {
+        content = content.child(render_instance(instance, theme));
+    }
+    div()
+        .flex_col()
+        .gap(8.0)
+        .child(label(group.label).text_color(secondary).text_size(11.0))
+        .child(content)
+}
+
+/// The matrix sections render the scene's first instance at each axis value
+/// (the projection convention the web renderers share).
+fn render_matrix(theme: &JetstreamThemeProvider, title: &str, axis: &[&str], instance: &SpecimenInstance, prop_name: &str) -> El {
+    let secondary = resolve_color(theme, "color.text.secondary");
+    let mut content = div().flex_col().gap(12.0);
+    for value in axis {
+        let mut props: Vec<SpecimenProp> = instance.props.to_vec();
+        props.push(SpecimenProp {
+            prop: prop_name,
+            value,
+        });
+        let adjusted = SpecimenInstance {
+            component: instance.component,
+            caption: instance.caption,
+            props: &props,
+        };
+        content = content.child(render_instance(&adjusted, theme));
+    }
+    div()
+        .flex_col()
+        .gap(8.0)
+        .child(label(title).text_color(secondary).text_size(11.0))
+        .child(content)
+}
+
+/// Renders the scene for a slug, or `None` when the slug is not scene-driven.
+pub fn render(slug: &str, theme: &JetstreamThemeProvider) -> Option<El> {
+    let scene = scene_for(slug)?;
+    let mut page = div().flex_col().gap(24.0);
+    for group in scene.groups {
+        page = page.child(render_group(group, theme));
+    }
+    if let Some(first_instance) = scene.groups.first().and_then(|g| g.instances.first()) {
+        if !scene.size_axis.is_empty() {
+            page = page.child(render_matrix(
+                theme,
+                "Sizes",
+                scene.size_axis,
+                first_instance,
+                "size",
+            ));
+        }
+        if !scene.density_axis.is_empty() {
+            page = page.child(render_matrix(
+                theme,
+                "Densities",
+                scene.density_axis,
+                first_instance,
+                "density",
+            ));
+        }
+    }
+    Some(page)
+}

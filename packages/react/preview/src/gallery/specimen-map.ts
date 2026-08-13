@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 
+import { SceneSpecimen } from "./SceneSpecimen";
 import { AccordionSpecimen } from "./specimens/AccordionSpecimen";
 import { ActionDiscoveryPanelSpecimen } from "./specimens/ActionDiscoveryPanelSpecimen";
 import { AgentQuestionRecordSpecimen } from "./specimens/AgentQuestionRecordSpecimen";
@@ -12,14 +13,14 @@ import { HistoryCenterSpecimen } from "./specimens/HistoryCenterSpecimen";
 import { AudioPlayerSpecimen } from "./specimens/AudioPlayerSpecimen";
 import { AudioMeterSpecimen } from "./specimens/AudioMeterSpecimen";
 import { AudioSwitchSpecimen } from "./specimens/AudioSwitchSpecimen";
-import { AvatarSpecimen } from "./specimens/AvatarSpecimen";
+
 import { BlockEditorSpecimen } from "./specimens/BlockEditorSpecimen";
 import { BoxSpecimen } from "./specimens/BoxSpecimen";
 import { BreadcrumbsSpecimen } from "./specimens/BreadcrumbsSpecimen";
 import { BulkActionBarSpecimen } from "./specimens/BulkActionBarSpecimen";
 import { ButtonSpecimen } from "./specimens/ButtonSpecimen";
 import { CalendarSpecimen } from "./specimens/CalendarSpecimen";
-import { CalloutSpecimen } from "./specimens/CalloutSpecimen";
+
 import { RemediationBannerSpecimen } from "./specimens/RemediationBannerSpecimen";
 import { CardRadioGroupSpecimen } from "./specimens/CardRadioGroupSpecimen";
 import { CardSpecimen } from "./specimens/CardSpecimen";
@@ -53,7 +54,7 @@ import { EditableLabelSpecimen } from "./specimens/EditableLabelSpecimen";
 import { EditableListSpecimen } from "./specimens/EditableListSpecimen";
 import { EmbedInputSpecimen } from "./specimens/EmbedInputSpecimen";
 import { EmbedPreviewSpecimen } from "./specimens/EmbedPreviewSpecimen";
-import { EmptyStateSpecimen } from "./specimens/EmptyStateSpecimen";
+
 import { EnvelopeEditorSpecimen } from "./specimens/EnvelopeEditorSpecimen";
 import { ErrorBoundarySpecimen } from "./specimens/ErrorBoundarySpecimen";
 import { EyebrowSpecimen } from "./specimens/EyebrowSpecimen";
@@ -104,7 +105,7 @@ import { PaginationSpecimen } from "./specimens/PaginationSpecimen";
 import { PaginationSummarySpecimen } from "./specimens/PaginationSummarySpecimen";
 import { PasswordRequirementsSpecimen } from "./specimens/PasswordRequirementsSpecimen";
 import { PickerShellSpecimen } from "./specimens/PickerShellSpecimen";
-import { PillSpecimen } from "./specimens/PillSpecimen";
+
 import { PopoverSpecimen } from "./specimens/PopoverSpecimen";
 import { ProgressSpecimen } from "./specimens/ProgressSpecimen";
 import { RadioGroupSpecimen } from "./specimens/RadioGroupSpecimen";
@@ -124,7 +125,7 @@ import { SidebarNavSpecimen } from "./specimens/SidebarNavSpecimen";
 import { SkeletonSpecimen } from "./specimens/SkeletonSpecimen";
 import { SliderSpecimen } from "./specimens/SliderSpecimen";
 import { SpacerSpecimen } from "./specimens/SpacerSpecimen";
-import { SpinnerSpecimen } from "./specimens/SpinnerSpecimen";
+
 import { SplitButtonSpecimen } from "./specimens/SplitButtonSpecimen";
 import { SplitViewSpecimen } from "./specimens/SplitViewSpecimen";
 import { StackSpecimen } from "./specimens/StackSpecimen";
@@ -165,7 +166,7 @@ import { allComponents } from "./registry";
  * Slug -> specimen component, mirroring the Svelte preview's specimens/registry.ts.
  * Slugs match the component-registry so the two galleries route identically.
  */
-export const specimenMap: Record<string, ComponentType> = {
+export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "accordion": AccordionSpecimen,
   "action-discovery-panel": ActionDiscoveryPanelSpecimen,
   "agent-question": AgentQuestionSpecimen,
@@ -178,14 +179,14 @@ export const specimenMap: Record<string, ComponentType> = {
   "audio-player": AudioPlayerSpecimen,
   "audio-meter": AudioMeterSpecimen,
   "audio-switch": AudioSwitchSpecimen,
-  "avatar": AvatarSpecimen,
+  "avatar": SceneSpecimen,
   "block-editor": BlockEditorSpecimen,
   "box": BoxSpecimen,
   "breadcrumbs": BreadcrumbsSpecimen,
   "bulk-action-bar": BulkActionBarSpecimen,
   "button": ButtonSpecimen,
   "calendar": CalendarSpecimen,
-  "callout": CalloutSpecimen,
+  "callout": SceneSpecimen,
   "remediation-banner": RemediationBannerSpecimen,
   "card": CardSpecimen,
   "card-radio-group": CardRadioGroupSpecimen,
@@ -219,7 +220,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "editable-list": EditableListSpecimen,
   "embed-input": EmbedInputSpecimen,
   "embed-preview": EmbedPreviewSpecimen,
-  "empty-state": EmptyStateSpecimen,
+  "empty-state": SceneSpecimen,
   "envelope-editor": EnvelopeEditorSpecimen,
   "error-boundary": ErrorBoundarySpecimen,
   "eyebrow": EyebrowSpecimen,
@@ -274,7 +275,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "pagination-summary": PaginationSummarySpecimen,
   "password-requirements": PasswordRequirementsSpecimen,
   "picker-shell": PickerShellSpecimen,
-  "pill": PillSpecimen,
+  "pill": SceneSpecimen,
   "popover": PopoverSpecimen,
   "progress": ProgressSpecimen,
   "radio": RadioSpecimen,
@@ -294,7 +295,7 @@ export const specimenMap: Record<string, ComponentType> = {
   "skeleton": SkeletonSpecimen,
   "slider": SliderSpecimen,
   "spacer": SpacerSpecimen,
-  "spinner": SpinnerSpecimen,
+  "spinner": SceneSpecimen,
   "split-button": SplitButtonSpecimen,
   "split-view": SplitViewSpecimen,
   "stack": StackSpecimen,

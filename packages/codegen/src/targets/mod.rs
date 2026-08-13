@@ -22,6 +22,8 @@ pub mod registry;
 pub mod schema;
 pub mod shell;
 pub mod shell_rust;
+pub mod specimen_rust;
+pub mod specimen_ts;
 pub mod ts;
 
 /// Every registered target, in stable order — the default set a plain
@@ -42,6 +44,8 @@ pub fn selectable() -> Vec<&'static dyn EmitTarget> {
     let mut targets = all();
     targets.push(&shell::ShellSceneTarget);
     targets.push(&shell_rust::ShellRustTarget);
+    targets.push(&specimen_ts::SpecimenTsTarget);
+    targets.push(&specimen_rust::SpecimenRustTarget);
     targets
 }
 

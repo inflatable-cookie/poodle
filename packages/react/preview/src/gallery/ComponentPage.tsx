@@ -6,7 +6,7 @@ import { UsageDocs } from "./UsageDocs";
 
 export interface ComponentPageProps {
   entry: ComponentEntry;
-  specimenComponent?: ComponentType | null;
+  specimenComponent?: ComponentType<{ slug?: string }> | null;
 }
 
 export function ComponentPage({ entry, specimenComponent: Specimen = null }: ComponentPageProps) {
@@ -26,7 +26,7 @@ export function ComponentPage({ entry, specimenComponent: Specimen = null }: Com
 
       <section className="poodle-component-page__section">
         {Specimen ? (
-          <Specimen />
+          <Specimen slug={entry.slug} />
         ) : (
           <div className="poodle-component-page__placeholder">
             <p>

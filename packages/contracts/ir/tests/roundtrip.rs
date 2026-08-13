@@ -423,6 +423,7 @@ fn sample_model() -> IrModel {
                 },
             ],
             caption: Some("Danger tone".to_owned()),
+            group: Some("Tones".to_owned()),
         }],
         axes: vec![
             SceneAxis {

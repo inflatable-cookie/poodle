@@ -321,6 +321,10 @@ input {
   align-items: center;
   gap: 0.5rem;
 }
+.poodle-specimen__cell {
+  display: inline-flex;
+  align-items: center;
+}
 .poodle-specimen__stack {
   display: flex;
   flex-direction: column;

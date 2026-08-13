@@ -51,7 +51,15 @@ fn usage() -> String {
      --author-shell  serialize the Rust-authored shell model\n\
               (packages/codegen/src/models/preview_shell.rs) to OUT — the\n\
               fixture the pipeline consumes — after a validate round trip;\n\
-              with --check, byte-compare instead of write."
+              with --check, byte-compare instead of write.\n\
+     \n\
+     usage: poodle-codegen --author-specimens <OUT> [--check]\n\
+     \n\
+     --author-specimens  serialize the Rust-authored display-specimen\n\
+              scenes (packages/codegen/src/models/display_specimens.rs) to\n\
+              OUT — the fixture the specimen targets consume — after a\n\
+              validate round trip; with --check, byte-compare instead of\n\
+              write."
         .to_owned()
 }
 
@@ -59,6 +67,7 @@ struct Args {
     fixture: Option<PathBuf>,
     out: Option<PathBuf>,
     author_shell: Option<PathBuf>,
+    author_specimens: Option<PathBuf>,
     target: Option<String>,
     check: bool,
 }
@@ -66,6 +75,7 @@ struct Args {
 fn parse_args() -> Result<Args, String> {
     let mut out = None;
     let mut author_shell = None;
+    let mut author_specimens = None;
     let mut target = None;
     let mut check = false;
     let mut positional = Vec::new();
@@ -85,6 +95,12 @@ fn parse_args() -> Result<Args, String> {
                         .ok_or("--author-shell requires an output path")?,
                 ));
             }
+            "--author-specimens" => {
+                author_specimens = Some(PathBuf::from(
+                    args.next()
+                        .ok_or("--author-specimens requires an output path")?,
+                ));
+            }
             "--target" => {
                 target = Some(
                     args.next()
@@ -97,7 +113,7 @@ fn parse_args() -> Result<Args, String> {
         }
     }
 
-    let author_mode = author_shell.is_some();
+    let author_mode = author_shell.is_some() || author_specimens.is_some();
 
     let fixture = match (author_mode, positional.len()) {
         (true, 0) => None,
@@ -127,6 +143,7 @@ fn parse_args() -> Result<Args, String> {
         fixture,
         out,
         author_shell,
+        author_specimens,
         target,
         check,
     })
@@ -134,10 +151,19 @@ fn parse_args() -> Result<Args, String> {
 
 fn run(args: &Args) -> Result<(), CodegenError> {
     if let Some(out_path) = &args.author_shell {
+        let model = models::preview_shell::shell_model();
         return if args.check {
-            check_author_shell(out_path)
+            check_author_model(out_path, &model, "shell")
         } else {
-            write_author_shell(out_path)
+            write_author_model(out_path, &model, "shell")
+        };
+    }
+    if let Some(out_path) = &args.author_specimens {
+        let model = models::display_specimens::display_specimens_model();
+        return if args.check {
+            check_author_model(out_path, &model, "display-specimens")
+        } else {
+            write_author_model(out_path, &model, "display-specimens")
         };
     }
     run_emit(
@@ -146,32 +172,31 @@ fn run(args: &Args) -> Result<(), CodegenError> {
     )
 }
 
-/// Serializes the Rust-authored shell model to the fixture after a validate
-/// round trip (card 035 R1): the bytes written are exactly the bytes the
+/// Serializes a Rust-authored model to the fixture after a validate round
+/// trip (card 035 R1): the bytes written are exactly the bytes the
 /// pipeline's `load_and_validate` will accept.
-fn author_shell_document() -> Result<String, CodegenError> {
-    let model = models::preview_shell::shell_model();
-    let document = serde_json::to_string_pretty(&model).map_err(|error| CodegenError::Gate {
-        message: format!("cannot serialize the authored shell model: {error}"),
+fn author_document(model: &poodle_ir::IrModel, label: &str) -> Result<String, CodegenError> {
+    let document = serde_json::to_string_pretty(model).map_err(|error| CodegenError::Gate {
+        message: format!("cannot serialize the authored {label} model: {error}"),
     })?;
     // Validate the serialized form, not just the in-memory model: the
     // fixture is the pipeline's input, and it must pass `load_and_validate`.
     let round_tripped: poodle_ir::IrModel =
         serde_json::from_str(&document).map_err(|error| CodegenError::Gate {
-            message: format!("authored shell model does not round-trip as JSON: {error}"),
+            message: format!("authored {label} model does not round-trip as JSON: {error}"),
         })?;
     let findings = round_tripped.validate();
     if !findings.is_empty() {
         return Err(CodegenError::Invalid {
-            path: PathBuf::from("packages/codegen/fixtures/shell-model.json"),
+            path: PathBuf::from(format!("packages/codegen/fixtures/{label}-model.json")),
             findings,
         });
     }
     Ok(format!("{document}\n"))
 }
 
-fn write_author_shell(out_path: &Path) -> Result<(), CodegenError> {
-    let document = author_shell_document()?;
+fn write_author_model(out_path: &Path, model: &poodle_ir::IrModel, label: &str) -> Result<(), CodegenError> {
+    let document = author_document(model, label)?;
     if let Some(parent) = out_path.parent() {
         fs::create_dir_all(parent).map_err(|error| CodegenError::Write {
             path: parent.to_path_buf(),
@@ -183,30 +208,30 @@ fn write_author_shell(out_path: &Path) -> Result<(), CodegenError> {
         source: error,
     })?;
     println!(
-        "Authored shell model ({} bytes, IR schema {}).",
+        "Authored {label} model ({} bytes, IR schema {}).",
         document.len(),
         poodle_ir::IR_SCHEMA_VERSION
     );
     Ok(())
 }
 
-/// Read-only twin of [`write_author_shell`]: regenerate in memory and
+/// Read-only twin of [`write_author_model`]: regenerate in memory and
 /// byte-compare against the committed fixture. No write call exists on this
 /// path.
-fn check_author_shell(out_path: &Path) -> Result<(), CodegenError> {
-    let document = author_shell_document()?;
+fn check_author_model(out_path: &Path, model: &poodle_ir::IrModel, label: &str) -> Result<(), CodegenError> {
+    let document = author_document(model, label)?;
     let committed = fs::read_to_string(out_path).map_err(|error| CodegenError::Read {
         path: out_path.to_path_buf(),
         source: error,
     })?;
     if committed == document {
-        println!("Authored shell model is current.");
+        println!("Authored {label} model is current.");
         Ok(())
     } else {
         Err(CodegenError::Gate {
             message: format!(
-                "authored shell model is stale under {}: the committed fixture differs from \
-                 `packages/codegen/src/models/preview_shell.rs`; run `effigy ir:build`",
+                "authored {label} model is stale under {}: the committed fixture differs from \
+                 the model source; run `effigy ir:build`",
                 out_path.display()
             ),
         })

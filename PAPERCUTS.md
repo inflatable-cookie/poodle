@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-13 — codegen write mode sweeps each target's output-root **top
+  level** for orphans, so two targets sharing one `generated/` root delete
+  each other's artifacts on `ir:build` (g14-b005's first build silently
+  removed the shell artifacts). Sibling targets must own a nested root
+  (`generated/specimens/`), which the sweep treats as another target's
+  territory. The shell and specimen targets are the precedent pair.
+
 - 2026-08-13 — the documented g13-036 symlink workaround for the Jetstream
   sibling path-dep no longer works: a `poodle` symlink next to a real
   worktree makes cargo fail with a lockfile collision ("packages
