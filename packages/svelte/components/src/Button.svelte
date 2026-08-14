@@ -1,5 +1,6 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/button.css";
+  import type { ButtonPortableProps } from "@inflatable-cookie/poodle-core/conformance/button";
   import type { Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
@@ -9,21 +10,18 @@
     resolveSupportingVisualSize,
   } from "./presentation";
   import { default as Spinner } from "./Spinner.svelte";
-  import type {
-    ButtonTone,
-    ButtonVariant,
-    ControlDensity,
-    ControlSize,
-    IconProp,
-    SemanticControlSizeRole,
-  } from "./types";
+  import type { IconProp } from "./types";
 
-  interface Props {
-    variant?: ButtonVariant;
-    tone?: ButtonTone;
-    size?: ControlSize | null;
-    sizeRole?: SemanticControlSizeRole;
-    density?: ControlDensity | null;
+  /**
+   * Portable props come from the conformance interface authority
+   * (`packages/core/src/conformance/button.ts`): renaming a portable prop
+   * there fails this interface and the component body. The label region is
+   * rendered through `children`; web-only HTML and styling props stay
+   * extensions here.
+   */
+  type Portable = Omit<ButtonPortableProps, "label" | "leadingIcon" | "trailingIcon">;
+
+  interface Props extends Partial<Portable> {
     type?: HTMLButtonElement["type"];
     form?: string | null;
     formaction?: string | null;
@@ -35,19 +33,8 @@
     formmethod?: "get" | "post" | "dialog" | null;
     formnovalidate?: boolean;
     formtarget?: "_self" | "_blank" | "_parent" | "_top" | string | null;
-    disabled?: boolean;
-    loading?: boolean;
     leadingIcon?: IconProp | null;
     trailingIcon?: IconProp | null;
-    chevron?: boolean;
-    truncate?: boolean;
-    fit?: "default" | "content";
-    maxWidth?: string | null;
-    pressed?: boolean | null;
-    defaultPressed?: boolean | null;
-    ariaLabel?: string | null;
-    ariaExpanded?: boolean | null;
-    describedBy?: string | null;
     className?: string;
     style?: string | null;
     onClick?: ((event: MouseEvent) => void) | null;

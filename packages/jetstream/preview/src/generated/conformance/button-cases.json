@@ -1,0 +1,1123 @@
+{
+  "schemaVersion": 1,
+  "component": "button",
+  "cases": [
+    {
+      "id": "button/default",
+      "fixture": {
+        "props": {},
+        "regions": {
+          "label": "Run"
+        }
+      },
+      "specimen": {
+        "group": "Basics",
+        "caption": "Default",
+        "captureId": "button/default",
+        "axes": [
+          "theme",
+          "density",
+          "size"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Run",
+            "focusable": true,
+            "states": {
+              "disabled": false,
+              "loading": false
+            },
+            "tokenRoles": {
+              "variant": "secondary",
+              "tone": "default",
+              "size": "md",
+              "density": "default"
+            },
+            "geometry": {
+              "height": 36,
+              "minWidth": 80,
+              "paddingLeft": 12,
+              "paddingRight": 12,
+              "radius": 6,
+              "borderWidth": 1,
+              "tolerance": 1
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Run"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/primary",
+      "fixture": {
+        "props": {
+          "variant": "primary"
+        },
+        "regions": {
+          "label": "Run"
+        }
+      },
+      "specimen": {
+        "group": "Variants",
+        "caption": "Primary",
+        "captureId": "button/primary",
+        "axes": [
+          "theme",
+          "density",
+          "size"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Run",
+            "focusable": true,
+            "states": {
+              "disabled": false,
+              "loading": false
+            },
+            "tokenRoles": {
+              "variant": "primary",
+              "tone": "default",
+              "size": "md",
+              "density": "default"
+            },
+            "geometry": {
+              "height": 36,
+              "minWidth": 80,
+              "paddingLeft": 12,
+              "paddingRight": 12,
+              "radius": 6,
+              "borderWidth": 1,
+              "tolerance": 1
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Run"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/secondary",
+      "fixture": {
+        "props": {
+          "variant": "secondary"
+        },
+        "regions": {
+          "label": "Run"
+        }
+      },
+      "specimen": {
+        "group": "Variants",
+        "caption": "Secondary",
+        "captureId": "button/secondary",
+        "axes": [
+          "theme",
+          "density",
+          "size"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Run",
+            "focusable": true,
+            "states": {
+              "disabled": false,
+              "loading": false
+            },
+            "tokenRoles": {
+              "variant": "secondary",
+              "tone": "default",
+              "size": "md",
+              "density": "default"
+            },
+            "geometry": {
+              "height": 36,
+              "minWidth": 80,
+              "paddingLeft": 12,
+              "paddingRight": 12,
+              "radius": 6,
+              "borderWidth": 1,
+              "tolerance": 1
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Run"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/ghost",
+      "fixture": {
+        "props": {
+          "variant": "ghost"
+        },
+        "regions": {
+          "label": "Run"
+        }
+      },
+      "specimen": {
+        "group": "Variants",
+        "caption": "Ghost",
+        "captureId": "button/ghost",
+        "axes": [
+          "theme",
+          "density",
+          "size"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Run",
+            "focusable": true,
+            "states": {
+              "disabled": false,
+              "loading": false
+            },
+            "tokenRoles": {
+              "variant": "ghost",
+              "tone": "default",
+              "size": "md",
+              "density": "default"
+            },
+            "geometry": {
+              "height": 36,
+              "minWidth": 80,
+              "paddingLeft": 12,
+              "paddingRight": 12,
+              "radius": 6,
+              "borderWidth": 1,
+              "tolerance": 1
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Run"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/tone-danger",
+      "fixture": {
+        "props": {
+          "tone": "danger"
+        },
+        "regions": {
+          "label": "Delete"
+        }
+      },
+      "specimen": {
+        "group": "Tones",
+        "caption": "Danger",
+        "captureId": "button/tone-danger",
+        "axes": [
+          "theme",
+          "density",
+          "size"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Delete",
+            "focusable": true,
+            "states": {
+              "disabled": false,
+              "loading": false
+            },
+            "tokenRoles": {
+              "variant": "secondary",
+              "tone": "danger",
+              "size": "md",
+              "density": "default"
+            },
+            "geometry": {
+              "height": 36,
+              "minWidth": 80,
+              "paddingLeft": 12,
+              "paddingRight": 12,
+              "radius": 6,
+              "borderWidth": 1,
+              "tolerance": 1
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Delete"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/tone-success",
+      "fixture": {
+        "props": {
+          "tone": "success"
+        },
+        "regions": {
+          "label": "Save"
+        }
+      },
+      "specimen": {
+        "group": "Tones",
+        "caption": "Success",
+        "captureId": "button/tone-success",
+        "axes": [
+          "theme",
+          "density",
+          "size"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Save",
+            "focusable": true,
+            "states": {
+              "disabled": false,
+              "loading": false
+            },
+            "tokenRoles": {
+              "variant": "secondary",
+              "tone": "success",
+              "size": "md",
+              "density": "default"
+            },
+            "geometry": {
+              "height": 36,
+              "minWidth": 80,
+              "paddingLeft": 12,
+              "paddingRight": 12,
+              "radius": 6,
+              "borderWidth": 1,
+              "tolerance": 1
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Save"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/tone-warning",
+      "fixture": {
+        "props": {
+          "tone": "warning"
+        },
+        "regions": {
+          "label": "Sync"
+        }
+      },
+      "specimen": {
+        "group": "Tones",
+        "caption": "Warning",
+        "captureId": "button/tone-warning",
+        "axes": [
+          "theme",
+          "density",
+          "size"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Sync",
+            "focusable": true,
+            "states": {
+              "disabled": false,
+              "loading": false
+            },
+            "tokenRoles": {
+              "variant": "secondary",
+              "tone": "warning",
+              "size": "md",
+              "density": "default"
+            },
+            "geometry": {
+              "height": 36,
+              "minWidth": 80,
+              "paddingLeft": 12,
+              "paddingRight": 12,
+              "radius": 6,
+              "borderWidth": 1,
+              "tolerance": 1
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Sync"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/disabled",
+      "fixture": {
+        "props": {
+          "disabled": true
+        },
+        "regions": {
+          "label": "Run"
+        }
+      },
+      "specimen": {
+        "group": "States",
+        "caption": "Disabled",
+        "captureId": "button/disabled",
+        "axes": [
+          "theme"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Run",
+            "focusable": false,
+            "states": {
+              "disabled": true,
+              "loading": false
+            },
+            "tokenRoles": {
+              "variant": "secondary",
+              "tone": "default",
+              "size": "md",
+              "density": "default"
+            },
+            "geometry": {
+              "height": 36,
+              "minWidth": 80,
+              "paddingLeft": 12,
+              "paddingRight": 12,
+              "radius": 6,
+              "borderWidth": 1,
+              "tolerance": 1
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Run"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/loading",
+      "fixture": {
+        "props": {
+          "loading": true
+        },
+        "regions": {
+          "label": "Save"
+        }
+      },
+      "specimen": {
+        "group": "States",
+        "caption": "Loading",
+        "captureId": "button/loading",
+        "axes": [
+          "theme"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Save",
+            "focusable": false,
+            "states": {
+              "disabled": true,
+              "loading": true
+            },
+            "tokenRoles": {
+              "variant": "secondary",
+              "tone": "default",
+              "size": "md",
+              "density": "default"
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Save"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/leading-icon",
+      "fixture": {
+        "props": {
+          "chevron": null
+        },
+        "regions": {
+          "label": "Save",
+          "leading": "plus"
+        }
+      },
+      "specimen": {
+        "group": "Icons",
+        "caption": "Leading",
+        "captureId": "button/leading-icon",
+        "axes": [
+          "size"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Save",
+            "focusable": true,
+            "states": {
+              "disabled": false
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Save"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "leadingIcon",
+          "expect": {
+            "present": true,
+            "icon": "plus"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trailingIcon",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "chevron",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/trailing-icon",
+      "fixture": {
+        "props": {
+          "chevron": null
+        },
+        "regions": {
+          "label": "Save",
+          "trailing": "check"
+        }
+      },
+      "specimen": {
+        "group": "Icons",
+        "caption": "Trailing",
+        "captureId": "button/trailing-icon",
+        "axes": [
+          "size"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Save",
+            "focusable": true,
+            "states": {
+              "disabled": false
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Save"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "leadingIcon",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trailingIcon",
+          "expect": {
+            "present": true,
+            "icon": "check"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "chevron",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/both-icons",
+      "fixture": {
+        "props": {
+          "chevron": null
+        },
+        "regions": {
+          "label": "Save",
+          "leading": "plus",
+          "trailing": "check"
+        }
+      },
+      "specimen": {
+        "group": "Icons",
+        "caption": "Both",
+        "captureId": "button/both-icons",
+        "axes": [
+          "size"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Save",
+            "focusable": true,
+            "states": {
+              "disabled": false
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Save"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "leadingIcon",
+          "expect": {
+            "present": true,
+            "icon": "plus"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trailingIcon",
+          "expect": {
+            "present": true,
+            "icon": "check"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "chevron",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/chevron",
+      "fixture": {
+        "props": {
+          "chevron": true
+        },
+        "regions": {
+          "label": "Save"
+        }
+      },
+      "specimen": {
+        "group": "Icons",
+        "caption": "Chevron",
+        "captureId": "button/chevron",
+        "axes": [
+          "size"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Save",
+            "focusable": true,
+            "states": {
+              "disabled": false
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Save"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "leadingIcon",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trailingIcon",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "chevron",
+          "expect": {
+            "present": true,
+            "icon": "chevron-down"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/size-lg",
+      "fixture": {
+        "props": {
+          "size": "lg"
+        },
+        "regions": {
+          "label": "Run"
+        }
+      },
+      "specimen": {
+        "group": "Size",
+        "caption": "Large",
+        "captureId": "button/size-lg",
+        "axes": [
+          "density",
+          "theme"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Run",
+            "focusable": true,
+            "states": {
+              "disabled": false,
+              "loading": false
+            },
+            "tokenRoles": {
+              "variant": "secondary",
+              "tone": "default",
+              "size": "lg",
+              "density": "default"
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Run"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/density-compact",
+      "fixture": {
+        "props": {
+          "density": "compact"
+        },
+        "regions": {
+          "label": "Run"
+        }
+      },
+      "specimen": {
+        "group": "Density",
+        "caption": "Compact",
+        "captureId": "button/density-compact",
+        "axes": [
+          "size",
+          "theme"
+        ]
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Run",
+            "focusable": true,
+            "states": {
+              "disabled": false,
+              "loading": false
+            },
+            "tokenRoles": {
+              "variant": "secondary",
+              "tone": "default",
+              "size": "md",
+              "density": "compact"
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "label",
+          "expect": {
+            "present": true,
+            "text": "Run"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "button/press-pointer",
+      "fixture": {
+        "props": {},
+        "regions": {
+          "label": "Press"
+        }
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Press by pointer",
+        "captureId": "button/press-pointer",
+        "axes": []
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Press",
+            "focusable": true,
+            "states": {
+              "disabled": false
+            }
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "root",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "press"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "button/press-keyboard",
+      "fixture": {
+        "props": {},
+        "regions": {
+          "label": "Press"
+        }
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Press by keyboard",
+        "captureId": "button/press-keyboard",
+        "axes": []
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "focus",
+          "part": "root"
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "focused": true
+            }
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "root",
+          "input": "keyboard"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "press"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "button/toggle",
+      "fixture": {
+        "props": {
+          "pressed": false
+        },
+        "regions": {
+          "label": "Mute"
+        }
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Controlled toggle",
+        "captureId": "button/toggle",
+        "axes": []
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Mute",
+            "states": {
+              "pressed": false
+            }
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "root",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "pressedChange",
+            "press"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "pressed": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "button/focus-visible",
+      "fixture": {
+        "props": {},
+        "regions": {
+          "label": "Focus"
+        }
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Focus-visible",
+        "captureId": "button/focus-visible",
+        "axes": []
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "focus",
+          "part": "root"
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Focus",
+            "states": {
+              "focused": true,
+              "focusVisible": true
+            }
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    }
+  ]
+}

@@ -306,6 +306,20 @@ pub fn button(
         }
     }
 
+    // ── Accessibility projection (contract §8) ──
+    // Toggle state mirrors the web `aria-pressed`; disclosure state mirrors
+    // `aria-expanded`. None = attribute omitted, exactly like the web
+    // implementations.
+    if spec.is_toggle_mode() {
+        el.a11y.toggled = Some(if spec.current_pressed() {
+            poodle_node::NodeToggled::True
+        } else {
+            poodle_node::NodeToggled::False
+        });
+    }
+    if let Some(expanded) = spec.aria_expanded {
+        el.a11y.expanded = Some(expanded);
+    }
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
     }

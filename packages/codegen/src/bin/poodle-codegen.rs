@@ -31,7 +31,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use poodle_codegen::{
-    check_outputs, generate, load_and_validate, machine_interfaces, models, targets,
+    check_outputs, conformance, generate, load_and_validate, machine_interfaces, models, targets,
     write_outputs, CodegenError,
 };
 
@@ -65,8 +65,17 @@ fn usage() -> String {
      usage: poodle-codegen --machine-interfaces <FILE> --out <DIR> --target <machine-ts|machine-rust> [--check]\n\
      \n\
      --machine-interfaces  schema of machine states, events, effects, and\n\
-              context types (spec 064 mechanism 1). Not an IrModel; the\n\
-              machine targets are select-only."
+               context types (spec 064 mechanism 1). Not an IrModel; the\n\
+               machine targets are select-only.\n\
+     \n\
+     usage: poodle-codegen --conformance <INTERFACE> --cases <CORPUS> --out <DIR> --target <conformance-rust|conformance-cases> [--check]\n\
+     \n\
+     --conformance  serialized portable interface (spec 066), authored in\n\
+               TypeScript and emitted as JSON by the conformance serializer.\n\
+               `conformance-rust` renders the portable declaration into the\n\
+               consuming crate's generated tree; `conformance-cases` copies\n\
+               the interface and corpus JSON into a native preview's\n\
+               generated tree. Select-only, like the machine targets."
         .to_owned()
 }
 
@@ -76,6 +85,8 @@ struct Args {
     author_shell: Option<PathBuf>,
     author_specimens: Option<PathBuf>,
     machine_interfaces: Option<PathBuf>,
+    conformance_interface: Option<PathBuf>,
+    conformance_cases: Option<PathBuf>,
     target: Option<String>,
     check: bool,
 }
@@ -85,6 +96,8 @@ fn parse_args() -> Result<Args, String> {
     let mut author_shell = None;
     let mut author_specimens = None;
     let mut machine_interfaces = None;
+    let mut conformance_interface = None;
+    let mut conformance_cases = None;
     let mut target = None;
     let mut check = false;
     let mut positional = Vec::new();
@@ -116,6 +129,18 @@ fn parse_args() -> Result<Args, String> {
                         .ok_or("--machine-interfaces requires a schema path")?,
                 ));
             }
+            "--conformance" => {
+                conformance_interface = Some(PathBuf::from(
+                    args.next()
+                        .ok_or("--conformance requires an interface path")?,
+                ));
+            }
+            "--cases" => {
+                conformance_cases = Some(PathBuf::from(
+                    args.next()
+                        .ok_or("--cases requires a corpus path")?,
+                ));
+            }
             "--target" => {
                 target = Some(
                     args.next()
@@ -130,9 +155,10 @@ fn parse_args() -> Result<Args, String> {
 
     let author_mode = author_shell.is_some() || author_specimens.is_some();
     let machine_mode = machine_interfaces.is_some();
+    let conformance_mode = conformance_interface.is_some() || conformance_cases.is_some();
 
-    if author_mode && machine_mode {
-        return Err("run --author-* and --machine-interfaces separately".to_owned());
+    if conformance_mode && (author_mode || machine_mode) {
+        return Err("run --conformance separately from --author-* and --machine-interfaces".to_owned());
     }
 
     if machine_mode {
@@ -164,6 +190,51 @@ fn parse_args() -> Result<Args, String> {
             author_shell: None,
             author_specimens: None,
             machine_interfaces,
+            conformance_interface: None,
+            conformance_cases: None,
+            target,
+            check,
+        });
+    }
+
+    if conformance_mode {
+        let (interface, cases) = match (conformance_interface, conformance_cases) {
+            (Some(interface), Some(cases)) => (interface, cases),
+            _ => {
+                return Err(
+                    "--conformance requires both --conformance <interface> and --cases <corpus>"
+                        .to_owned(),
+                );
+            }
+        };
+        if !positional.is_empty() {
+            return Err("conformance mode takes no positional FIXTURE argument".to_owned());
+        }
+        if out.is_none() {
+            return Err("--out is required with --conformance".to_owned());
+        }
+        match target.as_deref() {
+            Some(targets::conformance_rust::ID) | Some(targets::conformance_cases::ID) => {}
+            Some(id) => {
+                return Err(format!(
+                    "conformance --target must be conformance-rust or conformance-cases, not '{id}'"
+                ));
+            }
+            None => {
+                return Err(
+                    "--target is required with --conformance (conformance-rust or conformance-cases)"
+                        .to_owned(),
+                );
+            }
+        }
+        return Ok(Args {
+            fixture: None,
+            out,
+            author_shell: None,
+            author_specimens: None,
+            machine_interfaces: None,
+            conformance_interface: Some(interface),
+            conformance_cases: Some(cases),
             target,
             check,
         });
@@ -199,6 +270,8 @@ fn parse_args() -> Result<Args, String> {
         author_shell,
         author_specimens,
         machine_interfaces,
+        conformance_interface: None,
+        conformance_cases: None,
         target,
         check,
     })
@@ -223,6 +296,9 @@ fn run(args: &Args) -> Result<(), CodegenError> {
     }
     if let Some(schema) = &args.machine_interfaces {
         return run_machine_interfaces(schema, args);
+    }
+    if let (Some(interface), Some(cases)) = (&args.conformance_interface, &args.conformance_cases) {
+        return run_conformance(interface, cases, args);
     }
     run_emit(
         args.fixture.as_ref().expect("emit mode carries a fixture"),
@@ -281,6 +357,71 @@ fn run_machine_interfaces(schema: &Path, args: &Args) -> Result<(), CodegenError
             "Generated {} files (target: {target_id}, machine interface schema {}).",
             files.len(),
             document.schema_version
+        );
+    }
+    Ok(())
+}
+
+/// Conformance mode (spec 066): renders the portable declaration into a
+/// consuming crate (`conformance-rust`) or copies the serialized interface
+/// and corpus into a native preview (`conformance-cases`). Same check/write
+/// split as the other modes; `--check` never writes.
+fn run_conformance(
+    interface_path: &Path,
+    cases_path: &Path,
+    args: &Args,
+) -> Result<(), CodegenError> {
+    let interface = conformance::load_interface(interface_path)?;
+    conformance::load_cases(cases_path)?;
+    let source_path = interface_path.to_string_lossy().into_owned();
+    let target_id = args
+        .target
+        .as_deref()
+        .expect("parse requires --target in conformance mode");
+    let (files, output_root) = match target_id {
+        targets::conformance_rust::ID => (
+            targets::conformance_rust::render(&interface, &source_path)?,
+            targets::conformance_rust::OUTPUT_ROOT,
+        ),
+        targets::conformance_cases::ID => (
+            targets::conformance_cases::render(interface_path, cases_path)?,
+            targets::conformance_cases::OUTPUT_ROOT,
+        ),
+        other => {
+            return Err(CodegenError::UnknownTarget {
+                id: other.to_owned(),
+                known: vec![
+                    targets::conformance_rust::ID.to_owned(),
+                    targets::conformance_cases::ID.to_owned(),
+                ],
+            });
+        }
+    };
+    let out = args.out.as_ref().expect("parse requires --out");
+    let root = out.join(output_root);
+
+    if args.check {
+        let report = check_outputs(&root, &files)?;
+        if !report.is_clean() {
+            return Err(CodegenError::Gate {
+                message: format!(
+                    "generated conformance artifacts are stale under {} (target {target_id}):\n{}",
+                    root.display(),
+                    report.message()
+                ),
+            });
+        }
+        println!(
+            "Verified {} files (target: {target_id}, interface {}).",
+            files.len(),
+            interface.id
+        );
+    } else {
+        write_outputs(&root, &files)?;
+        println!(
+            "Generated {} files (target: {target_id}, interface {}).",
+            files.len(),
+            interface.id
         );
     }
     Ok(())

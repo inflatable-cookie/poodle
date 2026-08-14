@@ -5,6 +5,7 @@
 
 mod app_state;
 mod component_registry;
+mod conformance_support;
 mod contract_usage_docs;
 mod node_compat;
 mod providers;

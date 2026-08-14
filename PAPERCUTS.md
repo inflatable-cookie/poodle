@@ -7,6 +7,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+<<<<<<< HEAD
 - 2026-08-14 — `contract-prop-drift` finds a contract's props by searching for
   the literal `### Public Props`, and **skips the contract entirely** when it
   finds none (`if (cProps.size === 0) { skipped++; continue }`). A contract that
@@ -26,6 +27,10 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   routes through `getFocusableElements(panel)` in both frameworks instead, which
   works but is focus-by-position rather than focus-by-identity. Adding
   `export function focus()` to the Svelte component would close it.
+- 2026-08-14 — historical, reworked away: the first g14.001 pass temporarily
+  repointed the sibling jetstream repo's `jetstream-poodle` path deps at a
+  t3code worktree and moved the stale `poodle` clone aside. The replacement
+  pass deleted the Jetstream lane (program-deferred) and restored both.
 
 - 2026-08-13 — codegen write mode sweeps each target's output-root **top
   level** for orphans, so two targets sharing one `generated/` root delete
