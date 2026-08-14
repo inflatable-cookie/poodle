@@ -37,6 +37,7 @@ type ProbeEvidenceFile = {
     capabilityId: string;
     probeId: string;
     verdict: string;
+    observations?: string[];
     fields?: unknown;
     reason?: string | null;
   }>;
@@ -45,12 +46,30 @@ type ProbeEvidenceFile = {
 type LayerEvidence = {
   status: Verdict;
   probeIds: string[];
+  observations: string[];
   reason?: string;
 };
 
-function readEvidence(path: string): ProbeEvidenceFile | null {
+const capabilityIds = new Set(PRIMITIVE_CAPABILITIES.map((row) => row.id));
+
+function readEvidence(path: string, expectedRuntime: string): ProbeEvidenceFile | null {
   if (!existsSync(path)) return null;
-  return JSON.parse(readFileSync(path, "utf8")) as ProbeEvidenceFile;
+  const file = JSON.parse(readFileSync(path, "utf8")) as ProbeEvidenceFile;
+  if (file.schema !== "primitive-probe-evidence.v1") {
+    throw new Error(`${path}: expected primitive-probe-evidence.v1`);
+  }
+  if (file.runtime !== expectedRuntime) {
+    throw new Error(`${path}: runtime '${file.runtime}', expected '${expectedRuntime}'`);
+  }
+  for (const probe of file.probes) {
+    if (!capabilityIds.has(probe.capabilityId)) {
+      throw new Error(`${path}: unknown capability '${probe.capabilityId}' in probe '${probe.probeId}'`);
+    }
+    if (!Array.isArray(probe.observations) || probe.observations.some((item) => typeof item !== "string")) {
+      throw new Error(`${path}: probe '${probe.probeId}' must declare its executed observations`);
+    }
+  }
+  return file;
 }
 
 function ensureRustEvidence(): ProbeEvidenceFile {
@@ -65,26 +84,30 @@ function ensureRustEvidence(): ProbeEvidenceFile {
     ],
     { cwd: ROOT, encoding: "utf8", stdio: "inherit" },
   );
-  const existing = readEvidence(RUST_EVIDENCE);
-  if (!existing || existing.schema !== "primitive-probe-evidence.v1") {
+  const existing = readEvidence(RUST_EVIDENCE, "render-neutral");
+  if (!existing) {
     throw new Error(`render-neutral evidence missing at ${RUST_EVIDENCE}`);
   }
   return existing;
 }
 
 function layerFromFile(file: ProbeEvidenceFile | null, capabilityId: string): LayerEvidence {
-  if (!file) return { status: "missing", probeIds: [], reason: "evidence file missing" };
+  if (!file) return { status: "missing", probeIds: [], observations: [], reason: "evidence file missing" };
   const probes = file.probes.filter((p) => p.capabilityId === capabilityId);
-  if (probes.length === 0) return { status: "missing", probeIds: [], reason: "no executed probe" };
+  if (probes.length === 0) {
+    return { status: "missing", probeIds: [], observations: [], reason: "no executed probe" };
+  }
+  const observations = [...new Set(probes.flatMap((probe) => probe.observations ?? []))].sort();
   const failed = probes.find((p) => p.verdict !== "pass");
   if (failed) {
     return {
       status: "failing",
       probeIds: probes.map((p) => p.probeId),
+      observations,
       reason: failed.reason ?? `${failed.probeId} failed`,
     };
   }
-  return { status: "passing", probeIds: probes.map((p) => p.probeId) };
+  return { status: "passing", probeIds: probes.map((p) => p.probeId), observations };
 }
 
 function rowReport(
@@ -103,12 +126,20 @@ function rowReport(
   }
 
   let status: Verdict | "deferred" = "deferred";
+  let missingObservations: string[] = [];
   if (owned) {
     const statuses = ["svelte", "react", "render-neutral", "gpui"].map(
       (layer) => (evidence[layer as Layer] as LayerEvidence).status,
     );
+    const observed = new Set(
+      ["svelte", "react", "render-neutral", "gpui"].flatMap(
+        (layer) => (evidence[layer as Layer] as LayerEvidence).observations,
+      ),
+    );
+    missingObservations = row.requiredObservations.filter((field) => !observed.has(field));
     if (statuses.some((s) => s === "failing")) status = "failing";
     else if (statuses.some((s) => s === "missing")) status = "missing";
+    else if (missingObservations.length > 0) status = "missing";
     else status = "passing";
   }
 
@@ -120,16 +151,17 @@ function rowReport(
     requiredObservations: row.requiredObservations,
     governingContract: row.governingContract ?? null,
     notes: row.notes ?? null,
+    missingObservations,
     status,
     evidence,
   };
 }
 
 const layers: Record<Layer, ProbeEvidenceFile | null> = {
-  svelte: readEvidence(join(OUT_DIR, "primitive-svelte.json")),
-  react: readEvidence(join(OUT_DIR, "primitive-react.json")),
+  svelte: readEvidence(join(OUT_DIR, "primitive-svelte.json"), "svelte"),
+  react: readEvidence(join(OUT_DIR, "primitive-react.json"), "react"),
   "render-neutral": ensureRustEvidence(),
-  gpui: readEvidence(join(OUT_DIR, "primitive-gpui.json")),
+  gpui: readEvidence(join(OUT_DIR, "primitive-gpui.json"), "gpui"),
 };
 
 const rows = PRIMITIVE_CAPABILITIES.map((row) => rowReport(row, layers));

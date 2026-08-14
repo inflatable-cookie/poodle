@@ -16,7 +16,8 @@ import {
   serializeInterface,
   type PrimitiveCapabilityId,
 } from "../../../packages/core/src/conformance";
-import { runCase, type RuntimeAdapter } from "./runner";
+import { observeDom, runCase, type RuntimeAdapter } from "./runner";
+import { computedStyleOf, parseLength } from "./observer";
 import { SvelteButtonAdapter } from "./svelte-adapter";
 import { ReactButtonAdapter } from "./react-adapter";
 
@@ -36,6 +37,7 @@ type ProbeRow = {
   capabilityId: string;
   probeId: string;
   verdict: "pass" | "fail";
+  observations: string[];
   fields: Record<string, unknown>;
   reason?: string;
 };
@@ -44,57 +46,17 @@ function injectRealCss(): void {
   if (document.getElementById("conformance-web-css")) return;
   const style = document.createElement("style");
   style.id = "conformance-web-css";
-  style.textContent = `${tokensCss}\n${buttonCss}`;
+  style.textContent = `${tokensCss}\n${buttonCss}\n@keyframes primitive-probe-spin { from { opacity: .98; } to { opacity: .97; } }`;
   document.head.appendChild(style);
-}
-
-function parseLength(value: string | null): number | null {
-  if (!value || value.includes("calc(")) return null;
-  const parsed = Number.parseFloat(value);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function channelsOf(el: HTMLElement): Record<string, string | null> {
-  const style = el.ownerDocument.defaultView?.getComputedStyle(el);
-  if (!style) return { background: null, borderColor: null, color: null, opacity: null };
-  const clean = (value: string | null): string | null =>
-    value && !value.includes("color-mix") && !value.includes("calc(") ? value : null;
-  return {
-    background: clean(style.backgroundColor),
-    borderColor: clean(style.borderColor),
-    color: clean(style.color),
-    opacity: clean(style.opacity),
-  };
-}
-
-function geometryOf(el: HTMLElement): Record<string, number | null> {
-  const style = el.ownerDocument.defaultView?.getComputedStyle(el);
-  if (!style) {
-    return {
-      height: null,
-      minWidth: null,
-      paddingLeft: null,
-      paddingRight: null,
-      radius: null,
-      borderWidth: null,
-    };
-  }
-  return {
-    height: parseLength(style.height),
-    minWidth: parseLength(style.minWidth),
-    paddingLeft: parseLength(style.paddingLeft),
-    paddingRight: parseLength(style.paddingRight),
-    radius: parseLength(style.borderRadius),
-    borderWidth: parseLength(style.borderWidth),
-  };
 }
 
 function pass(
   capabilityId: PrimitiveCapabilityId | string,
   probeId: string,
   fields: Record<string, unknown>,
+  observations: string[] = [],
 ): ProbeRow {
-  return { capabilityId, probeId, verdict: "pass", fields };
+  return { capabilityId, probeId, verdict: "pass", observations, fields };
 }
 
 function fail(
@@ -102,16 +64,17 @@ function fail(
   probeId: string,
   fields: Record<string, unknown>,
   reason: string,
+  observations: string[] = [],
 ): ProbeRow {
-  return { capabilityId, probeId, verdict: "fail", fields, reason };
+  return { capabilityId, probeId, verdict: "fail", observations, fields, reason };
 }
 
 /** Substrate DOM fixture — not a public component. */
-function mountSurfaceFixture(): HTMLElement {
-  const root = document.createElement("div");
+function mountSurfaceFixture(): HTMLButtonElement {
+  const root = document.createElement("button");
   root.id = "primitive-probe-root";
-  root.setAttribute("role", "button");
   root.setAttribute("aria-label", "Probe control");
+  root.setAttribute("data-has-leading", "true");
   root.setAttribute("data-variant", "primary");
   root.setAttribute("data-tone", "default");
   root.tabIndex = 0;
@@ -133,13 +96,16 @@ function mountSurfaceFixture(): HTMLElement {
     "overflow:hidden",
     "cursor:pointer",
     "box-shadow:0 2px 4px rgba(0,0,0,0.25)",
+    "animation:primitive-probe-spin 2s linear infinite",
   ].join(";");
+  root.style.animationName = "primitive-probe-spin";
+  root.style.animationDuration = "2s";
   const icon = document.createElement("span");
   icon.setAttribute("data-icon", "star");
-  icon.className = "probe-icon";
+  icon.className = "poodle-button__icon";
   icon.textContent = "★";
   const label = document.createElement("span");
-  label.className = "probe-label";
+  label.className = "poodle-button__label";
   label.textContent = "Probe";
   root.append(icon, label);
   document.body.appendChild(root);
@@ -147,11 +113,13 @@ function mountSurfaceFixture(): HTMLElement {
 }
 
 function fixtureProbes(root: HTMLElement): ProbeRow[] {
-  const geometry = geometryOf(root);
-  const channels = channelsOf(root);
-  const style = root.ownerDocument.defaultView!.getComputedStyle(root);
+  const observation = observeDom("web-fixture", "primitive-probe", iface, root);
+  const rootPart = observation.parts.root;
+  const geometry = rootPart.geometry;
+  const channels = rootPart.channels;
+  const style = computedStyleOf(root);
   const icon = root.querySelector("[data-icon]") as HTMLElement | null;
-  const label = root.querySelector(".probe-label") as HTMLElement | null;
+  const label = root.querySelector(".poodle-button__label") as HTMLElement | null;
 
   const rows: ProbeRow[] = [];
 
@@ -160,7 +128,7 @@ function fixtureProbes(root: HTMLElement): ProbeRow[] {
       ? pass("structure.identity", "dom-tree", {
           "node.id": root.id,
           "children.len": root.children.length,
-        })
+        }, ["parts.present"])
       : fail("structure.identity", "dom-tree", { id: root.id }, "node.id or children"),
   );
 
@@ -169,7 +137,7 @@ function fixtureProbes(root: HTMLElement): ProbeRow[] {
       ? pass("structure.part-resolution", "dom-parts", {
           "parts.icon": icon.getAttribute("data-icon"),
           "parts.text": label.textContent,
-        })
+        }, ["parts.present", "parts.text", "parts.icon"])
       : fail("structure.part-resolution", "dom-parts", {}, "parts.text or parts.icon"),
   );
 
@@ -179,13 +147,13 @@ function fixtureProbes(root: HTMLElement): ProbeRow[] {
           position: style.position,
           overflow: style.overflow,
           display: style.display,
-        })
+        }, ["parts.geometry"])
       : fail("layout.intent", "computed-layout", { position: style.position }, "layout intent"),
   );
 
   rows.push(
     geometry.height != null && geometry.minWidth != null && geometry.paddingLeft != null
-      ? pass("layout.geometry", "computed-geometry", geometry)
+      ? pass("layout.geometry", "computed-geometry", geometry, ["parts.geometry"])
       : fail("layout.geometry", "computed-geometry", geometry, "parts.geometry"),
   );
 
@@ -197,7 +165,7 @@ function fixtureProbes(root: HTMLElement): ProbeRow[] {
 
   rows.push(
     channels.background && channels.borderColor && channels.color && channels.opacity
-      ? pass("surface.channels", "computed-channels", channels)
+      ? pass("surface.channels", "computed-channels", channels, ["parts.channels"])
       : fail("surface.channels", "computed-channels", channels, "parts.channels"),
   );
 
@@ -219,15 +187,22 @@ function fixtureProbes(root: HTMLElement): ProbeRow[] {
   const focusVisible = root.matches(":focus-visible") || document.activeElement === root;
   rows.push(
     focusVisible
-      ? pass("surface.state-patches", "focus-style", { focusVisible: true })
+      ? pass("surface.state-patches", "focus-style", { focusVisible: true }, ["parts.focusVisible"])
       : fail("surface.state-patches", "focus-style", { focusVisible }, "parts.focusVisible"),
   );
 
   rows.push(
-    pass("surface.animation", "declaration-absent-ok", {
-      note: "web fixture has no CSS animation; channel certified as observable absence",
-      animationName: style.animationName,
-    }),
+    root.style.animationName === "primitive-probe-spin"
+      ? pass("surface.animation", "dom-animation-declaration", {
+          animationName: root.style.animationName,
+          animationDuration: root.style.animationDuration,
+        })
+      : fail(
+          "surface.animation",
+          "dom-animation-declaration",
+          { animationName: root.style.animationName },
+          "animationName",
+        ),
   );
 
   rows.push(
@@ -235,7 +210,7 @@ function fixtureProbes(root: HTMLElement): ProbeRow[] {
       ? pass("content.text-icon", "dom-content", {
           icon: icon.getAttribute("data-icon"),
           text: label.textContent,
-        })
+        }, ["parts.text", "parts.icon"])
       : fail("content.text-icon", "dom-content", {}, "parts.text or parts.icon"),
   );
 
@@ -251,20 +226,20 @@ function fixtureProbes(root: HTMLElement): ProbeRow[] {
   );
 
   rows.push(
-    root.getAttribute("data-variant") === "primary"
+    rootPart.tokenRoles.variant === "primary" && rootPart.tokenRoles.tone === "default"
       ? pass("semantic.token-roles", "data-roles", {
-          variant: root.getAttribute("data-variant"),
-          tone: root.getAttribute("data-tone"),
-        })
+          variant: rootPart.tokenRoles.variant,
+          tone: rootPart.tokenRoles.tone,
+        }, ["parts.tokenRoles"])
       : fail("semantic.token-roles", "data-roles", {}, "parts.tokenRoles"),
   );
 
   rows.push(
-    root.getAttribute("role") === "button" && root.getAttribute("aria-label") === "Probe control"
+    rootPart.role === "button" && rootPart.name === "Probe control"
       ? pass("accessibility.projection", "dom-a11y", {
-          role: root.getAttribute("role"),
-          name: root.getAttribute("aria-label"),
-        })
+          role: rootPart.role,
+          name: rootPart.name,
+        }, ["parts.role", "parts.name"])
       : fail("accessibility.projection", "dom-a11y", {}, "parts.role or parts.name"),
   );
 
@@ -275,15 +250,25 @@ function fixtureProbes(root: HTMLElement): ProbeRow[] {
 /** Button corpus cases that exercise interaction/semantic substrate on web. */
 const BUTTON_PROBE_CASES: Array<{
   caseId: string;
-  capabilities: PrimitiveCapabilityId[];
+  capabilities: Array<{ id: PrimitiveCapabilityId; observations: string[] }>;
 }> = [
   {
     caseId: "button/press-pointer",
-    capabilities: ["activate", "structure.part-resolution", "content.text-icon"],
+    capabilities: [
+      { id: "activate", observations: ["trace"] },
+      { id: "structure.part-resolution", observations: ["parts.present", "parts.text", "parts.icon"] },
+      { id: "content.text-icon", observations: ["parts.text", "parts.icon"] },
+    ],
   },
-  { caseId: "button/disabled", capabilities: ["semantic.disabled"] },
-  { caseId: "button/toggle", capabilities: ["toggle"] },
-  { caseId: "button/focus-visible", capabilities: ["focus", "surface.state-patches"] },
+  { caseId: "button/disabled", capabilities: [{ id: "semantic.disabled", observations: ["parts.states"] }] },
+  { caseId: "button/toggle", capabilities: [{ id: "toggle", observations: ["parts.states"] }] },
+  {
+    caseId: "button/focus-visible",
+    capabilities: [
+      { id: "focus", observations: ["parts.focusable", "parts.focused"] },
+      { id: "surface.state-patches", observations: ["parts.focusVisible"] },
+    ],
+  },
 ];
 
 async function buttonBackedProbes(adapter: RuntimeAdapter): Promise<ProbeRow[]> {
@@ -291,19 +276,19 @@ async function buttonBackedProbes(adapter: RuntimeAdapter): Promise<ProbeRow[]> 
   for (const mapping of BUTTON_PROBE_CASES) {
     const caseData = buttonCases.cases.find((c) => c.id === mapping.caseId);
     if (!caseData) {
-      for (const capabilityId of mapping.capabilities) {
-        rows.push(fail(capabilityId, mapping.caseId, {}, "case missing"));
+      for (const capability of mapping.capabilities) {
+        rows.push(fail(capability.id, mapping.caseId, {}, "case missing", capability.observations));
       }
       continue;
     }
     const { results } = await runCase(adapter, iface, buttonCases.component, caseData);
     const failures = results.filter((r) => r.verdict === "fail");
     const ok = failures.length === 0;
-    for (const capabilityId of mapping.capabilities) {
+    for (const capability of mapping.capabilities) {
       rows.push(
         ok
-          ? pass(capabilityId, mapping.caseId, { casePass: true, assertions: results.length })
-          : fail(capabilityId, mapping.caseId, { failures }, "button case"),
+          ? pass(capability.id, mapping.caseId, { casePass: true, assertions: results.length }, capability.observations)
+          : fail(capability.id, mapping.caseId, { failures }, "button case", capability.observations),
       );
     }
   }
@@ -312,16 +297,6 @@ async function buttonBackedProbes(adapter: RuntimeAdapter): Promise<ProbeRow[]> 
 
 function writeEvidence(runtime: string, probes: ProbeRow[]): void {
   mkdirSync(OUT_DIR, { recursive: true });
-  const byCapability = new Map<string, ProbeRow>();
-  for (const probe of probes) {
-    const prior = byCapability.get(probe.capabilityId);
-    if (!prior || (prior.verdict === "fail" && probe.verdict === "pass")) {
-      byCapability.set(probe.capabilityId, probe);
-    }
-    if (prior?.verdict === "pass" && probe.verdict === "fail") {
-      byCapability.set(probe.capabilityId, probe);
-    }
-  }
   // Prefer fail if any probe for a capability failed.
   const merged = new Map<string, ProbeRow>();
   for (const probe of probes) {

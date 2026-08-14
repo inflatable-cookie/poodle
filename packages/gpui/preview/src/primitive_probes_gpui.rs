@@ -15,6 +15,81 @@ use super::conformance_driver::{
     wait_for_focus_handle, warmup_and_calibrate, ClickCalibration,
 };
 
+fn backend_expected(capability_id: &str) -> &'static [&'static str] {
+    match capability_id {
+        "structure.identity" => &["structure.identity.container"],
+        "structure.part-resolution" => &["content.text-icon.text", "content.text-icon.icon"],
+        "layout.intent" => &["layout.intent.direction", "layout.intent.gap"],
+        "layout.geometry" => &[
+            "layout.geometry.flex-grow",
+            "layout.geometry.min-width",
+            "layout.geometry.max-width",
+        ],
+        "layout.position" => &["layout.position.relative"],
+        "surface.channels" => &[
+            "surface.channels.background",
+            "surface.channels.border",
+            "surface.channels.text",
+            "surface.channels.opacity",
+        ],
+        "surface.extended" => &[
+            "surface.extended.side-border",
+            "surface.extended.shadow",
+            "surface.extended.cursor",
+        ],
+        "surface.state-patches" => &[
+            "surface.state-patches.hover",
+            "surface.state-patches.active",
+            "surface.state-patches.focus",
+        ],
+        "surface.animation" => &["surface.animation.scheduled"],
+        "content.text-icon" => &["content.text-icon.text", "content.text-icon.icon"],
+        "content.typography" => &[
+            "content.typography.size",
+            "content.typography.weight",
+            "content.typography.line-height",
+        ],
+        "semantic.token-roles" => &["semantic.token-roles.received"],
+        "toggle" => &["toggle.received"],
+        "semantic.disabled" => &["semantic.disabled.blocked"],
+        "accessibility.projection" => &["accessibility.projection.received"],
+        "focus" | "activate" => &[],
+        _ => &[],
+    }
+}
+
+fn require_backend_receipt(
+    probe: ProbeEvidence,
+    receipt: &std::collections::BTreeSet<&'static str>,
+) -> ProbeEvidence {
+    if probe.verdict == "fail" {
+        return probe;
+    }
+    let expected = backend_expected(&probe.capability_id);
+    let missing = expected
+        .iter()
+        .copied()
+        .find(|marker| !receipt.contains(marker));
+    let fields = serde_json::json!({
+        "neutral": probe.fields,
+        "backendMarkers": expected,
+    });
+    match missing {
+        Some(marker) => ProbeEvidence::fail(
+            probe.capability_id,
+            format!("backend-{}", probe.probe_id),
+            fields,
+            format!("backend.{marker}"),
+        ),
+        None => ProbeEvidence::pass_observed(
+            probe.capability_id,
+            format!("backend-{}", probe.probe_id),
+            fields,
+            &probe.observations,
+        ),
+    }
+}
+
 pub async fn drive_primitive_probes(cx: &mut AsyncWindowContext) -> Vec<ProbeEvidence> {
     let calibration = warmup_and_calibrate(cx).await;
     let trace = Arc::new(Mutex::new(0usize));
@@ -24,14 +99,28 @@ pub async fn drive_primitive_probes(cx: &mut AsyncWindowContext) -> Vec<ProbeEvi
     });
 
     let node = Arc::new(Mutex::new(build_probe_fixture(Some(handler))));
+    cx.update(|_window, _cx| poodle_gpui_node_backend::begin_probe_capture())
+        .ok();
     mount_node(cx, Arc::clone(&node));
     blur_element_focus(cx, PROBE_ELEMENT_ID).await;
     wait_for_focus_handle(cx, PROBE_ELEMENT_ID).await;
 
-    let mut probes = cx
+    let receipt = cx
+        .update(|_window, _cx| {
+            poodle_gpui_node_backend::take_probe_capture()
+                .into_iter()
+                .collect::<std::collections::BTreeSet<_>>()
+        })
+        .unwrap_or_default();
+
+    let mut probes: Vec<ProbeEvidence> = cx
         .update(|_window, _cx| {
             let node = node.lock().expect("node lock").clone();
             run_neutral_probes(&node)
+                .into_iter()
+                .filter(|probe| probe.capability_id != "focus" && probe.capability_id != "activate")
+                .map(|probe| require_backend_receipt(probe, &receipt))
+                .collect()
         })
         .unwrap_or_default();
 
@@ -58,7 +147,9 @@ pub async fn drive_primitive_probes(cx: &mut AsyncWindowContext) -> Vec<ProbeEvi
             let count = *trace.lock().expect("trace lock");
             probe_activate_gpui(count)
         })
-        .unwrap_or_else(|_| ProbeEvidence::fail("activate", "pointer-activate", Value::Null, "gpui.event"));
+        .unwrap_or_else(|_| {
+            ProbeEvidence::fail("activate", "pointer-activate", Value::Null, "gpui.event")
+        });
     probes.push(activate_probe);
 
     drain_event_queue(cx).await;

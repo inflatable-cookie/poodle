@@ -15,7 +15,7 @@
  * Capability names are closed over the primitive roster (g14.002).
  */
 
-import { assertKnownCapabilities } from "./primitives";
+import { assertKnownCapabilities, type PrimitiveCapabilityId } from "./primitives";
 
 // ── Interface declarations ─────────────────────────────────────────────────
 
@@ -117,7 +117,7 @@ export interface TokenRoleDecl {
 }
 
 export interface CapabilityDecl {
-  name: string;
+  name: PrimitiveCapabilityId;
   required: boolean;
 }
 

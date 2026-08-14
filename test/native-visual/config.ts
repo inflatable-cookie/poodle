@@ -30,11 +30,14 @@ import path from "node:path";
 
 export const repoRoot = path.resolve(import.meta.dir, "../..");
 
+export const CONTROL_SIZES = ["xs", "sm", "md", "lg", "xl"] as const;
+export type ControlSize = (typeof CONTROL_SIZES)[number];
+
 export type Axis = {
   id: string;
   theme: string;
   density: string;
-  controlSize: string;
+  controlSize: ControlSize;
 };
 
 /**

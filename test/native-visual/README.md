@@ -26,8 +26,9 @@ If a component never settles, it belongs in the skip list in `config.ts`.
 
 The gate always passes `--control-size` to the preview. The preview accepts
 `--control-size` as the canonical flag (`--size` remains a synonym). A focused
-run with a non-default size must prove the preview received it — do not infer
-size only from pixels.
+run writes a `native-visual-axis-receipt.v1` beside each capture and rejects a
+receipt whose resolved size differs from the requested size. Axis proof does
+not depend on pixel inference.
 
 ```sh
 bun test/native-visual/run.ts --slug=button --control-size=lg
@@ -44,8 +45,10 @@ images. Do not add large PNG sets to Git.
 exact refresh command. Comparison never writes a new reference.
 
 **Refresh** replaces the baseline after preserving the previous PNG as
-`*.previous.png` and emits `test/native-visual/out/refresh-manifest-<axis>.json`
-with slug, axis, dimensions, old/new hashes, paths, and reason.
+`*.previous.png`. Every invocation gets its own timestamped directory under
+`test/native-visual/out/`; refresh keeps before, after, diff, axis receipt, and
+`refresh-manifest-<axis>.json` together there. The manifest records slug, axis,
+dimensions, old/new hashes, every evidence path, and reason.
 
 ```sh
 effigy test:native-visual
@@ -58,7 +61,8 @@ bun test/native-visual/run.ts --refresh --control-size=sm --reason='stale baseli
 
 `--update` is an alias for `--refresh`.
 
-Diffs land in `test/native-visual/out/`; baselines live in
+Run evidence lands in timestamped directories under `test/native-visual/out/`
+and is not erased by the next compare or refresh; baselines live in
 `packages/gpui/preview/baselines/`. Before, after, and diff evidence remain
 available until review — refresh does not silently overwrite the only capture.
 

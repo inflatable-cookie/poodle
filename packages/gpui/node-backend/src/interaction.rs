@@ -77,6 +77,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
         if let Some(patch) = &node.style.active {
             let patch = *patch;
             el = el.active(move |s| apply_patch(s, patch));
+            record_probe_channel("surface.state-patches.active");
         }
         // gpui's focus styling needs the element focusable, which the
         // `focusable` flag above has already arranged.
@@ -84,10 +85,12 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
             if let Some(patch) = &node.style.focus {
                 let patch = *patch;
                 el = el.focus(move |s| apply_patch(s, patch));
+                record_probe_channel("surface.state-patches.focus");
             }
         }
     }
     if node.interaction.disabled {
+        record_probe_channel("semantic.disabled.blocked");
         return el;
     }
     if let Some(handler) = &node.interaction.on_activate {
@@ -101,6 +104,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
                 cx.refresh_windows();
             },
         );
+        record_probe_channel("activate.listener");
         // Enter/Space activation is gpui's own: a focused div with a click
         // listener synthesizes KeyUp → click (div.rs). Binding `on_key_down`
         // here as well double-fires — the conformance corpus caught it (two

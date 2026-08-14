@@ -60,17 +60,39 @@ pub struct ProbeEvidence {
     pub capability_id: String,
     pub probe_id: String,
     pub verdict: &'static str,
+    pub observations: Vec<&'static str>,
     pub fields: Value,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
 }
 
 impl ProbeEvidence {
-    pub fn pass(capability_id: impl Into<String>, probe_id: impl Into<String>, fields: Value) -> Self {
+    pub fn pass(
+        capability_id: impl Into<String>,
+        probe_id: impl Into<String>,
+        fields: Value,
+    ) -> Self {
         Self {
             capability_id: capability_id.into(),
             probe_id: probe_id.into(),
             verdict: "pass",
+            observations: Vec::new(),
+            fields,
+            reason: None,
+        }
+    }
+
+    pub fn pass_observed(
+        capability_id: impl Into<String>,
+        probe_id: impl Into<String>,
+        fields: Value,
+        observations: &[&'static str],
+    ) -> Self {
+        Self {
+            capability_id: capability_id.into(),
+            probe_id: probe_id.into(),
+            verdict: "pass",
+            observations: observations.to_vec(),
             fields,
             reason: None,
         }
@@ -86,6 +108,7 @@ impl ProbeEvidence {
             capability_id: capability_id.into(),
             probe_id: probe_id.into(),
             verdict: "fail",
+            observations: Vec::new(),
             fields,
             reason: Some(reason.into()),
         }
@@ -104,7 +127,8 @@ impl ProbeEvidence {
 }
 
 pub fn probe_interface() -> InterfaceDoc {
-    let interface: Value = serde_json::from_str(PROBE_INTERFACE_JSON).expect("probe interface parses");
+    let interface: Value =
+        serde_json::from_str(PROBE_INTERFACE_JSON).expect("probe interface parses");
     InterfaceDoc::parse(&interface).expect("probe interface valid")
 }
 
@@ -213,6 +237,10 @@ pub fn build_probe_fixture(activate_trace: Option<Arc<dyn Fn() + Send + Sync>>) 
     root.children.push({
         let mut icon = Node::icon("star", 16.0);
         icon.style.flex_shrink_zero = true;
+        // Exercise the backend's disabled-listener short circuit without
+        // disabling the interactive root used by focus/activation probes.
+        icon.interaction.disabled = true;
+        icon.interaction.on_activate = Some(Arc::new(|| {}));
         icon
     });
     root.children.push(Node::text("Probe"));
@@ -231,7 +259,12 @@ fn probe_structure_identity(node: &Node) -> ProbeEvidence {
         "root.kind": "Container",
     });
     if id_ok && children_ok && kinds_ok {
-        ProbeEvidence::pass("structure.identity", "node-tree", fields)
+        ProbeEvidence::pass_observed(
+            "structure.identity",
+            "node-tree",
+            fields,
+            &["parts.present", "node.field"],
+        )
     } else {
         ProbeEvidence::fail(
             "structure.identity",
@@ -260,8 +293,17 @@ fn probe_structure_part_resolution(node: &Node, iface: &InterfaceDoc) -> ProbeEv
         "leadingIcon.present": icon_present,
         "leadingIcon.icon": icon_name,
     });
-    if label_present && label_text == Some(json!("Probe")) && icon_present && icon_name == Some(json!("star")) {
-        ProbeEvidence::pass("structure.part-resolution", "observe-tree", fields)
+    if label_present
+        && label_text == Some(json!("Probe"))
+        && icon_present
+        && icon_name == Some(json!("star"))
+    {
+        ProbeEvidence::pass_observed(
+            "structure.part-resolution",
+            "observe-tree",
+            fields,
+            &["parts.present", "parts.text", "parts.icon"],
+        )
     } else {
         ProbeEvidence::fail(
             "structure.part-resolution",
@@ -285,9 +327,19 @@ fn probe_layout_intent(node: &Node) -> ProbeEvidence {
         && layout.alignment.main == MainAxisAlignment::Center
         && layout.spacing.gap == 8.0;
     if pass {
-        ProbeEvidence::pass("layout.intent", "descriptor-layout", fields)
+        ProbeEvidence::pass_observed(
+            "layout.intent",
+            "descriptor-layout",
+            fields,
+            &["node.field"],
+        )
     } else {
-        ProbeEvidence::fail("layout.intent", "descriptor-layout", fields, "layout.intent fields")
+        ProbeEvidence::fail(
+            "layout.intent",
+            "descriptor-layout",
+            fields,
+            "layout.intent fields",
+        )
     }
 }
 
@@ -305,7 +357,7 @@ fn probe_layout_geometry(node: &Node) -> ProbeEvidence {
         && node.style.max_width == Some(240.0)
         && node.style.flex_grow == Some(1.0);
     if pass {
-        ProbeEvidence::pass("layout.geometry", "node-style", fields)
+        ProbeEvidence::pass_observed("layout.geometry", "node-style", fields, &["node.field"])
     } else {
         ProbeEvidence::fail("layout.geometry", "node-style", fields, "geometry fields")
     }
@@ -316,7 +368,7 @@ fn probe_layout_position(node: &Node) -> ProbeEvidence {
         "position": format!("{:?}", node.position),
     });
     if matches!(node.position, NodePosition::Relative) {
-        ProbeEvidence::pass("layout.position", "node-position", fields)
+        ProbeEvidence::pass_observed("layout.position", "node-position", fields, &["node.field"])
     } else {
         ProbeEvidence::fail("layout.position", "node-position", fields, "NodePosition")
     }
@@ -324,12 +376,20 @@ fn probe_layout_position(node: &Node) -> ProbeEvidence {
 
 fn probe_surface_channels(node: &Node, iface: &InterfaceDoc) -> ProbeEvidence {
     let observation = observe_tree("render-neutral", "primitive-probe", iface, node, None);
-    let channels = observation.pointer("/parts/root/channels").cloned().unwrap_or(Value::Null);
+    let channels = observation
+        .pointer("/parts/root/channels")
+        .cloned()
+        .unwrap_or(Value::Null);
     let bg = channels.get("background").is_some();
     let border = channels.get("borderColor").is_some();
     let fields = json!({ "channels": channels });
     if bg && border {
-        ProbeEvidence::pass("surface.channels", "observe-tree-channels", fields)
+        ProbeEvidence::pass_observed(
+            "surface.channels",
+            "observe-tree-channels",
+            fields,
+            &["parts.channels", "node.field"],
+        )
     } else {
         ProbeEvidence::fail(
             "surface.channels",
@@ -354,9 +414,19 @@ fn probe_surface_extended(node: &Node) -> ProbeEvidence {
         && desc.cursor == CursorHint::Pointer
         && node.style.border_color_left.is_some();
     if pass {
-        ProbeEvidence::pass("surface.extended", "node-style-extended", fields)
+        ProbeEvidence::pass_observed(
+            "surface.extended",
+            "node-style-extended",
+            fields,
+            &["node.field"],
+        )
     } else {
-        ProbeEvidence::fail("surface.extended", "node-style-extended", fields, "extended surface fields")
+        ProbeEvidence::fail(
+            "surface.extended",
+            "node-style-extended",
+            fields,
+            "extended surface fields",
+        )
     }
 }
 
@@ -367,9 +437,19 @@ fn probe_surface_state_patches(node: &Node) -> ProbeEvidence {
         "focus": node.style.focus.is_some(),
     });
     if node.style.hover.is_some() && node.style.active.is_some() && node.style.focus.is_some() {
-        ProbeEvidence::pass("surface.state-patches", "style-patches", fields)
+        ProbeEvidence::pass_observed(
+            "surface.state-patches",
+            "style-patches",
+            fields,
+            &["node.field"],
+        )
     } else {
-        ProbeEvidence::fail("surface.state-patches", "style-patches", fields, "StylePatch channels")
+        ProbeEvidence::fail(
+            "surface.state-patches",
+            "style-patches",
+            fields,
+            "StylePatch channels",
+        )
     }
 }
 
@@ -382,9 +462,19 @@ fn probe_surface_animation(node: &Node) -> ProbeEvidence {
         })),
     });
     if node.style.animation.is_some() {
-        ProbeEvidence::pass("surface.animation", "node-animation", fields)
+        ProbeEvidence::pass_observed(
+            "surface.animation",
+            "node-animation",
+            fields,
+            &["node.field"],
+        )
     } else {
-        ProbeEvidence::fail("surface.animation", "node-animation", fields, "NodeStyle.animation")
+        ProbeEvidence::fail(
+            "surface.animation",
+            "node-animation",
+            fields,
+            "NodeStyle.animation",
+        )
     }
 }
 
@@ -394,9 +484,19 @@ fn probe_content_text_icon(node: &Node, iface: &InterfaceDoc) -> ProbeEvidence {
     let icon = observation.pointer("/parts/leadingIcon/icon").cloned();
     let fields = json!({ "label.text": text, "leadingIcon.icon": icon });
     if text == Some(json!("Probe")) && icon == Some(json!("star")) {
-        ProbeEvidence::pass("content.text-icon", "part-carriers", fields)
+        ProbeEvidence::pass_observed(
+            "content.text-icon",
+            "part-carriers",
+            fields,
+            &["parts.text", "parts.icon", "node.field"],
+        )
     } else {
-        ProbeEvidence::fail("content.text-icon", "part-carriers", fields, "text or icon content")
+        ProbeEvidence::fail(
+            "content.text-icon",
+            "part-carriers",
+            fields,
+            "text or icon content",
+        )
     }
 }
 
@@ -414,18 +514,38 @@ fn probe_content_typography(node: &Node) -> ProbeEvidence {
         && node.style.text_weight == Some(500)
         && node.style.line_height == Some(1.25);
     if pass {
-        ProbeEvidence::pass("content.typography", "node-typography", fields)
+        ProbeEvidence::pass_observed(
+            "content.typography",
+            "node-typography",
+            fields,
+            &["node.field"],
+        )
     } else {
-        ProbeEvidence::fail("content.typography", "node-typography", fields, "typography fields")
+        ProbeEvidence::fail(
+            "content.typography",
+            "node-typography",
+            fields,
+            "typography fields",
+        )
     }
 }
 
 fn probe_semantic_token_roles(node: &Node, iface: &InterfaceDoc) -> ProbeEvidence {
     let observation = observe_tree("render-neutral", "primitive-probe", iface, node, None);
-    let roles = observation.pointer("/parts/root/tokenRoles").cloned().unwrap_or(Value::Null);
+    let roles = observation
+        .pointer("/parts/root/tokenRoles")
+        .cloned()
+        .unwrap_or(Value::Null);
     let fields = json!({ "tokenRoles": roles });
-    if roles.get("variant") == Some(&json!("primary")) && roles.get("tone") == Some(&json!("default")) {
-        ProbeEvidence::pass("semantic.token-roles", "observe-tree-roles", fields)
+    if roles.get("variant") == Some(&json!("primary"))
+        && roles.get("tone") == Some(&json!("default"))
+    {
+        ProbeEvidence::pass_observed(
+            "semantic.token-roles",
+            "observe-tree-roles",
+            fields,
+            &["parts.tokenRoles"],
+        )
     } else {
         ProbeEvidence::fail(
             "semantic.token-roles",
@@ -439,9 +559,10 @@ fn probe_semantic_token_roles(node: &Node, iface: &InterfaceDoc) -> ProbeEvidenc
 fn probe_toggle(node: &Node, iface: &InterfaceDoc) -> ProbeEvidence {
     let observation = observe_tree("render-neutral", "primitive-probe", iface, node, None);
     let pressed = observation.pointer("/parts/root/states/pressed").cloned();
-    let fields = json!({ "states.pressed": pressed, "a11y.toggled": format!("{:?}", node.a11y.toggled) });
+    let fields =
+        json!({ "states.pressed": pressed, "a11y.toggled": format!("{:?}", node.a11y.toggled) });
     if pressed == Some(json!(false)) {
-        ProbeEvidence::pass("toggle", "a11y-toggled", fields)
+        ProbeEvidence::pass_observed("toggle", "a11y-toggled", fields, &["parts.states"])
     } else {
         ProbeEvidence::fail("toggle", "a11y-toggled", fields, "states.pressed")
     }
@@ -455,9 +576,19 @@ fn probe_semantic_disabled(node: &Node, iface: &InterfaceDoc) -> ProbeEvidence {
         "interaction.disabled": node.interaction.disabled,
     });
     if disabled == Some(json!(false)) && !node.interaction.disabled {
-        ProbeEvidence::pass("semantic.disabled", "interaction-disabled", fields)
+        ProbeEvidence::pass_observed(
+            "semantic.disabled",
+            "interaction-disabled",
+            fields,
+            &["parts.states"],
+        )
     } else {
-        ProbeEvidence::fail("semantic.disabled", "interaction-disabled", fields, "states.disabled")
+        ProbeEvidence::fail(
+            "semantic.disabled",
+            "interaction-disabled",
+            fields,
+            "states.disabled",
+        )
     }
 }
 
@@ -472,7 +603,12 @@ fn probe_accessibility_projection(node: &Node, iface: &InterfaceDoc) -> ProbeEvi
         "node.a11y.label": node.a11y.label,
     });
     if role == Some(json!("button")) && name == Some(json!("Probe control")) {
-        ProbeEvidence::pass("accessibility.projection", "a11y-metadata", fields)
+        ProbeEvidence::pass_observed(
+            "accessibility.projection",
+            "a11y-metadata",
+            fields,
+            &["parts.role", "parts.name", "node.a11y"],
+        )
     } else {
         ProbeEvidence::fail(
             "accessibility.projection",
@@ -509,7 +645,13 @@ pub fn run_neutral_probes(node: &Node) -> Vec<ProbeEvidence> {
 
 fn probe_focus_neutral(node: &Node, iface: &InterfaceDoc) -> ProbeEvidence {
     let focused = observe_tree("render-neutral", "primitive-probe", iface, node, Some(true));
-    let unfocused = observe_tree("render-neutral", "primitive-probe", iface, node, Some(false));
+    let unfocused = observe_tree(
+        "render-neutral",
+        "primitive-probe",
+        iface,
+        node,
+        Some(false),
+    );
     let focusable = focused
         .pointer("/parts/root/focusable")
         .and_then(Value::as_bool)
@@ -529,7 +671,12 @@ fn probe_focus_neutral(node: &Node, iface: &InterfaceDoc) -> ProbeEvidence {
         "interaction.focusable": node.interaction.focusable,
     });
     if node.interaction.focusable && focusable && focused_true && focused_false {
-        ProbeEvidence::pass("focus", "node-focus-channel", fields)
+        ProbeEvidence::pass_observed(
+            "focus",
+            "node-focus-channel",
+            fields,
+            &["parts.focusable", "parts.focused"],
+        )
     } else {
         ProbeEvidence::fail("focus", "node-focus-channel", fields, "parts.focused")
     }
@@ -543,9 +690,14 @@ fn probe_activate_neutral(node: &Node) -> ProbeEvidence {
     // Headless layer certifies the activation channel is present on the node.
     // GPUI proves the real event path; web proves dispatched DOM events.
     if wired {
-        ProbeEvidence::pass("activate", "node-activate-channel", fields)
+        ProbeEvidence::pass_observed("activate", "node-activate-channel", fields, &[])
     } else {
-        ProbeEvidence::fail("activate", "node-activate-channel", fields, "interaction.on_activate")
+        ProbeEvidence::fail(
+            "activate",
+            "node-activate-channel",
+            fields,
+            "interaction.on_activate",
+        )
     }
 }
 
@@ -558,27 +710,25 @@ pub fn neutral_evidence_report(probes: &[ProbeEvidence]) -> Value {
 }
 
 /// GPUI-layer probes that require backend focus registry or real events.
-pub fn probe_focus_gpui(backend_focus: Option<bool>, focus_visible: Option<Value>) -> ProbeEvidence {
+pub fn probe_focus_gpui(
+    backend_focus: Option<bool>,
+    focus_visible: Option<Value>,
+) -> ProbeEvidence {
     let fields = json!({
         "gpui.focus": backend_focus,
         "parts.focusVisible": focus_visible,
     });
     if backend_focus == Some(true) {
-        ProbeEvidence::pass("focus", "backend-focus-registry", fields)
+        ProbeEvidence::pass_observed("focus", "backend-focus-registry", fields, &["gpui.focus"])
     } else {
-        ProbeEvidence::fail(
-            "focus",
-            "backend-focus-registry",
-            fields,
-            "gpui.focus",
-        )
+        ProbeEvidence::fail("focus", "backend-focus-registry", fields, "gpui.focus")
     }
 }
 
 pub fn probe_activate_gpui(trace_len: usize) -> ProbeEvidence {
     let fields = json!({ "trace.len": trace_len, "gpui.event": trace_len > 0 });
     if trace_len > 0 {
-        ProbeEvidence::pass("activate", "pointer-activate", fields)
+        ProbeEvidence::pass_observed("activate", "pointer-activate", fields, &["gpui.event"])
     } else {
         ProbeEvidence::fail("activate", "pointer-activate", fields, "gpui.event")
     }
@@ -619,7 +769,10 @@ mod tests {
         }
         std::fs::write(
             &out,
-            format!("{}\n", serde_json::to_string_pretty(&report).expect("report serializes")),
+            format!(
+                "{}\n",
+                serde_json::to_string_pretty(&report).expect("report serializes")
+            ),
         )
         .expect("write render-neutral evidence");
         assert!(probes.iter().all(|p| p.verdict == "pass"));

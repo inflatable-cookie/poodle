@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
@@ -8,6 +8,8 @@ import { captureSlugStable, ensurePreviewBuilt } from "./capture";
 import {
   Axis,
   BASELINE_DIR,
+  CONTROL_SIZES,
+  type ControlSize,
   DEFAULT_AXIS,
   MAX_DIFF_RATIO,
   OUT_DIR,
@@ -43,8 +45,12 @@ type RefreshEntry = {
   oldHash: string | null;
   newHash: string;
   previousPath: string | null;
+  beforePath: string | null;
+  afterPath: string;
+  diffPath: string | null;
   baselinePath: string;
   capturePath: string;
+  axisReceiptPath: string;
   reason: string;
 };
 
@@ -64,11 +70,14 @@ function parseArgs() {
 
 function axisFor(controlSize: string | null): Axis {
   if (!controlSize || controlSize === DEFAULT_AXIS.controlSize) return DEFAULT_AXIS;
+  if (!CONTROL_SIZES.includes(controlSize as ControlSize)) {
+    throw new Error(`unknown control size '${controlSize}'; expected ${CONTROL_SIZES.join(", ")}`);
+  }
   return {
     id: `${DEFAULT_AXIS.theme}-${DEFAULT_AXIS.density}-${controlSize}`,
     theme: DEFAULT_AXIS.theme,
     density: DEFAULT_AXIS.density,
-    controlSize,
+    controlSize: controlSize as ControlSize,
   };
 }
 
@@ -104,8 +113,28 @@ function compare(a: Buffer, b: Buffer): { ratio: number; diff: Buffer } | { mism
   return { ratio: differing / (left.width * left.height), diff: PNG.sync.write(diff) };
 }
 
+/** Always produce reviewable diff evidence, including dimension changes. */
+function diffEvidence(a: Buffer, b: Buffer): Buffer {
+  const left = PNG.sync.read(a);
+  const right = PNG.sync.read(b);
+  const width = Math.max(left.width, right.width);
+  const height = Math.max(left.height, right.height);
+  const padded = (source: PNG): PNG => {
+    const target = new PNG({ width, height });
+    PNG.bitblt(source, target, 0, 0, source.width, source.height, 0, 0);
+    return target;
+  };
+  const leftPadded = padded(left);
+  const rightPadded = padded(right);
+  const diff = new PNG({ width, height });
+  pixelmatch(leftPadded.data, rightPadded.data, diff.data, width, height, { threshold: 0.1 });
+  return PNG.sync.write(diff);
+}
+
 const { refresh, reason, controlSize, slugs: only } = parseArgs();
 const axis = axisFor(controlSize);
+const runId = `${new Date().toISOString().replace(/[-:.]/g, "")}-${refresh ? "refresh" : "compare"}`;
+const runDir = path.join(repoRoot, OUT_DIR, runId);
 const slugs = (only ?? gpuiSlugs()).filter((s) => only || !(s in SKIPPED));
 const refreshCommand =
   `bun test/native-visual/run.ts --refresh --control-size=${axis.controlSize}` +
@@ -113,8 +142,8 @@ const refreshCommand =
   ` --reason='bootstrap or intentional refresh'`;
 
 mkdirSync(path.join(repoRoot, BASELINE_DIR), { recursive: true });
-rmSync(path.join(repoRoot, OUT_DIR), { recursive: true, force: true });
 mkdirSync(path.join(repoRoot, OUT_DIR), { recursive: true });
+mkdirSync(runDir, { recursive: true });
 
 console.log(
   `native visual gate: ${slugs.length} components, axis=${axis.id}` +
@@ -131,7 +160,7 @@ const refreshManifest: RefreshEntry[] = [];
 let consecutiveCaptureFailures = 0;
 
 for (const [index, slug] of slugs.entries()) {
-  const shot = path.join(repoRoot, OUT_DIR, `${slug}-${axis.id}.png`);
+  const shot = path.join(runDir, `${slug}-${axis.id}-after.png`);
   if (index > 0) await Bun.sleep(1000);
 
   process.stdout.write(`  → ${index + 1}/${slugs.length} ${slug}\n`);
@@ -168,11 +197,18 @@ for (const [index, slug] of slugs.entries()) {
   if (refresh) {
     let oldHash: string | null = null;
     let preserved: string | null = null;
+    let beforeEvidence: string | null = null;
+    let diffPath: string | null = null;
     if (existsSync(baseline)) {
       const previous = previousPath(slug, axis);
       copyFileSync(baseline, previous);
-      oldHash = sha256(readFileSync(previous));
+      const oldBytes = readFileSync(previous);
+      oldHash = sha256(oldBytes);
       preserved = previous;
+      beforeEvidence = path.join(runDir, `${slug}-${axis.id}-before.png`);
+      copyFileSync(previous, beforeEvidence);
+      diffPath = path.join(runDir, `${slug}-${axis.id}-diff.png`);
+      writeFileSync(diffPath, diffEvidence(shotBytes, oldBytes));
     }
     writeFileSync(baseline, shotBytes);
     refreshManifest.push({
@@ -183,8 +219,12 @@ for (const [index, slug] of slugs.entries()) {
       oldHash,
       newHash,
       previousPath: preserved,
+      beforePath: beforeEvidence,
+      afterPath: shot,
+      diffPath,
       baselinePath: baseline,
       capturePath: shot,
+      axisReceiptPath: capture.receiptPath,
       reason,
     });
     results.push({ slug, status: "ok" });
@@ -213,7 +253,7 @@ for (const [index, slug] of slugs.entries()) {
   }
 
   if (result.ratio > MAX_DIFF_RATIO) {
-    writeFileSync(path.join(repoRoot, OUT_DIR, `${slug}-${axis.id}-diff.png`), result.diff);
+    writeFileSync(path.join(runDir, `${slug}-${axis.id}-diff.png`), result.diff);
     results.push({
       slug,
       status: "failed",
@@ -228,7 +268,7 @@ for (const [index, slug] of slugs.entries()) {
 }
 
 if (refresh && refreshManifest.length > 0) {
-  const manifestPath = path.join(repoRoot, OUT_DIR, `refresh-manifest-${axis.id}.json`);
+  const manifestPath = path.join(runDir, `refresh-manifest-${axis.id}.json`);
   writeFileSync(
     manifestPath,
     `${JSON.stringify(
@@ -250,6 +290,6 @@ if (refresh && refreshManifest.length > 0) {
 const failed = results.filter((r) => r.status === "failed" || r.status === "missing");
 console.log(`\ncompared ${results.length} components, ${failed.length} failing`);
 if (failed.length > 0) {
-  console.log(`diffs in ${OUT_DIR}/`);
+  console.log(`evidence in ${path.relative(repoRoot, runDir)}/`);
   process.exit(1);
 }

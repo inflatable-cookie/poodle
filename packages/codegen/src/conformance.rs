@@ -71,8 +71,25 @@ pub struct ComponentInterface {
     pub states: Vec<StateDecl>,
     pub token_roles: Vec<TokenRoleDecl>,
     pub axes: Vec<String>,
+    pub capabilities: Vec<PortableCapability>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PortableCapability {
+    pub name: String,
     #[allow(dead_code)]
-    pub capabilities: Vec<serde_json::Value>,
+    pub required: bool,
+}
+
+#[derive(Debug, Deserialize)]
+struct PrimitiveCapabilityRoster {
+    schema: String,
+    capabilities: Vec<PrimitiveCapabilityRow>,
+}
+
+#[derive(Debug, Deserialize)]
+struct PrimitiveCapabilityRow {
+    id: String,
 }
 
 /// A named declaration (event or region).
@@ -165,26 +182,14 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
         .iter()
         .map(|p| (p.name.as_str(), p))
         .collect();
-    let regions: std::collections::HashSet<&str> = interface
-        .regions
-        .iter()
-        .map(|r| r.name.as_str())
-        .collect();
-    let parts: std::collections::HashSet<&str> = interface
-        .parts
-        .iter()
-        .map(|p| p.id.as_str())
-        .collect();
-    let states: std::collections::HashSet<&str> = interface
-        .states
-        .iter()
-        .map(|s| s.name.as_str())
-        .collect();
-    let events: std::collections::HashSet<&str> = interface
-        .events
-        .iter()
-        .map(|e| e.name.as_str())
-        .collect();
+    let regions: std::collections::HashSet<&str> =
+        interface.regions.iter().map(|r| r.name.as_str()).collect();
+    let parts: std::collections::HashSet<&str> =
+        interface.parts.iter().map(|p| p.id.as_str()).collect();
+    let states: std::collections::HashSet<&str> =
+        interface.states.iter().map(|s| s.name.as_str()).collect();
+    let events: std::collections::HashSet<&str> =
+        interface.events.iter().map(|e| e.name.as_str()).collect();
     let token_roles: std::collections::HashSet<&str> = interface
         .token_roles
         .iter()
@@ -265,7 +270,9 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
                     if !parts.contains(part.as_str()) {
                         findings.push(at(format!("expects unknown part '{part}'")));
                     }
-                    if let Some(expect_states) = expect.get("states").and_then(serde_json::Value::as_object) {
+                    if let Some(expect_states) =
+                        expect.get("states").and_then(serde_json::Value::as_object)
+                    {
                         for key in expect_states.keys() {
                             if !states.contains(key.as_str()) {
                                 findings.push(at(format!("expects unknown state '{key}'")));
@@ -337,7 +344,10 @@ fn validate_geometry_expectation(
         findings.push(at("geometry expectation must be an object".to_owned()));
         return;
     };
-    match geometry.get("tolerance").and_then(serde_json::Value::as_f64) {
+    match geometry
+        .get("tolerance")
+        .and_then(serde_json::Value::as_f64)
+    {
         Some(tolerance) if tolerance.is_finite() && tolerance >= 0.0 => {}
         _ => findings.push(at(
             "geometry tolerance must be an authored finite non-negative number".to_owned(),
@@ -359,7 +369,7 @@ fn validate_geometry_expectation(
     }
     if field_count == 0 {
         findings.push(at(
-            "geometry expectation needs at least one asserted field".to_owned(),
+            "geometry expectation needs at least one asserted field".to_owned()
         ));
     }
 }
@@ -386,7 +396,56 @@ pub fn load_interface(path: &Path) -> Result<ComponentInterface> {
             ),
         });
     }
+    let roster_path = path
+        .parent()
+        .unwrap_or_else(|| Path::new("."))
+        .join("primitive-capability-roster.json");
+    let roster_document = fs::read_to_string(&roster_path).map_err(|error| CodegenError::Read {
+        path: roster_path.clone(),
+        source: error,
+    })?;
+    let roster: PrimitiveCapabilityRoster =
+        serde_json::from_str(&roster_document).map_err(|error| CodegenError::Gate {
+            message: format!(
+                "primitive capability roster {} is not valid JSON: {error}",
+                roster_path.display()
+            ),
+        })?;
+    if roster.schema != "primitive-capability-roster.v1" {
+        return Err(CodegenError::Gate {
+            message: format!(
+                "primitive capability roster {} has schema '{}', expected primitive-capability-roster.v1",
+                roster_path.display(),
+                roster.schema
+            ),
+        });
+    }
+    validate_interface_capabilities(&interface, &roster, path)?;
     Ok(interface)
+}
+
+fn validate_interface_capabilities(
+    interface: &ComponentInterface,
+    roster: &PrimitiveCapabilityRoster,
+    interface_path: &Path,
+) -> Result<()> {
+    let known: std::collections::HashSet<&str> = roster
+        .capabilities
+        .iter()
+        .map(|row| row.id.as_str())
+        .collect();
+    for capability in &interface.capabilities {
+        if !known.contains(capability.name.as_str()) {
+            return Err(CodegenError::Gate {
+                message: format!(
+                    "conformance interface {} names unknown primitive capability '{}'",
+                    interface_path.display(),
+                    capability.name
+                ),
+            });
+        }
+    }
+    Ok(())
 }
 
 /// Loads and validates the case corpus JSON.
@@ -489,5 +548,34 @@ mod tests {
             findings,
             ["geometry tolerance must be an authored finite non-negative number"]
         );
+    }
+
+    #[test]
+    fn rust_loading_rejects_unknown_primitive_capability() {
+        let interface = ComponentInterface {
+            schema_version: 1,
+            id: "probe".to_owned(),
+            profile: "control".to_owned(),
+            props: Vec::new(),
+            events: Vec::new(),
+            regions: Vec::new(),
+            parts: Vec::new(),
+            states: Vec::new(),
+            token_roles: Vec::new(),
+            axes: Vec::new(),
+            capabilities: vec![PortableCapability {
+                name: "not-a-capability".to_owned(),
+                required: true,
+            }],
+        };
+        let roster = PrimitiveCapabilityRoster {
+            schema: "primitive-capability-roster.v1".to_owned(),
+            capabilities: vec![PrimitiveCapabilityRow {
+                id: "activate".to_owned(),
+            }],
+        };
+        let error = validate_interface_capabilities(&interface, &roster, Path::new("probe.json"))
+            .expect_err("unknown capability must fail Rust loading");
+        assert!(error.to_string().contains("not-a-capability"));
     }
 }

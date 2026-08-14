@@ -3,7 +3,7 @@
 Date: 2026-08-14
 Card: `docs/roadmaps/g14/002-primitive-substrate-certification.md`
 Depends on: g14.001 / PR #10
-Status: execution complete — awaiting orchestrator review
+Status: orchestrator accepted — pending merge
 
 ## Outcome
 
@@ -34,6 +34,11 @@ rows (10) keep channel ownership on cards 003–007:
 | `interaction.drag-drop`, `interaction.context` | g14.007 |
 | `overlay.intent` | g14.005 |
 | `input.value`, `input.editing` | g14.006 |
+
+Capability names are closed twice over the same generated roster: TypeScript
+authoring/serialization and Rust fixture loading. Evidence files also reject
+unknown capability IDs. The report unions each probe's executed observation
+names and fails an owned row when any `requiredObservations` entry is absent.
 
 ## Executed Matrix
 
@@ -69,10 +74,10 @@ passing rows). No parallel GPUI accessibility tree scheduled.
 
 | Surface | g14.001 | g14.002 |
 | --- | ---: | ---: |
-| Generic kernel | 2,947 | 5,051 |
+| Generic kernel | 2,947 | 5,390 |
 | Button pilot increment | 1,575 | 1,249 |
 | Button harness (inside pilot) | 1,052 | 756 |
-| GPUI capture repair | — | 356 |
+| GPUI capture repair | — | 417 |
 | Generated data (bytes) | 33,392 | 46,177 |
 | Replaced hand-written | 619 | 619 |
 
@@ -83,10 +88,12 @@ adapter + fixture path. One completion path
 
 ## GPUI Capture Repair
 
-- Preview accepts `--control-size` (canonical) with `--size` synonym.
+- Preview accepts `--control-size` (canonical) with `--size` synonym and emits
+  a checked `native-visual-axis-receipt.v1` for every capture.
 - Compare mode is read-only; missing baseline fails with the refresh command.
-- Refresh preserves `*.previous.png` and writes
-  `native-visual-refresh-manifest.v1` under `test/native-visual/out/`.
+- Every run keeps a timestamped evidence directory. Refresh preserves
+  `*.previous.png` plus before, after, diff, receipt, and
+  `native-visual-refresh-manifest.v1` paths under that directory.
 - README matches the implemented behaviour.
 
 ## Legacy Capability Tooling
@@ -99,11 +106,11 @@ detection. Execution authority is `primitive-capability-report.v1`.
 
 | Plant | Expected failure identity |
 | --- | --- |
-| Unknown component capability name | interface authoring / serialize |
+| Unknown component capability name | TypeScript authoring / serialization and Rust fixture loading |
 | Drop `interaction.on_activate` on probe fixture | `activate` / render-neutral / `node-activate-channel` |
 | Clear GPUI focus registry binding | `focus` / gpui / `backend-focus-registry` |
 | Break web observer channel projection | matching `surface.channels` / web probe |
-| Corrupt GPUI style interpretation on fixture | matching surface/layout probe field |
+| Remove a GPUI style/layout emission | matching `backend.<channel>` receipt field |
 
 Revert plants before merge review. Commands:
 
@@ -126,17 +133,25 @@ through the shared adapters (no copied harness path).
 - `effigy conformance:serialize` / `conformance:check`
 - `effigy conformance:test-web`
 - `cargo test --manifest-path packages/render/Cargo.toml primitive_probes::tests`
-- `effigy conformance:test-primitives-gpui` (prior windowed run; evidence retained)
+- `effigy conformance:test-primitives-gpui` (windowed backend receipts + focus/event path)
 - `effigy conformance:primitives-report` — 17/17 owned rows passing
 - `effigy conformance:cost`
 - focused `test/native-visual` compare/refresh + `--control-size=sm|lg`
   - compare missing baseline fails with refresh command (no write)
-  - refresh writes baseline + manifest; second refresh keeps `*.previous.png`
-  - sm and lg baselines differ (control-size live end to end)
+  - refresh writes before/after/diff + manifest; second refresh keeps `*.previous.png`
+  - non-default `lg` capture produced and passed a resolved-axis receipt
 - `effigy conformance:compare` — 20 cases × 3 active runtimes passing
+- `effigy ci:rust`
+- `effigy ci:native`
+- `effigy ci:web`
+- `effigy docs:check`
 - `git diff --check`
 
 Do not run Jetstream selectors.
+
+`ci:web` initially reproduced the known duplicate-Svelte `Snippet` identity
+errors in `AppHeaderCenterHarness.svelte`. The test-only harness now crosses
+that packed-install boundary explicitly; the full selector passes.
 
 ## Unresolved / Pressure
 
@@ -145,5 +160,3 @@ Do not run Jetstream selectors.
   implemented observation shape plus node vocabulary.
 - Stale GPUI baselines still need operator reclassify via explicit refresh;
   this card does not treat bulk refresh as proof of correctness.
-- `ci:web` may still hit the three pre-existing
-  `AppHeaderCenterHarness.svelte` Snippet identity errors from g14.001.

@@ -5,12 +5,14 @@
 </script>
 
 <!-- Renders AppHeader with idiomatic snippet syntax so the tests can assert
-     the exact region markup. Snippet props are only supplied when enabled. -->
+     the exact region markup. Snippet props are only supplied when enabled.
+     `never` crosses the duplicate-Svelte type identity created by the packed
+     install smoke; snippets have no runtime conversion. -->
 <AppHeader
   title="Finch"
-  center={center ? centerContent : undefined}
-  actions={actions ? actionsContent : undefined}
-  utility={utility ? utilityContent : undefined}
+  center={center ? (centerContent as never) : undefined}
+  actions={actions ? (actionsContent as never) : undefined}
+  utility={utility ? (utilityContent as never) : undefined}
 >
 </AppHeader>
 

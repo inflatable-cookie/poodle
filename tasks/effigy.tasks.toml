@@ -225,8 +225,9 @@
 # the GPUI preview screenshots its own window, so it needs a live macOS window
 # server, same constraint as check:jetstream.
 "test:native-visual" = "bun test/native-visual/run.ts"
-# Refresh preserves the previous baseline and writes a machine-readable
-# manifest under test/native-visual/out/. Comparison never writes references.
+# Refresh preserves before/after/diff evidence plus a machine-readable manifest
+# in a timestamped test/native-visual/out/ run directory. Comparison never
+# writes references.
 "native-visual:refresh" = "bun test/native-visual/run.ts --refresh"
 "native-visual:update" = "bun test/native-visual/run.ts --refresh"
 

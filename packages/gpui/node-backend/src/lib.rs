@@ -21,17 +21,17 @@
 //! (`poodle-render::color`); nodes carry final values.
 
 use std::cell::RefCell;
-use std::sync::Arc;
 use std::rc::Rc;
-use std::sync::atomic::{AtomicU64, Ordering, AtomicUsize};
+use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 
 use gpui::{
-    deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, svg, AnyElement, App,
-    AppContext, ClickEvent, CursorStyle, Div, ElementId, Hsla, InteractiveElement, IntoElement,
-    KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent, ParentElement,
-    SharedString, Stateful, StatefulInteractiveElement,
-    StyleRefinement, Styled, StyledImage, Window,
+    deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, svg, AnyElement,
+    App, AppContext, ClickEvent, CursorStyle, Div, ElementId, Hsla, InteractiveElement,
+    IntoElement, KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent,
+    ParentElement, SharedString, Stateful, StatefulInteractiveElement, StyleRefinement, Styled,
+    StyledImage, Window,
 };
 use poodle_node::{
     AnimEasing, AnimLoop, AnimProperty, ColorValue, CrossAxisAlignment, CursorHint, DropEdge,
@@ -48,6 +48,33 @@ use style::{
     apply_cursor, apply_layout, apply_paint, apply_patch, apply_position, apply_state_patches,
     apply_text,
 };
+
+thread_local! {
+    static PROBE_ACTIVE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    static PROBE_CHANNELS: RefCell<std::collections::BTreeSet<&'static str>> =
+        RefCell::new(std::collections::BTreeSet::new());
+}
+
+/// Begin a bounded receipt for the real backend channel walk.
+pub fn begin_probe_capture() {
+    PROBE_CHANNELS.with(|channels| channels.borrow_mut().clear());
+    PROBE_ACTIVE.with(|active| active.set(true));
+}
+
+/// Finish the current receipt. Markers sit inside the mapping branches, so a
+/// removed backend emission also removes its evidence.
+pub fn take_probe_capture() -> Vec<&'static str> {
+    PROBE_ACTIVE.with(|active| active.set(false));
+    PROBE_CHANNELS.with(|channels| channels.borrow().iter().copied().collect())
+}
+
+pub(crate) fn record_probe_channel(channel: &'static str) {
+    if PROBE_ACTIVE.with(|active| active.get()) {
+        PROBE_CHANNELS.with(|channels| {
+            channels.borrow_mut().insert(channel);
+        });
+    }
+}
 
 /// sRGB passthrough — the exact conversion the old GPUI tier performed.
 /// gpui's `Rgba` channels are sRGB; the round trip through `Hsla` is what
@@ -116,9 +143,25 @@ fn element_id(node: &Node) -> ElementId {
 
 /// Interpret one node (and its subtree) as a GPUI element.
 pub fn to_gpui(node: &Node) -> AnyElement {
+    if !node.roles.is_empty() {
+        record_probe_channel("semantic.token-roles.received");
+    }
+    if node.a11y.role.is_some() && node.a11y.label.is_some() {
+        record_probe_channel("accessibility.projection.received");
+    }
+    if node.a11y.toggled.is_some() {
+        record_probe_channel("toggle.received");
+    }
+    if node.interaction.disabled {
+        record_probe_channel("semantic.disabled.received");
+    }
     match &node.kind {
-        NodeKind::Container => build_box(node, div()),
+        NodeKind::Container => {
+            record_probe_channel("structure.identity.container");
+            build_box(node, div())
+        }
         NodeKind::Text { content } => {
+            record_probe_channel("content.text-icon.text");
             // A text node carrying a caret is a field's value: the component
             // draws it as text so it stays a single node in the accessibility
             // tree (an input nested inside an input is one control announced
@@ -179,6 +222,7 @@ pub fn to_gpui(node: &Node) -> AnyElement {
         // children (affixes, icons, count) and the backend avoids duplicating
         // the value. Caret/selection/IME remain a backend gap.
         NodeKind::Button { label } => {
+            record_probe_channel("structure.identity.button");
             let el = if label.is_empty() {
                 div()
             } else if matches!(
@@ -200,6 +244,7 @@ pub fn to_gpui(node: &Node) -> AnyElement {
             build_box(node, el)
         }
         NodeKind::Input { value, placeholder } => {
+            record_probe_channel("structure.identity.input");
             // A childless input renders its own value; composite inputs supply
             // styled children (affixes, count) and the backend must not
             // duplicate the value underneath them.
@@ -231,7 +276,9 @@ pub fn to_gpui(node: &Node) -> AnyElement {
                     value.clone(),
                     text_color,
                     node.caret.map(|c| c.selection),
-                    node.caret.map(|c| color(c.caret_color)).unwrap_or(text_color),
+                    node.caret
+                        .map(|c| color(c.caret_color))
+                        .unwrap_or(text_color),
                     node.caret
                         .map(|c| color(c.selection_color))
                         .unwrap_or(text_color),
@@ -243,6 +290,7 @@ pub fn to_gpui(node: &Node) -> AnyElement {
             build_box(node, el)
         }
         NodeKind::Progress { fraction } => {
+            record_probe_channel("structure.identity.progress");
             // The node styles the track; the backend fills `fraction` of it.
             // Fill colour comes from `text_color` when the component set one —
             // the vocabulary carries no dedicated fill channel (Jetstream's
@@ -262,6 +310,7 @@ pub fn to_gpui(node: &Node) -> AnyElement {
             build_box(node, div().child(fill))
         }
         NodeKind::Icon { name, size } => {
+            record_probe_channel("content.text-icon.icon");
             // Same path convention as the old tier's Icon: the app owns the
             // asset source; the name is the contract. svg() renders tinted by
             // `text_color`, which the style walk supplies.
@@ -272,6 +321,7 @@ pub fn to_gpui(node: &Node) -> AnyElement {
             build_svg_leaf(node, el)
         }
         NodeKind::Image { source } => {
+            record_probe_channel("structure.identity.image");
             // Vocabulary: fits by covering the box (object-fit: cover).
             let el = img(source.clone()).object_fit(gpui::ObjectFit::Cover);
             build_leaf(node, el)
@@ -328,6 +378,7 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
     let Some(anim) = &node.style.animation else {
         return el.into_any_element();
     };
+    record_probe_channel("surface.animation.scheduled");
     if sample_property(anim, AnimProperty::Rotate, 0.0).is_none() {
         return maybe_animated(el, node);
     }
@@ -552,6 +603,7 @@ where
     let Some(anim) = &node.style.animation else {
         return el.into_any_element();
     };
+    record_probe_channel("surface.animation.scheduled");
     let anim = anim.clone();
     let id = element_id(node);
     el.with_animation(id, gpui_animation(&anim), move |el, t| {
