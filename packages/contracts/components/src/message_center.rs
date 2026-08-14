@@ -2,7 +2,7 @@ use crate::{ControlDensity, ControlSize, OverlayPlacement, SemanticControlSizeRo
 
 /// Optional progress presentation for a live item row.
 ///
-/// A pure projection of host-owned values; the component never animates,
+/// A pure projection of host-owned values; the component never advances,
 /// estimates, or mutates it. `max` defaults to `100`.
 #[derive(Clone, Debug, PartialEq)]
 pub struct MessageCenterItemProgress {
@@ -125,8 +125,7 @@ impl MessageCenterItem {
     }
 
     /// A live activity row: retained in place, not selectable, not removable,
-    /// and not part of the unread/read cycle. Hosts pair this with
-    /// `with_read(true)` so live rows do not inflate the unread count.
+    /// and not part of the unread/read cycle.
     pub fn as_live_row(mut self) -> Self {
         self.read = true;
         self.selectable = false;

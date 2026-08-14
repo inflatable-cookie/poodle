@@ -1,9 +1,7 @@
 use crate::compat::js_message_center;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{
-    MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec, StatusTone,
-};
+use poodle_specs::{MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec, StatusTone};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let populated = MessageCenterSpec::new(vec![

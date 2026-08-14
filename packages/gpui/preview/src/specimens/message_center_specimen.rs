@@ -5,8 +5,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_render::{message_center, MessageCenterHandlers};
 use poodle_specs::{
-    MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec, OverlayPlacement,
-    StatusTone,
+    MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec, OverlayPlacement, StatusTone,
 };
 
 const IDS: &[&str] = &["render", "mention", "maintenance"];

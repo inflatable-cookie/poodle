@@ -104,7 +104,7 @@ type MessageCenterItem = {
 - `tone` colors the leading indicator; it does not change announcement behavior.
 - Supplying `icon` replaces the default read/unread dot.
 - `progress` renders a compact `Progress` bar under the copy. It is a pure
-  projection of host-owned values: the component never animates, estimates,
+  projection of host-owned values: the component never advances, estimates,
   or mutates it. `max` defaults to `100`. When `indeterminate` is true the
   bar animates without a value; otherwise `value` drives the fill.
 - `selectable`, `removable`, and `readControl` default to `true`. Setting one

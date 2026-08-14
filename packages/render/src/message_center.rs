@@ -244,7 +244,12 @@ fn message_row(
         }
     }
 
-    let content = message_content(item, spec, theme, handlers.on_item_select.clone().filter(|_| item.selectable));
+    let content = message_content(
+        item,
+        spec,
+        theme,
+        handlers.on_item_select.clone().filter(|_| item.selectable),
+    );
     row = row.child(content);
 
     let mut actions = Node::container();
@@ -562,21 +567,11 @@ mod tests {
             .with_open(true)
         };
 
-        let early = message_center(
-            &spec_at(20.0),
-            &theme(),
-            MessageCenterHandlers::default(),
-        );
-        let late = message_center(
-            &spec_at(80.0),
-            &theme(),
-            MessageCenterHandlers::default(),
-        );
+        let early = message_center(&spec_at(20.0), &theme(), MessageCenterHandlers::default());
+        let late = message_center(&spec_at(80.0), &theme(), MessageCenterHandlers::default());
 
         let fraction = |node: &Node| {
-            node.children[1].children[0].children[0].children[1].children[0]
-                .children[0]
-                .children[1]
+            node.children[1].children[0].children[0].children[1].children[0].children[0].children[1]
                 .children
                 .iter()
                 .find_map(|child| match child.kind {
