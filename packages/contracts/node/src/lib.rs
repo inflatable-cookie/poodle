@@ -550,7 +550,11 @@ pub struct Interaction {
     /// context menu.
     pub on_context: Option<Arc<dyn Fn(NodePoint) + Send + Sync>>,
     /// Navigation and command keys, while this node holds focus.
-    pub on_key: Option<Arc<dyn Fn(NodeKey, NodeModifiers) + Send + Sync>>,
+    ///
+    /// Returning an element id asks the backend to move focus there. The
+    /// component chooses the semantic destination; the backend owns the
+    /// actual platform focus operation.
+    pub on_key: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>>,
     /// Marks this node as a drag source carrying an opaque payload id. The
     /// component chooses the id; the backend only carries it back.
     pub drag_payload: Option<String>,

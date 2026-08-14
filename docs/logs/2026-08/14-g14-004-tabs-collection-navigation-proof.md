@@ -3,7 +3,7 @@
 Date: 2026-08-14
 Card: `docs/roadmaps/g14/004-tabs-collection-navigation-proof.md`
 Depends on: g14.003 / PR #13
-Status: ready for orchestrator review
+Status: accepted for merge
 
 ## Outcome
 
@@ -31,6 +31,13 @@ one structured item collection + stable semantic keys
 - Svelte and React adapters drive real focus, click, and keyboard events.
 - GPUI renders tablist/tab/tabpanel roles, controlled value changes, semantic
   relationships, roving focus, and automatic/manual keyboard navigation.
+- Native instance ids scope every list, trigger, panel, and relationship id.
+  `Tabs::with_id` now reaches the renderer instead of being discarded, so
+  equal tab values in separate tabsets cannot share GPUI focus handles.
+- `NodeInteraction::on_key` can return a semantic focus target. The GPUI
+  backend performs the platform focus move and projects roving `tab_index`
+  metadata into GPUI tab-stop state; Tabs does not require a backend special
+  case.
 - The GPUI conformance binary writes `gpui-tabs.json` beside the Button and
   RangeSlider reports. Generic runners discover repeated parts from interface
   metadata; there is no Tabs dispatch branch or alternate item list.
@@ -47,6 +54,12 @@ one structured item collection + stable semantic keys
   the default chrome role's resolved size (`sm`).
 - The expanded identity comparison exposed missing native orientation on the
   embedded RangeSlider controls; that pre-existing gap is closed.
+- Review found that the GPUI driver completed arrow navigation itself after
+  dispatching the key. It now only rebuilds the controlled tree; the backend
+  must execute the focus request for the observation to pass.
+- Review also found global native trigger ids (`tabs:<value>`). Stable instance
+  scoping now isolates focus caches and accessibility relationships, with a
+  renderer regression covering two tabsets that reuse the same values.
 
 ## Geometry and relationships
 
@@ -78,6 +91,7 @@ target. `conformance:compare` named the runtime, case, repeated part, and
 | Command | Result |
 | --- | --- |
 | `effigy conformance:typecheck` | pass |
+| `effigy check:gpui` | pass (184 renderer + 11 backend tests) |
 | `effigy conformance:test-web` | pass (4 files) |
 | `cargo check --manifest-path packages/gpui/preview/Cargo.toml --bins` | pass |
 | `effigy conformance:test-gpui-windowed` | pass (20 Button + 10 RangeSlider + 9 Tabs) |

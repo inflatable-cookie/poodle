@@ -26,6 +26,7 @@ struct CaseHost {
     focused: Arc<Mutex<String>>,
     trace: Arc<Mutex<Vec<Value>>>,
     panel_text: String,
+    instance_id: String,
     theme: GpuiThemeProvider,
 }
 
@@ -55,6 +56,7 @@ impl CaseHost {
                 on_change: Some(on_change),
                 on_focus: Some(on_focus),
                 focused_value: Some(focused),
+                instance_id: Some(self.instance_id.clone()),
                 ..TabsHandlers::default()
             },
             panel,
@@ -67,10 +69,10 @@ fn part_value(part: &str) -> Option<&str> {
     part.strip_prefix("trigger:")
 }
 
-fn element_id(part: &str) -> String {
+fn element_id(instance_id: &str, part: &str) -> String {
     part_value(part)
-        .map(|value| format!("tabs:{value}"))
-        .unwrap_or_else(|| "tabs-list".to_owned())
+        .map(|value| format!("tabs:{instance_id}:tab:{value}"))
+        .unwrap_or_else(|| format!("tabs:{instance_id}:list"))
 }
 
 fn observe_case(host: &CaseHost, iface: &InterfaceDoc) -> Value {
@@ -98,13 +100,25 @@ async fn rebuild_and_focus(cx: &mut AsyncWindowContext, host: &Arc<Mutex<CaseHos
         .update(|window, _cx| {
             let mut host = host.lock().expect("host lock");
             host.rebuild();
-            let target = format!("tabs:{}", host.focused.lock().expect("focus lock"));
+            let target = format!(
+                "tabs:{}:tab:{}",
+                host.instance_id,
+                host.focused.lock().expect("focus lock")
+            );
             window.refresh();
             target
         })
         .unwrap_or_default();
     wait_for_focus_handle(cx, &target).await;
     focus_element(cx, &target).await;
+}
+
+fn rebuild(cx: &mut AsyncWindowContext, host: &Arc<Mutex<CaseHost>>) {
+    cx.update(|window, _cx| {
+        host.lock().expect("host lock").rebuild();
+        window.refresh();
+    })
+    .ok();
 }
 
 pub async fn drive_tabs_cases(
@@ -144,11 +158,12 @@ pub async fn drive_tabs_cases(
                 .and_then(Value::as_str)
                 .unwrap_or_default()
                 .to_owned(),
+            instance_id: format!("conformance-{case_id}"),
             theme: GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE),
         }));
         host.lock().expect("host lock").rebuild();
         mount_node(cx, Arc::clone(&node));
-        let initial_id = format!("tabs:{initial}");
+        let initial_id = format!("tabs:conformance-{case_id}:tab:{initial}");
         blur_element_focus(cx, &initial_id).await;
         // A prior case can briefly repaint the new semantic ids while its old
         // focus handle is still active. Reset the host's semantic focus after
@@ -173,7 +188,8 @@ pub async fn drive_tabs_cases(
                 "action" => {
                     let name = step.get("name").and_then(Value::as_str).unwrap_or("");
                     let part = step.get("part").and_then(Value::as_str).unwrap_or("");
-                    let id = element_id(part);
+                    let instance_id = host.lock().expect("host lock").instance_id.clone();
+                    let id = element_id(&instance_id, part);
                     match name {
                         "focus" => {
                             if let Some(value) = part_value(part) {
@@ -193,7 +209,7 @@ pub async fn drive_tabs_cases(
                             });
                             keyboard_activate(cx, &id).await;
                             if !disabled {
-                                rebuild_and_focus(cx, &host).await;
+                                rebuild(cx, &host);
                             }
                         }
                         "key" => {
@@ -203,7 +219,7 @@ pub async fn drive_tabs_cases(
                             } else if let Some(code) = keycode(key) {
                                 keyboard_key(cx, &id, code).await;
                             }
-                            rebuild_and_focus(cx, &host).await;
+                            rebuild(cx, &host);
                         }
                         _ => {}
                     }

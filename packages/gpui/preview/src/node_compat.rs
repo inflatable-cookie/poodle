@@ -3762,6 +3762,7 @@ impl IntoElement for TextLink {
 pub(crate) struct Tabs {
     spec: TabsSpec,
     theme: GpuiThemeProvider,
+    id: Option<String>,
     content: Vec<(String, gpui::AnyElement)>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_close: Option<Arc<dyn Fn(&str) + Send + Sync>>,
@@ -3772,13 +3773,15 @@ impl Tabs {
         Self {
             spec,
             theme: theme.clone(),
+            id: None,
             content: Vec::new(),
             on_change: None,
             on_close: None,
         }
     }
 
-    pub(crate) fn with_id(self, _id: impl Into<String>) -> Self {
+    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.id = Some(id.into());
         self
     }
 
@@ -3810,7 +3813,29 @@ impl Tabs {
         GpuiThemeProvider,
         Vec<(String, gpui::AnyElement)>,
     ) {
-        let node = poodle_render::tabs(&self.spec, &self.theme, self.on_change, self.on_close);
+        let focused_value = self.id.as_ref().and_then(|scope| {
+            self.spec
+                .tabs
+                .iter()
+                .find(|tab| {
+                    poodle_gpui_node_backend::focus_state_for(&format!(
+                        "tabs:{scope}:tab:{}",
+                        tab.value
+                    )) == Some(true)
+                })
+                .map(|tab| tab.value.clone())
+        });
+        let node = poodle_render::tabs_with_handlers(
+            &self.spec,
+            &self.theme,
+            poodle_render::TabsHandlers {
+                on_change: self.on_change,
+                on_close: self.on_close,
+                focused_value,
+                instance_id: self.id,
+                ..poodle_render::TabsHandlers::default()
+            },
+        );
         (node, self.spec, self.theme, self.content)
     }
 }

@@ -233,6 +233,7 @@ fn projected_tabs_handlers(
     close_state_key: Option<String>,
 ) -> TabsHandlers {
     let events = Arc::clone(&state.node_events);
+    let instance_id = state_key.clone();
     let on_change = Arc::new(move |value: &str| {
         events.lock().unwrap().push(NodeSpecimenEvent::SetText {
             key: state_key.clone(),
@@ -254,6 +255,7 @@ fn projected_tabs_handlers(
     TabsHandlers {
         on_change: Some(on_change),
         on_close,
+        instance_id: Some(instance_id),
         ..TabsHandlers::default()
     }
 }

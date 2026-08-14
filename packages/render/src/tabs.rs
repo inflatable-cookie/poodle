@@ -33,7 +33,34 @@ pub struct TabsHandlers {
     pub on_close: Option<TabHandler>,
     pub on_focus: Option<TabHandler>,
     pub focused_value: Option<String>,
+    /// Stable native instance scope. Semantic ids remain readable, but two
+    /// tabsets with the same values must never share backend focus handles.
+    pub instance_id: Option<String>,
     pub has_panel: bool,
+}
+
+fn tab_list_id(handlers: &TabsHandlers) -> String {
+    handlers
+        .instance_id
+        .as_ref()
+        .map(|scope| format!("tabs:{scope}:list"))
+        .unwrap_or_else(|| "tabs-list".to_owned())
+}
+
+fn tab_id(handlers: &TabsHandlers, value: &str) -> String {
+    handlers
+        .instance_id
+        .as_ref()
+        .map(|scope| format!("tabs:{scope}:tab:{value}"))
+        .unwrap_or_else(|| format!("tabs:{value}"))
+}
+
+fn tab_panel_id(handlers: &TabsHandlers, value: &str) -> String {
+    handlers
+        .instance_id
+        .as_ref()
+        .map(|scope| format!("tabs:{scope}:panel:{value}"))
+        .unwrap_or_else(|| format!("tabs-panel:{value}"))
 }
 
 fn rounded_all(node: &mut Node, r: f32) {
@@ -175,8 +202,14 @@ fn build_close_button(theme: &dyn ThemeProvider, tab_label: &str) -> Node {
 }
 
 /// Transient reorder-drag visuals: source dims, target rings.
-fn apply_drag_state(node: &mut Node, tab_value: &str, spec: &TabsSpec, theme: &dyn ThemeProvider) {
-    node.id = Some(format!("tabs:{tab_value}"));
+fn apply_drag_state(
+    node: &mut Node,
+    tab_value: &str,
+    spec: &TabsSpec,
+    handlers: &TabsHandlers,
+    theme: &dyn ThemeProvider,
+) {
+    node.id = Some(tab_id(handlers, tab_value));
     if spec.is_drag_value(tab_value) {
         node.style.descriptor.opacity = 0.4;
     }
@@ -255,11 +288,13 @@ pub fn tabs_with_panel(
     let Some(value) = spec.current_value() else {
         return tabs_with_handlers(spec, theme, handlers);
     };
+    let panel_id = tab_panel_id(&handlers, value);
+    let trigger_id = tab_id(&handlers, value);
     let mut root = tabs_with_handlers(spec, theme, handlers);
     let mut panel = panel;
-    panel.id = Some(format!("tabs-panel:{value}"));
+    panel.id = Some(panel_id);
     panel.a11y.role = Some(NodeRole::TabPanel);
-    panel.a11y.labelled_by = Some(format!("tabs:{value}"));
+    panel.a11y.labelled_by = Some(trigger_id);
     panel.interaction.focusable = true;
     panel.a11y.tab_index = Some(0);
     root.children.push(panel);
@@ -317,7 +352,7 @@ fn wire_collection_semantics(
         }
     }
     if handlers.has_panel {
-        node.a11y.controls = Some(format!("tabs-panel:{}", tab.value));
+        node.a11y.controls = Some(tab_panel_id(handlers, &tab.value));
     }
     if tab.is_disabled {
         return;
@@ -339,7 +374,7 @@ fn wire_collection_semantics(
     };
     let orientation = spec.orientation;
     let on_change = handlers.on_change.clone();
-    let on_focus = handlers.on_focus.clone();
+    let instance_id = handlers.instance_id.clone();
     node.interaction.on_key = Some(Arc::new(move |key, _modifiers| {
         let direction = match (orientation, key) {
             (Orientation::Horizontal, NodeKey::ArrowRight)
@@ -355,7 +390,7 @@ fn wire_collection_semantics(
             _ => None,
         };
         let Some(direction) = direction else {
-            return;
+            return None;
         };
         let context = poodle_headless::tabs::TabsContext {
             items: items.clone(),
@@ -371,11 +406,17 @@ fn wire_collection_semantics(
                 from_index: Some(index),
             },
         );
+        let mut focus_target = None;
         for effect in effects {
             match effect {
                 poodle_headless::tabs::TabsEffect::FocusTab { index } => {
-                    if let (Some(handler), Some(item)) = (on_focus.as_ref(), items.get(index)) {
-                        handler(&item.value);
+                    if let Some(item) = items.get(index) {
+                        focus_target = Some(
+                            instance_id
+                                .as_ref()
+                                .map(|scope| format!("tabs:{scope}:tab:{}", item.value))
+                                .unwrap_or_else(|| format!("tabs:{}", item.value)),
+                        );
                     }
                 }
                 poodle_headless::tabs::TabsEffect::EmitValueChange { value } => {
@@ -386,6 +427,7 @@ fn wire_collection_semantics(
                 _ => {}
             }
         }
+        focus_target
     }));
 }
 
@@ -412,7 +454,7 @@ fn render_card(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandle
     let solid = spec.active_fill == ActiveFill::Solid;
 
     let mut tab_bar = Node::container();
-    tab_bar.id = Some("tabs-list".to_owned());
+    tab_bar.id = Some(tab_list_id(handlers));
     tab_bar.a11y.role = Some(NodeRole::TabList);
     tab_bar.a11y.label = spec.aria_label.clone();
     tab_bar.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
@@ -500,7 +542,7 @@ fn render_card(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandle
             tab_el = tab_el.child(close);
         }
 
-        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, theme);
+        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, theme);
         wire_select(
             &mut tab_el,
             is_disabled,
@@ -533,7 +575,7 @@ fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandle
     let selected = spec.current_value().map(|s| s.to_string());
 
     let mut container = Node::container();
-    container.id = Some("tabs-list".to_owned());
+    container.id = Some(tab_list_id(handlers));
     container.a11y.role = Some(NodeRole::TabList);
     container.a11y.label = spec.aria_label.clone();
     container.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
@@ -586,7 +628,7 @@ fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandle
         // Pill is always horizontal.
         let mut tab_el = tab_el.child(build_tab_label(tab, theme, text_color, font_size, false));
 
-        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, theme);
+        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, theme);
         wire_select(
             &mut tab_el,
             is_disabled,
@@ -621,7 +663,7 @@ fn render_block(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandl
     let vertical = spec.is_vertical();
 
     let mut tab_bar = Node::container();
-    tab_bar.id = Some("tabs-list".to_owned());
+    tab_bar.id = Some(tab_list_id(handlers));
     tab_bar.a11y.role = Some(NodeRole::TabList);
     tab_bar.a11y.label = spec.aria_label.clone();
     tab_bar.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
@@ -690,7 +732,7 @@ fn render_block(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandl
         tab_el.interaction.focusable = true;
         let mut tab_el = tab_el.child(build_tab_label(tab, theme, text_color, font_size, vertical));
 
-        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, theme);
+        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, theme);
         wire_select(
             &mut tab_el,
             is_disabled,
@@ -961,5 +1003,76 @@ mod tests {
         let inactive = tab_of(&root, "b");
         assert_eq!(inactive.style.border_bottom_width, Some(rem_to_px(0.125)));
         assert_eq!(inactive.style.border_color_bottom, Some(TRANSPARENT));
+    }
+
+    #[test]
+    fn instance_scope_isolates_ids_relationships_and_focus_requests() {
+        let theme = theme();
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B"),
+        ])
+        .with_activation_mode(TabActivationMode::Manual)
+        .with_value("a");
+        let focused = Arc::new(Mutex::new(Vec::new()));
+        let on_focus: TabHandler = {
+            let focused = Arc::clone(&focused);
+            Arc::new(move |value| focused.lock().unwrap().push(value.to_owned()))
+        };
+        let root = tabs_with_panel(
+            &spec,
+            &theme,
+            TabsHandlers {
+                on_focus: Some(on_focus),
+                instance_id: Some("first".to_owned()),
+                ..TabsHandlers::default()
+            },
+            Node::text("Panel"),
+        );
+
+        let first = root
+            .find(&|node| node.id.as_deref() == Some("tabs:first:tab:a"))
+            .expect("scoped trigger exists");
+        assert_eq!(first.a11y.controls.as_deref(), Some("tabs:first:panel:a"));
+        assert_eq!(
+            first.interaction.on_key.as_ref().expect("key handler")(
+                NodeKey::ArrowRight,
+                poodle_node::NodeModifiers::default(),
+            ),
+            Some("tabs:first:tab:b".to_owned())
+        );
+        assert!(
+            focused.lock().unwrap().is_empty(),
+            "focus notification belongs to the backend focus event"
+        );
+        let focus_listener = root
+            .find(&|node| node.id.as_deref() == Some("tabs:first:tab:b"))
+            .expect("focus target exists")
+            .interaction
+            .on_focus_change
+            .as_ref()
+            .expect("focus listener");
+        focus_listener(true);
+        assert_eq!(*focused.lock().unwrap(), vec!["b"]);
+
+        let panel = root
+            .find(&|node| node.id.as_deref() == Some("tabs:first:panel:a"))
+            .expect("scoped panel exists");
+        assert_eq!(panel.a11y.labelled_by.as_deref(), Some("tabs:first:tab:a"));
+
+        let second = tabs_with_handlers(
+            &spec,
+            &theme,
+            TabsHandlers {
+                instance_id: Some("second".to_owned()),
+                ..TabsHandlers::default()
+            },
+        );
+        assert!(second
+            .find(&|node| node.id.as_deref() == Some("tabs:second:tab:a"))
+            .is_some());
+        assert!(second
+            .find(&|node| node.id.as_deref() == Some("tabs:first:tab:a"))
+            .is_none());
     }
 }

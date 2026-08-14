@@ -205,6 +205,10 @@ collections:
 - **Execution** — Svelte / React / GPUI run controlled selection, disabled
   items, horizontal/vertical arrows, wrap, Home/End, automatic/manual
   activation, focus, relationships, events, token roles, and bounded geometry.
+- **Native focus boundary** — stable per-instance ids isolate GPUI focus
+  handles and relationships; renderer key effects return semantic focus
+  targets, GPUI executes them, and roving `tab_index` reaches real GPUI tab
+  stops. The conformance driver no longer completes focus after key dispatch.
 - **Generic vocabulary** — collection prop fields, repeated parts, keyed web
   resolution, native id templates, selected/tabbable/orientation/controls/
   labelled-by observations. The runners contain no Tabs component branch or

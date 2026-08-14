@@ -267,7 +267,7 @@ pub fn range_slider(
                         | NodeKey::ArrowDown
                         | NodeKey::ArrowRight
                         | NodeKey::ArrowUp => current + direction * step,
-                        _ => return,
+                        _ => return None,
                     };
                     let context = RangeSliderContext {
                         value: live,
@@ -305,6 +305,7 @@ pub fn range_slider(
                             }
                         }
                     }
+                    None
                 }));
             };
 
