@@ -299,16 +299,15 @@ export function ModelCatalogueEditor({
                         {leading({ item })}
                       </span>
                     ) : null}
-                    <p className="poodle-model-catalogue-editor__label">{item.label}</p>
-                    {item.badges.map((badge) => (
-                      <Pill key={badge.label} tone={badge.tone ?? "neutral"} appearance="subtle">
-                        {badge.label}
-                      </Pill>
-                    ))}
+                    <p className="poodle-model-catalogue-editor__label">
+                      {item.label}
+                      {item.providerLabel ? (
+                        <span className="poodle-model-catalogue-editor__provider">
+                          {` ${item.providerLabel}`}
+                        </span>
+                      ) : null}
+                    </p>
                   </div>
-                  {item.providerLabel ? (
-                    <p className="poodle-model-catalogue-editor__provider">{item.providerLabel}</p>
-                  ) : null}
                   {item.description ? (
                     <p className="poodle-model-catalogue-editor__description">{item.description}</p>
                   ) : null}
@@ -318,6 +317,11 @@ export function ModelCatalogueEditor({
                 </div>
 
                 <div className="poodle-model-catalogue-editor__utilities">
+                  {item.badges.map((badge) => (
+                    <Pill key={badge.label} tone={badge.tone ?? "neutral"} appearance="subtle">
+                      {badge.label}
+                    </Pill>
+                  ))}
                   {onInfo ? (
                     <IconButton
                       icon="info"
@@ -376,11 +380,15 @@ export function ModelCatalogueEditor({
                     >
                       <div className="poodle-model-catalogue-editor__identity">
                         <div className="poodle-model-catalogue-editor__label-row">
-                          <p className="poodle-model-catalogue-editor__label">{item.label}</p>
+                          <p className="poodle-model-catalogue-editor__label">
+                            {item.label}
+                            {item.providerLabel ? (
+                              <span className="poodle-model-catalogue-editor__provider">
+                                {` ${item.providerLabel}`}
+                              </span>
+                            ) : null}
+                          </p>
                         </div>
-                        {item.providerLabel ? (
-                          <p className="poodle-model-catalogue-editor__provider">{item.providerLabel}</p>
-                        ) : null}
                       </div>
                       <div className="poodle-model-catalogue-editor__utilities">
                         <IconButton

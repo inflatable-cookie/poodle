@@ -28,9 +28,8 @@ Governing spec: `../../specs/067-model-connection-management.md`
       │       └── [Radio cards] <div role="radiogroup">
       │           └── [Option] <button role="radio"> *
       │               ├── [Leading snippet]
-      │               ├── [Copy]
-      │               ├── [Badges]
-      │               └── [Availability]
+      │               ├── [Provider + route copy]
+      │               └── [Compact availability]
       └── [Footer snippet]
 ```
 
@@ -40,7 +39,7 @@ Governing spec: `../../specs/067-model-connection-management.md`
 | Toolbar | yes | search field | control height, inline gap |
 | Groups | ready only | host-ordered option groups | stack gap |
 | Option | per visible option | exact route choice | surface, border, radius, focus |
-| Leading | no | host-rendered provider mark | icon size, tint surface |
+| Leading | no | host-rendered provider mark, replaced by the selected check | icon size, tint surface |
 | Availability | yes | text plus status indicator | status colour, secondary text |
 | Footer | no | host actions or guidance | separator, stack gap |
 
@@ -78,10 +77,10 @@ type ModelConnectionOption = {
   description: string | null;
   group: string;
   keywords: string[];
-  badges: { label: string; tone?: PillTone }[];
   availability: ModelConnectionAvailability;
   availabilityLabel: string;
   isDisabled: boolean;
+  requiresConfiguration: boolean;
 };
 ```
 
@@ -108,7 +107,7 @@ keywords. The host controls ranking and source order by ordering `options`.
 | empty | `state="empty"` or no source options | empty catalogue posture |
 | no results | non-empty query has no matches | no-results posture |
 | disabled | `isDisabled` | controls inert; selection retained |
-| selected | option id equals value | accent border and checked indicator |
+| selected | option id equals value | accent border; checked indicator replaces provider mark |
 | unavailable | option availability is unavailable/unsupported | reason shown; option disabled |
 
 ### Behavior Machine
@@ -136,7 +135,8 @@ single-select transition, radio roving focus, and id wiring.
 - Root is a labelled section.
 - Each group has a visible heading and radiogroup label association.
 - Options use radio semantics with checked and disabled state.
-- Availability has visible text; colour and provider marks are supplementary.
+- Availability has compact visible text and exposes the supplied full reason
+  to assistive technology; colour and provider marks are supplementary.
 
 ### Keyboard
 
@@ -157,7 +157,9 @@ single-select transition, radio roving focus, and id wiring.
 ## 7. Layout
 
 - Options use one column in narrow containers and may use two when each card
-  retains its description without truncating essential status.
+  retains its provider, route, and compact status without truncation.
+- Descriptions remain searchable and available to assistive technology but do
+  not occupy a third visual line. Group-derived badges are not part of options.
 - The result region scrolls; the search field stays outside that scroll port.
 - Provider marks are fixed-size; copy columns use `min-width: 0`.
 - The component stretches to its parent; overlay width belongs to the host.

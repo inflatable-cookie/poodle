@@ -97,6 +97,9 @@
   const meta = $derived(
     [routeLabel, version].filter((part): part is string => Boolean(part)).join(" · "),
   );
+  const statusLabel = $derived(
+    readiness === "ready" && accessSummary ? accessSummary : readinessLabel,
+  );
 
   function disclosureControl(): HTMLElement | null {
     return (
@@ -144,21 +147,15 @@
   aria-label={ariaLabel ?? title}
 >
   <div class="poodle-model-connection-card__summary" bind:this={summaryEl}>
-    <StatusIndicator
-      status={modelConnectionReadinessTone(readiness)}
-      label={readinessLabel}
-    />
-
-    <span class="poodle-model-connection-card__leading" aria-hidden="true">
-      {#if leading}
-        {@render leading({ id })}
-      {:else}
-        <Icon name="package" />
-      {/if}
-    </span>
-
     <div class="poodle-model-connection-card__identity">
       <div class="poodle-model-connection-card__title-row">
+        <span class="poodle-model-connection-card__leading" aria-hidden="true">
+          {#if leading}
+            {@render leading({ id })}
+          {:else}
+            <Icon name="package" />
+          {/if}
+        </span>
         <h3 class="poodle-model-connection-card__title">{title}</h3>
         {#if badges}
           {@render badges({ id })}
@@ -167,13 +164,14 @@
       {#if meta}
         <p class="poodle-model-connection-card__meta">{meta}</p>
       {/if}
-      {#if accessSummary}
-        <p class="poodle-model-connection-card__access">{accessSummary}</p>
-      {/if}
       <span class="poodle-sr-only">{providerLabel}</span>
     </div>
 
     <div class="poodle-model-connection-card__controls">
+      <StatusIndicator
+        status={modelConnectionReadinessTone(readiness)}
+        label={statusLabel}
+      />
       {#if !isOpen && closedAccessory}
         {@render closedAccessory({ id })}
       {/if}

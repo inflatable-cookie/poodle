@@ -13,6 +13,7 @@ import {
   filterModelConnectionOptions,
   groupModelConnectionOptions,
   menuListNavigate,
+  modelConnectionAvailabilityLabel,
   modelConnectionAvailabilityTone,
   modelConnectionOptionSelectable,
   modelConnectionPickerResultAnnouncement,
@@ -25,7 +26,6 @@ import {
 
 import { Icon } from "./Icon";
 import { PickerShell } from "./PickerShell";
-import { Pill } from "./Pill";
 import { StatusIndicator } from "./StatusIndicator";
 import { TextInput } from "./TextInput";
 import type { PickerVariant } from "./types";
@@ -250,26 +250,21 @@ export function ModelConnectionPicker({
                         onKeyDown={(event) => handleOptionKeydown(event, option.id)}
                       >
                         <span className="poodle-model-connection-picker__leading" aria-hidden="true">
-                          {leading ? leading({ option }) : <Icon name="package" />}
+                          {currentValue === option.id ? (
+                            <span className="poodle-model-connection-picker__selected-icon">
+                              <Icon name="check" />
+                            </span>
+                          ) : leading ? (
+                            leading({ option })
+                          ) : (
+                            <Icon name="package" />
+                          )}
                         </span>
                         <span className="poodle-model-connection-picker__copy">
                           <span className="poodle-model-connection-picker__title-row">
                             <span className="poodle-model-connection-picker__provider">
                               {option.providerLabel}
                             </span>
-                            {option.badges.length > 0 ? (
-                              <span className="poodle-model-connection-picker__badges">
-                                {option.badges.map((badge, badgeIndex) => (
-                                  <Pill
-                                    key={`${badge.label}-${badgeIndex}`}
-                                    tone={badge.tone ?? "neutral"}
-                                    appearance="subtle"
-                                  >
-                                    {badge.label}
-                                  </Pill>
-                                ))}
-                              </span>
-                            ) : null}
                           </span>
                           {option.routeLabel ? (
                             <span className="poodle-model-connection-picker__route">
@@ -277,20 +272,14 @@ export function ModelConnectionPicker({
                             </span>
                           ) : null}
                           {option.description ? (
-                            <span className="poodle-model-connection-picker__description">
-                              {option.description}
-                            </span>
+                            <span className="poodle-sr-only">{option.description}</span>
                           ) : null}
                         </span>
                         <span className="poodle-model-connection-picker__availability">
-                          {currentValue === option.id ? (
-                            <span className="poodle-model-connection-picker__selected-icon" aria-hidden="true">
-                              <Icon name="check" />
-                            </span>
-                          ) : null}
                           <StatusIndicator
                             status={modelConnectionAvailabilityTone(option.availability)}
-                            label={option.availabilityLabel}
+                            label={modelConnectionAvailabilityLabel(option.availability)}
+                            ariaLabel={option.availabilityLabel}
                           />
                         </span>
                       </button>

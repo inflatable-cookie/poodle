@@ -19,12 +19,10 @@ Governing spec: `../../specs/067-model-connection-management.md`
 ```text
 [Root] <section data-open data-readiness data-enabled>
   ├── [Summary row]
-  │   ├── [StatusIndicator]
-  │   ├── [Leading snippet]
   │   ├── [Identity]
-  │   │   ├── [Title + badges]
-  │   │   ├── [Route + version]
-  │   │   └── [Access summary]
+  │   │   ├── [Inline leading snippet + title + badges]
+  │   │   └── [Route + version]
+  │   ├── [StatusIndicator: active readiness or access summary]
   │   ├── [Closed accessory snippet] (closed only)
   │   ├── [Actions snippet]
   │   ├── [Disclosure IconButton]
@@ -55,7 +53,7 @@ Governing spec: `../../specs/067-model-connection-management.md`
 | `providerLabel` | `string` | — | yes | provider family display label |
 | `routeLabel` | `string \| null` | `null` | no | exact route display label |
 | `version` | `string \| null` | `null` | no | observed safe version text |
-| `accessSummary` | `string \| null` | `null` | no | sanitized auth/access summary |
+| `accessSummary` | `string \| null` | `null` | no | ready-state status label; sanitized auth/access summary |
 | `readiness` | `ModelConnectionReadiness` | `"unknown"` | no | display posture only |
 | `readinessLabel` | `string` | `"Status unknown"` | no | visible/accessibility meaning |
 | `open` | `boolean \| undefined` | `undefined` | no | controlled disclosure |
@@ -94,8 +92,8 @@ host-owned and changes only through `onEnabledChange`.
 |-------|---------|-----------------|
 | closed | default | compact summary and closed accessory |
 | open | disclosure | details region; closed accessory omitted |
-| enabled/off | `isEnabled` | Switch state changes; readiness remains unchanged |
-| checking | readiness checking | pending indicator and label |
+| enabled/off | `isEnabled` | off card is visually muted; Switch remains clear and readiness remains unchanged |
+| checking | readiness checking | readiness label overrides the access summary |
 | attention | readiness attention | warning indicator and supplied reason |
 | unavailable/error | supplied readiness | honest status; details remain reachable |
 | disabled | `isDisabled` | all controls inert, content readable |
@@ -119,7 +117,8 @@ or derive one state from the other.
 - Disclosure button has `aria-expanded` and controls a labelled region.
 - Switch has an explicit `Enable {title}` accessible name.
 - Disclosure, closed accessory, actions, and Switch are separate tab stops.
-- StatusIndicator receives `readinessLabel`; colour alone is insufficient.
+- StatusIndicator receives the resolved access/readiness label; colour alone is
+  insufficient.
 - Opening does not move focus. Closing while focus is inside details restores
   focus to disclosure.
 - Native implementation must expose equivalent expanded, enabled, and status
@@ -127,12 +126,18 @@ or derive one state from the other.
 
 ## 7. Layout
 
-- Summary uses provider/status lanes, a flexible identity column, then compact
-  controls. It may wrap to two rows before truncating readiness or access copy.
+- Summary uses a flexible two-line identity, then a contextual status
+  immediately before compact controls. The provider mark precedes the title
+  inline. Ready connections show the access summary; other readiness states
+  show their readiness label.
 - Details span the full card below a separator.
 - Provider marks and controls do not shrink; copy uses `min-width: 0`.
-- Narrow containers stack accessory/actions below identity while keeping
-  disclosure and Switch adjacent.
+- Disabled connections mute card copy, status, and auxiliary controls without
+  muting the enable Switch.
+- Card-width container rules move status and controls below identity when the
+  card runs narrow, independent of the page viewport. All copy and status share
+  the same left edge; the provider mark stays inline before the name, while
+  accessories, disclosure, and Switch remain adjacent and right-aligned.
 
 ## 8. Token Usage
 

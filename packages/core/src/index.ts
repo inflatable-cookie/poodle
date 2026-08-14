@@ -84,6 +84,7 @@ export {
   modelCatalogueReorderAnnouncement,
   modelCatalogueStateCopy,
   modelCatalogueVisibilityAnnouncement,
+  modelConnectionAvailabilityLabel,
   modelConnectionAvailabilityTone,
   modelConnectionOptionSelectable,
   modelConnectionPickerResultAnnouncement,

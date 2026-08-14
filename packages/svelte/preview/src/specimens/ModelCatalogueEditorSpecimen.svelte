@@ -1,24 +1,8 @@
 <script lang="ts">
   import { Button, ModelCatalogueEditor } from "@inflatable-cookie/poodle-svelte";
-  import type { ModelCatalogueItem } from "@inflatable-cookie/poodle-core";
-  import { MODEL_CATALOGUE_FIXTURES } from "@inflatable-cookie/poodle-core";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
-
-  let items = $state<ModelCatalogueItem[]>([...MODEL_CATALOGUE_FIXTURES]);
-
-  function applyOrder(orderedIds: string[]): void {
-    const hidden = items.filter((item) => !item.visible);
-    const byId = new Map(items.map((item) => [item.id, item]));
-    const reordered = orderedIds.map((id) => byId.get(id)!);
-    items = [...reordered, ...hidden];
-  }
-
-  function applyVisibility(change: { id: string; visible: boolean }): void {
-    items = items.map((item) =>
-      item.id === change.id ? { ...item, visible: change.visible } : item,
-    );
-  }
+  import ModelCatalogueEditorHarness from "./ModelCatalogueEditorHarness.svelte";
 </script>
 
 <SpecimenLayout showSizes={false} showDensities={false}>
@@ -26,21 +10,13 @@
     <div class="poodle-model-catalogue-editor-specimen">
       <SpecimenGroup label="Shown and hidden models">
         <div class="poodle-model-catalogue-editor-specimen__panel">
-          <ModelCatalogueEditor
-            items={MODEL_CATALOGUE_FIXTURES}
-            onInfo={() => {}}
-          />
+          <ModelCatalogueEditorHarness />
         </div>
       </SpecimenGroup>
 
       <SpecimenGroup label="Reorder-capable list">
         <div class="poodle-model-catalogue-editor-specimen__panel">
-          <ModelCatalogueEditor
-            {items}
-            onOrderChange={applyOrder}
-            onVisibilityChange={applyVisibility}
-            onInfo={() => {}}
-          />
+          <ModelCatalogueEditorHarness />
         </div>
       </SpecimenGroup>
 
@@ -52,11 +28,11 @@
 
       <SpecimenGroup label="Custom action">
         <div class="poodle-model-catalogue-editor-specimen__panel">
-          <ModelCatalogueEditor items={MODEL_CATALOGUE_FIXTURES}>
+          <ModelCatalogueEditorHarness>
             {#snippet customAction()}
               <Button variant="secondary" size="sm">Add custom model</Button>
             {/snippet}
-          </ModelCatalogueEditor>
+          </ModelCatalogueEditorHarness>
         </div>
       </SpecimenGroup>
 

@@ -35,7 +35,7 @@ describe("ModelConnectionCard (svelte)", () => {
     expect(onOpenChange).toHaveBeenCalledTimes(1);
   });
 
-  it("shows readiness text and does not collapse on disable", async () => {
+  it("uses access summary when ready and active readiness while checking", async () => {
     const { rerender } = render(ModelConnectionCard, {
       props: {
         id: "conn-openai-work",
@@ -48,21 +48,29 @@ describe("ModelConnectionCard (svelte)", () => {
       },
     });
 
-    expect(screen.getByText("Ready")).toBeTruthy();
     expect(screen.getByText("API key on file")).toBeTruthy();
+    expect(screen.queryByText("Ready")).toBeNull();
+    expect(
+      document
+        .querySelector(".poodle-model-connection-card__title-row")
+        ?.firstElementChild?.classList.contains("poodle-model-connection-card__leading"),
+    ).toBe(true);
 
     await rerender({
       id: "conn-openai-work",
       title: "OpenAI · Work",
       providerLabel: "OpenAI",
-      readiness: "ready",
-      readinessLabel: "Ready",
-      accessSummary: "API key on file",
-      isEnabled: false,
+      readiness: "checking",
+      readinessLabel: "Checking install",
+      accessSummary: "Signed in",
+      isEnabled: true,
     });
 
-    expect(screen.getByText("Ready")).toBeTruthy();
-    expect(screen.getByText("API key on file")).toBeTruthy();
+    expect(screen.getByText("Checking install")).toBeTruthy();
+    expect(screen.queryByText("Signed in")).toBeNull();
+    expect(
+      document.querySelector(".poodle-model-connection-card__controls .poodle-status-indicator"),
+    ).toBeTruthy();
   });
 
   it("uses instance-scoped detail ids for repeated connection records", () => {

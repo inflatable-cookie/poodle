@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { Button, ModelCatalogueEditor } from "@inflatable-cookie/poodle-react";
 import type { ModelCatalogueItem } from "@inflatable-cookie/poodle-core";
 import { MODEL_CATALOGUE_FIXTURES } from "@inflatable-cookie/poodle-core";
@@ -9,7 +9,7 @@ const stackStyle: CSSProperties = { display: "flex", flexDirection: "column", ga
 const panelStyle: CSSProperties = { width: "min(36rem, 100%)" };
 const noteStyle: CSSProperties = { margin: 0, fontSize: "0.875rem", opacity: 0.75 };
 
-function ReorderableCatalogue() {
+function InteractiveCatalogue({ customAction }: { customAction?: () => ReactNode }) {
   const [items, setItems] = useState<ModelCatalogueItem[]>([...MODEL_CATALOGUE_FIXTURES]);
 
   function applyOrder(orderedIds: string[]): void {
@@ -35,6 +35,7 @@ function ReorderableCatalogue() {
       onOrderChange={applyOrder}
       onVisibilityChange={applyVisibility}
       onInfo={() => {}}
+      customAction={customAction}
     />
   );
 }
@@ -45,13 +46,13 @@ export function ModelCatalogueEditorSpecimen() {
       <div style={stackStyle}>
         <SpecimenGroup label="Shown and hidden models">
           <div style={panelStyle}>
-            <ModelCatalogueEditor items={MODEL_CATALOGUE_FIXTURES} onInfo={() => {}} />
+            <InteractiveCatalogue />
           </div>
         </SpecimenGroup>
 
         <SpecimenGroup label="Reorder-capable list">
           <div style={panelStyle}>
-            <ReorderableCatalogue />
+            <InteractiveCatalogue />
           </div>
         </SpecimenGroup>
 
@@ -63,8 +64,7 @@ export function ModelCatalogueEditorSpecimen() {
 
         <SpecimenGroup label="Custom action">
           <div style={panelStyle}>
-            <ModelCatalogueEditor
-              items={MODEL_CATALOGUE_FIXTURES}
+            <InteractiveCatalogue
               customAction={() => (
                 <Button variant="secondary" size="sm">
                   Add custom model

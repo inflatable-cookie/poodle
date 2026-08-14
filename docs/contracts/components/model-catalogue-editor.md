@@ -25,8 +25,8 @@ Governing spec: `../../specs/067-model-connection-management.md`
       ├── [Shown list] <ol>
       │   └── [Model row] <li> *
       │       ├── [Reorder handle/button]
-      │       ├── [Identity + badges + description]
-      │       ├── [Info action] optional
+      │       ├── [Model + provider metadata; optional description]
+      │       ├── [Badges + info action] optional
       │       ├── [Move up/down actions]
       │       └── [Hide action]
       └── [Hidden Collapsible]
@@ -145,7 +145,10 @@ and disclosure transition for the hidden section.
 ## 7. Layout
 
 - Rows are compact grid/flex surfaces: reorder lane, flexible copy, utilities.
-- Long labels and descriptions truncate visually but retain accessible names.
+- Model leads the compact title line; provider follows as quieter inline
+  metadata. The optional description is the only second copy line; both
+  truncate visually while retaining accessible names.
+- Badges sit at the utility edge immediately before the optional info action.
 - Utility controls do not shrink. At narrow widths, description moves below
   title and actions may occupy a second row.
 - Hidden section is visually quieter and does not reserve reorder lanes.

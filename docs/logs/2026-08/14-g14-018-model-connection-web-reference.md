@@ -51,7 +51,7 @@ conformance — that stays g14.020 after the conformance pilot.
 | `filterModelConnectionOptions` / `groupModelConnectionOptions` | case-folded filter; host order retained |
 | `modelConnectionOptionSelectable` | available ∧ ¬disabled |
 | `resolveModelConnectionPickerShellState` | ready/loading/error/empty/no-results → PickerShell |
-| `modelConnectionSetupTransition` (+ canContinue / canSubmit) | choose→configure guards; exact-id submit |
+| `modelConnectionSetupTransition` (+ canContinue / canSubmit) | direct-add or choose→configure guards; exact-id submit |
 | `shownModelCatalogueItems` / `hiddenModelCatalogueItems` | partition; hidden order meaningless |
 | `requestModelCatalogueOrder` | complete shown-id order via `applyReorder` |
 | `requestModelCatalogueVisibility` | `{ id, visible }` only |
@@ -67,7 +67,8 @@ conformance — that stays g14.020 after the conformance pilot.
 `ModelConnectionSetup` — controlled/uncontrolled `stage` + `value` + `query`,
 picker forwards, `canSubmit` / `isPending` / feedback copy, action labels,
 `leading` / `configuration` / `configureAside`, stage/value/query/submit/cancel
-callbacks.
+callbacks. Each option declares `requiresConfiguration`; direct routes submit
+from choose without an empty configure step.
 
 `ModelConnectionCard` — required `id` / `title` / `providerLabel`, optional
 route/version/access/readiness, controlled/uncontrolled `open`, host-owned

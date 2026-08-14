@@ -53,10 +53,10 @@ export type ModelConnectionOption = {
   description: string | null;
   group: string;
   keywords: string[];
-  badges: ModelConnectionBadge[];
   availability: ModelConnectionAvailability;
   availabilityLabel: string;
   isDisabled: boolean;
+  requiresConfiguration: boolean;
 };
 
 export type ModelConnectionSetupStage = "choose" | "configure";
@@ -287,11 +287,14 @@ export function modelConnectionSetupCanSubmit(
     "stage" | "value" | "options" | "canSubmit" | "isPending"
   >,
 ): boolean {
-  if (context.isPending || context.stage !== "configure" || !context.canSubmit) {
-    return false;
-  }
+  if (context.isPending || !context.canSubmit) return false;
   if (context.value === null) return false;
-  return context.options.some((option) => option.id === context.value);
+  const option = context.options.find((candidate) => candidate.id === context.value);
+  if (!option) return false;
+  if (context.stage === "choose") {
+    return !option.requiresConfiguration && modelConnectionOptionSelectable(option);
+  }
+  return true;
 }
 
 export function modelConnectionSetupTransition(
@@ -460,6 +463,21 @@ export function modelConnectionAvailabilityTone(
   }
 }
 
+export function modelConnectionAvailabilityLabel(
+  availability: ModelConnectionAvailability,
+): string {
+  switch (availability) {
+    case "available":
+      return "Available";
+    case "checking":
+      return "Checking";
+    case "unavailable":
+      return "Unavailable";
+    case "unsupported":
+      return "Unsupported";
+  }
+}
+
 export function modelConnectionReadinessTone(
   readiness: ModelConnectionReadiness,
 ): ModelConnectionStatusTone {
@@ -524,10 +542,10 @@ export const MODEL_CONNECTION_PICKER_FIXTURES: ModelConnectionOption[] = [
     description: "Hosted Responses route for chat and tools.",
     group: "Hosted",
     keywords: ["openai", "responses", "api"],
-    badges: [{ label: "Hosted", tone: "info" }],
     availability: "available",
     availabilityLabel: "Available",
     isDisabled: false,
+    requiresConfiguration: true,
   },
   {
     id: "openai-completions",
@@ -536,10 +554,10 @@ export const MODEL_CONNECTION_PICKER_FIXTURES: ModelConnectionOption[] = [
     description: "Legacy chat-completions route.",
     group: "Hosted",
     keywords: ["openai", "completions"],
-    badges: [{ label: "Hosted", tone: "info" }],
     availability: "available",
     availabilityLabel: "Available",
     isDisabled: false,
+    requiresConfiguration: true,
   },
   {
     id: "anthropic-messages",
@@ -548,10 +566,10 @@ export const MODEL_CONNECTION_PICKER_FIXTURES: ModelConnectionOption[] = [
     description: "Hosted Messages route.",
     group: "Hosted",
     keywords: ["anthropic", "messages"],
-    badges: [{ label: "Hosted", tone: "info" }],
     availability: "available",
     availabilityLabel: "Available",
     isDisabled: false,
+    requiresConfiguration: true,
   },
   {
     id: "codex-app",
@@ -560,10 +578,10 @@ export const MODEL_CONNECTION_PICKER_FIXTURES: ModelConnectionOption[] = [
     description: "Installed local harness.",
     group: "Installed",
     keywords: ["codex", "local", "harness"],
-    badges: [{ label: "Installed", tone: "success" }],
     availability: "checking",
     availabilityLabel: "Checking install",
     isDisabled: true,
+    requiresConfiguration: false,
   },
   {
     id: "ollama-local",
@@ -572,10 +590,10 @@ export const MODEL_CONNECTION_PICKER_FIXTURES: ModelConnectionOption[] = [
     description: "Local OpenAI-compatible endpoint.",
     group: "Local runtime",
     keywords: ["ollama", "local", "endpoint"],
-    badges: [{ label: "Local", tone: "neutral" }],
     availability: "available",
     availabilityLabel: "Available",
     isDisabled: false,
+    requiresConfiguration: true,
   },
   {
     id: "lmstudio-local",
@@ -584,10 +602,10 @@ export const MODEL_CONNECTION_PICKER_FIXTURES: ModelConnectionOption[] = [
     description: "Local OpenAI-compatible server.",
     group: "Local runtime",
     keywords: ["lmstudio", "local"],
-    badges: [{ label: "Local", tone: "neutral" }],
     availability: "unavailable",
     availabilityLabel: "Runtime not detected",
     isDisabled: true,
+    requiresConfiguration: true,
   },
   {
     id: "vendor-legacy",
@@ -596,10 +614,10 @@ export const MODEL_CONNECTION_PICKER_FIXTURES: ModelConnectionOption[] = [
     description: "Unsupported on this machine.",
     group: "Hosted",
     keywords: ["legacy"],
-    badges: [{ label: "Unsupported", tone: "warning" }],
     availability: "unsupported",
     availabilityLabel: "Unsupported on this platform",
     isDisabled: true,
+    requiresConfiguration: true,
   },
 ];
 
@@ -666,8 +684,8 @@ export const MODEL_CATALOGUE_FIXTURES: ModelCatalogueItem[] = [
     id: "model-alpha",
     label: "Frontier Alpha",
     providerLabel: "OpenAI",
-    description: "General reasoning.",
-    badges: [{ label: "Default candidate", tone: "info" }],
+    description: null,
+    badges: [{ label: "Default", tone: "info" }],
     visible: true,
     isDisabled: false,
   },
@@ -675,7 +693,7 @@ export const MODEL_CATALOGUE_FIXTURES: ModelCatalogueItem[] = [
     id: "model-beta",
     label: "Frontier Beta",
     providerLabel: "OpenAI",
-    description: "Faster variant.",
+    description: null,
     badges: [],
     visible: true,
     isDisabled: false,
@@ -693,7 +711,7 @@ export const MODEL_CATALOGUE_FIXTURES: ModelCatalogueItem[] = [
     id: "model-dup-a",
     label: "Shared Label",
     providerLabel: "OpenAI",
-    description: "First opaque id.",
+    description: null,
     badges: [],
     visible: true,
     isDisabled: false,
@@ -702,7 +720,7 @@ export const MODEL_CATALOGUE_FIXTURES: ModelCatalogueItem[] = [
     id: "model-dup-b",
     label: "Shared Label",
     providerLabel: "Anthropic",
-    description: "Second opaque id.",
+    description: null,
     badges: [],
     visible: false,
     isDisabled: false,

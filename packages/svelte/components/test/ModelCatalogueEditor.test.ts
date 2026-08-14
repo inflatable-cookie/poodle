@@ -6,6 +6,26 @@ import { MODEL_CATALOGUE_FIXTURES } from "@inflatable-cookie/poodle-core";
 import ModelCatalogueEditor from "../src/ModelCatalogueEditor.svelte";
 
 describe("ModelCatalogueEditor (svelte)", () => {
+  it("renders a compact model-provider title with only optional description below", () => {
+    const { container } = render(ModelCatalogueEditor, {
+      props: { items: MODEL_CATALOGUE_FIXTURES },
+    });
+
+    const labels = container.querySelectorAll(".poodle-model-catalogue-editor__label");
+    expect(labels[0]?.textContent?.trim()).toBe("Frontier Alpha OpenAI");
+    expect(labels[0]?.querySelector(".poodle-model-catalogue-editor__provider")?.textContent?.trim()).toBe(
+      "OpenAI",
+    );
+    const firstRow = container.querySelector('[data-model-catalogue-id="model-alpha"]');
+    expect(firstRow?.querySelector(".poodle-model-catalogue-editor__label-row")?.textContent).not.toContain(
+      "Default",
+    );
+    expect(firstRow?.querySelector(".poodle-model-catalogue-editor__utilities")?.textContent).toContain(
+      "Default",
+    );
+    expect(container.querySelectorAll(".poodle-model-catalogue-editor__description")).toHaveLength(1);
+  });
+
   it("emits complete shown-id order from move actions", async () => {
     const onOrderChange = vi.fn();
     render(ModelCatalogueEditor, {

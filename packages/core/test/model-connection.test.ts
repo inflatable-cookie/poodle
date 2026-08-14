@@ -7,6 +7,7 @@ import {
   modelCatalogueFocusAfterHide,
   modelCatalogueReorderAnnouncement,
   modelCatalogueVisibilityAnnouncement,
+  modelConnectionAvailabilityLabel,
   modelConnectionAvailabilityTone,
   modelConnectionOptionSelectable,
   modelConnectionPickerResultAnnouncement,
@@ -26,6 +27,11 @@ import {
 } from "../src/model-connection";
 
 const options = MODEL_CONNECTION_PICKER_FIXTURES;
+const directOptions: ModelConnectionOption[] = options.map((option) =>
+  option.id === "codex-app"
+    ? { ...option, availability: "available", availabilityLabel: "Available", isDisabled: false }
+    : option,
+);
 
 function setup(
   overrides: Partial<ModelConnectionSetupContext> = {},
@@ -161,6 +167,21 @@ describe("modelConnectionSetupTransition", () => {
     expect(accepted.effects).toEqual([{ type: "emitSubmit", id: "openai-responses" }]);
   });
 
+  test("direct routes submit from choose without entering configure", () => {
+    const context = setup({
+      value: "codex-app",
+      options: directOptions,
+      canSubmit: true,
+    });
+
+    expect(modelConnectionSetupCanContinue(context)).toBe(true);
+    expect(modelConnectionSetupCanSubmit(context)).toBe(true);
+    expect(modelConnectionSetupTransition(context, { type: "SUBMIT" })).toEqual({
+      context,
+      effects: [{ type: "emitSubmit", id: "codex-app" }],
+    });
+  });
+
   test("pending guards workflow events", () => {
     const pending = setup({
       stage: "configure",
@@ -260,5 +281,12 @@ describe("status tones", () => {
     expect(modelConnectionAvailabilityTone("unsupported")).toBe("neutral");
     expect(modelConnectionReadinessTone("attention")).toBe("warning");
     expect(modelConnectionReadinessTone("error")).toBe("danger");
+  });
+
+  test("uses compact picker availability labels", () => {
+    expect(modelConnectionAvailabilityLabel("available")).toBe("Available");
+    expect(modelConnectionAvailabilityLabel("checking")).toBe("Checking");
+    expect(modelConnectionAvailabilityLabel("unavailable")).toBe("Unavailable");
+    expect(modelConnectionAvailabilityLabel("unsupported")).toBe("Unsupported");
   });
 });

@@ -295,14 +295,12 @@
                   {@render leading({ item })}
                 </span>
               {/if}
-              <p class="poodle-model-catalogue-editor__label">{item.label}</p>
-              {#each item.badges as badge (badge.label)}
-                <Pill tone={badge.tone ?? "neutral"} appearance="subtle">{badge.label}</Pill>
-              {/each}
+              <p class="poodle-model-catalogue-editor__label">
+                {item.label}{#if item.providerLabel}
+                  {" "}<span class="poodle-model-catalogue-editor__provider">{item.providerLabel}</span>
+                {/if}
+              </p>
             </div>
-            {#if item.providerLabel}
-              <p class="poodle-model-catalogue-editor__provider">{item.providerLabel}</p>
-            {/if}
             {#if item.description}
               <p class="poodle-model-catalogue-editor__description">{item.description}</p>
             {/if}
@@ -314,6 +312,9 @@
           </div>
 
           <div class="poodle-model-catalogue-editor__utilities">
+            {#each item.badges as badge (badge.label)}
+              <Pill tone={badge.tone ?? "neutral"} appearance="subtle">{badge.label}</Pill>
+            {/each}
             {#if onInfo}
               <IconButton
                 icon="info"
@@ -363,11 +364,12 @@
               <li class="poodle-model-catalogue-editor__row" data-model-catalogue-id={item.id}>
                 <div class="poodle-model-catalogue-editor__identity">
                   <div class="poodle-model-catalogue-editor__label-row">
-                    <p class="poodle-model-catalogue-editor__label">{item.label}</p>
+                    <p class="poodle-model-catalogue-editor__label">
+                      {item.label}{#if item.providerLabel}
+                        {" "}<span class="poodle-model-catalogue-editor__provider">{item.providerLabel}</span>
+                      {/if}
+                    </p>
                   </div>
-                  {#if item.providerLabel}
-                    <p class="poodle-model-catalogue-editor__provider">{item.providerLabel}</p>
-                  {/if}
                 </div>
                 <div class="poodle-model-catalogue-editor__utilities">
                   <IconButton

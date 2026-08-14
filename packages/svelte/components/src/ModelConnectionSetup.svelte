@@ -107,6 +107,7 @@
   const currentValue = $derived(isValueControlled ? (value ?? null) : uncontrolledValue);
   const currentQuery = $derived(isQueryControlled ? (query ?? "") : uncontrolledQuery);
   const selected = $derived(options.find((option) => option.id === currentValue));
+  const requiresConfiguration = $derived(selected?.requiresConfiguration ?? true);
   const canContinue = $derived(
     modelConnectionSetupCanContinue({
       value: currentValue,
@@ -262,16 +263,18 @@
         <Callout tone="success" message={success} announceMode="polite" />
       {/if}
 
-      <div class="poodle-model-connection-setup__configuration">
-        {#if configuration}
-          {@render configuration({ option: selected, isPending })}
-        {/if}
-        {#if configureAside}
-          <div class="poodle-model-connection-setup__aside">
-            {@render configureAside({ option: selected })}
-          </div>
-        {/if}
-      </div>
+      {#if configuration || configureAside}
+        <div class="poodle-model-connection-setup__configuration">
+          {#if configuration}
+            {@render configuration({ option: selected, isPending })}
+          {/if}
+          {#if configureAside}
+            <div class="poodle-model-connection-setup__aside">
+              {@render configureAside({ option: selected })}
+            </div>
+          {/if}
+        </div>
+      {/if}
 
       {#if isPending}
         <p class="poodle-model-connection-setup__pending" role="status" aria-live="polite">
@@ -287,8 +290,11 @@
       <Button variant="ghost" disabled={isPending} onClick={() => run({ type: "CANCEL" })}>
         {cancelLabel}
       </Button>
-      <Button disabled={!canContinue} onClick={() => run({ type: "CONTINUE" })}>
-        {continueLabel}
+      <Button
+        disabled={requiresConfiguration ? !canContinue : !canAdd}
+        onClick={() => run({ type: requiresConfiguration ? "CONTINUE" : "SUBMIT" })}
+      >
+        {requiresConfiguration ? continueLabel : submitLabel}
       </Button>
     {:else}
       <Button variant="ghost" disabled={isPending} onClick={() => run({ type: "BACK" })}>

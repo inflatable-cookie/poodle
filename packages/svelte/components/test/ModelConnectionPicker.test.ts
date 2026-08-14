@@ -77,11 +77,36 @@ describe("ModelConnectionPicker (svelte)", () => {
     const { container } = render(ModelConnectionPicker, {
       props: { options, defaultValue: "openai-responses" },
     });
+    const selected = container.querySelector(
+      '[data-model-connection-option="openai-responses"]',
+    ) as HTMLElement;
 
     expect(
-      container.querySelector(
-        '[data-model-connection-option="openai-responses"] .poodle-model-connection-picker__selected-icon',
+      selected.querySelector(
+        ".poodle-model-connection-picker__leading > .poodle-model-connection-picker__selected-icon",
       ),
     ).toBeTruthy();
+    expect(
+      selected.querySelector(
+        ".poodle-model-connection-picker__availability .poodle-model-connection-picker__selected-icon",
+      ),
+    ).toBeNull();
+  });
+
+  it("renders compact option copy without group badges or visible descriptions", () => {
+    const { container } = render(ModelConnectionPicker, { props: { options } });
+
+    expect(container.querySelector(".poodle-model-connection-picker__badges")).toBeNull();
+    expect(container.querySelector(".poodle-model-connection-picker__description")).toBeNull();
+    expect(
+      container.querySelector(
+        '[data-model-connection-option="codex-app"] .poodle-status-indicator__label',
+      )?.textContent,
+    ).toBe("Checking");
+    expect(
+      container.querySelector(
+        '[data-model-connection-option="vendor-legacy"] .poodle-status-indicator__label',
+      )?.textContent,
+    ).toBe("Unsupported");
   });
 });

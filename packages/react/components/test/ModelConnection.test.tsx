@@ -13,6 +13,11 @@ import { ModelConnectionPicker } from "../src/ModelConnectionPicker";
 import { ModelConnectionSetup } from "../src/ModelConnectionSetup";
 
 const options = MODEL_CONNECTION_PICKER_FIXTURES;
+const directOptions: ModelConnectionOption[] = options.map((option) =>
+  option.id === "codex-app"
+    ? { ...option, availability: "available", availabilityLabel: "Available", isDisabled: false }
+    : option,
+);
 
 describe("ModelConnectionPicker (react)", () => {
   it("filters case-folded and keeps source order when query is controlled", () => {
@@ -78,16 +83,60 @@ describe("ModelConnectionPicker (react)", () => {
     const { container } = render(
       <ModelConnectionPicker options={options} defaultValue="openai-responses" />,
     );
+    const selected = container.querySelector(
+      '[data-model-connection-option="openai-responses"]',
+    ) as HTMLElement;
 
     expect(
-      container.querySelector(
-        '[data-model-connection-option="openai-responses"] .poodle-model-connection-picker__selected-icon',
+      selected.querySelector(
+        ".poodle-model-connection-picker__leading > .poodle-model-connection-picker__selected-icon",
       ),
     ).toBeTruthy();
+    expect(
+      selected.querySelector(
+        ".poodle-model-connection-picker__availability .poodle-model-connection-picker__selected-icon",
+      ),
+    ).toBeNull();
+  });
+
+  it("renders compact option copy without group badges or visible descriptions", () => {
+    const { container } = render(<ModelConnectionPicker options={options} />);
+
+    expect(container.querySelector(".poodle-model-connection-picker__badges")).toBeNull();
+    expect(container.querySelector(".poodle-model-connection-picker__description")).toBeNull();
+    expect(
+      container.querySelector(
+        '[data-model-connection-option="codex-app"] .poodle-status-indicator__label',
+      )?.textContent,
+    ).toBe("Checking");
+    expect(
+      container.querySelector(
+        '[data-model-connection-option="vendor-legacy"] .poodle-status-indicator__label',
+      )?.textContent,
+    ).toBe("Unsupported");
   });
 });
 
 describe("ModelConnectionSetup (react)", () => {
+  it("submits a direct route without entering configure", () => {
+    const onStageChange = vi.fn();
+    const onSubmit = vi.fn();
+    render(
+      <ModelConnectionSetup
+        options={directOptions}
+        defaultValue="codex-app"
+        canSubmit
+        onStageChange={onStageChange}
+        onSubmit={onSubmit}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Add connection" }));
+    expect(onSubmit).toHaveBeenCalledWith("codex-app");
+    expect(onStageChange).not.toHaveBeenCalled();
+  });
+
   it("continues then submits only with host canSubmit", () => {
     const onStageChange = vi.fn();
     const onSubmit = vi.fn();
@@ -149,6 +198,18 @@ describe("ModelConnectionSetup (react)", () => {
     expect(onCancel).not.toHaveBeenCalled();
   });
 
+  it("does not render an empty configuration surface", () => {
+    const { container } = render(
+      <ModelConnectionSetup
+        options={options}
+        stage="configure"
+        value="openai-responses"
+      />,
+    );
+
+    expect(container.querySelector(".poodle-model-connection-setup__configuration")).toBeNull();
+  });
+
   it("restores focus to the selected route after a controlled Back transition", async () => {
     const { container, rerender } = render(
       <ModelConnectionSetup
@@ -174,6 +235,46 @@ describe("ModelConnectionSetup (react)", () => {
 });
 
 describe("ModelConnectionCard (react)", () => {
+  it("uses access summary when ready and active readiness while checking", () => {
+    const { container, rerender } = render(
+      <ModelConnectionCard
+        id="conn-openai-work"
+        title="OpenAI · Work"
+        providerLabel="OpenAI"
+        accessSummary="API key on file"
+        readiness="ready"
+        readinessLabel="Ready"
+      />,
+    );
+
+    const controls = container.querySelector(".poodle-model-connection-card__controls");
+    expect(
+      container
+        .querySelector(".poodle-model-connection-card__title-row")
+        ?.firstElementChild?.classList.contains("poodle-model-connection-card__leading"),
+    ).toBe(true);
+    expect(controls?.querySelector(".poodle-status-indicator")?.textContent).toContain(
+      "API key on file",
+    );
+    expect(screen.queryByText("Ready")).toBeNull();
+
+    rerender(
+      <ModelConnectionCard
+        id="conn-openai-work"
+        title="OpenAI · Work"
+        providerLabel="OpenAI"
+        accessSummary="Signed in"
+        readiness="checking"
+        readinessLabel="Checking install"
+      />,
+    );
+
+    expect(controls?.querySelector(".poodle-status-indicator")?.textContent).toContain(
+      "Checking install",
+    );
+    expect(screen.queryByText("Signed in")).toBeNull();
+  });
+
   it("keeps disclosure and enable callbacks independent", () => {
     const onOpenChange = vi.fn();
     const onEnabledChange = vi.fn();
@@ -241,6 +342,26 @@ describe("ModelConnectionCard (react)", () => {
 });
 
 describe("ModelCatalogueEditor (react)", () => {
+  it("renders a compact model-provider title with only optional description below", () => {
+    const { container } = render(
+      <ModelCatalogueEditor items={MODEL_CATALOGUE_FIXTURES} />,
+    );
+
+    const labels = container.querySelectorAll(".poodle-model-catalogue-editor__label");
+    expect(labels[0]?.textContent?.trim()).toBe("Frontier Alpha OpenAI");
+    expect(labels[0]?.querySelector(".poodle-model-catalogue-editor__provider")?.textContent?.trim()).toBe(
+      "OpenAI",
+    );
+    const firstRow = container.querySelector('[data-model-catalogue-id="model-alpha"]');
+    expect(firstRow?.querySelector(".poodle-model-catalogue-editor__label-row")?.textContent).not.toContain(
+      "Default",
+    );
+    expect(firstRow?.querySelector(".poodle-model-catalogue-editor__utilities")?.textContent).toContain(
+      "Default",
+    );
+    expect(container.querySelectorAll(".poodle-model-catalogue-editor__description")).toHaveLength(1);
+  });
+
   it("emits complete shown-id order from move actions", () => {
     const onOrderChange = vi.fn();
     render(

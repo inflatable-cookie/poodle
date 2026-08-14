@@ -100,6 +100,7 @@ export function ModelConnectionSetup({
   const currentValue = isValueControlled ? (value ?? null) : uncontrolledValue;
   const currentQuery = isQueryControlled ? (query ?? "") : uncontrolledQuery;
   const selected = options.find((option) => option.id === currentValue);
+  const requiresConfiguration = selected?.requiresConfiguration ?? true;
   const canContinue = modelConnectionSetupCanContinue({
     value: currentValue,
     options,
@@ -243,14 +244,16 @@ export function ModelConnectionSetup({
             {error ? <Callout tone="danger" message={error} announceMode="assertive" /> : null}
             {success ? <Callout tone="success" message={success} announceMode="polite" /> : null}
 
-            <div className="poodle-model-connection-setup__configuration">
-              {configuration ? configuration({ option: selected, isPending }) : null}
-              {configureAside ? (
-                <div className="poodle-model-connection-setup__aside">
-                  {configureAside({ option: selected })}
-                </div>
-              ) : null}
-            </div>
+            {configuration || configureAside ? (
+              <div className="poodle-model-connection-setup__configuration">
+                {configuration ? configuration({ option: selected, isPending }) : null}
+                {configureAside ? (
+                  <div className="poodle-model-connection-setup__aside">
+                    {configureAside({ option: selected })}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
 
             {isPending ? (
               <p className="poodle-model-connection-setup__pending" role="status" aria-live="polite">
@@ -268,8 +271,13 @@ export function ModelConnectionSetup({
             <Button variant="ghost" disabled={isPending} onClick={() => run({ type: "CANCEL" })}>
               {cancelLabel}
             </Button>
-            <Button disabled={!canContinue} onClick={() => run({ type: "CONTINUE" })}>
-              {continueLabel}
+            <Button
+              disabled={requiresConfiguration ? !canContinue : !canAdd}
+              onClick={() =>
+                run({ type: requiresConfiguration ? "CONTINUE" : "SUBMIT" })
+              }
+            >
+              {requiresConfiguration ? continueLabel : submitLabel}
             </Button>
           </>
         ) : (

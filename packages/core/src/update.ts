@@ -58,6 +58,7 @@ export type UpdateRejectionCode =
   | "staleAuthority"
   | "noOffer"
   | "unavailable"
+  | "channelMismatch"
   | "unreachable"
   | "signatureRejected"
   | "notWritable"
@@ -114,6 +115,10 @@ export function updateRejectionMessage(code: UpdateRejectionCode): string {
       return "No update is available right now.";
     case "unavailable":
       return "The update service is unavailable.";
+    // The feed answered for a different channel than the build selected —
+    // an operational fault upstream, not something the user did.
+    case "channelMismatch":
+      return "The update feed answered for a different channel.";
     case "unreachable":
       return "The update service could not be reached.";
     // A signature rejection is not a network problem: the artifact did not come

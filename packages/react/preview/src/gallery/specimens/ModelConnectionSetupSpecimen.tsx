@@ -5,6 +5,11 @@ import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 const options = MODEL_CONNECTION_PICKER_FIXTURES;
+const interactiveOptions = options.map((option) =>
+  option.id === "codex-app"
+    ? { ...option, availability: "available" as const, availabilityLabel: "Available", isDisabled: false }
+    : option,
+);
 
 const stackStyle: CSSProperties = { display: "flex", flexDirection: "column", gap: "2rem" };
 const panelStyle: CSSProperties = { width: "min(42rem, 100%)" };
@@ -46,7 +51,19 @@ export function ModelConnectionSetupSpecimen() {
       <div style={stackStyle}>
         <SpecimenGroup label="Choose stage">
           <div style={panelStyle}>
-            <ModelConnectionSetup options={options} defaultValue="openai-responses" />
+            <ModelConnectionSetup
+              options={interactiveOptions}
+              defaultValue="openai-responses"
+              canSubmit={true}
+              configuration={({ option }) => {
+                if (option.id === "codex-app") return null;
+                if (option.id === "ollama-local") return <LocalEndpointConfigure />;
+                if (option.id === "anthropic-messages") {
+                  return <Button variant="secondary">Sign in with browser</Button>;
+                }
+                return <ApiKeyConfigure />;
+              }}
+            />
           </div>
         </SpecimenGroup>
 

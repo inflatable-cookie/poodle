@@ -87,6 +87,7 @@ export function ModelConnectionCard({
   const isOpenControlled = open !== undefined;
   const isOpen = isOpenControlled ? open === true : uncontrolledOpen;
   const meta = [routeLabel, version].filter((part): part is string => Boolean(part)).join(" · ");
+  const statusLabel = readiness === "ready" && accessSummary ? accessSummary : readinessLabel;
 
   function disclosureControl(): HTMLElement | null {
     return summaryRef.current?.querySelector<HTMLElement>("[data-model-connection-disclosure] button");
@@ -124,28 +125,23 @@ export function ModelConnectionCard({
       aria-label={ariaLabel ?? title}
     >
       <div ref={summaryRef} className="poodle-model-connection-card__summary">
-        <StatusIndicator
-          status={modelConnectionReadinessTone(readiness)}
-          label={readinessLabel}
-        />
-
-        <span className="poodle-model-connection-card__leading" aria-hidden="true">
-          {leading ? leading({ id }) : <Icon name="package" />}
-        </span>
-
         <div className="poodle-model-connection-card__identity">
           <div className="poodle-model-connection-card__title-row">
+            <span className="poodle-model-connection-card__leading" aria-hidden="true">
+              {leading ? leading({ id }) : <Icon name="package" />}
+            </span>
             <h3 className="poodle-model-connection-card__title">{title}</h3>
             {badges ? badges({ id }) : null}
           </div>
           {meta ? <p className="poodle-model-connection-card__meta">{meta}</p> : null}
-          {accessSummary ? (
-            <p className="poodle-model-connection-card__access">{accessSummary}</p>
-          ) : null}
           <span className="poodle-sr-only">{providerLabel}</span>
         </div>
 
         <div className="poodle-model-connection-card__controls">
+          <StatusIndicator
+            status={modelConnectionReadinessTone(readiness)}
+            label={statusLabel}
+          />
           {!isOpen && closedAccessory ? closedAccessory({ id }) : null}
           {actions ? actions({ id, isOpen }) : null}
           <span data-model-connection-disclosure>

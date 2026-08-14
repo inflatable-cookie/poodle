@@ -5,6 +5,7 @@
     filterModelConnectionOptions,
     groupModelConnectionOptions,
     menuListNavigate,
+    modelConnectionAvailabilityLabel,
     modelConnectionAvailabilityTone,
     modelConnectionOptionSelectable,
     modelConnectionPickerResultAnnouncement,
@@ -18,7 +19,6 @@
 
   import { default as Icon } from "./Icon.svelte";
   import { default as PickerShell } from "./PickerShell.svelte";
-  import { default as Pill } from "./Pill.svelte";
   import { default as StatusIndicator } from "./StatusIndicator.svelte";
   import { default as TextInput } from "./TextInput.svelte";
   import type { PickerVariant } from "./types";
@@ -247,7 +247,11 @@
                 onkeydown={(event) => handleOptionKeydown(event, option.id)}
               >
                 <span class="poodle-model-connection-picker__leading" aria-hidden="true">
-                  {#if leading}
+                  {#if currentValue === option.id}
+                    <span class="poodle-model-connection-picker__selected-icon">
+                      <Icon name="check" />
+                    </span>
+                  {:else if leading}
                     {@render leading({ option })}
                   {:else}
                     <Icon name="package" />
@@ -256,30 +260,19 @@
                 <span class="poodle-model-connection-picker__copy">
                   <span class="poodle-model-connection-picker__title-row">
                     <span class="poodle-model-connection-picker__provider">{option.providerLabel}</span>
-                    {#if option.badges.length > 0}
-                      <span class="poodle-model-connection-picker__badges">
-                        {#each option.badges as badge, badgeIndex (`${badge.label}-${badgeIndex}`)}
-                          <Pill tone={badge.tone ?? "neutral"} appearance="subtle">{badge.label}</Pill>
-                        {/each}
-                      </span>
-                    {/if}
                   </span>
                   {#if option.routeLabel}
                     <span class="poodle-model-connection-picker__route">{option.routeLabel}</span>
                   {/if}
                   {#if option.description}
-                    <span class="poodle-model-connection-picker__description">{option.description}</span>
+                    <span class="poodle-sr-only">{option.description}</span>
                   {/if}
                 </span>
                 <span class="poodle-model-connection-picker__availability">
-                  {#if currentValue === option.id}
-                    <span class="poodle-model-connection-picker__selected-icon" aria-hidden="true">
-                      <Icon name="check" />
-                    </span>
-                  {/if}
                   <StatusIndicator
                     status={modelConnectionAvailabilityTone(option.availability)}
-                    label={option.availabilityLabel}
+                    label={modelConnectionAvailabilityLabel(option.availability)}
+                    ariaLabel={option.availabilityLabel}
                   />
                 </span>
               </button>

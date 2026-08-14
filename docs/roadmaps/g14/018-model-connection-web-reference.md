@@ -89,8 +89,9 @@ components.
   consumer-defined and may say "Providers".
 - One option id identifies one exact route. No provider-level fallback or
   automatic route choice exists in Poodle.
-- Setup is exactly `choose` then `configure`. Provider-specific content is a
-  snippet/render prop; no generic field schema or arbitrary stepper is added.
+- Setup starts at `choose`; routes with `requiresConfiguration=false` submit
+  directly, while other routes enter `configure`. Provider-specific content is
+  a snippet/render prop; no generic field schema or arbitrary stepper is added.
 - Enabled state is independent of readiness, auth, update, and deletion.
 - `UpdateCenter` is composed through the card's closed accessory. The card does
   not mirror UpdateCenter's authority props.
@@ -109,7 +110,7 @@ components.
 - [ ] Loading, error, empty, no-results, checking, unavailable, and unsupported
       picker postures are visibly distinct and accessible.
 - [ ] Setup cannot continue without a selectable connection or submit without
-      host `canSubmit`; pending guards duplicate actions.
+      host `canSubmit`; direct routes skip configure and pending guards duplicate actions.
 - [ ] Setup can render auto-detection, API key, OAuth, local endpoint, and
       validation fixtures without Poodle receiving credential values.
 - [ ] Closed cards show safe readiness and access copy; UpdateCenter,

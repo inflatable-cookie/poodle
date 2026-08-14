@@ -98,10 +98,12 @@ keeps route descriptions visible.
 
 An adaptive controlled shell around route selection and route-specific setup.
 
-Stages:
+Flow:
 
 1. `choose` — render `ModelConnectionPicker`
-2. `configure` — render the selected connection summary, host content,
+2. submit directly when the selected option declares that no configuration is
+   required, otherwise enter `configure`
+3. `configure` — render the selected connection summary, host content,
    validation posture, and actions
 
 There is no fixed Identity or Config step. The host content may contain:
@@ -202,7 +204,6 @@ type ModelConnectionOption = {
   description: string | null;
   group: string;
   keywords: string[];
-  badges: { label: string; tone?: PillTone }[];
   availability:
     | "available"
     | "checking"
@@ -210,6 +211,7 @@ type ModelConnectionOption = {
     | "unsupported";
   availabilityLabel: string;
   isDisabled: boolean;
+  requiresConfiguration: boolean;
 };
 
 type ModelConnectionSummary = {
@@ -259,9 +261,10 @@ Host Add action
   -> host Dialog/Drawer
   -> ModelConnectionSetup: choose
        -> ModelConnectionPicker
-  -> ModelConnectionSetup: configure
-       -> host credential/config/detection content
-       -> host verifies and persists
+       -> direct route: host verifies and persists
+       -> configured route: ModelConnectionSetup: configure
+            -> host credential/config/detection content
+            -> host verifies and persists
   -> configured settings list
        -> ModelConnectionCard
        -> open details
@@ -374,7 +377,8 @@ exception equivalent to the licence reference lane. It must not touch
 
 - Public component vocabulary: `ModelConnection*`. Product copy remains
   consumer-defined and may say "Providers".
-- Setup: adaptive `choose` then `configure`; no generic stepper.
+- Setup: `choose`, then direct submit or `configure` according to the selected
+  option; no generic stepper.
 - Model settings: ordering and visibility only. Defaults, favourites, and
   option defaults remain consumer concerns.
 - Delivery: dispatch the bounded Svelte/React web reference now. Native

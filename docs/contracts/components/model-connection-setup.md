@@ -8,10 +8,10 @@ Governing spec: `../../specs/067-model-connection-management.md`
 
 - Component name: `ModelConnectionSetup`
 - Layer: `composites`
-- Summary: an adaptive two-stage shell for choosing one exact model connection
-  and completing host-owned setup or detection
-- In scope: choose/configure navigation, selected-route summary, workflow
-  actions, pending lock, safe feedback, configuration composition
+- Summary: an adaptive shell for choosing one exact model connection and,
+  when required, completing host-owned setup or detection
+- In scope: direct add, choose/configure navigation, selected-route summary,
+  workflow actions, pending lock, safe feedback, configuration composition
 - Out of scope: credentials, OAuth, discovery, validation, persistence,
   provider form schemas, overlay ownership, or arbitrary workflow steps
 
@@ -20,7 +20,8 @@ Governing spec: `../../specs/067-model-connection-management.md`
 ```text
 [Root] <section>
   ├── choose
-  │   └── [ModelConnectionPicker]
+  │   ├── [ModelConnectionPicker]
+  │   └── [Actions] Cancel + Continue or Add
   └── configure
       ├── [Header] selected provider and route
       ├── [Feedback] optional safe error/success
@@ -32,7 +33,7 @@ Governing spec: `../../specs/067-model-connection-management.md`
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | workflow region | surface, stack gap |
-| Picker | choose | exact route selection | delegated |
+| Picker | choose | exact route selection; options declare whether configuration is required | delegated |
 | Header | configure | selected route context | heading, secondary text |
 | Configuration | configure | host-owned fields/actions | inset surface, stack gap |
 | Feedback | no | form-level status | status tokens |
@@ -46,7 +47,7 @@ Governing spec: `../../specs/067-model-connection-management.md`
 |------|------|---------|----------|-------|
 | `stage` | `"choose" \| "configure" \| undefined` | `undefined` | no | controlled stage |
 | `defaultStage` | `"choose" \| "configure"` | `"choose"` | no | uncontrolled initial stage |
-| `options` | `ModelConnectionOption[]` | `[]` | no | forwarded to picker |
+| `options` | `ModelConnectionOption[]` | `[]` | no | forwarded to picker; `requiresConfiguration` selects direct or configured flow |
 | `value` | `string \| null \| undefined` | `undefined` | no | controlled selected option id |
 | `defaultValue` | `string \| null` | `null` | no | uncontrolled initial selection |
 | `query` | `string \| undefined` | `undefined` | no | controlled picker query |
@@ -79,15 +80,18 @@ Governing spec: `../../specs/067-model-connection-management.md`
 
 ### Controlled And Uncontrolled
 
-Stage, selection, and query are independently controllable. Continue moves to
-`configure` only with a selected available option. Back returns to `choose`
-without clearing selection or host-owned field state.
+Stage, selection, and query are independently controllable. A selected
+available option with `requiresConfiguration=false` presents Add and submits
+from `choose`; no configure stage is emitted. Other options present Continue
+and move to `configure`. Back returns to `choose` without clearing selection
+or host-owned field state.
 
 ## 4. States
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| choose | initial stage | searchable picker plus Continue/Cancel |
+| choose | initial stage | searchable picker plus Cancel and route-dependent Continue/Add |
+| direct add | selected option does not require configuration | Add submits from choose; configure is skipped |
 | configure | continued/controlled | selected summary and injected content |
 | pending | `isPending` | spinner/status; navigation and submit locked |
 | invalid | `canSubmit=false` | Add disabled; content remains interactive unless pending |
@@ -98,19 +102,21 @@ without clearing selection or host-owned field state.
 
 Behavior classification: machine-backed.
 
-Context: controllable stage, selected id, query, `canSubmit`, `isPending`.
+Context: controllable stage, selected id, query, option configuration
+requirement, `canSubmit`, `isPending`.
 Events: `SELECT`, `SET_QUERY`, `CONTINUE`, `BACK`, `SUBMIT`, `CANCEL`, and
 programmatic setters. Pending guards every workflow event except programmatic
-state replacement. `CONTINUE` requires an available selected option. `SUBMIT`
-requires configure stage, exact selection, and `canSubmit`. Effects emit only
-the documented callbacks. Machinery dependencies: picker selection machinery,
-id wiring, and polite status announcement.
+state replacement. `CONTINUE` requires an available selected option which
+requires configuration. `SUBMIT` requires an exact selection and `canSubmit`;
+from choose it additionally requires a selectable direct-add option. Effects
+emit only the documented callbacks. Machinery dependencies: picker selection
+machinery, id wiring, and polite status announcement.
 
 ## 5. Events
 
 | Event | When It Fires | Payload | Notes |
 |-------|---------------|---------|-------|
-| `onStageChange` | Continue or Back accepted | next stage | after local transition request |
+| `onStageChange` | Continue or Back accepted | next stage | direct add does not emit a stage |
 | `onValueChange` | picker selection changes | exact option id | pass-through |
 | `onQueryChange` | picker query changes | string | pass-through |
 | `onSubmit` | enabled Add activated | selected id | host performs validation/persistence |
@@ -119,7 +125,7 @@ id wiring, and polite status announcement.
 ## 6. Accessibility
 
 - Root is a labelled region, not a dialog.
-- Stage changes move focus to the new visible heading; Back restores focus to
+- Configured-flow stage changes move focus to the new visible heading; Back restores focus to
   the selected option when practical.
 - Pending status uses `role="status"`, `aria-live="polite"`.
 - Errors use `role="alert"`; host fields retain their own error association.
@@ -159,6 +165,7 @@ id wiring, and polite status announcement.
 ### Tier 1: Strict Parity
 
 - [ ] stage guards, focus movement, callbacks, and pending lock match
+- [ ] direct routes submit from choose without emitting configure
 - [ ] injected content receives the same selected option and pending state
 
 ### Tier 2: Visual Parity

@@ -2418,7 +2418,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "model-connection-picker": {
     props: [
-      { name: "options", type: "ModelConnectionOption[]", default: "[]", description: "Host-ordered exact route options with opaque ids, availability, and badges." },
+      { name: "options", type: "ModelConnectionOption[]", default: "[]", description: "Host-ordered exact route options with opaque ids, availability, and configuration requirement." },
       { name: "value", type: "string | null | undefined", default: "undefined", description: "Controlled selected option id." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Uncontrolled initial selection." },
       { name: "query", type: "string | undefined", default: "undefined", description: "Controlled search text." },
@@ -2456,7 +2456,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "stage", type: '"choose" | "configure" | undefined', default: "undefined", description: "Controlled workflow stage." },
       { name: "defaultStage", type: '"choose" | "configure"', default: '"choose"', description: "Uncontrolled initial stage." },
-      { name: "options", type: "ModelConnectionOption[]", default: "[]", description: "Forwarded to the embedded picker." },
+      { name: "options", type: "ModelConnectionOption[]", default: "[]", description: "Forwarded to the picker; each option declares whether configuration is required." },
       { name: "value", type: "string | null | undefined", default: "undefined", description: "Controlled selected option id." },
       { name: "defaultValue", type: "string | null", default: "null", description: "Uncontrolled initial selection." },
       { name: "query", type: "string | undefined", default: "undefined", description: "Controlled picker query." },

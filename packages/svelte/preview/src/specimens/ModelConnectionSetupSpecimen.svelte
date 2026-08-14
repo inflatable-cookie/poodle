@@ -10,6 +10,11 @@
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const options = MODEL_CONNECTION_PICKER_FIXTURES;
+  const interactiveOptions = options.map((option) =>
+    option.id === "codex-app"
+      ? { ...option, availability: "available" as const, availabilityLabel: "Available", isDisabled: false }
+      : option,
+  );
 
   let apiKey = $state("");
   let endpoint = $state("http://127.0.0.1:11434");
@@ -20,7 +25,36 @@
     <div class="poodle-model-connection-setup-specimen">
       <SpecimenGroup label="Choose stage">
         <div class="poodle-model-connection-setup-specimen__panel">
-          <ModelConnectionSetup {options} defaultValue="openai-responses" />
+          <ModelConnectionSetup
+            options={interactiveOptions}
+            defaultValue="openai-responses"
+            canSubmit={true}
+          >
+            {#snippet configuration({ option })}
+              {#if option.id === "ollama-local"}
+                <Field id="mcs-choose-endpoint" label="Endpoint URL">
+                  <TextInput
+                    id="mcs-choose-endpoint"
+                    value={endpoint}
+                    placeholder="http://127.0.0.1:11434"
+                    onValueChange={(value) => (endpoint = value)}
+                  />
+                </Field>
+              {:else if option.id === "anthropic-messages"}
+                <Button variant="secondary">Sign in with browser</Button>
+              {:else if option.id !== "codex-app"}
+                <Field id="mcs-choose-api-key" label="API key">
+                  <TextInput
+                    id="mcs-choose-api-key"
+                    type="password"
+                    value={apiKey}
+                    placeholder="sk-demo-placeholder"
+                    onValueChange={(value) => (apiKey = value)}
+                  />
+                </Field>
+              {/if}
+            {/snippet}
+          </ModelConnectionSetup>
         </div>
       </SpecimenGroup>
 

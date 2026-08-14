@@ -1,13 +1,40 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
-import { MODEL_CONNECTION_PICKER_FIXTURES } from "@inflatable-cookie/poodle-core";
+import {
+  MODEL_CONNECTION_PICKER_FIXTURES,
+  type ModelConnectionOption,
+} from "@inflatable-cookie/poodle-core";
 
 import ModelConnectionSetup from "../src/ModelConnectionSetup.svelte";
 
 const options = MODEL_CONNECTION_PICKER_FIXTURES;
+const directOptions: ModelConnectionOption[] = options.map((option) =>
+  option.id === "codex-app"
+    ? { ...option, availability: "available", availabilityLabel: "Available", isDisabled: false }
+    : option,
+);
 
 describe("ModelConnectionSetup (svelte)", () => {
+  it("submits a direct route without entering configure", async () => {
+    const onStageChange = vi.fn();
+    const onSubmit = vi.fn();
+    render(ModelConnectionSetup, {
+      props: {
+        options: directOptions,
+        defaultValue: "codex-app",
+        canSubmit: true,
+        onStageChange,
+        onSubmit,
+      },
+    });
+
+    expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
+    await fireEvent.click(screen.getByRole("button", { name: "Add connection" }));
+    expect(onSubmit).toHaveBeenCalledWith("codex-app");
+    expect(onStageChange).not.toHaveBeenCalled();
+  });
+
   it("blocks continue without a selectable connection", async () => {
     const onStageChange = vi.fn();
     render(ModelConnectionSetup, {
@@ -79,6 +106,18 @@ describe("ModelConnectionSetup (svelte)", () => {
     );
     await fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("does not render an empty configuration surface", () => {
+    const { container } = render(ModelConnectionSetup, {
+      props: {
+        options,
+        stage: "configure",
+        value: "openai-responses",
+      },
+    });
+
+    expect(container.querySelector(".poodle-model-connection-setup__configuration")).toBeNull();
   });
 
   it("restores focus to the selected route after a controlled Back transition", async () => {
