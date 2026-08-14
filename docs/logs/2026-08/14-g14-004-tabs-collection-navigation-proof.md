@@ -57,8 +57,9 @@ labelled-by links. Reordered fixtures retain the same semantic ids.
 ## Replacement and cost
 
 - Corpus projection replaces only the bounded collection/navigation examples.
-  Each active specimen retains an explicit residual section for overflow,
-  icons/counts, close/reorder, edge/fill variants, panels, and scale examples.
+  Web specimens retain overflow and working close/reorder examples. GPUI
+  retains working close plus icons/counts, edge/fill, panel, and scale examples;
+  native reorder and overflow remain outside the preview's supported surface.
 - Tabs pilot increment: 1,126 LOC, including the generated Rust declaration.
 - Tabs generated interface/case data: 23,010 bytes.
 - `TabsSpec` is not replaced: overflow, history, close/reorder, tooltips, and

@@ -70,7 +70,17 @@ export function TabsSpecimen() {
         <div style={{ resize: "horizontal", overflow: "auto", width: "24rem", minWidth: "12rem" }}>
           <Tabs items={residualItems} overflowStrategy="shed" collapseWhenOverflow ariaLabel="Overflow shedding" />
         </div>
-        <Tabs items={residualItems} variant="card" activeEdge="outline" activeFill="solid" defaultValue="editor" reorderable onClose={(value) => setValueLog(`Closed: ${value}`)} ariaLabel="Closable files" />
+        <Tabs
+          items={residualItems}
+          variant="card"
+          activeEdge="outline"
+          activeFill="solid"
+          defaultValue="editor"
+          reorderable
+          onClose={(value) => setValueLog(`Closed: ${value}`)}
+          onReorder={(items) => setValueLog(`Reordered: ${items.join(", ")}`)}
+          ariaLabel="Closable, reorderable files"
+        />
         <Tabs items={residualItems} variant="block" activeEdge="underline" activeFill="none" fullWidth defaultValue="editor" ariaLabel="Full-width workspace">
           {(activeValue) => <p>Panel: {activeValue}</p>}
         </Tabs>

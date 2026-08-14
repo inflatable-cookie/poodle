@@ -69,6 +69,7 @@ fn render_corpus_groups(state: &AppState) -> Div {
             caption,
             tabs_spec_from_fixture(&fixture),
             panel_text(&fixture),
+            None,
         ));
 
         let axes = case
@@ -100,6 +101,7 @@ fn render_corpus_groups(state: &AppState) -> Div {
                     &format!("{caption} · {value}"),
                     tabs_spec_from_fixture(&expanded),
                     panel_text(&expanded),
+                    None,
                 ));
             }
         }
@@ -125,14 +127,23 @@ fn render_corpus_groups(state: &AppState) -> Div {
             state,
             theme,
             "residual:closable",
-            "Closable, reorderable, icons and counts",
+            "Closable, icons and counts",
             TabsSpec::new(residual_items())
                 .with_variant(TabVariant::Card)
                 .with_active_edge(ActiveEdge::Outline)
-                .with_active_fill(ActiveFill::Solid)
-                .with_reorderable(true),
+                .with_active_fill(ActiveFill::Solid),
             String::new(),
+            Some("tabs-residual:last-closed"),
         ))
+        .child(div().text_size(px(12.0)).child(format!(
+                "Last closed: {}",
+                state
+                    .specimens
+                    .text
+                    .get("tabs-residual:last-closed")
+                    .map(String::as_str)
+                    .unwrap_or("none")
+            )))
         .child(row(
             state,
             theme,
@@ -144,6 +155,7 @@ fn render_corpus_groups(state: &AppState) -> Div {
                 .with_active_fill(ActiveFill::None)
                 .with_full_width(true),
             "Surface content area".to_owned(),
+            None,
         ))
         .child(row(
             state,
@@ -155,6 +167,7 @@ fn render_corpus_groups(state: &AppState) -> Div {
                 .with_size(ControlSize::Lg)
                 .with_density(ControlDensity::Comfortable),
             String::new(),
+            None,
         ));
     root
 }
@@ -186,13 +199,14 @@ fn row(
     caption: &str,
     mut spec: TabsSpec,
     panel: String,
+    close_state_key: Option<&str>,
 ) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
     let state_key = format!("tabs-corpus:{key}");
     if let Some(value) = state.specimens.text.get(&state_key) {
         spec.value = Some(value.clone());
     }
-    let handlers = projected_tabs_handlers(state, state_key);
+    let handlers = projected_tabs_handlers(state, state_key, close_state_key.map(str::to_owned));
     let node = tabs_with_panel(&spec, theme, handlers, Node::text(panel));
     div()
         .flex()
@@ -213,7 +227,11 @@ fn row(
         )
 }
 
-fn projected_tabs_handlers(state: &AppState, state_key: String) -> TabsHandlers {
+fn projected_tabs_handlers(
+    state: &AppState,
+    state_key: String,
+    close_state_key: Option<String>,
+) -> TabsHandlers {
     let events = Arc::clone(&state.node_events);
     let on_change = Arc::new(move |value: &str| {
         events.lock().unwrap().push(NodeSpecimenEvent::SetText {
@@ -221,8 +239,21 @@ fn projected_tabs_handlers(state: &AppState, state_key: String) -> TabsHandlers 
             value: value.to_owned(),
         });
     });
+    let close_events = Arc::clone(&state.node_events);
+    let on_close = close_state_key.map(|key| {
+        Arc::new(move |value: &str| {
+            close_events
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetText {
+                    key: key.clone(),
+                    value: value.to_owned(),
+                });
+        }) as poodle_render::TabHandler
+    });
     TabsHandlers {
         on_change: Some(on_change),
+        on_close,
         ..TabsHandlers::default()
     }
 }

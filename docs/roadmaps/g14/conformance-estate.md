@@ -210,7 +210,10 @@ collections:
   labelled-by observations. The runners contain no Tabs component branch or
   second item corpus.
 - **Specimens** — the three active Tabs pages project the bounded corpus and
-  retain explicit residual examples for shipped behavior outside the profile.
+  retain explicit residual examples for supported behavior outside the profile.
+  Web keeps overflow and close/reorder operator evidence; GPUI keeps observable
+  close and residual presentation examples, without claiming unsupported native
+  reorder or overflow behavior.
 - **Cost** — 1,126 LOC Tabs pilot increment and 23,010 bytes of Tabs fixture JSON.
 - **Residual surfaces** — `TabsSpec` remains because overflow, history,
   close/reorder, tooltips, and host actions are outside this bounded profile.
@@ -242,7 +245,7 @@ No experimental surface is architecture merely because it merged.
 | **hand-written Button specimen fixtures (3 active runtimes)** | replaced by corpus projections; the Jetstream specimen stays deferred with its runtime | done |
 | **hand-written RangeSlider specimen fixtures (3 active runtimes)** | replaced by corpus projections | done |
 | **g14.004 Tabs identified-collection proof** | keep — stable keyed repeated anatomy and navigation profile | g14.010 |
-| **hand-written Tabs specimen fixtures (3 active runtimes)** | partially projected; retain residual overflow, decoration, operator, panel, and scale coverage | g14.010 / g14.011 |
+| **hand-written Tabs specimen fixtures (3 active runtimes)** | partially projected; retain web overflow/reorder and supported per-runtime close, decoration, panel, and scale coverage | g14.010 / g14.011 |
 | **hand-written TabsSpec + Tabs machine vectors** | retain residual overflow/history/close/reorder claims not replaced by g14.004 | g14.010 / g14.011 |
 | **generated specimen scenes (specimen-ts/rust targets)** | still the shell/nav surface; Button no longer depends on them | g14.009 |
 
