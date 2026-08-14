@@ -9,8 +9,11 @@ use poodle_specs::{
 };
 use serde_json::Value;
 
-pub const CASES: &str = include_str!("./generated/conformance/button-cases.json");
-pub const INTERFACE: &str = include_str!("./generated/conformance/button-interface.json");
+// The canonical fixtures: the TypeScript authority's serialized output,
+// gated byte-exact by `conformance:serialize-check`. No copies — every
+// consumer reads the same bytes.
+pub const CASES: &str = include_str!("../../../codegen/fixtures/conformance/button-cases.json");
+pub const INTERFACE: &str = include_str!("../../../codegen/fixtures/conformance/button-interface.json");
 
 /// The fixture → spec adapter (the harness's mount step for Button).
 pub fn spec_from_fixture(fixture: &Value) -> ButtonSpec {

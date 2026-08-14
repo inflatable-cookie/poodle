@@ -48,6 +48,10 @@ export interface EventDecl<P = object> {
    * payload types under `const` inference (a `Record` constraint widens
    * them, which is how the handler projections lost their value types). */
   payload: P;
+  /** Framework carrier for the web handler (e.g. "mouse-event" for press).
+   * The public web callback keeps its framework shape; the carrier marks
+   * how the semantic event surfaces on web. */
+  webCarrier?: "mouse-event";
 }
 
 export interface RegionDecl {
@@ -228,11 +232,19 @@ export type PayloadToTs<P> = {
 
 /** Handler arguments for an event payload: no payload → no args; a
  * single-field payload → the field value; more fields → the object. */
-export type PayloadArgs<P> = keyof P extends never
-  ? []
-  : PayloadToTs<P> extends infer O
-    ? [O[keyof O]]
-    : never;
+/** The value type of a single-field payload (the field's own value). */
+type SingleFieldValue<P> = keyof P extends infer K
+  ? K extends keyof P
+    ? Exclude<keyof P, K> extends never
+      ? PayloadToTs<P>[K]
+      : PayloadToTs<P>
+    : never
+  : never;
+
+/** Handler arguments for an event payload: no payload → no args; a
+ * single-field payload → the field value; more fields → the payload
+ * object (one argument, not a union of field values). */
+export type PayloadArgs<P> = keyof P extends never ? [] : [SingleFieldValue<P>];
 
 export type PortableEventsOf<I extends InterfaceConfig> = {
   [E in I["events"][number] as E["name"]]: (...args: PayloadArgs<E["payload"]>) => void;
@@ -308,6 +320,8 @@ export interface PartExpectation<I extends InterfaceConfig> {
   role?: string;
   name?: string;
   text?: string;
+  /** The icon name the part carries (observed on all runtimes). */
+  icon?: string;
   present?: boolean;
   focusable?: boolean;
   states?: Partial<Record<StateNamesOf<I>, boolean>>;

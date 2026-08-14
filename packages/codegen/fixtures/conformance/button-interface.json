@@ -257,7 +257,8 @@
   "events": [
     {
       "name": "press",
-      "payload": {}
+      "payload": {},
+      "webCarrier": "mouse-event"
     },
     {
       "name": "pressedChange",

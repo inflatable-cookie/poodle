@@ -17,6 +17,9 @@ import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { buttonCases } from "../../packages/core/src/conformance/button-cases";
+import type { SerializedCase } from "../../packages/core/src/conformance/define";
+
 interface AssertionResult {
   stepIndex: number;
   part: string | null;
@@ -63,7 +66,32 @@ const IDENTITY_FIELDS = [
   "focusVisible",
 ] as const;
 const GEOMETRY_FIELDS = ["height", "minWidth", "paddingLeft", "paddingRight", "radius"] as const;
-const GEOMETRY_TOLERANCE = 1.0;
+
+/**
+ * Geometry contracts, authored per case: the corpus's geometry assertions
+ * carry the named, assertion-local tolerance (spec 066). The comparison
+ * compares exactly those fields with exactly those bounds — no blanket
+ * runtime tolerance exists. Geometry fields no case asserts are recorded,
+ * not compared.
+ */
+function geometryContracts(): Map<string, Map<string, number>> {
+  const contracts = new Map<string, Map<string, number>>();
+  for (const caseData of buttonCases.cases as SerializedCase[]) {
+    const fields = new Map<string, number>();
+    for (const step of caseData.steps) {
+      if (step.kind !== "expectPart") continue;
+      const geometry = (step.expect.geometry ?? {}) as Record<string, unknown>;
+      const tolerance = typeof geometry.tolerance === "number" ? geometry.tolerance : 0.5;
+      for (const field of GEOMETRY_FIELDS) {
+        if (typeof geometry[field] === "number") fields.set(field, tolerance);
+      }
+    }
+    if (fields.size > 0) contracts.set(caseData.id, fields);
+  }
+  return contracts;
+}
+
+const GEOMETRY_CONTRACTS = geometryContracts();
 
 interface ObservationShape {
   parts?: Record<string, Record<string, unknown>>;
@@ -153,29 +181,12 @@ function compareFrame(
         }
       }
     }
-    // Geometry: values with a tolerance, where the reference observes them
-    // (the one documented skip — calc() geometry the headless DOM cannot
-    // resolve). A planted divergence where the reference observes fails.
-    for (const field of GEOMETRY_FIELDS) {
-      const reference = fieldOf(refObs, partId, "geometry") as Record<string, unknown> | undefined;
-      const expected = reference?.[field];
-      if (expected === null || expected === undefined || typeof expected !== "number") continue;
-      for (const runtime of runtimesOrder) {
-        if (runtime === "svelte") continue;
-        const geometry = fieldOf(perRuntime.get(runtime), partId, "geometry") as Record<string, unknown> | undefined;
-        const actual = geometry?.[field];
-        if (typeof actual !== "number") {
-          problems.push(
-            `${runtime} ${caseId} obs ${index} ${partId}.geometry.${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
-          );
-          continue;
-        }
-        if (Math.abs(expected - actual) > GEOMETRY_TOLERANCE) {
-          problems.push(
-            `${runtime} ${caseId} obs ${index} ${partId}.geometry.${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
-          );
-        }
-      }
+    // Geometry: only the fields the corpus asserts, with the authored,
+    // assertion-local tolerance (spec 066 — named bounds, never a blanket
+    // runtime tolerance). Unasserted geometry is recorded, not compared.
+    const contract = GEOMETRY_CONTRACTS.get(caseId);
+    if (contract && partId === "root") {
+      compareContractedGeometry(problems, caseId, index, partId, perRuntime, runtimesOrder, contract, refObs);
     }
   }
   // The trace (event order + payloads) must agree exactly.
@@ -189,6 +200,45 @@ function compareFrame(
     }
   }
 }
+
+function compareContractedGeometry(
+  problems: string[],
+  caseId: string,
+  index: number,
+  partId: string,
+  perRuntime: Map<string, unknown>,
+  runtimesOrder: string[],
+  contract: Map<string, number>,
+  refObs: ObservationShape | undefined,
+): void {
+    for (const [field, tolerance] of contract) {
+      const reference = fieldOf(refObs, partId, "geometry") as Record<string, unknown> | undefined;
+      const expected = reference?.[field];
+      if (expected === null || expected === undefined || typeof expected !== "number") {
+        // The reference cannot resolve this field headlessly (e.g. a calc()
+        // the DOM does not evaluate) — the authored bound still gates the
+        // runtimes that do observe it against the authored expectation.
+        continue;
+      }
+      for (const runtime of runtimesOrder) {
+        if (runtime === "svelte") continue;
+        const geometry = fieldOf(perRuntime.get(runtime), partId, "geometry") as Record<string, unknown> | undefined;
+        const actual = geometry?.[field];
+        if (typeof actual !== "number") {
+          problems.push(
+            `${runtime} ${caseId} obs ${index} ${partId}.geometry.${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
+          );
+          continue;
+        }
+        if (Math.abs(expected - actual) > tolerance) {
+          problems.push(
+            `${runtime} ${caseId} obs ${index} ${partId}.geometry.${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)} (bound ${tolerance})`,
+          );
+        }
+      }
+    }
+}
+
 
 function main(): void {
   const available = ACTIVE_RUNTIMES.filter((runtime) => loadReport(runtime) !== null);

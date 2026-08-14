@@ -1,6 +1,7 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/button.css";
   import type {
+    ButtonInterface,
     ButtonPortableEvents,
     ButtonPortableProps,
   } from "@inflatable-cookie/poodle-core/conformance/button";
@@ -32,6 +33,20 @@
   type Portable = Omit<ButtonPortableProps, (typeof carrierProps)[number]>;
   type PortableEvents = ButtonPortableEvents;
 
+  /**
+   * The web handler for a semantic event: the public callback keeps its
+   * framework shape (the contract's `MouseEvent`), while the name binds
+   * mechanically to the interface — renaming the semantic `press` event
+   * fails this file without a second type mirror.
+   */
+  type WebHandler<
+    N extends keyof PortableEvents,
+  > = Extract<ButtonInterface["events"][number], { name: N }> extends {
+    webCarrier: "mouse-event";
+  }
+    ? (event: MouseEvent) => void
+    : PortableEvents[N];
+
   interface Props extends Partial<Portable> {
     type?: HTMLButtonElement["type"];
     form?: string | null;
@@ -48,7 +63,7 @@
     trailingIcon?: IconProp | null;
     className?: string;
     style?: string | null;
-    onClick?: PortableEvents["press"] | null;
+    onClick?: WebHandler<"press"> | null;
     onFocus?: ((event: FocusEvent) => void) | null;
     onBlur?: ((event: FocusEvent) => void) | null;
     onPressedChange?: PortableEvents["pressedChange"] | null;
@@ -156,9 +171,7 @@
       }
       onPressedChange?.(next);
     }
-    // The portable `press` handler takes no payload; the framework carries
-    // the DOM event at the boundary.
-    (onClick as ((event: MouseEvent) => void) | null)?.(event);
+    onClick?.(event);
   }
 </script>
 

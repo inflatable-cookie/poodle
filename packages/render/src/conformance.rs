@@ -247,24 +247,27 @@ fn first_text(root: &Node) -> Option<&Node> {
 
 /// The visible label text: the root's intrinsic label or its first Text
 /// child.
+/// The visible label text: the root's first Text child, or the text the
+/// root intrinsically carries (the vocabulary's own accessor — no kind
+/// branch in observer code).
 fn label_text(root: &Node) -> Option<String> {
-    match &root.kind {
-        NodeKind::Button { label } if !label.is_empty() => Some(label.clone()),
-        _ => first_text(root).map(|node| match &node.kind {
+    first_text(root)
+        .map(|node| match &node.kind {
             NodeKind::Text { content } => content.clone(),
             _ => String::new(),
-        }),
-    }
+        })
+        .or_else(|| root.intrinsic_text().map(str::to_owned))
 }
 
+/// The renderer declares roles on `a11y`; the observer never infers a
+/// role from a node kind. Removing the renderer's declaration makes the
+/// role observation `null` and the owning assertion fails — never a
+/// silent fallback.
 fn role_of(node: &Node) -> Option<String> {
-    if let Some(role) = &node.a11y.role {
-        return Some(format!("{role:?}").to_ascii_lowercase());
-    }
-    match &node.kind {
-        NodeKind::Button { .. } => Some("button".to_owned()),
-        _ => None,
-    }
+    node.a11y
+        .role
+        .as_ref()
+        .map(|role| format!("{role:?}").to_ascii_lowercase())
 }
 
 fn rgba(color: &poodle_node::ColorValue) -> String {

@@ -214,15 +214,15 @@ fn parse_args() -> Result<Args, String> {
             return Err("--out is required with --conformance".to_owned());
         }
         match target.as_deref() {
-            Some(targets::conformance_rust::ID) | Some(targets::conformance_cases::ID) => {}
+            Some(targets::conformance_rust::ID) => {}
             Some(id) => {
                 return Err(format!(
-                    "conformance --target must be conformance-rust or conformance-cases, not '{id}'"
+                    "conformance --target must be conformance-rust, not '{id}'"
                 ));
             }
             None => {
                 return Err(
-                    "--target is required with --conformance (conformance-rust or conformance-cases)"
+                    "--target is required with --conformance (conformance-rust)"
                         .to_owned(),
                 );
             }
@@ -384,16 +384,13 @@ fn run_conformance(
             targets::conformance_rust::render(&interface, &source_path)?,
             targets::conformance_rust::OUTPUT_ROOT,
         ),
-        targets::conformance_cases::ID => (
-            targets::conformance_cases::render(interface_path, cases_path)?,
-            targets::conformance_cases::OUTPUT_ROOT,
-        ),
+
         other => {
             return Err(CodegenError::UnknownTarget {
                 id: other.to_owned(),
                 known: vec![
                     targets::conformance_rust::ID.to_owned(),
-                    targets::conformance_cases::ID.to_owned(),
+
                 ],
             });
         }

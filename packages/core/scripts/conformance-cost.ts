@@ -24,7 +24,11 @@ function countLines(text: string): number {
 }
 
 function workingLoc(path: string): number {
-  return countLines(readFileSync(`${ROOT}/${path}`, "utf8"));
+  try {
+    return countLines(readFileSync(`${ROOT}/${path}`, "utf8"));
+  } catch {
+    return 0;
+  }
 }
 
 function mainLoc(path: string): number {
@@ -46,16 +50,13 @@ const AUTHORED: Array<[string, string]> = [
 const CODEGEN: Array<[string, string]> = [
   ["Codegen conformance parsing + case validation", "packages/codegen/src/conformance.rs"],
   ["Codegen Rust declaration target", "packages/codegen/src/targets/conformance_rust.rs"],
-  ["Codegen cases-copy target", "packages/codegen/src/targets/conformance_cases.rs"],
   ["Codegen CLI mode (delta)", "packages/codegen/src/bin/poodle-codegen.rs"],
 ];
 
 const GENERATED: Array<[string, string]> = [
   ["Rust declaration (generated/button.rs)", "packages/contracts/components/src/generated/button.rs"],
-  ["Interface fixture JSON", "packages/codegen/fixtures/conformance/button-interface.json"],
-  ["Case fixture JSON", "packages/codegen/fixtures/conformance/button-cases.json"],
-  ["Interface JSON copy (gpui preview)", "packages/gpui/preview/src/generated/conformance/button-interface.json"],
-  ["Case JSON copy (gpui preview)", "packages/gpui/preview/src/generated/conformance/button-cases.json"],
+  ["Interface fixture JSON (bytes)", "packages/codegen/fixtures/conformance/button-interface.json"],
+  ["Case fixture JSON (bytes)", "packages/codegen/fixtures/conformance/button-cases.json"],
 ];
 
 const OBSERVERS_AND_RUNNERS: Array<[string, string]> = [
@@ -110,6 +111,10 @@ function table(title: string, rows: Array<[string, string]>, mode: "working" | "
       count = Math.max(0, workingLoc(path) - mainLoc(path));
     } else if (path.includes("#conformance")) {
       count = sectionLoc(path.split("#")[0], "# Conformance kernel (g14.001", "# Preview (documentation site)");
+    } else if (path.includes("JSON (bytes)")) {
+      // Byte-grounded: serialized data artifacts are counted in bytes
+      // (1,024 bytes = 1 unit), not as source lines.
+      count = Math.round(readFileSync(`${ROOT}/${path}`, "utf8").length / 1024);
     } else {
       count = workingLoc(path);
     }
@@ -136,11 +141,12 @@ console.log("\n=== Summary ===");
 console.log(`mechanism total: ${mechanism}`);
 console.log(`  reusable kernel (codegen + observers/runners + supporting + wiring): ${reusable}`);
 console.log(`  per-component authority (interface + corpus + projection + serializer): ${perComponent}`);
-console.log(`  generated artifacts (declaration + four JSON artifacts): ${generated}`);
+console.log(`  generated artifacts (declaration + two canonical JSON fixtures, byte-counted): ${generated}`);
 console.log(`replaced: ${replaced}`);
 console.log(`net (mechanism minus replaced): ${mechanism - replaced}`);
 console.log(
-  `stop-condition check: mechanism ${mechanism} vs replaced ${replaced} on Button alone; ` +
-    `the reusable kernel (${reusable}) is a one-time investment the remaining profile pilots ` +
-    `consume without growth — the amortization claim is tested again at the RangeSlider pilot.`,
+  `stop-condition check: mechanism ${mechanism} vs replaced ${replaced} on Button alone — the ` +
+    `condition is TRIGGERED (spec 066). The reusable kernel (${reusable}) is a one-time ` +
+    `investment; concrete amortization evidence requires a second component, which this card ` +
+    `must not start. See the g14.001 batch log for the simplify/accept/reject options.`,
 );

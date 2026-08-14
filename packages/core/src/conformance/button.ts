@@ -56,7 +56,7 @@ export const buttonInterface = defineComponentInterface({
     { name: "style", type: { kind: "string" }, default: null, nullable: true, extension: "web-styling" },
   ],
   events: [
-    { name: "press", payload: {} },
+    { name: "press", payload: {}, webCarrier: "mouse-event" },
     { name: "pressedChange", payload: { pressed: "boolean" } },
   ],
   regions: [
@@ -171,6 +171,17 @@ export type ButtonStateName = StateNamesOf<ButtonInterface>;
 export type ButtonEventName = EventNamesOf<ButtonInterface>;
 export type ButtonTokenRole = TokenRoleNamesOf<ButtonInterface>;
 export type ButtonAxis = AxisNamesOf<ButtonInterface>;
+
+/**
+ * Type-level payload tests: the handler projections must hold without any
+ * runtime gate. `pressedChange` takes the boolean value; `press` takes no
+ * arguments. A failure here is a schema regression, not a lint.
+ */
+type AssertPayload<T extends true> = T;
+type PressParams = Parameters<ButtonPortableEvents["press"]>;
+type PressedChangeParams = Parameters<ButtonPortableEvents["pressedChange"]>;
+type _PressTakesNoArgs = AssertPayload<PressParams extends [] ? true : false>;
+type _PressedChangeTakesBoolean = AssertPayload<PressedChangeParams extends [boolean] ? true : false>;
 
 export const BUTTON_DEFAULT_PROPS: ButtonPortableProps = {
   variant: "secondary",
