@@ -1,7 +1,7 @@
 # g14 — Executable Component Conformance
 
 Status: active
-Posture: strict-ready
+Posture: migration
 Opened: 2026-08-14
 Governing refs: `../../architecture/009-cross-runtime-component-conformance.md`,
 `../../specs/066-executable-component-conformance.md`,
@@ -52,8 +52,8 @@ the adopted cases before promotion.
 
 ## Runway
 
-1. [001 — Conformance kernel and Button proof](001-conformance-kernel-and-button-proof.md) — ready
-2. [002 — Primitive substrate certification](002-primitive-substrate-certification.md)
+1. [001 — Conformance kernel and Button proof](001-conformance-kernel-and-button-proof.md) — review-blocked; PR #10 replacement required
+2. [002 — Primitive substrate certification](002-primitive-substrate-certification.md) — blocked on 001
 3. [003 — RangeSlider controlled-control proof](003-range-slider-controlled-control-proof.md)
 4. [004 — Tabs collection and navigation proof](004-tabs-collection-navigation-proof.md)
 5. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md)
@@ -86,12 +86,14 @@ roadmap surfaces.
 
 ## First Task
 
-`g14.001` is the next worker card. It must prove one authored Button interface
+`g14.001` is the next worker card. PR #10 is retained as failed-pilot evidence,
+not merged authority. The replacement pass must prove one authored Button interface
 and case can drive Svelte, React, shared Rust composition, and GPUI
 observations, tests, and specimen structure without becoming a behaviour
 compiler or additive mirror.
 
-`g14.016` is ready as an operator checkpoint beside it. Review the landed
+`g14.016` is active as an orchestrator/operator checkpoint in this thread.
+Review the landed
 Svelte and React licence specimens, record feedback, and permit at most one
 bounded web-reference refinement pass. Native/conformance completion remains
 visibly open under `017`.

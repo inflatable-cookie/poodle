@@ -19,8 +19,9 @@ Updated: 2026-08-14
     the licence web reference; `016` is its operator review checkpoint; `017`
     completes it through the adopted conformance path; `018`–`019` clean up
     and close.
-  - Next: `g14.001` conformance kernel and Button proof. `g14.016` may run as
-    an operator review checkpoint beside it.
+  - Next: replace the review-blocked `g14.001` proof; PR #10 is evidence, not
+    merge authority. `g14.002` stays closed. `g14.016` is active as a shared
+    operator review in the current orchestrator thread.
 
 ## Latest Completed Track
 

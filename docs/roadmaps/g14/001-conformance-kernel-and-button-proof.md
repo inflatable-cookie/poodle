@@ -1,6 +1,6 @@
 # g14.001 — Conformance Kernel And Button Proof
 
-Status: ready
+Status: review-blocked — PR #10 requires a replacement pass
 Depends on: none
 Governing spec: `../../specs/066-executable-component-conformance.md`
 
@@ -18,6 +18,32 @@ one portable interface + one typed case corpus
 
 This is a replacement proof, not a platform build. Keep the generic surface
 as small as Button needs while preserving extension points named by spec 066.
+
+## Review Ruling
+
+PR #10 proved that shared cases can project the Button specimen structure, but
+it does not satisfy the conformance boundary. Keep the branch as evidence; do
+not merge or build `g14.002` on it.
+
+The replacement pass must remove these blockers rather than document them as
+later debt:
+
+- infer web portable prop and event types from the interface value; a second
+  hand-written `ButtonPortableProps` or `ButtonPortableEvents` shape is not an
+  authority
+- bind case fixtures, regions, parts, states, events, and values to that
+  interface at compile time and validate the serialized artifact against it
+- make shared observers data-driven from stable runtime part identity; shared
+  code may not hardcode Button's part list or tree-search rules
+- fail a required assertion when any active runtime cannot observe it;
+  cross-runtime "someone exercised it" vacuity is not completion
+- execute activation through the GPUI backend binding; converting a node and
+  then calling `Node.interaction.on_activate` directly is not backend evidence
+- keep Jetstream opt-in and program-deferred; it cannot substitute for missing
+  GPUI focus, token, or input evidence
+- remeasure cost after removing copied artifacts and the Jetstream execution
+  lane; stop again if reusable mechanism still grows faster than replaced
+  declarations and specimen structure without a concrete amortization proof
 
 ## Scope
 
@@ -60,13 +86,21 @@ stable case and capture IDs.
 
 ## Acceptance
 
-- Changing one portable prop name fails TypeScript/Rust generation or compile.
+- Changing one portable prop or event name fails the consuming TypeScript
+  shells and Rust generation or compile without editing a second type mirror.
+- An unknown fixture prop, region, part, state, event, enum value, or axis fails
+  authoring or serialization; it cannot be ignored by every runtime.
 - Changing a fixture/group/caption changes all three active specimen
   projections.
 - A planted event, role, token-role, part, or geometry divergence fails and
   names runtime, case, step, and field.
+- A required field that GPUI cannot observe fails GPUI completion rather than
+  becoming vacuous because Svelte or React observed it.
 - Removing Button from the GPUI registry fails completion.
-- Replacing a real handler with an inert one fails an executed case.
+- Replacing the GPUI backend listener binding with an inert one fails an
+  executed case. Calling the source node callback directly is forbidden.
+- Shared runners and observers contain no Button identifier, part list, icon
+  name, or Button-specific tree branch.
 - Double generation is byte-identical; check mode never mutates the tree and
   catches orphans.
 - Existing hand-written portable declarations and duplicate specimen fixture
@@ -83,6 +117,8 @@ stable case and capture IDs.
 - Native success can be obtained without exercising GPUI backend output, or
   the portable Rust surface embeds GPUI-specific types that obstruct a later
   backend.
+- Any required active-runtime assertion can pass as vacuous.
+- A second hand-authored type or fixture vocabulary mirrors the interface.
 - Total mechanism grows without deleting equivalent declarations/specimens.
 - The worker must redesign another component to make Button pass.
 

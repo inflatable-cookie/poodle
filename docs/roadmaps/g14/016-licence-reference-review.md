@@ -1,6 +1,6 @@
 # g14.016 — Licence Reference Review
 
-Status: ready — operator checkpoint
+Status: active — orchestrator/operator checkpoint
 Depends on: `g14.015`
 Governing refs: `../../contracts/components/licence-status.md`,
 `../../contracts/components/licence-activation.md`,
@@ -82,7 +82,8 @@ Run them with `effigy svelte:preview` and `effigy react:preview`.
 
 ## Completion Protocol
 
-If no code changes are required, the orchestrator records the approval and
-closes the checkpoint without a PR. If changes are required, one fresh
-worktree owns the whole bounded refinement and returns one PR with exact review
-captures and focused validation. The worker does not change roadmap status.
+The review and any bounded refinement stay in the current orchestrator thread
+so the operator can inspect each change in the collaborative preview. If no
+code changes are required, record approval and close without a PR. If changes
+are required, keep them in one review batch with exact captures and focused
+validation; do not dispatch a separate worker.
