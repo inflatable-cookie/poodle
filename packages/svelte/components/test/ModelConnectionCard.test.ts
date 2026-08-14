@@ -1,7 +1,12 @@
-import { fireEvent, render, screen } from "@testing-library/svelte";
+import { fireEvent, render, screen, waitFor } from "@testing-library/svelte";
+import { createRawSnippet } from "svelte";
 import { describe, expect, it, vi } from "vitest";
 
 import ModelConnectionCard from "../src/ModelConnectionCard.svelte";
+
+const detailsSnippet = createRawSnippet(() => ({
+  render: () => '<button type="button">Detail action</button>',
+}));
 
 describe("ModelConnectionCard (svelte)", () => {
   it("keeps disclosure and enable callbacks independent", async () => {
@@ -58,5 +63,37 @@ describe("ModelConnectionCard (svelte)", () => {
 
     expect(screen.getByText("Ready")).toBeTruthy();
     expect(screen.getByText("API key on file")).toBeTruthy();
+  });
+
+  it("uses instance-scoped detail ids for repeated connection records", () => {
+    render(ModelConnectionCard, {
+      props: { id: "same", title: "First", providerLabel: "Provider" },
+    });
+    render(ModelConnectionCard, {
+      props: { id: "same", title: "Second", providerLabel: "Provider" },
+    });
+
+    const controls = screen
+      .getAllByRole("button", { name: /Expand/ })
+      .map((button) => button.getAttribute("aria-controls"));
+    expect(new Set(controls).size).toBe(2);
+  });
+
+  it("restores focus when a controlled card closes around focused details", async () => {
+    const props = {
+      id: "controlled",
+      title: "Controlled",
+      providerLabel: "Provider",
+      open: true,
+      details: detailsSnippet as never,
+    };
+    const { rerender } = render(ModelConnectionCard, { props });
+    const detailAction = screen.getByRole("button", { name: "Detail action" });
+    detailAction.focus();
+
+    await rerender({ ...props, open: false });
+
+    const disclosure = screen.getByRole("button", { name: "Expand Controlled" });
+    await waitFor(() => expect(document.activeElement).toBe(disclosure));
   });
 });

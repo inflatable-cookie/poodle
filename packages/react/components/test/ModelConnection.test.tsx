@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -53,10 +53,37 @@ describe("ModelConnectionPicker (react)", () => {
     const { rerender } = render(
       <ModelConnectionPicker options={options} state="loading" />,
     );
-    expect(document.querySelector('[data-state="loading"]')).toBeTruthy();
+    expect(screen.getByText("Loading connections")).toBeTruthy();
 
     rerender(<ModelConnectionPicker options={[] as ModelConnectionOption[]} state="ready" />);
-    expect(document.querySelector('[data-state="empty"]')).toBeTruthy();
+    expect(screen.getByText("No connections available")).toBeTruthy();
+  });
+
+  it("keeps a visible option tabbable when the selected option is filtered out", () => {
+    const { container } = render(
+      <ModelConnectionPicker
+        options={options}
+        value="openai-responses"
+        query="local"
+      />,
+    );
+
+    const ollama = container.querySelector(
+      '[data-model-connection-option="ollama-local"]',
+    ) as HTMLButtonElement;
+    expect(ollama.tabIndex).toBe(0);
+  });
+
+  it("renders the selected-route indicator", () => {
+    const { container } = render(
+      <ModelConnectionPicker options={options} defaultValue="openai-responses" />,
+    );
+
+    expect(
+      container.querySelector(
+        '[data-model-connection-option="openai-responses"] .poodle-model-connection-picker__selected-icon',
+      ),
+    ).toBeTruthy();
   });
 });
 
@@ -121,6 +148,29 @@ describe("ModelConnectionSetup (react)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onCancel).not.toHaveBeenCalled();
   });
+
+  it("restores focus to the selected route after a controlled Back transition", async () => {
+    const { container, rerender } = render(
+      <ModelConnectionSetup
+        options={options}
+        stage="configure"
+        value="openai-responses"
+      />,
+    );
+
+    rerender(
+      <ModelConnectionSetup
+        options={options}
+        stage="choose"
+        value="openai-responses"
+      />,
+    );
+
+    const selected = container.querySelector(
+      '[data-model-connection-option="openai-responses"]',
+    );
+    await waitFor(() => expect(document.activeElement).toBe(selected));
+  });
 });
 
 describe("ModelConnectionCard (react)", () => {
@@ -146,6 +196,47 @@ describe("ModelConnectionCard (react)", () => {
 
     fireEvent.click(screen.getByRole("switch", { name: /Enable OpenAI/i }));
     expect(onEnabledChange).toHaveBeenCalledWith(false);
+  });
+
+  it("uses instance-scoped detail ids for repeated connection records", () => {
+    render(
+      <>
+        <ModelConnectionCard id="same" title="First" providerLabel="Provider" />
+        <ModelConnectionCard id="same" title="Second" providerLabel="Provider" />
+      </>,
+    );
+
+    const controls = screen
+      .getAllByRole("button", { name: /Expand/ })
+      .map((button) => button.getAttribute("aria-controls"));
+    expect(new Set(controls).size).toBe(2);
+  });
+
+  it("restores focus when a controlled card closes around focused details", async () => {
+    const details = () => <button type="button">Detail action</button>;
+    const { rerender } = render(
+      <ModelConnectionCard
+        id="controlled"
+        title="Controlled"
+        providerLabel="Provider"
+        open
+        details={details}
+      />,
+    );
+    screen.getByRole("button", { name: "Detail action" }).focus();
+
+    rerender(
+      <ModelConnectionCard
+        id="controlled"
+        title="Controlled"
+        providerLabel="Provider"
+        open={false}
+        details={details}
+      />,
+    );
+
+    const disclosure = screen.getByRole("button", { name: "Expand Controlled" });
+    await waitFor(() => expect(document.activeElement).toBe(disclosure));
   });
 });
 
@@ -184,5 +275,27 @@ describe("ModelCatalogueEditor (react)", () => {
 
     rerender(<ModelCatalogueEditor items={[]} state="sessionNegotiated" />);
     expect(screen.getByText("Models after session")).toBeTruthy();
+  });
+
+  it("tracks a keyboard grab by stable id and limits pointer drag to the handle", () => {
+    const { container } = render(
+      <ModelCatalogueEditor
+        items={MODEL_CATALOGUE_FIXTURES}
+        onOrderChange={vi.fn()}
+      />,
+    );
+    const handle = screen.getByRole("button", {
+      name: /Frontier Alpha, position 1 of 4/i,
+    }) as HTMLButtonElement;
+    const row = container.querySelector(
+      '[data-model-catalogue-id="model-alpha"]',
+    ) as HTMLElement;
+
+    expect(row.getAttribute("draggable")).toBeNull();
+    expect(handle.getAttribute("draggable")).toBe("true");
+    fireEvent.keyDown(handle, { key: " " });
+    fireEvent.keyDown(handle, { key: "ArrowDown" });
+    expect(row.getAttribute("data-grabbed")).toBe("true");
+    expect(handle.getAttribute("aria-pressed")).toBe("true");
   });
 });

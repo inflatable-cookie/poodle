@@ -49,4 +49,23 @@ describe("ModelCatalogueEditor (svelte)", () => {
     rerender({ items: [], state: "empty" });
     expect(screen.getByText("No models")).toBeTruthy();
   });
+
+  it("tracks a keyboard grab by stable id and limits pointer drag to the handle", async () => {
+    const { container } = render(ModelCatalogueEditor, {
+      props: { items: MODEL_CATALOGUE_FIXTURES, onOrderChange: vi.fn() },
+    });
+    const handle = screen.getByRole("button", {
+      name: /Frontier Alpha, position 1 of 4/i,
+    }) as HTMLButtonElement;
+    const row = container.querySelector(
+      '[data-model-catalogue-id="model-alpha"]',
+    ) as HTMLElement;
+
+    expect(row.getAttribute("draggable")).toBeNull();
+    expect(handle.getAttribute("draggable")).toBe("true");
+    await fireEvent.keyDown(handle, { key: " " });
+    await fireEvent.keyDown(handle, { key: "ArrowDown" });
+    expect(row.getAttribute("data-grabbed")).toBe("true");
+    expect(handle.getAttribute("aria-pressed")).toBe("true");
+  });
 });

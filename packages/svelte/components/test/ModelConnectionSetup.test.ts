@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/svelte";
+import { fireEvent, render, screen, waitFor } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
 import { MODEL_CONNECTION_PICKER_FIXTURES } from "@inflatable-cookie/poodle-core";
@@ -79,5 +79,26 @@ describe("ModelConnectionSetup (svelte)", () => {
     );
     await fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("restores focus to the selected route after a controlled Back transition", async () => {
+    const { container, rerender } = render(ModelConnectionSetup, {
+      props: {
+        options,
+        stage: "configure",
+        value: "openai-responses",
+      },
+    });
+
+    await rerender({
+      options,
+      stage: "choose",
+      value: "openai-responses",
+    });
+
+    const selected = container.querySelector(
+      '[data-model-connection-option="openai-responses"]',
+    );
+    await waitFor(() => expect(document.activeElement).toBe(selected));
   });
 });

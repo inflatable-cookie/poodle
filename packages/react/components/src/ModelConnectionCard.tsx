@@ -1,6 +1,6 @@
 import "@inflatable-cookie/poodle-core/styles/model-connection.css";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 import {
   disclosureTransition,
@@ -81,11 +81,8 @@ export function ModelConnectionCard({
 }: ModelConnectionCardProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const summaryRef = useRef<HTMLDivElement | null>(null);
-
-  const detailsId = useMemo(
-    () => `poodle-mcc-details-${id.replace(/[^a-zA-Z0-9_-]+/g, "-")}`,
-    [id],
-  );
+  const detailsHadFocusRef = useRef(false);
+  const detailsId = `${useId()}-details`;
 
   const isOpenControlled = open !== undefined;
   const isOpen = isOpenControlled ? open === true : uncontrolledOpen;
@@ -111,14 +108,12 @@ export function ModelConnectionCard({
     }
   }
 
-  useEffect(() => {
-    if (isOpen) return;
-    const active = document.activeElement;
-    const detailsEl = summaryRef.current?.parentElement?.querySelector(`#${CSS.escape(detailsId)}`);
-    if (active instanceof HTMLElement && detailsEl?.contains(active)) {
+  useLayoutEffect(() => {
+    if (!isOpen && detailsHadFocusRef.current) {
+      detailsHadFocusRef.current = false;
       disclosureControl()?.focus();
     }
-  }, [isOpen, detailsId]);
+  }, [isOpen]);
 
   return (
     <section
@@ -183,6 +178,15 @@ export function ModelConnectionCard({
           id={detailsId}
           role="region"
           aria-label={`${title} details`}
+          onFocusCapture={() => {
+            detailsHadFocusRef.current = true;
+          }}
+          onBlurCapture={(event) => {
+            const next = event.relatedTarget;
+            if (!(next instanceof Node) || !event.currentTarget.contains(next)) {
+              detailsHadFocusRef.current = false;
+            }
+          }}
         >
           {details ? details({ id, isEnabled }) : null}
         </div>

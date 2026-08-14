@@ -119,7 +119,7 @@ export type ModelConnectionOptionGroup = {
 // ── Picker filtering ─────────────────────────────────────────────────────
 
 function caseFold(value: string): string {
-  return value.toLocaleLowerCase();
+  return value.toLowerCase();
 }
 
 function optionMatchesQuery(option: ModelConnectionOption, foldedQuery: string): boolean {
@@ -197,6 +197,40 @@ export function modelConnectionPickerResultAnnouncement(
   return matchCount === 1
     ? `1 connection matches “${trimmed}”`
     : `${matchCount} connections match “${trimmed}”`;
+}
+
+export function modelConnectionPickerStateCopy(
+  state: ModelConnectionPickerShellState,
+  query: string,
+): { title: string; message: string } {
+  switch (state) {
+    case "loading":
+      return {
+        title: "Loading connections",
+        message: "Checking the available connection routes.",
+      };
+    case "error":
+      return {
+        title: "Could not load connections",
+        message: "Try again from the host application.",
+      };
+    case "empty":
+      return {
+        title: "No connections available",
+        message: "Add or detect a supported connection route first.",
+      };
+    case "no-results": {
+      const trimmed = query.trim();
+      return {
+        title: "No matching connections",
+        message: trimmed
+          ? `No connections match “${trimmed}”.`
+          : "Try a different search.",
+      };
+    }
+    case "ready":
+      return { title: "Choose a connection", message: "" };
+  }
 }
 
 // ── Setup stage guards ───────────────────────────────────────────────────

@@ -10,6 +10,7 @@ import {
   modelConnectionAvailabilityTone,
   modelConnectionOptionSelectable,
   modelConnectionPickerResultAnnouncement,
+  modelConnectionPickerStateCopy,
   modelConnectionReadinessTone,
   modelConnectionSetupCanContinue,
   modelConnectionSetupCanSubmit,
@@ -105,6 +106,22 @@ describe("modelConnectionPickerResultAnnouncement", () => {
     expect(modelConnectionPickerResultAnnouncement(0, "zzz")).toContain("No connections");
     expect(modelConnectionPickerResultAnnouncement(1, "a")).toContain("1 connection matches");
     expect(modelConnectionPickerResultAnnouncement(3, "")).toBe("3 connections");
+  });
+});
+
+describe("modelConnectionPickerStateCopy", () => {
+  test("names every non-ready posture", () => {
+    expect(modelConnectionPickerStateCopy("loading", "").title).toBe("Loading connections");
+    expect(modelConnectionPickerStateCopy("error", "").title).toBe(
+      "Could not load connections",
+    );
+    expect(modelConnectionPickerStateCopy("empty", "").title).toBe(
+      "No connections available",
+    );
+    expect(modelConnectionPickerStateCopy("no-results", "local")).toEqual({
+      title: "No matching connections",
+      message: "No connections match “local”.",
+    });
   });
 });
 

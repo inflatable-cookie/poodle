@@ -16,6 +16,7 @@
   import type { Snippet } from "svelte";
 
   import { default as Collapsible } from "./Collapsible.svelte";
+  import { default as Callout } from "./Callout.svelte";
   import { default as EmptyState } from "./EmptyState.svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as IconButton } from "./IconButton.svelte";
@@ -66,9 +67,9 @@
     rowMeta,
   }: Props = $props();
 
-  let grabbedIndex = $state<number | null>(null);
-  let draggingIndex = $state<number | null>(null);
-  let dropTargetIndex = $state<number | null>(null);
+  let grabbedId = $state<string | null>(null);
+  let draggingId = $state<string | null>(null);
+  let dropTargetId = $state<string | null>(null);
   let liveMessage = $state("");
   let rootEl = $state<HTMLElement | null>(null);
   let hiddenOpen = $state(false);
@@ -113,7 +114,6 @@
     );
     const focusId = next[toIndex];
     if (focusId) focusShown(focusId);
-    if (grabbedIndex !== null) grabbedIndex = toIndex;
   }
 
   function hideItem(item: ModelCatalogueItem): void {
@@ -134,23 +134,26 @@
 
   function handleKeydown(event: KeyboardEvent, index: number): void {
     if (locked) return;
+    const grabbedIndex = grabbedId === null
+      ? null
+      : shown.findIndex((item) => item.id === grabbedId);
     const intent = listReorderKeyIntent(event.key, index, grabbedIndex, shown.length);
     if (!intent) return;
     event.preventDefault();
 
     switch (intent.type) {
       case "grab":
-        grabbedIndex = index;
+        grabbedId = shown[index]?.id ?? null;
         announce(
           `Grabbed ${shown[index]?.label ?? "model"}. Use arrow keys to move, Escape to cancel.`,
         );
         break;
       case "drop":
-        grabbedIndex = null;
+        grabbedId = null;
         announce("Dropped item.");
         break;
       case "cancelGrab":
-        grabbedIndex = null;
+        grabbedId = null;
         announce("Cancelled keyboard move.");
         break;
       case "boundary":
@@ -164,8 +167,8 @@
 
   function handleDragStart(event: DragEvent, index: number): void {
     if (locked || !isDragEnabled) return;
-    draggingIndex = index;
-    dropTargetIndex = index;
+    draggingId = shown[index]?.id ?? null;
+    dropTargetId = shown[index]?.id ?? null;
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = "move";
       event.dataTransfer.setData("text/plain", String(index));
@@ -173,23 +176,26 @@
   }
 
   function handleDragOver(event: DragEvent, index: number): void {
-    if (locked || draggingIndex === null) return;
+    if (locked || draggingId === null) return;
     event.preventDefault();
-    dropTargetIndex = index;
+    dropTargetId = shown[index]?.id ?? null;
   }
 
   function handleDrop(event: DragEvent, index: number): void {
     event.preventDefault();
-    if (draggingIndex !== null && draggingIndex !== index) {
-      emitOrder(draggingIndex, index);
+    const fromIndex = draggingId === null
+      ? -1
+      : shown.findIndex((item) => item.id === draggingId);
+    if (fromIndex >= 0 && fromIndex !== index) {
+      emitOrder(fromIndex, index);
     }
-    draggingIndex = null;
-    dropTargetIndex = null;
+    draggingId = null;
+    dropTargetId = null;
   }
 
   function handleDragEnd(): void {
-    draggingIndex = null;
-    dropTargetIndex = null;
+    draggingId = null;
+    dropTargetId = null;
   }
 </script>
 
@@ -226,11 +232,18 @@
           <Spinner variant="grid" tone="accent" />
         {/snippet}
       </EmptyState>
+    {:else if catalogueState === "error"}
+      <Callout
+        tone="danger"
+        title={resolvedStateTitle}
+        message={resolvedStateMessage}
+        announceMode="assertive"
+      />
     {:else}
       <EmptyState
         title={resolvedStateTitle}
         message={resolvedStateMessage}
-        variant={catalogueState === "error" ? "neutral" : catalogueState === "empty" ? "firstRun" : "neutral"}
+        variant={catalogueState === "empty" ? "firstRun" : "neutral"}
       />
     {/if}
   {:else}
@@ -239,10 +252,8 @@
         <li
           class="poodle-model-catalogue-editor__row"
           data-model-catalogue-id={item.id}
-          data-grabbed={grabbedIndex === index ? "true" : "false"}
-          data-drop-target={dropTargetIndex === index ? "true" : "false"}
-          draggable={isDragEnabled && !locked && !item.isDisabled}
-          ondragstart={(event) => handleDragStart(event, index)}
+          data-grabbed={grabbedId === item.id ? "true" : "false"}
+          data-drop-target={dropTargetId === item.id ? "true" : "false"}
           ondragover={(event) => handleDragOver(event, index)}
           ondrop={(event) => handleDrop(event, index)}
           ondragend={handleDragEnd}
@@ -253,16 +264,19 @@
             data-variant="ghost"
             data-size-role="chrome"
             data-reorder-handle=""
+            draggable={isDragEnabled && !locked && !item.isDisabled}
+            aria-pressed={grabbedId === item.id}
             aria-label={`${item.label}, position ${index + 1} of ${shown.length}`}
             disabled={locked || item.isDisabled}
+            ondragstart={(event) => handleDragStart(event, index)}
             onkeydown={(event) => handleKeydown(event, index)}
             onclick={() => {
               if (locked || item.isDisabled) return;
-              if (grabbedIndex === index) {
-                grabbedIndex = null;
+              if (grabbedId === item.id) {
+                grabbedId = null;
                 announce("Dropped item.");
               } else {
-                grabbedIndex = index;
+                grabbedId = item.id;
                 announce(
                   `Grabbed ${item.label}. Use arrow keys to move, Escape to cancel.`,
                 );

@@ -16,6 +16,7 @@ import {
   modelConnectionAvailabilityTone,
   modelConnectionOptionSelectable,
   modelConnectionPickerResultAnnouncement,
+  modelConnectionPickerStateCopy,
   resolveModelConnectionPickerShellState,
   singleSelectTransition,
   type ModelConnectionOption,
@@ -90,6 +91,7 @@ export function ModelConnectionPicker({
     () => filtered.filter(modelConnectionOptionSelectable),
     [filtered],
   );
+  const hasVisibleSelection = flatEnabled.some((option) => option.id === currentValue);
   const shellState = useMemo(
     () =>
       resolveModelConnectionPickerShellState(state, options.length, filtered.length, currentQuery),
@@ -99,9 +101,10 @@ export function ModelConnectionPicker({
     shellState === "ready" || shellState === "no-results"
       ? modelConnectionPickerResultAnnouncement(filtered.length, currentQuery)
       : null;
+  const stateCopy = modelConnectionPickerStateCopy(shellState, currentQuery);
 
-  function groupDomId(group: string): string {
-    return `${instanceId}-${group.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase()}`;
+  function groupDomId(index: number): string {
+    return `${instanceId}-group-${index}`;
   }
 
   function setQuery(next: string): void {
@@ -172,15 +175,14 @@ export function ModelConnectionPicker({
   function tabIndexFor(option: ModelConnectionOption): number {
     if (isDisabled || !modelConnectionOptionSelectable(option)) return -1;
     if (currentValue === option.id) return 0;
-    if (currentValue === null && flatEnabled[0]?.id === option.id) return 0;
+    if (!hasVisibleSelection && flatEnabled[0]?.id === option.id) return 0;
     return -1;
   }
 
   return (
-    <section
+    <div
       ref={rootRef}
       className="poodle-model-connection-picker"
-      aria-label={ariaLabel ?? title}
       data-disabled={isDisabled ? "true" : "false"}
     >
       <PickerShell
@@ -188,6 +190,8 @@ export function ModelConnectionPicker({
         description={description}
         variant={variant}
         state={shellState}
+        stateTitle={stateCopy.title}
+        stateMessage={stateCopy.message}
         ariaLabel={ariaLabel ?? title}
         resultCount={shellState === "ready" ? filtered.length : null}
         selectionCount={currentValue ? 1 : 0}
@@ -200,7 +204,7 @@ export function ModelConnectionPicker({
             placeholder={searchPlaceholder}
             disabled={isDisabled}
             ariaLabel={searchPlaceholder}
-            describedBy={`${instanceId}-status`}
+            describedBy={statusText ? `${instanceId}-status` : null}
             onValueChange={(next) => setQuery(next)}
           />
         }
@@ -211,8 +215,8 @@ export function ModelConnectionPicker({
         }
       >
         <div className="poodle-model-connection-picker__groups">
-          {groups.map((group) => {
-            const groupId = groupDomId(group.group);
+          {groups.map((group, groupIndex) => {
+            const groupId = groupDomId(groupIndex);
             return (
               <section
                 key={group.group}
@@ -255,9 +259,9 @@ export function ModelConnectionPicker({
                             </span>
                             {option.badges.length > 0 ? (
                               <span className="poodle-model-connection-picker__badges">
-                                {option.badges.map((badge) => (
+                                {option.badges.map((badge, badgeIndex) => (
                                   <Pill
-                                    key={badge.label}
+                                    key={`${badge.label}-${badgeIndex}`}
                                     tone={badge.tone ?? "neutral"}
                                     appearance="subtle"
                                   >
@@ -279,6 +283,11 @@ export function ModelConnectionPicker({
                           ) : null}
                         </span>
                         <span className="poodle-model-connection-picker__availability">
+                          {currentValue === option.id ? (
+                            <span className="poodle-model-connection-picker__selected-icon" aria-hidden="true">
+                              <Icon name="check" />
+                            </span>
+                          ) : null}
                           <StatusIndicator
                             status={modelConnectionAvailabilityTone(option.availability)}
                             label={option.availabilityLabel}
@@ -293,6 +302,6 @@ export function ModelConnectionPicker({
           })}
         </div>
       </PickerShell>
-    </section>
+    </div>
   );
 }

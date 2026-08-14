@@ -17,6 +17,7 @@ import {
 } from "@inflatable-cookie/poodle-core";
 
 import { Collapsible } from "./Collapsible";
+import { Callout } from "./Callout";
 import { EmptyState } from "./EmptyState";
 import { Icon } from "./Icon";
 import { IconButton } from "./IconButton";
@@ -68,9 +69,9 @@ export function ModelCatalogueEditor({
 }: ModelCatalogueEditorProps) {
   const rootRef = useRef<HTMLElement | null>(null);
 
-  const [grabbedIndex, setGrabbedIndex] = useState<number | null>(null);
-  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
+  const [grabbedId, setGrabbedId] = useState<string | null>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dropTargetId, setDropTargetId] = useState<string | null>(null);
   const [liveMessage, setLiveMessage] = useState("");
   const [hiddenOpen, setHiddenOpen] = useState(false);
 
@@ -116,7 +117,6 @@ export function ModelCatalogueEditor({
     );
     const focusId = next[toIndex];
     if (focusId) focusShown(focusId);
-    if (grabbedIndex !== null) setGrabbedIndex(toIndex);
   }
 
   function hideItem(item: ModelCatalogueItem): void {
@@ -137,23 +137,26 @@ export function ModelCatalogueEditor({
 
   function handleKeydown(event: KeyboardEvent<HTMLButtonElement>, index: number): void {
     if (locked) return;
+    const grabbedIndex = grabbedId === null
+      ? null
+      : shown.findIndex((item) => item.id === grabbedId);
     const intent = listReorderKeyIntent(event.key, index, grabbedIndex, shown.length);
     if (!intent) return;
     event.preventDefault();
 
     switch (intent.type) {
       case "grab":
-        setGrabbedIndex(index);
+        setGrabbedId(shown[index]?.id ?? null);
         announce(
           `Grabbed ${shown[index]?.label ?? "model"}. Use arrow keys to move, Escape to cancel.`,
         );
         break;
       case "drop":
-        setGrabbedIndex(null);
+        setGrabbedId(null);
         announce("Dropped item.");
         break;
       case "cancelGrab":
-        setGrabbedIndex(null);
+        setGrabbedId(null);
         announce("Cancelled keyboard move.");
         break;
       case "boundary":
@@ -165,10 +168,10 @@ export function ModelCatalogueEditor({
     }
   }
 
-  function handleDragStart(event: DragEvent<HTMLLIElement>, index: number): void {
+  function handleDragStart(event: DragEvent<HTMLButtonElement>, index: number): void {
     if (locked || !isDragEnabled) return;
-    setDraggingIndex(index);
-    setDropTargetIndex(index);
+    setDraggingId(shown[index]?.id ?? null);
+    setDropTargetId(shown[index]?.id ?? null);
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = "move";
       event.dataTransfer.setData("text/plain", String(index));
@@ -176,23 +179,26 @@ export function ModelCatalogueEditor({
   }
 
   function handleDragOver(event: DragEvent<HTMLLIElement>, index: number): void {
-    if (locked || draggingIndex === null) return;
+    if (locked || draggingId === null) return;
     event.preventDefault();
-    setDropTargetIndex(index);
+    setDropTargetId(shown[index]?.id ?? null);
   }
 
   function handleDrop(event: DragEvent<HTMLLIElement>, index: number): void {
     event.preventDefault();
-    if (draggingIndex !== null && draggingIndex !== index) {
-      emitOrder(draggingIndex, index);
+    const fromIndex = draggingId === null
+      ? -1
+      : shown.findIndex((item) => item.id === draggingId);
+    if (fromIndex >= 0 && fromIndex !== index) {
+      emitOrder(fromIndex, index);
     }
-    setDraggingIndex(null);
-    setDropTargetIndex(null);
+    setDraggingId(null);
+    setDropTargetId(null);
   }
 
   function handleDragEnd(): void {
-    setDraggingIndex(null);
-    setDropTargetIndex(null);
+    setDraggingId(null);
+    setDropTargetId(null);
   }
 
   return (
@@ -228,11 +234,18 @@ export function ModelCatalogueEditor({
       {state !== "ready" ? (
         state === "loading" ? (
           <EmptyState title={resolvedStateTitle} message={resolvedStateMessage} visual={<Spinner variant="grid" tone="accent" />} />
+        ) : state === "error" ? (
+          <Callout
+            tone="danger"
+            title={resolvedStateTitle}
+            message={resolvedStateMessage}
+            announceMode="assertive"
+          />
         ) : (
           <EmptyState
             title={resolvedStateTitle}
             message={resolvedStateMessage}
-            variant={state === "error" ? "neutral" : state === "empty" ? "firstRun" : "neutral"}
+            variant={state === "empty" ? "firstRun" : "neutral"}
           />
         )
       ) : (
@@ -243,10 +256,8 @@ export function ModelCatalogueEditor({
                 key={item.id}
                 className="poodle-model-catalogue-editor__row"
                 data-model-catalogue-id={item.id}
-                data-grabbed={grabbedIndex === index ? "true" : "false"}
-                data-drop-target={dropTargetIndex === index ? "true" : "false"}
-                draggable={isDragEnabled && !locked && !item.isDisabled}
-                onDragStart={(event) => handleDragStart(event, index)}
+                data-grabbed={grabbedId === item.id ? "true" : "false"}
+                data-drop-target={dropTargetId === item.id ? "true" : "false"}
                 onDragOver={(event) => handleDragOver(event, index)}
                 onDrop={(event) => handleDrop(event, index)}
                 onDragEnd={handleDragEnd}
@@ -257,16 +268,19 @@ export function ModelCatalogueEditor({
                   data-variant="ghost"
                   data-size-role="chrome"
                   data-reorder-handle=""
+                  draggable={isDragEnabled && !locked && !item.isDisabled}
+                  aria-pressed={grabbedId === item.id}
                   aria-label={`${item.label}, position ${index + 1} of ${shown.length}`}
                   disabled={locked || item.isDisabled}
+                  onDragStart={(event) => handleDragStart(event, index)}
                   onKeyDown={(event) => handleKeydown(event, index)}
                   onClick={() => {
                     if (locked || item.isDisabled) return;
-                    if (grabbedIndex === index) {
-                      setGrabbedIndex(null);
+                    if (grabbedId === item.id) {
+                      setGrabbedId(null);
                       announce("Dropped item.");
                     } else {
-                      setGrabbedIndex(index);
+                      setGrabbedId(item.id);
                       announce(
                         `Grabbed ${item.label}. Use arrow keys to move, Escape to cancel.`,
                       );

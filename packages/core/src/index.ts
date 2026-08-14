@@ -87,6 +87,7 @@ export {
   modelConnectionAvailabilityTone,
   modelConnectionOptionSelectable,
   modelConnectionPickerResultAnnouncement,
+  modelConnectionPickerStateCopy,
   modelConnectionReadinessTone,
   modelConnectionSelectedSummary,
   modelConnectionSetupCanContinue,

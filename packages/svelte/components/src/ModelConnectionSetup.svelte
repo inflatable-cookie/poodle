@@ -89,6 +89,7 @@
   let uncontrolledValue = $state<string | null>(null);
   let uncontrolledQuery = $state("");
   let seeded = $state(false);
+  let previousStage = $state<ModelConnectionSetupStage | null>(null);
   let headingEl = $state<HTMLElement | null>(null);
   let pickerRoot = $state<HTMLElement | null>(null);
 
@@ -138,6 +139,18 @@
       ?.focus();
   }
 
+  $effect(() => {
+    const nextStage = currentStage;
+    if (previousStage === null) {
+      previousStage = nextStage;
+      return;
+    }
+    if (previousStage === nextStage) return;
+    previousStage = nextStage;
+    if (nextStage === "configure") void focusHeading();
+    else void focusSelectedOption();
+  });
+
   function run(
     event:
       | { type: "SELECT"; id: string }
@@ -173,8 +186,6 @@
       switch (effect.type) {
         case "emitStageChange":
           onStageChange?.(effect.stage);
-          if (effect.stage === "configure") void focusHeading();
-          if (effect.stage === "choose") void focusSelectedOption();
           break;
         case "emitValueChange":
           onValueChange?.(effect.id);

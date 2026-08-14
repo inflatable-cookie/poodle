@@ -1,6 +1,7 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/model-connection.css";
   import {
+    createInstanceId,
     disclosureTransition,
     modelConnectionReadinessTone,
   } from "@inflatable-cookie/poodle-core";
@@ -82,7 +83,8 @@
   let uncontrolledOpen = $state(false);
   let seeded = $state(false);
   let summaryEl = $state<HTMLElement | null>(null);
-  const detailsId = $derived(`poodle-mcc-details-${id.replace(/[^a-zA-Z0-9_-]+/g, "-")}`);
+  let detailsHadFocus = $state(false);
+  const detailsId = `${createInstanceId("model-connection-card")}-details`;
 
   $effect.pre(() => {
     if (seeded) return;
@@ -118,14 +120,20 @@
     }
   }
 
-  $effect(() => {
-    if (isOpen) return;
-    const active = document.activeElement;
-    const details = summaryEl?.parentElement?.querySelector(`#${CSS.escape(detailsId)}`);
-    if (active instanceof HTMLElement && details?.contains(active)) {
+  $effect.pre(() => {
+    if (!isOpen && detailsHadFocus) {
+      detailsHadFocus = false;
       disclosureControl()?.focus();
     }
   });
+
+  function handleDetailsFocusOut(event: FocusEvent): void {
+    const details = event.currentTarget;
+    const next = event.relatedTarget;
+    if (!(details instanceof HTMLElement) || !(next instanceof Node) || !details.contains(next)) {
+      detailsHadFocus = false;
+    }
+  }
 </script>
 
 <section
@@ -202,6 +210,8 @@
       id={detailsId}
       role="region"
       aria-label={`${title} details`}
+      onfocusin={() => (detailsHadFocus = true)}
+      onfocusout={handleDetailsFocusOut}
     >
       {#if details}
         {@render details({ id, isEnabled })}

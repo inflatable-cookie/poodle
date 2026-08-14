@@ -1,12 +1,14 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/model-connection.css";
   import {
+    createInstanceId,
     filterModelConnectionOptions,
     groupModelConnectionOptions,
     menuListNavigate,
     modelConnectionAvailabilityTone,
     modelConnectionOptionSelectable,
     modelConnectionPickerResultAnnouncement,
+    modelConnectionPickerStateCopy,
     resolveModelConnectionPickerShellState,
     singleSelectTransition,
     type ModelConnectionOption,
@@ -63,14 +65,14 @@
     footer: footerSnippet,
   }: Props = $props();
 
-  let instanceId = $state(`poodle-mcp-${Math.random().toString(36).slice(2, 9)}`);
+  const instanceId = createInstanceId("model-connection-picker");
   let uncontrolledValue = $state<string | null>(null);
   let uncontrolledQuery = $state("");
   let seeded = $state(false);
   let rootEl = $state<HTMLElement | null>(null);
 
-  function groupDomId(group: string): string {
-    return `${instanceId}-${group.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase()}`;
+  function groupDomId(index: number): string {
+    return `${instanceId}-group-${index}`;
   }
 
   $effect.pre(() => {
@@ -87,6 +89,9 @@
   const filtered = $derived(filterModelConnectionOptions(options, currentQuery));
   const groups = $derived(groupModelConnectionOptions(filtered));
   const flatEnabled = $derived(filtered.filter(modelConnectionOptionSelectable));
+  const hasVisibleSelection = $derived(
+    flatEnabled.some((option) => option.id === currentValue),
+  );
   const shellState = $derived(
     resolveModelConnectionPickerShellState(
       pickerState,
@@ -100,6 +105,7 @@
       ? modelConnectionPickerResultAnnouncement(filtered.length, currentQuery)
       : null,
   );
+  const stateCopy = $derived(modelConnectionPickerStateCopy(shellState, currentQuery));
 
   function setQuery(next: string): void {
     if (!isQueryControlled) uncontrolledQuery = next;
@@ -169,15 +175,14 @@
   function tabIndexFor(option: ModelConnectionOption): number {
     if (isDisabled || !modelConnectionOptionSelectable(option)) return -1;
     if (currentValue === option.id) return 0;
-    if (currentValue === null && flatEnabled[0]?.id === option.id) return 0;
+    if (!hasVisibleSelection && flatEnabled[0]?.id === option.id) return 0;
     return -1;
   }
 </script>
 
-<section
+<div
   class="poodle-model-connection-picker"
   bind:this={rootEl}
-  aria-label={ariaLabel ?? title}
   data-disabled={isDisabled ? "true" : "false"}
 >
   {#snippet toolbarSnippet()}
@@ -187,7 +192,7 @@
       placeholder={searchPlaceholder}
       disabled={isDisabled}
       ariaLabel={searchPlaceholder}
-      describedBy={`${instanceId}-status`}
+      describedBy={statusText ? `${instanceId}-status` : null}
       onValueChange={(next) => setQuery(next)}
     />
   {/snippet}
@@ -203,6 +208,8 @@
     {description}
     {variant}
     state={shellState}
+    stateTitle={stateCopy.title}
+    stateMessage={stateCopy.message}
     ariaLabel={ariaLabel ?? title}
     resultCount={shellState === "ready" ? filtered.length : null}
     selectionCount={currentValue ? 1 : 0}
@@ -212,8 +219,8 @@
     footer={footerSnippet ? (footerContent as unknown as Snippet<[]>) : undefined}
   >
     <div class="poodle-model-connection-picker__groups">
-      {#each groups as group (group.group)}
-        {@const groupId = groupDomId(group.group)}
+      {#each groups as group, groupIndex (group.group)}
+        {@const groupId = groupDomId(groupIndex)}
         <section class="poodle-model-connection-picker__group" aria-labelledby={groupId}>
           <h3 class="poodle-model-connection-picker__group-title" id={groupId}>
             {group.group}
@@ -251,7 +258,7 @@
                     <span class="poodle-model-connection-picker__provider">{option.providerLabel}</span>
                     {#if option.badges.length > 0}
                       <span class="poodle-model-connection-picker__badges">
-                        {#each option.badges as badge (badge.label)}
+                        {#each option.badges as badge, badgeIndex (`${badge.label}-${badgeIndex}`)}
                           <Pill tone={badge.tone ?? "neutral"} appearance="subtle">{badge.label}</Pill>
                         {/each}
                       </span>
@@ -265,6 +272,11 @@
                   {/if}
                 </span>
                 <span class="poodle-model-connection-picker__availability">
+                  {#if currentValue === option.id}
+                    <span class="poodle-model-connection-picker__selected-icon" aria-hidden="true">
+                      <Icon name="check" />
+                    </span>
+                  {/if}
                   <StatusIndicator
                     status={modelConnectionAvailabilityTone(option.availability)}
                     label={option.availabilityLabel}
@@ -277,4 +289,4 @@
       {/each}
     </div>
   </PickerShell>
-</section>
+</div>

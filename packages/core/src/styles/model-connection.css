@@ -124,8 +124,21 @@
 }
 
 .poodle-model-connection-picker__availability {
+  display: flex;
+  align-items: center;
+  gap: var(--poodle-space-inline-xs);
   justify-self: end;
   align-self: start;
+}
+
+.poodle-model-connection-picker__selected-icon {
+  display: grid;
+  place-items: center;
+  width: var(--poodle-size-icon-md, 1.25rem);
+  height: var(--poodle-size-icon-md, 1.25rem);
+  border-radius: 999px;
+  background: var(--poodle-color-accent-base);
+  color: var(--poodle-color-text-inverse);
 }
 
 .poodle-model-connection-picker__footer {

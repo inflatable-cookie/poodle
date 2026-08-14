@@ -1,6 +1,6 @@
 import "@inflatable-cookie/poodle-core/styles/model-connection.css";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import {
   modelConnectionSetupCanContinue,
@@ -91,6 +91,7 @@ export function ModelConnectionSetup({
 
   const headingRef = useRef<HTMLHeadingElement | null>(null);
   const pickerRootRef = useRef<HTMLDivElement | null>(null);
+  const previousStageRef = useRef<ModelConnectionSetupStage | null>(null);
 
   const isStageControlled = stage !== undefined;
   const isValueControlled = value !== undefined;
@@ -127,6 +128,17 @@ export function ModelConnectionSetup({
     });
   }
 
+  useEffect(() => {
+    if (previousStageRef.current === null) {
+      previousStageRef.current = currentStage;
+      return;
+    }
+    if (previousStageRef.current === currentStage) return;
+    previousStageRef.current = currentStage;
+    if (currentStage === "configure") focusHeading();
+    else focusSelectedOption();
+  }, [currentStage]);
+
   function run(
     event:
       | { type: "SELECT"; id: string }
@@ -162,8 +174,6 @@ export function ModelConnectionSetup({
       switch (effect.type) {
         case "emitStageChange":
           onStageChange?.(effect.stage);
-          if (effect.stage === "configure") focusHeading();
-          if (effect.stage === "choose") focusSelectedOption();
           break;
         case "emitValueChange":
           onValueChange?.(effect.id);

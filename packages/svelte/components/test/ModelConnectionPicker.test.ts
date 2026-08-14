@@ -52,9 +52,36 @@ describe("ModelConnectionPicker (svelte)", () => {
     const { rerender } = render(ModelConnectionPicker, {
       props: { options, state: "loading" },
     });
-    expect(document.querySelector('[data-state="loading"]')).toBeTruthy();
+    expect(screen.getByText("Loading connections")).toBeTruthy();
 
     await rerender({ options: [] as ModelConnectionOption[], state: "ready" });
-    expect(document.querySelector('[data-state="empty"]')).toBeTruthy();
+    expect(screen.getByText("No connections available")).toBeTruthy();
+  });
+
+  it("keeps a visible option tabbable when the selected option is filtered out", () => {
+    const { container } = render(ModelConnectionPicker, {
+      props: {
+        options,
+        value: "openai-responses",
+        query: "local",
+      },
+    });
+
+    const ollama = container.querySelector(
+      '[data-model-connection-option="ollama-local"]',
+    ) as HTMLButtonElement;
+    expect(ollama.tabIndex).toBe(0);
+  });
+
+  it("renders the selected-route indicator", () => {
+    const { container } = render(ModelConnectionPicker, {
+      props: { options, defaultValue: "openai-responses" },
+    });
+
+    expect(
+      container.querySelector(
+        '[data-model-connection-option="openai-responses"] .poodle-model-connection-picker__selected-icon',
+      ),
+    ).toBeTruthy();
   });
 });

@@ -2,7 +2,7 @@
 
 Branch: `t3code/model-connection-components`
 Date: 2026-08-14
-Base SHA: `2b40fdbf`
+Base SHA: `d93f26e6`
 Card: `docs/roadmaps/g14/018-model-connection-web-reference.md`
 Contracts: `model-connection-picker.md`, `model-connection-setup.md`,
 `model-connection-card.md`, `model-catalogue-editor.md`
@@ -20,7 +20,7 @@ conformance — that stays g14.020 after the conformance pilot.
 | `packages/core/src/model-connection.ts` | new — display types, picker filter/group, setup transition, catalogue order/visibility helpers, fixtures |
 | `packages/core/src/styles/model-connection.css` | new — one stylesheet, four blocks |
 | `packages/core/src/index.ts` | exports added |
-| `packages/core/test/model-connection.test.ts` | new — 18 tests |
+| `packages/core/test/model-connection.test.ts` | new — 19 tests |
 
 ### Batch B — web components
 
@@ -37,7 +37,7 @@ conformance — that stays g14.020 after the conformance pilot.
 | File | What |
 |---|---|
 | specimen pages ×4 per runtime | new |
-| component tests (Svelte + React) | 21 focused tests |
+| component tests (Svelte + React) | 33 focused tests |
 | registries / docs / parity / audit | 207 → 211 |
 | `test/fixtures/component-props.ts` | 4 fixtures (inlined; no package import) |
 | pack-install fixture | imports + mounts all four in both runtimes |
@@ -77,13 +77,27 @@ route/version/access/readiness, controlled/uncontrolled `open`, host-owned
 keyboard grab, explicit move), hide/restore, optional `onInfo` /
 `customAction` / `leading` / `rowMeta`.
 
+## Orchestrator acceptance fixes
+
+- Added explicit loading, error, empty, and no-results picker copy.
+- Kept a selectable picker route in the tab order when the controlled value is
+  filtered out or unavailable; added the required checked indicator.
+- Made setup-stage focus follow controlled as well as local transitions.
+- Made card disclosure IDs instance-safe and restored trigger focus after a
+  controlled external close.
+- Tracked catalogue keyboard grabs by stable item ID rather than array index.
+- Restricted pointer drag initiation to the reorder handle and exposed its
+  pressed state.
+- Rendered catalogue failures with the required danger posture.
+- Added regressions for each correction in both web runtimes where applicable.
+
 ## Acceptance → test map
 
 | Criterion | Where |
 |---|---|
 | deterministic filter + source order | core filter tests; picker suites |
 | exact available id selection | picker suites (legacy/unsupported inert) |
-| loading/empty postures distinct | picker suites |
+| loading/error/empty/no-results postures distinct | core + picker suites |
 | continue/submit guards + pending lock | setup transition core + setup suites |
 | disclosure ⊥ enable | card suites |
 | disable leaves readiness/access copy | card svelte suite |
@@ -98,8 +112,10 @@ keyboard grab, explicit move), hide/restore, optional `onInfo` /
 
 | Selector | Result |
 |---|---|
-| `packages/core/test/model-connection.test.ts` | pass (18) |
-| focused component vitest | pass (21) |
+| `packages/core/test/model-connection.test.ts` | pass (19) |
+| focused component vitest | pass (33) |
+| `effigy ci:web` | pass (98 files, 1,299 tests; packed consumer 7/7) |
+| `effigy docs:check` | pass |
 | `effigy test:parity` | pass (174) |
 | `effigy test:a11y` | pass (176) |
 | `effigy svelte:surface-audit` | pass (174/174) |
@@ -107,18 +123,18 @@ keyboard grab, explicit move), hide/restore, optional `onInfo` /
 | `effigy docs:react-specimen-drift` | pass |
 | `effigy test:web-pack-install` | pass |
 | `effigy docs:contract-drift` | pre-existing: Button `children/leading/trailing` |
-| `effigy check:svelte` | pre-existing: AppHeaderCenterHarness snippet types |
-| `effigy test:core` full | pre-existing: missing `marked` in markdown-blocks |
+| `effigy check:svelte` | pass (0 errors; 4 existing warnings) |
+| `effigy test:core` | pass (722) |
 | `git diff --check` | clean |
 
 ## Screenshots
 
 Specimen routes (both previews):
 
-- `/model-connection-picker`
-- `/model-connection-setup`
-- `/model-connection-card`
-- `/model-catalogue-editor`
+- `#components/model-connection-picker`
+- `#components/model-connection-setup`
+- `#components/model-connection-card`
+- `#components/model-catalogue-editor`
 
 Operator capture for the PR handoff; not committed in this batch.
 
