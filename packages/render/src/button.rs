@@ -253,6 +253,16 @@ pub fn button(
             text_color: None,
             opacity: None,
         });
+        // Focus-visible treatment (contract §8): the accent focus-ring color
+        // takes the border while the node holds focus — the native counterpart
+        // of the web `:focus-visible` outline. Its presence is also the
+        // observation channel for the focus-visible state.
+        el.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(theme.resolve_color(spec.focus_ring_color_token())),
+            text_color: None,
+            opacity: None,
+        });
         el.style.descriptor.cursor = CursorHint::Pointer;
         if let Some(handler) = on_click {
             el.interaction.on_activate = Some(Arc::new(move || handler()));
@@ -323,6 +333,31 @@ pub fn button(
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
     }
+
+    // ── Semantic token roles (the native data-* counterpart) ──
+    // Observers read these; the web pair projects the same values through
+    // its data attributes. Resolved size/density mirror the web's resolved
+    // attribute values.
+    el.roles.insert(
+        "variant".to_owned(),
+        format!("{:?}", spec.variant).to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "tone".to_owned(),
+        format!("{:?}", spec.tone).to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "size".to_owned(),
+        format!("{effective_size:?}").to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "density".to_owned(),
+        format!("{:?}", spec.density).to_ascii_lowercase(),
+    );
+    el.roles.insert(
+        "fit".to_owned(),
+        format!("{:?}", spec.fit).to_ascii_lowercase(),
+    );
     el
 }
 

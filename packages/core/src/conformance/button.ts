@@ -1,15 +1,27 @@
 /**
  * Button portable interface — the single authority for the portable Button
  * surface (spec 066, architecture 009). Svelte and React import the inferred
- * portable types; `poodle-codegen --conformance` generates the Rust
- * `ButtonSpec` declaration from the serialized form.
+ * portable types (`PortablePropsOf`/`PortableEventsOf` of this value);
+ * `poodle-codegen --conformance` generates the Rust `ButtonSpec` declaration
+ * from the serialized form; the web and native observers resolve parts and
+ * states from the declared resolution descriptors. Nothing portable is
+ * restated anywhere else.
  *
  * Web-only HTML attributes (`type`, `form*`, className, style) are marked as
  * platform extensions and are not portable. The `label` prop is the portable
  * text; web implementations render it through the `label` region (children).
  */
 
-import { defineComponentInterface, type ComponentInterface } from "./define";
+import { defineComponentInterface } from "./define";
+import type {
+  AxisNamesOf,
+  EventNamesOf,
+  PartIdsOf,
+  PortableEventsOf,
+  PortablePropsOf,
+  StateNamesOf,
+  TokenRoleNamesOf,
+} from "./define";
 
 export const buttonInterface = defineComponentInterface({
   id: "button",
@@ -53,19 +65,92 @@ export const buttonInterface = defineComponentInterface({
     { name: "trailing", payload: "icon" },
   ],
   parts: [
-    { id: "root", role: "button", contains: "label" },
-    { id: "label", contains: "text" },
-    { id: "leadingIcon", contains: "icon" },
-    { id: "trailingIcon", contains: "icon" },
-    { id: "spinner", contains: "icon" },
-    { id: "chevron", contains: "icon" },
+    {
+      id: "root",
+      role: "button",
+      contains: "label",
+      resolve: { web: { kind: "self" }, native: { kind: "self" } },
+    },
+    {
+      id: "label",
+      contains: "text",
+      resolve: {
+        web: { kind: "class", className: ".poodle-button__label" },
+        native: { kind: "root-label" },
+      },
+    },
+    {
+      id: "leadingIcon",
+      contains: "icon",
+      resolve: {
+        web: { kind: "icon", position: "first", gatedBy: "data-has-leading" },
+        native: { kind: "icon-side", side: "leading", except: ["spinner"] },
+      },
+    },
+    {
+      id: "trailingIcon",
+      contains: "icon",
+      resolve: {
+        web: { kind: "icon", position: "last", gatedBy: "data-has-trailing" },
+        native: { kind: "icon-side", side: "trailing", except: ["chevron-down"] },
+      },
+    },
+    {
+      id: "spinner",
+      contains: "icon",
+      resolve: {
+        web: { kind: "class", className: ".poodle-button__spinner" },
+        native: { kind: "icon-named", name: "spinner" },
+      },
+    },
+    {
+      id: "chevron",
+      contains: "icon",
+      resolve: {
+        web: { kind: "class", className: ".poodle-button__chevron" },
+        native: { kind: "icon-named", name: "chevron-down" },
+      },
+    },
   ],
   states: [
-    { name: "disabled", condition: "disabled || loading" },
-    { name: "loading" },
-    { name: "pressed", condition: "toggle mode: pressed ?? defaultPressed" },
-    { name: "focusVisible" },
+    {
+      name: "disabled",
+      condition: "disabled || loading",
+      web: "disabled-attr",
+      native: "interaction-disabled",
+    },
+    {
+      name: "loading",
+      web: "data-attr",
+      attr: "data-loading",
+      native: "part-present",
+      part: "spinner",
+    },
+    {
+      name: "pressed",
+      condition: "toggle mode: pressed ?? defaultPressed",
+      web: "aria-pressed",
+      native: "a11y-toggled",
+    },
+    {
+      name: "focused",
+      web: "active-element",
+      native: "backend-focus",
+    },
+    {
+      name: "focusVisible",
+      web: "focus-visible-pseudo",
+      native: "focus-with-focus-style",
+    },
   ],
+  tokenRoles: [
+    { name: "variant", prop: "variant" },
+    { name: "tone", prop: "tone", default: "default" },
+    { name: "size", prop: "size" },
+    { name: "density", prop: "density" },
+    { name: "fit", prop: "fit", default: "default" },
+  ],
+  axes: ["size", "density", "theme"],
   capabilities: [
     { name: "activate", required: true },
     { name: "focus", required: true },
@@ -75,35 +160,17 @@ export const buttonInterface = defineComponentInterface({
 
 export type ButtonInterface = typeof buttonInterface;
 
-/** Portable props (extensions excluded), inferred from the interface. */
-export type ButtonPortableProps = {
-  variant: "primary" | "secondary" | "ghost";
-  tone: "default" | "danger" | "success" | "warning";
-  size: "xs" | "sm" | "md" | "lg" | "xl" | null;
-  sizeRole: "chrome" | "control" | "prominent";
-  density: "compact" | "default" | "comfortable" | null;
-  disabled: boolean;
-  loading: boolean;
-  leadingIcon: string | null;
-  trailingIcon: string | null;
-  chevron: boolean;
-  truncate: boolean;
-  fit: "default" | "content";
-  maxWidth: string | null;
-  pressed: boolean | null;
-  defaultPressed: boolean | null;
-  label: string | null;
-  ariaLabel: string | null;
-  ariaExpanded: boolean | null;
-  describedBy: string | null;
-};
+/** Portable props, mechanically derived from the interface. */
+export type ButtonPortableProps = PortablePropsOf<ButtonInterface>;
 
-export type ButtonPortableEvents = {
-  press: () => void;
-  pressedChange: (pressed: boolean) => void;
-};
+/** Portable events, mechanically derived from the interface. */
+export type ButtonPortableEvents = PortableEventsOf<ButtonInterface>;
 
-export const BUTTON_PART_IDS = ["root", "label", "leadingIcon", "trailingIcon", "spinner", "chevron"] as const;
+export type ButtonPartId = PartIdsOf<ButtonInterface>;
+export type ButtonStateName = StateNamesOf<ButtonInterface>;
+export type ButtonEventName = EventNamesOf<ButtonInterface>;
+export type ButtonTokenRole = TokenRoleNamesOf<ButtonInterface>;
+export type ButtonAxis = AxisNamesOf<ButtonInterface>;
 
 export const BUTTON_DEFAULT_PROPS: ButtonPortableProps = {
   variant: "secondary",
@@ -120,15 +187,9 @@ export const BUTTON_DEFAULT_PROPS: ButtonPortableProps = {
   fit: "default",
   maxWidth: null,
   pressed: null,
-  defaultPressed: false,
+  defaultPressed: null,
   label: null,
   ariaLabel: null,
   ariaExpanded: null,
   describedBy: null,
 };
-
-export type ButtonFixtureProps = Partial<ButtonPortableProps>;
-
-export function resolveButtonFixture(fixture: ButtonFixtureProps): ButtonPortableProps {
-  return { ...BUTTON_DEFAULT_PROPS, ...fixture };
-}

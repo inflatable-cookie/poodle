@@ -1,14 +1,14 @@
 /**
- * Conformance orchestrator (spec 066, g14.001): reads the per-runtime reports
- * (`svelte.json`, `react.json` from the web vitest run; `gpui.json`,
- * `jetstream.json` from the native cargo runners) and applies the
- * cross-runtime rules:
+ * Conformance orchestrator (spec 066, g14.001): reads the active-runtime
+ * reports (`svelte.json`, `react.json` from the web vitest run; `gpui.json`
+ * from the real-window GPUI runner) and applies the cross-runtime rules:
  *
- *   - every case must have run in every runtime present in the run;
+ *   - every case must have run in every active runtime;
  *   - no assertion may fail in any runtime (failures name
- *     runtime / case / step / field);
- *   - no assertion may be vacuous in every runtime (an assertion no runtime
- *     can exercise is not evidence — coverage must be real somewhere).
+ *     runtime / case / step / field, with the reason when a runtime could
+ *     not observe a required field);
+ *   - Jetstream is program-deferred (working rules, active cohort): it is
+ *     reported as deferred, never as passing.
  *
  * Exit 1 on any violation.
  */
@@ -21,9 +21,10 @@ interface AssertionResult {
   stepIndex: number;
   part: string | null;
   field: string;
-  verdict: "pass" | "fail" | "vacuous";
+  verdict: "pass" | "fail";
   expected?: unknown;
   actual?: unknown;
+  reason?: string;
 }
 
 interface CaseResult {
@@ -41,7 +42,9 @@ interface RuntimeReport {
 }
 
 const OUT_DIR = join(dirname(fileURLToPath(import.meta.url)), "web", "out");
-const RUNTIMES = ["svelte", "react", "gpui", "jetstream"] as const;
+/** The active completion cohort (working rules). Jetstream is deferred. */
+const ACTIVE_RUNTIMES = ["svelte", "react", "gpui"] as const;
+const DEFERRED_RUNTIMES = ["jetstream"] as const;
 
 function loadReport(runtime: string): RuntimeReport | null {
   const path = join(OUT_DIR, `${runtime}.json`);
@@ -50,7 +53,7 @@ function loadReport(runtime: string): RuntimeReport | null {
 }
 
 function main(): void {
-  const available = RUNTIMES.filter((runtime) => loadReport(runtime) !== null);
+  const available = ACTIVE_RUNTIMES.filter((runtime) => loadReport(runtime) !== null);
   if (available.length === 0) {
     console.error("no runtime reports found — run conformance:test first");
     process.exit(1);
@@ -64,7 +67,7 @@ function main(): void {
 
   const problems: string[] = [];
 
-  // Completeness: every case in every available runtime.
+  // Completeness: every case in every active runtime.
   for (const [runtime, report] of reports) {
     const present = new Set(report.results.map((r) => r.caseId));
     for (const caseId of expectedCases) {
@@ -74,41 +77,23 @@ function main(): void {
     }
   }
 
-  // Failures name runtime/case/step/field.
-  for (const [runtime, report] of reports) {
-    for (const result of report.results) {
-      for (const failure of result.failures) {
-        problems.push(
-          `${runtime} ${result.caseId} step ${failure.stepIndex} ${failure.field}: ` +
-            `expected ${JSON.stringify(failure.expected)}, got ${JSON.stringify(failure.actual)}`,
-        );
-      }
+  // Missing active runtimes are incomplete.
+  for (const runtime of ACTIVE_RUNTIMES) {
+    if (!reports.has(runtime)) {
+      problems.push(`runtime ${runtime} is missing from the active cohort run`);
     }
   }
 
-  // Vacuity: each (case, step, field) assertion must be non-vacuous in at
-  // least one runtime.
-  const vacuousByKey = new Map<string, string[]>();
-  const exercisedByKey = new Set<string>();
+  // Failures name runtime/case/step/field (and why, when unobservable).
   for (const [runtime, report] of reports) {
     for (const result of report.results) {
-      for (const assertion of result.assertions ?? []) {
-        const key = `${result.caseId}|${assertion.stepIndex}|${assertion.field}`;
-        if (assertion.verdict === "vacuous") {
-          vacuousByKey.set(key, [...(vacuousByKey.get(key) ?? []), runtime]);
-        } else {
-          exercisedByKey.add(key);
-        }
+      for (const failure of result.failures) {
+        const reason = failure.reason ? ` (${failure.reason})` : "";
+        problems.push(
+          `${runtime} ${result.caseId} step ${failure.stepIndex} ${failure.field}${reason}: ` +
+            `expected ${JSON.stringify(failure.expected)}, got ${JSON.stringify(failure.actual)}`,
+        );
       }
-    }
-  }
-  for (const [key, runtimes] of vacuousByKey) {
-    if (!exercisedByKey.has(key)) {
-      const [caseId, step, field] = key.split("|");
-      problems.push(
-        `${caseId} step ${step} ${field}: assertion not exercised by any runtime ` +
-          `(vacuous in ${runtimes.join(", ")})`,
-      );
     }
   }
 
@@ -119,8 +104,13 @@ function main(): void {
   }
 
   const caseCount = expectedCases.size;
+  const deferred = DEFERRED_RUNTIMES.map((runtime) => {
+    const present = loadReport(runtime) !== null;
+    return `  - ${runtime}: program-deferred${present ? " (stale report present — not counted as passing)" : ""}`;
+  });
   console.log(
-    `conformance: ${caseCount} cases × ${available.length} runtimes (${available.join(", ")}) — all passing, no vacuous-only assertions.`,
+    `conformance: ${caseCount} cases × ${available.length} active runtimes ` +
+      `(${available.join(", ")}) — all passing.\n${deferred.join("\n")}`,
   );
 }
 

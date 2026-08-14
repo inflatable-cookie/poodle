@@ -1,25 +1,34 @@
 /**
  * Web conformance execution (spec 066): runs the Button corpus against the
- * real Svelte and React implementations in happy-dom, asserts every case,
- * and writes the per-runtime observation reports consumed by
- * `conformance:compare`. The assertions here are the Svelte<->React drift
- * gate; native execution happens in the cargo runners and is compared by the
- * orchestrator.
+ * real Svelte and React implementations in happy-dom, asserts every case
+ * strictly (unobservable required fields fail), and writes the per-runtime
+ * observation reports consumed by `conformance:compare`. The assertions here
+ * are the Svelte<->React drift gate; native execution happens in the GPUI
+ * runner and is compared by the orchestrator.
  */
 
 import { describe, expect, it } from "vitest";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
-
-import tokensCss from "../../../packages/core/src/tokens/generated/css/poodle-tokens.css?raw";
-import buttonCss from "../../../packages/core/src/styles/button.css?raw";
-import { buttonCases } from "../../../packages/core/src/conformance";
+import { buttonCases, buttonInterface, serializeInterface } from "../../../packages/core/src/conformance";
 
 import { runCase, summarize, type RuntimeAdapter } from "./runner";
 import { SvelteButtonAdapter } from "./svelte-adapter";
 import { ReactButtonAdapter } from "./react-adapter";
 
 const OUT_DIR = `${import.meta.dirname}/out`;
+const iface = serializeInterface(buttonInterface);
+
+// The real theme CSS and component CSS, read as source (vite's css transform
+// cannot be relied on to pass ?raw through in this project).
+const tokensCss = readFileSync(
+  `${import.meta.dirname}/../../../packages/core/src/tokens/generated/css/poodle-tokens.css`,
+  "utf8",
+);
+const buttonCss = readFileSync(
+  `${import.meta.dirname}/../../../packages/core/src/styles/button.css`,
+  "utf8",
+);
 
 function injectRealCss(): void {
   const style = document.createElement("style");
@@ -31,15 +40,19 @@ function injectRealCss(): void {
 async function collectResults(adapter: RuntimeAdapter): Promise<ReturnType<typeof summarize>> {
   const perCase: { caseId: string; results: never[]; observations: never[] }[] = [];
   for (const caseData of buttonCases.cases) {
-    const { results, observations } = await runCase(adapter, caseData);
+    const { results, observations } = await runCase(
+      adapter,
+      iface,
+      buttonCases.component,
+      caseData,
+    );
     perCase.push({ caseId: caseData.id, results, observations });
   }
   return summarize(adapter.runtime, buttonCases.component, perCase);
 }
 
 function writeReport(report: ReturnType<typeof summarize>): void {
-  const dir = OUT_DIR;
-  mkdirSync(dir, { recursive: true });
+  mkdirSync(OUT_DIR, { recursive: true });
   writeFileSync(`${OUT_DIR}/${report.runtime}.json`, JSON.stringify(report, null, 2));
 }
 

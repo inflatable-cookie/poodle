@@ -80,12 +80,10 @@
 "conformance:codegen" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/contracts/components/src --target conformance-rust" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/gpui/preview/src --target conformance-cases" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/jetstream/preview/src --target conformance-cases" },
 ]
 "conformance:codegen-check" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/contracts/components/src --target conformance-rust --check" },
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/gpui/preview/src --target conformance-cases --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/jetstream/preview/src --target conformance-cases --check" },
 ]
 "conformance:build" = [
   { task = "conformance:serialize" },
@@ -98,25 +96,26 @@
   { task = "conformance:codegen-check" },
 ]
 "conformance:test-web" = "bunx vitest run --project conformance"
-# CPU-only, no window: builds the real node, runs the real backend
-# conversion, dispatches the node-level activation. Runs in ci:native.
+# LOCAL-ONLY, like test:native-visual: opens a real GPUI window and drives
+# real NSEvents through the AppKit queue (hit testing, listener binding,
+# focus, activation). Needs a macOS window server.
 "conformance:test-gpui" = "cargo run --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin conformance -- --out=test/conformance/web/out/gpui.json"
-# Needs the sibling jetstream repo (same constraint as test:jetstream-a11y).
-# Exercises the full backend input path: GameUi pointer/keyboard dispatch.
-"conformance:test-jetstream" = "cargo run --quiet --manifest-path packages/jetstream/preview/Cargo.toml --bin conformance -- --out=test/conformance/web/out/jetstream.json"
+# Compile-only twin for CPU gates: the windowed execution is local-only.
+"conformance:check-gpui" = "cargo check --manifest-path packages/gpui/preview/Cargo.toml --bin conformance"
 "conformance:test" = [
   { task = "conformance:test-web" },
   { task = "conformance:test-gpui" },
-  { task = "conformance:test-jetstream" },
 ]
 "conformance:compare" = "bun test/conformance/compare.ts"
 # The completion gate: drift-free authority, then all four runtimes, then the
 # cross-runtime comparison. `--component button` is the pilot profile.
+# The completion gate: drift-free authority, then all three active runtimes,
+# then the cross-runtime comparison. Jetstream is program-deferred (working
+# rules): it is reported as deferred, never as passing.
 "conformance:complete" = [
   { task = "conformance:check" },
   { task = "conformance:test-web" },
   { task = "conformance:test-gpui" },
-  { task = "conformance:test-jetstream" },
   { task = "conformance:compare" },
 ]
 "conformance:cost" = "bun packages/core/scripts/conformance-cost.ts"
@@ -420,8 +419,9 @@
   { task = "jetstream:build" },
   { task = "test:jetstream-a11y" },
   { task = "drift:roles" },
-  # The conformance kernel's native leg (g14.001): CPU-only, no window.
-  { task = "conformance:test-gpui" },
+  # The conformance kernel's native leg (g14.001): compile the real-window
+  # runner; the windowed execution is local-only (conformance:complete).
+  { task = "conformance:check-gpui" },
 ]
 "qa:jetstream" = [
   { task = "ci:jetstream" },

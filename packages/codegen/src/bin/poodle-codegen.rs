@@ -372,7 +372,8 @@ fn run_conformance(
     args: &Args,
 ) -> Result<(), CodegenError> {
     let interface = conformance::load_interface(interface_path)?;
-    conformance::load_cases(cases_path)?;
+    let cases = conformance::load_cases(cases_path)?;
+    conformance::validate_cases(&interface, &cases)?;
     let source_path = interface_path.to_string_lossy().into_owned();
     let target_id = args
         .target

@@ -7,9 +7,9 @@
  */
 
 import type {
+  SerializedCase,
   SerializedComponentCases,
   SerializedComponentInterface,
-  ComponentCase,
 } from "./define";
 
 export interface ProjectedInstance {
@@ -34,7 +34,7 @@ function enumValues(iface: SerializedComponentInterface, propName: string): stri
 }
 
 function instanceFor(
-  caseData: ComponentCase,
+  caseData: SerializedCase,
   caption: string,
   props: Record<string, string | boolean | number | null>,
 ): ProjectedInstance {

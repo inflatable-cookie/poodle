@@ -419,8 +419,18 @@ pub(crate) fn focused_handle() -> Option<gpui::FocusHandle> {
     focus_handle_for(&id)
 }
 
-fn focus_handle_for(id: &str) -> Option<gpui::FocusHandle> {
+/// The focus handle for a tracked node's element id, if one has been
+/// created. The conformance runner focuses through this — the real backend
+/// focus API, observed both ways.
+pub fn focus_handle_for(id: &str) -> Option<gpui::FocusHandle> {
     FOCUS_HANDLES.with(|h| h.borrow().get(id).cloned())
+}
+
+/// Whether the node with this element id held focus as of the last frame.
+/// The conformance observer reads this for the `backend-focus` state — real
+/// window focus, observed both ways, never a latched flag.
+pub fn focus_state_for(id: &str) -> Option<bool> {
+    FOCUS_STATES.with(|s| s.borrow().get(id).copied())
 }
 
 /// Whether this node held focus as of the last frame.

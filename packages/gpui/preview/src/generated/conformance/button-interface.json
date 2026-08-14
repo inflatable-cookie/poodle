@@ -284,44 +284,153 @@
     {
       "id": "root",
       "role": "button",
-      "contains": "label"
+      "contains": "label",
+      "resolve": {
+        "web": {
+          "kind": "self"
+        },
+        "native": {
+          "kind": "self"
+        }
+      }
     },
     {
       "id": "label",
-      "contains": "text"
+      "contains": "text",
+      "resolve": {
+        "web": {
+          "kind": "class",
+          "className": ".poodle-button__label"
+        },
+        "native": {
+          "kind": "root-label"
+        }
+      }
     },
     {
       "id": "leadingIcon",
-      "contains": "icon"
+      "contains": "icon",
+      "resolve": {
+        "web": {
+          "kind": "icon",
+          "position": "first",
+          "gatedBy": "data-has-leading"
+        },
+        "native": {
+          "kind": "icon-side",
+          "side": "leading",
+          "except": [
+            "spinner"
+          ]
+        }
+      }
     },
     {
       "id": "trailingIcon",
-      "contains": "icon"
+      "contains": "icon",
+      "resolve": {
+        "web": {
+          "kind": "icon",
+          "position": "last",
+          "gatedBy": "data-has-trailing"
+        },
+        "native": {
+          "kind": "icon-side",
+          "side": "trailing",
+          "except": [
+            "chevron-down"
+          ]
+        }
+      }
     },
     {
       "id": "spinner",
-      "contains": "icon"
+      "contains": "icon",
+      "resolve": {
+        "web": {
+          "kind": "class",
+          "className": ".poodle-button__spinner"
+        },
+        "native": {
+          "kind": "icon-named",
+          "name": "spinner"
+        }
+      }
     },
     {
       "id": "chevron",
-      "contains": "icon"
+      "contains": "icon",
+      "resolve": {
+        "web": {
+          "kind": "class",
+          "className": ".poodle-button__chevron"
+        },
+        "native": {
+          "kind": "icon-named",
+          "name": "chevron-down"
+        }
+      }
     }
   ],
   "states": [
     {
       "name": "disabled",
-      "condition": "disabled || loading"
+      "condition": "disabled || loading",
+      "web": "disabled-attr",
+      "native": "interaction-disabled"
     },
     {
-      "name": "loading"
+      "name": "loading",
+      "web": "data-attr",
+      "attr": "data-loading",
+      "native": "part-present",
+      "part": "spinner"
     },
     {
       "name": "pressed",
-      "condition": "toggle mode: pressed ?? defaultPressed"
+      "condition": "toggle mode: pressed ?? defaultPressed",
+      "web": "aria-pressed",
+      "native": "a11y-toggled"
     },
     {
-      "name": "focusVisible"
+      "name": "focused",
+      "web": "active-element",
+      "native": "backend-focus"
+    },
+    {
+      "name": "focusVisible",
+      "web": "focus-visible-pseudo",
+      "native": "focus-with-focus-style"
     }
+  ],
+  "tokenRoles": [
+    {
+      "name": "variant",
+      "prop": "variant"
+    },
+    {
+      "name": "tone",
+      "prop": "tone",
+      "default": "default"
+    },
+    {
+      "name": "size",
+      "prop": "size"
+    },
+    {
+      "name": "density",
+      "prop": "density"
+    },
+    {
+      "name": "fit",
+      "prop": "fit",
+      "default": "default"
+    }
+  ],
+  "axes": [
+    "size",
+    "density",
+    "theme"
   ],
   "capabilities": [
     {

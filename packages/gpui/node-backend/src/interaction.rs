@@ -101,16 +101,11 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
                 cx.refresh_windows();
             },
         );
-        // Activation includes Enter/Space on a focused node — the same
-        // semantics the old tier wired per component.
-        if node.interaction.focusable {
-            let key = handler.clone();
-            el = el.on_key_down(move |event: &KeyDownEvent, _window, _cx| {
-                if event.keystroke.key == "space" || event.keystroke.key == "enter" {
-                    key();
-                }
-            });
-        }
+        // Enter/Space activation is gpui's own: a focused div with a click
+        // listener synthesizes KeyUp → click (div.rs). Binding `on_key_down`
+        // here as well double-fires — the conformance corpus caught it (two
+        // press events from one Enter). The click binding above is the one
+        // activation path, for pointer and keyboard alike.
     }
     // Pointer selection is keyed on the channel, not on the node's kind: a
     // field's value is a *text* node carrying a caret, so that the field root

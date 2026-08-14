@@ -1,17 +1,19 @@
 /**
- * Shared web conformance runner (spec 066): interprets the serialized case
- * corpus against a runtime adapter (Svelte or React), observing the real
- * DOM, and emits per-runtime results with per-assertion verdicts
- * (`pass` | `fail` | `vacuous`). A vacuous verdict means the runtime cannot
- * observe that field (e.g. icon identity from an inline SVG) — recorded, not
- * masked; the orchestrator fails any assertion no runtime can exercise.
+ * Shared web conformance machinery (spec 066): interprets the serialized
+ * case corpus against a runtime adapter (Svelte or React), observing the
+ * real DOM through the interface's part descriptors and state observation
+ * rules. No component identifier, class name, part list, or icon name is
+ * hardcoded here — the interface data drives everything.
+ *
+ * Verdicts are strict: every case assertion must be observable by the
+ * runtime evaluating it. An expected field the runtime cannot observe is a
+ * failure naming runtime, case, step, and field — never a silently passable
+ * "vacuous".
  */
 
 import type {
-  CaseStep,
-  ComponentCase,
-  PartExpectation,
-  SerializedComponentCases,
+  SerializedCase,
+  SerializedComponentInterface,
 } from "@inflatable-cookie/poodle-core/conformance";
 
 export interface TraceEntry {
@@ -25,11 +27,11 @@ export interface PartObservation {
   name: string | null;
   text: string | null;
   icon: string | null;
-  states: Record<string, boolean>;
-  tokenRoles: Record<string, string>;
+  states: Record<string, boolean | null>;
+  tokenRoles: Record<string, string | null>;
   focusable: boolean;
-  focused: boolean;
-  focusVisible: boolean;
+  focused: boolean | null;
+  focusVisible: boolean | null;
   geometry: Record<string, number | null>;
   channels: Record<string, string | null>;
 }
@@ -45,16 +47,17 @@ export interface AssertionResult {
   stepIndex: number;
   part: string | null;
   field: string;
-  verdict: "pass" | "fail" | "vacuous";
+  verdict: "pass" | "fail";
   expected?: unknown;
   actual?: unknown;
+  reason?: string;
 }
 
 export interface CaseResult {
   caseId: string;
   pass: boolean;
   failures: AssertionResult[];
-  /** Every assertion verdict for this case (pass | fail | vacuous). */
+  /** Every assertion verdict for this case (pass | fail). */
   assertions: AssertionResult[];
   observations: RuntimeObservation[];
 }
@@ -69,7 +72,7 @@ export interface RuntimeCaseReport {
 export interface RuntimeAdapter {
   readonly runtime: string;
   mount(caseFixture: { props: Record<string, unknown>; regions: Record<string, string> }): void;
-  observe(): RuntimeObservation;
+  rootElement(): HTMLElement | null;
   press(part: string, input: "pointer" | "keyboard"): Promise<void>;
   focus(part: string): void;
   /** Flush pending framework state/effects so observation sees final DOM. */
@@ -88,10 +91,68 @@ function parseLength(value: string | null): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-export function observeRootGeometry(root: HTMLElement): Record<string, number | null> {
+function resolveWebPart(
+  root: HTMLElement,
+  part: SerializedComponentInterface["parts"][number],
+): HTMLElement | null {
+  const { kind } = part.resolve.web;
+  switch (kind) {
+    case "self":
+      return root;
+    case "class":
+      return root.querySelector<HTMLElement>(part.resolve.web.className);
+    case "icon": {
+      const { position, gatedBy } = part.resolve.web;
+      if (!root.hasAttribute(gatedBy)) return null;
+      const spans = Array.from(root.querySelectorAll<HTMLElement>(".poodle-button__icon"));
+      return position === "first" ? spans[0] ?? null : spans[spans.length - 1] ?? null;
+    }
+  }
+}
+
+function observeRootStates(
+  iface: SerializedComponentInterface,
+  root: HTMLElement,
+): Record<string, boolean | null> {
+  const doc = root.ownerDocument;
+  const states: Record<string, boolean | null> = {};
+  for (const state of iface.states) {
+    switch (state.web) {
+      case "disabled-attr":
+        states[state.name] = root.hasAttribute("disabled");
+        break;
+      case "data-attr":
+        states[state.name] = root.getAttribute(state.attr ?? "") === "true";
+        break;
+      case "aria-pressed":
+        states[state.name] = root.getAttribute("aria-pressed") === "true";
+        break;
+      case "active-element":
+        states[state.name] = doc.activeElement === root;
+        break;
+      case "focus-visible-pseudo":
+        states[state.name] = doc.activeElement === root && root.matches(":focus-visible");
+        break;
+    }
+  }
+  return states;
+}
+
+function observeRootTokenRoles(
+  iface: SerializedComponentInterface,
+  root: HTMLElement,
+): Record<string, string | null> {
+  const roles: Record<string, string | null> = {};
+  for (const role of iface.tokenRoles) {
+    roles[role.name] = root.getAttribute(`data-${role.prop}`) ?? role.default ?? null;
+  }
+  return roles;
+}
+
+function geometryOf(root: HTMLElement): Record<string, number | null> {
   const style = root.ownerDocument.defaultView?.getComputedStyle(root);
   if (!style) return Object.fromEntries(geometryFields.map((f) => [f, null]));
-  const out: Record<string, number | null> = {
+  return {
     height: parseLength(style.height),
     minWidth: parseLength(style.minWidth),
     paddingLeft: parseLength(style.paddingLeft),
@@ -99,10 +160,9 @@ export function observeRootGeometry(root: HTMLElement): Record<string, number | 
     radius: parseLength(style.borderRadius),
     borderWidth: parseLength(style.borderWidth),
   };
-  return out;
 }
 
-export function observeRootChannels(root: HTMLElement): Record<string, string | null> {
+function channelsOf(root: HTMLElement): Record<string, string | null> {
   const style = root.ownerDocument.defaultView?.getComputedStyle(root);
   if (!style) return { background: null, borderColor: null, color: null, opacity: null };
   const clean = (value: string | null): string | null =>
@@ -115,113 +175,160 @@ export function observeRootChannels(root: HTMLElement): Record<string, string | 
   };
 }
 
-/** Per-field compare with a local named tolerance for geometry. */
-function fieldMatches(
+/** Observes the mounted Button root through the interface's descriptors. */
+export function observeDom(
+  runtime: string,
+  component: string,
+  iface: SerializedComponentInterface,
+  root: HTMLElement,
+): RuntimeObservation {
+  const states = observeRootStates(iface, root);
+  const tokenRoles = observeRootTokenRoles(iface, root);
+  const parts: Record<string, PartObservation> = {};
+  for (const part of iface.parts) {
+    const el = resolveWebPart(root, part);
+    const isRoot = part.id === "root";
+    const labelText =
+      root.querySelector<HTMLElement>(".poodle-button__label")?.textContent?.trim() ?? null;
+    const accessibleName =
+      root.getAttribute("aria-label") ?? labelText ?? root.textContent?.trim() ?? null;
+    parts[part.id] = {
+      present: Boolean(el),
+      role: el ? (el.tagName === "BUTTON" ? "button" : null) : null,
+      name: isRoot && el ? accessibleName : null,
+      text: el?.textContent?.trim() ?? null,
+      icon: null,
+      states: isRoot ? states : {},
+      tokenRoles: isRoot ? tokenRoles : {},
+      focusable: el ? !el.hasAttribute("disabled") : false,
+      focused: isRoot ? (states.focused ?? null) : null,
+      focusVisible: isRoot ? (states.focusVisible ?? null) : null,
+      geometry: isRoot && el ? geometryOf(el) : {},
+      channels: isRoot && el ? channelsOf(el) : {},
+    };
+  }
+  return { runtime, component, parts, trace: [] };
+}
+
+// ── Strict assertion evaluation ────────────────────────────────────────────
+
+function numbersMatch(expected: unknown, actual: unknown, tolerance: number): boolean {
+  return (
+    typeof expected === "number" &&
+    typeof actual === "number" &&
+    Math.abs(expected - actual) <= tolerance
+  );
+}
+
+function check(
+  results: AssertionResult[],
+  runtime: string,
+  stepIndex: number,
+  part: string,
   field: string,
   expected: unknown,
   actual: unknown,
   tolerance?: number,
-): boolean {
-  if (field === "icon" && actual === null) return false;
-  if (typeof expected === "number" && typeof actual === "number") {
-    const tol = tolerance ?? 0.5;
-    return Math.abs(expected - actual) <= tol;
+): void {
+  if (actual === null || actual === undefined) {
+    results.push({
+      stepIndex,
+      part,
+      field,
+      verdict: "fail",
+      expected,
+      reason: `not observed by ${runtime}`,
+    });
+    return;
   }
-  return expected === actual;
+  const matches =
+    tolerance !== undefined ? numbersMatch(expected, actual, tolerance) : expected === actual;
+  results.push({
+    stepIndex,
+    part,
+    field,
+    verdict: matches ? "pass" : "fail",
+    expected,
+    actual,
+  });
 }
 
 export function assertPartObservation(
+  runtime: string,
   partId: string,
   observed: PartObservation | undefined,
-  expect: PartExpectation,
+  expect: Record<string, unknown>,
   stepIndex: number,
 ): AssertionResult[] {
   const results: AssertionResult[] = [];
   if (!observed) {
-    return [
-      {
-        stepIndex,
-        part: partId,
-        field: "present",
-        verdict: "fail",
-        expected: true,
-        actual: "part not observed",
-      },
-    ];
+    results.push({
+      stepIndex,
+      part: partId,
+      field: "present",
+      verdict: "fail",
+      expected: true,
+      reason: `not observed by ${runtime}`,
+    });
+    return results;
   }
 
-  const check = (
-    field: string,
-    expected: unknown,
-    actual: unknown,
-    options: { tolerance?: number; vacuousWhen?: (actual: unknown) => boolean } = {},
-  ): void => {
-    if (expected === undefined) return;
-    const vacuous = options.vacuousWhen ? options.vacuousWhen(actual) : actual === null || actual === undefined;
-    if (vacuous) {
-      results.push({ stepIndex, part: partId, field, verdict: "vacuous", expected, actual });
-      return;
+  check(
+    results,
+    runtime,
+    stepIndex,
+    partId,
+    "present",
+    expect.present ?? true,
+    observed.present,
+  );
+  if (!observed.present) return results;
+
+  for (const field of ["role", "name", "text", "focusable"] as const) {
+    if (expect[field] !== undefined) {
+      check(results, runtime, stepIndex, partId, field, expect[field], observed[field]);
     }
-    const match = fieldMatches(field, expected, actual, options.tolerance);
-    results.push({
-      stepIndex,
-      part: partId,
-      field,
-      verdict: match ? "pass" : "fail",
-      expected,
-      actual,
-    });
-  };
-
-  check("present", expect.present ?? true, observed.present);
-  check("role", expect.role, observed.role);
-  check("name", expect.name, observed.name);
-  check("text", expect.text, observed.text);
-  check("icon", expect.icon, observed.icon);
-  check("focusable", expect.focusable, observed.focusable);
-  for (const [state, value] of Object.entries(expect.states ?? {})) {
-    const actual = observed.states[state];
-    const vacuous = actual === undefined;
-    const match = !vacuous && actual === value;
-    results.push({
-      stepIndex,
-      part: partId,
-      field: `state.${state}`,
-      verdict: vacuous ? "vacuous" : match ? "pass" : "fail",
-      expected: value,
-      actual: vacuous ? undefined : actual,
-    });
   }
-  for (const [token, value] of Object.entries(expect.tokenRoles ?? {})) {
-    const actual = observed.tokenRoles[token] ?? "";
-    const vacuous = actual === "";
-    const match = !vacuous && actual === value;
-    results.push({
+  const states = (expect.states ?? {}) as Record<string, boolean>;
+  for (const [state, value] of Object.entries(states)) {
+    check(
+      results,
+      runtime,
       stepIndex,
-      part: partId,
-      field: `tokenRole.${token}`,
-      verdict: vacuous ? "vacuous" : match ? "pass" : "fail",
-      expected: value,
-      actual: vacuous ? undefined : actual,
-    });
+      partId,
+      `state.${state}`,
+      value,
+      observed.states[state],
+    );
   }
-  const tolerance = expect.geometry?.tolerance;
+  const tokenRoles = (expect.tokenRoles ?? {}) as Record<string, string>;
+  for (const [token, value] of Object.entries(tokenRoles)) {
+    check(
+      results,
+      runtime,
+      stepIndex,
+      partId,
+      `tokenRole.${token}`,
+      value,
+      observed.tokenRoles[token],
+    );
+  }
+  const geometry = (expect.geometry ?? {}) as Record<string, number | undefined>;
+  const tolerance = geometry.tolerance ?? 0.5;
   for (const field of geometryFields) {
-    const expected = expect.geometry?.[field];
+    const expected = geometry[field];
     if (expected === undefined) continue;
-    const actual = observed.geometry[field] ?? null;
-    const vacuous = actual === null;
-    const match = !vacuous && fieldMatches(field, expected, actual, tolerance);
-    results.push({
+    check(
+      results,
+      runtime,
       stepIndex,
-      part: partId,
-      field: `geometry.${field}`,
-      verdict: vacuous ? "vacuous" : match ? "pass" : "fail",
+      partId,
+      `geometry.${field}`,
       expected,
-      actual: vacuous ? undefined : actual,
-    });
+      observed.geometry[field] ?? null,
+      tolerance,
+    );
   }
-
   return results;
 }
 
@@ -240,14 +347,16 @@ export function assertEvents(
 /** Runs one case against an adapter; returns the per-assertion results. */
 export async function runCase(
   adapter: RuntimeAdapter,
-  caseData: ComponentCase,
+  iface: SerializedComponentInterface,
+  component: string,
+  caseData: SerializedCase,
 ): Promise<{ results: AssertionResult[]; observations: RuntimeObservation[] }> {
   const results: AssertionResult[] = [];
   const observations: RuntimeObservation[] = [];
 
   adapter.mount(caseData.fixture);
   await adapter.flush();
-  observations.push(adapter.observe());
+  observations.push(capture(adapter, iface, component));
 
   for (let index = 0; index < caseData.steps.length; index += 1) {
     const step = caseData.steps[index];
@@ -256,12 +365,20 @@ export async function runCase(
         if (step.name === "press") await adapter.press(step.part, step.input ?? "pointer");
         else if (step.name === "focus") adapter.focus(step.part);
         await adapter.flush();
-        observations.push(adapter.observe());
+        observations.push(capture(adapter, iface, component));
         break;
       }
       case "expectPart": {
-        const observed = adapter.observe().parts[step.part];
-        results.push(...assertPartObservation(step.part, observed, step.expect, index));
+        const observed = capture(adapter, iface, component).parts[step.part];
+        results.push(
+          ...assertPartObservation(
+            adapter.runtime,
+            step.part,
+            observed,
+            step.expect,
+            index,
+          ),
+        );
         break;
       }
       case "expectEvents": {
@@ -273,6 +390,20 @@ export async function runCase(
 
   adapter.cleanup();
   return { results, observations };
+}
+
+function capture(
+  adapter: RuntimeAdapter,
+  iface: SerializedComponentInterface,
+  component: string,
+): RuntimeObservation {
+  const root = adapter.rootElement();
+  if (!root) {
+    return { runtime: adapter.runtime, component, parts: {}, trace: [...adapter.trace()] };
+  }
+  const observation = observeDom(adapter.runtime, component, iface, root);
+  observation.trace = [...adapter.trace()];
+  return observation;
 }
 
 export function summarize(

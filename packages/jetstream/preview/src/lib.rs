@@ -4,7 +4,6 @@
 pub mod app_state;
 pub mod compat;
 pub mod component_registry;
-pub mod conformance_support;
 pub mod jsx;
 pub mod nel;
 pub mod shell;

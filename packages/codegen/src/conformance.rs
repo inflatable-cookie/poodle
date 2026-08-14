@@ -56,16 +56,55 @@ pub struct ComponentInterface {
     pub id: String,
     pub profile: String,
     pub props: Vec<PortableProp>,
-    #[allow(dead_code)]
-    pub events: Vec<serde_json::Value>,
-    #[allow(dead_code)]
-    pub regions: Vec<serde_json::Value>,
-    #[allow(dead_code)]
-    pub parts: Vec<serde_json::Value>,
-    #[allow(dead_code)]
-    pub states: Vec<serde_json::Value>,
+    pub events: Vec<Named>,
+    pub regions: Vec<Named>,
+    pub parts: Vec<PartDecl>,
+    pub states: Vec<StateDecl>,
+    pub token_roles: Vec<TokenRoleDecl>,
+    pub axes: Vec<String>,
     #[allow(dead_code)]
     pub capabilities: Vec<serde_json::Value>,
+}
+
+/// A named declaration (event or region).
+#[derive(Debug, Clone, Deserialize)]
+pub struct Named {
+    pub name: String,
+}
+
+/// A stable part with its native resolution descriptor.
+#[derive(Debug, Clone, Deserialize)]
+pub struct PartDecl {
+    pub id: String,
+    #[serde(default)]
+    pub role: Option<String>,
+    #[serde(default)]
+    pub resolve: Option<ResolveDecl>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ResolveDecl {
+    pub web: serde_json::Value,
+    pub native: serde_json::Value,
+}
+
+/// An observable state with its native observation rule.
+#[derive(Debug, Clone, Deserialize)]
+pub struct StateDecl {
+    pub name: String,
+    pub native: String,
+    #[serde(default)]
+    pub part: Option<String>,
+}
+
+/// A semantic token role projecting a prop.
+#[derive(Debug, Clone, Deserialize)]
+pub struct TokenRoleDecl {
+    pub name: String,
+    #[serde(default)]
+    pub prop: String,
+    #[serde(default)]
+    pub default: Option<String>,
 }
 
 /// A step in a component case.
@@ -82,7 +121,6 @@ pub enum CaseStep {
     #[serde(rename = "expectPart")]
     ExpectPart {
         part: String,
-        #[allow(dead_code)]
         expect: serde_json::Value,
     },
     #[serde(rename = "expectEvents")]
@@ -93,9 +131,7 @@ pub enum CaseStep {
 #[derive(Debug, Clone, Deserialize)]
 pub struct ComponentCase {
     pub id: String,
-    #[allow(dead_code)]
     pub fixture: serde_json::Value,
-    #[allow(dead_code)]
     pub specimen: serde_json::Value,
     pub steps: Vec<CaseStep>,
 }
@@ -108,6 +144,175 @@ pub struct ComponentCases {
     pub schema_version: u32,
     pub component: String,
     pub cases: Vec<ComponentCase>,
+}
+
+/// Validates the case corpus against the interface: every fixture prop,
+/// region, part, state, event, token role, axis, and enum value must be
+/// closed over the interface. Unknown names are errors, never ignored.
+pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) -> Result<()> {
+    let mut findings = Vec::new();
+    let props: std::collections::HashMap<&str, &PortableProp> = interface
+        .props
+        .iter()
+        .map(|p| (p.name.as_str(), p))
+        .collect();
+    let regions: std::collections::HashSet<&str> = interface
+        .regions
+        .iter()
+        .map(|r| r.name.as_str())
+        .collect();
+    let parts: std::collections::HashSet<&str> = interface
+        .parts
+        .iter()
+        .map(|p| p.id.as_str())
+        .collect();
+    let states: std::collections::HashSet<&str> = interface
+        .states
+        .iter()
+        .map(|s| s.name.as_str())
+        .collect();
+    let events: std::collections::HashSet<&str> = interface
+        .events
+        .iter()
+        .map(|e| e.name.as_str())
+        .collect();
+    let token_roles: std::collections::HashSet<&str> = interface
+        .token_roles
+        .iter()
+        .map(|t| t.name.as_str())
+        .collect();
+    let axes: std::collections::HashSet<&str> = interface.axes.iter().map(String::as_str).collect();
+
+    for case in &cases.cases {
+        let at = |message: String| format!("case '{}': {message}", case.id);
+
+        if let Some(fixture_props) = case
+            .fixture
+            .get("props")
+            .and_then(serde_json::Value::as_object)
+        {
+            for (key, value) in fixture_props {
+                let Some(prop) = props.get(key.as_str()) else {
+                    findings.push(at(format!("unknown prop '{key}'")));
+                    continue;
+                };
+                if value.is_null() {
+                    if !prop.nullable {
+                        findings.push(at(format!("prop '{key}' is not nullable")));
+                    }
+                    continue;
+                }
+                match prop.kind.kind.as_str() {
+                    "boolean" => {
+                        if !value.is_boolean() {
+                            findings.push(at(format!("prop '{key}' expects a boolean")));
+                        }
+                    }
+                    "string" | "icon" | "dimension" => {
+                        if !value.is_string() {
+                            findings.push(at(format!("prop '{key}' expects a string")));
+                        }
+                    }
+                    "enum" => {
+                        let Some(expected) = value.as_str() else {
+                            findings.push(at(format!("prop '{key}' expects an enum string")));
+                            continue;
+                        };
+                        let values = prop.kind.values.as_deref().unwrap_or_default();
+                        if !values.iter().any(|v| v == expected) {
+                            findings.push(at(format!(
+                                "prop '{key}' value '{expected}' is not one of {values:?}"
+                            )));
+                        }
+                    }
+                    other => findings.push(at(format!("prop '{key}' has unknown type '{other}'"))),
+                }
+            }
+        }
+
+        if let Some(fixture_regions) = case
+            .fixture
+            .get("regions")
+            .and_then(serde_json::Value::as_object)
+        {
+            for key in fixture_regions.keys() {
+                if !regions.contains(key.as_str()) {
+                    findings.push(at(format!("unknown region '{key}'")));
+                }
+            }
+        }
+
+        for step in &case.steps {
+            match step {
+                CaseStep::Action { part, name, .. } => {
+                    if !parts.contains(part.as_str()) {
+                        findings.push(at(format!("action targets unknown part '{part}'")));
+                    }
+                    if name != "press" && name != "focus" {
+                        findings.push(at(format!("unknown action '{name}'")));
+                    }
+                }
+                CaseStep::ExpectPart { part, expect } => {
+                    if !parts.contains(part.as_str()) {
+                        findings.push(at(format!("expects unknown part '{part}'")));
+                    }
+                    if let Some(expect_states) = expect.get("states").and_then(serde_json::Value::as_object) {
+                        for key in expect_states.keys() {
+                            if !states.contains(key.as_str()) {
+                                findings.push(at(format!("expects unknown state '{key}'")));
+                            }
+                        }
+                    }
+                    if let Some(expect_roles) = expect
+                        .get("tokenRoles")
+                        .and_then(serde_json::Value::as_object)
+                    {
+                        for key in expect_roles.keys() {
+                            if !token_roles.contains(key.as_str()) {
+                                findings.push(at(format!("expects unknown token role '{key}'")));
+                            }
+                        }
+                    }
+                }
+                CaseStep::ExpectEvents { events: expected } => {
+                    for event in expected {
+                        if !events.contains(event.as_str()) {
+                            findings.push(at(format!("expects unknown event '{event}'")));
+                        }
+                    }
+                }
+            }
+        }
+
+        if let Some(specimen_axes) = case
+            .specimen
+            .get("axes")
+            .and_then(serde_json::Value::as_array)
+        {
+            for axis in specimen_axes {
+                let Some(axis) = axis.as_str() else {
+                    findings.push(at("specimen axis is not a string".to_owned()));
+                    continue;
+                };
+                if !axes.contains(axis) {
+                    findings.push(at(format!("unknown specimen axis '{axis}'")));
+                }
+            }
+        }
+    }
+
+    if findings.is_empty() {
+        Ok(())
+    } else {
+        Err(CodegenError::Gate {
+            message: format!(
+                "case corpus {} does not validate against interface {}:\n{}",
+                cases.component,
+                interface.id,
+                findings.join("\n")
+            ),
+        })
+    }
 }
 
 /// Loads and validates the interface JSON.

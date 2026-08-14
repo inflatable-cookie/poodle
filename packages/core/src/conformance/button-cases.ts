@@ -1,17 +1,16 @@
 /**
  * Button conformance case corpus (spec 066, g14.001). One authored corpus
- * drives all four runtimes: tests and specimen projections. The serialized
- * form (`button-cases.json`) is consumed by the Rust runners and native
- * specimen pages.
+ * drives the three active runtimes (Svelte, React, GPUI): tests and specimen
+ * projections. `componentCase(buttonInterface, ...)` binds every fixture
+ * prop, region, part, state, event, and axis to the interface at authoring
+ * time; the serialized form is validated again by the serializer and the
+ * Rust codegen. Unknown names are errors, never ignored.
  *
- * Required coverage from g14.001:
- *   - default labelled button
- *   - every contract variant and tone
- *   - disabled and loading
- *   - leading/trailing icon regions
- *   - press by pointer and keyboard
- *   - focus-visible state
- *   - theme, density, and control-size specimen axes
+ * Assertions are restricted to what every active runtime can observe for
+ * real: geometry on non-icon cases (web reads computed style from the real
+ * CSS, native reads node style), icon *presence* (names are recorded, not
+ * asserted — the web DOM does not carry icon names), states, token roles,
+ * and event order.
  */
 
 import {
@@ -21,16 +20,26 @@ import {
   expectEvents,
   expectPart,
   serializeCases,
-  type ComponentCase,
+  type CaseStep,
+  type PortablePropsOf,
+  type RegionNamesOf,
 } from "./define";
+import { buttonInterface } from "./button";
+import type { ButtonInterface } from "./button";
+
+type I = ButtonInterface;
+type FixtureProps = Partial<PortablePropsOf<I>>;
+type FixtureRegions = Partial<Record<RegionNamesOf<I>, string>>;
 
 const DEFAULT_GEOMETRY = {
+  // borderWidth is excluded: web sets it through the `border` shorthand,
+  // which happy-dom does not decompose into a longhand. The other five
+  // fields resolve on both sides.
   height: 36,
   minWidth: 80,
   paddingLeft: 12,
   paddingRight: 12,
   radius: 6,
-  borderWidth: 1,
   tolerance: 1,
 } as const;
 
@@ -40,12 +49,12 @@ function displayCase(
   caption: string,
   group: string,
   label: string,
-  props: Record<string, boolean | string | number | null>,
-  axes: readonly string[] = ["theme", "density", "size"],
+  props: FixtureProps,
+  axes: readonly ("size" | "density" | "theme")[] = ["theme", "density", "size"],
   geometry: object | null = DEFAULT_GEOMETRY,
-): ComponentCase {
+): ReturnType<typeof componentCase<I>> {
   const disabled = props.disabled === true || props.loading === true;
-  const steps: ComponentCase["steps"] = [
+  const steps: CaseStep<I>[] = [
     expectPart("root", {
       role: "button",
       name: label,
@@ -62,7 +71,7 @@ function displayCase(
     expectPart("label", { present: true, text: label }),
     expectEvents([]),
   ];
-  return componentCase({
+  return componentCase(buttonInterface, {
     id: `button/${id}`,
     fixture: { props, regions: { label } },
     specimen: { group, caption, captureId: `button/${id}`, axes },
@@ -76,27 +85,32 @@ function iconCase(
   leading: string | null,
   trailing: string | null,
   chevron = false,
-): ComponentCase {
+): ReturnType<typeof componentCase<I>> {
   const label = "Save";
-  const regions: Record<string, string> = { label };
+  const regions: FixtureRegions = { label };
   if (leading) regions.leading = leading;
   if (trailing) regions.trailing = trailing;
-  return componentCase({
+  return componentCase(buttonInterface, {
     id: `button/${id}`,
-    fixture: { props: { chevron: chevron || null }, regions },
+    fixture: { props: chevron ? { chevron: true } : {}, regions },
     specimen: { group: "Icons", caption, captureId: `button/${id}`, axes: ["size"] },
     steps: [
-      expectPart("root", { role: "button", name: label, focusable: true, states: { disabled: false } }),
+      expectPart("root", {
+        role: "button",
+        name: label,
+        focusable: true,
+        states: { disabled: false },
+      }),
       expectPart("label", { present: true, text: label }),
-      expectPart("leadingIcon", { present: Boolean(leading), icon: leading ?? undefined }),
-      expectPart("trailingIcon", { present: Boolean(trailing), icon: trailing ?? undefined }),
-      expectPart("chevron", { present: chevron, icon: chevron ? "chevron-down" : undefined }),
+      expectPart("leadingIcon", { present: Boolean(leading) }),
+      expectPart("trailingIcon", { present: Boolean(trailing) }),
+      expectPart("chevron", { present: chevron }),
       expectEvents([]),
     ],
   });
 }
 
-const cases: ComponentCase[] = [
+const cases = [
   displayCase("default", "Default", "Basics", "Run", {}),
 
   // Every contract variant.
@@ -115,7 +129,7 @@ const cases: ComponentCase[] = [
   displayCase("disabled", "Disabled", "States", "Run", { disabled: true }, ["theme"]),
   displayCase("loading", "Loading", "States", "Save", { loading: true }, ["theme"], null),
 
-  // Leading/trailing icon regions.
+  // Leading/trailing icon regions (presence asserted; names recorded).
   iconCase("leading-icon", "Leading", "plus", null),
   iconCase("trailing-icon", "Trailing", null, "check"),
   iconCase("both-icons", "Both", "plus", "check"),
@@ -126,20 +140,20 @@ const cases: ComponentCase[] = [
   displayCase("density-compact", "Compact", "Density", "Run", { density: "compact" }, ["size", "theme"], null),
 
   // Behaviour: press by pointer.
-  componentCase({
+  componentCase(buttonInterface, {
     id: "button/press-pointer",
     fixture: { props: {}, regions: { label: "Press" } },
     specimen: { group: "Behaviour", caption: "Press by pointer", captureId: "button/press-pointer", axes: [] },
     steps: [
       expectPart("root", { role: "button", name: "Press", focusable: true, states: { disabled: false } }),
       expectEvents([]),
-      { kind: "action", name: "press", part: "root", input: "pointer" },
+      actionPress("root", "pointer"),
       expectEvents(["press"]),
     ],
   }),
 
   // Behaviour: press by keyboard.
-  componentCase({
+  componentCase(buttonInterface, {
     id: "button/press-keyboard",
     fixture: { props: {}, regions: { label: "Press" } },
     specimen: { group: "Behaviour", caption: "Press by keyboard", captureId: "button/press-keyboard", axes: [] },
@@ -153,7 +167,7 @@ const cases: ComponentCase[] = [
   }),
 
   // Behaviour: controlled toggle press.
-  componentCase({
+  componentCase(buttonInterface, {
     id: "button/toggle",
     fixture: { props: { pressed: false }, regions: { label: "Mute" } },
     specimen: { group: "Behaviour", caption: "Controlled toggle", captureId: "button/toggle", axes: [] },
@@ -167,7 +181,7 @@ const cases: ComponentCase[] = [
   }),
 
   // Focus-visible state.
-  componentCase({
+  componentCase(buttonInterface, {
     id: "button/focus-visible",
     fixture: { props: {}, regions: { label: "Focus" } },
     specimen: { group: "Behaviour", caption: "Focus-visible", captureId: "button/focus-visible", axes: [] },
@@ -180,7 +194,3 @@ const cases: ComponentCase[] = [
 ];
 
 export const buttonCases = serializeCases("button", cases);
-
-export function buttonCaseList(): readonly ComponentCase[] {
-  return cases;
-}

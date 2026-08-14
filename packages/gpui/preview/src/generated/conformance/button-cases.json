@@ -13,12 +13,12 @@
       "specimen": {
         "group": "Basics",
         "caption": "Default",
-        "captureId": "button/default",
         "axes": [
           "theme",
           "density",
           "size"
-        ]
+        ],
+        "captureId": "button/default"
       },
       "steps": [
         {
@@ -44,7 +44,6 @@
               "paddingLeft": 12,
               "paddingRight": 12,
               "radius": 6,
-              "borderWidth": 1,
               "tolerance": 1
             }
           }
@@ -76,12 +75,12 @@
       "specimen": {
         "group": "Variants",
         "caption": "Primary",
-        "captureId": "button/primary",
         "axes": [
           "theme",
           "density",
           "size"
-        ]
+        ],
+        "captureId": "button/primary"
       },
       "steps": [
         {
@@ -107,7 +106,6 @@
               "paddingLeft": 12,
               "paddingRight": 12,
               "radius": 6,
-              "borderWidth": 1,
               "tolerance": 1
             }
           }
@@ -139,12 +137,12 @@
       "specimen": {
         "group": "Variants",
         "caption": "Secondary",
-        "captureId": "button/secondary",
         "axes": [
           "theme",
           "density",
           "size"
-        ]
+        ],
+        "captureId": "button/secondary"
       },
       "steps": [
         {
@@ -170,7 +168,6 @@
               "paddingLeft": 12,
               "paddingRight": 12,
               "radius": 6,
-              "borderWidth": 1,
               "tolerance": 1
             }
           }
@@ -202,12 +199,12 @@
       "specimen": {
         "group": "Variants",
         "caption": "Ghost",
-        "captureId": "button/ghost",
         "axes": [
           "theme",
           "density",
           "size"
-        ]
+        ],
+        "captureId": "button/ghost"
       },
       "steps": [
         {
@@ -233,7 +230,6 @@
               "paddingLeft": 12,
               "paddingRight": 12,
               "radius": 6,
-              "borderWidth": 1,
               "tolerance": 1
             }
           }
@@ -265,12 +261,12 @@
       "specimen": {
         "group": "Tones",
         "caption": "Danger",
-        "captureId": "button/tone-danger",
         "axes": [
           "theme",
           "density",
           "size"
-        ]
+        ],
+        "captureId": "button/tone-danger"
       },
       "steps": [
         {
@@ -296,7 +292,6 @@
               "paddingLeft": 12,
               "paddingRight": 12,
               "radius": 6,
-              "borderWidth": 1,
               "tolerance": 1
             }
           }
@@ -328,12 +323,12 @@
       "specimen": {
         "group": "Tones",
         "caption": "Success",
-        "captureId": "button/tone-success",
         "axes": [
           "theme",
           "density",
           "size"
-        ]
+        ],
+        "captureId": "button/tone-success"
       },
       "steps": [
         {
@@ -359,7 +354,6 @@
               "paddingLeft": 12,
               "paddingRight": 12,
               "radius": 6,
-              "borderWidth": 1,
               "tolerance": 1
             }
           }
@@ -391,12 +385,12 @@
       "specimen": {
         "group": "Tones",
         "caption": "Warning",
-        "captureId": "button/tone-warning",
         "axes": [
           "theme",
           "density",
           "size"
-        ]
+        ],
+        "captureId": "button/tone-warning"
       },
       "steps": [
         {
@@ -422,7 +416,6 @@
               "paddingLeft": 12,
               "paddingRight": 12,
               "radius": 6,
-              "borderWidth": 1,
               "tolerance": 1
             }
           }
@@ -454,10 +447,10 @@
       "specimen": {
         "group": "States",
         "caption": "Disabled",
-        "captureId": "button/disabled",
         "axes": [
           "theme"
-        ]
+        ],
+        "captureId": "button/disabled"
       },
       "steps": [
         {
@@ -483,7 +476,6 @@
               "paddingLeft": 12,
               "paddingRight": 12,
               "radius": 6,
-              "borderWidth": 1,
               "tolerance": 1
             }
           }
@@ -515,10 +507,10 @@
       "specimen": {
         "group": "States",
         "caption": "Loading",
-        "captureId": "button/loading",
         "axes": [
           "theme"
-        ]
+        ],
+        "captureId": "button/loading"
       },
       "steps": [
         {
@@ -557,9 +549,7 @@
     {
       "id": "button/leading-icon",
       "fixture": {
-        "props": {
-          "chevron": null
-        },
+        "props": {},
         "regions": {
           "label": "Save",
           "leading": "plus"
@@ -568,10 +558,10 @@
       "specimen": {
         "group": "Icons",
         "caption": "Leading",
-        "captureId": "button/leading-icon",
         "axes": [
           "size"
-        ]
+        ],
+        "captureId": "button/leading-icon"
       },
       "steps": [
         {
@@ -598,8 +588,7 @@
           "kind": "expectPart",
           "part": "leadingIcon",
           "expect": {
-            "present": true,
-            "icon": "plus"
+            "present": true
           }
         },
         {
@@ -625,9 +614,7 @@
     {
       "id": "button/trailing-icon",
       "fixture": {
-        "props": {
-          "chevron": null
-        },
+        "props": {},
         "regions": {
           "label": "Save",
           "trailing": "check"
@@ -636,10 +623,10 @@
       "specimen": {
         "group": "Icons",
         "caption": "Trailing",
-        "captureId": "button/trailing-icon",
         "axes": [
           "size"
-        ]
+        ],
+        "captureId": "button/trailing-icon"
       },
       "steps": [
         {
@@ -673,8 +660,7 @@
           "kind": "expectPart",
           "part": "trailingIcon",
           "expect": {
-            "present": true,
-            "icon": "check"
+            "present": true
           }
         },
         {
@@ -693,9 +679,7 @@
     {
       "id": "button/both-icons",
       "fixture": {
-        "props": {
-          "chevron": null
-        },
+        "props": {},
         "regions": {
           "label": "Save",
           "leading": "plus",
@@ -705,10 +689,10 @@
       "specimen": {
         "group": "Icons",
         "caption": "Both",
-        "captureId": "button/both-icons",
         "axes": [
           "size"
-        ]
+        ],
+        "captureId": "button/both-icons"
       },
       "steps": [
         {
@@ -735,16 +719,14 @@
           "kind": "expectPart",
           "part": "leadingIcon",
           "expect": {
-            "present": true,
-            "icon": "plus"
+            "present": true
           }
         },
         {
           "kind": "expectPart",
           "part": "trailingIcon",
           "expect": {
-            "present": true,
-            "icon": "check"
+            "present": true
           }
         },
         {
@@ -773,10 +755,10 @@
       "specimen": {
         "group": "Icons",
         "caption": "Chevron",
-        "captureId": "button/chevron",
         "axes": [
           "size"
-        ]
+        ],
+        "captureId": "button/chevron"
       },
       "steps": [
         {
@@ -817,8 +799,7 @@
           "kind": "expectPart",
           "part": "chevron",
           "expect": {
-            "present": true,
-            "icon": "chevron-down"
+            "present": true
           }
         },
         {
@@ -840,11 +821,11 @@
       "specimen": {
         "group": "Size",
         "caption": "Large",
-        "captureId": "button/size-lg",
         "axes": [
           "density",
           "theme"
-        ]
+        ],
+        "captureId": "button/size-lg"
       },
       "steps": [
         {
@@ -893,11 +874,11 @@
       "specimen": {
         "group": "Density",
         "caption": "Compact",
-        "captureId": "button/density-compact",
         "axes": [
           "size",
           "theme"
-        ]
+        ],
+        "captureId": "button/density-compact"
       },
       "steps": [
         {
@@ -944,8 +925,8 @@
       "specimen": {
         "group": "Behaviour",
         "caption": "Press by pointer",
-        "captureId": "button/press-pointer",
-        "axes": []
+        "axes": [],
+        "captureId": "button/press-pointer"
       },
       "steps": [
         {
@@ -989,8 +970,8 @@
       "specimen": {
         "group": "Behaviour",
         "caption": "Press by keyboard",
-        "captureId": "button/press-keyboard",
-        "axes": []
+        "axes": [],
+        "captureId": "button/press-keyboard"
       },
       "steps": [
         {
@@ -1038,8 +1019,8 @@
       "specimen": {
         "group": "Behaviour",
         "caption": "Controlled toggle",
-        "captureId": "button/toggle",
-        "axes": []
+        "axes": [],
+        "captureId": "button/toggle"
       },
       "steps": [
         {
@@ -1092,8 +1073,8 @@
       "specimen": {
         "group": "Behaviour",
         "caption": "Focus-visible",
-        "captureId": "button/focus-visible",
-        "axes": []
+        "axes": [],
+        "captureId": "button/focus-visible"
       },
       "steps": [
         {

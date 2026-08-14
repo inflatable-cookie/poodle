@@ -44,8 +44,10 @@ function locFrom(original: string): number {
 }
 
 function blob(path: string): string {
+  // The pre-card baseline is main, not this branch's HEAD (the first pass
+  // already replaced these surfaces).
   try {
-    return execSync(`git show HEAD:${path}`, { cwd: ROOT }).toString();
+    return execSync(`git show origin/main:${path}`, { cwd: ROOT }).toString();
   } catch {
     return "";
   }
@@ -61,8 +63,7 @@ const authored: Array<[string, string]> = [
 
 const generated: Array<[string, string]> = [
   ["Rust declaration (generated/button.rs)", "packages/contracts/components/src/generated/button.rs"],
-  ["Case JSON copies (gpui)", "packages/gpui/preview/src/generated/conformance/button-cases.json"],
-  ["Case JSON copies (jetstream)", "packages/jetstream/preview/src/generated/conformance/button-cases.json"],
+  ["Case JSON copy (gpui preview)", "packages/gpui/preview/src/generated/conformance/button-cases.json"],
 ];
 
 const adapters: Array<[string, string]> = [
@@ -71,9 +72,7 @@ const adapters: Array<[string, string]> = [
   ["React adapter", "test/conformance/web/react-adapter.tsx"],
   ["Web test entry", "test/conformance/web/button.test.ts"],
   ["Native observer (render::conformance)", "packages/render/src/conformance.rs"],
-  ["Jetstream runner bin", "packages/jetstream/preview/src/bin/conformance.rs"],
-  ["Jetstream support module", "packages/jetstream/preview/src/conformance_support.rs"],
-  ["GPUI runner bin", "packages/gpui/preview/src/bin/conformance.rs"],
+  ["GPUI runner bin (real window + driver)", "packages/gpui/preview/src/bin/conformance.rs"],
   ["GPUI support module", "packages/gpui/preview/src/conformance_support.rs"],
   ["Orchestrator (compare)", "test/conformance/compare.ts"],
 ];
@@ -103,7 +102,7 @@ const replaced: Array<[string, string, number]> = [
   ],
   ["Svelte specimen fixture content", "packages/svelte/preview/src/specimens/ButtonSpecimen.svelte", 0],
   ["React specimen fixture content", "packages/react/preview/src/gallery/specimens/ButtonSpecimen.tsx", 0],
-  ["Jetstream specimen fixture content", "packages/jetstream/preview/src/specimens/button.rs", 0],
+
   ["GPUI specimen fixture content", "packages/gpui/preview/src/specimens/button.rs", 0],
 ];
 
@@ -152,10 +151,9 @@ const replacedTotal = table("Replaced (deleted hand-written surfaces, from git)"
 
 console.log("\n=== Summary ===");
 console.log(`mechanism (authored + generated + adapters + wiring): ${authoredTotal + generatedTotal + adapterTotal + wiringTotal}`);
-console.log(`replaced: ${replacedTotal}`);
+console.log(`  reusable mechanism (observers + runners + wiring + codegen surface): ${adapterTotal + wiringTotal}`);
+console.log(`  per-component authority (interface + corpus + projection, excluding the reusable schema): ~${authoredTotal}`);
+console.log(`replaced (hand-written declarations + specimen fixtures, measured against main): ${replacedTotal}`);
 console.log(
-  `net: ${authoredTotal + generatedTotal + adapterTotal + wiringTotal - replacedTotal} lines (positive = mechanism grew; the Button proof's per-component cost is authored + adapters)`,
-);
-console.log(
-  `ongoing per-component authoring cost (interface + corpus, per component): ~${Math.round((authoredTotal / 1))} lines today, before profile reuse`,
+  `net: ${authoredTotal + generatedTotal + adapterTotal + wiringTotal - replacedTotal} lines (mechanism minus replaced; the Button proof is the first claim on the reusable share)`,
 );
