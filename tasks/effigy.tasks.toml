@@ -68,7 +68,7 @@
 ]
 
 # Conformance kernel (g14.001, spec 066): the Button proof loop — portable
-# interface + typed case corpus -> four runtimes -> component-observation.v1
+# interface + typed case corpus -> three active runtimes -> component-observation.v1
 # -> one completion gate. The authority lives in TypeScript
 # (packages/core/src/conformance/); `conformance:build` serializes it to the
 # neutral JSON fixtures and generates the Rust declaration surface; `*:check`
@@ -101,7 +101,7 @@
 # gate this check.
 "conformance:typecheck" = "bunx tsc --noEmit --ignoreConfig packages/core/src/conformance/define.ts packages/core/src/conformance/button.ts packages/core/src/conformance/button-cases.ts packages/core/src/conformance/project.ts --strict --skipLibCheck --moduleResolution bundler --module esnext --target es2022"
 "conformance:test-web" = "bunx vitest run --project conformance"
-# LOCAL-ONLY, like test:native-visual: opens a real GPUI window and drives
+# WINDOWED, like test:native-visual: opens a real GPUI window and drives
 # real NSEvents through the AppKit queue (hit testing, listener binding,
 # focus, activation). Needs a macOS window server.
 "conformance:test-gpui" = "cargo run --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin conformance -- --out=test/conformance/web/out/gpui.json"
@@ -112,8 +112,6 @@
   { task = "conformance:test-gpui" },
 ]
 "conformance:compare" = "bun test/conformance/compare.ts"
-# The completion gate: drift-free authority, then all four runtimes, then the
-# cross-runtime comparison. `--component button` is the pilot profile.
 # The completion gate: drift-free authority, then all three active runtimes,
 # then the cross-runtime comparison. Jetstream is program-deferred (working
 # rules): it is reported as deferred, never as passing.
@@ -124,11 +122,8 @@
   { task = "conformance:compare" },
 ]
 "conformance:cost" = "bun packages/core/scripts/conformance-cost.ts"
-# The executed conformance board (LOCAL-ONLY, macOS window server): the
-# standing surface for the full proof. The windowed GPUI run cannot join
-# the headless boards (qa / ci:native) by their contract, so the executed
-# comparison lives on its own named board — the same pattern
-# `test:native-visual` and `qa:jetstream` use for windowed/paired work.
+# The executed conformance board (macOS window server). It stays outside the
+# headless qa / ci:native contract and runs in the dedicated PR workflow.
 "ci:conformance" = [
   { task = "conformance:check" },
   { task = "conformance:test-web" },

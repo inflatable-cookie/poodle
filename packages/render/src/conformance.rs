@@ -245,8 +245,6 @@ fn first_text(root: &Node) -> Option<&Node> {
         .find(|child| matches!(child.kind, NodeKind::Text { .. }))
 }
 
-/// The visible label text: the root's intrinsic label or its first Text
-/// child.
 /// The visible label text: the root's first Text child, or the text the
 /// root intrinsically carries (the vocabulary's own accessor — no kind
 /// branch in observer code).
@@ -745,7 +743,7 @@ pub fn assert_part(
         let tolerance = geometry
             .get("tolerance")
             .and_then(Value::as_f64)
-            .unwrap_or(0.5);
+            .expect("validated geometry expectation requires an authored tolerance");
         for field in GEOMETRY_FIELDS {
             let Some(expected) = geometry.get(*field) else {
                 continue;

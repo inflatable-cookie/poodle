@@ -347,7 +347,10 @@ export function assertPartObservation(
     );
   }
   const geometry = (expect.geometry ?? {}) as Record<string, number | undefined>;
-  const tolerance = geometry.tolerance ?? 0.5;
+  const tolerance = geometry.tolerance;
+  if (expect.geometry !== undefined && tolerance === undefined) {
+    throw new Error(`${runtime} step ${stepIndex} ${partId}.geometry: missing authored tolerance`);
+  }
   for (const field of geometryFields) {
     const expected = geometry[field];
     if (expected === undefined) continue;

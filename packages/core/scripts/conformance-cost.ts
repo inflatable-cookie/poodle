@@ -1,120 +1,144 @@
 /**
- * Conformance cost report (spec 066 "Cost And Replacement Rules", g14.001):
- * an exhaustive inventory of every mechanism line — all four committed JSON
- * artifacts included — against what the mechanism replaced. Counts
- * non-blank, non-comment lines; replaced lines are measured against
- * `origin/main` (the pre-card baseline).
+ * Conformance cost report (spec 066, g14.001): exhaustive source LOC by
+ * ownership, generated data in bytes, and replaced source against the branch
+ * merge base. LOC excludes blank and comment-only lines.
  */
 
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
-const ROOT = execSync("git rev-parse --show-toplevel").toString().trim();
+const ROOT = execFileSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" }).trim();
+/** Fixed pre-proof baseline; override only when measuring a later pilot. */
+const BASE = process.env.POODLE_CONFORMANCE_COST_BASE ?? "5180ac16ad276988eb9f235a6d6957a283aea3b8";
 
 function countLines(text: string): number {
-  return text
-    .split("\n")
-    .filter((line) => {
-      const trimmed = line.trim();
-      if (!trimmed) return false;
-      if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*")) return false;
-      if (trimmed.startsWith("#") && !trimmed.startsWith("#!")) return false;
-      return true;
-    }).length;
+  return text.split("\n").filter((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return false;
+    if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*")) return false;
+    if (trimmed.startsWith("#") && !trimmed.startsWith("#!")) return false;
+    return true;
+  }).length;
+}
+
+function workingText(path: string): string {
+  try {
+    return readFileSync(`${ROOT}/${path}`, "utf8");
+  } catch {
+    return "";
+  }
+}
+
+function baseText(path: string): string {
+  try {
+    return execFileSync("git", ["show", `${BASE}:${path}`], {
+      cwd: ROOT,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+  } catch {
+    return "";
+  }
 }
 
 function workingLoc(path: string): number {
-  try {
-    return countLines(readFileSync(`${ROOT}/${path}`, "utf8"));
-  } catch {
-    return 0;
-  }
+  return countLines(workingText(path));
 }
 
-function mainLoc(path: string): number {
-  try {
-    return countLines(execSync(`git show origin/main:${path}`, { cwd: ROOT }).toString());
-  } catch {
-    return 0;
-  }
+function baseLoc(path: string): number {
+  return countLines(baseText(path));
 }
 
-const AUTHORED: Array<[string, string]> = [
-  ["Interface schema (define.ts)", "packages/core/src/conformance/define.ts"],
-  ["Button interface (button.ts)", "packages/core/src/conformance/button.ts"],
-  ["Button corpus (button-cases.ts)", "packages/core/src/conformance/button-cases.ts"],
-  ["Specimen projection (project.ts)", "packages/core/src/conformance/project.ts"],
-  ["Serializer script", "packages/core/scripts/conformance-serialize.ts"],
+const REUSABLE_AUTHORITY: Array<[string, string]> = [
+  ["Interface and case schema", "packages/core/src/conformance/define.ts"],
+  ["Specimen projection", "packages/core/src/conformance/project.ts"],
+  ["Serializer", "packages/core/scripts/conformance-serialize.ts"],
+  ["Authority validation tests", "packages/core/test/component-case-authority.test.ts"],
+];
+
+const PER_COMPONENT_AUTHORITY: Array<[string, string]> = [
+  ["Button interface", "packages/core/src/conformance/button.ts"],
+  ["Button corpus", "packages/core/src/conformance/button-cases.ts"],
 ];
 
 const CODEGEN: Array<[string, string]> = [
-  ["Codegen conformance parsing + case validation", "packages/codegen/src/conformance.rs"],
-  ["Codegen Rust declaration target", "packages/codegen/src/targets/conformance_rust.rs"],
-  ["Codegen CLI mode (delta)", "packages/codegen/src/bin/poodle-codegen.rs"],
+  ["Conformance parsing and validation", "packages/codegen/src/conformance.rs"],
+  ["Rust declaration target", "packages/codegen/src/targets/conformance_rust.rs"],
+  ["CLI integration", "packages/codegen/src/bin/poodle-codegen.rs"],
 ];
 
-const GENERATED: Array<[string, string]> = [
-  ["Rust declaration (generated/button.rs)", "packages/contracts/components/src/generated/button.rs"],
-  ["Interface fixture JSON (bytes)", "packages/codegen/fixtures/conformance/button-interface.json"],
-  ["Case fixture JSON (bytes)", "packages/codegen/fixtures/conformance/button-cases.json"],
+const GENERATED_SOURCE: Array<[string, string]> = [
+  ["Generated Button Rust declaration", "packages/contracts/components/src/generated/button.rs"],
 ];
 
-const OBSERVERS_AND_RUNNERS: Array<[string, string]> = [
-  ["Web runner core (data-driven observer)", "test/conformance/web/runner.ts"],
+const GENERATED_DATA: Array<[string, string]> = [
+  ["Interface fixture JSON", "packages/codegen/fixtures/conformance/button-interface.json"],
+  ["Case fixture JSON", "packages/codegen/fixtures/conformance/button-cases.json"],
+];
+
+const GENERIC_RUNTIME: Array<[string, string]> = [
+  ["Web runner and observer", "test/conformance/web/runner.ts"],
+  ["Native observer and assertion runner", "packages/render/src/conformance.rs"],
+  ["Cross-runtime comparator", "test/conformance/compare.ts"],
+];
+
+const BUTTON_HARNESS: Array<[string, string]> = [
   ["Svelte adapter", "test/conformance/web/svelte-adapter.ts"],
   ["React adapter", "test/conformance/web/react-adapter.tsx"],
-  ["Svelte host component", "test/conformance/web/hosts/ButtonHost.svelte"],
-  ["Web test entry", "test/conformance/web/button.test.ts"],
-  ["Native observer (render::conformance)", "packages/render/src/conformance.rs"],
-  ["GPUI runner bin (real window + driver)", "packages/gpui/preview/src/bin/conformance.rs"],
-  ["GPUI support module", "packages/gpui/preview/src/conformance_support.rs"],
-  ["Orchestrator (normalized comparison)", "test/conformance/compare.ts"],
+  ["Svelte host", "test/conformance/web/hosts/ButtonHost.svelte"],
+  ["Web execution tests", "test/conformance/web/button.test.ts"],
+  ["GPUI execution driver", "packages/gpui/preview/src/bin/conformance.rs"],
+  ["GPUI fixture adapter", "packages/gpui/preview/src/conformance_support.rs"],
 ];
 
-const SUPPORTING_DELTAS: Array<[string, string]> = [
-  ["poodle-node roles + intrinsic_text", "packages/contracts/node/src/lib.rs"],
-  ["render::button roles/focus/a11y/metrics fixes", "packages/render/src/button.rs"],
-  ["node-backend focus query + single activation path", "packages/gpui/node-backend/src/lib.rs"],
-  ["node-backend interaction fix", "packages/gpui/node-backend/src/interaction.rs"],
-  ["Svelte Button shell + identity channels", "packages/svelte/components/src/Button.svelte"],
-  ["React Button shell + identity channels", "packages/react/components/src/Button.tsx"],
+const GENERIC_SUPPORTING_DELTAS: Array<[string, string]> = [
+  ["poodle-node observation vocabulary", "packages/contracts/node/src/lib.rs"],
+  ["GPUI focus and activation backend", "packages/gpui/node-backend/src/lib.rs"],
+  ["GPUI interaction backend", "packages/gpui/node-backend/src/interaction.rs"],
+];
+
+const BUTTON_SUPPORTING_DELTAS: Array<[string, string]> = [
+  ["Button renderer semantics", "packages/render/src/button.rs"],
+  ["Svelte Button shell", "packages/svelte/components/src/Button.svelte"],
+  ["React Button shell", "packages/react/components/src/Button.tsx"],
 ];
 
 const WIRING: Array<[string, string]> = [
-  ["Effigy selectors + gate wiring", "tasks/effigy.tasks.toml#conformance"],
-  ["Cost report (this script)", "packages/core/scripts/conformance-cost.ts"],
+  ["Effigy selector section", "tasks/effigy.tasks.toml#conformance"],
+  ["Cost report", "packages/core/scripts/conformance-cost.ts"],
+  ["macOS conformance workflow", ".github/workflows/ci-conformance.yml"],
 ];
 
 const REPLACED: Array<[string, string]> = [
-  ["Hand-written ButtonSpec declaration surface", "packages/contracts/components/src/button.rs"],
-  ["Svelte specimen fixture content", "packages/svelte/preview/src/specimens/ButtonSpecimen.svelte"],
-  ["React specimen fixture content", "packages/react/preview/src/gallery/specimens/ButtonSpecimen.tsx"],
-  ["GPUI specimen fixture content", "packages/gpui/preview/src/specimens/button.rs"],
+  ["Hand-written ButtonSpec declaration", "packages/contracts/components/src/button.rs"],
+  ["Svelte Button specimen fixtures", "packages/svelte/preview/src/specimens/ButtonSpecimen.svelte"],
+  ["React Button specimen fixtures", "packages/react/preview/src/gallery/specimens/ButtonSpecimen.tsx"],
+  ["GPUI Button specimen fixtures", "packages/gpui/preview/src/specimens/button.rs"],
 ];
 
 function sectionLoc(path: string, startMarker: string, endMarker: string): number {
-  const text = readFileSync(`${ROOT}/${path}`, "utf8");
+  const text = workingText(path);
   const start = text.indexOf(startMarker);
-  const end = text.indexOf(endMarker, start + 1);
+  const end = text.indexOf(endMarker, start + startMarker.length);
   if (start < 0 || end < 0) return 0;
   return countLines(text.slice(start, end));
 }
 
-function table(title: string, rows: Array<[string, string]>, mode: "working" | "delta" | "replaced"): number {
-  console.log(`\n${title}`);
+function sourceTable(
+  title: string,
+  rows: Array<[string, string]>,
+  mode: "working" | "delta" | "replaced",
+): number {
+  console.log(`\n${title} (LOC)`);
   let total = 0;
   for (const [label, path] of rows) {
     let count: number;
     if (mode === "replaced") {
-      count = Math.max(0, mainLoc(path) - workingLoc(path));
+      count = Math.max(0, baseLoc(path) - workingLoc(path));
     } else if (mode === "delta") {
-      count = Math.max(0, workingLoc(path) - mainLoc(path));
-    } else if (path.includes("#conformance")) {
+      count = Math.max(0, workingLoc(path) - baseLoc(path));
+    } else if (path.endsWith("#conformance")) {
       count = sectionLoc(path.split("#")[0], "# Conformance kernel (g14.001", "# Preview (documentation site)");
-    } else if (path.includes("JSON (bytes)")) {
-      // Byte-grounded: serialized data artifacts are counted in bytes
-      // (1,024 bytes = 1 unit), not as source lines.
-      count = Math.round(readFileSync(`${ROOT}/${path}`, "utf8").length / 1024);
     } else {
       count = workingLoc(path);
     }
@@ -125,28 +149,45 @@ function table(title: string, rows: Array<[string, string]>, mode: "working" | "
   return total;
 }
 
-const authored = table("Authored (TS authority + serializer)", AUTHORED, "working");
-const codegen = table("Codegen (parsing, validation, targets)", CODEGEN, "delta");
-const generated = table("Generated artifacts (all four committed JSON artifacts included)", GENERATED, "working");
-const observers = table("Observers and runners", OBSERVERS_AND_RUNNERS, "working");
-const supporting = table("Supporting deltas (vocabulary, renderer, backends, shells)", SUPPORTING_DELTAS, "delta");
-const wiring = table("Wiring (selectors + cost script)", WIRING, "working");
-const replaced = table("Replaced (deleted hand-written surfaces, measured against main)", REPLACED, "replaced");
+function dataTable(rows: Array<[string, string]>): number {
+  console.log("\nGenerated data artifacts (bytes)");
+  let total = 0;
+  for (const [label, path] of rows) {
+    const bytes = Buffer.byteLength(workingText(path));
+    total += bytes;
+    console.log(`  ${String(bytes).padStart(5)}  ${label}`);
+  }
+  console.log(`  ${String(total).padStart(5)}  total`);
+  return total;
+}
 
-const mechanism = authored + codegen + generated + observers + supporting + wiring;
-const reusable = codegen + observers + supporting + wiring;
-const perComponent = authored;
+console.log(`Conformance cost base: ${BASE}`);
+const reusableAuthority = sourceTable("Reusable authority", REUSABLE_AUTHORITY, "working");
+const perComponentAuthority = sourceTable("Per-component authored authority", PER_COMPONENT_AUTHORITY, "working");
+const codegen = sourceTable("Codegen", CODEGEN, "delta");
+const generatedSource = sourceTable("Generated source", GENERATED_SOURCE, "working");
+const generatedBytes = dataTable(GENERATED_DATA);
+const genericRuntime = sourceTable("Generic observers and runners", GENERIC_RUNTIME, "working");
+const buttonHarness = sourceTable("Button pilot harness", BUTTON_HARNESS, "working");
+const genericSupporting = sourceTable("Generic runtime deltas", GENERIC_SUPPORTING_DELTAS, "delta");
+const buttonSupporting = sourceTable("Button runtime deltas", BUTTON_SUPPORTING_DELTAS, "delta");
+const wiring = sourceTable("Wiring", WIRING, "working");
+const replaced = sourceTable("Replaced hand-written source", REPLACED, "replaced");
+
+const genericKernel = reusableAuthority + codegen + genericRuntime + genericSupporting + wiring;
+const buttonPilot = perComponentAuthority + generatedSource + buttonHarness + buttonSupporting;
+const sourceMechanism = genericKernel + buttonPilot;
 
 console.log("\n=== Summary ===");
-console.log(`mechanism total: ${mechanism}`);
-console.log(`  reusable kernel (codegen + observers/runners + supporting + wiring): ${reusable}`);
-console.log(`  per-component authority (interface + corpus + projection + serializer): ${perComponent}`);
-console.log(`  generated artifacts (declaration + two canonical JSON fixtures, byte-counted): ${generated}`);
-console.log(`replaced: ${replaced}`);
-console.log(`net (mechanism minus replaced): ${mechanism - replaced}`);
+console.log(`source mechanism: ${sourceMechanism} LOC`);
+console.log(`  generic kernel: ${genericKernel} LOC`);
+console.log(`  Button pilot increment: ${buttonPilot} LOC`);
+console.log(`    authored authority: ${perComponentAuthority} LOC`);
+console.log(`    generated source: ${generatedSource} LOC`);
+console.log(`    harness and runtime deltas: ${buttonHarness + buttonSupporting} LOC`);
+console.log(`generated data: ${generatedBytes} bytes`);
+console.log(`replaced hand-written source: ${replaced} LOC`);
 console.log(
-  `stop-condition check: mechanism ${mechanism} vs replaced ${replaced} on Button alone — the ` +
-    `condition is TRIGGERED (spec 066). The reusable kernel (${reusable}) is a one-time ` +
-    `investment; concrete amortization evidence requires a second component, which this card ` +
-    `must not start. See the g14.001 batch log for the simplify/accept/reject options.`,
+  `stop-condition evidence: Button pilot increment ${buttonPilot} vs replaced ${replaced} — ` +
+    "triggered. The orchestrator ruling belongs in the g14.001 delivery log.",
 );

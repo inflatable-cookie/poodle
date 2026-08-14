@@ -12,6 +12,15 @@ use serde::Deserialize;
 use crate::error::Result;
 use crate::CodegenError;
 
+const GEOMETRY_FIELDS: [&str; 6] = [
+    "height",
+    "minWidth",
+    "paddingLeft",
+    "paddingRight",
+    "radius",
+    "borderWidth",
+];
+
 /// One prop in the portable interface.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -273,6 +282,7 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
                             }
                         }
                     }
+                    validate_geometry_expectation(expect, &at, &mut findings);
                 }
                 CaseStep::ExpectEvents { events: expected } => {
                     for event in expected {
@@ -312,6 +322,45 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
                 findings.join("\n")
             ),
         })
+    }
+}
+
+fn validate_geometry_expectation(
+    expect: &serde_json::Value,
+    at: &impl Fn(String) -> String,
+    findings: &mut Vec<String>,
+) {
+    let Some(geometry) = expect.get("geometry") else {
+        return;
+    };
+    let Some(geometry) = geometry.as_object() else {
+        findings.push(at("geometry expectation must be an object".to_owned()));
+        return;
+    };
+    match geometry.get("tolerance").and_then(serde_json::Value::as_f64) {
+        Some(tolerance) if tolerance.is_finite() && tolerance >= 0.0 => {}
+        _ => findings.push(at(
+            "geometry tolerance must be an authored finite non-negative number".to_owned(),
+        )),
+    }
+    let mut field_count = 0;
+    for (field, value) in geometry {
+        if field == "tolerance" {
+            continue;
+        }
+        if !GEOMETRY_FIELDS.contains(&field.as_str()) {
+            findings.push(at(format!("unknown geometry field '{field}'")));
+            continue;
+        }
+        field_count += 1;
+        if !value.as_f64().is_some_and(f64::is_finite) {
+            findings.push(at(format!("geometry '{field}' must be a finite number")));
+        }
+    }
+    if field_count == 0 {
+        findings.push(at(
+            "geometry expectation needs at least one asserted field".to_owned(),
+        ));
     }
 }
 
@@ -429,5 +478,16 @@ mod tests {
         assert_eq!(rust_field_name(&prop), "is_disabled");
         prop.rust_name = None;
         assert_eq!(rust_field_name(&prop), "disabled");
+    }
+
+    #[test]
+    fn geometry_requires_an_explicit_local_tolerance() {
+        let expect = serde_json::json!({ "geometry": { "height": 36 } });
+        let mut findings = Vec::new();
+        validate_geometry_expectation(&expect, &|message| message, &mut findings);
+        assert_eq!(
+            findings,
+            ["geometry tolerance must be an authored finite non-negative number"]
+        );
     }
 }

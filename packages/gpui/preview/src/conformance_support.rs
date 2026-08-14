@@ -1,8 +1,8 @@
 //! Conformance specimen support (spec 066, g14.001): the fixture → spec
 //! adapter shared by the conformance runner bin and the Button specimen
 //! page. Pure — no crate-internal imports, so the bin can pull it in via
-//! `#[path]`. The corpus JSON is the generated copy of the TypeScript
-//! authority — never restated here.
+//! `#[path]`. Both canonical JSON fixtures are included directly from the
+//! TypeScript authority's checked output — never copied or restated here.
 
 use poodle_specs::{
     ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, ControlSize,

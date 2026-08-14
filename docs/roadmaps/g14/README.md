@@ -52,8 +52,8 @@ the adopted cases before promotion.
 
 ## Runway
 
-1. [001 — Conformance kernel and Button proof](001-conformance-kernel-and-button-proof.md) — review-blocked; PR #10 replacement required
-2. [002 — Primitive substrate certification](002-primitive-substrate-certification.md) — blocked on 001
+1. [001 — Conformance kernel and Button proof](001-conformance-kernel-and-button-proof.md) — complete; replacement proof accepted
+2. [002 — Primitive substrate certification](002-primitive-substrate-certification.md) — ready
 3. [003 — RangeSlider controlled-control proof](003-range-slider-controlled-control-proof.md)
 4. [004 — Tabs collection and navigation proof](004-tabs-collection-navigation-proof.md)
 5. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md)
@@ -86,11 +86,9 @@ roadmap surfaces.
 
 ## First Task
 
-`g14.001` is the next worker card. PR #10 is retained as failed-pilot evidence,
-not merged authority. The replacement pass must prove one authored Button interface
-and case can drive Svelte, React, shared Rust composition, and GPUI
-observations, tests, and specimen structure without becoming a behaviour
-compiler or additive mirror.
+`g14.002` is the next conformance card. It must certify and reuse the primitive,
+observer, and driver substrate proven by `g14.001`; copying Button's pilot
+harness is a stop condition. Jetstream remains outside the active cohort.
 
 `g14.016` is active as an orchestrator/operator checkpoint in this thread.
 Review the landed

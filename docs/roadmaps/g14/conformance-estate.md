@@ -23,8 +23,8 @@ The previous frozen baseline measured:
 
 Those figures are point-in-time evidence, not a completion denominator. The
 g14.001 executable roster is now established from source: the Button corpus
-(`packages/core/src/conformance/button-cases.ts`) enumerates 19 cases across
-four runtimes, executed by `effigy conformance:complete --component button`.
+(`packages/core/src/conformance/button-cases.ts`) enumerates 20 cases across
+the three active runtimes, executed by `effigy conformance:complete`.
 
 ## Current Gates And Holes
 
@@ -40,7 +40,7 @@ four runtimes, executed by `effigy conformance:complete --component button`.
 | React specimen registered | `docs:react-specimen-drift` | specimen content and GPUI |
 | capability declaration has a trace | `docs:capability-drift` | undeclared capability vocabulary and actual parity |
 | visual baselines exist | web and native snapshot tools | shared fixture identity; stale GPUI captures; Jetstream overwrite workflow |
-| **Button completes the conformance kernel** | `conformance:complete --component button` (19 cases × 4 runtimes) | profile pilots 2–6; native token-role projection |
+| **Button completes the conformance kernel** | `ci:conformance` (20 cases × Svelte, React, GPUI) | profile pilots 2–6 |
 
 `docs:check` currently stays green while the machine-shape selector is red.
 `check:svelte` currently has three `AppHeaderCenterHarness.svelte` Snippet
@@ -87,12 +87,13 @@ Delivered for Button:
 - **Strict verdicts** — `pass`/`fail` only. A required field a runtime
   cannot observe fails that runtime's case, naming runtime/case/step/field
   and the reason; no cross-runtime "someone exercised it" vacuity exists.
-- **Standing enforcement** — the executed GPUI run sits in `ci:native`
-  (compile-only cannot catch an inert listener); `docs:check`/`ci:web`
-  carry the authority drift checks and the web execution.
+- **Standing enforcement** — `docs:check` and `ci:web` carry read-only
+  authority checks and web execution. A dedicated path-scoped macOS PR
+  workflow runs `ci:conformance`, including real GPUI execution and normalized
+  comparison. Headless `qa` and `ci:native` stay window-free.
 - **Specimens** — all three active Button specimen pages are corpus
   projections; hand-written specimen fixtures deleted.
-- **Completion** — `effigy conformance:complete --component button` passes
+- **Completion** — `effigy conformance:complete` passes
   the active cohort and reports Jetstream program-deferred, never passing.
   Removing the GPUI registration fails completion; an inert backend binding
   fails the executed cases.
@@ -117,13 +118,26 @@ Delivered for Button:
 
 ### Driver notes (recorded, not architecture)
 
-- The GPUI runner is LOCAL-ONLY (macOS window server), like
-  `test:native-visual`. `ci:native` compiles it (`conformance:check-gpui`);
-  `conformance:complete` executes it. The driver activates the app, warms
+- The GPUI runner needs a macOS window server. `ci:native` compiles it
+  (`conformance:check-gpui`); `ci:conformance` executes it locally and in the
+  dedicated macOS PR workflow. The driver activates the app, warms
   macOS's first-click swallow with a click on empty chrome, polls until the
   window has painted (focus handle exists), and retries a swallowed click
   like a real user would — the retry is real clicks, and an inert backend
   binding still fails no matter how many times it is clicked.
+
+### Cost ruling
+
+The final exhaustive report records 4,522 source LOC plus 33,392 bytes of
+generated JSON:
+
+- generic kernel: 2,947 LOC
+- Button pilot increment: 1,575 LOC, including 1,052 LOC of Button harness
+- replaced Button declaration and three active specimen fixtures: 619 LOC
+
+The stop condition is triggered. The orchestrator accepts `g14.001` as a
+feasibility proof, not a rollout verdict. Cards `002`–`007` must reuse or
+extract the pilot harness; `008` still decides adoption.
 
 ## Experimental Surface Disposition
 

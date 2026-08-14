@@ -21,6 +21,7 @@ import {
   expectPart,
   serializeCases,
   type CaseStep,
+  type GeometryExpectation,
   type PortablePropsOf,
   type RegionNamesOf,
 } from "./define";
@@ -51,7 +52,7 @@ function displayCase(
   label: string,
   props: FixtureProps,
   axes: readonly ("size" | "density" | "theme")[] = ["theme", "density", "size"],
-  geometry: object | null = DEFAULT_GEOMETRY,
+  geometry: GeometryExpectation | null = DEFAULT_GEOMETRY,
 ): ReturnType<typeof componentCase<I>> {
   const disabled = props.disabled === true || props.loading === true;
   const steps: CaseStep<I>[] = [

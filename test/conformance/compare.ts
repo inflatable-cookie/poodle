@@ -65,7 +65,11 @@ const IDENTITY_FIELDS = [
   "focused",
   "focusVisible",
 ] as const;
-const GEOMETRY_FIELDS = ["height", "minWidth", "paddingLeft", "paddingRight", "radius"] as const;
+const GEOMETRY_FIELDS = ["height", "minWidth", "paddingLeft", "paddingRight", "radius", "borderWidth"] as const;
+
+type GeometryFieldContract = Map<string, number>;
+type GeometryPartContract = Map<string, GeometryFieldContract>;
+type GeometryFrameContract = Map<number, GeometryPartContract>;
 
 /**
  * Geometry contracts, authored per case: the corpus's geometry assertions
@@ -74,19 +78,39 @@ const GEOMETRY_FIELDS = ["height", "minWidth", "paddingLeft", "paddingRight", "r
  * runtime tolerance exists. Geometry fields no case asserts are recorded,
  * not compared.
  */
-function geometryContracts(): Map<string, Map<string, number>> {
-  const contracts = new Map<string, Map<string, number>>();
+function geometryContracts(): Map<string, GeometryFrameContract> {
+  const contracts = new Map<string, GeometryFrameContract>();
   for (const caseData of buttonCases.cases as SerializedCase[]) {
-    const fields = new Map<string, number>();
+    const frames: GeometryFrameContract = new Map();
+    let observationIndex = 0;
     for (const step of caseData.steps) {
+      if (step.kind === "action") {
+        observationIndex += 1;
+        continue;
+      }
       if (step.kind !== "expectPart") continue;
       const geometry = (step.expect.geometry ?? {}) as Record<string, unknown>;
-      const tolerance = typeof geometry.tolerance === "number" ? geometry.tolerance : 0.5;
-      for (const field of GEOMETRY_FIELDS) {
-        if (typeof geometry[field] === "number") fields.set(field, tolerance);
+      const assertedFields = GEOMETRY_FIELDS.filter((field) => typeof geometry[field] === "number");
+      if (assertedFields.length === 0) continue;
+      if (typeof geometry.tolerance !== "number") {
+        throw new Error(`${caseData.id} step geometry is missing its authored tolerance`);
       }
+      const parts = frames.get(observationIndex) ?? new Map<string, GeometryFieldContract>();
+      const fields = parts.get(step.part) ?? new Map<string, number>();
+      for (const field of GEOMETRY_FIELDS) {
+        if (typeof geometry[field] !== "number") continue;
+        const prior = fields.get(field);
+        if (prior !== undefined && prior !== geometry.tolerance) {
+          throw new Error(
+            `${caseData.id} observation ${observationIndex} ${step.part}.geometry.${field} has conflicting tolerances`,
+          );
+        }
+        fields.set(field, geometry.tolerance);
+      }
+      parts.set(step.part, fields);
+      frames.set(observationIndex, parts);
     }
-    if (fields.size > 0) contracts.set(caseData.id, fields);
+    if (frames.size > 0) contracts.set(caseData.id, frames);
   }
   return contracts;
 }
@@ -184,8 +208,8 @@ function compareFrame(
     // Geometry: only the fields the corpus asserts, with the authored,
     // assertion-local tolerance (spec 066 — named bounds, never a blanket
     // runtime tolerance). Unasserted geometry is recorded, not compared.
-    const contract = GEOMETRY_CONTRACTS.get(caseId);
-    if (contract && partId === "root") {
+    const contract = GEOMETRY_CONTRACTS.get(caseId)?.get(index)?.get(partId);
+    if (contract) {
       compareContractedGeometry(problems, caseId, index, partId, perRuntime, runtimesOrder, contract, refObs);
     }
   }
@@ -208,35 +232,35 @@ function compareContractedGeometry(
   partId: string,
   perRuntime: Map<string, unknown>,
   runtimesOrder: string[],
-  contract: Map<string, number>,
+  contract: GeometryFieldContract,
   refObs: ObservationShape | undefined,
 ): void {
-    for (const [field, tolerance] of contract) {
-      const reference = fieldOf(refObs, partId, "geometry") as Record<string, unknown> | undefined;
-      const expected = reference?.[field];
-      if (expected === null || expected === undefined || typeof expected !== "number") {
-        // The reference cannot resolve this field headlessly (e.g. a calc()
-        // the DOM does not evaluate) — the authored bound still gates the
-        // runtimes that do observe it against the authored expectation.
+  for (const [field, tolerance] of contract) {
+    const reference = fieldOf(refObs, partId, "geometry") as Record<string, unknown> | undefined;
+    const expected = reference?.[field];
+    if (expected === null || expected === undefined || typeof expected !== "number") {
+      // The reference cannot resolve this field headlessly (e.g. a calc()
+      // the DOM does not evaluate) — the authored bound still gates the
+      // runtimes that do observe it against the authored expectation.
+      continue;
+    }
+    for (const runtime of runtimesOrder) {
+      if (runtime === "svelte") continue;
+      const geometry = fieldOf(perRuntime.get(runtime), partId, "geometry") as Record<string, unknown> | undefined;
+      const actual = geometry?.[field];
+      if (typeof actual !== "number") {
+        problems.push(
+          `${runtime} ${caseId} obs ${index} ${partId}.geometry.${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
+        );
         continue;
       }
-      for (const runtime of runtimesOrder) {
-        if (runtime === "svelte") continue;
-        const geometry = fieldOf(perRuntime.get(runtime), partId, "geometry") as Record<string, unknown> | undefined;
-        const actual = geometry?.[field];
-        if (typeof actual !== "number") {
-          problems.push(
-            `${runtime} ${caseId} obs ${index} ${partId}.geometry.${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
-          );
-          continue;
-        }
-        if (Math.abs(expected - actual) > tolerance) {
-          problems.push(
-            `${runtime} ${caseId} obs ${index} ${partId}.geometry.${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)} (bound ${tolerance})`,
-          );
-        }
+      if (Math.abs(expected - actual) > tolerance) {
+        problems.push(
+          `${runtime} ${caseId} obs ${index} ${partId}.geometry.${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)} (bound ${tolerance})`,
+        );
       }
     }
+  }
 }
 
 

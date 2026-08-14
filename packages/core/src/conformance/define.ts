@@ -230,21 +230,29 @@ export type PayloadToTs<P> = {
   [K in keyof P]: P[K] extends "boolean" ? boolean : P[K] extends "number" ? number : string;
 };
 
-/** Handler arguments for an event payload: no payload → no args; a
- * single-field payload → the field value; more fields → the object. */
-/** The value type of a single-field payload (the field's own value). */
-type SingleFieldValue<P> = keyof P extends infer K
-  ? K extends keyof P
-    ? Exclude<keyof P, K> extends never
-      ? PayloadToTs<P>[K]
-      : PayloadToTs<P>
-    : never
+type IsUnion<T, Whole = T> = T extends Whole
+  ? [Whole] extends [T]
+    ? false
+    : true
   : never;
 
 /** Handler arguments for an event payload: no payload → no args; a
  * single-field payload → the field value; more fields → the payload
  * object (one argument, not a union of field values). */
-export type PayloadArgs<P> = keyof P extends never ? [] : [SingleFieldValue<P>];
+export type PayloadArgs<P> = keyof P extends never
+  ? []
+  : true extends IsUnion<keyof P>
+    ? [PayloadToTs<P>]
+    : [PayloadToTs<P>[keyof P]];
+
+type AssertPayloadProjection<T extends true> = T;
+type Exact<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2)
+    ? true
+    : false;
+type _MultiFieldPayloadStaysOneObjectArgument = AssertPayloadProjection<
+  Exact<PayloadArgs<{ value: "string"; committed: "boolean" }>, [{ value: string; committed: boolean }]>
+>;
 
 export type PortableEventsOf<I extends InterfaceConfig> = {
   [E in I["events"][number] as E["name"]]: (...args: PayloadArgs<E["payload"]>) => void;
@@ -316,6 +324,19 @@ export interface CaseSpecimen<I extends InterfaceConfig> {
   captureId: string;
 }
 
+export type GeometryField =
+  | "height"
+  | "minWidth"
+  | "paddingLeft"
+  | "paddingRight"
+  | "radius"
+  | "borderWidth";
+
+export type GeometryExpectation = Partial<Record<GeometryField, number>> & {
+  /** Explicit assertion-local bound. Blanket runtime tolerances are forbidden. */
+  tolerance: number;
+};
+
 export interface PartExpectation<I extends InterfaceConfig> {
   role?: string;
   name?: string;
@@ -326,9 +347,7 @@ export interface PartExpectation<I extends InterfaceConfig> {
   focusable?: boolean;
   states?: Partial<Record<StateNamesOf<I>, boolean>>;
   tokenRoles?: Partial<Record<TokenRoleNamesOf<I>, string>>;
-  geometry?: Partial<
-    Record<"height" | "minWidth" | "paddingLeft" | "paddingRight" | "radius" | "borderWidth", number>
-  > & { tolerance?: number };
+  geometry?: GeometryExpectation;
 }
 
 export type CaseStep<I extends InterfaceConfig> =
@@ -416,6 +435,23 @@ export function validateCase<I extends InterfaceConfig>(
             throw new Error(`case '${config.id}' expects unknown token role '${token}'`);
           }
         }
+        if (step.expect.geometry) {
+          const { tolerance, ...fields } = step.expect.geometry;
+          if (!Number.isFinite(tolerance) || tolerance < 0) {
+            throw new Error(`case '${config.id}' geometry tolerance must be a finite non-negative number`);
+          }
+          if (Object.keys(fields).length === 0) {
+            throw new Error(`case '${config.id}' geometry expectation needs at least one field`);
+          }
+          for (const [field, value] of Object.entries(fields)) {
+            if (!GEOMETRY_FIELDS.has(field as GeometryField)) {
+              throw new Error(`case '${config.id}' expects unknown geometry field '${field}'`);
+            }
+            if (!Number.isFinite(value)) {
+              throw new Error(`case '${config.id}' geometry '${field}' must be a finite number`);
+            }
+          }
+        }
         break;
       }
       case "expectEvents": {
@@ -438,6 +474,15 @@ export function validateCase<I extends InterfaceConfig>(
     }
   }
 }
+
+const GEOMETRY_FIELDS = new Set<GeometryField>([
+  "height",
+  "minWidth",
+  "paddingLeft",
+  "paddingRight",
+  "radius",
+  "borderWidth",
+]);
 
 /** JSON-stable serialization: key order fixed by construction, no undefined. */
 export function serializeInterface<I extends InterfaceConfig>(iface: I): SerializedComponentInterface {

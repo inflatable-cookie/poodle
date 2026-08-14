@@ -68,14 +68,13 @@ fn usage() -> String {
                context types (spec 064 mechanism 1). Not an IrModel; the\n\
                machine targets are select-only.\n\
      \n\
-     usage: poodle-codegen --conformance <INTERFACE> --cases <CORPUS> --out <DIR> --target <conformance-rust|conformance-cases> [--check]\n\
+     usage: poodle-codegen --conformance <INTERFACE> --cases <CORPUS> --out <DIR> --target conformance-rust [--check]\n\
      \n\
      --conformance  serialized portable interface (spec 066), authored in\n\
                TypeScript and emitted as JSON by the conformance serializer.\n\
                `conformance-rust` renders the portable declaration into the\n\
-               consuming crate's generated tree; `conformance-cases` copies\n\
-               the interface and corpus JSON into a native preview's\n\
-               generated tree. Select-only, like the machine targets."
+               consuming crate's generated tree. Select-only, like the\n\
+               machine targets."
         .to_owned()
 }
 
@@ -363,9 +362,8 @@ fn run_machine_interfaces(schema: &Path, args: &Args) -> Result<(), CodegenError
 }
 
 /// Conformance mode (spec 066): renders the portable declaration into a
-/// consuming crate (`conformance-rust`) or copies the serialized interface
-/// and corpus into a native preview (`conformance-cases`). Same check/write
-/// split as the other modes; `--check` never writes.
+/// consuming crate (`conformance-rust`). Same check/write split as the other
+/// modes; `--check` never writes.
 fn run_conformance(
     interface_path: &Path,
     cases_path: &Path,
@@ -384,14 +382,10 @@ fn run_conformance(
             targets::conformance_rust::render(&interface, &source_path)?,
             targets::conformance_rust::OUTPUT_ROOT,
         ),
-
         other => {
             return Err(CodegenError::UnknownTarget {
                 id: other.to_owned(),
-                known: vec![
-                    targets::conformance_rust::ID.to_owned(),
-
-                ],
+                known: vec![targets::conformance_rust::ID.to_owned()],
             });
         }
     };
