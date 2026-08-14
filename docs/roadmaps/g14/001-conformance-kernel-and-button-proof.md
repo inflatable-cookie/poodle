@@ -1,6 +1,6 @@
 # g14.001 — Conformance Kernel And Button Proof
 
-Status: review-blocked — PR #10 requires a replacement pass
+Status: review-blocked — PR #10 replacement commit `0d041108` still fails the proof boundary
 Depends on: none
 Governing spec: `../../specs/066-executable-component-conformance.md`
 
