@@ -60,8 +60,8 @@ export interface RegionDecl {
 /** Web part resolution: how the web adapter finds the part in the DOM. */
 export type WebResolution =
   | { kind: "self" }
-  | { kind: "class"; className: string }
-  | { kind: "icon"; position: "first" | "last"; gatedBy: string };
+  | { kind: "class"; className: string; attribute?: string }
+  | { kind: "icon"; position: "first" | "last"; gatedBy: string; selector: string; attribute: string };
 
 /** Native part resolution: how the node observer finds the part in the tree. */
 export type NativeResolution =

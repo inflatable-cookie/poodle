@@ -57,6 +57,13 @@ static EXIT_CODE: AtomicU8 = AtomicU8::new(0);
 /// case's converted button element.
 struct ConformanceRoot {
     node: Arc<Mutex<Node>>,
+    focus: FocusHandle,
+}
+
+impl Focusable for ConformanceRoot {
+    fn focus_handle(&self, _cx: &App) -> FocusHandle {
+        self.focus.clone()
+    }
 }
 
 impl Render for ConformanceRoot {
@@ -64,6 +71,7 @@ impl Render for ConformanceRoot {
         let node = self.node.lock().expect("node lock").clone();
         div()
             .size_full()
+            .track_focus(&self.focus)
             .child(
                 div()
                     .w(px(BOX_WIDTH))
@@ -84,7 +92,7 @@ struct CaseHost {
     spec: ButtonSpec,
     node: Arc<Mutex<Node>>,
     pressed: Arc<Mutex<Option<bool>>>,
-    trace: Arc<Mutex<Vec<String>>>,
+    trace: Arc<Mutex<Vec<Value>>>,
     theme: GpuiThemeProvider,
 }
 
@@ -92,7 +100,7 @@ impl CaseHost {
     /// The activation handler bound to the real click/key listener path.
     fn make_handler(
         pressed: Arc<Mutex<Option<bool>>>,
-        trace: Arc<Mutex<Vec<String>>>,
+        trace: Arc<Mutex<Vec<Value>>>,
         toggle_mode: bool,
     ) -> Arc<dyn Fn() + Send + Sync> {
         Arc::new(move || {
@@ -105,8 +113,8 @@ impl CaseHost {
         })
     }
 
-    fn rebuild(&mut self, handler: Arc<dyn Fn() + Send + Sync>) {
-        if self.spec.pressed.is_some() {
+    fn rebuild(&mut self, handler: Arc<dyn Fn() + Send + Sync>, toggle_mode: bool) {
+        if toggle_mode {
             self.spec.pressed = *self.pressed.lock().expect("pressed lock");
         }
         let mut node = poodle_render::button(&self.spec, &self.theme, Some(handler));
@@ -337,19 +345,29 @@ async fn drive_cases(
         .timer(std::time::Duration::from_millis(600))
         .await;
     // Activation is not instantaneous and macOS may refuse it once or
-    // twice; poll until the app is genuinely active so posted clicks are
-    // delivered instead of swallowed as activation beats.
-    for _ in 0..20 {
-        let active = cx
+    // twice; poll until the app is genuinely active AND the window is key.
+    // `Window::focus` silently no-ops while the window is not key
+    // (`focus_enabled`), so key-ness is a precondition for every focus and
+    // blur the driver performs.
+    for _ in 0..30 {
+        let ready = cx
             .update(|_window, _cx| {
                 use objc2::MainThreadMarker;
                 use objc2_app_kit::NSApplication;
                 MainThreadMarker::new()
-                    .map(|mtm| NSApplication::sharedApplication(mtm).isActive())
+                    .map(|mtm| {
+                        let app = NSApplication::sharedApplication(mtm);
+                        let key = app
+                            .windows()
+                            .firstObject()
+                            .map(|win| win.isKeyWindow())
+                            .unwrap_or(false);
+                        app.isActive() && key
+                    })
                     .unwrap_or(false)
             })
             .unwrap_or(false);
-        if active {
+        if ready {
             break;
         }
         cx.update(|_window, _cx| {
@@ -412,7 +430,7 @@ async fn drive_cases(
         let spec = conformance_support::spec_from_fixture(&fixture);
         let toggle_mode = spec.is_toggle_mode();
         let pressed = Arc::new(Mutex::new(spec.pressed));
-        let trace = Arc::new(Mutex::new(Vec::<String>::new()));
+        let trace = Arc::new(Mutex::new(Vec::<Value>::new()));
         let theme =
             GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
         let node = Arc::new(Mutex::new(Node::container()));
@@ -424,7 +442,9 @@ async fn drive_cases(
             theme,
         }));
 
-        // Mount the case's node into the window root and repaint.
+        // Mount the case's node into the window root and repaint. The
+        // window root takes focus first (the real blur path): a previous
+        // case's focus must not leak into this case's observation.
         {
             let host = host.lock().expect("host lock");
             let handler = CaseHost::make_handler(Arc::clone(&pressed), Arc::clone(&trace), toggle_mode);
@@ -442,6 +462,42 @@ async fn drive_cases(
             window.refresh();
         })
         .ok();
+        // Blur after the swap: the previous case's click-to-focus must not
+        // leak into this case's mount observation. Focusing the window
+        // root's own handle is the real backend blur; poll until the
+        // registry records it (the update lands on the next paint).
+        for _ in 0..20 {
+            cx.update(|window, cx| {
+                if let Some(Some(root)) = window.root::<ConformanceRoot>() {
+                    let root_handle = root.focus_handle(cx);
+                    window.focus(&root_handle);
+                    window.refresh();
+                }
+                use objc2::MainThreadMarker;
+                use objc2_app_kit::NSApplication;
+                if let Some(mtm) = MainThreadMarker::new() {
+                    let app = NSApplication::sharedApplication(mtm);
+                    #[allow(deprecated)] { app.activateIgnoringOtherApps(true); }
+                    let windows = app.windows();
+                    if let Some(win) = windows.firstObject() {
+                        win.makeKeyAndOrderFront(None);
+                    }
+                }
+            })
+            .ok();
+            cx.background_executor()
+                .timer(std::time::Duration::from_millis(120))
+                .await;
+            let blurred = cx
+                .update(|_window, _cx| {
+                    poodle_gpui_node_backend::focus_state_for(BUTTON_ELEMENT_ID)
+                })
+                .ok()
+                .flatten()
+                == Some(false);            if blurred {
+                break;
+            }
+        }
         // Readiness: the node-backend creates the focus handle in the
         // canvas (paint) pass; drive the case only once the window has
         // actually painted the node. An inactive app can defer painting.
@@ -474,10 +530,16 @@ async fn drive_cases(
         cx.background_executor()
             .timer(std::time::Duration::from_millis(200))
             .await;
+        let mount_observation = cx
+            .update(|_window, _cx| {
+                let host = host.lock().expect("host lock");
+                observe_case(&host, &iface)
+            })
+            .unwrap_or_else(|_| json!({}));
 
         let mut failures = Vec::new();
         let mut assertions = Vec::new();
-        let mut observations = Vec::new();
+        let mut observations = vec![mount_observation];
 
         for (index, step) in steps.iter().enumerate() {
             let kind = step.get("kind").and_then(Value::as_str).unwrap_or("");
@@ -531,7 +593,7 @@ async fn drive_cases(
                                 // after the warmup beat; a real user
                                 // re-clicks, and so does the driver — once.
                                 cx.background_executor()
-                                    .timer(std::time::Duration::from_millis(400))
+                                    .timer(std::time::Duration::from_millis(700))
                                     .await;
                                 if trace.lock().expect("trace lock").len() > before {
                                     break;
@@ -548,7 +610,7 @@ async fn drive_cases(
                                     Arc::clone(&trace),
                                     toggle_mode,
                                 );
-                                host.rebuild(handler);
+                                host.rebuild(handler, toggle_mode);
                                 window.refresh();
                             })
                             .ok();
@@ -556,6 +618,13 @@ async fn drive_cases(
                                 .timer(std::time::Duration::from_millis(150))
                                 .await;
                         }
+                        let action_observation = cx
+                            .update(|_window, _cx| {
+                                let host = host.lock().expect("host lock");
+                                observe_case(&host, &iface)
+                            })
+                            .unwrap_or_else(|_| json!({}));
+                        observations.push(action_observation);
                     } else if name == "focus" {
                         // Real backend focus: the same FocusHandle the
                         // backend tracks, focused through gpui's own API.
@@ -572,6 +641,13 @@ async fn drive_cases(
                         cx.background_executor()
                             .timer(std::time::Duration::from_millis(300))
                             .await;
+                        let focus_observation = cx
+                            .update(|_window, _cx| {
+                                let host = host.lock().expect("host lock");
+                                observe_case(&host, &iface)
+                            })
+                            .unwrap_or_else(|_| json!({}));
+                        observations.push(focus_observation);
                     }
                 }
                 "expectPart" => {
@@ -583,7 +659,6 @@ async fn drive_cases(
                             observe_case(&host, &iface)
                         })
                         .unwrap_or_else(|_| json!({}));
-                    observations.push(observation.clone());
                     let mut results = Vec::new();
                     assert_part(&iface, part, &expect, index, observation, "gpui", &mut results);
                     for r in &results {
@@ -605,7 +680,12 @@ async fn drive_cases(
                                 .collect::<Vec<_>>()
                         })
                         .unwrap_or_default();
-                    let actual = trace.lock().expect("trace lock").clone();
+                    let actual: Vec<String> = trace
+                        .lock()
+                        .expect("trace lock")
+                        .iter()
+                        .filter_map(|entry| entry.get("event").and_then(Value::as_str).map(str::to_owned))
+                        .collect();
                     let mut results = Vec::new();
                     assert_events(&expected, &actual, index, &mut results);
                     for r in &results {
@@ -619,19 +699,11 @@ async fn drive_cases(
             }
         }
 
-        let final_observation = cx
-            .update(|_window, _cx| {
-                let host = host.lock().expect("host lock");
-                observe_case(&host, &iface)
-            })
-            .unwrap_or_else(|_| json!({}));
-        observations.push(final_observation);
-
-        // Let the queue drain before the next case mounts: a queued key
-        // event from this case (e.g. Enter) must not activate the next
-        // case's node, which shares the element id and any focused state.
+        // Let the queue drain before the next case mounts: a queued key or
+        // mouse event from this case must not focus or activate the next
+        // case's node. Longer than any observed delivery latency.
         cx.background_executor()
-            .timer(std::time::Duration::from_millis(400))
+            .timer(std::time::Duration::from_millis(900))
             .await;
 
         outcomes.push(CaseOutcome {
@@ -734,7 +806,10 @@ fn main() {
             },
             |window, cx| {
                 let window_node = Arc::new(Mutex::new(Node::container()));
-                let root_entity = cx.new(|_cx| ConformanceRoot { node: Arc::clone(&window_node) });
+                let root_entity = cx.new(|cx| ConformanceRoot {
+                    node: Arc::clone(&window_node),
+                    focus: cx.focus_handle(),
+                });
                 let iface = iface.clone();
                 let cases = case_list.clone();
                 let only = only.clone();

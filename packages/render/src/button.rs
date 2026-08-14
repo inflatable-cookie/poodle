@@ -23,8 +23,8 @@ use poodle_specs::{
 
 use crate::color::{mix_srgb, with_alpha, BLACK, TRANSPARENT, WHITE};
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem, size_min_width_rem,
-    size_padding_x_offset_rem,
+    control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_icon_inset_rem,
+    size_min_width_rem,
 };
 
 /// The old tier's `color_mix_black`: scales RGB toward black at `ratio` while
@@ -41,7 +41,9 @@ pub fn button(
     theme: &dyn ThemeProvider,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    // Absent size follows the presentation default (md at the base tier) —
+    // the same resolution the web pair performs for `size = null`.
+    let effective_size = resolve_semantic_size(spec.size.unwrap_or_default(), spec.size_role);
 
     // ── Base tokens ──
     let base_fill = theme.resolve_color(spec.resolved_fill_token());
@@ -64,26 +66,24 @@ pub fn button(
         ButtonTone::Default => None,
     };
 
-    // ── Axis-faithful metrics (g12.019 recipe correction): the axis-layered
-    // token plus the per-size offset — the old GPUI tier's form, matching
-    // Svelte's CSS vars — not the fixed tables (`control_height_rem` /
-    // `control_space_x_rem`), which ignore the theme's density/control-size
-    // layering.
-    let height = theme.resolve_space(spec.control_height_token())
-        + rem_to_px(size_height_offset_rem(effective_size));
+    // ── Metrics follow the web CSS (the reference): button.css hardcodes
+    // the per-size height ladder and keeps padding at the control-x token,
+    // with density-only offsets. The old token-plus-offset recipe disagreed
+    // with the CSS (lg rendered 42px against the CSS's 44px) — the
+    // normalized observation comparison caught it.
+    let height = rem_to_px(control_height_rem(effective_size));
     let min_width = rem_to_px(size_min_width_rem(effective_size));
     // Svelte: compact -0.125rem, comfortable +0.125rem density offset on padding.
-    let density_pad_offset = rem_to_px(match spec.density {
+    let density = spec.density.unwrap_or_default();
+    let density_pad_offset = rem_to_px(match density {
         ControlDensity::Compact => -0.125,
         ControlDensity::Default => 0.0,
         ControlDensity::Comfortable => 0.125,
     });
-    let pad_x = theme.resolve_space(spec.horizontal_padding_token())
-        + rem_to_px(size_padding_x_offset_rem(effective_size))
-        + density_pad_offset;
+    let pad_x = theme.resolve_space(spec.horizontal_padding_token()) + density_pad_offset;
     let label_size = rem_to_px(size_font_rem(effective_size));
     // The content gap ladders on density, not size.
-    let gap = match spec.density {
+    let gap = match density {
         ControlDensity::Compact => theme.resolve_space("space.inline.xs"),
         ControlDensity::Default => theme.resolve_space(ButtonSpec::content_gap_token()),
         ControlDensity::Comfortable => theme.resolve_space("space.inline.md"),
@@ -95,8 +95,10 @@ pub fn button(
     // ladder stop from the spec (12px), not a theme token.
     let spinner_size = SpinnerSpec::new().with_size(SpinnerSize::Sm).size_px();
 
-    // Icon padding adjustment (contract §8): reduce padding on icon side by 0.125rem.
-    let icon_inset = theme.resolve_space(ButtonSpec::icon_side_inset_token());
+    // Icon padding adjustment (contract §8): per-size reduction on the icon
+    // side, matching button.css's `[data-has-leading]`/`[data-has-trailing]`
+    // per-size rules.
+    let icon_inset = rem_to_px(size_icon_inset_rem(effective_size));
     let has_leading = spec.leading_icon.is_some() || spec.is_loading;
     let has_trailing = spec.trailing_icon.is_some() || spec.chevron;
     let pad_left = if has_leading {
@@ -333,6 +335,9 @@ pub fn button(
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
     }
+    // The renderer declares the role; observers read `a11y.role` alone and
+    // never branch on node kinds.
+    el.a11y.role = Some(poodle_node::NodeRole::Button);
 
     // ── Semantic token roles (the native data-* counterpart) ──
     // Observers read these; the web pair projects the same values through
@@ -352,7 +357,7 @@ pub fn button(
     );
     el.roles.insert(
         "density".to_owned(),
-        format!("{:?}", spec.density).to_ascii_lowercase(),
+        format!("{:?}", density).to_ascii_lowercase(),
     );
     el.roles.insert(
         "fit".to_owned(),
@@ -391,14 +396,15 @@ mod tests {
     }
 
     #[test]
-    fn metrics_follow_the_axis_faithful_recipe() {
-        // height = size.control.height token (36px at base) + per-size offset
+    fn metrics_follow_the_web_css_ladder() {
+        // The web CSS (the reference) hardcodes the per-size height ladder:
+        // xs 1.5rem, sm 1.75rem, md 2.25rem, lg 2.75rem, xl 3.25rem.
         let cases = [
-            (ControlSize::Xs, 28.0),
-            (ControlSize::Sm, 30.0),
+            (ControlSize::Xs, 24.0),
+            (ControlSize::Sm, 28.0),
             (ControlSize::Md, 36.0),
-            (ControlSize::Lg, 42.0),
-            (ControlSize::Xl, 44.0),
+            (ControlSize::Lg, 44.0),
+            (ControlSize::Xl, 52.0),
         ];
         for (size, expected) in cases {
             let spec = ButtonSpec::new().with_size(size);
@@ -406,22 +412,14 @@ mod tests {
             assert_eq!(fixed_height(&node), expected, "height for {size:?}");
         }
 
-        // pad_x = space.control.x token + per-size offset + density offset
+        // pad_x = space.control.x token + density offset only — the CSS has
+        // no per-size padding offsets.
         let theme = theme();
         let base = theme.resolve_space("space.control.x");
         let cases = [
-            // md/default: base + 0 + 0
             ((ControlSize::Md, ControlDensity::Default), base),
-            // sm/compact: base - 0.125rem (size) - 0.125rem (density)
-            (
-                (ControlSize::Sm, ControlDensity::Compact),
-                base - rem_to_px(0.125) - rem_to_px(0.125),
-            ),
-            // lg/comfortable: base + 0.125rem (size) + 0.125rem (density)
-            (
-                (ControlSize::Lg, ControlDensity::Comfortable),
-                base + rem_to_px(0.125) + rem_to_px(0.125),
-            ),
+            ((ControlSize::Sm, ControlDensity::Compact), base - rem_to_px(0.125)),
+            ((ControlSize::Lg, ControlDensity::Comfortable), base + rem_to_px(0.125)),
         ];
         for ((size, density), expected) in cases {
             // A label keeps the button out of the icon-only (square) recipe.

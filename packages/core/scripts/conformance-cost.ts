@@ -1,59 +1,41 @@
 /**
  * Conformance cost report (spec 066 "Cost And Replacement Rules", g14.001):
- * every mechanism line vs what it replaced. Counts non-blank, non-comment
- * lines; replaced lines are measured from git against the pre-pilot state.
+ * an exhaustive inventory of every mechanism line — all four committed JSON
+ * artifacts included — against what the mechanism replaced. Counts
+ * non-blank, non-comment lines; replaced lines are measured against
+ * `origin/main` (the pre-card baseline).
  */
 
 import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 
 const ROOT = execSync("git rev-parse --show-toplevel").toString().trim();
 
-function loc(path: string): number {
-  try {
-    const source = execSync(`git show HEAD:${path} 2>/dev/null || true`, {
-      cwd: ROOT,
-    })
-      .toString();
-    const text = require("node:fs").readFileSync(
-      `${ROOT}/${path}`,
-      "utf8",
-    );
-    void source;
-    const lines = text.split("\n").filter((line) => {
-      const trimmed = line.trim();
-      if (!trimmed) return false;
-      if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*")) return false;
-      return true;
-    });
-    return lines.length;
-  } catch {
-    return 0;
-  }
-}
-
-function locFrom(original: string): number {
-  const text = original;
+function countLines(text: string): number {
   return text
     .split("\n")
     .filter((line) => {
       const trimmed = line.trim();
       if (!trimmed) return false;
       if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*")) return false;
+      if (trimmed.startsWith("#") && !trimmed.startsWith("#!")) return false;
       return true;
     }).length;
 }
 
-function blob(path: string): string {
-  // The pre-card baseline is main, not this branch's HEAD (the first pass
-  // already replaced these surfaces).
+function workingLoc(path: string): number {
+  return countLines(readFileSync(`${ROOT}/${path}`, "utf8"));
+}
+
+function mainLoc(path: string): number {
   try {
-    return execSync(`git show origin/main:${path}`, { cwd: ROOT }).toString();
+    return countLines(execSync(`git show origin/main:${path}`, { cwd: ROOT }).toString());
   } catch {
-    return "";
+    return 0;
   }
 }
 
-const authored: Array<[string, string]> = [
+const AUTHORED: Array<[string, string]> = [
   ["Interface schema (define.ts)", "packages/core/src/conformance/define.ts"],
   ["Button interface (button.ts)", "packages/core/src/conformance/button.ts"],
   ["Button corpus (button-cases.ts)", "packages/core/src/conformance/button-cases.ts"],
@@ -61,78 +43,75 @@ const authored: Array<[string, string]> = [
   ["Serializer script", "packages/core/scripts/conformance-serialize.ts"],
 ];
 
-const generated: Array<[string, string]> = [
+const CODEGEN: Array<[string, string]> = [
+  ["Codegen conformance parsing + case validation", "packages/codegen/src/conformance.rs"],
+  ["Codegen Rust declaration target", "packages/codegen/src/targets/conformance_rust.rs"],
+  ["Codegen cases-copy target", "packages/codegen/src/targets/conformance_cases.rs"],
+  ["Codegen CLI mode (delta)", "packages/codegen/src/bin/poodle-codegen.rs"],
+];
+
+const GENERATED: Array<[string, string]> = [
   ["Rust declaration (generated/button.rs)", "packages/contracts/components/src/generated/button.rs"],
+  ["Interface fixture JSON", "packages/codegen/fixtures/conformance/button-interface.json"],
+  ["Case fixture JSON", "packages/codegen/fixtures/conformance/button-cases.json"],
+  ["Interface JSON copy (gpui preview)", "packages/gpui/preview/src/generated/conformance/button-interface.json"],
   ["Case JSON copy (gpui preview)", "packages/gpui/preview/src/generated/conformance/button-cases.json"],
 ];
 
-const adapters: Array<[string, string]> = [
-  ["Web runner core", "test/conformance/web/runner.ts"],
-  ["Svelte adapter + host", "test/conformance/web/svelte-adapter.ts"],
+const OBSERVERS_AND_RUNNERS: Array<[string, string]> = [
+  ["Web runner core (data-driven observer)", "test/conformance/web/runner.ts"],
+  ["Svelte adapter", "test/conformance/web/svelte-adapter.ts"],
   ["React adapter", "test/conformance/web/react-adapter.tsx"],
+  ["Svelte host component", "test/conformance/web/hosts/ButtonHost.svelte"],
   ["Web test entry", "test/conformance/web/button.test.ts"],
   ["Native observer (render::conformance)", "packages/render/src/conformance.rs"],
   ["GPUI runner bin (real window + driver)", "packages/gpui/preview/src/bin/conformance.rs"],
   ["GPUI support module", "packages/gpui/preview/src/conformance_support.rs"],
-  ["Orchestrator (compare)", "test/conformance/compare.ts"],
+  ["Orchestrator (normalized comparison)", "test/conformance/compare.ts"],
 ];
 
-const wiring: Array<[string, string]> = [
-  ["Effigy selectors + gate wiring (conformance section)", "tasks/effigy.tasks.toml#conformance"],
+const SUPPORTING_DELTAS: Array<[string, string]> = [
+  ["poodle-node roles + intrinsic_text", "packages/contracts/node/src/lib.rs"],
+  ["render::button roles/focus/a11y/metrics fixes", "packages/render/src/button.rs"],
+  ["node-backend focus query + single activation path", "packages/gpui/node-backend/src/lib.rs"],
+  ["node-backend interaction fix", "packages/gpui/node-backend/src/interaction.rs"],
+  ["Svelte Button shell + identity channels", "packages/svelte/components/src/Button.svelte"],
+  ["React Button shell + identity channels", "packages/react/components/src/Button.tsx"],
+];
+
+const WIRING: Array<[string, string]> = [
+  ["Effigy selectors + gate wiring", "tasks/effigy.tasks.toml#conformance"],
   ["Cost report (this script)", "packages/core/scripts/conformance-cost.ts"],
 ];
 
-function locOfSection(path: string, startMarker: string, endMarker: string): number {
-  const text = require("node:fs").readFileSync(`${ROOT}/${path}`, "utf8");
+const REPLACED: Array<[string, string]> = [
+  ["Hand-written ButtonSpec declaration surface", "packages/contracts/components/src/button.rs"],
+  ["Svelte specimen fixture content", "packages/svelte/preview/src/specimens/ButtonSpecimen.svelte"],
+  ["React specimen fixture content", "packages/react/preview/src/gallery/specimens/ButtonSpecimen.tsx"],
+  ["GPUI specimen fixture content", "packages/gpui/preview/src/specimens/button.rs"],
+];
+
+function sectionLoc(path: string, startMarker: string, endMarker: string): number {
+  const text = readFileSync(`${ROOT}/${path}`, "utf8");
   const start = text.indexOf(startMarker);
   const end = text.indexOf(endMarker, start + 1);
   if (start < 0 || end < 0) return 0;
-  return text
-    .slice(start, end)
-    .split("\n")
-    .filter((line) => line.trim().length > 0).length;
+  return countLines(text.slice(start, end));
 }
 
-/** Replaced surfaces, measured against HEAD (the pre-pilot state). */
-const replaced: Array<[string, string, number]> = [
-  [
-    "Hand-written ButtonSpec declaration surface",
-    "packages/contracts/components/src/button.rs",
-    0, // measured below as the delta vs the generated+extension split
-  ],
-  ["Svelte specimen fixture content", "packages/svelte/preview/src/specimens/ButtonSpecimen.svelte", 0],
-  ["React specimen fixture content", "packages/react/preview/src/gallery/specimens/ButtonSpecimen.tsx", 0],
-
-  ["GPUI specimen fixture content", "packages/gpui/preview/src/specimens/button.rs", 0],
-];
-
-function replacedDelta(): void {
-  for (const entry of replaced) {
-    const [label, path] = entry;
-    const before = blob(path);
-    const beforeLoc = locFrom(before);
-    const after = require("node:fs").readFileSync(`${ROOT}/${path}`, "utf8");
-    const afterLoc = locFrom(after);
-    const delta = beforeLoc - afterLoc;
-    entry[2] = delta > 0 ? delta : 0;
-  }
-}
-
-function table(title: string, rows: Array<[string, string] | [string, string, number]>): number {
+function table(title: string, rows: Array<[string, string]>, mode: "working" | "delta" | "replaced"): number {
   console.log(`\n${title}`);
   let total = 0;
-  for (const [label, path, replacedCount] of rows as Array<[string, string, number?]>) {
+  for (const [label, path] of rows) {
     let count: number;
-    if (replacedCount !== undefined) {
-      count = replacedCount;
+    if (mode === "replaced") {
+      count = Math.max(0, mainLoc(path) - workingLoc(path));
+    } else if (mode === "delta") {
+      count = Math.max(0, workingLoc(path) - mainLoc(path));
     } else if (path.includes("#conformance")) {
-      count = locOfSection(
-        path.split("#")[0],
-        "# Conformance kernel (g14.001",
-        "# Preview (documentation site)",
-      );
+      count = sectionLoc(path.split("#")[0], "# Conformance kernel (g14.001", "# Preview (documentation site)");
     } else {
-      count = loc(path);
+      count = workingLoc(path);
     }
     total += count;
     console.log(`  ${String(count).padStart(5)}  ${label}`);
@@ -141,19 +120,27 @@ function table(title: string, rows: Array<[string, string] | [string, string, nu
   return total;
 }
 
-replacedDelta();
+const authored = table("Authored (TS authority + serializer)", AUTHORED, "working");
+const codegen = table("Codegen (parsing, validation, targets)", CODEGEN, "delta");
+const generated = table("Generated artifacts (all four committed JSON artifacts included)", GENERATED, "working");
+const observers = table("Observers and runners", OBSERVERS_AND_RUNNERS, "working");
+const supporting = table("Supporting deltas (vocabulary, renderer, backends, shells)", SUPPORTING_DELTAS, "delta");
+const wiring = table("Wiring (selectors + cost script)", WIRING, "working");
+const replaced = table("Replaced (deleted hand-written surfaces, measured against main)", REPLACED, "replaced");
 
-const authoredTotal = table("Authored (TS authority + serializer)", authored);
-const generatedTotal = table("Generated (Rust declaration + JSON copies)", generated);
-const adapterTotal = table("Adapters (runners + observers + orchestrator)", adapters);
-const wiringTotal = table("Wiring (selectors + cost script)", wiring);
-const replacedTotal = table("Replaced (deleted hand-written surfaces, from git)", replaced);
+const mechanism = authored + codegen + generated + observers + supporting + wiring;
+const reusable = codegen + observers + supporting + wiring;
+const perComponent = authored;
 
 console.log("\n=== Summary ===");
-console.log(`mechanism (authored + generated + adapters + wiring): ${authoredTotal + generatedTotal + adapterTotal + wiringTotal}`);
-console.log(`  reusable mechanism (observers + runners + wiring + codegen surface): ${adapterTotal + wiringTotal}`);
-console.log(`  per-component authority (interface + corpus + projection, excluding the reusable schema): ~${authoredTotal}`);
-console.log(`replaced (hand-written declarations + specimen fixtures, measured against main): ${replacedTotal}`);
+console.log(`mechanism total: ${mechanism}`);
+console.log(`  reusable kernel (codegen + observers/runners + supporting + wiring): ${reusable}`);
+console.log(`  per-component authority (interface + corpus + projection + serializer): ${perComponent}`);
+console.log(`  generated artifacts (declaration + four JSON artifacts): ${generated}`);
+console.log(`replaced: ${replaced}`);
+console.log(`net (mechanism minus replaced): ${mechanism - replaced}`);
 console.log(
-  `net: ${authoredTotal + generatedTotal + adapterTotal + wiringTotal - replacedTotal} lines (mechanism minus replaced; the Button proof is the first claim on the reusable share)`,
+  `stop-condition check: mechanism ${mechanism} vs replaced ${replaced} on Button alone; ` +
+    `the reusable kernel (${reusable}) is a one-time investment the remaining profile pilots ` +
+    `consume without growth — the amortization claim is tested again at the RangeSlider pilot.`,
 );

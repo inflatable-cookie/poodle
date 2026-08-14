@@ -102,9 +102,9 @@ function iconCase(
         states: { disabled: false },
       }),
       expectPart("label", { present: true, text: label }),
-      expectPart("leadingIcon", { present: Boolean(leading) }),
-      expectPart("trailingIcon", { present: Boolean(trailing) }),
-      expectPart("chevron", { present: chevron }),
+      expectPart("leadingIcon", { present: Boolean(leading), icon: leading ?? undefined }),
+      expectPart("trailingIcon", { present: Boolean(trailing), icon: trailing ?? undefined }),
+      expectPart("chevron", { present: chevron, icon: chevron ? "chevron-down" : undefined }),
       expectEvents([]),
     ],
   });
@@ -127,7 +127,29 @@ const cases = [
   // shrinks the left padding — its geometry is spinner-dependent, so only the
   // disabled case asserts bounds.
   displayCase("disabled", "Disabled", "States", "Run", { disabled: true }, ["theme"]),
-  displayCase("loading", "Loading", "States", "Save", { loading: true }, ["theme"], null),
+  // The loading case also pins the spinner part's icon identity.
+  componentCase(buttonInterface, {
+    id: "button/loading",
+    fixture: { props: { loading: true }, regions: { label: "Save" } },
+    specimen: { group: "States", caption: "Loading", captureId: "button/loading", axes: ["theme"] },
+    steps: [
+      expectPart("root", {
+        role: "button",
+        name: "Save",
+        focusable: false,
+        states: { disabled: true, loading: true },
+        tokenRoles: {
+          variant: "secondary",
+          tone: "default",
+          size: "md",
+          density: "default",
+        },
+      }),
+      expectPart("label", { present: true, text: "Save" }),
+      expectPart("spinner", { present: true, icon: "spinner" }),
+      expectEvents([]),
+    ],
+  }),
 
   // Leading/trailing icon regions (presence asserted; names recorded).
   iconCase("leading-icon", "Leading", "plus", null),
@@ -171,6 +193,23 @@ const cases = [
     id: "button/toggle",
     fixture: { props: { pressed: false }, regions: { label: "Mute" } },
     specimen: { group: "Behaviour", caption: "Controlled toggle", captureId: "button/toggle", axes: [] },
+    steps: [
+      expectPart("root", { role: "button", name: "Mute", states: { pressed: false } }),
+      expectEvents([]),
+      actionPress("root", "pointer"),
+      expectEvents(["pressedChange", "press"]),
+      expectPart("root", { states: { pressed: true } }),
+    ],
+  }),
+
+  // Behaviour: explicit defaultPressed=false enters toggle mode. Absence
+  // and explicit false must not collapse — this case pins the
+  // cross-language nullable shape (web `null !== false`, Rust
+  // `None != Some(false)`).
+  componentCase(buttonInterface, {
+    id: "button/default-pressed-toggle",
+    fixture: { props: { defaultPressed: false }, regions: { label: "Mute" } },
+    specimen: { group: "Behaviour", caption: "Default-pressed toggle", captureId: "button/default-pressed-toggle", axes: [] },
     steps: [
       expectPart("root", { role: "button", name: "Mute", states: { pressed: false } }),
       expectEvents([]),

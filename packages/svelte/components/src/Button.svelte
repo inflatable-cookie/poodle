@@ -204,13 +204,17 @@
   }}
 >
   {#if loading}
-    <span class="poodle-button__spinner" aria-hidden="true">
+    <span class="poodle-button__spinner" aria-hidden="true" data-icon="spinner">
       <Spinner variant="ring" size={resolvedIconSize} tone="current" />
     </span>
   {/if}
 
   {#if leading || leadingIcon}
-    <span class="poodle-button__icon" aria-hidden="true">
+    <span
+      class="poodle-button__icon"
+      aria-hidden="true"
+      data-icon={typeof leadingIcon === "string" ? leadingIcon : undefined}
+    >
       {#if leading}
         {@render leading()}
       {:else if leadingIcon}
@@ -226,7 +230,11 @@
   {/if}
 
   {#if trailing || trailingIcon}
-    <span class="poodle-button__icon" aria-hidden="true">
+    <span
+      class="poodle-button__icon"
+      aria-hidden="true"
+      data-icon={typeof trailingIcon === "string" ? trailingIcon : undefined}
+    >
       {#if trailing}
         {@render trailing()}
       {:else if trailingIcon}
@@ -236,7 +244,7 @@
   {/if}
 
   {#if chevron}
-    <span class="poodle-button__chevron" aria-hidden="true">
+    <span class="poodle-button__chevron" aria-hidden="true" data-icon="chevron-down">
       <Icon name="chevron-down" size={resolvedIconSize} />
     </span>
   {/if}

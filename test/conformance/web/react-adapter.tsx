@@ -56,6 +56,10 @@ export class ReactButtonAdapter implements RuntimeAdapter {
       fireEvent.keyDown(root, { key: "Enter" });
       fireEvent.click(root);
     } else {
+      // Click-to-focus is the browser's default on pointer press too;
+      // happy-dom leaves focus untouched, so the harness performs the
+      // default a real browser would.
+      root.focus();
       fireEvent.click(root);
     }
     await this.flush();

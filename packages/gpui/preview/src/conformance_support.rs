@@ -91,6 +91,11 @@ pub fn spec_from_fixture(fixture: &Value) -> ButtonSpec {
                     spec = spec.with_pressed(pressed);
                 }
             }
+            "defaultPressed" => {
+                if let Some(pressed) = value.as_bool() {
+                    spec = spec.with_default_pressed(pressed);
+                }
+            }
             _ => {}
         }
     }

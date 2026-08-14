@@ -42,7 +42,7 @@
           "xl"
         ]
       },
-      "default": "md",
+      "default": null,
       "nullable": true,
       "rustType": "ControlSize"
     },
@@ -69,7 +69,7 @@
           "comfortable"
         ]
       },
-      "default": "default",
+      "default": null,
       "nullable": true,
       "rustType": "ControlDensity"
     },
@@ -153,7 +153,7 @@
       "type": {
         "kind": "boolean"
       },
-      "default": false,
+      "default": null,
       "nullable": true
     },
     {
@@ -314,7 +314,9 @@
         "web": {
           "kind": "icon",
           "position": "first",
-          "gatedBy": "data-has-leading"
+          "gatedBy": "data-has-leading",
+          "selector": ".poodle-button__icon",
+          "attribute": "data-icon"
         },
         "native": {
           "kind": "icon-side",
@@ -332,7 +334,9 @@
         "web": {
           "kind": "icon",
           "position": "last",
-          "gatedBy": "data-has-trailing"
+          "gatedBy": "data-has-trailing",
+          "selector": ".poodle-button__icon",
+          "attribute": "data-icon"
         },
         "native": {
           "kind": "icon-side",
@@ -349,7 +353,8 @@
       "resolve": {
         "web": {
           "kind": "class",
-          "className": ".poodle-button__spinner"
+          "className": ".poodle-button__spinner",
+          "attribute": "data-icon"
         },
         "native": {
           "kind": "icon-named",
@@ -363,7 +368,8 @@
       "resolve": {
         "web": {
           "kind": "class",
-          "className": ".poodle-button__chevron"
+          "className": ".poodle-button__chevron",
+          "attribute": "data-icon"
         },
         "native": {
           "kind": "icon-named",

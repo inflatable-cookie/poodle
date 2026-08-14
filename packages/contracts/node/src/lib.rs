@@ -881,6 +881,18 @@ impl Node {
         self
     }
 
+    /// The text this node intrinsically carries, whatever its kind: a
+    /// `Text` run's content, a `Button`'s label, an `Input`'s value.
+    /// Observers read the label this way instead of branching on kinds.
+    pub fn intrinsic_text(&self) -> Option<&str> {
+        match &self.kind {
+            NodeKind::Text { content } => Some(content.as_str()),
+            NodeKind::Button { label } => Some(label.as_str()),
+            NodeKind::Input { value, .. } => Some(value.as_str()),
+            _ => None,
+        }
+    }
+
     pub fn aria_label(mut self, label: impl Into<String>) -> Self {
         self.a11y.label = Some(label.into());
         self

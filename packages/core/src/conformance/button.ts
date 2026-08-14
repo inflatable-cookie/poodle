@@ -29,9 +29,9 @@ export const buttonInterface = defineComponentInterface({
   props: [
     { name: "variant", type: { kind: "enum", values: ["primary", "secondary", "ghost"] }, default: "secondary", rustType: "ButtonVariant" },
     { name: "tone", type: { kind: "enum", values: ["default", "danger", "success", "warning"] }, default: "default", rustType: "ButtonTone" },
-    { name: "size", type: { kind: "enum", values: ["xs", "sm", "md", "lg", "xl"] }, default: "md", nullable: true, rustType: "ControlSize" },
+    { name: "size", type: { kind: "enum", values: ["xs", "sm", "md", "lg", "xl"] }, default: null, nullable: true, rustType: "ControlSize" },
     { name: "sizeRole", type: { kind: "enum", values: ["chrome", "control", "prominent"] }, default: "control", rustType: "SemanticControlSizeRole" },
-    { name: "density", type: { kind: "enum", values: ["compact", "default", "comfortable"] }, default: "default", nullable: true, rustType: "ControlDensity" },
+    { name: "density", type: { kind: "enum", values: ["compact", "default", "comfortable"] }, default: null, nullable: true, rustType: "ControlDensity" },
     { name: "disabled", type: { kind: "boolean" }, default: false, rustName: "is_disabled" },
     { name: "loading", type: { kind: "boolean" }, default: false, rustName: "is_loading" },
     { name: "leadingIcon", type: { kind: "icon" }, default: null, nullable: true },
@@ -41,7 +41,7 @@ export const buttonInterface = defineComponentInterface({
     { name: "fit", type: { kind: "enum", values: ["default", "content"] }, default: "default", rustEnumName: "ButtonFit" },
     { name: "maxWidth", type: { kind: "dimension" }, default: null, nullable: true },
     { name: "pressed", type: { kind: "boolean" }, default: null, nullable: true, controlledBy: "pressedChange" },
-    { name: "defaultPressed", type: { kind: "boolean" }, default: false, nullable: true },
+    { name: "defaultPressed", type: { kind: "boolean" }, default: null, nullable: true },
     { name: "label", type: { kind: "string" }, default: null, nullable: true },
     { name: "ariaLabel", type: { kind: "string" }, default: null, nullable: true },
     { name: "ariaExpanded", type: { kind: "boolean" }, default: null, nullable: true },
@@ -83,7 +83,7 @@ export const buttonInterface = defineComponentInterface({
       id: "leadingIcon",
       contains: "icon",
       resolve: {
-        web: { kind: "icon", position: "first", gatedBy: "data-has-leading" },
+        web: { kind: "icon", position: "first", gatedBy: "data-has-leading", selector: ".poodle-button__icon", attribute: "data-icon" },
         native: { kind: "icon-side", side: "leading", except: ["spinner"] },
       },
     },
@@ -91,7 +91,7 @@ export const buttonInterface = defineComponentInterface({
       id: "trailingIcon",
       contains: "icon",
       resolve: {
-        web: { kind: "icon", position: "last", gatedBy: "data-has-trailing" },
+        web: { kind: "icon", position: "last", gatedBy: "data-has-trailing", selector: ".poodle-button__icon", attribute: "data-icon" },
         native: { kind: "icon-side", side: "trailing", except: ["chevron-down"] },
       },
     },
@@ -99,7 +99,7 @@ export const buttonInterface = defineComponentInterface({
       id: "spinner",
       contains: "icon",
       resolve: {
-        web: { kind: "class", className: ".poodle-button__spinner" },
+        web: { kind: "class", className: ".poodle-button__spinner", attribute: "data-icon" },
         native: { kind: "icon-named", name: "spinner" },
       },
     },
@@ -107,7 +107,7 @@ export const buttonInterface = defineComponentInterface({
       id: "chevron",
       contains: "icon",
       resolve: {
-        web: { kind: "class", className: ".poodle-button__chevron" },
+        web: { kind: "class", className: ".poodle-button__chevron", attribute: "data-icon" },
         native: { kind: "icon-named", name: "chevron-down" },
       },
     },

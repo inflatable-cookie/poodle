@@ -97,14 +97,14 @@ fn generated_enum(prop: &PortableProp) -> Option<String> {
     Some(out)
 }
 
-/// The Rust field type of a prop.
+/// The Rust field type of a prop. Nullable props keep `Option` so absent
+/// (`null`) stays distinguishable from an explicit value — the TypeScript
+/// projection and the Rust surface must have the same shape.
 fn prop_type(prop: &PortableProp) -> String {
-    match prop.kind.kind.as_str() {
-        "boolean" if prop.default.is_null() => "Option<bool>".to_owned(),
+    let base = match prop.kind.kind.as_str() {
         "boolean" => "bool".to_owned(),
-        "icon" => "Option<String>".to_owned(),
-        "dimension" => "Option<crate::types::Dimension>".to_owned(),
-        "string" if prop.default.is_null() => "Option<String>".to_owned(),
+        "icon" => "String".to_owned(),
+        "dimension" => "crate::types::Dimension".to_owned(),
         "string" => "String".to_owned(),
         "enum" => {
             if let Some(rust_type) = &prop.rust_type {
@@ -116,6 +116,11 @@ fn prop_type(prop: &PortableProp) -> String {
             }
         }
         other => other.to_owned(),
+    };
+    if prop.nullable {
+        format!("Option<{base}>")
+    } else {
+        base
     }
 }
 
@@ -193,14 +198,27 @@ fn render_builder(prop: &PortableProp) -> String {
     let field = rust_field_name(prop);
     let method = format!("with_{}", crate::conformance::to_snake_case(&prop.name));
     let ty = prop_type(prop);
-    let (param, assign) = match ty.as_str() {
-        "Option<String>" => ("impl Into<String>", format!("self.{field} = Some(value.into());")),
-        "Option<crate::types::Dimension>" => (
-            "impl Into<crate::types::Dimension>",
-            format!("self.{field} = Some(value.into());"),
-        ),
-        "Option<bool>" => ("bool", format!("self.{field} = Some(value);")),
-        _ => (ty.as_str(), format!("self.{field} = value;")),
+    let (param, assign) = if ty.starts_with("Option<") {
+        match ty.as_str() {
+            "Option<String>" => ("impl Into<String>".to_owned(), format!("self.{field} = Some(value.into());")),
+            "Option<crate::types::Dimension>" => (
+                "impl Into<crate::types::Dimension>".to_owned(),
+                format!("self.{field} = Some(value.into());"),
+            ),
+            "Option<bool>" => ("bool".to_owned(), format!("self.{field} = Some(value);")),
+            // Nullable enums: the builder takes the plain value and wraps
+            // it, so an explicit value stays distinguishable from absence.
+            other => (
+                other
+                    .strip_prefix("Option<")
+                    .and_then(|rest| rest.strip_suffix('>'))
+                    .unwrap_or(other)
+                    .to_owned(),
+                format!("self.{field} = Some(value);"),
+            ),
+        }
+    } else {
+        (ty.clone(), format!("self.{field} = value;"))
     };
     format!(
         "    pub fn {method}(mut self, value: {param}) -> Self {{\n        {assign}\n        self\n    }}"

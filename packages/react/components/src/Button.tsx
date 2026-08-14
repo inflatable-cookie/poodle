@@ -136,13 +136,17 @@ export function Button({
       onBlur={(event) => onBlur?.(event)}
     >
       {loading ? (
-        <span className="poodle-button__spinner" aria-hidden="true">
+        <span className="poodle-button__spinner" aria-hidden="true" data-icon="spinner">
           <Spinner variant="ring" size={resolvedIconSize} tone="current" />
         </span>
       ) : null}
 
       {leading || leadingIcon ? (
-        <span className="poodle-button__icon" aria-hidden="true">
+        <span
+          className="poodle-button__icon"
+          aria-hidden="true"
+          data-icon={typeof leadingIcon === "string" ? leadingIcon : undefined}
+        >
           {leading ?? (leadingIcon ? <Icon icon={leadingIcon} size={resolvedIconSize} /> : null)}
         </span>
       ) : null}
@@ -150,13 +154,17 @@ export function Button({
       {children ? <span className="poodle-button__label">{children}</span> : null}
 
       {trailing || trailingIcon ? (
-        <span className="poodle-button__icon" aria-hidden="true">
+        <span
+          className="poodle-button__icon"
+          aria-hidden="true"
+          data-icon={typeof trailingIcon === "string" ? trailingIcon : undefined}
+        >
           {trailing ?? (trailingIcon ? <Icon icon={trailingIcon} size={resolvedIconSize} /> : null)}
         </span>
       ) : null}
 
       {chevron ? (
-        <span className="poodle-button__chevron" aria-hidden="true">
+        <span className="poodle-button__chevron" aria-hidden="true" data-icon="chevron-down">
           <Icon name="chevron-down" size={resolvedIconSize} />
         </span>
       ) : null}

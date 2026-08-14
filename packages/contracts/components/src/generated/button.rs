@@ -19,9 +19,9 @@ pub enum ButtonFit {
 pub struct ButtonSpec {
     pub variant: crate::types::ButtonVariant,
     pub tone: crate::types::ButtonTone,
-    pub size: crate::types::ControlSize,
+    pub size: Option<crate::types::ControlSize>,
     pub size_role: crate::types::SemanticControlSizeRole,
-    pub density: crate::types::ControlDensity,
+    pub density: Option<crate::types::ControlDensity>,
     pub is_disabled: bool,
     pub is_loading: bool,
     pub leading_icon: Option<String>,
@@ -31,7 +31,7 @@ pub struct ButtonSpec {
     pub fit: ButtonFit,
     pub max_width: Option<crate::types::Dimension>,
     pub pressed: Option<bool>,
-    pub default_pressed: bool,
+    pub default_pressed: Option<bool>,
     pub label: Option<String>,
     pub aria_label: Option<String>,
     pub aria_expanded: Option<bool>,
@@ -43,9 +43,9 @@ impl Default for ButtonSpec {
         Self {
             variant: crate::types::ButtonVariant::Secondary,
             tone: crate::types::ButtonTone::Default,
-            size: crate::types::ControlSize::Md,
+            size: None,
             size_role: crate::types::SemanticControlSizeRole::Control,
-            density: crate::types::ControlDensity::Default,
+            density: None,
             is_disabled: false,
             is_loading: false,
             leading_icon: None,
@@ -55,7 +55,7 @@ impl Default for ButtonSpec {
             fit: ButtonFit::Default,
             max_width: None,
             pressed: None,
-            default_pressed: false,
+            default_pressed: None,
             label: None,
             aria_label: None,
             aria_expanded: None,
@@ -78,7 +78,7 @@ impl ButtonSpec {
         self
     }
     pub fn with_size(mut self, value: crate::types::ControlSize) -> Self {
-        self.size = value;
+        self.size = Some(value);
         self
     }
     pub fn with_size_role(mut self, value: crate::types::SemanticControlSizeRole) -> Self {
@@ -86,7 +86,7 @@ impl ButtonSpec {
         self
     }
     pub fn with_density(mut self, value: crate::types::ControlDensity) -> Self {
-        self.density = value;
+        self.density = Some(value);
         self
     }
     pub fn with_disabled(mut self, value: bool) -> Self {
@@ -126,7 +126,7 @@ impl ButtonSpec {
         self
     }
     pub fn with_default_pressed(mut self, value: bool) -> Self {
-        self.default_pressed = value;
+        self.default_pressed = Some(value);
         self
     }
     pub fn with_label(mut self, value: impl Into<String>) -> Self {

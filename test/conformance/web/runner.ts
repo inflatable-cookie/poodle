@@ -102,12 +102,25 @@ function resolveWebPart(
     case "class":
       return root.querySelector<HTMLElement>(part.resolve.web.className);
     case "icon": {
-      const { position, gatedBy } = part.resolve.web;
+      const { position, gatedBy, selector } = part.resolve.web;
       if (!root.hasAttribute(gatedBy)) return null;
-      const spans = Array.from(root.querySelectorAll<HTMLElement>(".poodle-button__icon"));
+      const spans = Array.from(root.querySelectorAll<HTMLElement>(selector));
       return position === "first" ? spans[0] ?? null : spans[spans.length - 1] ?? null;
     }
   }
+  return null;
+}
+
+/** The icon identity channel: the attribute the descriptor names on the
+ * resolved part element. */
+function iconIdentity(
+  part: SerializedComponentInterface["parts"][number],
+  el: HTMLElement | null,
+): string | null {
+  if (!el) return null;
+  const web = part.resolve.web;
+  const attribute = ("attribute" in web && web.attribute) || "data-icon";
+  return el.getAttribute(attribute);
 }
 
 function observeRootStates(
@@ -188,25 +201,45 @@ export function observeDom(
   for (const part of iface.parts) {
     const el = resolveWebPart(root, part);
     const isRoot = part.id === "root";
-    const labelText =
-      root.querySelector<HTMLElement>(".poodle-button__label")?.textContent?.trim() ?? null;
-    const accessibleName =
-      root.getAttribute("aria-label") ?? labelText ?? root.textContent?.trim() ?? null;
     parts[part.id] = {
       present: Boolean(el),
-      role: el ? (el.tagName === "BUTTON" ? "button" : null) : null,
-      name: isRoot && el ? accessibleName : null,
-      text: el?.textContent?.trim() ?? null,
-      icon: null,
-      states: isRoot ? states : {},
-      tokenRoles: isRoot ? tokenRoles : {},
-      focusable: el ? !el.hasAttribute("disabled") : false,
-      focused: isRoot ? (states.focused ?? null) : null,
-      focusVisible: isRoot ? (states.focusVisible ?? null) : null,
-      geometry: isRoot && el ? geometryOf(el) : {},
-      channels: isRoot && el ? channelsOf(el) : {},
+      // Only root carries role/interactivity; other parts are carriers.
+      role: isRoot ? (el?.tagName === "BUTTON" ? "button" : null) : null,
+      name: null,
+      // Text belongs to the text-carrying part (the label), not root.
+      text: isRoot ? null : (el?.textContent?.trim() || null),
+      icon: iconIdentity(part, el),
+      states: {},
+      tokenRoles: {},
+      focusable: null,
+      focused: null,
+      focusVisible: null,
+      geometry: {},
+      channels: {},
     };
   }
+  // Root observations (identity + states + token roles + geometry), and the
+  // accessible name: aria-label, else the first text-carrying part, else the
+  // root's own text — all resolved through the interface, no class names.
+  let accessibleName = root.getAttribute("aria-label");
+  if (!accessibleName) {
+    for (const part of iface.parts) {
+      if (part.contains === "text" && parts[part.id]?.text) {
+        accessibleName = parts[part.id].text;
+        break;
+      }
+    }
+  }
+  if (!accessibleName) accessibleName = root.textContent?.trim() ?? null;
+  const rootPart = parts.root;
+  rootPart.name = accessibleName;
+  rootPart.states = states;
+  rootPart.tokenRoles = tokenRoles;
+  rootPart.focusable = !root.hasAttribute("disabled");
+  rootPart.focused = states.focused ?? null;
+  rootPart.focusVisible = states.focusVisible ?? null;
+  rootPart.geometry = geometryOf(root);
+  rootPart.channels = channelsOf(root);
   return { runtime, component, parts, trace: [] };
 }
 
@@ -284,7 +317,7 @@ export function assertPartObservation(
   );
   if (!observed.present) return results;
 
-  for (const field of ["role", "name", "text", "focusable"] as const) {
+  for (const field of ["role", "name", "text", "icon", "focusable"] as const) {
     if (expect[field] !== undefined) {
       check(results, runtime, stepIndex, partId, field, expect[field], observed[field]);
     }

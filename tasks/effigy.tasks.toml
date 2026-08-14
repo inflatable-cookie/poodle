@@ -419,9 +419,14 @@
   { task = "jetstream:build" },
   { task = "test:jetstream-a11y" },
   { task = "drift:roles" },
-  # The conformance kernel's native leg (g14.001): compile the real-window
-  # runner; the windowed execution is local-only (conformance:complete).
-  { task = "conformance:check-gpui" },
+  # The conformance kernel's native leg (g14.001): executed GPUI evidence
+  # on the standing local board — the board already runs macOS-only and
+  # windowed gates (gpui:test, test:jetstream-a11y are display-free but
+  # local; the runner opens a real window). Compile-only cannot catch an
+  # inert listener, so the executed run sits here; the scheduled GitHub
+  # workflow keeps the check-only mirror (no windowed CI runs by standing
+  # decision — see the g14.001 batch log enforcement options).
+  { task = "conformance:test-gpui" },
 ]
 "qa:jetstream" = [
   { task = "ci:jetstream" },

@@ -541,6 +541,14 @@
           }
         },
         {
+          "kind": "expectPart",
+          "part": "spinner",
+          "expect": {
+            "present": true,
+            "icon": "spinner"
+          }
+        },
+        {
           "kind": "expectEvents",
           "events": []
         }
@@ -588,7 +596,8 @@
           "kind": "expectPart",
           "part": "leadingIcon",
           "expect": {
-            "present": true
+            "present": true,
+            "icon": "plus"
           }
         },
         {
@@ -660,7 +669,8 @@
           "kind": "expectPart",
           "part": "trailingIcon",
           "expect": {
-            "present": true
+            "present": true,
+            "icon": "check"
           }
         },
         {
@@ -719,14 +729,16 @@
           "kind": "expectPart",
           "part": "leadingIcon",
           "expect": {
-            "present": true
+            "present": true,
+            "icon": "plus"
           }
         },
         {
           "kind": "expectPart",
           "part": "trailingIcon",
           "expect": {
-            "present": true
+            "present": true,
+            "icon": "check"
           }
         },
         {
@@ -799,7 +811,8 @@
           "kind": "expectPart",
           "part": "chevron",
           "expect": {
-            "present": true
+            "present": true,
+            "icon": "chevron-down"
           }
         },
         {
@@ -1021,6 +1034,62 @@
         "caption": "Controlled toggle",
         "axes": [],
         "captureId": "button/toggle"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "button",
+            "name": "Mute",
+            "states": {
+              "pressed": false
+            }
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "root",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "pressedChange",
+            "press"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "pressed": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "button/default-pressed-toggle",
+      "fixture": {
+        "props": {
+          "defaultPressed": false
+        },
+        "regions": {
+          "label": "Mute"
+        }
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Default-pressed toggle",
+        "axes": [],
+        "captureId": "button/default-pressed-toggle"
       },
       "steps": [
         {

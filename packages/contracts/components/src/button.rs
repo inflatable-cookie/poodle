@@ -63,11 +63,11 @@ impl ButtonSpec {
     }
 
     pub fn control_height_token(&self) -> &'static str {
-        self.size.control_height_token()
+        self.size.unwrap_or_default().control_height_token()
     }
 
     pub fn control_min_width_token(&self) -> &'static str {
-        self.size.control_min_width_token()
+        self.size.unwrap_or_default().control_min_width_token()
     }
 
     /// Icon size token — always sm in buttons per contract.
@@ -109,13 +109,15 @@ impl ButtonSpec {
         semantic::RADIUS_CONTROL
     }
 
-    /// Returns true when button is in toggle mode (pressed non-null or default_pressed set).
+    /// Returns true when button is in toggle mode (pressed or
+    /// default_pressed explicitly provided — absence is `None` on both
+    /// surfaces).
     pub fn is_toggle_mode(&self) -> bool {
-        self.pressed.is_some() || self.default_pressed
+        self.pressed.is_some() || self.default_pressed.is_some()
     }
 
     /// Current pressed state for toggle-mode buttons.
     pub fn current_pressed(&self) -> bool {
-        self.pressed.unwrap_or(self.default_pressed)
+        self.pressed.or(self.default_pressed).unwrap_or(false)
     }
 }

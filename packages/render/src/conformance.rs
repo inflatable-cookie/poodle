@@ -306,13 +306,16 @@ fn observe_part(
     };
     json!({
         "present": true,
-        "role": role_of(node),
-        "name": name_of(node, root),
-        "text": text,
+        // Only root carries role, name, and interactivity; other parts are
+        // carriers (text/icon). The label part normalizes to those carrier
+        // semantics on every runtime.
+        "role": if is_root { role_of(node).map(|r| json!(r)).unwrap_or(Value::Null) } else { Value::Null },
+        "name": if is_root { name_of(node, root).map(|n| json!(n)).unwrap_or(Value::Null) } else { Value::Null },
+        "text": if is_root { Value::Null } else { text.map(|t| json!(t)).unwrap_or(Value::Null) },
         "icon": icon_of(node),
         "states": states,
         "tokenRoles": token_roles,
-        "focusable": node.interaction.focusable && !node.interaction.disabled,
+        "focusable": if is_root { json!(node.interaction.focusable && !node.interaction.disabled) } else { Value::Null },
         "focused": if is_root { backend_focus.map(|f| json!(f)).unwrap_or(Value::Null) } else { Value::Null },
         "focusVisible": if is_root { focus_visible_of(node, backend_focus) } else { Value::Null },
         "geometry": geometry,
@@ -329,7 +332,7 @@ fn absent_part() -> Value {
         "icon": null,
         "states": {},
         "tokenRoles": {},
-        "focusable": false,
+        "focusable": null,
         "focused": null,
         "focusVisible": null,
         "geometry": {},
@@ -690,7 +693,7 @@ pub fn assert_part(
     if let Some(expected) = expect.get("present") {
         check(out, runtime, step_index, part, "present".to_owned(), expected, Some(&json!(present)), None);
     }
-    for field in ["role", "name", "text", "focusable"] {
+    for field in ["role", "name", "text", "icon", "focusable"] {
         if let Some(expected) = expect.get(field) {
             let actual = observed.get(field);
             check(out, runtime, step_index, part, field.to_owned(), expected, actual, None);
@@ -764,12 +767,12 @@ pub fn assert_part(
 
 /// A host-owned activation handler that mirrors the web toggle path:
 /// `pressedChange` is emitted before `press`, matching the reference
-/// (Svelte) order.
-pub fn host_activate(toggle_mode: bool, pressed: &mut Option<bool>, trace: &mut Vec<String>) {
+/// (Svelte) order, with the same payload the web pair records.
+pub fn host_activate(toggle_mode: bool, pressed: &mut Option<bool>, trace: &mut Vec<Value>) {
     if toggle_mode {
         let next = !pressed.unwrap_or(false);
         *pressed = Some(next);
-        trace.push("pressedChange".to_owned());
+        trace.push(json!({ "event": "pressedChange", "payload": { "pressed": next } }));
     }
-    trace.push("press".to_owned());
+    trace.push(json!({ "event": "press" }));
 }

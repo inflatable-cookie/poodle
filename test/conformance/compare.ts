@@ -52,6 +52,144 @@ function loadReport(runtime: string): RuntimeReport | null {
   return JSON.parse(readFileSync(path, "utf8")) as RuntimeReport;
 }
 
+const IDENTITY_FIELDS = [
+  "present",
+  "role",
+  "name",
+  "text",
+  "icon",
+  "focusable",
+  "focused",
+  "focusVisible",
+] as const;
+const GEOMETRY_FIELDS = ["height", "minWidth", "paddingLeft", "paddingRight", "radius"] as const;
+const GEOMETRY_TOLERANCE = 1.0;
+
+interface ObservationShape {
+  parts?: Record<string, Record<string, unknown>>;
+  trace?: unknown[];
+}
+
+/** The observing set for a field across runtimes: runtimes whose value is
+ * non-null. */
+function observingSet(perRuntime: Map<string, unknown>, pick: (obs: unknown) => unknown): Set<string> {
+  const set = new Set<string>();
+  for (const [runtime, obs] of perRuntime) {
+    const value = pick(obs);
+    if (value !== null && value !== undefined) set.add(runtime);
+  }
+  return set;
+}
+
+function fieldOf(obs: unknown, partId: string, field: string): unknown {
+  return (obs as ObservationShape).parts?.[partId]?.[field];
+}
+
+function compareFrame(
+  problems: string[],
+  caseId: string,
+  index: number,
+  perRuntime: Map<string, unknown>,
+  runtimesOrder: string[],
+): void {
+  const anyObs = perRuntime.values().next().value as ObservationShape | undefined;
+  const refObs = perRuntime.get("svelte") as ObservationShape | undefined;
+  const partIds = new Set<string>();
+  for (const obs of perRuntime.values()) {
+    for (const partId of Object.keys((obs as ObservationShape).parts ?? {})) {
+      partIds.add(partId);
+    }
+  }
+  for (const partId of partIds) {
+    const present = observingSet(perRuntime, (obs) => fieldOf(obs, partId, "present"));
+    for (const runtime of runtimesOrder) {
+      if (!present.has(runtime)) continue;
+    }
+    // Identity fields: shape (observing set) and value must agree.
+    for (const field of IDENTITY_FIELDS) {
+      const observers = observingSet(perRuntime, (obs) => fieldOf(obs, partId, field));
+      const nonObservers = runtimesOrder.filter((r) => !observers.has(r));
+      if (observers.size > 0 && nonObservers.length > 0) {
+        problems.push(
+          `${caseId} obs ${index} ${partId}.${field}: shape mismatch — observed by [${[...observers].join(", ")}] but not by [${nonObservers.join(", ")}]`,
+        );
+        continue;
+      }
+      const reference = fieldOf(refObs, partId, field);
+      for (const runtime of observers) {
+        const value = fieldOf(perRuntime.get(runtime), partId, field);
+        if (reference !== value) {
+          problems.push(
+            `${runtime} ${caseId} obs ${index} ${partId}.${field}: expected ${JSON.stringify(reference)}, got ${JSON.stringify(value)}`,
+          );
+        }
+      }
+    }
+    // Maps: states and token roles.
+    for (const mapField of ["states", "tokenRoles"]) {
+      const keySet = new Set<string>();
+      for (const obs of perRuntime.values()) {
+        for (const key of Object.keys((fieldOf(obs, partId, mapField) ?? {}) as Record<string, unknown>)) {
+          keySet.add(key);
+        }
+      }
+      for (const key of keySet) {
+        const observers = observingSet(perRuntime, (obs) => (fieldOf(obs, partId, mapField) as Record<string, unknown>)?.[key]);
+        const nonObservers = runtimesOrder.filter((r) => !observers.has(r));
+        if (observers.size > 0 && nonObservers.length > 0) {
+          problems.push(
+            `${caseId} obs ${index} ${partId}.${mapField}.${key}: shape mismatch — observed by [${[...observers].join(", ")}] but not by [${nonObservers.join(", ")}]`,
+          );
+          continue;
+        }
+        const reference = (fieldOf(refObs, partId, mapField) as Record<string, unknown>)?.[key];
+        for (const runtime of observers) {
+          const value = (fieldOf(perRuntime.get(runtime), partId, mapField) as Record<string, unknown>)?.[key];
+          if (reference !== value) {
+            problems.push(
+              `${runtime} ${caseId} obs ${index} ${partId}.${mapField}.${key}: expected ${JSON.stringify(reference)}, got ${JSON.stringify(value)}`,
+            );
+          }
+        }
+      }
+    }
+    // Geometry: values with a tolerance, where the reference observes them
+    // (the one documented skip — calc() geometry the headless DOM cannot
+    // resolve). A planted divergence where the reference observes fails.
+    for (const field of GEOMETRY_FIELDS) {
+      const reference = fieldOf(refObs, partId, "geometry") as Record<string, unknown> | undefined;
+      const expected = reference?.[field];
+      if (expected === null || expected === undefined || typeof expected !== "number") continue;
+      for (const runtime of runtimesOrder) {
+        if (runtime === "svelte") continue;
+        const geometry = fieldOf(perRuntime.get(runtime), partId, "geometry") as Record<string, unknown> | undefined;
+        const actual = geometry?.[field];
+        if (typeof actual !== "number") {
+          problems.push(
+            `${runtime} ${caseId} obs ${index} ${partId}.geometry.${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
+          );
+          continue;
+        }
+        if (Math.abs(expected - actual) > GEOMETRY_TOLERANCE) {
+          problems.push(
+            `${runtime} ${caseId} obs ${index} ${partId}.geometry.${field}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
+          );
+        }
+      }
+    }
+  }
+  // The trace (event order + payloads) must agree exactly.
+  const traces = [...perRuntime.entries()].map(([runtime, obs]) => [runtime, (obs as ObservationShape).trace ?? []] as const);
+  const referenceTrace = JSON.stringify((refObs as ObservationShape | undefined)?.trace ?? []);
+  for (const [runtime, trace] of traces) {
+    if (JSON.stringify(trace) !== referenceTrace) {
+      problems.push(
+        `${runtime} ${caseId} obs ${index} trace: expected ${referenceTrace}, got ${JSON.stringify(trace)}`,
+      );
+    }
+  }
+}
+
 function main(): void {
   const available = ACTIVE_RUNTIMES.filter((runtime) => loadReport(runtime) !== null);
   if (available.length === 0) {
@@ -94,6 +232,46 @@ function main(): void {
             `expected ${JSON.stringify(failure.expected)}, got ${JSON.stringify(failure.actual)}`,
         );
       }
+    }
+  }
+
+  // Normalized-observation comparison across the active cohort. Identity
+  // fields (present/role/name/text/icon/focusable/focused/focusVisible,
+  // states, token roles, and the trace) must agree in SHAPE — which
+  // runtimes observe a value — and in VALUE. A field one runtime observes
+  // and another cannot is a divergence, not a gap: the label part leaking
+  // root's role fails here. Geometry compares values where the reference
+  // observes them (a calc() the headless DOM cannot resolve is the one
+  // documented skip, and it is geometry-only). Channels are recorded, not
+  // compared — web cannot resolve color-mix recipes headlessly.
+  const runtimesOrder = available;
+  const resultsByCase = new Map<string, Map<string, CaseResult>>();
+  for (const [runtime, report] of reports) {
+    for (const result of report.results) {
+      if (!resultsByCase.has(result.caseId)) resultsByCase.set(result.caseId, new Map());
+      resultsByCase.get(result.caseId)!.set(runtime, result);
+    }
+  }
+  for (const [caseId, byRuntime] of resultsByCase) {
+    const lengths = new Map<string, number>();
+    for (const [runtime, result] of byRuntime) {
+      lengths.set(runtime, result.observations.length);
+    }
+    const expectedLength = Math.max(...lengths.values());
+    for (const [runtime, length] of lengths) {
+      if (length !== expectedLength) {
+        problems.push(`${runtime} ${caseId}: observation count ${length} != ${expectedLength}`);
+      }
+    }
+    const obsByIndex = new Map<number, Map<string, unknown>>();
+    for (const [runtime, result] of byRuntime) {
+      result.observations.forEach((obs, index) => {
+        if (!obsByIndex.has(index)) obsByIndex.set(index, new Map());
+        obsByIndex.get(index)!.set(runtime, obs);
+      });
+    }
+    for (const [index, perRuntime] of obsByIndex) {
+      compareFrame(problems, caseId, index, perRuntime, runtimesOrder);
     }
   }
 

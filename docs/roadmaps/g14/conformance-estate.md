@@ -60,12 +60,14 @@ Delivered for Button:
   roles, and axes — no hand-written type mirror exists anywhere. Svelte and
   React bind their shells to the derived types (`satisfies`-checked carrier
   names, `PortableEventsOf` key access), so a rename fails the shells.
-- **Typed case corpus** — `packages/core/src/conformance/button-cases.ts`,
-  authored through `componentCase(buttonInterface, ...)`: fixture props,
-  regions, parts, states, events, token roles, axes, and enum values are
-  closed over the interface at authoring time, re-validated by the
-  serializer, and validated again by the Rust codegen against the interface
-  JSON. Unknown names are errors, never ignored.
+- **Typed case corpus** — `packages/core/src/conformance/button-cases.ts`
+  (20 cases), authored through `componentCase(buttonInterface, ...)`:
+  fixture props, regions, parts, states, events, token roles, axes, and
+  enum values are closed over the interface at authoring time, re-validated
+  by the serializer, and validated again by the Rust codegen against the
+  interface JSON. Unknown names are errors, never ignored. Nullable props
+  stay `Option` in generated Rust — absence is `None`/`null` on both
+  surfaces, pinned by the `default-pressed-toggle` case.
 - **Generated Rust declaration** — `packages/contracts/components/src/generated/button.rs`
   replaces the hand-written `ButtonSpec` struct/default/builders; the token
   recipes live in the extension module beside it.
@@ -76,11 +78,18 @@ Delivered for Button:
 - **Observation** — `component-observation.v1` per runtime, data-driven from
   the interface's part descriptors and observation rules. No component
   identifier, class name, icon name, or part list lives in shared runner or
-  observer code. Token roles travel on a new `poodle-node` channel
-  (`node.roles`) the renderer stamps; states are observed per declared rule.
+  observer code. Token roles travel on the `poodle-node` `roles` channel
+  the renderer stamps; roles are read from `a11y.role`; labels through
+  `Node::intrinsic_text()`. Icon identity is observed and asserted on all
+  three runtimes through the web `data-icon` channels and the native Icon
+  nodes. The orchestrator compares the normalized observations
+  field-for-field (shape + value), not just asserted fields.
 - **Strict verdicts** — `pass`/`fail` only. A required field a runtime
   cannot observe fails that runtime's case, naming runtime/case/step/field
   and the reason; no cross-runtime "someone exercised it" vacuity exists.
+- **Standing enforcement** — the executed GPUI run sits in `ci:native`
+  (compile-only cannot catch an inert listener); `docs:check`/`ci:web`
+  carry the authority drift checks and the web execution.
 - **Specimens** — all three active Button specimen pages are corpus
   projections; hand-written specimen fixtures deleted.
 - **Completion** — `effigy conformance:complete --component button` passes
