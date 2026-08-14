@@ -57,8 +57,8 @@ the adopted cases before promotion.
 ## Runway
 
 1. [001 — Conformance kernel and Button proof](001-conformance-kernel-and-button-proof.md) — complete; replacement proof accepted
-2. [002 — Primitive substrate certification](002-primitive-substrate-certification.md) — ready
-3. [003 — RangeSlider controlled-control proof](003-range-slider-controlled-control-proof.md)
+2. [002 — Primitive substrate certification](002-primitive-substrate-certification.md) — complete; accepted in PR #11
+3. [003 — RangeSlider controlled-control proof](003-range-slider-controlled-control-proof.md) — ready
 4. [004 — Tabs collection and navigation proof](004-tabs-collection-navigation-proof.md)
 5. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md)
 6. [006 — TextInput runtime-boundary proof](006-text-input-runtime-boundary-proof.md)
@@ -94,11 +94,12 @@ external-repository surfaces.
 
 ## First Task
 
-`g14.002` is the next conformance card. It must certify and reuse the primitive,
-observer, and driver substrate proven by `g14.001`; copying Button's pilot
-harness is a stop condition. Jetstream remains outside the active cohort.
+`g14.003` is the next conformance card. It must prove controlled two-part value
+semantics through the certified primitive, observer, and driver substrate.
+RangeSlider-specific branches in generic machinery are a stop condition.
+Jetstream remains outside the active cohort.
 
-`g14.018` may run in one fresh worktree beside `002`. It owns only the approved
+`g14.018` may run in one fresh worktree beside `003`. It owns only the approved
 model-connection Svelte/React reference lane. The operator review remains in
 this orchestrator thread under `019`; native/conformance completion stays open
 under `020`.

@@ -1,6 +1,6 @@
 # g14.002 — Primitive Substrate Certification
 
-Status: ready
+Status: complete — accepted in PR #11
 Depends on: `g14.001` — replacement proof accepted in PR #10
 Governing refs: `../../architecture/009-cross-runtime-component-conformance.md`,
 `../../specs/066-executable-component-conformance.md`,

@@ -3,7 +3,7 @@
 Date: 2026-08-14
 Card: `docs/roadmaps/g14/002-primitive-substrate-certification.md`
 Depends on: g14.001 / PR #10
-Status: orchestrator accepted — pending merge
+Status: accepted and landed in PR #11 (`cc9f5613`)
 
 ## Outcome
 
