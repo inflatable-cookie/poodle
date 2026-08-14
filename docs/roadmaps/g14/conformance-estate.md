@@ -43,6 +43,13 @@ the three active runtimes, executed by the opt-in
 | visual baselines exist | web and native snapshot tools | shared fixture identity; stale GPUI captures; Jetstream overwrite workflow |
 | **Button completes the conformance kernel** | `ci:conformance-windowed` (20 cases × Svelte, React, GPUI) | profile pilots 2–6 |
 
+Operator ruling, 2026-08-14: the foreground GPUI proof is not acceptable as a
+normal worker validation path. Local invocation is now hard-guarded; g14.023
+migrates the same backend execution and observations onto GPUI's in-memory test
+platform before the remaining profiles continue. Until then,
+`ci:conformance` is safe but GPUI compile-only, while the legacy execution proof
+is isolated-CI-only.
+
 `docs:check` currently stays green while the machine-shape selector is red.
 `check:svelte` currently has three `AppHeaderCenterHarness.svelte` Snippet
 identity errors. These failures predate the redesigned runway; g14.001
@@ -120,14 +127,15 @@ Delivered for Button:
 
 ### Driver notes (recorded, not architecture)
 
-- The GPUI runner needs a live macOS desktop and takes focus. `ci:native` and
+- The legacy GPUI runner needs a live macOS desktop and takes focus. `ci:native` and
   headless `ci:conformance` compile it (`conformance:check-gpui`);
-  `ci:conformance-windowed` executes it in the dedicated macOS PR workflow or
-  when an operator explicitly yields the desktop. The driver activates the app, warms
+  `ci:conformance-windowed` executes it only in the dedicated macOS PR workflow
+  or when the operator explicitly sets the foreground opt-in. The driver activates the app, warms
   macOS's first-click swallow with a click on empty chrome, polls until the
   window has painted (focus handle exists), and retries a swallowed click
   like a real user would — the retry is real clicks, and an inert backend
-  binding still fails no matter how many times it is clicked.
+  binding still fails no matter how many times it is clicked. g14.023 removes
+  this path after equivalent headless GPUI evidence lands.
 
 ### Cost ruling
 

@@ -37,5 +37,6 @@ Jetstream admission.
 
 ## Validation
 
-Run TextInput cases, IME/editing suites, conformance gates, `docs:check`, and
-`git diff --check`.
+Run TextInput cases, IME/editing suites, `effigy ci:conformance` (headless),
+`docs:check`, and `git diff --check`. No foreground conformance selector is
+permitted.

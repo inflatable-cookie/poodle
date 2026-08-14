@@ -1,7 +1,7 @@
 # g14.005 — Popover Overlay And Focus Proof
 
 Status: planned
-Depends on: `g14.004`
+Depends on: `g14.023`
 
 ## Outcome
 
@@ -34,5 +34,6 @@ contract-bound.
 
 ## Validation
 
-Run Popover cases and overlay/focus suites, conformance gates, `docs:check`,
-and `git diff --check`.
+Run Popover cases and overlay/focus suites, `effigy ci:conformance`
+(headless), `docs:check`, and `git diff --check`. No foreground conformance
+selector is permitted.

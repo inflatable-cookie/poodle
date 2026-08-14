@@ -242,6 +242,14 @@ fn main() {
         );
         std::process::exit(2);
     }
+    let foreground_allowed = std::env::var("GITHUB_ACTIONS").as_deref() == Ok("true")
+        || std::env::var("POODLE_ALLOW_FOREGROUND_CONFORMANCE").as_deref() == Ok("1");
+    if !foreground_allowed {
+        eprintln!(
+            "Foreground GPUI conformance is blocked on local desktops. Use the headless `effigy ci:conformance` board. Only isolated CI or an operator-approved run with POODLE_ALLOW_FOREGROUND_CONFORMANCE=1 may take OS focus."
+        );
+        std::process::exit(2);
+    }
     let (primitives, only, out) = parse_args(&args);
 
     if primitives {

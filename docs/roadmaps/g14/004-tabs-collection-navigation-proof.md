@@ -32,5 +32,6 @@ keyboard navigation with the same component pipeline.
 
 ## Validation
 
-Run Tabs cases and narrow suites, conformance gates, `docs:check`, and
-`git diff --check`.
+Run Tabs cases and narrow suites, `effigy ci:conformance` (headless),
+`docs:check`, and `git diff --check`. Do not run any `*-windowed` selector on
+the operator desktop; isolated CI owns that legacy proof until g14.023 lands.

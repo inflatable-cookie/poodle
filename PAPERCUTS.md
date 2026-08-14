@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-14 — g14.004 said only “conformance gates”, so a worktree agent ran
+  the foreground `ci:conformance-windowed` board for 15+ minutes and repeatedly
+  stole desktop focus. Selector naming and comments did not protect the
+  operator. Resolved at the task boundary with a local opt-in guard; planned
+  cards now name the headless selector explicitly. Full GPUI execution still
+  needs migration onto GPUI's in-memory test platform.
+
 - 2026-08-14 — fresh t3 worktrees ship without `node_modules`; `effigy
   conformance:test-web` fails on unresolved `@sveltejs/vite-plugin-svelte`
   until `bun install`. Doctor/bootstrap could seed workspace installs for

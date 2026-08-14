@@ -33,9 +33,11 @@ Rust case and node boundary renderer-neutral for later Jetstream admission.
 ## Sequence
 
 `001` builds the smallest end-to-end kernel through Button. `002` certifies
-the primitive substrate that later components depend on. `003`–`007` prove
-the same pipeline across increasing component profiles. `008` records an
-adopt/revise/reject verdict.
+the primitive substrate that later components depend on. `003` and `004`
+prove controlled and collection profiles. `023` then replaces the unsafe
+foreground GPUI runner with headless GPUI execution before `005`–`007` resume
+the increasing component profiles. `008` records an adopt/revise/reject
+verdict.
 
 Rollout cards `009`–`013` stay blocked until `008` records **adopt**. `014`
 makes the workflow mandatory for new components.
@@ -46,8 +48,8 @@ Native and shared-case completion stays blocked under `017` until `008`
 records **adopt**.
 
 The operator-approved model-connection suite follows the same staged pattern.
-`018` delivers its bounded Svelte/React reference, `019` reviews the live
-specimens in the orchestrator thread, and `020` stays blocked on **adopt** for
+`018` delivered its bounded Svelte/React reference and `019` approved the live
+specimens after one bounded refinement. `020` stays blocked on **adopt** for
 shared cases and GPUI. Cleanup moves to `021`; `022` closes the generation.
 
 Jetstream is outside the g14 completion cohort. Its paired build and evidence
@@ -60,24 +62,25 @@ the adopted cases before promotion.
 2. [002 — Primitive substrate certification](002-primitive-substrate-certification.md) — complete; accepted in PR #11
 3. [003 — RangeSlider controlled-control proof](003-range-slider-controlled-control-proof.md) — complete; accepted in PR #13
 4. [004 — Tabs collection and navigation proof](004-tabs-collection-navigation-proof.md)
-5. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md)
-6. [006 — TextInput runtime-boundary proof](006-text-input-runtime-boundary-proof.md)
-7. [007 — HistoryCenter composite proof](007-history-center-composite-proof.md)
-8. [008 — Pilot verdict](008-pilot-verdict.md)
-9. [009 — Foundation and display rollout](009-foundation-display-rollout.md)
-10. [010 — Controls and forms rollout](010-controls-forms-rollout.md)
-11. [011 — Collections and navigation rollout](011-collections-navigation-rollout.md)
-12. [012 — Overlays and input rollout](012-overlays-input-rollout.md)
-13. [013 — Composite and workstation rollout](013-composite-workstation-rollout.md)
-14. [014 — Completion gate and component factory](014-completion-gate-and-component-factory.md)
-15. [015 — Licence web reference](015-licence-web-reference.md) — landed
-16. [016 — Licence reference review](016-licence-reference-review.md) — complete; reference approved
-17. [017 — Licence active-runtime completion](017-licence-active-runtime-completion.md)
-18. [018 — Model connection web reference](018-model-connection-web-reference.md) — complete; accepted in PR #12
-19. [019 — Model connection reference review](019-model-connection-reference-review.md) — ready; operator/orchestrator lane
-20. [020 — Model connection active-runtime completion](020-model-connection-active-runtime-completion.md)
-21. [021 — Experimental cleanup and gate consolidation](021-experimental-cleanup-and-gate-consolidation.md)
-22. [022 — Generation closeout](022-generation-closeout.md)
+5. [023 — Headless GPUI conformance execution](023-headless-gpui-conformance-execution.md)
+6. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md)
+7. [006 — TextInput runtime-boundary proof](006-text-input-runtime-boundary-proof.md)
+8. [007 — HistoryCenter composite proof](007-history-center-composite-proof.md)
+9. [008 — Pilot verdict](008-pilot-verdict.md)
+10. [009 — Foundation and display rollout](009-foundation-display-rollout.md)
+11. [010 — Controls and forms rollout](010-controls-forms-rollout.md)
+12. [011 — Collections and navigation rollout](011-collections-navigation-rollout.md)
+13. [012 — Overlays and input rollout](012-overlays-input-rollout.md)
+14. [013 — Composite and workstation rollout](013-composite-workstation-rollout.md)
+15. [014 — Completion gate and component factory](014-completion-gate-and-component-factory.md)
+16. [015 — Licence web reference](015-licence-web-reference.md) — landed
+17. [016 — Licence reference review](016-licence-reference-review.md) — complete; reference approved
+18. [017 — Licence active-runtime completion](017-licence-active-runtime-completion.md)
+19. [018 — Model connection web reference](018-model-connection-web-reference.md) — complete; accepted in PR #12
+20. [019 — Model connection reference review](019-model-connection-reference-review.md) — complete; reference approved
+21. [020 — Model connection active-runtime completion](020-model-connection-active-runtime-completion.md)
+22. [021 — Experimental cleanup and gate consolidation](021-experimental-cleanup-and-gate-consolidation.md)
+23. [022 — Generation closeout](022-generation-closeout.md)
 
 ## Dispatch Rule
 
@@ -89,15 +92,16 @@ records evidence, merges, then opens the next file.
 No batch-card layer. No parallel work on the conformance kernel before the
 prior profile settles its vocabulary. Bounded web-reference lanes may run in
 parallel only when named here. `018` used that exception and is now complete.
-`019` stays in this operator/orchestrator thread; it is not a worker dispatch.
+`019` stayed in the operator/orchestrator thread and is now complete.
 
 ## First Task
 
-`g14.004` is the next conformance card. It must prove identified collection
-and keyboard-navigation semantics through the landed kernel. Tabs-specific
-branches in generic machinery are a stop condition. Jetstream remains outside
-the active cohort.
+`g14.004` is in review. It must prove identified collection and
+keyboard-navigation semantics through the landed kernel before merge.
+Tabs-specific branches in generic machinery remain a stop condition.
+Jetstream stays outside the active cohort. Its local validation is headless;
+legacy foreground proof is isolated-CI-only. `g14.023` follows immediately and
+must land before `005`.
 
-`g14.019` is ready in this orchestrator thread. Review the landed Svelte and
-React model-connection specimens with the operator, then freeze the accepted
-reference. Native/conformance completion stays open under `020`.
+The model-connection web reference is approved. Native/conformance completion
+stays open under `020` until the pilot records **adopt**.

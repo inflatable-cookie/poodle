@@ -6,7 +6,7 @@ Updated: 2026-08-14
 
 - `g14`
   - Status: active
-  - Range: `001` to `022`
+  - Range: `001` to `023`
   - Governing architecture:
     `docs/architecture/009-cross-runtime-component-conformance.md`
   - Governing spec: `docs/specs/066-executable-component-conformance.md`
@@ -17,10 +17,11 @@ Updated: 2026-08-14
   - Runway: `001`–`003` are accepted; `004`–`007` prove the remaining component
     profiles; `008` records adopt/revise/reject. `009`–`014` remain blocked
     until adopt. `015`–`017` stage and complete the licence surface;
-    `018`–`020` do the same for model connections; `021` cleans the estate and
-    `022` closes the generation.
-  - Next: dispatch `g14.004`. `g14.019` is active as a shared operator review
-    in the current orchestrator thread.
+    `018`–`020` do the same for model connections; `021` cleans the estate,
+    `022` closes the generation, and interposed `023` replaces foreground GPUI
+    conformance before profile `005` begins.
+  - Next: close review of `g14.004`, then dispatch `g14.023`. `g14.019` is
+    complete; the model-connection web reference is approved.
 
 ## Latest Completed Track
 

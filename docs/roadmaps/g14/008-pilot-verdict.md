@@ -1,7 +1,7 @@
 # g14.008 — Pilot Verdict
 
 Status: planned
-Depends on: `g14.001`–`g14.007`
+Depends on: `g14.001`–`g14.007`, `g14.023`
 
 ## Outcome
 
@@ -39,5 +39,6 @@ component fixes and evidence.
 
 ## Validation
 
-Run the complete conformance board, docs gates, `git diff --check`, and verify
-all figures from source rather than worker summaries.
+Run `effigy conformance:complete` and the complete headless conformance board,
+docs gates, `git diff --check`, and verify all figures from source rather than
+worker summaries. No foreground conformance selector is permitted.

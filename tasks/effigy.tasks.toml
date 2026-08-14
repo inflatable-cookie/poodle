@@ -104,7 +104,8 @@
 # WINDOWED, like test:native-visual: opens a foreground GPUI window and drives
 # real NSEvents through the AppKit queue (hit testing, listener binding,
 # focus, activation). It takes OS focus and needs a live macOS desktop. Never
-# include this selector in normal local QA.
+# include this selector in normal local QA. The binary hard-blocks local runs
+# unless the operator sets POODLE_ALLOW_FOREGROUND_CONFORMANCE=1.
 "conformance:test-gpui-windowed" = "cargo run --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin conformance -- --windowed --out=test/conformance/web/out/gpui.json"
 # WINDOWED primitive substrate probes (g14.002): real GPUI backend + focus/events.
 "conformance:test-primitives-gpui-windowed" = "cargo run --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin conformance -- --windowed --primitives --out=test/conformance/web/out/primitive-gpui.json"

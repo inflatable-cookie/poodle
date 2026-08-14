@@ -9,6 +9,7 @@ Scope: whole `poodle/` repository.
 - Keep Svelte and GPUI implementations aligned to one documented contract; parity means semantic inputs, states, behavior, and token usage first.
 - Keep Underlay-facing integration behind Underlay-owned adapters and token bridges; app code should not need to know Poodle exists.
 - Treat Bits Svelte as an implementation detail where useful, not as Poodle's public contract.
+- Never run `*-windowed` conformance selectors on a local desktop without explicit operator approval; use `effigy ci:conformance`.
 - Keep AGENTS content lean: scope, hard rules, validation, links.
 
 ## Validate

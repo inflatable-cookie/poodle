@@ -40,5 +40,6 @@ specimen-only registration.
 
 ## Validation
 
-Run HistoryCenter core/component/native suites and all conformance gates,
-`docs:check`, and `git diff --check`.
+Run HistoryCenter core/component/native suites and `effigy ci:conformance`
+(headless), `docs:check`, and `git diff --check`. No foreground conformance
+selector is permitted.
