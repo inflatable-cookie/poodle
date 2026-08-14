@@ -41,10 +41,14 @@ Rollout cards `009`–`013` stay blocked until `008` records **adopt**. `014`
 makes the workflow mandatory for new components.
 
 `015` landed the independent Svelte/React reference tranche for the new
-licence surface. `016` is an immediate operator review and bounded refinement
-checkpoint over those live specimen pages. Native and shared-case completion
-stays blocked under `017` until `008` records **adopt**. `018` deletes
-superseded experiments and gates. `019` closes the generation.
+licence surface. `016` completed its operator review and bounded refinement.
+Native and shared-case completion stays blocked under `017` until `008`
+records **adopt**.
+
+The operator-approved model-connection suite follows the same staged pattern.
+`018` delivers its bounded Svelte/React reference, `019` reviews the live
+specimens in the orchestrator thread, and `020` stays blocked on **adopt** for
+shared cases and GPUI. Cleanup moves to `021`; `022` closes the generation.
 
 Jetstream is outside the g14 completion cohort. Its paired build and evidence
 remain opt-in and visibly deferred; a later backend-admission runway must run
@@ -67,10 +71,13 @@ the adopted cases before promotion.
 13. [013 — Composite and workstation rollout](013-composite-workstation-rollout.md)
 14. [014 — Completion gate and component factory](014-completion-gate-and-component-factory.md)
 15. [015 — Licence web reference](015-licence-web-reference.md) — landed
-16. [016 — Licence reference review](016-licence-reference-review.md) — ready operator checkpoint
+16. [016 — Licence reference review](016-licence-reference-review.md) — complete; reference approved
 17. [017 — Licence active-runtime completion](017-licence-active-runtime-completion.md)
-18. [018 — Experimental cleanup and gate consolidation](018-experimental-cleanup-and-gate-consolidation.md)
-19. [019 — Generation closeout](019-generation-closeout.md)
+18. [018 — Model connection web reference](018-model-connection-web-reference.md) — ready parallel web lane
+19. [019 — Model connection reference review](019-model-connection-reference-review.md)
+20. [020 — Model connection active-runtime completion](020-model-connection-active-runtime-completion.md)
+21. [021 — Experimental cleanup and gate consolidation](021-experimental-cleanup-and-gate-consolidation.md)
+22. [022 — Generation closeout](022-generation-closeout.md)
 
 ## Dispatch Rule
 
@@ -80,9 +87,10 @@ to a fresh thread/worktree when its dependencies are met. Workers do not write
 records evidence, merges, then opens the next file.
 
 No batch-card layer. No parallel work on the conformance kernel before the
-prior profile settles its vocabulary. The bounded licence review in `016` is
-the only current parallel exception; it cannot edit kernel, Rust, native, or
-roadmap surfaces.
+prior profile settles its vocabulary. Bounded web-reference lanes may run in
+parallel only when named here. `018` is the current exception; it cannot edit
+conformance/codegen, Rust, native, Jetstream, Effigy tasks, roadmap, or
+external-repository surfaces.
 
 ## First Task
 
@@ -90,8 +98,7 @@ roadmap surfaces.
 observer, and driver substrate proven by `g14.001`; copying Button's pilot
 harness is a stop condition. Jetstream remains outside the active cohort.
 
-`g14.016` is active as an orchestrator/operator checkpoint in this thread.
-Review the landed
-Svelte and React licence specimens, record feedback, and permit at most one
-bounded web-reference refinement pass. Native/conformance completion remains
-visibly open under `017`.
+`g14.018` may run in one fresh worktree beside `002`. It owns only the approved
+model-connection Svelte/React reference lane. The operator review remains in
+this orchestrator thread under `019`; native/conformance completion stays open
+under `020`.

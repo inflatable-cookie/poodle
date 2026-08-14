@@ -1,6 +1,6 @@
 # g14.016 — Licence Reference Review
 
-Status: active — orchestrator/operator checkpoint
+Status: complete — reference approved
 Depends on: `g14.015`
 Governing refs: `../../contracts/components/licence-status.md`,
 `../../contracts/components/licence-activation.md`,
@@ -22,16 +22,16 @@ Run them with `effigy svelte:preview` and `effigy react:preview`.
 
 ## Goals
 
-- [ ] Review all three pages in Svelte and React under at least one dark and
+- [x] Review all three pages in Svelte and React under at least one dark and
       one light theme.
-- [ ] Review hierarchy, spacing, tone, copy, activation-model selection,
+- [x] Review hierarchy, spacing, tone, copy, activation-model selection,
       external and embedded account journeys, account/offline flow, seat
       honesty, empty state, pending state, and destructive confirmation.
-- [ ] Record each feedback item as approve, change now, contract change, or
+- [x] Record each feedback item as approve, change now, contract change, or
       later native/conformance work.
-- [ ] Apply one bounded Svelte/React refinement batch when feedback requires
+- [x] Apply one bounded Svelte/React refinement batch when feedback requires
       code changes.
-- [ ] Freeze the reviewed web reference for `g14.017` shared cases.
+- [x] Freeze the reviewed web reference for `g14.017` shared cases.
 
 ## Execution Plan
 
@@ -54,41 +54,41 @@ Run them with `effigy svelte:preview` and `effigy react:preview`.
 
 ### Review bundle
 
-- [ ] Open the three exact routes in both web previews.
-- [ ] Confirm the page fixtures expose every usability state, coverage-window
+- [x] Open the three exact routes in both web previews.
+- [x] Confirm the page fixtures expose every usability state, coverage-window
       combination, trust basis, both activation models, the account/offline
       switch, external and host-owned embedded account content,
       pending/disabled posture, labelled/unnamed seat shape, and empty seat
       authority.
-- [ ] Capture matching review images when the operator cannot inspect both
+- [x] Capture matching review images when the operator cannot inspect both
       previews live.
 
 ### Operator decision
 
-- [ ] Collect concrete feedback against the component contracts rather than a
+- [x] Collect concrete feedback against the component contracts rather than a
       replacement settings-screen design.
-- [ ] Change a contract first when feedback alters observable semantics, copy,
+- [x] Change a contract first when feedback alters observable semantics, copy,
       events, accessibility, or layout intent.
-- [ ] Keep application enforcement, Longhorn behaviour, and `LicenceCentre`
+- [x] Keep application enforcement, Longhorn behaviour, and `LicenceCentre`
       outside the review.
 
 ### Bounded refinement
 
-- [ ] Update shared core derivation/CSS first, then keep Svelte and React shells
+- [x] Update shared core derivation/CSS first, then keep Svelte and React shells
       structurally aligned.
-- [ ] Update both specimen pages and focused tests for every accepted change.
-- [ ] Regenerate only the existing web reports owned by the touched surface.
+- [x] Update both specimen pages and focused tests for every accepted change.
+- [x] Regenerate only the existing web reports owned by the touched surface.
 
 ## Acceptance Criteria
 
-- [ ] The operator can inspect all three components without Rust or Jetstream
+- [x] The operator can inspect all three components without Rust or Jetstream
       workspace setup.
-- [ ] Svelte and React show the same review cases and interaction affordances.
-- [ ] Feedback has an explicit disposition; no unresolved visual or semantic
+- [x] Svelte and React show the same review cases and interaction affordances.
+- [x] Feedback has an explicit disposition; no unresolved visual or semantic
       question is silently handed to native implementation.
-- [ ] Accepted changes pass focused component/parity/package checks and
+- [x] Accepted changes pass focused component/parity/package checks and
       `git diff --check`.
-- [ ] The completion record states whether the landed g14.015 reference was
+- [x] The completion record states whether the landed g14.015 reference was
       approved unchanged or names the refinement commit.
 
 ## Stop Conditions
@@ -107,3 +107,9 @@ so the operator can inspect each change in the collaborative preview. If no
 code changes are required, record approval and close without a PR. If changes
 are required, keep them in one review batch with exact captures and focused
 validation; do not dispatch a separate worker.
+
+## Completion Record
+
+The operator approved the refined Svelte and React reference after the bounded
+review batch landed through commits `d5f2bba1` and `5180ac16`. g14.017 owns the
+remaining shared-case, Rust, and GPUI work.

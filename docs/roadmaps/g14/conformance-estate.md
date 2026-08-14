@@ -176,11 +176,28 @@ Poodle's structural field mirrors and Longhorn's generated field maps remains
 Longhorn-owned; g14.015 exports the Poodle side but cannot claim that gate.
 Jetstream is program-deferred rather than a per-component known delta.
 
+## Staged Model-Connection Intake
+
+The model-connection suite enters through the same bounded web-reference
+posture. Poodle owns presentation and interaction only; Nucleus and Swallowtail
+remain external authorities.
+
+| Component | Web reference | Review | Native/shared cases | Completion state |
+| --- | --- | --- | --- | --- |
+| `ModelConnectionPicker` | g14.018 | g14.019 | g14.020 after adopt | incomplete |
+| `ModelConnectionSetup` | g14.018 | g14.019 | g14.020 after adopt | incomplete |
+| `ModelConnectionCard` | g14.018 | g14.019 | g14.020 after adopt | incomplete |
+| `ModelCatalogueEditor` | g14.018 | g14.019 | g14.020 after adopt | incomplete |
+
+The existing `ModelPicker` stays the per-thread model/options control. No
+provider registry, route fallback, credential authority, provider schema, or
+model-default policy enters this intake. Jetstream remains program-deferred.
+
 ## Cleanup Rule
 
 Every active claim ends with one canonical gate. A legacy gate may stay while
 coverage migrates, but it needs an owner and retirement condition. Generated
 artifacts stay out of hand-edited source roots where possible (the poodle-specs
 `generated/` module is generated and gated byte-exact). Known generated-source
-and god-file health findings are owned by g14.018 rather than normalized as
+and god-file health findings are owned by g14.021 rather than normalized as
 permanent warnings.

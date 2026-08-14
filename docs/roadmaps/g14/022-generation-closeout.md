@@ -1,7 +1,7 @@
-# g14.019 — Generation Closeout
+# g14.022 — Generation Closeout
 
-Status: blocked pending `g14.018`
-Depends on: `g14.018`
+Status: blocked pending `g14.021`
+Depends on: `g14.021`
 
 ## Outcome
 

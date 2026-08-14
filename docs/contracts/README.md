@@ -152,6 +152,10 @@ contract references the rule rather than restating it:
 - `components/meter.md`
 - `components/metric-tile.md`
 - `components/mod-matrix-grid.md`
+- `components/model-catalogue-editor.md`
+- `components/model-connection-card.md`
+- `components/model-connection-picker.md`
+- `components/model-connection-setup.md`
 - `components/model-picker.md`
 - `components/nav-card.md`
 - `components/navigation-menu.md`

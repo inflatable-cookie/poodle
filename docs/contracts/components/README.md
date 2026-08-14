@@ -111,6 +111,10 @@ primitives and layout surfaces through higher-order application components.
 - `fader.md`
 - `gain-reduction-meter.md`
 - `metric-tile.md`
+- `model-catalogue-editor.md`
+- `model-connection-card.md`
+- `model-connection-picker.md`
+- `model-connection-setup.md`
 - `model-picker.md`
 - `mod-matrix-grid.md`
 - `nav-card.md`

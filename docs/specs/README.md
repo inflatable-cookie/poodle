@@ -40,6 +40,8 @@ Important current cross-cutting references include:
   contract; its one-authored-structure requirement moves to `066`
 - `066-executable-component-conformance.md` — provisional g14 contract for
   portable interfaces, shared cases/specimens, observations, and completion
+- `067-model-connection-management.md` — shaping contract for reusable model
+  route setup, configured connection rows, and model catalogue curation
 
 Specs are normative constraints, not task queues. Current execution status
 belongs in the roadmap.
