@@ -42,8 +42,9 @@ describe("packed @inflatable-cookie/poodle-svelte", () => {
     });
     const activation = render(LicenceActivation, {
       props: {
+        mode: "key",
         keyFormat: licenceKeyFormat,
-        accountTokenProvider: { acquire: async () => null },
+        machineLabel: "Studio Mac",
       },
     });
     const seatList = render(LicenceSeats, { props: { seats } });

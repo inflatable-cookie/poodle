@@ -96,6 +96,14 @@
   color: var(--poodle-color-text-primary);
 }
 
+.poodle-licence-activation__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--poodle-space-inline-md);
+  margin-block-end: var(--poodle-space-stack-sm);
+}
+
 .poodle-licence-activation__title {
   margin: 0;
   font-family: var(--poodle-typography-heading-family);
@@ -104,19 +112,16 @@
   line-height: var(--poodle-typography-body-lineHeight);
 }
 
-/* Three equal columns where there is room; one column per row where there is
-   not. Equal prominence survives the narrow case — a route must never become
-   the one you have to go looking for. */
-.poodle-licence-activation__routes .poodle-tabs__list {
-  display: grid;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(var(--poodle-recipe-licence-activation-route-min, 8rem), 1fr)
-  );
-  gap: var(--poodle-space-inline-xs);
+.poodle-licence-activation__route-switch {
+  --poodle-button-text: var(--poodle-color-text-secondary);
 }
 
 .poodle-licence-activation__route {
+  display: grid;
+  gap: var(--poodle-space-stack-sm);
+}
+
+.poodle-licence-activation__account-content {
   display: grid;
   gap: var(--poodle-space-stack-sm);
 }
@@ -128,17 +133,26 @@
   line-height: var(--poodle-typography-label-lineHeight);
 }
 
-/* The label and the submit sit outside the route panels: they belong to the
-   activation, not to whichever route is on screen. */
-.poodle-licence-activation__shared {
-  display: grid;
-  gap: var(--poodle-space-stack-sm);
+.poodle-licence-activation__machine {
+  display: flex;
+  align-items: center;
+  gap: var(--poodle-space-inline-sm);
+  min-width: 0;
+  margin-right: auto;
+}
+
+.poodle-licence-activation__machine-name {
+  color: var(--poodle-color-text-secondary);
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
 }
 
 .poodle-licence-activation__actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: var(--poodle-space-inline-sm);
+  margin-block-start: var(--poodle-space-stack-sm);
 }
 
 /* ── LicenceSeats ──────────────────────────────────────────────────────── */

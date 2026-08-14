@@ -212,18 +212,12 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
     usable: true,
     attention: "none",
   },
-  // Both host behaviours are required props. Stubs, because the sweeps mount
-  // and inspect anatomy — the real parser and account flow belong to the host,
-  // and Poodle must work against any pair that satisfies the interface.
+  // Account activation is one of two host-selected product modes. Its provider
+  // is a stub because the sweep inspects anatomy rather than leaving the page.
   LicenceActivation: {
-    keyFormat: {
-      parse: (input: string) =>
-        input.length >= 20
-          ? { ok: true, key: input, grouped: input }
-          : { ok: false, problem: { kind: "tooShort", minimum: 20, actual: input.length } },
-      isProbablyATypo: (problem: { kind: string }) => problem.kind !== "tooShort",
-    },
+    mode: "account",
     accountTokenProvider: { acquire: async () => null },
+    machineLabel: "Studio Mac",
   },
   // Empty seats renders nothing by contract, so the sweep needs real rows: this
   // machine (marker, no action) plus a named and an unnamed releasable seat.

@@ -231,6 +231,7 @@ export {
   codeSelectionRange,
   codeSlotSelection,
   codeInsertReplacement,
+  codeGroupEndIndices,
 } from "./code-input";
 
 export {
@@ -423,7 +424,6 @@ export {
   LICENCE_MIRROR_FIELDS,
   LICENCE_MIRROR_VARIANT_FIELDS,
   LICENCE_RELEASE_CONFIRM_TITLE,
-  LICENCE_ROUTES,
   LICENCE_THIS_MACHINE,
   LICENCE_UNNAMED_MACHINE,
   licenceFileContentsBase64,
@@ -435,14 +435,15 @@ export {
   licenceTimestampMilliseconds,
   resolveLicenceSubmit,
   type LicenceAccountTokenProvider,
+  type LicenceActivationMode,
   type LicenceActivationRoute,
   type LicenceAttention,
   type LicenceCoverageRow,
   type LicenceCredential,
+  type LicenceKeyCodeInputOptions,
   type LicenceKeyFormat,
   type LicenceKeyProblem,
   type LicenceKeyResult,
-  type LicenceRouteDescriptor,
   type LicenceSeat,
   type LicenceSeatRow,
   type LicenceStatusIndicator,

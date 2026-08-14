@@ -140,6 +140,7 @@
     <header class="poodle-app-top-bar">
       <div class="poodle-app-top-bar__title">
         <strong>Poodle</strong>
+        <span class="poodle-app-top-bar__framework">Svelte</span>
       </div>
       <Tabs
         value={activeSection}
@@ -209,6 +210,19 @@
     font-weight: 700;
     color: var(--poodle-color-text-primary);
     white-space: nowrap;
+  }
+
+  .poodle-app-top-bar__title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+
+  .poodle-app-top-bar__framework {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--poodle-color-text-secondary);
   }
 
   .poodle-app-top-bar__pills {

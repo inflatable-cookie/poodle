@@ -3,6 +3,7 @@ import { tick } from "svelte";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import LicenceActivation from "../src/LicenceActivation.svelte";
+import LicenceActivationAccountHarness from "./LicenceActivationAccountHarness.svelte";
 import type { LicenceKeyFormat, LicenceKeyProblem } from "@inflatable-cookie/poodle-core";
 
 const VALID_KEY = "abcde-fghij-klmno-pqrst";
@@ -73,11 +74,24 @@ function keyFormat(overrides: Partial<LicenceKeyFormat> = {}): LicenceKeyFormat 
   };
 }
 
-function mount(props: Record<string, unknown> = {}) {
+function mountKey(props: Record<string, unknown> = {}) {
   const onActivate = vi.fn();
   const view = render(LicenceActivation, {
     props: {
+      mode: "key",
       keyFormat: keyFormat(),
+      onActivate,
+      ...props,
+    } as never,
+  });
+  return { ...view, onActivate };
+}
+
+function mountAccount(props: Record<string, unknown> = {}) {
+  const onActivate = vi.fn();
+  const view = render(LicenceActivation, {
+    props: {
+      mode: "account",
       accountTokenProvider: { acquire: async () => null },
       onActivate,
       ...props,
@@ -96,8 +110,8 @@ async function submit(container: HTMLElement): Promise<void> {
   await tick();
 }
 
-async function chooseRoute(name: RegExp | string): Promise<void> {
-  await fireEvent.click(screen.getByRole("tab", { name }));
+async function chooseAccountRoute(name: "Activate offline" | "Use account activation"): Promise<void> {
+  await fireEvent.click(screen.getByRole("button", { name }));
   await tick();
 }
 
@@ -108,31 +122,63 @@ async function typeKey(container: HTMLElement, value: string): Promise<void> {
 }
 
 describe("LicenceActivation (svelte)", () => {
-  it("presents all three routes as equally visible, reachable tabs", () => {
-    mount();
-    const tabs = screen.getAllByRole("tab");
-    expect(tabs.map((tab) => tab.textContent?.trim())).toEqual(["Key", "Account", "Licence file"]);
-    for (const tab of tabs) {
-      expect(tab.hasAttribute("disabled")).toBe(false);
-      expect(tab.getAttribute("tabindex")).not.toBe(null);
-    }
+  it("keeps key activation separate from account activation with its offline fallback", () => {
+    const key = mountKey();
+    expect(key.getByText("Licence key")).toBeTruthy();
+    expect(key.queryByRole("button", { name: "Activate offline" })).toBeNull();
+    key.unmount();
+
+    const account = mountAccount();
+    expect(account.getByRole("button", { name: "Continue with account" })).toBeTruthy();
+    const offline = account.getByRole("button", { name: "Activate offline" });
+    expect(offline.closest(".poodle-licence-activation__header")).toBeTruthy();
+    expect(offline.classList.contains("poodle-button")).toBe(true);
+    expect(offline.classList.contains("poodle-text-link")).toBe(false);
+    expect(offline.getAttribute("data-variant")).toBe("ghost");
+    expect(offline.getAttribute("data-size")).toBe("xs");
+    expect(offline.querySelector("svg.poodle-icon")).toBeTruthy();
+    expect(account.queryByText("Licence key")).toBeNull();
+    expect(account.queryAllByRole("tab")).toHaveLength(0);
   });
 
-  it("renders no account-token input on any route", async () => {
-    const { container } = mount();
-    await chooseRoute("Account");
+  it("opts into grouped CodeInput key entry without changing the default field", async () => {
+    const plain = mountKey();
+    expect(plain.container.querySelector(".poodle-code-input")).toBeNull();
+    plain.unmount();
+
+    const { container, onActivate } = mountKey({
+      keyCodeInput: { length: 20, groups: [5, 5, 5, 5] },
+    });
+    const slots = [...container.querySelectorAll(".poodle-code-input__slot")];
+    expect(slots).toHaveLength(20);
+    expect(
+      slots
+        .map((slot, index) =>
+          slot.classList.contains("poodle-code-input__slot--group-end") ? index : null,
+        )
+        .filter((index) => index !== null),
+    ).toEqual([4, 9, 14]);
+
+    await typeKey(container, "abcdefghijklmnopqrst");
+    await submit(container);
+    expect(onActivate).toHaveBeenCalledWith({
+      credential: { kind: "key", key: "abcdefghijklmnopqrst" },
+      label: null,
+    });
+  });
+
+  it("renders neither an account-token input nor machine naming by default", () => {
+    const { container } = mountAccount();
     const inputs = [...container.querySelectorAll("input")].filter(
       (input) => input.type !== "file",
     );
-    // The key route is no longer mounted, so only the shared machine label
-    // remains. Nothing anywhere asks the customer to paste a token.
-    expect(inputs).toHaveLength(1);
-    expect(inputs[0].id).toMatch(/-label$/);
+    expect(inputs).toHaveLength(0);
+    expect(screen.queryByRole("button", { name: "Edit machine name" })).toBeNull();
     expect(container.textContent).not.toMatch(/paste|token/i);
   });
 
   it("emits a valid key exactly once, exactly as typed", async () => {
-    const { container, onActivate } = mount();
+    const { container, onActivate } = mountKey();
     await typeKey(container, VALID_KEY);
     await submit(container);
     expect(onActivate).toHaveBeenCalledTimes(1);
@@ -153,14 +199,14 @@ describe("LicenceActivation (svelte)", () => {
       isProbablyATypo: recording.isProbablyATypo,
     };
     const raw = " abcde-fghij klmno-pqrsI lO ";
-    const { container } = mount({ keyFormat: spy });
+    const { container } = mountKey({ keyFormat: spy });
     await typeKey(container, raw);
     await submit(container);
     expect(seen).toEqual([raw]);
   });
 
   it("renders typo copy for a check failure and emits nothing", async () => {
-    const { container, onActivate } = mount();
+    const { container, onActivate } = mountKey();
     await typeKey(container, "abcde-fghij-klmno-pqrsX");
     await submit(container);
     expect(screen.getByText("Check the key for a typing mistake.")).toBeTruthy();
@@ -169,7 +215,7 @@ describe("LicenceActivation (svelte)", () => {
   });
 
   it("renders typo copy for an unexpected symbol and emits nothing", async () => {
-    const { container, onActivate } = mount();
+    const { container, onActivate } = mountKey();
     await typeKey(container, "abcde-fghij-klmno-pqr$t");
     await submit(container);
     expect(screen.getByText("Check the key for a typing mistake.")).toBeTruthy();
@@ -177,7 +223,7 @@ describe("LicenceActivation (svelte)", () => {
   });
 
   it("renders distinct copy for a too-short key and emits nothing", async () => {
-    const { container, onActivate } = mount();
+    const { container, onActivate } = mountKey();
     await typeKey(container, "abc");
     await submit(container);
     expect(screen.getByText("This key is too short.")).toBeTruthy();
@@ -186,7 +232,7 @@ describe("LicenceActivation (svelte)", () => {
   });
 
   it("does not round-trip a rejected key back into the field", async () => {
-    const { container } = mount();
+    const { container } = mountKey();
     await typeKey(container, "abc");
     await submit(container);
     const input = container.querySelector('input[id$="-key"]') as HTMLInputElement;
@@ -196,10 +242,8 @@ describe("LicenceActivation (svelte)", () => {
 
   it("invokes the injected account provider and emits its token", async () => {
     const acquire = vi.fn(async () => "tok_live");
-    const { container, onActivate } = mount({ accountTokenProvider: { acquire } });
-    await chooseRoute("Account");
-    expect(screen.queryByRole("button", { name: "Continue with account" })).toBeNull();
-    await fireEvent.click(screen.getByRole("button", { name: "Activate" }));
+    const { container, onActivate } = mountAccount({ accountTokenProvider: { acquire } });
+    await fireEvent.click(screen.getByRole("button", { name: "Continue with account" }));
     await tick();
     await tick();
     expect(acquire).toHaveBeenCalledTimes(1);
@@ -211,19 +255,40 @@ describe("LicenceActivation (svelte)", () => {
     expect(container.innerHTML).not.toContain("tok_live");
   });
 
+  it("submits host-owned account fields through the injected provider", async () => {
+    const acquire = vi.fn(async (email: string) => `token-for:${email}`);
+    const onActivate = vi.fn();
+    const { container } = render(LicenceActivationAccountHarness, {
+      props: { acquire, onActivate },
+    });
+
+    await fireEvent.input(screen.getByLabelText("Account email"), {
+      target: { value: "studio@example.com" },
+    });
+    await fireEvent.click(screen.getByRole("button", { name: "Activate" }));
+    await tick();
+    await tick();
+
+    expect(acquire).toHaveBeenCalledWith("studio@example.com");
+    expect(onActivate).toHaveBeenCalledWith({
+      credential: { kind: "accountToken", token: "token-for:studio@example.com" },
+      label: null,
+    });
+    expect(container.querySelectorAll("form")).toHaveLength(1);
+  });
+
   it("freezes an account acquisition and emits the label captured at submit", async () => {
     const acquisition = deferred<string | null>();
-    const { container, onActivate } = mount({
+    const { container, onActivate } = mountAccount({
       accountTokenProvider: { acquire: () => acquisition.promise },
+      machineLabel: "Studio Mac",
     });
-    await chooseRoute("Account");
-    const label = container.querySelector('input[id$="-label"]') as HTMLInputElement;
-    await fireEvent.input(label, { target: { value: "Studio Mac" } });
+    const label = screen.getByRole("button", { name: "Edit machine name" });
     await fireEvent.submit(form(container));
     await tick();
 
     expect(form(container).getAttribute("aria-busy")).toBe("true");
-    expect(screen.getAllByRole("tab").every((tab) => tab.hasAttribute("disabled"))).toBe(true);
+    expect(screen.getByRole("button", { name: "Activate offline" }).hasAttribute("disabled")).toBe(true);
     expect(label.hasAttribute("disabled")).toBe(true);
 
     acquisition.resolve("tok_deferred");
@@ -236,24 +301,22 @@ describe("LicenceActivation (svelte)", () => {
   });
 
   it("treats a cancelled account flow as quiet", async () => {
-    const { container, onActivate } = mount({
+    const { container, onActivate } = mountAccount({
       accountTokenProvider: { acquire: async () => null },
     });
-    await chooseRoute("Account");
     await submit(container);
     expect(onActivate).not.toHaveBeenCalled();
     expect(container.querySelector('[role="status"]')).toBeNull();
   });
 
   it("reports a failed account flow politely, without credential detail", async () => {
-    const { container, onActivate } = mount({
+    const { container, onActivate } = mountAccount({
       accountTokenProvider: {
         acquire: async () => {
           throw new Error("tok_secret leaked in the message");
         },
       },
     });
-    await chooseRoute("Account");
     await submit(container);
     const message = container.querySelector('[role="status"]') as HTMLElement;
     expect(message.textContent).toBe("Account activation could not be completed.");
@@ -262,8 +325,8 @@ describe("LicenceActivation (svelte)", () => {
   });
 
   it("emits file bytes as base64 with no data-URL prefix", async () => {
-    const { container, onActivate } = mount({ fileAccept: ".licence" });
-    await chooseRoute("Licence file");
+    const { container, onActivate } = mountAccount({ fileAccept: ".licence" });
+    await chooseAccountRoute("Activate offline");
     const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(["ABC"], "studio.licence", { type: "application/octet-stream" });
     Object.defineProperty(input, "files", { value: [file], configurable: true });
@@ -287,8 +350,8 @@ describe("LicenceActivation (svelte)", () => {
   });
 
   it("asks for a file rather than emitting an empty licence-file route", async () => {
-    const { container, onActivate } = mount();
-    await chooseRoute("Licence file");
+    const { container, onActivate } = mountAccount();
+    await chooseAccountRoute("Activate offline");
     await submit(container);
     expect(screen.getByRole("status").textContent).toBe("Choose a licence file to continue.");
     const input = container.querySelector('input[type="file"]') as HTMLInputElement;
@@ -303,8 +366,8 @@ describe("LicenceActivation (svelte)", () => {
   });
 
   it("clears completed file bytes when the file route is left", async () => {
-    const { container, onActivate } = mount();
-    await chooseRoute("Licence file");
+    const { container, onActivate } = mountAccount();
+    await chooseAccountRoute("Activate offline");
     const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(["ABC"], "studio.licence", { type: "application/octet-stream" });
     Object.defineProperty(input, "files", { value: [file], configurable: true });
@@ -315,8 +378,8 @@ describe("LicenceActivation (svelte)", () => {
     });
     onActivate.mockClear();
 
-    await chooseRoute("Key");
-    await chooseRoute("Licence file");
+    await chooseAccountRoute("Use account activation");
+    await chooseAccountRoute("Activate offline");
     await submit(container);
     expect(screen.getByRole("status").textContent).toBe("Choose a licence file to continue.");
     expect(onActivate).not.toHaveBeenCalled();
@@ -324,8 +387,8 @@ describe("LicenceActivation (svelte)", () => {
 
   it("ignores a file read that completes after the file is removed", async () => {
     vi.stubGlobal("FileReader", DeferredFileReader as unknown as typeof FileReader);
-    const { container, onActivate } = mount();
-    await chooseRoute("Licence file");
+    const { container, onActivate } = mountAccount();
+    await chooseAccountRoute("Activate offline");
     const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(["ABC"], "studio.licence", { type: "application/octet-stream" });
     Object.defineProperty(input, "files", { value: [file], configurable: true });
@@ -343,8 +406,8 @@ describe("LicenceActivation (svelte)", () => {
 
   it("clears a premature file-required message when the selected read completes", async () => {
     vi.stubGlobal("FileReader", DeferredFileReader as unknown as typeof FileReader);
-    const { container, onActivate } = mount();
-    await chooseRoute("Licence file");
+    const { container, onActivate } = mountAccount();
+    await chooseAccountRoute("Activate offline");
     const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(["ABC"], "studio.licence", { type: "application/octet-stream" });
     Object.defineProperty(input, "files", { value: [file], configurable: true });
@@ -364,49 +427,67 @@ describe("LicenceActivation (svelte)", () => {
     });
   });
 
-  it("carries the trimmed machine label, and null when it is blank", async () => {
-    const { container, onActivate } = mount();
-    const label = container.querySelector('input[id$="-label"]') as HTMLInputElement;
-    await fireEvent.input(label, { target: { value: "   " } });
+  it("shows an empty opted-in machine label as placeholder, never as a value", async () => {
+    const { container, onActivate } = mountKey({ machineLabel: null });
+    const display = screen.getByRole("button", { name: "Edit machine name" });
+    const actions = display.closest(".poodle-licence-activation__actions");
+    expect(actions?.querySelector('button[type="submit"]')).toBeTruthy();
+    expect(display.textContent).toContain("unnamed machine");
+    expect(display.classList.contains("poodle-editable-label__display--empty")).toBe(true);
+
+    await fireEvent.click(display);
+    await tick();
+    const label = container.querySelector(".poodle-editable-label__input") as HTMLInputElement;
+    expect(label.value).toBe("");
+    expect(label.placeholder).toBe("unnamed machine");
+
     await typeKey(container, VALID_KEY);
     await submit(container);
     expect(onActivate).toHaveBeenLastCalledWith({
       credential: { kind: "key", key: VALID_KEY },
       label: null,
     });
+  });
 
-    await fireEvent.input(label, { target: { value: "  Studio Mac  " } });
+  it("carries the trimmed committed machine label", async () => {
+    const { container, onActivate } = mountKey({ machineLabel: "Studio Mac" });
+    await fireEvent.click(screen.getByRole("button", { name: "Edit machine name" }));
+    await tick();
+    const label = container.querySelector(".poodle-editable-label__input") as HTMLInputElement;
+    await fireEvent.input(label, { target: { value: "  Tour laptop  " } });
+    expect(await fireEvent.keyDown(label, { key: "Enter" })).toBe(false);
+    await tick();
+    expect(onActivate).not.toHaveBeenCalled();
+    await typeKey(container, VALID_KEY);
     await submit(container);
     expect(onActivate).toHaveBeenLastCalledWith({
       credential: { kind: "key", key: VALID_KEY },
-      label: "Studio Mac",
+      label: "Tour laptop",
     });
   });
 
-  it("blocks a duplicate submit while pending without hiding a route", async () => {
-    const { container, onActivate } = mount({ pending: true });
+  it("blocks a duplicate submit while pending", async () => {
+    const { container, onActivate } = mountKey({ pending: true });
     expect(form(container).getAttribute("aria-busy")).toBe("true");
     expect(screen.getByRole("button", { name: "Activate" }).hasAttribute("disabled")).toBe(true);
-    expect(screen.getAllByRole("tab")).toHaveLength(3);
     await typeKey(container, VALID_KEY);
     await submit(container);
     expect(onActivate).not.toHaveBeenCalled();
   });
 
-  it("disables every route and field when disabled, and still shows all three", () => {
-    const { container } = mount({ disabled: true });
-    const tabs = screen.getAllByRole("tab");
-    expect(tabs).toHaveLength(3);
-    expect(tabs.every((tab) => tab.hasAttribute("disabled"))).toBe(true);
+  it("disables the account route switch, submit, account fields, and machine edit", () => {
+    const { container } = mountAccount({ disabled: true, machineLabel: "Studio Mac" });
     for (const input of container.querySelectorAll("input")) {
       expect(input.hasAttribute("disabled")).toBe(true);
     }
-    expect(screen.getByRole("button", { name: "Activate" }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: "Edit machine name" }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: "Activate offline" }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: "Continue with account" }).hasAttribute("disabled")).toBe(true);
   });
 
   it("moves focus to the route's own first field when a route activates", async () => {
-    const { container } = mount();
-    await chooseRoute("Licence file");
+    const { container } = mountAccount();
+    await chooseAccountRoute("Activate offline");
     await vi.waitFor(() => {
       const panel = container.querySelector(".poodle-licence-activation__route") as HTMLElement;
       expect(panel.contains(document.activeElement)).toBe(true);
@@ -414,7 +495,7 @@ describe("LicenceActivation (svelte)", () => {
   });
 
   it("focuses the key field when its submit is rejected", async () => {
-    const { container } = mount();
+    const { container } = mountKey();
     await typeKey(container, "abc");
     await submit(container);
     await vi.waitFor(() => {

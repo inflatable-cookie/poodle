@@ -8,6 +8,7 @@ import {
 } from "react";
 import {
   clampCodePosition,
+  codeGroupEndIndices,
   codeInsertReplacement,
   codeSelectionRange,
   codeSlotSelection,
@@ -30,6 +31,7 @@ export interface CodeInputProps {
   error?: string | null;
   disabled?: boolean;
   length?: number;
+  groups?: readonly number[] | null;
   mask?: boolean;
   numbersOnly?: boolean;
   ariaLabel?: string | null;
@@ -52,6 +54,7 @@ export function CodeInput({
   error = null,
   disabled = false,
   length = 6,
+  groups = null,
   mask = false,
   numbersOnly = true,
   ariaLabel = null,
@@ -81,6 +84,7 @@ export function CodeInput({
   const currentValueRef = useRef(currentValue);
   currentValueRef.current = currentValue;
   const digits = Array.from({ length }, (_, index) => currentValue[index] ?? "");
+  const groupEndIndices = codeGroupEndIndices(length, groups);
   const effectiveValidationState = error ? "invalid" : validationState;
   const activeCaretIndex = Math.min(caretIndex, Math.max(length - 1, 0));
 
@@ -261,7 +265,7 @@ export function CodeInput({
                   "poodle-code-input__slot",
                   hasFocus && index === activeCaretIndex ? "poodle-code-input__slot--active" : "",
                   digit.length > 0 ? "poodle-code-input__slot--filled" : "",
-                  length === 6 && index === 2 ? "poodle-code-input__slot--split-after" : "",
+                  groupEndIndices.includes(index) ? "poodle-code-input__slot--group-end" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}

@@ -79,6 +79,16 @@ export interface LicenceKeyFormat {
 }
 
 /**
+ * Opt-in segmented licence-key entry. Omit it to preserve free-form TextInput
+ * entry. Group lengths are visual and must form one complete partition of
+ * `length`.
+ */
+export interface LicenceKeyCodeInputOptions {
+  length: number;
+  groups?: readonly number[] | null;
+}
+
+/**
  * The host's account flow. It owns the browser or login journey and returns the
  * resulting token; `null` is a cancellation. Poodle never renders a token field.
  */
@@ -319,23 +329,11 @@ function trustRow(basis: LicenceTrustBasis): LicenceTrustRow {
 
 // ── LicenceActivation resolution ─────────────────────────────────────────
 
+/** The activation product model selected by the host application. */
+export type LicenceActivationMode = "key" | "account";
+
+/** The credential route currently being submitted. */
 export type LicenceActivationRoute = "key" | "accountToken" | "licenceFile";
-
-export interface LicenceRouteDescriptor {
-  value: LicenceActivationRoute;
-  label: string;
-}
-
-/**
- * The three routes, in one order, as equal peers. Both renderers build their
- * tab strip from this so neither can quietly promote one route or bury another
- * behind an "advanced" disclosure.
- */
-export const LICENCE_ROUTES: readonly LicenceRouteDescriptor[] = [
-  { value: "key", label: "Key" },
-  { value: "accountToken", label: "Account" },
-  { value: "licenceFile", label: "Licence file" },
-];
 
 /** A mistyped key. Never `invalid`, `fake`, or `not recognised`. */
 export const LICENCE_KEY_TYPO_MESSAGE = "Check the key for a typing mistake.";
@@ -411,12 +409,15 @@ export type LicenceSubmitResolution =
  */
 export function resolveLicenceSubmit(
   draft: LicenceSubmitDraft,
-  keyFormat: LicenceKeyFormat,
+  keyFormat: LicenceKeyFormat | null,
 ): LicenceSubmitResolution {
   const label = licenceMachineLabel(draft.label);
 
   switch (draft.route) {
     case "key": {
+      if (keyFormat === null) {
+        throw new Error("A key-format adapter is required for key activation.");
+      }
       const result = keyFormat.parse(draft.key);
       if (!result.ok) {
         return { outcome: "reject", message: licenceKeyProblemMessage(result.problem, keyFormat) };

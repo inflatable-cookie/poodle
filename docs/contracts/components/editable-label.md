@@ -127,7 +127,7 @@ now state-guarded, so a blur after Escape cannot double-emit.
 | `Space` in view mode | enters edit mode (when `activationMode` is `"enterOrSpace"`) |
 | double-click in view mode | enters edit mode (when `activationMode` is `"doubleClick"`) |
 | text-input keys in edit mode | standard single-line text editing |
-| `Enter` in edit mode | commits edit |
+| `Enter` in edit mode | commits edit and prevents an ancestor form submit |
 | `Escape` in edit mode | cancels edit, restores original value |
 | `Tab` in edit mode | commits edit (blur-triggered commit) |
 

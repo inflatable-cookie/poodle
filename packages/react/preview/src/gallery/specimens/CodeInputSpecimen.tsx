@@ -10,12 +10,13 @@ export function CodeInputSpecimen() {
   return (
     <SpecimenLayout
       sizes={(size) => (
-        <CodeInput id={`size-${size}`} size={size} label={`Code at ${size}`} ariaLabel={`Code at ${size}`} />
+        <CodeInput id={`size-${size}`} size={size} groups={[3, 3]} label={`Code at ${size}`} ariaLabel={`Code at ${size}`} />
       )}
       densities={(density) => (
         <CodeInput
           id={`density-${density}`}
           density={density}
+          groups={[3, 3]}
           label={`Code at ${density}`}
           ariaLabel={`Code at ${density}`}
         />
@@ -27,6 +28,7 @@ export function CodeInputSpecimen() {
           value={code}
           label="Verification code"
           hint="Enter the 6-digit code from your authenticator app."
+          groups={[3, 3]}
           onValueChange={(value) => {
             setCode(value);
             setCompleted(false);
@@ -43,7 +45,19 @@ export function CodeInputSpecimen() {
       </SpecimenGroup>
 
       <SpecimenGroup label="Masked">
-        <CodeInput id="code-masked" label="PIN code" hint="Digits are hidden for security." mask />
+        <CodeInput id="code-masked" label="PIN code" hint="Digits are hidden for security." length={4} mask />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Multiple groups">
+        <CodeInput
+          id="code-grouped"
+          label="Grouped recovery key"
+          defaultValue="AB12CD34"
+          length={12}
+          groups={[4, 4, 4]}
+          numbersOnly={false}
+          autoComplete="off"
+        />
       </SpecimenGroup>
 
       <SpecimenGroup label="Alphanumeric">
@@ -64,6 +78,7 @@ export function CodeInputSpecimen() {
           value="12"
           label="Email code"
           error="That verification code is invalid."
+          groups={[3, 3]}
         />
       </SpecimenGroup>
 

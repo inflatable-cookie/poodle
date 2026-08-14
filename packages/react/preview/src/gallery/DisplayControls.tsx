@@ -1,5 +1,12 @@
-import { Eyebrow, Slider, TextInput, ToggleGroup, type ToggleGroupOption } from "@inflatable-cookie/poodle-react";
-import { themes, densityModes, controlSizes } from "@inflatable-cookie/poodle-core/tokens";
+import {
+  Eyebrow,
+  Slider,
+  TextInput,
+  ThemeSelect,
+  ToggleGroup,
+  type ToggleGroupOption,
+} from "@inflatable-cookie/poodle-react";
+import { themeOptions, densityModes, controlSizes } from "@inflatable-cookie/poodle-core/tokens";
 import { previewShell } from "../generated/preview-shell";
 
 export interface DisplayControlsProps {
@@ -35,10 +42,9 @@ const densityControl = previewShell.controls.find((control): control is NamedCon
 const contrastControl = previewShell.controls.find((control): control is RangeControl => (control.kind as string) === "contrast");
 const searchControl = previewShell.controls.find((control): control is SearchControl => (control.kind as string) === "search");
 
-const themeOptions: ToggleGroupOption[] = themeControl
-  ? Object.keys(themes)
-      .filter((name) => (themeControl.values as readonly string[]).includes(name))
-      .map((name) => ({ value: name, label: name }))
+const themeCatalogue = themeOptions();
+const themeList = themeControl
+  ? themeCatalogue.filter((option) => (themeControl.values as readonly string[]).includes(option.value))
   : [];
 const densityOptions: ToggleGroupOption[] = densityControl
   ? densityControl.values
@@ -68,11 +74,11 @@ export function DisplayControls({
       {themeControl && (
         <div className="poodle-display-controls__group">
           <Eyebrow>{themeControl.label}</Eyebrow>
-          <ToggleGroup
+          <ThemeSelect
             value={theme}
-            options={themeOptions}
+            themes={themeList}
             ariaLabel={themeControl.label}
-            onValueChange={(value) => onThemeChange(value as string)}
+            onChange={onThemeChange}
           />
         </div>
       )}

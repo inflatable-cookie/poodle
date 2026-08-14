@@ -5865,56 +5865,60 @@
   "licence-activation": {
     "props": [
       {
+        "name": "mode",
+        "type": "\"key\" | \"account\"",
+        "description": "Required. Selects the host application's activation product model."
+      },
+      {
         "name": "keyFormat",
         "type": "LicenceKeyFormat",
-        "description": "Required. Host-supplied key parser and typo predicate. Poodle never reimplements either."
+        "description": "Required in key mode; rejected in account mode. Host-supplied parser and typo predicate."
+      },
+      {
+        "name": "keyCodeInput",
+        "type": "LicenceKeyCodeInputOptions | null",
+        "default": "null",
+        "description": "Key mode only. Opts into fixed-length segmented entry; groups are positive lengths that partition the total length."
       },
       {
         "name": "accountTokenProvider",
         "type": "LicenceAccountTokenProvider",
-        "description": "Required. Host-supplied account flow returning a token, or null for a cancellation."
-      },
-      {
-        "name": "defaultRoute",
-        "type": "\"key\" | \"accountToken\" | \"licenceFile\"",
-        "default": "\"key\"",
-        "description": "Initial selection only. No route is styled primary."
+        "description": "Required in account mode; rejected in key mode. Host-supplied activation adapter; it does not imply a browser flow."
       },
       {
         "name": "pending",
         "type": "boolean",
         "default": "false",
-        "description": "Disables submission while the host command runs. Routes stay visible."
+        "description": "Disables submission while the host command runs."
       },
       {
         "name": "disabled",
         "type": "boolean",
         "default": "false",
-        "description": "Disables every field and route."
+        "description": "Disables every field and action."
       },
       {
         "name": "title",
         "type": "string",
         "default": "\"Activate licence\"",
-        "description": "Form heading and tablist name."
+        "description": "Form heading."
       },
       {
-        "name": "machineLabelLabel",
-        "type": "string",
-        "default": "\"Name this machine (optional)\"",
-        "description": "Label copy for the shared machine-label field."
+        "name": "machineLabel",
+        "type": "string | null",
+        "description": "Opt-in machine name. Supply a hostname to seed the inline editor, null for its unnamed-machine placeholder, or omit the prop entirely to hide it."
       },
       {
         "name": "activateLabel",
-        "type": "string",
-        "default": "\"Activate\"",
-        "description": "Submit button label."
+        "type": "string | null",
+        "default": "null",
+        "description": "Overrides the mode/view-specific submit label."
       },
       {
         "name": "fileAccept",
         "type": "string | null",
         "default": "null",
-        "description": "Narrows accepted file types on the licence-file route."
+        "description": "Account mode only. Narrows accepted offline licence files."
       },
       {
         "name": "size",
@@ -5929,7 +5933,12 @@
         "description": "Explicit density override."
       }
     ],
-    "slots": [],
+    "slots": [
+      {
+        "name": "accountContent",
+        "description": "Account-mode host content. Receives the disabled state and renders inside Poodle's form; omit it for an external account journey."
+      }
+    ],
     "events": [
       {
         "name": "onActivate",
@@ -5937,7 +5946,7 @@
         "description": "A valid route form was submitted; file bytes are already base64 without a data-URL prefix."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { LicenceActivation } from \"@inflatable-cookie/poodle-svelte\";\n  import { isProbablyATypo, parseLicenceKey } from \"the-host-authority\";\n</script>\n\n<LicenceActivation\n  keyFormat={{ parse: parseLicenceKey, isProbablyATypo }}\n  accountTokenProvider={{ acquire: startAccountFlow }}\n  pending={activating}\n  onActivate={({ credential, label }) => activate(credential, label)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { Field, LicenceActivation, TextInput } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<LicenceActivation\n  mode=\"account\"\n  accountTokenProvider={{ acquire: () => login(email, password) }}\n  activateLabel=\"Activate\"\n  machineLabel={hostname ?? null}\n  pending={activating}\n  onActivate={({ credential, label }) => activate(credential, label)}\n>\n  {#snippet accountContent(disabled)}\n    <Field id=\"licence-email\" label=\"Email address\">\n      <TextInput id=\"licence-email\" bind:value={email} {disabled} />\n    </Field>\n    <Field id=\"licence-password\" label=\"Password\">\n      <TextInput id=\"licence-password\" type=\"password\" bind:value={password} {disabled} />\n    </Field>\n  {/snippet}\n</LicenceActivation>"
   },
   "licence-seats": {
     "props": [
@@ -7973,10 +7982,22 @@
         "description": "Number of visible digit slots and max code length."
       },
       {
+        "name": "groups",
+        "type": "readonly number[] | null",
+        "default": "null",
+        "description": "Optional complete partition of length. Adds a visual gap after every group except the last without changing the value."
+      },
+      {
         "name": "mask",
         "type": "boolean",
         "default": "false",
         "description": "When true, display dots instead of digits in the visual slots."
+      },
+      {
+        "name": "numbersOnly",
+        "type": "boolean",
+        "default": "true",
+        "description": "When false, accepts arbitrary characters instead of filtering to digits."
       },
       {
         "name": "ariaLabel",
@@ -8029,7 +8050,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { CodeInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let code = \"\";\n</script>\n\n<CodeInput\n  id=\"verify-code\"\n  value={code}\n  label=\"Verification code\"\n  hint=\"Enter the 6-digit code from your authenticator app.\"\n  onValueChange={(value) => (code = value)}\n  onComplete={(value) => verify(value)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { CodeInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let code = \"\";\n</script>\n\n<CodeInput\n  id=\"verify-code\"\n  value={code}\n  label=\"Verification code\"\n  hint=\"Enter the 6-digit code from your authenticator app.\"\n  groups={[3, 3]}\n  onValueChange={(value) => (code = value)}\n  onComplete={(value) => verify(value)}\n/>"
   },
   "password-requirements": {
     "props": [

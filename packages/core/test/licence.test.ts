@@ -9,7 +9,6 @@ import {
   LICENCE_KEY_UNREADABLE_MESSAGE,
   LICENCE_MIRROR_FIELDS,
   LICENCE_MIRROR_VARIANT_FIELDS,
-  LICENCE_ROUTES,
   LICENCE_UNNAMED_MACHINE,
   licenceFileContentsBase64,
   licenceKeyProblemMessage,
@@ -315,13 +314,10 @@ describe("key problem copy", () => {
 });
 
 describe("resolveLicenceSubmit", () => {
-  test("routes stay three equal peers in one order", () => {
-    expect(LICENCE_ROUTES.map((route) => route.value)).toEqual([
-      "key",
-      "accountToken",
-      "licenceFile",
-    ]);
-    expect(LICENCE_ROUTES.map((route) => route.label)).toEqual(["Key", "Account", "Licence file"]);
+  test("key submission requires the key-mode adapter", () => {
+    expect(() => resolveLicenceSubmit(draft(), null)).toThrow(
+      "A key-format adapter is required for key activation.",
+    );
   });
 
   test("a valid key emits exactly as typed", () => {

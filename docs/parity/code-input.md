@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
+<!-- parity consv=fixed gpui=1 jetstream=1 specimen=ok -->
 <!-- pass 42: specimens backfilled to full contract coverage on both Rust targets — empty/partial/complete, numbers-only vs alphanumeric, masked, invalid, disabled, plus size + density ladders. All groups use real CodeInput/js_code_input from CodeInputSpec (no hand-rolled slots). Both previews build clean. -->
 <!-- pass 41: both targets — square slot ladder (code_input_slot_size_rem), slot font ladder (code_input_slot_font_rem), token-resolved density gap (xs→sm→md inline), fixed split-after (space.inline.md) on Jetstream, active slot uses accent.border, numbers_only spec flag drives alphanumeric on both. Remaining: real input / paste / autofill / slot-click caret + monospace font + caret are runtime/preview-loop gaps (accepted). -->
 # Parity: CodeInput
@@ -26,6 +26,8 @@ Svelte slot geometry and the default label disagree with the contract. Svelte is
 - [x] FIXED Split-after gap: contract §2 anatomy now notes the index-2 `--split-after` marker, and §7 adds a "Slot — split-after" table (`margin-right: var(--poodle-space-inline-md)`) documenting the 3+3 grouping for 6-digit codes.
 - [x] FIXED Validation focus colors: §7 now has a "Slot — active" table (`--code-slot-focus` border + `--code-slot-focus-ring` box-shadow) and a "Slot — validation state" table mapping default vs `invalid` to the border/focus/ring custom properties, matching Svelte (lines 69-83).
 - [x] FIXED `validationState` valid/pending: §5 Behavior now notes only the `invalid` case (or a non-null `error`) changes slot visuals; other states render default colors.
+- [x] FIXED Grouping is explicit: Svelte accepts a complete `groups` partition
+  and no longer infers 3+3 presentation from `length === 6`.
 
 ## GPUI gap (vs Svelte + contract)
 
@@ -34,6 +36,8 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - [x] FIXED Font + gap resolve from ladders/tokens — `code_input_slot_font_rem` for slot font; density gap now `space.inline.xs`/`sm`/`md` (compact/default/comfortable) and split-after = `space.inline.md` (both token-resolved), no raw rem-float density literals.
 - [x] FIXED Slot sizing uses the explicit square ladder `code_input_slot_size_rem` (xs 1.5 → xl 3.25rem; md 2.25rem matches Svelte) instead of `control_height_rem`, so width == height == contract value at every size.
 - [x] FIXED `numbers_only` spec flag added — `sanitized_chars()` filters digits when true, all chars when false; the key handler accepts alphanumeric in non-numbers-only mode. Contract `numbersOnly={false}` now supported.
+- [ ] `CodeInputSpec` needs the explicit group partition and the renderer must
+  apply every derived boundary. It still infers one 3+3 split from length 6.
 - accepted: No real input / paste / autofill / one-time-code autocomplete (contract §5/§6) — focusable group with `on_key_down` approximates auto-advance + backspace-retreat; paste/autofill/slot-click caret are runtime concerns (preview-loop).
 - accepted: No slot-click-to-focus / in-place replacement — `active_index` is preview-driven; caret placement is a runtime concern.
 - accepted: no ARIA (gpui has no accessibility API) — `role="group"`, `aria-label`, `aria-invalid`, `aria-disabled` not emitted.
@@ -45,6 +49,9 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - [x] FIXED Slot height uses the same square ladder (width == height), removing the `control_height + offset` non-square drift.
 - [x] FIXED Font size uses `code_input_slot_font_rem` (md 1rem) — the `×1.5` heuristic is gone.
 - [x] FIXED 3+3 split-after gap added — index 2 gets `mr(space.inline.md)` when `length == 6`.
+- [ ] Replace the inferred 3+3 rule with the same explicit group partition.
+  Jetstream is program-deferred in g14; this remains admission work, not an
+  active-cohort blocker.
 - [x] FIXED Active slot now uses `color.accent.border` (was `accent.base`), matching Svelte; only the invalid case overrides slot colors (Valid/Pending branches removed).
 - accepted: No real input / paste / autofill / autocomplete / slot-click — visual slot grid only; interaction (typing, paste, focus movement) lives in the preview event loop.
 - accepted: No hint/label rendering — the `Field` wrapper (label/hint) is a runtime composition concern; the component renders the slot row + error label.
@@ -59,6 +66,9 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Notes
 
-- `consv=fixed`: the stale slot geometry (now square `2.25rem` md + square per-size table), default label (`Authenticator code`), root-gap token, slot font-weight, 3+3 split-after, and validation-derived slot colors are all reconciled to Svelte. Remaining gpui/jetstream todos are code-side.
+- `consv=fixed`: the web contract and Svelte now agree on explicit grouping,
+  slot geometry, label, root gap, slot font weight, and validation-derived
+  colors. GPUI still needs the grouping field; Jetstream receives it only when
+  admitted later.
 - Both Rust targets render visual slot grids only; real-input ownership (paste, autofill, one-time-code, slot-click caret placement) is a documented runtime concern but means Tier-1 auto-advance/backspace/onComplete parity is only partially met (GPUI via key events, Jetstream not at all).
 - `numbersOnly={false}` (alphanumeric) is now supported on both Rust targets — `CodeInputSpec.numbers_only` (default true) drives `sanitized_chars()`; GPUI's key handler also accepts alphanumeric in that mode.

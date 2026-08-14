@@ -13,6 +13,35 @@ export function sanitizeCodeValue(input: string, length: number, numbersOnly: bo
   return normalized.slice(0, length);
 }
 
+/**
+ * Slot indices that end a visual group.
+ *
+ * Group lengths are accepted only as one complete, positive-integer
+ * partition of `length`. Invalid partial patterns produce no breaks, keeping
+ * grouping presentation-only and leaving value/caret behaviour untouched.
+ */
+export function codeGroupEndIndices(
+  length: number,
+  groups: readonly number[] | null | undefined,
+): number[] {
+  if (
+    !Number.isInteger(length) ||
+    length < 1 ||
+    !groups ||
+    groups.length < 2 ||
+    groups.some((group) => !Number.isInteger(group) || group < 1) ||
+    groups.reduce((total, group) => total + group, 0) !== length
+  ) {
+    return [];
+  }
+
+  let consumed = 0;
+  return groups.slice(0, -1).map((group) => {
+    consumed += group;
+    return consumed - 1;
+  });
+}
+
 /** Active caret position clamped into the filled prefix and the segment count. */
 export function clampCodePosition(index: number, valueLength: number, length: number): number {
   const maxPosition = Math.max(Math.min(valueLength, length - 1), 0);

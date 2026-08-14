@@ -2,6 +2,8 @@
 
 Status: landed — merge `fd32d7d5`
 Posture: complete
+Review correction: g14.016 supersedes this card's equal-route activation model
+with required `key | account` modes; this card remains the delivery record.
 Depends on: approved component contracts for `LicenceStatus`,
 `LicenceActivation`, and `LicenceSeats`
 Governing refs: `../../contracts/001-working-rules.md`,

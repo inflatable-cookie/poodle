@@ -7,18 +7,26 @@ Updated: 2026-08-14
 
 - Component name: `LicenceActivation`
 - Layer: composite
-- Summary: presents key, account, and licence-file activation as equal routes
-  and emits one structural credential plus an optional machine label
-- Composes: `Tabs`, `Field`, `TextInput`, `FileUpload`, `Button`, `Callout`
-- In scope: route selection, local key-format feedback through injected
-  Longhorn helpers, invoking an injected account-token provider,
-  file-to-base64 browser plumbing, pending/disabled state
-- Out of scope: account login implementation, licence evaluation, persistence,
-  rejection policy, entitlement enforcement, Longhorn imports
+- Summary: renders one host-selected activation model: licence-key entry, or
+  account activation with licence-file fallback
+- Composes: `Field`, `TextInput`, `EditableLabel`, `FileUpload`, `Button`
+- In scope: activation-model selection by prop, local key-format feedback
+  through an injected helper, an optional host-owned account-content region,
+  invoking an injected account-token provider, switching account activation to
+  offline file import, opt-in inline machine naming, file-to-base64 browser
+  plumbing, pending/disabled state
+- Out of scope: choosing an activation model for the application, account login
+  implementation, licence evaluation, persistence, rejection policy,
+  entitlement enforcement, Longhorn imports
+
+The host chooses its product model once. A customer is never presented with
+key, account, and file activation as three peer tabs.
 
 ## 2. Data Shapes
 
 ```ts
+type LicenceActivationMode = "key" | "account";
+
 type LicenceCredential =
   | { kind: "key"; key: string }
   | { kind: "accountToken"; token: string }
@@ -43,70 +51,143 @@ interface LicenceAccountTokenProvider {
 }
 ```
 
-`LicenceKeyFormat` is injected by the host:
+`LicenceKeyFormat` is supplied only in key mode:
 
 ```ts
-keyFormat={{ parse: parseLicenceKey, isProbablyATypo }}
+<LicenceActivation
+  mode="key"
+  keyFormat={{ parse: parseLicenceKey, isProbablyATypo }}
+/>
 ```
 
 Poodle neither imports nor reimplements those helpers. The raw typed key is
 emitted after the helper accepts it; Poodle does not normalize again.
 
-`LicenceAccountTokenProvider` is also injected. It owns the host's browser or
-account flow and returns the resulting token. `null` means the customer
-cancelled. Poodle never asks the customer to paste an account token.
+`LicenceAccountTokenProvider` is supplied only in account mode. It is an
+activation adapter, not a browser-flow decision. It may open browser OAuth,
+complete an embedded credential flow from host-owned state, run a device-code
+flow, or use another host policy. It returns the resulting token; `null` means
+the journey ended without activation. Poodle never asks the customer to paste
+a token.
 
 ## 3. Anatomy
 
+### Key mode
+
 ```text
 Form
-├── Route Tabs (Key | Account | Licence file; equal weight)
-├── Route panel
-│   ├── Key: TextInput + local format message
-│   ├── Account: explanation
-│   └── Licence file: single FileUpload
-├── Machine label TextInput (shared by all routes; optional)
-└── Activate Button
+├── Heading
+├── Licence-key TextInput + local format message
+└── Actions
+    ├── Machine-name EditableLabel (left; only when opted in)
+    └── Activate Button (right)
 ```
 
-All three route triggers remain visible. File import is never under an
-advanced/overflow disclosure.
+### Account mode
+
+```text
+Form
+├── Header
+│   ├── Heading
+│   └── Activate offline | Use account activation ghost Button
+├── Current view
+│   ├── Account: host account content or default explanation
+│   └── Offline: single FileUpload
+└── Actions
+    ├── Machine-name EditableLabel (left; only when opted in)
+    └── Continue with account | Activate submit Button (right)
+```
+
+Account activation is the initial and primary view. Offline activation is a
+direct, named fallback, not an advanced setting. Key activation is a separate
+product model and never appears in account mode.
 
 ## 4. Props And Events
 
-### Public Props
+### Mode-specific props
+
+The public props form a discriminated union:
+
+| Mode | Required | Rejected |
+| --- | --- | --- |
+| `"key"` | `keyFormat: LicenceKeyFormat` | `accountTokenProvider`, `accountContent`, `fileAccept` |
+| `"account"` | `accountTokenProvider: LicenceAccountTokenProvider` | `keyFormat` |
+
+Account mode additionally accepts:
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `accountContent` | React: `(disabled: boolean) => ReactNode`; Svelte: `Snippet<[boolean]>` | — | Host-owned content for an embedded account journey |
+| `fileAccept` | `string \| null` | `null` | Narrows accepted offline licence files |
+
+Key mode additionally accepts:
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `keyCodeInput` | `{ length: number; groups?: readonly number[] \| null } \| null` | `null` | Opts into segmented CodeInput entry; omit for free-form TextInput entry |
+
+`keyCodeInput.groups` is a list of group lengths, not separator positions or a
+regular expression. `{ length: 20, groups: [5, 5, 5, 5] }` produces four
+five-character visual groups while the parser receives one joined string.
+The pattern must be a complete positive-integer partition of `length`; an
+invalid pattern renders the configured number of slots without visual breaks.
+
+### Account content region
+
+`accountContent(disabled)` renders inside Poodle's account-mode `<form>` and
+replaces the default external-flow explanation. The host may supply labelled
+login fields, device-code instructions, SSO choices, or other account UI. It
+must supply a form fragment, not a nested `<form>`.
+
+Poodle owns the submit button and passes `true` while the component is disabled
+or account acquisition is running. The provider may close over the host-owned
+field state; pressing Poodle's submit button then calls `acquire()`. Field
+validation and authentication-specific errors remain host-owned.
+
+### Shared props
 
 | Prop | Type | Default | Required | Notes |
 | --- | --- | --- | --- | --- |
-| `keyFormat` | `LicenceKeyFormat` | — | yes | Host-supplied Longhorn behaviour |
-| `accountTokenProvider` | `LicenceAccountTokenProvider` | — | yes | Host-supplied account flow; returns a token or cancellation |
-| `defaultRoute` | `"key" \| "accountToken" \| "licenceFile"` | `"key"` | no | Initial selection only; no route is styled primary |
-| `pending` | `boolean` | `false` | no | Disables submission while host command runs |
-| `disabled` | `boolean` | `false` | no | Disables all fields/routes |
+| `mode` | `"key" \| "account"` | — | yes | Host-selected activation product model |
+| `pending` | `boolean` | `false` | no | Disables submission while the host command runs |
+| `disabled` | `boolean` | `false` | no | Disables fields and actions |
 | `title` | `string` | `"Activate licence"` | no | Form heading |
-| `machineLabelLabel` | `string` | `"Name this machine (optional)"` | no | Label field copy |
-| `activateLabel` | `string` | `"Activate"` | no | Submit button |
-| `fileAccept` | `string \| null` | `null` | no | Host may narrow accepted file types |
+| `machineLabel` | `string \| null` | — | no | Omit to hide machine naming; pass a hostname to seed it or `null` to opt in empty |
+| `activateLabel` | `string \| null` | `null` | no | Submit override; otherwise mode/view copy is used |
 | `size` | `ControlSize \| null` | `null` | no | Shared semantic size |
 | `density` | `ControlDensity \| null` | `null` | no | Shared density |
+
+Default submit copy is `Continue with account` in the account view and
+`Activate` in key/offline views.
 
 ### Callbacks
 
 | Callback | Payload | When |
 | --- | --- | --- |
-| `onActivate` | `{ credential: LicenceCredential; label: string \| null }` | Valid route form submitted; file bytes have been converted to base64 |
+| `onActivate` | `{ credential: LicenceCredential; label: string \| null }` | Valid form submitted; file bytes have been converted to base64 |
 
 The label is trimmed; empty becomes `null`. Credential contents are never
 logged, rendered back after submit, or placed in `data-*` attributes.
 
+`machineLabel` is an opt-in seed, not licence authority data. When omitted,
+the form contains no machine-name control and activation emits `label: null`.
+When supplied, Poodle renders an inline `EditableLabel`. A non-empty value is
+the host-provided default, normally the hostname. `null` or a committed empty
+edit displays `unnamed machine` as empty-state and input placeholder copy; that
+copy is never stored or emitted as the label.
+
 ## 5. States And Behaviour
 
-Internal state: selected route, key draft, optional label, selected file, key
-result, account acquisition pending, file-read failure.
+Internal state: account/offline view, key draft, optional opted-in machine-label
+draft, selected file, key result, account acquisition pending, file-read
+failure.
 
-### Key route
+Changing `mode` resets account mode to its primary view and invalidates any
+selected or pending file read.
 
-1. Submit calls `keyFormat.parse(rawKey)` synchronously.
+### Key mode
+
+1. Submit calls `keyFormat.parse(keyDraft)` synchronously.
 2. `ok: true` emits the raw key.
 3. `ok: false` does not emit or round-trip.
 4. `keyFormat.isProbablyATypo(problem) === true` renders:
@@ -114,57 +195,86 @@ result, account acquisition pending, file-read failure.
    `not recognised`.
 5. `tooShort` renders: `This key is too short.` It is distinct from typo copy.
 
-Lowercase, dashes, whitespace, and I/L/O confusions are the injected parser's
-job. Poodle must not pre-normalize them.
+TextInput is the default and preserves lowercase, dashes, whitespace, and I/L/O
+confusions exactly for the injected parser. Poodle must not pre-normalize them.
 
-### Account route
+When `keyCodeInput` is supplied, CodeInput owns fixed-length segmented entry
+with `numbersOnly=false`. The parser receives CodeInput's joined, length-capped
+value; visual group gaps are never inserted into it. Hosts that must preserve
+arbitrary separator or whitespace characters from pasted input use the default
+TextInput route instead.
 
+### Account view
+
+- It is the initial account-mode view.
+- Without `accountContent`, Poodle renders neutral external-flow copy. The
+  provider may then open a browser or start another out-of-surface journey.
+- With `accountContent`, Poodle renders that host-owned form fragment. Its state
+  remains outside Poodle and may be captured by the provider.
 - Submit calls `accountTokenProvider.acquire()`.
-- The shared Activate button is the only account submit action.
 - A returned token emits `{ kind: "accountToken", token }` immediately.
 - `null` is a quiet cancellation and does not emit.
 - Provider failure uses a polite generic account-flow error. It never exposes
   token or credential contents.
-- While acquisition is pending, routes and fields are frozen and the form is
-  busy. The submitted route and label are the values captured when acquisition
-  began, so an async completion cannot drift between renderers.
+- While acquisition is pending, the switch and fields are frozen and the form
+  is busy. The label is captured when acquisition begins.
+- `Activate offline` switches in place to the file view.
 - Poodle renders no token field and performs no token-format inference.
 
-### File route
+### Offline file view
 
+- It exists only inside account mode.
 - Exactly one file.
 - Browser adapter reads bytes and emits base64 without a data-URL prefix.
 - File name may render; contents never do.
 - Read failure is a local polite error and does not emit.
-- Leaving the file route or removing the file cancels/invalidates any pending
-  read and clears its bytes. Returning to the route requires a new selection.
+- Returning to account activation or changing mode cancels/invalidates any
+  pending read and clears its bytes. Returning offline requires a new file.
 
 ### Behavior Machine
 
-Behavior classification: machine-backed via composed Tabs/TextInput/FileUpload
+Behavior classification: machine-backed through composed TextInput/FileUpload
 machinery plus a small pure core submit resolver. No licence transition is
 implemented in Poodle.
 
 ## 6. Accessibility
 
 - Root is a `<form>` with visible heading.
-- Routes use Tabs' tablist/tab/tabpanel semantics and keyboard behaviour.
 - Every credential field has a visible label; placeholders are not names.
+- Segmented key entry remains one real named input; visual slots and group gaps
+  do not become separate accessibility stops.
+- The optional machine name is a named inline-edit control. Its empty-state
+  copy is visually distinct and never substitutes for its value.
+- Enter commits a machine-name edit without submitting activation. A separate
+  submit action is still required.
+- The host labels and validates controls supplied through `accountContent` and
+  respects its `disabled` argument.
 - Key/file errors link through `aria-describedby` and use polite status
   announcement, not alert.
-- Account activation uses the form's named Activate button, not a token control.
-- Pending state sets `aria-busy` on the form and disables submission without
-  changing route visibility.
-- Focus moves to the first field when a route activates. Invalid submit focuses
-  the relevant field/message.
+- The account/offline switch is a named ghost Button and never submits the form.
+- Switching offline focuses the file control; returning online focuses the
+  account submit action.
+- Invalid submit focuses the relevant field/message.
+- Pending state sets `aria-busy` and freezes every action that could change the
+  captured submission.
 
 ## 7. Layout And Tokens
 
-- Route triggers are one equal-width row where space allows; vertical stacking
-  preserves equal prominence at narrow widths.
-- Machine label and submit action sit outside the route panels.
-- No route uses muted, advanced, secondary, or overflow-only treatment.
-- Validation uses shared Field/TextInput/Callout token roles.
+- There is no route tab strip.
+- Account/offline switching preserves the form frame and any opted-in machine
+  name.
+- The opted-in machine name and primary activation button share the footer row,
+  aligned to opposite edges.
+- The footer has one additional `stack-sm` separation from the active form
+  view.
+- The route switch sits at the top right opposite the title and uses an `xs`
+  ghost Button with secondary text colour. `Activate offline` carries a
+  decorative `cloud-off` icon; the return action carries `user`.
+- The header has one additional `stack-sm` separation from the active login or
+  file-import view.
+- Validation uses shared Field/TextInput token roles.
+- Optional segmented key entry uses CodeInput's slot and explicit group-end
+  token roles; LicenceActivation adds no licence-specific separator styling.
 - Recipe hooks use `--poodle-recipe-licence-activation-*` names.
 
 ## 8. Framework And Runtime Parity
@@ -177,17 +287,30 @@ admission.
 
 ## 9. Acceptance Cases
 
+- key mode renders no account or offline route and requires only `keyFormat`
+- account mode opens on account activation, renders no key route, and requires
+  only `accountTokenProvider`
+- account mode exposes a direct `Activate offline` switch and a route back
+- no route tabs render
 - valid raw key emits once
+- key mode defaults to free-form TextInput and may opt into fixed-length
+  CodeInput with explicit multi-group presentation
 - check-failed and unexpected-symbol problems render typo copy and do not emit
 - too-short renders distinct copy and does not emit
 - lowercase/dashes/whitespace/confusions reach the injected parser unchanged
-- key, account token, and file routes are visible and equally reachable
-- each route emits the exact structural credential and shared optional label
-- file base64 excludes the data-URL prefix
 - account activation invokes the injected provider; no token-paste field exists
+- machine naming is absent unless `machineLabel` is supplied
+- a supplied hostname is inline-editable and emits the committed trimmed label
+- `machineLabel={null}` displays `unnamed machine` as placeholder copy while
+  emitting `label: null` unless the customer enters a name
+- account mode supports both default external activation and host-owned embedded
+  account content without prescribing browser OAuth or login vocabulary
+- submitting host-owned account content invokes the provider against host state
+- each available route emits the exact structural credential and optional label
+- file base64 excludes the data-URL prefix
 - async account acquisition freezes interaction and emits the captured label
 - leaving/removing a file invalidates pending and completed file bytes
-- pending/disabled blocks duplicate submit but never hides a route
+- pending/disabled blocks duplicate submit
 - no Longhorn import or package dependency
 
 ## 10. Known Deltas
@@ -195,3 +318,4 @@ admission.
 | Delta | Status | Follow-up |
 | --- | --- | --- |
 | no native implementation in web-reference PR | incomplete, not accepted parity | g14.017 |
+| grouped key entry depends on the new web CodeInput `groups` prop; Rust CodeInput still has its legacy inferred 3+3 split | staged, not accepted parity | g14.017 ports grouping through the adopted interface before native LicenceActivation |

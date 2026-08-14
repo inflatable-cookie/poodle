@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { editLabelTransition, listReorderKeyIntent, type EditLabelContext } from "../src/edit.ts";
 import {
   clampCodePosition,
+  codeGroupEndIndices,
   codeInsertReplacement,
   codeSelectionRange,
   codeSlotSelection,
@@ -63,6 +64,19 @@ describe("listReorderKeyIntent", () => {
 });
 
 describe("code-input math", () => {
+  test("group ends derive from a complete positive partition", () => {
+    expect(codeGroupEndIndices(20, [5, 5, 5, 5])).toEqual([4, 9, 14]);
+    expect(codeGroupEndIndices(6, [3, 3])).toEqual([2]);
+    expect(codeGroupEndIndices(6, [6])).toEqual([]);
+  });
+
+  test("invalid and partial group patterns do not alter presentation", () => {
+    expect(codeGroupEndIndices(6, [3, 2])).toEqual([]);
+    expect(codeGroupEndIndices(6, [3, 0, 3])).toEqual([]);
+    expect(codeGroupEndIndices(6, [3, 1.5, 1.5])).toEqual([]);
+    expect(codeGroupEndIndices(6, null)).toEqual([]);
+  });
+
   test("sanitize strips non-digits when numbersOnly and caps length", () => {
     expect(sanitizeCodeValue("1a2b3c4d5e6f7", 6, true)).toBe("123456");
     expect(sanitizeCodeValue("abc123", 4, false)).toBe("abc1");

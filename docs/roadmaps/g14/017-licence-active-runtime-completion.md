@@ -26,6 +26,8 @@ backend-neutral for later Jetstream admission.
       activation=`input/composite`.
 - [ ] Replace the temporary duplicate web specimens with shared cases.
 - [ ] Generate/check Rust portable declarations and add `poodle-render` specs.
+- [ ] Port CodeInput's explicit `groups` partition before projecting grouped
+      LicenceActivation; remove the native renderer's inferred 3+3 rule.
 - [ ] Implement native components and preview projections.
 - [ ] Treat file selection/base64 as a runtime-owned capability with equivalent
       result; missing GPUI plumbing remains red, not absent-pass.

@@ -1,7 +1,7 @@
 # CodeInput
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-14
 
 > **Note:** This component replaces both `PinInput` and `TotpInput`. Use
 > `mask: true` for PIN-style masked entry. Use `mask: false` (default) for
@@ -14,9 +14,9 @@ Updated: 2026-07-10
 - Summary: a segmented code-entry input with one hidden real input and visual
   digit slots, designed for autofill, paste handling, and password-manager
   compatibility
-- In scope: fixed-length digit entry, hidden real input, visual digit slots,
-  one-time-code autocomplete, paste handling, completion signaling, Field
-  integration, optional masking
+- In scope: fixed-length code entry, hidden real input, visual character slots,
+  explicit visual grouping, one-time-code autocomplete, paste handling,
+  completion signaling, Field integration, optional masking
 - Out of scope: backup-code entry, auth-flow orchestration
 
 ## 2. Anatomy
@@ -27,8 +27,7 @@ Updated: 2026-07-10
         ├── [Hidden submission input] <input type="hidden">
         ├── [Real input .code-input__control] <input type="text">
         └── [Visual slot .code-input__slot]... (repeated `length`)
-              (slot at index 2 carries `--split-after` for 6-digit codes →
-               3+3 grouping gap)
+              (slots ending an explicit group carry `--group-end`)
 ```
 
 ## 3. Public Props
@@ -46,6 +45,7 @@ Updated: 2026-07-10
 | `numbersOnly` | `boolean` | `true` |
 | `disabled` | `boolean` | `false` |
 | `length` | `number` | `6` |
+| `groups` | `readonly number[] \| null` | `null` |
 | `ariaLabel` | `string \| null` | `null` |
 | `autocomplete` | `string` | `"one-time-code"` |
 | `size` | `ControlSize \| null` | `null` |
@@ -82,6 +82,14 @@ requestAnimationFrame timing stay adapter-side.
   - password-manager interaction
   - paste behavior
 - Visual slots mirror the real input value
+- `groups` is a presentation-only partition of `length`. `[5, 5, 5, 5]`
+  creates breaks after slots 5, 10, and 15 while the value remains one
+  20-character string
+- Every group length must be a positive integer and the full list must sum to
+  `length`. An omitted, single-group, partial, or invalid pattern renders no
+  group breaks and never changes value or caret behaviour
+- Grouping is never inferred from `length`; a six-character input is
+  uninterrupted unless the caller passes `groups={[3, 3]}`
 - When `mask` is true, filled slots display a bullet character instead of the
   digit
 - Clicking any slot focuses the real input and moves the caret
@@ -140,13 +148,13 @@ Slots are square. The border color is `--code-slot-border`, derived from
 | `line-height` | `1` |
 | `text-align` | `center` |
 
-### Slot — split-after (`.code-input__slot--split-after`, index 2 when `length === 6`)
+### Slot — group end (`.code-input__slot--group-end`)
 
 | Property | Value |
 |----------|-------|
 | `margin-right` | `var(--poodle-space-inline-md)` |
 
-This produces the 3+3 visual grouping for six-digit codes.
+This separates every explicit group while keeping one contiguous input value.
 
 ### Slot -- active (`.code-input__slot--active`, the slot at the caret position while focused)
 
@@ -204,6 +212,12 @@ Density adjusts only the inter-slot gap: `compact` `0.25rem`, `default`
 |-------|---------------|-----------------|
 | Alphanumeric | `length={6}`, `numbersOnly={false}`, `ariaLabel="Recovery code"` | Six slots accepting letters and digits; clicking an earlier slot allows in-place replacement |
 
+### Grouped key
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Grouped key | `length={20}`, `groups={[5, 5, 5, 5]}`, `numbersOnly={false}` | Twenty slots with three visual group breaks; emitted value contains no visual separators |
+
 ### Disabled
 
 | Label | Props / Config | Expected Visual |
@@ -221,6 +235,7 @@ Density adjusts only the inter-slot gap: `compact` `0.25rem`, `default`
 ### Tier 1: Strict Parity
 
 - [ ] fixed-length semantics match (length prop controls slot count)
+- [ ] explicit group boundaries match without altering the value
 - [ ] auto-advance behavior matches (digit entry moves to next slot)
 - [ ] backspace-retreat behavior matches (empty slot backspace goes to previous)
 - [ ] onComplete fires when all slots filled
@@ -232,6 +247,7 @@ Density adjusts only the inter-slot gap: `compact` `0.25rem`, `default`
 - [ ] all five sizes visually match (height, padding, font-size per size table)
 - [ ] slot is square (2.25rem x 2.25rem at md) match
 - [ ] gap between slots (space-inline-sm) matches
+- [ ] group-end margin (space-inline-md) matches at every explicit boundary
 - [ ] code-family font on slots matches
 - [ ] focus ring (outline with focusRing color) matches
 - [ ] disabled opacity matches
@@ -246,3 +262,9 @@ Density adjusts only the inter-slot gap: `compact` `0.25rem`, `default`
 - contract status: `detailed contract`
 - replaces: `PinInput`, `TotpInput`
 - downstream adopters: verification flows, 2FA entry, compact code-entry surfaces
+
+## 11. Known Deltas
+
+| Delta | Status | Follow-up |
+| --- | --- | --- |
+| Rust spec/renderer still infer one 3+3 split for length 6 and cannot accept explicit groups | staged web-reference delta; not accepted parity | g14.017 must port the grouping field through the adopted interface before LicenceActivation native completion |

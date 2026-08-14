@@ -46,7 +46,7 @@
     box-shadow: var(--poodle-recipe-code-input-slot--active-shadow, 0 0 0 var(--poodle-border-width-focus) var(--code-slot-focus-ring, color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)));
   }
 
-  .poodle-code-input__slot--split-after {
+  .poodle-code-input__slot--group-end {
     margin-right: var(--poodle-space-inline-md);
   }
 
@@ -94,7 +94,7 @@
       font-size: 0.9375rem;
     }
 
-    .poodle-code-input__slot--split-after {
+    .poodle-code-input__slot--group-end {
       margin-right: var(--poodle-space-inline-sm);
     }
   }

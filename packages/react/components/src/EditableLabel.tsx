@@ -115,7 +115,10 @@ export function EditableLabel({
           onChange={(event: ChangeEvent<HTMLInputElement>) => setDraftValue(event.currentTarget.value)}
           onBlur={() => send({ type: "COMMIT" })}
           onKeyDown={(event) => {
-            if (event.key === "Enter") send({ type: "COMMIT" });
+            if (event.key === "Enter") {
+              event.preventDefault();
+              send({ type: "COMMIT" });
+            }
             if (event.key === "Escape") {
               event.preventDefault();
               send({ type: "CANCEL" });

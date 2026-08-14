@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { LicenceActivation } from "@inflatable-cookie/poodle-svelte";
+  import { Field, LicenceActivation, TextInput } from "@inflatable-cookie/poodle-svelte";
   import type { LicenceKeyProblem, LicenceKeyResult } from "@inflatable-cookie/poodle-core";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
@@ -24,31 +24,73 @@
   };
 
   const accountTokenProvider = { acquire: async () => null };
+  let email = $state("");
+  let password = $state("");
 </script>
 
 <SpecimenLayout showSizes={false} showDensities={false}>
   {#snippet children()}
     <div class="poodle-licence-activation-specimen">
-      <!-- Three routes, one row, equal weight. The default selection does not
-           make Key primary; the other two are peers, not fallbacks. -->
-      <SpecimenGroup label="Routes">
-        <LicenceActivation {keyFormat} {accountTokenProvider} />
-        <LicenceActivation {keyFormat} {accountTokenProvider} defaultRoute="accountToken" />
-        <LicenceActivation {keyFormat} {accountTokenProvider} defaultRoute="licenceFile" fileAccept=".licence" />
+      <SpecimenGroup label="Embedded account activation">
+        <LicenceActivation
+          mode="account"
+          {accountTokenProvider}
+          activateLabel="Activate"
+          fileAccept=".licence"
+          machineLabel="Studio Mac"
+        >
+          {#snippet accountContent(disabled)}
+            <Field id="licence-account-email" label="Email address">
+              <TextInput
+                id="licence-account-email"
+                type="email"
+                value={email}
+                {disabled}
+                onValueChange={(value) => (email = value)}
+              />
+            </Field>
+            <Field id="licence-account-password" label="Password">
+              <TextInput
+                id="licence-account-password"
+                type="password"
+                value={password}
+                {disabled}
+                onValueChange={(value) => (password = value)}
+              />
+            </Field>
+          {/snippet}
+        </LicenceActivation>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="External account activation">
+        <LicenceActivation mode="account" {accountTokenProvider} fileAccept=".licence" />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Key activation">
+        <LicenceActivation
+          mode="key"
+          {keyFormat}
+          keyCodeInput={{ length: 20, groups: [5, 5, 5, 5] }}
+          size="xs"
+        />
       </SpecimenGroup>
 
       <SpecimenGroup label="Pending and disabled">
-        <!-- Pending blocks a duplicate submit. Every route stays on screen. -->
-        <LicenceActivation {keyFormat} {accountTokenProvider} pending />
-        <LicenceActivation {keyFormat} {accountTokenProvider} disabled />
+        <LicenceActivation mode="account" {accountTokenProvider} pending />
+        <LicenceActivation
+          mode="key"
+          {keyFormat}
+          keyCodeInput={{ length: 20, groups: [5, 5, 5, 5] }}
+          disabled
+        />
       </SpecimenGroup>
 
       <SpecimenGroup label="Host copy">
         <LicenceActivation
-          {keyFormat}
+          mode="account"
           {accountTokenProvider}
           title="Activate Finch"
-          machineLabelLabel="Name this machine (optional)"
+          machineLabel={null}
           activateLabel="Activate Finch"
         />
       </SpecimenGroup>

@@ -7,8 +7,22 @@ Card: `docs/roadmaps/g14/015-licence-web-reference.md`
 Contracts: `licence-status.md`, `licence-activation.md`, `licence-seats.md`
 
 Svelte and React reference implementations for three authority-agnostic licence
-components. No Rust, no native, no conformance — that stays g14.016, and the
+components. No Rust, no native, no conformance — that stays g14.017 after the
+g14.016 operator review, and the
 contracts' Known Deltas and the g14 estate both still say so.
+
+> Post-merge review correction: g14.016 replaced the three-peer activation
+> route model with a required `key | account` mode. Key activation now stands
+> alone; account activation owns a direct offline-file fallback and an optional
+> host-owned account-content region. The token provider may drive browser OAuth
+> or embedded login state; Poodle prescribes neither. The delivery facts below
+> describe the original g14.015 merge, not the corrected reference.
+> The account/offline switch now uses an `xs` ghost Button opposite the form
+> title, with route-specific iconography and secondary text colour. The footer
+> contains the primary submit action and, only when opted in, the inline
+> machine-name editor. Key mode may opt into grouped CodeInput entry with a
+> fixed length and explicit group partition; free-form TextInput remains the
+> default.
 
 ## Files
 
@@ -61,7 +75,7 @@ Mirror maps, for the downstream Longhorn assertion:
 Keys are the authority's protocol type names so a downstream `exact()`-style
 comparison against its generated `LICENCE_FIELDS` / `LICENCE_VARIANT_FIELDS`
 needs no reshaping. **That cross-repo gate does not exist yet.** This PR ships
-the half Poodle owns; the assertion is g14.016's, in the Longhorn adapter.
+the half Poodle owns; the assertion is g14.017's, in the Longhorn adapter.
 
 Deliberately absent, per the card: no wire record for the flattened controller
 reads (`usable`, `attention`, `useUntil`, `updateUntil`) — Longhorn has none,
@@ -79,9 +93,15 @@ milliseconds boundary used by the shared status view.
 `LicenceStatus` — `usability`, `trustBasis`, `useUntil`, `updateUntil`,
 `usable`, `attention`, `title`, `size`, `density`. No callbacks.
 
-`LicenceActivation` — `keyFormat`, `accountTokenProvider`, `defaultRoute`,
-`pending`, `disabled`, `title`, `machineLabelLabel`, `activateLabel`,
-`fileAccept`, `size`, `density`; `onActivate({ credential, label })`.
+`LicenceActivation` — corrected in g14.016 to the discriminated
+`mode="key" | "account"` surface. Key mode requires `keyFormat`. Account mode
+requires `accountTokenProvider`, accepts the host-owned `accountContent`
+region and `fileAccept`, and owns the offline-file fallback. Shared props are
+`pending`, `disabled`, `title`, opt-in `machineLabel`, `activateLabel`, `size`,
+and `density`; `onActivate({ credential, label })` emits the result. The
+machine label uses the shared inline editor; `null` shows `unnamed machine` as
+placeholder copy without emitting it as a value. Key mode additionally accepts
+`keyCodeInput: { length, groups? }`; omitting it keeps the free-form TextInput.
 
 `LicenceSeats` — readonly `seats`, `pendingMachineId`, `title`, `releaseLabel`,
 `confirmRelease`, `size`, `density`; `onRelease({ machineId })`.
@@ -108,7 +128,8 @@ Identical in both frameworks, and now gated: the contracts were restructured
 | `usable` never disables/hides/locks/removes | `changes only reported state when usable flips` ×2; core `usable is reported, not re-derived` |
 | mistyped vs too-short distinct; typo copy never implies invalid | three tests per framework; core `key problem copy` block |
 | injected parser receives input unchanged | `hands the injected parser lowercase, dashes, whitespace and I/L/O unchanged` ×2 + core |
-| three routes equally visible and keyboard reachable | `presents all three routes as equally visible, reachable tabs` ×2 |
+| key mode stays separate; account mode owns a direct offline fallback | `keeps key activation separate from account activation with its offline fallback` ×2 |
+| optional grouped key entry renders every declared boundary and emits one joined value | `opts into grouped CodeInput key entry without changing the default field` ×2; shared CodeInput grouping tests ×2 |
 | account invokes provider, quiet cancel, no token field | four tests per framework |
 | async account completion cannot drift by route/label | deferred-provider test ×2; interaction freezes and submit snapshot is explicit |
 | exact credential shapes + `label: string \| null` | per-route emit tests ×2; core `every route carries the same optional label` |
@@ -120,7 +141,7 @@ Identical in both frameworks, and now gated: the contracts were restructured
 | no Longhorn import anywhere | grep below |
 | mirror maps exported, cross-repo gate not claimed | core `mirror field maps` block; this log |
 | Svelte/React agreement | `test:parity` anatomy diff (170 tests, `KNOWN_DIVERGENCE` still empty) **plus** the cross-framework pixel gate: 3 pairs, 0 failing |
-| estate lists native completion under g14.016 | `conformance-estate.md` §Staged Licence Intake, unchanged |
+| estate lists native completion after the web review | g14.017, blocked on the pilot verdict and g14.016 |
 
 ## Longhorn-free
 
@@ -165,9 +186,10 @@ element is the one mechanism both shells can run. It satisfies both contract
 clauses — first field on route activation, relevant field on invalid submit —
 because in every route the relevant field *is* the first focusable.
 
-**One shared submit for every route.** The account panel explains the host-owned
-journey; the form's `Activate` button is its only action. This keeps all three
-routes on one submit path and removes duplicate controls with identical effects.
+**One shared submit per activation surface.** The account panel explains the
+host-owned journey; the form's primary button submits either its account view
+or direct offline fallback. Key mode uses the same form shape but is a separate
+host-selected product model.
 
 **Authority timestamps stay seconds until the shared view boundary.** Longhorn
 records integer Unix seconds. Core converts once to milliseconds for `TimeAgo`;
@@ -258,16 +280,38 @@ pixel-matched framework output.
 ## Known incomplete
 
 - No Rust spec, no `poodle-render` implementation, no GPUI or Jetstream
-  specimen. Not a delta — the declared g14.016 scope. Each contract's Known
+  specimen. Not a delta — the declared g14.017 scope. Each contract's Known
   Deltas table says `incomplete, not accepted parity`.
-- The Svelte and React specimens are deliberate duplicates. g14.016 replaces
+- The Svelte and React specimens are deliberate duplicates. g14.017 replaces
   them with shared cases.
+- Explicit CodeInput grouping is currently web-only. Rust still carries the
+  old inferred 3+3 split; g14.017 must port the field through the adopted
+  interface before native LicenceActivation can claim completion.
 - The Longhorn adapter assertion against `LICENCE_MIRROR_FIELDS` /
   `LICENCE_MIRROR_VARIANT_FIELDS` does not exist. Nothing in this PR gates
   Poodle↔Longhorn drift.
 - File selection is browser `FileReader` plumbing. Native file-selection
-  semantics are g14.016's, and the card treats a missing native path as red,
+  semantics are g14.017's, and the card treats a missing native path as red,
   not as an absent-pass.
 
 These components are a staged web reference. They are not parity-reviewed and
 not four-runtime complete.
+
+## g14.016 Live-refinement Validation
+
+After the activation-model, machine-label, spacing, icon, and grouped-key
+changes:
+
+- `effigy test:core`: 701 passed
+- `effigy test:components`: 89 files, 1228 passed
+- `effigy test:parity`: 170 passed
+- `effigy test:a11y`: 172 passed
+- `effigy docs:check`: passed; generated web docs/reports are current
+- `effigy react:build`: passed
+- `effigy test:web-pack-install`: 3 packed packages, 5 consumer tests passed
+- `effigy audit:icons`: 103 names verified
+- targeted web visual gate, `code-input,licence-activation`: 2 pairs, 0 failing
+- `git diff --check`: passed
+
+Existing Svelte warnings remain in TextInput, HistoryCenter, SceneSpecimen, and
+the HistoryCenter specimen. None is on the touched licence or CodeInput paths.

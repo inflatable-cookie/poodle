@@ -1,92 +1,108 @@
 import "@inflatable-cookie/poodle-core/styles/licence.css";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 
 import {
   LICENCE_ACCOUNT_FAILED_MESSAGE,
   LICENCE_FILE_UNREADABLE_MESSAGE,
-  LICENCE_ROUTES,
   getFocusableElements,
   licenceFileContentsBase64,
   resolveLicenceSubmit,
   type LicenceAccountTokenProvider,
+  type LicenceActivationMode,
   type LicenceActivationRoute,
   type LicenceCredential,
+  type LicenceKeyCodeInputOptions,
   type LicenceKeyFormat,
   type LicenceSubmitDraft,
 } from "@inflatable-cookie/poodle-core";
 
 import { Button } from "./Button";
+import { CodeInput } from "./CodeInput";
+import { EditableLabel } from "./EditableLabel";
 import { Field } from "./Field";
 import { FileUpload } from "./FileUpload";
-import { Tabs } from "./Tabs";
 import { TextInput } from "./TextInput";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize } from "./types";
 
 let nextActivationId = 0;
 
-export interface LicenceActivationProps {
-  keyFormat: LicenceKeyFormat;
-  accountTokenProvider: LicenceAccountTokenProvider;
-  defaultRoute?: LicenceActivationRoute;
+interface LicenceActivationCommonProps {
+  mode: LicenceActivationMode;
   pending?: boolean;
   disabled?: boolean;
   title?: string;
-  machineLabelLabel?: string;
-  activateLabel?: string;
-  fileAccept?: string | null;
+  machineLabel?: string | null;
+  activateLabel?: string | null;
   size?: ControlSize | null;
   density?: ControlDensity | null;
   onActivate?: (detail: { credential: LicenceCredential; label: string | null }) => void;
 }
 
-export function LicenceActivation({
-  keyFormat,
-  accountTokenProvider,
-  defaultRoute = "key",
-  pending = false,
-  disabled = false,
-  title = "Activate licence",
-  machineLabelLabel = "Name this machine (optional)",
-  activateLabel = "Activate",
-  fileAccept = null,
-  size = null,
-  density = null,
-  onActivate,
-}: LicenceActivationProps) {
+export type LicenceActivationProps = LicenceActivationCommonProps &
+  (
+    | {
+        mode: "key";
+        keyFormat: LicenceKeyFormat;
+        keyCodeInput?: LicenceKeyCodeInputOptions | null;
+        accountContent?: never;
+        accountTokenProvider?: never;
+        fileAccept?: never;
+      }
+    | {
+        mode: "account";
+        accountTokenProvider: LicenceAccountTokenProvider;
+        accountContent?: (disabled: boolean) => ReactNode;
+        keyCodeInput?: never;
+        keyFormat?: never;
+        fileAccept?: string | null;
+      }
+  );
+
+export function LicenceActivation(props: LicenceActivationProps) {
+  const {
+    mode,
+    pending = false,
+    disabled = false,
+    title = "Activate licence",
+    machineLabel = undefined,
+    activateLabel = null,
+    size = null,
+    density = null,
+    onActivate,
+  } = props;
+
   const uiPresentation = useUiPresentation();
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, "control");
   const resolvedDensity = density ?? uiPresentation.density;
 
   const instanceId = useMemo(() => `poodle-licence-activation-${nextActivationId++}`, []);
   const keyFieldId = `${instanceId}-key`;
-  const labelFieldId = `${instanceId}-label`;
   const routeMessageId = `${instanceId}-route-message`;
 
-  const [route, setRoute] = useState<LicenceActivationRoute>(defaultRoute);
+  const [accountRoute, setAccountRoute] = useState<"accountToken" | "licenceFile">("accountToken");
   const [keyDraft, setKeyDraft] = useState("");
-  const [machineLabel, setMachineLabel] = useState("");
+  const [machineLabelDraft, setMachineLabelDraft] = useState(machineLabel ?? "");
   const [keyMessage, setKeyMessage] = useState<string | null>(null);
-  /* The route panel's own message: a failed account flow or an unreadable
-     file. Never the credential, and never anything the provider returned. */
   const [routeMessage, setRouteMessage] = useState<string | null>(null);
   const [accountBusy, setAccountBusy] = useState(false);
   const fileContentsRef = useRef<string | null>(null);
   const fileReaderRef = useRef<FileReader | null>(null);
   const fileReadGenerationRef = useRef(0);
-  const panelRef = useRef<HTMLDivElement | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const routeRef = useRef<HTMLDivElement | null>(null);
 
+  const route: LicenceActivationRoute = mode === "key" ? "key" : accountRoute;
   const interactionDisabled = disabled || accountBusy;
-
-  /* All three routes are peers, so all three are tabs, always visible, never
-     behind an overflow menu. Disabled/busy state freezes them; it never
-     removes them. */
-  const routeItems = LICENCE_ROUTES.map((entry) => ({
-    value: entry.value,
-    label: entry.label,
-    disabled: interactionDisabled,
-  }));
   const submitBlocked = disabled || pending || accountBusy;
 
   const clearFileRead = useCallback(() => {
@@ -99,20 +115,30 @@ export function LicenceActivation({
 
   useEffect(() => clearFileRead, [clearFileRead]);
 
-  const focusFirstControl = useCallback(() => {
-    if (!panelRef.current) return;
-    getFocusableElements(panelRef.current)[0]?.focus();
-  }, []);
-
-  function handleRouteChange(next: string): void {
-    if (route === "licenceFile" && next !== "licenceFile") clearFileRead();
-    setRoute(next as LicenceActivationRoute);
+  useEffect(() => {
+    clearFileRead();
+    setAccountRoute("accountToken");
     setKeyMessage(null);
     setRouteMessage(null);
-    // The route's own first field, not the form's. Landing a customer on the
-    // machine-label box after they chose "Licence file" is landing them in the
-    // wrong place.
-    queueMicrotask(focusFirstControl);
+  }, [mode, clearFileRead]);
+
+  useEffect(() => {
+    setMachineLabelDraft(machineLabel ?? "");
+  }, [machineLabel]);
+
+  const focusRouteControl = useCallback(() => {
+    getFocusableElements(routeRef.current)[0]?.focus();
+  }, []);
+
+  function switchAccountRoute(next: "accountToken" | "licenceFile"): void {
+    if (interactionDisabled || mode !== "account" || accountRoute === next) return;
+    if (accountRoute === "licenceFile") clearFileRead();
+    setAccountRoute(next);
+    setRouteMessage(null);
+    queueMicrotask(() => {
+      if (next === "licenceFile") focusRouteControl();
+      else formRef.current?.querySelector<HTMLButtonElement>('button[type="submit"]')?.focus();
+    });
   }
 
   function handleFiles(files: File[]): void {
@@ -127,8 +153,6 @@ export function LicenceActivation({
       if (generation !== fileReadGenerationRef.current) return;
       fileReaderRef.current = null;
       const read = typeof reader.result === "string" ? reader.result : null;
-      // A data URL carries a `data:...;base64,` prefix the authority will not
-      // accept. Core strips it once, for both renderers.
       fileContentsRef.current = read === null ? null : licenceFileContentsBase64(read);
       setRouteMessage(
         fileContentsRef.current === null ? LICENCE_FILE_UNREADABLE_MESSAGE : null,
@@ -149,6 +173,7 @@ export function LicenceActivation({
   }
 
   function emit(draft: LicenceSubmitDraft): void {
+    const keyFormat = mode === "key" ? props.keyFormat : null;
     const resolution = resolveLicenceSubmit(draft, keyFormat);
     if (resolution.outcome === "emit") {
       setKeyMessage(null);
@@ -156,16 +181,14 @@ export function LicenceActivation({
       onActivate?.({ credential: resolution.credential, label: resolution.label });
       return;
     }
-    // A cancelled account flow says nothing at all — the customer already knows
-    // they backed out, and an error would read as a fault they caused.
     if (resolution.outcome === "quiet") return;
     if (draft.route === "key") {
       setKeyMessage(resolution.message);
-      queueMicrotask(focusFirstControl);
+      queueMicrotask(focusRouteControl);
       return;
     }
     setRouteMessage(resolution.message);
-    queueMicrotask(focusFirstControl);
+    queueMicrotask(focusRouteControl);
   }
 
   async function submit(): Promise<void> {
@@ -176,19 +199,19 @@ export function LicenceActivation({
         key: keyDraft,
         token: null,
         fileContentsBase64: fileContentsRef.current,
-        label: machineLabel,
+        label: machineLabelDraft,
       });
       return;
     }
-    // The host owns the account journey; Poodle only asks for its result.
-    const submittedLabel = machineLabel;
+
+    const submittedLabel = machineLabelDraft;
     setAccountBusy(true);
     setRouteMessage(null);
     try {
       emit({
         route: "accountToken",
         key: "",
-        token: await accountTokenProvider.acquire(),
+        token: await props.accountTokenProvider.acquire(),
         fileContentsBase64: null,
         label: submittedLabel,
       });
@@ -204,106 +227,124 @@ export function LicenceActivation({
     void submit();
   }
 
+  const submitLabel = activateLabel ?? (route === "accountToken" ? "Continue with account" : "Activate");
+
   return (
     <form
+      ref={formRef}
       className="poodle-licence-activation"
       aria-busy={pending || accountBusy}
+      data-mode={mode}
       data-route={route}
       data-pending={pending || accountBusy}
       data-size={resolvedSize}
       data-density={resolvedDensity}
       onSubmit={handleSubmit}
     >
-      <h3 className="poodle-licence-activation__title">{title}</h3>
-
-      <div className="poodle-licence-activation__routes">
-        <Tabs
-          items={routeItems}
-          value={route}
-          ariaLabel={title}
-          size={resolvedSize}
-          density={resolvedDensity}
-          onValueChange={handleRouteChange}
-        >
-          {(active) => (
-            <div ref={panelRef} className="poodle-licence-activation__route" data-route={active}>
-              {active === "key" ? (
-                <Field
-                  id={keyFieldId}
-                  label="Licence key"
-                  error={keyMessage}
-                  validationState={keyMessage ? "invalid" : "none"}
-                  size={resolvedSize}
-                  density={resolvedDensity}
-                  control={(fieldProps) => (
-                    /* The raw text goes to the injected parser untouched: lower
-                       case, dashes, spaces and I/L/O confusions are its job, and
-                       normalising here would judge the key twice. */
-                    <TextInput
-                      id={keyFieldId}
-                      value={keyDraft}
-                      disabled={interactionDisabled}
-                      describedBy={fieldProps.describedBy}
-                      validationState={fieldProps.validationState}
-                      onValueChange={setKeyDraft}
-                    />
-                  )}
-                />
-              ) : active === "accountToken" ? (
-                <p className="poodle-licence-activation__explanation">
-                  Continue with your account to authorise this machine. There is nothing to type
-                  here.
-                </p>
-              ) : (
-                <FileUpload
-                  accept={fileAccept}
-                  multiple={false}
-                  showPreview={false}
-                  disabled={interactionDisabled}
-                  describedBy={routeMessage ? routeMessageId : null}
-                  size={resolvedSize}
-                  density={resolvedDensity}
-                  onUpload={handleFiles}
-                  onRemove={handleFileRemoved}
-                />
-              )}
-
-              {routeMessage && active !== "key" ? (
-                <p
-                  className="poodle-licence-activation__explanation"
-                  id={routeMessageId}
-                  role="status"
-                >
-                  {routeMessage}
-                </p>
-              ) : null}
-            </div>
-          )}
-        </Tabs>
+      <div className="poodle-licence-activation__header">
+        <h3 className="poodle-licence-activation__title">{title}</h3>
+        {mode === "account" ? (
+          <Button
+            className="poodle-licence-activation__route-switch"
+            type="button"
+            variant="ghost"
+            fit="content"
+            size="xs"
+            density={resolvedDensity}
+            leadingIcon={route === "accountToken" ? "cloud-off" : "user"}
+            disabled={interactionDisabled}
+            onClick={() => switchAccountRoute(route === "accountToken" ? "licenceFile" : "accountToken")}
+          >
+            {route === "accountToken" ? "Activate offline" : "Use account activation"}
+          </Button>
+        ) : null}
       </div>
 
-      {/* The machine label and the submit belong to the activation, not to a
-          route: naming this machine means the same thing whichever credential
-          carries it. */}
-      <div className="poodle-licence-activation__shared">
-        <Field
-          id={labelFieldId}
-          label={machineLabelLabel}
-          size={resolvedSize}
-          density={resolvedDensity}
-          control={(fieldProps) => (
-            <TextInput
-              id={labelFieldId}
-              value={machineLabel}
-              disabled={interactionDisabled}
-              describedBy={fieldProps.describedBy}
-              onValueChange={setMachineLabel}
-            />
-          )}
-        />
+      <div ref={routeRef} className="poodle-licence-activation__route" data-route={route}>
+        {route === "key" && props.keyCodeInput ? (
+          <CodeInput
+            id={keyFieldId}
+            name="licenceKey"
+            value={keyDraft}
+            label="Licence key"
+            error={keyMessage}
+            disabled={interactionDisabled}
+            length={props.keyCodeInput.length}
+            groups={props.keyCodeInput.groups}
+            numbersOnly={false}
+            autoComplete="off"
+            size={resolvedSize}
+            density={resolvedDensity}
+            onValueChange={setKeyDraft}
+          />
+        ) : route === "key" ? (
+          <Field
+            id={keyFieldId}
+            label="Licence key"
+            error={keyMessage}
+            validationState={keyMessage ? "invalid" : "none"}
+            size={resolvedSize}
+            density={resolvedDensity}
+            control={(fieldProps) => (
+              <TextInput
+                id={keyFieldId}
+                value={keyDraft}
+                disabled={interactionDisabled}
+                describedBy={fieldProps.describedBy}
+                validationState={fieldProps.validationState}
+                onValueChange={setKeyDraft}
+              />
+            )}
+          />
+        ) : route === "accountToken" ? (
+          props.accountContent ? (
+            <div className="poodle-licence-activation__account-content">
+              {props.accountContent(interactionDisabled)}
+            </div>
+          ) : (
+            <p className="poodle-licence-activation__explanation">
+              Continue with your account to authorise this machine.
+            </p>
+          )
+        ) : (
+          <FileUpload
+            accept={props.fileAccept}
+            multiple={false}
+            showPreview={false}
+            disabled={interactionDisabled}
+            describedBy={routeMessage ? routeMessageId : null}
+            size={resolvedSize}
+            density={resolvedDensity}
+            onUpload={handleFiles}
+            onRemove={handleFileRemoved}
+          />
+        )}
+
+        {routeMessage && route !== "key" ? (
+          <p className="poodle-licence-activation__explanation" id={routeMessageId} role="status">
+            {routeMessage}
+          </p>
+        ) : null}
       </div>
 
       <div className="poodle-licence-activation__actions">
+        {machineLabel !== undefined ? (
+          <div className="poodle-licence-activation__machine">
+            <span className="poodle-licence-activation__machine-name">Machine name</span>
+            <EditableLabel
+              value={machineLabelDraft}
+              ariaLabel="Edit machine name"
+              disabled={interactionDisabled}
+              activationMode="enterOrSpace"
+              emptyText="unnamed machine"
+              placeholder="unnamed machine"
+              showEditIcon
+              size={resolvedSize}
+              density={resolvedDensity}
+              onCommit={({ value }) => setMachineLabelDraft(value)}
+            />
+          </div>
+        ) : null}
         <Button
           type="submit"
           variant="primary"
@@ -312,7 +353,7 @@ export function LicenceActivation({
           disabled={submitBlocked}
           loading={pending || accountBusy}
         >
-          {activateLabel}
+          {submitLabel}
         </Button>
       </div>
     </form>

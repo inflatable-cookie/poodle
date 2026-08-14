@@ -1,5 +1,5 @@
-import type { CSSProperties } from "react";
-import { LicenceActivation } from "@inflatable-cookie/poodle-react";
+import { useState, type CSSProperties } from "react";
+import { Field, LicenceActivation, TextInput } from "@inflatable-cookie/poodle-react";
 import type { LicenceKeyProblem, LicenceKeyResult } from "@inflatable-cookie/poodle-core";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
@@ -27,47 +27,89 @@ const accountTokenProvider = { acquire: async () => null };
 
 const stackStyle: CSSProperties = { display: "flex", flexDirection: "column", gap: "2rem" };
 
+function EmbeddedAccountActivation() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  return (
+    <LicenceActivation
+      mode="account"
+      accountTokenProvider={{ acquire: async () => null }}
+      activateLabel="Activate"
+      fileAccept=".licence"
+      machineLabel="Studio Mac"
+      accountContent={(disabled) => (
+        <>
+          <Field id="licence-account-email" label="Email address">
+            <TextInput
+              id="licence-account-email"
+              type="email"
+              value={email}
+              disabled={disabled}
+              onValueChange={setEmail}
+            />
+          </Field>
+          <Field id="licence-account-password" label="Password">
+            <TextInput
+              id="licence-account-password"
+              type="password"
+              value={password}
+              disabled={disabled}
+              onValueChange={setPassword}
+            />
+          </Field>
+        </>
+      )}
+    />
+  );
+}
+
 export function LicenceActivationSpecimen() {
   return (
     <SpecimenLayout showSizes={false} showDensities={false}>
       <div style={stackStyle}>
-        {/* Three routes, one row, equal weight. The default selection does not
-            make Key primary; the other two are peers, not fallbacks. */}
-        <SpecimenGroup label="Routes">
-          <LicenceActivation keyFormat={keyFormat} accountTokenProvider={accountTokenProvider} />
+        <SpecimenGroup label="Embedded account activation">
+          <EmbeddedAccountActivation />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="External account activation">
           <LicenceActivation
-            keyFormat={keyFormat}
+            mode="account"
             accountTokenProvider={accountTokenProvider}
-            defaultRoute="accountToken"
-          />
-          <LicenceActivation
-            keyFormat={keyFormat}
-            accountTokenProvider={accountTokenProvider}
-            defaultRoute="licenceFile"
             fileAccept=".licence"
+          />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Key activation">
+          <LicenceActivation
+            mode="key"
+            keyFormat={keyFormat}
+            keyCodeInput={{ length: 20, groups: [5, 5, 5, 5] }}
+            size="xs"
           />
         </SpecimenGroup>
 
         <SpecimenGroup label="Pending and disabled">
           {/* Pending blocks a duplicate submit. Every route stays on screen. */}
           <LicenceActivation
-            keyFormat={keyFormat}
+            mode="account"
             accountTokenProvider={accountTokenProvider}
             pending
           />
           <LicenceActivation
+            mode="key"
             keyFormat={keyFormat}
-            accountTokenProvider={accountTokenProvider}
+            keyCodeInput={{ length: 20, groups: [5, 5, 5, 5] }}
             disabled
           />
         </SpecimenGroup>
 
         <SpecimenGroup label="Host copy">
           <LicenceActivation
-            keyFormat={keyFormat}
+            mode="account"
             accountTokenProvider={accountTokenProvider}
             title="Activate Finch"
-            machineLabelLabel="Name this machine (optional)"
+            machineLabel={null}
             activateLabel="Activate Finch"
           />
         </SpecimenGroup>

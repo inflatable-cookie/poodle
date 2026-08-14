@@ -14,6 +14,7 @@
       value={code}
       label="Verification code"
       hint="Enter the 6-digit code from your authenticator app."
+      groups={[3, 3]}
       onValueChange={(value) => { code = value; completed = false; }}
       onComplete={() => { completed = true; }}
     />
@@ -27,7 +28,20 @@
       id="code-masked"
       label="PIN code"
       hint="Digits are hidden for security."
+      length={4}
       mask
+    />
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Multiple groups">
+    <CodeInput
+      id="code-grouped"
+      label="Grouped recovery key"
+      defaultValue="AB12CD34"
+      length={12}
+      groups={[4, 4, 4]}
+      numbersOnly={false}
+      autocomplete="off"
     />
   </SpecimenGroup>
 
@@ -49,6 +63,7 @@
       value="12"
       label="Email code"
       error="That verification code is invalid."
+      groups={[3, 3]}
     />
   </SpecimenGroup>
 
@@ -63,10 +78,10 @@
   </SpecimenGroup>
 
   {#snippet sizes(size)}
-    <CodeInput id={"size-" + size} {size} label={"Code at " + size} ariaLabel={"Code at " + size} />
+    <CodeInput id={"size-" + size} {size} groups={[3, 3]} label={"Code at " + size} ariaLabel={"Code at " + size} />
   {/snippet}
 
   {#snippet densities(density)}
-    <CodeInput id={"density-" + density} {density} label={"Code at " + density} ariaLabel={"Code at " + density} />
+    <CodeInput id={"density-" + density} {density} groups={[3, 3]} label={"Code at " + density} ariaLabel={"Code at " + density} />
   {/snippet}
 </SpecimenLayout>

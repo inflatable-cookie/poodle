@@ -24,7 +24,8 @@ Run them with `effigy svelte:preview` and `effigy react:preview`.
 
 - [ ] Review all three pages in Svelte and React under at least one dark and
       one light theme.
-- [ ] Review hierarchy, spacing, tone, copy, route equality, form flow, seat
+- [ ] Review hierarchy, spacing, tone, copy, activation-model selection,
+      external and embedded account journeys, account/offline flow, seat
       honesty, empty state, pending state, and destructive confirmation.
 - [ ] Record each feedback item as approve, change now, contract change, or
       later native/conformance work.
@@ -34,12 +35,27 @@ Run them with `effigy svelte:preview` and `effigy react:preview`.
 
 ## Execution Plan
 
+## Review Decisions — Active
+
+| Feedback | Disposition | Reference outcome |
+| --- | --- | --- |
+| React preview chrome diverged from Svelte | change now | React uses the shared theme picker; Svelte carries the matching runtime badge |
+| Three peer activation tabs do not match real product choices | contract change | key is one product mode; account is the other, with offline file as its direct fallback |
+| Account activation may be browser-owned or embedded | contract change | injected token provider owns acquisition; optional host content supplies embedded login fields |
+| Machine naming should be optional and inline | contract change | omitted hides it; string seeds it; null uses honest unnamed placeholder copy; inline editor shares the submit row |
+| Offline switch read as an external link and dominated the header | change now | top-right `xs` ghost Button with `cloud-off`/`user` icon and secondary text colour |
+| Header, route, and footer controls were crowded | change now | explicit shared spacing at both boundaries |
+| Licence keys may need fixed-length segmented entry | contract change | optional `keyCodeInput={{ length, groups }}`; default remains free-form TextInput |
+| CodeInput inferred one 3+3 divider from length | contract change | web grouping is an explicit full partition and supports any number of groups; native port is a named g14.017 delta |
+
 ### Review bundle
 
 - [ ] Open the three exact routes in both web previews.
 - [ ] Confirm the page fixtures expose every usability state, coverage-window
-      combination, trust basis, activation route, pending/disabled posture,
-      labelled/unnamed seat shape, and empty seat authority.
+      combination, trust basis, both activation models, the account/offline
+      switch, external and host-owned embedded account content,
+      pending/disabled posture, labelled/unnamed seat shape, and empty seat
+      authority.
 - [ ] Capture matching review images when the operator cannot inspect both
       previews live.
 

@@ -25,6 +25,7 @@ import { circlePause } from "./icons/circle-pause";
 import { circleQuestionMark } from "./icons/circle-question-mark";
 import { circleX } from "./icons/circle-x";
 import { clock } from "./icons/clock";
+import { cloudOff } from "./icons/cloud-off";
 import { code } from "./icons/code";
 import { columns2 } from "./icons/columns-2";
 import { columns3 } from "./icons/columns-3";
@@ -130,6 +131,7 @@ export {
   circleQuestionMark,
   circleX,
   clock,
+  cloudOff,
   code,
   columns2,
   columns3,
@@ -236,6 +238,7 @@ export const defaultLucideIconSet: IconSet = {
   "circle-question-mark": circleQuestionMark,
   "circle-x": circleX,
   "clock": clock,
+  "cloud-off": cloudOff,
   "code": code,
   "columns-2": columns2,
   "columns-3": columns3,

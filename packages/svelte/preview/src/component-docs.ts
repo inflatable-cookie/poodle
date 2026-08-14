@@ -2347,33 +2347,46 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "licence-activation": {
     props: [
-      { name: "keyFormat", type: "LicenceKeyFormat", description: "Required. Host-supplied key parser and typo predicate. Poodle never reimplements either." },
-      { name: "accountTokenProvider", type: "LicenceAccountTokenProvider", description: "Required. Host-supplied account flow returning a token, or null for a cancellation." },
-      { name: "defaultRoute", type: '"key" | "accountToken" | "licenceFile"', default: '"key"', description: "Initial selection only. No route is styled primary." },
-      { name: "pending", type: "boolean", default: "false", description: "Disables submission while the host command runs. Routes stay visible." },
-      { name: "disabled", type: "boolean", default: "false", description: "Disables every field and route." },
-      { name: "title", type: "string", default: '"Activate licence"', description: "Form heading and tablist name." },
-      { name: "machineLabelLabel", type: "string", default: '"Name this machine (optional)"', description: "Label copy for the shared machine-label field." },
-      { name: "activateLabel", type: "string", default: '"Activate"', description: "Submit button label." },
-      { name: "fileAccept", type: "string | null", default: "null", description: "Narrows accepted file types on the licence-file route." },
+      { name: "mode", type: '"key" | "account"', description: "Required. Selects the host application's activation product model." },
+      { name: "keyFormat", type: "LicenceKeyFormat", description: "Required in key mode; rejected in account mode. Host-supplied parser and typo predicate." },
+      { name: "keyCodeInput", type: "LicenceKeyCodeInputOptions | null", default: "null", description: "Key mode only. Opts into fixed-length segmented entry; groups are positive lengths that partition the total length." },
+      { name: "accountTokenProvider", type: "LicenceAccountTokenProvider", description: "Required in account mode; rejected in key mode. Host-supplied activation adapter; it does not imply a browser flow." },
+      { name: "pending", type: "boolean", default: "false", description: "Disables submission while the host command runs." },
+      { name: "disabled", type: "boolean", default: "false", description: "Disables every field and action." },
+      { name: "title", type: "string", default: '"Activate licence"', description: "Form heading." },
+      { name: "machineLabel", type: "string | null", description: "Opt-in machine name. Supply a hostname to seed the inline editor, null for its unnamed-machine placeholder, or omit the prop entirely to hide it." },
+      { name: "activateLabel", type: "string | null", default: "null", description: "Overrides the mode/view-specific submit label." },
+      { name: "fileAccept", type: "string | null", default: "null", description: "Account mode only. Narrows accepted offline licence files." },
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit semantic size override." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override." },
     ],
-    slots: [],
+    slots: [
+      { name: "accountContent", description: "Account-mode host content. Receives the disabled state and renders inside Poodle's form; omit it for an external account journey." },
+    ],
     events: [
       { name: "onActivate", payload: "((detail: { credential: LicenceCredential; label: string | null }) => void) | undefined", description: "A valid route form was submitted; file bytes are already base64 without a data-URL prefix." },
     ],
     usage: `<script lang="ts">
-  import { LicenceActivation } from "@inflatable-cookie/poodle-svelte";
-  import { isProbablyATypo, parseLicenceKey } from "the-host-authority";
+  import { Field, LicenceActivation, TextInput } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <LicenceActivation
-  keyFormat={{ parse: parseLicenceKey, isProbablyATypo }}
-  accountTokenProvider={{ acquire: startAccountFlow }}
+  mode="account"
+  accountTokenProvider={{ acquire: () => login(email, password) }}
+  activateLabel="Activate"
+  machineLabel={hostname ?? null}
   pending={activating}
   onActivate={({ credential, label }) => activate(credential, label)}
-/>`,
+>
+  {#snippet accountContent(disabled)}
+    <Field id="licence-email" label="Email address">
+      <TextInput id="licence-email" bind:value={email} {disabled} />
+    </Field>
+    <Field id="licence-password" label="Password">
+      <TextInput id="licence-password" type="password" bind:value={password} {disabled} />
+    </Field>
+  {/snippet}
+</LicenceActivation>`,
   },
 
   "licence-seats": {
@@ -3209,7 +3222,9 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "error", type: "string | null", default: "null", description: "Optional error message; also drives invalid validation state." },
       { name: "disabled", type: "boolean", default: "false", description: "Disables the hidden real input and visual slot interaction." },
       { name: "length", type: "number", default: "6", description: "Number of visible digit slots and max code length." },
+      { name: "groups", type: "readonly number[] | null", default: "null", description: "Optional complete partition of length. Adds a visual gap after every group except the last without changing the value." },
       { name: "mask", type: "boolean", default: "false", description: "When true, display dots instead of digits in the visual slots." },
+      { name: "numbersOnly", type: "boolean", default: "true", description: "When false, accepts arbitrary characters instead of filtering to digits." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Optional accessible label override for the grouped control." },
       { name: "autocomplete", type: "string", default: '"one-time-code"', description: "Autocomplete hint for verification-code autofill." },
       { name: "size", type: "ControlSize | null", default: "null", description: "Explicit size override. Supports xs, sm, md, lg, and xl." },
@@ -3232,6 +3247,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   value={code}
   label="Verification code"
   hint="Enter the 6-digit code from your authenticator app."
+  groups={[3, 3]}
   onValueChange={(value) => (code = value)}
   onComplete={(value) => verify(value)}
 />`,

@@ -35,8 +35,9 @@ describe("packed @inflatable-cookie/poodle-react", () => {
           attention="none"
         />
         <LicenceActivation
+          mode="key"
           keyFormat={licenceKeyFormat}
-          accountTokenProvider={{ acquire: async () => null }}
+          machineLabel="Studio Mac"
         />
         <LicenceSeats seats={seats} />
       </>,

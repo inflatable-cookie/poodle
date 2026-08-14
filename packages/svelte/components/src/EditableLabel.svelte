@@ -133,7 +133,7 @@
       oninput={(event) => (draftValue = (event.currentTarget).value)}
       onblur={() => commit()}
       onkeydown={(event) => {
-        if (event.key === "Enter") commit();
+        if (event.key === "Enter") { event.preventDefault(); commit(); }
         if (event.key === "Escape") { event.preventDefault(); cancel(); }
       }}
     />
@@ -162,4 +162,3 @@
     </button>
   {/if}
 </div>
-

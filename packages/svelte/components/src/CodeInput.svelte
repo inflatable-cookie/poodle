@@ -2,6 +2,7 @@
   import "@inflatable-cookie/poodle-core/styles/code-input.css";
   import {
     clampCodePosition,
+    codeGroupEndIndices,
     codeInsertReplacement,
     codeSelectionRange,
     codeSlotSelection,
@@ -23,6 +24,7 @@
     error?: string | null;
     disabled?: boolean;
     length?: number;
+    groups?: readonly number[] | null;
     mask?: boolean;
     numbersOnly?: boolean;
     ariaLabel?: string | null;
@@ -47,6 +49,7 @@
     error = null,
     disabled = false,
     length = 6,
+    groups = null,
     mask = false,
     numbersOnly = true,
     ariaLabel = null,
@@ -72,6 +75,7 @@
   const isControlled = $derived(value !== undefined);
   const currentValue = $derived(sanitizeValue(isControlled ? value ?? "" : uncontrolledValue));
   const digits = $derived(Array.from({ length }, (_, index) => currentValue[index] ?? ""));
+  const groupEndIndices = $derived(codeGroupEndIndices(length, groups));
   const effectiveValidationState = $derived(error ? "invalid" : validationState);
   const activeCaretIndex = $derived(Math.min(caretIndex, Math.max(length - 1, 0)));
   const slotBorderColor = $derived(
@@ -280,7 +284,7 @@
           class="poodle-code-input__slot"
           class:poodle-code-input__slot--active={hasFocus && index === activeCaretIndex}
           class:poodle-code-input__slot--filled={digit.length > 0}
-          class:poodle-code-input__slot--split-after={length === 6 && index === 2}
+          class:poodle-code-input__slot--group-end={groupEndIndices.includes(index)}
           tabindex={-1}
           onmousedown={(event) => event.preventDefault()}
           onclick={() => handleSlotClick(index)}
@@ -292,4 +296,3 @@
     </div>
   {/snippet}
 </Field>
-
