@@ -1,5 +1,9 @@
 # g14.003 — RangeSlider Controlled-control Proof
 
+Post-completion correction: commit `8ac863b4` restored the curated RangeSlider
+specimens. The corpus still owns executable fixtures and exhaustive evidence;
+it no longer replaces the catalogue `Examples` view.
+
 Status: complete — accepted in PR #13
 Depends on: `g14.002`
 
@@ -10,8 +14,8 @@ hard-coded runtime knowledge.
 
 ## Scope
 
-- Move RangeSlider portable interface and specimen structure into the shared
-  authority/cases.
+- Move RangeSlider portable interface and executable cases into shared
+  authority. Preserve its curated catalogue specimen.
 - Exercise lower/upper values, crossing policy, clamping, keyboard steps,
   pointer drag, disabled state, orientation, accessible names, and event order.
 - Observe both identified thumbs, values, roles, focus, token roles, and

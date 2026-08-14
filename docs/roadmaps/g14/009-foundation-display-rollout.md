@@ -6,7 +6,8 @@ Depends on: `g14.008`
 ## Outcome
 
 Migrate the `display` profile and shared layout/foundation components to the
-adopted interface/case/specimen/completion pipeline.
+adopted interface/case/completion pipeline without replacing curated catalogue
+specimens with exhaustive cases.
 
 ## Scope
 
@@ -18,8 +19,10 @@ kernel without a recorded contract need.
 ## Acceptance
 
 - Every rostered component passes active-cohort completion.
-- No missing native registration, hand-written canonical specimen fixture, or
-  redundant portable declaration remains in the migrated profile.
+- No missing native registration, duplicate executable fixture, or redundant
+  portable declaration remains in the migrated profile.
+- Curated specimens stay useful; exhaustive cases remain a separate
+  diagnostic projection.
 - Tranche cost and defects are recorded; standing CI stays bounded.
 
 ## Stop Conditions

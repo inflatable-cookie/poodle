@@ -11,7 +11,8 @@ open corpus rollout by momentum.
 ## Evidence
 
 - full mechanism LOC and per-component marginal cost
-- duplicate declarations/specimens/vectors removed
+- duplicate declarations and executable fixtures/vectors removed
+- curated specimen cost and usefulness assessed separately from case coverage
 - defects existing gates missed and the new system caught
 - schema/action/assertion growth by profile
 - active-cohort execution time and reliability

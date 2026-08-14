@@ -6,14 +6,15 @@ Depends on: `g14.008`, `g14.016`
 ## Outcome
 
 Move `LicenceStatus`, `LicenceActivation`, and `LicenceSeats` through the
-adopted portable-interface, shared-case/specimen, normalized-observation, Rust
-renderer, and GPUI pipeline. Close the intentional web-reference gap without
-weakening file-selection or interaction requirements. Keep every Rust surface
-backend-neutral for later Jetstream admission.
+adopted portable-interface, shared-case, normalized-observation, Rust renderer,
+and GPUI pipeline. Preserve the approved curated specimens. Close the
+intentional web-reference gap without weakening file-selection or interaction
+requirements. Keep every Rust surface backend-neutral for later Jetstream
+admission.
 
 ## Goals
 
-- [ ] One portable interface and case/specimen corpus per component.
+- [ ] One portable interface and executable case corpus per component.
 - [ ] Shared native composition in `poodle-render`; thin backend interpretation.
 - [ ] Functional activation, inline seat rename, seat release, focus, keyboard,
       accessibility, and renderer evidence in Svelte, React, and GPUI.
@@ -24,7 +25,9 @@ backend-neutral for later Jetstream admission.
 
 - [ ] Classify the three profiles: status=`display`, seats=`collection`,
       activation=`input/composite`.
-- [ ] Replace the temporary duplicate web specimens with shared cases.
+- [ ] Keep the approved web specimens human-centred; share their ordered
+      outline later through the specimen-catalogue lane rather than replacing
+      them with exhaustive cases.
 - [ ] Generate/check Rust portable declarations and add `poodle-render` specs.
 - [ ] Port CodeInput's explicit `groups` partition and optional `separator`
       plus full-value completion validation and its tick/cross result before

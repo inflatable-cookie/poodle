@@ -11,8 +11,10 @@ specimen-only registration.
 
 ## Scope
 
-- Move HistoryCenter portable interface and specimen structure into shared
-  authority without importing Longhorn or product state.
+- Move HistoryCenter portable interface and executable cases into shared
+  authority without importing Longhorn or product state. Preserve its curated
+  catalogue specimen as documentation rather than projecting every case into
+  `Examples`.
 - Use structured fixture data and named host commands for selection, checkout,
   rename, open/close, and branch navigation.
 - Cover empty, linear, multiple-fork, nested-fork, depth-cap, current-entry,

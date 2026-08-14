@@ -11,8 +11,9 @@ Jetstream admission.
 
 ## Scope
 
-- Move TextInput portable interface and specimen structure into shared
+- Move TextInput portable interface and executable cases into shared
   authority; keep web-only attributes and imperative methods explicit.
+  Preserve the curated catalogue specimen.
 - Cover controlled value, typing, selection, validation, clear, focus, submit,
   disabled/read-only, adornment regions, and event ordering.
 - Exercise composition/IME capability where the runtime supports it and keep

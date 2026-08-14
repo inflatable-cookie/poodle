@@ -1,5 +1,9 @@
 # g14.004 — Tabs Collection And Navigation Proof
 
+Post-completion correction: commit `8ac863b4` restored the curated Tabs
+specimens. The corpus still owns executable fixtures and exhaustive evidence;
+it no longer replaces the catalogue `Examples` view.
+
 Status: complete — accepted in PR #14
 Depends on: `g14.003`
 
@@ -10,7 +14,8 @@ keyboard navigation with the same component pipeline.
 
 ## Scope
 
-- Move Tabs portable interface and specimen structure into shared authority.
+- Move Tabs portable interface and executable cases into shared authority.
+  Preserve its curated catalogue specimen.
 - Model stable item/trigger/panel identities without runtime index leakage.
 - Cover controlled selection, disabled items, orientation/direction, Home/End,
   arrow navigation, activation mode, focus, and event order.

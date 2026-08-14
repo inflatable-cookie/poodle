@@ -26,6 +26,23 @@ prefer the narrower current authority and repair the stale document.
 - Do not infer parity from a preview specimen alone; validate contract behavior
   and relevant interaction evidence.
 
+## Catalogue Specimens
+
+- Catalogue specimens are human-facing documentation. Their first job is to
+  show what a component is for, what is available, and how it is normally
+  composed.
+- Keep `Examples` representative and curated. Do not replace it with an
+  exhaustive case corpus or repeat size and density matrices already owned by
+  dedicated tabs.
+- Executable conformance cases own exhaustive fixtures, actions, assertions,
+  and diagnostic evidence. A preview may expose those cases in a separate
+  `Conformance` tab; they do not define the catalogue's teaching structure.
+- A renderer-neutral specimen plan may share ordered tabs, sections, captions,
+  and fixture references across runtimes. Runtime adapters still render real
+  components and may own bounded presentation needed by their renderer.
+- Review specimens as documentation. Passing conformance does not make a
+  specimen page useful, and an attractive specimen does not prove parity.
+
 ## Shared Implementation
 
 - Put framework-free web state and interaction logic in `poodle-core`.

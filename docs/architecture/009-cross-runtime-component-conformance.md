@@ -30,7 +30,8 @@ Svelte + React       poodle-render
   corpus; its later backend-admission gate must add execution, not a second
   component implementation.
 - The conformance plane shares declarations, inputs, actions, assertions, and
-  specimen structure. It does not share executable component behaviour.
+  exhaustive diagnostic cases. It does not share executable component
+  behaviour or own the catalogue's teaching structure.
 - Svelte remains the reference when current implementations disagree. The
   component contract remains the authority for what should ship.
 
@@ -63,15 +64,31 @@ portable declarations; additive mirrors fail the cost gate.
 A case carries:
 
 - fixture data and portable inputs
-- specimen group, caption, axes, and capture identity
+- stable case identity, diagnostic labels, axes, and capture identity
 - semantic actions addressed to stable component parts
 - expected state, event order, focus, accessibility, structure, token roles,
   and geometry
 - explicit runtime-owned capability requirements and tolerances
 
-The same authored case drives tests and specimen pages in every active runtime.
-Specimens are views over cases, not a second fixture corpus. Cases remain
-backend-neutral so the deferred Jetstream runner can consume them unchanged.
+The same authored case drives tests in every active runtime. A dedicated
+conformance view may project the complete corpus for manual diagnosis. Cases
+remain backend-neutral so the deferred Jetstream runner can consume them
+unchanged.
+
+### Catalogue specimens
+
+Catalogue specimens are a documentation layer beside conformance, not a view
+that must enumerate every case. Their `Examples` tab is a curated route through
+the component: primary use, meaningful variants, important states, and useful
+composition. Size and density matrices stay in their named tabs. Exhaustive
+cases may appear in a separate `Conformance` tab.
+
+One renderer-neutral specimen plan may own tab order, section order, captions,
+and references to shared fixture data. It must remain smaller and simpler than
+the runtime specimens it coordinates. It cannot become a universal scene tree
+or encode component behaviour. Svelte, React, GPUI, and later Jetstream render
+real runtime components through thin adapters; bounded runtime-only examples
+remain explicit.
 
 ### Normalized observations
 
@@ -139,7 +156,8 @@ A component is active-cohort complete only when:
    interface;
 3. required shared cases execute in Svelte, React, and GPUI;
 4. normalized observations pass;
-5. the same cases render the three active specimen views;
+5. each active runtime has a useful curated specimen and the complete case
+   corpus remains available to its executable harness;
 6. required primitive capabilities are certified; and
 7. no placeholder, inert handler, missing registration, or declared absence
    remains for required behaviour.
@@ -149,7 +167,8 @@ unit test alone is not delivery.
 
 Jetstream has a separate admission state. It is neither required for current
 active-cohort completion nor allowed to appear as passing until its backend
-executes the shared cases, observations, interactions, and specimen views.
+executes the shared cases, observations, and interactions. Its curated
+specimen joins through the separate catalogue workflow.
 
 ## Boundaries
 
@@ -160,7 +179,8 @@ executes the shared cases, observations, interactions, and specimen views.
 - Runtime harnesses may translate actions and observe output; they may not
   contain a second fixture definition.
 - Every generated or authored conformance surface must state what existing
-  declaration or specimen content it replaces.
+  declaration or executable fixture content it replaces. Curated catalogue
+  specimens are not deletion credit merely because a case corpus exists.
 
 The executable format and pilot stop conditions live in
 `../specs/066-executable-component-conformance.md`.

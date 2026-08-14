@@ -10,10 +10,12 @@ Governing refs: `../../architecture/009-cross-runtime-component-conformance.md`,
 ## Goal
 
 Make portable drift unable to remain silent across Svelte, React, and Rust
-through GPUI. Define component interface and specimen structure once, execute
+through GPUI. Define component interfaces and executable cases once, execute
 the same cases in the active runtimes, compare normalized observable output,
 and block completion while an active runtime is missing or inert. Keep the
 Rust case and node boundary renderer-neutral for later Jetstream admission.
+Keep catalogue specimens human-centred; exhaustive cases belong to a separate
+diagnostic projection when exposed in the preview.
 
 ## Fixed Decisions
 
@@ -23,8 +25,12 @@ Rust case and node boundary renderer-neutral for later Jetstream admission.
   deferred consumer of that same substrate.
 - Cross-language behaviour remains hand-implemented in those two substrates.
 - Portable interfaces may generate declarations. Behaviour may not.
-- Shared cases own fixture data, test actions/assertions, and specimen
+- Shared cases own exhaustive fixture data, test actions/assertions, and
+  diagnostic projection metadata. They do not own the curated catalogue
   structure. A separate scene component model is not allowed.
+- Catalogue `Examples` are curated documentation. Size and density matrices
+  stay in their named tabs; a future `Conformance` tab may list the full case
+  corpus.
 - Runtimes normalize their real output into one semantic observation format.
 - Missing or declared-absent required capability is incomplete, not parity.
 - Every cost report includes schema, generators, generated files, adapters,
@@ -63,6 +69,10 @@ the overloaded component `tag` with one generated catalogue taxonomy, then
 uses that authority to group the active Svelte, React, and GPUI previews.
 Jetstream receives generated metadata only; its shell remains deferred.
 
+`026` records the later specimen-catalogue audit. It freezes a human-centred
+rubric, inventories every page, pilots shared curation without another scene
+tree, and compiles bounded rollout cards after the conformance verdict.
+
 Jetstream is outside the g14 completion cohort. Its paired build and evidence
 remain opt-in and visibly deferred; a later backend-admission runway must run
 the adopted cases before promotion.
@@ -94,6 +104,7 @@ the adopted cases before promotion.
 23. [022 — Generation closeout](022-generation-closeout.md)
 24. [024 — Batched AudioMeter web surface](024-batched-audio-meter-web-surface.md) — ready; independent web-performance lane
 25. [025 — Preview catalogue taxonomy and generated navigation](025-preview-catalogue-taxonomy-and-generated-navigation.md) — complete; accepted in PR #16
+26. [026 — Human-centred specimen catalogue audit](026-human-centred-specimen-catalogue-audit.md) — blocked pending `008`
 
 ## Dispatch Rule
 
@@ -125,3 +136,7 @@ return as one PR for orchestrator review.
 
 `g14.025` is complete. PR #16 landed the generated catalogue authority and
 active-preview navigation after orchestrator taxonomy review.
+
+`g14.026` is deliberately later. Do not dispatch it before `008`; the pilot
+verdict decides whether a dedicated exhaustive `Conformance` tab is retained,
+revised, or removed.

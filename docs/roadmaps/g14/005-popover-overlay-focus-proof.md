@@ -11,7 +11,9 @@ contract-bound.
 
 ## Scope
 
-- Move Popover interface/specimen structure into shared authority.
+- Move Popover portable interface and executable cases into shared authority.
+  Preserve the curated catalogue specimen; an exhaustive projection, if
+  exposed, belongs in a separate `Conformance` tab.
 - Cover trigger/content regions, controlled open state, placement, Escape,
   outside interaction, request-close/event order, initial focus, and restore.
 - Observe layer relationship, role/name, focus path, placement result, token
@@ -25,7 +27,7 @@ contract-bound.
 - Placement geometry uses named bounded tolerances only.
 - Inert outside/Escape handling and broken focus restore fail.
 - Generic schema/runners gain no Popover-specific behaviour.
-- Redundant machine/specimen surfaces are removed and costed.
+- Redundant machine and executable fixture surfaces are removed and costed.
 
 ## Stop Conditions
 

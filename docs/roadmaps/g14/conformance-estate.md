@@ -7,9 +7,9 @@ Owner: Poodle orchestrator
 ## Problem Baseline
 
 Poodle has no component-level gate that proves the same portable interface,
-fixture, behaviour, semantic output, and specimen structure across the active
-Svelte, React, and GPUI cohort while preserving a renderer-neutral Rust
-boundary.
+executable fixture, behaviour, and semantic output across the active Svelte,
+React, and GPUI cohort while preserving a renderer-neutral Rust boundary.
+Catalogue specimen structure is a separate human-facing documentation concern.
 
 The previous frozen baseline measured:
 
@@ -58,8 +58,10 @@ recorded them as baseline (they are untouched by this card).
 ## Conformance Kernel Status (g14.001)
 
 One portable interface + one typed case corpus → Svelte / React / GPUI
-execution → normalized observations → three specimen views → one failing
-completion gate (spec 066, architecture 009, active-cohort working rules).
+execution → normalized observations → one failing completion gate (spec 066,
+architecture 009, active-cohort working rules). Curated catalogue specimens
+remain a separate documentation surface; an exhaustive projection may later
+appear in a dedicated `Conformance` tab.
 Delivered for Button:
 
 - **Portable interface module** — `packages/core/src/conformance/button.ts`.
@@ -100,8 +102,10 @@ Delivered for Button:
   workflow runs `ci:conformance-windowed`, including real GPUI execution and
   normalized comparison. Headless `qa`, `ci:conformance`, and `ci:native`
   stay window-free.
-- **Specimens** — all three active Button specimen pages are corpus
-  projections; hand-written specimen fixtures deleted.
+- **Catalogue correction** — g14 initially replaced all three active Button
+  specimen pages with corpus projections. Commit `8ac863b4` restored the last
+  curated pages. The corpus remains executable harness authority, not the
+  catalogue's teaching structure.
 - **Completion** — `effigy conformance:complete-windowed` passes
   the active cohort and reports Jetstream program-deferred, never passing.
   Removing the GPUI registration fails completion; an inert backend binding
@@ -144,7 +148,8 @@ generated JSON:
 
 - generic kernel: 2,947 LOC
 - Button pilot increment: 1,575 LOC, including 1,052 LOC of Button harness
-- replaced Button declaration and three active specimen fixtures: 619 LOC
+- replaced Button declaration plus the temporary specimen projection delta:
+  619 LOC. Curated specimen deletion no longer counts as pilot savings.
 
 The stop condition is triggered. The orchestrator accepts `g14.001` as a
 feasibility proof, not a rollout verdict. Cards `002`–`007` must reuse or
@@ -247,12 +252,12 @@ No experimental surface is architecture merely because it merged.
 | **g14.002 primitive capability roster + report** | keep — substrate certification beneath profile pilots | g14.010 |
 | **g14.003 RangeSlider controlled-control proof** | keep — second profile pilot; reuses Button harness path | g14.010 |
 | **hand-written ButtonSpec declaration surface** | replaced by `generated/button/mod.rs` + extension module | done |
-| **hand-written Button specimen fixtures (3 active runtimes)** | replaced by corpus projections; the Jetstream specimen stays deferred with its runtime | done |
-| **hand-written RangeSlider specimen fixtures (3 active runtimes)** | replaced by corpus projections | done |
+| **curated Button specimens (3 active runtimes)** | restored; keep as documentation, audit under g14.026 | g14.026 |
+| **curated RangeSlider specimens (3 active runtimes)** | restored; keep as documentation, audit under g14.026 | g14.026 |
 | **g14.004 Tabs identified-collection proof** | keep — stable keyed repeated anatomy and navigation profile | g14.010 |
-| **hand-written Tabs specimen fixtures (3 active runtimes)** | partially projected; retain web overflow/reorder and supported per-runtime close, decoration, panel, and scale coverage | g14.010 / g14.011 |
+| **curated Tabs specimens (3 active runtimes)** | restored; retain useful overflow/reorder, close, decoration, panel, and scale examples, then audit under the human-centred rubric | g14.026 |
 | **hand-written TabsSpec + Tabs machine vectors** | retain residual overflow/history/close/reorder claims not replaced by g14.004 | g14.010 / g14.011 |
-| **generated specimen scenes (specimen-ts/rust targets)** | still the shell/nav surface; Button no longer depends on them | g14.009 |
+| **generated specimen scenes (specimen-ts/rust targets)** | shell/nav support only; do not promote into a universal catalogue scene tree | g14.021 / g14.026 |
 
 ## Staged Licence Intake
 

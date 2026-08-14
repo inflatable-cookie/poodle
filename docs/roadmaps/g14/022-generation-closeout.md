@@ -17,7 +17,8 @@ and no false-start authority left active.
 - Full active-cohort conformance, web, Rust, native, docs, health, and diff
   boards pass. Paired Jetstream gates remain explicit deferred evidence rather
   than a closeout prerequisite.
-- Each active runtime's specimen/capture workflow is reproducible.
+- Each active runtime's curated specimen and conformance-capture workflows are
+  reproducible and visibly distinct.
 - Generation evidence records defects caught, parity gaps closed, total cost,
   known limits, and the later Jetstream admission program.
 

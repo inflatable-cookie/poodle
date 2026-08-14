@@ -12,8 +12,8 @@ Migrate collection, menu, tree, table, selection, and navigation components.
 - Stable repeated identity, selection, focus movement, keyboard routes,
   accessibility relationships, and event payloads pass in all active runtimes.
 - Large-data fixtures remain bounded and deterministic.
-- Existing collection/navigation specimen copies and redundant vectors leave
-  the active path.
+- Duplicate executable collection/navigation fixtures and redundant vectors
+  leave the active path. Curated specimen examples remain documentation.
 
 ## Stop Conditions
 

@@ -7,13 +7,16 @@ Governing ref: `../../specs/067-model-connection-management.md`
 ## Outcome
 
 Move the approved model-connection reference suite into the adopted shared
-case/specimen pipeline and complete Svelte, React, Rust declarations, shared
-renderer/node behavior, and GPUI execution. Keep Jetstream deferred.
+case pipeline and complete Svelte, React, Rust declarations, shared
+renderer/node behavior, and GPUI execution. Preserve the approved curated
+specimens. Keep Jetstream deferred.
 
 ## Goals
 
-- [ ] Author each portable interface and specimen structure once.
-- [ ] Replace temporary duplicate web specimen wrappers with shared cases.
+- [ ] Author each portable interface and executable case corpus once.
+- [ ] Keep the approved web specimens human-centred; share their ordered
+      outline later through the specimen-catalogue lane rather than replacing
+      them with exhaustive cases.
 - [ ] Add normalized semantic observations for selection, setup stages,
       disclosure/enable separation, reorder, visibility, focus, and status.
 - [ ] Add Rust declarations and shared renderer/node support without a
@@ -22,7 +25,8 @@ renderer/node behavior, and GPUI execution. Keep Jetstream deferred.
 
 ## Acceptance Criteria
 
-- [ ] Every reviewed specimen comes from shared cases.
+- [ ] Every reviewed specimen remains useful documentation; executable case
+      coverage is assessed separately.
 - [ ] Required interactions execute and compare in all active runtimes.
 - [ ] Missing provider marks or host-rendered config are represented as
       composition inputs, not native omissions.

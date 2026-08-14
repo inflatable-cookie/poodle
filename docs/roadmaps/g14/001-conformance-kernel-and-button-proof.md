@@ -1,5 +1,9 @@
 # g14.001 — Conformance Kernel And Button Proof
 
+Post-completion correction: commit `8ac863b4` restored the curated Button
+specimens. The corpus still owns executable fixtures and exhaustive evidence;
+it no longer replaces the catalogue `Examples` view.
+
 Status: complete — replacement proof accepted in PR #10
 Depends on: none
 Governing spec: `../../specs/066-executable-component-conformance.md`
@@ -12,7 +16,7 @@ Deliver the smallest complete conformance loop through Button:
 one portable interface + one typed case corpus
   -> Svelte / React / GPUI execution
   -> normalized observations
-  -> three active specimen views
+  -> optional exhaustive diagnostic projections
   -> one failing completion gate
 ```
 
@@ -38,11 +42,12 @@ PR #10's replacement pass closes the proof blockers:
   GPUI focus, token, or input evidence
 - remeasure cost after removing copied artifacts and the Jetstream execution
   lane; stop again if reusable mechanism still grows faster than replaced
-  declarations and specimen structure without a concrete amortization proof
+  declarations and executable fixtures without a concrete amortization proof
 
 The final measurement still triggers the cost stop: 2,947 LOC of generic
-kernel plus a 1,575-LOC Button pilot increment replaces 619 LOC of declarations
-and specimen fixtures. The orchestrator accepts this as a bounded feasibility
+kernel plus a 1,575-LOC Button pilot increment was initially measured against
+619 LOC of declarations and specimen fixtures. Curated specimen deletion is no
+longer accepted as replacement credit. The orchestrator accepts this as a bounded feasibility
 proof because it establishes the missing executable guarantee; it is not an
 economics verdict for rollout. Cards `002`–`007` must demonstrate reuse rather
 than clone the 1,052-LOC Button harness. Card `008` retains the
@@ -59,7 +64,7 @@ Headless `qa` and `ci:native` remain unchanged; Jetstream remains deferred.
 2. Add the constrained portable interface module for Button. Svelte and React
    consume its portable types; generated Rust replaces the equivalent
    `ButtonSpec` declaration surface. Keep platform extensions explicit.
-3. Add a typed Button case corpus with fixture, specimen metadata, actions,
+3. Add a typed Button case corpus with fixture, diagnostic projection metadata, actions,
    and assertions. Emit deterministic neutral JSON for Rust.
 4. Implement thin harnesses for Svelte, React, and GPUI. Exercise the real
    Button implementation and GPUI backend event path; no mock renderer may
@@ -68,8 +73,8 @@ Headless `qa` and `ci:native` remain unchanged; Jetstream remains deferred.
 5. Emit `component-observation.v1` from each runtime and compare exact Button
    part, role/name/state, token role, focusability, event order, and bounded
    geometry.
-6. Make all three active Button specimen pages project the same case
-   structure. Keep runtime chrome outside the case.
+6. Make all three active runtime adapters consume the same case structure.
+   Keep any exhaustive projection separate from the curated catalogue.
 7. Add `conformance:build`, `conformance:check`, selected
    `conformance:test`, `conformance:test-windowed`,
    `conformance:complete-windowed`, and `conformance:cost` Effigy selectors.
@@ -97,8 +102,8 @@ stable case and capture IDs.
   shells and Rust generation or compile without editing a second type mirror.
 - An unknown fixture prop, region, part, state, event, enum value, or axis fails
   authoring or serialization; it cannot be ignored by every runtime.
-- Changing a fixture/group/caption changes all three active specimen
-  projections.
+- Changing a fixture/group/caption changes all three active runtime executions
+  and any optional diagnostic projections.
 - A planted event, role, token-role, part, or geometry divergence fails and
   names runtime, case, step, and field.
 - A required field that GPUI cannot observe fails GPUI completion rather than
@@ -110,7 +115,7 @@ stable case and capture IDs.
   name, or Button-specific tree branch.
 - Double generation is byte-identical; check mode never mutates the tree and
   catches orphans.
-- Existing hand-written portable declarations and duplicate specimen fixture
+- Existing hand-written portable declarations and duplicate executable fixture
   content are removed, not left beside the new authority.
 - Full cost report shows every mechanism line and what it replaced.
 - `conformance:complete-windowed --component button` passes the active cohort and
