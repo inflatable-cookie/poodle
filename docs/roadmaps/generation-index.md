@@ -14,16 +14,16 @@ Updated: 2026-08-14
     GPUI. One portable interface and case/specimen corpus; two implementation
     substrates; three executed observations; strict active-cohort completion.
     Jetstream remains a deferred backend over the same Rust boundary.
-  - Runway: `001`–`003` are accepted; `004`–`007` prove the remaining component
+  - Runway: `001`–`004` are accepted; `005`–`007` prove the remaining component
     profiles; `008` records adopt/revise/reject. `009`–`014` remain blocked
     until adopt. `015`–`017` stage and complete the licence surface;
     `018`–`020` do the same for model connections; `021` cleans the estate,
     `022` closes the generation, interposed `023` replaces foreground GPUI
     conformance before profile `005`, and independent `024` adds the batched
     AudioMeter web rendering tier.
-  - Next: close review of `g14.004`, then dispatch `g14.023`. `g14.019` is
-    complete; the model-connection web reference is approved. `g14.024` is
-    ready to run in a separate web-performance worktree.
+  - Next: dispatch `g14.023`. `g14.019` is complete; the model-connection web
+    reference is approved. `g14.024` is ready to run in a separate
+    web-performance worktree.
 
 ## Latest Completed Track
 

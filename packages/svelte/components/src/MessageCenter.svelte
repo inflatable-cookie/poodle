@@ -5,6 +5,7 @@
   import { default as Icon } from "./Icon.svelte";
   import { default as IconButton } from "./IconButton.svelte";
   import { default as Popover } from "./Popover.svelte";
+  import { default as Progress } from "./Progress.svelte";
   import { default as TimeAgo } from "./TimeAgo.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
@@ -141,7 +142,7 @@
         <ul class="poodle-message-center__list">
           {#each items as item (item.id)}
             <li class="poodle-message-center__item" data-read={item.read} data-tone={item.tone ?? "info"}>
-              {#if onItemSelect}
+              {#if onItemSelect && item.selectable !== false}
                 <button
                   type="button"
                   class="poodle-message-center__content poodle-message-center__content--interactive"
@@ -156,31 +157,33 @@
                 </div>
               {/if}
 
-              <div class="poodle-message-center__actions">
-                {#if onReadChange}
-                  <IconButton
-                    icon={item.read ? "mail" : "check"}
-                    ariaLabel={item.read ? `Mark ${item.title} unread` : `Mark ${item.title} read`}
-                    tooltip={item.read ? "Mark unread" : "Mark read"}
-                    variant="ghost"
-                    size="xs"
-                    density={resolvedDensity}
-                    onClick={() => onReadChange?.(item.id, !item.read)}
-                  />
-                {/if}
-                {#if onRemove}
-                  <IconButton
-                    icon="trash-2"
-                    ariaLabel={`Remove ${item.title}`}
-                    tooltip="Remove"
-                    variant="ghost"
-                    tone="danger"
-                    size="xs"
-                    density={resolvedDensity}
-                    onClick={() => onRemove?.(item.id)}
-                  />
-                {/if}
-              </div>
+              {#if (onReadChange && item.readControl !== false) || (onRemove && item.removable !== false)}
+                <div class="poodle-message-center__actions">
+                  {#if onReadChange && item.readControl !== false}
+                    <IconButton
+                      icon={item.read ? "mail" : "check"}
+                      ariaLabel={item.read ? `Mark ${item.title} unread` : `Mark ${item.title} read`}
+                      tooltip={item.read ? "Mark unread" : "Mark read"}
+                      variant="ghost"
+                      size="xs"
+                      density={resolvedDensity}
+                      onClick={() => onReadChange?.(item.id, !item.read)}
+                    />
+                  {/if}
+                  {#if onRemove && item.removable !== false}
+                    <IconButton
+                      icon="trash-2"
+                      ariaLabel={`Remove ${item.title}`}
+                      tooltip="Remove"
+                      variant="ghost"
+                      tone="danger"
+                      size="xs"
+                      density={resolvedDensity}
+                      onClick={() => onRemove?.(item.id)}
+                    />
+                  {/if}
+                </div>
+              {/if}
             </li>
           {/each}
         </ul>
@@ -210,6 +213,15 @@
           <TimeAgo datetime={item.timestamp} short typography="inherit" />
         {/if}
       </span>
+    {/if}
+    {#if item.progress}
+      <Progress
+        value={item.progress.value}
+        max={item.progress.max ?? 100}
+        indeterminate={item.progress.indeterminate ?? false}
+        size="xs"
+        ariaLabel={`${item.title} progress`}
+      />
     {/if}
   </span>
 {/snippet}

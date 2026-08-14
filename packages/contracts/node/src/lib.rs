@@ -39,6 +39,11 @@ pub struct Node {
     /// and animation clocks. An animation's `key` also becomes the id when no
     /// explicit one is set.
     pub id: Option<String>,
+    /// Stable backend-state identity when the semantic [`Self::id`] can repeat
+    /// across component instances. Observers and accessibility relationships
+    /// continue to use `id`; backends use this key for element state, focus,
+    /// editing, and gesture caches.
+    pub runtime_id: Option<String>,
     pub kind: NodeKind,
     pub style: NodeStyle,
     pub position: NodePosition,
@@ -550,7 +555,11 @@ pub struct Interaction {
     /// context menu.
     pub on_context: Option<Arc<dyn Fn(NodePoint) + Send + Sync>>,
     /// Navigation and command keys, while this node holds focus.
-    pub on_key: Option<Arc<dyn Fn(NodeKey, NodeModifiers) + Send + Sync>>,
+    ///
+    /// Returning an element id asks the backend to move focus there. The
+    /// component chooses the semantic destination; the backend owns the
+    /// actual platform focus operation.
+    pub on_key: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>>,
     /// Marks this node as a drag source carrying an opaque payload id. The
     /// component chooses the id; the backend only carries it back.
     pub drag_payload: Option<String>,
@@ -603,6 +612,7 @@ pub enum NodeRole {
     Switch,
     Tab,
     TabList,
+    TabPanel,
     TextInput,
     Toolbar,
     Tooltip,
@@ -698,6 +708,13 @@ pub struct NodeA11y {
     pub label: Option<String>,
     pub expanded: Option<bool>,
     pub selected: Option<bool>,
+    /// Roving traversal marker. `0` is the current traversal stop; `-1`
+    /// remains programmatically focusable but is skipped by sequential focus.
+    pub tab_index: Option<i32>,
+    /// Semantic part relationships, normalized before backend projection.
+    pub controls: Option<String>,
+    pub labelled_by: Option<String>,
+    pub orientation: Option<String>,
     pub toggled: Option<NodeToggled>,
     /// Hierarchy level (1-based) — a treeitem's depth, announced as
     /// "level N" rather than inferred from indentation nobody can see.

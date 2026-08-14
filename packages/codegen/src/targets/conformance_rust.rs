@@ -7,7 +7,7 @@
 //! with `--target conformance-rust`; not in [`super::all`].
 
 use crate::conformance::{portable_props, rust_field_name, ComponentInterface, PortableProp};
-use crate::emit::{GeneratedFile, header};
+use crate::emit::{header, GeneratedFile};
 use crate::error::Result;
 
 /// Target id accepted by `--target` in conformance mode.
@@ -16,10 +16,10 @@ pub const ID: &str = "conformance-rust";
 /// Output root relative to `--out` (the consuming crate's `src/`).
 pub const OUTPUT_ROOT: &str = "generated";
 
-/// Renders one file per declared component: `<id>.rs`.
+/// Renders one module per declared component: `<id>/mod.rs`.
 pub fn render(interface: &ComponentInterface, source_path: &str) -> Result<Vec<GeneratedFile>> {
     Ok(vec![GeneratedFile::new(
-        format!("{}.rs", interface.id),
+        format!("{}/mod.rs", interface.id),
         render_declaration(interface, source_path),
     )])
 }
@@ -87,10 +87,15 @@ fn generated_enum(prop: &PortableProp) -> Option<String> {
         .clone()
         .unwrap_or_else(|| pascal_case(&prop.name));
     let values = prop.kind.values.as_deref().unwrap_or_default();
-    let mut out = format!("#[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]\npub enum {name} {{\n");
+    let mut out =
+        format!("#[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]\npub enum {name} {{\n");
     for value in values {
         let variant = variant_name(value);
-        let default = if value == "default" { "#[default] " } else { "" };
+        let default = if value == "default" {
+            "#[default] "
+        } else {
+            ""
+        };
         out.push_str(&format!("    {default}{variant},\n"));
     }
     out.push_str("}\n");
@@ -106,9 +111,16 @@ fn prop_type(prop: &PortableProp) -> String {
         "icon" => "String".to_owned(),
         "dimension" => "crate::types::Dimension".to_owned(),
         "string" => "String".to_owned(),
+        "collection" => format!(
+            "Vec<crate::types::{}>",
+            prop.kind
+                .rust_type
+                .as_deref()
+                .unwrap_or("serde_json::Value")
+        ),
         "enum" => {
             if let Some(rust_type) = &prop.rust_type {
-                format!("crate::types::{rust_type}")
+                rust_named_type(rust_type)
             } else {
                 prop.rust_enum_name
                     .clone()
@@ -125,13 +137,23 @@ fn prop_type(prop: &PortableProp) -> String {
 }
 
 fn struct_name(interface: &ComponentInterface) -> String {
-    format!("{}Spec", pascal_case(&interface.id))
+    let suffix = if interface.profile == "collection" {
+        "PortableSpec"
+    } else {
+        "Spec"
+    };
+    format!("{}{suffix}", pascal_case(&interface.id))
+}
+
+fn rust_named_type(name: &str) -> String {
+    match name {
+        "ActiveEdge" | "ActiveFill" => format!("crate::tabs::{name}"),
+        _ => format!("crate::types::{name}"),
+    }
 }
 
 fn render_struct(struct_name: &str, props: &[&PortableProp]) -> String {
-    let mut out = format!(
-        "#[derive(Clone, Debug, Eq, PartialEq)]\npub struct {struct_name} {{\n"
-    );
+    let mut out = format!("#[derive(Clone, Debug, Eq, PartialEq)]\npub struct {struct_name} {{\n");
     for prop in props {
         out.push_str(&format!(
             "    pub {}: {},\n",
@@ -168,7 +190,7 @@ fn rust_default(prop: &PortableProp) -> String {
     }
     if prop.kind.kind == "enum" {
         let name = if let Some(rust_type) = &prop.rust_type {
-            format!("crate::types::{rust_type}")
+            rust_named_type(rust_type)
         } else {
             prop.rust_enum_name
                 .clone()
@@ -185,7 +207,9 @@ fn rust_default(prop: &PortableProp) -> String {
 }
 
 fn render_builders(struct_name: &str, props: &[&PortableProp]) -> String {
-    let mut out = format!("impl {struct_name} {{\n    pub fn new() -> Self {{\n        Self::default()\n    }}\n\n");
+    let mut out = format!(
+        "impl {struct_name} {{\n    pub fn new() -> Self {{\n        Self::default()\n    }}\n\n"
+    );
     for prop in props {
         out.push_str(&render_builder(prop));
         out.push('\n');
@@ -200,7 +224,10 @@ fn render_builder(prop: &PortableProp) -> String {
     let ty = prop_type(prop);
     let (param, assign) = if ty.starts_with("Option<") {
         match ty.as_str() {
-            "Option<String>" => ("impl Into<String>".to_owned(), format!("self.{field} = Some(value.into());")),
+            "Option<String>" => (
+                "impl Into<String>".to_owned(),
+                format!("self.{field} = Some(value.into());"),
+            ),
             "Option<crate::types::Dimension>" => (
                 "impl Into<crate::types::Dimension>".to_owned(),
                 format!("self.{field} = Some(value.into());"),

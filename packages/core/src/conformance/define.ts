@@ -19,13 +19,23 @@ import { assertKnownCapabilities, type PrimitiveCapabilityId } from "./primitive
 
 // ── Interface declarations ─────────────────────────────────────────────────
 
-export type ScalarTypeDef =
+export type ItemScalarTypeDef =
   | { kind: "boolean" }
   | { kind: "string" }
   | { kind: "icon" }
+  | { kind: "number" };
+
+export interface ItemFieldDecl {
+  name: string;
+  type: ItemScalarTypeDef;
+  optional?: boolean;
+}
+
+export type ScalarTypeDef =
+  | ItemScalarTypeDef
   | { kind: "dimension" }
-  | { kind: "number" }
   | { kind: "numberPair" }
+  | { kind: "collection"; fields: readonly ItemFieldDecl[]; rustType: string }
   | { kind: "enum"; values: readonly string[] };
 
 export interface PropDecl {
@@ -33,7 +43,7 @@ export interface PropDecl {
   name: string;
   type: ScalarTypeDef;
   /** Literal default, serializable to JSON. */
-  default: boolean | string | number | readonly [number, number] | null;
+  default: boolean | string | number | readonly [number, number] | readonly object[] | null;
   /** Accepts null (absent value) in addition to the default. */
   nullable?: boolean;
   /** Rust field name when not the mechanical camelCase → snake_case form. */
@@ -70,13 +80,14 @@ export interface RegionDecl {
 /** Web part resolution: how the web adapter finds the part in the DOM. */
 export type WebResolution =
   | { kind: "self" }
-  | { kind: "class"; className: string; attribute?: string }
+  | { kind: "class"; className: string; attribute?: string; keyAttribute?: string }
   | { kind: "icon"; position: "first" | "last"; gatedBy: string; selector: string; attribute: string };
 
 /** Native part resolution: how the node observer finds the part in the tree. */
 export type NativeResolution =
   | { kind: "self" }
   | { kind: "id"; id: string }
+  | { kind: "id-template"; template: string }
   | { kind: "root-label" }
   | { kind: "first-text" }
   | { kind: "icon-side"; side: "leading" | "trailing"; except: readonly string[] }
@@ -88,6 +99,9 @@ export interface PartDecl {
   role?: string;
   /** What the part carries, for observation. */
   contains?: "label" | "text" | "icon";
+  /** Repeated part keyed by one field of a collection prop. Cases address it
+   * as `<id>:<semantic-key>`; runtime indices never enter the corpus. */
+  repeat?: { prop: string; key: string; webIdPrefix?: string };
   resolve: { web: WebResolution; native: NativeResolution };
 }
 
@@ -190,6 +204,25 @@ export function validateInterface(config: InterfaceConfig): void {
   for (const part of config.parts) {
     if (partIds.has(part.id)) throw new Error(`duplicate part '${part.id}'`);
     partIds.add(part.id);
+    if (part.repeat) {
+      const prop = config.props.find((candidate) => candidate.name === part.repeat?.prop);
+      if (!prop || prop.type.kind !== "collection") {
+        throw new Error(`part '${part.id}' repeats unknown collection prop '${part.repeat.prop}'`);
+      }
+      const keyField = prop.type.fields.find((field) => field.name === part.repeat?.key);
+      if (!keyField) {
+        throw new Error(`part '${part.id}' repeats unknown key '${part.repeat.key}'`);
+      }
+      if (keyField.type.kind !== "string") {
+        throw new Error(`part '${part.id}' repeated key '${part.repeat.key}' must be a string field`);
+      }
+      if (part.resolve.web.kind !== "class" || !part.resolve.web.keyAttribute) {
+        throw new Error(`repeated part '${part.id}' needs a web class keyAttribute`);
+      }
+      if (part.resolve.native.kind !== "id-template" || !part.resolve.native.template.includes("{key}")) {
+        throw new Error(`repeated part '${part.id}' needs a native id-template containing '{key}'`);
+      }
+    }
     if (!part.role && !part.contains && part.resolve.native.kind !== "self") {
       throw new Error(`part '${part.id}' needs a role or a payload`);
     }
@@ -263,11 +296,30 @@ export type ScalarToTs<S extends ScalarTypeDef, Nullable extends boolean> =
       ? Nullable extends true ? number | null : number
       : S extends { kind: "numberPair" }
         ? Nullable extends true ? [number, number] | null : [number, number]
+        : S extends { kind: "collection"; fields: readonly ItemFieldDecl[] }
+          ? Nullable extends true ? CollectionItemToTs<S["fields"]>[] | null : CollectionItemToTs<S["fields"]>[]
         : S extends { kind: "enum"; values: readonly string[] }
           ? Nullable extends true ? S["values"][number] | null : S["values"][number]
           : S extends { kind: "string" | "icon" | "dimension" }
             ? Nullable extends true ? string | null : string
             : never;
+
+type ItemScalarToTs<S extends ItemScalarTypeDef> = S extends { kind: "boolean" }
+  ? boolean
+  : S extends { kind: "number" }
+    ? number
+    : string;
+
+type RequiredCollectionFields<F extends readonly ItemFieldDecl[]> = {
+  [P in F[number] as P extends { optional: true } ? never : P["name"]]: ItemScalarToTs<P["type"]>;
+};
+
+type OptionalCollectionFields<F extends readonly ItemFieldDecl[]> = {
+  [P in F[number] as P extends { optional: true } ? P["name"] : never]?: ItemScalarToTs<P["type"]>;
+};
+
+export type CollectionItemToTs<F extends readonly ItemFieldDecl[]> =
+  RequiredCollectionFields<F> & OptionalCollectionFields<F>;
 
 export type PayloadToTs<P> = {
   [K in keyof P]: P[K] extends "boolean"
@@ -347,7 +399,13 @@ export type SerializedCaseStep =
   | { kind: "expectEvents"; events: string[] };
 
 /** Fixture prop values in the neutral JSON (includes structured numbers). */
-export type SerializedFixtureProp = string | boolean | number | readonly [number, number] | null;
+export type SerializedFixtureProp =
+  | string
+  | boolean
+  | number
+  | readonly [number, number]
+  | readonly Record<string, string | boolean | number>[]
+  | null;
 
 /** The loose, runtime-shaped case in the neutral JSON. */
 export interface SerializedCase {
@@ -407,22 +465,37 @@ export interface PartExpectation<I extends InterfaceConfig> {
   value?: number | readonly [number, number];
   present?: boolean;
   focusable?: boolean;
+  focused?: boolean;
+  focusVisible?: boolean;
+  tabbable?: boolean;
+  selected?: boolean;
+  orientation?: "horizontal" | "vertical";
+  controls?: string;
+  labelledBy?: string;
   states?: Partial<Record<StateNamesOf<I>, boolean>>;
   tokenRoles?: Partial<Record<TokenRoleNamesOf<I>, string>>;
   geometry?: GeometryExpectation;
 }
 
+export type CasePartId<I extends InterfaceConfig> = I["parts"][number] extends infer P
+  ? P extends { id: infer Id extends string; repeat: object }
+    ? `${Id}:${string}`
+    : P extends { id: infer Id extends string }
+      ? Id
+      : never
+  : never;
+
 export type CaseStep<I extends InterfaceConfig> =
-  | { kind: "action"; name: "press" | "focus"; part: PartIdsOf<I>; input?: "pointer" | "keyboard" }
-  | { kind: "action"; name: "key"; part: PartIdsOf<I>; key: string }
+  | { kind: "action"; name: "press" | "focus"; part: CasePartId<I>; input?: "pointer" | "keyboard" }
+  | { kind: "action"; name: "key"; part: CasePartId<I>; key: string }
   | {
       kind: "action";
       name: "scrub";
-      part: PartIdsOf<I>;
+      part: CasePartId<I>;
       fraction: number;
       phase: "press" | "drag" | "release";
     }
-  | { kind: "expectPart"; part: PartIdsOf<I>; expect: PartExpectation<I> }
+  | { kind: "expectPart"; part: CasePartId<I>; expect: PartExpectation<I> }
   | { kind: "expectEvents"; events: EventNamesOf<I>[] };
 
 export interface ComponentCase<I extends InterfaceConfig = InterfaceConfig> {
@@ -471,6 +544,30 @@ export function validateCase<I extends InterfaceConfig>(
         throw new Error(`case '${config.id}' prop '${key}' must be a [number, number] pair`);
       }
     }
+    if (prop.type.kind === "collection" && value !== null) {
+      if (!Array.isArray(value)) {
+        throw new Error(`case '${config.id}' prop '${key}' must be a collection`);
+      }
+      for (const [index, item] of value.entries()) {
+        if (typeof item !== "object" || item === null || Array.isArray(item)) {
+          throw new Error(`case '${config.id}' prop '${key}' item ${index} must be an object`);
+        }
+        const itemRecord = item as Record<string, unknown>;
+        for (const field of prop.type.fields) {
+          const fieldValue = itemRecord[field.name];
+          if (fieldValue === undefined && field.optional) continue;
+          const expectedType = field.type.kind === "number" ? "number" : field.type.kind === "boolean" ? "boolean" : "string";
+          if (typeof fieldValue !== expectedType) {
+            throw new Error(`case '${config.id}' prop '${key}' item ${index} field '${field.name}' must be ${expectedType}`);
+          }
+        }
+        for (const fieldName of Object.keys(itemRecord)) {
+          if (!prop.type.fields.some((field) => field.name === fieldName)) {
+            throw new Error(`case '${config.id}' prop '${key}' item ${index} uses unknown field '${fieldName}'`);
+          }
+        }
+      }
+    }
   }
   void propNames;
   const regionNames = new Set(iface.regions.map((r) => r.name));
@@ -479,7 +576,34 @@ export function validateCase<I extends InterfaceConfig>(
       throw new Error(`case '${config.id}' uses unknown region '${key}'`);
     }
   }
-  const partIds = new Set(iface.parts.map((p) => p.id));
+  const partIds = new Set(iface.parts.filter((p) => !p.repeat).map((p) => p.id));
+  const repeatedPartKeys = new Map<string, Set<string>>();
+  for (const part of iface.parts) {
+    if (!part.repeat) continue;
+    const collection = (config.fixture.props as Record<string, unknown>)[part.repeat.prop];
+    const keys = new Set<string>();
+    if (Array.isArray(collection)) {
+      for (const [index, item] of collection.entries()) {
+        const key = (item as Record<string, unknown>)[part.repeat.key];
+        if (typeof key !== "string" || key.length === 0) {
+          throw new Error(
+            `case '${config.id}' prop '${part.repeat.prop}' item ${index} key '${part.repeat.key}' must be a non-empty string`,
+          );
+        }
+        if (keys.has(key)) {
+          throw new Error(`case '${config.id}' prop '${part.repeat.prop}' has duplicate key '${key}'`);
+        }
+        keys.add(key);
+      }
+    }
+    repeatedPartKeys.set(part.id, keys);
+  }
+  const partIsKnown = (part: string): boolean => {
+    if (partIds.has(part)) return true;
+    const separator = part.indexOf(":");
+    if (separator <= 0 || separator >= part.length - 1) return false;
+    return repeatedPartKeys.get(part.slice(0, separator))?.has(part.slice(separator + 1)) ?? false;
+  };
   const stateNames = new Set(iface.states.map((s) => s.name));
   const eventNames = new Set(iface.events.map((e) => e.name));
   const tokenNames = new Set(iface.tokenRoles.map((t) => t.name));
@@ -494,7 +618,7 @@ export function validateCase<I extends InterfaceConfig>(
     switch (step.kind) {
       case "action": {
         sawAction = true;
-        if (!partIds.has(step.part)) {
+        if (!partIsKnown(step.part)) {
           throw new Error(`case '${config.id}' action targets unknown part '${step.part}'`);
         }
         if (step.name === "key" && (!("key" in step) || !step.key)) {
@@ -511,7 +635,7 @@ export function validateCase<I extends InterfaceConfig>(
         break;
       }
       case "expectPart": {
-        if (!partIds.has(step.part)) {
+        if (!partIsKnown(step.part)) {
           throw new Error(`case '${config.id}' expects unknown part '${step.part}'`);
         }
         for (const state of Object.keys(step.expect.states ?? {})) {
@@ -643,22 +767,22 @@ export function serializeCases<I extends InterfaceConfig>(
 }
 
 export function actionPress<I extends InterfaceConfig>(
-  part: PartIdsOf<I>,
+  part: CasePartId<I>,
   input: "pointer" | "keyboard" = "pointer",
 ): CaseStep<I> {
   return { kind: "action", name: "press", part, input };
 }
 
-export function actionFocus<I extends InterfaceConfig>(part: PartIdsOf<I>): CaseStep<I> {
+export function actionFocus<I extends InterfaceConfig>(part: CasePartId<I>): CaseStep<I> {
   return { kind: "action", name: "focus", part };
 }
 
-export function actionKey<I extends InterfaceConfig>(part: PartIdsOf<I>, key: string): CaseStep<I> {
+export function actionKey<I extends InterfaceConfig>(part: CasePartId<I>, key: string): CaseStep<I> {
   return { kind: "action", name: "key", part, key };
 }
 
 export function actionScrub<I extends InterfaceConfig>(
-  part: PartIdsOf<I>,
+  part: CasePartId<I>,
   fraction: number,
   phase: "press" | "drag" | "release" = "press",
 ): CaseStep<I> {
@@ -666,7 +790,7 @@ export function actionScrub<I extends InterfaceConfig>(
 }
 
 export function expectPart<I extends InterfaceConfig>(
-  part: PartIdsOf<I>,
+  part: CasePartId<I>,
   expect: PartExpectation<I>,
 ): CaseStep<I> {
   return { kind: "expectPart", part, expect };

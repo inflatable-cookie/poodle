@@ -400,6 +400,7 @@ export type {
   MediaUploadWorkflowStep,
   MediaState,
   MessageCenterItem,
+  MessageCenterItemProgress,
   HistoryEntry,
   HistoryEntryPosition,
   HistoryBranch,

@@ -322,7 +322,10 @@ fn render_row(
     if let (false, Some(handler)) = (node.is_disabled, &handlers.on_key) {
         let handler = Arc::clone(handler);
         let value = node.value.clone();
-        row.interaction.on_key = Some(Arc::new(move |key, mods| handler(&value, key, mods)));
+        row.interaction.on_key = Some(Arc::new(move |key, mods| {
+            handler(&value, key, mods);
+            None
+        }));
     }
 
     // Reorder: every row is both a source and a zone, so a row can be dropped

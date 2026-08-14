@@ -16,7 +16,11 @@ export interface ProjectedInstance {
   caseId: string;
   caption: string;
   label: string;
-  props: Record<string, string | boolean | number | readonly [number, number] | null>;
+  props: Record<
+    string,
+    string | boolean | number | readonly [number, number] |
+      readonly Record<string, string | boolean | number>[] | null
+  >;
   leadingIcon: string | null;
   trailingIcon: string | null;
   /** Whether this instance is an interactive (behaviour) case. */
@@ -36,7 +40,11 @@ function enumValues(iface: SerializedComponentInterface, propName: string): stri
 function instanceFor(
   caseData: SerializedCase,
   caption: string,
-  props: Record<string, string | boolean | number | readonly [number, number] | null>,
+  props: Record<
+    string,
+    string | boolean | number | readonly [number, number] |
+      readonly Record<string, string | boolean | number>[] | null
+  >,
 ): ProjectedInstance {
   return {
     caseId: caseData.id,

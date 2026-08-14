@@ -14,14 +14,16 @@ use poodle_node::Node;
 use poodle_render::conformance::InterfaceDoc;
 use serde_json::Value;
 
-#[path = "../conformance_driver.rs"]
-mod conformance_driver;
 #[path = "../conformance_button.rs"]
 mod conformance_button;
+#[path = "../conformance_driver.rs"]
+mod conformance_driver;
 #[path = "../conformance_range_slider.rs"]
 mod conformance_range_slider;
 #[path = "../conformance_support.rs"]
 mod conformance_support;
+#[path = "../conformance_tabs.rs"]
+mod conformance_tabs;
 #[path = "../primitive_probes_gpui.rs"]
 mod primitive_probes_gpui;
 
@@ -31,6 +33,7 @@ use conformance_driver::{
     ConformanceRoot, EXIT_CODE,
 };
 use conformance_range_slider::{drive_range_slider_cases, range_slider_report};
+use conformance_tabs::{drive_tabs_cases, tabs_report};
 use primitive_probes_gpui::drive_primitive_probes;
 
 fn parse_args(args: &[String]) -> (bool, Option<String>, Option<PathBuf>) {
@@ -50,8 +53,8 @@ fn run_button_mode(only: Option<String>, out: Option<PathBuf>) {
         std::process::exit(1);
     }
 
-    let interface: Value = serde_json::from_str(conformance_support::INTERFACE)
-        .expect("committed interface parses");
+    let interface: Value =
+        serde_json::from_str(conformance_support::INTERFACE).expect("committed interface parses");
     let iface = InterfaceDoc::parse(&interface).expect("interface parses");
     let cases: Value =
         serde_json::from_str(conformance_support::CASES).expect("committed corpus parses");
@@ -66,9 +69,8 @@ fn run_button_mode(only: Option<String>, out: Option<PathBuf>) {
         .cloned()
         .unwrap_or_default();
 
-    let range_interface: Value =
-        serde_json::from_str(conformance_support::RANGE_SLIDER_INTERFACE)
-            .expect("range-slider interface parses");
+    let range_interface: Value = serde_json::from_str(conformance_support::RANGE_SLIDER_INTERFACE)
+        .expect("range-slider interface parses");
     let range_iface = InterfaceDoc::parse(&range_interface).expect("range-slider interface parses");
     let range_cases: Value = serde_json::from_str(conformance_support::RANGE_SLIDER_CASES)
         .expect("range-slider corpus parses");
@@ -83,10 +85,28 @@ fn run_button_mode(only: Option<String>, out: Option<PathBuf>) {
         .cloned()
         .unwrap_or_default();
 
+    let tabs_interface: Value =
+        serde_json::from_str(conformance_support::TABS_INTERFACE).expect("tabs interface parses");
+    let tabs_iface = InterfaceDoc::parse(&tabs_interface).expect("tabs interface parses");
+    let tabs_cases: Value =
+        serde_json::from_str(conformance_support::TABS_CASES).expect("tabs corpus parses");
+    let tabs_component = tabs_cases
+        .get("component")
+        .and_then(Value::as_str)
+        .unwrap_or("tabs")
+        .to_owned();
+    let tabs_case_list = tabs_cases
+        .get("cases")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+
     let outcomes: Arc<Mutex<Vec<CaseOutcome>>> = Arc::new(Mutex::new(Vec::new()));
     let range_outcomes: Arc<Mutex<Vec<CaseOutcome>>> = Arc::new(Mutex::new(Vec::new()));
+    let tabs_outcomes: Arc<Mutex<Vec<CaseOutcome>>> = Arc::new(Mutex::new(Vec::new()));
     let outcomes_in_run = Arc::clone(&outcomes);
     let range_outcomes_in_run = Arc::clone(&range_outcomes);
+    let tabs_outcomes_in_run = Arc::clone(&tabs_outcomes);
 
     Application::new()
         .with_assets(conformance_assets())
@@ -107,9 +127,12 @@ fn run_button_mode(only: Option<String>, out: Option<PathBuf>) {
                     let cases = case_list.clone();
                     let range_iface = range_iface.clone();
                     let range_cases = range_case_list.clone();
+                    let tabs_iface = tabs_iface.clone();
+                    let tabs_cases = tabs_case_list.clone();
                     let only = only.clone();
                     let out = out.clone();
                     let range_component = range_component.clone();
+                    let tabs_component = tabs_component.clone();
                     window
                         .spawn(cx, async move |cx| {
                             let results = drive_button_cases(
@@ -128,24 +151,44 @@ fn run_button_mode(only: Option<String>, out: Option<PathBuf>) {
                             *outcomes_in_run.lock().expect("outcomes lock") = results;
                             write_or_print_report(out.as_ref(), &report);
 
-                            let range_results =
-                                drive_range_slider_cases(cx, range_iface, range_cases, only).await;
-                            let range_report = range_slider_report(&range_component, &range_results);
+                            let range_results = drive_range_slider_cases(
+                                cx,
+                                range_iface,
+                                range_cases,
+                                only.clone(),
+                            )
+                            .await;
+                            let range_report =
+                                range_slider_report(&range_component, &range_results);
                             let range_failed = range_results.iter().filter(|o| !o.pass).count();
                             if range_failed > 0 {
                                 EXIT_CODE.store(1, Ordering::SeqCst);
                             }
                             *range_outcomes_in_run.lock().expect("range outcomes lock") =
                                 range_results;
-                            let range_out = out.as_ref().map(|path| {
-                                path.with_file_name("gpui-range-slider.json")
-                            });
+                            let range_out = out
+                                .as_ref()
+                                .map(|path| path.with_file_name("gpui-range-slider.json"));
                             write_or_print_report(range_out.as_ref(), &range_report);
 
-                            if failed + range_failed > 0 {
+                            let tabs_results =
+                                drive_tabs_cases(cx, tabs_iface, tabs_cases, only).await;
+                            let tabs_report = tabs_report(&tabs_component, &tabs_results);
+                            let tabs_failed = tabs_results.iter().filter(|o| !o.pass).count();
+                            if tabs_failed > 0 {
+                                EXIT_CODE.store(1, Ordering::SeqCst);
+                            }
+                            *tabs_outcomes_in_run.lock().expect("tabs outcomes lock") =
+                                tabs_results;
+                            let tabs_out = out
+                                .as_ref()
+                                .map(|path| path.with_file_name("gpui-tabs.json"));
+                            write_or_print_report(tabs_out.as_ref(), &tabs_report);
+
+                            if failed + range_failed + tabs_failed > 0 {
                                 eprintln!(
                                     "\n{} failing case(s) — see report",
-                                    failed + range_failed
+                                    failed + range_failed + tabs_failed
                                 );
                             }
                             cx.update(|_window, cx| cx.quit()).ok();
@@ -165,6 +208,12 @@ fn run_button_mode(only: Option<String>, out: Option<PathBuf>) {
         + range_outcomes
             .lock()
             .expect("range outcomes lock")
+            .iter()
+            .filter(|o| !o.pass)
+            .count()
+        + tabs_outcomes
+            .lock()
+            .expect("tabs outcomes lock")
             .iter()
             .filter(|o| !o.pass)
             .count();
@@ -198,10 +247,8 @@ fn run_primitives_mode(out: Option<PathBuf>) {
                     window
                         .spawn(cx, async move |cx| {
                             let probes = drive_primitive_probes(cx).await;
-                            let failed: Vec<_> = probes
-                                .iter()
-                                .filter(|p| p.verdict == "fail")
-                                .collect();
+                            let failed: Vec<_> =
+                                probes.iter().filter(|p| p.verdict == "fail").collect();
                             if !failed.is_empty() {
                                 EXIT_CODE.store(1, Ordering::SeqCst);
                                 for probe in &failed {
@@ -213,7 +260,10 @@ fn run_primitives_mode(out: Option<PathBuf>) {
                             let report = primitive_evidence_report(&probes);
                             write_or_print_report(out.as_ref(), &report);
                             if !failed.is_empty() {
-                                eprintln!("\n{} failing primitive probe(s) — see report", failed.len());
+                                eprintln!(
+                                    "\n{} failing primitive probe(s) — see report",
+                                    failed.len()
+                                );
                             }
                             cx.update(|_window, cx| cx.quit()).ok();
                         })

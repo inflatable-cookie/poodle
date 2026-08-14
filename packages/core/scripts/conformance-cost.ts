@@ -58,11 +58,19 @@ const REUSABLE_AUTHORITY: Array<[string, string]> = [
   ["Authority validation tests", "packages/core/test/component-case-authority.test.ts"],
 ];
 
-const PER_COMPONENT_AUTHORITY: Array<[string, string]> = [
+const BUTTON_AUTHORITY: Array<[string, string]> = [
   ["Button interface", "packages/core/src/conformance/button.ts"],
   ["Button corpus", "packages/core/src/conformance/button-cases.ts"],
+];
+
+const RANGE_SLIDER_AUTHORITY: Array<[string, string]> = [
   ["RangeSlider interface", "packages/core/src/conformance/range-slider.ts"],
   ["RangeSlider corpus", "packages/core/src/conformance/range-slider-cases.ts"],
+];
+
+const TABS_AUTHORITY: Array<[string, string]> = [
+  ["Tabs interface", "packages/core/src/conformance/tabs.ts"],
+  ["Tabs corpus", "packages/core/src/conformance/tabs-cases.ts"],
 ];
 
 const CODEGEN: Array<[string, string]> = [
@@ -71,8 +79,12 @@ const CODEGEN: Array<[string, string]> = [
   ["CLI integration", "packages/codegen/src/bin/poodle-codegen.rs"],
 ];
 
-const GENERATED_SOURCE: Array<[string, string]> = [
-  ["Generated Button Rust declaration", "packages/contracts/components/src/generated/button.rs"],
+const BUTTON_GENERATED_SOURCE: Array<[string, string]> = [
+  ["Generated Button Rust declaration", "packages/contracts/components/src/generated/button/mod.rs"],
+];
+
+const TABS_GENERATED_SOURCE: Array<[string, string]> = [
+  ["Generated Tabs Rust declaration", "packages/contracts/components/src/generated/tabs/mod.rs"],
 ];
 
 const GENERATED_DATA: Array<[string, string]> = [
@@ -80,6 +92,8 @@ const GENERATED_DATA: Array<[string, string]> = [
   ["Case fixture JSON", "packages/codegen/fixtures/conformance/button-cases.json"],
   ["RangeSlider interface fixture JSON", "packages/codegen/fixtures/conformance/range-slider-interface.json"],
   ["RangeSlider case fixture JSON", "packages/codegen/fixtures/conformance/range-slider-cases.json"],
+  ["Tabs interface fixture JSON", "packages/codegen/fixtures/conformance/tabs-interface.json"],
+  ["Tabs case fixture JSON", "packages/codegen/fixtures/conformance/tabs-cases.json"],
   ["Primitive roster JSON", "packages/codegen/fixtures/conformance/primitive-capability-roster.json"],
 ];
 
@@ -111,6 +125,14 @@ const RANGE_SLIDER_HARNESS: Array<[string, string]> = [
   ["GPUI RangeSlider adapter", "packages/gpui/preview/src/conformance_range_slider.rs"],
 ];
 
+const TABS_HARNESS: Array<[string, string]> = [
+  ["Svelte Tabs adapter", "test/conformance/web/svelte-tabs-adapter.ts"],
+  ["React Tabs adapter", "test/conformance/web/react-tabs-adapter.tsx"],
+  ["Svelte Tabs host", "test/conformance/web/hosts/TabsHost.svelte"],
+  ["Web Tabs tests", "test/conformance/web/tabs.test.ts"],
+  ["GPUI Tabs adapter", "packages/gpui/preview/src/conformance_tabs.rs"],
+];
+
 const CAPTURE_REPAIR: Array<[string, string]> = [
   ["Native visual runner", "test/native-visual/run.ts"],
   ["Native visual capture", "test/native-visual/capture.ts"],
@@ -133,6 +155,12 @@ const RANGE_SLIDER_SUPPORTING_DELTAS: Array<[string, string]> = [
   ["RangeSlider renderer semantics", "packages/render/src/range_slider.rs"],
   ["Svelte RangeSlider shell", "packages/svelte/components/src/RangeSlider.svelte"],
   ["React RangeSlider shell", "packages/react/components/src/RangeSlider.tsx"],
+];
+
+const TABS_SUPPORTING_DELTAS: Array<[string, string]> = [
+  ["Tabs renderer semantics", "packages/render/src/tabs.rs"],
+  ["Svelte Tabs shell", "packages/svelte/components/src/Tabs.svelte"],
+  ["React Tabs shell", "packages/react/components/src/Tabs.tsx"],
 ];
 
 const WIRING: Array<[string, string]> = [
@@ -198,13 +226,21 @@ function dataTable(rows: Array<[string, string]>): number {
 
 console.log(`Conformance cost base: ${BASE}`);
 const reusableAuthority = sourceTable("Reusable authority", REUSABLE_AUTHORITY, "working");
-const perComponentAuthority = sourceTable("Per-component authored authority", PER_COMPONENT_AUTHORITY, "working");
+const buttonAuthority = sourceTable("Button authored authority", BUTTON_AUTHORITY, "working");
+const rangeSliderAuthority = sourceTable(
+  "RangeSlider authored authority",
+  RANGE_SLIDER_AUTHORITY,
+  "working",
+);
+const tabsAuthority = sourceTable("Tabs authored authority", TABS_AUTHORITY, "working");
 const codegen = sourceTable("Codegen", CODEGEN, "delta");
-const generatedSource = sourceTable("Generated source", GENERATED_SOURCE, "working");
+const buttonGeneratedSource = sourceTable("Generated Button source", BUTTON_GENERATED_SOURCE, "working");
+const tabsGeneratedSource = sourceTable("Generated Tabs source", TABS_GENERATED_SOURCE, "working");
 const generatedBytes = dataTable(GENERATED_DATA);
 const genericRuntime = sourceTable("Generic observers and runners", GENERIC_RUNTIME, "working");
 const buttonHarness = sourceTable("Button pilot harness", BUTTON_HARNESS, "working");
 const rangeSliderHarness = sourceTable("RangeSlider pilot harness", RANGE_SLIDER_HARNESS, "working");
+const tabsHarness = sourceTable("Tabs pilot harness", TABS_HARNESS, "working");
 const captureRepair = sourceTable("GPUI capture repair", CAPTURE_REPAIR, "working");
 const genericSupporting = sourceTable("Generic runtime deltas", GENERIC_SUPPORTING_DELTAS, "delta");
 const buttonSupporting = sourceTable("Button runtime deltas", BUTTON_SUPPORTING_DELTAS, "delta");
@@ -213,26 +249,29 @@ const rangeSliderSupporting = sourceTable(
   RANGE_SLIDER_SUPPORTING_DELTAS,
   "delta",
 );
+const tabsSupporting = sourceTable("Tabs runtime deltas", TABS_SUPPORTING_DELTAS, "delta");
 const wiring = sourceTable("Wiring", WIRING, "working");
 const replaced = sourceTable("Replaced hand-written source", REPLACED, "replaced");
 
 const genericKernel = reusableAuthority + codegen + genericRuntime + genericSupporting + wiring;
-const buttonPilot = perComponentAuthority + generatedSource + buttonHarness + buttonSupporting;
-const rangeSliderPilot = rangeSliderHarness + rangeSliderSupporting;
-const sourceMechanism = genericKernel + buttonPilot + rangeSliderPilot + captureRepair;
+const buttonPilot = buttonAuthority + buttonGeneratedSource + buttonHarness + buttonSupporting;
+const rangeSliderPilot = rangeSliderAuthority + rangeSliderHarness + rangeSliderSupporting;
+const tabsPilot = tabsAuthority + tabsGeneratedSource + tabsHarness + tabsSupporting;
+const sourceMechanism = genericKernel + buttonPilot + rangeSliderPilot + tabsPilot + captureRepair;
 
 console.log("\n=== Summary ===");
 console.log(`source mechanism: ${sourceMechanism} LOC`);
 console.log(`  generic kernel: ${genericKernel} LOC`);
 console.log(`  Button pilot increment: ${buttonPilot} LOC`);
-console.log(`    authored authority: ${perComponentAuthority} LOC`);
-console.log(`    generated source: ${generatedSource} LOC`);
+console.log(`    authored authority: ${buttonAuthority} LOC`);
+  console.log(`    generated source: ${buttonGeneratedSource} LOC`);
 console.log(`    harness and runtime deltas: ${buttonHarness + buttonSupporting} LOC`);
 console.log(`  RangeSlider pilot increment: ${rangeSliderPilot} LOC`);
+console.log(`  Tabs pilot increment: ${tabsPilot} LOC`);
 console.log(`  GPUI capture repair: ${captureRepair} LOC`);
 console.log(`generated data: ${generatedBytes} bytes`);
 console.log(`replaced hand-written source: ${replaced} LOC`);
 console.log(
   `stop-condition evidence: Button pilot increment ${buttonPilot} vs replaced ${replaced} — ` +
-    "triggered at g14.001. g14.003 reuses the Button harness path for RangeSlider.",
+    "triggered at g14.001. g14.003 and g14.004 reuse the generic kernel for RangeSlider and Tabs.",
 );

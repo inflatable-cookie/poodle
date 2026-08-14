@@ -362,7 +362,7 @@ pub use media_browse_panel::{MediaBrowseItem, MediaBrowsePanelSpec};
 pub use media_picker::{MediaPickerItem, MediaPickerSpec, MediaPickerTab};
 pub use media_preview::MediaPreviewSpec;
 pub use media_thumbnail::{MediaFit, MediaFrameWidth, MediaPresentation, MediaThumbnailSpec};
-pub use message_center::{MessageCenterItem, MessageCenterSpec};
+pub use message_center::{MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec};
 pub use metric_tile::{MetricTileSpec, MetricTrend};
 pub use page_header::{PageHeaderAlign, PageHeaderPosture, PageHeaderSpec};
 pub use page_loading::{PageLoadingPresentation, PageLoadingSpec};
