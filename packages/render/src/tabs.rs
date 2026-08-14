@@ -39,15 +39,14 @@ pub struct TabsHandlers {
     pub has_panel: bool,
 }
 
-fn tab_list_id(handlers: &TabsHandlers) -> String {
+fn tab_list_runtime_id(handlers: &TabsHandlers) -> Option<String> {
     handlers
         .instance_id
         .as_ref()
         .map(|scope| format!("tabs:{scope}:list"))
-        .unwrap_or_else(|| "tabs-list".to_owned())
 }
 
-fn tab_id(handlers: &TabsHandlers, value: &str) -> String {
+fn tab_runtime_id(handlers: &TabsHandlers, value: &str) -> String {
     handlers
         .instance_id
         .as_ref()
@@ -55,12 +54,11 @@ fn tab_id(handlers: &TabsHandlers, value: &str) -> String {
         .unwrap_or_else(|| format!("tabs:{value}"))
 }
 
-fn tab_panel_id(handlers: &TabsHandlers, value: &str) -> String {
+fn tab_panel_runtime_id(handlers: &TabsHandlers, value: &str) -> Option<String> {
     handlers
         .instance_id
         .as_ref()
         .map(|scope| format!("tabs:{scope}:panel:{value}"))
-        .unwrap_or_else(|| format!("tabs-panel:{value}"))
 }
 
 fn rounded_all(node: &mut Node, r: f32) {
@@ -209,7 +207,11 @@ fn apply_drag_state(
     handlers: &TabsHandlers,
     theme: &dyn ThemeProvider,
 ) {
-    node.id = Some(tab_id(handlers, tab_value));
+    node.id = Some(format!("tabs:{tab_value}"));
+    node.runtime_id = handlers
+        .instance_id
+        .as_ref()
+        .map(|_| tab_runtime_id(handlers, tab_value));
     if spec.is_drag_value(tab_value) {
         node.style.descriptor.opacity = 0.4;
     }
@@ -288,13 +290,13 @@ pub fn tabs_with_panel(
     let Some(value) = spec.current_value() else {
         return tabs_with_handlers(spec, theme, handlers);
     };
-    let panel_id = tab_panel_id(&handlers, value);
-    let trigger_id = tab_id(&handlers, value);
+    let panel_runtime_id = tab_panel_runtime_id(&handlers, value);
     let mut root = tabs_with_handlers(spec, theme, handlers);
     let mut panel = panel;
-    panel.id = Some(panel_id);
+    panel.id = Some(format!("tabs-panel:{value}"));
+    panel.runtime_id = panel_runtime_id;
     panel.a11y.role = Some(NodeRole::TabPanel);
-    panel.a11y.labelled_by = Some(trigger_id);
+    panel.a11y.labelled_by = Some(format!("tabs:{value}"));
     panel.interaction.focusable = true;
     panel.a11y.tab_index = Some(0);
     root.children.push(panel);
@@ -352,7 +354,7 @@ fn wire_collection_semantics(
         }
     }
     if handlers.has_panel {
-        node.a11y.controls = Some(tab_panel_id(handlers, &tab.value));
+        node.a11y.controls = Some(format!("tabs-panel:{}", tab.value));
     }
     if tab.is_disabled {
         return;
@@ -454,7 +456,8 @@ fn render_card(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandle
     let solid = spec.active_fill == ActiveFill::Solid;
 
     let mut tab_bar = Node::container();
-    tab_bar.id = Some(tab_list_id(handlers));
+    tab_bar.id = Some("tabs-list".to_owned());
+    tab_bar.runtime_id = tab_list_runtime_id(handlers);
     tab_bar.a11y.role = Some(NodeRole::TabList);
     tab_bar.a11y.label = spec.aria_label.clone();
     tab_bar.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
@@ -575,7 +578,8 @@ fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandle
     let selected = spec.current_value().map(|s| s.to_string());
 
     let mut container = Node::container();
-    container.id = Some(tab_list_id(handlers));
+    container.id = Some("tabs-list".to_owned());
+    container.runtime_id = tab_list_runtime_id(handlers);
     container.a11y.role = Some(NodeRole::TabList);
     container.a11y.label = spec.aria_label.clone();
     container.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
@@ -663,7 +667,8 @@ fn render_block(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandl
     let vertical = spec.is_vertical();
 
     let mut tab_bar = Node::container();
-    tab_bar.id = Some(tab_list_id(handlers));
+    tab_bar.id = Some("tabs-list".to_owned());
+    tab_bar.runtime_id = tab_list_runtime_id(handlers);
     tab_bar.a11y.role = Some(NodeRole::TabList);
     tab_bar.a11y.label = spec.aria_label.clone();
     tab_bar.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
@@ -1031,9 +1036,10 @@ mod tests {
         );
 
         let first = root
-            .find(&|node| node.id.as_deref() == Some("tabs:first:tab:a"))
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:first:tab:a"))
             .expect("scoped trigger exists");
-        assert_eq!(first.a11y.controls.as_deref(), Some("tabs:first:panel:a"));
+        assert_eq!(first.id.as_deref(), Some("tabs:a"));
+        assert_eq!(first.a11y.controls.as_deref(), Some("tabs-panel:a"));
         assert_eq!(
             first.interaction.on_key.as_ref().expect("key handler")(
                 NodeKey::ArrowRight,
@@ -1046,7 +1052,7 @@ mod tests {
             "focus notification belongs to the backend focus event"
         );
         let focus_listener = root
-            .find(&|node| node.id.as_deref() == Some("tabs:first:tab:b"))
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:first:tab:b"))
             .expect("focus target exists")
             .interaction
             .on_focus_change
@@ -1056,9 +1062,10 @@ mod tests {
         assert_eq!(*focused.lock().unwrap(), vec!["b"]);
 
         let panel = root
-            .find(&|node| node.id.as_deref() == Some("tabs:first:panel:a"))
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:first:panel:a"))
             .expect("scoped panel exists");
-        assert_eq!(panel.a11y.labelled_by.as_deref(), Some("tabs:first:tab:a"));
+        assert_eq!(panel.id.as_deref(), Some("tabs-panel:a"));
+        assert_eq!(panel.a11y.labelled_by.as_deref(), Some("tabs:a"));
 
         let second = tabs_with_handlers(
             &spec,
@@ -1069,10 +1076,10 @@ mod tests {
             },
         );
         assert!(second
-            .find(&|node| node.id.as_deref() == Some("tabs:second:tab:a"))
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:second:tab:a"))
             .is_some());
         assert!(second
-            .find(&|node| node.id.as_deref() == Some("tabs:first:tab:a"))
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:first:tab:a"))
             .is_none());
     }
 }

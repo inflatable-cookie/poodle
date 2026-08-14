@@ -39,6 +39,11 @@ pub struct Node {
     /// and animation clocks. An animation's `key` also becomes the id when no
     /// explicit one is set.
     pub id: Option<String>,
+    /// Stable backend-state identity when the semantic [`Self::id`] can repeat
+    /// across component instances. Observers and accessibility relationships
+    /// continue to use `id`; backends use this key for element state, focus,
+    /// editing, and gesture caches.
+    pub runtime_id: Option<String>,
     pub kind: NodeKind,
     pub style: NodeStyle,
     pub position: NodePosition,

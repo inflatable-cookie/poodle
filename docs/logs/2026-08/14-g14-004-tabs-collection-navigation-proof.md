@@ -31,9 +31,10 @@ one structured item collection + stable semantic keys
 - Svelte and React adapters drive real focus, click, and keyboard events.
 - GPUI renders tablist/tab/tabpanel roles, controlled value changes, semantic
   relationships, roving focus, and automatic/manual keyboard navigation.
-- Native instance ids scope every list, trigger, panel, and relationship id.
+- Native instance ids scope every list, trigger, and panel runtime identity.
   `Tabs::with_id` now reaches the renderer instead of being discarded, so
-  equal tab values in separate tabsets cannot share GPUI focus handles.
+  equal tab values in separate tabsets cannot share GPUI focus handles while
+  portable semantic ids and relationships remain unchanged.
 - `NodeInteraction::on_key` can return a semantic focus target. The GPUI
   backend performs the platform focus move and projects roving `tab_index`
   metadata into GPUI tab-stop state; Tabs does not require a backend special
@@ -57,9 +58,10 @@ one structured item collection + stable semantic keys
 - Review found that the GPUI driver completed arrow navigation itself after
   dispatching the key. It now only rebuilds the controlled tree; the backend
   must execute the focus request for the observation to pass.
-- Review also found global native trigger ids (`tabs:<value>`). Stable instance
-  scoping now isolates focus caches and accessibility relationships, with a
-  renderer regression covering two tabsets that reuse the same values.
+- Review also found global native trigger ids (`tabs:<value>`). A separate
+  runtime identity now isolates backend caches without changing observable
+  semantic ids or accessibility relationships, with a renderer regression
+  covering two tabsets that reuse the same values.
 
 ## Geometry and relationships
 

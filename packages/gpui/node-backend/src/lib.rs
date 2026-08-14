@@ -127,6 +127,9 @@ fn next_gesture_id() -> String {
 }
 
 fn element_id(node: &Node) -> ElementId {
+    if let Some(id) = &node.runtime_id {
+        return ElementId::Name(SharedString::from(id.clone()));
+    }
     if let Some(id) = &node.id {
         return ElementId::Name(SharedString::from(id.clone()));
     }
@@ -507,7 +510,7 @@ fn tracks_focus(node: &Node) -> bool {
 }
 
 fn element_id_string(node: &Node) -> String {
-    match &node.id {
+    match node.runtime_id.as_ref().or(node.id.as_ref()) {
         Some(id) => id.clone(),
         None => match &node.style.animation {
             Some(anim) => anim.key.clone(),
