@@ -83,6 +83,10 @@ import { ListGridSpecimen } from "./specimens/ListGridSpecimen";
 import { LicenceActivationSpecimen } from "./specimens/LicenceActivationSpecimen";
 import { LicenceSeatsSpecimen } from "./specimens/LicenceSeatsSpecimen";
 import { LicenceStatusSpecimen } from "./specimens/LicenceStatusSpecimen";
+import { ModelCatalogueEditorSpecimen } from "./specimens/ModelCatalogueEditorSpecimen";
+import { ModelConnectionCardSpecimen } from "./specimens/ModelConnectionCardSpecimen";
+import { ModelConnectionPickerSpecimen } from "./specimens/ModelConnectionPickerSpecimen";
+import { ModelConnectionSetupSpecimen } from "./specimens/ModelConnectionSetupSpecimen";
 import { LogListSpecimen } from "./specimens/LogListSpecimen";
 import { MarkdownEditorSpecimen } from "./specimens/MarkdownEditorSpecimen";
 import { MediaBrowsePanelSpecimen } from "./specimens/MediaBrowsePanelSpecimen";
@@ -255,6 +259,10 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "licence-activation": LicenceActivationSpecimen,
   "licence-seats": LicenceSeatsSpecimen,
   "licence-status": LicenceStatusSpecimen,
+  "model-catalogue-editor": ModelCatalogueEditorSpecimen,
+  "model-connection-card": ModelConnectionCardSpecimen,
+  "model-connection-picker": ModelConnectionPickerSpecimen,
+  "model-connection-setup": ModelConnectionSetupSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
   "media-browse-panel": MediaBrowsePanelSpecimen,

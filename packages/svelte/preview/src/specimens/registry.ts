@@ -67,6 +67,10 @@ import ListGridSpecimen from "./ListGridSpecimen.svelte";
 import LicenceActivationSpecimen from "./LicenceActivationSpecimen.svelte";
 import LicenceSeatsSpecimen from "./LicenceSeatsSpecimen.svelte";
 import LicenceStatusSpecimen from "./LicenceStatusSpecimen.svelte";
+import ModelCatalogueEditorSpecimen from "./ModelCatalogueEditorSpecimen.svelte";
+import ModelConnectionCardSpecimen from "./ModelConnectionCardSpecimen.svelte";
+import ModelConnectionPickerSpecimen from "./ModelConnectionPickerSpecimen.svelte";
+import ModelConnectionSetupSpecimen from "./ModelConnectionSetupSpecimen.svelte";
 import LogListSpecimen from "./LogListSpecimen.svelte";
 import NavCardSpecimen from "./NavCardSpecimen.svelte";
 import MarkdownEditorSpecimen from "./MarkdownEditorSpecimen.svelte";
@@ -247,6 +251,10 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "licence-activation": LicenceActivationSpecimen,
   "licence-seats": LicenceSeatsSpecimen,
   "licence-status": LicenceStatusSpecimen,
+  "model-catalogue-editor": ModelCatalogueEditorSpecimen,
+  "model-connection-card": ModelConnectionCardSpecimen,
+  "model-connection-picker": ModelConnectionPickerSpecimen,
+  "model-connection-setup": ModelConnectionSetupSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
   "media-browse-panel": MediaBrowsePanelSpecimen,

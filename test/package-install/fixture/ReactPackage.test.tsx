@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { defaultLucideIconSet } from "@inflatable-cookie/poodle-core/icons";
 import "@inflatable-cookie/poodle-core/styles/licence.css";
+import "@inflatable-cookie/poodle-core/styles/model-connection.css";
 import type { LicenceKeyFormat, LicenceSeat } from "@inflatable-cookie/poodle-core";
 import {
   Button,
@@ -11,6 +12,10 @@ import {
   LicenceActivation,
   LicenceSeats,
   LicenceStatus,
+  ModelCatalogueEditor,
+  ModelConnectionCard,
+  ModelConnectionPicker,
+  ModelConnectionSetup,
 } from "@inflatable-cookie/poodle-react";
 
 const licenceKeyFormat: LicenceKeyFormat = {
@@ -20,6 +25,21 @@ const licenceKeyFormat: LicenceKeyFormat = {
 
 const seats: readonly LicenceSeat[] = [
   { machineId: "packed-seat", label: "Studio", thisMachine: true },
+];
+
+const connectionOptions = [
+  {
+    id: "openai-responses",
+    providerLabel: "OpenAI",
+    routeLabel: "Responses API",
+    description: "Hosted route",
+    group: "Hosted",
+    keywords: ["openai"],
+    badges: [] as { label: string }[],
+    availability: "available" as const,
+    availabilityLabel: "Available",
+    isDisabled: false,
+  },
 ];
 
 describe("packed @inflatable-cookie/poodle-react", () => {
@@ -46,6 +66,40 @@ describe("packed @inflatable-cookie/poodle-react", () => {
     expect(view.getByRole("heading", { name: "Licence active" })).toBeTruthy();
     expect(view.getByRole("heading", { name: "Activate licence" })).toBeTruthy();
     expect(view.getByRole("heading", { name: "Activated machines" })).toBeTruthy();
+  });
+
+  it("resolves the model-connection stylesheet and mounts every model-connection export", () => {
+    const view = render(
+      <>
+        <ModelConnectionPicker options={connectionOptions} />
+        <ModelConnectionSetup options={connectionOptions} defaultValue="openai-responses" />
+        <ModelConnectionCard
+          id="conn-1"
+          title="OpenAI · Work"
+          providerLabel="OpenAI"
+          readiness="ready"
+          readinessLabel="Ready"
+        />
+        <ModelCatalogueEditor
+          items={[
+            {
+              id: "model-alpha",
+              label: "Frontier Alpha",
+              providerLabel: "OpenAI",
+              description: null,
+              badges: [],
+              visible: true,
+              isDisabled: false,
+            },
+          ]}
+        />
+      </>,
+    );
+
+    expect(view.container.querySelector(".poodle-model-connection-picker")).toBeTruthy();
+    expect(view.getByRole("button", { name: "Continue" })).toBeTruthy();
+    expect(view.getByRole("switch", { name: /Enable OpenAI/i })).toBeTruthy();
+    expect(view.container.querySelector(".poodle-model-catalogue-editor")).toBeTruthy();
   });
 
   it("mounts public components with the scoped default icon set", () => {

@@ -2,11 +2,16 @@ import { fireEvent, render } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
 import "@inflatable-cookie/poodle-core/styles/licence.css";
+import "@inflatable-cookie/poodle-core/styles/model-connection.css";
 import {
   DockRegion,
   LicenceActivation,
   LicenceSeats,
   LicenceStatus,
+  ModelCatalogueEditor,
+  ModelConnectionCard,
+  ModelConnectionPicker,
+  ModelConnectionSetup,
 } from "@inflatable-cookie/poodle-svelte";
 import type { LicenceKeyFormat, LicenceSeat } from "@inflatable-cookie/poodle-core";
 import type {
@@ -26,6 +31,21 @@ const licenceKeyFormat: LicenceKeyFormat = {
 
 const seats: readonly LicenceSeat[] = [
   { machineId: "packed-seat", label: "Studio", thisMachine: true },
+];
+
+const connectionOptions = [
+  {
+    id: "openai-responses",
+    providerLabel: "OpenAI",
+    routeLabel: "Responses API",
+    description: "Hosted route",
+    group: "Hosted",
+    keywords: ["openai"],
+    badges: [],
+    availability: "available" as const,
+    availabilityLabel: "Available",
+    isDisabled: false,
+  },
 ];
 
 describe("packed @inflatable-cookie/poodle-svelte", () => {
@@ -55,6 +75,52 @@ describe("packed @inflatable-cookie/poodle-svelte", () => {
     status.unmount();
     activation.unmount();
     seatList.unmount();
+  });
+
+  it("resolves the model-connection stylesheet and mounts every model-connection export", () => {
+    const picker = render(ModelConnectionPicker, {
+      props: { options: connectionOptions },
+    });
+    const setup = render(ModelConnectionSetup, {
+      props: { options: connectionOptions, defaultValue: "openai-responses" },
+    });
+    const card = render(ModelConnectionCard, {
+      props: {
+        id: "conn-1",
+        title: "OpenAI · Work",
+        providerLabel: "OpenAI",
+        readiness: "ready",
+        readinessLabel: "Ready",
+      },
+    });
+    const catalogue = render(ModelCatalogueEditor, {
+      props: {
+        items: [
+          {
+            id: "model-alpha",
+            label: "Frontier Alpha",
+            providerLabel: "OpenAI",
+            description: null,
+            badges: [],
+            visible: true,
+            isDisabled: false,
+          },
+        ],
+      },
+    });
+
+    expect(
+      picker.container.querySelector(".poodle-model-connection-picker"),
+    ).toBeTruthy();
+    expect(setup.getByRole("button", { name: "Continue" })).toBeTruthy();
+    expect(card.getByRole("switch", { name: /Enable OpenAI/i })).toBeTruthy();
+    expect(
+      catalogue.container.querySelector(".poodle-model-catalogue-editor"),
+    ).toBeTruthy();
+    picker.unmount();
+    setup.unmount();
+    card.unmount();
+    catalogue.unmount();
   });
 
   it("mounts the public drag seam and keeps local reorder", async () => {
