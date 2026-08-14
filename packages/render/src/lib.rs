@@ -313,7 +313,7 @@ pub use surface::surface;
 pub use switch::switch;
 pub use tab_strip::{tab_strip, TabStripHandlers};
 pub use table::table;
-pub use tabs::{tabs, TabHandler};
+pub use tabs::{tabs, tabs_with_handlers, tabs_with_panel, TabHandler, TabsHandlers};
 pub use text::text;
 pub use text_input::{
     text_input, text_input_with_change, text_input_with_handlers, TextInputHandlers,

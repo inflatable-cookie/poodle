@@ -50,10 +50,24 @@ pub struct PortableProp {
 
 /// A scalar type in the portable interface.
 #[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ScalarType {
     pub kind: String,
     #[serde(default)]
     pub values: Option<Vec<String>>,
+    #[serde(default)]
+    pub fields: Option<Vec<ItemFieldDecl>>,
+    #[serde(default)]
+    pub rust_type: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ItemFieldDecl {
+    pub name: String,
+    #[serde(rename = "type")]
+    pub kind: ScalarType,
+    #[serde(default)]
+    pub optional: bool,
 }
 
 /// The serialized portable interface (`button-interface.json`).
@@ -106,6 +120,14 @@ pub struct PartDecl {
     pub role: Option<String>,
     #[serde(default)]
     pub resolve: Option<ResolveDecl>,
+    #[serde(default)]
+    pub repeat: Option<RepeatDecl>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct RepeatDecl {
+    pub prop: String,
+    pub key: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -184,8 +206,12 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
         .collect();
     let regions: std::collections::HashSet<&str> =
         interface.regions.iter().map(|r| r.name.as_str()).collect();
-    let parts: std::collections::HashSet<&str> =
-        interface.parts.iter().map(|p| p.id.as_str()).collect();
+    let parts: std::collections::HashSet<&str> = interface
+        .parts
+        .iter()
+        .filter(|p| p.repeat.is_none())
+        .map(|p| p.id.as_str())
+        .collect();
     let states: std::collections::HashSet<&str> =
         interface.states.iter().map(|s| s.name.as_str()).collect();
     let events: std::collections::HashSet<&str> =
@@ -197,8 +223,28 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
         .collect();
     let axes: std::collections::HashSet<&str> = interface.axes.iter().map(String::as_str).collect();
 
+    for part in interface.parts.iter().filter(|part| part.repeat.is_some()) {
+        let repeat = part.repeat.as_ref().expect("filtered repeated part");
+        let key_is_string = props
+            .get(repeat.prop.as_str())
+            .filter(|prop| prop.kind.kind == "collection")
+            .and_then(|prop| prop.kind.fields.as_deref())
+            .and_then(|fields| fields.iter().find(|field| field.name == repeat.key))
+            .is_some_and(|field| field.kind.kind == "string");
+        if !key_is_string {
+            findings.push(format!(
+                "part '{}' repeated key '{}.{}' must be a string field",
+                part.id, repeat.prop, repeat.key
+            ));
+        }
+    }
+
     for case in &cases.cases {
         let at = |message: String| format!("case '{}': {message}", case.id);
+        let mut repeated_part_keys: std::collections::HashMap<
+            &str,
+            std::collections::HashSet<String>,
+        > = std::collections::HashMap::new();
 
         if let Some(fixture_props) = case
             .fixture
@@ -220,6 +266,62 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
                     "boolean" => {
                         if !value.is_boolean() {
                             findings.push(at(format!("prop '{key}' expects a boolean")));
+                        }
+                    }
+                    "number" => {
+                        if !value.is_number() {
+                            findings.push(at(format!("prop '{key}' expects a number")));
+                        }
+                    }
+                    "numberPair" => {
+                        let valid = value.as_array().is_some_and(|pair| {
+                            pair.len() == 2 && pair.iter().all(serde_json::Value::is_number)
+                        });
+                        if !valid {
+                            findings.push(at(format!("prop '{key}' expects a number pair")));
+                        }
+                    }
+                    "collection" => {
+                        let Some(items) = value.as_array() else {
+                            findings.push(at(format!("prop '{key}' expects an object collection")));
+                            continue;
+                        };
+                        let fields = prop.kind.fields.as_deref().unwrap_or_default();
+                        for (index, item) in items.iter().enumerate() {
+                            let Some(item) = item.as_object() else {
+                                findings.push(at(format!(
+                                    "prop '{key}' item {index} expects an object"
+                                )));
+                                continue;
+                            };
+                            for field in fields {
+                                let Some(field_value) = item.get(&field.name) else {
+                                    if !field.optional {
+                                        findings.push(at(format!(
+                                            "prop '{key}' item {index} misses field '{}'",
+                                            field.name
+                                        )));
+                                    }
+                                    continue;
+                                };
+                                let valid = match field.kind.kind.as_str() {
+                                    "boolean" => field_value.is_boolean(),
+                                    "number" => field_value.is_number(),
+                                    "string" | "icon" => field_value.is_string(),
+                                    _ => false,
+                                };
+                                if !valid {
+                                    findings.push(at(format!(
+                                        "prop '{key}' item {index} field '{}' has wrong type",
+                                        field.name
+                                    )));
+                                }
+                            }
+                            for field_name in item.keys() {
+                                if !fields.iter().any(|field| field.name == *field_name) {
+                                    findings.push(at(format!("prop '{key}' item {index} uses unknown field '{field_name}'")));
+                                }
+                            }
                         }
                     }
                     "string" | "icon" | "dimension" => {
@@ -244,6 +346,42 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
             }
         }
 
+        for part in interface.parts.iter().filter(|part| part.repeat.is_some()) {
+            let repeat = part.repeat.as_ref().expect("filtered repeated part");
+            let mut keys = std::collections::HashSet::new();
+            if let Some(items) = case
+                .fixture
+                .get("props")
+                .and_then(|p| p.get(&repeat.prop))
+                .and_then(serde_json::Value::as_array)
+            {
+                for (index, item) in items.iter().enumerate() {
+                    let key = item.get(&repeat.key).and_then(serde_json::Value::as_str);
+                    match key {
+                        Some(key) if !key.is_empty() && keys.insert(key.to_owned()) => {}
+                        Some(key) if !key.is_empty() => findings.push(at(format!(
+                            "prop '{}' has duplicate key '{key}'",
+                            repeat.prop
+                        ))),
+                        _ => findings.push(at(format!(
+                            "prop '{}' item {index} key '{}' must be a non-empty string",
+                            repeat.prop, repeat.key
+                        ))),
+                    }
+                }
+            }
+            repeated_part_keys.insert(part.id.as_str(), keys);
+        }
+
+        let part_is_known = |part: &str| {
+            parts.contains(part)
+                || part.split_once(':').is_some_and(|(base, key)| {
+                    repeated_part_keys
+                        .get(base)
+                        .is_some_and(|keys| keys.contains(key))
+                })
+        };
+
         if let Some(fixture_regions) = case
             .fixture
             .get("regions")
@@ -259,15 +397,15 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
         for step in &case.steps {
             match step {
                 CaseStep::Action { part, name, .. } => {
-                    if !parts.contains(part.as_str()) {
+                    if !part_is_known(part) {
                         findings.push(at(format!("action targets unknown part '{part}'")));
                     }
-                    if name != "press" && name != "focus" {
+                    if !matches!(name.as_str(), "press" | "focus" | "key" | "scrub") {
                         findings.push(at(format!("unknown action '{name}'")));
                     }
                 }
                 CaseStep::ExpectPart { part, expect } => {
-                    if !parts.contains(part.as_str()) {
+                    if !part_is_known(part) {
                         findings.push(at(format!("expects unknown part '{part}'")));
                     }
                     if let Some(expect_states) =
@@ -525,6 +663,8 @@ mod tests {
             kind: ScalarType {
                 kind: "boolean".to_owned(),
                 values: None,
+                fields: None,
+                rust_type: None,
             },
             default: serde_json::Value::Bool(false),
             nullable: false,
@@ -577,5 +717,55 @@ mod tests {
         let error = validate_interface_capabilities(&interface, &roster, Path::new("probe.json"))
             .expect_err("unknown capability must fail Rust loading");
         assert!(error.to_string().contains("not-a-capability"));
+    }
+
+    fn tabs_documents(
+        items: serde_json::Value,
+        part: &str,
+    ) -> (ComponentInterface, ComponentCases) {
+        let interface: ComponentInterface = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "id": "tabs", "profile": "collection",
+            "props": [{ "name": "items", "type": { "kind": "collection", "rustType": "TabDefinition", "fields": [
+                { "name": "value", "type": { "kind": "string" } },
+                { "name": "label", "type": { "kind": "string" } }
+            ]}, "default": [] }],
+            "events": [], "regions": [],
+            "parts": [{ "id": "trigger", "repeat": { "prop": "items", "key": "value" } }],
+            "states": [], "tokenRoles": [], "axes": [], "capabilities": []
+        })).unwrap();
+        let cases: ComponentCases = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "component": "tabs", "cases": [{
+                "id": "tabs/planted", "fixture": { "props": { "items": items }, "regions": {} },
+                "specimen": { "axes": [] },
+                "steps": [{ "kind": "action", "name": "press", "part": part }]
+            }]
+        }))
+        .unwrap();
+        (interface, cases)
+    }
+
+    #[test]
+    fn rust_validator_rejects_duplicate_collection_keys() {
+        let (interface, cases) = tabs_documents(
+            serde_json::json!([
+                { "value": "overview", "label": "Overview" },
+                { "value": "overview", "label": "Duplicate" }
+            ]),
+            "trigger:overview",
+        );
+        let error = validate_cases(&interface, &cases).unwrap_err();
+        assert!(error.to_string().contains("duplicate key 'overview'"));
+    }
+
+    #[test]
+    fn rust_validator_rejects_repeated_part_outside_collection() {
+        let (interface, cases) = tabs_documents(
+            serde_json::json!([
+                { "value": "overview", "label": "Overview" }
+            ]),
+            "trigger:missing",
+        );
+        let error = validate_cases(&interface, &cases).unwrap_err();
+        assert!(error.to_string().contains("unknown part 'trigger:missing'"));
     }
 }

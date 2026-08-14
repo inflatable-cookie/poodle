@@ -76,7 +76,7 @@ Delivered for Button:
   interface JSON. Unknown names are errors, never ignored. Nullable props
   stay `Option` in generated Rust — absence is `None`/`null` on both
   surfaces, pinned by the `default-pressed-toggle` case.
-- **Generated Rust declaration** — `packages/contracts/components/src/generated/button.rs`
+- **Generated Rust declaration** — `packages/contracts/components/src/generated/button/mod.rs`
   replaces the hand-written `ButtonSpec` struct/default/builders; the token
   recipes live in the extension module beside it.
 - **Runtime harnesses** — web runners (Svelte + React, real DOM + real
@@ -194,6 +194,39 @@ RangeSlider proves a controlled two-part value through the same kernel:
 
 See `docs/logs/2026-08/14-g14-003-range-slider-controlled-control-proof.md`.
 
+## Identified-collection Status (g14.004)
+
+Tabs extends the kernel from fixed parts to ordered, semantically identified
+collections:
+
+- **Authority** — `tabs.ts` + 9 typed cases; `items` is a structured collection
+  and repeated trigger/panel parts resolve as `<part>:<item.value>`, independent
+  of fixture order.
+- **Execution** — Svelte / React / GPUI run controlled selection, disabled
+  items, horizontal/vertical arrows, wrap, Home/End, automatic/manual
+  activation, focus, relationships, events, token roles, and bounded geometry.
+- **Native focus boundary** — stable per-instance runtime ids isolate GPUI
+  focus handles without changing portable semantic ids or relationships;
+  renderer key effects return focus targets, GPUI executes them, and roving
+  `tab_index` reaches real GPUI tab stops. The conformance driver no longer
+  completes focus after key dispatch.
+- **Generic vocabulary** — collection prop fields, repeated parts, keyed web
+  resolution, native id templates, selected/tabbable/orientation/controls/
+  labelled-by observations. The runners contain no Tabs component branch or
+  second item corpus.
+- **Specimens** — the three active Tabs pages project the bounded corpus and
+  retain explicit residual examples for supported behavior outside the profile.
+  Web keeps overflow and close/reorder operator evidence; GPUI keeps observable
+  close and residual presentation examples, without claiming unsupported native
+  reorder or overflow behavior.
+- **Cost** — 1,126 LOC Tabs pilot increment and 23,010 bytes of Tabs fixture JSON.
+- **Residual surfaces** — `TabsSpec` remains because overflow, history,
+  close/reorder, tooltips, and host actions are outside this bounded profile.
+  Headless Tabs vectors remain for close/reorder claims not replaced here.
+- **Deferred runtime** — Jetstream remains program-deferred.
+
+See `docs/logs/2026-08/14-g14-004-tabs-collection-navigation-proof.md`.
+
 ## Experimental Surface Disposition
 
 No experimental surface is architecture merely because it merged.
@@ -213,9 +246,12 @@ No experimental surface is architecture merely because it merged.
 | **g14.001 conformance kernel (typed interface, corpus, observers, GPUI runner)** | keep — the replacement-pass proof; profile pilots 2–6 reuse it | g14.010 |
 | **g14.002 primitive capability roster + report** | keep — substrate certification beneath profile pilots | g14.010 |
 | **g14.003 RangeSlider controlled-control proof** | keep — second profile pilot; reuses Button harness path | g14.010 |
-| **hand-written ButtonSpec declaration surface** | replaced by `generated/button.rs` + extension module | done |
+| **hand-written ButtonSpec declaration surface** | replaced by `generated/button/mod.rs` + extension module | done |
 | **hand-written Button specimen fixtures (3 active runtimes)** | replaced by corpus projections; the Jetstream specimen stays deferred with its runtime | done |
 | **hand-written RangeSlider specimen fixtures (3 active runtimes)** | replaced by corpus projections | done |
+| **g14.004 Tabs identified-collection proof** | keep — stable keyed repeated anatomy and navigation profile | g14.010 |
+| **hand-written Tabs specimen fixtures (3 active runtimes)** | partially projected; retain web overflow/reorder and supported per-runtime close, decoration, panel, and scale coverage | g14.010 / g14.011 |
+| **hand-written TabsSpec + Tabs machine vectors** | retain residual overflow/history/close/reorder claims not replaced by g14.004 | g14.010 / g14.011 |
 | **generated specimen scenes (specimen-ts/rust targets)** | still the shell/nav surface; Button no longer depends on them | g14.009 |
 
 ## Staged Licence Intake

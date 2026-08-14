@@ -3,7 +3,14 @@
 use super::*;
 
 pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
-    if node.interaction.focusable {
+    if let Some(tab_index) = node.a11y.tab_index {
+        // GPUI uses a non-negative index for ordering and a separate flag for
+        // whether the element participates in sequential traversal. Preserve
+        // DOM-style roving tabindex: -1 stays programmatically focusable.
+        el = el
+            .tab_index(tab_index.max(0) as isize)
+            .tab_stop(tab_index >= 0);
+    } else if node.interaction.focusable {
         el = el.focusable();
     }
 
@@ -473,9 +480,13 @@ fn apply_selection_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div
     }
     if let Some(handler) = &node.interaction.on_key {
         let keys = handler.clone();
-        el = el.on_key_down(move |event: &KeyDownEvent, _window, cx| {
+        el = el.on_key_down(move |event: &KeyDownEvent, window, cx| {
             if let Some(key) = node_key(event.keystroke.key.as_str()) {
-                keys(key, node_modifiers(&event.keystroke.modifiers));
+                if let Some(target) = keys(key, node_modifiers(&event.keystroke.modifiers)) {
+                    if let Some(handle) = focus_handle_for(&target) {
+                        handle.focus(window);
+                    }
+                }
                 cx.refresh_windows();
             }
         });

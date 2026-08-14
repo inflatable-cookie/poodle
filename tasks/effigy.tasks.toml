@@ -79,9 +79,11 @@
 "conformance:serialize-check" = "bun packages/core/scripts/conformance-serialize.ts --check"
 "conformance:codegen" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/contracts/components/src --target conformance-rust" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/tabs-interface.json --cases packages/codegen/fixtures/conformance/tabs-cases.json --out packages/contracts/components/src --target conformance-rust" },
 ]
 "conformance:codegen-check" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/contracts/components/src --target conformance-rust --check" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/tabs-interface.json --cases packages/codegen/fixtures/conformance/tabs-cases.json --out packages/contracts/components/src --target conformance-rust --check" },
 ]
 "conformance:build" = [
   { task = "conformance:serialize" },
@@ -99,7 +101,7 @@
 # green execution run with a broken schema is not evidence. Narrow — only
 # the conformance source files, so unrelated core baseline errors never
 # gate this check.
-"conformance:typecheck" = "bunx tsc --noEmit --ignoreConfig packages/core/src/conformance/define.ts packages/core/src/conformance/primitives.ts packages/core/src/conformance/button.ts packages/core/src/conformance/button-cases.ts packages/core/src/conformance/range-slider.ts packages/core/src/conformance/range-slider-cases.ts packages/core/src/conformance/project.ts --strict --skipLibCheck --moduleResolution bundler --module esnext --target es2022"
+"conformance:typecheck" = "bunx tsc --noEmit --ignoreConfig packages/core/src/conformance/define.ts packages/core/src/conformance/primitives.ts packages/core/src/conformance/button.ts packages/core/src/conformance/button-cases.ts packages/core/src/conformance/range-slider.ts packages/core/src/conformance/range-slider-cases.ts packages/core/src/conformance/tabs.ts packages/core/src/conformance/tabs-cases.ts packages/core/src/conformance/project.ts --strict --skipLibCheck --moduleResolution bundler --module esnext --target es2022"
 "conformance:test-web" = "bunx vitest run --project conformance"
 # WINDOWED, like test:native-visual: opens a foreground GPUI window and drives
 # real NSEvents through the AppKit queue (hit testing, listener binding,

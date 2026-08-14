@@ -19,6 +19,7 @@ import { fileURLToPath } from "node:url";
 
 import { buttonCases } from "../../packages/core/src/conformance/button-cases";
 import { rangeSliderCases } from "../../packages/core/src/conformance/range-slider-cases";
+import { tabsCases } from "../../packages/core/src/conformance/tabs-cases";
 import type { SerializedCase } from "../../packages/core/src/conformance/define";
 
 interface AssertionResult {
@@ -58,6 +59,7 @@ const COMPONENT_CORPORA: Array<{
 }> = [
   { label: "button", reportSuffix: "", cases: buttonCases },
   { label: "range-slider", reportSuffix: "-range-slider", cases: rangeSliderCases },
+  { label: "tabs", reportSuffix: "-tabs", cases: tabsCases },
 ];
 
 function loadReport(runtime: string, reportSuffix: string): RuntimeReport | null {
@@ -75,6 +77,11 @@ const IDENTITY_FIELDS = [
   "focusable",
   "focused",
   "focusVisible",
+  "tabbable",
+  "selected",
+  "orientation",
+  "controls",
+  "labelledBy",
 ] as const;
 const GEOMETRY_FIELDS = ["height", "minWidth", "paddingLeft", "paddingRight", "radius", "borderWidth"] as const;
 

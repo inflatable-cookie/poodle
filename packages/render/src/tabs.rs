@@ -16,9 +16,9 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeRole, ShadowLayer,
+    Node, NodeKey, NodeRole, ShadowLayer, StylePatch,
 };
-use poodle_specs::{ActiveEdge, ActiveFill, TabVariant, TabsSpec};
+use poodle_specs::{ActiveEdge, ActiveFill, Orientation, TabActivationMode, TabVariant, TabsSpec};
 
 use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
 use crate::presentation::{
@@ -26,6 +26,40 @@ use crate::presentation::{
 };
 
 pub type TabHandler = Arc<dyn Fn(&str) + Send + Sync>;
+
+#[derive(Clone, Default)]
+pub struct TabsHandlers {
+    pub on_change: Option<TabHandler>,
+    pub on_close: Option<TabHandler>,
+    pub on_focus: Option<TabHandler>,
+    pub focused_value: Option<String>,
+    /// Stable native instance scope. Semantic ids remain readable, but two
+    /// tabsets with the same values must never share backend focus handles.
+    pub instance_id: Option<String>,
+    pub has_panel: bool,
+}
+
+fn tab_list_runtime_id(handlers: &TabsHandlers) -> Option<String> {
+    handlers
+        .instance_id
+        .as_ref()
+        .map(|scope| format!("tabs:{scope}:list"))
+}
+
+fn tab_runtime_id(handlers: &TabsHandlers, value: &str) -> String {
+    handlers
+        .instance_id
+        .as_ref()
+        .map(|scope| format!("tabs:{scope}:tab:{value}"))
+        .unwrap_or_else(|| format!("tabs:{value}"))
+}
+
+fn tab_panel_runtime_id(handlers: &TabsHandlers, value: &str) -> Option<String> {
+    handlers
+        .instance_id
+        .as_ref()
+        .map(|scope| format!("tabs:{scope}:panel:{value}"))
+}
 
 fn rounded_all(node: &mut Node, r: f32) {
     let c = &mut node.style.descriptor.corner_radii;
@@ -166,8 +200,18 @@ fn build_close_button(theme: &dyn ThemeProvider, tab_label: &str) -> Node {
 }
 
 /// Transient reorder-drag visuals: source dims, target rings.
-fn apply_drag_state(node: &mut Node, tab_value: &str, spec: &TabsSpec, theme: &dyn ThemeProvider) {
+fn apply_drag_state(
+    node: &mut Node,
+    tab_value: &str,
+    spec: &TabsSpec,
+    handlers: &TabsHandlers,
+    theme: &dyn ThemeProvider,
+) {
     node.id = Some(format!("tabs:{tab_value}"));
+    node.runtime_id = handlers
+        .instance_id
+        .as_ref()
+        .map(|_| tab_runtime_id(handlers, tab_value));
     if spec.is_drag_value(tab_value) {
         node.style.descriptor.opacity = 0.4;
     }
@@ -191,19 +235,71 @@ pub fn tabs(
     on_change: Option<TabHandler>,
     on_close: Option<TabHandler>,
 ) -> Node {
+    tabs_with_handlers(
+        spec,
+        theme,
+        TabsHandlers {
+            on_change,
+            on_close,
+            ..TabsHandlers::default()
+        },
+    )
+}
+
+pub fn tabs_with_handlers(
+    spec: &TabsSpec,
+    theme: &dyn ThemeProvider,
+    handlers: TabsHandlers,
+) -> Node {
+    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let tab_bar = match spec.variant {
-        TabVariant::Card => render_card(spec, theme, on_change.as_ref(), on_close.as_ref()),
-        TabVariant::Pill => render_pill(spec, theme, on_change.as_ref()),
-        TabVariant::Block => render_block(spec, theme, on_change.as_ref()),
+        TabVariant::Card => render_card(spec, theme, &handlers),
+        TabVariant::Pill => render_pill(spec, theme, &handlers),
+        TabVariant::Block => render_block(spec, theme, &handlers),
     };
 
     let mut root = Node::container();
     root.style.descriptor.layout.direction = LayoutDirection::Column;
-    let mut root = root.child(tab_bar);
-    if let Some(label) = spec.aria_label.as_deref() {
-        root.a11y.label = Some(label.to_string());
-    }
-    root.a11y.role = Some(NodeRole::TabList);
+    root.roles.insert(
+        "variant".to_owned(),
+        format!("{:?}", spec.variant).to_ascii_lowercase(),
+    );
+    root.roles.insert(
+        "orientation".to_owned(),
+        format!("{:?}", spec.orientation).to_ascii_lowercase(),
+    );
+    root.roles.insert(
+        "size".to_owned(),
+        format!("{effective_size:?}").to_ascii_lowercase(),
+    );
+    root.roles.insert(
+        "density".to_owned(),
+        format!("{:?}", spec.density).to_ascii_lowercase(),
+    );
+    let root = root.child(tab_bar);
+    root
+}
+
+pub fn tabs_with_panel(
+    spec: &TabsSpec,
+    theme: &dyn ThemeProvider,
+    mut handlers: TabsHandlers,
+    panel: Node,
+) -> Node {
+    handlers.has_panel = true;
+    let Some(value) = spec.current_value() else {
+        return tabs_with_handlers(spec, theme, handlers);
+    };
+    let panel_runtime_id = tab_panel_runtime_id(&handlers, value);
+    let mut root = tabs_with_handlers(spec, theme, handlers);
+    let mut panel = panel;
+    panel.id = Some(format!("tabs-panel:{value}"));
+    panel.runtime_id = panel_runtime_id;
+    panel.a11y.role = Some(NodeRole::TabPanel);
+    panel.a11y.labelled_by = Some(format!("tabs:{value}"));
+    panel.interaction.focusable = true;
+    panel.a11y.tab_index = Some(0);
+    root.children.push(panel);
     root
 }
 
@@ -215,12 +311,129 @@ fn wire_select(node: &mut Node, is_disabled: bool, value: &str, on_change: Optio
     }
 }
 
-fn render_card(
+fn wire_collection_semantics(
+    node: &mut Node,
     spec: &TabsSpec,
+    index: usize,
+    handlers: &TabsHandlers,
     theme: &dyn ThemeProvider,
-    on_change: Option<&TabHandler>,
-    on_close: Option<&TabHandler>,
-) -> Node {
+) {
+    let tab = &spec.tabs[index];
+    let is_selected = spec.current_value() == Some(tab.value.as_str());
+    node.a11y.role = Some(NodeRole::Tab);
+    node.a11y.label = Some(tab.label.clone());
+    let focused_value = handlers
+        .focused_value
+        .as_deref()
+        .or_else(|| spec.current_value());
+    node.interaction.disabled = tab.is_disabled;
+    node.interaction.focusable = !tab.is_disabled;
+    if !tab.is_disabled {
+        node.style.focus = Some(StylePatch {
+            border_color: Some(theme.resolve_color(spec.focus_ring_color_token())),
+            ..StylePatch::default()
+        });
+    }
+    node.a11y.tab_index = Some(
+        if !tab.is_disabled && focused_value == Some(tab.value.as_str()) {
+            0
+        } else {
+            -1
+        },
+    );
+    node.a11y.selected = Some(is_selected);
+    if !tab.is_disabled {
+        if let Some(handler) = handlers.on_focus.as_ref() {
+            let handler = Arc::clone(handler);
+            let value = tab.value.clone();
+            node.interaction.on_focus_change = Some(Arc::new(move |focused| {
+                if focused {
+                    handler(&value);
+                }
+            }));
+        }
+    }
+    if handlers.has_panel {
+        node.a11y.controls = Some(format!("tabs-panel:{}", tab.value));
+    }
+    if tab.is_disabled {
+        return;
+    }
+
+    let items = spec
+        .tabs
+        .iter()
+        .map(|item| poodle_headless::tabs::TabsItem {
+            value: item.value.clone(),
+            disabled: item.is_disabled,
+            closable: item.is_closable,
+        })
+        .collect::<Vec<_>>();
+    let value = spec.current_value().map(str::to_owned);
+    let activation_mode = match spec.activation_mode {
+        TabActivationMode::Manual => poodle_headless::tabs::ActivationMode::Manual,
+        TabActivationMode::Automatic => poodle_headless::tabs::ActivationMode::Automatic,
+    };
+    let orientation = spec.orientation;
+    let on_change = handlers.on_change.clone();
+    let instance_id = handlers.instance_id.clone();
+    node.interaction.on_key = Some(Arc::new(move |key, _modifiers| {
+        let direction = match (orientation, key) {
+            (Orientation::Horizontal, NodeKey::ArrowRight)
+            | (Orientation::Vertical, NodeKey::ArrowDown) => {
+                Some(poodle_headless::tabs::FocusDirection::Next)
+            }
+            (Orientation::Horizontal, NodeKey::ArrowLeft)
+            | (Orientation::Vertical, NodeKey::ArrowUp) => {
+                Some(poodle_headless::tabs::FocusDirection::Prev)
+            }
+            (_, NodeKey::Home) => Some(poodle_headless::tabs::FocusDirection::First),
+            (_, NodeKey::End) => Some(poodle_headless::tabs::FocusDirection::Last),
+            _ => None,
+        };
+        let Some(direction) = direction else {
+            return None;
+        };
+        let context = poodle_headless::tabs::TabsContext {
+            items: items.clone(),
+            value: value.clone(),
+            focus_index: index,
+            activation_mode,
+            reorderable: false,
+        };
+        let (_, effects) = poodle_headless::tabs::tabs_transition(
+            context,
+            poodle_headless::tabs::TabsEvent::FocusMove {
+                direction,
+                from_index: Some(index),
+            },
+        );
+        let mut focus_target = None;
+        for effect in effects {
+            match effect {
+                poodle_headless::tabs::TabsEffect::FocusTab { index } => {
+                    if let Some(item) = items.get(index) {
+                        focus_target = Some(
+                            instance_id
+                                .as_ref()
+                                .map(|scope| format!("tabs:{scope}:tab:{}", item.value))
+                                .unwrap_or_else(|| format!("tabs:{}", item.value)),
+                        );
+                    }
+                }
+                poodle_headless::tabs::TabsEffect::EmitValueChange { value } => {
+                    if let Some(handler) = on_change.as_ref() {
+                        handler(&value);
+                    }
+                }
+                _ => {}
+            }
+        }
+        focus_target
+    }));
+}
+
+fn render_card(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandlers) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let pad_x = rem_to_px(control_space_x_rem(spec.density));
@@ -243,6 +456,11 @@ fn render_card(
     let solid = spec.active_fill == ActiveFill::Solid;
 
     let mut tab_bar = Node::container();
+    tab_bar.id = Some("tabs-list".to_owned());
+    tab_bar.runtime_id = tab_list_runtime_id(handlers);
+    tab_bar.a11y.role = Some(NodeRole::TabList);
+    tab_bar.a11y.label = spec.aria_label.clone();
+    tab_bar.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
     {
         let s = &mut tab_bar.style;
         if vertical {
@@ -314,7 +532,7 @@ fn render_card(
 
         if tab.is_closable {
             let mut close = build_close_button(theme, &tab.label);
-            close.interaction.on_activate = Some(match (is_disabled, on_close) {
+            close.interaction.on_activate = Some(match (is_disabled, handlers.on_close.as_ref()) {
                 (false, Some(handler)) => {
                     let handler = Arc::clone(handler);
                     let value = tab.value.clone();
@@ -327,14 +545,20 @@ fn render_card(
             tab_el = tab_el.child(close);
         }
 
-        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, theme);
-        wire_select(&mut tab_el, is_disabled, &tab.value, on_change);
+        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, theme);
+        wire_select(
+            &mut tab_el,
+            is_disabled,
+            &tab.value,
+            handlers.on_change.as_ref(),
+        );
+        wire_collection_semantics(&mut tab_el, spec, tab_bar.children.len(), handlers, theme);
         tab_bar = tab_bar.child(tab_el);
     }
     tab_bar
 }
 
-fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Option<&TabHandler>) -> Node {
+fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandlers) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let control_height = rem_to_px(control_height_rem(effective_size));
@@ -354,6 +578,11 @@ fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Option<&Ta
     let selected = spec.current_value().map(|s| s.to_string());
 
     let mut container = Node::container();
+    container.id = Some("tabs-list".to_owned());
+    container.runtime_id = tab_list_runtime_id(handlers);
+    container.a11y.role = Some(NodeRole::TabList);
+    container.a11y.label = spec.aria_label.clone();
+    container.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
     {
         let s = &mut container.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
@@ -403,18 +632,20 @@ fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, on_change: Option<&Ta
         // Pill is always horizontal.
         let mut tab_el = tab_el.child(build_tab_label(tab, theme, text_color, font_size, false));
 
-        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, theme);
-        wire_select(&mut tab_el, is_disabled, &tab.value, on_change);
+        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, theme);
+        wire_select(
+            &mut tab_el,
+            is_disabled,
+            &tab.value,
+            handlers.on_change.as_ref(),
+        );
+        wire_collection_semantics(&mut tab_el, spec, container.children.len(), handlers, theme);
         container = container.child(tab_el);
     }
     container
 }
 
-fn render_block(
-    spec: &TabsSpec,
-    theme: &dyn ThemeProvider,
-    on_change: Option<&TabHandler>,
-) -> Node {
+fn render_block(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandlers) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let control_height = rem_to_px(control_height_rem(effective_size));
@@ -436,6 +667,11 @@ fn render_block(
     let vertical = spec.is_vertical();
 
     let mut tab_bar = Node::container();
+    tab_bar.id = Some("tabs-list".to_owned());
+    tab_bar.runtime_id = tab_list_runtime_id(handlers);
+    tab_bar.a11y.role = Some(NodeRole::TabList);
+    tab_bar.a11y.label = spec.aria_label.clone();
+    tab_bar.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
     {
         let s = &mut tab_bar.style;
         s.descriptor.background = Some(list_bg);
@@ -501,8 +737,14 @@ fn render_block(
         tab_el.interaction.focusable = true;
         let mut tab_el = tab_el.child(build_tab_label(tab, theme, text_color, font_size, vertical));
 
-        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, theme);
-        wire_select(&mut tab_el, is_disabled, &tab.value, on_change);
+        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, theme);
+        wire_select(
+            &mut tab_el,
+            is_disabled,
+            &tab.value,
+            handlers.on_change.as_ref(),
+        );
+        wire_collection_semantics(&mut tab_el, spec, tab_bar.children.len(), handlers, theme);
         tab_bar = tab_bar.child(tab_el);
     }
     tab_bar
@@ -545,13 +787,17 @@ mod tests {
         let root = tabs(&spec, &theme, None, Some(on_close));
 
         assert!(
-            root.find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "file"))
-                .is_some(),
+            root.find(
+                &|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "file")
+            )
+            .is_some(),
             "the card renderer draws the item icon"
         );
         assert!(
-            root.find(&|n| matches!(&n.kind, poodle_node::NodeKind::Text { content } if content == "3"))
-                .is_some(),
+            root.find(
+                &|n| matches!(&n.kind, poodle_node::NodeKind::Text { content } if content == "3")
+            )
+            .is_some(),
             "the card renderer draws the count badge"
         );
 
@@ -565,10 +811,13 @@ mod tests {
     #[test]
     fn card_renderer_solid_fill_uses_accent_with_inverse_foreground() {
         let theme = theme();
-        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
-            .with_variant(TabVariant::Card)
-            .with_active_fill(ActiveFill::Solid)
-            .with_value("a");
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B"),
+        ])
+        .with_variant(TabVariant::Card)
+        .with_active_fill(ActiveFill::Solid)
+        .with_value("a");
 
         let root = tabs(&spec, &theme, None, None);
         let accent = theme.resolve_color(spec.indicator_token());
@@ -589,10 +838,13 @@ mod tests {
     #[test]
     fn card_renderer_active_edge_outline_borders_only_the_selected_tab() {
         let theme = theme();
-        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
-            .with_variant(TabVariant::Card)
-            .with_active_edge(ActiveEdge::Outline)
-            .with_value("a");
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B"),
+        ])
+        .with_variant(TabVariant::Card)
+        .with_active_edge(ActiveEdge::Outline)
+        .with_value("a");
 
         let root = tabs(&spec, &theme, None, None);
         let accent = theme.resolve_color(spec.indicator_token());
@@ -616,9 +868,12 @@ mod tests {
     #[test]
     fn card_renderer_does_not_draw_outline_by_default() {
         let theme = theme();
-        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
-            .with_variant(TabVariant::Card)
-            .with_value("a");
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B"),
+        ])
+        .with_variant(TabVariant::Card)
+        .with_value("a");
 
         let root = tabs(&spec, &theme, None, None);
         assert_eq!(tab_of(&root, "a").style.descriptor.border.width, 0.0);
@@ -628,10 +883,13 @@ mod tests {
     #[test]
     fn block_renderer_underline_edges_only_the_selected_tab() {
         let theme = theme();
-        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
-            .with_variant(TabVariant::Block)
-            .with_active_edge(ActiveEdge::Underline)
-            .with_value("a");
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B"),
+        ])
+        .with_variant(TabVariant::Block)
+        .with_active_edge(ActiveEdge::Underline)
+        .with_value("a");
 
         let root = tabs(&spec, &theme, None, None);
         let accent = theme.resolve_color(spec.indicator_token());
@@ -650,11 +908,14 @@ mod tests {
     #[test]
     fn block_renderer_vertical_underline_uses_the_inline_end_edge() {
         let theme = theme();
-        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
-            .with_variant(TabVariant::Block)
-            .with_orientation(poodle_specs::Orientation::Vertical)
-            .with_active_edge(ActiveEdge::Underline)
-            .with_value("a");
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B"),
+        ])
+        .with_variant(TabVariant::Block)
+        .with_orientation(poodle_specs::Orientation::Vertical)
+        .with_active_edge(ActiveEdge::Underline)
+        .with_value("a");
 
         let root = tabs(&spec, &theme, None, None);
         let accent = theme.resolve_color(spec.indicator_token());
@@ -667,10 +928,13 @@ mod tests {
     #[test]
     fn block_renderer_keeps_separators_under_outline() {
         let theme = theme();
-        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
-            .with_variant(TabVariant::Block)
-            .with_active_edge(ActiveEdge::Outline)
-            .with_value("a");
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B"),
+        ])
+        .with_variant(TabVariant::Block)
+        .with_active_edge(ActiveEdge::Outline)
+        .with_value("a");
 
         let root = tabs(&spec, &theme, None, None);
         let separator = with_alpha(
@@ -693,11 +957,13 @@ mod tests {
         let theme = theme();
         let text_primary = theme.resolve_color("color.text.primary");
         for variant in [TabVariant::Card, TabVariant::Pill, TabVariant::Block] {
-            let spec =
-                TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
-                    .with_variant(variant)
-                    .with_active_fill(ActiveFill::None)
-                    .with_value("a");
+            let spec = TabsSpec::new(vec![
+                TabDefinition::new("a", "A"),
+                TabDefinition::new("b", "B"),
+            ])
+            .with_variant(variant)
+            .with_active_fill(ActiveFill::None)
+            .with_value("a");
 
             let root = tabs(&spec, &theme, None, None);
             let active = tab_of(&root, "a");
@@ -720,11 +986,14 @@ mod tests {
     #[test]
     fn block_none_fill_keeps_underline_edge() {
         let theme = theme();
-        let spec = TabsSpec::new(vec![TabDefinition::new("a", "A"), TabDefinition::new("b", "B")])
-            .with_variant(TabVariant::Block)
-            .with_active_fill(ActiveFill::None)
-            .with_active_edge(ActiveEdge::Underline)
-            .with_value("a");
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B"),
+        ])
+        .with_variant(TabVariant::Block)
+        .with_active_fill(ActiveFill::None)
+        .with_active_edge(ActiveEdge::Underline)
+        .with_value("a");
 
         let root = tabs(&spec, &theme, None, None);
         let accent = theme.resolve_color(spec.indicator_token());
@@ -739,5 +1008,78 @@ mod tests {
         let inactive = tab_of(&root, "b");
         assert_eq!(inactive.style.border_bottom_width, Some(rem_to_px(0.125)));
         assert_eq!(inactive.style.border_color_bottom, Some(TRANSPARENT));
+    }
+
+    #[test]
+    fn instance_scope_isolates_ids_relationships_and_focus_requests() {
+        let theme = theme();
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B"),
+        ])
+        .with_activation_mode(TabActivationMode::Manual)
+        .with_value("a");
+        let focused = Arc::new(Mutex::new(Vec::new()));
+        let on_focus: TabHandler = {
+            let focused = Arc::clone(&focused);
+            Arc::new(move |value| focused.lock().unwrap().push(value.to_owned()))
+        };
+        let root = tabs_with_panel(
+            &spec,
+            &theme,
+            TabsHandlers {
+                on_focus: Some(on_focus),
+                instance_id: Some("first".to_owned()),
+                ..TabsHandlers::default()
+            },
+            Node::text("Panel"),
+        );
+
+        let first = root
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:first:tab:a"))
+            .expect("scoped trigger exists");
+        assert_eq!(first.id.as_deref(), Some("tabs:a"));
+        assert_eq!(first.a11y.controls.as_deref(), Some("tabs-panel:a"));
+        assert_eq!(
+            first.interaction.on_key.as_ref().expect("key handler")(
+                NodeKey::ArrowRight,
+                poodle_node::NodeModifiers::default(),
+            ),
+            Some("tabs:first:tab:b".to_owned())
+        );
+        assert!(
+            focused.lock().unwrap().is_empty(),
+            "focus notification belongs to the backend focus event"
+        );
+        let focus_listener = root
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:first:tab:b"))
+            .expect("focus target exists")
+            .interaction
+            .on_focus_change
+            .as_ref()
+            .expect("focus listener");
+        focus_listener(true);
+        assert_eq!(*focused.lock().unwrap(), vec!["b"]);
+
+        let panel = root
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:first:panel:a"))
+            .expect("scoped panel exists");
+        assert_eq!(panel.id.as_deref(), Some("tabs-panel:a"));
+        assert_eq!(panel.a11y.labelled_by.as_deref(), Some("tabs:a"));
+
+        let second = tabs_with_handlers(
+            &spec,
+            &theme,
+            TabsHandlers {
+                instance_id: Some("second".to_owned()),
+                ..TabsHandlers::default()
+            },
+        );
+        assert!(second
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:second:tab:a"))
+            .is_some());
+        assert!(second
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:first:tab:a"))
+            .is_none());
     }
 }

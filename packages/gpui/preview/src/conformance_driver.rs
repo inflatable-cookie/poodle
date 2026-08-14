@@ -394,6 +394,10 @@ pub async fn focus_element(cx: &mut AsyncWindowContext, element_id: &str) {
 }
 
 pub async fn pointer_activate(cx: &mut AsyncWindowContext, calibration: ClickCalibration) {
+    // The foreground proof can lose key-window status between cases while
+    // reports are serialized. Reassert it immediately before each real
+    // AppKit pointer pass so retries do not repeat a known-inactive click.
+    activate_app_and_window(cx);
     let target = calibration.apply(mount_box_center());
     // One press/release. Callers that need a swallowed-click retry (Button)
     // loop on this helper and break when their trace grows.
@@ -427,6 +431,11 @@ pub async fn keyboard_activate(cx: &mut AsyncWindowContext, element_id: &str) {
 
 /// Arrow-right keycode (macOS virtual key).
 pub const KEY_RIGHT: u16 = 124;
+pub const KEY_LEFT: u16 = 123;
+pub const KEY_DOWN: u16 = 125;
+pub const KEY_UP: u16 = 126;
+pub const KEY_HOME: u16 = 115;
+pub const KEY_END: u16 = 119;
 
 pub async fn keyboard_key(cx: &mut AsyncWindowContext, element_id: &str, keycode: u16) {
     focus_element(cx, element_id).await;
