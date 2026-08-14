@@ -7,6 +7,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-14 — fresh t3 worktrees ship without `node_modules`; `effigy
+  conformance:test-web` fails on unresolved `@sveltejs/vite-plugin-svelte`
+  until `bun install`. Doctor/bootstrap could seed workspace installs for
+  worktree checkout, or the conformance task could fail with that command.
+
 - 2026-08-14 — A Svelte 5 prop named `state` collides with the `$state` rune at
   runtime (`store_invalid_shape: state is not a store with a subscribe method`).
   Components that need a public `state` prop must alias it in `$props()`
@@ -654,4 +659,3 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   pseudo-element onto a child, in a component whose other `@container` rules
   correctly target `__body` and `__header`. The baseline entry now records the
   measurement instead of the guess.
-

@@ -1,85 +1,64 @@
 <script lang="ts">
   import { RangeSlider } from "@inflatable-cookie/poodle-svelte";
+  import {
+    rangeSliderCases,
+    rangeSliderInterface,
+    projectCorpus,
+  } from "@inflatable-cookie/poodle-core/conformance";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
+  import type { ProjectedInstance } from "@inflatable-cookie/poodle-core/conformance";
 
-  let priceRange: [number, number] = $state([20, 80]);
-  let ageRange: [number, number] = $state([23, 43]);
-  let embeddedUnipolarRange: [number, number] = $state([0.2, 0.75]);
-  let embeddedBipolarRange: [number, number] = $state([-0.6, 0.35]);
-  let sizeUnipolarRanges = $state<Record<string, [number, number]>>({ xs: [0.2, 0.75], sm: [0.2, 0.75], md: [0.2, 0.75], lg: [0.2, 0.75], xl: [0.2, 0.75] });
-  let sizeBipolarRanges = $state<Record<string, [number, number]>>({ xs: [-0.5, 0.5], sm: [-0.5, 0.5], md: [-0.5, 0.5], lg: [-0.5, 0.5], xl: [-0.5, 0.5] });
+  // g14.003: specimen page is a projection of the conformance case corpus.
+  const groups = projectCorpus(rangeSliderCases, rangeSliderInterface);
+
+  let valueLog = $state("No range change yet.");
+
+  function propsOf(instance: ProjectedInstance): Record<string, unknown> {
+    const props: Record<string, unknown> = { ...instance.props };
+    for (const key of Object.keys(props)) {
+      if (props[key] === null) delete props[key];
+    }
+    return props;
+  }
+
+  function onChange(instance: ProjectedInstance, value: [number, number]): void {
+    valueLog = `${instance.caption}: [${value[0]}, ${value[1]}]`;
+  }
 </script>
 
-<div class="poodle-range-slider-specimen">
 <SpecimenLayout>
-  <SpecimenGroup label="Default">
-    <RangeSlider
-      value={priceRange}
-      min={0}
-      max={100}
-      ariaLabel="Price range"
-      onValueChange={(value) => (priceRange = value)}
-    />
-    <p>${priceRange[0]} – ${priceRange[1]}</p>
-  </SpecimenGroup>
+  {#each groups as group (group.label)}
+    <SpecimenGroup label={group.label}>
+      {#each group.instances as instance (instance.caseId + instance.caption)}
+        <div class="poodle-specimen__row poodle-specimen__row--captioned">
+          <span class="poodle-specimen__caption">{instance.caption}</span>
+          <RangeSlider
+            {...propsOf(instance)}
+            onValueChange={(value) => onChange(instance, value)}
+          />
+        </div>
+      {/each}
+    </SpecimenGroup>
+  {/each}
 
-  <SpecimenGroup label="With step">
-    <RangeSlider
-      value={ageRange}
-      min={18}
-      max={65}
-      step={5}
-      ariaLabel="Age range"
-      onValueChange={(value) => (ageRange = value)}
-    />
-    <p>Ages {ageRange[0]} – {ageRange[1]}</p>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Disabled">
-    <RangeSlider value={[30, 70]} min={0} max={100} disabled ariaLabel="Disabled range" />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Embedded unipolar control">
-    <RangeSlider variant="embedded" polarity="unipolar" value={embeddedUnipolarRange} min={0} max={1} step={0.01} ariaLabel="Unipolar modulation range" onValueChange={(value) => (embeddedUnipolarRange = value)} />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Embedded bipolar control">
-    <RangeSlider variant="embedded" polarity="bipolar" value={embeddedBipolarRange} min={-1} max={1} step={0.01} ariaLabel="Bipolar modulation range" onValueChange={(value) => (embeddedBipolarRange = value)} />
-  </SpecimenGroup>
-
-  {#snippet sizes(size)}
-    <div class="poodle-range-slider-specimen__size-variants">
-      <span>{size.toUpperCase()} · standard</span>
-      <RangeSlider value={sizeUnipolarRanges[size]} min={0} max={1} step={0.01} {size} ariaLabel={"Standard range at " + size} onValueChange={(value) => (sizeUnipolarRanges[size] = value)} />
-      <span>{size.toUpperCase()} · embedded unipolar</span>
-      <RangeSlider variant="embedded" polarity="unipolar" value={sizeUnipolarRanges[size]} min={0} max={1} step={0.01} {size} ariaLabel={"Embedded unipolar range at " + size} onValueChange={(value) => (sizeUnipolarRanges[size] = value)} />
-      <span>{size.toUpperCase()} · embedded bipolar</span>
-      <RangeSlider variant="embedded" polarity="bipolar" value={sizeBipolarRanges[size]} min={-1} max={1} step={0.01} {size} ariaLabel={"Embedded bipolar range at " + size} onValueChange={(value) => (sizeBipolarRanges[size] = value)} />
+  <SpecimenGroup label="Interaction" bare>
+    <div class="poodle-specimen__row">
+      <span class="poodle-specimen__caption">{valueLog}</span>
     </div>
-  {/snippet}
-
-  {#snippet densities(density)}
-    <RangeSlider variant="embedded" polarity="bipolar" value={[-0.5, 0.5]} min={-1} max={1} {density} ariaLabel={"Embedded range at " + density + " density"} />
-  {/snippet}
-
+  </SpecimenGroup>
 </SpecimenLayout>
-</div>
 
 <style>
-  .poodle-range-slider-specimen {
-    max-width: 20rem;
-  }
-
-  .poodle-range-slider-specimen__size-variants {
+  .poodle-specimen__row--captioned {
     display: flex;
-    width: 100%;
-    flex-direction: column;
-    gap: 0.375rem;
+    align-items: center;
+    gap: 0.75rem;
   }
 
-  .poodle-range-slider-specimen__size-variants > span {
-    color: var(--poodle-color-text-secondary);
-    font-size: var(--poodle-typography-label-size);
+  .poodle-specimen__caption {
+    color: var(--poodle-color-text-secondary, #c9d4e0);
+    font-size: 0.75rem;
+    min-width: 12rem;
   }
 </style>

@@ -32,6 +32,7 @@ const GEOMETRY_FIELDS: &[&str] = &[
 #[derive(Debug, Clone)]
 pub enum NativeResolution {
     SelfNode,
+    Id { id: String },
     RootLabel,
     FirstText,
     /// Icons on one side of the label: leading icons sit before the first
@@ -60,6 +61,8 @@ pub enum NativeStateObservation {
     A11yToggled,
     BackendFocus,
     FocusWithFocusStyle,
+    PartInteractionDisabled { part: String },
+    PartBackendFocus { part: String },
 }
 
 #[derive(Debug, Clone)]
@@ -107,6 +110,13 @@ impl InterfaceDoc {
             let kind = native.get("kind").and_then(Value::as_str).unwrap_or("");
             let resolve = match kind {
                 "self" => NativeResolution::SelfNode,
+                "id" => NativeResolution::Id {
+                    id: native
+                        .get("id")
+                        .and_then(Value::as_str)
+                        .ok_or_else(|| format!("part '{id}' id resolution needs an id"))?
+                        .to_owned(),
+                },
                 "root-label" => NativeResolution::RootLabel,
                 "first-text" => NativeResolution::FirstText,
                 "icon-side" => NativeResolution::IconSide {
@@ -161,6 +171,20 @@ impl InterfaceDoc {
                 "a11y-toggled" => NativeStateObservation::A11yToggled,
                 "backend-focus" => NativeStateObservation::BackendFocus,
                 "focus-with-focus-style" => NativeStateObservation::FocusWithFocusStyle,
+                "part-interaction-disabled" => NativeStateObservation::PartInteractionDisabled {
+                    part: state
+                        .get("part")
+                        .and_then(Value::as_str)
+                        .ok_or_else(|| format!("state '{name}' needs a part"))?
+                        .to_owned(),
+                },
+                "part-backend-focus" => NativeStateObservation::PartBackendFocus {
+                    part: state
+                        .get("part")
+                        .and_then(Value::as_str)
+                        .ok_or_else(|| format!("state '{name}' needs a part"))?
+                        .to_owned(),
+                },
                 other => return Err(format!("state '{name}' has unknown native observation '{other}'")),
             };
             states.push(StateDecl { name, observe });
@@ -211,6 +235,7 @@ pub fn find_part<'a>(iface: &InterfaceDoc, root: &'a Node, part_id: &str) -> Opt
     let decl = iface.part_decl(part_id)?;
     match &decl.resolve {
         NativeResolution::SelfNode => Some(root),
+        NativeResolution::Id { id } => root.find(&|node| node.id.as_deref() == Some(id.as_str())),
         NativeResolution::RootLabel => label_text(root).map(|_| root),
         NativeResolution::FirstText => first_text(root),
         NativeResolution::IconSide { side, except } => {
@@ -280,7 +305,7 @@ fn observe_part(
     node: &Node,
     root: &Node,
     iface: &InterfaceDoc,
-    backend_focus: Option<bool>,
+    focus_by_id: &dyn Fn(&str) -> Option<bool>,
 ) -> Value {
     let part_id = decl.id.as_str();
     let is_root = part_id == "root";
@@ -290,7 +315,7 @@ fn observe_part(
         (json!({}), json!({}))
     };
     let states = if is_root {
-        states_of(iface, root, backend_focus)
+        states_of(iface, root, focus_by_id)
     } else {
         json!({})
     };
@@ -305,20 +330,68 @@ fn observe_part(
     } else {
         text_of(node)
     };
+    let identity_part = is_root
+        || decl.role.is_some()
+        || matches!(
+            decl.resolve,
+            NativeResolution::Id { .. } | NativeResolution::SelfNode
+        );
+    let focused = if identity_part {
+        // Non-focusable identity parts are observed as unfocused (not
+        // "unobservable"): a prior case can leave a stale FOCUS_STATES entry
+        // for the same element id after remount.
+        if !node.interaction.focusable || node.interaction.disabled {
+            Some(false)
+        } else {
+            Some(
+                node.id
+                    .as_deref()
+                    .and_then(focus_by_id)
+                    .or_else(|| if is_root { focus_by_id("") } else { None })
+                    .unwrap_or(false),
+            )
+        }
+    } else {
+        None
+    };
     json!({
         "present": true,
-        // Only root carries role, name, and interactivity; other parts are
-        // carriers (text/icon). The label part normalizes to those carrier
-        // semantics on every runtime.
-        "role": if is_root { role_of(node).map(|r| json!(r)).unwrap_or(Value::Null) } else { Value::Null },
-        "name": if is_root { name_of(node, root).map(|n| json!(n)).unwrap_or(Value::Null) } else { Value::Null },
+        "role": if identity_part {
+            role_of(node).map(|r| json!(r)).unwrap_or(Value::Null)
+        } else {
+            Value::Null
+        },
+        "name": if identity_part {
+            node.a11y
+                .label
+                .clone()
+                .or_else(|| if is_root { name_of(node, root) } else { None })
+                .filter(|s| !s.is_empty())
+                .map(Value::String)
+                .unwrap_or(Value::Null)
+        } else {
+            Value::Null
+        },
         "text": if is_root { Value::Null } else { text.map(|t| json!(t)).unwrap_or(Value::Null) },
         "icon": icon_of(node),
+        "value": if identity_part {
+            node.a11y.value.map(|v| json!(v)).unwrap_or(Value::Null)
+        } else {
+            Value::Null
+        },
         "states": states,
         "tokenRoles": token_roles,
-        "focusable": if is_root { json!(node.interaction.focusable && !node.interaction.disabled) } else { Value::Null },
-        "focused": if is_root { backend_focus.map(|f| json!(f)).unwrap_or(Value::Null) } else { Value::Null },
-        "focusVisible": if is_root { focus_visible_of(node, backend_focus) } else { Value::Null },
+        "focusable": if identity_part {
+            json!(node.interaction.focusable && !node.interaction.disabled)
+        } else {
+            Value::Null
+        },
+        "focused": focused.map(|f| json!(f)).unwrap_or(Value::Null),
+        "focusVisible": if identity_part {
+            focus_visible_of(node, focused)
+        } else {
+            Value::Null
+        },
         "geometry": geometry,
         "channels": channels,
     })
@@ -331,6 +404,7 @@ fn absent_part() -> Value {
         "name": null,
         "text": null,
         "icon": null,
+        "value": null,
         "states": {},
         "tokenRoles": {},
         "focusable": null,
@@ -341,7 +415,7 @@ fn absent_part() -> Value {
     })
 }
 
-fn states_of(iface: &InterfaceDoc, root: &Node, backend_focus: Option<bool>) -> Value {
+fn states_of(iface: &InterfaceDoc, root: &Node, focus_by_id: &dyn Fn(&str) -> Option<bool>) -> Value {
     let mut states = BTreeMap::new();
     for decl in &iface.states {
         let value = match &decl.observe {
@@ -352,11 +426,35 @@ fn states_of(iface: &InterfaceDoc, root: &Node, backend_focus: Option<bool>) -> 
             NativeStateObservation::A11yToggled => {
                 json!(matches!(root.a11y.toggled, Some(NodeToggled::True)))
             }
-            NativeStateObservation::BackendFocus => match backend_focus {
+            NativeStateObservation::BackendFocus => match focus_by_id(
+                root.id.as_deref().unwrap_or(""),
+            ) {
                 Some(focused) => json!(focused),
                 None => Value::Null,
             },
-            NativeStateObservation::FocusWithFocusStyle => focus_visible_of(root, backend_focus),
+            NativeStateObservation::FocusWithFocusStyle => {
+                focus_visible_of(root, focus_by_id(root.id.as_deref().unwrap_or("")))
+            }
+            NativeStateObservation::PartInteractionDisabled { part } => {
+                match find_part(iface, root, part) {
+                    Some(node) => json!(node.interaction.disabled),
+                    None => Value::Null,
+                }
+            }
+            NativeStateObservation::PartBackendFocus { part } => {
+                match find_part(iface, root, part) {
+                    Some(node)
+                        if !node.interaction.focusable || node.interaction.disabled =>
+                    {
+                        json!(false)
+                    }
+                    Some(node) => match node.id.as_deref().and_then(focus_by_id) {
+                        Some(focused) => json!(focused),
+                        None => json!(false),
+                    },
+                    None => Value::Null,
+                }
+            }
         };
         states.insert(decl.name.clone(), value);
     }
@@ -443,16 +541,45 @@ pub fn observe_tree(
     root: &Node,
     backend_focus: Option<bool>,
 ) -> Value {
+    let root_id = root.id.clone();
+    let focus_by_id = move |id: &str| -> Option<bool> {
+        if id.is_empty() || root_id.as_deref() == Some(id) {
+            backend_focus
+        } else {
+            None
+        }
+    };
+    observe_tree_with_focus(runtime, component, iface, root, &focus_by_id)
+}
+
+/// Observes with an explicit per-element focus lookup (GPUI runner).
+pub fn observe_tree_with_focus(
+    runtime: &str,
+    component: &str,
+    iface: &InterfaceDoc,
+    root: &Node,
+    focus_by_id: &dyn Fn(&str) -> Option<bool>,
+) -> Value {
     let mut parts = BTreeMap::new();
     for decl in &iface.parts {
         let observed = find_part(iface, root, &decl.id);
         parts.insert(
             decl.id.clone(),
             match observed {
-                Some(node) => observe_part(decl, node, root, iface, backend_focus),
+                Some(node) => observe_part(decl, node, root, iface, focus_by_id),
                 None => absent_part(),
             },
         );
+    }
+    if let (Some(lower), Some(upper)) = (
+        parts.get("lower").and_then(|p| p.get("value").and_then(Value::as_f64)),
+        parts.get("upper").and_then(|p| p.get("value").and_then(Value::as_f64)),
+    ) {
+        if let Some(root_part) = parts.get_mut("root") {
+            if let Some(obj) = root_part.as_object_mut() {
+                obj.insert("value".to_owned(), json!([lower, upper]));
+            }
+        }
     }
     json!({
         "runtime": runtime,
@@ -630,13 +757,7 @@ fn check(
         ));
         return;
     }
-    let matches = match tolerance {
-        Some(tol) => match (expected.as_f64(), actual.as_f64()) {
-            (Some(e), Some(a)) => (e - a).abs() <= tol,
-            _ => expected == actual,
-        },
-        None => expected == actual,
-    };
+    let matches = values_match(expected, actual, tolerance);
     out.push(result(
         index,
         Some(part),
@@ -646,6 +767,29 @@ fn check(
         Some(actual.clone()),
         None,
     ));
+}
+
+/// Numeric-aware equality: case JSON often stores integers while a11y values
+/// are f64, and serde_json's Number PartialEq treats those as unequal.
+fn values_match(expected: &Value, actual: &Value, tolerance: Option<f64>) -> bool {
+    let tol = tolerance.unwrap_or(1e-9);
+    match (expected, actual) {
+        (Value::Number(e), Value::Number(a)) => match (e.as_f64(), a.as_f64()) {
+            (Some(e), Some(a)) => (e - a).abs() <= tol,
+            _ => expected == actual,
+        },
+        (Value::Array(e), Value::Array(a)) if e.len() == a.len() => e
+            .iter()
+            .zip(a.iter())
+            .all(|(e, a)| values_match(e, a, Some(tol))),
+        _ => match tolerance {
+            Some(tol) => match (expected.as_f64(), actual.as_f64()) {
+                (Some(e), Some(a)) => (e - a).abs() <= tol,
+                _ => expected == actual,
+            },
+            None => expected == actual,
+        },
+    }
 }
 
 pub fn assert_part(
@@ -699,6 +843,10 @@ pub fn assert_part(
             let actual = observed.get(field);
             check(out, runtime, step_index, part, field.to_owned(), expected, actual, None);
         }
+    }
+    if let Some(expected) = expect.get("value") {
+        let actual = observed.get("value");
+        check(out, runtime, step_index, part, "value".to_owned(), expected, actual, None);
     }
 
     if let Some(states) = expect.get("states").and_then(Value::as_object) {

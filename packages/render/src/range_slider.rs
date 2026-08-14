@@ -15,7 +15,7 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, NodeRole,
-    ScrubPhase, ShadowValue,
+    ScrubPhase, ShadowValue, StylePatch,
 };
 use poodle_specs::{ControlSize, RangeSliderSpec, SliderVariant};
 
@@ -134,11 +134,21 @@ pub fn range_slider(
     };
 
     // Thumbs absolutely positioned at the segment junctions, vertically
-    // centred on the track.
+    // centred on the track. Each thumb is a stable, identified part with its
+    // own slider role and accessible name (contract §6; g14.003).
     let thumb_top = -(thumb_r - track_h * 0.5);
+    let lower_label = match spec.aria_label.as_deref() {
+        Some(label) if !label.is_empty() => format!("{label} minimum"),
+        _ => "Minimum value".to_owned(),
+    };
+    let upper_label = match spec.aria_label.as_deref() {
+        Some(label) if !label.is_empty() => format!("{label} maximum"),
+        _ => "Maximum value".to_owned(),
+    };
 
-    let make_thumb = || -> Node {
+    let make_thumb = |id: &str, label: String, value: f64| -> Node {
         let mut thumb = Node::container();
+        thumb.id = Some(id.to_owned());
         thumb.position = NodePosition::Absolute {
             top: Some(thumb_top),
             left: None,
@@ -161,10 +171,26 @@ pub fn range_slider(
             s.descriptor.cursor = CursorHint::Pointer;
             s.descriptor.shadow = Some(thumb_shadow);
         }
+        thumb.a11y.role = Some(NodeRole::Slider);
+        thumb.a11y.label = Some(label);
+        thumb.a11y.value = Some(value);
+        if spec.is_disabled {
+            thumb.interaction.disabled = true;
+        } else {
+            thumb.interaction.focusable = true;
+            // Focus style is also the GPUI observation channel: `tracks_focus`
+            // requires it (or on_focus_change) before a focus handle exists.
+            thumb.style.focus = Some(StylePatch {
+                background: None,
+                border_color: Some(theme.resolve_color(spec.focus_ring_color_token())),
+                text_color: None,
+                opacity: None,
+            });
+        }
         thumb
     };
-    let thumb_lo = make_thumb();
-    let thumb_hi = make_thumb();
+    let mut thumb_lo = make_thumb("range-slider-lower", lower_label.clone(), spec.low);
+    let mut thumb_hi = make_thumb("range-slider-upper", upper_label.clone(), spec.high);
 
     // One shared pair of values, so dragging either thumb reports both.
     let mut scrub_handler: Option<Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>> = None;
@@ -206,6 +232,102 @@ pub fn range_slider(
             let on_change = handlers.on_change.clone();
             let on_value_commit = handlers.on_value_commit.clone();
 
+            let bind_key = |thumb_kind: RangeThumb,
+                            target: &mut Node,
+                            low: Arc<AtomicU64>,
+                            high: Arc<AtomicU64>,
+                            on_change: Option<Arc<dyn Fn(f64, f64) + Send + Sync>>,
+                            on_value_commit: Option<Arc<dyn Fn(f64, f64) + Send + Sync>>,
+                            min: f64,
+                            max: f64,
+                            step: f64| {
+                use poodle_node::{NodeKey, NodeModifiers};
+                use poodle_headless::slider::{range_slider_transition, RangeSliderContext, RangeSliderEvent};
+                target.interaction.on_key = Some(Arc::new(move |key: NodeKey, _mods: NodeModifiers| {
+                    let live = (
+                        f64::from_bits(low.load(Ordering::SeqCst)),
+                        f64::from_bits(high.load(Ordering::SeqCst)),
+                    );
+                    let current = match thumb_kind {
+                        RangeThumb::Lower => live.0,
+                        RangeThumb::Upper => live.1,
+                    };
+                    let direction = match key {
+                        NodeKey::ArrowLeft | NodeKey::ArrowDown => -1.0,
+                        NodeKey::ArrowRight | NodeKey::ArrowUp => 1.0,
+                        _ => 0.0,
+                    };
+                    let raw = match key {
+                        NodeKey::Home => min,
+                        NodeKey::End => max,
+                        NodeKey::ArrowLeft
+                        | NodeKey::ArrowDown
+                        | NodeKey::ArrowRight
+                        | NodeKey::ArrowUp => current + direction * step,
+                        _ => return,
+                    };
+                    let context = RangeSliderContext {
+                        value: live,
+                        min,
+                        max,
+                        step,
+                        disabled: false,
+                    };
+                    let (changed, change_effects) =
+                        range_slider_transition(context, RangeSliderEvent::Input { thumb: thumb_kind, raw });
+                    let commit_raw = match thumb_kind {
+                        RangeThumb::Lower => changed.value.0,
+                        RangeThumb::Upper => changed.value.1,
+                    };
+                    let (committed, commit_effects) = range_slider_transition(
+                        changed,
+                        RangeSliderEvent::Commit {
+                            thumb: thumb_kind,
+                            raw: commit_raw,
+                        },
+                    );
+                    low.store(committed.value.0.to_bits(), Ordering::SeqCst);
+                    high.store(committed.value.1.to_bits(), Ordering::SeqCst);
+                    for effect in change_effects.into_iter().chain(commit_effects) {
+                        match effect {
+                            poodle_headless::slider::RangeSliderEffect::EmitValueChange { value } => {
+                                if let Some(handler) = &on_change {
+                                    handler(value.0, value.1);
+                                }
+                            }
+                            poodle_headless::slider::RangeSliderEffect::EmitValueCommit { value } => {
+                                if let Some(handler) = &on_value_commit {
+                                    handler(value.0, value.1);
+                                }
+                            }
+                        }
+                    }
+                }));
+            };
+
+            bind_key(
+                RangeThumb::Lower,
+                &mut thumb_lo,
+                Arc::clone(&low),
+                Arc::clone(&high),
+                on_change.clone(),
+                on_value_commit.clone(),
+                spec.min,
+                spec.max,
+                spec.step,
+            );
+            bind_key(
+                RangeThumb::Upper,
+                &mut thumb_hi,
+                Arc::clone(&low),
+                Arc::clone(&high),
+                on_change.clone(),
+                on_value_commit.clone(),
+                spec.min,
+                spec.max,
+                spec.step,
+            );
+
             let scrub: Arc<dyn Fn(f32, ScrubPhase) + Send + Sync> =
                 Arc::new(move |fraction: f32, phase: ScrubPhase| {
                     let live = (
@@ -220,8 +342,8 @@ pub fn range_slider(
                     let event = match phase {
                         ScrubPhase::Press => {
                             if dragged.swap(false, Ordering::SeqCst) {
-                                // The click that ends a drag. The value is
-                                // already where the drag left it.
+                                // The click that ends a drag is not a new press;
+                                // commit already landed on Release.
                                 return;
                             }
                             RangeSliderControlEvent::PointerBegin {
@@ -240,6 +362,7 @@ pub fn range_slider(
                                 }
                             }
                         }
+                        ScrubPhase::Release => RangeSliderControlEvent::PointerEnd,
                     };
 
                     let context = RangeSliderControlContext {
@@ -263,6 +386,13 @@ pub fn range_slider(
                     for effect in effects {
                         match effect {
                             RangeSliderEffect::EmitValueChange { value } => {
+                                // Skip no-op moves (pointer still dragging after
+                                // clamp): web fires one input per scrub phase;
+                                // GPUI mouse_move would otherwise spam the
+                                // same pair and break strict event-order cases.
+                                if value == live {
+                                    continue;
+                                }
                                 if let Some(handler) = &on_change {
                                     handler(value.0, value.1);
                                 }
@@ -296,8 +426,6 @@ pub fn range_slider(
         layer.style.descriptor.layout.height = LayoutSizing::Fixed(track_h);
         layer.child(anchor)
     };
-    let low_thumb_layer = thumb_layer(lo, thumb_lo);
-    let high_thumb_layer = thumb_layer(hi, thumb_hi);
 
     // Full-width 6px pill; percentage segments anchor both thumbs without
     // requiring backend-specific layout bounds.
@@ -321,8 +449,11 @@ pub fn range_slider(
         .child(seg_negative)
         .child(seg_positive)
         .child(seg_hi);
-    if spec.variant == SliderVariant::Standard {
-        track = track.child(low_thumb_layer).child(high_thumb_layer);
+    let embedded_thumbs = if spec.variant == SliderVariant::Standard {
+        track = track
+            .child(thumb_layer(lo, thumb_lo))
+            .child(thumb_layer(hi, thumb_hi));
+        None
     } else {
         let mut marker = Node::container();
         marker.style.descriptor.layout.width = LayoutSizing::Fixed(border_w);
@@ -337,7 +468,8 @@ pub fn range_slider(
         let mut anchor = segment(visual.center_norm as f32, None);
         anchor.position = NodePosition::Relative;
         track = track.child(anchor.child(marker));
-    }
+        Some((thumb_lo, thumb_hi))
+    };
 
     // The scrub belongs to a full-width grab overlay, not to either thumb: the
     // fraction is measured across whichever node carries it, and a fraction
@@ -364,26 +496,54 @@ pub fn range_slider(
         let s = &mut el.style;
         s.fill_width = true;
     }
+    el.a11y.role = Some(NodeRole::Group);
+    // Token roles mirror web data-* projection for observers.
+    el.roles.insert(
+        "size".to_owned(),
+        match effective_size {
+            ControlSize::Xs => "xs",
+            ControlSize::Sm => "sm",
+            ControlSize::Md => "md",
+            ControlSize::Lg => "lg",
+            ControlSize::Xl => "xl",
+        }
+        .to_owned(),
+    );
+    el.roles.insert(
+        "density".to_owned(),
+        match spec.density {
+            poodle_specs::ControlDensity::Compact => "compact",
+            poodle_specs::ControlDensity::Default => "default",
+            poodle_specs::ControlDensity::Comfortable => "comfortable",
+        }
+        .to_owned(),
+    );
+    el.roles.insert(
+        "variant".to_owned(),
+        match spec.variant {
+            SliderVariant::Standard => "standard",
+            SliderVariant::Embedded => "embedded",
+        }
+        .to_owned(),
+    );
+    el.roles.insert(
+        "polarity".to_owned(),
+        match spec.polarity {
+            poodle_specs::SliderPolarity::Unipolar => "unipolar",
+            poodle_specs::SliderPolarity::Bipolar => "bipolar",
+        }
+        .to_owned(),
+    );
     let mut el = el.child(track);
+    if let Some((lower, upper)) = embedded_thumbs {
+        el = el.child(lower).child(upper);
+    }
 
     if spec.is_disabled {
         el.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
         el.interaction.disabled = true;
-    } else {
-        el.interaction.focusable = true;
     }
 
-    // Contract §6: the control node exposes the slider role on the shared
-    // native path — same shape as audio.rs's knob and color_picker.rs's
-    // channel wrap. The role lands only on a node that already carries an
-    // accessible name (the ruling's requirement): an unnamed slider is
-    // worse than an unnamed container, and the audit fails on one.
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            el.a11y.label = Some(label.to_string());
-            el.a11y.role = Some(NodeRole::Slider);
-        }
-    }
     el
 }
 
@@ -488,7 +648,9 @@ mod tests {
         scrub(0.1, ScrubPhase::Press);
         scrub(0.4, ScrubPhase::Drag);
         let after_drag = seen.lock().unwrap().last().copied().unwrap();
-        scrub(0.4, ScrubPhase::Press); // the release click
+        scrub(0.4, ScrubPhase::Release);
+        assert_eq!(seen.lock().unwrap().last().copied(), Some(after_drag));
+        scrub(0.4, ScrubPhase::Press); // stray click after release must not move again
         assert_eq!(seen.lock().unwrap().last().copied(), Some(after_drag));
     }
 
@@ -501,36 +663,37 @@ mod tests {
         assert_eq!(track_thickness_rem(ControlSize::Xl), 0.625);
     }
 
-    /// Contract §6: the shared native path projects the slider role, and it
-    /// lands on the node that carries the accessible name (the control node),
-    /// so a screen reader describes the slider, not a container. An unnamed
-    /// control stays roleless — an unnamed slider is worse than an unnamed
-    /// container, and the a11y audit fails on one.
+    /// Contract §6 / g14.003: each thumb is an identified slider with its own
+    /// accessible name. Default names apply when aria_label is absent, so the
+    /// a11y audit never sees an unnamed slider.
     #[test]
-    fn the_control_node_exposes_the_slider_role() {
+    fn each_thumb_exposes_the_slider_role() {
         let named = spec().with_aria_label("Price range");
         let node = range_slider(&named, &theme(), RangeSliderHandlers::default());
-        let named_slider = node
-            .find(&|n| n.a11y.role == Some(NodeRole::Slider))
-            .expect("the role persists when a label is provided");
-        assert_eq!(named_slider.a11y.label.as_deref(), Some("Price range"));
-        assert_eq!(
-            named_slider.a11y.role,
-            Some(NodeRole::Slider),
-            "the role and the name sit on the same node"
-        );
-        assert!(
-            named_slider.interaction.focusable,
-            "the slider is a focusable control"
-        );
+        let lower = node
+            .find(&|n| n.id.as_deref() == Some("range-slider-lower"))
+            .expect("lower thumb");
+        let upper = node
+            .find(&|n| n.id.as_deref() == Some("range-slider-upper"))
+            .expect("upper thumb");
+        assert_eq!(lower.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(upper.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(lower.a11y.label.as_deref(), Some("Price range minimum"));
+        assert_eq!(upper.a11y.label.as_deref(), Some("Price range maximum"));
+        assert_eq!(lower.a11y.value, Some(20.0));
+        assert_eq!(upper.a11y.value, Some(80.0));
+        assert!(lower.interaction.focusable);
+        assert!(upper.interaction.focusable);
+        assert_eq!(node.a11y.role, Some(NodeRole::Group));
     }
 
     #[test]
-    fn an_unnamed_control_stays_roleless() {
-        let (node, _) = armed();
-        assert!(
-            node.find(&|n| n.a11y.role == Some(NodeRole::Slider)).is_none(),
-            "no slider role without an accessible name"
-        );
+    fn unnamed_controls_still_name_their_thumbs() {
+        let node = range_slider(&spec(), &theme(), RangeSliderHandlers::default());
+        let lower = node
+            .find(&|n| n.id.as_deref() == Some("range-slider-lower"))
+            .expect("lower thumb");
+        assert_eq!(lower.a11y.label.as_deref(), Some("Minimum value"));
+        assert_eq!(lower.a11y.role, Some(NodeRole::Slider));
     }
 }

@@ -117,6 +117,11 @@ pub fn dispatch_press(window: &mut Window, position: Point<Pixels>) {
     post_mouse_event(window, NSEventType::LeftMouseDown, position);
 }
 
+pub fn dispatch_drag(window: &mut Window, position: Point<Pixels>) {
+    use objc2_app_kit::NSEventType;
+    post_mouse_event(window, NSEventType::LeftMouseDragged, position);
+}
+
 pub fn dispatch_release(window: &mut Window, position: Point<Pixels>) {
     use objc2_app_kit::NSEventType;
     post_mouse_event(window, NSEventType::LeftMouseUp, position);
@@ -415,6 +420,62 @@ pub async fn pointer_activate(cx: &mut AsyncWindowContext, calibration: ClickCal
 pub async fn keyboard_activate(cx: &mut AsyncWindowContext, element_id: &str) {
     focus_element(cx, element_id).await;
     cx.update(|_window, _cx| post_key(KEY_ENTER)).ok();
+    cx.background_executor()
+        .timer(std::time::Duration::from_millis(300))
+        .await;
+}
+
+/// Arrow-right keycode (macOS virtual key).
+pub const KEY_RIGHT: u16 = 124;
+
+pub async fn keyboard_key(cx: &mut AsyncWindowContext, element_id: &str, keycode: u16) {
+    focus_element(cx, element_id).await;
+    cx.update(|_window, _cx| post_key(keycode)).ok();
+    cx.background_executor()
+        .timer(std::time::Duration::from_millis(300))
+        .await;
+}
+
+/// Pointer scrub at a fraction along the mount box (0 = left, 1 = right).
+///
+/// Matches GPUI scrub wiring: mouse-down → Press, move while held → Drag,
+/// mouse-up → Release. The mount box flex-centers the control, so Y targets
+/// the box mid-line (same as Button activation).
+pub async fn pointer_scrub_at(
+    cx: &mut AsyncWindowContext,
+    calibration: ClickCalibration,
+    fraction: f32,
+    phase: &str,
+) {
+    let x = MOUNT_BOX_LEFT + fraction.clamp(0.0, 1.0) * MOUNT_BOX_WIDTH;
+    let y = MOUNT_BOX_TOP + MOUNT_BOX_HEIGHT / 2.0;
+    let target = calibration.apply(point(px(x), px(y)));
+    match phase {
+        "press" => {
+            cx.update(|window, _cx| {
+                dispatch_press(window, target);
+                window.refresh();
+                post_frame_flush();
+            })
+            .ok();
+        }
+        "drag" => {
+            cx.update(|window, _cx| {
+                dispatch_drag(window, target);
+                window.refresh();
+                post_frame_flush();
+            })
+            .ok();
+        }
+        _ => {
+            cx.update(|window, _cx| {
+                dispatch_release(window, target);
+                window.refresh();
+                post_frame_flush();
+            })
+            .ok();
+        }
+    }
     cx.background_executor()
         .timer(std::time::Duration::from_millis(300))
         .await;

@@ -162,6 +162,22 @@ Finite typed roster → web / render-neutral / GPUI probes →
 
 See `docs/logs/2026-08/14-g14-002-primitive-substrate-certification.md`.
 
+## Controlled-control Status (g14.003)
+
+RangeSlider proves a controlled two-part value through the same kernel:
+
+- **Authority** — `range-slider.ts` + 10 typed cases; scrub/key/value vocabulary
+  stays generic (no RangeSlider-specific runner branches).
+- **Execution** — Svelte / React / GPUI all green; compare covers button +
+  range-slider corpora (30 cases × 3 runtimes).
+- **Native** — dual identified thumbs, keyboard, scrub Release; GPUI scrub uses
+  mouse-down/move/up because `on_drag` does not arm from synthetic AppKit drags.
+- **Specimens** — all three active runtimes project the corpus.
+- **Disposition** — two-thumb claims live in RangeSlider cases; single-value
+  `slider` vectors remain. Jetstream stays program-deferred.
+
+See `docs/logs/2026-08/14-g14-003-range-slider-controlled-control-proof.md`.
+
 ## Experimental Surface Disposition
 
 No experimental surface is architecture merely because it merged.
@@ -180,8 +196,10 @@ No experimental surface is architecture merely because it merged.
 | stale specs 063–065 and old roadmap | archived/retired | done |
 | **g14.001 conformance kernel (typed interface, corpus, observers, GPUI runner)** | keep — the replacement-pass proof; profile pilots 2–6 reuse it | g14.010 |
 | **g14.002 primitive capability roster + report** | keep — substrate certification beneath profile pilots | g14.010 |
+| **g14.003 RangeSlider controlled-control proof** | keep — second profile pilot; reuses Button harness path | g14.010 |
 | **hand-written ButtonSpec declaration surface** | replaced by `generated/button.rs` + extension module | done |
 | **hand-written Button specimen fixtures (3 active runtimes)** | replaced by corpus projections; the Jetstream specimen stays deferred with its runtime | done |
+| **hand-written RangeSlider specimen fixtures (3 active runtimes)** | replaced by corpus projections | done |
 | **generated specimen scenes (specimen-ts/rust targets)** | still the shell/nav surface; Button no longer depends on them | g14.009 |
 
 ## Staged Licence Intake

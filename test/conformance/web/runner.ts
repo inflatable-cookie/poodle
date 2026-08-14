@@ -28,9 +28,11 @@ export interface PartObservation {
   name: string | null;
   text: string | null;
   icon: string | null;
+  /** Scalar thumb value or controlled pair on root. */
+  value: number | [number, number] | null;
   states: Record<string, boolean | null>;
   tokenRoles: Record<string, string | null>;
-  focusable: boolean;
+  focusable: boolean | null;
   focused: boolean | null;
   focusVisible: boolean | null;
   geometry: Record<string, number | null>;
@@ -76,6 +78,8 @@ export interface RuntimeAdapter {
   rootElement(): HTMLElement | null;
   press(part: string, input: "pointer" | "keyboard"): Promise<void>;
   focus(part: string): void;
+  key(part: string, key: string): Promise<void>;
+  scrub(part: string, fraction: number, phase: "press" | "drag" | "release"): Promise<void>;
   /** Flush pending framework state/effects so observation sees final DOM. */
   flush(): Promise<void>;
   trace(): TraceEntry[];
@@ -114,6 +118,33 @@ function iconIdentity(
   return el.getAttribute(attribute);
 }
 
+function roleOf(el: HTMLElement): string | null {
+  const explicit = el.getAttribute("role");
+  if (explicit) return explicit;
+  if (el.tagName === "BUTTON") return "button";
+  if (el.tagName === "INPUT" && (el as HTMLInputElement).type === "range") return "slider";
+  return null;
+}
+
+function isFocusable(el: HTMLElement): boolean {
+  if (el.hasAttribute("disabled") || el.getAttribute("aria-disabled") === "true") return false;
+  if (el.tabIndex >= 0) return true;
+  const tag = el.tagName;
+  return tag === "BUTTON" || tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA" || tag === "A";
+}
+
+function partValue(el: HTMLElement | null): number | null {
+  if (!el) return null;
+  if (el instanceof HTMLInputElement && el.type === "range") {
+    const parsed = Number(el.value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  const now = el.getAttribute("aria-valuenow");
+  if (now == null) return null;
+  const parsed = Number(now);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function observeRootStates(
   iface: SerializedComponentInterface,
   root: HTMLElement,
@@ -137,6 +168,20 @@ function observeRootStates(
       case "focus-visible-pseudo":
         states[state.name] = doc.activeElement === root && root.matches(":focus-visible");
         break;
+      case "part-disabled-attr": {
+        const decl = iface.parts.find((part) => part.id === state.part);
+        const el = decl ? resolveWebPart(root, decl) : null;
+        states[state.name] = el
+          ? el.hasAttribute("disabled") || el.getAttribute("aria-disabled") === "true"
+          : null;
+        break;
+      }
+      case "part-active-element": {
+        const decl = iface.parts.find((part) => part.id === state.part);
+        const el = decl ? resolveWebPart(root, decl) : null;
+        states[state.name] = el ? doc.activeElement === el : null;
+        break;
+      }
     }
   }
   return states;
@@ -166,26 +211,32 @@ export function observeDom(
   for (const part of iface.parts) {
     const el = resolveWebPart(root, part);
     const isRoot = part.id === "root";
+    const identity =
+      isRoot ||
+      Boolean(part.role) ||
+      part.resolve?.native?.kind === "id" ||
+      part.resolve?.native?.kind === "self";
     parts[part.id] = {
       present: Boolean(el),
-      // Only root carries role/interactivity; other parts are carriers.
-      role: isRoot ? (el?.tagName === "BUTTON" ? "button" : null) : null,
-      name: null,
-      // Text belongs to the text-carrying part (the label), not root.
+      role: el ? roleOf(el) : null,
+      name: el?.getAttribute("aria-label") || null,
       text: isRoot ? null : (el?.textContent?.trim() || null),
       icon: iconIdentity(part, el),
+      value: partValue(el),
       states: {},
       tokenRoles: {},
-      focusable: null,
-      focused: null,
-      focusVisible: null,
+      focusable: el && identity ? isFocusable(el) : null,
+      focused: el && identity ? root.ownerDocument.activeElement === el : null,
+      focusVisible:
+        el && identity
+          ? root.ownerDocument.activeElement === el && el.matches(":focus-visible")
+          : null,
       geometry: {},
       channels: {},
     };
   }
-  // Root observations (identity + states + token roles + geometry), and the
-  // accessible name: aria-label, else the first text-carrying part, else the
-  // root's own text — all resolved through the interface, no class names.
+  // Root accessible name: aria-label, else the first text-carrying part, else
+  // the root's own text — all resolved through the interface, no class names.
   let accessibleName = root.getAttribute("aria-label");
   if (!accessibleName) {
     for (const part of iface.parts) {
@@ -195,16 +246,24 @@ export function observeDom(
       }
     }
   }
-  if (!accessibleName) accessibleName = root.textContent?.trim() ?? null;
+  if (!accessibleName) {
+    const trimmed = root.textContent?.trim() ?? "";
+    accessibleName = trimmed.length > 0 ? trimmed : null;
+  }
   const rootPart = parts.root;
-  rootPart.name = accessibleName;
+  if (rootPart.name == null) rootPart.name = accessibleName;
   rootPart.states = states;
   rootPart.tokenRoles = tokenRoles;
-  rootPart.focusable = !root.hasAttribute("disabled");
-  rootPart.focused = states.focused ?? null;
-  rootPart.focusVisible = states.focusVisible ?? null;
+  rootPart.focusable = isFocusable(root);
+  rootPart.focused = states.focused ?? rootPart.focused;
+  rootPart.focusVisible = states.focusVisible ?? rootPart.focusVisible;
   rootPart.geometry = geometryOf(root);
   rootPart.channels = channelsOf(root);
+  const lower = parts.lower?.value;
+  const upper = parts.upper?.value;
+  if (typeof lower === "number" && typeof upper === "number") {
+    rootPart.value = [lower, upper];
+  }
   return { runtime, component, parts, trace: [] };
 }
 
@@ -287,6 +346,34 @@ export function assertPartObservation(
       check(results, runtime, stepIndex, partId, field, expect[field], observed[field]);
     }
   }
+  if (expect.value !== undefined) {
+    const expected = expect.value;
+    const actual = observed.value;
+    const matches = Array.isArray(expected)
+      ? Array.isArray(actual) &&
+        expected.length === actual.length &&
+        expected.every((entry, index) => numbersMatch(entry, actual[index], 1e-9))
+      : numbersMatch(expected, actual, 1e-9);
+    if (actual === null || actual === undefined) {
+      results.push({
+        stepIndex,
+        part: partId,
+        field: "value",
+        verdict: "fail",
+        expected,
+        reason: `not observed by ${runtime}`,
+      });
+    } else {
+      results.push({
+        stepIndex,
+        part: partId,
+        field: "value",
+        verdict: matches ? "pass" : "fail",
+        expected,
+        actual,
+      });
+    }
+  }
   const states = (expect.states ?? {}) as Record<string, boolean>;
   for (const [state, value] of Object.entries(states)) {
     check(
@@ -363,8 +450,16 @@ export async function runCase(
     const step = caseData.steps[index];
     switch (step.kind) {
       case "action": {
-        if (step.name === "press") await adapter.press(step.part, step.input ?? "pointer");
+        if (step.name === "press") await adapter.press(step.part, (step.input as "pointer" | "keyboard") ?? "pointer");
         else if (step.name === "focus") adapter.focus(step.part);
+        else if (step.name === "key") await adapter.key(step.part, step.key ?? "");
+        else if (step.name === "scrub") {
+          await adapter.scrub(
+            step.part,
+            typeof step.fraction === "number" ? step.fraction : 0,
+            (step.phase as "press" | "drag" | "release") ?? "press",
+          );
+        }
         await adapter.flush();
         observations.push(capture(adapter, iface, component));
         break;

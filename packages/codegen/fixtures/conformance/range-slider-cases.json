@@ -1,0 +1,731 @@
+{
+  "schemaVersion": 1,
+  "component": "range-slider",
+  "cases": [
+    {
+      "id": "range-slider/default",
+      "fixture": {
+        "props": {
+          "value": [
+            20,
+            80
+          ],
+          "ariaLabel": "Price range"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Basics",
+        "caption": "Default",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "range-slider/default"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "group",
+            "focusable": false,
+            "states": {
+              "disabled": false
+            },
+            "tokenRoles": {
+              "size": "md",
+              "density": "default",
+              "variant": "standard",
+              "polarity": "unipolar"
+            },
+            "value": [
+              20,
+              80
+            ]
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "lower",
+          "expect": {
+            "role": "slider",
+            "name": "Price range minimum",
+            "focusable": true,
+            "value": 20
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "upper",
+          "expect": {
+            "role": "slider",
+            "name": "Price range maximum",
+            "focusable": true,
+            "value": 80
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "range-slider/with-step",
+      "fixture": {
+        "props": {
+          "value": [
+            25,
+            45
+          ],
+          "min": 18,
+          "max": 65,
+          "step": 5,
+          "ariaLabel": "Age range"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Basics",
+        "caption": "With step",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "range-slider/with-step"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "group",
+            "focusable": false,
+            "states": {
+              "disabled": false
+            },
+            "tokenRoles": {
+              "size": "md",
+              "density": "default",
+              "variant": "standard",
+              "polarity": "unipolar"
+            },
+            "value": [
+              25,
+              45
+            ]
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "lower",
+          "expect": {
+            "role": "slider",
+            "name": "Age range minimum",
+            "focusable": true,
+            "value": 25
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "upper",
+          "expect": {
+            "role": "slider",
+            "name": "Age range maximum",
+            "focusable": true,
+            "value": 45
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "range-slider/disabled",
+      "fixture": {
+        "props": {
+          "value": [
+            30,
+            70
+          ],
+          "disabled": true,
+          "ariaLabel": "Disabled range"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "States",
+        "caption": "Disabled",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "range-slider/disabled"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "group",
+            "focusable": false,
+            "states": {
+              "disabled": true
+            },
+            "tokenRoles": {
+              "size": "md",
+              "density": "default",
+              "variant": "standard",
+              "polarity": "unipolar"
+            },
+            "value": [
+              30,
+              70
+            ]
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "lower",
+          "expect": {
+            "role": "slider",
+            "name": "Disabled range minimum",
+            "focusable": false,
+            "value": 30
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "upper",
+          "expect": {
+            "role": "slider",
+            "name": "Disabled range maximum",
+            "focusable": false,
+            "value": 70
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "range-slider/vertical",
+      "fixture": {
+        "props": {
+          "value": [
+            20,
+            80
+          ],
+          "orientation": "vertical",
+          "ariaLabel": "Vertical range"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Orientation",
+        "caption": "Vertical",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "range-slider/vertical"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "group",
+            "focusable": false,
+            "states": {
+              "disabled": false
+            },
+            "tokenRoles": {
+              "size": "md",
+              "density": "default",
+              "variant": "standard",
+              "polarity": "unipolar"
+            },
+            "value": [
+              20,
+              80
+            ]
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "lower",
+          "expect": {
+            "role": "slider",
+            "name": "Vertical range minimum",
+            "focusable": true,
+            "value": 20
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "upper",
+          "expect": {
+            "role": "slider",
+            "name": "Vertical range maximum",
+            "focusable": true,
+            "value": 80
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "range-slider/embedded-unipolar",
+      "fixture": {
+        "props": {
+          "value": [
+            0.2,
+            0.75
+          ],
+          "min": 0,
+          "max": 1,
+          "step": 0.01,
+          "variant": "embedded",
+          "polarity": "unipolar",
+          "ariaLabel": "Unipolar modulation range"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Variants",
+        "caption": "Embedded unipolar",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "range-slider/embedded-unipolar"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "group",
+            "focusable": false,
+            "states": {
+              "disabled": false
+            },
+            "tokenRoles": {
+              "size": "md",
+              "density": "default",
+              "variant": "embedded",
+              "polarity": "unipolar"
+            },
+            "value": [
+              0.2,
+              0.75
+            ]
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "lower",
+          "expect": {
+            "role": "slider",
+            "name": "Unipolar modulation range minimum",
+            "focusable": true,
+            "value": 0.2
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "upper",
+          "expect": {
+            "role": "slider",
+            "name": "Unipolar modulation range maximum",
+            "focusable": true,
+            "value": 0.75
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "range-slider/size-lg",
+      "fixture": {
+        "props": {
+          "value": [
+            20,
+            80
+          ],
+          "size": "lg",
+          "ariaLabel": "Large range"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Size",
+        "caption": "Large",
+        "axes": [
+          "density",
+          "theme"
+        ],
+        "captureId": "range-slider/size-lg"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "role": "group",
+            "focusable": false,
+            "states": {
+              "disabled": false
+            },
+            "tokenRoles": {
+              "size": "lg",
+              "density": "default",
+              "variant": "standard",
+              "polarity": "unipolar"
+            },
+            "value": [
+              20,
+              80
+            ]
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "lower",
+          "expect": {
+            "role": "slider",
+            "name": "Large range minimum",
+            "focusable": true,
+            "value": 20
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "upper",
+          "expect": {
+            "role": "slider",
+            "name": "Large range maximum",
+            "focusable": true,
+            "value": 80
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "range-slider/scrub-upper",
+      "fixture": {
+        "props": {
+          "value": [
+            20,
+            80
+          ],
+          "ariaLabel": "Scrub range"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Scrub upper thumb",
+        "axes": [],
+        "captureId": "range-slider/scrub-upper"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "lower",
+          "expect": {
+            "value": 20
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "upper",
+          "expect": {
+            "value": 80
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "scrub",
+          "part": "root",
+          "fraction": 0.9,
+          "phase": "press"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "valueChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "value": [
+              20,
+              90
+            ]
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "upper",
+          "expect": {
+            "value": 90
+          }
+        },
+        {
+          "kind": "action",
+          "name": "scrub",
+          "part": "root",
+          "fraction": 0.9,
+          "phase": "release"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "valueChange",
+            "valueCommit"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "range-slider/crossing-clamp",
+      "fixture": {
+        "props": {
+          "value": [
+            20,
+            80
+          ],
+          "ariaLabel": "Crossing range"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Crossing clamp",
+        "axes": [],
+        "captureId": "range-slider/crossing-clamp"
+      },
+      "steps": [
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "scrub",
+          "part": "root",
+          "fraction": 0.1,
+          "phase": "press"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "valueChange"
+          ]
+        },
+        {
+          "kind": "action",
+          "name": "scrub",
+          "part": "root",
+          "fraction": 0.95,
+          "phase": "drag"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "valueChange",
+            "valueChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "value": [
+              80,
+              80
+            ]
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "lower",
+          "expect": {
+            "value": 80
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "upper",
+          "expect": {
+            "value": 80
+          }
+        },
+        {
+          "kind": "action",
+          "name": "scrub",
+          "part": "root",
+          "fraction": 0.95,
+          "phase": "release"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "valueChange",
+            "valueChange",
+            "valueCommit"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "range-slider/keyboard-step",
+      "fixture": {
+        "props": {
+          "value": [
+            20,
+            80
+          ],
+          "step": 5,
+          "ariaLabel": "Keyboard range"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Keyboard step",
+        "axes": [],
+        "captureId": "range-slider/keyboard-step"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "focus",
+          "part": "lower"
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "lowerFocused": true,
+              "upperFocused": false
+            }
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "key",
+          "part": "lower",
+          "key": "ArrowRight"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "valueChange",
+            "valueCommit"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "lower",
+          "expect": {
+            "value": 25
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "value": [
+              25,
+              80
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "range-slider/disabled-inert",
+      "fixture": {
+        "props": {
+          "value": [
+            30,
+            70
+          ],
+          "disabled": true,
+          "ariaLabel": "Inert range"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Disabled inert",
+        "axes": [],
+        "captureId": "range-slider/disabled-inert"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "disabled": true
+            },
+            "value": [
+              30,
+              70
+            ]
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "scrub",
+          "part": "root",
+          "fraction": 0.9,
+          "phase": "press"
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "value": [
+              30,
+              70
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

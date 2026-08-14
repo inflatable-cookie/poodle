@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent, type PointerEvent } from "react";
+import { useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from "react";
 import {
   createRangeSliderControlContext,
   normalizeRangeValue,
@@ -88,7 +88,11 @@ export function RangeSlider({
     "--poodle-range-positive-span": `${visualState.positiveFillSpanNorm * 100}%`,
   } as CSSProperties;
 
-  function send(type: "INPUT" | "COMMIT", thumb: "lower" | "upper", event: FormEvent<HTMLInputElement>): void {
+  function send(
+    type: "INPUT" | "COMMIT",
+    thumb: "lower" | "upper",
+    event: { currentTarget: EventTarget & HTMLInputElement },
+  ): void {
     const raw = Number(event.currentTarget.value);
     const result = rangeSliderTransition(machineContext, { type, thumb, raw });
     for (const effect of result.effects) {
@@ -135,6 +139,7 @@ export function RangeSlider({
   return (
     <div ref={root}
       className="poodle-range-slider"
+      role="group"
       data-orientation={orientation}
       data-disabled={disabled}
       style={rangeStyle}
@@ -160,7 +165,9 @@ export function RangeSlider({
         aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"}
         aria-valuetext={lowerValueText ?? undefined}
         onInput={(event) => send("INPUT", "lower", event)}
-        onChange={(event) => send("COMMIT", "lower", event)}
+        onMouseUp={(event) => send("COMMIT", "lower", event)}
+        onKeyUp={(event) => send("COMMIT", "lower", event)}
+        onTouchEnd={(event) => send("COMMIT", "lower", event)}
       />
 
       <input
@@ -174,7 +181,9 @@ export function RangeSlider({
         aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"}
         aria-valuetext={upperValueText ?? undefined}
         onInput={(event) => send("INPUT", "upper", event)}
-        onChange={(event) => send("COMMIT", "upper", event)}
+        onMouseUp={(event) => send("COMMIT", "upper", event)}
+        onKeyUp={(event) => send("COMMIT", "upper", event)}
+        onTouchEnd={(event) => send("COMMIT", "upper", event)}
       /></>}
       {variant === "embedded" && <>
         <div className="poodle-range-slider__embedded-control poodle-range-slider__embedded-control--lower" role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => embeddedKey(event, "lower")} />

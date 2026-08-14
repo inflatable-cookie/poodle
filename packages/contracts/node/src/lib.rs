@@ -96,6 +96,8 @@ pub enum ScrubPhase {
     Press,
     /// The pointer moved while the gesture is held.
     Drag,
+    /// The pointer was released; commits the active scrub gesture.
+    Release,
 }
 
 /// How far a pointer selection reaches out from where it landed.
@@ -700,6 +702,8 @@ pub struct NodeA11y {
     /// Hierarchy level (1-based) — a treeitem's depth, announced as
     /// "level N" rather than inferred from indentation nobody can see.
     pub level: Option<usize>,
+    /// Current numeric value for value-bearing controls (slider thumbs).
+    pub value: Option<f64>,
 }
 
 impl Node {

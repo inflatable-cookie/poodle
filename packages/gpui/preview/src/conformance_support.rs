@@ -5,7 +5,8 @@
 //! TypeScript authority's checked output — never copied or restated here.
 
 use poodle_specs::{
-    ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, ControlSize,
+    ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, ControlSize, Orientation,
+    RangeSliderSpec, SliderPolarity, SliderVariant,
 };
 use serde_json::Value;
 
@@ -14,6 +15,10 @@ use serde_json::Value;
 // consumer reads the same bytes.
 pub const CASES: &str = include_str!("../../../codegen/fixtures/conformance/button-cases.json");
 pub const INTERFACE: &str = include_str!("../../../codegen/fixtures/conformance/button-interface.json");
+pub const RANGE_SLIDER_CASES: &str =
+    include_str!("../../../codegen/fixtures/conformance/range-slider-cases.json");
+pub const RANGE_SLIDER_INTERFACE: &str =
+    include_str!("../../../codegen/fixtures/conformance/range-slider-interface.json");
 
 /// The fixture → spec adapter (the harness's mount step for Button).
 pub fn spec_from_fixture(fixture: &Value) -> ButtonSpec {
@@ -101,6 +106,68 @@ pub fn spec_from_fixture(fixture: &Value) -> ButtonSpec {
             }
             _ => {}
         }
+    }
+    spec
+}
+
+/// The fixture → spec adapter for RangeSlider (g14.003).
+pub fn range_slider_spec_from_fixture(fixture: &Value) -> RangeSliderSpec {
+    let props = fixture.get("props").cloned().unwrap_or_else(|| serde_json::json!({}));
+    let mut spec = RangeSliderSpec::default();
+    if let Some(pair) = props.get("value").and_then(Value::as_array) {
+        if pair.len() == 2 {
+            spec.low = pair[0].as_f64().unwrap_or(spec.low);
+            spec.high = pair[1].as_f64().unwrap_or(spec.high);
+        }
+    }
+    if let Some(v) = props.get("min").and_then(Value::as_f64) {
+        spec.min = v;
+    }
+    if let Some(v) = props.get("max").and_then(Value::as_f64) {
+        spec.max = v;
+    }
+    if let Some(v) = props.get("step").and_then(Value::as_f64) {
+        spec.step = v;
+    }
+    if let Some(v) = props.get("disabled").and_then(Value::as_bool) {
+        spec.is_disabled = v;
+    }
+    if let Some(v) = props.get("ariaLabel").and_then(Value::as_str) {
+        spec.aria_label = Some(v.to_owned());
+    }
+    if let Some(v) = props.get("orientation").and_then(Value::as_str) {
+        spec.orientation = match v {
+            "vertical" => Orientation::Vertical,
+            _ => Orientation::Horizontal,
+        };
+    }
+    if let Some(v) = props.get("variant").and_then(Value::as_str) {
+        spec.variant = match v {
+            "embedded" => SliderVariant::Embedded,
+            _ => SliderVariant::Standard,
+        };
+    }
+    if let Some(v) = props.get("polarity").and_then(Value::as_str) {
+        spec.polarity = match v {
+            "bipolar" => SliderPolarity::Bipolar,
+            _ => SliderPolarity::Unipolar,
+        };
+    }
+    if let Some(v) = props.get("size").and_then(Value::as_str) {
+        spec.size = match v {
+            "xs" => ControlSize::Xs,
+            "sm" => ControlSize::Sm,
+            "lg" => ControlSize::Lg,
+            "xl" => ControlSize::Xl,
+            _ => ControlSize::Md,
+        };
+    }
+    if let Some(v) = props.get("density").and_then(Value::as_str) {
+        spec.density = match v {
+            "compact" => ControlDensity::Compact,
+            "comfortable" => ControlDensity::Comfortable,
+            _ => ControlDensity::Default,
+        };
     }
     spec
 }

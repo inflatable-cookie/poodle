@@ -18,6 +18,8 @@ use serde_json::Value;
 mod conformance_driver;
 #[path = "../conformance_button.rs"]
 mod conformance_button;
+#[path = "../conformance_range_slider.rs"]
+mod conformance_range_slider;
 #[path = "../conformance_support.rs"]
 mod conformance_support;
 #[path = "../primitive_probes_gpui.rs"]
@@ -28,6 +30,7 @@ use conformance_driver::{
     conformance_assets, primitive_evidence_report, set_exit_from_probes, write_or_print_report,
     ConformanceRoot, EXIT_CODE,
 };
+use conformance_range_slider::{drive_range_slider_cases, range_slider_report};
 use primitive_probes_gpui::drive_primitive_probes;
 
 fn parse_args(args: &[String]) -> (bool, Option<String>, Option<PathBuf>) {
@@ -63,8 +66,27 @@ fn run_button_mode(only: Option<String>, out: Option<PathBuf>) {
         .cloned()
         .unwrap_or_default();
 
+    let range_interface: Value =
+        serde_json::from_str(conformance_support::RANGE_SLIDER_INTERFACE)
+            .expect("range-slider interface parses");
+    let range_iface = InterfaceDoc::parse(&range_interface).expect("range-slider interface parses");
+    let range_cases: Value = serde_json::from_str(conformance_support::RANGE_SLIDER_CASES)
+        .expect("range-slider corpus parses");
+    let range_component = range_cases
+        .get("component")
+        .and_then(Value::as_str)
+        .unwrap_or("range-slider")
+        .to_owned();
+    let range_case_list = range_cases
+        .get("cases")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+
     let outcomes: Arc<Mutex<Vec<CaseOutcome>>> = Arc::new(Mutex::new(Vec::new()));
+    let range_outcomes: Arc<Mutex<Vec<CaseOutcome>>> = Arc::new(Mutex::new(Vec::new()));
     let outcomes_in_run = Arc::clone(&outcomes);
+    let range_outcomes_in_run = Arc::clone(&range_outcomes);
 
     Application::new()
         .with_assets(conformance_assets())
@@ -83,15 +105,18 @@ fn run_button_mode(only: Option<String>, out: Option<PathBuf>) {
                     });
                     let iface = iface.clone();
                     let cases = case_list.clone();
+                    let range_iface = range_iface.clone();
+                    let range_cases = range_case_list.clone();
                     let only = only.clone();
                     let out = out.clone();
+                    let range_component = range_component.clone();
                     window
                         .spawn(cx, async move |cx| {
                             let results = drive_button_cases(
                                 cx,
                                 iface,
                                 cases,
-                                only,
+                                only.clone(),
                                 conformance_support::spec_from_fixture,
                             )
                             .await;
@@ -102,8 +127,26 @@ fn run_button_mode(only: Option<String>, out: Option<PathBuf>) {
                             }
                             *outcomes_in_run.lock().expect("outcomes lock") = results;
                             write_or_print_report(out.as_ref(), &report);
-                            if failed > 0 {
-                                eprintln!("\n{failed} failing case(s) — see report");
+
+                            let range_results =
+                                drive_range_slider_cases(cx, range_iface, range_cases, only).await;
+                            let range_report = range_slider_report(&range_component, &range_results);
+                            let range_failed = range_results.iter().filter(|o| !o.pass).count();
+                            if range_failed > 0 {
+                                EXIT_CODE.store(1, Ordering::SeqCst);
+                            }
+                            *range_outcomes_in_run.lock().expect("range outcomes lock") =
+                                range_results;
+                            let range_out = out.as_ref().map(|path| {
+                                path.with_file_name("gpui-range-slider.json")
+                            });
+                            write_or_print_report(range_out.as_ref(), &range_report);
+
+                            if failed + range_failed > 0 {
+                                eprintln!(
+                                    "\n{} failing case(s) — see report",
+                                    failed + range_failed
+                                );
                             }
                             cx.update(|_window, cx| cx.quit()).ok();
                         })
@@ -118,7 +161,13 @@ fn run_button_mode(only: Option<String>, out: Option<PathBuf>) {
         .expect("outcomes lock")
         .iter()
         .filter(|o| !o.pass)
-        .count();
+        .count()
+        + range_outcomes
+            .lock()
+            .expect("range outcomes lock")
+            .iter()
+            .filter(|o| !o.pass)
+            .count();
     let exit_code = EXIT_CODE.load(Ordering::SeqCst);
     if failed > 0 || exit_code != 0 {
         std::process::exit(1);

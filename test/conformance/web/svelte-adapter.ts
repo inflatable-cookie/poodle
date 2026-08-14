@@ -64,6 +64,14 @@ export class SvelteButtonAdapter implements RuntimeAdapter {
     if (part === "root") this.root?.focus();
   }
 
+  async key(_part: string, _key: string): Promise<void> {
+    // Button corpus does not exercise key actions.
+  }
+
+  async scrub(_part: string, _fraction: number, _phase: "press" | "drag" | "release"): Promise<void> {
+    // Button corpus does not exercise scrub actions.
+  }
+
   trace(): TraceEntry[] {
     return [...this._trace];
   }

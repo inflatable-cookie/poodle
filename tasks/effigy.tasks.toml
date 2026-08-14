@@ -99,7 +99,7 @@
 # green execution run with a broken schema is not evidence. Narrow — only
 # the conformance source files, so unrelated core baseline errors never
 # gate this check.
-"conformance:typecheck" = "bunx tsc --noEmit --ignoreConfig packages/core/src/conformance/define.ts packages/core/src/conformance/primitives.ts packages/core/src/conformance/button.ts packages/core/src/conformance/button-cases.ts packages/core/src/conformance/project.ts --strict --skipLibCheck --moduleResolution bundler --module esnext --target es2022"
+"conformance:typecheck" = "bunx tsc --noEmit --ignoreConfig packages/core/src/conformance/define.ts packages/core/src/conformance/primitives.ts packages/core/src/conformance/button.ts packages/core/src/conformance/button-cases.ts packages/core/src/conformance/range-slider.ts packages/core/src/conformance/range-slider-cases.ts packages/core/src/conformance/project.ts --strict --skipLibCheck --moduleResolution bundler --module esnext --target es2022"
 "conformance:test-web" = "bunx vitest run --project conformance"
 # WINDOWED, like test:native-visual: opens a real GPUI window and drives
 # real NSEvents through the AppKit queue (hit testing, listener binding,
