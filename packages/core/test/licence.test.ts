@@ -34,6 +34,11 @@ const base: LicenceStatusInput = {
   attention: "none",
 };
 
+const USE_UNTIL_SECONDS = 1_800_000_000;
+const UPDATE_UNTIL_SECONDS = 1_900_000_000;
+const CHECKED_SECONDS = 1_750_000_000;
+const EXPIRED_SECONDS = 1_700_000_000;
+
 function view(overrides: Partial<LicenceStatusInput> = {}) {
   return licenceStatusView({ ...base, ...overrides });
 }
@@ -121,9 +126,9 @@ describe("mirror field maps", () => {
 describe("licenceStatusView usability states", () => {
   const states: LicenceUsability[] = [
     { state: "active" },
-    { state: "inGrace", until: 1_800_000_000_000 },
-    { state: "useWindowExpired", at: 1_700_000_000_000 },
-    { state: "leaseLapsed", at: 1_700_000_000_000 },
+    { state: "inGrace", until: USE_UNTIL_SECONDS },
+    { state: "useWindowExpired", at: EXPIRED_SECONDS },
+    { state: "leaseLapsed", at: EXPIRED_SECONDS },
     { state: "clockRefused" },
   ];
 
@@ -156,27 +161,27 @@ describe("licenceStatusView usability states", () => {
 
   test("inGrace is never warning or danger, in any tone channel", () => {
     for (const attention of ["none", "informational", "actionable"] as const) {
-      const result = view({ usability: { state: "inGrace", until: 1_800_000_000_000 }, attention });
+      const result = view({ usability: { state: "inGrace", until: USE_UNTIL_SECONDS }, attention });
       expect(result.tone === "warning" || result.tone === "danger").toBe(false);
       expect(result.indicator === "warning" || result.indicator === "danger").toBe(false);
     }
   });
 
   test("inGrace carries the continuation deadline as a quiet detail", () => {
-    const result = view({ usability: { state: "inGrace", until: 1_800_000_000_000 } });
+    const result = view({ usability: { state: "inGrace", until: USE_UNTIL_SECONDS } });
     expect(result.detail).toEqual({ text: "Use continues until", timestamp: 1_800_000_000_000 });
     expect(result.body.text).not.toMatch(/fail|error|problem/i);
   });
 
   test("useWindowExpired says nothing about update coverage", () => {
-    const result = view({ usability: { state: "useWindowExpired", at: 1_700_000_000_000 } });
+    const result = view({ usability: { state: "useWindowExpired", at: EXPIRED_SECONDS } });
     expect(result.tone).toBe("danger");
     expect(result.body.timestamp).toBe(1_700_000_000_000);
     expect(`${result.title} ${result.body.text}`).not.toMatch(/update/i);
   });
 
   test("leaseLapsed never calls the licence expired", () => {
-    const result = view({ usability: { state: "leaseLapsed", at: 1_700_000_000_000 } });
+    const result = view({ usability: { state: "leaseLapsed", at: EXPIRED_SECONDS } });
     expect(result.tone).toBe("warning");
     expect(result.body.timestamp).toBe(1_700_000_000_000);
     expect(`${result.title} ${result.body.text}`).not.toMatch(/expir|invalid|revok/i);
@@ -195,9 +200,9 @@ describe("licenceStatusView usability states", () => {
 describe("licenceStatusView coverage rows", () => {
   const combinations: Array<[number | null, number | null]> = [
     [null, null],
-    [1_800_000_000_000, null],
-    [null, 1_800_000_000_000],
-    [1_800_000_000_000, 1_900_000_000_000],
+    [USE_UNTIL_SECONDS, null],
+    [null, USE_UNTIL_SECONDS],
+    [USE_UNTIL_SECONDS, UPDATE_UNTIL_SECONDS],
   ];
 
   test("use and update always stay two separate rows", () => {
@@ -224,7 +229,7 @@ describe("licenceStatusView coverage rows", () => {
   });
 
   test("dated windows carry their timestamp and their own term", () => {
-    const result = view({ useUntil: 1_800_000_000_000, updateUntil: 1_900_000_000_000 });
+    const result = view({ useUntil: USE_UNTIL_SECONDS, updateUntil: UPDATE_UNTIL_SECONDS });
     expect(result.coverage[0]).toEqual({
       id: "use",
       term: "Use covered until",
@@ -247,7 +252,7 @@ describe("licenceStatusView trust basis and authority reads", () => {
       text: "Verified on this machine",
       timestamp: null,
     });
-    expect(view({ trustBasis: { kind: "remoteAssertion", checked: 1_750_000_000_000 } }).trust).toEqual({
+    expect(view({ trustBasis: { kind: "remoteAssertion", checked: CHECKED_SECONDS } }).trust).toEqual({
       term: "Trust basis",
       text: "Confirmed with the server",
       timestamp: 1_750_000_000_000,

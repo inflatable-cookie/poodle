@@ -13,7 +13,7 @@ import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize } from "./types";
 
 export interface LicenceSeatsProps {
-  seats?: LicenceSeat[];
+  seats?: readonly LicenceSeat[];
   pendingMachineId?: string | null;
   title?: string;
   releaseLabel?: string;

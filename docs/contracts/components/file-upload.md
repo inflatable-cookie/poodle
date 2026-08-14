@@ -72,6 +72,7 @@ Updated: 2026-03-30
 | `maxFiles` | `number` | `10` | no | max number of files when multiple |
 | `showPreview` | `boolean` | `true` | no | show image thumbnails |
 | `disabled` | `boolean` | `false` | no | disables all interaction |
+| `describedBy` | `string \| null` | `null` | no | `aria-describedby` target for the native file input |
 | `files` | `FileUploadItem[]` | `[]` | no | bindable file list |
 | `validate` | `(file: File) => string \| null` | `undefined` | no | app-owned custom validation callback |
 | `compress` | `boolean` | `false` | no | compress raster images before they are added |
@@ -156,6 +157,8 @@ interface ImageCompressionOptions {
 - Hidden input: `<input type="file">` with `accept` and `multiple` attributes.
   Visually hidden but focusable, and carries the accessible label — it is the
   real control that keyboard and assistive technology use
+- `describedBy`, when provided, is applied to the native file input and to any
+  renderer-owned focusable dropzone shell
 - File list: `<ul>` with `<li>` items
 - Remove button: `<button>` with accessible label (e.g., "Remove filename")
 - Disabled: modifier class `.file-upload--disabled` on root

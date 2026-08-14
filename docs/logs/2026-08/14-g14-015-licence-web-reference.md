@@ -17,7 +17,7 @@ contracts' Known Deltas and the g14 estate both still say so.
 | File | What |
 |---|---|
 | `packages/core/src/licence.ts` | new — structural mirrors, mirror field maps, `licenceStatusView`, submit resolver, seat rows, all copy |
-| `packages/core/src/index.ts` | 19 value + 22 type exports added |
+| `packages/core/src/index.ts` | 20 value + 22 type exports added |
 | `packages/core/test/licence.test.ts` | new — 40 tests, 124 assertions |
 
 ### Batch B — web components
@@ -39,7 +39,7 @@ contracts' Known Deltas and the g14 estate both still say so.
 |---|---|
 | `packages/svelte/preview/src/specimens/Licence{Status,Activation,Seats}Specimen.svelte` | new |
 | `packages/react/preview/src/gallery/specimens/Licence{Status,Activation,Seats}Specimen.tsx` | new |
-| `packages/{svelte,react}/components/test/Licence*.test.{ts,tsx}` | new — 42 tests per framework |
+| `packages/{svelte,react}/components/test/{Licence*,FileUpload}.test.{ts,tsx}` | 43 licence-surface tests per framework after review regressions |
 | `packages/svelte/preview/src/component-registry.ts` | 3 entries, `workstation`, `hasSpecimen` |
 | `packages/svelte/preview/src/component-docs.ts` | 3 usage-doc entries |
 | `packages/svelte/preview/src/specimens/registry.ts` | 3 |
@@ -71,7 +71,8 @@ and inventing one would assert a shape that is not there. No unrelated
 View and resolution API: `licenceStatusView`, `resolveLicenceSubmit`,
 `licenceKeyProblemMessage`, `licenceMachineLabel`, `licenceFileContentsBase64`,
 `licenceSeatRows`, `licenceOtherSeats`, `LICENCE_ROUTES`, and the six message
-constants.
+constants. `licenceTimestampMilliseconds` is the one authority-seconds → web-
+milliseconds boundary used by the shared status view.
 
 ## Public component API
 
@@ -82,8 +83,15 @@ constants.
 `pending`, `disabled`, `title`, `machineLabelLabel`, `activateLabel`,
 `fileAccept`, `size`, `density`; `onActivate({ credential, label })`.
 
-`LicenceSeats` — `seats`, `pendingMachineId`, `title`, `releaseLabel`,
+`LicenceSeats` — readonly `seats`, `pendingMachineId`, `title`, `releaseLabel`,
 `confirmRelease`, `size`, `density`; `onRelease({ machineId })`.
+
+`FileUpload` gained one bounded additive prop, `describedBy`, so
+`LicenceActivation` can associate file validation with the native file input.
+The original card's stop condition required orchestrator approval for public
+surface expansion. The orchestrator approved this exception in PR review; it
+is the smallest accessible composition and adds no licence behaviour to
+`FileUpload`.
 
 Identical in both frameworks, and now gated: the contracts were restructured
 (below) so `docs:contract-drift` and `docs:callback-drift` cover all three.
@@ -93,6 +101,7 @@ Identical in both frameworks, and now gated: the contracts were restructured
 | Criterion | Where |
 |---|---|
 | five usability states, each with a test and a specimen case | `Licence*Status.test` ×2 (5 cases each), `LicenceStatusSpecimen` "Usability states" |
+| authority timestamps are Unix seconds and render as modern dates | core uses 10-digit fixtures and asserts millisecond view output; both status suites assert exact `<time datetime>` |
 | `inGrace` no warning/danger class, token role, icon, announcement | `gives inGrace no warning or danger role, and never announces` ×2; core `inGrace is never warning or danger, in any tone channel` |
 | `clockRefused` clock remedy, no expiry/purchase | `gives clockRefused the clock remedy…` ×2; core equivalent |
 | `useUntil` / `updateUntil` two visible labelled values | three tests per framework (null/null, dated/dated, mixed); core covers all four combinations |
@@ -100,9 +109,12 @@ Identical in both frameworks, and now gated: the contracts were restructured
 | mistyped vs too-short distinct; typo copy never implies invalid | three tests per framework; core `key problem copy` block |
 | injected parser receives input unchanged | `hands the injected parser lowercase, dashes, whitespace and I/L/O unchanged` ×2 + core |
 | three routes equally visible and keyboard reachable | `presents all three routes as equally visible, reachable tabs` ×2 |
-| account invokes provider, quiet cancel, no token field | three tests per framework |
+| account invokes provider, quiet cancel, no token field | four tests per framework |
+| async account completion cannot drift by route/label | deferred-provider test ×2; interaction freezes and submit snapshot is explicit |
 | exact credential shapes + `label: string \| null` | per-route emit tests ×2; core `every route carries the same optional label` |
 | base64 without data-URL prefix; secrets never render or reach attributes | `emits file bytes as base64 with no data-URL prefix` ×2; core `licenceFileContentsBase64` |
+| hidden/removed/stale file bytes cannot activate | leave-and-return, remove-before-read, and submit-before-read completion tests ×2 |
+| file errors describe the focused native input | `LicenceActivation` association assertion plus direct `FileUpload.describedBy` test ×2 |
 | empty seats renders nothing; `Unnamed machine`; this machine not releasable; others are | four tests per framework |
 | no machine ID / hostname / platform / last-seen in rendered or accessible text | `never exposes a machine ID…` and `says nothing about hostnames…` ×2; core `no derived string exposes a machine ID` |
 | no Longhorn import anywhere | grep below |
@@ -153,10 +165,18 @@ element is the one mechanism both shells can run. It satisfies both contract
 clauses — first field on route activation, relevant field on invalid submit —
 because in every route the relevant field *is* the first focusable.
 
-**Two buttons on the account route.** The anatomy puts "Continue with account"
-inside the panel and `Activate` outside it, shared by all routes. Both run the
-same submit path. Implemented literally rather than hiding one; a route whose
-submit lives somewhere else is the kind of asymmetry the card exists to prevent.
+**One shared submit for every route.** The account panel explains the host-owned
+journey; the form's `Activate` button is its only action. This keeps all three
+routes on one submit path and removes duplicate controls with identical effects.
+
+**Authority timestamps stay seconds until the shared view boundary.** Longhorn
+records integer Unix seconds. Core converts once to milliseconds for `TimeAgo`;
+neither renderer nor caller converts. Real 10-digit fixtures pin the boundary.
+
+**A file credential exists only while its visible selection does.** Leaving the
+file route or removing the file cancels/invalidates its read and clears bytes.
+Generation guards reject stale callbacks. A successful delayed read also clears
+the temporary required-file message raised by an early submit.
 
 ## Contract edits (discovered contradiction)
 
@@ -193,16 +213,16 @@ surfaces still 106 and now green.
 | Command | Exit | Notes |
 |---|---|---|
 | `effigy test:core` | 0 | 699 tests, 46 files (licence: 40) |
-| `effigy test:components` | 0 | 1208 tests, 85 files (was 1124/79) |
+| `effigy test:components` | 0 | 1218 tests, 87 files |
 | `effigy test:parity` | 0 | 170 |
 | `effigy test:a11y` | 0 | 172, axe-clean |
-| `effigy check:svelte` | **1** | **pre-existing**: 3 errors in `test/AppHeaderCenterHarness.svelte`, recorded on main in `5b64a594`. Zero licence diagnostics; 725 files checked |
+| `effigy check:svelte-components` | **1** | **pre-existing**: 3 errors in `test/AppHeaderCenterHarness.svelte`, recorded on main in `5b64a594`. Zero licence diagnostics |
 | `effigy svelte:surface-audit` | 0 | 170 exports, 0 coverage gaps, 0 legacy markers |
 | `effigy docs:contract-drift` | 0 | 134 checked |
 | `effigy docs:callback-drift` | 0 | 106 checked |
 | `effigy docs:react-specimen-drift` | 0 | 164 specimens, all claimed present |
 | `effigy docs:capability-drift` | 0 | 36 rows |
-| `effigy test:web-pack-install` | 0 | 3 packed tarballs install and import |
+| `effigy test:web-pack-install` | 0 | 3 packed tarballs; 5 consumer tests; all licence exports mount and `styles/licence.css` resolves at framework floors |
 | `effigy audit:icons` / `audit:tokens` / `drift:recipes` | 0 | |
 | `effigy docs:lint` | 0 | 177 contracts |
 | `effigy docs:check` | 0 | includes `gate:clean` — artifacts committed match regeneration |
@@ -217,6 +237,23 @@ are untouched.
 `effigy ci:web` was not run end-to-end: it fails at `check:svelte` on the
 pre-existing harness errors above. Every other member was run individually and
 is listed here.
+
+## Orchestrator review correction
+
+The first PR review found four release blockers plus three hardening gaps:
+authority timestamp units, async account drift, stale file credentials,
+file-error accessibility, readonly authority seats, duplicate account actions,
+and a generic packed-consumer proof that never imported the new surface. All
+seven are corrected above. The review also caught the submit-before-read error
+lifetime during recheck; that transition now has a regression in both runtimes.
+
+Fresh Svelte and React captures were generated from the same frozen clock,
+viewport, theme, density, and size axis used by the visual gate. They show the
+modern timestamp dates, single account action, all routes, seat states, and
+pixel-matched framework output.
+
+- [Svelte specimen capture](../assets/2026-08-14-g14-015/svelte-handoff.webp)
+- [React specimen capture](../assets/2026-08-14-g14-015/react-handoff.webp)
 
 ## Known incomplete
 

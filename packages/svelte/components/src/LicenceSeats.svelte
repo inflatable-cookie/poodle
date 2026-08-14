@@ -13,7 +13,7 @@
   import type { ControlDensity, ControlSize } from "./types";
 
   interface Props {
-    seats?: LicenceSeat[];
+    seats?: readonly LicenceSeat[];
     pendingMachineId?: string | null;
     title?: string;
     releaseLabel?: string;

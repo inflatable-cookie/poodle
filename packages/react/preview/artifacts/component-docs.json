@@ -4519,6 +4519,12 @@
         "description": "Whether the upload input is disabled."
       },
       {
+        "name": "describedBy",
+        "type": "string | null",
+        "default": "null",
+        "description": "ID of descriptive content for the file control and any focusable dropzone shell."
+      },
+      {
         "name": "files",
         "type": "FileUploadItem[]",
         "default": "[]",
@@ -5816,12 +5822,12 @@
       {
         "name": "useUntil",
         "type": "number | null",
-        "description": "Required. Use-coverage end, or null for no end date. Always its own row."
+        "description": "Required. Use-coverage end in Unix seconds, or null for no end date. Always its own row."
       },
       {
         "name": "updateUntil",
         "type": "number | null",
-        "description": "Required. Update-coverage end, or null for no end date. Always its own row."
+        "description": "Required. Update-coverage end in Unix seconds, or null for no end date. Always its own row."
       },
       {
         "name": "usable",
@@ -5937,7 +5943,7 @@
     "props": [
       {
         "name": "seats",
-        "type": "LicenceSeat[]",
+        "type": "readonly LicenceSeat[]",
         "default": "[]",
         "description": "Authority-reported seats. Empty renders nothing, not a synthetic count."
       },

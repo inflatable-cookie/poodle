@@ -1743,6 +1743,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "maxFiles", type: "number", default: "10", description: "Maximum number of files when multiple is true." },
       { name: "showPreview", type: "boolean", default: "true", description: "Whether to show file previews." },
       { name: "disabled", type: "boolean", default: "false", description: "Whether the upload input is disabled." },
+      { name: "describedBy", type: "string | null", default: "null", description: "ID of descriptive content for the file control and any focusable dropzone shell." },
       { name: "files", type: "FileUploadItem[]", default: "[]", description: "Current array of uploaded file items." },
       { name: "validate", type: "(file: File) => string | null", default: "undefined", description: "Optional custom file validation callback." },
       { name: "compress", type: "boolean", default: "false", description: "Whether raster images should be compressed before upload." },
@@ -2320,8 +2321,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     props: [
       { name: "usability", type: "LicenceUsability", description: "Required. The authority's usability projection; every state renders distinctly." },
       { name: "trustBasis", type: "LicenceTrustBasis", description: "Required. How the licence was verified. Contains no credential." },
-      { name: "useUntil", type: "number | null", description: "Required. Use-coverage end, or null for no end date. Always its own row." },
-      { name: "updateUntil", type: "number | null", description: "Required. Update-coverage end, or null for no end date. Always its own row." },
+      { name: "useUntil", type: "number | null", description: "Required. Use-coverage end in Unix seconds, or null for no end date. Always its own row." },
+      { name: "updateUntil", type: "number | null", description: "Required. Update-coverage end in Unix seconds, or null for no end date. Always its own row." },
       { name: "usable", type: "boolean", description: "Required. A supplied read, reported through data state only. It gates nothing." },
       { name: "attention", type: "LicenceAttention", description: "Required. Authority emphasis; never re-derived from the other reads." },
       { name: "title", type: "string", default: '"Licence"', description: "Accessible name for the section." },
@@ -2377,7 +2378,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   "licence-seats": {
     props: [
-      { name: "seats", type: "LicenceSeat[]", default: "[]", description: "Authority-reported seats. Empty renders nothing, not a synthetic count." },
+      { name: "seats", type: "readonly LicenceSeat[]", default: "[]", description: "Authority-reported seats. Empty renders nothing, not a synthetic count." },
       { name: "pendingMachineId", type: "string | null", default: "null", description: "Disables that one row's release while its command runs." },
       { name: "title", type: "string", default: '"Activated machines"', description: "Section heading and accessible name." },
       { name: "releaseLabel", type: "string", default: '"Release"', description: "Row action label; also the confirmation's confirm label." },

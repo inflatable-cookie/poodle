@@ -205,12 +205,12 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   // body, both coverage rows, trust row, and the quiet detail row that only
   // this state has.
   LicenceStatus: {
-    usability: { state: "inGrace", until: 1_800_000_000_000 },
-    trustBasis: { kind: "remoteAssertion", checked: 1_750_000_000_000 },
-    useUntil: 1_800_000_000_000,
+    usability: { state: "inGrace", until: 1_800_000_000 },
+    trustBasis: { kind: "remoteAssertion", checked: 1_750_000_000 },
+    useUntil: 1_800_000_000,
     updateUntil: null,
     usable: true,
-    attention: "informational",
+    attention: "none",
   },
   // Both host behaviours are required props. Stubs, because the sweeps mount
   // and inspect anatomy — the real parser and account flow belong to the host,

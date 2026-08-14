@@ -46,7 +46,7 @@ Section (absent when seats=[])
 
 | Prop | Type | Default | Required | Notes |
 | --- | --- | --- | --- | --- |
-| `seats` | `LicenceSeat[]` | `[]` | no | Empty renders nothing, not `1 seat` |
+| `seats` | `readonly LicenceSeat[]` | `[]` | no | Accepts authority getters directly; empty renders nothing, not `1 seat` |
 | `pendingMachineId` | `string \| null` | `null` | no | Disables that row's duplicate release |
 | `title` | `string` | `"Activated machines"` | no | Section heading/name |
 | `releaseLabel` | `string` | `"Release"` | no | Row action |

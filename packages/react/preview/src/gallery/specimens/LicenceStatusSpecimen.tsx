@@ -3,11 +3,11 @@ import { LicenceStatus } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
-const now = Date.now();
-const soon = now + 12 * 86_400_000;
-const later = now + 240 * 86_400_000;
-const past = now - 9 * 86_400_000;
-const checked = now - 3_600_000;
+const now = Math.floor(Date.now() / 1_000);
+const soon = now + 12 * 86_400;
+const later = now + 240 * 86_400;
+const past = now - 9 * 86_400;
+const checked = now - 3_600;
 
 const offline = { kind: "offlineSignature" } as const;
 const remote = { kind: "remoteAssertion", checked } as const;
@@ -34,7 +34,7 @@ export function LicenceStatusSpecimen() {
             useUntil={soon}
             updateUntil={later}
             usable={true}
-            attention="informational"
+            attention="none"
           />
           <LicenceStatus
             usability={{ state: "useWindowExpired", at: past }}

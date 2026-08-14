@@ -129,7 +129,7 @@ export const LICENCE_MIRROR_VARIANT_FIELDS: Record<
 
 export type LicenceStatusState = LicenceUsability["state"];
 
-/** Copy that may carry a timestamp the renderer prints through `<time>`. */
+/** Copy carrying web milliseconds after the shared authority-seconds conversion. */
 export interface LicenceTimedText {
   text: string;
   timestamp: number | null;
@@ -174,10 +174,17 @@ export interface LicenceStatusView {
 export interface LicenceStatusInput {
   usability: LicenceUsability;
   trustBasis: LicenceTrustBasis;
+  /** Authority timestamp in integer Unix seconds. */
   useUntil: number | null;
+  /** Authority timestamp in integer Unix seconds. */
   updateUntil: number | null;
   usable: boolean;
   attention: LicenceAttention;
+}
+
+/** Convert one authority timestamp at the shared view boundary. */
+export function licenceTimestampMilliseconds(timestampSeconds: number): number {
+  return timestampSeconds * 1_000;
 }
 
 export function licenceStatusView(input: LicenceStatusInput): LicenceStatusView {
@@ -217,7 +224,10 @@ function usabilityCopy(usability: LicenceUsability): {
       return {
         title: "Licence active",
         body: { text: "A renewal is pending. Use continues in the meantime.", timestamp: null },
-        detail: { text: "Use continues until", timestamp: usability.until },
+        detail: {
+          text: "Use continues until",
+          timestamp: licenceTimestampMilliseconds(usability.until),
+        },
         indicator: "neutral",
       };
     // Use coverage only. Update coverage is a separate window with its own
@@ -226,7 +236,10 @@ function usabilityCopy(usability: LicenceUsability): {
     case "useWindowExpired":
       return {
         title: "Use coverage ended",
-        body: { text: "This licence stopped covering use", timestamp: usability.at },
+        body: {
+          text: "This licence stopped covering use",
+          timestamp: licenceTimestampMilliseconds(usability.at),
+        },
         detail: null,
         indicator: "danger",
       };
@@ -234,7 +247,10 @@ function usabilityCopy(usability: LicenceUsability): {
     case "leaseLapsed":
       return {
         title: "Licence confirmation required",
-        body: { text: "The lease lapsed", timestamp: usability.at },
+        body: {
+          text: "The lease lapsed",
+          timestamp: licenceTimestampMilliseconds(usability.at),
+        },
         detail: null,
         indicator: "warning",
       };
@@ -274,17 +290,31 @@ function coverageRow(id: "use" | "update", until: number | null): LicenceCoverag
   if (id === "use") {
     return until === null
       ? { id, term: "Use coverage", text: "No end date", timestamp: null }
-      : { id, term: "Use covered until", text: null, timestamp: until };
+      : {
+          id,
+          term: "Use covered until",
+          text: null,
+          timestamp: licenceTimestampMilliseconds(until),
+        };
   }
   return until === null
     ? { id, term: "Update coverage", text: "No end date", timestamp: null }
-    : { id, term: "Updates covered until", text: null, timestamp: until };
+    : {
+        id,
+        term: "Updates covered until",
+        text: null,
+        timestamp: licenceTimestampMilliseconds(until),
+      };
 }
 
 function trustRow(basis: LicenceTrustBasis): LicenceTrustRow {
   return basis.kind === "offlineSignature"
     ? { term: "Trust basis", text: "Verified on this machine", timestamp: null }
-    : { term: "Trust basis", text: "Confirmed with the server", timestamp: basis.checked };
+    : {
+        term: "Trust basis",
+        text: "Confirmed with the server",
+        timestamp: licenceTimestampMilliseconds(basis.checked),
+      };
 }
 
 // ── LicenceActivation resolution ─────────────────────────────────────────

@@ -63,7 +63,7 @@ Form
 ├── Route Tabs (Key | Account | Licence file; equal weight)
 ├── Route panel
 │   ├── Key: TextInput + local format message
-│   ├── Account: explanation + Continue with account Button
+│   ├── Account: explanation
 │   └── Licence file: single FileUpload
 ├── Machine label TextInput (shared by all routes; optional)
 └── Activate Button
@@ -120,10 +120,14 @@ job. Poodle must not pre-normalize them.
 ### Account route
 
 - Submit calls `accountTokenProvider.acquire()`.
+- The shared Activate button is the only account submit action.
 - A returned token emits `{ kind: "accountToken", token }` immediately.
 - `null` is a quiet cancellation and does not emit.
 - Provider failure uses a polite generic account-flow error. It never exposes
   token or credential contents.
+- While acquisition is pending, routes and fields are frozen and the form is
+  busy. The submitted route and label are the values captured when acquisition
+  began, so an async completion cannot drift between renderers.
 - Poodle renders no token field and performs no token-format inference.
 
 ### File route
@@ -132,6 +136,8 @@ job. Poodle must not pre-normalize them.
 - Browser adapter reads bytes and emits base64 without a data-URL prefix.
 - File name may render; contents never do.
 - Read failure is a local polite error and does not emit.
+- Leaving the file route or removing the file cancels/invalidates any pending
+  read and clears its bytes. Returning to the route requires a new selection.
 
 ### Behavior Machine
 
@@ -146,7 +152,7 @@ implemented in Poodle.
 - Every credential field has a visible label; placeholders are not names.
 - Key/file errors link through `aria-describedby` and use polite status
   announcement, not alert.
-- Account activation is a named button, not an unlabelled token control.
+- Account activation uses the form's named Activate button, not a token control.
 - Pending state sets `aria-busy` on the form and disables submission without
   changing route visibility.
 - Focus moves to the first field when a route activates. Invalid submit focuses
@@ -178,6 +184,8 @@ four-runtime conformance.
 - each route emits the exact structural credential and shared optional label
 - file base64 excludes the data-URL prefix
 - account activation invokes the injected provider; no token-paste field exists
+- async account acquisition freezes interaction and emits the captured label
+- leaving/removing a file invalidates pending and completed file bytes
 - pending/disabled blocks duplicate submit but never hides a route
 - no Longhorn import or package dependency
 

@@ -4,9 +4,9 @@ import { describe, expect, it } from "vitest";
 import { LicenceStatus, type LicenceStatusProps } from "../src/LicenceStatus";
 import type { LicenceUsability } from "@inflatable-cookie/poodle-core";
 
-const USE_UNTIL = 1_800_000_000_000;
-const UPDATE_UNTIL = 1_900_000_000_000;
-const CHECKED = 1_750_000_000_000;
+const USE_UNTIL = 1_800_000_000;
+const UPDATE_UNTIL = 1_900_000_000;
+const CHECKED = 1_750_000_000;
 
 const base: LicenceStatusProps = {
   usability: { state: "active" },
@@ -64,7 +64,9 @@ describe("LicenceStatus (react)", () => {
     const { container } = mount({ usability: { state: "inGrace", until: USE_UNTIL } });
     const detail = container.querySelector(".poodle-licence-status__detail") as HTMLElement;
     expect(detail.textContent).toContain("Use continues until");
-    expect(detail.querySelector("time")).toBeTruthy();
+    expect(detail.querySelector("time")?.getAttribute("datetime")).toBe(
+      new Date(USE_UNTIL * 1_000).toISOString(),
+    );
   });
 
   it("gives clockRefused the clock remedy and no expiry or purchase copy", () => {

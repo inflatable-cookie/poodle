@@ -24,6 +24,7 @@
     maxFiles = 10,
     showPreview = true,
     disabled = false,
+    describedBy = null,
     files = $bindable([]),
     validate = undefined,
     compress = false,
@@ -42,6 +43,7 @@
     maxFiles?: number;
     showPreview?: boolean;
     disabled?: boolean;
+    describedBy?: string | null;
     files?: FileUploadItem[];
     validate?: ((file: File) => string | null) | undefined;
     compress?: boolean;
@@ -241,6 +243,7 @@
     tabindex={disabled ? -1 : 0}
     aria-disabled={disabled}
     aria-label="File upload dropzone"
+    aria-describedby={describedBy ?? undefined}
     ondrop={handleDrop}
     ondragover={handleDragOver}
     ondragleave={handleDragLeave}
@@ -254,6 +257,7 @@
       {multiple}
       {disabled}
       class="poodle-file-upload__input"
+      aria-describedby={describedBy ?? undefined}
       onchange={handleInputChange}
       aria-label={multiple ? "Drop files here or click to browse" : "Drop a file here or click to browse"}
     />

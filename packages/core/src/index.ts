@@ -432,6 +432,7 @@ export {
   licenceOtherSeats,
   licenceSeatRows,
   licenceStatusView,
+  licenceTimestampMilliseconds,
   resolveLicenceSubmit,
   type LicenceAccountTokenProvider,
   type LicenceActivationRoute,

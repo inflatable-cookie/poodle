@@ -1,11 +1,55 @@
 import { fireEvent, render, screen } from "@testing-library/svelte";
 import { tick } from "svelte";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import LicenceActivation from "../src/LicenceActivation.svelte";
 import type { LicenceKeyFormat, LicenceKeyProblem } from "@inflatable-cookie/poodle-core";
 
 const VALID_KEY = "abcde-fghij-klmno-pqrst";
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((done) => {
+    resolve = done;
+  });
+  return { promise, resolve };
+}
+
+const deferredReaders: DeferredFileReader[] = [];
+
+class DeferredFileReader {
+  static readonly EMPTY = 0;
+  static readonly LOADING = 1;
+  static readonly DONE = 2;
+  readonly LOADING = DeferredFileReader.LOADING;
+  readyState = DeferredFileReader.EMPTY;
+  result: string | ArrayBuffer | null = null;
+  onload: ((event: ProgressEvent<FileReader>) => void) | null = null;
+  onerror: ((event: ProgressEvent<FileReader>) => void) | null = null;
+
+  constructor() {
+    deferredReaders.push(this);
+  }
+
+  readAsDataURL(): void {
+    this.readyState = DeferredFileReader.LOADING;
+  }
+
+  abort(): void {
+    this.readyState = DeferredFileReader.DONE;
+  }
+
+  resolve(result: string): void {
+    this.result = result;
+    this.readyState = DeferredFileReader.DONE;
+    this.onload?.({} as ProgressEvent<FileReader>);
+  }
+}
+
+afterEach(() => {
+  deferredReaders.length = 0;
+  vi.unstubAllGlobals();
+});
 
 /** The host's real pairing: a check failure or a stray symbol is a typing
  *  mistake; a truncation is not. */
@@ -154,7 +198,8 @@ describe("LicenceActivation (svelte)", () => {
     const acquire = vi.fn(async () => "tok_live");
     const { container, onActivate } = mount({ accountTokenProvider: { acquire } });
     await chooseRoute("Account");
-    await fireEvent.click(screen.getByRole("button", { name: "Continue with account" }));
+    expect(screen.queryByRole("button", { name: "Continue with account" })).toBeNull();
+    await fireEvent.click(screen.getByRole("button", { name: "Activate" }));
     await tick();
     await tick();
     expect(acquire).toHaveBeenCalledTimes(1);
@@ -164,6 +209,30 @@ describe("LicenceActivation (svelte)", () => {
     });
     // The token was never rendered back or parked in an attribute.
     expect(container.innerHTML).not.toContain("tok_live");
+  });
+
+  it("freezes an account acquisition and emits the label captured at submit", async () => {
+    const acquisition = deferred<string | null>();
+    const { container, onActivate } = mount({
+      accountTokenProvider: { acquire: () => acquisition.promise },
+    });
+    await chooseRoute("Account");
+    const label = container.querySelector('input[id$="-label"]') as HTMLInputElement;
+    await fireEvent.input(label, { target: { value: "Studio Mac" } });
+    await fireEvent.submit(form(container));
+    await tick();
+
+    expect(form(container).getAttribute("aria-busy")).toBe("true");
+    expect(screen.getAllByRole("tab").every((tab) => tab.hasAttribute("disabled"))).toBe(true);
+    expect(label.hasAttribute("disabled")).toBe(true);
+
+    acquisition.resolve("tok_deferred");
+    await tick();
+    await tick();
+    expect(onActivate).toHaveBeenCalledWith({
+      credential: { kind: "accountToken", token: "tok_deferred" },
+      label: "Studio Mac",
+    });
   });
 
   it("treats a cancelled account flow as quiet", async () => {
@@ -222,7 +291,77 @@ describe("LicenceActivation (svelte)", () => {
     await chooseRoute("Licence file");
     await submit(container);
     expect(screen.getByRole("status").textContent).toBe("Choose a licence file to continue.");
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const messageId = screen.getByRole("status").id;
+    expect(input.getAttribute("aria-describedby")).toBe(messageId);
+    await vi.waitFor(() => {
+      expect((document.activeElement as HTMLElement).getAttribute("aria-describedby")).toBe(
+        messageId,
+      );
+    });
     expect(onActivate).not.toHaveBeenCalled();
+  });
+
+  it("clears completed file bytes when the file route is left", async () => {
+    const { container, onActivate } = mount();
+    await chooseRoute("Licence file");
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(["ABC"], "studio.licence", { type: "application/octet-stream" });
+    Object.defineProperty(input, "files", { value: [file], configurable: true });
+    await fireEvent.change(input);
+    await vi.waitFor(async () => {
+      await submit(container);
+      expect(onActivate).toHaveBeenCalledTimes(1);
+    });
+    onActivate.mockClear();
+
+    await chooseRoute("Key");
+    await chooseRoute("Licence file");
+    await submit(container);
+    expect(screen.getByRole("status").textContent).toBe("Choose a licence file to continue.");
+    expect(onActivate).not.toHaveBeenCalled();
+  });
+
+  it("ignores a file read that completes after the file is removed", async () => {
+    vi.stubGlobal("FileReader", DeferredFileReader as unknown as typeof FileReader);
+    const { container, onActivate } = mount();
+    await chooseRoute("Licence file");
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(["ABC"], "studio.licence", { type: "application/octet-stream" });
+    Object.defineProperty(input, "files", { value: [file], configurable: true });
+    await fireEvent.change(input);
+    await tick();
+    const reader = deferredReaders[0];
+    await fireEvent.click(screen.getByRole("button", { name: "Remove studio.licence" }));
+    reader.resolve("data:application/octet-stream;base64,QUJD");
+    await tick();
+
+    await submit(container);
+    expect(screen.getByRole("status").textContent).toBe("Choose a licence file to continue.");
+    expect(onActivate).not.toHaveBeenCalled();
+  });
+
+  it("clears a premature file-required message when the selected read completes", async () => {
+    vi.stubGlobal("FileReader", DeferredFileReader as unknown as typeof FileReader);
+    const { container, onActivate } = mount();
+    await chooseRoute("Licence file");
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(["ABC"], "studio.licence", { type: "application/octet-stream" });
+    Object.defineProperty(input, "files", { value: [file], configurable: true });
+    await fireEvent.change(input);
+    await tick();
+
+    await submit(container);
+    expect(screen.getByRole("status").textContent).toBe("Choose a licence file to continue.");
+    deferredReaders[0].resolve("data:application/octet-stream;base64,QUJD");
+    await tick();
+    expect(screen.queryByRole("status")).toBeNull();
+
+    await submit(container);
+    expect(onActivate).toHaveBeenCalledWith({
+      credential: { kind: "licenceFile", contentsBase64: "QUJD" },
+      label: null,
+    });
   });
 
   it("carries the trimmed machine label, and null when it is blank", async () => {

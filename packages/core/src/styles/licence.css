@@ -128,12 +128,6 @@
   line-height: var(--poodle-typography-label-lineHeight);
 }
 
-/* The route panel is a grid, so a bare button would stretch to its width and
-   read as the form's primary action rather than the account route's own. */
-.poodle-licence-activation__account-action {
-  justify-self: start;
-}
-
 /* The label and the submit sit outside the route panels: they belong to the
    activation, not to whichever route is on screen. */
 .poodle-licence-activation__shared {

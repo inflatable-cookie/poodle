@@ -11,8 +11,9 @@
     type LicenceActivationRoute,
     type LicenceCredential,
     type LicenceKeyFormat,
+    type LicenceSubmitDraft,
   } from "@inflatable-cookie/poodle-core";
-  import { untrack } from "svelte";
+  import { onDestroy, untrack } from "svelte";
 
   import { default as Button } from "./Button.svelte";
   import { default as Field } from "./Field.svelte";
@@ -75,13 +76,22 @@
      file. Never the credential, and never anything the provider returned. */
   let routeMessage = $state<string | null>(null);
   let fileContentsBase64 = $state<string | null>(null);
+  let fileReader: FileReader | null = null;
+  let fileReadGeneration = 0;
   let accountBusy = $state(false);
   let panelElement = $state<HTMLDivElement | null>(null);
 
+  const interactionDisabled = $derived(disabled || accountBusy);
+
   /* All three routes are peers, so all three are tabs, always visible, never
-     behind an overflow menu. `disabled` greys them; it does not remove them. */
+     behind an overflow menu. Disabled/busy state freezes them; it never
+     removes them. */
   const routeItems = $derived(
-    LICENCE_ROUTES.map((entry) => ({ value: entry.value, label: entry.label, disabled })),
+    LICENCE_ROUTES.map((entry) => ({
+      value: entry.value,
+      label: entry.label,
+      disabled: interactionDisabled,
+    })),
   );
   const submitBlocked = $derived(disabled || pending || accountBusy);
 
@@ -91,6 +101,7 @@
   }
 
   function handleRouteChange(next: string): void {
+    if (route === "licenceFile" && next !== "licenceFile") clearFileRead();
     route = next as LicenceActivationRoute;
     keyMessage = null;
     routeMessage = null;
@@ -100,19 +111,36 @@
     queueMicrotask(focusFirstControl);
   }
 
+  function clearFileRead(): void {
+    fileReadGeneration += 1;
+    if (fileReader && fileReader.readyState === fileReader.LOADING) fileReader.abort();
+    fileReader = null;
+    fileContentsBase64 = null;
+  }
+
+  onDestroy(clearFileRead);
+
   function handleFiles(files: File[]): void {
     const file = files[0];
     if (!file) return;
+    clearFileRead();
     routeMessage = null;
     const reader = new FileReader();
+    const generation = fileReadGeneration;
+    fileReader = reader;
     reader.onload = () => {
+      if (generation !== fileReadGeneration) return;
+      fileReader = null;
       const read = typeof reader.result === "string" ? reader.result : null;
       // A data URL carries a `data:...;base64,` prefix the authority will not
       // accept. Core strips it once, for both renderers.
       fileContentsBase64 = read === null ? null : licenceFileContentsBase64(read);
-      if (fileContentsBase64 === null) routeMessage = LICENCE_FILE_UNREADABLE_MESSAGE;
+      routeMessage =
+        fileContentsBase64 === null ? LICENCE_FILE_UNREADABLE_MESSAGE : null;
     };
     reader.onerror = () => {
+      if (generation !== fileReadGeneration) return;
+      fileReader = null;
       fileContentsBase64 = null;
       routeMessage = LICENCE_FILE_UNREADABLE_MESSAGE;
     };
@@ -120,15 +148,12 @@
   }
 
   function handleFileRemoved(): void {
-    fileContentsBase64 = null;
+    clearFileRead();
     routeMessage = null;
   }
 
-  function emit(token: string | null): void {
-    const resolution = resolveLicenceSubmit(
-      { route, key: keyDraft, token, fileContentsBase64, label: machineLabel },
-      keyFormat,
-    );
+  function emit(draft: LicenceSubmitDraft): void {
+    const resolution = resolveLicenceSubmit(draft, keyFormat);
     if (resolution.outcome === "emit") {
       keyMessage = null;
       routeMessage = null;
@@ -138,7 +163,7 @@
     // A cancelled account flow says nothing at all — the customer already knows
     // they backed out, and an error would read as a fault they caused.
     if (resolution.outcome === "quiet") return;
-    if (route === "key") {
+    if (draft.route === "key") {
       keyMessage = resolution.message;
       queueMicrotask(focusFirstControl);
       return;
@@ -150,14 +175,21 @@
   async function submit(): Promise<void> {
     if (submitBlocked) return;
     if (route !== "accountToken") {
-      emit(null);
+      emit({ route, key: keyDraft, token: null, fileContentsBase64, label: machineLabel });
       return;
     }
     // The host owns the account journey; Poodle only asks for its result.
+    const submittedLabel = machineLabel;
     accountBusy = true;
     routeMessage = null;
     try {
-      emit(await accountTokenProvider.acquire());
+      emit({
+        route: "accountToken",
+        key: "",
+        token: await accountTokenProvider.acquire(),
+        fileContentsBase64: null,
+        label: submittedLabel,
+      });
     } catch {
       routeMessage = LICENCE_ACCOUNT_FAILED_MESSAGE;
     } finally {
@@ -173,9 +205,9 @@
 
 <form
   class="poodle-licence-activation"
-  aria-busy={pending}
+  aria-busy={pending || accountBusy}
   data-route={route}
-  data-pending={pending}
+  data-pending={pending || accountBusy}
   data-size={resolvedSize}
   data-density={resolvedDensity}
   onsubmit={handleSubmit}
@@ -192,12 +224,7 @@
       onValueChange={handleRouteChange}
     >
       {#snippet children(active)}
-        <div
-          bind:this={panelElement}
-          class="poodle-licence-activation__route"
-          data-route={active}
-          aria-describedby={routeMessage && active !== "key" ? routeMessageId : undefined}
-        >
+        <div bind:this={panelElement} class="poodle-licence-activation__route" data-route={active}>
           {#if active === "key"}
             <Field
               id={keyFieldId}
@@ -214,7 +241,7 @@
                 <TextInput
                   id={keyFieldId}
                   value={keyDraft}
-                  disabled={disabled}
+                  disabled={interactionDisabled}
                   describedBy={fieldProps.describedBy}
                   validationState={fieldProps.validationState}
                   onValueChange={(value) => (keyDraft = value)}
@@ -225,24 +252,13 @@
             <p class="poodle-licence-activation__explanation">
               Continue with your account to authorise this machine. There is nothing to type here.
             </p>
-            <span class="poodle-licence-activation__account-action">
-              <Button
-                variant="secondary"
-                size={resolvedSize}
-                density={resolvedDensity}
-                disabled={submitBlocked}
-                loading={accountBusy}
-                onClick={() => void submit()}
-              >
-                Continue with account
-              </Button>
-            </span>
           {:else}
             <FileUpload
               accept={fileAccept}
               multiple={false}
               showPreview={false}
-              disabled={disabled}
+              disabled={interactionDisabled}
+              describedBy={routeMessage ? routeMessageId : null}
               size={resolvedSize}
               density={resolvedDensity}
               onUpload={handleFiles}
@@ -274,7 +290,7 @@
         <TextInput
           id={labelFieldId}
           value={machineLabel}
-          disabled={disabled}
+          disabled={interactionDisabled}
           describedBy={fieldProps.describedBy}
           onValueChange={(value) => (machineLabel = value)}
         />
@@ -289,7 +305,7 @@
       size={resolvedSize}
       density={resolvedDensity}
       disabled={submitBlocked}
-      loading={pending}
+      loading={pending || accountBusy}
     >
       {activateLabel}
     </Button>
