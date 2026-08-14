@@ -1,6 +1,6 @@
 # g14.025 — Preview Catalogue Taxonomy and Generated Navigation
 
-Status: ready — independent preview-IA lane
+Status: complete — accepted in PR #16
 Depends on: current `main`; no conformance verdict dependency
 Governing refs: `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
 `../../specs/025-parity-automation-and-harness-boundary.md`,
@@ -21,16 +21,16 @@ the active preview and validation cohort.
 
 ## Goals
 
-- [ ] Give every catalogue entry one broad section, one primary family, one
+- [x] Give every catalogue entry one broad section, one primary family, one
       anatomy kind, and optional secondary collections.
-- [ ] Keep related suites together: agent/tools, model connections,
+- [x] Keep related suites together: agent/tools, model connections,
       audio/music, and account/lifecycle.
-- [ ] Generate TypeScript and Rust catalogue data from one neutral manifest.
-- [ ] Make incomplete, duplicate, unknown, or stale classification fail a
+- [x] Generate TypeScript and Rust catalogue data from one neutral manifest.
+- [x] Make incomplete, duplicate, unknown, or stale classification fail a
       checked generator instead of falling into a default bucket.
-- [ ] Preserve every `#components/<slug>` route and runtime-local specimen
+- [x] Preserve every `#components/<slug>` route and runtime-local specimen
       availability difference.
-- [ ] Reduce sidebar scanning through collapsible families, counts, active
+- [x] Reduce sidebar scanning through collapsible families, counts, active
       family disclosure, and useful search results.
 
 ## Fixed Taxonomy
@@ -93,116 +93,116 @@ still give each entry one explicit family.
 
 ### Batch A — Neutral manifest and checked generation
 
-- [ ] Rebase first. Inventory every entry present on current `main` before
+- [x] Rebase first. Inventory every entry present on current `main` before
       migration; the planning baseline contains 174, but concurrent component
       work may add more.
-- [ ] Add a versioned neutral manifest under
+- [x] Add a versioned neutral manifest under
       `packages/codegen/fixtures/preview-catalogue.json`. It owns section and
       family definitions, their order and labels, the kind vocabulary,
       optional collection definitions, and canonical component identity:
       slug, display name, description, section, family, kind, collections.
-- [ ] Keep package names and specimen availability out of canonical identity.
+- [x] Keep package names and specimen availability out of canonical identity.
       Those are runtime overlays derived or declared beside the runtime's
       actual specimen registry.
-- [ ] Extend the existing codegen package with a focused catalogue target.
+- [x] Extend the existing codegen package with a focused catalogue target.
       Generate one TypeScript module for both web previews and one Rust module
       shape consumed by both native previews. Generated files carry source and
       do-not-edit headers.
-- [ ] Replace the hand-authored Svelte registry data and GPUI/Jetstream static
+- [x] Replace the hand-authored Svelte registry data and GPUI/Jetstream static
       catalogue copies. React may keep a small explicit runtime overlay, but it
       must consume the generated canonical module rather than mirror labels or
       ordering.
-- [ ] Remove GPUI's unknown-slug → `Workstation` fallback. Unknown slugs,
+- [x] Remove GPUI's unknown-slug → `Workstation` fallback. Unknown slugs,
       duplicate slugs, invalid relationships, empty families, missing fields,
       or stale generated output fail generation/check mode.
-- [ ] Add `effigy catalogue:build` and `effigy catalogue:check` selectors.
+- [x] Add `effigy catalogue:build` and `effigy catalogue:check` selectors.
       `build` writes deterministic output; `check` proves the tree matches the
       manifest without rewriting it.
 
 ### Batch B — Complete classification and audit
 
-- [ ] Classify every current component. Preserve names, descriptions, slugs,
+- [x] Classify every current component. Preserve names, descriptions, slugs,
       package routing, specimen routing, and route identity.
-- [ ] Add a machine-readable audit test proving every canonical entry appears
+- [x] Add a machine-readable audit test proving every canonical entry appears
       once, every family belongs to its declared section, every kind and
       collection is declared, and every generated runtime entry resolves to
       the same canonical section/family/kind.
-- [ ] Prove the fixed agent, model, audio, licence/update, and application-shell
+- [x] Prove the fixed agent, model, audio, licence/update, and application-shell
       assignments with assertions, not review memory.
-- [ ] Compare canonical entries with Svelte/React specimen maps and GPUI's
+- [x] Compare canonical entries with Svelte/React specimen maps and GPUI's
       implemented specimen roots. Missing specimens remain visible runtime
       availability facts; they do not remove or silently reclassify entries.
-- [ ] Update scripts that import `allComponents` so contract, capability, and
+- [x] Update scripts that import `allComponents` so contract, capability, and
       surface audits keep working from the generated web registry.
-- [ ] Keep `packages/svelte/preview/src/catalog.ts` documentation-suite and
+- [x] Keep `packages/svelte/preview/src/catalog.ts` documentation-suite and
       adoption-layer metadata separate. This card does not merge its
       `docsSections`/`docsFamilies` vocabulary into component navigation.
 
 ### Batch C — Active-preview navigation
 
-- [ ] Update Svelte and React together. Share catalogue data and CSS; keep only
+- [x] Update Svelte and React together. Share catalogue data and CSS; keep only
       framework lifecycle/state glue separate.
-- [ ] Render the same three sections and ordered families in Svelte, React,
+- [x] Render the same three sections and ordered families in Svelte, React,
       and GPUI. Family headings show component counts and can be collapsed.
-- [ ] On a direct component route, automatically disclose its family and show
+- [x] On a direct component route, automatically disclose its family and show
       the active item. Navigating between components must not lose active
       context.
-- [ ] When no search is active, families start collapsed except the active
+- [x] When no search is active, families start collapsed except the active
       family. On the catalogue landing route, no arbitrary family is forced
       open.
-- [ ] When search is active, replace the hierarchy with one flat result list.
+- [x] When search is active, replace the hierarchy with one flat result list.
       Match display name, description, family label, kind label, and collection
       labels. Each result shows a compact `Family · Kind` breadcrumb.
-- [ ] Keep catalogue search in the existing shell search surface. Do not add a
+- [x] Keep catalogue search in the existing shell search surface. Do not add a
       second input inside the component sidebar.
-- [ ] Rebuild the landing page around the same section/family authority. It may
+- [x] Rebuild the landing page around the same section/family authority. It may
       show all family cards expanded because the content region has room; it
       must not revert to the old anatomy tags.
-- [ ] Compose existing preview-shell and Poodle primitives where they fit.
+- [x] Compose existing preview-shell and Poodle primitives where they fit.
       Shell-local disclosure state is allowed. Do not widen `SidebarNav`,
       `Collapsible`, or another public component API for preview convenience.
-- [ ] Preserve keyboard reachability, visible focus, link semantics, scroll
+- [x] Preserve keyboard reachability, visible focus, link semantics, scroll
       behavior, theme behavior, and narrow sidebar layout.
 
 ### Batch D — Deferred Jetstream metadata and evidence
 
-- [ ] Generate Jetstream's catalogue module from the same manifest so entries,
+- [x] Generate Jetstream's catalogue module from the same manifest so entries,
       descriptions, sections, families, and order cannot drift.
-- [ ] Preserve Jetstream-local `has_specimen` truth. Do not require a sibling
+- [x] Preserve Jetstream-local `has_specimen` truth. Do not require a sibling
       Jetstream checkout or import Jetstream sources into Poodle.
-- [ ] Do not rebuild Jetstream's interactive shell in this card. Record that
+- [x] Do not rebuild Jetstream's interactive shell in this card. Record that
       navigation consumption is deferred with runtime admission.
-- [ ] Add focused web and GPUI tests for grouping, collapse/default state,
+- [x] Add focused web and GPUI tests for grouping, collapse/default state,
       direct-route disclosure, search matching/breadcrumbs, counts, and stable
       hrefs.
-- [ ] Capture matching Svelte/React screenshots at catalogue landing, an
+- [x] Capture matching Svelte/React screenshots at catalogue landing, an
       agent component, a model component, and active search. Use headless
       structural/render tests for GPUI; no GPUI screenshot is required and the
       native preview must not be launched.
-- [ ] Add one August implementation log containing before/after category
+- [x] Add one August implementation log containing before/after category
       counts, the full ambiguity register, generated outputs, active-runtime
       evidence, deferred Jetstream status, and residual risk.
 
 ## Acceptance Criteria
 
-- [ ] One neutral manifest owns every canonical component description and
+- [x] One neutral manifest owns every canonical component description and
       classification; no runtime owns a second handwritten taxonomy.
-- [ ] All entries present after rebase are classified exactly once with no
+- [x] All entries present after rebase are classified exactly once with no
       fallback, orphaned family, or uncategorized component.
-- [ ] Agent, model, audio, and account/lifecycle suites each occupy one obvious
+- [x] Agent, model, audio, and account/lifecycle suites each occupy one obvious
       family even though their members have different anatomy kinds.
-- [ ] Svelte and React render the same hierarchy, counts, active disclosure,
+- [x] Svelte and React render the same hierarchy, counts, active disclosure,
       search order, breadcrumbs, and routes from shared data and CSS.
-- [ ] GPUI exposes the same hierarchy, counts, active disclosure, search
+- [x] GPUI exposes the same hierarchy, counts, active disclosure, search
       fields/order, and routes from generated Rust data.
-- [ ] Jetstream's generated metadata matches the manifest while its shell and
+- [x] Jetstream's generated metadata matches the manifest while its shell and
       runtime validation remain explicitly deferred.
-- [ ] A planted missing classification, duplicate slug, invalid family, stale
+- [x] A planted missing classification, duplicate slug, invalid family, stale
       TS output, or stale Rust output fails `effigy catalogue:check`.
-- [ ] Adding a new component requires one manifest entry plus a runtime
+- [x] Adding a new component requires one manifest entry plus a runtime
       availability/specimen implementation; it never requires editing four
       category match tables.
-- [ ] Existing component routes, specimens, contract audits, and package names
+- [x] Existing component routes, specimens, contract audits, and package names
       are unchanged.
 
 ## Stop Conditions

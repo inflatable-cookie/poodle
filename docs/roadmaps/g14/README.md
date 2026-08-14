@@ -58,7 +58,7 @@ portable component meaning, generated conformance surface, Rust, GPUI, or
 Jetstream. It ships Canvas2D first and leaves WebGL2 behind a measured
 follow-up decision.
 
-`025` is an independent preview-information-architecture lane. It replaces
+`025` completed the independent preview-information-architecture lane. It replaces
 the overloaded component `tag` with one generated catalogue taxonomy, then
 uses that authority to group the active Svelte, React, and GPUI previews.
 Jetstream receives generated metadata only; its shell remains deferred.
@@ -93,7 +93,7 @@ the adopted cases before promotion.
 22. [021 — Experimental cleanup and gate consolidation](021-experimental-cleanup-and-gate-consolidation.md)
 23. [022 — Generation closeout](022-generation-closeout.md)
 24. [024 — Batched AudioMeter web surface](024-batched-audio-meter-web-surface.md) — ready; independent web-performance lane
-25. [025 — Preview catalogue taxonomy and generated navigation](025-preview-catalogue-taxonomy-and-generated-navigation.md) — ready; independent preview-IA lane
+25. [025 — Preview catalogue taxonomy and generated navigation](025-preview-catalogue-taxonomy-and-generated-navigation.md) — complete; accepted in PR #16
 
 ## Dispatch Rule
 
@@ -107,8 +107,8 @@ prior profile settles its vocabulary. Bounded web-reference lanes may run in
 parallel only when named here. `018` used that exception and is now complete.
 `019` stayed in the operator/orchestrator thread and is now complete. `024`
 may run independently under its explicit no-conformance/no-native boundary.
-`025` may also run independently. It owns preview catalogue metadata and
-navigation only; it must rebase concurrent registry additions before review.
+`025` used that independent lane and is now complete. It owns preview catalogue
+metadata and navigation; Jetstream's interactive shell remains deferred.
 
 ## First Task
 
@@ -123,6 +123,5 @@ stays open under `020` until the pilot records **adopt**.
 roadmap file; its Canvas2D, browser, allocation, and performance evidence must
 return as one PR for orchestrator review.
 
-`g14.025` is ready for a separate worktree now. Give the worker the complete
-roadmap file. It must return the complete classification, generator, active
-preview navigation, drift gate, and headless validation as one PR.
+`g14.025` is complete. PR #16 landed the generated catalogue authority and
+active-preview navigation after orchestrator taxonomy review.

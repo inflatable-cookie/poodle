@@ -6,7 +6,7 @@ Updated: 2026-08-14
 
 - `g14`
   - Status: active
-  - Range: `001` to `024`
+  - Range: `001` to `025`
   - Governing architecture:
     `docs/architecture/009-cross-runtime-component-conformance.md`
   - Governing spec: `docs/specs/066-executable-component-conformance.md`
@@ -19,11 +19,12 @@ Updated: 2026-08-14
     until adopt. `015`–`017` stage and complete the licence surface;
     `018`–`020` do the same for model connections; `021` cleans the estate,
     `022` closes the generation, interposed `023` replaces foreground GPUI
-    conformance before profile `005`, and independent `024` adds the batched
-    AudioMeter web rendering tier.
-  - Next: dispatch `g14.023`. `g14.019` is complete; the model-connection web
-    reference is approved. `g14.024` is ready to run in a separate
-    web-performance worktree.
+    conformance before profile `005`, independent `024` adds the batched
+    AudioMeter web rendering tier, and completed `025` provides the generated
+    preview catalogue taxonomy and active-runtime navigation.
+  - Next: dispatch `g14.023`. `g14.019` and `g14.025` are complete;
+    model-connection reference and preview catalogue navigation are approved.
+    `g14.024` is active in its separate web-performance worktree.
 
 ## Latest Completed Track
 
