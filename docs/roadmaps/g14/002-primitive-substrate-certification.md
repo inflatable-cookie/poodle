@@ -5,10 +5,10 @@ Depends on: `g14.001`
 
 ## Outcome
 
-Certify the shared shapes that components assume. Prove GPUI and Jetstream
-interpret the same `poodle-node` primitives and intents with equivalent
-semantic observations; prove web observations use matching token and layout
-roles.
+Certify the shared shapes that components assume. Prove `poodle-render` emits
+renderer-neutral `poodle-node` primitives and intents and GPUI interprets them
+with equivalent semantic observations; prove web observations use matching
+token and layout roles.
 
 ## Scope
 
@@ -17,11 +17,11 @@ roles.
   accessibility, overlay/dismissal, and text-editing boundary.
 - Add primitive conformance cases and observation probes using the g14.001
   kernel. No component-specific workaround.
-- Repair the native preview/capture workflow: stale GPUI baselines, the
-  `--control-size`/`--size` mismatch, Jetstream overwrite semantics, and
-  clipped specimen rows.
-- Emit a capability matrix with executed evidence per backend. Missing rows
-  fail; declared absence stays incomplete.
+- Repair the GPUI preview/capture workflow: stale baselines and the
+  `--control-size`/`--size` mismatch.
+- Emit a capability matrix with executed evidence for the active cohort.
+  Missing rows fail; declared absence stays incomplete. Record Jetstream as a
+  deferred backend admission, not a capability-by-capability waiver.
 - Route existing capability declarations into the matrix or retire them.
 
 ## Acceptance

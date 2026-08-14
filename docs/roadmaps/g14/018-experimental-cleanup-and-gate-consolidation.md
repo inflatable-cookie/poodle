@@ -1,7 +1,7 @@
-# g14.017 — Experimental Cleanup And Gate Consolidation
+# g14.018 — Experimental Cleanup And Gate Consolidation
 
-Status: blocked pending `g14.014` and `g14.016`
-Depends on: `g14.014`, `g14.016`
+Status: blocked pending `g14.014` and `g14.017`
+Depends on: `g14.014`, `g14.017`
 
 ## Outcome
 

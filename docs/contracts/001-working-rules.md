@@ -41,13 +41,17 @@ prefer the narrower current authority and repair the stale document.
 
 ## Runtime Parity Authority
 
-Poodle has four runtimes: Svelte, React, GPUI, and Jetstream.
+Poodle targets Svelte, React, GPUI, and Jetstream. The active completion cohort
+is currently Svelte, React, and GPUI plus the renderer-neutral Rust declaration
+and `poodle-node` output. Jetstream is a deferred backend integration until a
+later admission runway proves its converter, input, accessibility, and preview
+workflow against the same cases.
 
 - **Svelte is the reference implementation.** Where runtimes disagree on what a
   component can do, Svelte is what the others are brought up to.
-- A capability present in Svelte and absent elsewhere is a **gap to port**, not
-  an accepted delta. It remains a failing completion condition even when the
-  absence is declared and explained.
+- A capability present in Svelte and absent from another active runtime is a
+  **gap to port**, not an accepted delta. It remains a failing completion
+  condition even when the absence is declared and explained.
 - A capability present in another runtime and absent from Svelte is a
   **candidate for inclusion**, not an automatic port. Evaluate it, then either
   add it to Svelte and the contract, or record why it stays runtime-specific.
@@ -67,18 +71,26 @@ Contracts remain the semantic authority. This rule decides what *should* be
 true when a contract is silent and the runtimes disagree; it does not let an
 implementation override a contract that already speaks.
 
-### Every component ships in all four runtimes
+### Every component ships in the active cohort
 
-A component is not exempt from a runtime because of where it is typically used.
-A titlebar control, a desktop-only affordance, a dev-tool surface — all four
-runtimes still implement it. "It's only used on the web" is not a reason to
-skip GPUI and Jetstream; the runtimes are targets, not use cases.
+A component is not exempt from an active runtime because of where it is
+typically used. A titlebar control, a desktop-only affordance, or a dev-tool
+surface still implements Svelte, React, shared Rust composition, and GPUI.
+"It's only used on the web" is not a reason to skip the Rust target.
+
+Jetstream deferral is program-wide, not a per-component exception and not a
+parity claim. Components must keep renderer-neutral specs, cases, and node
+output so Jetstream can consume the same authority later. Reports must label
+Jetstream deferred until its admission gate passes; they must not report it as
+passing, complete, or an accepted absence.
 
 Distinguish two things that sound alike:
 
-- **Component parity is required.** Every component has a contract, a Svelte
-  and React implementation, a `<Name>Spec`, a `poodle-render` implementation,
-  and a specimen in both native previews.
+- **Active-cohort component parity is required.** Every component has a
+  contract, Svelte and React implementations, a `<Name>Spec`, a
+  `poodle-render` implementation, and a GPUI specimen. Jetstream preview
+  admission is deferred as one backend program rather than waived component by
+  component.
 - **Web-platform prop parity is not.** Native attributes like `autocomplete`,
   `autofocus` and `spellcheck`, imperative escape hatches, and DOM-node props
   stay web-only and out of the portable spec. `WEB_ONLY_PROPS` in

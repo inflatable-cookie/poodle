@@ -1,6 +1,6 @@
 # LicenceStatus
 
-Status: approved for web reference; native/conformance pending g14.016
+Status: approved web reference; active native/conformance pending g14.017
 Updated: 2026-08-14
 
 ## 1. Purpose
@@ -136,8 +136,9 @@ pure core view data. It owns no entitlement or licence transition.
 ## 8. Framework And Runtime Parity
 
 Svelte and React share types, view derivation, copy, CSS, and tests. The web
-reference is incomplete until g14.016 adds the portable interface, shared
-cases/specimens, Rust spec/renderer, GPUI, and Jetstream evidence.
+reference is incomplete until g14.017 adds the portable interface, shared
+cases/specimens, Rust spec/renderer, and GPUI evidence. Jetstream remains a
+separate deferred backend admission and is not claimed by that milestone.
 
 ## 9. Acceptance Cases
 
@@ -154,4 +155,4 @@ cases/specimens, Rust spec/renderer, GPUI, and Jetstream evidence.
 
 | Delta | Status | Follow-up |
 | --- | --- | --- |
-| no native implementation in web-reference PR | incomplete, not accepted parity | g14.016 |
+| no native implementation in web-reference PR | incomplete, not accepted parity | g14.017 |

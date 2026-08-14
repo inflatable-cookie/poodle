@@ -1,6 +1,6 @@
 # LicenceSeats
 
-Status: approved for web reference; native/conformance pending g14.016
+Status: approved web reference; active native/conformance pending g14.017
 Updated: 2026-08-14
 
 ## 1. Purpose
@@ -110,8 +110,9 @@ owns the release command and resulting seat refresh.
 ## 8. Framework And Runtime Parity
 
 Svelte and React share types, row derivation, copy, CSS, and cases. The web
-reference is incomplete until g14.016 adds native composition and full
-four-runtime conformance.
+reference is incomplete until g14.017 adds native composition and full
+active-cohort conformance. Jetstream remains a separate deferred backend
+admission.
 
 ## 9. Acceptance Cases
 
@@ -127,4 +128,4 @@ four-runtime conformance.
 
 | Delta | Status | Follow-up |
 | --- | --- | --- |
-| no native implementation in web-reference PR | incomplete, not accepted parity | g14.016 |
+| no native implementation in web-reference PR | incomplete, not accepted parity | g14.017 |

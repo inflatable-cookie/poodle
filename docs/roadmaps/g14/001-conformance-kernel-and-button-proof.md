@@ -10,9 +10,9 @@ Deliver the smallest complete conformance loop through Button:
 
 ```text
 one portable interface + one typed case corpus
-  -> Svelte / React / GPUI / Jetstream execution
+  -> Svelte / React / GPUI execution
   -> normalized observations
-  -> four specimen views
+  -> three active specimen views
   -> one failing completion gate
 ```
 
@@ -29,13 +29,15 @@ as small as Button needs while preserving extension points named by spec 066.
    `ButtonSpec` declaration surface. Keep platform extensions explicit.
 3. Add a typed Button case corpus with fixture, specimen metadata, actions,
    and assertions. Emit deterministic neutral JSON for Rust.
-4. Implement thin harnesses for all four runtimes. Exercise the real Button
-   implementation and backend event path; no mock renderer may satisfy native.
+4. Implement thin harnesses for Svelte, React, and GPUI. Exercise the real
+   Button implementation and GPUI backend event path; no mock renderer may
+   satisfy native. Keep the Rust fixture and observation boundary usable by a
+   later Jetstream runner without importing Jetstream types.
 5. Emit `component-observation.v1` from each runtime and compare exact Button
    part, role/name/state, token role, focusability, event order, and bounded
    geometry.
-6. Make all four Button specimen pages project the same case structure. Keep
-   runtime chrome outside the case.
+6. Make all three active Button specimen pages project the same case
+   structure. Keep runtime chrome outside the case.
 7. Add `conformance:build`, `conformance:check`, selected
    `conformance:test`, `conformance:complete`, and `conformance:cost` Effigy
    selectors. Wire read-only enforcement into the applicable standing gates.
@@ -59,25 +61,28 @@ stable case and capture IDs.
 ## Acceptance
 
 - Changing one portable prop name fails TypeScript/Rust generation or compile.
-- Changing a fixture/group/caption changes all four specimen projections.
+- Changing a fixture/group/caption changes all three active specimen
+  projections.
 - A planted event, role, token-role, part, or geometry divergence fails and
   names runtime, case, step, and field.
-- Removing Button from either native registry fails completion.
+- Removing Button from the GPUI registry fails completion.
 - Replacing a real handler with an inert one fails an executed case.
 - Double generation is byte-identical; check mode never mutates the tree and
   catches orphans.
 - Existing hand-written portable declarations and duplicate specimen fixture
   content are removed, not left beside the new authority.
 - Full cost report shows every mechanism line and what it replaced.
-- `conformance:complete --component button` passes all four runtimes.
+- `conformance:complete --component button` passes the active cohort and
+  reports Jetstream as program-deferred, never passing.
 
 ## Stop Conditions
 
 - The interface or case schema needs transitions, guards, derivations, or
   arbitrary callback bodies.
 - Generic runners need Button-specific branches.
-- Native success can be obtained without exercising GPUI and Jetstream backend
-  output.
+- Native success can be obtained without exercising GPUI backend output, or
+  the portable Rust surface embeds GPUI-specific types that obstruct a later
+  backend.
 - Total mechanism grows without deleting equivalent declarations/specimens.
 - The worker must redesign another component to make Button pass.
 

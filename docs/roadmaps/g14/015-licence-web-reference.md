@@ -1,7 +1,7 @@
 # g14.015 — Licence Web Reference
 
-Status: ready — may run beside g14.001
-Posture: strict-ready
+Status: landed — merge `fd32d7d5`
+Posture: complete
 Depends on: approved component contracts for `LicenceStatus`,
 `LicenceActivation`, and `LicenceSeats`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -14,7 +14,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 Deliver the Svelte and React reference implementations for three
 authority-agnostic licence components. Share types, display derivation, tests,
 and CSS through `poodle-core`. Leave an explicit incomplete native/conformance
-row for g14.016.
+row for g14.017.
 
 This card may run in parallel with g14.001 because it does not touch Button,
 conformance kernel/codegen, Rust, native previews, or Effigy task definitions.
@@ -75,7 +75,7 @@ Longhorn adapter owns the explicit name mapping and controller-view proof.
 
 - [ ] Add standalone Svelte and React specimens with matching structure and
       fixture data. This is pre-conformance duplication, kept deliberately
-      small and replaced by g14.016 shared cases.
+      small and replaced by g14.017 shared cases.
 - [ ] Add component tests for all acceptance cases and accessible semantics.
 - [ ] Register contracts, exports, component fixtures, specimens, package
       entry points, reports, and audit counts through the existing new-component
@@ -137,7 +137,7 @@ Longhorn adapter owns the explicit name mapping and controller-view proof.
 - [ ] Svelte/React public props, callbacks, copy, anatomy, CSS, specimens, and
       interaction tests agree.
 - [ ] g14's estate continues to list native/conformance completion under
-      g14.016.
+      g14.017.
 
 ## Stop Conditions
 

@@ -1,6 +1,7 @@
 # g14 — Executable Component Conformance
 
 Status: active
+Posture: strict-ready
 Opened: 2026-08-14
 Governing refs: `../../architecture/009-cross-runtime-component-conformance.md`,
 `../../specs/066-executable-component-conformance.md`,
@@ -8,16 +9,18 @@ Governing refs: `../../architecture/009-cross-runtime-component-conformance.md`,
 
 ## Goal
 
-Make portable drift unable to remain silent across Svelte, React, GPUI, and
-Jetstream. Define component interface and specimen structure once, execute the
-same cases in all runtimes, compare normalized observable output, and block
-completion while a required runtime is missing or inert.
+Make portable drift unable to remain silent across Svelte, React, and Rust
+through GPUI. Define component interface and specimen structure once, execute
+the same cases in the active runtimes, compare normalized observable output,
+and block completion while an active runtime is missing or inert. Keep the
+Rust case and node boundary renderer-neutral for later Jetstream admission.
 
 ## Fixed Decisions
 
 - Svelte is the reference implementation; contracts define shipped meaning.
 - Svelte + React share `poodle-core` and CSS.
-- GPUI + Jetstream share `poodle-render` and `poodle-node`.
+- GPUI uses shared `poodle-render` and `poodle-node`; Jetstream remains a
+  deferred consumer of that same substrate.
 - Cross-language behaviour remains hand-implemented in those two substrates.
 - Portable interfaces may generate declarations. Behaviour may not.
 - Shared cases own fixture data, test actions/assertions, and specimen
@@ -37,10 +40,15 @@ adopt/revise/reject verdict.
 Rollout cards `009`–`013` stay blocked until `008` records **adopt**. `014`
 makes the workflow mandatory for new components.
 
-`015` is an independent Svelte/React reference tranche for the new licence
-surface and may run beside `001`. Its native and shared-case completion stays
-blocked under `016` until `008` records **adopt**. `017` deletes superseded
-experiments and gates. `018` closes the generation.
+`015` landed the independent Svelte/React reference tranche for the new
+licence surface. `016` is an immediate operator review and bounded refinement
+checkpoint over those live specimen pages. Native and shared-case completion
+stays blocked under `017` until `008` records **adopt**. `018` deletes
+superseded experiments and gates. `019` closes the generation.
+
+Jetstream is outside the g14 completion cohort. Its paired build and evidence
+remain opt-in and visibly deferred; a later backend-admission runway must run
+the adopted cases before promotion.
 
 ## Runway
 
@@ -58,10 +66,11 @@ experiments and gates. `018` closes the generation.
 12. [012 — Overlays and input rollout](012-overlays-input-rollout.md)
 13. [013 — Composite and workstation rollout](013-composite-workstation-rollout.md)
 14. [014 — Completion gate and component factory](014-completion-gate-and-component-factory.md)
-15. [015 — Licence web reference](015-licence-web-reference.md) — ready; may run beside 001
-16. [016 — Licence four-runtime completion](016-licence-four-runtime-completion.md)
-17. [017 — Experimental cleanup and gate consolidation](017-experimental-cleanup-and-gate-consolidation.md)
-18. [018 — Generation closeout](018-generation-closeout.md)
+15. [015 — Licence web reference](015-licence-web-reference.md) — landed
+16. [016 — Licence reference review](016-licence-reference-review.md) — ready operator checkpoint
+17. [017 — Licence active-runtime completion](017-licence-active-runtime-completion.md)
+18. [018 — Experimental cleanup and gate consolidation](018-experimental-cleanup-and-gate-consolidation.md)
+19. [019 — Generation closeout](019-generation-closeout.md)
 
 ## Dispatch Rule
 
@@ -71,14 +80,18 @@ to a fresh thread/worktree when its dependencies are met. Workers do not write
 records evidence, merges, then opens the next file.
 
 No batch-card layer. No parallel work on the conformance kernel before the
-prior profile settles its vocabulary. The bounded web-reference intake in
-`015` is the only current parallel exception; it cannot edit kernel, native,
-or roadmap surfaces.
+prior profile settles its vocabulary. The bounded licence review in `016` is
+the only current parallel exception; it cannot edit kernel, Rust, native, or
+roadmap surfaces.
 
 ## First Task
 
-`g14.001` and `g14.015` are ready in separate worktrees. `001` must prove one
-authored Button interface and case can drive all four implementations,
+`g14.001` is the next worker card. It must prove one authored Button interface
+and case can drive Svelte, React, shared Rust composition, and GPUI
 observations, tests, and specimen structure without becoming a behaviour
-compiler or additive mirror. `015` builds only the Svelte/React licence
-reference and leaves native/conformance completion visibly open.
+compiler or additive mirror.
+
+`g14.016` is ready as an operator checkpoint beside it. Review the landed
+Svelte and React licence specimens, record feedback, and permit at most one
+bounded web-reference refinement pass. Native/conformance completion remains
+visibly open under `017`.

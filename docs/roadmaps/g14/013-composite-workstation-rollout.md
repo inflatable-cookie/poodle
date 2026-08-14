@@ -10,7 +10,7 @@ product workflows outside Poodle.
 
 ## Acceptance
 
-- The frozen composite/workstation roster passes four-runtime completion.
+- The frozen composite/workstation roster passes active-cohort completion.
 - Host commands are typed semantic boundaries, not embedded product logic.
 - Nested components reuse their own cases/authority instead of being copied.
 - Native implementations are functional, not static visual facsimiles.

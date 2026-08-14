@@ -79,6 +79,12 @@ The durable implementation shape is pair-wise:
 The pairs do not maintain four independent component implementations. They
 also do not share executable behaviour across the TypeScript/Rust boundary.
 
+The current completion cohort is Svelte, React, and GPUI plus the portable
+Rust declaration and renderer-neutral node output. Jetstream remains a target,
+but its backend integration is deferred until a dedicated admission runway can
+exercise the same cases without requiring every Poodle worktree to clone or
+link the sibling engine repository. Deferral does not make Jetstream passing.
+
 A separate conformance plane binds both pairs to the component contracts. It
 owns portable interface declarations, shared cases and specimen structure,
 and normalized observations. It may generate types and serialized fixtures;
@@ -149,6 +155,11 @@ elements and owns backend-specific input, text editing, and event plumbing.
 Jetstream theme provider. The `jetstream-poodle` crate in the Jetstream
 repository converts Poodle nodes into Jetstream `JsEl` trees at the engine
 boundary.
+
+Jetstream integration is currently deferred. Normal Poodle development and QA
+must not require a sibling Jetstream checkout. Its paired build, accessibility,
+interaction, and visual checks run through explicit opt-in selectors until a
+later admission verdict promotes the backend into the active cohort.
 
 A native component should not be reimplemented separately in both backends.
 Shared composition belongs in `poodle-render`; only runtime interpretation

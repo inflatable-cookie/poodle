@@ -15,7 +15,7 @@ hard-coded runtime knowledge.
 - Exercise lower/upper values, crossing policy, clamping, keyboard steps,
   pointer drag, disabled state, orientation, accessible names, and event order.
 - Observe both identified thumbs, values, roles, focus, token roles, and
-  geometry in all four runtimes.
+  geometry in all active runtimes.
 - Replace the thin three-case slider vector where the shared component cases
   cover the same claim; preserve the native role fix.
 

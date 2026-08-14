@@ -17,7 +17,7 @@ kernel without a recorded contract need.
 
 ## Acceptance
 
-- Every rostered component passes four-runtime completion.
+- Every rostered component passes active-cohort completion.
 - No missing native registration, hand-written canonical specimen fixture, or
   redundant portable declaration remains in the migrated profile.
 - Tranche cost and defects are recorded; standing CI stays bounded.

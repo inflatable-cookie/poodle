@@ -13,8 +13,8 @@ Choose the runtime used by your application:
   surface and experimental-package constraints
 - [GPUI developer guide](guides/gpui-developer-guide.md) — Rust contracts,
   themes, node rendering, and the GPUI backend
-- [Jetstream developer guide](guides/jetstream-developer-guide.md) — Rust
-  contracts, themes, node rendering, and Jetstream conversion
+- [Jetstream developer guide](guides/jetstream-developer-guide.md) — deferred
+  paired integration for Rust contracts, node rendering, and conversion
 - [Application pattern recipes](guides/README.md) — forms, lists, dialogs,
   media workflows, and admin shells
 

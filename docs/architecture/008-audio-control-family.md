@@ -333,7 +333,9 @@ machines. GPUI and Jetstream share Rust headless logic, specs, and node
 builders; runtime differences are limited to backend input and accessibility
 capabilities and must be recorded in each component contract.
 
-Every audio component ships a standalone specimen page in all four previews.
+Every audio component ships a standalone specimen page in each active preview.
+Jetstream receives the same case-backed page when its backend admission lane
+reopens.
 The page must cover the contract's named states rather than merely prove the
 component can mount. Parity evidence includes web interaction tests, native
 headless/render tests, registry and adapter-manifest drift checks, preview

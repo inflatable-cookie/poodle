@@ -37,6 +37,7 @@ Common commands:
 - `effigy docs:dev` — start documentation dev server
 - `effigy docs:check` — run all documentation checks
 - `effigy qa` — full local release board (headless / CPU-only)
+- `effigy qa:jetstream` — opt-in paired Jetstream integration board
 - `effigy doctor` — orientation (built-ins + cheap `tasks.health`)
 - `effigy scan attention-markers` — scan for TODO/FIXME markers
 

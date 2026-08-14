@@ -7,28 +7,23 @@ Updated: 2026-08-14
 The orchestrator is the only writer. Workers write their scoped deliverables,
 batch log, and papercuts; they do not edit this ledger or roadmap/card status.
 
-## Thread Reuse Protocol
+## Worker Protocol
 
-Worker threads and their worktrees are reused across cards; each card ends
-in a merged or closed PR, and the loop continues in place. Every card
-handoff implies this reset, unless the card says otherwise:
-
-1. `git fetch origin --prune` and `git checkout main`, `git pull --ff-only`.
-2. Create the card's branch from latest `main` — never from the previous
-   card's branch.
-3. Work only inside the card's writable paths; push the branch as a PR.
-4. After the PR merges, the orchestrator deletes the branch; the thread's
-   worktree stays and repeats from step 1 on the next card.
+Each g14 card goes to a fresh thread and worktree from current `origin/main`.
+The roadmap file is the complete handoff. The worker pushes one PR and stops;
+the orchestrator reviews, records evidence, merges, and opens the next card.
 
 Shared surfaces (`PAPERCUTS.md`, `tasks/effigy.tasks.toml`) stay append-only
 under any number of parallel threads; the orchestrator reconciles at merge.
-Native gates (`ci:native`) run in the main checkout at review — worktrees do
-not resolve the Jetstream sibling path-dep.
+Default native gates (`ci:native`, `qa`) are self-contained in every Poodle
+worktree. Paired Jetstream integration is explicit under `ci:jetstream` and
+`qa:jetstream`; do not construct a sibling link for ordinary cards.
 
 | Batch | Card | Branch | Model | Status | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | `g14-r001-conformance-kernel-button` | `g14/001-conformance-kernel-and-button-proof.md` | `thread/g14-001-conformance-kernel-button` | maintainer thread | ready | Redesigned runway first task. Full roadmap file is the handoff; no batch card. Do not dispatch alongside another conformance-kernel change. |
-| `g14-r015-licence-web-reference` | `g14/015-licence-web-reference.md` | `thread/g14-015-licence-web-reference` | maintainer thread | ready | Independent Svelte/React reference tranche for LicenceStatus, LicenceActivation, and LicenceSeats. May run beside g14.001. Native/shared-case completion remains g14.016; second PR merged must rebase shared indexes and reports. |
+| `g14-r015-licence-web-reference` | `g14/015-licence-web-reference.md` | `t3code/add-g14-licence-web-reference` | maintainer thread | merged | Merge `fd32d7d5`; Svelte/React reference and matching standalone specimens landed. Active native/shared-case completion remains g14.017. |
+| `g14-r016-licence-reference-review` | `g14/016-licence-reference-review.md` | operator checkpoint | maintainer | ready | Review the landed Svelte/React pages and either approve unchanged or dispatch one bounded refinement PR. No Rust or conformance work. |
 | `g13-b001-authority-inventory` | `g13/batch-cards/001-authority-inventory-and-docs-baseline.md` | `thread/g13-001-authority-inventory` | `deepseek-v4-flash` (`xhigh`) | merged | Commit `251cc858` → merge `a0ca039d`; counts re-measured and confirmed; `svelte:surface-audit`, `docs:lint`, `docs:check`, `git diff --check` all exit 0 on merged main; review log `docs/logs/2026-08/11-g13-b001-b005-review-and-merge.md`; worktree removed |
 | `g13-b002-pilot-fixture-metrics` | `g13/batch-cards/002-pilot-fixture-and-metrics-freeze.md` | `thread/g13-002-pilot-fixture-metrics` | `deepseek-v4-flash` (`xhigh`) | merged | Commit `89debbcb` → merge `2368f436`; 32 `FIX-*` fixtures, full quantitative baseline; LOC, glob totals, and verbatim drift-gate quotes spot-verified; `docs:lint`, `svelte:surface-audit`, `git diff --check` exit 0 on merged main; found the corpus §8 classification-count defect (ruled: row marks win, `EXT` = 6); worktree removed |
 | `g13-b006-button-tone-parity` | `g13/batch-cards/006-button-family-tone-parity.md` | `thread/g13-006-button-tone-parity` | `deepseek-v4-flash` (`xhigh`) | merged | Commit `22337a31` → merged; Button success + IconButton warning delivered, all 7 tone blocks verified byte-identical to their danger counterparts after substitution; renderer confirmed exhaustive over variant×tone, no Rust edited; correctly stopped on the SplitButton shadow conflict (→ `008`) |

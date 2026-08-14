@@ -12,8 +12,8 @@ accessibility behavior, use the [component contracts](../contracts/components/RE
   React surface
 - [GPUI](gpui-developer-guide.md) — Rust specs, shared rendering, and the GPUI
   node backend
-- [Jetstream](jetstream-developer-guide.md) — Rust specs, shared rendering, and
-  the Jetstream node conversion boundary
+- [Jetstream](jetstream-developer-guide.md) — deferred paired integration for
+  Rust specs, shared rendering, and the Jetstream node conversion boundary
 
 ## Application Recipes
 

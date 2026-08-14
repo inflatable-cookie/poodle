@@ -16,16 +16,19 @@ component contract + portable interface
        shared typed cases
       /                   \
 Svelte + React       poodle-render
-      |                /       \
- web observers     GPUI       Jetstream
-      \                |       /
+      |                    |
+ web observers          GPUI
+      \                    /
         normalized observations
                   |
              parity gate
 ```
 
 - Svelte and React share `poodle-core` behaviour and CSS.
-- GPUI and Jetstream share `poodle-render` composition and `poodle-node`.
+- GPUI consumes shared `poodle-render` composition and `poodle-node` now.
+- Jetstream remains a deferred consumer of the same Rust substrate and case
+  corpus; its later backend-admission gate must add execution, not a second
+  component implementation.
 - The conformance plane shares declarations, inputs, actions, assertions, and
   specimen structure. It does not share executable component behaviour.
 - Svelte remains the reference when current implementations disagree. The
@@ -66,8 +69,9 @@ A case carries:
   and geometry
 - explicit runtime-owned capability requirements and tolerances
 
-The same authored case drives tests and specimen pages in all four runtimes.
-Specimens are views over cases, not a second fixture corpus.
+The same authored case drives tests and specimen pages in every active runtime.
+Specimens are views over cases, not a second fixture corpus. Cases remain
+backend-neutral so the deferred Jetstream runner can consume them unchanged.
 
 ### Normalized observations
 
@@ -102,9 +106,11 @@ Component parity depends on a small renderer vocabulary. Poodle certifies:
 - accessibility projection
 - text editing and IME boundaries
 
-GPUI and Jetstream must prove that they interpret shared `poodle-node`
-primitives and intents equivalently. A component-specific workaround cannot
-stand in for a missing primitive.
+The active pilot certifies the node vocabulary and GPUI interpretation without
+leaking GPUI objects into `poodle-node`. Jetstream admission must later prove
+equivalent interpretation of those primitives and intents. A
+component-specific workaround cannot stand in for a missing primitive in
+either backend.
 
 ## Component Construction Profiles
 
@@ -126,19 +132,24 @@ bespoke parity method.
 
 ## Completion
 
-A component is complete only when:
+A component is active-cohort complete only when:
 
 1. its contract and portable interface agree;
-2. both implementation pairs consume the declared interface;
-3. required shared cases execute in Svelte, React, GPUI, and Jetstream;
+2. both web implementations and shared Rust composition consume the declared
+   interface;
+3. required shared cases execute in Svelte, React, and GPUI;
 4. normalized observations pass;
-5. the same cases render the four specimen views;
+5. the same cases render the three active specimen views;
 6. required primitive capabilities are certified; and
 7. no placeholder, inert handler, missing registration, or declared absence
    remains for required behaviour.
 
 New components enter through this pipeline. A preview registration or passing
 unit test alone is not delivery.
+
+Jetstream has a separate admission state. It is neither required for current
+active-cohort completion nor allowed to appear as passing until its backend
+executes the shared cases, observations, interactions, and specimen views.
 
 ## Boundaries
 

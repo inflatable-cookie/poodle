@@ -5,9 +5,9 @@ Depends on: `g14.005`
 
 ## Outcome
 
-Prove text editing where DOM, GPUI, and Jetstream mechanisms legitimately
-differ. Expose missing Jetstream behaviour as incomplete rather than an
-accepted declaration.
+Prove text editing where DOM and GPUI mechanisms legitimately differ. Keep the
+portable action, capability, and observation boundary neutral for later
+Jetstream admission.
 
 ## Scope
 
@@ -22,9 +22,10 @@ accepted declaration.
 
 ## Acceptance
 
-- Real text entry and editing paths execute in all required runtimes.
+- Real text entry and editing paths execute in all active runtimes.
 - Platform-only props do not leak into the portable Rust spec.
-- Declaring Jetstream absence documents the gap but does not green completion.
+- Jetstream remains program-deferred and cannot appear as passing or
+  `not-applicable` in active-cohort evidence.
 - A planted dropped edit, selection, IME, or event-order error fails.
 - No TextInput-specific generic runner logic; full cost recorded.
 

@@ -20,7 +20,7 @@ to understand the other implementations.
 | Svelte 5 | Web applications | Preview | [Svelte developer guide](docs/guides/svelte-developer-guide.md) |
 | React 18+ | Web applications | Experimental | [React package guide](packages/react/components/README.md) |
 | GPUI | Native Rust applications | Preview | [GPUI developer guide](docs/guides/gpui-developer-guide.md) |
-| Jetstream | Jetstream applications | Preview | [Jetstream developer guide](docs/guides/jetstream-developer-guide.md) |
+| Jetstream | Jetstream applications | Deferred integration | [Jetstream developer guide](docs/guides/jetstream-developer-guide.md) |
 
 The web packages are:
 
@@ -128,6 +128,10 @@ effigy react:preview
 effigy gpui:preview
 effigy jetstream:preview
 ```
+
+The Jetstream preview is an opt-in paired-repository integration. Normal
+Poodle worktrees and `effigy qa` do not require a sibling Jetstream checkout.
+Use `effigy qa:jetstream` only in a prepared paired workspace.
 
 Before submitting a change, run the checks relevant to it. The broad repository
 check is:

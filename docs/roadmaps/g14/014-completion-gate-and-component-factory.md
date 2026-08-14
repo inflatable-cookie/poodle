@@ -13,8 +13,9 @@ blocks incomplete runtime coverage.
 
 - Derive the component roster from source and contract authority.
 - Provide an idempotent scaffold for the six component profiles.
-- Require interface, implementation pair, cases, observations, specimens,
-  certified capabilities, and four passing runtime rows.
+- Require interface, web pair, shared Rust composition, cases, observations,
+  specimens, certified capabilities, and three passing active runtime rows.
+  Report Jetstream separately as program-deferred.
 - Consolidate old prop/callback/spec/registration/specimen gates behind the
   completion board where claims overlap.
 - Document the Button-to-HistoryCenter recipe in component docs.

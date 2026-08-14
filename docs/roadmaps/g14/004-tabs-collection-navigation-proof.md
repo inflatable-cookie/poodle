@@ -15,12 +15,12 @@ keyboard navigation with the same component pipeline.
 - Cover controlled selection, disabled items, orientation/direction, Home/End,
   arrow navigation, activation mode, focus, and event order.
 - Compare repeated part relationships, selected state, accessibility links,
-  token roles, and geometry across all runtimes.
+  token roles, and geometry across all active runtimes.
 
 ## Acceptance
 
 - Reordering fixture items preserves semantic identity.
-- Every required navigation route executes in all four runtimes.
+- Every required navigation route executes in all active runtimes.
 - A planted focus, selection, ID, or panel relationship error fails.
 - No Tabs-specific runner branch or second item model.
 - Replaced fixtures/vectors/declarations are removed and costed.

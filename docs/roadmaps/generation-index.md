@@ -6,19 +6,21 @@ Updated: 2026-08-14
 
 - `g14`
   - Status: active
-  - Range: `001` to `018`
+  - Range: `001` to `019`
   - Governing architecture:
     `docs/architecture/009-cross-runtime-component-conformance.md`
   - Governing spec: `docs/specs/066-executable-component-conformance.md`
-  - Goal: no silent portable drift across Svelte, React, GPUI, and Jetstream.
-    One portable interface and case/specimen corpus; two implementation
-    substrates; four executed observations; strict completion.
+  - Goal: no silent portable drift across Svelte, React, and Rust through
+    GPUI. One portable interface and case/specimen corpus; two implementation
+    substrates; three executed observations; strict active-cohort completion.
+    Jetstream remains a deferred backend over the same Rust boundary.
   - Runway: `001`–`007` prove increasing component profiles; `008` records
-    adopt/revise/reject. `009`–`014` remain blocked until adopt. `015` is a
-    parallel licence web-reference intake; `016` completes it through the
-    adopted conformance path; `017`–`018` clean up and close.
-  - Next: `g14.001` conformance kernel and Button proof plus independent
-    `g14.015` licence web reference in separate worktrees.
+    adopt/revise/reject. `009`–`014` remain blocked until adopt. `015` landed
+    the licence web reference; `016` is its operator review checkpoint; `017`
+    completes it through the adopted conformance path; `018`–`019` clean up
+    and close.
+  - Next: `g14.001` conformance kernel and Button proof. `g14.016` may run as
+    an operator review checkpoint beside it.
 
 ## Latest Completed Track
 
@@ -66,7 +68,8 @@ retire provisional specs, and name one first task.
 ## Current Program Posture
 
 The implementation baseline remains pair-wise: shared TypeScript behaviour and
-styles for Svelte/React; shared Rust spec/render/node composition for
-GPUI/Jetstream. g14 adds an executable conformance plane above those pairs. It
-shares interface declarations, cases, specimen structure, and observations;
-it does not compile behaviour or impose one renderer model on web and native.
+styles for Svelte/React; shared Rust spec/render/node composition for native
+backends. g14 executes that plane through GPUI while keeping the boundary
+neutral for later Jetstream admission. It shares interface declarations,
+cases, specimen structure, and observations; it does not compile behaviour or
+impose one renderer model on web and native.

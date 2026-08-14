@@ -7,8 +7,9 @@ Owner: Poodle orchestrator
 ## Problem Baseline
 
 Poodle has no component-level gate that proves the same portable interface,
-fixture, behaviour, semantic output, and specimen structure across all four
-runtimes.
+fixture, behaviour, semantic output, and specimen structure across the active
+Svelte, React, and GPUI cohort while preserving a renderer-neutral Rust
+boundary.
 
 The previous frozen baseline measured:
 
@@ -34,7 +35,7 @@ g14.001 establishes the executable roster from source.
 | native roles appear | `drift:roles` | placement, state, accessible name, GPUI evidence |
 | native has a handler | `drift:events` / `drift:handlers` | correct handler, payload, timing, actual backend action |
 | machine names have vectors | `docs:machine-shape-drift` | vector depth and equal output; currently fails after generated imports |
-| React specimen registered | `docs:react-specimen-drift` | specimen content and both natives |
+| React specimen registered | `docs:react-specimen-drift` | specimen content and GPUI |
 | capability declaration has a trace | `docs:capability-drift` | undeclared capability vocabulary and actual parity |
 | visual baselines exist | web and native snapshot tools | shared fixture identity; stale GPUI captures; Jetstream overwrite workflow |
 
@@ -65,20 +66,21 @@ No experimental surface is architecture merely because it merged.
 The licence surface enters through a bounded web-reference tranche while the
 conformance kernel is still under proof. Web delivery is not completion.
 
-| Component | Web reference | Native/shared cases | Completion state |
-| --- | --- | --- | --- |
-| `LicenceStatus` | g14.015 | g14.016 after adopt | incomplete |
-| `LicenceActivation` | g14.015 | g14.016 after adopt | incomplete |
-| `LicenceSeats` | g14.015 | g14.016 after adopt | incomplete |
+| Component | Web reference | Review | Native/shared cases | Completion state |
+| --- | --- | --- | --- | --- |
+| `LicenceStatus` | g14.015 landed | g14.016 | g14.017 after adopt | incomplete |
+| `LicenceActivation` | g14.015 landed | g14.016 | g14.017 after adopt | incomplete |
+| `LicenceSeats` | g14.015 landed | g14.016 | g14.017 after adopt | incomplete |
 
 `LicenceCentre` is an explicit non-goal. The downstream comparison between
 Poodle's structural field mirrors and Longhorn's generated field maps remains
 Longhorn-owned; g14.015 exports the Poodle side but cannot claim that gate.
+Jetstream is program-deferred rather than a per-component known delta.
 
 ## Cleanup Rule
 
 Every active claim ends with one canonical gate. A legacy gate may stay while
 coverage migrates, but it needs an owner and retirement condition. Generated
 artifacts stay out of hand-edited source roots where possible. Known
-generated-source and god-file health findings are owned by g14.017 rather than
+generated-source and god-file health findings are owned by g14.018 rather than
 normalized as permanent warnings.

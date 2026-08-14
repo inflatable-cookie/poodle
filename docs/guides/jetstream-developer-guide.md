@@ -4,6 +4,11 @@ Poodle renders native components from shared Rust specs. `poodle-render`
 produces renderer-neutral node trees; the `jetstream-poodle` backend in the
 Jetstream repository converts those trees to `JsEl` at the engine boundary.
 
+Jetstream is currently a deferred paired-repository integration. Normal Poodle
+component completion and `effigy qa` do not require the sibling engine. Use the
+explicit `effigy ci:jetstream` or `effigy qa:jetstream` boards only in a
+prepared paired workspace.
+
 Poodle's Rust crates are pre-1.0 source previews and are not published to
 crates.io. Use path or workspace dependencies. Jetstream and
 `jetstream-poodle` are supplied by the Jetstream repository.

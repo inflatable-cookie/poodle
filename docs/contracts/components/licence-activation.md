@@ -1,6 +1,6 @@
 # LicenceActivation
 
-Status: approved for web reference; native/conformance pending g14.016
+Status: approved web reference; active native/conformance pending g14.017
 Updated: 2026-08-14
 
 ## 1. Purpose
@@ -171,8 +171,9 @@ implemented in Poodle.
 
 Svelte and React share data types, submit resolver, validation copy, CSS, and
 test cases. File reading is thin framework/browser plumbing. The web reference
-is incomplete until g14.016 supplies native file-selection semantics and full
-four-runtime conformance.
+is incomplete until g14.017 supplies native file-selection semantics and full
+active-cohort conformance. Jetstream remains a separate deferred backend
+admission.
 
 ## 9. Acceptance Cases
 
@@ -193,4 +194,4 @@ four-runtime conformance.
 
 | Delta | Status | Follow-up |
 | --- | --- | --- |
-| no native implementation in web-reference PR | incomplete, not accepted parity | g14.016 |
+| no native implementation in web-reference PR | incomplete, not accepted parity | g14.017 |

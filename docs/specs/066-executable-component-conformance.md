@@ -9,9 +9,11 @@ Depends on: `../architecture/009-cross-runtime-component-conformance.md`,
 ## Purpose
 
 Define the smallest code-centred system that can make portable drift fail
-across Svelte, React, GPUI, and Jetstream. This spec is provisional until the
-g14 profile pilots pass. Architecture 009 fixes the invariants; g14 may revise
-the storage format and tooling.
+across Svelte, React, and Rust through GPUI. The portable Rust declarations,
+cases, and `poodle-node` observations remain renderer-neutral so Jetstream can
+join through a later backend-admission runway. This spec is provisional until
+the g14 profile pilots pass. Architecture 009 fixes the invariants; g14 may
+revise the storage format and tooling.
 
 ## Authored Surfaces
 
@@ -166,7 +168,9 @@ generic runners.
 Runtime states are `passing`, `failing`, `missing`, or `not-applicable`.
 `not-applicable` is valid only for a contract-classified platform extension.
 `missing` may carry a reason but remains incomplete. There is no
-`known-divergence` pass state.
+`known-divergence` pass state. Program-level deferred runtimes are excluded
+from the active completion cohort and reported separately; they may not be
+serialized as `passing` or disguised as `not-applicable`.
 
 ## Cleanup Rule
 

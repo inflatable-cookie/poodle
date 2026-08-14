@@ -343,10 +343,9 @@
 # The adapter crates cover theme/token resolution, layout mapping, and their
 # direct manifest claims independently of the shared renderer.
 "test:jetstream-adapter" = "cargo test -p poodle-jetstream --manifest-path packages/jetstream/adapter/Cargo.toml"
-# The a11y audit belongs here rather than in ci:rust: it renders specimens, so
-# it needs the sibling jetstream repo — the same constraint that already makes
-# this group local-only. It is a real gate now that the count is zero; before
-# that it would only have reported a number.
+# Self-contained native board. This intentionally stops at Poodle-owned Rust,
+# GPUI, and the in-repo Jetstream adapter; it must run from an ordinary Poodle
+# worktree with no sibling engine checkout.
 "ci:native" = [
   { task = "drift:handlers" },
   { task = "drift:events" },
@@ -354,8 +353,19 @@
   { task = "check:gpui" },
   { task = "gpui:test" },
   { task = "test:jetstream-adapter" },
+]
+
+# Paired-repository Jetstream admission board. The preview, accessibility
+# projection, and role drift checks path-depend on the sibling Jetstream engine
+# and therefore stay explicit rather than leaking into default QA.
+"ci:jetstream" = [
+  { task = "jetstream:build" },
   { task = "test:jetstream-a11y" },
   { task = "drift:roles" },
+]
+"qa:jetstream" = [
+  { task = "ci:jetstream" },
+  { task = "test:jetstream-visual" },
 ]
 
 # Documentation
@@ -381,9 +391,10 @@
 # Cheap orientation for `effigy doctor`. Never alias health to the full board.
 health = [{ task = "docs:lint" }]
 
-# Full local release board (headless / CPU-only). Visual GPUI sweep stays
-# separate (`test:native-visual`). Was previously misnamed `health`, which made
-# every `effigy doctor` run the whole suite.
+# Full self-contained local release board (headless / CPU-only). Visual GPUI
+# and paired Jetstream sweeps stay separate (`test:native-visual`,
+# `qa:jetstream`). Was previously misnamed `health`, which made every
+# `effigy doctor` run the whole suite.
 qa = [
   { task = "ci" },
   { task = "ci:native" },

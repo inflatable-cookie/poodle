@@ -6,8 +6,8 @@ Depends on: `g14.006`
 ## Outcome
 
 Prove the same pipeline scales to a host-coordinated interactive composite.
-Deliver working GPUI and Jetstream implementations rather than specimen-only
-registrations.
+Deliver working shared Rust composition and GPUI interaction rather than a
+specimen-only registration.
 
 ## Scope
 
@@ -25,7 +25,7 @@ registrations.
 ## Acceptance
 
 - All fixture entries appear exactly once with stable semantic identity.
-- Svelte, React, GPUI, and Jetstream execute the same command scenarios.
+- Svelte, React, and GPUI execute the same command scenarios.
 - Native components are functional, accessible, and specimen-visible.
 - A planted hierarchy, payload, focus, scroll, or inert-handler error fails.
 - Composite needs extensions, not a second conformance architecture.
@@ -35,7 +35,8 @@ registrations.
 
 - Cases need Longhorn types, persistence, routing, or product callbacks.
 - Generic runners need HistoryCenter tree or command logic.
-- Native parity requires separate GPUI and Jetstream component composition.
+- Native parity requires GPUI-only composition instead of shared
+  `poodle-render` composition.
 
 ## Validation
 

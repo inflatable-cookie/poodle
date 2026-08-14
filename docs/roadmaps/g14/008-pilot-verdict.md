@@ -14,7 +14,8 @@ open corpus rollout by momentum.
 - duplicate declarations/specimens/vectors removed
 - defects existing gates missed and the new system caught
 - schema/action/assertion growth by profile
-- four-runtime execution time and reliability
+- active-cohort execution time and reliability
+- estimated Jetstream admission cost and any GPUI leakage in the node boundary
 - primitive/backend gaps fixed and still missing
 - component-specific branches in generic tooling; target zero
 - standing gate integration and planted-failure results
@@ -22,11 +23,12 @@ open corpus rollout by momentum.
 
 ## Verdict Rules
 
-Adopt only if one pipeline covers all six profiles, required absence remains
-red, generic tooling stays component-neutral, and ongoing cost is lower than
-the duplication removed. Revise only with a bounded correction and a named
-second verdict. Reject removes pilot machinery while retaining component fixes
-and evidence.
+Adopt only if one pipeline covers all six profiles across Svelte, React, and
+GPUI, required active-runtime absence remains red, generic tooling stays
+component-neutral, the Rust boundary remains backend-neutral, and ongoing cost
+is lower than the duplication removed. Revise only with a bounded correction
+and a named second verdict. Reject removes pilot machinery while retaining
+component fixes and evidence.
 
 ## Acceptance
 

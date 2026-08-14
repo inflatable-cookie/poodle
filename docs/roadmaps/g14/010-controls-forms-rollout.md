@@ -10,7 +10,7 @@ audio controls through the adopted pipeline.
 
 ## Acceptance
 
-- The frozen control/form roster passes four-runtime completion.
+- The frozen control/form roster passes active-cohort completion.
 - Controlled pairs, event order, focus/keyboard/pointer, value domains, and
   validation cases are executed, not inferred from declarations.
 - Thin machine/domain vectors are replaced or explicitly retained for a
