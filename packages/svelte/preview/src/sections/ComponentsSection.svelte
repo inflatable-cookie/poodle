@@ -12,10 +12,20 @@
 
   let { activeComponent = undefined, search = "" }: { activeComponent?: string | undefined; search?: string } = $props();
   let contentElement: HTMLDivElement | undefined = $state();
-  let userExpanded = $state<string[]>([]);
+  let previousActiveComponent = $state<string | undefined>();
+  let userDisclosure = $state<Record<string, boolean>>({});
 
   let entry = $derived(activeComponent ? findComponent(activeComponent) : undefined);
   $effect(() => {
+    if (previousActiveComponent !== activeComponent) {
+      const activeFamily = activeComponent ? findComponent(activeComponent)?.family : undefined;
+      if (activeFamily && activeFamily in userDisclosure) {
+        const remainingChoices = { ...userDisclosure };
+        delete remainingChoices[activeFamily];
+        userDisclosure = remainingChoices;
+      }
+      previousActiveComponent = activeComponent;
+    }
     if (activeComponent && contentElement) {
       contentElement.scrollTop = 0;
     }
@@ -28,18 +38,16 @@
       ? allComponents.filter((component) => matchesCatalogueSearch(component, searchLower))
       : allComponents,
   );
-  let expandedSet = $derived(new Set(userExpanded));
+  let disclosureMap = $derived(new Map(Object.entries(userDisclosure)));
   let sectionGroups = $derived(componentsBySection(allComponents));
   let searchResults = $derived(filteredComponents);
 
-  function toggleFamily(familyId: string): void {
-    userExpanded = userExpanded.includes(familyId)
-      ? userExpanded.filter((id) => id !== familyId)
-      : [...userExpanded, familyId];
+  function toggleFamily(familyId: string, open: boolean): void {
+    userDisclosure = { ...userDisclosure, [familyId]: !open };
   }
 
   function familyOpen(familyId: (typeof sectionGroups)[number]["families"][number]["id"]): boolean {
-    return isFamilyDisclosed(familyId, activeComponent, expandedSet, allComponents);
+    return isFamilyDisclosed(familyId, activeComponent, disclosureMap, allComponents);
   }
 
   function navItems(items: ComponentEntry[]) {
@@ -83,7 +91,7 @@
                   type="button"
                   class="poodle-catalogue-family__trigger"
                   aria-expanded={open}
-                  onclick={() => toggleFamily(family.id)}
+                  onclick={() => toggleFamily(family.id, open)}
                 >
                   <Icon name={open ? "chevron-down" : "chevron-right"} size="sm" />
                   <span class="poodle-catalogue-family__label">{family.label}</span>

@@ -882,7 +882,7 @@ pub const CANONICAL_COMPONENTS: &[CanonicalComponent] = &[
     CanonicalComponent {
 		slug: "error-boundary",
 		display_name: "ErrorBoundary",
-		description: "Svelte error boundary with retryable empty-state fallback.",
+		description: "Error boundary with retryable empty-state fallback.",
 		section: CatalogueSectionId::Foundations,
 		family: CatalogueFamilyId::StatusProgress,
 		kind: CatalogueKindId::Feedback,

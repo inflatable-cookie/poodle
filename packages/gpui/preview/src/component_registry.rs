@@ -80,15 +80,15 @@ pub fn grouped_sections(search: &str) -> Vec<SectionGroup> {
         .collect()
 }
 
-/// True when a family should render open: the active component lives in it,
-/// or the operator expanded it. Landing with no search forces none open.
+/// True when a family should render open. An explicit operator choice wins;
+/// otherwise the active component's family is disclosed automatically.
 pub fn family_is_disclosed(
     family: CatalogueFamilyId,
     active_slug: Option<&str>,
-    user_expanded: &std::collections::HashSet<String>,
+    user_disclosure: &std::collections::HashMap<String, bool>,
 ) -> bool {
-    if user_expanded.contains(family.id()) {
-        return true;
+    if let Some(disclosed) = user_disclosure.get(family.id()) {
+        return *disclosed;
     }
     active_slug
         .and_then(find_component)

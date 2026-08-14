@@ -22,7 +22,7 @@ mod generated_shell;
 
 use std::borrow::Cow;
 use std::collections::hash_map::DefaultHasher;
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 use std::path::PathBuf;
 
@@ -32,9 +32,7 @@ use poodle_adapter::ThemeProvider;
 use poodle_specs::{
     CodeSpec, ControlDensity as SpecControlDensity, ControlSize as SpecControlSize,
     SemanticControlSizeRole, SidebarNavGroup, SidebarNavItem, SidebarNavSpec, SliderSpec,
-    TabDefinition,
-    ThemeSelectSpec,
-    TabVariant, TabsSpec, TextInputSpec,
+    TabDefinition, TabVariant, TabsSpec, TextInputSpec, ThemeSelectSpec,
 };
 
 /// Asset source that loads files from the preview app's directory.
@@ -75,17 +73,16 @@ impl AssetSource for PreviewAssets {
     }
 }
 
+use crate::node_compat::{Code, SidebarNav, Slider, Tabs, TextInput, ThemeSelect};
 use app_state::{
-    AppState, ChromeEvent, ControlSize, Density, NodeSpecimenEvent, Section, CONTRAST_MAX,
-    CONTRAST_MIN,
-    ThemePreset, TokenPanel,
+    AppState, ChromeEvent, ControlSize, Density, NodeSpecimenEvent, Section, ThemePreset,
+    TokenPanel, CONTRAST_MAX, CONTRAST_MIN,
 };
 use component_registry::{
     family_by_id, family_is_disclosed, find_component, grouped_sections, package_name,
     search_components,
 };
 use contract_usage_docs::load_contract_usage_docs;
-use crate::node_compat::{Code, SidebarNav, Slider, Tabs, TextInput, ThemeSelect};
 use style_bridge::color_to_hsla;
 
 // Global keyboard actions
@@ -122,7 +119,7 @@ struct CatalogueSidebar {
     key: CatalogueSidebarKey,
     theme: poodle_gpui::GpuiThemeProvider,
     node_events: std::sync::Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
-    user_expanded: HashSet<String>,
+    user_disclosure: HashMap<String, bool>,
 }
 
 impl CatalogueSidebarKey {
@@ -144,13 +141,22 @@ impl CatalogueSidebar {
             key: CatalogueSidebarKey::from_state(state),
             theme: state.theme.clone(),
             node_events: std::sync::Arc::clone(&state.node_events),
-            user_expanded: HashSet::new(),
+            user_disclosure: HashMap::new(),
         }
     }
 
     fn sync(&mut self, state: &AppState, cx: &mut Context<Self>) {
         let key = CatalogueSidebarKey::from_state(state);
         if self.key != key {
+            if self.key.active_component_slug != key.active_component_slug {
+                if let Some(active) = key
+                    .active_component_slug
+                    .as_deref()
+                    .and_then(find_component)
+                {
+                    self.user_disclosure.remove(active.family.id());
+                }
+            }
             self.key = key;
             self.theme = state.theme.clone();
             cx.notify();
@@ -253,11 +259,7 @@ impl Render for CatalogueSidebar {
 
             for family in section.families {
                 let family_id = family.family.id().to_string();
-                let open = family_is_disclosed(
-                    family.family,
-                    active_slug,
-                    &self.user_expanded,
-                );
+                let open = family_is_disclosed(family.family, active_slug, &self.user_disclosure);
                 let count = family.items.len();
                 let chevron = if open { "▾" } else { "▸" };
                 let mut family_el = div()
@@ -296,41 +298,40 @@ impl Render for CatalogueSidebar {
                                     .text_color(color_to_hsla(text_secondary))
                                     .child(format!("{count}")),
                             )
-                            .on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
-                                if !this.user_expanded.remove(&family_id) {
-                                    this.user_expanded.insert(family_id.clone());
-                                }
-                                cx.notify();
-                            })),
+                            .on_click(cx.listener(
+                                move |this, _event: &ClickEvent, _window, cx| {
+                                    this.user_disclosure.insert(family_id.clone(), !open);
+                                    cx.notify();
+                                },
+                            )),
                     );
 
                 if open {
                     let items = family
                         .items
                         .iter()
-                        .map(|component| SidebarNavItem::new(component.slug, component.display_name))
+                        .map(|component| {
+                            SidebarNavItem::new(component.slug, component.display_name)
+                        })
                         .collect();
-                    let mut spec = SidebarNavSpec::new(vec![SidebarNavGroup::new(
-                        family.family.id(),
-                        items,
-                    )])
-                    .with_aria_label(family.label)
-                    .with_density(density)
-                    .with_size(size)
-                    .with_size_role(SemanticControlSizeRole::Chrome);
+                    let mut spec =
+                        SidebarNavSpec::new(vec![SidebarNavGroup::new(family.family.id(), items)])
+                            .with_aria_label(family.label)
+                            .with_density(density)
+                            .with_size(size)
+                            .with_size_role(SemanticControlSizeRole::Chrome);
                     if let Some(active) = active_slug {
                         spec = spec.with_value(active);
                     }
-                    family_el = family_el.child(
-                        SidebarNav::from_spec(spec, &self.theme).on_change({
+                    family_el =
+                        family_el.child(SidebarNav::from_spec(spec, &self.theme).on_change({
                             let queue = std::sync::Arc::clone(&queue);
                             std::sync::Arc::new(move |val: &str| {
                                 queue.lock().unwrap().push(NodeSpecimenEvent::Chrome(
                                     ChromeEvent::ActiveComponent(val.to_string()),
                                 ));
                             })
-                        }),
-                    );
+                        }));
                 }
 
                 section_el = section_el.child(family_el);
@@ -536,7 +537,10 @@ impl PreviewRoot {
     /// becoming a compile error (the card-035 R3 removal property, repeated
     /// for the natives). Casing is presentation (R3): this shell renders
     /// eyebrows uppercase as its house look.
-    #[expect(clippy::too_many_arguments, reason = "the preview control bar keeps resolved theme values explicit")]
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "the preview control bar keeps resolved theme values explicit"
+    )]
     fn render_display_controls(
         &self,
         text_secondary: poodle_tokens::typed::ColorValue,
@@ -684,33 +688,30 @@ impl PreviewRoot {
                         // use, with the 6px track centred in it, so the row
                         // lines up on one baseline instead of the slider
                         // floating above it.
-                        div()
-                            .w(px(160.0))
-                            .h(px(32.0))
-                            .flex()
-                            .items_center()
-                            .child(Slider::from_spec(
-                            SliderSpec {
-                                // The default step is 1.0, which over a 0..1
-                                // range can only ever snap to the endpoints —
-                                // the axis is continuous, so it needs a fine
-                                // one.
-                                step: 0.01,
-                                ..SliderSpec::new(self.state.contrast as f64)
-                                    .with_bounds(CONTRAST_MIN as f64, CONTRAST_MAX as f64)
-                            },
-                            &self.state.theme,
-                        )
-                        .with_id("contrast")
-                        .aria_label(control.label)
-                        .on_change({
-                            let queue = std::sync::Arc::clone(&self.state.node_events);
-                            std::sync::Arc::new(move |value: f64| {
-                                queue.lock().unwrap().push(NodeSpecimenEvent::Chrome(
-                                    ChromeEvent::Contrast(value as f32),
-                                ));
-                            })
-                        })),
+                        div().w(px(160.0)).h(px(32.0)).flex().items_center().child(
+                            Slider::from_spec(
+                                SliderSpec {
+                                    // The default step is 1.0, which over a 0..1
+                                    // range can only ever snap to the endpoints —
+                                    // the axis is continuous, so it needs a fine
+                                    // one.
+                                    step: 0.01,
+                                    ..SliderSpec::new(self.state.contrast as f64)
+                                        .with_bounds(CONTRAST_MIN as f64, CONTRAST_MAX as f64)
+                                },
+                                &self.state.theme,
+                            )
+                            .with_id("contrast")
+                            .aria_label(control.label)
+                            .on_change({
+                                let queue = std::sync::Arc::clone(&self.state.node_events);
+                                std::sync::Arc::new(move |value: f64| {
+                                    queue.lock().unwrap().push(NodeSpecimenEvent::Chrome(
+                                        ChromeEvent::Contrast(value as f32),
+                                    ));
+                                })
+                            }),
+                        ),
                     ),
             );
         }
@@ -736,7 +737,9 @@ impl PreviewRoot {
                             TextInputSpec::new()
                                 .with_id("component-search")
                                 .with_input_type("search")
-                                .with_placeholder(control.placeholder.unwrap_or("Find component..."))
+                                .with_placeholder(
+                                    control.placeholder.unwrap_or("Find component..."),
+                                )
                                 .with_value(&self.state.component_search)
                                 .with_selection(
                                     self.state.search_selection.0,
@@ -784,7 +787,10 @@ impl PreviewRoot {
 
     /// A labelled toggle group (uppercase eyebrow + row of individual toggle buttons).
     /// Matches Svelte: each button is a separate pill with its own border.
-    #[expect(clippy::too_many_arguments, reason = "toggle groups keep preview state and resolved theme values explicit")]
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "toggle groups keep preview state and resolved theme values explicit"
+    )]
     fn render_toggle_group(
         &self,
         label: &'static str,
@@ -1196,7 +1202,10 @@ impl PreviewRoot {
     }
 
     /// Landing page grid showing all components as cards.
-    #[expect(clippy::too_many_arguments, reason = "the catalogue layout keeps viewport and resolved theme values explicit")]
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "the catalogue layout keeps viewport and resolved theme values explicit"
+    )]
     fn render_catalogue_landing(
         &self,
         groups: &[component_registry::SectionGroup],
@@ -1215,17 +1224,13 @@ impl PreviewRoot {
             .sum();
 
         for section in groups {
-            let mut section_el = div()
-                .flex()
-                .flex_col()
-                .gap(px(12.0))
-                .child(
-                    div()
-                        .text_size(px(11.0))
-                        .font_weight(FontWeight::SEMIBOLD)
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(section.label.to_ascii_uppercase()),
-                );
+            let mut section_el = div().flex().flex_col().gap(px(12.0)).child(
+                div()
+                    .text_size(px(11.0))
+                    .font_weight(FontWeight::SEMIBOLD)
+                    .text_color(color_to_hsla(text_secondary))
+                    .child(section.label.to_ascii_uppercase()),
+            );
 
             for family in &section.families {
                 let mut grid = div().flex().flex_wrap().gap(px(12.0));
@@ -1258,10 +1263,12 @@ impl PreviewRoot {
                                     .text_color(color_to_hsla(text_secondary))
                                     .child(crumb),
                             )
-                            .on_click(cx.listener(move |this, _event: &ClickEvent, _window, cx| {
-                                this.state.active_component_slug = Some(slug.to_string());
-                                cx.notify();
-                            })),
+                            .on_click(cx.listener(
+                                move |this, _event: &ClickEvent, _window, cx| {
+                                    this.state.active_component_slug = Some(slug.to_string());
+                                    cx.notify();
+                                },
+                            )),
                     );
                 }
                 section_el = section_el.child(
@@ -1314,7 +1321,6 @@ impl PreviewRoot {
                 ),
         )
     }
-
 
     /// Render a single specimen for a specific component by slug.
     fn render_component_specimen(&self, slug: &str, cx: &mut Context<Self>) -> Div {

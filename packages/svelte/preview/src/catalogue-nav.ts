@@ -16,29 +16,36 @@ export type CatalogueNavEntry = CanonicalComponent & {
   collectionLabels: string[];
 };
 
-export type CatalogueFamilyGroup<T extends CatalogueNavEntry = CatalogueNavEntry> = {
+export type CatalogueFamilyGroup<
+  T extends CatalogueNavEntry = CatalogueNavEntry,
+> = {
   id: CatalogueFamilyId;
   label: string;
   section: CatalogueSectionId;
   items: T[];
 };
 
-export type CatalogueSectionGroup<T extends CatalogueNavEntry = CatalogueNavEntry> = {
+export type CatalogueSectionGroup<
+  T extends CatalogueNavEntry = CatalogueNavEntry,
+> = {
   id: CatalogueSectionId;
   label: string;
   families: CatalogueFamilyGroup<T>[];
 };
 
-const familyById = new Map(catalogueFamilies.map((family) => [family.id, family]));
+const familyById = new Map(
+  catalogueFamilies.map((family) => [family.id, family]),
+);
 const kindById = new Map(catalogueKinds.map((kind) => [kind.id, kind]));
-const sectionById = new Map(catalogueSections.map((section) => [section.id, section]));
+const sectionById = new Map(
+  catalogueSections.map((section) => [section.id, section]),
+);
 // Empty collection vocabularies emit `CatalogueCollectionId = never`; keep the
 // lookup string-keyed so decorate/search still typecheck before any collection exists.
 const collectionById = new Map<string, { id: string; label: string }>(
-  (catalogueCollections as ReadonlyArray<{ id: string; label: string }>).map((collection) => [
-    collection.id,
-    collection,
-  ]),
+  (catalogueCollections as ReadonlyArray<{ id: string; label: string }>).map(
+    (collection) => [collection.id, collection],
+  ),
 );
 
 export function decorateCanonical<T extends CanonicalComponent>(
@@ -65,7 +72,10 @@ export function decorateCanonical<T extends CanonicalComponent>(
   };
 }
 
-export function matchesCatalogueSearch(entry: CatalogueNavEntry, query: string): boolean {
+export function matchesCatalogueSearch(
+  entry: CatalogueNavEntry,
+  query: string,
+): boolean {
   const needle = query.trim().toLowerCase();
   if (!needle) return true;
   return (
@@ -87,7 +97,8 @@ export function componentsByFamily<T extends CatalogueNavEntry>(
       label: family.label,
       section: family.section,
       items: components.filter(
-        (component) => component.family === family.id && allowed.has(component.slug),
+        (component) =>
+          component.family === family.id && allowed.has(component.slug),
       ),
     }))
     .filter((group) => group.items.length > 0);
@@ -109,13 +120,19 @@ export function componentsBySection<T extends CatalogueNavEntry>(
 export function isFamilyDisclosed(
   familyId: CatalogueFamilyId,
   activeSlug: string | undefined,
-  userExpanded: ReadonlySet<string>,
+  userDisclosure: ReadonlyMap<string, boolean>,
   components: readonly CatalogueNavEntry[],
 ): boolean {
-  if (userExpanded.has(familyId)) return true;
+  const userChoice = userDisclosure.get(familyId);
+  if (userChoice !== undefined) return userChoice;
   if (!activeSlug) return false;
   const active = components.find((component) => component.slug === activeSlug);
   return active?.family === familyId;
 }
 
-export { canonicalComponents, catalogueFamilies, catalogueSections, catalogueKinds };
+export {
+  canonicalComponents,
+  catalogueFamilies,
+  catalogueSections,
+  catalogueKinds,
+};

@@ -22,13 +22,11 @@ export const allComponents: ComponentEntry[] = canonicalComponents
   .map((component) => ({
     ...decorateCanonical(component),
     packageName: "@inflatable-cookie/poodle-react",
-    description:
-      component.displayName === "ErrorBoundary"
-        ? "React error boundary with retryable empty-state fallback."
-        : component.description,
     hasSpecimen: !embeddedOnlySpecimens.has(component.displayName),
   }));
 
-export function findComponent(componentSlug: string): ComponentEntry | undefined {
+export function findComponent(
+  componentSlug: string,
+): ComponentEntry | undefined {
   return allComponents.find((component) => component.slug === componentSlug);
 }

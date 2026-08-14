@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon, SidebarNav } from "@inflatable-cookie/poodle-react";
 import { allComponents, findComponent } from "./registry";
 import {
@@ -15,14 +15,34 @@ export interface ComponentsSectionProps {
   search?: string;
 }
 
-export function ComponentsSection({ activeComponent, search = "" }: ComponentsSectionProps) {
+export function ComponentsSection({
+  activeComponent,
+  search = "",
+}: ComponentsSectionProps) {
   const contentRef = useRef<HTMLDivElement | null>(null);
-  const [userExpanded, setUserExpanded] = useState<string[]>([]);
+  const previousActiveComponent = useRef(activeComponent);
+  const [userDisclosure, setUserDisclosure] = useState<Map<string, boolean>>(
+    () => new Map(),
+  );
 
   const entry = activeComponent ? findComponent(activeComponent) : undefined;
   const specimen = entry?.slug ? (specimenMap[entry.slug] ?? null) : null;
 
   useEffect(() => {
+    if (previousActiveComponent.current !== activeComponent) {
+      const activeFamily = activeComponent
+        ? findComponent(activeComponent)?.family
+        : undefined;
+      if (activeFamily) {
+        setUserDisclosure((current) => {
+          if (!current.has(activeFamily)) return current;
+          const next = new Map(current);
+          next.delete(activeFamily);
+          return next;
+        });
+      }
+      previousActiveComponent.current = activeComponent;
+    }
     if (activeComponent && contentRef.current) {
       contentRef.current.scrollTop = 0;
     }
@@ -30,15 +50,18 @@ export function ComponentsSection({ activeComponent, search = "" }: ComponentsSe
 
   const searchActive = search.trim().length > 0;
   const filteredComponents = searchActive
-    ? allComponents.filter((component) => matchesCatalogueSearch(component, search))
+    ? allComponents.filter((component) =>
+        matchesCatalogueSearch(component, search),
+      )
     : allComponents;
-  const expandedSet = useMemo(() => new Set(userExpanded), [userExpanded]);
   const sectionGroups = componentsBySection(allComponents);
 
-  const toggleFamily = (familyId: string) => {
-    setUserExpanded((current) =>
-      current.includes(familyId) ? current.filter((id) => id !== familyId) : [...current, familyId],
-    );
+  const toggleFamily = (familyId: string, open: boolean) => {
+    setUserDisclosure((current) => {
+      const next = new Map(current);
+      next.set(familyId, !open);
+      return next;
+    });
   };
 
   return (
@@ -47,17 +70,23 @@ export function ComponentsSection({ activeComponent, search = "" }: ComponentsSe
         {searchActive ? (
           <div className="poodle-catalogue-search" data-catalogue-search="true">
             {filteredComponents.length === 0 ? (
-              <p className="poodle-catalogue-search__empty">No matching components.</p>
+              <p className="poodle-catalogue-search__empty">
+                No matching components.
+              </p>
             ) : (
               filteredComponents.map((component) => (
                 <a
                   key={component.slug}
                   className="poodle-catalogue-search__item"
                   href={`#components/${component.slug}`}
-                  aria-current={component.slug === activeComponent ? "page" : undefined}
+                  aria-current={
+                    component.slug === activeComponent ? "page" : undefined
+                  }
                   data-catalogue-result={component.slug}
                 >
-                  <span className="poodle-catalogue-search__name">{component.displayName}</span>
+                  <span className="poodle-catalogue-search__name">
+                    {component.displayName}
+                  </span>
                   <span className="poodle-catalogue-search__crumb">
                     {component.familyLabel} · {component.kindLabel}
                   </span>
@@ -68,10 +97,21 @@ export function ComponentsSection({ activeComponent, search = "" }: ComponentsSe
         ) : (
           <nav className="poodle-catalogue-nav" aria-label="Components">
             {sectionGroups.map((section) => (
-              <div key={section.id} className="poodle-catalogue-nav__section" data-catalogue-section={section.id}>
-                <h2 className="poodle-catalogue-nav__section-title">{section.label}</h2>
+              <div
+                key={section.id}
+                className="poodle-catalogue-nav__section"
+                data-catalogue-section={section.id}
+              >
+                <h2 className="poodle-catalogue-nav__section-title">
+                  {section.label}
+                </h2>
                 {section.families.map((family) => {
-                  const open = isFamilyDisclosed(family.id, activeComponent, expandedSet, allComponents);
+                  const open = isFamilyDisclosed(
+                    family.id,
+                    activeComponent,
+                    userDisclosure,
+                    allComponents,
+                  );
                   return (
                     <div
                       key={family.id}
@@ -83,11 +123,18 @@ export function ComponentsSection({ activeComponent, search = "" }: ComponentsSe
                         type="button"
                         className="poodle-catalogue-family__trigger"
                         aria-expanded={open}
-                        onClick={() => toggleFamily(family.id)}
+                        onClick={() => toggleFamily(family.id, open)}
                       >
-                        <Icon name={open ? "chevron-down" : "chevron-right"} size="sm" />
-                        <span className="poodle-catalogue-family__label">{family.label}</span>
-                        <span className="poodle-catalogue-family__count">{family.items.length}</span>
+                        <Icon
+                          name={open ? "chevron-down" : "chevron-right"}
+                          size="sm"
+                        />
+                        <span className="poodle-catalogue-family__label">
+                          {family.label}
+                        </span>
+                        <span className="poodle-catalogue-family__count">
+                          {family.items.length}
+                        </span>
                       </button>
                       {open ? (
                         <div className="poodle-catalogue-family__items">

@@ -661,7 +661,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 	{
 		slug: "error-boundary",
 		displayName: "ErrorBoundary",
-		description: "Svelte error boundary with retryable empty-state fallback.",
+		description: "Error boundary with retryable empty-state fallback.",
 		section: "foundations",
 		family: "status-progress",
 		kind: "feedback",

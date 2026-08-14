@@ -14,30 +14,30 @@ routes, contracts, or conformance meaning changed.
 
 Canonical count stayed **174**. Previous Svelte anatomy `tag` split:
 
-| Tag | n |
-|---|---|
-| display | 31 |
-| input | 28 |
-| workstation | 21 |
-| control | 18 |
-| data | 18 |
-| overlay | 12 |
-| feedback | 12 |
-| layout | 11 |
-| navigation | 9 |
-| form | 8 |
-| media | 6 |
+| Tag         | n   |
+| ----------- | --- |
+| display     | 31  |
+| input       | 28  |
+| workstation | 21  |
+| control     | 18  |
+| data        | 18  |
+| overlay     | 12  |
+| feedback    | 12  |
+| layout      | 11  |
+| navigation  | 9   |
+| form        | 8   |
+| media       | 6   |
 
 GPUI copied 155 entries and defaulted unknown slugs to Workstation. Jetstream
 copied 151. Neither native copy is an authority anymore.
 
 After: 3 sections, 16 families, 11 kinds, 0 collections.
 
-| Section | Families | n |
-|---|---|---|
-| Foundations | actions-selection 12, text-value-entry 15, date-time 10, layout 11, content-identity 14, status-progress 14 | 76 |
-| Composition | navigation 9, overlays-disclosure 14, forms-validation 9, data-collections 16, media 6 | 54 |
-| Systems | application-shell 12, agent-tools 11, model-connections 5, audio-music 11, account-lifecycle 5 | 44 |
+| Section     | Families                                                                                                    | n   |
+| ----------- | ----------------------------------------------------------------------------------------------------------- | --- |
+| Foundations | actions-selection 12, text-value-entry 15, date-time 10, layout 11, content-identity 14, status-progress 14 | 76  |
+| Composition | navigation 9, overlays-disclosure 14, forms-validation 9, data-collections 16, media 6                      | 54  |
+| Systems     | application-shell 12, agent-tools 11, model-connections 5, audio-music 11, account-lifecycle 5              | 44  |
 
 Kinds: display 30, input 28, composite 19, control 18, data 18, feedback 14,
 overlay 13, layout 13, navigation 8, form 7, media 6.
@@ -49,11 +49,11 @@ Manifest: `packages/codegen/fixtures/preview-catalogue.json` (schema v1).
 Selectors: `effigy catalogue:build` / `effigy catalogue:check`. Not composed
 into `ir:build` / `ir:check`.
 
-| Runtime | Artifact |
-|---|---|
-| Svelte | `packages/svelte/preview/src/generated/catalogue/catalogue.ts` |
-| React | `packages/react/preview/src/generated/catalogue/catalogue.ts` |
-| GPUI | `packages/gpui/preview/src/generated/catalogue/catalogue.rs` |
+| Runtime   | Artifact                                                          |
+| --------- | ----------------------------------------------------------------- |
+| Svelte    | `packages/svelte/preview/src/generated/catalogue/catalogue.ts`    |
+| React     | `packages/react/preview/src/generated/catalogue/catalogue.ts`     |
+| GPUI      | `packages/gpui/preview/src/generated/catalogue/catalogue.rs`      |
 | Jetstream | `packages/jetstream/preview/src/generated/catalogue/catalogue.rs` |
 
 Package names and `hasSpecimen` stay in runtime overlays. Unknown slugs return
@@ -71,34 +71,34 @@ Fixed placements from the card, all asserted in tests:
 
 Judgement calls (still one explicit family, no fallback bucket):
 
-| Component | Family | Why |
-|---|---|---|
-| ConfirmAction | actions-selection | Adopters look with Button/IconButton; kind is overlay |
-| ThemeSelect, RefSelect | text-value-entry | Value choosers, not chrome |
-| Card | content-identity | Identity/surface, not a collection widget |
-| BulkActionBar | data-collections | Lives on selected rows |
-| Accordion, Collapsible, DebugDialog | overlays-disclosure | Disclosure/overlay anatomy |
-| CommandPalette | overlays-disclosure | Overlay search; ActionDiscoveryPanel stays application-shell |
-| FormDialog | overlays-disclosure | Dialog chrome wrapping a form |
-| TimeAgo | date-time | Temporal display, not status |
-| CollapseToggle | actions-selection | Control, not the disclosure region |
-| Icon, IconProvider, UiPresentationProvider | content-identity | Identity/presentation, not layout |
-| EmptyState, ErrorBoundary, RemediationBanner, StateTile, Meter, MetricTile | status-progress | Status/progress, not audio (Meter ≠ AudioMeter) |
-| Rating, Slider, RangeSlider, DragNumberField | text-value-entry | Value entry |
-| PickerShell, RelationPicker | data-collections | Collection pickers |
-| CardRadioGroup, CardToggleGroup | data-collections | Option collections |
-| FilterBuilder, FilterToolbar, OrderBy | data-collections | Collection query chrome |
-| BlockEditor, MarkdownEditor | forms-validation | Form editors |
-| AudioPlayer, VideoPlayer, Media* | media | Playback/browse, not the audio-music instrument suite |
-| NavCard | navigation | Navigation affordance |
-| ValueReadout | audio-music | Card-fixed audio display suite |
+| Component                                                                  | Family              | Why                                                          |
+| -------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------ |
+| ConfirmAction                                                              | actions-selection   | Adopters look with Button/IconButton; kind is overlay        |
+| ThemeSelect, RefSelect                                                     | text-value-entry    | Value choosers, not chrome                                   |
+| Card                                                                       | content-identity    | Identity/surface, not a collection widget                    |
+| BulkActionBar                                                              | data-collections    | Lives on selected rows                                       |
+| Accordion, Collapsible, DebugDialog                                        | overlays-disclosure | Disclosure/overlay anatomy                                   |
+| CommandPalette                                                             | overlays-disclosure | Overlay search; ActionDiscoveryPanel stays application-shell |
+| FormDialog                                                                 | overlays-disclosure | Dialog chrome wrapping a form                                |
+| TimeAgo                                                                    | date-time           | Temporal display, not status                                 |
+| CollapseToggle                                                             | actions-selection   | Control, not the disclosure region                           |
+| Icon, IconProvider, UiPresentationProvider                                 | content-identity    | Identity/presentation, not layout                            |
+| EmptyState, ErrorBoundary, RemediationBanner, StateTile, Meter, MetricTile | status-progress     | Status/progress, not audio (Meter ≠ AudioMeter)              |
+| Rating, Slider, RangeSlider, DragNumberField                               | text-value-entry    | Value entry                                                  |
+| PickerShell, RelationPicker                                                | data-collections    | Collection pickers                                           |
+| CardRadioGroup, CardToggleGroup                                            | data-collections    | Option collections                                           |
+| FilterBuilder, FilterToolbar, OrderBy                                      | data-collections    | Collection query chrome                                      |
+| BlockEditor, MarkdownEditor                                                | forms-validation    | Form editors                                                 |
+| AudioPlayer, VideoPlayer, Media*                                           | media               | Playback/browse, not the audio-music instrument suite        |
+| NavCard                                                                    | navigation          | Navigation affordance                                        |
+| ValueReadout                                                               | audio-music         | Card-fixed audio display suite                               |
 
 Not classified (stale GPUI-only slugs, never promoted): `form-shell`,
 `tab-strip`, `inline-remediation`. They now miss instead of mapping to
 Workstation.
 
-React overlay still drops `AgentPlan` / `AgentPlanRecord`, marks embedded-only
-specimens, and keeps the ErrorBoundary description tweak. Jetstream
+React overlay still drops `AgentPlan` / `AgentPlanRecord` and marks embedded-only
+specimens. `ErrorBoundary` now keeps one renderer-neutral canonical description. Jetstream
 `has_specimen` stays local (false for `radio`, `time-input`, `status-bar`, plus
 the 23 slugs that were never in the old 151-entry copy).
 
@@ -144,25 +144,24 @@ navigation UX remains open.
 
 ## Validation
 
-| Selector | Result |
-|---|---|
-| focused codegen catalogue tests | pass (10) |
-| focused Svelte/React/GPUI catalogue tests | pass (20) |
-| `effigy catalogue:check` | pass |
-| `effigy check:svelte` | pass (0 errors; 4 existing warnings) |
-| `effigy react:build` | pass |
-| `effigy check:gpui` | pass (existing dead-code warnings in node_compat) |
-| `effigy test:components` | pass (103 files, 1323 tests) |
-| `effigy test:parity` | pass (174) |
-| `effigy docs:check` | pass |
-| `git diff --check` | clean |
+| Selector                                  | Result                                            |
+| ----------------------------------------- | ------------------------------------------------- |
+| focused codegen catalogue tests           | pass (10)                                         |
+| focused Svelte/React/GPUI catalogue tests | pass (20)                                         |
+| `effigy catalogue:check`                  | pass                                              |
+| `effigy check:svelte`                     | pass (0 errors; 4 existing warnings)              |
+| `effigy react:build`                      | pass                                              |
+| `effigy check:gpui`                       | pass (existing dead-code warnings in node_compat) |
+| `effigy test:components`                  | pass (103 files, 1323 tests)                      |
+| `effigy test:parity`                      | pass (174)                                        |
+| `effigy docs:check`                       | pass                                              |
+| `git diff --check`                        | clean                                             |
 
 Not run, per card: `qa`, `qa:jetstream`, `ci:conformance-windowed`,
 `test:native-visual`, `gpui:run`, `jetstream:run`.
 
 ## Residual risk
 
-- Active family cannot be user-collapsed; auto-disclose always wins.
 - Empty collection vocabulary emits `CatalogueCollectionId = never`; nav uses a
   string-keyed lookup until collections exist.
 - React shares Svelte nav/CSS via relative paths (`src/gallery` is one extra
@@ -172,3 +171,14 @@ Not run, per card: `qa`, `qa:jetstream`, `ci:conformance-windowed`,
 - Secondary collections are empty on purpose.
 
 Roadmap/dispatch status not edited. Stop here.
+
+## Orchestrator review corrections
+
+- Explicit disclosure state now overrides direct-route auto-disclosure, so an
+  active family can be collapsed and reopened in Svelte, React, and GPUI. A
+  later route change clears the destination family's override and restores
+  active context.
+- Catalogue-size tests derive their expectation from generated data instead of
+  pinning 174, preserving the one-manifest-entry addition path.
+- Removed the React-only `ErrorBoundary` description override; canonical
+  catalogue identity stays renderer-neutral.

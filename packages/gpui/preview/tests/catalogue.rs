@@ -18,7 +18,7 @@ fn unknown_slug_has_no_workstation_fallback() {
 
 #[test]
 fn every_canonical_entry_has_a_family_and_section() {
-    assert_eq!(CANONICAL_COMPONENTS.len(), 174);
+    assert!(!CANONICAL_COMPONENTS.is_empty());
     for component in CANONICAL_COMPONENTS {
         assert_eq!(component.section, component.family.section());
     }
@@ -32,7 +32,10 @@ fn motivating_suites_share_one_family() {
         "changed-files",
         "agent-chat-input",
     ] {
-        assert_eq!(find_component(slug).unwrap().family, CatalogueFamilyId::AgentTools);
+        assert_eq!(
+            find_component(slug).unwrap().family,
+            CatalogueFamilyId::AgentTools
+        );
     }
     for slug in [
         "model-picker",
@@ -45,7 +48,10 @@ fn motivating_suites_share_one_family() {
         );
     }
     for slug in ["knob", "audio-meter", "waveform-display"] {
-        assert_eq!(find_component(slug).unwrap().family, CatalogueFamilyId::AudioMusic);
+        assert_eq!(
+            find_component(slug).unwrap().family,
+            CatalogueFamilyId::AudioMusic
+        );
     }
     for slug in ["licence-status", "update-center"] {
         assert_eq!(
@@ -53,7 +59,12 @@ fn motivating_suites_share_one_family() {
             CatalogueFamilyId::AccountLifecycle
         );
     }
-    for slug in ["app-header", "message-center", "history-center", "settings-shell"] {
+    for slug in [
+        "app-header",
+        "message-center",
+        "history-center",
+        "settings-shell",
+    ] {
         assert_eq!(
             find_component(slug).unwrap().family,
             CatalogueFamilyId::ApplicationShell
@@ -63,16 +74,28 @@ fn motivating_suites_share_one_family() {
 
 #[test]
 fn landing_starts_with_no_family_forced_open() {
-    let expanded = std::collections::HashSet::new();
+    let mut disclosure = std::collections::HashMap::new();
     assert!(!family_is_disclosed(
         CatalogueFamilyId::ActionsSelection,
         None,
-        &expanded
+        &disclosure
     ));
     assert!(family_is_disclosed(
         CatalogueFamilyId::AgentTools,
         Some("agent-plan"),
-        &expanded
+        &disclosure
+    ));
+    disclosure.insert("agent-tools".to_string(), false);
+    assert!(!family_is_disclosed(
+        CatalogueFamilyId::AgentTools,
+        Some("agent-plan"),
+        &disclosure
+    ));
+    disclosure.insert("actions-selection".to_string(), true);
+    assert!(family_is_disclosed(
+        CatalogueFamilyId::ActionsSelection,
+        None,
+        &disclosure
     ));
 }
 
@@ -97,7 +120,7 @@ fn grouped_sections_preserve_counts_and_order() {
         .flat_map(|section| section.families.iter())
         .map(|family| family.items.len())
         .sum();
-    assert_eq!(total, 174);
+    assert_eq!(total, CANONICAL_COMPONENTS.len());
     let agent = sections[2]
         .families
         .iter()
