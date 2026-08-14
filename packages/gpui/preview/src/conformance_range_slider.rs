@@ -1,8 +1,6 @@
-//! RangeSlider GPUI conformance adapter (g14.003).
+//! RangeSlider GPUI conformance adapter (g14.003), headless (g14.023).
 
 use std::sync::{Arc, Mutex};
-
-use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
 use poodle_render::conformance::{
@@ -13,10 +11,7 @@ use poodle_specs::RangeSliderSpec;
 use serde_json::{json, Value};
 
 use super::conformance_button::CaseOutcome;
-use super::conformance_driver::{
-    blur_element_focus, drain_event_queue, keyboard_key, mount_node, pointer_scrub_at,
-    wait_for_focus_handle, warmup_and_calibrate, KEY_RIGHT, MOUNT_BOX_HEIGHT, MOUNT_BOX_WIDTH,
-};
+use super::conformance_driver::HeadlessDriver;
 use super::conformance_support::range_slider_spec_from_fixture;
 
 pub const ROOT_ELEMENT_ID: &str = "conformance-range-slider";
@@ -105,15 +100,12 @@ fn part_element_id(part: &str) -> &str {
     }
 }
 
-pub async fn drive_range_slider_cases(
-    cx: &mut AsyncWindowContext,
+pub fn drive_range_slider_cases(
+    driver: &mut HeadlessDriver<'_>,
     iface: InterfaceDoc,
     cases: Vec<Value>,
     only: Option<String>,
 ) -> Vec<CaseOutcome> {
-    let calibration = warmup_and_calibrate(cx).await;
-    let _ = (MOUNT_BOX_WIDTH, MOUNT_BOX_HEIGHT);
-
     let mut outcomes = Vec::new();
     for case in &cases {
         let case_id = case.get("id").and_then(Value::as_str).unwrap_or("?").to_owned();
@@ -146,16 +138,11 @@ pub async fn drive_range_slider_cases(
             let mut host = host.lock().expect("host lock");
             host.rebuild();
         }
-        mount_node(cx, Arc::clone(&node));
-        blur_element_focus(cx, "range-slider-lower").await;
-        wait_for_focus_handle(cx, "range-slider-lower").await;
+        driver.mount_node(Arc::clone(&node));
+        driver.blur_element_focus("range-slider-lower");
+        driver.wait_for_focus_handle("range-slider-lower");
 
-        let mount_observation = cx
-            .update(|_window, _cx| {
-                let host = host.lock().expect("host lock");
-                observe_case(&host, &iface)
-            })
-            .unwrap_or_else(|_| json!({}));
+        let mount_observation = observe_case(&host.lock().expect("host lock"), &iface);
 
         let mut failures = Vec::new();
         let mut assertions = Vec::new();
@@ -168,52 +155,36 @@ pub async fn drive_range_slider_cases(
                     let name = step.get("name").and_then(Value::as_str).unwrap_or("");
                     let part = step.get("part").and_then(Value::as_str).unwrap_or("root");
                     if name == "focus" {
-                        super::conformance_driver::focus_element(cx, part_element_id(part)).await;
+                        driver.focus_element(part_element_id(part));
                     } else if name == "key" {
                         let key = step.get("key").and_then(Value::as_str).unwrap_or("");
-                        let keycode = match key {
-                            "ArrowRight" | "ArrowUp" => KEY_RIGHT,
-                            _ => KEY_RIGHT,
+                        let gpui_key = match key {
+                            "ArrowRight" | "ArrowUp" => "right",
+                            _ => "right",
                         };
-                        keyboard_key(cx, part_element_id(part), keycode).await;
-                        cx.update(|window, _cx| {
-                            let mut host = host.lock().expect("host lock");
-                            host.rebuild();
-                            window.refresh();
-                        })
-                        .ok();
+                        driver.keyboard_key(part_element_id(part), gpui_key);
+                        let mut host = host.lock().expect("host lock");
+                        host.rebuild();
+                        driver.draw_frame();
                     } else if name == "scrub" {
                         let fraction = step.get("fraction").and_then(Value::as_f64).unwrap_or(0.0) as f32;
                         let phase = step.get("phase").and_then(Value::as_str).unwrap_or("press");
-                        pointer_scrub_at(cx, calibration, fraction, phase).await;
+                        driver.pointer_scrub_at(fraction, phase);
                         // Rebuild only after release — press/drag must keep
                         // the same scrub atomics for gesture continuity.
                         if phase == "release" {
-                            cx.update(|window, _cx| {
-                                let mut host = host.lock().expect("host lock");
-                                host.rebuild();
-                                window.refresh();
-                            })
-                            .ok();
+                            let mut host = host.lock().expect("host lock");
+                            host.rebuild();
+                            driver.draw_frame();
                         }
                     }
-                    let action_observation = cx
-                        .update(|_window, _cx| {
-                            let host = host.lock().expect("host lock");
-                            observe_case(&host, &iface)
-                        })
-                        .unwrap_or_else(|_| json!({}));
+                    let action_observation = observe_case(&host.lock().expect("host lock"), &iface);
                     observations.push(action_observation);
                 }
                 "expectPart" => {
                     let part = step.get("part").and_then(Value::as_str).unwrap_or("");
                     let expect = step.get("expect").cloned().unwrap_or(Value::Null);
-                    let observation = cx
-                        .update(|_window, _cx| {
-                            let host = host.lock().expect("host lock");
-                            observe_case(&host, &iface)
-                        })
-                        .unwrap_or_else(|_| json!({}));
+                    let observation = observe_case(&host.lock().expect("host lock"), &iface);
                     let mut results = Vec::new();
                     assert_part(&iface, part, &expect, index, observation, "gpui", &mut results);
                     for r in &results {
@@ -256,7 +227,7 @@ pub async fn drive_range_slider_cases(
             }
         }
 
-        drain_event_queue(cx).await;
+        driver.drain();
         outcomes.push(CaseOutcome {
             pass: failures.is_empty(),
             failures,

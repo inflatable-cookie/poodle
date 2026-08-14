@@ -1,6 +1,6 @@
 # g14.023 — Headless GPUI Conformance Execution
 
-Status: planned — next after g14.004
+Status: complete — accepted in PR #17
 Depends on: `g14.004`
 Governing refs: `../../architecture/009-cross-runtime-component-conformance.md`,
 `../../specs/066-executable-component-conformance.md`,
@@ -19,64 +19,65 @@ pipeline, and strict completion semantics.
 
 ## Goals
 
-- [ ] Execute every landed GPUI Button, primitive, RangeSlider, and Tabs case
+- [x] Execute every landed GPUI Button, primitive, RangeSlider, and Tabs case
       through `TestAppContext`, `VisualTestContext`, and `TestWindow`.
-- [ ] Render the real `poodle-render` → `poodle-node` →
+      (`tests/conformance_headless.rs` — 39 cases + 17 primitive probes.)
+- [x] Render the real `poodle-render` → `poodle-node` →
       `poodle-gpui-node-backend` path before observing or interacting.
-- [ ] Dispatch pointer, drag, focus, and keyboard actions through GPUI's test
+- [x] Dispatch pointer, drag, focus, and keyboard actions through GPUI's test
       platform event tree; never invoke component handlers as test shortcuts.
-- [ ] Make the ordinary complete conformance selector headless and safe in any
+- [x] Make the ordinary complete conformance selector headless and safe in any
       local worktree.
-- [ ] Delete the AppKit activation/calibration/retry path and its windowed task
+- [x] Delete the AppKit activation/calibration/retry path and its windowed task
       family once equivalence is proved.
 
 ## Execution Plan
 
 ### Batch A — In-memory runtime driver
 
-- [ ] Introduce one generic GPUI test-platform driver for mounting nodes,
+- [x] Introduce one generic GPUI test-platform driver for mounting nodes,
       drawing frames, locating focus targets, dispatching input, draining
       tasks, and collecting backend observations.
-- [ ] Port the primitive probes and Button cases first. Keep capability IDs,
+- [x] Port the primitive probes and Button cases first. Keep capability IDs,
       case IDs, reports, and `component-observation.v1` unchanged.
-- [ ] Prove focus and activation through the backend focus registry and bound
+- [x] Prove focus and activation through the backend focus registry and bound
       listener path. A driver that calls a Poodle callback directly fails this
       card.
 
 ### Batch B — Controlled and collection cases
 
-- [ ] Port RangeSlider press/drag/release and keyboard execution without a
+- [x] Port RangeSlider press/drag/release and keyboard execution without a
       component-specific branch in the generic driver.
-- [ ] Run the landed Tabs collection/navigation cases through the same action
+- [x] Run the landed Tabs collection/navigation cases through the same action
       vocabulary and driver.
-- [ ] Add planted failures for an inert listener, wrong focus target, missing
+- [x] Add planted failures for an inert listener, wrong focus target, missing
       selected state, and broken drag/keyboard event order.
 
 ### Batch C — Gate and estate consolidation
 
-- [ ] Replace `conformance:complete-windowed` and
+- [x] Replace `conformance:complete-windowed` and
       `ci:conformance-windowed` with a single headless
-      `conformance:complete` path. `ci:conformance` must execute it locally and
+      `conformance:complete` path. `ci:conformance` executes it locally and
       in CI without environment-dependent behavior.
-- [ ] Remove `--windowed`, AppKit activation, affine click calibration,
+- [x] Remove `--windowed`, AppKit activation, affine click calibration,
       first-click retry, foreground opt-in plumbing, and obsolete task aliases.
-- [ ] Update the cost report, conformance estate, spec evidence, task comments,
+- [x] Update the cost report, conformance estate, spec evidence, task comments,
       and one August batch log with before/after runtime and source cost.
 
 ## Acceptance Criteria
 
-- [ ] Running the complete conformance board never creates an AppKit window,
+- [x] Running the complete conformance board never creates an AppKit window,
       changes the active application, or takes keyboard focus.
-- [ ] All landed active-runtime cases execute and compare; GPUI is execution
+- [x] All landed active-runtime cases execute and compare; GPUI is execution
       evidence, not compile-only coverage.
-- [ ] GPUI observations retain the same normalized shape and strict failure
+- [x] GPUI observations retain the same normalized shape and strict failure
       identity as the windowed baseline.
-- [ ] Pointer, drag, keyboard, focus, and event-order planted failures all fail
+- [x] Pointer, drag, keyboard, focus, and event-order planted failures all fail
       for the expected runtime/case/step/field.
-- [ ] Removing a GPUI registration or backend listener still fails completion.
-- [ ] No component name, part list, fixture, or assertion enters the generic
+- [x] Removing a GPUI registration or backend listener still fails completion.
+- [x] No component name, part list, fixture, or assertion enters the generic
       driver.
-- [ ] Jetstream remains explicitly deferred.
+- [x] Jetstream remains explicitly deferred.
 
 ## Stop Conditions
 

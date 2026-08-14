@@ -103,8 +103,9 @@ const GENERIC_RUNTIME: Array<[string, string]> = [
   ["Renderer-neutral primitive probes", "packages/render/src/primitive_probes.rs"],
   ["Cross-runtime comparator", "test/conformance/compare.ts"],
   ["Web primitive probes", "test/conformance/web/primitives.test.ts"],
-  ["GPUI generic driver", "packages/gpui/preview/src/conformance_driver.rs"],
+  ["GPUI headless test-platform driver", "packages/gpui/preview/src/conformance_driver.rs"],
   ["GPUI primitive probes", "packages/gpui/preview/src/primitive_probes_gpui.rs"],
+  ["GPUI headless board and driver tests", "packages/gpui/preview/tests/conformance_headless.rs"],
 ];
 
 const BUTTON_HARNESS: Array<[string, string]> = [
@@ -112,7 +113,6 @@ const BUTTON_HARNESS: Array<[string, string]> = [
   ["React adapter", "test/conformance/web/react-adapter.tsx"],
   ["Svelte host", "test/conformance/web/hosts/ButtonHost.svelte"],
   ["Web execution tests", "test/conformance/web/button.test.ts"],
-  ["GPUI conformance CLI", "packages/gpui/preview/src/bin/conformance.rs"],
   ["GPUI Button adapter", "packages/gpui/preview/src/conformance_button.rs"],
   ["GPUI fixture adapter", "packages/gpui/preview/src/conformance_support.rs"],
 ];

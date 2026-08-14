@@ -256,9 +256,10 @@ Use Effigy. All automated validation is headless:
 - `effigy docs:check`
 - `git diff --check`
 
-Do not run `effigy qa`, `effigy qa:jetstream`, `ci:conformance-windowed`,
-`test:native-visual`, `gpui:run`, `jetstream:run`, or any selector that opens
-or activates an operating-system window. Do not treat a foreground manual
+Do not run `effigy qa`, `effigy qa:jetstream`, `test:native-visual`,
+`gpui:run`, `jetstream:run`, or any selector that opens or activates an
+operating-system window. `conformance:complete` and `ci:conformance` are
+headless since g14.023 and are safe to run. Do not treat a foreground manual
 preview as automated evidence.
 
 ## Completion Protocol

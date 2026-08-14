@@ -1,19 +1,12 @@
-//! GPUI windowed primitive substrate probes (spec 066, g14.002).
+//! GPUI headless primitive substrate probes (spec 066, g14.002 / g14.023).
 
 use std::sync::{Arc, Mutex};
-
-use gpui::*;
 use poodle_render::conformance::observe_tree;
 use poodle_render::primitive_probes::{
     build_probe_fixture, probe_activate_gpui, probe_focus_gpui, probe_interface,
     run_neutral_probes, ProbeEvidence, PROBE_ELEMENT_ID,
 };
-use serde_json::Value;
-
-use super::conformance_driver::{
-    blur_element_focus, drain_event_queue, focus_element, mount_node, pointer_activate,
-    wait_for_focus_handle, warmup_and_calibrate, ClickCalibration,
-};
+use super::conformance_driver::HeadlessDriver;
 
 fn backend_expected(capability_id: &str) -> &'static [&'static str] {
     match capability_id {
@@ -90,8 +83,7 @@ fn require_backend_receipt(
     }
 }
 
-pub async fn drive_primitive_probes(cx: &mut AsyncWindowContext) -> Vec<ProbeEvidence> {
-    let calibration = warmup_and_calibrate(cx).await;
+pub fn drive_primitive_probes(driver: &mut HeadlessDriver<'_>) -> Vec<ProbeEvidence> {
     let trace = Arc::new(Mutex::new(0usize));
     let trace_for_handler = Arc::clone(&trace);
     let handler: Arc<dyn Fn() + Send + Sync> = Arc::new(move || {
@@ -99,68 +91,44 @@ pub async fn drive_primitive_probes(cx: &mut AsyncWindowContext) -> Vec<ProbeEvi
     });
 
     let node = Arc::new(Mutex::new(build_probe_fixture(Some(handler))));
-    cx.update(|_window, _cx| poodle_gpui_node_backend::begin_probe_capture())
-        .ok();
-    mount_node(cx, Arc::clone(&node));
-    blur_element_focus(cx, PROBE_ELEMENT_ID).await;
-    wait_for_focus_handle(cx, PROBE_ELEMENT_ID).await;
+    poodle_gpui_node_backend::begin_probe_capture();
+    driver.mount_node(Arc::clone(&node));
+    driver.blur_element_focus(PROBE_ELEMENT_ID);
+    driver.wait_for_focus_handle(PROBE_ELEMENT_ID);
 
-    let receipt = cx
-        .update(|_window, _cx| {
-            poodle_gpui_node_backend::take_probe_capture()
-                .into_iter()
-                .collect::<std::collections::BTreeSet<_>>()
-        })
-        .unwrap_or_default();
+    let receipt = poodle_gpui_node_backend::take_probe_capture()
+        .into_iter()
+        .collect::<std::collections::BTreeSet<_>>();
 
-    let mut probes: Vec<ProbeEvidence> = cx
-        .update(|_window, _cx| {
-            let node = node.lock().expect("node lock").clone();
-            run_neutral_probes(&node)
-                .into_iter()
-                .filter(|probe| probe.capability_id != "focus" && probe.capability_id != "activate")
-                .map(|probe| require_backend_receipt(probe, &receipt))
-                .collect()
-        })
-        .unwrap_or_default();
+    let mut probes: Vec<ProbeEvidence> = {
+        let node = node.lock().expect("node lock").clone();
+        run_neutral_probes(&node)
+            .into_iter()
+            .filter(|probe| probe.capability_id != "focus" && probe.capability_id != "activate")
+            .map(|probe| require_backend_receipt(probe, &receipt))
+            .collect()
+    };
 
     // focus — real backend focus registry after gpui FocusHandle.focus
-    focus_element(cx, PROBE_ELEMENT_ID).await;
-    let focus_probe = cx
-        .update(|_window, _cx| {
-            let node = node.lock().expect("node lock").clone();
-            let iface = probe_interface();
-            let backend_focus = poodle_gpui_node_backend::focus_state_for(PROBE_ELEMENT_ID);
-            let observation = observe_tree("gpui", "primitive-probe", &iface, &node, backend_focus);
-            let focus_visible = observation.pointer("/parts/root/focusVisible").cloned();
-            probe_focus_gpui(backend_focus, focus_visible)
-        })
-        .unwrap_or_else(|_| {
-            ProbeEvidence::fail("focus", "backend-focus-registry", Value::Null, "gpui.focus")
-        });
+    driver.focus_element(PROBE_ELEMENT_ID);
+    let focus_probe = {
+        let node = node.lock().expect("node lock").clone();
+        let iface = probe_interface();
+        let backend_focus = poodle_gpui_node_backend::focus_state_for(PROBE_ELEMENT_ID);
+        let observation = observe_tree("gpui", "primitive-probe", &iface, &node, backend_focus);
+        let focus_visible = observation.pointer("/parts/root/focusVisible").cloned();
+        probe_focus_gpui(backend_focus, focus_visible)
+    };
     probes.push(focus_probe);
 
-    // activate — real NSEvent pointer path through node-backend listener
-    pointer_activate(cx, calibration).await;
-    let activate_probe = cx
-        .update(|_window, _cx| {
-            let count = *trace.lock().expect("trace lock");
-            probe_activate_gpui(count)
-        })
-        .unwrap_or_else(|_| {
-            ProbeEvidence::fail("activate", "pointer-activate", Value::Null, "gpui.event")
-        });
+    // activate — real pointer path through the node-backend listener
+    driver.pointer_activate();
+    let activate_probe = {
+        let count = *trace.lock().expect("trace lock");
+        probe_activate_gpui(count)
+    };
     probes.push(activate_probe);
 
-    drain_event_queue(cx).await;
+    driver.drain();
     probes
-}
-
-#[allow(dead_code)]
-pub async fn drive_primitive_probes_with_calibration(
-    cx: &mut AsyncWindowContext,
-    calibration: ClickCalibration,
-) -> Vec<ProbeEvidence> {
-    let _ = calibration;
-    drive_primitive_probes(cx).await
 }
