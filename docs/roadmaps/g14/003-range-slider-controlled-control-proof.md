@@ -1,6 +1,6 @@
 # g14.003 — RangeSlider Controlled-control Proof
 
-Status: ready
+Status: complete — accepted in PR #13
 Depends on: `g14.002`
 
 ## Outcome

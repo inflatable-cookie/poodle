@@ -58,7 +58,7 @@ the adopted cases before promotion.
 
 1. [001 — Conformance kernel and Button proof](001-conformance-kernel-and-button-proof.md) — complete; replacement proof accepted
 2. [002 — Primitive substrate certification](002-primitive-substrate-certification.md) — complete; accepted in PR #11
-3. [003 — RangeSlider controlled-control proof](003-range-slider-controlled-control-proof.md) — ready
+3. [003 — RangeSlider controlled-control proof](003-range-slider-controlled-control-proof.md) — complete; accepted in PR #13
 4. [004 — Tabs collection and navigation proof](004-tabs-collection-navigation-proof.md)
 5. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md)
 6. [006 — TextInput runtime-boundary proof](006-text-input-runtime-boundary-proof.md)
@@ -93,10 +93,10 @@ parallel only when named here. `018` used that exception and is now complete.
 
 ## First Task
 
-`g14.003` is the next conformance card. It must prove controlled two-part value
-semantics through the certified primitive, observer, and driver substrate.
-RangeSlider-specific branches in generic machinery are a stop condition.
-Jetstream remains outside the active cohort.
+`g14.004` is the next conformance card. It must prove identified collection
+and keyboard-navigation semantics through the landed kernel. Tabs-specific
+branches in generic machinery are a stop condition. Jetstream remains outside
+the active cohort.
 
 `g14.019` is ready in this orchestrator thread. Review the landed Svelte and
 React model-connection specimens with the operator, then freeze the accepted

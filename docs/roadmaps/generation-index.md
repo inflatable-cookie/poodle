@@ -6,7 +6,7 @@ Updated: 2026-08-14
 
 - `g14`
   - Status: active
-  - Range: `001` to `019`
+  - Range: `001` to `022`
   - Governing architecture:
     `docs/architecture/009-cross-runtime-component-conformance.md`
   - Governing spec: `docs/specs/066-executable-component-conformance.md`
@@ -14,14 +14,13 @@ Updated: 2026-08-14
     GPUI. One portable interface and case/specimen corpus; two implementation
     substrates; three executed observations; strict active-cohort completion.
     Jetstream remains a deferred backend over the same Rust boundary.
-  - Runway: `001`–`007` prove increasing component profiles; `008` records
-    adopt/revise/reject. `009`–`014` remain blocked until adopt. `015` landed
-    the licence web reference; `016` is its operator review checkpoint; `017`
-    completes it through the adopted conformance path; `018`–`019` clean up
-    and close.
-  - Next: replace the review-blocked `g14.001` proof; PR #10 is evidence, not
-    merge authority. `g14.002` stays closed. `g14.016` is active as a shared
-    operator review in the current orchestrator thread.
+  - Runway: `001`–`003` are accepted; `004`–`007` prove the remaining component
+    profiles; `008` records adopt/revise/reject. `009`–`014` remain blocked
+    until adopt. `015`–`017` stage and complete the licence surface;
+    `018`–`020` do the same for model connections; `021` cleans the estate and
+    `022` closes the generation.
+  - Next: dispatch `g14.004`. `g14.019` is active as a shared operator review
+    in the current orchestrator thread.
 
 ## Latest Completed Track
 

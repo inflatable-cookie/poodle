@@ -3,7 +3,7 @@
 Date: 2026-08-14
 Card: `docs/roadmaps/g14/003-range-slider-controlled-control-proof.md`
 Depends on: g14.002 / PR #11
-Status: complete — ready for PR (do not flip roadmap status)
+Status: landed — PR #13, merge `fe0d026c`
 Reviewed against: `668ab7b3`
 
 ## Outcome
