@@ -1,15 +1,13 @@
 import { Eyebrow } from "@inflatable-cookie/poodle-react";
-import { componentsByTag, type ComponentEntry } from "./registry";
+import { componentsBySection } from "../../../../svelte/preview/src/catalogue-nav";
+import type { ComponentEntry } from "./registry";
 
 export interface CatalogueLandingProps {
   components?: ComponentEntry[];
 }
 
 export function CatalogueLanding({ components = [] }: CatalogueLandingProps) {
-  const componentSlugs = new Set(components.map((c) => c.slug));
-  const groups = componentsByTag()
-    .map((group) => ({ ...group, items: group.items.filter((c) => componentSlugs.has(c.slug)) }))
-    .filter((group) => group.items.length > 0);
+  const groups = componentsBySection(components);
 
   return (
     <div className="poodle-catalogue-landing">
@@ -19,17 +17,28 @@ export function CatalogueLanding({ components = [] }: CatalogueLandingProps) {
         <p className="poodle-catalogue-landing__count">{components.length} components</p>
       </div>
 
-      {groups.map((group) => (
-        <section key={group.tag} className="poodle-catalogue-landing__section">
-          <Eyebrow>{group.label}</Eyebrow>
-          <div className="poodle-catalogue-landing__grid">
-            {group.items.map((component) => (
-              <a key={component.slug} className="poodle-component-card" href={`#components/${component.slug}`}>
-                <strong className="poodle-component-card__name">{component.displayName}</strong>
-                <p className="poodle-component-card__description">{component.description}</p>
-              </a>
-            ))}
-          </div>
+      {groups.map((section) => (
+        <section key={section.id} className="poodle-catalogue-landing__section" data-catalogue-section={section.id}>
+          <Eyebrow>{section.label}</Eyebrow>
+          {section.families.map((family) => (
+            <div key={family.id} className="poodle-catalogue-landing__family" data-catalogue-family={family.id}>
+              <h3 className="poodle-catalogue-landing__family-title">
+                {family.label}
+                <span className="poodle-catalogue-landing__family-count">{family.items.length}</span>
+              </h3>
+              <div className="poodle-catalogue-landing__grid">
+                {family.items.map((component) => (
+                  <a key={component.slug} className="poodle-component-card" href={`#components/${component.slug}`}>
+                    <strong className="poodle-component-card__name">{component.displayName}</strong>
+                    <p className="poodle-component-card__description">{component.description}</p>
+                    <p className="poodle-component-card__crumb">
+                      {component.familyLabel} · {component.kindLabel}
+                    </p>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
         </section>
       ))}
     </div>

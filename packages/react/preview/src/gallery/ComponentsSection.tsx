@@ -1,6 +1,11 @@
-import { useEffect, useRef } from "react";
-import { SidebarNav } from "@inflatable-cookie/poodle-react";
-import { allComponents, componentsByTag, findComponent } from "./registry";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Icon, SidebarNav } from "@inflatable-cookie/poodle-react";
+import { allComponents, findComponent } from "./registry";
+import {
+  componentsBySection,
+  isFamilyDisclosed,
+  matchesCatalogueSearch,
+} from "../../../../svelte/preview/src/catalogue-nav";
 import { CatalogueLanding } from "./CatalogueLanding";
 import { ComponentPage } from "./ComponentPage";
 import { specimenMap } from "./specimen-map";
@@ -12,6 +17,7 @@ export interface ComponentsSectionProps {
 
 export function ComponentsSection({ activeComponent, search = "" }: ComponentsSectionProps) {
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const [userExpanded, setUserExpanded] = useState<string[]>([]);
 
   const entry = activeComponent ? findComponent(activeComponent) : undefined;
   const specimen = entry?.slug ? (specimenMap[entry.slug] ?? null) : null;
@@ -22,33 +28,92 @@ export function ComponentsSection({ activeComponent, search = "" }: ComponentsSe
     }
   }, [activeComponent]);
 
-  const searchLower = search.trim().toLowerCase();
-  const filteredComponents = searchLower
-    ? allComponents.filter(
-        (c) => c.displayName.toLowerCase().includes(searchLower) || c.description.toLowerCase().includes(searchLower),
-      )
+  const searchActive = search.trim().length > 0;
+  const filteredComponents = searchActive
+    ? allComponents.filter((component) => matchesCatalogueSearch(component, search))
     : allComponents;
+  const expandedSet = useMemo(() => new Set(userExpanded), [userExpanded]);
+  const sectionGroups = componentsBySection(allComponents);
 
-  const navGroups = componentsByTag()
-    .map((group) => ({
-      id: group.tag,
-      label: group.label,
-      items: group.items
-        .filter(
-          (c) => !searchLower || c.displayName.toLowerCase().includes(searchLower) || c.description.toLowerCase().includes(searchLower),
-        )
-        .map((component) => ({
-          value: component.slug,
-          label: component.displayName,
-          href: `#components/${component.slug}`,
-        })),
-    }))
-    .filter((group) => group.items.length > 0);
+  const toggleFamily = (familyId: string) => {
+    setUserExpanded((current) =>
+      current.includes(familyId) ? current.filter((id) => id !== familyId) : [...current, familyId],
+    );
+  };
 
   return (
     <div className="poodle-catalogue-layout">
       <div className="poodle-catalogue-sidebar">
-        <SidebarNav ariaLabel="Components" groups={navGroups} value={activeComponent ?? null} />
+        {searchActive ? (
+          <div className="poodle-catalogue-search" data-catalogue-search="true">
+            {filteredComponents.length === 0 ? (
+              <p className="poodle-catalogue-search__empty">No matching components.</p>
+            ) : (
+              filteredComponents.map((component) => (
+                <a
+                  key={component.slug}
+                  className="poodle-catalogue-search__item"
+                  href={`#components/${component.slug}`}
+                  aria-current={component.slug === activeComponent ? "page" : undefined}
+                  data-catalogue-result={component.slug}
+                >
+                  <span className="poodle-catalogue-search__name">{component.displayName}</span>
+                  <span className="poodle-catalogue-search__crumb">
+                    {component.familyLabel} · {component.kindLabel}
+                  </span>
+                </a>
+              ))
+            )}
+          </div>
+        ) : (
+          <nav className="poodle-catalogue-nav" aria-label="Components">
+            {sectionGroups.map((section) => (
+              <div key={section.id} className="poodle-catalogue-nav__section" data-catalogue-section={section.id}>
+                <h2 className="poodle-catalogue-nav__section-title">{section.label}</h2>
+                {section.families.map((family) => {
+                  const open = isFamilyDisclosed(family.id, activeComponent, expandedSet, allComponents);
+                  return (
+                    <div
+                      key={family.id}
+                      className="poodle-catalogue-family"
+                      data-catalogue-family={family.id}
+                      data-open={open || undefined}
+                    >
+                      <button
+                        type="button"
+                        className="poodle-catalogue-family__trigger"
+                        aria-expanded={open}
+                        onClick={() => toggleFamily(family.id)}
+                      >
+                        <Icon name={open ? "chevron-down" : "chevron-right"} size="sm" />
+                        <span className="poodle-catalogue-family__label">{family.label}</span>
+                        <span className="poodle-catalogue-family__count">{family.items.length}</span>
+                      </button>
+                      {open ? (
+                        <div className="poodle-catalogue-family__items">
+                          <SidebarNav
+                            ariaLabel={family.label}
+                            groups={[
+                              {
+                                id: family.id,
+                                items: family.items.map((component) => ({
+                                  value: component.slug,
+                                  label: component.displayName,
+                                  href: `#components/${component.slug}`,
+                                })),
+                              },
+                            ]}
+                            value={activeComponent ?? null}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </nav>
+        )}
       </div>
 
       <div className="poodle-catalogue-content" ref={contentRef}>

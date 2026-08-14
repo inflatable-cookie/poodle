@@ -21,6 +21,17 @@ export default defineConfig({
         },
       },
       {
+        plugins: [svelte()],
+        resolve: { conditions: ["browser"] },
+        test: {
+          name: "svelte-preview",
+          environment: "happy-dom",
+          globals: true,
+          include: ["packages/svelte/preview/test/**/*.test.ts"],
+          setupFiles: ["./test/vitest.setup.ts"],
+        },
+      },
+      {
         // Headless DOM geometry: the parts of @inflatable-cookie/poodle-core that read layout
         // and computed style. The rest of the core suite is pure and runs under
         // `bun test`, which has no DOM at all.
@@ -37,6 +48,15 @@ export default defineConfig({
           environment: "happy-dom",
           globals: true,
           include: ["packages/react/components/test/**/*.test.tsx"],
+          setupFiles: ["./test/vitest.setup.ts"],
+        },
+      },
+      {
+        test: {
+          name: "react-preview",
+          environment: "happy-dom",
+          globals: true,
+          include: ["packages/react/preview/test/**/*.test.tsx"],
           setupFiles: ["./test/vitest.setup.ts"],
         },
       },

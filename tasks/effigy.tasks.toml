@@ -67,7 +67,20 @@
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/jetstream/preview/src --target specimen-rust --check" },
 ]
 
-# Conformance kernel (g14.001, spec 066): the Button proof loop — portable
+    "catalogue:build" = [
+      { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/svelte/preview/src --target catalogue-ts" },
+      { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/react/preview/src --target catalogue-ts" },
+      { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/gpui/preview/src --target catalogue-rust" },
+      { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/jetstream/preview/src --target catalogue-rust" },
+    ]
+    "catalogue:check" = [
+      { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/svelte/preview/src --target catalogue-ts --check" },
+      { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/react/preview/src --target catalogue-ts --check" },
+      { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/gpui/preview/src --target catalogue-rust --check" },
+      { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/jetstream/preview/src --target catalogue-rust --check" },
+    ]
+
+    # Conformance kernel (g14.001, spec 066): the Button proof loop — portable
 # interface + typed case corpus -> three active runtimes -> component-observation.v1
 # -> one completion gate. The authority lives in TypeScript
 # (packages/core/src/conformance/); `conformance:build` serializes it to the

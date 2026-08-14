@@ -403,7 +403,7 @@ fn snap_all_specimens(only: &[String]) {
     let canvas = resolve_color(&theme, "color.background.canvas");
     let state = AppState::new();
     let mut done = 0;
-    for entry in component_registry::ALL_COMPONENTS {
+    for entry in component_registry::all_components() {
         if !entry.has_specimen {
             continue;
         }
@@ -458,7 +458,7 @@ fn snap_all_specimens(only: &[String]) {
     // Specimen page with view tabs (checkbox has Sizes + Densities sections).
     {
         let mut st = AppState::new();
-        let idx = component_registry::ALL_COMPONENTS
+        let idx = component_registry::all_components()
             .iter()
             .position(|c| c.slug == "checkbox");
         st.set_active_component(idx);

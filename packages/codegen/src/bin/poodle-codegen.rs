@@ -31,8 +31,8 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use poodle_codegen::{
-    check_outputs, conformance, generate, load_and_validate, machine_interfaces, models, targets,
-    write_outputs, CodegenError,
+    catalogue, check_outputs, conformance, generate, load_and_validate, machine_interfaces, models,
+    targets, write_outputs, CodegenError,
 };
 
 fn usage() -> String {
@@ -74,7 +74,12 @@ fn usage() -> String {
                TypeScript and emitted as JSON by the conformance serializer.\n\
                `conformance-rust` renders the portable declaration into the\n\
                consuming crate's generated tree. Select-only, like the\n\
-               machine targets."
+               machine targets.\n\
+     \n\
+     usage: poodle-codegen --catalogue <FILE> --out <DIR> --target <catalogue-ts|catalogue-rust> [--check]\n\
+     \n\
+     --catalogue  renderer-neutral preview catalogue manifest. Not an IrModel;\n\
+               the catalogue targets are select-only."
         .to_owned()
 }
 
@@ -84,6 +89,7 @@ struct Args {
     author_shell: Option<PathBuf>,
     author_specimens: Option<PathBuf>,
     machine_interfaces: Option<PathBuf>,
+    catalogue: Option<PathBuf>,
     conformance_interface: Option<PathBuf>,
     conformance_cases: Option<PathBuf>,
     target: Option<String>,
@@ -95,6 +101,7 @@ fn parse_args() -> Result<Args, String> {
     let mut author_shell = None;
     let mut author_specimens = None;
     let mut machine_interfaces = None;
+    let mut catalogue = None;
     let mut conformance_interface = None;
     let mut conformance_cases = None;
     let mut target = None;
@@ -128,6 +135,12 @@ fn parse_args() -> Result<Args, String> {
                         .ok_or("--machine-interfaces requires a schema path")?,
                 ));
             }
+            "--catalogue" => {
+                catalogue = Some(PathBuf::from(
+                    args.next()
+                        .ok_or("--catalogue requires a manifest path")?,
+                ));
+            }
             "--conformance" => {
                 conformance_interface = Some(PathBuf::from(
                     args.next()
@@ -154,10 +167,54 @@ fn parse_args() -> Result<Args, String> {
 
     let author_mode = author_shell.is_some() || author_specimens.is_some();
     let machine_mode = machine_interfaces.is_some();
+    let catalogue_mode = catalogue.is_some();
     let conformance_mode = conformance_interface.is_some() || conformance_cases.is_some();
 
-    if conformance_mode && (author_mode || machine_mode) {
-        return Err("run --conformance separately from --author-* and --machine-interfaces".to_owned());
+    if [conformance_mode, author_mode, machine_mode, catalogue_mode]
+        .iter()
+        .filter(|flag| **flag)
+        .count()
+        > 1
+    {
+        return Err(
+            "run --catalogue, --conformance, --author-*, and --machine-interfaces separately"
+                .to_owned(),
+        );
+    }
+
+    if catalogue_mode {
+        if !positional.is_empty() {
+            return Err("catalogue mode takes no positional FIXTURE argument".to_owned());
+        }
+        if out.is_none() {
+            return Err("--out is required with --catalogue".to_owned());
+        }
+        match target.as_deref() {
+            Some(targets::catalogue_ts::ID) | Some(targets::catalogue_rust::ID) => {}
+            Some(id) => {
+                return Err(format!(
+                    "catalogue --target must be catalogue-ts or catalogue-rust, not '{id}'"
+                ));
+            }
+            None => {
+                return Err(
+                    "--target is required with --catalogue (catalogue-ts or catalogue-rust)"
+                        .to_owned(),
+                );
+            }
+        }
+        return Ok(Args {
+            fixture: None,
+            out,
+            author_shell: None,
+            author_specimens: None,
+            machine_interfaces: None,
+            catalogue,
+            conformance_interface: None,
+            conformance_cases: None,
+            target,
+            check,
+        });
     }
 
     if machine_mode {
@@ -189,6 +246,7 @@ fn parse_args() -> Result<Args, String> {
             author_shell: None,
             author_specimens: None,
             machine_interfaces,
+            catalogue: None,
             conformance_interface: None,
             conformance_cases: None,
             target,
@@ -232,6 +290,7 @@ fn parse_args() -> Result<Args, String> {
             author_shell: None,
             author_specimens: None,
             machine_interfaces: None,
+            catalogue: None,
             conformance_interface: Some(interface),
             conformance_cases: Some(cases),
             target,
@@ -269,6 +328,7 @@ fn parse_args() -> Result<Args, String> {
         author_shell,
         author_specimens,
         machine_interfaces,
+        catalogue: None,
         conformance_interface: None,
         conformance_cases: None,
         target,
@@ -295,6 +355,9 @@ fn run(args: &Args) -> Result<(), CodegenError> {
     }
     if let Some(schema) = &args.machine_interfaces {
         return run_machine_interfaces(schema, args);
+    }
+    if let Some(manifest) = &args.catalogue {
+        return run_catalogue(manifest, args);
     }
     if let (Some(interface), Some(cases)) = (&args.conformance_interface, &args.conformance_cases) {
         return run_conformance(interface, cases, args);
@@ -354,6 +417,62 @@ fn run_machine_interfaces(schema: &Path, args: &Args) -> Result<(), CodegenError
         write_outputs(&root, &files)?;
         println!(
             "Generated {} files (target: {target_id}, machine interface schema {}).",
+            files.len(),
+            document.schema_version
+        );
+    }
+    Ok(())
+}
+
+fn run_catalogue(manifest: &Path, args: &Args) -> Result<(), CodegenError> {
+    let document = catalogue::load_and_validate(manifest)?;
+    let source_path = manifest.to_string_lossy().into_owned();
+    let target_id = args
+        .target
+        .as_deref()
+        .expect("parse requires --target in catalogue mode");
+    let (files, output_root) = match target_id {
+        targets::catalogue_ts::ID => (
+            targets::catalogue_ts::render(&document, &source_path),
+            targets::catalogue_ts::OUTPUT_ROOT,
+        ),
+        targets::catalogue_rust::ID => (
+            targets::catalogue_rust::render(&document, &source_path),
+            targets::catalogue_rust::OUTPUT_ROOT,
+        ),
+        other => {
+            return Err(CodegenError::UnknownTarget {
+                id: other.to_owned(),
+                known: vec![
+                    targets::catalogue_ts::ID.to_owned(),
+                    targets::catalogue_rust::ID.to_owned(),
+                ],
+            });
+        }
+    };
+    let out = args.out.as_ref().expect("parse requires --out");
+    let root = out.join(output_root);
+
+    if args.check {
+        let report = check_outputs(&root, &files)?;
+        if !report.is_clean() {
+            return Err(CodegenError::Gate {
+                message: format!(
+                    "generated catalogue artifacts are stale under {} (target {target_id}):\n{}",
+                    root.display(),
+                    report.message()
+                ),
+            });
+        }
+        println!(
+            "Verified {} files (target: {target_id}, catalogue schema {}).",
+            files.len(),
+            document.schema_version
+        );
+    } else {
+        write_outputs(&root, &files)?;
+        println!(
+            "Generated {} files (target: {target_id}, catalogue schema {}).",
             files.len(),
             document.schema_version
         );

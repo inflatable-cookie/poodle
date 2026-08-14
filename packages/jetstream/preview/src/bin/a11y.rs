@@ -89,7 +89,7 @@ fn main() {
     let mut role_less = Vec::new();
     let mut total_nodes = 0;
 
-    for entry in component_registry::ALL_COMPONENTS {
+    for entry in component_registry::all_components() {
         if !entry.has_specimen {
             continue;
         }

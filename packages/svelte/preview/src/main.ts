@@ -10,6 +10,7 @@ import "../../../tokens/artifacts/css/poodle-control-size-md.css";
 import "../../../tokens/artifacts/css/poodle-control-size-lg.css";
 import "../../../tokens/artifacts/css/poodle-control-size-xl.css";
 import "./app.css";
+import "./catalogue.css";
 
 import { mount } from "svelte";
 import App from "./App.svelte";

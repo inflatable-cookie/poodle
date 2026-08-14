@@ -547,7 +547,7 @@ impl AppState {
     /// Whether the Tree specimen is the active component (for keyboard routing).
     pub fn is_tree_active(&self) -> bool {
         if let Some(idx) = self.active_component() {
-            crate::component_registry::ALL_COMPONENTS
+            crate::component_registry::all_components()
                 .get(idx)
                 .is_some_and(|c| c.slug == "tree")
         } else {
