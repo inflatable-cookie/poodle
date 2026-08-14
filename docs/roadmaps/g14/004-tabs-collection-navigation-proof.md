@@ -1,6 +1,6 @@
 # g14.004 — Tabs Collection And Navigation Proof
 
-Status: planned
+Status: complete — accepted in PR #14
 Depends on: `g14.003`
 
 ## Outcome

@@ -72,8 +72,8 @@ the adopted cases before promotion.
 1. [001 — Conformance kernel and Button proof](001-conformance-kernel-and-button-proof.md) — complete; replacement proof accepted
 2. [002 — Primitive substrate certification](002-primitive-substrate-certification.md) — complete; accepted in PR #11
 3. [003 — RangeSlider controlled-control proof](003-range-slider-controlled-control-proof.md) — complete; accepted in PR #13
-4. [004 — Tabs collection and navigation proof](004-tabs-collection-navigation-proof.md)
-5. [023 — Headless GPUI conformance execution](023-headless-gpui-conformance-execution.md)
+4. [004 — Tabs collection and navigation proof](004-tabs-collection-navigation-proof.md) — complete; accepted in PR #14
+5. [023 — Headless GPUI conformance execution](023-headless-gpui-conformance-execution.md) — next
 6. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md)
 7. [006 — TextInput runtime-boundary proof](006-text-input-runtime-boundary-proof.md)
 8. [007 — HistoryCenter composite proof](007-history-center-composite-proof.md)
@@ -112,12 +112,9 @@ navigation only; it must rebase concurrent registry additions before review.
 
 ## First Task
 
-`g14.004` is in review. It must prove identified collection and
-keyboard-navigation semantics through the landed kernel before merge.
-Tabs-specific branches in generic machinery remain a stop condition.
-Jetstream stays outside the active cohort. Its local validation is headless;
-legacy foreground proof is isolated-CI-only. `g14.023` follows immediately and
-must land before `005`.
+`g14.023` is next. It replaces the foreground GPUI conformance runner with
+headless GPUI execution before `005` resumes the component profiles. Jetstream
+stays outside the active cohort. Its local validation remains headless.
 
 The model-connection web reference is approved. Native/conformance completion
 stays open under `020` until the pilot records **adopt**.
