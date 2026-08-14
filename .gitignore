@@ -103,4 +103,7 @@ packages/gpui/preview/baselines/
 packages/jetstream/preview/baselines/
 test/native-visual/out/
 test/native-visual/out-jetstream/
+# Per-runtime conformance observation reports (spec 066) — written by the
+# web vitest run and the native cargo runners, consumed by conformance:compare.
+test/conformance/web/out/
 release-artifacts/

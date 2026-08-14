@@ -66,6 +66,20 @@ export default defineConfig({
           setupFiles: ["./test/vitest.setup.ts"],
         },
       },
+      {
+        // Conformance execution (spec 066): runs the shared case corpus against
+        // the real Svelte and React implementations and writes the per-runtime
+        // observation reports the orchestrator compares with the native runs.
+        plugins: [svelte()],
+        resolve: { conditions: ["browser"] },
+        test: {
+          name: "conformance",
+          environment: "happy-dom",
+          globals: true,
+          include: ["test/conformance/web/**/*.test.ts"],
+          setupFiles: ["./test/vitest.setup.ts"],
+        },
+      },
     ],
   },
 });

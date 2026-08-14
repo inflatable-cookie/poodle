@@ -1,5 +1,10 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/button.css";
+  import type {
+    ButtonInterface,
+    ButtonPortableEvents,
+    ButtonPortableProps,
+  } from "@inflatable-cookie/poodle-core/conformance/button";
   import type { Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
@@ -9,21 +14,40 @@
     resolveSupportingVisualSize,
   } from "./presentation";
   import { default as Spinner } from "./Spinner.svelte";
-  import type {
-    ButtonTone,
-    ButtonVariant,
-    ControlDensity,
-    ControlSize,
-    IconProp,
-    SemanticControlSizeRole,
-  } from "./types";
+  import type { IconProp } from "./types";
 
-  interface Props {
-    variant?: ButtonVariant;
-    tone?: ButtonTone;
-    size?: ControlSize | null;
-    sizeRole?: SemanticControlSizeRole;
-    density?: ControlDensity | null;
+  /**
+   * Portable props and events come from the conformance interface authority
+   * (`packages/core/src/conformance/button.ts`): renaming a portable prop or
+   * event there fails this interface and the component body without editing
+   * a second type mirror. The label region is rendered through `children`;
+   * web-only HTML and styling props stay extensions here.
+   */
+  /**
+   * The props the web shell carries through framework channels (label →
+   * children, icons → snippets/IconProp). The `satisfies` check binds these
+   * names to the interface: renaming a portable prop fails this file.
+   */
+  const carrierProps = ["label", "leadingIcon", "trailingIcon"] as const satisfies
+    readonly (keyof ButtonPortableProps)[];
+  type Portable = Omit<ButtonPortableProps, (typeof carrierProps)[number]>;
+  type PortableEvents = ButtonPortableEvents;
+
+  /**
+   * The web handler for a semantic event: the public callback keeps its
+   * framework shape (the contract's `MouseEvent`), while the name binds
+   * mechanically to the interface — renaming the semantic `press` event
+   * fails this file without a second type mirror.
+   */
+  type WebHandler<
+    N extends keyof PortableEvents,
+  > = Extract<ButtonInterface["events"][number], { name: N }> extends {
+    webCarrier: "mouse-event";
+  }
+    ? (event: MouseEvent) => void
+    : PortableEvents[N];
+
+  interface Props extends Partial<Portable> {
     type?: HTMLButtonElement["type"];
     form?: string | null;
     formaction?: string | null;
@@ -35,25 +59,14 @@
     formmethod?: "get" | "post" | "dialog" | null;
     formnovalidate?: boolean;
     formtarget?: "_self" | "_blank" | "_parent" | "_top" | string | null;
-    disabled?: boolean;
-    loading?: boolean;
     leadingIcon?: IconProp | null;
     trailingIcon?: IconProp | null;
-    chevron?: boolean;
-    truncate?: boolean;
-    fit?: "default" | "content";
-    maxWidth?: string | null;
-    pressed?: boolean | null;
-    defaultPressed?: boolean | null;
-    ariaLabel?: string | null;
-    ariaExpanded?: boolean | null;
-    describedBy?: string | null;
     className?: string;
     style?: string | null;
-    onClick?: ((event: MouseEvent) => void) | null;
+    onClick?: WebHandler<"press"> | null;
     onFocus?: ((event: FocusEvent) => void) | null;
     onBlur?: ((event: FocusEvent) => void) | null;
-    onPressedChange?: ((pressed: boolean) => void) | null;
+    onPressedChange?: PortableEvents["pressedChange"] | null;
     children?: Snippet<[]>;
     leading?: Snippet<[]>;
     trailing?: Snippet<[]>;
@@ -204,13 +217,17 @@
   }}
 >
   {#if loading}
-    <span class="poodle-button__spinner" aria-hidden="true">
+    <span class="poodle-button__spinner" aria-hidden="true" data-icon="spinner">
       <Spinner variant="ring" size={resolvedIconSize} tone="current" />
     </span>
   {/if}
 
   {#if leading || leadingIcon}
-    <span class="poodle-button__icon" aria-hidden="true">
+    <span
+      class="poodle-button__icon"
+      aria-hidden="true"
+      data-icon={typeof leadingIcon === "string" ? leadingIcon : undefined}
+    >
       {#if leading}
         {@render leading()}
       {:else if leadingIcon}
@@ -226,7 +243,11 @@
   {/if}
 
   {#if trailing || trailingIcon}
-    <span class="poodle-button__icon" aria-hidden="true">
+    <span
+      class="poodle-button__icon"
+      aria-hidden="true"
+      data-icon={typeof trailingIcon === "string" ? trailingIcon : undefined}
+    >
       {#if trailing}
         {@render trailing()}
       {:else if trailingIcon}
@@ -236,7 +257,7 @@
   {/if}
 
   {#if chevron}
-    <span class="poodle-button__chevron" aria-hidden="true">
+    <span class="poodle-button__chevron" aria-hidden="true" data-icon="chevron-down">
       <Icon name="chevron-down" size={resolvedIconSize} />
     </span>
   {/if}

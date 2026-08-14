@@ -26,7 +26,7 @@ token and layout roles.
 
 ## Acceptance
 
-- Both native backends execute each required primitive case.
+- Shared Rust composition and GPUI execute each required primitive case.
 - Planting a backend-only style, semantic, focus, or event error fails the
   matching observation.
 - Snapshot refresh is explicit, reviewable, and cannot overwrite the only
@@ -44,5 +44,5 @@ token and layout roles.
 
 ## Validation
 
-Run the primitive cases, both native suites, relevant web observation tests,
+Run the primitive cases, the shared Rust and GPUI suites, relevant web observation tests,
 `docs:check`, and `git diff --check`. Record the certified matrix in the PR.

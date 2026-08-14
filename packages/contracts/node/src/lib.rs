@@ -44,6 +44,10 @@ pub struct Node {
     pub position: NodePosition,
     pub interaction: Interaction,
     pub a11y: NodeA11y,
+    /// Semantic token roles the component projects onto this node — the
+    /// native counterpart of web `data-*` recipe attributes (e.g.
+    /// `variant: primary`). Observers read these; nothing executes them.
+    pub roles: std::collections::BTreeMap<String, String>,
     /// An input's caret and selection, when the host owns one. Ignored by
     /// every other kind, and by any backend that does not draw carets.
     pub caret: Option<NodeCaret>,
@@ -869,6 +873,24 @@ impl Node {
     pub fn role(mut self, role: NodeRole) -> Self {
         self.a11y.role = Some(role);
         self
+    }
+
+    /// Stamp one semantic token role (the `data-*` counterpart).
+    pub fn token_role(mut self, name: impl Into<String>, value: impl Into<String>) -> Self {
+        self.roles.insert(name.into(), value.into());
+        self
+    }
+
+    /// The text this node intrinsically carries, whatever its kind: a
+    /// `Text` run's content, a `Button`'s label, an `Input`'s value.
+    /// Observers read the label this way instead of branching on kinds.
+    pub fn intrinsic_text(&self) -> Option<&str> {
+        match &self.kind {
+            NodeKind::Text { content } => Some(content.as_str()),
+            NodeKind::Button { label } => Some(label.as_str()),
+            NodeKind::Input { value, .. } => Some(value.as_str()),
+            _ => None,
+        }
     }
 
     pub fn aria_label(mut self, label: impl Into<String>) -> Self {

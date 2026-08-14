@@ -33,6 +33,7 @@
 //! machine value, and float/string rendering is locale-independent.
 
 pub mod check;
+pub mod conformance;
 pub mod emit;
 pub mod error;
 pub mod machine_interfaces;
@@ -42,6 +43,7 @@ pub mod targets;
 pub mod write;
 
 pub use check::{check_outputs, CheckReport, DriftKind};
+pub use conformance::{load_cases, load_interface};
 pub use emit::{generate, header, machine_header, EmitTarget, GeneratedFile};
 pub use error::{CodegenError, Result};
 pub use model::load_and_validate;

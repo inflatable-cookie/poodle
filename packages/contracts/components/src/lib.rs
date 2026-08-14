@@ -159,6 +159,9 @@ mod tree;
 mod validation_summary;
 mod video_player;
 
+/// Generated portable declarations (spec 066 conformance authority).
+pub mod generated;
+
 pub use accordion::{AccordionSelectionMode, AccordionSpec};
 pub use agent_chat_input::{
     AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, ComposerKey, ComposerKeyModifiers,

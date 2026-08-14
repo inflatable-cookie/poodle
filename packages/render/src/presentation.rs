@@ -385,6 +385,19 @@ pub fn size_height_offset_rem(size: ControlSize) -> f32 {
     }
 }
 
+/// Button icon-side padding inset per size (contract §8 / button.css
+/// `[data-has-leading]`/`[data-has-trailing]` per-size rules). Flat
+/// 0.125rem for md; smaller sizes pull harder, lg none, xl pushes out.
+pub fn size_icon_inset_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 0.1875,
+        ControlSize::Sm => 0.25,
+        ControlSize::Md => 0.125,
+        ControlSize::Lg => 0.0,
+        ControlSize::Xl => -0.0625,
+    }
+}
+
 /// ToggleGroup inter-item gap in rem per density (contract §8 Root).
 pub fn toggle_group_gap_rem(density: ControlDensity) -> f32 {
     match density {

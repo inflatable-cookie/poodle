@@ -2,47 +2,60 @@ import { useState, type FocusEvent, type MouseEvent, type ReactNode } from "reac
 
 import "@inflatable-cookie/poodle-core/styles/button.css";
 
+import type {
+  ButtonInterface,
+  ButtonPortableEvents,
+  ButtonPortableProps,
+} from "@inflatable-cookie/poodle-core/conformance/button";
+
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, resolveSupportingVisualSize, useUiPresentation } from "./presentation";
 import { Spinner } from "./Spinner";
-import type {
-  ButtonTone,
-  ButtonVariant,
-  ControlDensity,
-  ControlSize,
-  IconProp,
-  SemanticControlSizeRole,
-} from "./types";
+import type { IconProp } from "./types";
 
-export interface ButtonProps {
-  variant?: ButtonVariant;
-  tone?: ButtonTone;
-  size?: ControlSize | null;
-  sizeRole?: SemanticControlSizeRole;
-  density?: ControlDensity | null;
+/**
+ * Portable props and events come from the conformance interface authority
+ * (`packages/core/src/conformance/button.ts`): renaming a portable prop or
+ * event there fails this interface and the component body without editing
+ * a second type mirror. The label region is rendered through `children`;
+ * web-only HTML and styling props stay extensions here.
+ */
+/**
+ * The props the web shell carries through framework channels (label →
+ * children, icons → ReactNode/IconProp). The `satisfies` check binds these
+ * names to the interface: renaming a portable prop fails this file.
+ */
+const carrierProps = ["label", "leadingIcon", "trailingIcon"] as const satisfies
+  readonly (keyof ButtonPortableProps)[];
+type Portable = Omit<ButtonPortableProps, (typeof carrierProps)[number]>;
+type PortableEvents = ButtonPortableEvents;
+
+/**
+ * The web handler for a semantic event: the public callback keeps its
+ * framework shape (the contract's `MouseEvent`), while the name binds
+ * mechanically to the interface — renaming the semantic `press` event
+ * fails this file without a second type mirror.
+ */
+type WebHandler<N extends keyof PortableEvents> = Extract<
+  ButtonInterface["events"][number],
+  { name: N }
+> extends { webCarrier: "mouse-event" }
+  ? (event: MouseEvent<HTMLButtonElement>) => void
+  : PortableEvents[N];
+
+export interface ButtonProps extends Partial<Portable> {
   type?: "button" | "submit" | "reset";
   form?: string | null;
   formAction?: string | null;
   formNoValidate?: boolean;
   formTarget?: string | null;
-  disabled?: boolean;
-  loading?: boolean;
   leadingIcon?: IconProp | null;
   trailingIcon?: IconProp | null;
-  chevron?: boolean;
-  truncate?: boolean;
-  fit?: "default" | "content";
-  maxWidth?: string | null;
-  pressed?: boolean | null;
-  defaultPressed?: boolean | null;
-  ariaLabel?: string | null;
-  ariaExpanded?: boolean | null;
-  describedBy?: string | null;
   className?: string;
-  onClick?: ((event: MouseEvent<HTMLButtonElement>) => void) | null;
+  onClick?: WebHandler<"press"> | null;
   onFocus?: ((event: FocusEvent<HTMLButtonElement>) => void) | null;
   onBlur?: ((event: FocusEvent<HTMLButtonElement>) => void) | null;
-  onPressedChange?: ((pressed: boolean) => void) | null;
+  onPressedChange?: PortableEvents["pressedChange"] | null;
   children?: ReactNode;
   leading?: ReactNode;
   trailing?: ReactNode;
@@ -135,13 +148,17 @@ export function Button({
       onBlur={(event) => onBlur?.(event)}
     >
       {loading ? (
-        <span className="poodle-button__spinner" aria-hidden="true">
+        <span className="poodle-button__spinner" aria-hidden="true" data-icon="spinner">
           <Spinner variant="ring" size={resolvedIconSize} tone="current" />
         </span>
       ) : null}
 
       {leading || leadingIcon ? (
-        <span className="poodle-button__icon" aria-hidden="true">
+        <span
+          className="poodle-button__icon"
+          aria-hidden="true"
+          data-icon={typeof leadingIcon === "string" ? leadingIcon : undefined}
+        >
           {leading ?? (leadingIcon ? <Icon icon={leadingIcon} size={resolvedIconSize} /> : null)}
         </span>
       ) : null}
@@ -149,13 +166,17 @@ export function Button({
       {children ? <span className="poodle-button__label">{children}</span> : null}
 
       {trailing || trailingIcon ? (
-        <span className="poodle-button__icon" aria-hidden="true">
+        <span
+          className="poodle-button__icon"
+          aria-hidden="true"
+          data-icon={typeof trailingIcon === "string" ? trailingIcon : undefined}
+        >
           {trailing ?? (trailingIcon ? <Icon icon={trailingIcon} size={resolvedIconSize} /> : null)}
         </span>
       ) : null}
 
       {chevron ? (
-        <span className="poodle-button__chevron" aria-hidden="true">
+        <span className="poodle-button__chevron" aria-hidden="true" data-icon="chevron-down">
           <Icon name="chevron-down" size={resolvedIconSize} />
         </span>
       ) : null}

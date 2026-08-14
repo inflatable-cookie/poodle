@@ -1,138 +1,63 @@
 <script lang="ts">
   import { Button } from "@inflatable-cookie/poodle-svelte";
+  import { buttonCases, buttonInterface, projectCorpus } from "@inflatable-cookie/poodle-core/conformance";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
+  import type { ProjectedInstance } from "@inflatable-cookie/poodle-core/conformance";
+
+  // g14.001: the specimen page is a projection of the conformance case
+  // corpus — groups, captions, axes, and fixtures come from
+  // packages/core/src/conformance/button-cases.ts, never restated here.
+  const groups = projectCorpus(buttonCases, buttonInterface);
 
   let clickLog = $state("No button clicked yet.");
-  let intent = $state("save");
 
-  let bookmarked = $state(false);
+  function log(instance: ProjectedInstance): void {
+    clickLog = `Clicked: ${instance.caption}`;
+  }
 
-  function log(label: string): void {
-    clickLog = `Clicked: ${label}`;
+  function propsOf(instance: ProjectedInstance): Record<string, unknown> {
+    const props: Record<string, unknown> = { ...instance.props };
+    for (const key of Object.keys(props)) {
+      if (props[key] === null) delete props[key];
+    }
+    props.leadingIcon = instance.leadingIcon ?? null;
+    props.trailingIcon = instance.trailingIcon ?? null;
+    return props;
   }
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Variants">
+  {#each groups as group (group.label)}
+    <SpecimenGroup label={group.label}>
+      {#each group.instances as instance (instance.caseId + instance.caption)}
+        <div class="poodle-specimen__row poodle-specimen__row--captioned">
+          <span class="poodle-specimen__caption">{instance.caption}</span>
+          <Button {...propsOf(instance)} onClick={() => log(instance)}>
+            {instance.label}
+          </Button>
+        </div>
+      {/each}
+    </SpecimenGroup>
+  {/each}
+
+  <SpecimenGroup label="Interaction" bare>
     <div class="poodle-specimen__row">
-      <Button variant="primary" onClick={() => log("Primary")}>Primary</Button>
-      <Button variant="secondary" onClick={() => log("Secondary")}>Secondary</Button>
-      <Button variant="ghost" onClick={() => log("Ghost")}>Ghost</Button>
+      <span class="poodle-specimen__caption">{clickLog}</span>
     </div>
   </SpecimenGroup>
-
-  <SpecimenGroup label="Danger tone">
-    <div class="poodle-specimen__row">
-      <Button variant="primary" tone="danger" onClick={() => log("Danger primary")}>Danger primary</Button>
-      <Button variant="secondary" tone="danger" onClick={() => log("Danger secondary")}>Danger secondary</Button>
-      <Button variant="ghost" tone="danger" onClick={() => log("Danger ghost")}>Danger ghost</Button>
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Success tone">
-    <div class="poodle-specimen__row">
-      <Button variant="primary" tone="success" onClick={() => log("Success primary")}>Success primary</Button>
-      <Button variant="secondary" tone="success" onClick={() => log("Success secondary")}>Success secondary</Button>
-      <Button variant="ghost" tone="success" onClick={() => log("Success ghost")}>Success ghost</Button>
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="With icons">
-    <div class="poodle-specimen__row">
-      <Button leadingIcon="plus" onClick={() => log("Leading icon")}>Create</Button>
-      <Button trailingIcon="external-link" onClick={() => log("Trailing icon")}>Open</Button>
-      <Button leadingIcon="save" trailingIcon="check" onClick={() => log("Both icons")}>Save</Button>
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="With chevron">
-    <div class="poodle-specimen__row">
-      <Button chevron onClick={() => log("Chevron")}>Options</Button>
-      <Button variant="primary" chevron onClick={() => log("Primary chevron")}>Actions</Button>
-      <Button leadingIcon="filter" chevron onClick={() => log("Icon + chevron")}>Filter</Button>
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="States">
-    <div class="poodle-specimen__row">
-      <Button variant="primary" disabled>Disabled</Button>
-      <Button variant="primary" loading>Loading</Button>
-      <Button variant="secondary" disabled>Disabled secondary</Button>
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Toggle (pressed state)">
-    <div class="poodle-specimen__row">
-      <Button
-        variant="secondary"
-        leadingIcon="star"
-        bind:pressed={bookmarked}
-      >{bookmarked ? "Bookmarked" : "Bookmark"}</Button>
-      <Button variant="secondary" leadingIcon="heart" defaultPressed={false}>Like</Button>
-      <Button variant="ghost" leadingIcon="lock-open" defaultPressed>Locked</Button>
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Form overrides">
-    <form
-      class="poodle-specimen__form"
-      onsubmit={(event) => {
-        event.preventDefault();
-        log(`Submitted via ${intent}`);
-      }}
-    >
-      <input type="hidden" name="intent" value={intent} />
-      <div class="poodle-specimen__row">
-        <Button
-          type="submit"
-          variant="secondary"
-          onClick={() => {
-            intent = "save";
-          }}
-        >
-          Save
-        </Button>
-        <Button
-          type="submit"
-          variant="primary"
-          formaction="/publish"
-          formnovalidate
-          onClick={() => {
-            intent = "publish";
-          }}
-        >
-          Publish
-        </Button>
-      </div>
-    </form>
-  </SpecimenGroup>
-
-  <p class="poodle-specimen__log">{clickLog}</p>
-
-  {#snippet sizes(size)}
-    <Button variant="primary" {size} leadingIcon="plus" onClick={() => log(`Size ${size}`)}>{size.toUpperCase()}</Button>
-  {/snippet}
-
-  {#snippet densities(density)}
-    <Button variant="secondary" {density} leadingIcon="download" onClick={() => log(`Density ${density}`)}>Action</Button>
-  {/snippet}
 </SpecimenLayout>
 
 <style>
-  .poodle-specimen__row {
+  .poodle-specimen__row--captioned {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
-  .poodle-specimen__log {
-    font-size: 0.8125rem;
-    color: var(--poodle-color-text-secondary);
-    margin: 0;
-    padding: 0.5rem 0.75rem;
-    background: color-mix(in srgb, var(--poodle-color-background-canvas) 80%, transparent);
-    border-radius: var(--poodle-radius-control);
+  .poodle-specimen__caption {
+    color: var(--poodle-color-text-secondary, #c9d4e0);
+    font-size: 0.75rem;
+    min-width: 12rem;
   }
 </style>

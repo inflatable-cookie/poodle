@@ -67,6 +67,70 @@
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- packages/codegen/fixtures/specimens-model.json --out packages/jetstream/preview/src --target specimen-rust --check" },
 ]
 
+# Conformance kernel (g14.001, spec 066): the Button proof loop — portable
+# interface + typed case corpus -> three active runtimes -> component-observation.v1
+# -> one completion gate. The authority lives in TypeScript
+# (packages/core/src/conformance/); `conformance:build` serializes it to the
+# neutral JSON fixtures and generates the Rust declaration surface; `*:check`
+# twins are read-only and gate the tree. Gates may only reach `*:check` and
+# the test/compare selectors — write-mode generation is never composed into
+# a gate (the 45caae82 lesson).
+"conformance:serialize" = "bun packages/core/scripts/conformance-serialize.ts"
+"conformance:serialize-check" = "bun packages/core/scripts/conformance-serialize.ts --check"
+"conformance:codegen" = [
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/contracts/components/src --target conformance-rust" },
+]
+"conformance:codegen-check" = [
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/contracts/components/src --target conformance-rust --check" },
+]
+"conformance:build" = [
+  { task = "conformance:serialize" },
+  { task = "conformance:codegen" },
+]
+# Read-only enforcement surface: fixture + generated artifact drift + type
+# gate. Runs inside docs:check and ci:web; the executed proof lives on
+# ci:conformance (windowed GPUI) with a compile-only leg in ci:native.
+"conformance:check" = [
+  { task = "conformance:serialize-check" },
+  { task = "conformance:codegen-check" },
+  { task = "conformance:typecheck" },
+]
+# The typed authority must type-check: Bun strips types at runtime, so a
+# green execution run with a broken schema is not evidence. Narrow — only
+# the conformance source files, so unrelated core baseline errors never
+# gate this check.
+"conformance:typecheck" = "bunx tsc --noEmit --ignoreConfig packages/core/src/conformance/define.ts packages/core/src/conformance/button.ts packages/core/src/conformance/button-cases.ts packages/core/src/conformance/project.ts --strict --skipLibCheck --moduleResolution bundler --module esnext --target es2022"
+"conformance:test-web" = "bunx vitest run --project conformance"
+# WINDOWED, like test:native-visual: opens a real GPUI window and drives
+# real NSEvents through the AppKit queue (hit testing, listener binding,
+# focus, activation). Needs a macOS window server.
+"conformance:test-gpui" = "cargo run --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin conformance -- --out=test/conformance/web/out/gpui.json"
+# Compile-only twin for CPU gates: the windowed execution is local-only.
+"conformance:check-gpui" = "cargo check --manifest-path packages/gpui/preview/Cargo.toml --bin conformance"
+"conformance:test" = [
+  { task = "conformance:test-web" },
+  { task = "conformance:test-gpui" },
+]
+"conformance:compare" = "bun test/conformance/compare.ts"
+# The completion gate: drift-free authority, then all three active runtimes,
+# then the cross-runtime comparison. Jetstream is program-deferred (working
+# rules): it is reported as deferred, never as passing.
+"conformance:complete" = [
+  { task = "conformance:check" },
+  { task = "conformance:test-web" },
+  { task = "conformance:test-gpui" },
+  { task = "conformance:compare" },
+]
+"conformance:cost" = "bun packages/core/scripts/conformance-cost.ts"
+# The executed conformance board (macOS window server). It stays outside the
+# headless qa / ci:native contract and runs in the dedicated PR workflow.
+"ci:conformance" = [
+  { task = "conformance:check" },
+  { task = "conformance:test-web" },
+  { task = "conformance:test-gpui" },
+  { task = "conformance:compare" },
+]
+
 # Preview (documentation site)
 "svelte:build" = "bun run --cwd packages/svelte/preview build"
 "svelte:run" = "bun run --cwd packages/svelte/preview dev"
@@ -314,6 +378,12 @@
   { task = "docs:lint" },
   { task = "docs:react-specimen-drift" },
   { task = "docs:capability-drift" },
+  # Conformance kernel (g14.001): read-only authority drift + type gate +
+  # web execution. The windowed GPUI execution lives on `ci:conformance`.
+  { task = "conformance:serialize-check" },
+  { task = "conformance:codegen-check" },
+  { task = "conformance:typecheck" },
+  { task = "conformance:test-web" },
   { task = "react:docs" },
   { task = "report:parity" },
   { task = "report:accessibility" },
@@ -353,6 +423,9 @@
   { task = "check:gpui" },
   { task = "gpui:test" },
   { task = "test:jetstream-adapter" },
+  # Compile-only leg of the conformance kernel (g14.001). Not execution
+  # evidence — the executed windowed proof runs on `ci:conformance`.
+  { task = "conformance:check-gpui" },
 ]
 
 # Paired-repository Jetstream admission board. The preview, accessibility
@@ -377,6 +450,12 @@
   { task = "drift:recipes" },
   { task = "svelte:surface-audit" },
   { task = "docs:lint" },
+  # Conformance kernel (g14.001): read-only authority drift + type gate +
+  # web execution. The windowed GPUI execution lives on `ci:conformance`.
+  { task = "conformance:serialize-check" },
+  { task = "conformance:codegen-check" },
+  { task = "conformance:typecheck" },
+  { task = "conformance:test-web" },
   { task = "react:docs" },
   { task = "report:parity" },
   { task = "report:accessibility" },

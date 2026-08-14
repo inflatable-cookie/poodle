@@ -1,0 +1,493 @@
+//! Conformance authority parsing (spec 066): the serialized portable
+//! interface and component case corpus authored in TypeScript under
+//! `packages/core/src/conformance/` and emitted as neutral JSON fixtures by
+//! `conformance:build`'s serializer step. The Rust pipeline consumes these
+//! through `serde` and never re-authors them.
+
+use std::fs;
+use std::path::Path;
+
+use serde::Deserialize;
+
+use crate::error::Result;
+use crate::CodegenError;
+
+const GEOMETRY_FIELDS: [&str; 6] = [
+    "height",
+    "minWidth",
+    "paddingLeft",
+    "paddingRight",
+    "radius",
+    "borderWidth",
+];
+
+/// One prop in the portable interface.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PortableProp {
+    pub name: String,
+    #[serde(rename = "type")]
+    pub kind: ScalarType,
+    pub default: serde_json::Value,
+    #[serde(default)]
+    pub nullable: bool,
+    /// Rust field name when not the mechanical camelCase → snake_case form.
+    #[serde(default)]
+    pub rust_name: Option<String>,
+    /// Rust type in `crate::types` for enum props.
+    #[serde(default)]
+    pub rust_type: Option<String>,
+    /// Generated Rust enum name when the values are not a poodle type.
+    #[serde(default)]
+    pub rust_enum_name: Option<String>,
+    /// Controlled-state pair: the event carrying the new value.
+    #[serde(default)]
+    pub controlled_by: Option<String>,
+    /// Platform extension marker. Extensions are not portable.
+    #[serde(default)]
+    pub extension: Option<String>,
+}
+
+/// A scalar type in the portable interface.
+#[derive(Debug, Clone, Deserialize)]
+pub struct ScalarType {
+    pub kind: String,
+    #[serde(default)]
+    pub values: Option<Vec<String>>,
+}
+
+/// The serialized portable interface (`button-interface.json`).
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ComponentInterface {
+    #[allow(dead_code)]
+    pub schema_version: u32,
+    pub id: String,
+    pub profile: String,
+    pub props: Vec<PortableProp>,
+    pub events: Vec<Named>,
+    pub regions: Vec<Named>,
+    pub parts: Vec<PartDecl>,
+    pub states: Vec<StateDecl>,
+    pub token_roles: Vec<TokenRoleDecl>,
+    pub axes: Vec<String>,
+    #[allow(dead_code)]
+    pub capabilities: Vec<serde_json::Value>,
+}
+
+/// A named declaration (event or region).
+#[derive(Debug, Clone, Deserialize)]
+pub struct Named {
+    pub name: String,
+}
+
+/// A stable part with its native resolution descriptor.
+#[derive(Debug, Clone, Deserialize)]
+pub struct PartDecl {
+    pub id: String,
+    #[serde(default)]
+    pub role: Option<String>,
+    #[serde(default)]
+    pub resolve: Option<ResolveDecl>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ResolveDecl {
+    pub web: serde_json::Value,
+    pub native: serde_json::Value,
+}
+
+/// An observable state with its native observation rule.
+#[derive(Debug, Clone, Deserialize)]
+pub struct StateDecl {
+    pub name: String,
+    pub native: String,
+    #[serde(default)]
+    pub part: Option<String>,
+}
+
+/// A semantic token role projecting a prop.
+#[derive(Debug, Clone, Deserialize)]
+pub struct TokenRoleDecl {
+    pub name: String,
+    #[serde(default)]
+    pub prop: String,
+    #[serde(default)]
+    pub default: Option<String>,
+}
+
+/// A step in a component case.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(tag = "kind")]
+pub enum CaseStep {
+    #[serde(rename = "action")]
+    Action {
+        name: String,
+        part: String,
+        #[serde(default)]
+        input: Option<String>,
+    },
+    #[serde(rename = "expectPart")]
+    ExpectPart {
+        part: String,
+        expect: serde_json::Value,
+    },
+    #[serde(rename = "expectEvents")]
+    ExpectEvents { events: Vec<String> },
+}
+
+/// One serialized component case.
+#[derive(Debug, Clone, Deserialize)]
+pub struct ComponentCase {
+    pub id: String,
+    pub fixture: serde_json::Value,
+    pub specimen: serde_json::Value,
+    pub steps: Vec<CaseStep>,
+}
+
+/// The serialized case corpus (`button-cases.json`).
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ComponentCases {
+    #[allow(dead_code)]
+    pub schema_version: u32,
+    pub component: String,
+    pub cases: Vec<ComponentCase>,
+}
+
+/// Validates the case corpus against the interface: every fixture prop,
+/// region, part, state, event, token role, axis, and enum value must be
+/// closed over the interface. Unknown names are errors, never ignored.
+pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) -> Result<()> {
+    let mut findings = Vec::new();
+    let props: std::collections::HashMap<&str, &PortableProp> = interface
+        .props
+        .iter()
+        .map(|p| (p.name.as_str(), p))
+        .collect();
+    let regions: std::collections::HashSet<&str> = interface
+        .regions
+        .iter()
+        .map(|r| r.name.as_str())
+        .collect();
+    let parts: std::collections::HashSet<&str> = interface
+        .parts
+        .iter()
+        .map(|p| p.id.as_str())
+        .collect();
+    let states: std::collections::HashSet<&str> = interface
+        .states
+        .iter()
+        .map(|s| s.name.as_str())
+        .collect();
+    let events: std::collections::HashSet<&str> = interface
+        .events
+        .iter()
+        .map(|e| e.name.as_str())
+        .collect();
+    let token_roles: std::collections::HashSet<&str> = interface
+        .token_roles
+        .iter()
+        .map(|t| t.name.as_str())
+        .collect();
+    let axes: std::collections::HashSet<&str> = interface.axes.iter().map(String::as_str).collect();
+
+    for case in &cases.cases {
+        let at = |message: String| format!("case '{}': {message}", case.id);
+
+        if let Some(fixture_props) = case
+            .fixture
+            .get("props")
+            .and_then(serde_json::Value::as_object)
+        {
+            for (key, value) in fixture_props {
+                let Some(prop) = props.get(key.as_str()) else {
+                    findings.push(at(format!("unknown prop '{key}'")));
+                    continue;
+                };
+                if value.is_null() {
+                    if !prop.nullable {
+                        findings.push(at(format!("prop '{key}' is not nullable")));
+                    }
+                    continue;
+                }
+                match prop.kind.kind.as_str() {
+                    "boolean" => {
+                        if !value.is_boolean() {
+                            findings.push(at(format!("prop '{key}' expects a boolean")));
+                        }
+                    }
+                    "string" | "icon" | "dimension" => {
+                        if !value.is_string() {
+                            findings.push(at(format!("prop '{key}' expects a string")));
+                        }
+                    }
+                    "enum" => {
+                        let Some(expected) = value.as_str() else {
+                            findings.push(at(format!("prop '{key}' expects an enum string")));
+                            continue;
+                        };
+                        let values = prop.kind.values.as_deref().unwrap_or_default();
+                        if !values.iter().any(|v| v == expected) {
+                            findings.push(at(format!(
+                                "prop '{key}' value '{expected}' is not one of {values:?}"
+                            )));
+                        }
+                    }
+                    other => findings.push(at(format!("prop '{key}' has unknown type '{other}'"))),
+                }
+            }
+        }
+
+        if let Some(fixture_regions) = case
+            .fixture
+            .get("regions")
+            .and_then(serde_json::Value::as_object)
+        {
+            for key in fixture_regions.keys() {
+                if !regions.contains(key.as_str()) {
+                    findings.push(at(format!("unknown region '{key}'")));
+                }
+            }
+        }
+
+        for step in &case.steps {
+            match step {
+                CaseStep::Action { part, name, .. } => {
+                    if !parts.contains(part.as_str()) {
+                        findings.push(at(format!("action targets unknown part '{part}'")));
+                    }
+                    if name != "press" && name != "focus" {
+                        findings.push(at(format!("unknown action '{name}'")));
+                    }
+                }
+                CaseStep::ExpectPart { part, expect } => {
+                    if !parts.contains(part.as_str()) {
+                        findings.push(at(format!("expects unknown part '{part}'")));
+                    }
+                    if let Some(expect_states) = expect.get("states").and_then(serde_json::Value::as_object) {
+                        for key in expect_states.keys() {
+                            if !states.contains(key.as_str()) {
+                                findings.push(at(format!("expects unknown state '{key}'")));
+                            }
+                        }
+                    }
+                    if let Some(expect_roles) = expect
+                        .get("tokenRoles")
+                        .and_then(serde_json::Value::as_object)
+                    {
+                        for key in expect_roles.keys() {
+                            if !token_roles.contains(key.as_str()) {
+                                findings.push(at(format!("expects unknown token role '{key}'")));
+                            }
+                        }
+                    }
+                    validate_geometry_expectation(expect, &at, &mut findings);
+                }
+                CaseStep::ExpectEvents { events: expected } => {
+                    for event in expected {
+                        if !events.contains(event.as_str()) {
+                            findings.push(at(format!("expects unknown event '{event}'")));
+                        }
+                    }
+                }
+            }
+        }
+
+        if let Some(specimen_axes) = case
+            .specimen
+            .get("axes")
+            .and_then(serde_json::Value::as_array)
+        {
+            for axis in specimen_axes {
+                let Some(axis) = axis.as_str() else {
+                    findings.push(at("specimen axis is not a string".to_owned()));
+                    continue;
+                };
+                if !axes.contains(axis) {
+                    findings.push(at(format!("unknown specimen axis '{axis}'")));
+                }
+            }
+        }
+    }
+
+    if findings.is_empty() {
+        Ok(())
+    } else {
+        Err(CodegenError::Gate {
+            message: format!(
+                "case corpus {} does not validate against interface {}:\n{}",
+                cases.component,
+                interface.id,
+                findings.join("\n")
+            ),
+        })
+    }
+}
+
+fn validate_geometry_expectation(
+    expect: &serde_json::Value,
+    at: &impl Fn(String) -> String,
+    findings: &mut Vec<String>,
+) {
+    let Some(geometry) = expect.get("geometry") else {
+        return;
+    };
+    let Some(geometry) = geometry.as_object() else {
+        findings.push(at("geometry expectation must be an object".to_owned()));
+        return;
+    };
+    match geometry.get("tolerance").and_then(serde_json::Value::as_f64) {
+        Some(tolerance) if tolerance.is_finite() && tolerance >= 0.0 => {}
+        _ => findings.push(at(
+            "geometry tolerance must be an authored finite non-negative number".to_owned(),
+        )),
+    }
+    let mut field_count = 0;
+    for (field, value) in geometry {
+        if field == "tolerance" {
+            continue;
+        }
+        if !GEOMETRY_FIELDS.contains(&field.as_str()) {
+            findings.push(at(format!("unknown geometry field '{field}'")));
+            continue;
+        }
+        field_count += 1;
+        if !value.as_f64().is_some_and(f64::is_finite) {
+            findings.push(at(format!("geometry '{field}' must be a finite number")));
+        }
+    }
+    if field_count == 0 {
+        findings.push(at(
+            "geometry expectation needs at least one asserted field".to_owned(),
+        ));
+    }
+}
+
+/// Loads and validates the interface JSON.
+pub fn load_interface(path: &Path) -> Result<ComponentInterface> {
+    let document = fs::read_to_string(path).map_err(|error| CodegenError::Read {
+        path: path.to_path_buf(),
+        source: error,
+    })?;
+    let interface: ComponentInterface =
+        serde_json::from_str(&document).map_err(|error| CodegenError::Gate {
+            message: format!(
+                "conformance interface {} is not valid JSON: {error}",
+                path.display()
+            ),
+        })?;
+    if interface.schema_version != 1 {
+        return Err(CodegenError::Gate {
+            message: format!(
+                "conformance interface {} has schema_version {}, expected 1",
+                path.display(),
+                interface.schema_version
+            ),
+        });
+    }
+    Ok(interface)
+}
+
+/// Loads and validates the case corpus JSON.
+pub fn load_cases(path: &Path) -> Result<ComponentCases> {
+    let document = fs::read_to_string(path).map_err(|error| CodegenError::Read {
+        path: path.to_path_buf(),
+        source: error,
+    })?;
+    let cases: ComponentCases =
+        serde_json::from_str(&document).map_err(|error| CodegenError::Gate {
+            message: format!(
+                "conformance cases {} are not valid JSON: {error}",
+                path.display()
+            ),
+        })?;
+    if cases.schema_version != 1 {
+        return Err(CodegenError::Gate {
+            message: format!(
+                "conformance cases {} have schema_version {}, expected 1",
+                path.display(),
+                cases.schema_version
+            ),
+        });
+    }
+    Ok(cases)
+}
+
+/// Portable props only: extensions are not generated into the Rust surface.
+pub fn portable_props(interface: &ComponentInterface) -> Vec<&PortableProp> {
+    interface
+        .props
+        .iter()
+        .filter(|prop| prop.extension.is_none())
+        .collect()
+}
+
+/// The Rust field name for a portable prop.
+pub fn rust_field_name(prop: &PortableProp) -> String {
+    if let Some(rust_name) = &prop.rust_name {
+        return rust_name.clone();
+    }
+    to_snake_case(&prop.name)
+}
+
+/// Mechanical camelCase → snake_case.
+pub fn to_snake_case(name: &str) -> String {
+    let mut out = String::with_capacity(name.len() + 4);
+    for (index, ch) in name.chars().enumerate() {
+        if ch.is_uppercase() {
+            if index > 0 {
+                out.push('_');
+            }
+            out.push(ch.to_ascii_lowercase());
+        } else {
+            out.push(ch);
+        }
+    }
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn snake_case_mechanical_transform() {
+        assert_eq!(to_snake_case("leadingIcon"), "leading_icon");
+        assert_eq!(to_snake_case("ariaExpanded"), "aria_expanded");
+        assert_eq!(to_snake_case("defaultPressed"), "default_pressed");
+        assert_eq!(to_snake_case("variant"), "variant");
+    }
+
+    #[test]
+    fn rust_field_name_honors_explicit_override() {
+        let mut prop = PortableProp {
+            name: "disabled".to_owned(),
+            kind: ScalarType {
+                kind: "boolean".to_owned(),
+                values: None,
+            },
+            default: serde_json::Value::Bool(false),
+            nullable: false,
+            rust_name: Some("is_disabled".to_owned()),
+            rust_type: None,
+            rust_enum_name: None,
+            controlled_by: None,
+            extension: None,
+        };
+        assert_eq!(rust_field_name(&prop), "is_disabled");
+        prop.rust_name = None;
+        assert_eq!(rust_field_name(&prop), "disabled");
+    }
+
+    #[test]
+    fn geometry_requires_an_explicit_local_tolerance() {
+        let expect = serde_json::json!({ "geometry": { "height": 36 } });
+        let mut findings = Vec::new();
+        validate_geometry_expectation(&expect, &|message| message, &mut findings);
+        assert_eq!(
+            findings,
+            ["geometry tolerance must be an authored finite non-negative number"]
+        );
+    }
+}

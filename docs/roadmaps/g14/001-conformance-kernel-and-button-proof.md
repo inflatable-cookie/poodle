@@ -1,6 +1,6 @@
 # g14.001 — Conformance Kernel And Button Proof
 
-Status: review-blocked — PR #10 replacement commit `0d041108` still fails the proof boundary
+Status: complete — replacement proof accepted in PR #10
 Depends on: none
 Governing spec: `../../specs/066-executable-component-conformance.md`
 
@@ -19,14 +19,9 @@ one portable interface + one typed case corpus
 This is a replacement proof, not a platform build. Keep the generic surface
 as small as Button needs while preserving extension points named by spec 066.
 
-## Review Ruling
+## Acceptance Ruling
 
-PR #10 proved that shared cases can project the Button specimen structure, but
-it does not satisfy the conformance boundary. Keep the branch as evidence; do
-not merge or build `g14.002` on it.
-
-The replacement pass must remove these blockers rather than document them as
-later debt:
+PR #10's replacement pass closes the proof blockers:
 
 - infer web portable prop and event types from the interface value; a second
   hand-written `ButtonPortableProps` or `ButtonPortableEvents` shape is not an
@@ -44,6 +39,17 @@ later debt:
 - remeasure cost after removing copied artifacts and the Jetstream execution
   lane; stop again if reusable mechanism still grows faster than replaced
   declarations and specimen structure without a concrete amortization proof
+
+The final measurement still triggers the cost stop: 2,947 LOC of generic
+kernel plus a 1,575-LOC Button pilot increment replaces 619 LOC of declarations
+and specimen fixtures. The orchestrator accepts this as a bounded feasibility
+proof because it establishes the missing executable guarantee; it is not an
+economics verdict for rollout. Cards `002`–`007` must demonstrate reuse rather
+than clone the 1,052-LOC Button harness. Card `008` retains the
+adopt/revise/reject decision, and cards `009`–`014` remain blocked until then.
+
+The executed GPUI leg now has a dedicated path-scoped macOS PR workflow.
+Headless `qa` and `ci:native` remain unchanged; Jetstream remains deferred.
 
 ## Scope
 

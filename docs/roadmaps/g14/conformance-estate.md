@@ -21,8 +21,10 @@ The previous frozen baseline measured:
 - 14 drift gates, each covering one projection rather than component
   completion
 
-Those figures are point-in-time evidence, not a completion denominator. New
-g14.001 establishes the executable roster from source.
+Those figures are point-in-time evidence, not a completion denominator. The
+g14.001 executable roster is now established from source: the Button corpus
+(`packages/core/src/conformance/button-cases.ts`) enumerates 20 cases across
+the three active runtimes, executed by `effigy conformance:complete`.
 
 ## Current Gates And Holes
 
@@ -38,11 +40,104 @@ g14.001 establishes the executable roster from source.
 | React specimen registered | `docs:react-specimen-drift` | specimen content and GPUI |
 | capability declaration has a trace | `docs:capability-drift` | undeclared capability vocabulary and actual parity |
 | visual baselines exist | web and native snapshot tools | shared fixture identity; stale GPUI captures; Jetstream overwrite workflow |
+| **Button completes the conformance kernel** | `ci:conformance` (20 cases × Svelte, React, GPUI) | profile pilots 2–6 |
 
 `docs:check` currently stays green while the machine-shape selector is red.
 `check:svelte` currently has three `AppHeaderCenterHarness.svelte` Snippet
-identity errors. These failures predate the redesigned runway; g14.001 must
-either fix or explicitly route them before claiming a clean baseline.
+identity errors. These failures predate the redesigned runway; g14.001
+recorded them as baseline (they are untouched by this card).
+
+## Conformance Kernel Status (g14.001)
+
+One portable interface + one typed case corpus → Svelte / React / GPUI
+execution → normalized observations → three specimen views → one failing
+completion gate (spec 066, architecture 009, active-cohort working rules).
+Delivered for Button:
+
+- **Portable interface module** — `packages/core/src/conformance/button.ts`.
+  The single authority: `defineComponentInterface` takes a `const` generic
+  and mapped types derive portable props, events, part ids, states, token
+  roles, and axes — no hand-written type mirror exists anywhere. Svelte and
+  React bind their shells to the derived types (`satisfies`-checked carrier
+  names, `PortableEventsOf` key access), so a rename fails the shells.
+- **Typed case corpus** — `packages/core/src/conformance/button-cases.ts`
+  (20 cases), authored through `componentCase(buttonInterface, ...)`:
+  fixture props, regions, parts, states, events, token roles, axes, and
+  enum values are closed over the interface at authoring time, re-validated
+  by the serializer, and validated again by the Rust codegen against the
+  interface JSON. Unknown names are errors, never ignored. Nullable props
+  stay `Option` in generated Rust — absence is `None`/`null` on both
+  surfaces, pinned by the `default-pressed-toggle` case.
+- **Generated Rust declaration** — `packages/contracts/components/src/generated/button.rs`
+  replaces the hand-written `ButtonSpec` struct/default/builders; the token
+  recipes live in the extension module beside it.
+- **Runtime harnesses** — web runners (Svelte + React, real DOM + real
+  events + real CSS geometry), GPUI runner (a real window: calibrated
+  NSEvent clicks through the AppKit queue, real backend focus through the
+  node-backend's focus registry, real Enter key activation).
+- **Observation** — `component-observation.v1` per runtime, data-driven from
+  the interface's part descriptors and observation rules. No component
+  identifier, class name, icon name, or part list lives in shared runner or
+  observer code. Token roles travel on the `poodle-node` `roles` channel
+  the renderer stamps; roles are read from `a11y.role`; labels through
+  `Node::intrinsic_text()`. Icon identity is observed and asserted on all
+  three runtimes through the web `data-icon` channels and the native Icon
+  nodes. The orchestrator compares the normalized observations
+  field-for-field (shape + value), not just asserted fields.
+- **Strict verdicts** — `pass`/`fail` only. A required field a runtime
+  cannot observe fails that runtime's case, naming runtime/case/step/field
+  and the reason; no cross-runtime "someone exercised it" vacuity exists.
+- **Standing enforcement** — `docs:check` and `ci:web` carry read-only
+  authority checks and web execution. A dedicated path-scoped macOS PR
+  workflow runs `ci:conformance`, including real GPUI execution and normalized
+  comparison. Headless `qa` and `ci:native` stay window-free.
+- **Specimens** — all three active Button specimen pages are corpus
+  projections; hand-written specimen fixtures deleted.
+- **Completion** — `effigy conformance:complete` passes
+  the active cohort and reports Jetstream program-deferred, never passing.
+  Removing the GPUI registration fails completion; an inert backend binding
+  fails the executed cases.
+
+### Defects the corpus caught (fixed, not waived)
+
+- GPUI double-activation: the node-backend bound Enter/Space `on_key_down`
+  while gpui itself synthesizes Enter/Space KeyUp → click on focused
+  clickable elements — one Enter fired the handler twice. The redundant
+  binding is removed; the click binding is the single activation path.
+- Native never projected `aria-pressed`/`aria-expanded`/focus-visible:
+  `poodle-render::button` now sets `a11y.toggled`, `a11y.expanded`, and a
+  focus style, and stamps token roles.
+
+### Recorded native gaps (not required Button cases)
+
+- `fit`, `truncate`, `max_width` are declared portable but `poodle-render`
+  does not consume them (web-only behaviour today). Tracked for `g14.014`.
+- Keyboard activation on web: happy-dom implements no browser default
+  actions, so the web harness performs the browser default (keydown then
+  click); GPUI proves the real keyboard confirm path.
+
+### Driver notes (recorded, not architecture)
+
+- The GPUI runner needs a macOS window server. `ci:native` compiles it
+  (`conformance:check-gpui`); `ci:conformance` executes it locally and in the
+  dedicated macOS PR workflow. The driver activates the app, warms
+  macOS's first-click swallow with a click on empty chrome, polls until the
+  window has painted (focus handle exists), and retries a swallowed click
+  like a real user would — the retry is real clicks, and an inert backend
+  binding still fails no matter how many times it is clicked.
+
+### Cost ruling
+
+The final exhaustive report records 4,522 source LOC plus 33,392 bytes of
+generated JSON:
+
+- generic kernel: 2,947 LOC
+- Button pilot increment: 1,575 LOC, including 1,052 LOC of Button harness
+- replaced Button declaration and three active specimen fixtures: 619 LOC
+
+The stop condition is triggered. The orchestrator accepts `g14.001` as a
+feasibility proof, not a rollout verdict. Cards `002`–`007` must reuse or
+extract the pilot harness; `008` still decides adoption.
 
 ## Experimental Surface Disposition
 
@@ -60,6 +155,10 @@ No experimental surface is architecture merely because it merged.
 | prop/callback/spec drift scripts | consolidate behind component completion | g14.014 |
 | native registration and snapshot tooling | repair and feed completion evidence | g14.002 / g14.014 |
 | stale specs 063–065 and old roadmap | archived/retired | done |
+| **g14.001 conformance kernel (typed interface, corpus, observers, GPUI runner)** | keep — the replacement-pass proof; profile pilots 2–6 reuse it | g14.010 |
+| **hand-written ButtonSpec declaration surface** | replaced by `generated/button.rs` + extension module | done |
+| **hand-written Button specimen fixtures (3 active runtimes)** | replaced by corpus projections; the Jetstream specimen stays deferred with its runtime | done |
+| **generated specimen scenes (specimen-ts/rust targets)** | still the shell/nav surface; Button no longer depends on them | g14.009 |
 
 ## Staged Licence Intake
 
@@ -81,6 +180,7 @@ Jetstream is program-deferred rather than a per-component known delta.
 
 Every active claim ends with one canonical gate. A legacy gate may stay while
 coverage migrates, but it needs an owner and retirement condition. Generated
-artifacts stay out of hand-edited source roots where possible. Known
-generated-source and god-file health findings are owned by g14.018 rather than
-normalized as permanent warnings.
+artifacts stay out of hand-edited source roots where possible (the poodle-specs
+`generated/` module is generated and gated byte-exact). Known generated-source
+and god-file health findings are owned by g14.018 rather than normalized as
+permanent warnings.

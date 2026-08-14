@@ -19,6 +19,7 @@ use crate::emit::EmitTarget;
 mod json_common;
 
 pub mod conformance;
+pub mod conformance_rust;
 pub mod docs;
 pub mod json;
 pub mod machine_rust;
