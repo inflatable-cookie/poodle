@@ -6,7 +6,7 @@
 
 use poodle_specs::{
     ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, ControlSize, Orientation,
-    RangeSliderSpec, SliderPolarity, SliderVariant,
+    RangeSliderSpec, SemanticControlSizeRole, SliderPolarity, SliderVariant,
 };
 use serde_json::Value;
 
@@ -153,6 +153,15 @@ pub fn range_slider_spec_from_fixture(fixture: &Value) -> RangeSliderSpec {
             _ => SliderPolarity::Unipolar,
         };
     }
+    spec.center_value = props.get("centerValue").and_then(Value::as_f64);
+    spec.lower_value_text = props
+        .get("lowerValueText")
+        .and_then(Value::as_str)
+        .map(str::to_owned);
+    spec.upper_value_text = props
+        .get("upperValueText")
+        .and_then(Value::as_str)
+        .map(str::to_owned);
     if let Some(v) = props.get("size").and_then(Value::as_str) {
         spec.size = match v {
             "xs" => ControlSize::Xs,
@@ -167,6 +176,13 @@ pub fn range_slider_spec_from_fixture(fixture: &Value) -> RangeSliderSpec {
             "compact" => ControlDensity::Compact,
             "comfortable" => ControlDensity::Comfortable,
             _ => ControlDensity::Default,
+        };
+    }
+    if let Some(v) = props.get("sizeRole").and_then(Value::as_str) {
+        spec.size_role = match v {
+            "chrome" => SemanticControlSizeRole::Chrome,
+            "prominent" => SemanticControlSizeRole::Prominent,
+            _ => SemanticControlSizeRole::Control,
         };
     }
     spec

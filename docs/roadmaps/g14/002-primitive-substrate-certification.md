@@ -297,7 +297,7 @@ Use `effigy test --plan` before choosing the test shape. Run:
 
 - the new primitive report and focused probes in every required layer
 - `effigy conformance:check`
-- `effigy ci:conformance`
+- `effigy ci:conformance-windowed`
 - `effigy conformance:cost`
 - focused `effigy test:native-visual` runs covering comparison, explicit
   refresh preservation, and at least two control sizes
@@ -307,7 +307,8 @@ Use `effigy test --plan` before choosing the test shape. Run:
 - `effigy docs:check`
 - `git diff --check`
 
-Run windowed selectors from a live macOS session. Record known main failures
+Run windowed selectors only when the operator has explicitly yielded a live
+macOS desktop, or leave them to isolated CI. Record known main failures
 separately from branch regressions. Do not run Jetstream selectors or create a
 Jetstream worktree symlink.
 

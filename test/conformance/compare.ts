@@ -282,6 +282,7 @@ function compareContractedGeometry(
 function compareCorpus(
   label: string,
   reportSuffix: string,
+  cases: { cases: SerializedCase[] },
   problems: string[],
 ): { caseCount: number; available: string[] } {
   const available = ACTIVE_RUNTIMES.filter(
@@ -295,16 +296,18 @@ function compareCorpus(
   const reports = new Map(
     available.map((runtime) => [runtime, loadReport(runtime, reportSuffix)!]),
   );
-  const expectedCases = new Set<string>();
-  for (const report of reports.values()) {
-    for (const result of report.results) expectedCases.add(result.caseId);
-  }
+  const expectedCases = new Set(cases.cases.map((caseData) => caseData.id));
 
   for (const [runtime, report] of reports) {
     const present = new Set(report.results.map((r) => r.caseId));
     for (const caseId of expectedCases) {
       if (!present.has(caseId)) {
         problems.push(`${runtime} did not run case ${caseId}`);
+      }
+    }
+    for (const caseId of present) {
+      if (!expectedCases.has(caseId)) {
+        problems.push(`${runtime} reported unexpected ${label} case ${caseId}`);
       }
     }
   }
@@ -367,7 +370,12 @@ function main(): void {
   const availableSets: string[][] = [];
 
   for (const corpus of COMPONENT_CORPORA) {
-    const { caseCount, available } = compareCorpus(corpus.label, corpus.reportSuffix, problems);
+    const { caseCount, available } = compareCorpus(
+      corpus.label,
+      corpus.reportSuffix,
+      corpus.cases,
+      problems,
+    );
     totalCases += caseCount;
     availableSets.push(available);
   }
@@ -380,7 +388,9 @@ function main(): void {
 
   const available = availableSets[0] ?? [];
   const deferred = DEFERRED_RUNTIMES.map((runtime) => {
-    const present = loadReport(runtime, "") !== null;
+    const present = COMPONENT_CORPORA.some(
+      (corpus) => loadReport(runtime, corpus.reportSuffix) !== null,
+    );
     return `  - ${runtime}: program-deferred${present ? " (stale report present — not counted as passing)" : ""}`;
   });
   console.log(

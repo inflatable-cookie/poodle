@@ -72,10 +72,16 @@ function displayCase(
 }
 
 const cases = [
-  displayCase("default", "Default", "Basics", {
-    value: [20, 80],
-    ariaLabel: "Price range",
-  }),
+  displayCase(
+    "default",
+    "Default",
+    "Basics",
+    {
+      value: [20, 80],
+      ariaLabel: "Price range",
+    },
+    ["size", "theme"],
+  ),
 
   displayCase("with-step", "With step", "Basics", {
     value: [25, 45],
@@ -116,15 +122,23 @@ const cases = [
       polarity: "unipolar",
       ariaLabel: "Unipolar modulation range",
     },
-    ["theme"],
+    ["size", "theme"],
   ),
 
   displayCase(
-    "size-lg",
-    "Large",
-    "Size",
-    { value: [20, 80], size: "lg", ariaLabel: "Large range" },
-    ["density", "theme"],
+    "embedded-bipolar",
+    "Embedded bipolar",
+    "Variants",
+    {
+      value: [-0.6, 0.35],
+      min: -1,
+      max: 1,
+      step: 0.01,
+      variant: "embedded",
+      polarity: "bipolar",
+      ariaLabel: "Bipolar modulation range",
+    },
+    ["size", "density", "theme"],
   ),
 
   // Controlled pointer scrub: press nearer the upper thumb, keep gesture.

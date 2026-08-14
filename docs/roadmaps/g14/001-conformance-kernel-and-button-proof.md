@@ -71,8 +71,9 @@ Headless `qa` and `ci:native` remain unchanged; Jetstream remains deferred.
 6. Make all three active Button specimen pages project the same case
    structure. Keep runtime chrome outside the case.
 7. Add `conformance:build`, `conformance:check`, selected
-   `conformance:test`, `conformance:complete`, and `conformance:cost` Effigy
-   selectors. Wire read-only enforcement into the applicable standing gates.
+   `conformance:test`, `conformance:test-windowed`,
+   `conformance:complete-windowed`, and `conformance:cost` Effigy selectors.
+   Wire read-only enforcement into the applicable standing gates.
 8. Classify old machine-interface, scene, capability, and Button-specific
    evidence as keep/adapt/replace/retire in `conformance-estate.md`. Delete
    only surfaces fully replaced by this proof.
@@ -112,7 +113,7 @@ stable case and capture IDs.
 - Existing hand-written portable declarations and duplicate specimen fixture
   content are removed, not left beside the new authority.
 - Full cost report shows every mechanism line and what it replaced.
-- `conformance:complete --component button` passes the active cohort and
+- `conformance:complete-windowed --component button` passes the active cohort and
   reports Jetstream as program-deferred, never passing.
 
 ## Stop Conditions

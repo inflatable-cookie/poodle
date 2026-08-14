@@ -348,12 +348,10 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
 
     if let Some(handler) = &node.interaction.on_scrub {
         // Scrub reports where the pointer sits along this element as a
-        // fraction of its width. Use mouse-down/move/up — not on_drag —
-        // because gpui's drag machinery swallows mouse-down and AppKit
-        // synthetic LeftMouseDragged never arms on_drag in the conformance
-        // harness (so Press/Drag never fired). In-bounds move is enough for
-        // the grab overlay; out-of-bounds follow is a known narrowing vs the
-        // prior on_drag_move path.
+        // fraction of its width. Mouse down/up carry the explicit gesture
+        // boundaries. `on_drag_move` keeps real pointer capture after the
+        // pointer leaves the element; the mouse-move listener is the fallback
+        // for synthetic window events that do not arm gpui's drag payload.
         //
         // Do not latch "scrubbing" in a Cell across this render: Press calls
         // refresh_windows, which rebuilds listeners and would clear the latch
@@ -368,7 +366,9 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
         let track_up = track.clone();
         let press = handler.clone();
         let mv = handler.clone();
+        let captured_mv = handler.clone();
         let release = handler.clone();
+        let gesture_id = next_gesture_id();
         el = el
             .child(
                 gpui::canvas(
@@ -390,7 +390,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
                 }
             })
             .on_mouse_move(move |event: &MouseMoveEvent, _window, cx| {
-                if !event.dragging() {
+                if !event.dragging() || cx.has_active_drag() {
                     return;
                 }
                 if let Some(bounds) = *track_move.borrow() {
@@ -400,6 +400,19 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
                     );
                     cx.refresh_windows();
                 }
+            })
+            .on_drag(NodeGestureDrag(gesture_id.clone()), |_, _, _window, cx| {
+                cx.new(|_| EmptyDragPreview)
+            })
+            .on_drag_move::<NodeGestureDrag>(move |event, _window, cx| {
+                if event.drag(cx).0 != gesture_id {
+                    return;
+                }
+                captured_mv(
+                    scrub_fraction(event.event.position.x.into(), event.bounds),
+                    ScrubPhase::Drag,
+                );
+                cx.refresh_windows();
             })
             .on_mouse_up(MouseButton::Left, move |event: &MouseUpEvent, _window, cx| {
                 if let Some(bounds) = *track_up.borrow() {

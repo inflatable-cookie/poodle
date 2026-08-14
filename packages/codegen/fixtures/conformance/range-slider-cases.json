@@ -18,6 +18,7 @@
         "group": "Basics",
         "caption": "Default",
         "axes": [
+          "size",
           "theme"
         ],
         "captureId": "range-slider/default"
@@ -300,6 +301,7 @@
         "group": "Variants",
         "caption": "Embedded unipolar",
         "axes": [
+          "size",
           "theme"
         ],
         "captureId": "range-slider/embedded-unipolar"
@@ -353,26 +355,31 @@
       ]
     },
     {
-      "id": "range-slider/size-lg",
+      "id": "range-slider/embedded-bipolar",
       "fixture": {
         "props": {
           "value": [
-            20,
-            80
+            -0.6,
+            0.35
           ],
-          "size": "lg",
-          "ariaLabel": "Large range"
+          "min": -1,
+          "max": 1,
+          "step": 0.01,
+          "variant": "embedded",
+          "polarity": "bipolar",
+          "ariaLabel": "Bipolar modulation range"
         },
         "regions": {}
       },
       "specimen": {
-        "group": "Size",
-        "caption": "Large",
+        "group": "Variants",
+        "caption": "Embedded bipolar",
         "axes": [
+          "size",
           "density",
           "theme"
         ],
-        "captureId": "range-slider/size-lg"
+        "captureId": "range-slider/embedded-bipolar"
       },
       "steps": [
         {
@@ -385,14 +392,14 @@
               "disabled": false
             },
             "tokenRoles": {
-              "size": "lg",
+              "size": "md",
               "density": "default",
-              "variant": "standard",
-              "polarity": "unipolar"
+              "variant": "embedded",
+              "polarity": "bipolar"
             },
             "value": [
-              20,
-              80
+              -0.6,
+              0.35
             ]
           }
         },
@@ -401,9 +408,9 @@
           "part": "lower",
           "expect": {
             "role": "slider",
-            "name": "Large range minimum",
+            "name": "Bipolar modulation range minimum",
             "focusable": true,
-            "value": 20
+            "value": -0.6
           }
         },
         {
@@ -411,9 +418,9 @@
           "part": "upper",
           "expect": {
             "role": "slider",
-            "name": "Large range maximum",
+            "name": "Bipolar modulation range maximum",
             "focusable": true,
-            "value": 80
+            "value": 0.35
           }
         },
         {

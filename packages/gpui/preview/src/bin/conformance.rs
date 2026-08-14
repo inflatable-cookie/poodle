@@ -236,6 +236,12 @@ fn run_primitives_mode(out: Option<PathBuf>) {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+    if !args.iter().any(|arg| arg == "--windowed") {
+        eprintln!(
+            "GPUI conformance drives a foreground AppKit window. Re-run with --windowed only in an isolated desktop session."
+        );
+        std::process::exit(2);
+    }
     let (primitives, only, out) = parse_args(&args);
 
     if primitives {

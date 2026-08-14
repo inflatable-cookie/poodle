@@ -36,7 +36,7 @@ passing by this board.
   path through real AppKit events.
 - The canonical JSON fixtures are included directly. Retired GPUI copies and
   the `conformance-cases` target are gone.
-- `ci:conformance` runs read-only authority checks, web execution, real-window
+- `ci:conformance-windowed` runs read-only authority checks, web execution, real-window
   GPUI execution, and normalized comparison. A dedicated path-scoped macOS PR
   workflow calls it. Headless `qa` and `ci:native` remain unchanged.
 
@@ -89,7 +89,7 @@ adopt/revise/reject verdict.
 - `cargo test --manifest-path packages/codegen/Cargo.toml conformance::tests`
 - `bun test packages/core/test/component-case-authority.test.ts`
 - `effigy conformance:cost`
-- `effigy ci:conformance` — 20 cases × 3 active runtimes
+- `effigy ci:conformance-windowed` — 20 cases × 3 active runtimes
 - `effigy ci:rust`
 - `effigy ci:native`
 - `effigy docs:check`
