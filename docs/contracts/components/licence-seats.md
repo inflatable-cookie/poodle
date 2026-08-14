@@ -40,7 +40,9 @@ Section (absent when seats=[])
         └── Release ConfirmAction (when false)
 ```
 
-## 4. Public Props And Events
+## 4. Props And Events
+
+### Public Props
 
 | Prop | Type | Default | Required | Notes |
 | --- | --- | --- | --- | --- |
@@ -51,6 +53,8 @@ Section (absent when seats=[])
 | `confirmRelease` | `boolean` | `true` | no | Uses warning confirmation before emitting |
 | `size` | `ControlSize \| null` | `null` | no | Shared semantic size |
 | `density` | `ControlDensity \| null` | `null` | no | Shared density |
+
+### Callbacks
 
 | Callback | Payload | When |
 | --- | --- | --- |

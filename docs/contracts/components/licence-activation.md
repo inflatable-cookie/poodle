@@ -72,7 +72,9 @@ Form
 All three route triggers remain visible. File import is never under an
 advanced/overflow disclosure.
 
-## 4. Public Props And Events
+## 4. Props And Events
+
+### Public Props
 
 | Prop | Type | Default | Required | Notes |
 | --- | --- | --- | --- | --- |
@@ -87,6 +89,8 @@ advanced/overflow disclosure.
 | `fileAccept` | `string \| null` | `null` | no | Host may narrow accepted file types |
 | `size` | `ControlSize \| null` | `null` | no | Shared semantic size |
 | `density` | `ControlDensity \| null` | `null` | no | Shared density |
+
+### Callbacks
 
 | Callback | Payload | When |
 | --- | --- | --- |

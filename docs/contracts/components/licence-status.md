@@ -56,7 +56,9 @@ Section
 
 No action lives in this component.
 
-## 4. Public Props
+## 4. Props And Inputs
+
+### Public Props
 
 | Prop | Type | Default | Required | Notes |
 | --- | --- | --- | --- | --- |
@@ -70,7 +72,9 @@ No action lives in this component.
 | `size` | `ControlSize \| null` | `null` | no | Shared semantic size |
 | `density` | `ControlDensity \| null` | `null` | no | Shared density |
 
-No callbacks.
+### Callbacks
+
+None. No action lives in this component, so there is nothing to report upwards.
 
 ## 5. States And Copy
 

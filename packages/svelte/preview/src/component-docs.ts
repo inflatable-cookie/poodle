@@ -2316,6 +2316,90 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <ListCardCounter icon={messageSquare} count={12} tooltip="12 comments" href="/comments" />`,
   },
 
+  "licence-status": {
+    props: [
+      { name: "usability", type: "LicenceUsability", description: "Required. The authority's usability projection; every state renders distinctly." },
+      { name: "trustBasis", type: "LicenceTrustBasis", description: "Required. How the licence was verified. Contains no credential." },
+      { name: "useUntil", type: "number | null", description: "Required. Use-coverage end, or null for no end date. Always its own row." },
+      { name: "updateUntil", type: "number | null", description: "Required. Update-coverage end, or null for no end date. Always its own row." },
+      { name: "usable", type: "boolean", description: "Required. A supplied read, reported through data state only. It gates nothing." },
+      { name: "attention", type: "LicenceAttention", description: "Required. Authority emphasis; never re-derived from the other reads." },
+      { name: "title", type: "string", default: '"Licence"', description: "Accessible name for the section." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit semantic size override." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override." },
+    ],
+    slots: [],
+    events: [],
+    usage: `<script lang="ts">
+  import { LicenceStatus } from "@inflatable-cookie/poodle-svelte";
+</script>
+
+<LicenceStatus
+  usability={{ state: "inGrace", until: renewalDeadline }}
+  trustBasis={{ kind: "remoteAssertion", checked: lastCheck }}
+  useUntil={useWindowEnd}
+  updateUntil={null}
+  usable={licence.usable}
+  attention={licence.attention}
+/>`,
+  },
+
+  "licence-activation": {
+    props: [
+      { name: "keyFormat", type: "LicenceKeyFormat", description: "Required. Host-supplied key parser and typo predicate. Poodle never reimplements either." },
+      { name: "accountTokenProvider", type: "LicenceAccountTokenProvider", description: "Required. Host-supplied account flow returning a token, or null for a cancellation." },
+      { name: "defaultRoute", type: '"key" | "accountToken" | "licenceFile"', default: '"key"', description: "Initial selection only. No route is styled primary." },
+      { name: "pending", type: "boolean", default: "false", description: "Disables submission while the host command runs. Routes stay visible." },
+      { name: "disabled", type: "boolean", default: "false", description: "Disables every field and route." },
+      { name: "title", type: "string", default: '"Activate licence"', description: "Form heading and tablist name." },
+      { name: "machineLabelLabel", type: "string", default: '"Name this machine (optional)"', description: "Label copy for the shared machine-label field." },
+      { name: "activateLabel", type: "string", default: '"Activate"', description: "Submit button label." },
+      { name: "fileAccept", type: "string | null", default: "null", description: "Narrows accepted file types on the licence-file route." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit semantic size override." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override." },
+    ],
+    slots: [],
+    events: [
+      { name: "onActivate", payload: "((detail: { credential: LicenceCredential; label: string | null }) => void) | undefined", description: "A valid route form was submitted; file bytes are already base64 without a data-URL prefix." },
+    ],
+    usage: `<script lang="ts">
+  import { LicenceActivation } from "@inflatable-cookie/poodle-svelte";
+  import { isProbablyATypo, parseLicenceKey } from "the-host-authority";
+</script>
+
+<LicenceActivation
+  keyFormat={{ parse: parseLicenceKey, isProbablyATypo }}
+  accountTokenProvider={{ acquire: startAccountFlow }}
+  pending={activating}
+  onActivate={({ credential, label }) => activate(credential, label)}
+/>`,
+  },
+
+  "licence-seats": {
+    props: [
+      { name: "seats", type: "LicenceSeat[]", default: "[]", description: "Authority-reported seats. Empty renders nothing, not a synthetic count." },
+      { name: "pendingMachineId", type: "string | null", default: "null", description: "Disables that one row's release while its command runs." },
+      { name: "title", type: "string", default: '"Activated machines"', description: "Section heading and accessible name." },
+      { name: "releaseLabel", type: "string", default: '"Release"', description: "Row action label; also the confirmation's confirm label." },
+      { name: "confirmRelease", type: "boolean", default: "true", description: "Confirms with a warning dialog before emitting." },
+      { name: "size", type: "ControlSize | null", default: "null", description: "Explicit semantic size override." },
+      { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override." },
+    ],
+    slots: [],
+    events: [
+      { name: "onRelease", payload: "((detail: { machineId: string }) => void) | undefined", description: "Release of a seat other than this machine was confirmed. This machine has no release action." },
+    ],
+    usage: `<script lang="ts">
+  import { LicenceSeats } from "@inflatable-cookie/poodle-svelte";
+</script>
+
+<LicenceSeats
+  seats={licence.seats}
+  pendingMachineId={releasing}
+  onRelease={({ machineId }) => releaseSeat(machineId)}
+/>`,
+  },
+
   "log-list": {
     props: [
       { name: "entries", type: "LogEntry[]", default: "[]", description: "Array of log entries to display." },
