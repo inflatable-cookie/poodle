@@ -1,0 +1,211 @@
+/* LicenceStatus, LicenceActivation and LicenceSeats.
+
+   One stylesheet, because the three blocks are one settings surface: a status
+   block, the activation form under it, and the seat list under that. They share
+   the same rhythm and the same row geometry, and splitting them into three
+   files would leave three copies of it to drift apart.
+
+   Nothing here draws a control. Buttons, fields, tabs, upload, status dots and
+   confirmation all come from the primitives; this file positions them. */
+
+/* ── LicenceStatus ─────────────────────────────────────────────────────── */
+
+.poodle-licence-status {
+  display: grid;
+  gap: var(--poodle-space-stack-md);
+  font-family: var(--poodle-typography-body-family);
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-licence-status__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--poodle-space-inline-sm);
+  min-width: 0;
+}
+
+.poodle-licence-status__title {
+  margin: 0;
+  font-family: var(--poodle-typography-heading-family);
+  font-size: var(--poodle-typography-body-size);
+  font-weight: var(--poodle-typography-label-weight);
+  line-height: var(--poodle-typography-body-lineHeight);
+}
+
+.poodle-licence-status__body {
+  margin: 0;
+  color: var(--poodle-color-text-secondary);
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
+}
+
+/* `informational` is visible where the operator already is. It borrows an info
+   edge and never interrupts — no toast, no live region, no dialog. */
+.poodle-licence-status[data-tone="info"] {
+  border-left: var(
+    --poodle-recipe-licence-status-accent-width,
+    0.125rem
+  ) solid var(--poodle-recipe-licence-status-info-edge, var(--poodle-color-status-info));
+  padding-left: var(--poodle-space-inline-sm);
+}
+
+.poodle-licence-status[data-tone="warning"] .poodle-licence-status__title {
+  color: var(--poodle-recipe-licence-status-warning-text, var(--poodle-color-status-warning));
+}
+
+.poodle-licence-status[data-tone="danger"] .poodle-licence-status__title {
+  color: var(--poodle-recipe-licence-status-danger-text, var(--poodle-color-status-danger));
+}
+
+/* `inGrace` has no rule of its own on purpose. It resolves to `data-tone`
+   neutral or info, so it can never pick up a warning or danger colour. */
+
+.poodle-licence-status__coverage {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  gap: var(--poodle-space-inline-xs) var(--poodle-space-inline-md);
+  margin: 0;
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
+}
+
+.poodle-licence-status__term {
+  margin: 0;
+  color: var(--poodle-color-text-secondary);
+}
+
+.poodle-licence-status__value {
+  margin: 0;
+  min-width: 0;
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-licence-status__detail {
+  margin: 0;
+  color: var(--poodle-color-text-tertiary);
+  font-size: var(--poodle-typography-caption-size);
+  line-height: var(--poodle-typography-caption-lineHeight);
+}
+
+/* ── LicenceActivation ─────────────────────────────────────────────────── */
+
+.poodle-licence-activation {
+  display: grid;
+  gap: var(--poodle-space-stack-md);
+  font-family: var(--poodle-typography-body-family);
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-licence-activation__title {
+  margin: 0;
+  font-family: var(--poodle-typography-heading-family);
+  font-size: var(--poodle-typography-body-size);
+  font-weight: var(--poodle-typography-label-weight);
+  line-height: var(--poodle-typography-body-lineHeight);
+}
+
+/* Three equal columns where there is room; one column per row where there is
+   not. Equal prominence survives the narrow case — a route must never become
+   the one you have to go looking for. */
+.poodle-licence-activation__routes .poodle-tabs__list {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(var(--poodle-recipe-licence-activation-route-min, 8rem), 1fr)
+  );
+  gap: var(--poodle-space-inline-xs);
+}
+
+.poodle-licence-activation__route {
+  display: grid;
+  gap: var(--poodle-space-stack-sm);
+}
+
+.poodle-licence-activation__explanation {
+  margin: 0;
+  color: var(--poodle-color-text-secondary);
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
+}
+
+/* The label and the submit sit outside the route panels: they belong to the
+   activation, not to whichever route is on screen. */
+.poodle-licence-activation__shared {
+  display: grid;
+  gap: var(--poodle-space-stack-sm);
+}
+
+.poodle-licence-activation__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--poodle-space-inline-sm);
+}
+
+/* ── LicenceSeats ──────────────────────────────────────────────────────── */
+
+.poodle-licence-seats {
+  display: grid;
+  gap: var(--poodle-space-stack-sm);
+  font-family: var(--poodle-typography-body-family);
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-licence-seats__title {
+  margin: 0;
+  font-family: var(--poodle-typography-heading-family);
+  font-size: var(--poodle-typography-body-size);
+  font-weight: var(--poodle-typography-label-weight);
+  line-height: var(--poodle-typography-body-lineHeight);
+}
+
+.poodle-licence-seats__list {
+  display: grid;
+  gap: var(--poodle-recipe-licence-seats-row-gap, var(--poodle-space-inline-xs));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.poodle-licence-seats__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--poodle-space-inline-md);
+  min-height: var(--poodle-recipe-licence-seats-row-height, 2.25rem);
+  padding-block: var(--poodle-space-inline-xs);
+  border-bottom: 0.0625rem solid var(--poodle-color-border-subtle);
+}
+
+.poodle-licence-seats__row:last-child {
+  border-bottom: none;
+}
+
+.poodle-licence-seats__identity {
+  display: flex;
+  align-items: baseline;
+  gap: var(--poodle-space-inline-sm);
+  min-width: 0;
+}
+
+/* An unnamed machine is normal text. Greying it, or italicising it as a
+   placeholder, would read as a defect in a row that is simply honest. */
+.poodle-licence-seats__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--poodle-color-text-primary);
+  font-size: var(--poodle-typography-label-size);
+  line-height: var(--poodle-typography-label-lineHeight);
+}
+
+.poodle-licence-seats__marker {
+  flex: none;
+  color: var(--poodle-color-text-tertiary);
+  font-size: var(--poodle-typography-caption-size);
+  line-height: var(--poodle-typography-caption-lineHeight);
+}
+
+.poodle-licence-seats__action {
+  flex: none;
+}

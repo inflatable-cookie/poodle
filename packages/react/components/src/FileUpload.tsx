@@ -34,6 +34,7 @@ export interface FileUploadProps {
   maxFiles?: number;
   showPreview?: boolean;
   disabled?: boolean;
+  describedBy?: string | null;
   files?: FileUploadItem[];
   defaultFiles?: FileUploadItem[];
   validate?: ((file: File) => string | null) | undefined;
@@ -62,6 +63,7 @@ export const FileUpload = forwardRef<FileUploadHandle, FileUploadProps>(function
     maxFiles = 10,
     showPreview = true,
     disabled = false,
+    describedBy = null,
     files: controlledFiles,
     defaultFiles = [],
     validate = undefined,
@@ -288,6 +290,7 @@ export const FileUpload = forwardRef<FileUploadHandle, FileUploadProps>(function
           multiple={multiple}
           disabled={disabled}
           className="poodle-file-upload__input"
+          aria-describedby={describedBy ?? undefined}
           aria-label={multiple ? "Drop files here or click to browse" : "Drop a file here or click to browse"}
           onChange={handleInputChange}
         />

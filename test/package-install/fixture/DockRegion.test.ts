@@ -1,7 +1,14 @@
 import { fireEvent, render } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
-import { DockRegion } from "@inflatable-cookie/poodle-svelte";
+import "@inflatable-cookie/poodle-core/styles/licence.css";
+import {
+  DockRegion,
+  LicenceActivation,
+  LicenceSeats,
+  LicenceStatus,
+} from "@inflatable-cookie/poodle-svelte";
+import type { LicenceKeyFormat, LicenceSeat } from "@inflatable-cookie/poodle-core";
 import type {
   DockExternalDragSource,
   PanelTabItem,
@@ -12,7 +19,43 @@ const items: PanelTabItem[] = [
   { value: "inspector", label: "Inspector" },
 ];
 
+const licenceKeyFormat: LicenceKeyFormat = {
+  parse: (input) => ({ ok: true, key: input, grouped: input }),
+  isProbablyATypo: () => false,
+};
+
+const seats: readonly LicenceSeat[] = [
+  { machineId: "packed-seat", label: "Studio", thisMachine: true },
+];
+
 describe("packed @inflatable-cookie/poodle-svelte", () => {
+  it("resolves the licence stylesheet and mounts every licence export", () => {
+    const status = render(LicenceStatus, {
+      props: {
+        usability: { state: "active" },
+        trustBasis: { kind: "offlineSignature" },
+        useUntil: null,
+        updateUntil: null,
+        usable: true,
+        attention: "none",
+      },
+    });
+    const activation = render(LicenceActivation, {
+      props: {
+        keyFormat: licenceKeyFormat,
+        accountTokenProvider: { acquire: async () => null },
+      },
+    });
+    const seatList = render(LicenceSeats, { props: { seats } });
+
+    expect(status.getByRole("heading", { name: "Licence active" })).toBeTruthy();
+    expect(activation.getByRole("heading", { name: "Activate licence" })).toBeTruthy();
+    expect(seatList.getByRole("heading", { name: "Activated machines" })).toBeTruthy();
+    status.unmount();
+    activation.unmount();
+    seatList.unmount();
+  });
+
   it("mounts the public drag seam and keeps local reorder", async () => {
     const onReorder = vi.fn();
     const end = vi.fn();

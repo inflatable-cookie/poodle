@@ -237,6 +237,9 @@ export const allComponents: ComponentEntry[] = [
   entry("DetailSectionGroup", "workstation", "Responsive layout group for multiple peer detail sections.", true),
   entry("DetailShell", "workstation", "Full detail page layout with header and sections.", true),
   entry("SettingsShell", "workstation", "Settings dialog shell: search, grouped navigation rail, and scrolling page region.", true),
+  entry("LicenceStatus", "workstation", "Held-licence usability, trust basis, and both coverage windows, without enforcing entitlement.", true),
+  entry("LicenceActivation", "workstation", "Key, account, and licence-file activation as equal routes over injected host behaviour.", true),
+  entry("LicenceSeats", "workstation", "Activated-machine list with self-service release of seats other than this machine.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
 export const tagLabels: Record<ComponentTag, string> = {

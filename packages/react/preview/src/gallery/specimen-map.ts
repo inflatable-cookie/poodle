@@ -80,6 +80,9 @@ import { KnobSpecimen } from "./specimens/KnobSpecimen";
 import { ListCardSpecimen } from "./specimens/ListCardSpecimen";
 import { ListContainerSpecimen } from "./specimens/ListContainerSpecimen";
 import { ListGridSpecimen } from "./specimens/ListGridSpecimen";
+import { LicenceActivationSpecimen } from "./specimens/LicenceActivationSpecimen";
+import { LicenceSeatsSpecimen } from "./specimens/LicenceSeatsSpecimen";
+import { LicenceStatusSpecimen } from "./specimens/LicenceStatusSpecimen";
 import { LogListSpecimen } from "./specimens/LogListSpecimen";
 import { MarkdownEditorSpecimen } from "./specimens/MarkdownEditorSpecimen";
 import { MediaBrowsePanelSpecimen } from "./specimens/MediaBrowsePanelSpecimen";
@@ -249,6 +252,9 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "list-card-counter": ListCardSpecimen,
   "list-container": ListContainerSpecimen,
   "list-grid": ListGridSpecimen,
+  "licence-activation": LicenceActivationSpecimen,
+  "licence-seats": LicenceSeatsSpecimen,
+  "licence-status": LicenceStatusSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
   "media-browse-panel": MediaBrowsePanelSpecimen,

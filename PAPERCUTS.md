@@ -7,6 +7,26 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-14 — `contract-prop-drift` finds a contract's props by searching for
+  the literal `### Public Props`, and **skips the contract entirely** when it
+  finds none (`if (cProps.size === 0) { skipped++; continue }`). A contract that
+  titles its table `## 4. Public Props` at heading level 2 therefore opts itself
+  out of the gate silently, and the run still reports success. 36 of 170 are
+  currently skipped, `update-status` among them. Measured on the licence trio:
+  before their headings were restructured the gate checked 131 surfaces, after
+  it checked 134 — the three were invisible to it, with no warning either way.
+  A "skipped because no props section" list in the output, or a required
+  heading in the contract template, would make the hole visible.
+
+- 2026-08-14 — Svelte `TextInput` defines `focus()` but never exports it
+  (`TextInput.svelte:379`), while React's exposes it through
+  `useImperativeHandle` (`TextInput.tsx:436`) and the working rules say
+  imperative escape hatches "are expected in both web runtimes". A composite
+  that must move focus into a field has no shared mechanism: `LicenceActivation`
+  routes through `getFocusableElements(panel)` in both frameworks instead, which
+  works but is focus-by-position rather than focus-by-identity. Adding
+  `export function focus()` to the Svelte component would close it.
+
 - 2026-08-13 — codegen write mode sweeps each target's output-root **top
   level** for orphans, so two targets sharing one `generated/` root delete
   each other's artifacts on `ir:build` (g14-b005's first build silently

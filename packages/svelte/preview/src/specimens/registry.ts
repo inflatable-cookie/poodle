@@ -64,6 +64,9 @@ import IconProviderSpecimen from "./IconProviderSpecimen.svelte";
 import ListCardSpecimen from "./ListCardSpecimen.svelte";
 import ListContainerSpecimen from "./ListContainerSpecimen.svelte";
 import ListGridSpecimen from "./ListGridSpecimen.svelte";
+import LicenceActivationSpecimen from "./LicenceActivationSpecimen.svelte";
+import LicenceSeatsSpecimen from "./LicenceSeatsSpecimen.svelte";
+import LicenceStatusSpecimen from "./LicenceStatusSpecimen.svelte";
 import LogListSpecimen from "./LogListSpecimen.svelte";
 import NavCardSpecimen from "./NavCardSpecimen.svelte";
 import MarkdownEditorSpecimen from "./MarkdownEditorSpecimen.svelte";
@@ -241,6 +244,9 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "list-card-counter": ListCardSpecimen,
   "list-container": ListContainerSpecimen,
   "list-grid": ListGridSpecimen,
+  "licence-activation": LicenceActivationSpecimen,
+  "licence-seats": LicenceSeatsSpecimen,
+  "licence-status": LicenceStatusSpecimen,
   "log-list": LogListSpecimen,
   "markdown-editor": MarkdownEditorSpecimen,
   "media-browse-panel": MediaBrowsePanelSpecimen,

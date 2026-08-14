@@ -39,6 +39,11 @@ type LicenceTrustBasis =
 type LicenceAttention = "none" | "informational" | "actionable";
 ```
 
+All authority timestamps (`until`, `at`, `checked`, `useUntil`, and
+`updateUntil`) are integer Unix seconds. Poodle core converts them to
+milliseconds once at the shared view boundary before passing them to
+`TimeAgo`. Callers and renderers must not convert them.
+
 ## 3. Anatomy
 
 ```text
@@ -56,21 +61,25 @@ Section
 
 No action lives in this component.
 
-## 4. Public Props
+## 4. Props And Inputs
+
+### Public Props
 
 | Prop | Type | Default | Required | Notes |
 | --- | --- | --- | --- | --- |
 | `usability` | `LicenceUsability` | — | yes | Authority projection; every state renders distinctly |
 | `trustBasis` | `LicenceTrustBasis` | — | yes | Shown quietly; contains no credential |
-| `useUntil` | `number \| null` | — | yes | Always rendered as its own row |
-| `updateUntil` | `number \| null` | — | yes | Always rendered as its own row |
+| `useUntil` | `number \| null` | — | yes | Unix seconds; always rendered as its own row |
+| `updateUntil` | `number \| null` | — | yes | Unix seconds; always rendered as its own row |
 | `usable` | `boolean` | — | yes | Reported through copy/data state only; never gates child controls |
 | `attention` | `LicenceAttention` | — | yes | Authority emphasis; not re-derived |
 | `title` | `string` | `"Licence"` | no | Section accessible name |
 | `size` | `ControlSize \| null` | `null` | no | Shared semantic size |
 | `density` | `ControlDensity \| null` | `null` | no | Shared density |
 
-No callbacks.
+### Callbacks
+
+None. No action lives in this component, so there is nothing to report upwards.
 
 ## 5. States And Copy
 
@@ -137,6 +146,7 @@ cases/specimens, Rust spec/renderer, GPUI, and Jetstream evidence.
 - `clockRefused` contains clock remedy and no expiry/purchase wording
 - use/update windows are two visible rows in all null/value combinations
 - both trust bases render distinctly
+- 10-digit authority seconds render as their intended modern date, not 1970
 - changing `usable` changes reported state only and never disables/hides an
   unrelated action
 

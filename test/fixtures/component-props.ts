@@ -198,6 +198,42 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
   Tree: { nodes: [{ value: "n1", label: "Node" }] },
   TriStateSwitch: { ariaLabel: "Toggle" },
   VideoPlayer: { src: "/video.mp4" },
+  // The licence trio. All three are authority-agnostic: the fixtures below are
+  // what a host supplies, never anything Poodle derives.
+  //
+  // `inGrace` with a remote trust basis puts the most anatomy on screen — head,
+  // body, both coverage rows, trust row, and the quiet detail row that only
+  // this state has.
+  LicenceStatus: {
+    usability: { state: "inGrace", until: 1_800_000_000 },
+    trustBasis: { kind: "remoteAssertion", checked: 1_750_000_000 },
+    useUntil: 1_800_000_000,
+    updateUntil: null,
+    usable: true,
+    attention: "none",
+  },
+  // Both host behaviours are required props. Stubs, because the sweeps mount
+  // and inspect anatomy — the real parser and account flow belong to the host,
+  // and Poodle must work against any pair that satisfies the interface.
+  LicenceActivation: {
+    keyFormat: {
+      parse: (input: string) =>
+        input.length >= 20
+          ? { ok: true, key: input, grouped: input }
+          : { ok: false, problem: { kind: "tooShort", minimum: 20, actual: input.length } },
+      isProbablyATypo: (problem: { kind: string }) => problem.kind !== "tooShort",
+    },
+    accountTokenProvider: { acquire: async () => null },
+  },
+  // Empty seats renders nothing by contract, so the sweep needs real rows: this
+  // machine (marker, no action) plus a named and an unnamed releasable seat.
+  LicenceSeats: {
+    seats: [
+      { machineId: "seat-1", label: "Studio Mac", thisMachine: true },
+      { machineId: "seat-2", label: "Tour laptop", thisMachine: false },
+      { machineId: "seat-3", label: null, thisMachine: false },
+    ],
+  },
   // Renders the installable offer: title, notes, install + defer actions.
   UpdateStatus: {
     status: { kind: "ready" },

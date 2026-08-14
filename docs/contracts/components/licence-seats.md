@@ -40,17 +40,21 @@ Section (absent when seats=[])
         └── Release ConfirmAction (when false)
 ```
 
-## 4. Public Props And Events
+## 4. Props And Events
+
+### Public Props
 
 | Prop | Type | Default | Required | Notes |
 | --- | --- | --- | --- | --- |
-| `seats` | `LicenceSeat[]` | `[]` | no | Empty renders nothing, not `1 seat` |
+| `seats` | `readonly LicenceSeat[]` | `[]` | no | Accepts authority getters directly; empty renders nothing, not `1 seat` |
 | `pendingMachineId` | `string \| null` | `null` | no | Disables that row's duplicate release |
 | `title` | `string` | `"Activated machines"` | no | Section heading/name |
 | `releaseLabel` | `string` | `"Release"` | no | Row action |
 | `confirmRelease` | `boolean` | `true` | no | Uses warning confirmation before emitting |
 | `size` | `ControlSize \| null` | `null` | no | Shared semantic size |
 | `density` | `ControlDensity \| null` | `null` | no | Shared density |
+
+### Callbacks
 
 | Callback | Payload | When |
 | --- | --- | --- |

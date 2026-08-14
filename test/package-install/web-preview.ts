@@ -180,16 +180,25 @@ const evidence = {
   },
   mountedProof: {
     svelte: {
-      component: "DockRegion",
+      components: ["DockRegion", "LicenceStatus", "LicenceActivation", "LicenceSeats"],
       publicImportsOnly: true,
+      licenceStyleSubpath: true,
       externalPayload: true,
       sameRegionReorder: true,
       accessibleRegionName: true,
       overlayGeometry: true,
     },
     react: {
-      components: ["Button", "Icon", "IconProvider"],
+      components: [
+        "Button",
+        "Icon",
+        "IconProvider",
+        "LicenceStatus",
+        "LicenceActivation",
+        "LicenceSeats",
+      ],
       publicImportsOnly: true,
+      licenceStyleSubpath: true,
       scopedDefaultIcons: true,
       clickHandler: true,
     },
