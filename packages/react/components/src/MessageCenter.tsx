@@ -7,6 +7,7 @@ import { EmptyState } from "./EmptyState";
 import { Icon } from "./Icon";
 import { IconButton } from "./IconButton";
 import { Popover } from "./Popover";
+import { Progress } from "./Progress";
 import { TimeAgo } from "./TimeAgo";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type {
@@ -88,6 +89,15 @@ export function MessageCenter({
               {item.timestamp != null ? <TimeAgo datetime={item.timestamp} short typography="inherit" /> : null}
             </span>
           ) : null}
+          {item.progress ? (
+            <Progress
+              value={item.progress.value}
+              max={item.progress.max ?? 100}
+              indeterminate={item.progress.indeterminate ?? false}
+              size="xs"
+              ariaLabel={`${item.title} progress`}
+            />
+          ) : null}
         </span>
       </>
     );
@@ -142,9 +152,13 @@ export function MessageCenter({
             </div>
           ) : (
             <ul className="poodle-message-center__list">
-              {items.map((item) => (
+              {items.map((item) => {
+                const canSelect = onItemSelect !== null && item.selectable !== false;
+                const canRead = onReadChange !== null && item.readControl !== false;
+                const canRemove = onRemove !== null && item.removable !== false;
+                return (
                 <li key={item.id} className="poodle-message-center__item" data-read={item.read} data-tone={item.tone ?? "info"}>
-                  {onItemSelect ? (
+                  {canSelect ? (
                     <button
                       type="button"
                       className="poodle-message-center__content poodle-message-center__content--interactive"
@@ -157,33 +171,36 @@ export function MessageCenter({
                     <div className="poodle-message-center__content">{messageContent(item)}</div>
                   )}
 
-                  <div className="poodle-message-center__actions">
-                    {onReadChange ? (
-                      <IconButton
-                        icon={item.read ? "mail" : "check"}
-                        ariaLabel={item.read ? `Mark ${item.title} unread` : `Mark ${item.title} read`}
-                        tooltip={item.read ? "Mark unread" : "Mark read"}
-                        variant="ghost"
-                        size="xs"
-                        density={resolvedDensity}
-                        onClick={() => onReadChange(item.id, !item.read)}
-                      />
-                    ) : null}
-                    {onRemove ? (
-                      <IconButton
-                        icon="trash-2"
-                        ariaLabel={`Remove ${item.title}`}
-                        tooltip="Remove"
-                        variant="ghost"
-                        tone="danger"
-                        size="xs"
-                        density={resolvedDensity}
-                        onClick={() => onRemove(item.id)}
-                      />
-                    ) : null}
-                  </div>
+                  {canRead || canRemove ? (
+                    <div className="poodle-message-center__actions">
+                      {canRead ? (
+                        <IconButton
+                          icon={item.read ? "mail" : "check"}
+                          ariaLabel={item.read ? `Mark ${item.title} unread` : `Mark ${item.title} read`}
+                          tooltip={item.read ? "Mark unread" : "Mark read"}
+                          variant="ghost"
+                          size="xs"
+                          density={resolvedDensity}
+                          onClick={() => onReadChange(item.id, !item.read)}
+                        />
+                      ) : null}
+                      {canRemove ? (
+                        <IconButton
+                          icon="trash-2"
+                          ariaLabel={`Remove ${item.title}`}
+                          tooltip="Remove"
+                          variant="ghost"
+                          tone="danger"
+                          size="xs"
+                          density={resolvedDensity}
+                          onClick={() => onRemove(item.id)}
+                        />
+                      ) : null}
+                    </div>
+                  ) : null}
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </section>
