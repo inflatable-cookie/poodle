@@ -58,3 +58,7 @@ opt-level = 3
 public-intent = false
 channel = "internal"
 stability = "internal-tooling"
+
+[[test]]
+name = "catalogue"
+path = "tests/catalogue.rs"

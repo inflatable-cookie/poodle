@@ -21,6 +21,8 @@
 //! - [`model`] — load and validate a serialized `IrModel`.
 //! - [`machine_interfaces`] — load and validate the machine-interface schema
 //!   (spec 064 mechanism 1). Parallel to [`model`], not an `IrModel`.
+//! - [`catalogue`] — load and validate the preview-catalogue manifest
+//!   (g14.025). Parallel to [`model`], not an `IrModel`.
 //! - [`targets`] — the target registry (TypeScript is the one target this
 //!   card ships; JSON schema, registry, conformance vectors, and docs
 //!   fragments are a follow-up card). Machine-interface targets are
@@ -32,6 +34,7 @@
 //! the header is a pure function of the source path with no timestamp or
 //! machine value, and float/string rendering is locale-independent.
 
+pub mod catalogue;
 pub mod check;
 pub mod conformance;
 pub mod emit;
@@ -44,7 +47,7 @@ pub mod write;
 
 pub use check::{check_outputs, CheckReport, DriftKind};
 pub use conformance::{load_cases, load_interface};
-pub use emit::{generate, header, machine_header, EmitTarget, GeneratedFile};
+pub use emit::{catalogue_header, generate, header, machine_header, EmitTarget, GeneratedFile};
 pub use error::{CodegenError, Result};
 pub use model::load_and_validate;
 pub use write::write_outputs;

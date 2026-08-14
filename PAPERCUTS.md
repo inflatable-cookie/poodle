@@ -7,6 +7,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-14 — Empty catalogue collection vocabularies emit
+  `CatalogueCollectionId = never`. Mapping that union in shared preview
+  nav fails `effigy check:svelte`, which type-checks preview files via
+  the components workspace. Keep a string-keyed lookup until collections
+  exist, or emit a non-`never` empty-collection type.
+
+- 2026-08-14 — React preview files under `src/gallery/` need four `../`
+  segments to reach `packages/svelte/preview/src`, while `src/main.tsx`
+  needs three. Shared catalogue CSS/nav imports copied the shallower
+  depth and failed Vite resolve. A workspace alias for the shared
+  preview catalogue module would remove the depth trap.
+
 - 2026-08-14 — `effigy docs:contract-drift` fails on main for Button's
   Svelte-only `children`, `leading`, and `trailing` props, while
   `effigy docs:check` stays green because the aggregate lint path treats that

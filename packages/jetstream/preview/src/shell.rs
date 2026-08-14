@@ -391,17 +391,17 @@ fn build_sidebar(
             // Tag-grouped list mirroring the Svelte preview sidebar: a group
             // heading (CONTROLS, INPUTS, …) whenever the tag changes — entries
             // are pre-ordered by (tag order, name) in the registry.
-            let components = component_registry::ALL_COMPONENTS;
+            let components = component_registry::all_components();
             let active_idx = state.active_component();
-            let mut current_tag = None;
+            let mut current_family = None;
             for (i, entry) in components.iter().enumerate() {
                 if !state.matches_search(entry.display_name) {
                     continue;
                 }
-                if current_tag != Some(entry.tag) {
-                    current_tag = Some(entry.tag);
+                if current_family != Some(entry.family) {
+                    current_family = Some(entry.family);
                     sidebar = sidebar.child(
-                        label(entry.tag.label().to_uppercase())
+                        label(entry.tag_label().to_uppercase())
                             .px(14.0)
                             .pt(if i == 0 { 12.0 } else { 20.0 })
                             .pb(6.0)

@@ -1,0 +1,1714 @@
+{
+  "schemaVersion": 1,
+  "sections": [
+    {
+      "id": "foundations",
+      "label": "Foundations"
+    },
+    {
+      "id": "composition",
+      "label": "Composition"
+    },
+    {
+      "id": "systems",
+      "label": "Systems"
+    }
+  ],
+  "families": [
+    {
+      "id": "actions-selection",
+      "section": "foundations",
+      "label": "Actions & selection"
+    },
+    {
+      "id": "text-value-entry",
+      "section": "foundations",
+      "label": "Text & value entry"
+    },
+    {
+      "id": "date-time",
+      "section": "foundations",
+      "label": "Date & time"
+    },
+    {
+      "id": "layout",
+      "section": "foundations",
+      "label": "Layout"
+    },
+    {
+      "id": "content-identity",
+      "section": "foundations",
+      "label": "Content & identity"
+    },
+    {
+      "id": "status-progress",
+      "section": "foundations",
+      "label": "Status & progress"
+    },
+    {
+      "id": "navigation",
+      "section": "composition",
+      "label": "Navigation"
+    },
+    {
+      "id": "overlays-disclosure",
+      "section": "composition",
+      "label": "Overlays & disclosure"
+    },
+    {
+      "id": "forms-validation",
+      "section": "composition",
+      "label": "Forms & validation"
+    },
+    {
+      "id": "data-collections",
+      "section": "composition",
+      "label": "Data & collections"
+    },
+    {
+      "id": "media",
+      "section": "composition",
+      "label": "Media"
+    },
+    {
+      "id": "application-shell",
+      "section": "systems",
+      "label": "Application shell"
+    },
+    {
+      "id": "agent-tools",
+      "section": "systems",
+      "label": "Agent & tools"
+    },
+    {
+      "id": "model-connections",
+      "section": "systems",
+      "label": "Model connections"
+    },
+    {
+      "id": "audio-music",
+      "section": "systems",
+      "label": "Audio & music"
+    },
+    {
+      "id": "account-lifecycle",
+      "section": "systems",
+      "label": "Account & lifecycle"
+    }
+  ],
+  "kinds": [
+    {
+      "id": "control",
+      "label": "Control"
+    },
+    {
+      "id": "input",
+      "label": "Input"
+    },
+    {
+      "id": "layout",
+      "label": "Layout"
+    },
+    {
+      "id": "display",
+      "label": "Display"
+    },
+    {
+      "id": "overlay",
+      "label": "Overlay"
+    },
+    {
+      "id": "navigation",
+      "label": "Navigation"
+    },
+    {
+      "id": "data",
+      "label": "Data"
+    },
+    {
+      "id": "media",
+      "label": "Media"
+    },
+    {
+      "id": "feedback",
+      "label": "Feedback"
+    },
+    {
+      "id": "form",
+      "label": "Form"
+    },
+    {
+      "id": "composite",
+      "label": "Composite"
+    }
+  ],
+  "collections": [],
+  "components": [
+    {
+      "slug": "button",
+      "displayName": "Button",
+      "description": "Primary interactive control for triggering actions.",
+      "section": "foundations",
+      "family": "actions-selection",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "checkbox",
+      "displayName": "Checkbox",
+      "description": "Boolean toggle with label, supporting indeterminate state.",
+      "section": "foundations",
+      "family": "actions-selection",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "collapse-toggle",
+      "displayName": "CollapseToggle",
+      "description": "Directional chevron toggle for collapsing/expanding regions.",
+      "section": "foundations",
+      "family": "actions-selection",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "confirm-action",
+      "displayName": "ConfirmAction",
+      "description": "Trigger with confirmation prompt before executing.",
+      "section": "foundations",
+      "family": "actions-selection",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "icon-button",
+      "displayName": "IconButton",
+      "description": "Button variant displaying only an icon.",
+      "section": "foundations",
+      "family": "actions-selection",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "radio",
+      "displayName": "Radio",
+      "description": "Single radio option with native name-based group exclusivity.",
+      "section": "foundations",
+      "family": "actions-selection",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "radio-group",
+      "displayName": "RadioGroup",
+      "description": "Single-selection option group.",
+      "section": "foundations",
+      "family": "actions-selection",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "segmented-control",
+      "displayName": "SegmentedControl",
+      "description": "Inline toggle between mutually exclusive options.",
+      "section": "foundations",
+      "family": "actions-selection",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "split-button",
+      "displayName": "SplitButton",
+      "description": "Button with primary action and dropdown menu.",
+      "section": "foundations",
+      "family": "actions-selection",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "switch",
+      "displayName": "Switch",
+      "description": "Toggle switch for on/off states.",
+      "section": "foundations",
+      "family": "actions-selection",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "toggle-group",
+      "displayName": "ToggleGroup",
+      "description": "Group of mutually exclusive toggle buttons.",
+      "section": "foundations",
+      "family": "actions-selection",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "tri-state-switch",
+      "displayName": "TriStateSwitch",
+      "description": "Three-position switch for on/off/indeterminate.",
+      "section": "foundations",
+      "family": "actions-selection",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "code-input",
+      "displayName": "CodeInput",
+      "description": "Code entry with visual digit slots and mask mode.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "color-picker",
+      "displayName": "ColorPicker",
+      "description": "Color selection with native picker, hex input, and swatches.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "drag-number-field",
+      "displayName": "DragNumberField",
+      "description": "Numeric entry supporting pointer drag and direct type-in.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "editable-label",
+      "displayName": "EditableLabel",
+      "description": "Inline text that becomes editable on interaction.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "embed-input",
+      "displayName": "EmbedInput",
+      "description": "URL or embed code input with provider detection and parsing.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "file-upload",
+      "displayName": "FileUpload",
+      "description": "File input with drag-and-drop, type filtering, and upload progress.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "number-input",
+      "displayName": "NumberInput",
+      "description": "Numeric input with optional steppers.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "range-slider",
+      "displayName": "RangeSlider",
+      "description": "Dual-thumb slider for selecting a numeric range.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "rating",
+      "displayName": "Rating",
+      "description": "Star-based rating input or display.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "ref-select",
+      "displayName": "RefSelect",
+      "description": "Version-control ref chooser with search, a current marker and a loading footer.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "select",
+      "displayName": "Select",
+      "description": "Dropdown selection from a list of options.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "slider",
+      "displayName": "Slider",
+      "description": "Single-thumb slider for selecting a numeric value.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "text-input",
+      "displayName": "TextInput",
+      "description": "Single or multi-line text input with search, slug, and multiline modes.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "theme-select",
+      "displayName": "ThemeSelect",
+      "description": "Theme picker: popover of theme swatch tiles with an optional modular controller.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "token-input",
+      "displayName": "TokenInput",
+      "description": "Tokenizing text input for badge-like multi-value entry with separator-driven commit semantics.",
+      "section": "foundations",
+      "family": "text-value-entry",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "calendar",
+      "displayName": "Calendar",
+      "description": "Date grid for picking a single date or a date range.",
+      "section": "foundations",
+      "family": "date-time",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "date-picker",
+      "displayName": "DatePicker",
+      "description": "Date selection with calendar popup.",
+      "section": "foundations",
+      "family": "date-time",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "date-range-picker",
+      "displayName": "DateRangePicker",
+      "description": "Start and end date selection with dual calendar.",
+      "section": "foundations",
+      "family": "date-time",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "date-time-picker",
+      "displayName": "DateTimePicker",
+      "description": "Combined date and time selection.",
+      "section": "foundations",
+      "family": "date-time",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "date-time-range-picker",
+      "displayName": "DateTimeRangePicker",
+      "description": "Start/end date-time range selection.",
+      "section": "foundations",
+      "family": "date-time",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "date-time-zone-picker",
+      "displayName": "DateTimeZonePicker",
+      "description": "Date-time picker with timezone awareness.",
+      "section": "foundations",
+      "family": "date-time",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "duration-input",
+      "displayName": "DurationInput",
+      "description": "Segmented hours/minutes/seconds duration entry.",
+      "section": "foundations",
+      "family": "date-time",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "time-ago",
+      "displayName": "TimeAgo",
+      "description": "Live-updating relative timestamp display.",
+      "section": "foundations",
+      "family": "date-time",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "time-input",
+      "displayName": "TimeInput",
+      "description": "Time-of-day input with hour/minute selection.",
+      "section": "foundations",
+      "family": "date-time",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "time-zone-select",
+      "displayName": "TimeZoneSelect",
+      "description": "Timezone selection dropdown.",
+      "section": "foundations",
+      "family": "date-time",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "box",
+      "displayName": "Box",
+      "description": "Generic layout container with configurable padding and alignment.",
+      "section": "foundations",
+      "family": "layout",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "grid",
+      "displayName": "Grid",
+      "description": "CSS Grid layout container.",
+      "section": "foundations",
+      "family": "layout",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "list-grid",
+      "displayName": "ListGrid",
+      "description": "Responsive auto-fill grid for card or tile collections with optional header actions.",
+      "section": "foundations",
+      "family": "layout",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "region",
+      "displayName": "Region",
+      "description": "Dashed placeholder block for designating layout areas.",
+      "section": "foundations",
+      "family": "layout",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "resize-handle",
+      "displayName": "ResizeHandle",
+      "description": "Drag and keyboard resize handle for split layouts.",
+      "section": "foundations",
+      "family": "layout",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "scroll-shell",
+      "displayName": "ScrollShell",
+      "description": "Scrollable container with overflow management.",
+      "section": "foundations",
+      "family": "layout",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "separator",
+      "displayName": "Separator",
+      "description": "Visual divider between content sections.",
+      "section": "foundations",
+      "family": "layout",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "spacer",
+      "displayName": "Spacer",
+      "description": "Flexible space for pushing layout elements apart.",
+      "section": "foundations",
+      "family": "layout",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "split-view",
+      "displayName": "SplitView",
+      "description": "Resizable split pane layout with collapse toggles.",
+      "section": "foundations",
+      "family": "layout",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "stack",
+      "displayName": "Stack",
+      "description": "Vertical flex layout container.",
+      "section": "foundations",
+      "family": "layout",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "surface",
+      "displayName": "Surface",
+      "description": "Themed container with background, border, and padding variants.",
+      "section": "foundations",
+      "family": "layout",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "avatar",
+      "displayName": "Avatar",
+      "description": "Image or initials avatar for user identity surfaces.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "card",
+      "displayName": "Card",
+      "description": "Contained surface for grouped content.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "code",
+      "displayName": "Code",
+      "description": "Syntax-highlighted code display with copy button.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "detail-item",
+      "displayName": "DetailItem",
+      "description": "Label-value pair for metadata display.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "embed-preview",
+      "displayName": "EmbedPreview",
+      "description": "Rich preview card for embedded content.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "eyebrow",
+      "displayName": "Eyebrow",
+      "description": "Small uppercase label used for section categorization.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "icon",
+      "displayName": "Icon",
+      "description": "SVG icon accepting direct node data or string names.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "icon-provider",
+      "displayName": "IconProvider",
+      "description": "Context provider for bulk icon set lookups.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "meta-bar",
+      "displayName": "MetaBar",
+      "description": "Inline metadata ribbon for compact header facts.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "meta-item",
+      "displayName": "MetaItem",
+      "description": "Compact labeled metadata item for inline ribbons.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "pill",
+      "displayName": "Pill",
+      "description": "Small inline label chip with tone and size variants.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "text",
+      "displayName": "Text",
+      "description": "Small text primitive for body, caption, hint, and status copy.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "text-link",
+      "displayName": "TextLink",
+      "description": "Inline text link or action for prose and metadata copy.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "ui-presentation-provider",
+      "displayName": "UiPresentationProvider",
+      "description": "Scoped provider for semantic density and size defaults.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "callout",
+      "displayName": "Callout",
+      "description": "Informational block with tone and optional actions.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "empty-state",
+      "displayName": "EmptyState",
+      "description": "Placeholder for empty data views with messaging.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "error-boundary",
+      "displayName": "ErrorBoundary",
+      "description": "Error boundary with retryable empty-state fallback.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "meter",
+      "displayName": "Meter",
+      "description": "Visual gauge for scalar values within a known range.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "metric-tile",
+      "displayName": "MetricTile",
+      "description": "Compact label-value tile for metrics and KPIs.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "page-loading",
+      "displayName": "PageLoading",
+      "description": "Full-viewport loading overlay with spinner.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "progress",
+      "displayName": "Progress",
+      "description": "Determinate or indeterminate progress indicator.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "remediation-banner",
+      "displayName": "RemediationBanner",
+      "description": "Persistent recovery message with announcement and command actions.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "skeleton",
+      "displayName": "Skeleton",
+      "description": "Placeholder loading shape for content.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "spinner",
+      "displayName": "Spinner",
+      "description": "Animated loading indicator with ring and grid variants.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "state-tile",
+      "displayName": "StateTile",
+      "description": "Static label-value tile with optional trend and host-owned sparkline.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "status-indicator",
+      "displayName": "StatusIndicator",
+      "description": "Colored dot or icon indicating status.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "toast-host",
+      "displayName": "ToastHost",
+      "description": "Store-aware toast host with timer policy.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "toast-stack",
+      "displayName": "ToastStack",
+      "description": "Stacked transient notification manager.",
+      "section": "foundations",
+      "family": "status-progress",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "breadcrumbs",
+      "displayName": "Breadcrumbs",
+      "description": "Hierarchical navigation trail showing current location.",
+      "section": "composition",
+      "family": "navigation",
+      "kind": "navigation",
+      "collections": []
+    },
+    {
+      "slug": "nav-card",
+      "displayName": "NavCard",
+      "description": "Navigation-oriented card link with icon, badge, and arrow.",
+      "section": "composition",
+      "family": "navigation",
+      "kind": "navigation",
+      "collections": []
+    },
+    {
+      "slug": "navigation-menu",
+      "displayName": "NavigationMenu",
+      "description": "Horizontal navigation with dropdown sub-menus.",
+      "section": "composition",
+      "family": "navigation",
+      "kind": "navigation",
+      "collections": []
+    },
+    {
+      "slug": "pagination",
+      "displayName": "Pagination",
+      "description": "Page navigation controls for paged data sets.",
+      "section": "composition",
+      "family": "navigation",
+      "kind": "navigation",
+      "collections": []
+    },
+    {
+      "slug": "pagination-summary",
+      "displayName": "PaginationSummary",
+      "description": "Textual summary of pagination state.",
+      "section": "composition",
+      "family": "navigation",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "sidebar-nav",
+      "displayName": "SidebarNav",
+      "description": "Grouped sidebar navigation list with active item state.",
+      "section": "composition",
+      "family": "navigation",
+      "kind": "navigation",
+      "collections": []
+    },
+    {
+      "slug": "stepper",
+      "displayName": "Stepper",
+      "description": "Route through a multi-step process, with per-step status.",
+      "section": "composition",
+      "family": "navigation",
+      "kind": "navigation",
+      "collections": []
+    },
+    {
+      "slug": "tabs",
+      "displayName": "Tabs",
+      "description": "Tabbed interface with underline, card, pill, and strip variants.",
+      "section": "composition",
+      "family": "navigation",
+      "kind": "navigation",
+      "collections": []
+    },
+    {
+      "slug": "tree",
+      "displayName": "Tree",
+      "description": "Hierarchical file-explorer tree with expand/collapse and multi-select.",
+      "section": "composition",
+      "family": "navigation",
+      "kind": "navigation",
+      "collections": []
+    },
+    {
+      "slug": "accordion",
+      "displayName": "Accordion",
+      "description": "Expandable disclosure panels with single or multiple selection.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "alert-dialog",
+      "displayName": "AlertDialog",
+      "description": "Focused confirmation modal for destructive actions.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "collapsible",
+      "displayName": "Collapsible",
+      "description": "Show/hide content toggle without accordion grouping.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "command-palette",
+      "displayName": "CommandPalette",
+      "description": "Keyboard-driven command search and execution overlay.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "context-menu",
+      "displayName": "ContextMenu",
+      "description": "Right-click triggered menu overlay.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "debug-dialog",
+      "displayName": "DebugDialog",
+      "description": "Developer-facing JSON debug dialog hidden when no value is supplied.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "dialog",
+      "displayName": "Dialog",
+      "description": "Modal overlay for confirmations, forms, or alerts.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "drawer",
+      "displayName": "Drawer",
+      "description": "Slide-out panel from a screen edge.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "form-dialog",
+      "displayName": "FormDialog",
+      "description": "Modal dialog with embedded form and submit/cancel.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "hover-card",
+      "displayName": "HoverCard",
+      "description": "Rich preview card triggered by hover or focus.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "menu",
+      "displayName": "Menu",
+      "description": "Dropdown menu with items, separators, and keyboard navigation.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "menubar",
+      "displayName": "Menubar",
+      "description": "Horizontal menu bar with dropdown sub-menus.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "popover",
+      "displayName": "Popover",
+      "description": "Anchored overlay for contextual content.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "tooltip",
+      "displayName": "Tooltip",
+      "description": "Hover/focus-triggered informational overlay.",
+      "section": "composition",
+      "family": "overlays-disclosure",
+      "kind": "overlay",
+      "collections": []
+    },
+    {
+      "slug": "block-editor",
+      "displayName": "BlockEditor",
+      "description": "Block-based content editor shell with pluggable types.",
+      "section": "composition",
+      "family": "forms-validation",
+      "kind": "form",
+      "collections": []
+    },
+    {
+      "slug": "field",
+      "displayName": "Field",
+      "description": "Form field wrapper with label, help text, and validation.",
+      "section": "composition",
+      "family": "forms-validation",
+      "kind": "form",
+      "collections": []
+    },
+    {
+      "slug": "field-set",
+      "displayName": "FieldSet",
+      "description": "Semantic fieldset with legend and grid layout.",
+      "section": "composition",
+      "family": "forms-validation",
+      "kind": "form",
+      "collections": []
+    },
+    {
+      "slug": "form-actions",
+      "displayName": "FormActions",
+      "description": "Action row for form submit, cancel, and secondary actions.",
+      "section": "composition",
+      "family": "forms-validation",
+      "kind": "form",
+      "collections": []
+    },
+    {
+      "slug": "form-layout",
+      "displayName": "FormLayout",
+      "description": "Responsive form grid with error messaging.",
+      "section": "composition",
+      "family": "forms-validation",
+      "kind": "form",
+      "collections": []
+    },
+    {
+      "slug": "inline-list-section",
+      "displayName": "InlineListSection",
+      "description": "Compact related-list section for detail and metadata pages.",
+      "section": "composition",
+      "family": "forms-validation",
+      "kind": "form",
+      "collections": []
+    },
+    {
+      "slug": "markdown-editor",
+      "displayName": "MarkdownEditor",
+      "description": "Markdown authoring with formatting toolbar and preview.",
+      "section": "composition",
+      "family": "forms-validation",
+      "kind": "form",
+      "collections": []
+    },
+    {
+      "slug": "password-requirements",
+      "displayName": "PasswordRequirements",
+      "description": "Password-policy checklist driven by caller rules.",
+      "section": "composition",
+      "family": "forms-validation",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "validation-summary",
+      "displayName": "ValidationSummary",
+      "description": "Linked summary of active form validation failures.",
+      "section": "composition",
+      "family": "forms-validation",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "bulk-action-bar",
+      "displayName": "BulkActionBar",
+      "description": "Action bar for batch operations on selected items.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "feedback",
+      "collections": []
+    },
+    {
+      "slug": "card-radio-group",
+      "displayName": "CardRadioGroup",
+      "description": "Radio selection across rich card options.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "card-toggle-group",
+      "displayName": "CardToggleGroup",
+      "description": "Toggleable selection across rich card options.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "data-table",
+      "displayName": "DataTable",
+      "description": "Feature-rich table with sorting, selection, and pagination.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "editable-list",
+      "displayName": "EditableList",
+      "description": "Editable/reorderable list with add, remove, and drag-and-drop.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "filter-builder",
+      "displayName": "FilterBuilder",
+      "description": "Popover filter-clause builder with editable pills and AND/OR combinator.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "filter-toolbar",
+      "displayName": "FilterToolbar",
+      "description": "Toolbar with filter controls for data views.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "list-card",
+      "displayName": "ListCard",
+      "description": "Structured list item card with snippet-based leading, footer, and trailing composition.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "list-card-counter",
+      "displayName": "ListCardCounter",
+      "description": "Compact icon-count item used in ListCard footer composition.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "list-container",
+      "displayName": "ListContainer",
+      "description": "List-page shell with header, filters, and pagination.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "log-list",
+      "displayName": "LogList",
+      "description": "Operational log viewer and audit activity list.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "order-by",
+      "displayName": "OrderBy",
+      "description": "Sort-control toolbar for data views.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "picker-shell",
+      "displayName": "PickerShell",
+      "description": "Container for search-and-select picker workflows.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "relation-picker",
+      "displayName": "RelationPicker",
+      "description": "Searchable picker for selecting related items.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "selection-summary",
+      "displayName": "SelectionSummary",
+      "description": "Summary display of current selection state.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "table",
+      "displayName": "Table",
+      "description": "Static data table with headers, rows, and alignment.",
+      "section": "composition",
+      "family": "data-collections",
+      "kind": "data",
+      "collections": []
+    },
+    {
+      "slug": "audio-player",
+      "displayName": "AudioPlayer",
+      "description": "Audio playback with transport controls, volume, and speed.",
+      "section": "composition",
+      "family": "media",
+      "kind": "media",
+      "collections": []
+    },
+    {
+      "slug": "media-browse-panel",
+      "displayName": "MediaBrowsePanel",
+      "description": "Browsable media grid with search and pagination.",
+      "section": "composition",
+      "family": "media",
+      "kind": "media",
+      "collections": []
+    },
+    {
+      "slug": "media-picker",
+      "displayName": "MediaPicker",
+      "description": "Dialog for browsing and selecting media assets.",
+      "section": "composition",
+      "family": "media",
+      "kind": "media",
+      "collections": []
+    },
+    {
+      "slug": "media-preview",
+      "displayName": "MediaPreview",
+      "description": "Media asset preview with metadata and fallback.",
+      "section": "composition",
+      "family": "media",
+      "kind": "media",
+      "collections": []
+    },
+    {
+      "slug": "media-thumbnail",
+      "displayName": "MediaThumbnail",
+      "description": "Compact media thumbnail with overlay metadata.",
+      "section": "composition",
+      "family": "media",
+      "kind": "media",
+      "collections": []
+    },
+    {
+      "slug": "video-player",
+      "displayName": "VideoPlayer",
+      "description": "Video playback with overlay controls and fullscreen.",
+      "section": "composition",
+      "family": "media",
+      "kind": "media",
+      "collections": []
+    },
+    {
+      "slug": "action-discovery-panel",
+      "displayName": "ActionDiscoveryPanel",
+      "description": "Grouped action list with keyboard navigation.",
+      "section": "systems",
+      "family": "application-shell",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "app-header",
+      "displayName": "AppHeader",
+      "description": "Top-level application header with branding and actions.",
+      "section": "systems",
+      "family": "application-shell",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "detail-section",
+      "displayName": "DetailSection",
+      "description": "Titled section for grouping detail content.",
+      "section": "systems",
+      "family": "application-shell",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "detail-section-group",
+      "displayName": "DetailSectionGroup",
+      "description": "Responsive layout group for multiple peer detail sections.",
+      "section": "systems",
+      "family": "application-shell",
+      "kind": "layout",
+      "collections": []
+    },
+    {
+      "slug": "detail-shell",
+      "displayName": "DetailShell",
+      "description": "Full detail page layout with header and sections.",
+      "section": "systems",
+      "family": "application-shell",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "dock-region",
+      "displayName": "DockRegion",
+      "description": "Collapsible dock container with tabs and drag-and-drop.",
+      "section": "systems",
+      "family": "application-shell",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "history-center",
+      "displayName": "HistoryCenter",
+      "description": "History popover with undo/redo cluster and fork branches.",
+      "section": "systems",
+      "family": "application-shell",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "message-center",
+      "displayName": "MessageCenter",
+      "description": "Popover activity surface for durable messages and live operations.",
+      "section": "systems",
+      "family": "application-shell",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "page-header",
+      "displayName": "PageHeader",
+      "description": "Page-level header with title, actions, and breadcrumbs.",
+      "section": "systems",
+      "family": "application-shell",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "settings-shell",
+      "displayName": "SettingsShell",
+      "description": "Settings dialog shell: search, grouped navigation rail, and scrolling page region.",
+      "section": "systems",
+      "family": "application-shell",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "status-bar",
+      "displayName": "StatusBar",
+      "description": "Bottom status bar with leading and trailing slots.",
+      "section": "systems",
+      "family": "application-shell",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "toolbar",
+      "displayName": "Toolbar",
+      "description": "Horizontal action bar with grouped controls.",
+      "section": "systems",
+      "family": "application-shell",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "agent-chat-input",
+      "displayName": "AgentChatInput",
+      "description": "Agent composer: auto-growing editor, control toolbar, context ring, submit/stop action.",
+      "section": "systems",
+      "family": "agent-tools",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "agent-message",
+      "displayName": "AgentMessage",
+      "description": "One turn of agent prose, rendered from the shared markdown block model.",
+      "section": "systems",
+      "family": "agent-tools",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "agent-plan",
+      "displayName": "AgentPlan",
+      "description": "The plan an agent proposes at the end of a plan-mode turn, hosted by the composer.",
+      "section": "systems",
+      "family": "agent-tools",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "agent-plan-record",
+      "displayName": "AgentPlanRecord",
+      "description": "The read-only record a decided plan leaves in the transcript.",
+      "section": "systems",
+      "family": "agent-tools",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "agent-question",
+      "displayName": "AgentQuestion",
+      "description": "The question an agent asks mid-turn, hosted by the composer.",
+      "section": "systems",
+      "family": "agent-tools",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "agent-question-record",
+      "displayName": "AgentQuestionRecord",
+      "description": "The read-only record an answered question leaves in the transcript.",
+      "section": "systems",
+      "family": "agent-tools",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "agent-subagent",
+      "displayName": "AgentSubagent",
+      "description": "An inline group for a provider-owned child agent's work in the transcript.",
+      "section": "systems",
+      "family": "agent-tools",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "agent-transcript",
+      "displayName": "AgentTranscript",
+      "description": "The output surface of an agent conversation: grouped tool runs, messages and changed files.",
+      "section": "systems",
+      "family": "agent-tools",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "changed-files",
+      "displayName": "ChangedFiles",
+      "description": "What a turn touched: counted summary expanding into a directory tree.",
+      "section": "systems",
+      "family": "agent-tools",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "tool-call",
+      "displayName": "ToolCall",
+      "description": "One row of agent work, with its output behind a disclosure.",
+      "section": "systems",
+      "family": "agent-tools",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "tool-call-group",
+      "displayName": "ToolCallGroup",
+      "description": "A contiguous run of tool calls behind one collapsible summary.",
+      "section": "systems",
+      "family": "agent-tools",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "model-catalogue-editor",
+      "displayName": "ModelCatalogueEditor",
+      "description": "Reorderable shown-model list with hide/restore for one configured connection.",
+      "section": "systems",
+      "family": "model-connections",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "model-connection-card",
+      "displayName": "ModelConnectionCard",
+      "description": "Disclosure card for one configured connection with independent enable switch.",
+      "section": "systems",
+      "family": "model-connections",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "model-connection-picker",
+      "displayName": "ModelConnectionPicker",
+      "description": "Searchable grouped picker for one exact model route.",
+      "section": "systems",
+      "family": "model-connections",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "model-connection-setup",
+      "displayName": "ModelConnectionSetup",
+      "description": "Choose-then-configure shell for adding a model connection.",
+      "section": "systems",
+      "family": "model-connections",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "model-picker",
+      "displayName": "ModelPicker",
+      "description": "Combined model and capability-axis picker in one popover widget.",
+      "section": "systems",
+      "family": "model-connections",
+      "kind": "input",
+      "collections": []
+    },
+    {
+      "slug": "audio-meter",
+      "displayName": "AudioMeter",
+      "description": "Ballistic audio level meter with mono and stereo rendering.",
+      "section": "systems",
+      "family": "audio-music",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "audio-switch",
+      "displayName": "AudioSwitch",
+      "description": "Latch, momentary, or multi-state audio switch with lamp state.",
+      "section": "systems",
+      "family": "audio-music",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "envelope-editor",
+      "displayName": "EnvelopeEditor",
+      "description": "Editable normalized envelope with curved segments and snap hooks.",
+      "section": "systems",
+      "family": "audio-music",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "fader",
+      "displayName": "Fader",
+      "description": "Audio fader with detents and explicit gesture state.",
+      "section": "systems",
+      "family": "audio-music",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "gain-reduction-meter",
+      "displayName": "GainReductionMeter",
+      "description": "Inverted ballistic meter for gain-reduction magnitude.",
+      "section": "systems",
+      "family": "audio-music",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "keyboard",
+      "displayName": "Keyboard",
+      "description": "Virtual musical keyboard with pointer, computer-key, and pitch-gutter input.",
+      "section": "systems",
+      "family": "audio-music",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "knob",
+      "displayName": "Knob",
+      "description": "Audio rotary control with pluggable value laws and gesture semantics.",
+      "section": "systems",
+      "family": "audio-music",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "mod-matrix-grid",
+      "displayName": "ModMatrixGrid",
+      "description": "Generic source-by-destination grid of bipolar enabled amounts.",
+      "section": "systems",
+      "family": "audio-music",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "value-readout",
+      "displayName": "ValueReadout",
+      "description": "Formatted audio-domain numeric readout.",
+      "section": "systems",
+      "family": "audio-music",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "waveform-display",
+      "displayName": "WaveformDisplay",
+      "description": "Inspector-scale peak-pyramid display with cursor and selection.",
+      "section": "systems",
+      "family": "audio-music",
+      "kind": "display",
+      "collections": []
+    },
+    {
+      "slug": "xy-pad",
+      "displayName": "XYPad",
+      "description": "Atomic two-axis audio value control with independent laws.",
+      "section": "systems",
+      "family": "audio-music",
+      "kind": "control",
+      "collections": []
+    },
+    {
+      "slug": "licence-activation",
+      "displayName": "LicenceActivation",
+      "description": "Host-selected key activation, or account activation with an offline licence-file fallback.",
+      "section": "systems",
+      "family": "account-lifecycle",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "licence-seats",
+      "displayName": "LicenceSeats",
+      "description": "Inline-editable activated-machine list with self-service release of seats other than this machine.",
+      "section": "systems",
+      "family": "account-lifecycle",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "licence-status",
+      "displayName": "LicenceStatus",
+      "description": "Held-licence usability, trust basis, and both coverage windows, without enforcing entitlement.",
+      "section": "systems",
+      "family": "account-lifecycle",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "update-center",
+      "displayName": "UpdateCenter",
+      "description": "Update popover trigger with presence-driven visibility and attention.",
+      "section": "systems",
+      "family": "account-lifecycle",
+      "kind": "composite",
+      "collections": []
+    },
+    {
+      "slug": "update-status",
+      "displayName": "UpdateStatus",
+      "description": "Update availability and install-and-restart mechanism, embeddable anywhere.",
+      "section": "systems",
+      "family": "account-lifecycle",
+      "kind": "composite",
+      "collections": []
+    }
+  ]
+}

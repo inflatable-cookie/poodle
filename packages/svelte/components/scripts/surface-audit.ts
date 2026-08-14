@@ -174,10 +174,10 @@ function inspectCoverage() {
       specimenRegistrySource.matchAll(/^[ \t]*(?:"([a-z0-9-]+)"|([a-z][a-z0-9]*)):\s*\w+Specimen,/gm),
     ).map((match) => match[1] ?? match[2]),
   );
-  const componentRegistrySource = readFileSync(join(previewRoot, "component-registry.ts"), "utf8");
-  const componentRegistrySlugs = new Set(
-    Array.from(componentRegistrySource.matchAll(/entry\(\s*"([^"]+)"/g)).map((match) => toSlug(match[1])),
-  );
+  const manifest = JSON.parse(
+    readFileSync(join(repoRoot, "packages/codegen/fixtures/preview-catalogue.json"), "utf8"),
+  ) as { components: Array<{ slug: string }> };
+  const componentRegistrySlugs = new Set(manifest.components.map((component) => component.slug));
   const docsSource = readFileSync(join(previewRoot, "component-docs.ts"), "utf8");
   const usageDocSlugs = new Set(
     Array.from(docsSource.matchAll(/^[ \t]{2}(?:"([a-z0-9-]+)"|([a-z][a-z0-9]*)):\s*\{/gm)).map(

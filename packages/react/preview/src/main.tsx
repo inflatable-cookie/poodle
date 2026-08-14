@@ -13,6 +13,7 @@ import "../../../tokens/artifacts/css/poodle-control-size-md.css";
 import "../../../tokens/artifacts/css/poodle-control-size-lg.css";
 import "../../../tokens/artifacts/css/poodle-control-size-xl.css";
 import "./gallery/gallery.css";
+import "../../../svelte/preview/src/catalogue.css";
 
 import { App } from "./gallery/App";
 

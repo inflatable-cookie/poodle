@@ -165,7 +165,7 @@ use crate::component_registry::{self, ComponentEntry};
 pub fn build_content(state: &AppState, theme: &JetstreamThemeProvider) -> JsEl {
     match state.section {
         Section::Components => {
-            let components = component_registry::ALL_COMPONENTS;
+            let components = component_registry::all_components();
             match state.active_component() {
                 Some(idx) if idx < components.len() => {
                     build_specimen_page(&components[idx], theme, state)
@@ -261,7 +261,7 @@ fn build_specimen_page(
                     .gap(8.0)
                     .items_center()
                     .child(
-                        label(entry.tag.label())
+                        label(entry.tag_label())
                             .px(8.0)
                             .py(2.0)
                             .rounded(4.0)
@@ -525,7 +525,7 @@ fn build_catalogue_landing(state: &AppState, theme: &JetstreamThemeProvider) -> 
     let border = resolve_color(theme, "color.border.subtle");
     let accent = resolve_color(theme, "color.accent.base");
 
-    let components = component_registry::ALL_COMPONENTS;
+    let components = component_registry::all_components();
 
     // Mirrors the Svelte preview's landing: title + blurb + per-tag sections,
     // each a three-column grid of clickable component cards.
@@ -554,21 +554,20 @@ fn build_catalogue_landing(state: &AppState, theme: &JetstreamThemeProvider) -> 
             ),
     );
 
-    // Per-tag sections. Entries are pre-ordered by (tag order, name); a card's
-    // id reuses the sidebar action ("sidebar:{i}") so clicking navigates.
-    let mut current_tag = None;
+    // Per-family sections. Entries follow generated family order.
+    let mut current_family = None;
     let mut section_grid: Option<JsEl> = None;
     for (i, entry) in components.iter().enumerate() {
         if !state.matches_search(entry.display_name) {
             continue;
         }
-        if current_tag != Some(entry.tag) {
+        if current_family != Some(entry.family) {
             if let Some(grid) = section_grid.take() {
                 landing = landing.child(grid);
             }
-            current_tag = Some(entry.tag);
+            current_family = Some(entry.family);
             landing = landing.child(
-                label(entry.tag.label().to_uppercase())
+                label(entry.tag_label().to_uppercase())
                     .pt(8.0)
                     .text_color(accent)
                     .text_size(11.0)
