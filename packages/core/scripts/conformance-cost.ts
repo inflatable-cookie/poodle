@@ -51,8 +51,10 @@ function baseLoc(path: string): number {
 
 const REUSABLE_AUTHORITY: Array<[string, string]> = [
   ["Interface and case schema", "packages/core/src/conformance/define.ts"],
+  ["Primitive capability roster", "packages/core/src/conformance/primitives.ts"],
   ["Specimen projection", "packages/core/src/conformance/project.ts"],
   ["Serializer", "packages/core/scripts/conformance-serialize.ts"],
+  ["Primitive report gate", "packages/core/scripts/primitive-capability-report.ts"],
   ["Authority validation tests", "packages/core/test/component-case-authority.test.ts"],
 ];
 
@@ -74,12 +76,17 @@ const GENERATED_SOURCE: Array<[string, string]> = [
 const GENERATED_DATA: Array<[string, string]> = [
   ["Interface fixture JSON", "packages/codegen/fixtures/conformance/button-interface.json"],
   ["Case fixture JSON", "packages/codegen/fixtures/conformance/button-cases.json"],
+  ["Primitive roster JSON", "packages/codegen/fixtures/conformance/primitive-capability-roster.json"],
 ];
 
 const GENERIC_RUNTIME: Array<[string, string]> = [
   ["Web runner and observer", "test/conformance/web/runner.ts"],
   ["Native observer and assertion runner", "packages/render/src/conformance.rs"],
+  ["Renderer-neutral primitive probes", "packages/render/src/primitive_probes.rs"],
   ["Cross-runtime comparator", "test/conformance/compare.ts"],
+  ["Web primitive probes", "test/conformance/web/primitives.test.ts"],
+  ["GPUI generic driver", "packages/gpui/preview/src/conformance_driver.rs"],
+  ["GPUI primitive probes", "packages/gpui/preview/src/primitive_probes_gpui.rs"],
 ];
 
 const BUTTON_HARNESS: Array<[string, string]> = [
@@ -87,8 +94,15 @@ const BUTTON_HARNESS: Array<[string, string]> = [
   ["React adapter", "test/conformance/web/react-adapter.tsx"],
   ["Svelte host", "test/conformance/web/hosts/ButtonHost.svelte"],
   ["Web execution tests", "test/conformance/web/button.test.ts"],
-  ["GPUI execution driver", "packages/gpui/preview/src/bin/conformance.rs"],
+  ["GPUI conformance CLI", "packages/gpui/preview/src/bin/conformance.rs"],
+  ["GPUI Button adapter", "packages/gpui/preview/src/conformance_button.rs"],
   ["GPUI fixture adapter", "packages/gpui/preview/src/conformance_support.rs"],
+];
+
+const CAPTURE_REPAIR: Array<[string, string]> = [
+  ["Native visual runner", "test/native-visual/run.ts"],
+  ["Native visual capture", "test/native-visual/capture.ts"],
+  ["Native visual README", "test/native-visual/README.md"],
 ];
 
 const GENERIC_SUPPORTING_DELTAS: Array<[string, string]> = [
@@ -169,6 +183,7 @@ const generatedSource = sourceTable("Generated source", GENERATED_SOURCE, "worki
 const generatedBytes = dataTable(GENERATED_DATA);
 const genericRuntime = sourceTable("Generic observers and runners", GENERIC_RUNTIME, "working");
 const buttonHarness = sourceTable("Button pilot harness", BUTTON_HARNESS, "working");
+const captureRepair = sourceTable("GPUI capture repair", CAPTURE_REPAIR, "working");
 const genericSupporting = sourceTable("Generic runtime deltas", GENERIC_SUPPORTING_DELTAS, "delta");
 const buttonSupporting = sourceTable("Button runtime deltas", BUTTON_SUPPORTING_DELTAS, "delta");
 const wiring = sourceTable("Wiring", WIRING, "working");
@@ -176,7 +191,7 @@ const replaced = sourceTable("Replaced hand-written source", REPLACED, "replaced
 
 const genericKernel = reusableAuthority + codegen + genericRuntime + genericSupporting + wiring;
 const buttonPilot = perComponentAuthority + generatedSource + buttonHarness + buttonSupporting;
-const sourceMechanism = genericKernel + buttonPilot;
+const sourceMechanism = genericKernel + buttonPilot + captureRepair;
 
 console.log("\n=== Summary ===");
 console.log(`source mechanism: ${sourceMechanism} LOC`);
@@ -185,9 +200,10 @@ console.log(`  Button pilot increment: ${buttonPilot} LOC`);
 console.log(`    authored authority: ${perComponentAuthority} LOC`);
 console.log(`    generated source: ${generatedSource} LOC`);
 console.log(`    harness and runtime deltas: ${buttonHarness + buttonSupporting} LOC`);
+console.log(`  GPUI capture repair: ${captureRepair} LOC`);
 console.log(`generated data: ${generatedBytes} bytes`);
 console.log(`replaced hand-written source: ${replaced} LOC`);
 console.log(
   `stop-condition evidence: Button pilot increment ${buttonPilot} vs replaced ${replaced} — ` +
-    "triggered. The orchestrator ruling belongs in the g14.001 delivery log.",
+    "triggered at g14.001. g14.002 must show extraction/reuse of the Button harness, not a second completion path.",
 );

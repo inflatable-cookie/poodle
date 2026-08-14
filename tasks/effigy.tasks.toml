@@ -99,12 +99,16 @@
 # green execution run with a broken schema is not evidence. Narrow — only
 # the conformance source files, so unrelated core baseline errors never
 # gate this check.
-"conformance:typecheck" = "bunx tsc --noEmit --ignoreConfig packages/core/src/conformance/define.ts packages/core/src/conformance/button.ts packages/core/src/conformance/button-cases.ts packages/core/src/conformance/project.ts --strict --skipLibCheck --moduleResolution bundler --module esnext --target es2022"
+"conformance:typecheck" = "bunx tsc --noEmit --ignoreConfig packages/core/src/conformance/define.ts packages/core/src/conformance/primitives.ts packages/core/src/conformance/button.ts packages/core/src/conformance/button-cases.ts packages/core/src/conformance/project.ts --strict --skipLibCheck --moduleResolution bundler --module esnext --target es2022"
 "conformance:test-web" = "bunx vitest run --project conformance"
 # WINDOWED, like test:native-visual: opens a real GPUI window and drives
 # real NSEvents through the AppKit queue (hit testing, listener binding,
 # focus, activation). Needs a macOS window server.
 "conformance:test-gpui" = "cargo run --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin conformance -- --out=test/conformance/web/out/gpui.json"
+# WINDOWED primitive substrate probes (g14.002): real GPUI backend + focus/events.
+"conformance:test-primitives-gpui" = "cargo run --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin conformance -- --primitives --out=test/conformance/web/out/primitive-gpui.json"
+"conformance:test-primitives-rust" = "cargo test --quiet --manifest-path packages/render/Cargo.toml primitive_probes::tests"
+"conformance:primitives-report" = "bun packages/core/scripts/primitive-capability-report.ts"
 # Compile-only twin for CPU gates: the windowed execution is local-only.
 "conformance:check-gpui" = "cargo check --manifest-path packages/gpui/preview/Cargo.toml --bin conformance"
 "conformance:test" = [
@@ -119,7 +123,9 @@
   { task = "conformance:check" },
   { task = "conformance:test-web" },
   { task = "conformance:test-gpui" },
+  { task = "conformance:test-primitives-gpui" },
   { task = "conformance:compare" },
+  { task = "conformance:primitives-report" },
 ]
 "conformance:cost" = "bun packages/core/scripts/conformance-cost.ts"
 # The executed conformance board (macOS window server). It stays outside the
@@ -128,7 +134,9 @@
   { task = "conformance:check" },
   { task = "conformance:test-web" },
   { task = "conformance:test-gpui" },
+  { task = "conformance:test-primitives-gpui" },
   { task = "conformance:compare" },
+  { task = "conformance:primitives-report" },
 ]
 
 # Preview (documentation site)
@@ -217,7 +225,11 @@
 # the GPUI preview screenshots its own window, so it needs a live macOS window
 # server, same constraint as check:jetstream.
 "test:native-visual" = "bun test/native-visual/run.ts"
-"native-visual:update" = "bun test/native-visual/run.ts --update"
+# Refresh preserves before/after/diff evidence plus a machine-readable manifest
+# in a timestamped test/native-visual/out/ run directory. Comparison never
+# writes references.
+"native-visual:refresh" = "bun test/native-visual/run.ts --refresh"
+"native-visual:update" = "bun test/native-visual/run.ts --refresh"
 
 # Jetstream native visual gate — headless offscreen render, no window server.
 # 135 specimens in ~90s with zero flake, where the GPUI gate takes ~20min with

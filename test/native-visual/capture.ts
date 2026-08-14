@@ -69,7 +69,7 @@ export async function captureSlugStable(
   slug: string,
   axis: Axis,
   outPath: string,
-): Promise<{ ok: true } | { ok: false; reason: string }> {
+): Promise<{ ok: true; receiptPath: string } | { ok: false; reason: string }> {
   const probe = `${outPath}.probe.png`;
 
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -89,12 +89,13 @@ export async function captureSlugStable(
     const a = readFileSync(outPath);
     const b = readFileSync(probe);
     unlinkSync(probe);
+    if (existsSync(second.receiptPath)) unlinkSync(second.receiptPath);
 
     // Agreement is measured with the same tolerance the gate itself uses, not
     // byte equality. Some components carry a persistent antialiasing jitter —
     // `callout` differs by 11 pixels out of 6.4 million between any two runs —
     // and demanding identical bytes declared those permanently unsettled.
-    if (diffRatio(a, b) <= MAX_DIFF_RATIO) return { ok: true };
+    if (diffRatio(a, b) <= MAX_DIFF_RATIO) return first;
   }
 
   return {
@@ -107,8 +108,10 @@ async function captureSlug(
   slug: string,
   axis: Axis,
   outPath: string,
-): Promise<{ ok: true } | { ok: false; reason: string }> {
+): Promise<{ ok: true; receiptPath: string } | { ok: false; reason: string }> {
   if (existsSync(outPath)) unlinkSync(outPath);
+  const receiptPath = `${outPath}.axis.json`;
+  if (existsSync(receiptPath)) unlinkSync(receiptPath);
 
   const proc = Bun.spawn(
     [
@@ -123,13 +126,15 @@ async function captureSlug(
       axis.controlSize,
       "--screenshot",
       outPath,
+      "--capture-receipt",
+      receiptPath,
     ],
     { cwd: path.join(repoRoot, GPUI_PREVIEW_CWD), stdout: "ignore", stderr: "pipe" },
   );
 
   const deadline = Date.now() + CAPTURE_TIMEOUT_S * 1000;
   while (Date.now() < deadline) {
-    if (existsSync(outPath)) {
+    if (existsSync(outPath) && existsSync(receiptPath)) {
       // The file appears before `screencapture` has finished flushing it; wait
       // for the size to settle rather than reading a truncated PNG.
       let last = -1;
@@ -139,8 +144,22 @@ async function captureSlug(
         last = size;
         await Bun.sleep(150);
       }
+      const receipt = JSON.parse(readFileSync(receiptPath, "utf8")) as {
+        schema?: string;
+        controlSize?: string;
+      };
+      if (
+        receipt.schema !== "native-visual-axis-receipt.v1" ||
+        receipt.controlSize !== axis.controlSize
+      ) {
+        proc.kill();
+        return {
+          ok: false,
+          reason: `capture axis receipt reported controlSize=${receipt.controlSize ?? "missing"}, expected ${axis.controlSize}`,
+        };
+      }
       proc.kill();
-      return { ok: true };
+      return { ok: true, receiptPath };
     }
     if (proc.exitCode !== null && !existsSync(outPath)) {
       const err = await new Response(proc.stderr).text();

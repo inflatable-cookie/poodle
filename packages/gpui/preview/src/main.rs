@@ -1164,6 +1164,8 @@ struct CliArgs {
     density: Option<Density>,
     control_size: Option<ControlSize>,
     screenshot: Option<String>,
+    /// Machine-readable proof of the resolved capture axis.
+    capture_receipt: Option<String>,
     /// Points to click, in window coordinates, before capturing.
     clicks: Vec<DriverAction>,
     /// Print every specimen-state entry whose key starts with this, after the
@@ -1189,6 +1191,7 @@ fn parse_cli_args() -> CliArgs {
     let mut density = None;
     let mut control_size = None;
     let mut screenshot = None;
+    let mut capture_receipt = None;
     let mut clicks: Vec<DriverAction> = Vec::new();
     let mut print_state = None;
     let mut hold_ms: u64 = 120;
@@ -1268,7 +1271,9 @@ fn parse_cli_args() -> CliArgs {
                     i += 1;
                 }
             }
-            "--size" => {
+            // Canonical flag is `--control-size` (native-visual gate). `--size`
+            // remains as a synonym so older scripts keep working.
+            "--control-size" | "--size" => {
                 if let Some(val) = args.get(i + 1) {
                     control_size = match val.as_str() {
                         "xs" => Some(ControlSize::Xs),
@@ -1284,6 +1289,12 @@ fn parse_cli_args() -> CliArgs {
             "--screenshot" => {
                 if let Some(val) = args.get(i + 1) {
                     screenshot = Some(val.clone());
+                    i += 1;
+                }
+            }
+            "--capture-receipt" => {
+                if let Some(val) = args.get(i + 1) {
+                    capture_receipt = Some(val.clone());
                     i += 1;
                 }
             }
@@ -1376,6 +1387,7 @@ fn parse_cli_args() -> CliArgs {
         density,
         control_size,
         screenshot,
+        capture_receipt,
         clicks,
         print_state,
         hold_ms,
@@ -2127,6 +2139,25 @@ fn main() {
                     }
                     // Rebuild theme with all overrides applied together
                     root.state.rebuild_theme();
+                    if let Some(ref receipt_path) = cli.capture_receipt {
+                        let path = std::path::Path::new(receipt_path);
+                        if let Some(parent) = path.parent() {
+                            let _ = std::fs::create_dir_all(parent);
+                        }
+                        let receipt = serde_json::json!({
+                            "schema": "native-visual-axis-receipt.v1",
+                            "controlSize": root.state.control_size.label(),
+                        });
+                        std::fs::write(
+                            path,
+                            format!(
+                                "{}\n",
+                                serde_json::to_string_pretty(&receipt)
+                                    .expect("axis receipt serializes")
+                            ),
+                        )
+                        .expect("axis receipt writes");
+                    }
 
                     // Apply CLI overrides — navigation
                     if let Some(section) = cli.section {

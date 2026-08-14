@@ -11,6 +11,10 @@ publish = false
 name = "poodle-preview"
 path = "src/main.rs"
 
+[[bin]]
+name = "conformance"
+path = "src/bin/conformance.rs"
+
 [dependencies]
 # GPUI framework — Zed's GPU-accelerated UI framework (macOS/Metal)
 # Using crates.io release. If build fails due to core-foundation/font-kit

@@ -15,6 +15,7 @@ import type {
   SerializedCase,
   SerializedComponentInterface,
 } from "@inflatable-cookie/poodle-core/conformance";
+import { channelsOf, geometryFields, geometryOf } from "./observer";
 
 export interface TraceEntry {
   event: string;
@@ -79,16 +80,6 @@ export interface RuntimeAdapter {
   flush(): Promise<void>;
   trace(): TraceEntry[];
   cleanup(): void;
-}
-
-const geometryFields = ["height", "minWidth", "paddingLeft", "paddingRight", "radius", "borderWidth"] as const;
-
-/** Parse a computed CSS length; calc()/var() residues are not observable. */
-function parseLength(value: string | null): number | null {
-  if (!value) return null;
-  if (value.includes("calc(")) return null;
-  const parsed = Number.parseFloat(value);
-  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function resolveWebPart(
@@ -162,33 +153,7 @@ function observeRootTokenRoles(
   return roles;
 }
 
-function geometryOf(root: HTMLElement): Record<string, number | null> {
-  const style = root.ownerDocument.defaultView?.getComputedStyle(root);
-  if (!style) return Object.fromEntries(geometryFields.map((f) => [f, null]));
-  return {
-    height: parseLength(style.height),
-    minWidth: parseLength(style.minWidth),
-    paddingLeft: parseLength(style.paddingLeft),
-    paddingRight: parseLength(style.paddingRight),
-    radius: parseLength(style.borderRadius),
-    borderWidth: parseLength(style.borderWidth),
-  };
-}
-
-function channelsOf(root: HTMLElement): Record<string, string | null> {
-  const style = root.ownerDocument.defaultView?.getComputedStyle(root);
-  if (!style) return { background: null, borderColor: null, color: null, opacity: null };
-  const clean = (value: string | null): string | null =>
-    value && !value.includes("color-mix") && !value.includes("calc(") ? value : null;
-  return {
-    background: clean(style.backgroundColor),
-    borderColor: clean(style.borderColor),
-    color: clean(style.color),
-    opacity: clean(style.opacity),
-  };
-}
-
-/** Observes the mounted Button root through the interface's descriptors. */
+/** Observes a mounted component root through the interface's descriptors. */
 export function observeDom(
   runtime: string,
   component: string,

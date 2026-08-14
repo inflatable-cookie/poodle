@@ -16,6 +16,7 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
         LayoutDirection::Row => el.flex().flex_row(),
         LayoutDirection::Column => el.flex().flex_col(),
     };
+    record_probe_channel("layout.intent.direction");
     match d.layout.width {
         // `.flex_grow()` is a flex property, not a width — matching the
         // Jetstream `el.grow()` mapping, which is also a flex property.
@@ -61,6 +62,7 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
     if let Some(grow) = style.flex_grow {
         // Raw factor (fractional splits); `.flex_grow()` is the 1.0 case.
         el.style().flex_grow = Some(grow);
+        record_probe_channel("layout.geometry.flex-grow");
     }
     if style.flex_fill {
         // Jetstream maps flex_fill to its grow() — grow + shrink, no stretch.
@@ -97,6 +99,7 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
     }
     if d.layout.spacing.gap != 0.0 {
         el = el.gap(px(d.layout.spacing.gap));
+        record_probe_channel("layout.intent.gap");
     }
     let margin = d.layout.spacing.margin;
     if margin.left != 0.0 {
@@ -140,9 +143,11 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
     }
     if let Some(v) = style.min_width {
         el = el.min_w(px(v));
+        record_probe_channel("layout.geometry.min-width");
     }
     if let Some(v) = style.max_width {
         el = el.max_w(px(v));
+        record_probe_channel("layout.geometry.max-width");
     }
     if let Some(v) = style.min_height {
         el = el.min_h(px(v));
@@ -182,6 +187,9 @@ pub(super) fn apply_position<E: Styled>(mut el: E, node: &Node) -> E {
             }
         }
     }
+    if matches!(node.position, NodePosition::Relative) {
+        record_probe_channel("layout.position.relative");
+    }
     el
 }
 
@@ -195,6 +203,7 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
     // tint fill AND a fade gradient over it), so both apply when set.
     if let Some(bg) = d.background {
         el = el.bg(color(bg));
+        record_probe_channel("surface.channels.background");
     }
     if let Some((angle, stops)) = &style.gradient {
         // gpui 0.2.2 `linear_gradient` takes exactly two stops. Two-stop
@@ -253,12 +262,14 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
         || style.border_left_width.is_some();
     if has_border && uniform_color_set {
         el = el.border_color(color(d.border.color));
+        record_probe_channel("surface.channels.border");
     }
     if let Some(top) = style.border_color_top {
         el = el.border_color(color(top));
     }
     if let Some(left) = style.border_color_left {
         el = el.border_color(color(left));
+        record_probe_channel("surface.extended.side-border");
     }
     if let Some(bottom) = style.border_color_bottom {
         el = el.border_color(color(bottom));
@@ -309,10 +320,12 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
             blur_radius: px(shadow.blur),
             spread_radius: px(0.0),
         }]);
+        record_probe_channel("surface.extended.shadow");
     }
 
     if d.opacity != 1.0 {
         el = el.opacity(d.opacity);
+        record_probe_channel("surface.channels.opacity");
     }
     if !d.visible {
         el = el.invisible();
@@ -328,12 +341,15 @@ pub(super) fn apply_text<E: Styled>(mut el: E, node: &Node) -> E {
 
     if let Some(c) = d.text_color {
         el = el.text_color(color(c));
+        record_probe_channel("surface.channels.text");
     }
     if let Some(size) = style.text_size {
         el = el.text_size(px(size));
+        record_probe_channel("content.typography.size");
     }
     if let Some(weight) = style.text_weight {
         el = el.font_weight(gpui::FontWeight(weight as f32));
+        record_probe_channel("content.typography.weight");
     }
     if style.text_italic {
         el = el.italic();
@@ -341,6 +357,7 @@ pub(super) fn apply_text<E: Styled>(mut el: E, node: &Node) -> E {
     if let Some(lh) = style.line_height {
         // Vocabulary: a multiple of the font size → relative length.
         el = el.line_height(relative(lh));
+        record_probe_channel("content.typography.line-height");
     }
     if style.text_wrap {
         el = el.whitespace_normal();
@@ -392,6 +409,9 @@ pub(super) fn apply_cursor<E: Styled>(mut el: E, node: &Node) -> E {
         CursorHint::RowResize => el.cursor(CursorStyle::ResizeRow),
         CursorHint::Default => el,
     };
+    if node.style.descriptor.cursor == CursorHint::Pointer {
+        record_probe_channel("surface.extended.cursor");
+    }
     el
 }
 
@@ -436,6 +456,7 @@ pub(super) fn apply_state_patches<E: InteractiveElement>(mut el: E, node: &Node)
                 None => s,
             }
         });
+        record_probe_channel("surface.state-patches.hover");
     }
     el
 }
