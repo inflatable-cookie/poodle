@@ -182,3 +182,8 @@ Roadmap/dispatch status not edited. Stop here.
   pinning 174, preserving the one-manifest-entry addition path.
 - Removed the React-only `ErrorBoundary` description override; canonical
   catalogue identity stays renderer-neutral.
+- Reconciled against current `main` after PR #15: `MessageCenter` catalogue
+  copy now describes its durable-message and live-operation surface.
+- Re-ran the combined tree after merging `main`: catalogue generation/check,
+  10 codegen tests, 7 GPUI catalogue tests, and 1,333 tests across 104 web
+  component files all pass headlessly.

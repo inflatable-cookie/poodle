@@ -1318,7 +1318,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 	{
 		slug: "message-center",
 		displayName: "MessageCenter",
-		description: "Popover archive for notifications and durable messages.",
+		description: "Popover activity surface for durable messages and live operations.",
 		section: "systems",
 		family: "application-shell",
 		kind: "composite",

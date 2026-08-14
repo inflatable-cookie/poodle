@@ -1539,7 +1539,7 @@ pub const CANONICAL_COMPONENTS: &[CanonicalComponent] = &[
     CanonicalComponent {
 		slug: "message-center",
 		display_name: "MessageCenter",
-		description: "Popover archive for notifications and durable messages.",
+		description: "Popover activity surface for durable messages and live operations.",
 		section: CatalogueSectionId::Systems,
 		family: CatalogueFamilyId::ApplicationShell,
 		kind: CatalogueKindId::Composite,
