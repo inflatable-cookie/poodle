@@ -209,8 +209,12 @@ export function validateInterface(config: InterfaceConfig): void {
       if (!prop || prop.type.kind !== "collection") {
         throw new Error(`part '${part.id}' repeats unknown collection prop '${part.repeat.prop}'`);
       }
-      if (!prop.type.fields.some((field) => field.name === part.repeat?.key)) {
+      const keyField = prop.type.fields.find((field) => field.name === part.repeat?.key);
+      if (!keyField) {
         throw new Error(`part '${part.id}' repeats unknown key '${part.repeat.key}'`);
+      }
+      if (keyField.type.kind !== "string") {
+        throw new Error(`part '${part.id}' repeated key '${part.repeat.key}' must be a string field`);
       }
       if (part.resolve.web.kind !== "class" || !part.resolve.web.keyAttribute) {
         throw new Error(`repeated part '${part.id}' needs a web class keyAttribute`);
@@ -573,11 +577,32 @@ export function validateCase<I extends InterfaceConfig>(
     }
   }
   const partIds = new Set(iface.parts.filter((p) => !p.repeat).map((p) => p.id));
-  const repeatedPartIds = new Set(iface.parts.filter((p) => p.repeat).map((p) => p.id));
+  const repeatedPartKeys = new Map<string, Set<string>>();
+  for (const part of iface.parts) {
+    if (!part.repeat) continue;
+    const collection = (config.fixture.props as Record<string, unknown>)[part.repeat.prop];
+    const keys = new Set<string>();
+    if (Array.isArray(collection)) {
+      for (const [index, item] of collection.entries()) {
+        const key = (item as Record<string, unknown>)[part.repeat.key];
+        if (typeof key !== "string" || key.length === 0) {
+          throw new Error(
+            `case '${config.id}' prop '${part.repeat.prop}' item ${index} key '${part.repeat.key}' must be a non-empty string`,
+          );
+        }
+        if (keys.has(key)) {
+          throw new Error(`case '${config.id}' prop '${part.repeat.prop}' has duplicate key '${key}'`);
+        }
+        keys.add(key);
+      }
+    }
+    repeatedPartKeys.set(part.id, keys);
+  }
   const partIsKnown = (part: string): boolean => {
     if (partIds.has(part)) return true;
     const separator = part.indexOf(":");
-    return separator > 0 && separator < part.length - 1 && repeatedPartIds.has(part.slice(0, separator));
+    if (separator <= 0 || separator >= part.length - 1) return false;
+    return repeatedPartKeys.get(part.slice(0, separator))?.has(part.slice(separator + 1)) ?? false;
   };
   const stateNames = new Set(iface.states.map((s) => s.name));
   const eventNames = new Set(iface.events.map((e) => e.name));

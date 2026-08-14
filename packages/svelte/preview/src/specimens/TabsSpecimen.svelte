@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Tabs } from "@inflatable-cookie/poodle-svelte";
+  import { Tabs, type TabItem } from "@inflatable-cookie/poodle-svelte";
   import {
     projectCorpus,
     tabsCases,
@@ -12,7 +12,13 @@
   // g14.004: groups, fixtures, collection order, and axes come from the
   // executable Tabs corpus. The runtime contributes only its renderer.
   const groups = projectCorpus(tabsCases, tabsInterface);
+  const residualItems: TabItem[] = [
+    { value: "editor", label: "Editor", icon: "code" },
+    { value: "preview", label: "Preview", icon: "eye", count: 12, separator: true },
+    { value: "terminal", label: "Terminal", icon: "terminal", closable: true },
+  ];
   let valueLog = $state("No tab change yet.");
+  let values = $state<Record<string, string>>({});
 
   function propsOf(instance: ProjectedInstance): Record<string, unknown> {
     const props: Record<string, unknown> = { ...instance.props };
@@ -20,6 +26,19 @@
       if (props[key] === null) delete props[key];
     }
     return props;
+  }
+
+  function instanceKey(instance: ProjectedInstance): string {
+    return instance.caseId + instance.caption;
+  }
+
+  function valueOf(instance: ProjectedInstance): string {
+    return values[instanceKey(instance)] ?? String(instance.props.value ?? instance.props.defaultValue ?? "");
+  }
+
+  function commit(instance: ProjectedInstance, value: string): void {
+    values[instanceKey(instance)] = value;
+    valueLog = `${instance.caption}: ${value}`;
   }
 </script>
 
@@ -31,12 +50,24 @@
           <span class="poodle-specimen__caption">{instance.caption}</span>
           <Tabs
             {...propsOf(instance)}
-            onValueChange={(value) => (valueLog = `${instance.caption}: ${value}`)}
+            value={valueOf(instance)}
+            onValueChange={(value) => commit(instance, value)}
           />
         </div>
       {/each}
     </SpecimenGroup>
   {/each}
+
+  <SpecimenGroup label="Residual visual and operator coverage">
+    <div style="resize:horizontal;overflow:auto;width:24rem;min-width:12rem;">
+      <Tabs items={residualItems} overflowStrategy="shed" collapseWhenOverflow ariaLabel="Overflow shedding" />
+    </div>
+    <Tabs items={residualItems} variant="card" activeEdge="outline" activeFill="solid" defaultValue="editor" reorderable onClose={(value) => (valueLog = `Closed: ${value}`)} ariaLabel="Closable files" />
+    <Tabs items={residualItems} variant="block" activeEdge="underline" activeFill="none" fullWidth defaultValue="editor" ariaLabel="Full-width workspace">
+      {#snippet children(activeValue)}<p>Panel: {activeValue}</p>{/snippet}
+    </Tabs>
+    <Tabs items={residualItems} variant="pill" defaultValue="editor" size="lg" density="comfortable" ariaLabel="Large comfortable tabs" />
+  </SpecimenGroup>
 
   <SpecimenGroup label="Interaction" bare>
     <span class="poodle-specimen__caption">{valueLog}</span>

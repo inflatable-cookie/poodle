@@ -48,13 +48,6 @@
               "kind": "number"
             },
             "optional": true
-          },
-          {
-            "name": "separator",
-            "type": {
-              "kind": "boolean"
-            },
-            "optional": true
           }
         ]
       },

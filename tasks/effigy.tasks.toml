@@ -79,9 +79,11 @@
 "conformance:serialize-check" = "bun packages/core/scripts/conformance-serialize.ts --check"
 "conformance:codegen" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/contracts/components/src --target conformance-rust" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/tabs-interface.json --cases packages/codegen/fixtures/conformance/tabs-cases.json --out packages/contracts/components/src --target conformance-rust" },
 ]
 "conformance:codegen-check" = [
   { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/contracts/components/src --target conformance-rust --check" },
+  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/tabs-interface.json --cases packages/codegen/fixtures/conformance/tabs-cases.json --out packages/contracts/components/src --target conformance-rust --check" },
 ]
 "conformance:build" = [
   { task = "conformance:serialize" },

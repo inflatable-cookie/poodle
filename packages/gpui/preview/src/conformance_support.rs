@@ -302,7 +302,23 @@ pub fn tabs_spec_from_fixture(fixture: &Value) -> TabsSpec {
             _ => ControlDensity::Default,
         });
     }
-    spec
+    poodle_specs::generated::tabs::TabsPortableSpec {
+        tabs: spec.tabs,
+        value: spec.value,
+        variant: spec.variant,
+        active_edge: spec.active_edge,
+        active_fill: spec.active_fill,
+        orientation: spec.orientation,
+        activation_mode: spec.activation_mode,
+        is_bordered: spec.is_bordered,
+        is_full_width: spec.is_full_width,
+        is_reorderable: spec.is_reorderable,
+        aria_label: spec.aria_label,
+        size: Some(spec.size),
+        size_role: spec.size_role,
+        density: Some(spec.density),
+    }
+    .into()
 }
 
 /// Enum values for an interface prop (axis expansion).

@@ -30,7 +30,6 @@ export const tabsInterface = defineComponentInterface({
           { name: "disabled", type: { kind: "boolean" }, optional: true },
           { name: "closable", type: { kind: "boolean" }, optional: true },
           { name: "count", type: { kind: "number" }, optional: true },
-          { name: "separator", type: { kind: "boolean" }, optional: true },
         ],
       },
       default: [],

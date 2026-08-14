@@ -56,12 +56,13 @@ labelled-by links. Reordered fixtures retain the same semantic ids.
 
 ## Replacement and cost
 
-- Replaced active Tabs specimen fixtures: Svelte 316 LOC, React 240 LOC, GPUI
-  595 LOC — 1,151 LOC total.
-- Tabs pilot increment: 1,029 LOC.
-- Tabs generated interface/case data: 23,166 bytes.
+- Corpus projection replaces only the bounded collection/navigation examples.
+  Each active specimen retains an explicit residual section for overflow,
+  icons/counts, close/reorder, edge/fill variants, panels, and scale examples.
+- Tabs pilot increment: 1,126 LOC, including the generated Rust declaration.
+- Tabs generated interface/case data: 23,010 bytes.
 - `TabsSpec` is not replaced: overflow, history, close/reorder, tooltips, and
-  host actions remain outside this profile.
+  host actions remain outside this profile and are not counted as replaced.
 - Existing Tabs machine vectors are not replaced wholesale. Close/reorder
   claims remain vector-owned and are retained for g14.010/g14.011 disposition.
 

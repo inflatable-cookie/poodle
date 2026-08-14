@@ -79,8 +79,12 @@ const CODEGEN: Array<[string, string]> = [
   ["CLI integration", "packages/codegen/src/bin/poodle-codegen.rs"],
 ];
 
-const GENERATED_SOURCE: Array<[string, string]> = [
-  ["Generated Button Rust declaration", "packages/contracts/components/src/generated/button.rs"],
+const BUTTON_GENERATED_SOURCE: Array<[string, string]> = [
+  ["Generated Button Rust declaration", "packages/contracts/components/src/generated/button/mod.rs"],
+];
+
+const TABS_GENERATED_SOURCE: Array<[string, string]> = [
+  ["Generated Tabs Rust declaration", "packages/contracts/components/src/generated/tabs/mod.rs"],
 ];
 
 const GENERATED_DATA: Array<[string, string]> = [
@@ -173,9 +177,6 @@ const REPLACED: Array<[string, string]> = [
   ["Svelte RangeSlider specimen fixtures", "packages/svelte/preview/src/specimens/RangeSliderSpecimen.svelte"],
   ["React RangeSlider specimen fixtures", "packages/react/preview/src/gallery/specimens/RangeSliderSpecimen.tsx"],
   ["GPUI RangeSlider specimen fixtures", "packages/gpui/preview/src/specimens/range_slider.rs"],
-  ["Svelte Tabs specimen fixtures", "packages/svelte/preview/src/specimens/TabsSpecimen.svelte"],
-  ["React Tabs specimen fixtures", "packages/react/preview/src/gallery/specimens/TabsSpecimen.tsx"],
-  ["GPUI Tabs specimen fixtures", "packages/gpui/preview/src/specimens/tabs.rs"],
 ];
 
 function sectionLoc(path: string, startMarker: string, endMarker: string): number {
@@ -233,7 +234,8 @@ const rangeSliderAuthority = sourceTable(
 );
 const tabsAuthority = sourceTable("Tabs authored authority", TABS_AUTHORITY, "working");
 const codegen = sourceTable("Codegen", CODEGEN, "delta");
-const generatedSource = sourceTable("Generated source", GENERATED_SOURCE, "working");
+const buttonGeneratedSource = sourceTable("Generated Button source", BUTTON_GENERATED_SOURCE, "working");
+const tabsGeneratedSource = sourceTable("Generated Tabs source", TABS_GENERATED_SOURCE, "working");
 const generatedBytes = dataTable(GENERATED_DATA);
 const genericRuntime = sourceTable("Generic observers and runners", GENERIC_RUNTIME, "working");
 const buttonHarness = sourceTable("Button pilot harness", BUTTON_HARNESS, "working");
@@ -252,9 +254,9 @@ const wiring = sourceTable("Wiring", WIRING, "working");
 const replaced = sourceTable("Replaced hand-written source", REPLACED, "replaced");
 
 const genericKernel = reusableAuthority + codegen + genericRuntime + genericSupporting + wiring;
-const buttonPilot = buttonAuthority + generatedSource + buttonHarness + buttonSupporting;
+const buttonPilot = buttonAuthority + buttonGeneratedSource + buttonHarness + buttonSupporting;
 const rangeSliderPilot = rangeSliderAuthority + rangeSliderHarness + rangeSliderSupporting;
-const tabsPilot = tabsAuthority + tabsHarness + tabsSupporting;
+const tabsPilot = tabsAuthority + tabsGeneratedSource + tabsHarness + tabsSupporting;
 const sourceMechanism = genericKernel + buttonPilot + rangeSliderPilot + tabsPilot + captureRepair;
 
 console.log("\n=== Summary ===");
@@ -262,7 +264,7 @@ console.log(`source mechanism: ${sourceMechanism} LOC`);
 console.log(`  generic kernel: ${genericKernel} LOC`);
 console.log(`  Button pilot increment: ${buttonPilot} LOC`);
 console.log(`    authored authority: ${buttonAuthority} LOC`);
-console.log(`    generated source: ${generatedSource} LOC`);
+  console.log(`    generated source: ${buttonGeneratedSource} LOC`);
 console.log(`    harness and runtime deltas: ${buttonHarness + buttonSupporting} LOC`);
 console.log(`  RangeSlider pilot increment: ${rangeSliderPilot} LOC`);
 console.log(`  Tabs pilot increment: ${tabsPilot} LOC`);

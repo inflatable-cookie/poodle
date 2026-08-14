@@ -2,8 +2,13 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { act, createElement } from "react";
+import { createRoot } from "react-dom/client";
+import { mount, unmount } from "svelte";
 
 import { serializeInterface, tabsCases, tabsInterface } from "../../../packages/core/src/conformance";
+import { TabsSpecimen as ReactTabsSpecimen } from "../../../packages/react/preview/src/gallery/specimens/TabsSpecimen";
+import SvelteTabsSpecimen from "../../../packages/svelte/preview/src/specimens/TabsSpecimen.svelte";
 import { ReactTabsAdapter } from "./react-tabs-adapter";
 import { runCase, summarize, type RuntimeAdapter } from "./runner";
 import { SvelteTabsAdapter } from "./svelte-tabs-adapter";
@@ -29,6 +34,31 @@ async function collectResults(adapter: RuntimeAdapter): Promise<ReturnType<typeo
 }
 
 describe("tabs conformance (web)", () => {
+  it("projected specimens commit a changed selection", async () => {
+    const assertSelectionChanges = async (container: HTMLElement) => {
+      const trigger = container.querySelector<HTMLElement>('[role="tab"][data-value="billing"]');
+      expect(trigger).not.toBeNull();
+      trigger!.click();
+      await Promise.resolve();
+      expect(trigger!.getAttribute("aria-selected")).toBe("true");
+    };
+
+    const reactContainer = document.createElement("div");
+    document.body.appendChild(reactContainer);
+    const root = createRoot(reactContainer);
+    await act(async () => root.render(createElement(ReactTabsSpecimen)));
+    await act(async () => assertSelectionChanges(reactContainer));
+    await act(async () => root.unmount());
+    reactContainer.remove();
+
+    const svelteContainer = document.createElement("div");
+    document.body.appendChild(svelteContainer);
+    const component = mount(SvelteTabsSpecimen, { target: svelteContainer });
+    await assertSelectionChanges(svelteContainer);
+    unmount(component);
+    svelteContainer.remove();
+  });
+
   it("runs the shared corpus against Svelte and React", async () => {
     const style = document.createElement("style");
     style.textContent = `${tokensCss}\n${tabsCss}`;
