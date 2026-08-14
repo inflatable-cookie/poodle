@@ -237,8 +237,9 @@ Button's unrelated Svelte-only `children`, `leading`, and `trailing` props,
 while `docs:check` is green. Record that baseline and prove this card adds no
 AudioMeter or MeterSurface drift. Do not edit Button from this branch.
 
-Do not run `test:native-visual`, `ci:conformance-windowed`, or any other
-foreground/windowed selector.
+Do not run `test:native-visual` or any other foreground/windowed selector.
+`conformance:complete` and `ci:conformance` are headless since g14.023 and are
+safe to run.
 
 ## Completion Protocol
 

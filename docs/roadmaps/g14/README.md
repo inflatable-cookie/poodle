@@ -40,10 +40,10 @@ diagnostic projection when exposed in the preview.
 
 `001` builds the smallest end-to-end kernel through Button. `002` certifies
 the primitive substrate that later components depend on. `003` and `004`
-prove controlled and collection profiles. `023` then replaces the unsafe
-foreground GPUI runner with headless GPUI execution before `005`–`007` resume
-the increasing component profiles. `008` records an adopt/revise/reject
-verdict.
+prove controlled and collection profiles. `023` replaced the unsafe
+foreground GPUI runner with headless GPUI execution on GPUI's in-memory test
+platform before `005`–`007` resume the increasing component profiles. `008`
+records an adopt/revise/reject verdict.
 
 Rollout cards `009`–`013` stay blocked until `008` records **adopt**. `014`
 makes the workflow mandatory for new components.
@@ -83,8 +83,8 @@ the adopted cases before promotion.
 2. [002 — Primitive substrate certification](002-primitive-substrate-certification.md) — complete; accepted in PR #11
 3. [003 — RangeSlider controlled-control proof](003-range-slider-controlled-control-proof.md) — complete; accepted in PR #13
 4. [004 — Tabs collection and navigation proof](004-tabs-collection-navigation-proof.md) — complete; accepted in PR #14
-5. [023 — Headless GPUI conformance execution](023-headless-gpui-conformance-execution.md) — next
-6. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md)
+5. [023 — Headless GPUI conformance execution](023-headless-gpui-conformance-execution.md) — complete; accepted 2026-08-15
+6. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md) — next
 7. [006 — TextInput runtime-boundary proof](006-text-input-runtime-boundary-proof.md)
 8. [007 — HistoryCenter composite proof](007-history-center-composite-proof.md)
 9. [008 — Pilot verdict](008-pilot-verdict.md)
@@ -123,9 +123,11 @@ metadata and navigation; Jetstream's interactive shell remains deferred.
 
 ## First Task
 
-`g14.023` is next. It replaces the foreground GPUI conformance runner with
-headless GPUI execution before `005` resumes the component profiles. Jetstream
-stays outside the active cohort. Its local validation remains headless.
+`g14.023` is complete: the foreground GPUI conformance runner is replaced
+with headless GPUI execution on GPUI's in-memory test platform, and
+`conformance:complete` runs the full cohort in any local worktree. `005` is
+next and resumes the component profiles. Jetstream stays outside the active
+cohort. Its local validation remains headless.
 
 The model-connection web reference is approved. Native/conformance completion
 stays open under `020` until the pilot records **adopt**.

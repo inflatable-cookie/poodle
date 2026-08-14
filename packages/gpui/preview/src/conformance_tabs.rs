@@ -1,8 +1,6 @@
-//! Tabs GPUI conformance adapter (g14.004).
+//! Tabs GPUI conformance adapter (g14.004), headless (g14.023).
 
 use std::sync::{Arc, Mutex};
-
-use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
 use poodle_render::conformance::{
@@ -13,10 +11,7 @@ use poodle_specs::TabsSpec;
 use serde_json::{json, Value};
 
 use super::conformance_button::CaseOutcome;
-use super::conformance_driver::{
-    blur_element_focus, drain_event_queue, focus_element, keyboard_activate, keyboard_key,
-    mount_node, wait_for_focus_handle, KEY_DOWN, KEY_END, KEY_HOME, KEY_LEFT, KEY_RIGHT, KEY_UP,
-};
+use super::conformance_driver::HeadlessDriver;
 use super::conformance_support::tabs_spec_from_fixture;
 
 struct CaseHost {
@@ -83,46 +78,41 @@ fn observe_case(host: &CaseHost, iface: &InterfaceDoc) -> Value {
     observation
 }
 
-fn keycode(key: &str) -> Option<u16> {
+fn gpui_key(key: &str) -> Option<&'static str> {
     Some(match key {
-        "ArrowRight" => KEY_RIGHT,
-        "ArrowLeft" => KEY_LEFT,
-        "ArrowDown" => KEY_DOWN,
-        "ArrowUp" => KEY_UP,
-        "Home" => KEY_HOME,
-        "End" => KEY_END,
+        "ArrowRight" => "right",
+        "ArrowLeft" => "left",
+        "ArrowDown" => "down",
+        "ArrowUp" => "up",
+        "Home" => "home",
+        "End" => "end",
         _ => return None,
     })
 }
 
-async fn rebuild_and_focus(cx: &mut AsyncWindowContext, host: &Arc<Mutex<CaseHost>>) {
-    let target = cx
-        .update(|window, _cx| {
-            let mut host = host.lock().expect("host lock");
-            host.rebuild();
-            let target = format!(
-                "tabs:{}:tab:{}",
-                host.instance_id,
-                host.focused.lock().expect("focus lock")
-            );
-            window.refresh();
-            target
-        })
-        .unwrap_or_default();
-    wait_for_focus_handle(cx, &target).await;
-    focus_element(cx, &target).await;
+fn rebuild_and_focus(driver: &mut HeadlessDriver<'_>, host: &Arc<Mutex<CaseHost>>) {
+    let target = {
+        let mut host = host.lock().expect("host lock");
+        host.rebuild();
+        let target = format!(
+            "tabs:{}:tab:{}",
+            host.instance_id,
+            host.focused.lock().expect("focus lock")
+        );
+        driver.draw_frame();
+        target
+    };
+    driver.wait_for_focus_handle(&target);
+    driver.focus_element(&target);
 }
 
-fn rebuild(cx: &mut AsyncWindowContext, host: &Arc<Mutex<CaseHost>>) {
-    cx.update(|window, _cx| {
-        host.lock().expect("host lock").rebuild();
-        window.refresh();
-    })
-    .ok();
+fn rebuild(driver: &mut HeadlessDriver<'_>, host: &Arc<Mutex<CaseHost>>) {
+    host.lock().expect("host lock").rebuild();
+    driver.draw_frame();
 }
 
-pub async fn drive_tabs_cases(
-    cx: &mut AsyncWindowContext,
+pub fn drive_tabs_cases(
+    driver: &mut HeadlessDriver<'_>,
     iface: InterfaceDoc,
     cases: Vec<Value>,
     only: Option<String>,
@@ -162,9 +152,9 @@ pub async fn drive_tabs_cases(
             theme: GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE),
         }));
         host.lock().expect("host lock").rebuild();
-        mount_node(cx, Arc::clone(&node));
+        driver.mount_node(Arc::clone(&node));
         let initial_id = format!("tabs:conformance-{case_id}:tab:{initial}");
-        blur_element_focus(cx, &initial_id).await;
+        driver.blur_element_focus(&initial_id);
         // A prior case can briefly repaint the new semantic ids while its old
         // focus handle is still active. Reset the host's semantic focus after
         // the real backend blur so the new case starts from its fixture.
@@ -173,12 +163,10 @@ pub async fn drive_tabs_cases(
             *host.focused.lock().expect("focus lock") = initial.clone();
             host.rebuild();
         }
-        cx.update(|window, _cx| window.refresh()).ok();
-        wait_for_focus_handle(cx, &initial_id).await;
+        driver.draw_frame();
+        driver.wait_for_focus_handle(&initial_id);
 
-        let mount_observation = cx
-            .update(|_window, _cx| observe_case(&host.lock().expect("host lock"), &iface))
-            .unwrap_or_else(|_| json!({}));
+        let mount_observation = observe_case(&host.lock().expect("host lock"), &iface);
         let mut failures = Vec::new();
         let mut assertions = Vec::new();
         let mut observations = vec![mount_observation];
@@ -196,7 +184,7 @@ pub async fn drive_tabs_cases(
                                 let host = host.lock().expect("host lock");
                                 *host.focused.lock().expect("focus lock") = value.to_owned();
                             }
-                            rebuild_and_focus(cx, &host).await;
+                            rebuild_and_focus(driver, &host);
                         }
                         "press" => {
                             let disabled = part_value(part).is_some_and(|value| {
@@ -207,37 +195,29 @@ pub async fn drive_tabs_cases(
                                     .iter()
                                     .any(|tab| tab.value == value && tab.is_disabled)
                             });
-                            keyboard_activate(cx, &id).await;
+                            driver.keyboard_activate(&id);
                             if !disabled {
-                                rebuild(cx, &host);
+                                rebuild(driver, &host);
                             }
                         }
                         "key" => {
                             let key = step.get("key").and_then(Value::as_str).unwrap_or("");
                             if key == "Enter" {
-                                keyboard_activate(cx, &id).await;
-                            } else if let Some(code) = keycode(key) {
-                                keyboard_key(cx, &id, code).await;
+                                driver.keyboard_activate(&id);
+                            } else if let Some(gpui_key) = gpui_key(key) {
+                                driver.keyboard_key(&id, gpui_key);
                             }
-                            rebuild(cx, &host);
+                            rebuild(driver, &host);
                         }
                         _ => {}
                     }
-                    let observation = cx
-                        .update(|_window, _cx| {
-                            observe_case(&host.lock().expect("host lock"), &iface)
-                        })
-                        .unwrap_or_else(|_| json!({}));
+                    let observation = observe_case(&host.lock().expect("host lock"), &iface);
                     observations.push(observation);
                 }
                 "expectPart" => {
                     let part = step.get("part").and_then(Value::as_str).unwrap_or("");
                     let expect = step.get("expect").cloned().unwrap_or(Value::Null);
-                    let observation = cx
-                        .update(|_window, _cx| {
-                            observe_case(&host.lock().expect("host lock"), &iface)
-                        })
-                        .unwrap_or_else(|_| json!({}));
+                    let observation = observe_case(&host.lock().expect("host lock"), &iface);
                     let mut results = Vec::new();
                     assert_part(
                         &iface,
@@ -295,7 +275,7 @@ pub async fn drive_tabs_cases(
                 _ => {}
             }
         }
-        drain_event_queue(cx).await;
+        driver.drain();
         outcomes.push(CaseOutcome {
             case_id,
             pass: failures.is_empty(),

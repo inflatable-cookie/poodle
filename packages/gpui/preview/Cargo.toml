@@ -11,10 +11,6 @@ publish = false
 name = "poodle-preview"
 path = "src/main.rs"
 
-[[bin]]
-name = "conformance"
-path = "src/bin/conformance.rs"
-
 [dependencies]
 # GPUI framework — Zed's GPU-accelerated UI framework (macOS/Metal)
 # Using crates.io release. If build fails due to core-foundation/font-kit
@@ -33,9 +29,8 @@ poodle-style = { path = "../../contracts/style" }
 poodle-tokens = { path = "../../contracts/tokens" }
 anyhow = "1"
 
-# The click driver builds NSEvents in-process and sends them to our own
-# NSWindow — Window::dispatch_event returns a crate-private type, so gpui's
-# own event entry point cannot be called from here.
+# The interactive preview app posts real NSEvents to its own window through
+# the AppKit queue (preview click/key drive — not the conformance path).
 objc2 = "0.6"
 objc2-foundation = "0.3"
 objc2-app-kit = { version = "0.3", features = [
@@ -62,3 +57,13 @@ stability = "internal-tooling"
 [[test]]
 name = "catalogue"
 path = "tests/catalogue.rs"
+
+[[test]]
+name = "conformance_headless"
+path = "tests/conformance_headless.rs"
+
+# The headless conformance board runs through GPUI's in-memory test platform
+# (TestAppContext / VisualTestContext / TestWindow). test-support is a
+# dev-dependency so ordinary builds and the preview bin never pull it in.
+[dev-dependencies]
+gpui = { version = "0.2.2", features = ["test-support"] }

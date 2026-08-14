@@ -32,12 +32,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   operator. Resolved at the task boundary with a local opt-in guard; planned
   cards now name the headless selector explicitly. Full GPUI execution still
   needs migration onto GPUI's in-memory test platform.
+  RESOLVED 2026-08-15 by g14.023: the windowed board, its opt-in guard, and the
+  AppKit driver are deleted; `conformance:complete` runs the full cohort on
+  GPUI's in-memory test platform in any worktree.
 
 - 2026-08-14 — repeated `conformance:test-gpui-windowed` runs in one desktop
   session can write all three reports and exit the GPUI child while Effigy
   keeps waiting; later runs can also miss RangeSlider scrub/focus AppKit events
   after an earlier full-green run. The selector should time out/reap the child
   and isolate or reset foreground input state between invocations.
+  RESOLVED 2026-08-15 by g14.023: the selector is deleted; the headless board
+  is deterministic in-memory execution with no platform input state.
 
 - 2026-08-14 — `effigy graph explore ... --json` can leave its process alive
   after emitting the complete envelope, holding `.effigy/graph/refresh.lock` and

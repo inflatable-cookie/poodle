@@ -153,6 +153,11 @@ normal event tree; calling Poodle handlers directly is not runtime evidence.
 Conformance must never activate an operator's desktop application or window.
 Pixel snapshots remain a separate visual-regression concern.
 
+Landed with g14.023: `conformance:complete` runs the full active cohort
+headless, and planted-failure tests prove the runner catches an inert
+listener, a wrong focus target, a missing selected state, and broken
+drag/keyboard event order for the expected runtime/case/step/field.
+
 ## Pilot Profiles
 
 The g14 pilot proceeds in increasing complexity:

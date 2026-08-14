@@ -25,7 +25,7 @@ Those figures are point-in-time evidence, not a completion denominator. The
 g14.001 executable roster is now established from source: the Button corpus
 (`packages/core/src/conformance/button-cases.ts`) enumerates 20 cases across
 the three active runtimes, executed by the opt-in
-`effigy conformance:complete-windowed` selector.
+`effigy conformance:complete` selector.
 
 ## Current Gates And Holes
 
@@ -41,14 +41,15 @@ the three active runtimes, executed by the opt-in
 | React specimen registered | `docs:react-specimen-drift` | specimen content and GPUI |
 | capability declaration has a trace | `docs:capability-drift` | undeclared capability vocabulary and actual parity |
 | visual baselines exist | web and native snapshot tools | shared fixture identity; stale GPUI captures; Jetstream overwrite workflow |
-| **Button completes the conformance kernel** | `ci:conformance-windowed` (20 cases × Svelte, React, GPUI) | profile pilots 2–6 |
+| **Button completes the conformance kernel** | `ci:conformance` (20 cases × Svelte, React, GPUI, all headless) | profile pilots 2–6 |
 
 Operator ruling, 2026-08-14: the foreground GPUI proof is not acceptable as a
 normal worker validation path. Local invocation is now hard-guarded; g14.023
 migrates the same backend execution and observations onto GPUI's in-memory test
-platform before the remaining profiles continue. Until then,
-`ci:conformance` is safe but GPUI compile-only, while the legacy execution proof
-is isolated-CI-only.
+platform before the remaining profiles continue. Landed 2026-08-15:
+`conformance:complete` and `ci:conformance` execute the full cohort headless
+in any local worktree, and the AppKit activation/calibration/retry path is
+deleted.
 
 `docs:check` currently stays green while the machine-shape selector is red.
 `check:svelte` currently has three `AppHeaderCenterHarness.svelte` Snippet
@@ -82,9 +83,10 @@ Delivered for Button:
   replaces the hand-written `ButtonSpec` struct/default/builders; the token
   recipes live in the extension module beside it.
 - **Runtime harnesses** — web runners (Svelte + React, real DOM + real
-  events + real CSS geometry), GPUI runner (a real window: calibrated
-  NSEvent clicks through the AppKit queue, real backend focus through the
-  node-backend's focus registry, real Enter key activation).
+  events + real CSS geometry), GPUI runner (GPUI 0.2.2's in-memory test
+  platform: TestAppContext / VisualTestContext / TestWindow, real backend
+  focus through the node-backend's focus registry, real Enter key
+  activation through the window's dispatch tree).
 - **Observation** — `component-observation.v1` per runtime, data-driven from
   the interface's part descriptors and observation rules. No component
   identifier, class name, icon name, or part list lives in shared runner or
@@ -99,17 +101,19 @@ Delivered for Button:
   and the reason; no cross-runtime "someone exercised it" vacuity exists.
 - **Standing enforcement** — `docs:check` and `ci:web` carry read-only
   authority checks and web execution. A dedicated path-scoped macOS PR
-  workflow runs `ci:conformance-windowed`, including real GPUI execution and
-  normalized comparison. Headless `qa`, `ci:conformance`, and `ci:native`
-  stay window-free.
+  workflow runs `ci:conformance`, including full GPUI execution and
+  normalized comparison. `qa`, `ci:conformance`, and `ci:native` are all
+  headless.
 - **Catalogue correction** — g14 initially replaced all three active Button
   specimen pages with corpus projections. Commit `8ac863b4` restored the last
   curated pages. The corpus remains executable harness authority, not the
   catalogue's teaching structure.
-- **Completion** — `effigy conformance:complete-windowed` passes
+- **Completion** — `effigy conformance:complete` passes
   the active cohort and reports Jetstream program-deferred, never passing.
   Removing the GPUI registration fails completion; an inert backend binding
-  fails the executed cases.
+  fails the executed cases. Planted-failure tests cover an inert listener,
+  a wrong focus target, a missing selected state, and broken drag/keyboard
+  event order (g14.023).
 
 ### Defects the corpus caught (fixed, not waived)
 
@@ -131,15 +135,12 @@ Delivered for Button:
 
 ### Driver notes (recorded, not architecture)
 
-- The legacy GPUI runner needs a live macOS desktop and takes focus. `ci:native` and
-  headless `ci:conformance` compile it (`conformance:check-gpui`);
-  `ci:conformance-windowed` executes it only in the dedicated macOS PR workflow
-  or when the operator explicitly sets the foreground opt-in. The driver activates the app, warms
-  macOS's first-click swallow with a click on empty chrome, polls until the
-  window has painted (focus handle exists), and retries a swallowed click
-  like a real user would — the retry is real clicks, and an inert backend
-  binding still fails no matter how many times it is clicked. g14.023 removes
-  this path after equivalent headless GPUI evidence lands.
+- The headless GPUI driver (g14.023) runs on the in-memory test platform and
+  takes no OS focus. Every draw invalidates the mount view so paint-time
+  backend observations are deterministic, and all input goes through
+  `TestWindow`'s real dispatch callback (hit testing, focus chain,
+  listeners). The legacy AppKit activation, click calibration, first-click
+  retry, and foreground opt-in plumbing are deleted.
 
 ### Cost ruling
 
@@ -166,9 +167,9 @@ Finite typed roster → web / render-neutral / GPUI probes →
   and Markdown matrix. Jetstream is program-deferred outside rows. GPUI
   mounted accessibility is contract-003 forced-acceptance outside passing
   rows.
-- **Probes** — shared GPUI driver extracted from the Button bin; hand-built
-  node fixtures (not a public dummy component); web fixtures + Button cases
-  through the existing adapters.
+- **Probes** — shared headless GPUI driver; hand-built node fixtures (not a
+  public dummy component); web fixtures + Button cases through the existing
+  adapters.
 - **Legacy capability tooling** — `capabilities.json` + `capability-drift.ts`
   adapted as non-passing debt evidence. `timers` retired from the primitive
   roster.
@@ -187,8 +188,8 @@ RangeSlider proves a controlled two-part value through the same kernel:
 - **Execution** — Svelte / React / GPUI all green; compare covers button +
   range-slider corpora (30 cases × 3 runtimes).
 - **Native** — dual identified thumbs, keyboard, scrub Release; GPUI scrub uses
-  captured `on_drag_move` for real out-of-bounds drags plus mouse-move fallback
-  for synthetic AppKit events that do not arm GPUI drag payloads.
+  captured `on_drag_move` for real out-of-bounds drags plus the mouse-move
+  fallback on the headless platform.
 - **Specimens** — all three active runtimes project the corpus.
 - **Disposition** — two-thumb claims live in RangeSlider cases; single-value
   `slider` vectors remain. Jetstream stays program-deferred.

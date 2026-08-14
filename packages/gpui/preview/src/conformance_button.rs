@@ -1,11 +1,9 @@
 //! Button conformance adapter (spec 066, g14.001).
 //!
-//! Thin layer over the generic driver: fixture → ButtonSpec, case iteration,
-//! and observe_tree with the Button interface document.
+//! Thin layer over the generic headless driver: fixture → ButtonSpec, case
+//! iteration, and observe_tree with the Button interface document.
 
 use std::sync::{Arc, Mutex};
-
-use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
 use poodle_render::conformance::{
@@ -14,10 +12,7 @@ use poodle_render::conformance::{
 use poodle_specs::ButtonSpec;
 use serde_json::{json, Value};
 
-use super::conformance_driver::{
-    blur_element_focus, drain_event_queue, focus_element, keyboard_activate, mount_node,
-    pointer_activate, wait_for_focus_handle, warmup_and_calibrate,
-};
+use super::conformance_driver::HeadlessDriver;
 
 /// The stable element id the mounted button node carries.
 pub const BUTTON_ELEMENT_ID: &str = "conformance-button";
@@ -78,15 +73,13 @@ pub struct CaseOutcome {
     pub observations: Vec<Value>,
 }
 
-pub async fn drive_button_cases(
-    cx: &mut AsyncWindowContext,
+pub fn drive_button_cases(
+    driver: &mut HeadlessDriver<'_>,
     iface: InterfaceDoc,
     cases: Vec<Value>,
     only: Option<String>,
     spec_from_fixture: impl Fn(&Value) -> ButtonSpec,
 ) -> Vec<CaseOutcome> {
-    let calibration = warmup_and_calibrate(cx).await;
-
     let mut outcomes = Vec::new();
     for case in &cases {
         let case_id = case.get("id").and_then(Value::as_str).unwrap_or("?").to_owned();
@@ -122,16 +115,11 @@ pub async fn drive_button_cases(
             let initial = host.initial_node(handler);
             *host.node.lock().expect("node lock") = initial;
         }
-        mount_node(cx, Arc::clone(&node));
-        blur_element_focus(cx, BUTTON_ELEMENT_ID).await;
-        wait_for_focus_handle(cx, BUTTON_ELEMENT_ID).await;
+        driver.mount_node(Arc::clone(&node));
+        driver.blur_element_focus(BUTTON_ELEMENT_ID);
+        driver.wait_for_focus_handle(BUTTON_ELEMENT_ID);
 
-        let mount_observation = cx
-            .update(|_window, _cx| {
-                let host = host.lock().expect("host lock");
-                observe_case(&host, &iface)
-            })
-            .unwrap_or_else(|_| json!({}));
+        let mount_observation = observe_case(&host.lock().expect("host lock"), &iface);
 
         let mut failures = Vec::new();
         let mut assertions = Vec::new();
@@ -145,59 +133,32 @@ pub async fn drive_button_cases(
                     let input = step.get("input").and_then(Value::as_str).unwrap_or("pointer");
                     if name == "press" {
                         if input == "keyboard" {
-                            keyboard_activate(cx, BUTTON_ELEMENT_ID).await;
+                            driver.keyboard_activate(BUTTON_ELEMENT_ID);
                         } else {
-                            let before = trace.lock().expect("trace lock").len();
-                            for _click_pass in 0..3 {
-                                pointer_activate(cx, calibration).await;
-                                if trace.lock().expect("trace lock").len() > before {
-                                    break;
-                                }
-                            }
+                            driver.pointer_activate();
                         }
                         if toggle_mode {
-                            cx.update(|window, _cx| {
-                                let mut host = host.lock().expect("host lock");
-                                let handler = CaseHost::make_handler(
-                                    Arc::clone(&pressed),
-                                    Arc::clone(&trace),
-                                    toggle_mode,
-                                );
-                                host.rebuild(handler, toggle_mode);
-                                window.refresh();
-                            })
-                            .ok();
-                            cx.background_executor()
-                                .timer(std::time::Duration::from_millis(150))
-                                .await;
+                            let mut host = host.lock().expect("host lock");
+                            let handler = CaseHost::make_handler(
+                                Arc::clone(&pressed),
+                                Arc::clone(&trace),
+                                toggle_mode,
+                            );
+                            host.rebuild(handler, toggle_mode);
+                            driver.draw_frame();
                         }
-                        let action_observation = cx
-                            .update(|_window, _cx| {
-                                let host = host.lock().expect("host lock");
-                                observe_case(&host, &iface)
-                            })
-                            .unwrap_or_else(|_| json!({}));
+                        let action_observation = observe_case(&host.lock().expect("host lock"), &iface);
                         observations.push(action_observation);
                     } else if name == "focus" {
-                        focus_element(cx, BUTTON_ELEMENT_ID).await;
-                        let focus_observation = cx
-                            .update(|_window, _cx| {
-                                let host = host.lock().expect("host lock");
-                                observe_case(&host, &iface)
-                            })
-                            .unwrap_or_else(|_| json!({}));
+                        driver.focus_element(BUTTON_ELEMENT_ID);
+                        let focus_observation = observe_case(&host.lock().expect("host lock"), &iface);
                         observations.push(focus_observation);
                     }
                 }
                 "expectPart" => {
                     let part = step.get("part").and_then(Value::as_str).unwrap_or("");
                     let expect = step.get("expect").cloned().unwrap_or(Value::Null);
-                    let observation = cx
-                        .update(|_window, _cx| {
-                            let host = host.lock().expect("host lock");
-                            observe_case(&host, &iface)
-                        })
-                        .unwrap_or_else(|_| json!({}));
+                    let observation = observe_case(&host.lock().expect("host lock"), &iface);
                     let mut results = Vec::new();
                     assert_part(&iface, part, &expect, index, observation, "gpui", &mut results);
                     for r in &results {
@@ -238,7 +199,7 @@ pub async fn drive_button_cases(
             }
         }
 
-        drain_event_queue(cx).await;
+        driver.drain();
 
         outcomes.push(CaseOutcome {
             pass: failures.is_empty(),
