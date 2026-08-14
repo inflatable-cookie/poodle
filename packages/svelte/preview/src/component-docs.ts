@@ -2416,6 +2416,176 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 />`,
   },
 
+  "model-connection-picker": {
+    props: [
+      { name: "options", type: "ModelConnectionOption[]", default: "[]", description: "Host-ordered exact route options with opaque ids, availability, and badges." },
+      { name: "value", type: "string | null | undefined", default: "undefined", description: "Controlled selected option id." },
+      { name: "defaultValue", type: "string | null", default: "null", description: "Uncontrolled initial selection." },
+      { name: "query", type: "string | undefined", default: "undefined", description: "Controlled search text." },
+      { name: "defaultQuery", type: "string", default: '""', description: "Uncontrolled initial search text." },
+      { name: "state", type: "ModelConnectionPickerState", default: '"ready"', description: "Catalogue posture: ready, loading, error, empty, or no-results." },
+      { name: "title", type: "string", default: '"Choose a connection"', description: "PickerShell heading." },
+      { name: "description", type: "string | null", default: "null", description: "Supporting copy." },
+      { name: "searchPlaceholder", type: "string", default: '"Search connections"', description: "Query field placeholder." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Root accessible name; falls back to title." },
+      { name: "isDisabled", type: "boolean", default: "false", description: "Disables search and options." },
+      { name: "variant", type: '"inline" | "popover" | "modal"', default: '"inline"', description: "Forwarded to PickerShell." },
+    ],
+    slots: [
+      { name: "leading", description: "Provider mark for each option; default is a generic connection icon." },
+      { name: "footer", description: "Optional workflow guidance or actions below the option list." },
+    ],
+    events: [
+      { name: "onValueChange", payload: "((id: string) => void) | null", description: "User selected an enabled available route; emits the exact option id." },
+      { name: "onQueryChange", payload: "((query: string) => void) | null", description: "Search text changed." },
+    ],
+    usage: `<script lang="ts">
+  import { ModelConnectionPicker } from "@inflatable-cookie/poodle-svelte";
+</script>
+
+<ModelConnectionPicker
+  options={routes}
+  value={selectedId}
+  query={search}
+  onValueChange={(id) => selectRoute(id)}
+  onQueryChange={setSearch}
+/>`,
+  },
+
+  "model-connection-setup": {
+    props: [
+      { name: "stage", type: '"choose" | "configure" | undefined', default: "undefined", description: "Controlled workflow stage." },
+      { name: "defaultStage", type: '"choose" | "configure"', default: '"choose"', description: "Uncontrolled initial stage." },
+      { name: "options", type: "ModelConnectionOption[]", default: "[]", description: "Forwarded to the embedded picker." },
+      { name: "value", type: "string | null | undefined", default: "undefined", description: "Controlled selected option id." },
+      { name: "defaultValue", type: "string | null", default: "null", description: "Uncontrolled initial selection." },
+      { name: "query", type: "string | undefined", default: "undefined", description: "Controlled picker query." },
+      { name: "pickerState", type: "ModelConnectionPickerState", default: '"ready"', description: "Picker catalogue posture during choose." },
+      { name: "canSubmit", type: "boolean", default: "false", description: "Host-approved Add eligibility on configure." },
+      { name: "isPending", type: "boolean", default: "false", description: "Locks workflow actions during host work." },
+      { name: "pendingLabel", type: "string", default: '"Checking connection"', description: "Announced pending copy." },
+      { name: "error", type: "string | null", default: "null", description: "Safe form-level error." },
+      { name: "success", type: "string | null", default: "null", description: "Safe form-level success." },
+    ],
+    slots: [
+      { name: "leading", description: "Provider mark passed to the picker and selected-route summary." },
+      { name: "configuration", description: "Host-owned setup content for the selected route. Receives option and pending state." },
+      { name: "configureAside", description: "Optional secondary guidance beside configuration content." },
+    ],
+    events: [
+      { name: "onStageChange", payload: "((stage: ModelConnectionSetupStage) => void) | null", description: "Continue or Back accepted." },
+      { name: "onValueChange", payload: "((id: string) => void) | null", description: "Picker selection changed." },
+      { name: "onQueryChange", payload: "((query: string) => void) | null", description: "Picker query changed." },
+      { name: "onSubmit", payload: "((id: string) => void) | null", description: "Add activated for the selected id." },
+      { name: "onCancel", payload: "(() => void) | null", description: "Cancel activated; host owns overlay closure." },
+    ],
+    usage: `<script lang="ts">
+  import { Field, ModelConnectionSetup, TextInput } from "@inflatable-cookie/poodle-svelte";
+</script>
+
+<ModelConnectionSetup
+  options={routes}
+  stage={stage}
+  value={selectedId}
+  canSubmit={valid}
+  isPending={checking}
+  onStageChange={setStage}
+  onSubmit={(id) => addConnection(id)}
+>
+  {#snippet configuration({ isPending })}
+    <Field id="api-key" label="API key">
+      <TextInput id="api-key" type="password" bind:value={apiKey} disabled={isPending} />
+    </Field>
+  {/snippet}
+</ModelConnectionSetup>`,
+  },
+
+  "model-connection-card": {
+    props: [
+      { name: "id", type: "string", description: "Required. Opaque configured-connection id." },
+      { name: "title", type: "string", description: "Required. Instance label or provider label." },
+      { name: "providerLabel", type: "string", description: "Required. Provider family display label." },
+      { name: "routeLabel", type: "string | null", default: "null", description: "Exact route display label." },
+      { name: "version", type: "string | null", default: "null", description: "Observed safe version text." },
+      { name: "accessSummary", type: "string | null", default: "null", description: "Sanitized auth/access summary; never a credential." },
+      { name: "readiness", type: "ModelConnectionReadiness", default: '"unknown"', description: "Display posture only." },
+      { name: "readinessLabel", type: "string", default: '"Status unknown"', description: "Visible and accessible readiness meaning." },
+      { name: "open", type: "boolean | undefined", default: "undefined", description: "Controlled disclosure." },
+      { name: "defaultOpen", type: "boolean", default: "false", description: "Uncontrolled initial disclosure." },
+      { name: "isEnabled", type: "boolean", default: "true", description: "Host preference; separate from readiness." },
+      { name: "isEnableDisabled", type: "boolean", default: "false", description: "Disables only the Switch." },
+      { name: "isDisabled", type: "boolean", default: "false", description: "Disables card controls." },
+    ],
+    slots: [
+      { name: "leading", description: "Provider mark for the connection." },
+      { name: "badges", description: "Optional route maturity or host labels beside the title." },
+      { name: "closedAccessory", description: "Closed-only region intended for UpdateCenter or equivalent." },
+      { name: "actions", description: "Optional host actions or menu." },
+      { name: "details", description: "Open settings region: forms, access actions, ModelCatalogueEditor, diagnostics." },
+    ],
+    events: [
+      { name: "onOpenChange", payload: "((open: boolean) => void) | null", description: "Disclosure control activated." },
+      { name: "onEnabledChange", payload: "((enabled: boolean) => void) | null", description: "Enable switch activated." },
+    ],
+    usage: `<script lang="ts">
+  import { ModelConnectionCard, UpdateCenter } from "@inflatable-cookie/poodle-svelte";
+</script>
+
+<ModelConnectionCard
+  id={connection.id}
+  title={connection.title}
+  providerLabel={connection.providerLabel}
+  routeLabel={connection.routeLabel}
+  readiness={connection.readiness}
+  readinessLabel={connection.readinessLabel}
+  isEnabled={connection.enabled}
+  onEnabledChange={(enabled) => setEnabled(connection.id, enabled)}
+>
+  {#snippet closedAccessory()}
+    <UpdateCenter presence="attention" {...updateOffer} />
+  {/snippet}
+  {#snippet details()}
+    <!-- host settings, catalogue editor, access actions -->
+  {/snippet}
+</ModelConnectionCard>`,
+  },
+
+  "model-catalogue-editor": {
+    props: [
+      { name: "items", type: "ModelCatalogueItem[]", default: "[]", description: "Shown items use source order; hidden order is not meaningful." },
+      { name: "state", type: "ModelCatalogueState", default: '"ready"', description: "Catalogue posture: ready, loading, unavailable, empty, error, or sessionNegotiated." },
+      { name: "title", type: "string", default: '"Models"', description: "Visible heading." },
+      { name: "hiddenTitle", type: "string", default: '"Hidden models"', description: "Collapsed hidden-section heading." },
+      { name: "ariaLabel", type: "string | null", default: "null", description: "Falls back to title." },
+      { name: "isDisabled", type: "boolean", default: "false", description: "Disables editing; list remains readable." },
+      { name: "isPending", type: "boolean", default: "false", description: "Temporary mutation lock." },
+      { name: "isDragEnabled", type: "boolean", default: "true", description: "Pointer drag; keyboard and move buttons remain." },
+      { name: "showMoveActions", type: "boolean", default: "true", description: "Explicit up/down IconButtons." },
+      { name: "stateTitle", type: "string | null", default: "null", description: "Host override for non-ready heading." },
+      { name: "stateMessage", type: "string | null", default: "null", description: "Host-safe posture explanation." },
+    ],
+    slots: [
+      { name: "leading", description: "Optional model or provider mark per row." },
+      { name: "customAction", description: "Custom model or refresh action beside the header." },
+      { name: "rowMeta", description: "Optional safe capability metadata per row." },
+    ],
+    events: [
+      { name: "onOrderChange", payload: "((orderedIds: string[]) => void) | null", description: "Complete shown-id order after a move." },
+      { name: "onVisibilityChange", payload: "((change: { id: string; visible: boolean }) => void) | null", description: "Hide or restore request." },
+      { name: "onInfo", payload: "((id: string) => void) | null", description: "Per-row info action when supplied." },
+    ],
+    usage: `<script lang="ts">
+  import { ModelCatalogueEditor } from "@inflatable-cookie/poodle-svelte";
+</script>
+
+<ModelCatalogueEditor
+  items={catalogue}
+  onOrderChange={(orderedIds) => persistOrder(orderedIds)}
+  onVisibilityChange={({ id, visible }) => persistVisibility(id, visible)}
+  onInfo={(id) => showModelInfo(id)}
+/>`,
+  },
+
   "log-list": {
     props: [
       { name: "entries", type: "LogEntry[]", default: "[]", description: "Array of log entries to display." },

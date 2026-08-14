@@ -3,6 +3,9 @@
 //
 // Framework-neutral: values here are plain data only. Children/slots are supplied
 // by each harness (Svelte needs a Snippet, React a ReactNode), never here.
+//
+// Do not import package entry points here — svelte-check's workspace tsconfig
+// cannot resolve `@inflatable-cookie/poodle-core` from this path.
 
 const opts = [
   { value: "a", label: "Alpha" },
@@ -226,6 +229,57 @@ export const COMPONENT_PROPS: Record<string, Record<string, unknown>> = {
       { machineId: "seat-1", label: "Studio Mac", thisMachine: true },
       { machineId: "seat-2", label: "Tour laptop", thisMachine: false },
       { machineId: "seat-3", label: null, thisMachine: false },
+    ],
+  },
+  ModelConnectionPicker: {
+    options: [
+      {
+        id: "openai-responses",
+        providerLabel: "OpenAI",
+        routeLabel: "Responses API",
+        description: "Hosted Responses route.",
+        group: "Hosted",
+        keywords: ["openai"],
+        badges: [],
+        availability: "available",
+        availabilityLabel: "Available",
+        isDisabled: false,
+      },
+    ],
+  },
+  ModelConnectionSetup: {
+    options: [
+      {
+        id: "openai-responses",
+        providerLabel: "OpenAI",
+        routeLabel: "Responses API",
+        description: "Hosted Responses route.",
+        group: "Hosted",
+        keywords: ["openai"],
+        badges: [],
+        availability: "available",
+        availabilityLabel: "Available",
+        isDisabled: false,
+      },
+    ],
+    defaultValue: "openai-responses",
+  },
+  ModelConnectionCard: {
+    id: "conn-openai-work",
+    title: "OpenAI · Work",
+    providerLabel: "OpenAI",
+  },
+  ModelCatalogueEditor: {
+    items: [
+      {
+        id: "model-alpha",
+        label: "Frontier Alpha",
+        providerLabel: "OpenAI",
+        description: "General reasoning.",
+        badges: [],
+        visible: true,
+        isDisabled: false,
+      },
     ],
   },
   // Renders the installable offer: title, notes, install + defer actions.

@@ -7,6 +7,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-14 — A Svelte 5 prop named `state` collides with the `$state` rune at
+  runtime (`store_invalid_shape: state is not a store with a subscribe method`).
+  Components that need a public `state` prop must alias it in `$props()`
+  (`state: catalogueState = "ready"`). Hit while building
+  `ModelCatalogueEditor` / `ModelConnectionPicker`.
+
+- 2026-08-14 — Collapsible's `slide` transition calls `element.animate`, which
+  happy-dom does not implement. Opening a Collapsible in component tests throws
+  `TypeError: element.animate is not a function`. Work around by not exercising
+  open transitions in happy-dom suites, or polyfill `Element.prototype.animate`.
+
 - 2026-08-14 — `contract-prop-drift` finds a contract's props by searching for
   the literal `### Public Props`, and **skips the contract entirely** when it
   finds none (`if (cProps.size === 0) { skipped++; continue }`). A contract that

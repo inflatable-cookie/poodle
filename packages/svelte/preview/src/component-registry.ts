@@ -240,6 +240,10 @@ export const allComponents: ComponentEntry[] = [
   entry("LicenceStatus", "workstation", "Held-licence usability, trust basis, and both coverage windows, without enforcing entitlement.", true),
   entry("LicenceActivation", "workstation", "Host-selected key activation, or account activation with an offline licence-file fallback.", true),
   entry("LicenceSeats", "workstation", "Inline-editable activated-machine list with self-service release of seats other than this machine.", true),
+  entry("ModelCatalogueEditor", "workstation", "Reorderable shown-model list with hide/restore for one configured connection.", true),
+  entry("ModelConnectionCard", "workstation", "Disclosure card for one configured connection with independent enable switch.", true),
+  entry("ModelConnectionPicker", "workstation", "Searchable grouped picker for one exact model route.", true),
+  entry("ModelConnectionSetup", "workstation", "Choose-then-configure shell for adding a model connection.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
 export const tagLabels: Record<ComponentTag, string> = {
