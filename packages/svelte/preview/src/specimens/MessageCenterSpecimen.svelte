@@ -4,6 +4,8 @@
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let items = $state<MessageCenterItem[]>([
+    { id: "job-render", title: "Mix preview", message: "Rendering stems and automation…", meta: "Render queue · 60%", read: true, tone: "pending", progress: { value: 60 }, selectable: false, removable: false, readControl: false },
+    { id: "job-upload", title: "Uploading stems", message: "Three of four stems transferred.", meta: "Cloud sync", read: true, tone: "info", progress: { value: null, indeterminate: true }, selectable: false, removable: false, readControl: false },
     { id: "render", title: "Render complete", message: "Mix preview 42 is ready for review.", meta: "Render queue", timestamp: Date.now() - 90_000, read: false, tone: "success", icon: "circle-check" },
     { id: "mention", title: "Ada mentioned you", message: "Can you check the automation pass before we print?", meta: "Mix room", timestamp: Date.now() - 720_000, read: false, tone: "info", icon: "user" },
     { id: "storage", title: "Storage nearing capacity", message: "Workspace media storage is at 86%.", meta: "System", timestamp: Date.now() - 7_200_000, read: true, tone: "warning", icon: "triangle-alert" },
@@ -18,11 +20,12 @@
 <SpecimenLayout bareVariants>
   {#snippet children()}
     <div class="poodle-message-center-specimen">
-      <SpecimenGroup label="Notification archive">
+      <SpecimenGroup label="Mixed activity feed">
         <div class="poodle-message-center-specimen__anchor">
           <MessageCenter
             {items}
             defaultOpen
+            onItemSelect={(id) => console.log(id)}
             onReadChange={setRead}
             onRemove={(id) => items = items.filter((item) => item.id !== id)}
             onMarkAllRead={() => items = items.map((item) => ({ ...item, read: true }))}
@@ -31,7 +34,7 @@
       </SpecimenGroup>
 
       <SpecimenGroup label="Messaging language">
-        <MessageCenter items={items.slice(0, 2)} title="Messages" triggerIcon="mail" />
+        <MessageCenter items={items.slice(2, 4)} title="Messages" triggerIcon="mail" />
       </SpecimenGroup>
 
       <SpecimenGroup label="Empty">

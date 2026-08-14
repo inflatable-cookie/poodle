@@ -439,6 +439,12 @@ export type CommandActionItem = {
   disabled?: boolean;
 };
 
+export type MessageCenterItemProgress = {
+  value: number | null;
+  max?: number;
+  indeterminate?: boolean;
+};
+
 export type MessageCenterItem = {
   id: string;
   title: string;
@@ -448,6 +454,10 @@ export type MessageCenterItem = {
   read: boolean;
   tone?: StatusTone;
   icon?: IconProp | null;
+  progress?: MessageCenterItemProgress | null;
+  selectable?: boolean;
+  removable?: boolean;
+  readControl?: boolean;
 };
 
 export type HistoryEntryPosition = "past" | "current" | "future";

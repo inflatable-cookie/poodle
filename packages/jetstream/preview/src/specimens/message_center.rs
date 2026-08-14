@@ -1,10 +1,22 @@
 use crate::compat::js_message_center;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
-use poodle_specs::{MessageCenterItem, MessageCenterSpec, StatusTone};
+use poodle_specs::{
+    MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec, StatusTone,
+};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let populated = MessageCenterSpec::new(vec![
+        MessageCenterItem::new("job-render", "Mix preview")
+            .with_message("Rendering stems and automation…")
+            .with_meta("Render queue · 60%")
+            .with_progress(MessageCenterItemProgress::determinate(60.0))
+            .as_live_row(),
+        MessageCenterItem::new("job-upload", "Uploading stems")
+            .with_message("Three of four stems transferred.")
+            .with_meta("Cloud sync")
+            .with_progress(MessageCenterItemProgress::indeterminate())
+            .as_live_row(),
         MessageCenterItem::new("render", "Render complete")
             .with_message("Mix preview 42 is ready for review.")
             .with_meta("Render queue")
@@ -17,6 +29,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         MessageCenterItem::new("maintenance", "Maintenance scheduled")
             .with_message("Workstation services restart tonight at 23:00.")
             .with_meta("Operations")
+            .with_timestamp("2026-08-10T15:00:00Z")
             .with_read(true)
             .with_tone(StatusTone::Warning),
     ])

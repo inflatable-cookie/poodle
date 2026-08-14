@@ -11,7 +11,7 @@ use poodle_node::{
 };
 use poodle_specs::{
     ButtonFit, ButtonSpec, ButtonTone, ButtonVariant, ControlSize, EmptyStateSpec, IconButtonSpec,
-    InlineTypographyMode, MessageCenterItem, MessageCenterSpec, PopoverSpec,
+    InlineTypographyMode, MessageCenterItem, MessageCenterSpec, PopoverSpec, ProgressSpec,
     SemanticControlSizeRole, StatusIndicatorSpec, TimeAgoSpec,
 };
 
@@ -22,6 +22,7 @@ use crate::floating_overlay::floating_overlay;
 use crate::icon_button::icon_button;
 use crate::popover::popover;
 use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
+use crate::progress::progress;
 use crate::status_indicator::status_indicator;
 use crate::time_ago::time_ago;
 
@@ -243,56 +244,63 @@ fn message_row(
         }
     }
 
-    let content = message_content(item, spec, theme, handlers.on_item_select.clone());
+    let content = message_content(item, spec, theme, handlers.on_item_select.clone().filter(|_| item.selectable));
     row = row.child(content);
 
     let mut actions = Node::container();
     actions.style.descriptor.layout.direction = LayoutDirection::Row;
     actions.style.descriptor.layout.spacing.gap = rem_to_px(0.125);
     actions.style.flex_shrink_zero = true;
+    let mut has_actions = false;
 
-    if let Some(handler) = handlers.on_read_change.clone() {
-        let id = item.id.clone();
-        let next_read = !item.read;
-        let label = if item.read {
-            format!("Mark {} unread", item.title)
-        } else {
-            format!("Mark {} read", item.title)
-        };
-        let control = IconButtonSpec::new()
-            .with_icon(if item.read { "mail" } else { "check" })
-            .with_aria_label(label)
-            .with_tooltip(if item.read {
-                "Mark unread"
+    if item.read_control {
+        if let Some(handler) = handlers.on_read_change.clone() {
+            let id = item.id.clone();
+            let next_read = !item.read;
+            let label = if item.read {
+                format!("Mark {} unread", item.title)
             } else {
-                "Mark read"
-            })
-            .with_size(ControlSize::Xs)
-            .with_density(spec.density);
-        actions = actions.child(icon_button(
-            &control,
-            theme,
-            Some(Arc::new(move || handler(&id, next_read))),
-        ));
+                format!("Mark {} read", item.title)
+            };
+            let control = IconButtonSpec::new()
+                .with_icon(if item.read { "mail" } else { "check" })
+                .with_aria_label(label)
+                .with_tooltip(if item.read {
+                    "Mark unread"
+                } else {
+                    "Mark read"
+                })
+                .with_size(ControlSize::Xs)
+                .with_density(spec.density);
+            actions = actions.child(icon_button(
+                &control,
+                theme,
+                Some(Arc::new(move || handler(&id, next_read))),
+            ));
+            has_actions = true;
+        }
     }
 
-    if let Some(handler) = handlers.on_remove.clone() {
-        let id = item.id.clone();
-        let control = IconButtonSpec::new()
-            .with_icon("trash-2")
-            .with_aria_label(format!("Remove {}", item.title))
-            .with_tooltip("Remove")
-            .with_tone(ButtonTone::Danger)
-            .with_size(ControlSize::Xs)
-            .with_density(spec.density);
-        actions = actions.child(icon_button(
-            &control,
-            theme,
-            Some(Arc::new(move || handler(&id))),
-        ));
+    if item.removable {
+        if let Some(handler) = handlers.on_remove.clone() {
+            let id = item.id.clone();
+            let control = IconButtonSpec::new()
+                .with_icon("trash-2")
+                .with_aria_label(format!("Remove {}", item.title))
+                .with_tooltip("Remove")
+                .with_tone(ButtonTone::Danger)
+                .with_size(ControlSize::Xs)
+                .with_density(spec.density);
+            actions = actions.child(icon_button(
+                &control,
+                theme,
+                Some(Arc::new(move || handler(&id))),
+            ));
+            has_actions = true;
+        }
     }
 
-    if handlers.on_read_change.is_some() || handlers.on_remove.is_some() {
+    if has_actions {
         row = row.child(actions);
     }
     row
@@ -391,6 +399,26 @@ fn message_content(
         }
         copy = copy.child(meta);
     }
+
+    if let Some(item_progress) = item.progress.as_ref() {
+        let progress_spec = {
+            let mut spec = ProgressSpec::new()
+                .with_size(ControlSize::Xs)
+                .with_size_role(SemanticControlSizeRole::Control)
+                .with_density(spec.density);
+            if item_progress.indeterminate {
+                spec = spec.with_indeterminate(true);
+            } else if let Some(value) = item_progress.value {
+                spec = spec.with_value(value);
+            }
+            if item_progress.max != 100.0 {
+                spec.max = item_progress.max;
+            }
+            spec.aria_label = Some(format!("{} progress", item.title));
+            spec
+        };
+        copy = copy.child(progress(&progress_spec, theme));
+    }
     content.child(copy)
 }
 
@@ -448,5 +476,116 @@ mod tests {
             LayoutSizing::Fixed(rem_to_px(28.0))
         );
         assert!(content.children[0].style.border_bottom_width.is_some());
+    }
+
+    #[test]
+    fn mixed_feed_renders_progress_and_respects_item_policies() {
+        use poodle_node::NodeKind;
+        use poodle_specs::MessageCenterItemProgress;
+
+        let spec = MessageCenterSpec::new(vec![
+            MessageCenterItem::new("job", "Mix preview")
+                .with_meta("Rendering")
+                .with_progress(MessageCenterItemProgress::determinate(60.0))
+                .as_live_row(),
+            MessageCenterItem::new("upload", "Uploading stems")
+                .with_progress(MessageCenterItemProgress::indeterminate())
+                .as_live_row(),
+            MessageCenterItem::new("render", "Render complete")
+                .with_tone(poodle_specs::StatusTone::Success),
+        ])
+        .with_open(true);
+        let handlers = MessageCenterHandlers {
+            on_item_select: Some(Arc::new(|_| {})),
+            on_read_change: Some(Arc::new(|_, _| {})),
+            on_remove: Some(Arc::new(|_| {})),
+            ..Default::default()
+        };
+        let node = message_center(&spec, &theme(), handlers);
+
+        let content = &node.children[1].children[0].children[0];
+        let list = &content.children[1];
+        assert_eq!(list.children.len(), 3);
+
+        // Live determinate row: not a button, no action controls, progress fill.
+        let job_row = &list.children[0];
+        assert!(matches!(job_row.children[0].kind, NodeKind::Container));
+        assert_eq!(job_row.children.len(), 1, "live row carries no actions");
+        let job_copy = &job_row.children[0].children[1];
+        let job_progress = job_copy
+            .children
+            .iter()
+            .find(|child| child.a11y.role == Some(NodeRole::ProgressIndicator))
+            .expect("determinate live row renders a progress node");
+        assert!(matches!(
+            job_progress.kind,
+            NodeKind::Progress { fraction } if (fraction - 0.6).abs() < 0.001
+        ));
+        assert_eq!(
+            job_progress.a11y.label.as_deref(),
+            Some("Mix preview progress")
+        );
+
+        // Live indeterminate row: progress indicator without a fill fraction.
+        let upload_row = &list.children[1];
+        assert_eq!(upload_row.children.len(), 1);
+        let upload_copy = &upload_row.children[0].children[1];
+        let upload_progress = upload_copy
+            .children
+            .iter()
+            .find(|child| child.a11y.role == Some(NodeRole::ProgressIndicator))
+            .expect("indeterminate live row renders a progress node");
+        assert!(matches!(upload_progress.kind, NodeKind::Container));
+
+        // Durable message keeps full interaction: button content plus two controls.
+        let message_row = &list.children[2];
+        assert!(matches!(
+            message_row.children[0].kind,
+            NodeKind::Button { .. }
+        ));
+        assert_eq!(message_row.children.len(), 2, "durable row keeps actions");
+        assert_eq!(message_row.children[1].children.len(), 2);
+
+        // Live rows never inflate the unread count.
+        assert_eq!(spec.unread_count(), 1);
+    }
+
+    #[test]
+    fn progress_updates_render_in_place_without_local_authority() {
+        use poodle_node::NodeKind;
+        use poodle_specs::MessageCenterItemProgress;
+
+        let spec_at = |value: f64| {
+            MessageCenterSpec::new(vec![MessageCenterItem::new("job", "Mix preview")
+                .with_progress(MessageCenterItemProgress::determinate(value))
+                .as_live_row()])
+            .with_open(true)
+        };
+
+        let early = message_center(
+            &spec_at(20.0),
+            &theme(),
+            MessageCenterHandlers::default(),
+        );
+        let late = message_center(
+            &spec_at(80.0),
+            &theme(),
+            MessageCenterHandlers::default(),
+        );
+
+        let fraction = |node: &Node| {
+            node.children[1].children[0].children[0].children[1].children[0]
+                .children[0]
+                .children[1]
+                .children
+                .iter()
+                .find_map(|child| match child.kind {
+                    NodeKind::Progress { fraction } => Some(fraction),
+                    _ => None,
+                })
+                .expect("progress node present")
+        };
+        assert!((fraction(&early) - 0.2).abs() < 0.001);
+        assert!((fraction(&late) - 0.8).abs() < 0.001);
     }
 }

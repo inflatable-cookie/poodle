@@ -4,12 +4,25 @@ use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_render::{message_center, MessageCenterHandlers};
-use poodle_specs::{MessageCenterItem, MessageCenterSpec, OverlayPlacement, StatusTone};
+use poodle_specs::{
+    MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec, OverlayPlacement,
+    StatusTone,
+};
 
 const IDS: &[&str] = &["render", "mention", "maintenance"];
 
 pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let items = vec![
+        MessageCenterItem::new("job-render", "Mix preview")
+            .with_message("Rendering stems and automation…")
+            .with_meta("Render queue · 60%")
+            .with_progress(MessageCenterItemProgress::determinate(60.0))
+            .as_live_row(),
+        MessageCenterItem::new("job-upload", "Uploading stems")
+            .with_message("Three of four stems transferred.")
+            .with_meta("Cloud sync")
+            .with_progress(MessageCenterItemProgress::indeterminate())
+            .as_live_row(),
         MessageCenterItem::new("render", "Render complete")
             .with_message("Mix preview 42 is ready for review.")
             .with_meta("Render queue")

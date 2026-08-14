@@ -1,7 +1,41 @@
 use crate::{ControlDensity, ControlSize, OverlayPlacement, SemanticControlSizeRole, StatusTone};
 
-/// One durable message displayed by [`MessageCenterSpec`].
-#[derive(Clone, Debug, Eq, PartialEq)]
+/// Optional progress presentation for a live item row.
+///
+/// A pure projection of host-owned values; the component never animates,
+/// estimates, or mutates it. `max` defaults to `100`.
+#[derive(Clone, Debug, PartialEq)]
+pub struct MessageCenterItemProgress {
+    pub value: Option<f64>,
+    pub max: f64,
+    pub indeterminate: bool,
+}
+
+impl MessageCenterItemProgress {
+    pub fn determinate(value: f64) -> Self {
+        Self {
+            value: Some(value),
+            max: 100.0,
+            indeterminate: false,
+        }
+    }
+
+    pub fn indeterminate() -> Self {
+        Self {
+            value: None,
+            max: 100.0,
+            indeterminate: true,
+        }
+    }
+
+    pub fn with_max(mut self, max: f64) -> Self {
+        self.max = max;
+        self
+    }
+}
+
+/// One durable message or live activity row displayed by [`MessageCenterSpec`].
+#[derive(Clone, Debug, PartialEq)]
 pub struct MessageCenterItem {
     pub id: String,
     pub title: String,
@@ -12,6 +46,14 @@ pub struct MessageCenterItem {
     pub read: bool,
     pub tone: StatusTone,
     pub icon: Option<String>,
+    /// Compact progress presentation under the copy; absent for plain messages.
+    pub progress: Option<MessageCenterItemProgress>,
+    /// Whether the row may be activated through `on_item_select`.
+    pub selectable: bool,
+    /// Whether the row shows a remove control when `on_remove` is supplied.
+    pub removable: bool,
+    /// Whether the row shows a read toggle when `on_read_change` is supplied.
+    pub read_control: bool,
 }
 
 impl MessageCenterItem {
@@ -25,6 +67,10 @@ impl MessageCenterItem {
             read: false,
             tone: StatusTone::Info,
             icon: None,
+            progress: None,
+            selectable: true,
+            removable: true,
+            read_control: true,
         }
     }
 
@@ -55,6 +101,37 @@ impl MessageCenterItem {
 
     pub fn with_icon(mut self, icon: impl Into<String>) -> Self {
         self.icon = Some(icon.into());
+        self
+    }
+
+    pub fn with_progress(mut self, progress: MessageCenterItemProgress) -> Self {
+        self.progress = Some(progress);
+        self
+    }
+
+    pub fn with_selectable(mut self, selectable: bool) -> Self {
+        self.selectable = selectable;
+        self
+    }
+
+    pub fn with_removable(mut self, removable: bool) -> Self {
+        self.removable = removable;
+        self
+    }
+
+    pub fn with_read_control(mut self, read_control: bool) -> Self {
+        self.read_control = read_control;
+        self
+    }
+
+    /// A live activity row: retained in place, not selectable, not removable,
+    /// and not part of the unread/read cycle. Hosts pair this with
+    /// `with_read(true)` so live rows do not inflate the unread count.
+    pub fn as_live_row(mut self) -> Self {
+        self.read = true;
+        self.selectable = false;
+        self.removable = false;
+        self.read_control = false;
         self
     }
 }
@@ -194,5 +271,39 @@ mod tests {
         assert!(spec.current_open());
         assert_eq!(spec.unread_count(), 1);
         assert_eq!(spec.effective_trigger_label(), "Notifications, 1 unread");
+    }
+
+    #[test]
+    fn items_default_to_full_interaction_policy() {
+        let item = MessageCenterItem::new("one", "First");
+        assert!(item.selectable);
+        assert!(item.removable);
+        assert!(item.read_control);
+        assert!(item.progress.is_none());
+    }
+
+    #[test]
+    fn live_row_opts_out_of_interactions_and_unread() {
+        let item = MessageCenterItem::new("job", "Mix preview")
+            .with_progress(MessageCenterItemProgress::determinate(60.0))
+            .as_live_row();
+
+        assert!(item.read);
+        assert!(!item.selectable);
+        assert!(!item.removable);
+        assert!(!item.read_control);
+        assert_eq!(item.progress.as_ref().unwrap().value, Some(60.0));
+    }
+
+    #[test]
+    fn progress_preserves_max_and_indeterminate_meaning() {
+        let determinate = MessageCenterItemProgress::determinate(3.0).with_max(5.0);
+        assert_eq!(determinate.value, Some(3.0));
+        assert_eq!(determinate.max, 5.0);
+        assert!(!determinate.indeterminate);
+
+        let indeterminate = MessageCenterItemProgress::indeterminate();
+        assert!(indeterminate.value.is_none());
+        assert!(indeterminate.indeterminate);
     }
 }
