@@ -62,6 +62,10 @@ one structured item collection + stable semantic keys
   runtime identity now isolates backend caches without changing observable
   semantic ids or accessibility relationships, with a renderer regression
   covering two tabsets that reuse the same values.
+- The first isolated rerun caught the observer still querying focus by semantic
+  id after runtime identities split. Generic native observation now prefers a
+  node's runtime identity for backend focus only; part resolution remains
+  semantic.
 
 ## Geometry and relationships
 

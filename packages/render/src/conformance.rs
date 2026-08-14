@@ -365,6 +365,13 @@ fn normalize_relationship(value: &str, iface: &InterfaceDoc) -> String {
 
 // ── Observation ────────────────────────────────────────────────────────────
 
+fn runtime_identity(node: &Node) -> &str {
+    node.runtime_id
+        .as_deref()
+        .or(node.id.as_deref())
+        .unwrap_or("")
+}
+
 /// Observes one part into the observation JSON.
 fn observe_part(
     part_id: &str,
@@ -408,9 +415,7 @@ fn observe_part(
             Some(false)
         } else {
             Some(
-                node.id
-                    .as_deref()
-                    .and_then(focus_by_id)
+                focus_by_id(runtime_identity(node))
                     .or_else(|| if is_root { focus_by_id("") } else { None })
                     .unwrap_or(false),
             )
@@ -509,13 +514,13 @@ fn states_of(
                 json!(matches!(root.a11y.toggled, Some(NodeToggled::True)))
             }
             NativeStateObservation::BackendFocus => {
-                match focus_by_id(root.id.as_deref().unwrap_or("")) {
+                match focus_by_id(runtime_identity(root)) {
                     Some(focused) => json!(focused),
                     None => Value::Null,
                 }
             }
             NativeStateObservation::FocusWithFocusStyle => {
-                focus_visible_of(root, focus_by_id(root.id.as_deref().unwrap_or("")))
+                focus_visible_of(root, focus_by_id(runtime_identity(root)))
             }
             NativeStateObservation::PartInteractionDisabled { part } => {
                 match find_part(iface, root, part) {
@@ -528,7 +533,7 @@ fn states_of(
                     Some(node) if !node.interaction.focusable || node.interaction.disabled => {
                         json!(false)
                     }
-                    Some(node) => match node.id.as_deref().and_then(focus_by_id) {
+                    Some(node) => match focus_by_id(runtime_identity(node)) {
                         Some(focused) => json!(focused),
                         None => json!(false),
                     },
@@ -923,6 +928,21 @@ fn values_match(expected: &Value, actual: &Value, tolerance: Option<f64>) -> boo
             },
             None => expected == actual,
         },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn focus_observation_prefers_runtime_identity_without_changing_semantic_id() {
+        let mut node = Node::container();
+        node.id = Some("tabs:overview".to_owned());
+        node.runtime_id = Some("tabs:first:tab:overview".to_owned());
+
+        assert_eq!(runtime_identity(&node), "tabs:first:tab:overview");
+        assert_eq!(node.id.as_deref(), Some("tabs:overview"));
     }
 }
 
