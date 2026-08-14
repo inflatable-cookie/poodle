@@ -35,6 +35,11 @@ export interface PartObservation {
   focusable: boolean | null;
   focused: boolean | null;
   focusVisible: boolean | null;
+  tabbable: boolean | null;
+  selected: boolean | null;
+  orientation: string | null;
+  controls: string | null;
+  labelledBy: string | null;
   geometry: Record<string, number | null>;
   channels: Record<string, string | null>;
 }
@@ -89,13 +94,22 @@ export interface RuntimeAdapter {
 function resolveWebPart(
   root: HTMLElement,
   part: SerializedComponentInterface["parts"][number],
+  partId: string = part.id,
 ): HTMLElement | null {
   const { kind } = part.resolve.web;
   switch (kind) {
     case "self":
       return root;
-    case "class":
+    case "class": {
+      const key = part.repeat && partId.startsWith(`${part.id}:`)
+        ? partId.slice(part.id.length + 1)
+        : null;
+      if (key && part.resolve.web.keyAttribute) {
+        return Array.from(root.querySelectorAll<HTMLElement>(part.resolve.web.className))
+          .find((candidate) => candidate.getAttribute(part.resolve.web.keyAttribute!) === key) ?? null;
+      }
       return root.querySelector<HTMLElement>(part.resolve.web.className);
+    }
     case "icon": {
       const { position, gatedBy, selector } = part.resolve.web;
       if (!root.hasAttribute(gatedBy)) return null;
@@ -104,6 +118,50 @@ function resolveWebPart(
     }
   }
   return null;
+}
+
+function expandedParts(
+  iface: SerializedComponentInterface,
+  root: HTMLElement,
+): Array<{ id: string; decl: SerializedComponentInterface["parts"][number] }> {
+  const expanded: Array<{ id: string; decl: SerializedComponentInterface["parts"][number] }> = [];
+  for (const decl of iface.parts) {
+    if (!decl.repeat || decl.resolve.web.kind !== "class" || !decl.resolve.web.keyAttribute) {
+      expanded.push({ id: decl.id, decl });
+      continue;
+    }
+    const keys = new Set(
+      Array.from(root.querySelectorAll<HTMLElement>(decl.resolve.web.className))
+        .map((candidate) => candidate.getAttribute(decl.resolve.web.keyAttribute!))
+        .filter((key): key is string => Boolean(key)),
+    );
+    for (const key of keys) expanded.push({ id: `${decl.id}:${key}`, decl });
+  }
+  return expanded;
+}
+
+function normalizeRelationship(
+  raw: string | null,
+  iface: SerializedComponentInterface,
+  root: HTMLElement,
+): string | null {
+  if (!raw) return null;
+  for (const { id, decl } of expandedParts(iface, root)) {
+    const element = resolveWebPart(root, decl, id);
+    if (element?.id === raw) return id;
+  }
+  const repeatedKeys = new Set(
+    expandedParts(iface, root)
+      .map(({ id }) => id.includes(":") ? id.slice(id.indexOf(":") + 1) : null)
+      .filter((key): key is string => Boolean(key)),
+  );
+  for (const decl of iface.parts) {
+    if (!decl.repeat?.webIdPrefix || !raw.startsWith(decl.repeat.webIdPrefix)) continue;
+    for (const key of repeatedKeys) {
+      if (raw.endsWith(`-${key}`)) return `${decl.id}:${key}`;
+    }
+  }
+  return raw;
 }
 
 /** The icon identity channel: the attribute the descriptor names on the
@@ -208,19 +266,23 @@ export function observeDom(
   const states = observeRootStates(iface, root);
   const tokenRoles = observeRootTokenRoles(iface, root);
   const parts: Record<string, PartObservation> = {};
-  for (const part of iface.parts) {
-    const el = resolveWebPart(root, part);
-    const isRoot = part.id === "root";
+  for (const { id: partId, decl: part } of expandedParts(iface, root)) {
+    const el = resolveWebPart(root, part, partId);
+    const isRoot = partId === "root";
     const identity =
       isRoot ||
       Boolean(part.role) ||
       part.resolve?.native?.kind === "id" ||
       part.resolve?.native?.kind === "self";
-    parts[part.id] = {
+    const identityName = el
+      ? el.getAttribute("aria-label") ||
+        (part.role && !el.hasAttribute("aria-labelledby") ? el.textContent?.trim() || null : null)
+      : null;
+    parts[partId] = {
       present: Boolean(el),
       role: el ? roleOf(el) : null,
-      name: el?.getAttribute("aria-label") || null,
-      text: isRoot ? null : (el?.textContent?.trim() || null),
+      name: identityName,
+      text: !isRoot && part.contains === "text" ? (el?.textContent?.trim() || null) : null,
       icon: iconIdentity(part, el),
       value: partValue(el),
       states: {},
@@ -231,8 +293,15 @@ export function observeDom(
         el && identity
           ? root.ownerDocument.activeElement === el && el.matches(":focus-visible")
           : null,
-      geometry: {},
-      channels: {},
+      tabbable: el && identity ? isFocusable(el) && el.tabIndex === 0 : null,
+      selected: el && identity && el.hasAttribute("aria-selected")
+        ? el.getAttribute("aria-selected") === "true"
+        : null,
+      orientation: el?.getAttribute("aria-orientation") ?? null,
+      controls: normalizeRelationship(el?.getAttribute("aria-controls") ?? null, iface, root),
+      labelledBy: normalizeRelationship(el?.getAttribute("aria-labelledby") ?? null, iface, root),
+      geometry: el ? geometryOf(el) : {},
+      channels: el ? channelsOf(el) : {},
     };
   }
   // Root accessible name: aria-label, else the first text-carrying part, else
@@ -251,7 +320,8 @@ export function observeDom(
     accessibleName = trimmed.length > 0 ? trimmed : null;
   }
   const rootPart = parts.root;
-  if (rootPart.name == null) rootPart.name = accessibleName;
+  const rootDecl = iface.parts.find((part) => part.id === "root");
+  if (rootDecl?.role && rootPart.name == null) rootPart.name = accessibleName;
   rootPart.states = states;
   rootPart.tokenRoles = tokenRoles;
   rootPart.focusable = isFocusable(root);
@@ -341,7 +411,20 @@ export function assertPartObservation(
   );
   if (!observed.present) return results;
 
-  for (const field of ["role", "name", "text", "icon", "focusable"] as const) {
+  for (const field of [
+    "role",
+    "name",
+    "text",
+    "icon",
+    "focusable",
+    "focused",
+    "focusVisible",
+    "tabbable",
+    "selected",
+    "orientation",
+    "controls",
+    "labelledBy",
+  ] as const) {
     if (expect[field] !== undefined) {
       check(results, runtime, stepIndex, partId, field, expect[field], observed[field]);
     }

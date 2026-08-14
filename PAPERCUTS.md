@@ -21,6 +21,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   cards now name the headless selector explicitly. Full GPUI execution still
   needs migration onto GPUI's in-memory test platform.
 
+- 2026-08-14 — repeated `conformance:test-gpui-windowed` runs in one desktop
+  session can write all three reports and exit the GPUI child while Effigy
+  keeps waiting; later runs can also miss RangeSlider scrub/focus AppKit events
+  after an earlier full-green run. The selector should time out/reap the child
+  and isolate or reset foreground input state between invocations.
+
+- 2026-08-14 — `effigy graph explore ... --json` can leave its process alive
+  after emitting the complete envelope, holding `.effigy/graph/refresh.lock` and
+  making subsequent `graph index` calls fail after 10 seconds. The graph command
+  should release its refresh lock before output completion or exit promptly once
+  the one-shot envelope is written.
+
 - 2026-08-14 — fresh t3 worktrees ship without `node_modules`; `effigy
   conformance:test-web` fails on unresolved `@sveltejs/vite-plugin-svelte`
   until `bun install`. Doctor/bootstrap could seed workspace installs for

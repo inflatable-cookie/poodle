@@ -603,6 +603,7 @@ pub enum NodeRole {
     Switch,
     Tab,
     TabList,
+    TabPanel,
     TextInput,
     Toolbar,
     Tooltip,
@@ -698,6 +699,13 @@ pub struct NodeA11y {
     pub label: Option<String>,
     pub expanded: Option<bool>,
     pub selected: Option<bool>,
+    /// Roving traversal marker. `0` is the current traversal stop; `-1`
+    /// remains programmatically focusable but is skipped by sequential focus.
+    pub tab_index: Option<i32>,
+    /// Semantic part relationships, normalized before backend projection.
+    pub controls: Option<String>,
+    pub labelled_by: Option<String>,
+    pub orientation: Option<String>,
     pub toggled: Option<NodeToggled>,
     /// Hierarchy level (1-based) — a treeitem's depth, announced as
     /// "level N" rather than inferred from indentation nobody can see.

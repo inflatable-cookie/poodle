@@ -1,0 +1,93 @@
+# g14.004 — Tabs Collection And Navigation Proof
+
+Date: 2026-08-14
+Card: `docs/roadmaps/g14/004-tabs-collection-navigation-proof.md`
+Depends on: g14.003 / PR #13
+Status: ready for orchestrator review
+
+## Outcome
+
+```text
+one structured item collection + stable semantic keys
+  -> repeated trigger/panel parts in Svelte / React / GPUI
+  -> controlled navigation and relationship observations
+  -> corpus-projected specimens in all active runtimes
+  -> Jetstream program-deferred
+```
+
+## What changed
+
+### Shared authority
+
+- Added collection prop fields and keyed repeated parts to the generic schema.
+- Added native id templates and keyed web part resolution.
+- Authored one Tabs portable interface and nine cases. Item order changes while
+  `trigger:<value>` and `panel:<value>` identity stays stable.
+- Added selected, tabbable, orientation, controls, labelled-by, and focused
+  observations to both runtime paths and the comparator.
+
+### Runtime execution
+
+- Svelte and React adapters drive real focus, click, and keyboard events.
+- GPUI renders tablist/tab/tabpanel roles, controlled value changes, semantic
+  relationships, roving focus, and automatic/manual keyboard navigation.
+- The GPUI conformance binary writes `gpui-tabs.json` beside the Button and
+  RangeSlider reports. Generic runners discover repeated parts from interface
+  metadata; there is no Tabs dispatch branch or alternate item list.
+
+### Defects caught
+
+- React manual activation focused the next tab but derived `tabIndex` from the
+  selected item, leaving the focused tab outside the roving tab stop. React now
+  seeds focus from selection and preserves independent manual focus movement.
+- Native Tabs declared focusability without joining the backend tracked-focus
+  channel, so arrow events could not reach a semantic tab. Renderer focus-change
+  wiring now creates real handles and records visible focus.
+- Native token observation reported the unresolved base size (`md`) instead of
+  the default chrome role's resolved size (`sm`).
+- The expanded identity comparison exposed missing native orientation on the
+  embedded RangeSlider controls; that pre-existing gap is closed.
+
+## Geometry and relationships
+
+The default trigger asserts 12px inline padding with an authored ±1px bound.
+Every case observes stable trigger-to-panel controls and panel-to-trigger
+labelled-by links. Reordered fixtures retain the same semantic ids.
+
+## Replacement and cost
+
+- Replaced active Tabs specimen fixtures: Svelte 316 LOC, React 240 LOC, GPUI
+  595 LOC — 1,151 LOC total.
+- Tabs pilot increment: 1,029 LOC.
+- Tabs generated interface/case data: 23,166 bytes.
+- `TabsSpec` is not replaced: overflow, history, close/reorder, tooltips, and
+  host actions remain outside this profile.
+- Existing Tabs machine vectors are not replaced wholesale. Close/reorder
+  claims remain vector-owned and are retained for g14.010/g14.011 disposition.
+
+## Planted failure
+
+A generated report relationship was changed from `panel:overview` to a wrong
+target. `conformance:compare` named the runtime, case, repeated part, and
+`controls` divergence. Regenerating the report restored the green comparison.
+
+## Validation
+
+| Command | Result |
+| --- | --- |
+| `effigy conformance:typecheck` | pass |
+| `effigy conformance:test-web` | pass (4 files) |
+| `cargo check --manifest-path packages/gpui/preview/Cargo.toml --bins` | pass |
+| `effigy conformance:test-gpui-windowed` | pass (20 Button + 10 RangeSlider + 9 Tabs) |
+| `effigy conformance:compare` | pass (39 cases × 3 runtimes) |
+| planted relationship divergence | fails, then restores |
+| `effigy ci:conformance-headless` | pass |
+| `effigy docs:check` | pass |
+| `git diff --check` | pass |
+
+## Papercuts
+
+- Fresh worktrees need dependency bootstrap before web conformance.
+- The documented Jetstream sibling checkout can collide during Rust bootstrap;
+  Jetstream remains outside this card's active cohort.
+- A one-shot Effigy graph query can leave its refresh lock held after output.

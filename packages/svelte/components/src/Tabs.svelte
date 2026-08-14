@@ -12,6 +12,10 @@
     type TabsContext as HeadlessTabsContext,
     type TabsEvent as HeadlessTabsEvent,
   } from "@inflatable-cookie/poodle-core";
+  import type {
+    TabsPortableEvents,
+    TabsPortableProps,
+  } from "@inflatable-cookie/poodle-core/conformance/tabs";
 
   import { anchored } from "./anchored";
   import { default as Button } from "./Button.svelte";
@@ -31,22 +35,12 @@
   } from "./presentation";
 
   import type {
-    ActiveEdge,
-    ActiveFill,
-    ControlDensity,
-    ControlSize,
-    Orientation,
-    SemanticControlSizeRole,
-    TabActivationMode,
     TabItem,
-    TabVariant,
   } from "./types";
 
-  interface Props {
-    value?: string | null;
+  interface Props extends Partial<Omit<TabsPortableProps, "items">> {
     defaultValue?: string | null;
     items?: TabItem[];
-    variant?: TabVariant;
     /**
      * Selection edge on the active tab: `"none"` draws no edge, `"outline"`
      * draws the accent border around the active item (the former `card`
@@ -54,20 +48,12 @@
      * along the inline-end side (the former `strip` variant's indicator).
      * The edge axis is an enum, so outline and underline cannot both apply.
      */
-    activeEdge?: ActiveEdge;
     /**
      * Selection treatment on the active tab: `"none"` draws no fill (the
      * edge and the selected text colour carry selection alone), `"tint"` is
      * the accent-tinted fill; `"solid"` fills the tab with `accent-base` and
      * switches the foreground to `text-inverse` for contrast.
      */
-    activeFill?: ActiveFill;
-    orientation?: Orientation;
-    activationMode?: TabActivationMode;
-    bordered?: boolean;
-    size?: ControlSize | null;
-    sizeRole?: SemanticControlSizeRole;
-    density?: ControlDensity | null;
     collapseWhenOverflow?: boolean;
     /**
      * What to do as the strip stops fitting.
@@ -84,13 +70,10 @@
      * never shed, so no tab becomes an unnamed glyph.
      */
     shed?: ("icon" | "count")[];
-    fullWidth?: boolean;
     collapseLabel?: string | null;
-    reorderable?: boolean;
-    ariaLabel?: string | null;
     showTooltips?: boolean;
     historyKey?: string | null;
-    onValueChange?: ((value: string) => void) | undefined;
+    onValueChange?: TabsPortableEvents["valueChange"] | undefined;
     onReorder?: ((items: string[]) => void) | undefined;
     onClose?: ((value: string) => void) | undefined;
     onDragPrepare?: ((value: string, event: PointerEvent) => void) | undefined;
@@ -666,6 +649,7 @@
             ondragstart={(event) => handleDragStart(event, index)}
             ondragend={handleDragEnd}
             id={`poodle-tab-${tabsId}-${item.value}`}
+            data-value={item.value}
             role="tab"
             tabindex={focusIndex === index ? 0 : -1}
             aria-selected={currentValue === item.value ? "true" : "false"}
@@ -744,6 +728,7 @@
     <div
       class="poodle-tabs__panel"
       id={`poodle-tabpanel-${tabsId}-${currentValue}`}
+      data-value={currentValue}
       role="tabpanel"
       tabindex="0"
       aria-labelledby={`poodle-tab-${tabsId}-${currentValue}`}

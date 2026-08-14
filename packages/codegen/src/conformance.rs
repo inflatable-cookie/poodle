@@ -106,6 +106,14 @@ pub struct PartDecl {
     pub role: Option<String>,
     #[serde(default)]
     pub resolve: Option<ResolveDecl>,
+    #[serde(default)]
+    pub repeat: Option<RepeatDecl>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct RepeatDecl {
+    pub prop: String,
+    pub key: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -184,8 +192,24 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
         .collect();
     let regions: std::collections::HashSet<&str> =
         interface.regions.iter().map(|r| r.name.as_str()).collect();
-    let parts: std::collections::HashSet<&str> =
-        interface.parts.iter().map(|p| p.id.as_str()).collect();
+    let parts: std::collections::HashSet<&str> = interface
+        .parts
+        .iter()
+        .filter(|p| p.repeat.is_none())
+        .map(|p| p.id.as_str())
+        .collect();
+    let repeated_parts: std::collections::HashSet<&str> = interface
+        .parts
+        .iter()
+        .filter(|p| p.repeat.is_some())
+        .map(|p| p.id.as_str())
+        .collect();
+    let part_is_known = |part: &str| {
+        parts.contains(part)
+            || part
+                .split_once(':')
+                .is_some_and(|(base, key)| !key.is_empty() && repeated_parts.contains(base))
+    };
     let states: std::collections::HashSet<&str> =
         interface.states.iter().map(|s| s.name.as_str()).collect();
     let events: std::collections::HashSet<&str> =
@@ -220,6 +244,27 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
                     "boolean" => {
                         if !value.is_boolean() {
                             findings.push(at(format!("prop '{key}' expects a boolean")));
+                        }
+                    }
+                    "number" => {
+                        if !value.is_number() {
+                            findings.push(at(format!("prop '{key}' expects a number")));
+                        }
+                    }
+                    "numberPair" => {
+                        let valid = value.as_array().is_some_and(|pair| {
+                            pair.len() == 2 && pair.iter().all(serde_json::Value::is_number)
+                        });
+                        if !valid {
+                            findings.push(at(format!("prop '{key}' expects a number pair")));
+                        }
+                    }
+                    "collection" => {
+                        if !value
+                            .as_array()
+                            .is_some_and(|items| items.iter().all(serde_json::Value::is_object))
+                        {
+                            findings.push(at(format!("prop '{key}' expects an object collection")));
                         }
                     }
                     "string" | "icon" | "dimension" => {
@@ -259,15 +304,15 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
         for step in &case.steps {
             match step {
                 CaseStep::Action { part, name, .. } => {
-                    if !parts.contains(part.as_str()) {
+                    if !part_is_known(part) {
                         findings.push(at(format!("action targets unknown part '{part}'")));
                     }
-                    if name != "press" && name != "focus" {
+                    if !matches!(name.as_str(), "press" | "focus" | "key" | "scrub") {
                         findings.push(at(format!("unknown action '{name}'")));
                     }
                 }
                 CaseStep::ExpectPart { part, expect } => {
-                    if !parts.contains(part.as_str()) {
+                    if !part_is_known(part) {
                         findings.push(at(format!("expects unknown part '{part}'")));
                     }
                     if let Some(expect_states) =

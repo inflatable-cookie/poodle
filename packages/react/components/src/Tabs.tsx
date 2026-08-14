@@ -19,6 +19,10 @@ import {
   type TabsContext as HeadlessTabsContext,
   type TabsEvent as HeadlessTabsEvent,
 } from "@inflatable-cookie/poodle-core";
+import type {
+  TabsPortableEvents,
+  TabsPortableProps,
+} from "@inflatable-cookie/poodle-core/conformance/tabs";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Button } from "./Button";
@@ -36,25 +40,15 @@ import {
   useUiPresentation,
 } from "./presentation";
 import type {
-  ActiveEdge,
-  ActiveFill,
-  ControlDensity,
-  ControlSize,
-  Orientation,
-  SemanticControlSizeRole,
-  TabActivationMode,
   TabItem,
-  TabVariant,
 } from "./types";
 
 /** @deprecated Use TabItem instead (pilot-era alias). */
 export type TabsItem = TabItem;
 
-export interface TabsProps {
-  value?: string | null;
+export interface TabsProps extends Partial<Omit<TabsPortableProps, "items">> {
   defaultValue?: string | null;
   items?: TabItem[];
-  variant?: TabVariant;
   /**
    * Selection edge on the active tab: `"none"` draws no edge, `"outline"`
    * draws the accent border around the active item (the former `card`
@@ -62,20 +56,12 @@ export interface TabsProps {
    * along the inline-end side (the former `strip` variant's indicator).
    * The edge axis is an enum, so outline and underline cannot both apply.
    */
-  activeEdge?: ActiveEdge;
   /**
    * Selection treatment on the active tab: `"none"` draws no fill (the
    * edge and the selected text colour carry selection alone), `"tint"` is
    * the accent-tinted fill; `"solid"` fills the tab with `accent-base` and
    * switches the foreground to `text-inverse` for contrast.
    */
-  activeFill?: ActiveFill;
-  orientation?: Orientation;
-  activationMode?: TabActivationMode;
-  bordered?: boolean;
-  size?: ControlSize | null;
-  sizeRole?: SemanticControlSizeRole;
-  density?: ControlDensity | null;
   collapseWhenOverflow?: boolean;
   /**
    * What to do as the strip stops fitting. `"collapse"` is today's single
@@ -88,13 +74,10 @@ export interface TabsProps {
    * are never shed.
    */
   shed?: ("icon" | "count")[];
-  fullWidth?: boolean;
   collapseLabel?: string | null;
-  reorderable?: boolean;
-  ariaLabel?: string | null;
   showTooltips?: boolean;
   historyKey?: string | null;
-  onValueChange?: ((value: string) => void) | undefined;
+  onValueChange?: TabsPortableEvents["valueChange"] | undefined;
   onReorder?: ((items: string[]) => void) | undefined;
   // Forwarded so a host (DockRegion) can run its own drag session on top of
   // the reorder plumbing; the tab still reorders locally either way.
@@ -222,7 +205,13 @@ export function Tabs({
     checked: item.value === currentValue,
   }));
 
-  const effectiveFocusIndex = selectedIndex >= 0 ? selectedIndex : focusIndex;
+  // Selection seeds the roving tab stop, but manual activation may then move
+  // focus without moving selection. Deriving the tab stop from selection on
+  // every render made React's focused manual tab remain `tabIndex=-1`.
+  useEffect(() => {
+    if (selectedIndex >= 0) setFocusIndex(selectedIndex);
+  }, [selectedIndex]);
+  const effectiveFocusIndex = focusIndex;
 
   const machineContextRef = useRef<HeadlessTabsContext<TabItem> | null>(null);
   machineContextRef.current = {
@@ -626,6 +615,7 @@ export function Tabs({
                   onDragStart={(e) => handleDragStart(e, index)}
                   onDragEnd={handleDragEnd}
                   id={`poodle-tab-${tabsId}-${item.value}`}
+                  data-value={item.value}
                   role="tab"
                   tabIndex={effectiveFocusIndex === index ? 0 : -1}
                   aria-selected={currentValue === item.value ? "true" : "false"}
@@ -687,6 +677,7 @@ export function Tabs({
         <div
           className="poodle-tabs__panel"
           id={`poodle-tabpanel-${tabsId}-${currentValue}`}
+          data-value={currentValue}
           role="tabpanel"
           tabIndex={0}
           aria-labelledby={`poodle-tab-${tabsId}-${currentValue}`}

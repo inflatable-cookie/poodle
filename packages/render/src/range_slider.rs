@@ -174,6 +174,9 @@ pub fn range_slider(
         thumb.a11y.role = Some(NodeRole::Slider);
         thumb.a11y.label = Some(label);
         thumb.a11y.value = Some(value);
+        if spec.variant == SliderVariant::Embedded {
+            thumb.a11y.orientation = Some(format!("{:?}", spec.orientation).to_ascii_lowercase());
+        }
         if spec.is_disabled {
             thumb.interaction.disabled = true;
         } else {

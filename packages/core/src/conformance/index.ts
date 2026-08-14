@@ -5,4 +5,6 @@ export * from "./button";
 export * from "./button-cases";
 export * from "./range-slider";
 export * from "./range-slider-cases";
+export * from "./tabs";
+export * from "./tabs-cases";
 export * from "./project";

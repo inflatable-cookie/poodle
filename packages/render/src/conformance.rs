@@ -32,13 +32,23 @@ const GEOMETRY_FIELDS: &[&str] = &[
 #[derive(Debug, Clone)]
 pub enum NativeResolution {
     SelfNode,
-    Id { id: String },
+    Id {
+        id: String,
+    },
+    IdTemplate {
+        template: String,
+    },
     RootLabel,
     FirstText,
     /// Icons on one side of the label: leading icons sit before the first
     /// text child, trailing icons after it.
-    IconSide { side: IconSide, except: Vec<String> },
-    IconNamed { name: String },
+    IconSide {
+        side: IconSide,
+        except: Vec<String>,
+    },
+    IconNamed {
+        name: String,
+    },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -52,6 +62,7 @@ pub struct PartDecl {
     pub id: String,
     pub role: Option<String>,
     pub resolve: NativeResolution,
+    pub repeated: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -117,6 +128,15 @@ impl InterfaceDoc {
                         .ok_or_else(|| format!("part '{id}' id resolution needs an id"))?
                         .to_owned(),
                 },
+                "id-template" => NativeResolution::IdTemplate {
+                    template: native
+                        .get("template")
+                        .and_then(Value::as_str)
+                        .ok_or_else(|| {
+                            format!("part '{id}' id-template resolution needs a template")
+                        })?
+                        .to_owned(),
+                },
                 "root-label" => NativeResolution::RootLabel,
                 "first-text" => NativeResolution::FirstText,
                 "icon-side" => NativeResolution::IconSide {
@@ -143,9 +163,18 @@ impl InterfaceDoc {
                         .unwrap_or("")
                         .to_owned(),
                 },
-                other => return Err(format!("part '{id}' has unknown native resolution '{other}'")),
+                other => {
+                    return Err(format!(
+                        "part '{id}' has unknown native resolution '{other}'"
+                    ))
+                }
             };
-            parts.push(PartDecl { id, role, resolve });
+            parts.push(PartDecl {
+                id,
+                role,
+                resolve,
+                repeated: part.get("repeat").is_some(),
+            });
         }
 
         let mut states = Vec::new();
@@ -185,7 +214,11 @@ impl InterfaceDoc {
                         .ok_or_else(|| format!("state '{name}' needs a part"))?
                         .to_owned(),
                 },
-                other => return Err(format!("state '{name}' has unknown native observation '{other}'")),
+                other => {
+                    return Err(format!(
+                        "state '{name}' has unknown native observation '{other}'"
+                    ))
+                }
             };
             states.push(StateDecl { name, observe });
         }
@@ -224,7 +257,8 @@ impl InterfaceDoc {
     }
 
     pub fn part_decl(&self, id: &str) -> Option<&PartDecl> {
-        self.parts.iter().find(|p| p.id == id)
+        let base = id.split_once(':').map(|(base, _)| base).unwrap_or(id);
+        self.parts.iter().find(|p| p.id == base)
     }
 }
 
@@ -236,12 +270,15 @@ pub fn find_part<'a>(iface: &InterfaceDoc, root: &'a Node, part_id: &str) -> Opt
     match &decl.resolve {
         NativeResolution::SelfNode => Some(root),
         NativeResolution::Id { id } => root.find(&|node| node.id.as_deref() == Some(id.as_str())),
+        NativeResolution::IdTemplate { template } => {
+            let key = part_id.split_once(':')?.1;
+            let id = template.replace("{key}", key);
+            root.find(&|node| node.id.as_deref() == Some(id.as_str()))
+        }
         NativeResolution::RootLabel => label_text(root).map(|_| root),
         NativeResolution::FirstText => first_text(root),
         NativeResolution::IconSide { side, except } => {
-            let is_content_icon = |child: &&Node| {
-                matches!(&child.kind, NodeKind::Icon { name, .. } if !except.contains(name))
-            };
+            let is_content_icon = |child: &&Node| matches!(&child.kind, NodeKind::Icon { name, .. } if !except.contains(name));
             let label_index = root
                 .children
                 .iter()
@@ -250,17 +287,25 @@ pub fn find_part<'a>(iface: &InterfaceDoc, root: &'a Node, part_id: &str) -> Opt
             match side {
                 IconSide::Leading => {
                     let end = label_index.unwrap_or(children.len());
-                    children[..end].iter().rev().find(|child| is_content_icon(child)).copied()
+                    children[..end]
+                        .iter()
+                        .rev()
+                        .find(|child| is_content_icon(child))
+                        .copied()
                 }
                 IconSide::Trailing => {
                     let start = label_index.map(|i| i + 1).unwrap_or(0);
-                    children[start..].iter().find(|child| is_content_icon(child)).copied()
+                    children[start..]
+                        .iter()
+                        .find(|child| is_content_icon(child))
+                        .copied()
                 }
             }
         }
-        NativeResolution::IconNamed { name } => root.children.iter().find(|child| {
-            matches!(&child.kind, NodeKind::Icon { name: n, .. } if n == name)
-        }),
+        NativeResolution::IconNamed { name } => root
+            .children
+            .iter()
+            .find(|child| matches!(&child.kind, NodeKind::Icon { name: n, .. } if n == name)),
     }
 }
 
@@ -297,23 +342,40 @@ fn rgba(color: &poodle_node::ColorValue) -> String {
     format!("rgba({},{},{},{})", color.0, color.1, color.2, color.3)
 }
 
+/// Runtime relationships carry real node ids. Normalize id-template targets
+/// back to the corpus's semantic repeated-part ids before comparison.
+fn normalize_relationship(value: &str, iface: &InterfaceDoc) -> String {
+    for part in &iface.parts {
+        let NativeResolution::IdTemplate { template } = &part.resolve else {
+            continue;
+        };
+        let Some((prefix, suffix)) = template.split_once("{key}") else {
+            continue;
+        };
+        let Some(key) = value
+            .strip_prefix(prefix)
+            .and_then(|tail| tail.strip_suffix(suffix))
+        else {
+            continue;
+        };
+        return format!("{}:{key}", part.id);
+    }
+    value.to_owned()
+}
+
 // ── Observation ────────────────────────────────────────────────────────────
 
 /// Observes one part into the observation JSON.
 fn observe_part(
+    part_id: &str,
     decl: &PartDecl,
     node: &Node,
     root: &Node,
     iface: &InterfaceDoc,
     focus_by_id: &dyn Fn(&str) -> Option<bool>,
 ) -> Value {
-    let part_id = decl.id.as_str();
     let is_root = part_id == "root";
-    let (geometry, channels) = if is_root {
-        (geometry_of(node), channels_of(node))
-    } else {
-        (json!({}), json!({}))
-    };
+    let (geometry, channels) = (geometry_of(node), channels_of(node));
     let states = if is_root {
         states_of(iface, root, focus_by_id)
     } else {
@@ -334,7 +396,9 @@ fn observe_part(
         || decl.role.is_some()
         || matches!(
             decl.resolve,
-            NativeResolution::Id { .. } | NativeResolution::SelfNode
+            NativeResolution::Id { .. }
+                | NativeResolution::IdTemplate { .. }
+                | NativeResolution::SelfNode
         );
     let focused = if identity_part {
         // Non-focusable identity parts are observed as unfocused (not
@@ -361,7 +425,7 @@ fn observe_part(
         } else {
             Value::Null
         },
-        "name": if identity_part {
+        "name": if identity_part && (!is_root || decl.role.is_some()) {
             node.a11y
                 .label
                 .clone()
@@ -392,6 +456,15 @@ fn observe_part(
         } else {
             Value::Null
         },
+        "tabbable": if identity_part {
+            json!(node.interaction.focusable && !node.interaction.disabled && node.a11y.tab_index.unwrap_or(0) == 0)
+        } else {
+            Value::Null
+        },
+        "selected": node.a11y.selected.map(|value| json!(value)).unwrap_or(Value::Null),
+        "orientation": node.a11y.orientation.clone().map(Value::String).unwrap_or(Value::Null),
+        "controls": node.a11y.controls.as_deref().map(|value| Value::String(normalize_relationship(value, iface))).unwrap_or(Value::Null),
+        "labelledBy": node.a11y.labelled_by.as_deref().map(|value| Value::String(normalize_relationship(value, iface))).unwrap_or(Value::Null),
         "geometry": geometry,
         "channels": channels,
     })
@@ -410,12 +483,21 @@ fn absent_part() -> Value {
         "focusable": null,
         "focused": null,
         "focusVisible": null,
+        "tabbable": null,
+        "selected": null,
+        "orientation": null,
+        "controls": null,
+        "labelledBy": null,
         "geometry": {},
         "channels": {},
     })
 }
 
-fn states_of(iface: &InterfaceDoc, root: &Node, focus_by_id: &dyn Fn(&str) -> Option<bool>) -> Value {
+fn states_of(
+    iface: &InterfaceDoc,
+    root: &Node,
+    focus_by_id: &dyn Fn(&str) -> Option<bool>,
+) -> Value {
     let mut states = BTreeMap::new();
     for decl in &iface.states {
         let value = match &decl.observe {
@@ -426,12 +508,12 @@ fn states_of(iface: &InterfaceDoc, root: &Node, focus_by_id: &dyn Fn(&str) -> Op
             NativeStateObservation::A11yToggled => {
                 json!(matches!(root.a11y.toggled, Some(NodeToggled::True)))
             }
-            NativeStateObservation::BackendFocus => match focus_by_id(
-                root.id.as_deref().unwrap_or(""),
-            ) {
-                Some(focused) => json!(focused),
-                None => Value::Null,
-            },
+            NativeStateObservation::BackendFocus => {
+                match focus_by_id(root.id.as_deref().unwrap_or("")) {
+                    Some(focused) => json!(focused),
+                    None => Value::Null,
+                }
+            }
             NativeStateObservation::FocusWithFocusStyle => {
                 focus_visible_of(root, focus_by_id(root.id.as_deref().unwrap_or("")))
             }
@@ -443,9 +525,7 @@ fn states_of(iface: &InterfaceDoc, root: &Node, focus_by_id: &dyn Fn(&str) -> Op
             }
             NativeStateObservation::PartBackendFocus { part } => {
                 match find_part(iface, root, part) {
-                    Some(node)
-                        if !node.interaction.focusable || node.interaction.disabled =>
-                    {
+                    Some(node) if !node.interaction.focusable || node.interaction.disabled => {
                         json!(false)
                     }
                     Some(node) => match node.id.as_deref().and_then(focus_by_id) {
@@ -505,7 +585,10 @@ fn geometry_of(node: &Node) -> Value {
     if let LayoutSizing::Fixed(height) = descriptor.layout.height {
         geometry.insert("height".to_owned(), json!(height));
     }
-    geometry.insert("minWidth".to_owned(), json!(node.style.min_width.unwrap_or(0.0)));
+    geometry.insert(
+        "minWidth".to_owned(),
+        json!(node.style.min_width.unwrap_or(0.0)),
+    );
     geometry.insert(
         "paddingLeft".to_owned(),
         json!(descriptor.layout.spacing.padding.left),
@@ -525,7 +608,10 @@ fn channels_of(node: &Node) -> Value {
     if let Some(color) = descriptor.background {
         channels.insert("background".to_owned(), json!(rgba(&color)));
     }
-    channels.insert("borderColor".to_owned(), json!(rgba(&descriptor.border.color)));
+    channels.insert(
+        "borderColor".to_owned(),
+        json!(rgba(&descriptor.border.color)),
+    );
     if let Some(color) = descriptor.text_color {
         channels.insert("color".to_owned(), json!(rgba(&color)));
     }
@@ -562,18 +648,25 @@ pub fn observe_tree_with_focus(
 ) -> Value {
     let mut parts = BTreeMap::new();
     for decl in &iface.parts {
-        let observed = find_part(iface, root, &decl.id);
-        parts.insert(
-            decl.id.clone(),
-            match observed {
-                Some(node) => observe_part(decl, node, root, iface, focus_by_id),
-                None => absent_part(),
-            },
-        );
+        let part_ids = expanded_native_part_ids(decl, root);
+        for part_id in part_ids {
+            let observed = find_part(iface, root, &part_id);
+            parts.insert(
+                part_id.clone(),
+                match observed {
+                    Some(node) => observe_part(&part_id, decl, node, root, iface, focus_by_id),
+                    None => absent_part(),
+                },
+            );
+        }
     }
     if let (Some(lower), Some(upper)) = (
-        parts.get("lower").and_then(|p| p.get("value").and_then(Value::as_f64)),
-        parts.get("upper").and_then(|p| p.get("value").and_then(Value::as_f64)),
+        parts
+            .get("lower")
+            .and_then(|p| p.get("value").and_then(Value::as_f64)),
+        parts
+            .get("upper")
+            .and_then(|p| p.get("value").and_then(Value::as_f64)),
     ) {
         if let Some(root_part) = parts.get_mut("root") {
             if let Some(obj) = root_part.as_object_mut() {
@@ -587,6 +680,39 @@ pub fn observe_tree_with_focus(
         "parts": parts,
         "trace": [],
     })
+}
+
+fn expanded_native_part_ids(decl: &PartDecl, root: &Node) -> Vec<String> {
+    if !decl.repeated {
+        return vec![decl.id.clone()];
+    }
+    let NativeResolution::IdTemplate { template } = &decl.resolve else {
+        return Vec::new();
+    };
+    let Some((prefix, suffix)) = template.split_once("{key}") else {
+        return Vec::new();
+    };
+    fn visit(node: &Node, prefix: &str, suffix: &str, out: &mut Vec<String>) {
+        if let Some(id) = node.id.as_deref() {
+            if let Some(rest) = id.strip_prefix(prefix) {
+                if let Some(key) = rest.strip_suffix(suffix) {
+                    if !key.is_empty() {
+                        out.push(key.to_owned());
+                    }
+                }
+            }
+        }
+        for child in &node.children {
+            visit(child, prefix, suffix, out);
+        }
+    }
+    let mut keys = Vec::new();
+    visit(root, prefix, suffix, &mut keys);
+    keys.sort();
+    keys.dedup();
+    keys.into_iter()
+        .map(|key| format!("{}:{key}", decl.id))
+        .collect()
 }
 
 // ── Evaluation (strict verdicts) ───────────────────────────────────────────
@@ -672,7 +798,15 @@ pub fn evaluate_steps(
             "expectPart" => {
                 let part = step.get("part").and_then(Value::as_str).unwrap_or("");
                 let expect = step.get("expect").cloned().unwrap_or(Value::Null);
-                assert_part(iface, part, &expect, index, harness.observe(), harness.runtime(), &mut out);
+                assert_part(
+                    iface,
+                    part,
+                    &expect,
+                    index,
+                    harness.observe(),
+                    harness.runtime(),
+                    &mut out,
+                );
             }
             "expectEvents" => {
                 let expected = step
@@ -820,8 +954,14 @@ pub fn assert_part(
         return;
     }
 
-    let present = observed.get("present").and_then(Value::as_bool).unwrap_or(false);
-    let expected_present = expect.get("present").and_then(Value::as_bool).unwrap_or(true);
+    let present = observed
+        .get("present")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    let expected_present = expect
+        .get("present")
+        .and_then(Value::as_bool)
+        .unwrap_or(true);
     if !present && expected_present {
         out.push(result(
             step_index,
@@ -836,25 +976,63 @@ pub fn assert_part(
     }
 
     if let Some(expected) = expect.get("present") {
-        check(out, runtime, step_index, part, "present".to_owned(), expected, Some(&json!(present)), None);
+        check(
+            out,
+            runtime,
+            step_index,
+            part,
+            "present".to_owned(),
+            expected,
+            Some(&json!(present)),
+            None,
+        );
     }
-    for field in ["role", "name", "text", "icon", "focusable"] {
+    for field in [
+        "role",
+        "name",
+        "text",
+        "icon",
+        "focusable",
+        "focused",
+        "focusVisible",
+        "tabbable",
+        "selected",
+        "orientation",
+        "controls",
+        "labelledBy",
+    ] {
         if let Some(expected) = expect.get(field) {
             let actual = observed.get(field);
-            check(out, runtime, step_index, part, field.to_owned(), expected, actual, None);
+            check(
+                out,
+                runtime,
+                step_index,
+                part,
+                field.to_owned(),
+                expected,
+                actual,
+                None,
+            );
         }
     }
     if let Some(expected) = expect.get("value") {
         let actual = observed.get("value");
-        check(out, runtime, step_index, part, "value".to_owned(), expected, actual, None);
+        check(
+            out,
+            runtime,
+            step_index,
+            part,
+            "value".to_owned(),
+            expected,
+            actual,
+            None,
+        );
     }
 
     if let Some(states) = expect.get("states").and_then(Value::as_object) {
         let observed_states = observed.get("states").cloned().unwrap_or(Value::Null);
         for (state, expected) in states {
-            let actual = observed_states
-                .as_object()
-                .and_then(|s| s.get(state));
+            let actual = observed_states.as_object().and_then(|s| s.get(state));
             check(
                 out,
                 runtime,
@@ -871,9 +1049,7 @@ pub fn assert_part(
     if let Some(token_roles) = expect.get("tokenRoles").and_then(Value::as_object) {
         let observed_roles = observed.get("tokenRoles").cloned().unwrap_or(Value::Null);
         for (token, expected) in token_roles {
-            let actual = observed_roles
-                .as_object()
-                .and_then(|r| r.get(token));
+            let actual = observed_roles.as_object().and_then(|r| r.get(token));
             check(
                 out,
                 runtime,
@@ -896,9 +1072,7 @@ pub fn assert_part(
             let Some(expected) = geometry.get(*field) else {
                 continue;
             };
-            let actual = observed
-                .get("geometry")
-                .and_then(|g| g.get(*field));
+            let actual = observed.get("geometry").and_then(|g| g.get(*field));
             check(
                 out,
                 runtime,
@@ -911,7 +1085,6 @@ pub fn assert_part(
             );
         }
     }
-
 }
 
 /// A host-owned activation handler that mirrors the web toggle path:
