@@ -1,6 +1,6 @@
 # g14.023 — Headless GPUI Conformance Execution
 
-Status: complete — accepted 2026-08-15
+Status: complete — accepted in PR #17
 Depends on: `g14.004`
 Governing refs: `../../architecture/009-cross-runtime-component-conformance.md`,
 `../../specs/066-executable-component-conformance.md`,

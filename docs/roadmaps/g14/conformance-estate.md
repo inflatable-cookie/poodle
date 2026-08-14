@@ -190,7 +190,9 @@ RangeSlider proves a controlled two-part value through the same kernel:
 - **Native** — dual identified thumbs, keyboard, scrub Release; GPUI scrub uses
   captured `on_drag_move` for real out-of-bounds drags plus the mouse-move
   fallback on the headless platform.
-- **Specimens** — all three active runtimes project the corpus.
+- **Specimens** — the three curated RangeSlider pages remain documentation;
+  exhaustive cases execute through the conformance harness and may later gain
+  a separate diagnostic projection under g14.026.
 - **Disposition** — two-thumb claims live in RangeSlider cases; single-value
   `slider` vectors remain. Jetstream stays program-deferred.
 - **Known boundary** — `RangeSliderSpec.law` is a structured
@@ -220,11 +222,12 @@ collections:
   resolution, native id templates, selected/tabbable/orientation/controls/
   labelled-by observations. The runners contain no Tabs component branch or
   second item corpus.
-- **Specimens** — the three active Tabs pages project the bounded corpus and
-  retain explicit residual examples for supported behavior outside the profile.
-  Web keeps overflow and close/reorder operator evidence; GPUI keeps observable
-  close and residual presentation examples, without claiming unsupported native
-  reorder or overflow behavior.
+- **Specimens** — the three curated Tabs pages retain explicit examples for
+  supported behavior. Web keeps overflow and close/reorder operator evidence;
+  GPUI keeps observable close and residual presentation examples, without
+  claiming unsupported native reorder or overflow behavior. Exhaustive cases
+  stay in the conformance harness and may later gain a separate diagnostic
+  projection under g14.026.
 - **Cost** — 1,126 LOC Tabs pilot increment and 23,010 bytes of Tabs fixture JSON.
 - **Residual surfaces** — `TabsSpec` remains because overflow, history,
   close/reorder, tooltips, and host actions are outside this bounded profile.

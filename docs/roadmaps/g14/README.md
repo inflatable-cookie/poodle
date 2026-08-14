@@ -83,7 +83,7 @@ the adopted cases before promotion.
 2. [002 — Primitive substrate certification](002-primitive-substrate-certification.md) — complete; accepted in PR #11
 3. [003 — RangeSlider controlled-control proof](003-range-slider-controlled-control-proof.md) — complete; accepted in PR #13
 4. [004 — Tabs collection and navigation proof](004-tabs-collection-navigation-proof.md) — complete; accepted in PR #14
-5. [023 — Headless GPUI conformance execution](023-headless-gpui-conformance-execution.md) — complete; accepted 2026-08-15
+5. [023 — Headless GPUI conformance execution](023-headless-gpui-conformance-execution.md) — complete; accepted in PR #17
 6. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md) — next
 7. [006 — TextInput runtime-boundary proof](006-text-input-runtime-boundary-proof.md)
 8. [007 — HistoryCenter composite proof](007-history-center-composite-proof.md)
