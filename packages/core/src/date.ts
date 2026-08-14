@@ -210,6 +210,28 @@ export function formatDisplayDateTime(
   return date.toLocaleString(locale);
 }
 
+export function formatDisplayTimeDate(
+  value: Date | string | number | null | undefined,
+  locale?: string,
+): string {
+  const date = parseDisplayDateValue(value);
+
+  if (!date) {
+    return "";
+  }
+
+  const time = date.toLocaleTimeString(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const day = date.toLocaleDateString(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  return `${time} ${day}`;
+}
+
 export function isTimeValue(value: string | null | undefined): boolean {
   if (!value) {
     return false;

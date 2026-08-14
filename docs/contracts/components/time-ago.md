@@ -1,14 +1,15 @@
 # TimeAgo
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-14
 
 ## 1. Purpose
 
 - Component name: `TimeAgo`
 - Layer: `foundation`
 - Summary: a non-interactive time display primitive that renders a human-readable
-  relative timestamp in short or long form with optional live updating
+  relative timestamp in short or long form, with contextual future phrasing
+  and optional live updating
 - In scope: relative time formatting, live interval updates, absolute time in
   title/tooltip, past and future time support
 - Out of scope: date pickers, countdown timers, duration formatting, interactive
@@ -41,6 +42,9 @@ The absolute time is surfaced by wrapping the `<time>` in the shared `Tooltip` c
 | `interval` | `number` | `30000` | no | live update interval in milliseconds |
 | `ariaLabel` | `string \| null` | `null` | no | override accessible label |
 | `short` | `boolean` | `true` | no | use compact output like `"5m ago"` instead of long phrases |
+| `futureFormat` | `"in" \| "from-now"` | `"in"` | no | future direction phrase: `"in 5m"` standalone or `"5m from now"` after surrounding copy |
+| `futurePrefix` | `string \| null` | `null` | no | phrase inserted before future output, producing copy such as `"ends in 5m"` |
+| `pastPrefix` | `string \| null` | `null` | no | phrase inserted before past output, producing copy such as `"ended 5m ago"` |
 | `typography` | `"body" \| "inherit"` | `"body"` | no | body tokens by default; use `"inherit"` when the parent inline context should own font sizing and related typography |
 | `tooltipFormat` | `"full" \| "date" \| "datetime"` | `"datetime"` | no | absolute-time format used for the native title tooltip |
 | `timezone` | `string \| null` | `null` | no | optional IANA timezone for tooltip formatting |
@@ -60,8 +64,8 @@ The absolute time is surfaced by wrapping the `<time>` in the shared `Tooltip` c
 | static | `live=false` | relative text computed once and not updated |
 | short | `short=true` | compact relative labels like `"5m ago"` |
 | long | `short=false` | long-form labels like `"5 minutes ago"` and `"yesterday"` |
-| past | datetime is before now | shows "{value} ago" format |
-| future | datetime is after now | shows "in {value}" format |
+| past | datetime is before now | shows `"{pastPrefix} {value} ago"`, omitting the prefix when unset |
+| future | datetime is after now | shows `"{futurePrefix} in {value}"` or `"{futurePrefix} {value} from now"`, omitting the prefix when unset |
 | just-now | difference less than 5 seconds | shows "just now" |
 
 ### Component States
@@ -184,6 +188,11 @@ The absolute time (`absoluteText`) is passed to the `Tooltip` wrapper's `content
 | diff < 365d | `"{months}mo ago"` / `"{months} months ago"` | `"in {months}mo"` / `"in {months} months"` |
 | diff >= 365d | `"{years}y ago"` / `"{years} years ago"` | `"in {years}y"` / `"in {years} years"` |
 
+With `futureFormat="from-now"`, the future column moves the direction phrase
+to the end: `"5m from now"`, `"2 days from now"`, and so on. Past output is
+unchanged. This supports phrases such as `"Coverage ends 5m from now"` without
+turning TimeAgo into a duration or static-date component.
+
 Special case: in long form (`short=false`), a past difference of exactly one day (`days === 1`, not future) renders `"yesterday"` instead of `"1 day ago"`. Short form always uses `"1d ago"`.
 
 Values are computed using integer division (floor). Thresholds use seconds:
@@ -226,6 +235,7 @@ Values are computed using integer division (floor). Thresholds use seconds:
 - [ ] absolute formatted date is surfaced via the `Tooltip` wrapper (where a Tooltip primitive exists)
 - [ ] `aria-label` combines relative and absolute text
 - [ ] relative text thresholds and abbreviations match exactly
+- [ ] `futureFormat` chooses `in 5m` or `5m from now` without changing past output
 - [ ] live update interval defaults to 30000ms
 - [ ] timer cleanup on destroy
 

@@ -13,9 +13,9 @@ describe("icon catalogue boundary", () => {
   test("the default Lucide set contains only Poodle's component dependencies", () => {
     // The count is a deliberate ceiling: the default set is what every consumer
     // ships, so it grows only when a component genuinely needs an icon. Last
-    // moved to 103 by LicenceActivation's explicit offline route. The route
-    // needs cloud-off rather than a link-like or generic navigation glyph.
-    expect(Object.keys(defaultLucideIconSet)).toHaveLength(103);
+    // moved to 104 by LicenceSeats' machine glyph. The row needs a concrete
+    // machine affordance without exposing the authority's random machine ID.
+    expect(Object.keys(defaultLucideIconSet)).toHaveLength(104);
     expect(defaultLucideIconSet.search).toBe(search);
     expect(defaultLucideIconSet.x).toBe(x);
     expect("biohazard" in defaultLucideIconSet).toBe(false);

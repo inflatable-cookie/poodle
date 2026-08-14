@@ -14,6 +14,16 @@ pub enum TimeAgoTooltipFormat {
     Full,
 }
 
+/// Placement of the direction phrase for future relative times.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum TimeAgoFutureFormat {
+    /// `in 5m` (default standalone form).
+    #[default]
+    In,
+    /// `5m from now` (reads naturally after copy such as `ends`).
+    FromNow,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct TimeAgoSpec {
     pub timestamp: String,
@@ -25,6 +35,12 @@ pub struct TimeAgoSpec {
     /// When true (default), renders compact forms like "2m ago".
     /// When false, renders long forms like "2 minutes ago".
     pub short: bool,
+    /// Future direction phrase. Contract default `in`.
+    pub future_format: TimeAgoFutureFormat,
+    /// Optional word or phrase before future relative text, without trailing space.
+    pub future_prefix: Option<String>,
+    /// Optional word or phrase before past relative text, without trailing space.
+    pub past_prefix: Option<String>,
     pub aria_label: Option<String>,
     pub typography: InlineTypographyMode,
     /// Absolute-time format used for the tooltip. Contract default `datetime`.
@@ -40,6 +56,9 @@ impl Default for TimeAgoSpec {
             live: true,
             interval: 30_000,
             short: true,
+            future_format: TimeAgoFutureFormat::default(),
+            future_prefix: None,
+            past_prefix: None,
             aria_label: None,
             typography: InlineTypographyMode::default(),
             tooltip_format: TimeAgoTooltipFormat::default(),
@@ -70,6 +89,21 @@ impl TimeAgoSpec {
 
     pub fn with_short(mut self, short: bool) -> Self {
         self.short = short;
+        self
+    }
+
+    pub fn with_future_format(mut self, format: TimeAgoFutureFormat) -> Self {
+        self.future_format = format;
+        self
+    }
+
+    pub fn with_future_prefix(mut self, prefix: impl Into<String>) -> Self {
+        self.future_prefix = Some(prefix.into());
+        self
+    }
+
+    pub fn with_past_prefix(mut self, prefix: impl Into<String>) -> Self {
+        self.past_prefix = Some(prefix.into());
         self
     }
 
@@ -112,7 +146,21 @@ impl TimeAgoSpec {
     /// Shared by both Rust targets so the threshold table is defined once and
     /// matches `formatRelative` in `TimeAgo.svelte` exactly (no week tier).
     pub fn format_relative(&self, diff_seconds: i64) -> String {
-        format_relative(diff_seconds, self.short)
+        let relative = match self.future_format {
+            TimeAgoFutureFormat::In => format_relative(diff_seconds, self.short),
+            TimeAgoFutureFormat::FromNow => {
+                format_relative_with_future_format(diff_seconds, self.short, self.future_format)
+            }
+        };
+        let prefix = if diff_seconds < 0 {
+            &self.future_prefix
+        } else {
+            &self.past_prefix
+        };
+        match prefix {
+            Some(prefix) => format!("{prefix} {relative}"),
+            None => relative,
+        }
     }
 }
 
@@ -130,6 +178,14 @@ const YEAR: u64 = 365 * DAY; // 31_536_000
 
 /// Format a relative-time label. `diff_seconds` is `now − timestamp`.
 pub fn format_relative(diff_seconds: i64, short: bool) -> String {
+    format_relative_with_future_format(diff_seconds, short, TimeAgoFutureFormat::In)
+}
+
+fn format_relative_with_future_format(
+    diff_seconds: i64,
+    short: bool,
+    future_format: TimeAgoFutureFormat,
+) -> String {
     let is_future = diff_seconds < 0;
     let abs = diff_seconds.unsigned_abs();
 
@@ -158,7 +214,10 @@ pub fn format_relative(diff_seconds: i64, short: bool) -> String {
 
     if short {
         if is_future {
-            format!("in {value}{unit_short}")
+            match future_format {
+                TimeAgoFutureFormat::In => format!("in {value}{unit_short}"),
+                TimeAgoFutureFormat::FromNow => format!("{value}{unit_short} from now"),
+            }
         } else {
             format!("{value}{unit_short} ago")
         }
@@ -169,7 +228,10 @@ pub fn format_relative(diff_seconds: i64, short: bool) -> String {
             unit_plural
         };
         if is_future {
-            format!("in {value} {unit}")
+            match future_format {
+                TimeAgoFutureFormat::In => format!("in {value} {unit}"),
+                TimeAgoFutureFormat::FromNow => format!("{value} {unit} from now"),
+            }
         } else {
             format!("{value} {unit} ago")
         }
@@ -186,6 +248,9 @@ mod tests {
         assert!(s.live, "live defaults to true");
         assert_eq!(s.interval, 30_000);
         assert!(s.short);
+        assert_eq!(s.future_format, TimeAgoFutureFormat::In);
+        assert_eq!(s.future_prefix, None);
+        assert_eq!(s.past_prefix, None);
         assert_eq!(s.tooltip_format, TimeAgoTooltipFormat::Datetime);
         assert_eq!(s.text_color_token(), semantic::COLOR_TEXT_PRIMARY);
     }
@@ -214,6 +279,23 @@ mod tests {
     fn future_short_uses_in_prefix() {
         assert_eq!(format_relative(-(5 * 60), true), "in 5m");
         assert_eq!(format_relative(-(2 * 3600), true), "in 2h");
+    }
+
+    #[test]
+    fn future_from_now_uses_suffix_without_changing_past() {
+        let s = TimeAgoSpec::new().with_future_format(TimeAgoFutureFormat::FromNow);
+        assert_eq!(s.format_relative(-(5 * 60)), "5m from now");
+        assert_eq!(s.format_relative(-86_400), "1d from now");
+        assert_eq!(s.format_relative(5 * 60), "5m ago");
+    }
+
+    #[test]
+    fn tense_prefixes_keep_deadline_copy_grammatical() {
+        let s = TimeAgoSpec::new()
+            .with_future_prefix("ends")
+            .with_past_prefix("ended");
+        assert_eq!(s.format_relative(-(5 * 60)), "ends in 5m");
+        assert_eq!(s.format_relative(5 * 60), "ended 5m ago");
     }
 
     #[test]

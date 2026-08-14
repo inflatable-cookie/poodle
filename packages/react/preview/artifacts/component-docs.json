@@ -5996,12 +5996,17 @@
     "slots": [],
     "events": [
       {
+        "name": "onRename",
+        "payload": "((detail: { machineId: string; label: string | null }) => void) | undefined",
+        "description": "An inline machine-name edit was committed. Blank names emit null; the host persists the result."
+      },
+      {
         "name": "onRelease",
         "payload": "((detail: { machineId: string }) => void) | undefined",
         "description": "Release of a seat other than this machine was confirmed. This machine has no release action."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { LicenceSeats } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<LicenceSeats\n  seats={licence.seats}\n  pendingMachineId={releasing}\n  onRelease={({ machineId }) => releaseSeat(machineId)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { LicenceSeats } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<LicenceSeats\n  seats={licence.seats}\n  pendingMachineId={releasing}\n  onRename={({ machineId, label }) => renameSeat(machineId, label)}\n  onRelease={({ machineId }) => releaseSeat(machineId)}\n/>"
   },
   "log-list": {
     "props": [
@@ -7988,6 +7993,12 @@
         "description": "Optional complete partition of length. Adds a visual gap after every group except the last without changing the value."
       },
       {
+        "name": "separator",
+        "type": "string | null",
+        "default": "null",
+        "description": "Optional presentation-only text rendered at each valid group boundary."
+      },
+      {
         "name": "mask",
         "type": "boolean",
         "default": "false",
@@ -8036,6 +8047,12 @@
         "description": "Field-level validation state. Invalid is also inferred automatically when error is present."
       },
       {
+        "name": "validate",
+        "type": "InputValidator | undefined",
+        "default": "undefined",
+        "description": "Runs when the sanitized value reaches length. Its valid result drives the completion tick or cross."
+      },
+      {
         "name": "onValueChange",
         "type": "((value: string) => void) | undefined",
         "default": "undefined",
@@ -8050,7 +8067,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { CodeInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let code = \"\";\n</script>\n\n<CodeInput\n  id=\"verify-code\"\n  value={code}\n  label=\"Verification code\"\n  hint=\"Enter the 6-digit code from your authenticator app.\"\n  groups={[3, 3]}\n  onValueChange={(value) => (code = value)}\n  onComplete={(value) => verify(value)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { CodeInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let code = \"\";\n  const validateCode = (value: string) => ({ valid: value === \"123456\" });\n</script>\n\n<CodeInput\n  id=\"verify-code\"\n  value={code}\n  label=\"Verification code\"\n  hint=\"Enter the 6-digit code from your authenticator app.\"\n  groups={[3, 3]}\n  validate={validateCode}\n  onValueChange={(value) => (code = value)}\n  onComplete={(value) => verify(value)}\n/>"
   },
   "password-requirements": {
     "props": [
@@ -10732,6 +10749,24 @@
         "type": "boolean",
         "default": "true",
         "description": "Use short format (e.g. 5m ago) instead of long format (e.g. 5 minutes ago)."
+      },
+      {
+        "name": "futureFormat",
+        "type": "\"in\" | \"from-now\"",
+        "default": "\"in\"",
+        "description": "Render future times as in 5m or 5m from now to fit surrounding copy."
+      },
+      {
+        "name": "futurePrefix",
+        "type": "string | null",
+        "default": "null",
+        "description": "Optional phrase before future output, such as ends in 5m."
+      },
+      {
+        "name": "pastPrefix",
+        "type": "string | null",
+        "default": "null",
+        "description": "Optional phrase before past output, such as ended 5m ago."
       },
       {
         "name": "tooltipFormat",

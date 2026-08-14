@@ -283,7 +283,7 @@ pub use text::{TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTo
 pub type TextAreaSpec = TextInputSpec;
 pub use text_input::TextInputSpec;
 pub use text_link::{TextLinkSpec, TextLinkTone};
-pub use time_ago::{TimeAgoSpec, TimeAgoTooltipFormat};
+pub use time_ago::{TimeAgoFutureFormat, TimeAgoSpec, TimeAgoTooltipFormat};
 pub use time_field::TimeFieldSpec;
 pub use time_zone_select::{
     default_time_zone_options, TimeZoneSelectSpec, TIME_ZONE_EMPTY_MESSAGE, TIME_ZONE_PLACEHOLDER,

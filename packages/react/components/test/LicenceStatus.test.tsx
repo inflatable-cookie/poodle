@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { LicenceStatus, type LicenceStatusProps } from "../src/LicenceStatus";
-import type { LicenceUsability } from "@inflatable-cookie/poodle-core";
+import { formatDisplayTimeDate, type LicenceUsability } from "@inflatable-cookie/poodle-core";
 
 const USE_UNTIL = 1_800_000_000;
 const UPDATE_UNTIL = 1_900_000_000;
@@ -67,6 +67,10 @@ describe("LicenceStatus (react)", () => {
     expect(detail.querySelector("time")?.getAttribute("datetime")).toBe(
       new Date(USE_UNTIL * 1_000).toISOString(),
     );
+    expect(detail.querySelector("time")?.textContent).toBe(
+      formatDisplayTimeDate(USE_UNTIL * 1_000),
+    );
+    expect(detail.textContent).not.toMatch(/ago|from now|\bin\s+\d/i);
   });
 
   it("gives clockRefused the clock remedy and no expiry or purchase copy", () => {
@@ -94,8 +98,8 @@ describe("LicenceStatus (react)", () => {
     const terms = [...container.querySelectorAll(".poodle-licence-status__term")].map(
       (node) => node.textContent,
     );
-    expect(terms).toContain("Use covered until");
-    expect(terms).toContain("Updates covered until");
+    expect(terms).toContain("Use coverage");
+    expect(terms).toContain("Updates");
     expect(container.querySelector('[data-row="use"] time')).toBeTruthy();
     expect(container.querySelector('[data-row="update"] time')).toBeTruthy();
   });
@@ -106,16 +110,32 @@ describe("LicenceStatus (react)", () => {
     expect(container.querySelector('[data-row="update"]')?.textContent).toContain("No end date");
   });
 
+  it("uses grammatical deadline phrases for future coverage", () => {
+    const future = Math.floor(Date.now() / 1_000) + 240 * 86_400;
+    const { container } = mount({ useUntil: future, updateUntil: future });
+
+    expect(container.querySelector('[data-row="use"]')?.textContent?.trim()).toMatch(/^ends in /);
+    expect(container.querySelector('[data-row="update"]')?.textContent?.trim()).toMatch(/^end in /);
+  });
+
+  it("uses grammatical deadline phrases for elapsed coverage", () => {
+    const past = Math.floor(Date.now() / 1_000) - 240 * 86_400;
+    const { container } = mount({ useUntil: past, updateUntil: past });
+
+    expect(container.querySelector('[data-row="use"]')?.textContent?.trim()).toMatch(/^ended .* ago$/);
+    expect(container.querySelector('[data-row="update"]')?.textContent?.trim()).toMatch(/^ended .* ago$/);
+  });
+
   it("renders both trust bases distinctly", () => {
     const offline = mount({ trustBasis: { kind: "offlineSignature" } });
     expect(offline.container.querySelector('[data-row="trust"]')?.textContent).toContain(
-      "Verified on this machine",
+      "verified on this machine",
     );
     offline.unmount();
 
     const remote = mount({ trustBasis: { kind: "remoteAssertion", checked: CHECKED } });
     const cell = remote.container.querySelector('[data-row="trust"]') as HTMLElement;
-    expect(cell.textContent).toContain("Confirmed with the server");
+    expect(cell.textContent).toContain("confirmed");
     expect(cell.querySelector("time")).toBeTruthy();
   });
 

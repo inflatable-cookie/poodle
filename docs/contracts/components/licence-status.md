@@ -88,7 +88,7 @@ Copy is resolved once in `poodle-core`; Svelte and React consume the same view.
 | State | Title | Treatment | Required meaning |
 | --- | --- | --- | --- |
 | `active` | `Licence active` | neutral/success | use is currently covered |
-| `inGrace` | `Licence active` | neutral; never warning/danger | renewal is pending but use continues until `until` |
+| `inGrace` | `Licence active` | neutral; never warning/danger | renewal is pending; the quiet detail renders `until` as an absolute local time and date |
 | `useWindowExpired` | `Use coverage ended` | actionable | use window ended at `at`; do not mention update coverage here |
 | `leaseLapsed` | `Licence confirmation required` | actionable | lease lapsed at `at`; do not call the licence expired |
 | `clockRefused` | `Check this machine's clock` | actionable warning | clock moved backwards; never expiry or purchase copy |
@@ -96,17 +96,19 @@ Copy is resolved once in `poodle-core`; Svelte and React consume the same view.
 The use and update rows are always separate:
 
 - `useUntil === null` → `Use coverage: No end date`
-- timestamp → `Use covered until: <time>`
+- timestamp → `Use coverage: ends in <time>` for a future window, or
+  `Use coverage: ended <time> ago` for a window that has passed
 - `updateUntil === null` → `Update coverage: No end date`
-- timestamp → `Updates covered until: <time>`
+- timestamp → `Updates: end in <time>` for a future window, or
+  `Updates: ended <time> ago` for a window that has passed
 
 An update window never uses error styling. `informational` is visible where the
 operator is already looking and never interrupts.
 
 Trust copy:
 
-- `offlineSignature` → `Verified on this machine`
-- `remoteAssertion` → `Confirmed with the server <time>`
+- `offlineSignature` → `verified on this machine`
+- `remoteAssertion` → `confirmed <time>`
 
 ### Behavior Machine
 

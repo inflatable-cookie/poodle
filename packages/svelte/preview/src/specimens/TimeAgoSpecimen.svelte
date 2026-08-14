@@ -32,6 +32,17 @@
     </div>
   </SpecimenGroup>
 
+  <SpecimenGroup label="Future timestamp after surrounding copy">
+    <p class="poodle-specimen__inline-copy">
+      Coverage ends
+      <TimeAgo
+        datetime={inFiveMinutes}
+        futureFormat="from-now"
+        typography="inherit"
+      />.
+    </p>
+  </SpecimenGroup>
+
   <SpecimenGroup label="Long format">
     <div class="poodle-specimen__row">
       <span class="poodle-specimen__label">2 minutes ago:</span>

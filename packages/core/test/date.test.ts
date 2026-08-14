@@ -8,6 +8,7 @@ import {
   compareIsoDate,
   dayDeltaForWeekBoundary,
   daysBetween,
+  formatDisplayTimeDate,
   formatIsoDate,
   isIsoDateWithinRange,
   isTimeValue,
@@ -83,6 +84,12 @@ describe("calendar grid", () => {
 });
 
 describe("date-time values", () => {
+  test("compact display puts local time before the local date", () => {
+    const value = new Date(2026, 5, 25, 12, 45);
+    expect(formatDisplayTimeDate(value, "en-GB")).toBe("12:45 25/06/2026");
+    expect(formatDisplayTimeDate("not-a-date", "en-GB")).toBe("");
+  });
+
   test("compare and range normalization", () => {
     expect(
       compareDateTimeValue({ date: "2026-01-01", time: "09:00" }, { date: "2026-01-01", time: "10:00" }),

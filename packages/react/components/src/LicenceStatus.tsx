@@ -3,6 +3,7 @@ import "@inflatable-cookie/poodle-core/styles/licence.css";
 import { Fragment } from "react";
 
 import {
+  formatDisplayTimeDate,
   licenceStatusView,
   type LicenceAttention,
   type LicenceTrustBasis,
@@ -84,7 +85,12 @@ export function LicenceStatus({
             <dt className="poodle-licence-status__term">{row.term}</dt>
             <dd className="poodle-licence-status__value" data-row={row.id}>
               {row.timestamp !== null ? (
-                <TimeAgo datetime={row.timestamp} typography="inherit" />
+                <TimeAgo
+                  datetime={row.timestamp}
+                  futurePrefix={row.futurePrefix}
+                  pastPrefix={row.pastPrefix}
+                  typography="inherit"
+                />
               ) : (
                 row.text
               )}
@@ -109,7 +115,9 @@ export function LicenceStatus({
           {view.detail.timestamp !== null ? (
             <>
               &nbsp;
-              <TimeAgo datetime={view.detail.timestamp} typography="inherit" />
+              <time dateTime={new Date(view.detail.timestamp).toISOString()}>
+                {formatDisplayTimeDate(view.detail.timestamp)}
+              </time>
             </>
           ) : null}
         </p>

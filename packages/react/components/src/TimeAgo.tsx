@@ -10,6 +10,9 @@ export interface TimeAgoProps {
   interval?: number;
   ariaLabel?: string | null;
   short?: boolean;
+  futureFormat?: "in" | "from-now";
+  futurePrefix?: string | null;
+  pastPrefix?: string | null;
   typography?: "body" | "inherit";
   tooltipFormat?: "full" | "date" | "datetime";
   timezone?: string | null;
@@ -21,14 +24,24 @@ function toTimestamp(dt: Date | string | number): number {
   return new Date(dt).getTime();
 }
 
-function formatRelative(ts: number, currentNow: number, shortFormat: boolean): string {
+function formatRelative(
+  ts: number,
+  currentNow: number,
+  shortFormat: boolean,
+  futureFormat: "in" | "from-now",
+  futurePrefix: string | null,
+  pastPrefix: string | null,
+): string {
   const diff = currentNow - ts;
   const absDiff = Math.abs(diff);
   const isFuture = diff < 0;
-  const prefix = isFuture ? "in " : "";
-  const suffix = isFuture ? "" : " ago";
+  const tensePrefix = isFuture ? futurePrefix : pastPrefix;
+  const tensePrefixText = tensePrefix ? `${tensePrefix} ` : "";
+  const directionPrefix = isFuture && futureFormat === "in" ? "in " : "";
+  const prefix = `${tensePrefixText}${directionPrefix}`;
+  const suffix = isFuture ? (futureFormat === "from-now" ? " from now" : "") : " ago";
 
-  if (absDiff < 5_000) return shortFormat ? "now" : "just now";
+  if (absDiff < 5_000) return `${tensePrefixText}${shortFormat ? "now" : "just now"}`;
   if (absDiff < 60_000) {
     const seconds = Math.floor(absDiff / 1_000);
     return shortFormat ? `${prefix}${seconds}s${suffix}` : `${prefix}${seconds} second${seconds === 1 ? "" : "s"}${suffix}`;
@@ -94,6 +107,9 @@ export function TimeAgo({
   interval = 30_000,
   ariaLabel = null,
   short = true,
+  futureFormat = "in",
+  futurePrefix = null,
+  pastPrefix = null,
   typography = "body",
   tooltipFormat = "datetime",
   timezone = null,
@@ -108,7 +124,7 @@ export function TimeAgo({
   }, [live, interval]);
 
   const timestamp = toTimestamp(datetime);
-  const relativeText = formatRelative(timestamp, now, short);
+  const relativeText = formatRelative(timestamp, now, short, futureFormat, futurePrefix, pastPrefix);
   const absoluteText = formatAbsolute(timestamp, tooltipFormat, timezone);
 
   return (

@@ -1,6 +1,7 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/licence.css";
   import {
+    formatDisplayTimeDate,
     licenceStatusView,
     type LicenceAttention,
     type LicenceTrustBasis,
@@ -81,7 +82,12 @@
       <dt class="poodle-licence-status__term">{row.term}</dt>
       <dd class="poodle-licence-status__value" data-row={row.id}>
         {#if row.timestamp !== null}
-          <TimeAgo datetime={row.timestamp} typography="inherit" />
+          <TimeAgo
+            datetime={row.timestamp}
+            futurePrefix={row.futurePrefix}
+            pastPrefix={row.pastPrefix}
+            typography="inherit"
+          />
         {:else}
           {row.text}
         {/if}
@@ -98,10 +104,9 @@
 
   {#if view.detail}
     <p class="poodle-licence-status__detail">
-      {view.detail.text}{#if view.detail.timestamp !== null}&nbsp;<TimeAgo
-          datetime={view.detail.timestamp}
-          typography="inherit"
-        />{/if}
+      {view.detail.text}{#if view.detail.timestamp !== null}&nbsp;<time
+          datetime={new Date(view.detail.timestamp).toISOString()}
+        >{formatDisplayTimeDate(view.detail.timestamp)}</time>{/if}
     </p>
   {/if}
 </section>

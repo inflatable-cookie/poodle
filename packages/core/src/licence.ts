@@ -152,6 +152,8 @@ export interface LicenceCoverageRow {
   /** Value text when there is no window; `null` when `timestamp` renders. */
   text: string | null;
   timestamp: number | null;
+  futurePrefix: string | null;
+  pastPrefix: string | null;
 }
 
 export interface LicenceTrustRow {
@@ -300,30 +302,48 @@ function statusTone(state: LicenceStatusState, attention: LicenceAttention): Lic
 function coverageRow(id: "use" | "update", until: number | null): LicenceCoverageRow {
   if (id === "use") {
     return until === null
-      ? { id, term: "Use coverage", text: "No end date", timestamp: null }
+      ? {
+          id,
+          term: "Use coverage",
+          text: "No end date",
+          timestamp: null,
+          futurePrefix: null,
+          pastPrefix: null,
+        }
       : {
           id,
-          term: "Use covered until",
+          term: "Use coverage",
           text: null,
           timestamp: licenceTimestampMilliseconds(until),
+          futurePrefix: "ends",
+          pastPrefix: "ended",
         };
   }
   return until === null
-    ? { id, term: "Update coverage", text: "No end date", timestamp: null }
+    ? {
+        id,
+        term: "Update coverage",
+        text: "No end date",
+        timestamp: null,
+        futurePrefix: null,
+        pastPrefix: null,
+      }
     : {
         id,
-        term: "Updates covered until",
+        term: "Updates",
         text: null,
         timestamp: licenceTimestampMilliseconds(until),
+        futurePrefix: "end",
+        pastPrefix: "ended",
       };
 }
 
 function trustRow(basis: LicenceTrustBasis): LicenceTrustRow {
   return basis.kind === "offlineSignature"
-    ? { term: "Trust basis", text: "Verified on this machine", timestamp: null }
+    ? { term: "Trust basis", text: "verified on this machine", timestamp: null }
     : {
         term: "Trust basis",
-        text: "Confirmed with the server",
+        text: "confirmed",
         timestamp: licenceTimestampMilliseconds(basis.checked),
       };
 }

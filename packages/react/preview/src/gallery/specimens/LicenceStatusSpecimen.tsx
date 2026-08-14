@@ -18,7 +18,7 @@ export function LicenceStatusSpecimen() {
   return (
     <SpecimenLayout showSizes={false} showDensities={false}>
       <div style={stackStyle}>
-        <SpecimenGroup label="Usability states">
+        <SpecimenGroup label="Active">
           <LicenceStatus
             usability={{ state: "active" }}
             trustBasis={offline}
@@ -27,6 +27,9 @@ export function LicenceStatusSpecimen() {
             usable={true}
             attention="none"
           />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="In grace">
           {/* A pending renewal is the seller's outstanding work. It stays calm. */}
           <LicenceStatus
             usability={{ state: "inGrace", until: soon }}
@@ -36,6 +39,9 @@ export function LicenceStatusSpecimen() {
             usable={true}
             attention="none"
           />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Use window expired">
           <LicenceStatus
             usability={{ state: "useWindowExpired", at: past }}
             trustBasis={offline}
@@ -44,6 +50,9 @@ export function LicenceStatusSpecimen() {
             usable={false}
             attention="actionable"
           />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Lease lapsed">
           <LicenceStatus
             usability={{ state: "leaseLapsed", at: past }}
             trustBasis={remote}
@@ -52,6 +61,9 @@ export function LicenceStatusSpecimen() {
             usable={false}
             attention="actionable"
           />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Clock refused">
           {/* The remedy is the machine's clock, never a purchase. */}
           <LicenceStatus
             usability={{ state: "clockRefused" }}
@@ -63,7 +75,7 @@ export function LicenceStatusSpecimen() {
           />
         </SpecimenGroup>
 
-        <SpecimenGroup label="Coverage windows">
+        <SpecimenGroup label="No coverage expiry">
           <LicenceStatus
             usability={{ state: "active" }}
             trustBasis={offline}
@@ -72,6 +84,9 @@ export function LicenceStatusSpecimen() {
             usable={true}
             attention="none"
           />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Updates expired">
           {/* Perpetual use, lapsed updates. Two windows, two rows: collapsing
               them is how an owner is told they have lost what they bought. */}
           <LicenceStatus
@@ -82,6 +97,9 @@ export function LicenceStatusSpecimen() {
             usable={true}
             attention="informational"
           />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Use window only">
           <LicenceStatus
             usability={{ state: "active" }}
             trustBasis={offline}
@@ -92,7 +110,7 @@ export function LicenceStatusSpecimen() {
           />
         </SpecimenGroup>
 
-        <SpecimenGroup label="Trust basis">
+        <SpecimenGroup label="Offline verification">
           <LicenceStatus
             usability={{ state: "active" }}
             trustBasis={offline}
@@ -101,6 +119,9 @@ export function LicenceStatusSpecimen() {
             usable={true}
             attention="none"
           />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Remote verification">
           <LicenceStatus
             usability={{ state: "active" }}
             trustBasis={remote}

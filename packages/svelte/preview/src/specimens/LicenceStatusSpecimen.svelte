@@ -16,7 +16,7 @@
 <SpecimenLayout showSizes={false} showDensities={false}>
   {#snippet children()}
     <div class="poodle-licence-status-specimen">
-      <SpecimenGroup label="Usability states">
+      <SpecimenGroup label="Active">
         <LicenceStatus
           usability={{ state: "active" }}
           trustBasis={offline}
@@ -25,6 +25,9 @@
           usable={true}
           attention="none"
         />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="In grace">
         <!-- A pending renewal is the seller's outstanding work. It stays calm. -->
         <LicenceStatus
           usability={{ state: "inGrace", until: soon }}
@@ -34,6 +37,9 @@
           usable={true}
           attention="none"
         />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Use window expired">
         <LicenceStatus
           usability={{ state: "useWindowExpired", at: past }}
           trustBasis={offline}
@@ -42,6 +48,9 @@
           usable={false}
           attention="actionable"
         />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Lease lapsed">
         <LicenceStatus
           usability={{ state: "leaseLapsed", at: past }}
           trustBasis={remote}
@@ -50,6 +59,9 @@
           usable={false}
           attention="actionable"
         />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Clock refused">
         <!-- The remedy is the machine's clock, never a purchase. -->
         <LicenceStatus
           usability={{ state: "clockRefused" }}
@@ -61,7 +73,7 @@
         />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Coverage windows">
+      <SpecimenGroup label="No coverage expiry">
         <LicenceStatus
           usability={{ state: "active" }}
           trustBasis={offline}
@@ -70,6 +82,9 @@
           usable={true}
           attention="none"
         />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Updates expired">
         <!-- Perpetual use, lapsed updates. Two windows, two rows: collapsing
              them is how an owner is told they have lost what they bought. -->
         <LicenceStatus
@@ -80,6 +95,9 @@
           usable={true}
           attention="informational"
         />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Use window only">
         <LicenceStatus
           usability={{ state: "active" }}
           trustBasis={offline}
@@ -90,7 +108,7 @@
         />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Trust basis">
+      <SpecimenGroup label="Offline verification">
         <LicenceStatus
           usability={{ state: "active" }}
           trustBasis={offline}
@@ -99,6 +117,9 @@
           usable={true}
           attention="none"
         />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Remote verification">
         <LicenceStatus
           usability={{ state: "active" }}
           trustBasis={remote}

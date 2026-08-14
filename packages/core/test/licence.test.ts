@@ -218,12 +218,16 @@ describe("licenceStatusView coverage rows", () => {
       term: "Use coverage",
       text: "No end date",
       timestamp: null,
+      futurePrefix: null,
+      pastPrefix: null,
     });
     expect(result.coverage[1]).toEqual({
       id: "update",
       term: "Update coverage",
       text: "No end date",
       timestamp: null,
+      futurePrefix: null,
+      pastPrefix: null,
     });
   });
 
@@ -231,15 +235,19 @@ describe("licenceStatusView coverage rows", () => {
     const result = view({ useUntil: USE_UNTIL_SECONDS, updateUntil: UPDATE_UNTIL_SECONDS });
     expect(result.coverage[0]).toEqual({
       id: "use",
-      term: "Use covered until",
+      term: "Use coverage",
       text: null,
       timestamp: 1_800_000_000_000,
+      futurePrefix: "ends",
+      pastPrefix: "ended",
     });
     expect(result.coverage[1]).toEqual({
       id: "update",
-      term: "Updates covered until",
+      term: "Updates",
       text: null,
       timestamp: 1_900_000_000_000,
+      futurePrefix: "end",
+      pastPrefix: "ended",
     });
   });
 });
@@ -248,12 +256,12 @@ describe("licenceStatusView trust basis and authority reads", () => {
   test("both trust bases render distinctly", () => {
     expect(view({ trustBasis: { kind: "offlineSignature" } }).trust).toEqual({
       term: "Trust basis",
-      text: "Verified on this machine",
+      text: "verified on this machine",
       timestamp: null,
     });
     expect(view({ trustBasis: { kind: "remoteAssertion", checked: CHECKED_SECONDS } }).trust).toEqual({
       term: "Trust basis",
-      text: "Confirmed with the server",
+      text: "confirmed",
       timestamp: 1_750_000_000_000,
     });
   });
