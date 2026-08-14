@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/svelte";
+import { fireEvent, render, screen, waitFor } from "@testing-library/svelte";
 import { tick } from "svelte";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -147,7 +147,7 @@ describe("LicenceActivation (svelte)", () => {
     plain.unmount();
 
     const { container, onActivate } = mountKey({
-      keyCodeInput: { length: 20, groups: [5, 5, 5, 5] },
+      keyCodeInput: { length: 20, groups: [5, 5, 5, 5], separator: "-" },
     });
     const slots = [...container.querySelectorAll(".poodle-code-input__slot")];
     expect(slots).toHaveLength(20);
@@ -158,8 +158,16 @@ describe("LicenceActivation (svelte)", () => {
         )
         .filter((index) => index !== null),
     ).toEqual([4, 9, 14]);
+    expect(
+      [...container.querySelectorAll(".poodle-code-input__separator")].map(
+        (separator) => separator.textContent,
+      ),
+    ).toEqual(["-", "-", "-"]);
 
     await typeKey(container, "abcdefghijklmnopqrst");
+    await waitFor(() =>
+      expect(container.querySelector('[aria-label="Code check passed"]')).not.toBeNull(),
+    );
     await submit(container);
     expect(onActivate).toHaveBeenCalledWith({
       credential: { kind: "key", key: "abcdefghijklmnopqrst" },

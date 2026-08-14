@@ -12,9 +12,12 @@ const SEATS = [
 ];
 
 function mount(props: Record<string, unknown> = {}) {
+  const onRename = vi.fn();
   const onRelease = vi.fn();
-  const view = render(LicenceSeats, { props: { seats: SEATS, onRelease, ...props } as never });
-  return { ...view, onRelease };
+  const view = render(LicenceSeats, {
+    props: { seats: SEATS, onRename, onRelease, ...props } as never,
+  });
+  return { ...view, onRename, onRelease };
 }
 
 describe("LicenceSeats (svelte)", () => {
@@ -34,12 +37,20 @@ describe("LicenceSeats (svelte)", () => {
     expect(screen.getAllByText("Unnamed machine")).toHaveLength(2);
   });
 
+  it("shows one decorative computer icon for every machine row", () => {
+    const { container } = mount();
+    const icons = [...container.querySelectorAll(".poodle-licence-seats__machine-icon")];
+    expect(icons).toHaveLength(SEATS.length);
+    expect(icons.every((icon) => icon.getAttribute("aria-hidden") === "true")).toBe(true);
+    expect(icons.every((icon) => icon.querySelector("svg.poodle-icon"))).toBe(true);
+  });
+
   it("marks this machine and gives it no release action", () => {
     const { container } = mount();
     const rows = [...container.querySelectorAll(".poodle-licence-seats__row")];
     const thisMachine = rows.find((row) => row.getAttribute("data-this-machine") === "true");
     expect(thisMachine?.textContent).toContain("This machine");
-    expect(thisMachine?.querySelector("button")).toBeNull();
+    expect(thisMachine?.querySelector(".poodle-licence-seats__action")).toBeNull();
     expect(rows.filter((row) => row.getAttribute("data-this-machine") === "true")).toHaveLength(1);
   });
 
@@ -47,7 +58,39 @@ describe("LicenceSeats (svelte)", () => {
     mount();
     expect(screen.getByRole("button", { name: "Release Tour laptop" })).toBeTruthy();
     expect(screen.getAllByRole("button", { name: "Release unnamed machine" })).toHaveLength(2);
-    expect(screen.getAllByRole("button")).toHaveLength(3);
+    expect(screen.getAllByRole("button", { name: /^Release / })).toHaveLength(3);
+  });
+
+  it("uses row-named danger IconButtons for release", () => {
+    mount();
+    for (const button of screen.getAllByRole("button", { name: /^Release / })) {
+      expect(button.getAttribute("data-variant")).toBe("ghost");
+      expect(button.getAttribute("data-tone")).toBe("danger");
+      expect(button.querySelector("svg.poodle-icon")).toBeTruthy();
+    }
+  });
+
+  it("emits trimmed inline renames and clears blank names to null", async () => {
+    const { onRename } = mount();
+    expect(screen.getAllByRole("button", { name: /^Rename / })).toHaveLength(SEATS.length);
+
+    await fireEvent.click(screen.getByRole("button", { name: "Rename Studio Mac" }));
+    const namedInput = screen.getByRole("textbox", { name: "Rename Studio Mac" });
+    await fireEvent.input(namedInput, { target: { value: "  Live room  " } });
+    await fireEvent.keyDown(namedInput, { key: "Enter" });
+    expect(onRename).toHaveBeenLastCalledWith({
+      machineId: "cmd-9f3a2b7c",
+      label: "Live room",
+    });
+
+    await fireEvent.click(screen.getAllByRole("button", { name: "Rename unnamed machine" })[0]);
+    const unnamedInput = screen.getByRole("textbox", { name: "Rename unnamed machine" });
+    await fireEvent.input(unnamedInput, { target: { value: "   " } });
+    await fireEvent.keyDown(unnamedInput, { key: "Enter" });
+    expect(onRename).toHaveBeenLastCalledWith({
+      machineId: "cmd-77c1a5be",
+      label: null,
+    });
   });
 
   it("emits the exact machine ID once the release is confirmed", async () => {

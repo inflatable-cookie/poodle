@@ -16,7 +16,7 @@ Updated: 2026-08-14
   compatibility
 - In scope: fixed-length code entry, hidden real input, visual character slots,
   explicit visual grouping, one-time-code autocomplete, paste handling,
-  completion signaling, Field integration, optional masking
+  completion signaling and validation, Field integration, optional masking
 - Out of scope: backup-code entry, auth-flow orchestration
 
 ## 2. Anatomy
@@ -26,8 +26,10 @@ Updated: 2026-08-14
   └── [Root .code-input] <div role="group">
         ├── [Hidden submission input] <input type="hidden">
         ├── [Real input .code-input__control] <input type="text">
-        └── [Visual slot .code-input__slot]... (repeated `length`)
+        ├── [Visual slot .code-input__slot]... (repeated `length`)
               (slots ending an explicit group carry `--group-end`)
+              (optional `.code-input__separator` follows each group end)
+        └── [Completion result .code-input__validation-indicator] (optional)
 ```
 
 ## 3. Public Props
@@ -46,12 +48,14 @@ Updated: 2026-08-14
 | `disabled` | `boolean` | `false` |
 | `length` | `number` | `6` |
 | `groups` | `readonly number[] \| null` | `null` |
+| `separator` | `string \| null` | `null` |
 | `ariaLabel` | `string \| null` | `null` |
 | `autocomplete` | `string` | `"one-time-code"` |
 | `size` | `ControlSize \| null` | `null` |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` |
 | `density` | `ControlDensity \| null` | `null` |
 | `validationState` | `ValidationState` | `"none"` |
+| `validate` | `InputValidator \| undefined` | `undefined` |
 
 ## 4. Callbacks
 
@@ -59,6 +63,7 @@ Updated: 2026-08-14
 |------|---------|------|
 | `onValueChange` | `string` | whenever the sanitized code changes |
 | `onComplete` | `string` | when the code reaches `length` digits |
+| `validate` | `string` → `ValidationResult \| Promise<ValidationResult>` | when the code reaches `length`; `valid` drives the completion indicator |
 
 ### Behavior Machine
 
@@ -90,6 +95,15 @@ requestAnimationFrame timing stay adapter-side.
   group breaks and never changes value or caret behaviour
 - Grouping is never inferred from `length`; a six-character input is
   uninterrupted unless the caller passes `groups={[3, 3]}`
+- `separator` renders presentation-only text at each valid group boundary. It
+  is ignored without a valid multi-group pattern and never enters the value
+- `validate` runs only when the sanitized value reaches `length`. A valid
+  result renders a success tick after the slots; an invalid result or rejected
+  validator renders a danger cross
+- The result belongs to the exact value passed to the validator. Editing,
+  clearing, or replacing that value removes the indicator immediately; a late
+  asynchronous result for an older value is ignored
+- `onComplete` remains a notification callback and does not control validation
 - When `mask` is true, filled slots display a bullet character instead of the
   digit
 - Clicking any slot focuses the real input and moves the caret
@@ -105,8 +119,9 @@ two targets.
 - The component composes its own `Field` wrapper so callers can use `label`,
   `hint`, and `error` directly
 - `validationState` accepts the full `ValidationState` union, but only the
-  `invalid` case (or a non-null `error`) changes slot visuals; other states
-  render with the default slot colors. An `error` string forces invalid styling
+  `invalid` case, a failed completion validator, or a non-null `error` changes
+  slot visuals; other states render with the default slot colors. An `error`
+  string forces invalid styling
 
 ## 6. Accessibility
 
@@ -115,6 +130,9 @@ two targets.
   `numbersOnly=true`; otherwise it falls back to plain text entry
 - Visual slots are `aria-hidden="true"` -- only the real input is in the
   accessibility tree
+- Completion indicators expose polite `Code check passed` / `Code check
+  failed` status labels without claiming that a failed licence-key check is a
+  fake or expired entitlement
 - Focus ring appears on the active slot to indicate which digit is next
 - Disabled state applies `aria-disabled` and prevents keyboard entry
 - When `mask` is true, the real input uses `type="password"` for platform-
@@ -155,6 +173,17 @@ Slots are square. The border color is `--code-slot-border`, derived from
 | `margin-right` | `var(--poodle-space-inline-md)` |
 
 This separates every explicit group while keeping one contiguous input value.
+
+### Group separator (`.code-input__separator`)
+
+The optional separator uses code typography and secondary text color. It is
+`aria-hidden`; the uninterrupted input value remains the accessible value.
+
+### Completion validation indicator (`.code-input__validation-indicator`)
+
+The indicator follows the last slot or group separator. A passing result uses
+the `check` icon and `--poodle-color-status-success`; a failed result uses the
+`x` icon and `--poodle-color-status-danger`.
 
 ### Slot -- active (`.code-input__slot--active`, the slot at the caret position while focused)
 
@@ -198,7 +227,7 @@ Density adjusts only the inter-slot gap: `compact` `0.25rem`, `default`
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| 6-digit code | `length={6}`, `ariaLabel="Verification code"` | Six empty slots; digits only; typing auto-advances; displays entered code on completion |
+| 6-digit code | `length={6}`, `ariaLabel="Verification code"`, validator accepts `123456` | Six empty slots; digits only; typing auto-advances; full accepted value shows a green tick and another full value shows a red cross |
 
 ### 4-digit Masked
 
@@ -216,7 +245,7 @@ Density adjusts only the inter-slot gap: `compact` `0.25rem`, `default`
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Grouped key | `length={20}`, `groups={[5, 5, 5, 5]}`, `numbersOnly={false}` | Twenty slots with three visual group breaks; emitted value contains no visual separators |
+| Grouped key | `length={20}`, `groups={[5, 5, 5, 5]}`, `separator="-"`, `numbersOnly={false}` | Twenty slots with three visible hyphens; emitted value contains no separators |
 
 ### Disabled
 
@@ -239,6 +268,8 @@ Density adjusts only the inter-slot gap: `compact` `0.25rem`, `default`
 - [ ] auto-advance behavior matches (digit entry moves to next slot)
 - [ ] backspace-retreat behavior matches (empty slot backspace goes to previous)
 - [ ] onComplete fires when all slots filled
+- [ ] completion validation runs only when full and stale async results cannot render
+- [ ] passing/failing completion results show the matching tick/cross
 - [ ] mask prop toggles obscured input
 - [ ] group role with aria-label matches
 
@@ -248,6 +279,8 @@ Density adjusts only the inter-slot gap: `compact` `0.25rem`, `default`
 - [ ] slot is square (2.25rem x 2.25rem at md) match
 - [ ] gap between slots (space-inline-sm) matches
 - [ ] group-end margin (space-inline-md) matches at every explicit boundary
+- [ ] optional group separator text and placement match
+- [ ] completion validation indicator placement and status colour match
 - [ ] code-family font on slots matches
 - [ ] focus ring (outline with focusRing color) matches
 - [ ] disabled opacity matches
@@ -267,4 +300,4 @@ Density adjusts only the inter-slot gap: `compact` `0.25rem`, `default`
 
 | Delta | Status | Follow-up |
 | --- | --- | --- |
-| Rust spec/renderer still infer one 3+3 split for length 6 and cannot accept explicit groups | staged web-reference delta; not accepted parity | g14.017 must port the grouping field through the adopted interface before LicenceActivation native completion |
+| Rust spec/renderer still infer one 3+3 split for length 6 and cannot accept explicit groups, separators, or completion-result indication | staged web-reference delta; not accepted parity | g14.017 must port grouping and completion validation through the adopted interface before LicenceActivation native completion |

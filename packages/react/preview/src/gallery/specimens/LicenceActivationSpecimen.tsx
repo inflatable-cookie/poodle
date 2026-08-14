@@ -84,7 +84,7 @@ export function LicenceActivationSpecimen() {
           <LicenceActivation
             mode="key"
             keyFormat={keyFormat}
-            keyCodeInput={{ length: 20, groups: [5, 5, 5, 5] }}
+            keyCodeInput={{ length: 20, groups: [5, 5, 5, 5], separator: "-" }}
             size="xs"
           />
         </SpecimenGroup>
@@ -99,7 +99,7 @@ export function LicenceActivationSpecimen() {
           <LicenceActivation
             mode="key"
             keyFormat={keyFormat}
-            keyCodeInput={{ length: 20, groups: [5, 5, 5, 5] }}
+            keyCodeInput={{ length: 20, groups: [5, 5, 5, 5], separator: "-" }}
             disabled
           />
         </SpecimenGroup>

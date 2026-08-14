@@ -7,8 +7,10 @@
     type LicenceSeat,
   } from "@inflatable-cookie/poodle-core";
 
-  import { default as Button } from "./Button.svelte";
   import { default as ConfirmAction } from "./ConfirmAction.svelte";
+  import { default as EditableLabel } from "./EditableLabel.svelte";
+  import { default as Icon } from "./Icon.svelte";
+  import { default as IconButton } from "./IconButton.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize } from "./types";
 
@@ -20,6 +22,7 @@
     confirmRelease?: boolean;
     size?: ControlSize | null;
     density?: ControlDensity | null;
+    onRename?: ((detail: { machineId: string; label: string | null }) => void) | undefined;
     onRelease?: ((detail: { machineId: string }) => void) | undefined;
   }
 
@@ -31,12 +34,14 @@
     confirmRelease = true,
     size = null,
     density = null,
+    onRename = undefined,
     onRelease = undefined,
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, "control"));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
+  const glyphSize = $derived(resolveSemanticControlSize(resolvedSize, "chrome"));
 
   const rows = $derived(licenceSeatRows(seats, pendingMachineId, releaseLabel));
 </script>
@@ -54,16 +59,33 @@
     <ul class="poodle-licence-seats__list">
       {#each rows as row (row.machineId)}
         <li class="poodle-licence-seats__row" data-this-machine={row.thisMachine}>
-          <span class="poodle-licence-seats__identity">
+          <div class="poodle-licence-seats__identity">
+            <span class="poodle-licence-seats__machine-icon" aria-hidden="true">
+              <Icon icon="monitor" size={glyphSize} />
+            </span>
             <!-- The supplied label or `Unnamed machine`. Never the machine ID,
                  whole or shortened: it is a random command identifier, and
                  showing it would offer identity Poodle was never given. Two
                  unnamed rows looking alike is the honest outcome. -->
-            <span class="poodle-licence-seats__label">{row.displayLabel}</span>
+            <div class="poodle-licence-seats__label">
+              <EditableLabel
+                value={row.named ? row.displayLabel : ""}
+                ariaLabel={`Rename ${row.named ? row.displayLabel : "unnamed machine"}`}
+                activationMode="enterOrSpace"
+                variant="flush"
+                emptyText="Unnamed machine"
+                placeholder="Unnamed machine"
+                showEditIcon
+                size={resolvedSize}
+                density={resolvedDensity}
+                onCommit={({ value }) =>
+                  onRename?.({ machineId: row.machineId, label: value || null })}
+              />
+            </div>
             {#if row.thisMachine}
               <span class="poodle-licence-seats__marker">{LICENCE_THIS_MACHINE}</span>
             {/if}
-          </span>
+          </div>
 
           {#if row.releasable}
             <span class="poodle-licence-seats__action">
@@ -78,30 +100,30 @@
                   onConfirm={() => onRelease?.({ machineId: row.machineId })}
                 >
                   {#snippet trigger()}
-                    <Button
-                      variant="secondary"
+                    <IconButton
+                      icon="trash-2"
+                      variant="ghost"
+                      tone="danger"
                       size={resolvedSize}
                       density={resolvedDensity}
                       disabled={row.pending}
                       loading={row.pending}
                       ariaLabel={row.releaseName}
-                    >
-                      {releaseLabel}
-                    </Button>
+                    />
                   {/snippet}
                 </ConfirmAction>
               {:else}
-                <Button
-                  variant="secondary"
+                <IconButton
+                  icon="trash-2"
+                  variant="ghost"
+                  tone="danger"
                   size={resolvedSize}
                   density={resolvedDensity}
                   disabled={row.pending}
                   loading={row.pending}
                   ariaLabel={row.releaseName}
                   onClick={() => onRelease?.({ machineId: row.machineId })}
-                >
-                  {releaseLabel}
-                </Button>
+                />
               {/if}
             </span>
           {/if}

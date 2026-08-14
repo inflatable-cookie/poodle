@@ -171,6 +171,11 @@
     routeMessage = null;
   }
 
+  function handleKeyChange(value: string): void {
+    keyDraft = value;
+    keyMessage = null;
+  }
+
   function emit(draft: LicenceSubmitDraft): void {
     const resolution = resolveLicenceSubmit(draft, mode === "key" ? keyFormat ?? null : null);
     if (resolution.outcome === "emit") {
@@ -264,11 +269,13 @@
         disabled={interactionDisabled}
         length={keyCodeInput.length}
         groups={keyCodeInput.groups}
+        separator={keyCodeInput.separator}
         numbersOnly={false}
         autocomplete="off"
         size={resolvedSize}
         density={resolvedDensity}
-        onValueChange={(value) => (keyDraft = value)}
+        validate={(value) => ({ valid: keyFormat?.parse(value).ok ?? false })}
+        onValueChange={handleKeyChange}
       />
     {:else if route === "key"}
       <Field
@@ -286,7 +293,7 @@
             disabled={interactionDisabled}
             describedBy={fieldProps.describedBy}
             validationState={fieldProps.validationState}
-            onValueChange={(value) => (keyDraft = value)}
+            onValueChange={handleKeyChange}
           />
         {/snippet}
       </Field>

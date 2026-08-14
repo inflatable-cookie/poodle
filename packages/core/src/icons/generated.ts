@@ -67,6 +67,7 @@ import { maximize2 } from "./icons/maximize-2";
 import { menu } from "./icons/menu";
 import { minimize2 } from "./icons/minimize-2";
 import { minus } from "./icons/minus";
+import { monitor } from "./icons/monitor";
 import { monitorPlay } from "./icons/monitor-play";
 import { moreHorizontal } from "./icons/more-horizontal";
 import { moreVertical } from "./icons/more-vertical";
@@ -173,6 +174,7 @@ export {
   menu,
   minimize2,
   minus,
+  monitor,
   monitorPlay,
   moreHorizontal,
   moreVertical,
@@ -280,6 +282,7 @@ export const defaultLucideIconSet: IconSet = {
   "menu": menu,
   "minimize-2": minimize2,
   "minus": minus,
+  "monitor": monitor,
   "monitor-play": monitorPlay,
   "more-horizontal": moreHorizontal,
   "more-vertical": moreVertical,

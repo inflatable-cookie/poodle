@@ -150,7 +150,7 @@ describe("LicenceActivation (react)", () => {
     plain.unmount();
 
     const { container, onActivate } = mountKey({
-      keyCodeInput: { length: 20, groups: [5, 5, 5, 5] },
+      keyCodeInput: { length: 20, groups: [5, 5, 5, 5], separator: "-" },
     });
     const slots = [...container.querySelectorAll(".poodle-code-input__slot")];
     expect(slots).toHaveLength(20);
@@ -161,8 +161,16 @@ describe("LicenceActivation (react)", () => {
         )
         .filter((index) => index !== null),
     ).toEqual([4, 9, 14]);
+    expect(
+      [...container.querySelectorAll(".poodle-code-input__separator")].map(
+        (separator) => separator.textContent,
+      ),
+    ).toEqual(["-", "-", "-"]);
 
     await typeKey(container, "abcdefghijklmnopqrst");
+    await waitFor(() =>
+      expect(container.querySelector('[aria-label="Code check passed"]')).not.toBeNull(),
+    );
     await submit(container);
     expect(onActivate).toHaveBeenCalledWith({
       credential: { kind: "key", key: "abcdefghijklmnopqrst" },

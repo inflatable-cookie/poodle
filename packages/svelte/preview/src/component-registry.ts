@@ -239,7 +239,7 @@ export const allComponents: ComponentEntry[] = [
   entry("SettingsShell", "workstation", "Settings dialog shell: search, grouped navigation rail, and scrolling page region.", true),
   entry("LicenceStatus", "workstation", "Held-licence usability, trust basis, and both coverage windows, without enforcing entitlement.", true),
   entry("LicenceActivation", "workstation", "Host-selected key activation, or account activation with an offline licence-file fallback.", true),
-  entry("LicenceSeats", "workstation", "Activated-machine list with self-service release of seats other than this machine.", true),
+  entry("LicenceSeats", "workstation", "Inline-editable activated-machine list with self-service release of seats other than this machine.", true),
 ].sort((a, b) => a.displayName.localeCompare(b.displayName));
 
 export const tagLabels: Record<ComponentTag, string> = {

@@ -36,7 +36,7 @@
     "columns-2", "columns-3", "diff", "dot", "download", "ellipsis",
     "external-link", "eye", "file", "file-pen", "file-text", "git-branch",
     "git-commit-horizontal", "grip-vertical", "heading", "image", "inbox",
-    "info", "italic", "link", "list", "menu", "minus", "music", "pencil",
+    "info", "italic", "link", "list", "menu", "minus", "monitor", "music", "pencil",
     "play", "plus", "quote", "refresh-cw", "search", "square", "star",
     "tag", "terminal", "trash-2", "trending-down", "trending-up",
     "triangle-alert", "x",

@@ -70,7 +70,7 @@
         <LicenceActivation
           mode="key"
           {keyFormat}
-          keyCodeInput={{ length: 20, groups: [5, 5, 5, 5] }}
+          keyCodeInput={{ length: 20, groups: [5, 5, 5, 5], separator: "-" }}
           size="xs"
         />
       </SpecimenGroup>
@@ -80,7 +80,7 @@
         <LicenceActivation
           mode="key"
           {keyFormat}
-          keyCodeInput={{ length: 20, groups: [5, 5, 5, 5] }}
+          keyCodeInput={{ length: 20, groups: [5, 5, 5, 5], separator: "-" }}
           disabled
         />
       </SpecimenGroup>

@@ -15,11 +15,12 @@
       label="Verification code"
       hint="Enter the 6-digit code from your authenticator app."
       groups={[3, 3]}
+      validate={(value) => ({ valid: value === "123456" })}
       onValueChange={(value) => { code = value; completed = false; }}
       onComplete={() => { completed = true; }}
     />
     {#if completed}
-      <p>Completed value: <strong>{code}</strong></p>
+      <p>Completed value: <strong>{code}</strong> ({code === "123456" ? "check passes" : "check fails"})</p>
     {/if}
   </SpecimenGroup>
 
@@ -40,6 +41,7 @@
       defaultValue="AB12CD34"
       length={12}
       groups={[4, 4, 4]}
+      separator="-"
       numbersOnly={false}
       autocomplete="off"
     />

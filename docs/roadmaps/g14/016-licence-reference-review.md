@@ -45,8 +45,12 @@ Run them with `effigy svelte:preview` and `effigy react:preview`.
 | Machine naming should be optional and inline | contract change | omitted hides it; string seeds it; null uses honest unnamed placeholder copy; inline editor shares the submit row |
 | Offline switch read as an external link and dominated the header | change now | top-right `xs` ghost Button with `cloud-off`/`user` icon and secondary text colour |
 | Header, route, and footer controls were crowded | change now | explicit shared spacing at both boundaries |
-| Licence keys may need fixed-length segmented entry | contract change | optional `keyCodeInput={{ length, groups }}`; default remains free-form TextInput |
-| CodeInput inferred one 3+3 divider from length | contract change | web grouping is an explicit full partition and supports any number of groups; native port is a named g14.017 delta |
+| Licence keys may need fixed-length segmented entry | contract change | optional `keyCodeInput={{ length, groups, separator }}`; default remains free-form TextInput |
+| CodeInput inferred one 3+3 divider from length | contract change | web grouping is an explicit full partition with an optional presentation-only separator and supports any number of groups; native port is a named g14.017 delta |
+| Segmented keys need immediate format feedback | contract change | CodeInput validates only at full length and renders a value-bound success tick or failure cross; LicenceActivation delegates the check to the injected parser |
+| Seat rows need a faster visual identity cue | change now | every LicenceSeats row starts with the same decorative computer icon; labels remain the only identity claim |
+| Machine names need correction in place | contract change | every row composes EditableLabel and emits host-owned rename requests by machine ID; blank commits restore the honest unnamed state |
+| Release text actions dominate a compact machine list | change now | release uses a row-named ghost danger IconButton with `trash-2`; confirmation remains intact |
 
 ### Review bundle
 

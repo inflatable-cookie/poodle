@@ -127,6 +127,7 @@
       bind:this={inputElement}
       class="poodle-editable-label__input"
       type="text"
+      aria-label={ariaLabel}
       value={draftValue}
       {placeholder}
       maxlength={maxLength}

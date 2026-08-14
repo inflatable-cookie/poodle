@@ -109,6 +109,7 @@ export function EditableLabel({
           ref={inputRef}
           className="poodle-editable-label__input"
           type="text"
+          aria-label={ariaLabel}
           value={draftValue}
           placeholder={placeholder ?? undefined}
           maxLength={maxLength ?? undefined}

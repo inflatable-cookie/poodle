@@ -15,8 +15,8 @@ backend-neutral for later Jetstream admission.
 
 - [ ] One portable interface and case/specimen corpus per component.
 - [ ] Shared native composition in `poodle-render`; thin backend interpretation.
-- [ ] Functional activation, seat release, focus, keyboard, accessibility, and
-      renderer evidence in Svelte, React, and GPUI.
+- [ ] Functional activation, inline seat rename, seat release, focus, keyboard,
+      accessibility, and renderer evidence in Svelte, React, and GPUI.
 - [ ] Downstream Longhorn adapter asserts Poodle mirror field maps against its
       generated field maps without adding a Poodle → Longhorn edge.
 
@@ -26,9 +26,14 @@ backend-neutral for later Jetstream admission.
       activation=`input/composite`.
 - [ ] Replace the temporary duplicate web specimens with shared cases.
 - [ ] Generate/check Rust portable declarations and add `poodle-render` specs.
-- [ ] Port CodeInput's explicit `groups` partition before projecting grouped
-      LicenceActivation; remove the native renderer's inferred 3+3 rule.
+- [ ] Port CodeInput's explicit `groups` partition and optional `separator`
+      plus full-value completion validation and its tick/cross result before
+      projecting grouped LicenceActivation; remove the native renderer's
+      inferred 3+3 rule.
 - [ ] Implement native components and preview projections.
+- [ ] Preserve LicenceSeats composition: decorative monitor, controlled inline
+      rename with blank-to-null emission, and ghost danger trash IconButton
+      without ever rendering the machine ID.
 - [ ] Treat file selection/base64 as a runtime-owned capability with equivalent
       result; missing GPUI plumbing remains red, not absent-pass.
 - [ ] Run full observations, captures, and strict completion.
@@ -41,6 +46,8 @@ backend-neutral for later Jetstream admission.
 - [ ] No runtime substitutes a static activation mock for real input/file
       plumbing.
 - [ ] No runtime renders machine IDs or gates a feature.
+- [ ] Rename and release emit exact machine IDs to the host while all visible
+      and accessible identity remains label-only.
 - [ ] `conformance:complete` passes all three components with no missing or
       declared-absence required active capability and reports Jetstream as
       program-deferred.

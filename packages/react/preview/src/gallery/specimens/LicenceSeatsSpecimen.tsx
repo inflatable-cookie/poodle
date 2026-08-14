@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { LicenceSeats } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
@@ -23,23 +23,61 @@ const single = [{ machineId: "cmd-9f3a2b7c", label: "Studio Mac", thisMachine: t
 
 const stackStyle: CSSProperties = { display: "flex", flexDirection: "column", gap: "2rem" };
 
+type Seat = { machineId: string; label: string | null; thisMachine: boolean };
+
+interface InteractiveSeatsProps {
+  initialSeats: readonly Seat[];
+  pendingMachineId?: string;
+  confirmRelease?: boolean;
+}
+
+function InteractiveSeats({
+  initialSeats,
+  pendingMachineId,
+  confirmRelease,
+}: InteractiveSeatsProps) {
+  const [seats, setSeats] = useState<Seat[]>(() => initialSeats.map((seat) => ({ ...seat })));
+
+  return (
+    <LicenceSeats
+      seats={seats}
+      pendingMachineId={pendingMachineId}
+      confirmRelease={confirmRelease}
+      onRename={({ machineId, label }) =>
+        setSeats((current) =>
+          current.map((seat) => (seat.machineId === machineId ? { ...seat, label } : seat)),
+        )
+      }
+    />
+  );
+}
+
 export function LicenceSeatsSpecimen() {
   return (
     <SpecimenLayout showSizes={false} showDensities={false}>
       <div style={stackStyle}>
-        <SpecimenGroup label="Seats">
-          <LicenceSeats seats={mixed} />
-          <LicenceSeats seats={unnamed} />
+        <SpecimenGroup label="Mixed labels">
+          <InteractiveSeats initialSeats={mixed} />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Unnamed machines">
+          <InteractiveSeats initialSeats={unnamed} />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="This machine only">
           {/* This machine only: a marker, and no release action anywhere. */}
-          <LicenceSeats seats={single} />
+          <InteractiveSeats initialSeats={single} />
         </SpecimenGroup>
 
-        <SpecimenGroup label="Pending and direct release">
-          <LicenceSeats seats={mixed} pendingMachineId="cmd-41ee80d2" />
-          <LicenceSeats seats={mixed} confirmRelease={false} />
+        <SpecimenGroup label="Pending release">
+          <InteractiveSeats initialSeats={mixed} pendingMachineId="cmd-41ee80d2" />
         </SpecimenGroup>
 
-        <SpecimenGroup label="Empty">
+        <SpecimenGroup label="Direct release">
+          <InteractiveSeats initialSeats={mixed} confirmRelease={false} />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Empty authority">
           {/* Renders nothing: no heading, no list, and no invented seat count. */}
           <LicenceSeats seats={[]} />
         </SpecimenGroup>

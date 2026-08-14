@@ -172,6 +172,11 @@ export function LicenceActivation(props: LicenceActivationProps) {
     setRouteMessage(null);
   }
 
+  function handleKeyChange(value: string): void {
+    setKeyDraft(value);
+    setKeyMessage(null);
+  }
+
   function emit(draft: LicenceSubmitDraft): void {
     const keyFormat = mode === "key" ? props.keyFormat : null;
     const resolution = resolveLicenceSubmit(draft, keyFormat);
@@ -271,11 +276,13 @@ export function LicenceActivation(props: LicenceActivationProps) {
             disabled={interactionDisabled}
             length={props.keyCodeInput.length}
             groups={props.keyCodeInput.groups}
+            separator={props.keyCodeInput.separator}
             numbersOnly={false}
             autoComplete="off"
             size={resolvedSize}
             density={resolvedDensity}
-            onValueChange={setKeyDraft}
+            validate={(value) => ({ valid: props.keyFormat.parse(value).ok })}
+            onValueChange={handleKeyChange}
           />
         ) : route === "key" ? (
           <Field
@@ -292,7 +299,7 @@ export function LicenceActivation(props: LicenceActivationProps) {
                 disabled={interactionDisabled}
                 describedBy={fieldProps.describedBy}
                 validationState={fieldProps.validationState}
-                onValueChange={setKeyDraft}
+                onValueChange={handleKeyChange}
               />
             )}
           />

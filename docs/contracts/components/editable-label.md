@@ -3,7 +3,7 @@
 > **Surface elevation**: EditableLabel is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-14
 
 ## 1. Purpose
 
@@ -114,7 +114,8 @@ now state-guarded, so a blur after Escape cannot double-emit.
 ### Semantics
 
 - Role: button-like trigger in view mode (keyboard-reachable), text input in edit mode
-- `aria-label`: from prop, applied to display trigger (required when visible text is insufficient)
+- `aria-label`: from prop, applied to both the display trigger and edit input
+  so the row-specific edit name survives the mode transition
 - In edit mode: input receives focus and standard text-input accessibility
 - Edit icon: `aria-hidden="true"` (decorative)
 - Labeling rules: assistive technology must discover both current label value and edit action

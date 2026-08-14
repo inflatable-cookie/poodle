@@ -11,8 +11,15 @@
   import type { HTMLInputAttributes } from "svelte/elements";
 
   import { default as Field } from "./Field.svelte";
+  import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
+  import type {
+    ControlDensity,
+    ControlSize,
+    InputValidator,
+    SemanticControlSizeRole,
+    ValidationState,
+  } from "./types";
 
   interface Props {
     id?: string | null;
@@ -25,6 +32,7 @@
     disabled?: boolean;
     length?: number;
     groups?: readonly number[] | null;
+    separator?: string | null;
     mask?: boolean;
     numbersOnly?: boolean;
     ariaLabel?: string | null;
@@ -33,6 +41,7 @@
     density?: ControlDensity | null;
     autocomplete?: HTMLInputAttributes["autocomplete"];
     validationState?: ValidationState;
+    validate?: InputValidator | undefined;
     onValueChange?: ((value: string) => void) | undefined;
     onComplete?: ((value: string) => void) | undefined;
   }
@@ -50,6 +59,7 @@
     disabled = false,
     length = 6,
     groups = null,
+    separator = null,
     mask = false,
     numbersOnly = true,
     ariaLabel = null,
@@ -58,6 +68,7 @@
     density = null,
     autocomplete = "one-time-code",
     validationState = "none",
+    validate = undefined,
     onValueChange = undefined,
     onComplete = undefined,
   }: Props = $props();
@@ -68,6 +79,8 @@
   let caretIndex = $state(0);
   let hasFocus = $state(false);
   let pendingSelection: { start: number; end: number } | null = $state(null);
+  let validatedCompletion = $state<{ value: string; valid: boolean } | null>(null);
+  let validationGeneration = 0;
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
@@ -76,7 +89,20 @@
   const currentValue = $derived(sanitizeValue(isControlled ? value ?? "" : uncontrolledValue));
   const digits = $derived(Array.from({ length }, (_, index) => currentValue[index] ?? ""));
   const groupEndIndices = $derived(codeGroupEndIndices(length, groups));
-  const effectiveValidationState = $derived(error ? "invalid" : validationState);
+  const completionValidationState = $derived(
+    !error && validatedCompletion?.value === currentValue
+      ? validatedCompletion.valid
+        ? "valid"
+        : "invalid"
+      : "none"
+  );
+  const effectiveValidationState = $derived(
+    error
+      ? "invalid"
+      : completionValidationState !== "none"
+        ? completionValidationState
+        : validationState
+  );
   const activeCaretIndex = $derived(Math.min(caretIndex, Math.max(length - 1, 0)));
   const slotBorderColor = $derived(
     effectiveValidationState === "invalid"
@@ -105,8 +131,25 @@
     return sanitizeCodeValue(input, length, numbersOnly);
   }
 
+  async function validateCompletion(nextValue: string): Promise<void> {
+    if (!validate) return;
+    const generation = ++validationGeneration;
+    validatedCompletion = null;
+
+    try {
+      const result = await validate(nextValue);
+      if (generation !== validationGeneration || currentValue !== nextValue) return;
+      validatedCompletion = { value: nextValue, valid: result.valid };
+    } catch {
+      if (generation !== validationGeneration || currentValue !== nextValue) return;
+      validatedCompletion = { value: nextValue, valid: false };
+    }
+  }
+
   function updateValue(nextRawValue: string): void {
     const nextValue = sanitizeValue(nextRawValue);
+    validationGeneration += 1;
+    validatedCompletion = null;
 
     if (!isControlled) {
       uncontrolledValue = nextValue;
@@ -118,6 +161,7 @@
 
     if (nextValue.length === length) {
       onComplete?.(nextValue);
+      void validateCompletion(nextValue);
     }
   }
 
@@ -251,6 +295,7 @@
       class="poodle-code-input"
       class:poodle-code-input--disabled={disabled}
       class:poodle-code-input--focused={hasFocus}
+      data-has-separator={separator ? true : undefined}
       data-size={resolvedSize}
       data-density={resolvedDensity}
       style={`--code-slot-border:${slotBorderColor}; --code-slot-focus:${slotFocusColor}; --code-slot-focus-ring:${slotFocusRing};`}
@@ -292,7 +337,22 @@
         >
           {displayDigit(digit)}
         </button>
+        {#if separator && groupEndIndices.includes(index)}
+          <span class="poodle-code-input__separator" aria-hidden="true">{separator}</span>
+        {/if}
       {/each}
+
+      {#if completionValidationState !== "none"}
+        <span
+          class="poodle-code-input__validation-indicator"
+          class:poodle-code-input__validation-indicator--valid={completionValidationState === "valid"}
+          class:poodle-code-input__validation-indicator--invalid={completionValidationState === "invalid"}
+          role="status"
+          aria-label={completionValidationState === "valid" ? "Code check passed" : "Code check failed"}
+        >
+          <Icon icon={completionValidationState === "valid" ? "check" : "x"} />
+        </span>
+      {/if}
     </div>
   {/snippet}
 </Field>

@@ -124,11 +124,12 @@ Key mode additionally accepts:
 
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
-| `keyCodeInput` | `{ length: number; groups?: readonly number[] \| null } \| null` | `null` | Opts into segmented CodeInput entry; omit for free-form TextInput entry |
+| `keyCodeInput` | `{ length: number; groups?: readonly number[] \| null; separator?: string \| null } \| null` | `null` | Opts into segmented CodeInput entry; omit for free-form TextInput entry |
 
 `keyCodeInput.groups` is a list of group lengths, not separator positions or a
-regular expression. `{ length: 20, groups: [5, 5, 5, 5] }` produces four
-five-character visual groups while the parser receives one joined string.
+regular expression. `{ length: 20, groups: [5, 5, 5, 5], separator: "-" }`
+produces four five-character visual groups with presentation-only hyphens while
+the parser receives one joined string.
 The pattern must be a complete positive-integer partition of `length`; an
 invalid pattern renders the configured number of slots without visual breaks.
 
@@ -200,9 +201,16 @@ confusions exactly for the injected parser. Poodle must not pre-normalize them.
 
 When `keyCodeInput` is supplied, CodeInput owns fixed-length segmented entry
 with `numbersOnly=false`. The parser receives CodeInput's joined, length-capped
-value; visual group gaps are never inserted into it. Hosts that must preserve
-arbitrary separator or whitespace characters from pasted input use the default
-TextInput route instead.
+value; visual group gaps and `separator` text are never inserted into it. Hosts
+that must preserve arbitrary separator or whitespace characters from pasted
+input use the default TextInput route instead.
+
+At full segmented length, CodeInput calls the injected parser for presentation
+feedback: `ok: true` shows its success tick and `ok: false` shows its failure
+cross. This check never emits activation and never replaces the submit-time
+parse, whose problem kind still owns the distinct typo and too-short copy. The
+accessible status says the check passed or failed; it does not call a mistyped
+key invalid.
 
 ### Account view
 
@@ -273,8 +281,8 @@ implemented in Poodle.
 - The header has one additional `stack-sm` separation from the active login or
   file-import view.
 - Validation uses shared Field/TextInput token roles.
-- Optional segmented key entry uses CodeInput's slot and explicit group-end
-  token roles; LicenceActivation adds no licence-specific separator styling.
+- Optional segmented key entry uses CodeInput's slot, explicit group-end, and
+  separator token roles; LicenceActivation adds no licence-specific styling.
 - Recipe hooks use `--poodle-recipe-licence-activation-*` names.
 
 ## 8. Framework And Runtime Parity
@@ -294,7 +302,7 @@ admission.
 - no route tabs render
 - valid raw key emits once
 - key mode defaults to free-form TextInput and may opt into fixed-length
-  CodeInput with explicit multi-group presentation
+  CodeInput with explicit multi-group and separator presentation
 - check-failed and unexpected-symbol problems render typo copy and do not emit
 - too-short renders distinct copy and does not emit
 - lowercase/dashes/whitespace/confusions reach the injected parser unchanged
@@ -318,4 +326,4 @@ admission.
 | Delta | Status | Follow-up |
 | --- | --- | --- |
 | no native implementation in web-reference PR | incomplete, not accepted parity | g14.017 |
-| grouped key entry depends on the new web CodeInput `groups` prop; Rust CodeInput still has its legacy inferred 3+3 split | staged, not accepted parity | g14.017 ports grouping through the adopted interface before native LicenceActivation |
+| grouped key entry depends on the new web CodeInput `groups` and `separator` props; Rust CodeInput still has its legacy inferred 3+3 split | staged, not accepted parity | g14.017 ports grouping and separators through the adopted interface before native LicenceActivation |

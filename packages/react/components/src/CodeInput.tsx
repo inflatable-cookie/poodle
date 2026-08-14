@@ -1,4 +1,5 @@
 import {
+  Fragment,
   useRef,
   useState,
   type ChangeEvent,
@@ -18,8 +19,15 @@ import {
 import "@inflatable-cookie/poodle-core/styles/code-input.css";
 
 import { Field } from "./Field";
+import { Icon } from "./Icon";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
-import type { ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState } from "./types";
+import type {
+  ControlDensity,
+  ControlSize,
+  InputValidator,
+  SemanticControlSizeRole,
+  ValidationState,
+} from "./types";
 
 export interface CodeInputProps {
   id?: string | null;
@@ -32,6 +40,7 @@ export interface CodeInputProps {
   disabled?: boolean;
   length?: number;
   groups?: readonly number[] | null;
+  separator?: string | null;
   mask?: boolean;
   numbersOnly?: boolean;
   ariaLabel?: string | null;
@@ -40,6 +49,7 @@ export interface CodeInputProps {
   density?: ControlDensity | null;
   autoComplete?: string;
   validationState?: ValidationState;
+  validate?: InputValidator;
   onValueChange?: (value: string) => void;
   onComplete?: (value: string) => void;
 }
@@ -55,6 +65,7 @@ export function CodeInput({
   disabled = false,
   length = 6,
   groups = null,
+  separator = null,
   mask = false,
   numbersOnly = true,
   ariaLabel = null,
@@ -63,6 +74,7 @@ export function CodeInput({
   density = null,
   autoComplete = "one-time-code",
   validationState = "none",
+  validate,
   onValueChange,
   onComplete,
 }: CodeInputProps) {
@@ -73,8 +85,13 @@ export function CodeInput({
   const [uncontrolledValue, setUncontrolledValue] = useState(() => sanitize(defaultValue));
   const [caretIndex, setCaretIndex] = useState(0);
   const [hasFocus, setHasFocus] = useState(false);
+  const [validatedCompletion, setValidatedCompletion] = useState<{
+    value: string;
+    valid: boolean;
+  } | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const pendingSelection = useRef<{ start: number; end: number } | null>(null);
+  const validationGeneration = useRef(0);
 
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
@@ -85,7 +102,17 @@ export function CodeInput({
   currentValueRef.current = currentValue;
   const digits = Array.from({ length }, (_, index) => currentValue[index] ?? "");
   const groupEndIndices = codeGroupEndIndices(length, groups);
-  const effectiveValidationState = error ? "invalid" : validationState;
+  const completionValidationState =
+    !error && validatedCompletion?.value === currentValue
+      ? validatedCompletion.valid
+        ? "valid"
+        : "invalid"
+      : "none";
+  const effectiveValidationState = error
+    ? "invalid"
+    : completionValidationState !== "none"
+      ? completionValidationState
+      : validationState;
   const activeCaretIndex = Math.min(caretIndex, Math.max(length - 1, 0));
 
   const slotBorderColor =
@@ -97,11 +124,32 @@ export function CodeInput({
       ? "color-mix(in srgb, var(--poodle-color-status-danger) 24%, transparent)"
       : "color-mix(in srgb, var(--poodle-color-accent-focusRing) 28%, transparent)";
 
+  async function validateCompletion(nextValue: string): Promise<void> {
+    if (!validate) return;
+    const generation = ++validationGeneration.current;
+    setValidatedCompletion(null);
+
+    try {
+      const result = await validate(nextValue);
+      if (generation !== validationGeneration.current || currentValueRef.current !== nextValue) return;
+      setValidatedCompletion({ value: nextValue, valid: result.valid });
+    } catch {
+      if (generation !== validationGeneration.current || currentValueRef.current !== nextValue) return;
+      setValidatedCompletion({ value: nextValue, valid: false });
+    }
+  }
+
   function updateValue(nextRawValue: string): void {
     const nextValue = sanitize(nextRawValue);
+    validationGeneration.current += 1;
+    setValidatedCompletion(null);
     if (!isControlled) setUncontrolledValue(nextValue);
+    currentValueRef.current = nextValue;
     onValueChange?.(nextValue);
-    if (nextValue.length === length) onComplete?.(nextValue);
+    if (nextValue.length === length) {
+      onComplete?.(nextValue);
+      void validateCompletion(nextValue);
+    }
   }
 
   function syncCaret(): void {
@@ -226,6 +274,7 @@ export function CodeInput({
               .join(" ")}
             data-size={resolvedSize}
             data-density={resolvedDensity}
+            data-has-separator={separator ? true : undefined}
             style={
               {
                 "--code-slot-border": slotBorderColor,
@@ -258,25 +307,41 @@ export function CodeInput({
             />
 
             {digits.map((digit, index) => (
-              <button
-                key={index}
-                type="button"
-                className={[
-                  "poodle-code-input__slot",
-                  hasFocus && index === activeCaretIndex ? "poodle-code-input__slot--active" : "",
-                  digit.length > 0 ? "poodle-code-input__slot--filled" : "",
-                  groupEndIndices.includes(index) ? "poodle-code-input__slot--group-end" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                tabIndex={-1}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => handleSlotClick(index)}
-                aria-hidden="true"
-              >
-                {displayDigit(digit)}
-              </button>
+              <Fragment key={index}>
+                <button
+                  type="button"
+                  className={[
+                    "poodle-code-input__slot",
+                    hasFocus && index === activeCaretIndex ? "poodle-code-input__slot--active" : "",
+                    digit.length > 0 ? "poodle-code-input__slot--filled" : "",
+                    groupEndIndices.includes(index) ? "poodle-code-input__slot--group-end" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  tabIndex={-1}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => handleSlotClick(index)}
+                  aria-hidden="true"
+                >
+                  {displayDigit(digit)}
+                </button>
+                {separator && groupEndIndices.includes(index) ? (
+                  <span className="poodle-code-input__separator" aria-hidden="true">
+                    {separator}
+                  </span>
+                ) : null}
+              </Fragment>
             ))}
+
+            {completionValidationState !== "none" ? (
+              <span
+                className={`poodle-code-input__validation-indicator poodle-code-input__validation-indicator--${completionValidationState}`}
+                role="status"
+                aria-label={completionValidationState === "valid" ? "Code check passed" : "Code check failed"}
+              >
+                <Icon icon={completionValidationState === "valid" ? "check" : "x"} />
+              </span>
+            ) : null}
           </div>
         </>
       )}

@@ -196,21 +196,39 @@
 
 .poodle-licence-seats__identity {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--poodle-space-inline-sm);
   min-width: 0;
 }
 
-/* An unnamed machine is normal text. Greying it, or italicising it as a
-   placeholder, would read as a defect in a row that is simply honest. */
+.poodle-licence-seats__machine-icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--poodle-color-text-secondary);
+}
+
 .poodle-licence-seats__label {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--poodle-color-text-primary);
+}
+
+.poodle-licence-seats__label .poodle-editable-label {
+  max-width: 100%;
+}
+
+.poodle-licence-seats__label .poodle-editable-label__text {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* An unnamed machine is an honest row value, not an error or missing UI. */
+.poodle-licence-seats__label .poodle-editable-label__display--empty .poodle-editable-label__text {
   color: var(--poodle-color-text-primary);
-  font-size: var(--poodle-typography-label-size);
-  line-height: var(--poodle-typography-label-lineHeight);
+  font-style: normal;
 }
 
 .poodle-licence-seats__marker {

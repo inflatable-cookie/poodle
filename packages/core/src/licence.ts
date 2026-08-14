@@ -81,11 +81,12 @@ export interface LicenceKeyFormat {
 /**
  * Opt-in segmented licence-key entry. Omit it to preserve free-form TextInput
  * entry. Group lengths are visual and must form one complete partition of
- * `length`.
+ * `length`; an optional separator is presentation-only.
  */
 export interface LicenceKeyCodeInputOptions {
   length: number;
   groups?: readonly number[] | null;
+  separator?: string | null;
 }
 
 /**

@@ -2401,6 +2401,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     ],
     slots: [],
     events: [
+      { name: "onRename", payload: "((detail: { machineId: string; label: string | null }) => void) | undefined", description: "An inline machine-name edit was committed. Blank names emit null; the host persists the result." },
       { name: "onRelease", payload: "((detail: { machineId: string }) => void) | undefined", description: "Release of a seat other than this machine was confirmed. This machine has no release action." },
     ],
     usage: `<script lang="ts">
@@ -2410,6 +2411,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <LicenceSeats
   seats={licence.seats}
   pendingMachineId={releasing}
+  onRename={({ machineId, label }) => renameSeat(machineId, label)}
   onRelease={({ machineId }) => releaseSeat(machineId)}
 />`,
   },
@@ -3223,6 +3225,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "disabled", type: "boolean", default: "false", description: "Disables the hidden real input and visual slot interaction." },
       { name: "length", type: "number", default: "6", description: "Number of visible digit slots and max code length." },
       { name: "groups", type: "readonly number[] | null", default: "null", description: "Optional complete partition of length. Adds a visual gap after every group except the last without changing the value." },
+      { name: "separator", type: "string | null", default: "null", description: "Optional presentation-only text rendered at each valid group boundary." },
       { name: "mask", type: "boolean", default: "false", description: "When true, display dots instead of digits in the visual slots." },
       { name: "numbersOnly", type: "boolean", default: "true", description: "When false, accepts arbitrary characters instead of filtering to digits." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Optional accessible label override for the grouped control." },
@@ -3231,6 +3234,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "sizeRole", type: '"chrome" | "control" | "prominent"', default: '"control"', description: "Semantic size offset relative to the inherited presentation scale." },
       { name: "density", type: "ControlDensity | null", default: "null", description: "Explicit density override. Supports compact, default, and comfortable." },
       { name: "validationState", type: 'ValidationState', default: '"none"', description: "Field-level validation state. Invalid is also inferred automatically when error is present." },
+      { name: "validate", type: "InputValidator | undefined", default: "undefined", description: "Runs when the sanitized value reaches length. Its valid result drives the completion tick or cross." },
       { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called whenever the sanitized code value changes." },
       { name: "onComplete", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when the value reaches the configured length." },
     ],
@@ -3240,6 +3244,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { CodeInput } from "@inflatable-cookie/poodle-svelte";
 
   let code = "";
+  const validateCode = (value: string) => ({ valid: value === "123456" });
 </script>
 
 <CodeInput
@@ -3248,6 +3253,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   label="Verification code"
   hint="Enter the 6-digit code from your authenticator app."
   groups={[3, 3]}
+  validate={validateCode}
   onValueChange={(value) => (code = value)}
   onComplete={(value) => verify(value)}
 />`,
