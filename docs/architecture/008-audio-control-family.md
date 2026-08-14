@@ -1,7 +1,7 @@
 # 008 Audio Control Family
 
 Status: accepted
-Updated: 2026-08-11
+Updated: 2026-08-14
 Depends on: `006-headless-core-and-machine-model.md`,
 `007-appearance-recipe-contract.md`
 Source: Loophole `docs/research/poodle-instrument-rfc.md`
@@ -246,6 +246,40 @@ Peak hold lasts 1,500 ms, then decays at 20 dB/s. Clip latches when peak is at
 or above `1.0` and clears only on `RESET_CLIP`. Display normalization maps the
 configured dB range (default `-60..0 dBFS`) linearly to `0..1`; silence maps
 to the floor.
+
+## Batched Web Meter Rendering
+
+High-count web consoles may opt into one shared meter engine and one canvas
+draw pass. This is a rendering strategy for the existing `AudioMeter`
+semantics, not a Loophole mixer component and not a second meter contract.
+
+- `packages/core/src/audio/` owns `MeterBus`: an imperative, framework-free
+  batch engine over structure-of-arrays typed state. Registration may allocate;
+  frame ingestion, time advancement, observation, and painting may not.
+- The hot feed identifies channels by the numeric slot returned at
+  registration. Public channel IDs remain opaque strings or numbers and never
+  enter a `Float32Array`.
+- Feed batches retain `peak`, `meanSquare`, `atMs`, and `durationMs`. Calling an
+  RMS amplitude `rms` or dropping duration would change the existing RMS law.
+- The per-channel scalar laws stay pure and are shared by standalone
+  `audioMeterTransition` and the bus. Surface animation adds explicit time
+  advancement; it does not invent another attack, release, peak-hold, clip, or
+  RMS rule.
+- `packages/core/src/dom/` owns browser scheduling, placeholder measurement,
+  scroll projection, palette resolution, culling, and the default Canvas2D
+  painter. Svelte and React wrappers remain thin.
+- `MeterSurface` coordinates one overlay canvas for one scroll container.
+  `AudioMeter` surface mode renders only its layout and accessibility box; the
+  canvas is always accessibility-hidden.
+- The first painter is Canvas2D. Its input is one preallocated flat draw pass
+  and its lifecycle is injectable. WebGL2 is a later admission decision, not
+  part of the first delivery card.
+- Native runtimes do not gain `MeterSurface`: GPUI and Jetstream already submit
+  meter nodes through one renderer scene. Portable AudioMeter meaning remains
+  identical; only the web paint mechanism changes.
+
+The normative web API, feed validation, scheduling, accessibility cadence,
+browser matrix, and performance target live in spec 068.
 
 Gain-reduction frames carry a positive reduction magnitude in dB. The core
 uses a 10 ms attack and 300 ms release, with zero as no reduction. Display

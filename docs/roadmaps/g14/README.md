@@ -52,6 +52,12 @@ The operator-approved model-connection suite follows the same staged pattern.
 specimens after one bounded refinement. `020` stays blocked on **adopt** for
 shared cases and GPUI. Cleanup moves to `021`; `022` closes the generation.
 
+`024` is an independent web-performance lane for high-count AudioMeter
+rendering. It may run beside the conformance sequence because it changes no
+portable component meaning, generated conformance surface, Rust, GPUI, or
+Jetstream. It ships Canvas2D first and leaves WebGL2 behind a measured
+follow-up decision.
+
 Jetstream is outside the g14 completion cohort. Its paired build and evidence
 remain opt-in and visibly deferred; a later backend-admission runway must run
 the adopted cases before promotion.
@@ -81,6 +87,7 @@ the adopted cases before promotion.
 21. [020 — Model connection active-runtime completion](020-model-connection-active-runtime-completion.md)
 22. [021 — Experimental cleanup and gate consolidation](021-experimental-cleanup-and-gate-consolidation.md)
 23. [022 — Generation closeout](022-generation-closeout.md)
+24. [024 — Batched AudioMeter web surface](024-batched-audio-meter-web-surface.md) — ready; independent web-performance lane
 
 ## Dispatch Rule
 
@@ -92,7 +99,8 @@ records evidence, merges, then opens the next file.
 No batch-card layer. No parallel work on the conformance kernel before the
 prior profile settles its vocabulary. Bounded web-reference lanes may run in
 parallel only when named here. `018` used that exception and is now complete.
-`019` stayed in the operator/orchestrator thread and is now complete.
+`019` stayed in the operator/orchestrator thread and is now complete. `024`
+may run independently under its explicit no-conformance/no-native boundary.
 
 ## First Task
 
@@ -105,3 +113,7 @@ must land before `005`.
 
 The model-connection web reference is approved. Native/conformance completion
 stays open under `020` until the pilot records **adopt**.
+
+`g14.024` is ready for a separate worktree now. Give the worker the complete
+roadmap file; its Canvas2D, browser, allocation, and performance evidence must
+return as one PR for orchestrator review.

@@ -42,6 +42,9 @@ Important current cross-cutting references include:
   portable interfaces, shared cases/specimens, observations, and completion
 - `067-model-connection-management.md` — shaping contract for reusable model
   route setup, configured connection rows, and model catalogue curation
+- `068-batched-audio-meter-surface.md` — approved contract for the web
+  MeterBus, AudioMeter surface mode, one-canvas MeterSurface, browser evidence,
+  and the Canvas2D performance gate
 
 Specs are normative constraints, not task queues. Current execution status
 belongs in the roadmap.
