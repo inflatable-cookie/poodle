@@ -1,7 +1,7 @@
 # g14.018 — Model Connection Web Reference
 
-Status: ready
-Posture: bounded parallel web-reference exception
+Status: landed — merge `48c6ec37`
+Posture: complete; operator review continues under g14.019
 Depends on: approved spec 067 and the four model-connection contracts
 Governing refs: `../../specs/067-model-connection-management.md`,
 `../../contracts/components/model-connection-picker.md`,

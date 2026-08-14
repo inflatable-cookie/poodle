@@ -3,6 +3,7 @@
 Branch: `t3code/model-connection-components`
 Date: 2026-08-14
 Base SHA: `d93f26e6`
+Landed: PR #12, merge `48c6ec37`
 Card: `docs/roadmaps/g14/018-model-connection-web-reference.md`
 Contracts: `model-connection-picker.md`, `model-connection-setup.md`,
 `model-connection-card.md`, `model-catalogue-editor.md`

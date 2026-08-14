@@ -73,8 +73,8 @@ the adopted cases before promotion.
 15. [015 — Licence web reference](015-licence-web-reference.md) — landed
 16. [016 — Licence reference review](016-licence-reference-review.md) — complete; reference approved
 17. [017 — Licence active-runtime completion](017-licence-active-runtime-completion.md)
-18. [018 — Model connection web reference](018-model-connection-web-reference.md) — ready parallel web lane
-19. [019 — Model connection reference review](019-model-connection-reference-review.md)
+18. [018 — Model connection web reference](018-model-connection-web-reference.md) — complete; accepted in PR #12
+19. [019 — Model connection reference review](019-model-connection-reference-review.md) — ready; operator/orchestrator lane
 20. [020 — Model connection active-runtime completion](020-model-connection-active-runtime-completion.md)
 21. [021 — Experimental cleanup and gate consolidation](021-experimental-cleanup-and-gate-consolidation.md)
 22. [022 — Generation closeout](022-generation-closeout.md)
@@ -88,9 +88,8 @@ records evidence, merges, then opens the next file.
 
 No batch-card layer. No parallel work on the conformance kernel before the
 prior profile settles its vocabulary. Bounded web-reference lanes may run in
-parallel only when named here. `018` is the current exception; it cannot edit
-conformance/codegen, Rust, native, Jetstream, Effigy tasks, roadmap, or
-external-repository surfaces.
+parallel only when named here. `018` used that exception and is now complete.
+`019` stays in this operator/orchestrator thread; it is not a worker dispatch.
 
 ## First Task
 
@@ -99,7 +98,6 @@ semantics through the certified primitive, observer, and driver substrate.
 RangeSlider-specific branches in generic machinery are a stop condition.
 Jetstream remains outside the active cohort.
 
-`g14.018` may run in one fresh worktree beside `003`. It owns only the approved
-model-connection Svelte/React reference lane. The operator review remains in
-this orchestrator thread under `019`; native/conformance completion stays open
-under `020`.
+`g14.019` is ready in this orchestrator thread. Review the landed Svelte and
+React model-connection specimens with the operator, then freeze the accepted
+reference. Native/conformance completion stays open under `020`.

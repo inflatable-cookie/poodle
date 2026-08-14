@@ -1,6 +1,6 @@
 # 067 Model Connection Management
 
-Status: approved — web reference ready for dispatch
+Status: approved
 Updated: 2026-08-14
 Consumers: Nucleus and other model-host applications
 Related: `../contracts/components/model-picker.md`,

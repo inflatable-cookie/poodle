@@ -1,6 +1,6 @@
 # g14.019 — Model Connection Reference Review
 
-Status: blocked pending `g14.018`
+Status: ready — operator/orchestrator review
 Depends on: `g14.018`
 Governing ref: `../../specs/067-model-connection-management.md`
 
