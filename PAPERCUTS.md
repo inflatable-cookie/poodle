@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-14 — `effigy docs:contract-drift` fails on main for Button's
+  Svelte-only `children`, `leading`, and `trailing` props, while
+  `effigy docs:check` stays green because the aggregate lint path treats that
+  surface differently. Cards that name the standalone selector inherit a red
+  unrelated baseline. Align the two prop-normalization paths or declare the
+  slot props once in the contract-drift policy.
+
 - 2026-08-14 — g14.004 said only “conformance gates”, so a worktree agent ran
   the foreground `ci:conformance-windowed` board for 15+ minutes and repeatedly
   stole desktop focus. Selector naming and comments did not protect the

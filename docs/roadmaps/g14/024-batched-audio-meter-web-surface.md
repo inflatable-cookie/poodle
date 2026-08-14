@@ -232,6 +232,11 @@ Use Effigy. Keep every browser and repository check headless:
 - `effigy docs:check`
 - `git diff --check`
 
+Current-main exception: the standalone `docs:contract-drift` selector reports
+Button's unrelated Svelte-only `children`, `leading`, and `trailing` props,
+while `docs:check` is green. Record that baseline and prove this card adds no
+AudioMeter or MeterSurface drift. Do not edit Button from this branch.
+
 Do not run `test:native-visual`, `ci:conformance-windowed`, or any other
 foreground/windowed selector.
 
