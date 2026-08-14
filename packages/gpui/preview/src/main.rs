@@ -1268,7 +1268,9 @@ fn parse_cli_args() -> CliArgs {
                     i += 1;
                 }
             }
-            "--size" => {
+            // Canonical flag is `--control-size` (native-visual gate). `--size`
+            // remains as a synonym so older scripts keep working.
+            "--control-size" | "--size" => {
                 if let Some(val) = args.get(i + 1) {
                     control_size = match val.as_str() {
                         "xs" => Some(ControlSize::Xs),

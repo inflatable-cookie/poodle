@@ -12,6 +12,7 @@
 //! `docs/roadmaps/g12/019-gpui-node-backend.md`.
 
 pub mod conformance;
+pub mod primitive_probes;
 pub mod accordion;
 pub mod action_discovery_panel;
 pub mod agent_chat_input;

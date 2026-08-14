@@ -1,12 +1,9 @@
 /**
- * Serialize the conformance authority (spec 066): the Button portable
- * interface and case corpus from their TypeScript modules into the neutral
- * JSON fixtures the Rust pipeline consumes.
+ * Serialize conformance authority (spec 066): portable interfaces, case
+ * corpora, and the primitive capability roster into neutral JSON fixtures.
  *
- *   bun packages/core/scripts/conformance-serialize.ts          # write
- *   bun packages/core/scripts/conformance-serialize.ts --check  # byte-compare
- *
- * Deterministic output: fixed key order, 2-space indent, trailing newline.
+ *   bun packages/core/scripts/conformance-serialize.ts
+ *   bun packages/core/scripts/conformance-serialize.ts --check
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
@@ -16,6 +13,7 @@ import { fileURLToPath } from "node:url";
 import { serializeInterface } from "../src/conformance/define";
 import { buttonInterface } from "../src/conformance/button";
 import { buttonCases } from "../src/conformance/button-cases";
+import { serializePrimitiveRoster } from "../src/conformance/primitives";
 
 const CHECK = process.argv.includes("--check");
 
@@ -37,6 +35,11 @@ const artifacts: Array<{ path: string; document: string; label: string }> = [
     path: join(fixturesRoot, "button-cases.json"),
     document: `${JSON.stringify(buttonCases, null, 2)}\n`,
     label: "button cases",
+  },
+  {
+    path: join(fixturesRoot, "primitive-capability-roster.json"),
+    document: `${JSON.stringify(serializePrimitiveRoster(), null, 2)}\n`,
+    label: "primitive capability roster",
   },
 ];
 

@@ -11,7 +11,11 @@
  * `componentCase(iface, ...)` binds every fixture field, part, state, event,
  * axis, and enum value to the interface at authoring time and again at
  * serialization; unknown names are errors, never ignored.
+ *
+ * Capability names are closed over the primitive roster (g14.002).
  */
+
+import { assertKnownCapabilities } from "./primitives";
 
 // ── Interface declarations ─────────────────────────────────────────────────
 
@@ -207,6 +211,17 @@ export function validateInterface(config: InterfaceConfig): void {
       throw new Error(`prop '${prop.name}' controls unknown event '${prop.controlledBy}'`);
     }
   }
+  const capabilityNames = new Set<string>();
+  for (const capability of config.capabilities) {
+    if (capabilityNames.has(capability.name)) {
+      throw new Error(`duplicate capability '${capability.name}'`);
+    }
+    capabilityNames.add(capability.name);
+  }
+  assertKnownCapabilities(
+    config.capabilities.map((capability) => capability.name),
+    `interface '${config.id}'`,
+  );
 }
 
 // ── Type-level projections ─────────────────────────────────────────────────

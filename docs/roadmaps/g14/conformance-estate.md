@@ -139,6 +139,29 @@ The stop condition is triggered. The orchestrator accepts `g14.001` as a
 feasibility proof, not a rollout verdict. Cards `002`–`007` must reuse or
 extract the pilot harness; `008` still decides adoption.
 
+## Primitive Substrate Status (g14.002)
+
+Finite typed roster → web / render-neutral / GPUI probes →
+`primitive-capability-report.v1` → completion rejects missing owned evidence.
+
+- **Authority** — `packages/core/src/conformance/primitives.ts`. Component
+  capability names validate against the roster at interface authoring.
+- **Report** — `effigy conformance:primitives-report` emits the machine gate
+  and Markdown matrix. Jetstream is program-deferred outside rows. GPUI
+  mounted accessibility is contract-003 forced-acceptance outside passing
+  rows.
+- **Probes** — shared GPUI driver extracted from the Button bin; hand-built
+  node fixtures (not a public dummy component); web fixtures + Button cases
+  through the existing adapters.
+- **Legacy capability tooling** — `capabilities.json` + `capability-drift.ts`
+  adapted as non-passing debt evidence. `timers` retired from the primitive
+  roster.
+- **Native visual** — compare is read-only; refresh preserves
+  `*.previous.png` and writes a refresh manifest; `--control-size` is live
+  end to end.
+
+See `docs/logs/2026-08/14-g14-002-primitive-substrate-certification.md`.
+
 ## Experimental Surface Disposition
 
 No experimental surface is architecture merely because it merged.
@@ -151,11 +174,12 @@ No experimental surface is architecture merely because it merged.
 | Rust display specimen component definitions | retire; must not duplicate portable interface authority | g14.001 |
 | generated machine interfaces | adapt only if the kernel replaces declarations and fixes its standing gate | g14.001 |
 | machine vectors | adapt as case inputs where they prove component behaviour | profile pilots |
-| capability registry | adapt as debt/evidence, never completion | g14.001 |
+| capability registry | adapt as debt/evidence; execution authority is primitive-capability-report.v1 | g14.002 |
 | prop/callback/spec drift scripts | consolidate behind component completion | g14.014 |
-| native registration and snapshot tooling | repair and feed completion evidence | g14.002 / g14.014 |
+| native registration and snapshot tooling | repair and feed completion evidence | g14.002 done / g14.014 |
 | stale specs 063–065 and old roadmap | archived/retired | done |
 | **g14.001 conformance kernel (typed interface, corpus, observers, GPUI runner)** | keep — the replacement-pass proof; profile pilots 2–6 reuse it | g14.010 |
+| **g14.002 primitive capability roster + report** | keep — substrate certification beneath profile pilots | g14.010 |
 | **hand-written ButtonSpec declaration surface** | replaced by `generated/button.rs` + extension module | done |
 | **hand-written Button specimen fixtures (3 active runtimes)** | replaced by corpus projections; the Jetstream specimen stays deferred with its runtime | done |
 | **generated specimen scenes (specimen-ts/rust targets)** | still the shell/nav surface; Button no longer depends on them | g14.009 |
