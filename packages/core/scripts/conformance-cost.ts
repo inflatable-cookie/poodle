@@ -61,6 +61,8 @@ const REUSABLE_AUTHORITY: Array<[string, string]> = [
 const PER_COMPONENT_AUTHORITY: Array<[string, string]> = [
   ["Button interface", "packages/core/src/conformance/button.ts"],
   ["Button corpus", "packages/core/src/conformance/button-cases.ts"],
+  ["RangeSlider interface", "packages/core/src/conformance/range-slider.ts"],
+  ["RangeSlider corpus", "packages/core/src/conformance/range-slider-cases.ts"],
 ];
 
 const CODEGEN: Array<[string, string]> = [
@@ -76,6 +78,8 @@ const GENERATED_SOURCE: Array<[string, string]> = [
 const GENERATED_DATA: Array<[string, string]> = [
   ["Interface fixture JSON", "packages/codegen/fixtures/conformance/button-interface.json"],
   ["Case fixture JSON", "packages/codegen/fixtures/conformance/button-cases.json"],
+  ["RangeSlider interface fixture JSON", "packages/codegen/fixtures/conformance/range-slider-interface.json"],
+  ["RangeSlider case fixture JSON", "packages/codegen/fixtures/conformance/range-slider-cases.json"],
   ["Primitive roster JSON", "packages/codegen/fixtures/conformance/primitive-capability-roster.json"],
 ];
 
@@ -99,6 +103,14 @@ const BUTTON_HARNESS: Array<[string, string]> = [
   ["GPUI fixture adapter", "packages/gpui/preview/src/conformance_support.rs"],
 ];
 
+const RANGE_SLIDER_HARNESS: Array<[string, string]> = [
+  ["Svelte RangeSlider adapter", "test/conformance/web/svelte-range-slider-adapter.ts"],
+  ["React RangeSlider adapter", "test/conformance/web/react-range-slider-adapter.tsx"],
+  ["Svelte RangeSlider host", "test/conformance/web/hosts/RangeSliderHost.svelte"],
+  ["Web RangeSlider tests", "test/conformance/web/range-slider.test.ts"],
+  ["GPUI RangeSlider adapter", "packages/gpui/preview/src/conformance_range_slider.rs"],
+];
+
 const CAPTURE_REPAIR: Array<[string, string]> = [
   ["Native visual runner", "test/native-visual/run.ts"],
   ["Native visual capture", "test/native-visual/capture.ts"],
@@ -117,6 +129,12 @@ const BUTTON_SUPPORTING_DELTAS: Array<[string, string]> = [
   ["React Button shell", "packages/react/components/src/Button.tsx"],
 ];
 
+const RANGE_SLIDER_SUPPORTING_DELTAS: Array<[string, string]> = [
+  ["RangeSlider renderer semantics", "packages/render/src/range_slider.rs"],
+  ["Svelte RangeSlider shell", "packages/svelte/components/src/RangeSlider.svelte"],
+  ["React RangeSlider shell", "packages/react/components/src/RangeSlider.tsx"],
+];
+
 const WIRING: Array<[string, string]> = [
   ["Effigy selector section", "tasks/effigy.tasks.toml#conformance"],
   ["Cost report", "packages/core/scripts/conformance-cost.ts"],
@@ -128,6 +146,9 @@ const REPLACED: Array<[string, string]> = [
   ["Svelte Button specimen fixtures", "packages/svelte/preview/src/specimens/ButtonSpecimen.svelte"],
   ["React Button specimen fixtures", "packages/react/preview/src/gallery/specimens/ButtonSpecimen.tsx"],
   ["GPUI Button specimen fixtures", "packages/gpui/preview/src/specimens/button.rs"],
+  ["Svelte RangeSlider specimen fixtures", "packages/svelte/preview/src/specimens/RangeSliderSpecimen.svelte"],
+  ["React RangeSlider specimen fixtures", "packages/react/preview/src/gallery/specimens/RangeSliderSpecimen.tsx"],
+  ["GPUI RangeSlider specimen fixtures", "packages/gpui/preview/src/specimens/range_slider.rs"],
 ];
 
 function sectionLoc(path: string, startMarker: string, endMarker: string): number {
@@ -183,15 +204,22 @@ const generatedSource = sourceTable("Generated source", GENERATED_SOURCE, "worki
 const generatedBytes = dataTable(GENERATED_DATA);
 const genericRuntime = sourceTable("Generic observers and runners", GENERIC_RUNTIME, "working");
 const buttonHarness = sourceTable("Button pilot harness", BUTTON_HARNESS, "working");
+const rangeSliderHarness = sourceTable("RangeSlider pilot harness", RANGE_SLIDER_HARNESS, "working");
 const captureRepair = sourceTable("GPUI capture repair", CAPTURE_REPAIR, "working");
 const genericSupporting = sourceTable("Generic runtime deltas", GENERIC_SUPPORTING_DELTAS, "delta");
 const buttonSupporting = sourceTable("Button runtime deltas", BUTTON_SUPPORTING_DELTAS, "delta");
+const rangeSliderSupporting = sourceTable(
+  "RangeSlider runtime deltas",
+  RANGE_SLIDER_SUPPORTING_DELTAS,
+  "delta",
+);
 const wiring = sourceTable("Wiring", WIRING, "working");
 const replaced = sourceTable("Replaced hand-written source", REPLACED, "replaced");
 
 const genericKernel = reusableAuthority + codegen + genericRuntime + genericSupporting + wiring;
 const buttonPilot = perComponentAuthority + generatedSource + buttonHarness + buttonSupporting;
-const sourceMechanism = genericKernel + buttonPilot + captureRepair;
+const rangeSliderPilot = rangeSliderHarness + rangeSliderSupporting;
+const sourceMechanism = genericKernel + buttonPilot + rangeSliderPilot + captureRepair;
 
 console.log("\n=== Summary ===");
 console.log(`source mechanism: ${sourceMechanism} LOC`);
@@ -200,10 +228,11 @@ console.log(`  Button pilot increment: ${buttonPilot} LOC`);
 console.log(`    authored authority: ${perComponentAuthority} LOC`);
 console.log(`    generated source: ${generatedSource} LOC`);
 console.log(`    harness and runtime deltas: ${buttonHarness + buttonSupporting} LOC`);
+console.log(`  RangeSlider pilot increment: ${rangeSliderPilot} LOC`);
 console.log(`  GPUI capture repair: ${captureRepair} LOC`);
 console.log(`generated data: ${generatedBytes} bytes`);
 console.log(`replaced hand-written source: ${replaced} LOC`);
 console.log(
   `stop-condition evidence: Button pilot increment ${buttonPilot} vs replaced ${replaced} — ` +
-    "triggered at g14.001. g14.002 must show extraction/reuse of the Button harness, not a second completion path.",
+    "triggered at g14.001. g14.003 reuses the Button harness path for RangeSlider.",
 );

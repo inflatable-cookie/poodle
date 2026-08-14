@@ -84,7 +84,8 @@ passing rows). No parallel GPUI accessibility tree scheduled.
 Extraction moved the window/driver seams into generic modules
 (`conformance_driver.rs`, `primitive_probes*.rs`). Button keeps the thin
 adapter + fixture path. One completion path
-(`conformance:complete` / `ci:conformance`) includes the primitive report.
+(`conformance:complete-windowed` / `ci:conformance-windowed`) includes the
+primitive report.
 
 ## GPUI Capture Repair
 
@@ -133,7 +134,7 @@ through the shared adapters (no copied harness path).
 - `effigy conformance:serialize` / `conformance:check`
 - `effigy conformance:test-web`
 - `cargo test --manifest-path packages/render/Cargo.toml primitive_probes::tests`
-- `effigy conformance:test-primitives-gpui` (windowed backend receipts + focus/event path)
+- `effigy conformance:test-primitives-gpui-windowed` (windowed backend receipts + focus/event path)
 - `effigy conformance:primitives-report` — 17/17 owned rows passing
 - `effigy conformance:cost`
 - focused `test/native-visual` compare/refresh + `--control-size=sm|lg`

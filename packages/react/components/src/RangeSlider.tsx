@@ -65,6 +65,10 @@ export function RangeSlider({
   const controlRef = useRef(createRangeSliderControlContext());
   const root = useRef<HTMLDivElement>(null);
   const activePointer = useRef<number | null>(null);
+  const standardPending = useRef<{ lower: number | null; upper: number | null }>({
+    lower: null,
+    upper: null,
+  });
 
   const isControlled = value !== undefined;
   const currentValue = isControlled ? value : uncontrolledValue;
@@ -88,8 +92,11 @@ export function RangeSlider({
     "--poodle-range-positive-span": `${visualState.positiveFillSpanNorm * 100}%`,
   } as CSSProperties;
 
-  function send(type: "INPUT" | "COMMIT", thumb: "lower" | "upper", event: FormEvent<HTMLInputElement>): void {
-    const raw = Number(event.currentTarget.value);
+  function send(
+    type: "INPUT" | "COMMIT",
+    thumb: "lower" | "upper",
+    raw: number,
+  ): void {
     const result = rangeSliderTransition(machineContext, { type, thumb, raw });
     for (const effect of result.effects) {
       if (!isControlled) setUncontrolledValue(effect.value);
@@ -99,6 +106,19 @@ export function RangeSlider({
         onValueCommit?.(effect.value);
       }
     }
+  }
+
+  function input(thumb: "lower" | "upper", event: FormEvent<HTMLInputElement>): void {
+    const raw = Number(event.currentTarget.value);
+    standardPending.current[thumb] = raw;
+    send("INPUT", thumb, raw);
+  }
+
+  function commit(thumb: "lower" | "upper"): void {
+    const raw = standardPending.current[thumb];
+    if (raw == null) return;
+    standardPending.current[thumb] = null;
+    send("COMMIT", thumb, raw);
   }
 
   function runControl(event: Parameters<typeof rangeSliderControlTransition>[1]): void {
@@ -135,6 +155,7 @@ export function RangeSlider({
   return (
     <div ref={root}
       className="poodle-range-slider"
+      role="group"
       data-orientation={orientation}
       data-disabled={disabled}
       style={rangeStyle}
@@ -159,8 +180,10 @@ export function RangeSlider({
         disabled={disabled}
         aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"}
         aria-valuetext={lowerValueText ?? undefined}
-        onInput={(event) => send("INPUT", "lower", event)}
-        onChange={(event) => send("COMMIT", "lower", event)}
+        onInput={(event) => input("lower", event)}
+        onMouseUp={() => commit("lower")}
+        onKeyUp={() => commit("lower")}
+        onTouchEnd={() => commit("lower")}
       />
 
       <input
@@ -173,8 +196,10 @@ export function RangeSlider({
         disabled={disabled}
         aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"}
         aria-valuetext={upperValueText ?? undefined}
-        onInput={(event) => send("INPUT", "upper", event)}
-        onChange={(event) => send("COMMIT", "upper", event)}
+        onInput={(event) => input("upper", event)}
+        onMouseUp={() => commit("upper")}
+        onKeyUp={() => commit("upper")}
+        onTouchEnd={() => commit("upper")}
       /></>}
       {variant === "embedded" && <>
         <div className="poodle-range-slider__embedded-control poodle-range-slider__embedded-control--lower" role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => embeddedKey(event, "lower")} />

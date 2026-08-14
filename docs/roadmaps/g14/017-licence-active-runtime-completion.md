@@ -48,7 +48,7 @@ backend-neutral for later Jetstream admission.
 - [ ] No runtime renders machine IDs or gates a feature.
 - [ ] Rename and release emit exact machine IDs to the host while all visible
       and accessible identity remains label-only.
-- [ ] `conformance:complete` passes all three components with no missing or
+- [ ] `conformance:complete-windowed` passes all three components with no missing or
       declared-absence required active capability and reports Jetstream as
       program-deferred.
 - [ ] The downstream drift assertion fails on a planted Longhorn or Poodle

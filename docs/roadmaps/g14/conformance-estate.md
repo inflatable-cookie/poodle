@@ -24,7 +24,8 @@ The previous frozen baseline measured:
 Those figures are point-in-time evidence, not a completion denominator. The
 g14.001 executable roster is now established from source: the Button corpus
 (`packages/core/src/conformance/button-cases.ts`) enumerates 20 cases across
-the three active runtimes, executed by `effigy conformance:complete`.
+the three active runtimes, executed by the opt-in
+`effigy conformance:complete-windowed` selector.
 
 ## Current Gates And Holes
 
@@ -40,7 +41,7 @@ the three active runtimes, executed by `effigy conformance:complete`.
 | React specimen registered | `docs:react-specimen-drift` | specimen content and GPUI |
 | capability declaration has a trace | `docs:capability-drift` | undeclared capability vocabulary and actual parity |
 | visual baselines exist | web and native snapshot tools | shared fixture identity; stale GPUI captures; Jetstream overwrite workflow |
-| **Button completes the conformance kernel** | `ci:conformance` (20 cases × Svelte, React, GPUI) | profile pilots 2–6 |
+| **Button completes the conformance kernel** | `ci:conformance-windowed` (20 cases × Svelte, React, GPUI) | profile pilots 2–6 |
 
 `docs:check` currently stays green while the machine-shape selector is red.
 `check:svelte` currently has three `AppHeaderCenterHarness.svelte` Snippet
@@ -89,11 +90,12 @@ Delivered for Button:
   and the reason; no cross-runtime "someone exercised it" vacuity exists.
 - **Standing enforcement** — `docs:check` and `ci:web` carry read-only
   authority checks and web execution. A dedicated path-scoped macOS PR
-  workflow runs `ci:conformance`, including real GPUI execution and normalized
-  comparison. Headless `qa` and `ci:native` stay window-free.
+  workflow runs `ci:conformance-windowed`, including real GPUI execution and
+  normalized comparison. Headless `qa`, `ci:conformance`, and `ci:native`
+  stay window-free.
 - **Specimens** — all three active Button specimen pages are corpus
   projections; hand-written specimen fixtures deleted.
-- **Completion** — `effigy conformance:complete` passes
+- **Completion** — `effigy conformance:complete-windowed` passes
   the active cohort and reports Jetstream program-deferred, never passing.
   Removing the GPUI registration fails completion; an inert backend binding
   fails the executed cases.
@@ -118,9 +120,10 @@ Delivered for Button:
 
 ### Driver notes (recorded, not architecture)
 
-- The GPUI runner needs a macOS window server. `ci:native` compiles it
-  (`conformance:check-gpui`); `ci:conformance` executes it locally and in the
-  dedicated macOS PR workflow. The driver activates the app, warms
+- The GPUI runner needs a live macOS desktop and takes focus. `ci:native` and
+  headless `ci:conformance` compile it (`conformance:check-gpui`);
+  `ci:conformance-windowed` executes it in the dedicated macOS PR workflow or
+  when an operator explicitly yields the desktop. The driver activates the app, warms
   macOS's first-click swallow with a click on empty chrome, polls until the
   window has painted (focus handle exists), and retries a swallowed click
   like a real user would — the retry is real clicks, and an inert backend
@@ -162,6 +165,27 @@ Finite typed roster → web / render-neutral / GPUI probes →
 
 See `docs/logs/2026-08/14-g14-002-primitive-substrate-certification.md`.
 
+## Controlled-control Status (g14.003)
+
+RangeSlider proves a controlled two-part value through the same kernel:
+
+- **Authority** — `range-slider.ts` + 10 typed cases; scrub/key/value vocabulary
+  stays generic (no RangeSlider-specific runner branches).
+- **Execution** — Svelte / React / GPUI all green; compare covers button +
+  range-slider corpora (30 cases × 3 runtimes).
+- **Native** — dual identified thumbs, keyboard, scrub Release; GPUI scrub uses
+  captured `on_drag_move` for real out-of-bounds drags plus mouse-move fallback
+  for synthetic AppKit events that do not arm GPUI drag payloads.
+- **Specimens** — all three active runtimes project the corpus.
+- **Disposition** — two-thumb claims live in RangeSlider cases; single-value
+  `slider` vectors remain. Jetstream stays program-deferred.
+- **Known boundary** — `RangeSliderSpec.law` is a structured
+  `AudioValueLaw`, outside the pilot's scalar/number-pair interface vocabulary.
+  The profile does not claim full interface replacement until g14.010 rules on
+  structured portable values.
+
+See `docs/logs/2026-08/14-g14-003-range-slider-controlled-control-proof.md`.
+
 ## Experimental Surface Disposition
 
 No experimental surface is architecture merely because it merged.
@@ -180,8 +204,10 @@ No experimental surface is architecture merely because it merged.
 | stale specs 063–065 and old roadmap | archived/retired | done |
 | **g14.001 conformance kernel (typed interface, corpus, observers, GPUI runner)** | keep — the replacement-pass proof; profile pilots 2–6 reuse it | g14.010 |
 | **g14.002 primitive capability roster + report** | keep — substrate certification beneath profile pilots | g14.010 |
+| **g14.003 RangeSlider controlled-control proof** | keep — second profile pilot; reuses Button harness path | g14.010 |
 | **hand-written ButtonSpec declaration surface** | replaced by `generated/button.rs` + extension module | done |
 | **hand-written Button specimen fixtures (3 active runtimes)** | replaced by corpus projections; the Jetstream specimen stays deferred with its runtime | done |
+| **hand-written RangeSlider specimen fixtures (3 active runtimes)** | replaced by corpus projections | done |
 | **generated specimen scenes (specimen-ts/rust targets)** | still the shell/nav surface; Button no longer depends on them | g14.009 |
 
 ## Staged Licence Intake

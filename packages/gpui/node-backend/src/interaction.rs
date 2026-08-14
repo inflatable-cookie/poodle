@@ -347,19 +347,27 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
     }
 
     if let Some(handler) = &node.interaction.on_scrub {
-        // A scrub reports where the pointer sits ALONG this element, as a
-        // fraction of its own width. Pressing counts — clicking a slider track
-        // jumps the value there — and the gesture then follows the pointer
-        // anywhere via `on_drag_move`.
+        // Scrub reports where the pointer sits along this element as a
+        // fraction of its width. Mouse down/up carry the explicit gesture
+        // boundaries. `on_drag_move` keeps real pointer capture after the
+        // pointer leaves the element; the mouse-move listener is the fallback
+        // for synthetic window events that do not arm gpui's drag payload.
         //
-        // A mouse-down event carries no bounds, so a zero-cost `canvas` child
-        // records the track's rectangle at paint time for the press to read.
-        // `on_drag_move` supplies its own.
+        // Do not latch "scrubbing" in a Cell across this render: Press calls
+        // refresh_windows, which rebuilds listeners and would clear the latch
+        // before Release. Gate Drag with MouseMoveEvent::dragging() instead.
+        //
+        // A mouse-down event carries no bounds, so a zero-cost canvas child
+        // records the track rectangle at paint time.
         let track: Rc<RefCell<Option<gpui::Bounds<gpui::Pixels>>>> = Rc::new(RefCell::new(None));
         let track_paint = track.clone();
-        let track_press = track.clone();
+        let track_down = track.clone();
+        let track_move = track.clone();
+        let track_up = track.clone();
         let press = handler.clone();
         let mv = handler.clone();
+        let captured_mv = handler.clone();
+        let release = handler.clone();
         let gesture_id = next_gesture_id();
         el = el
             .child(
@@ -372,15 +380,23 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
                 .absolute()
                 .size_full(),
             )
-            // `on_click`, NOT `on_mouse_down`: registering `on_drag` on an
-            // element makes gpui's drag machinery swallow that element's
-            // mouse-down, so a down listener here never runs. Click survives,
-            // and a press-without-drag is exactly the track-click case.
-            .on_click(move |event: &ClickEvent, _window, cx| {
-                if let Some(bounds) = *track_press.borrow() {
+            .on_mouse_down(MouseButton::Left, move |event: &MouseDownEvent, _window, cx| {
+                if let Some(bounds) = *track_down.borrow() {
                     press(
-                        scrub_fraction(event.position().x.into(), bounds),
+                        scrub_fraction(event.position.x.into(), bounds),
                         ScrubPhase::Press,
+                    );
+                    cx.refresh_windows();
+                }
+            })
+            .on_mouse_move(move |event: &MouseMoveEvent, _window, cx| {
+                if !event.dragging() || cx.has_active_drag() {
+                    return;
+                }
+                if let Some(bounds) = *track_move.borrow() {
+                    mv(
+                        scrub_fraction(event.position.x.into(), bounds),
+                        ScrubPhase::Drag,
                     );
                     cx.refresh_windows();
                 }
@@ -392,11 +408,20 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
                 if event.drag(cx).0 != gesture_id {
                     return;
                 }
-                mv(
+                captured_mv(
                     scrub_fraction(event.event.position.x.into(), event.bounds),
                     ScrubPhase::Drag,
                 );
                 cx.refresh_windows();
+            })
+            .on_mouse_up(MouseButton::Left, move |event: &MouseUpEvent, _window, cx| {
+                if let Some(bounds) = *track_up.borrow() {
+                    release(
+                        scrub_fraction(event.position.x.into(), bounds),
+                        ScrubPhase::Release,
+                    );
+                    cx.refresh_windows();
+                }
             });
     }
     el = apply_selection_listeners(el, node);

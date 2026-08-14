@@ -13,6 +13,8 @@ import { fileURLToPath } from "node:url";
 import { serializeInterface } from "../src/conformance/define";
 import { buttonInterface } from "../src/conformance/button";
 import { buttonCases } from "../src/conformance/button-cases";
+import { rangeSliderInterface } from "../src/conformance/range-slider";
+import { rangeSliderCases } from "../src/conformance/range-slider-cases";
 import { serializePrimitiveRoster } from "../src/conformance/primitives";
 
 const CHECK = process.argv.includes("--check");
@@ -35,6 +37,16 @@ const artifacts: Array<{ path: string; document: string; label: string }> = [
     path: join(fixturesRoot, "button-cases.json"),
     document: `${JSON.stringify(buttonCases, null, 2)}\n`,
     label: "button cases",
+  },
+  {
+    path: join(fixturesRoot, "range-slider-interface.json"),
+    document: `${JSON.stringify(serializeInterface(rangeSliderInterface), null, 2)}\n`,
+    label: "range-slider interface",
+  },
+  {
+    path: join(fixturesRoot, "range-slider-cases.json"),
+    document: `${JSON.stringify(rangeSliderCases, null, 2)}\n`,
+    label: "range-slider cases",
   },
   {
     path: join(fixturesRoot, "primitive-capability-roster.json"),

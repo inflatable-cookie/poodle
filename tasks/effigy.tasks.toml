@@ -88,8 +88,8 @@
   { task = "conformance:codegen" },
 ]
 # Read-only enforcement surface: fixture + generated artifact drift + type
-# gate. Runs inside docs:check and ci:web; the executed proof lives on
-# ci:conformance (windowed GPUI) with a compile-only leg in ci:native.
+# gate. Runs inside docs:check and ci:web; the disruptive executed GPUI proof
+# is opt-in through the explicitly named windowed selectors below.
 "conformance:check" = [
   { task = "conformance:serialize-check" },
   { task = "conformance:codegen-check" },
@@ -99,45 +99,57 @@
 # green execution run with a broken schema is not evidence. Narrow — only
 # the conformance source files, so unrelated core baseline errors never
 # gate this check.
-"conformance:typecheck" = "bunx tsc --noEmit --ignoreConfig packages/core/src/conformance/define.ts packages/core/src/conformance/primitives.ts packages/core/src/conformance/button.ts packages/core/src/conformance/button-cases.ts packages/core/src/conformance/project.ts --strict --skipLibCheck --moduleResolution bundler --module esnext --target es2022"
+"conformance:typecheck" = "bunx tsc --noEmit --ignoreConfig packages/core/src/conformance/define.ts packages/core/src/conformance/primitives.ts packages/core/src/conformance/button.ts packages/core/src/conformance/button-cases.ts packages/core/src/conformance/range-slider.ts packages/core/src/conformance/range-slider-cases.ts packages/core/src/conformance/project.ts --strict --skipLibCheck --moduleResolution bundler --module esnext --target es2022"
 "conformance:test-web" = "bunx vitest run --project conformance"
-# WINDOWED, like test:native-visual: opens a real GPUI window and drives
+# WINDOWED, like test:native-visual: opens a foreground GPUI window and drives
 # real NSEvents through the AppKit queue (hit testing, listener binding,
-# focus, activation). Needs a macOS window server.
-"conformance:test-gpui" = "cargo run --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin conformance -- --out=test/conformance/web/out/gpui.json"
+# focus, activation). It takes OS focus and needs a live macOS desktop. Never
+# include this selector in normal local QA.
+"conformance:test-gpui-windowed" = "cargo run --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin conformance -- --windowed --out=test/conformance/web/out/gpui.json"
 # WINDOWED primitive substrate probes (g14.002): real GPUI backend + focus/events.
-"conformance:test-primitives-gpui" = "cargo run --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin conformance -- --primitives --out=test/conformance/web/out/primitive-gpui.json"
+"conformance:test-primitives-gpui-windowed" = "cargo run --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin conformance -- --windowed --primitives --out=test/conformance/web/out/primitive-gpui.json"
 "conformance:test-primitives-rust" = "cargo test --quiet --manifest-path packages/render/Cargo.toml primitive_probes::tests"
 "conformance:primitives-report" = "bun packages/core/scripts/primitive-capability-report.ts"
-# Compile-only twin for CPU gates: the windowed execution is local-only.
+# Compile-only twin for CPU gates.
 "conformance:check-gpui" = "cargo check --manifest-path packages/gpui/preview/Cargo.toml --bin conformance"
-"conformance:test" = [
+"conformance:test" = [{ task = "conformance:test-web" }]
+"conformance:test-windowed" = [
   { task = "conformance:test-web" },
-  { task = "conformance:test-gpui" },
+  { task = "conformance:test-gpui-windowed" },
 ]
 "conformance:compare" = "bun test/conformance/compare.ts"
-# The completion gate: drift-free authority, then all three active runtimes,
-# then the cross-runtime comparison. Jetstream is program-deferred (working
-# rules): it is reported as deferred, never as passing.
-"conformance:complete" = [
+# The active-cohort completion gate is deliberately named windowed: GPUI uses
+# real foreground AppKit events. Jetstream is program-deferred (working rules).
+"conformance:complete-windowed" = [
   { task = "conformance:check" },
   { task = "conformance:test-web" },
-  { task = "conformance:test-gpui" },
-  { task = "conformance:test-primitives-gpui" },
+  { task = "conformance:test-gpui-windowed" },
+  { task = "conformance:test-primitives-gpui-windowed" },
   { task = "conformance:compare" },
   { task = "conformance:primitives-report" },
 ]
 "conformance:cost" = "bun packages/core/scripts/conformance-cost.ts"
-# The executed conformance board (macOS window server). It stays outside the
-# headless qa / ci:native contract and runs in the dedicated PR workflow.
-"ci:conformance" = [
+# Headless conformance board: authority, web execution, renderer-neutral Rust,
+# and GPUI compile coverage. This is safe in an ordinary local session.
+"ci:conformance-headless" = [
   { task = "conformance:check" },
   { task = "conformance:test-web" },
-  { task = "conformance:test-gpui" },
-  { task = "conformance:test-primitives-gpui" },
+  { task = "conformance:test-primitives-rust" },
+  { task = "conformance:check-gpui" },
+]
+# Disruptive active-cohort proof. Run in isolated macOS CI or only when the
+# operator has explicitly yielded the desktop.
+"ci:conformance-windowed" = [
+  { task = "conformance:check" },
+  { task = "conformance:test-web" },
+  { task = "conformance:test-gpui-windowed" },
+  { task = "conformance:test-primitives-gpui-windowed" },
   { task = "conformance:compare" },
   { task = "conformance:primitives-report" },
 ]
+# Stable CI entrypoint: ordinary machines get the headless board; GitHub's
+# isolated macOS runner gets the complete foreground boundary proof.
+"ci:conformance" = "bun scripts/run-conformance-board.ts"
 
 # Preview (documentation site)
 "svelte:build" = "bun run --cwd packages/svelte/preview build"
@@ -391,7 +403,8 @@
   { task = "docs:react-specimen-drift" },
   { task = "docs:capability-drift" },
   # Conformance kernel (g14.001): read-only authority drift + type gate +
-  # web execution. The windowed GPUI execution lives on `ci:conformance`.
+  # web execution. The foreground GPUI proof lives on
+  # `ci:conformance-windowed`.
   { task = "conformance:serialize-check" },
   { task = "conformance:codegen-check" },
   { task = "conformance:typecheck" },
@@ -436,7 +449,7 @@
   { task = "gpui:test" },
   { task = "test:jetstream-adapter" },
   # Compile-only leg of the conformance kernel (g14.001). Not execution
-  # evidence — the executed windowed proof runs on `ci:conformance`.
+  # evidence — the executed proof runs on `ci:conformance-windowed`.
   { task = "conformance:check-gpui" },
 ]
 
@@ -463,7 +476,8 @@
   { task = "svelte:surface-audit" },
   { task = "docs:lint" },
   # Conformance kernel (g14.001): read-only authority drift + type gate +
-  # web execution. The windowed GPUI execution lives on `ci:conformance`.
+  # web execution. The foreground GPUI proof lives on
+  # `ci:conformance-windowed`.
   { task = "conformance:serialize-check" },
   { task = "conformance:codegen-check" },
   { task = "conformance:typecheck" },

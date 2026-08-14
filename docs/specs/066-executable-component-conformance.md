@@ -124,13 +124,19 @@ The pilot must deliver these selectors:
 
 - `conformance:build` — deterministic artifacts; orphan-aware
 - `conformance:check` — read-only drift check
-- `conformance:test` — run selected cases in available runners
-- `conformance:complete` — fail incomplete required runtime coverage
+- `conformance:test` — run selected cases in headless runners
+- `conformance:test-windowed` — add the foreground GPUI runner explicitly
+- `conformance:complete-windowed` — fail incomplete required runtime coverage
 - `conformance:cost` — report authored, generated, replaced, and adapter LOC
 
 Every mechanism needs a planted-failure proof. The standing docs/CI surface
 must call the read-only checks. A selector excluded from `docs:check`,
 `ci:web`, and `ci:native` is not enforcement.
+
+The GPUI boundary posts real AppKit input and therefore takes OS focus. It is
+not a snapshot runner. Normal local QA must remain headless; complete
+active-cohort execution belongs to explicitly named `*-windowed` selectors
+and isolated macOS CI.
 
 ## Pilot Profiles
 

@@ -204,6 +204,9 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
                             value_norm: fraction as f64,
                         }
                     }
+                    poodle_node::ScrubPhase::Release => {
+                        poodle_headless::slider::SliderControlEvent::PointerEnd
+                    }
                 };
                 let (next, effects) = poodle_headless::slider::slider_control_transition(
                     poodle_headless::slider::SliderControlContext {
