@@ -34,6 +34,7 @@ export interface ItemFieldDecl {
 export type ScalarTypeDef =
   | ItemScalarTypeDef
   | { kind: "dimension" }
+  | { kind: "remDimension" }
   | { kind: "numberPair" }
   | { kind: "collection"; fields: readonly ItemFieldDecl[]; rustType: string }
   | { kind: "enum"; values: readonly string[] };
@@ -312,7 +313,7 @@ export type ScalarToTs<S extends ScalarTypeDef, Nullable extends boolean> =
           ? Nullable extends true ? CollectionItemToTs<S["fields"]>[] | null : CollectionItemToTs<S["fields"]>[]
         : S extends { kind: "enum"; values: readonly string[] }
           ? Nullable extends true ? S["values"][number] | null : S["values"][number]
-          : S extends { kind: "string" | "icon" | "dimension" }
+          : S extends { kind: "string" | "icon" | "dimension" | "remDimension" }
             ? Nullable extends true ? string | null : string
             : never;
 
@@ -468,6 +469,11 @@ export interface CaseSpecimen<I extends InterfaceConfig> {
  * unsupported value never silently becomes a default. */
 const REM_DIMENSION = /^[0-9]+(\.[0-9]+)?rem$/;
 
+function isPortableRemDimension(value: string): boolean {
+  return REM_DIMENSION.test(value)
+    && Number.isFinite(Math.fround(Number(value.slice(0, -3))));
+}
+
 export type GeometryField =
   | "height"
   | "minWidth"
@@ -592,8 +598,8 @@ export function validateCase<I extends InterfaceConfig>(
     if (prop.type.kind === "number" && value !== null && typeof value !== "number") {
       throw new Error(`case '${config.id}' prop '${key}' must be a number`);
     }
-    if (prop.type.kind === "dimension" && value !== null) {
-      if (typeof value !== "string" || !REM_DIMENSION.test(value)) {
+    if (prop.type.kind === "remDimension" && value !== null) {
+      if (typeof value !== "string" || !isPortableRemDimension(value)) {
         throw new Error(
           `case '${config.id}' prop '${key}' value '${String(value)}' is not a portable rem length (the §12 subset)`,
         );

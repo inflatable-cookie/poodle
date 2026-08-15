@@ -18,14 +18,26 @@ fn rem_of(dimension: &Option<crate::types::Dimension>, default: f32) -> f32 {
     let Some(dimension) = dimension else {
         return default;
     };
-    let raw = dimension.as_str().trim();
-    let Some(value) = raw.strip_suffix("rem").map(str::trim) else {
+    let raw = dimension.as_str();
+    let Some(value) = raw.strip_suffix("rem") else {
         panic!(
-            "PopoverSpec surface width bound `{raw}` is not a portable rem length (contract §12);              arbitrary CSS lengths are a web-shell extension"
+            "PopoverSpec surface width bound `{raw}` is not a portable rem length (contract §12); arbitrary CSS lengths are a web-shell extension"
         );
     };
+    let mut digits = value.split('.');
+    let whole = digits.next().unwrap_or_default();
+    let shape_is_valid = !whole.is_empty()
+        && whole.chars().all(|ch| ch.is_ascii_digit())
+        && match digits.next() {
+            None => true,
+            Some(frac) => {
+                digits.next().is_none()
+                    && !frac.is_empty()
+                    && frac.chars().all(|ch| ch.is_ascii_digit())
+            }
+        };
     match value.parse::<f32>() {
-        Ok(rem) if rem.is_finite() && rem >= 0.0 => rem,
+        Ok(rem) if shape_is_valid && rem.is_finite() => rem,
         _ => panic!(
             "PopoverSpec surface width bound `{raw}` is not a portable rem length (contract §12)"
         ),
@@ -65,5 +77,24 @@ impl PopoverSpec {
 
     pub fn shadow_token(&self) -> &'static str {
         semantic::ELEVATION_OVERLAY
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::Dimension;
+
+    #[test]
+    fn portable_width_bound_accepts_rem() {
+        let spec = PopoverSpec::default().with_surface_min_width(Dimension::new("20.5rem"));
+        assert_eq!(spec.effective_surface_min_width_rem(), 20.5);
+    }
+
+    #[test]
+    #[should_panic(expected = "not a portable rem length")]
+    fn portable_width_bound_rejects_css_extensions() {
+        let spec = PopoverSpec::default().with_surface_min_width(Dimension::new("320px"));
+        let _ = spec.effective_surface_min_width_rem();
     }
 }

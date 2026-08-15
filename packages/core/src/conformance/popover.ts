@@ -65,8 +65,8 @@ export const popoverInterface = defineComponentInterface({
     // §12 subset): the corpus and the Rust codegen validate the `Nrem`
     // shape, so an unsupported value is an authoring error, never a silent
     // default. Arbitrary CSS lengths stay a web-shell extension.
-    { name: "surfaceMinWidth", type: { kind: "dimension" }, default: null, nullable: true },
-    { name: "surfaceMaxWidth", type: { kind: "dimension" }, default: null, nullable: true },
+    { name: "surfaceMinWidth", type: { kind: "remDimension" }, default: null, nullable: true },
+    { name: "surfaceMaxWidth", type: { kind: "remDimension" }, default: null, nullable: true },
     // Web-only extension: the wrapper observes clicks without adding a second
     // button role or keyboard handler. Native adapters compose the trigger
     // directly and never see this switch.

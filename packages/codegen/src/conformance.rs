@@ -15,8 +15,8 @@ use crate::CodegenError;
 /** True for a portable dimension value: a rem length (`14rem`, `20.5rem`).
  * Anything else is rejected at codegen, so an unsupported value never
  * silently becomes a default (popover contract §12). */
-fn is_portable_dimension(raw: &str) -> bool {
-    let Some(value) = raw.strip_suffix("rem").map(str::trim) else {
+fn is_portable_rem_dimension(raw: &str) -> bool {
+    let Some(value) = raw.strip_suffix("rem") else {
         return false;
     };
     let mut digits = value.split('.');
@@ -24,12 +24,15 @@ fn is_portable_dimension(raw: &str) -> bool {
     if whole.is_empty() || !whole.chars().all(|ch| ch.is_ascii_digit()) {
         return false;
     }
-    match digits.next() {
+    let shape_is_valid = match digits.next() {
         None => true,
         Some(frac) => {
-            digits.next().is_none() && !frac.is_empty() && frac.chars().all(|ch| ch.is_ascii_digit())
+            digits.next().is_none()
+                && !frac.is_empty()
+                && frac.chars().all(|ch| ch.is_ascii_digit())
         }
-    }
+    };
+    shape_is_valid && value.parse::<f32>().is_ok_and(f32::is_finite)
 }
 
 const GEOMETRY_FIELDS: [&str; 14] = [
@@ -356,18 +359,15 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
                             }
                         }
                     }
-                    "string" | "icon" => {
+                    "string" | "icon" | "dimension" => {
                         if !value.is_string() {
                             findings.push(at(format!("prop '{key}' expects a string")));
                         }
                     }
-                    "dimension" => {
-                        if !value
-                            .as_str()
-                            .is_some_and(|raw| is_portable_dimension(raw))
-                        {
+                    "remDimension" => {
+                        if !value.as_str().is_some_and(is_portable_rem_dimension) {
                             findings.push(at(format!(
-                                "prop '{key}' value is not a portable rem length (the popover §12 subset)"
+                                "prop '{key}' value is not a portable rem length"
                             )));
                         }
                     }
@@ -439,10 +439,7 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
         for step in &case.steps {
             match step {
                 CaseStep::Action {
-                    part,
-                    name,
-                    target,
-                    ..
+                    part, name, target, ..
                 } => {
                     if !part_is_known(part) {
                         findings.push(at(format!("action targets unknown part '{part}'")));
@@ -751,7 +748,7 @@ mod tests {
     fn rust_validator_rejects_non_rem_dimensions() {
         let interface: ComponentInterface = serde_json::from_value(serde_json::json!({
             "schemaVersion": 1, "id": "probe", "profile": "overlay",
-            "props": [{ "name": "surfaceMinWidth", "type": { "kind": "dimension" }, "default": null, "nullable": true }],
+            "props": [{ "name": "surfaceMinWidth", "type": { "kind": "remDimension" }, "default": null, "nullable": true }],
             "events": [], "regions": [],
             "parts": [{ "id": "root", "resolve": { "web": { "kind": "self" }, "native": { "kind": "self" } } }],
             "states": [], "tokenRoles": [], "axes": [], "capabilities": []
@@ -762,7 +759,8 @@ mod tests {
                 "specimen": { "axes": [] },
                 "steps": []
             }]
-        })).unwrap();
+        }))
+        .unwrap();
         let error = validate_cases(&interface, &cases).unwrap_err();
         assert!(error.to_string().contains("portable rem length"));
     }
@@ -771,7 +769,7 @@ mod tests {
     fn rust_validator_accepts_rem_dimensions() {
         let interface: ComponentInterface = serde_json::from_value(serde_json::json!({
             "schemaVersion": 1, "id": "probe", "profile": "overlay",
-            "props": [{ "name": "surfaceMinWidth", "type": { "kind": "dimension" }, "default": null, "nullable": true }],
+            "props": [{ "name": "surfaceMinWidth", "type": { "kind": "remDimension" }, "default": null, "nullable": true }],
             "events": [], "regions": [],
             "parts": [{ "id": "root", "resolve": { "web": { "kind": "self" }, "native": { "kind": "self" } } }],
             "states": [], "tokenRoles": [], "axes": [], "capabilities": []
@@ -782,8 +780,28 @@ mod tests {
                 "specimen": { "axes": [] },
                 "steps": []
             }]
-        })).unwrap();
+        }))
+        .unwrap();
         validate_cases(&interface, &cases).expect("rem dimensions validate");
+    }
+
+    #[test]
+    fn rust_validator_keeps_unconstrained_dimensions_opaque() {
+        let interface: ComponentInterface = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "id": "probe", "profile": "control",
+            "props": [{ "name": "maxWidth", "type": { "kind": "dimension" }, "default": null, "nullable": true }],
+            "events": [], "regions": [],
+            "parts": [{ "id": "root", "resolve": { "web": { "kind": "self" }, "native": { "kind": "self" } } }],
+            "states": [], "tokenRoles": [], "axes": [], "capabilities": []
+        })).unwrap();
+        let cases: ComponentCases = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "component": "probe", "cases": [{
+                "id": "probe/css-dimension", "fixture": { "props": { "maxWidth": "min(20rem, 90vw)" } },
+                "specimen": { "axes": [] },
+                "steps": []
+            }]
+        })).unwrap();
+        validate_cases(&interface, &cases).expect("plain dimensions remain contract-owned strings");
     }
 
     #[test]

@@ -105,7 +105,7 @@
     {
       "name": "surfaceMinWidth",
       "type": {
-        "kind": "dimension"
+        "kind": "remDimension"
       },
       "default": null,
       "nullable": true
@@ -113,7 +113,7 @@
     {
       "name": "surfaceMaxWidth",
       "type": {
-        "kind": "dimension"
+        "kind": "remDimension"
       },
       "default": null,
       "nullable": true

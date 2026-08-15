@@ -74,6 +74,17 @@ describe("component case authority", () => {
         steps: [{ kind: "expectPart", part: "root", expect: {} }],
       }),
     ).toThrow("not a portable rem length");
+    expect(() =>
+      componentCase(popoverInterface, {
+        id: "popover/planted-overflow-dimension",
+        fixture: {
+          props: { surfaceMinWidth: `${"9".repeat(100)}rem` },
+          regions: { trigger: "Open popover", children: "Panel" },
+        },
+        specimen: { group: "Validation", caption: "Overflow dimension", axes: [], captureId: "popover/planted-overflow-dimension" },
+        steps: [{ kind: "expectPart", part: "root", expect: {} }],
+      }),
+    ).toThrow("not a portable rem length");
   });
 
   test("accepts rem surface width bounds", () => {
@@ -85,6 +96,17 @@ describe("component case authority", () => {
           regions: { trigger: "Open popover", children: "Panel" },
         },
         specimen: { group: "Validation", caption: "Valid dimension", axes: [], captureId: "popover/planted-valid-dimension" },
+        steps: [{ kind: "expectPart", part: "root", expect: {} }],
+      }),
+    ).not.toThrow();
+  });
+
+  test("keeps unconstrained dimensions available to other component contracts", () => {
+    expect(() =>
+      componentCase(buttonInterface, {
+        id: "button/css-dimension",
+        fixture: { props: { maxWidth: "min(20rem, 90vw)" }, regions: { label: "Run" } },
+        specimen: { group: "Validation", caption: "CSS dimension", axes: [], captureId: "button/css-dimension" },
         steps: [{ kind: "expectPart", part: "root", expect: {} }],
       }),
     ).not.toThrow();

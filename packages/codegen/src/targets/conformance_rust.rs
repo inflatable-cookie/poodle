@@ -110,7 +110,7 @@ fn prop_type(prop: &PortableProp) -> String {
         "boolean" => "bool".to_owned(),
         "number" => "f32".to_owned(),
         "icon" => "String".to_owned(),
-        "dimension" => "crate::types::Dimension".to_owned(),
+        "dimension" | "remDimension" => "crate::types::Dimension".to_owned(),
         "string" => "String".to_owned(),
         "collection" => format!(
             "Vec<crate::types::{}>",
