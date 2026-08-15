@@ -53,6 +53,7 @@ export { resolveEmbedParseState, detectParsedEmbed, type EmbedParseState } from 
 export { ColorPicker, type ColorPickerProps } from "./ColorPicker";
 export { AudioPlayer, type AudioPlayerProps } from "./AudioPlayer";
 export { AudioMeter, type AudioMeterHandle, type AudioMeterProps } from "./AudioMeter";
+export { MeterSurface, type MeterSurfaceHandle, type MeterSurfaceProps } from "./MeterSurface";
 export { AudioSwitch, type AudioSwitchProps } from "./AudioSwitch";
 export { DragNumberField, type DragNumberFieldProps } from "./DragNumberField";
 export { EnvelopeEditor, type EnvelopeEditorProps } from "./EnvelopeEditor";

@@ -13306,6 +13306,23 @@
     ],
     "usage": "<script lang=\"ts\">\n  import { Fader } from \"@inflatable-cookie/poodle-svelte\";\n  let value = 0;\n</script>\n\n<Fader bind:value min={-60} max={12} detents={[0]} format={{ type: \"db\" }} ariaLabel=\"Gain\" />"
   },
+  "meter-surface": {
+    "props": [
+      {
+        "name": "bus",
+        "type": "MeterBus | null",
+        "default": "null",
+        "description": "The one MeterBus this surface paints from; null renders an inert container."
+      },
+      {
+        "name": "painter",
+        "type": "MeterSurfacePainter | null",
+        "default": "null",
+        "description": "Injectable painter seam; null uses the default Canvas2D painter."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  import { createMeterBus } from \"@inflatable-cookie/poodle-core\";\n  import { AudioMeter, MeterSurface } from \"@inflatable-cookie/poodle-svelte\";\n  const bus = createMeterBus();\n  const left = bus.register(\"ch-1\", { mode: \"ppm\" });\n</script>\n\n<MeterSurface {bus}>\n  <AudioMeter surface={bus} channel=\"ch-1\" ariaLabel=\"Channel 1\" />\n</MeterSurface>"
+  },
   "audio-meter": {
     "props": [
       {
@@ -13324,6 +13341,24 @@
         "type": "\"bar\" | \"segments\"",
         "default": "\"segments\"",
         "description": "Standard themed renderer style."
+      },
+      {
+        "name": "surface",
+        "type": "MeterBus | null",
+        "default": "null",
+        "description": "Opt-in batched web renderer; null keeps standalone painting."
+      },
+      {
+        "name": "channel",
+        "type": "MeterBusChannelId | null",
+        "default": "null",
+        "description": "Registered bus channel id; required in surface mode."
+      },
+      {
+        "name": "rightChannel",
+        "type": "MeterBusChannelId | null",
+        "default": "null",
+        "description": "Optional registered stereo channel in surface mode."
       }
     ],
     "usage": "<script lang=\"ts\">\n  import { createAudioMeterContext } from \"@inflatable-cookie/poodle-core\";\n  import { AudioMeter } from \"@inflatable-cookie/poodle-svelte\";\n  let meter = createAudioMeterContext({ mode: \"ppm\" });\n</script>\n\n<AudioMeter bind:context={meter} ariaLabel=\"Master level\" />"

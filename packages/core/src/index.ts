@@ -216,6 +216,21 @@ export {
   type ClipRect,
   type VirtualAnchor,
 } from "./dom/anchor";
+export {
+  createMeterSurfaceController,
+  createMeterSurfaceRegistry,
+  type MeterDrawPass,
+  type MeterPlaceholderHandle,
+  type MeterPlaceholderSpec,
+  type MeterSurfaceController,
+  type MeterSurfaceControllerOptions,
+  type MeterSurfaceElements,
+  type MeterSurfacePainter,
+  type MeterSurfacePalette,
+  type MeterSurfaceRegistry,
+  type MeterSurfaceRegistryOptions,
+} from "./dom/meter-surface";
+export { createCanvas2dMeterSurfacePainter } from "./dom/meter-surface-painter";
 
 export {
   checkboxTransition,

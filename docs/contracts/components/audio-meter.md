@@ -40,21 +40,13 @@ one shared accessibility-hidden canvas.
 | `orientation` | `"vertical" \| "horizontal"` | `"vertical"` | channel axis |
 | `segments` | `number` | `20` | segment geometry count |
 | `ariaLabel` | `string \| null` | `null` | accessible name |
+| `surface` | `MeterBus \| null` | `null` | **Web targets only** — opt-in batch renderer; `null` keeps standalone behavior |
+| `channel` | `MeterBusChannelId \| null` | `null` | **Web targets only** — required in surface mode; must already be registered on `surface` |
+| `rightChannel` | `MeterBusChannelId \| null` | `null` | **Web targets only** — optional registered stereo channel in surface mode |
 
 Mode and dB bounds live in each context. Contexts advance through exported
 `audioMeterTransition` calls; the component also exposes `push(frame,
 channel?)` and `resetClip(channel?)` handles for UI hosts.
-
-### Planned Surface Props (g14.024)
-
-These props are approved but not public until g14.024 lands. The implementation
-PR moves them into `Public Props` and must keep contract drift green.
-
-| Prop | Type | Default | Notes |
-| --- | --- | --- | --- |
-| `surface` | `MeterBus \| null` | `null` | web-only opt-in batch renderer; `null` keeps standalone behavior |
-| `channel` | `MeterBusChannelId \| null` | `null` | required in surface mode; must already be registered on `surface` |
-| `rightChannel` | `MeterBusChannelId \| null` | `null` | optional registered stereo channel in surface mode |
 
 `surface=null` is the existing standalone tier and remains the default.
 `surface!=null` requires `channel`; `context` and `rightContext` are not state

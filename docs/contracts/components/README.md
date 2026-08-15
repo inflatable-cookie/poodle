@@ -103,6 +103,7 @@ primitives and layout surfaces through higher-order application components.
 - `meta-bar.md`
 - `meta-item.md`
 - `meter.md`
+- `meter-surface.md`
 - `knob.md`
 - `keyboard.md`
 - `licence-activation.md`

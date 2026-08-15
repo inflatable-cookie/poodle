@@ -446,6 +446,7 @@ export type {
 } from "./types";
 export type { IconNodeElement, IconNodes, IconSet } from "./icon-registry";
 export { default as AudioMeter } from "./AudioMeter.svelte";
+export { default as MeterSurface } from "./MeterSurface.svelte";
 export { default as AudioSwitch } from "./AudioSwitch.svelte";
 export { default as DragNumberField } from "./DragNumberField.svelte";
 export { default as EnvelopeEditor } from "./EnvelopeEditor.svelte";

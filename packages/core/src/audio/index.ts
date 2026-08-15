@@ -4,6 +4,7 @@ export * from "./format";
 export * from "./envelope";
 export * from "./value-controls";
 export * from "./meter";
+export * from "./meter-bus";
 export * from "./xy-pad";
 export * from "./audio-switch";
 export * from "./gain-reduction-meter";

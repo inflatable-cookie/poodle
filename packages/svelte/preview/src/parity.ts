@@ -542,6 +542,7 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
       "Knob",
       "Keyboard",
       "Meter",
+      "MeterSurface",
       "ModMatrixGrid",
       "Menubar",
       "ModelPicker",

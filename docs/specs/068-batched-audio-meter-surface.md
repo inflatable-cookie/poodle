@@ -1,7 +1,7 @@
 # 068 Batched Audio Meter Surface
 
 Status: approved for g14.024 implementation
-Updated: 2026-08-14
+Updated: 2026-08-15
 Depends on: `../architecture/006-headless-core-and-machine-model.md`,
 `../architecture/008-audio-control-family.md`,
 `../contracts/components/audio-meter.md`
@@ -53,10 +53,43 @@ interface MeterBus {
   unregister(channel: MeterBusChannel): void;
   pushFrames(data: Float32Array, atMs: number, durationMs: number): number;
   resetClip(id: MeterBusChannelId): void;
+  setEnabled(id: MeterBusChannelId, value: boolean): void;
+  slotOf(id: MeterBusChannelId): number;
+  subscribe(listener: (timeMs: number) => void): () => void;
   destroy(): void;
   readonly view: MeterBusView;
 }
 ```
+
+Amended 2026-08-15 during g14.024 implementation. The original table omitted
+three operations the surface tier cannot work without; they are added here
+rather than published as undocumented API:
+
+- `slotOf` resolves a public channel id to its numeric slot. `AudioMeter`
+  receives a `channel` id, not the handle returned by `register`, so a
+  component has no other way to reach its slot. Callers resolve once at
+  registration and cache the result; it is not a per-frame operation.
+- `subscribe` lets a surface controller run its draw pass on the bus's single
+  animation loop. Without it every surface would need its own loop, which the
+  one-loop rule forbids.
+- `setEnabled` is the batch analogue of the standalone `SET_ENABLED` event.
+  Omitting it would make enable/disable reachable in the standalone tier only.
+
+A `destroyed` flag was considered and rejected: components cache slots and read
+`view.active` instead, so nothing needs to ask the bus about its own lifecycle.
+
+`unregister` takes the handle returned by `register`. Handle identity and the
+minted `(id, slot)` are both invariants, and neither replaces the other:
+
+- identity is required because slots are reused, so an `(id, slot)` comparison
+  alone would let a stale handle deactivate a later registration that inherited
+  both;
+- the bus acts on the id and slot it recorded at `register`, never on the
+  handle's current fields, so a tampered handle cannot free a slot it never
+  owned or strand an id in the index.
+
+The returned handle is frozen. It is an opaque receipt, not a mutable
+descriptor.
 
 `pushFrames` consumes repeated `[slot, peak, meanSquare]` triples. Slot is the
 small non-negative integer returned by `register`, exactly representable in a
@@ -86,6 +119,12 @@ slots. Data is invalid when the slot is not active, the slot is repeated in
 one batch, values are non-finite or negative, duration is not positive, or the
 timestamp is stale for that slot. `pushFrames` returns the accepted channel
 count and allocates no diagnostic list.
+
+Staleness is judged against the slot's advance clock, not merely its last
+telemetry stamp. Surface animation advances a slot to the current frame time
+between pushes, so a delayed batch stamped before that point is rejected. The
+bus never rewinds: accepting such a batch would clamp a negative elapsed to
+zero and diverge from the same push/time sequence applied in order.
 
 ## Ballistics And Time
 

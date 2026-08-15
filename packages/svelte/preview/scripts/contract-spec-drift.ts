@@ -41,6 +41,13 @@ const specsDir = path.join(repoRoot, "packages/contracts/components/src");
  */
 const WEB_ONLY_PROPS = new Set([
   "as",
+  // AudioMeter batched surface tier (spec 068 / g14.024): a web rendering
+  // strategy only. Native runtimes already batch meter nodes in their renderer
+  // scene, so `MeterSurface` has no Rust spec by fixed decision and these
+  // props are marked **Web targets only** in the contract.
+  "surface",
+  "channel",
+  "rightChannel",
   // Tree virtual scroll: the contract marks both **Svelte only** in its own
   // props table. Surfaced the moment the gate learned to resolve module specs
   // — `TreeSpec` lives in `tree/mod.rs` and had never been checked.
