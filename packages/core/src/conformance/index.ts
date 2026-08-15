@@ -11,4 +11,6 @@ export * from "./popover";
 export * from "./popover-cases";
 export * from "./text-input";
 export * from "./text-input-cases";
+export * from "./history-center";
+export * from "./history-center-cases";
 export * from "./project";

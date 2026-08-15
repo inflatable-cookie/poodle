@@ -4,6 +4,8 @@
 //! live beside the generated file in the component module.
 
 pub mod button;
+#[path = "generated/history-center/mod.rs"]
+pub mod history_center;
 pub mod popover;
 pub mod tabs;
 #[path = "generated/text-input/mod.rs"]

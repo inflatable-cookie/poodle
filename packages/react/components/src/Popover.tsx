@@ -98,9 +98,20 @@ export function Popover({
           if (!isControlled) setUncontrolledOpen(effect.open);
           onOpenChange?.(effect.open);
           break;
-        case "restoreTriggerFocus":
-          triggerRef.current?.focus();
+        case "restoreTriggerFocus": {
+          // With `triggerIsInteractive` the wrapper observes clicks without
+          // becoming a button, so the operable control is the one the caller
+          // composed inside it. Restoring focus to the wrapper would land it
+          // on something that cannot be activated — the operator would press
+          // Enter and nothing would happen.
+          const target = triggerIsInteractive
+            ? triggerRef.current?.querySelector<HTMLElement>(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+              ) ?? triggerRef.current
+            : triggerRef.current;
+          target?.focus();
           break;
+        }
         case "focusOnOpen":
           // handled by the isOpen effect above
           break;

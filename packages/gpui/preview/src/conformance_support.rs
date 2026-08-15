@@ -7,9 +7,11 @@
 use poodle_node::Node;
 use poodle_specs::{
     ActiveEdge, ActiveFill, ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, ControlSize,
-    Orientation, OverlayPlacement, PopoverInitialFocus, PopoverSpec, PopoverSurfaceWidth,
-    RangeSliderSpec, SemanticControlSizeRole, SliderPolarity, SliderVariant, TabActivationMode,
-    TabDefinition, TabVariant, TabsSpec, TextInputSpec, ValidationState,
+    HistoryCenterRejection, HistoryCenterSpec, HistoryCenterStatus, HistoryEntry,
+    HistoryEntryPosition, HistoryPathPage, Orientation, OverlayPlacement, PopoverInitialFocus,
+    PopoverSpec, PopoverSurfaceWidth, RangeSliderSpec, SemanticControlSizeRole, SliderPolarity,
+    SliderVariant, TabActivationMode, TabDefinition, TabVariant, TabsSpec, TextInputSpec,
+    ValidationState,
 };
 use serde_json::Value;
 
@@ -33,6 +35,188 @@ pub const TEXT_INPUT_CASES: &str =
     include_str!("../../../codegen/fixtures/conformance/text-input-cases.json");
 pub const TEXT_INPUT_INTERFACE: &str =
     include_str!("../../../codegen/fixtures/conformance/text-input-interface.json");
+pub const HISTORY_CENTER_CASES: &str =
+    include_str!("../../../codegen/fixtures/conformance/history-center-cases.json");
+pub const HISTORY_CENTER_INTERFACE: &str =
+    include_str!("../../../codegen/fixtures/conformance/history-center-interface.json");
+
+/// Fixture → HistoryCenterSpec adapter (g14.007). The nested page → entry
+/// collection maps straight onto the portable record types; the two host
+/// record channels are not props and are read by the fixture host instead.
+pub fn history_center_spec_from_fixture(fixture: &Value) -> HistoryCenterSpec {
+    let props = fixture
+        .get("props")
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    let mut spec = HistoryCenterSpec::new();
+
+    // `pages` is nullable, and absent is not the same as empty: null disables
+    // the list entirely, while an empty array is a history with no entries.
+    match props.get("pages") {
+        Some(Value::Array(pages)) => {
+            spec.pages = Some(pages.iter().map(history_page_from_json).collect());
+        }
+        _ => spec.pages = None,
+    }
+
+    if let Some(v) = props.get("canUndo").and_then(Value::as_bool) {
+        spec = spec.with_can_undo(v);
+    }
+    if let Some(v) = props.get("canRedo").and_then(Value::as_bool) {
+        spec = spec.with_can_redo(v);
+    }
+    if let Some(v) = props.get("busy").and_then(Value::as_bool) {
+        spec = spec.with_busy(v);
+    }
+    if let Some(v) = props.get("status").and_then(Value::as_str) {
+        spec = spec.with_status(match v {
+            "loading" => HistoryCenterStatus::Loading,
+            "failed" => HistoryCenterStatus::Failed,
+            _ => HistoryCenterStatus::Idle,
+        });
+    }
+    if let Some(v) = props.get("statusMessage").and_then(Value::as_str) {
+        spec = spec.with_status_message(v);
+    }
+    if let Some(v) = props.get("rejection").and_then(Value::as_str) {
+        spec = spec.with_rejection(match v {
+            "UnknownEntry" => HistoryCenterRejection::UnknownEntry,
+            _ => HistoryCenterRejection::AlreadyAtTarget,
+        });
+    }
+    if let Some(v) = props.get("open").and_then(Value::as_bool) {
+        spec = spec.with_open(v);
+    }
+    if let Some(v) = props.get("defaultOpen").and_then(Value::as_bool) {
+        spec = spec.with_default_open(v);
+    }
+    if let Some(v) = props.get("placement").and_then(Value::as_str) {
+        spec = spec.with_placement(overlay_placement(v));
+    }
+    for (key, apply) in [
+        ("undoLabel", 0usize),
+        ("redoLabel", 1),
+        ("listLabel", 2),
+        ("title", 3),
+        ("emptyMessage", 4),
+    ] {
+        if let Some(v) = props.get(key).and_then(Value::as_str) {
+            spec = match apply {
+                0 => spec.with_undo_label(v),
+                1 => spec.with_redo_label(v),
+                2 => spec.with_list_label(v),
+                3 => spec.with_title(v),
+                _ => spec.with_empty_message(v),
+            };
+        }
+    }
+    if let Some(v) = props.get("ariaLabel").and_then(Value::as_str) {
+        spec = spec.with_aria_label(v);
+    }
+    if let Some(v) = props.get("maxBranchNameBytes").and_then(Value::as_u64) {
+        spec = spec.with_max_branch_name_bytes(v as usize);
+    }
+    if let Some(v) = props.get("size").and_then(Value::as_str) {
+        spec = spec.with_size(control_size(v));
+    }
+    if let Some(v) = props.get("sizeRole").and_then(Value::as_str) {
+        spec = spec.with_size_role(match v {
+            "control" => SemanticControlSizeRole::Control,
+            "prominent" => SemanticControlSizeRole::Prominent,
+            _ => SemanticControlSizeRole::Chrome,
+        });
+    }
+    if let Some(v) = props.get("density").and_then(Value::as_str) {
+        spec = spec.with_density(control_density(v));
+    }
+    spec
+}
+
+fn history_page_from_json(page: &Value) -> HistoryPathPage {
+    let entries = page
+        .get("entries")
+        .and_then(Value::as_array)
+        .map(|entries| entries.iter().map(history_entry_from_json).collect())
+        .unwrap_or_default();
+    HistoryPathPage::new(entries)
+        .with_offset(page.get("offset").and_then(Value::as_u64).unwrap_or(0) as usize)
+        .with_preceding_continuation_count(
+            page.get("precedingContinuationCount")
+                .and_then(Value::as_u64)
+                .unwrap_or(0) as usize,
+        )
+        .with_truncated_before(
+            page.get("truncatedBefore")
+                .and_then(Value::as_bool)
+                .unwrap_or(false),
+        )
+        .with_truncated_after(
+            page.get("truncatedAfter")
+                .and_then(Value::as_bool)
+                .unwrap_or(false),
+        )
+}
+
+pub fn history_entry_from_json(entry: &Value) -> HistoryEntry {
+    let mut record = HistoryEntry::new(
+        entry.get("id").and_then(Value::as_str).unwrap_or_default(),
+        entry.get("label").and_then(Value::as_str).unwrap_or_default(),
+    )
+    .with_position(HistoryEntryPosition::from_portable(
+        entry.get("position").and_then(Value::as_str).unwrap_or("past"),
+    ))
+    .with_continuation_count(
+        entry
+            .get("continuationCount")
+            .and_then(Value::as_u64)
+            .unwrap_or(0) as usize,
+    );
+    if entry.get("checkpoint").and_then(Value::as_bool) == Some(true) {
+        record = record.with_checkpoint(true);
+    }
+    if let Some(group) = entry.get("groupId").and_then(Value::as_str) {
+        record = record.with_group_id(group);
+    }
+    if let Some(stamp) = entry.get("recordedAtMs").and_then(Value::as_u64) {
+        record = record.with_recorded_at_ms(stamp);
+    }
+    record
+}
+
+fn overlay_placement(value: &str) -> OverlayPlacement {
+    match value {
+        "top" => OverlayPlacement::Top,
+        "top-start" => OverlayPlacement::TopStart,
+        "top-end" => OverlayPlacement::TopEnd,
+        "bottom" => OverlayPlacement::Bottom,
+        "bottom-start" => OverlayPlacement::BottomStart,
+        "left" => OverlayPlacement::Left,
+        "left-start" => OverlayPlacement::LeftStart,
+        "left-end" => OverlayPlacement::LeftEnd,
+        "right" => OverlayPlacement::Right,
+        "right-start" => OverlayPlacement::RightStart,
+        "right-end" => OverlayPlacement::RightEnd,
+        _ => OverlayPlacement::BottomEnd,
+    }
+}
+
+fn control_size(value: &str) -> ControlSize {
+    match value {
+        "xs" => ControlSize::Xs,
+        "sm" => ControlSize::Sm,
+        "lg" => ControlSize::Lg,
+        "xl" => ControlSize::Xl,
+        _ => ControlSize::Md,
+    }
+}
+
+fn control_density(value: &str) -> ControlDensity {
+    match value {
+        "compact" => ControlDensity::Compact,
+        "comfortable" => ControlDensity::Comfortable,
+        _ => ControlDensity::Default,
+    }
+}
 
 /// Fixture → PopoverSpec adapter (g14.005). All 12 placements, the numeric
 /// offset, the guard, the focus strategies, and the surface width strategy

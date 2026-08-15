@@ -35,9 +35,10 @@ fn is_portable_rem_dimension(raw: &str) -> bool {
     shape_is_valid && value.parse::<f32>().is_ok_and(f32::is_finite)
 }
 
-const GEOMETRY_FIELDS: [&str; 14] = [
+const GEOMETRY_FIELDS: [&str; 15] = [
     "height",
     "minWidth",
+    "maxHeight",
     "paddingLeft",
     "paddingRight",
     "radius",
@@ -110,13 +111,15 @@ pub struct ComponentInterface {
     pub id: String,
     pub profile: String,
     pub props: Vec<PortableProp>,
-    pub events: Vec<Named>,
+    pub events: Vec<PortableEvent>,
     pub regions: Vec<Named>,
     pub parts: Vec<PartDecl>,
     pub states: Vec<StateDecl>,
     pub token_roles: Vec<TokenRoleDecl>,
     pub axes: Vec<String>,
     pub capabilities: Vec<PortableCapability>,
+    #[serde(default)]
+    pub host_records: Vec<HostRecordDecl>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -137,10 +140,19 @@ struct PrimitiveCapabilityRow {
     id: String,
 }
 
-/// A named declaration (event or region).
+/// A named declaration (region).
 #[derive(Debug, Clone, Deserialize)]
 pub struct Named {
     pub name: String,
+}
+
+/// A portable event: its name and its declared payload field names, which
+/// close the case corpus's payload expectations.
+#[derive(Debug, Clone, Deserialize)]
+pub struct PortableEvent {
+    pub name: String,
+    #[serde(default)]
+    pub payload: serde_json::Map<String, serde_json::Value>,
 }
 
 /// A stable part with its native resolution descriptor.
@@ -157,8 +169,46 @@ pub struct PartDecl {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct RepeatDecl {
-    pub prop: String,
+    pub sources: Vec<RepeatSource>,
     pub key: String,
+}
+
+/// Where a repeated part's keys come from: a portable collection prop, or a
+/// declared host record channel. `path` walks into one nested collection
+/// field first.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RepeatSource {
+    #[serde(default)]
+    pub prop: Option<String>,
+    #[serde(default)]
+    pub host_record: Option<String>,
+    #[serde(default)]
+    pub path: Option<String>,
+}
+
+impl RepeatSource {
+    fn label(&self) -> String {
+        let base = match (&self.prop, &self.host_record) {
+            (Some(prop), _) => format!("prop '{prop}'"),
+            (_, Some(record)) => format!("host record '{record}'"),
+            _ => "source".to_owned(),
+        };
+        match &self.path {
+            Some(path) => format!("{base}.{path}"),
+            None => base,
+        }
+    }
+}
+
+/// A declared host fixture record channel: the data a per-component fixture
+/// host answers a named host command from. Never a portable prop, so it
+/// generates no Rust spec field.
+#[derive(Debug, Clone, Deserialize)]
+pub struct HostRecordDecl {
+    pub name: String,
+    pub answers: String,
+    pub fields: Vec<ItemFieldDecl>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -217,7 +267,11 @@ pub enum CaseStep {
         expect: serde_json::Value,
     },
     #[serde(rename = "expectEvents")]
-    ExpectEvents { events: Vec<String> },
+    ExpectEvents {
+        /// A bare event name, or `{ name, payload }` when the case pins the
+        /// payload the command carried.
+        events: Vec<serde_json::Value>,
+    },
 }
 
 /// One serialized component case.
@@ -237,6 +291,121 @@ pub struct ComponentCases {
     pub schema_version: u32,
     pub component: String,
     pub cases: Vec<ComponentCase>,
+}
+
+/// The record fields one repeat source yields, walking an optional nested
+/// collection field first.
+fn source_fields<'a>(
+    interface: &'a ComponentInterface,
+    source: &RepeatSource,
+) -> Option<&'a [ItemFieldDecl]> {
+    let fields: &[ItemFieldDecl] = if let Some(prop) = &source.prop {
+        interface
+            .props
+            .iter()
+            .find(|candidate| &candidate.name == prop)
+            .filter(|candidate| candidate.kind.kind == "collection")
+            .and_then(|candidate| candidate.kind.fields.as_deref())?
+    } else {
+        let record = source.host_record.as_ref()?;
+        interface
+            .host_records
+            .iter()
+            .find(|candidate| &candidate.name == record)
+            .map(|candidate| candidate.fields.as_slice())?
+    };
+    let Some(path) = &source.path else {
+        return Some(fields);
+    };
+    fields
+        .iter()
+        .find(|field| &field.name == path)
+        .filter(|field| field.kind.kind == "collection")
+        .and_then(|field| field.kind.fields.as_deref())
+}
+
+/// The records a repeated part keys over in one fixture value, one nesting
+/// level deep.
+fn repeated_records<'a>(
+    value: Option<&'a serde_json::Value>,
+    path: Option<&str>,
+) -> Vec<&'a serde_json::Map<String, serde_json::Value>> {
+    let Some(items) = value.and_then(serde_json::Value::as_array) else {
+        return Vec::new();
+    };
+    match path {
+        None => items.iter().filter_map(serde_json::Value::as_object).collect(),
+        Some(path) => items
+            .iter()
+            .filter_map(serde_json::Value::as_object)
+            .filter_map(|item| item.get(path))
+            .filter_map(serde_json::Value::as_array)
+            .flatten()
+            .filter_map(serde_json::Value::as_object)
+            .collect(),
+    }
+}
+
+/// Validates one fixture collection value against its declared fields, one
+/// nesting level deep. Unknown fields are errors: a typo in a nested record
+/// would otherwise render as an absent row.
+fn validate_collection_value(
+    at: &impl Fn(String) -> String,
+    label: &str,
+    fields: &[ItemFieldDecl],
+    value: &serde_json::Value,
+    findings: &mut Vec<String>,
+) {
+    let Some(items) = value.as_array() else {
+        findings.push(at(format!("{label} expects an object collection")));
+        return;
+    };
+    for (index, item) in items.iter().enumerate() {
+        let Some(item) = item.as_object() else {
+            findings.push(at(format!("{label} item {index} expects an object")));
+            continue;
+        };
+        for field in fields {
+            let Some(field_value) = item.get(&field.name) else {
+                if !field.optional {
+                    findings.push(at(format!(
+                        "{label} item {index} misses field '{}'",
+                        field.name
+                    )));
+                }
+                continue;
+            };
+            if field.kind.kind == "collection" {
+                validate_collection_value(
+                    at,
+                    &format!("{label} item {index} field '{}'", field.name),
+                    field.kind.fields.as_deref().unwrap_or_default(),
+                    field_value,
+                    findings,
+                );
+                continue;
+            }
+            let valid = match field.kind.kind.as_str() {
+                "boolean" => field_value.is_boolean(),
+                "number" => field_value.is_number(),
+                "string" | "icon" => field_value.is_string(),
+                _ => false,
+            };
+            if !valid {
+                findings.push(at(format!(
+                    "{label} item {index} field '{}' has wrong type",
+                    field.name
+                )));
+            }
+        }
+        for field_name in item.keys() {
+            if !fields.iter().any(|field| field.name == *field_name) {
+                findings.push(at(format!(
+                    "{label} item {index} uses unknown field '{field_name}'"
+                )));
+            }
+        }
+    }
 }
 
 /// Validates the case corpus against the interface: every fixture prop,
@@ -261,6 +430,16 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
         interface.states.iter().map(|s| s.name.as_str()).collect();
     let events: std::collections::HashSet<&str> =
         interface.events.iter().map(|e| e.name.as_str()).collect();
+    let event_payloads: std::collections::HashMap<&str, std::collections::HashSet<&str>> = interface
+        .events
+        .iter()
+        .map(|event| {
+            (
+                event.name.as_str(),
+                event.payload.keys().map(String::as_str).collect(),
+            )
+        })
+        .collect();
     let token_roles: std::collections::HashSet<&str> = interface
         .token_roles
         .iter()
@@ -270,17 +449,29 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
 
     for part in interface.parts.iter().filter(|part| part.repeat.is_some()) {
         let repeat = part.repeat.as_ref().expect("filtered repeated part");
-        let key_is_string = props
-            .get(repeat.prop.as_str())
-            .filter(|prop| prop.kind.kind == "collection")
-            .and_then(|prop| prop.kind.fields.as_deref())
-            .and_then(|fields| fields.iter().find(|field| field.name == repeat.key))
-            .is_some_and(|field| field.kind.kind == "string");
-        if !key_is_string {
+        if repeat.sources.is_empty() {
             findings.push(format!(
-                "part '{}' repeated key '{}.{}' must be a string field",
-                part.id, repeat.prop, repeat.key
+                "repeated part '{}' needs at least one record source",
+                part.id
             ));
+        }
+        for source in &repeat.sources {
+            let key_is_string = source_fields(interface, source)
+                .and_then(|fields| {
+                    fields
+                        .iter()
+                        .find(|field| field.name == repeat.key)
+                        .cloned()
+                })
+                .is_some_and(|field| field.kind.kind == "string");
+            if !key_is_string {
+                findings.push(format!(
+                    "part '{}' repeated key '{}.{}' must be a string field",
+                    part.id,
+                    source.label(),
+                    repeat.key
+                ));
+            }
         }
     }
 
@@ -326,49 +517,13 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
                             findings.push(at(format!("prop '{key}' expects a number pair")));
                         }
                     }
-                    "collection" => {
-                        let Some(items) = value.as_array() else {
-                            findings.push(at(format!("prop '{key}' expects an object collection")));
-                            continue;
-                        };
-                        let fields = prop.kind.fields.as_deref().unwrap_or_default();
-                        for (index, item) in items.iter().enumerate() {
-                            let Some(item) = item.as_object() else {
-                                findings.push(at(format!(
-                                    "prop '{key}' item {index} expects an object"
-                                )));
-                                continue;
-                            };
-                            for field in fields {
-                                let Some(field_value) = item.get(&field.name) else {
-                                    if !field.optional {
-                                        findings.push(at(format!(
-                                            "prop '{key}' item {index} misses field '{}'",
-                                            field.name
-                                        )));
-                                    }
-                                    continue;
-                                };
-                                let valid = match field.kind.kind.as_str() {
-                                    "boolean" => field_value.is_boolean(),
-                                    "number" => field_value.is_number(),
-                                    "string" | "icon" => field_value.is_string(),
-                                    _ => false,
-                                };
-                                if !valid {
-                                    findings.push(at(format!(
-                                        "prop '{key}' item {index} field '{}' has wrong type",
-                                        field.name
-                                    )));
-                                }
-                            }
-                            for field_name in item.keys() {
-                                if !fields.iter().any(|field| field.name == *field_name) {
-                                    findings.push(at(format!("prop '{key}' item {index} uses unknown field '{field_name}'")));
-                                }
-                            }
-                        }
-                    }
+                    "collection" => validate_collection_value(
+                        &at,
+                        &format!("prop '{key}'"),
+                        prop.kind.fields.as_deref().unwrap_or_default(),
+                        value,
+                        &mut findings,
+                    ),
                     "string" | "icon" | "dimension" => {
                         if !value.is_string() {
                             findings.push(at(format!("prop '{key}' expects a string")));
@@ -398,26 +553,44 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
             }
         }
 
+        for record in &interface.host_records {
+            let Some(supplied) = case.fixture.get("host").and_then(|h| h.get(&record.name)) else {
+                continue;
+            };
+            validate_collection_value(
+                &at,
+                &format!("host record '{}'", record.name),
+                &record.fields,
+                supplied,
+                &mut findings,
+            );
+        }
+
         for part in interface.parts.iter().filter(|part| part.repeat.is_some()) {
             let repeat = part.repeat.as_ref().expect("filtered repeated part");
             let mut keys = std::collections::HashSet::new();
-            if let Some(items) = case
-                .fixture
-                .get("props")
-                .and_then(|p| p.get(&repeat.prop))
-                .and_then(serde_json::Value::as_array)
-            {
-                for (index, item) in items.iter().enumerate() {
+            for source in &repeat.sources {
+                let value = match (&source.prop, &source.host_record) {
+                    (Some(prop), _) => case.fixture.get("props").and_then(|p| p.get(prop)),
+                    (_, Some(record)) => case.fixture.get("host").and_then(|h| h.get(record)),
+                    _ => None,
+                };
+                for (index, item) in
+                    repeated_records(value, source.path.as_deref()).iter().enumerate()
+                {
                     let key = item.get(&repeat.key).and_then(serde_json::Value::as_str);
                     match key {
                         Some(key) if !key.is_empty() && keys.insert(key.to_owned()) => {}
+                        // One key space across the sources: a fork run entry
+                        // repeating a spine entry id would render twice.
                         Some(key) if !key.is_empty() => findings.push(at(format!(
-                            "prop '{}' has duplicate key '{key}'",
-                            repeat.prop
+                            "part '{}' has duplicate key '{key}'",
+                            part.id
                         ))),
                         _ => findings.push(at(format!(
-                            "prop '{}' item {index} key '{}' must be a non-empty string",
-                            repeat.prop, repeat.key
+                            "{} item {index} key '{}' must be a non-empty string",
+                            source.label(),
+                            repeat.key
                         ))),
                     }
                 }
@@ -502,9 +675,34 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
                     validate_geometry_expectation(expect, &at, &mut findings);
                 }
                 CaseStep::ExpectEvents { events: expected } => {
-                    for event in expected {
-                        if !events.contains(event.as_str()) {
-                            findings.push(at(format!("expects unknown event '{event}'")));
+                    for expectation in expected {
+                        let name = match expectation {
+                            serde_json::Value::String(name) => Some(name.as_str()),
+                            value => value.get("name").and_then(serde_json::Value::as_str),
+                        };
+                        let Some(name) = name else {
+                            findings
+                                .push(at("event expectation needs a name".to_owned()));
+                            continue;
+                        };
+                        if !events.contains(name) {
+                            findings.push(at(format!("expects unknown event '{name}'")));
+                        }
+                        let Some(payload) =
+                            expectation.get("payload").and_then(serde_json::Value::as_object)
+                        else {
+                            continue;
+                        };
+                        let declared = event_payloads
+                            .get(name)
+                            .cloned()
+                            .unwrap_or_default();
+                        for field in payload.keys() {
+                            if !declared.contains(field.as_str()) {
+                                findings.push(at(format!(
+                                    "expects unknown payload field '{name}.{field}'"
+                                )));
+                            }
                         }
                     }
                 }
@@ -860,6 +1058,7 @@ mod tests {
                 name: "not-a-capability".to_owned(),
                 required: true,
             }],
+            host_records: Vec::new(),
         };
         let roster = PrimitiveCapabilityRoster {
             schema: "primitive-capability-roster.v1".to_owned(),
@@ -883,7 +1082,7 @@ mod tests {
                 { "name": "label", "type": { "kind": "string" } }
             ]}, "default": [] }],
             "events": [], "regions": [],
-            "parts": [{ "id": "trigger", "repeat": { "prop": "items", "key": "value" } }],
+            "parts": [{ "id": "trigger", "repeat": { "sources": [{ "prop": "items" }], "key": "value" } }],
             "states": [], "tokenRoles": [], "axes": [], "capabilities": []
         })).unwrap();
         let cases: ComponentCases = serde_json::from_value(serde_json::json!({

@@ -7,7 +7,7 @@ use std::sync::{Arc, Mutex};
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
 use poodle_render::conformance::{
-    assert_events, assert_part, host_activate, observe_tree, InterfaceDoc,
+    assert_events, assert_part, expected_events, host_activate, observe_tree, InterfaceDoc,
 };
 use poodle_specs::ButtonSpec;
 use serde_json::{json, Value};
@@ -169,23 +169,8 @@ pub fn drive_button_cases(
                     }
                 }
                 "expectEvents" => {
-                    let expected = step
-                        .get("events")
-                        .and_then(Value::as_array)
-                        .map(|events| {
-                            events
-                                .iter()
-                                .filter_map(Value::as_str)
-                                .map(str::to_owned)
-                                .collect::<Vec<_>>()
-                        })
-                        .unwrap_or_default();
-                    let actual: Vec<String> = trace
-                        .lock()
-                        .expect("trace lock")
-                        .iter()
-                        .filter_map(|entry| entry.get("event").and_then(Value::as_str).map(str::to_owned))
-                        .collect();
+                    let expected = expected_events(step);
+                    let actual = trace.lock().expect("trace lock").clone();
                     let mut results = Vec::new();
                     assert_events(&expected, &actual, index, &mut results);
                     for r in &results {

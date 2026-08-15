@@ -622,8 +622,17 @@ export function HistoryCenter({
   }
 
   return (
-    <div className="poodle-history-center-popover" data-scope="history-center" data-part="root">
+    <div
+      className="poodle-history-center-popover"
+      data-scope="history-center"
+      data-part="root"
+      data-placement={placement}
+      data-status={status}
+      data-size={resolvedSize}
+      data-density={resolvedDensity}
+    >
       <span className="poodle-history-center__trigger" data-part="trigger">
+        <span className="poodle-history-center__undo">
         <IconButton
           icon="undo"
           ariaLabel={undoLabel}
@@ -634,6 +643,7 @@ export function HistoryCenter({
           disabled={!canUndo || busy}
           onClick={onUndo}
         />
+        </span>
 
         <Popover
           open={isOpen}
@@ -749,6 +759,7 @@ export function HistoryCenter({
                                 <button
                                   type="button"
                                   className="poodle-history-center__entry-content"
+                                  data-entry={row.entry.id}
                                   data-open={openAt ? "true" : undefined}
                                   tabIndex={rowFocused(row) ? 0 : -1}
                                   onClick={() => handleRowClick(row)}
@@ -775,6 +786,7 @@ export function HistoryCenter({
                                   <button
                                     type="button"
                                     className="poodle-history-center__fork"
+                                    data-entry={row.entry.id}
                                     data-part="fork-disclosure"
                                     data-open={openAt ? "true" : undefined}
                                     aria-label={
@@ -835,12 +847,14 @@ export function HistoryCenter({
                                     its branch name. */}
                                 <div
                                   className="poodle-history-center__picker-controls"
+                                  data-anchor={row.anchorEntryId}
                                   data-part="picker-select"
                                 >
                                   {renameTarget !== null && renamingBranchId === renameTarget.branchId ? (
                                     <input
                                       ref={renameInputRef}
                                       className="poodle-history-center__rename-input"
+                                      data-anchor={row.anchorEntryId}
                                       data-part="picker-rename-input"
                                       aria-label={`Rename branch ${renameTarget.name}`}
                                       maxLength={maxBranchNameBytes}
@@ -925,7 +939,11 @@ export function HistoryCenter({
                                       run already navigates and checks that fork out, so none of these is
                                       the row's primary action — checkout here exists only to activate a
                                       fork without moving the current position. */}
-                                  <span className="poodle-history-center__picker-actions" data-part="picker-actions">
+                                  <span
+                                    className="poodle-history-center__picker-actions"
+                                    data-part="picker-actions"
+                                    data-anchor={row.anchorEntryId}
+                                  >
                                     <Menu
                                       items={pickerActions(picked, renameTarget)}
                                       size="xs"
@@ -973,12 +991,17 @@ export function HistoryCenter({
                     <Spinner variant="ring" size="sm" tone="muted" />
                     <span>{statusMessage ?? "Loading history…"}</span>
                   </div>
+                ) : status === "failed" ? (
+                  <div className="poodle-history-center__loading" role="status">
+                    <span>{statusMessage ?? "History failed to load."}</span>
+                  </div>
                 ) : null}
               </>
             )}
           </section>
         </Popover>
 
+        <span className="poodle-history-center__redo">
         <IconButton
           icon="redo"
           ariaLabel={redoLabel}
@@ -989,6 +1012,7 @@ export function HistoryCenter({
           disabled={!canRedo || busy}
           onClick={onRedo}
         />
+        </span>
       </span>
 
       {/* One dialog for the whole component, not one per row: only ever a

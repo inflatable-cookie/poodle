@@ -246,7 +246,11 @@
       "id": "trigger",
       "role": "tab",
       "repeat": {
-        "prop": "items",
+        "sources": [
+          {
+            "prop": "items"
+          }
+        ],
         "key": "value",
         "webIdPrefix": "poodle-tab-"
       },
@@ -267,7 +271,11 @@
       "role": "tabpanel",
       "contains": "text",
       "repeat": {
-        "prop": "items",
+        "sources": [
+          {
+            "prop": "items"
+          }
+        ],
         "key": "value",
         "webIdPrefix": "poodle-tabpanel-"
       },

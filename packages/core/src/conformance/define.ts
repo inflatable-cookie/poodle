@@ -23,7 +23,12 @@ export type ItemScalarTypeDef =
   | { kind: "boolean" }
   | { kind: "string" }
   | { kind: "icon" }
-  | { kind: "number" };
+  | { kind: "number" }
+  /** A nested collection field (g14.007): structured fixture data whose items
+   * are themselves records. One level of nesting is what a composite's page
+   * → entry shape needs; the Rust item type is hand-written in `crate::types`
+   * exactly like a top-level collection's. */
+  | { kind: "collection"; fields: readonly ItemFieldDecl[]; rustType: string };
 
 export interface ItemFieldDecl {
   name: string;
@@ -81,7 +86,17 @@ export interface RegionDecl {
 /** Web part resolution: how the web adapter finds the part in the DOM. */
 export type WebResolution =
   | { kind: "self" }
-  | { kind: "class"; className: string; attribute?: string; keyAttribute?: string }
+  | {
+      kind: "class";
+      className: string;
+      attribute?: string;
+      keyAttribute?: string;
+      /** Ancestor that carries the key when the keyed element belongs to a
+       * composed component. A composite owns the wrapper it puts the anchor
+       * on; it does not own the trigger a `Select` renders inside it, so the
+       * part resolves as "the target inside the ancestor carrying this key". */
+      keyScope?: string;
+    }
   | { kind: "icon"; position: "first" | "last"; gatedBy: string; selector: string; attribute: string };
 
 /** Native part resolution: how the node observer finds the part in the tree. */
@@ -94,15 +109,43 @@ export type NativeResolution =
   | { kind: "icon-side"; side: "leading" | "trailing"; except: readonly string[] }
   | { kind: "icon-named"; name: string };
 
+/** Where a repeated part's keys come from: a portable collection prop, or a
+ * declared host record channel. `path` walks into one nested collection field
+ * first, so a composite's page → entry records key like a flat roster does. */
+export type RepeatSource =
+  | { prop: string; path?: string }
+  | { hostRecord: string; path?: string };
+
+export interface RepeatDecl {
+  /** One or more record sources. A composite's rows come from the spine the
+   * host passed in and from the runs it answered a command with; both are
+   * fixture data and one part renders both, so identity is one key space. */
+  sources: readonly RepeatSource[];
+  key: string;
+  webIdPrefix?: string;
+}
+
+/** A host fixture record channel (g14.007): the data a per-component fixture
+ * host answers a named host command from. Declared — not opaque — so its
+ * identity is validated and repeated parts can key over it. Host records are
+ * never portable props: the component receives them through its callbacks'
+ * results, so they generate no Rust spec field. */
+export interface HostRecordDecl {
+  name: string;
+  /** The portable event these records answer. */
+  answers: string;
+  fields: readonly ItemFieldDecl[];
+}
+
 export interface PartDecl {
   id: string;
   /** Semantic role (exact, e.g. "button"). */
   role?: string;
   /** What the part carries, for observation. */
   contains?: "label" | "text" | "icon";
-  /** Repeated part keyed by one field of a collection prop. Cases address it
+  /** Repeated part keyed by one field of its record sources. Cases address it
    * as `<id>:<semantic-key>`; runtime indices never enter the corpus. */
-  repeat?: { prop: string; key: string; webIdPrefix?: string };
+  repeat?: RepeatDecl;
   /** The part this part is positioned relative to (an anchored surface's
    * trigger). Observers record relative logical bounds gaps against it. */
   relativeTo?: string;
@@ -172,6 +215,9 @@ export interface InterfaceConfig {
   /** Specimen axes: enum props plus any global axes ("theme"). */
   axes: readonly string[];
   capabilities: readonly CapabilityDecl[];
+  /** Declared host fixture record channels. Absent for components whose
+   * fixtures need no host-answered data. */
+  hostRecords?: readonly HostRecordDecl[];
 }
 
 export interface InterfaceValue extends InterfaceConfig {
@@ -186,6 +232,64 @@ export function defineComponentInterface<const C extends InterfaceConfig>(config
   return config as C & InterfaceValue;
 }
 
+/** Collection item fields: names are unique and nesting stops at one level.
+ * A record inside a record inside a record is a tree, and a tree in fixture
+ * data is a second component model — the thing spec 066 forbids. */
+function assertItemFields(
+  owner: string,
+  fields: readonly ItemFieldDecl[],
+  depthBudget: number,
+): void {
+  const names = new Set<string>();
+  for (const field of fields) {
+    if (names.has(field.name)) {
+      throw new Error(`collection '${owner}' has duplicate field '${field.name}'`);
+    }
+    names.add(field.name);
+    if (field.type.kind !== "collection") continue;
+    if (depthBudget <= 0) {
+      throw new Error(
+        `collection '${owner}' field '${field.name}' nests deeper than one level`,
+      );
+    }
+    assertItemFields(`${owner}.${field.name}`, field.type.fields, depthBudget - 1);
+  }
+}
+
+function sourceLabel(source: RepeatSource): string {
+  const base = "prop" in source ? `prop '${source.prop}'` : `host record '${source.hostRecord}'`;
+  return source.path ? `${base}.${source.path}` : base;
+}
+
+/** The record fields one repeat source yields, walking an optional nested
+ * collection field first. */
+function resolveSourceFields(
+  config: InterfaceConfig,
+  source: RepeatSource,
+  owner: string,
+): readonly ItemFieldDecl[] {
+  let fields: readonly ItemFieldDecl[];
+  if ("prop" in source) {
+    const prop = config.props.find((candidate) => candidate.name === source.prop);
+    if (!prop || prop.type.kind !== "collection") {
+      throw new Error(`${owner} repeats unknown collection prop '${source.prop}'`);
+    }
+    fields = prop.type.fields;
+  } else {
+    const record = config.hostRecords?.find((candidate) => candidate.name === source.hostRecord);
+    if (!record) {
+      throw new Error(`${owner} repeats unknown host record '${source.hostRecord}'`);
+    }
+    fields = record.fields;
+  }
+  if (!source.path) return fields;
+  const nested = fields.find((field) => field.name === source.path);
+  if (!nested || nested.type.kind !== "collection") {
+    throw new Error(`${owner} repeat path '${source.path}' is not a nested collection of ${sourceLabel({ ...source, path: undefined } as RepeatSource)}`);
+  }
+  return nested.type.fields;
+}
+
 export function validateInterface(config: InterfaceConfig): void {
   const names = new Set<string>();
   const propNames = new Set<string>();
@@ -194,6 +298,9 @@ export function validateInterface(config: InterfaceConfig): void {
     propNames.add(prop.name);
     if (prop.type.kind === "enum" && prop.type.values.length === 0) {
       throw new Error(`enum prop '${prop.name}' needs values`);
+    }
+    if (prop.type.kind === "collection") {
+      assertItemFields(prop.name, prop.type.fields, 1);
     }
   }
   const eventNames = new Set<string>();
@@ -210,16 +317,19 @@ export function validateInterface(config: InterfaceConfig): void {
     if (partIds.has(part.id)) throw new Error(`duplicate part '${part.id}'`);
     partIds.add(part.id);
     if (part.repeat) {
-      const prop = config.props.find((candidate) => candidate.name === part.repeat?.prop);
-      if (!prop || prop.type.kind !== "collection") {
-        throw new Error(`part '${part.id}' repeats unknown collection prop '${part.repeat.prop}'`);
+      const { sources, key } = part.repeat;
+      if (sources.length === 0) {
+        throw new Error(`repeated part '${part.id}' needs at least one record source`);
       }
-      const keyField = prop.type.fields.find((field) => field.name === part.repeat?.key);
-      if (!keyField) {
-        throw new Error(`part '${part.id}' repeats unknown key '${part.repeat.key}'`);
-      }
-      if (keyField.type.kind !== "string") {
-        throw new Error(`part '${part.id}' repeated key '${part.repeat.key}' must be a string field`);
+      for (const source of sources) {
+        const fields = resolveSourceFields(config, source, `part '${part.id}'`);
+        const keyField = fields.find((field) => field.name === key);
+        if (!keyField) {
+          throw new Error(`part '${part.id}' repeats unknown key '${key}' in ${sourceLabel(source)}`);
+        }
+        if (keyField.type.kind !== "string") {
+          throw new Error(`part '${part.id}' repeated key '${key}' must be a string field`);
+        }
       }
       if (part.resolve.web.kind !== "class" || !part.resolve.web.keyAttribute) {
         throw new Error(`repeated part '${part.id}' needs a web class keyAttribute`);
@@ -281,6 +391,20 @@ export function validateInterface(config: InterfaceConfig): void {
       throw new Error(`prop '${prop.name}' controls unknown event '${prop.controlledBy}'`);
     }
   }
+  const hostRecordNames = new Set<string>();
+  for (const record of config.hostRecords ?? []) {
+    if (hostRecordNames.has(record.name)) {
+      throw new Error(`duplicate host record '${record.name}'`);
+    }
+    hostRecordNames.add(record.name);
+    if (!eventNames.has(record.answers)) {
+      throw new Error(`host record '${record.name}' answers unknown event '${record.answers}'`);
+    }
+    if (propNames.has(record.name)) {
+      throw new Error(`host record '${record.name}' collides with a portable prop`);
+    }
+    assertItemFields(`host record '${record.name}'`, record.fields, 1);
+  }
   const capabilityNames = new Set<string>();
   for (const capability of config.capabilities) {
     if (capabilityNames.has(capability.name)) {
@@ -321,7 +445,9 @@ type ItemScalarToTs<S extends ItemScalarTypeDef> = S extends { kind: "boolean" }
   ? boolean
   : S extends { kind: "number" }
     ? number
-    : string;
+    : S extends { kind: "collection"; fields: readonly ItemFieldDecl[] }
+      ? CollectionItemToTs<S["fields"]>[]
+      : string;
 
 type RequiredCollectionFields<F extends readonly ItemFieldDecl[]> = {
   [P in F[number] as P extends { optional: true } ? never : P["name"]]: ItemScalarToTs<P["type"]>;
@@ -413,7 +539,21 @@ export type SerializedCaseStep =
       end?: number;
     }
   | { kind: "expectPart"; part: string; expect: Record<string, unknown> }
-  | { kind: "expectEvents"; events: string[] };
+  | {
+      kind: "expectEvents";
+      events: (string | { name: string; payload: Record<string, string | number | boolean | null> })[];
+    };
+
+/** A record in a fixture collection: scalar fields plus, at one level of
+ * nesting, records of its own. */
+export type SerializedCollectionItem = {
+  readonly [field: string]:
+    | string
+    | boolean
+    | number
+    | readonly SerializedCollectionItem[]
+    | undefined;
+};
 
 /** Fixture prop values in the neutral JSON (includes structured numbers). */
 export type SerializedFixtureProp =
@@ -421,7 +561,7 @@ export type SerializedFixtureProp =
   | boolean
   | number
   | readonly [number, number]
-  | readonly Record<string, string | boolean | number>[]
+  | readonly SerializedCollectionItem[]
   | null;
 
 /** The loose, runtime-shaped case in the neutral JSON. */
@@ -496,7 +636,11 @@ export type GeometryField =
   | "hStart"
   | "hEnd"
   | "vStart"
-  | "widthGap";
+  | "widthGap"
+  // A bounded scroll region's own height cap (g14.007). Paired with
+  // `scrollable`, this is what makes "the list scrolls instead of growing"
+  // an observation rather than a screenshot.
+  | "maxHeight";
 
 export type GeometryExpectation = Partial<Record<GeometryField, number>> & {
   /** Explicit assertion-local bound. Blanket runtime tolerances are forbidden. */
@@ -537,6 +681,11 @@ export interface PartExpectation<I extends InterfaceConfig> {
   focusedText?: string;
   /** Root-only: the number of open overlay layers at/under this component. */
   layerCount?: number;
+  /** Hierarchy level (1-based). Depth an assistive technology can hear, not
+   * indentation only a sighted reader can infer. */
+  level?: number;
+  /** The part is a bounded scroll region rather than an unbounded column. */
+  scrollable?: boolean;
   states?: Partial<Record<StateNamesOf<I>, boolean>>;
   tokenRoles?: Partial<Record<TokenRoleNamesOf<I>, string>>;
   geometry?: GeometryExpectation;
@@ -572,7 +721,21 @@ export type CaseStep<I extends InterfaceConfig> =
       phase: "start" | "update" | "commit";
     }
   | { kind: "expectPart"; part: CasePartId<I>; expect: PartExpectation<I> }
-  | { kind: "expectEvents"; events: EventNamesOf<I>[] };
+  | { kind: "expectEvents"; events: EventExpectation<I>[] };
+
+/** An expected command in the trace: the event name alone, or the name plus
+ * the payload fields that must have travelled with it (g14.007). A composite's
+ * commands are only meaningful with their payload — "navigate fired" is not
+ * the claim; "navigate fired for this branch and this entry" is. */
+export type EventExpectation<I extends InterfaceConfig> =
+  | EventNamesOf<I>
+  | { name: EventNamesOf<I>; payload: Record<string, string | number | boolean | null> };
+
+export function eventExpectationName<I extends InterfaceConfig>(
+  expectation: EventExpectation<I>,
+): string {
+  return typeof expectation === "string" ? expectation : expectation.name;
+}
 
 export interface ComponentCase<I extends InterfaceConfig = InterfaceConfig> {
   id: string;
@@ -587,6 +750,74 @@ export function componentCase<I extends InterfaceConfig>(
 ): ComponentCase<I> {
   validateCase(iface, config);
   return config;
+}
+
+/** Fixture collection values, one record at a time and one nesting level
+ * deep. Unknown fields are errors here exactly as they are at the top level:
+ * a typo in a nested record would otherwise render as an absent row. */
+function validateCollectionValue(
+  at: string,
+  fields: readonly ItemFieldDecl[],
+  value: unknown,
+): void {
+  if (!Array.isArray(value)) {
+    throw new Error(`${at} must be a collection`);
+  }
+  for (const [index, item] of value.entries()) {
+    if (typeof item !== "object" || item === null || Array.isArray(item)) {
+      throw new Error(`${at} item ${index} must be an object`);
+    }
+    const itemRecord = item as Record<string, unknown>;
+    for (const field of fields) {
+      const fieldValue = itemRecord[field.name];
+      if (fieldValue === undefined && field.optional) continue;
+      if (field.type.kind === "collection") {
+        validateCollectionValue(
+          `${at} item ${index} field '${field.name}'`,
+          field.type.fields,
+          fieldValue,
+        );
+        continue;
+      }
+      const expectedType =
+        field.type.kind === "number"
+          ? "number"
+          : field.type.kind === "boolean"
+            ? "boolean"
+            : "string";
+      if (typeof fieldValue !== expectedType) {
+        throw new Error(`${at} item ${index} field '${field.name}' must be ${expectedType}`);
+      }
+    }
+    for (const fieldName of Object.keys(itemRecord)) {
+      if (!fields.some((field) => field.name === fieldName)) {
+        throw new Error(`${at} item ${index} uses unknown field '${fieldName}'`);
+      }
+    }
+  }
+}
+
+/** The records a repeated part keys over: the collection prop's items, or the
+ * items of its named nested collection field. */
+function repeatedRecords(
+  collection: unknown,
+  path: string | undefined,
+): Record<string, unknown>[] {
+  if (!Array.isArray(collection)) return [];
+  const items = collection.filter(
+    (item): item is Record<string, unknown> =>
+      typeof item === "object" && item !== null && !Array.isArray(item),
+  );
+  if (!path) return items;
+  return items.flatMap((item) => {
+    const nested = item[path];
+    return Array.isArray(nested)
+      ? nested.filter(
+          (entry): entry is Record<string, unknown> =>
+            typeof entry === "object" && entry !== null && !Array.isArray(entry),
+        )
+      : [];
+  });
 }
 
 export function validateCase<I extends InterfaceConfig>(
@@ -628,28 +859,7 @@ export function validateCase<I extends InterfaceConfig>(
       }
     }
     if (prop.type.kind === "collection" && value !== null) {
-      if (!Array.isArray(value)) {
-        throw new Error(`case '${config.id}' prop '${key}' must be a collection`);
-      }
-      for (const [index, item] of value.entries()) {
-        if (typeof item !== "object" || item === null || Array.isArray(item)) {
-          throw new Error(`case '${config.id}' prop '${key}' item ${index} must be an object`);
-        }
-        const itemRecord = item as Record<string, unknown>;
-        for (const field of prop.type.fields) {
-          const fieldValue = itemRecord[field.name];
-          if (fieldValue === undefined && field.optional) continue;
-          const expectedType = field.type.kind === "number" ? "number" : field.type.kind === "boolean" ? "boolean" : "string";
-          if (typeof fieldValue !== expectedType) {
-            throw new Error(`case '${config.id}' prop '${key}' item ${index} field '${field.name}' must be ${expectedType}`);
-          }
-        }
-        for (const fieldName of Object.keys(itemRecord)) {
-          if (!prop.type.fields.some((field) => field.name === fieldName)) {
-            throw new Error(`case '${config.id}' prop '${key}' item ${index} uses unknown field '${fieldName}'`);
-          }
-        }
-      }
+      validateCollectionValue(`case '${config.id}' prop '${key}'`, prop.type.fields, value);
     }
   }
   void propNames;
@@ -659,22 +869,38 @@ export function validateCase<I extends InterfaceConfig>(
       throw new Error(`case '${config.id}' uses unknown region '${key}'`);
     }
   }
+  for (const record of iface.hostRecords ?? []) {
+    const supplied = (config.fixture.host ?? {})[record.name];
+    if (supplied === undefined) continue;
+    validateCollectionValue(
+      `case '${config.id}' host record '${record.name}'`,
+      record.fields,
+      supplied,
+    );
+  }
   const partIds = new Set(iface.parts.filter((p) => !p.repeat).map((p) => p.id));
   const repeatedPartKeys = new Map<string, Set<string>>();
   for (const part of iface.parts) {
     if (!part.repeat) continue;
-    const collection = (config.fixture.props as Record<string, unknown>)[part.repeat.prop];
     const keys = new Set<string>();
-    if (Array.isArray(collection)) {
-      for (const [index, item] of collection.entries()) {
-        const key = (item as Record<string, unknown>)[part.repeat.key];
+    for (const source of part.repeat.sources) {
+      const collection =
+        "prop" in source
+          ? (config.fixture.props as Record<string, unknown>)[source.prop]
+          : (config.fixture.host ?? {})[source.hostRecord];
+      for (const [index, item] of repeatedRecords(collection, source.path).entries()) {
+        const key = item[part.repeat.key];
         if (typeof key !== "string" || key.length === 0) {
           throw new Error(
-            `case '${config.id}' prop '${part.repeat.prop}' item ${index} key '${part.repeat.key}' must be a non-empty string`,
+            `case '${config.id}' ${sourceLabel(source)} item ${index} key '${part.repeat.key}' must be a non-empty string`,
           );
         }
         if (keys.has(key)) {
-          throw new Error(`case '${config.id}' prop '${part.repeat.prop}' has duplicate key '${key}'`);
+          // One key space across the sources: a fork run entry that repeated a
+          // spine entry id would render the same entry twice.
+          throw new Error(
+            `case '${config.id}' part '${part.id}' has duplicate key '${key}'`,
+          );
         }
         keys.add(key);
       }
@@ -756,9 +982,20 @@ export function validateCase<I extends InterfaceConfig>(
         break;
       }
       case "expectEvents": {
-        for (const event of step.events) {
+        for (const expectation of step.events) {
+          const event = eventExpectationName(expectation);
           if (!eventNames.has(event)) {
             throw new Error(`case '${config.id}' expects unknown event '${event}'`);
+          }
+          if (typeof expectation === "string") continue;
+          const decl = iface.events.find((candidate) => candidate.name === event);
+          const payloadFields = new Set(Object.keys((decl?.payload ?? {}) as object));
+          for (const field of Object.keys(expectation.payload)) {
+            if (!payloadFields.has(field)) {
+              throw new Error(
+                `case '${config.id}' expects unknown payload field '${event}.${field}'`,
+              );
+            }
           }
         }
         break;
@@ -791,6 +1028,7 @@ const GEOMETRY_FIELDS = new Set<GeometryField>([
   "hEnd",
   "vStart",
   "widthGap",
+  "maxHeight",
 ]);
 
 /** JSON-stable serialization: key order fixed by construction, no undefined. */
@@ -807,6 +1045,9 @@ export function serializeInterface<I extends InterfaceConfig>(iface: I): Seriali
     tokenRoles: [...iface.tokenRoles],
     axes: [...iface.axes],
     capabilities: [...iface.capabilities],
+    // Absent for interfaces that declare none, so existing serialized
+    // fixtures stay byte-identical.
+    ...(iface.hostRecords ? { hostRecords: [...iface.hostRecords] } : {}),
   };
   validateInterface(serialized);
   return serialized;
@@ -889,7 +1130,14 @@ export function serializeCases<I extends InterfaceConfig>(
         if (step.kind === "expectPart") {
           return { kind: "expectPart", part: step.part, expect: { ...step.expect } as Record<string, unknown> };
         }
-        return { kind: "expectEvents", events: [...step.events] };
+        return {
+          kind: "expectEvents",
+          events: step.events.map((expectation) =>
+            typeof expectation === "string"
+              ? expectation
+              : { name: expectation.name, payload: { ...expectation.payload } },
+          ),
+        };
       }),
     })),
   };
@@ -970,6 +1218,8 @@ export function expectPart<I extends InterfaceConfig>(
   return { kind: "expectPart", part, expect };
 }
 
-export function expectEvents<I extends InterfaceConfig>(events: EventNamesOf<I>[]): CaseStep<I> {
+export function expectEvents<I extends InterfaceConfig>(
+  events: EventExpectation<I>[],
+): CaseStep<I> {
   return { kind: "expectEvents", events };
 }

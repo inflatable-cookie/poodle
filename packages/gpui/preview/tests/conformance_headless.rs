@@ -44,6 +44,9 @@ mod conformance_support;
 mod conformance_tabs;
 #[path = "../src/conformance_text_input.rs"]
 mod conformance_text_input;
+
+#[path = "../src/conformance_history_center.rs"]
+mod conformance_history_center;
 #[path = "../src/primitive_probes_gpui.rs"]
 mod primitive_probes_gpui;
 
@@ -80,6 +83,7 @@ fn parse_corpus(suffix: &str) -> (String, Vec<Value>) {
         "-tabs" => conformance_support::TABS_CASES,
         "-popover" => conformance_support::POPOVER_CASES,
         "-text-input" => conformance_support::TEXT_INPUT_CASES,
+        "-history-center" => conformance_support::HISTORY_CENTER_CASES,
         _ => panic!("unknown corpus suffix {suffix}"),
     };
     let cases: Value = serde_json::from_str(raw).expect("committed corpus parses");
@@ -103,6 +107,7 @@ fn parse_interface(suffix: &str) -> InterfaceDoc {
         "-tabs" => conformance_support::TABS_INTERFACE,
         "-popover" => conformance_support::POPOVER_INTERFACE,
         "-text-input" => conformance_support::TEXT_INPUT_INTERFACE,
+        "-history-center" => conformance_support::HISTORY_CENTER_INTERFACE,
         _ => panic!("unknown interface suffix {suffix}"),
     };
     let value: Value = serde_json::from_str(raw).expect("committed interface parses");
@@ -182,6 +187,24 @@ fn run_complete_board(cx: &mut TestAppContext) {
     write_report(
         "gpui-text-input.json",
         &conformance_text_input::text_input_report(&component, &results),
+    );
+    failures.extend(results.iter().filter(|o| !o.pass).map(|o| o.case_id.clone()));
+
+    // HistoryCenter (g14.007): the composite profile. Every case runs through
+    // the real dispatch tree — a focused control confirmed by keyboard, a real
+    // Escape through the window's dismiss route, real keystrokes into the
+    // rename input — and the fixture host answers the two named commands from
+    // the case's declared host records.
+    let (component, cases) = parse_corpus("-history-center");
+    let results = conformance_history_center::drive_history_center_cases(
+        &mut driver,
+        parse_interface("-history-center"),
+        cases,
+        None,
+    );
+    write_report(
+        "gpui-history-center.json",
+        &conformance_history_center::history_center_report(&component, &results),
     );
     failures.extend(results.iter().filter(|o| !o.pass).map(|o| o.case_id.clone()));
 
@@ -372,7 +395,7 @@ fn run_planted_inert_listener_fails(cx: &mut TestAppContext) {
     driver.pointer_activate();
 
     let mut results = Vec::new();
-    assert_events(&["press".to_owned()], &[], 0, &mut results);
+    assert_events(&[json!("press")], &[], 0, &mut results);
     assert_eq!(results[0].verdict, "fail");
     assert_eq!(results[0].step_index, 0);
     assert_eq!(results[0].field, "events");
@@ -403,7 +426,7 @@ fn run_planted_wrong_focus_target_fails(cx: &mut TestAppContext) {
 
     assert_eq!(*presses.lock().expect("presses lock"), 0);
     let mut results = Vec::new();
-    assert_events(&["press".to_owned()], &[], 0, &mut results);
+    assert_events(&[json!("press")], &[], 0, &mut results);
     assert_eq!(results[0].verdict, "fail");
     assert_eq!(results[0].step_index, 0);
 }
@@ -456,14 +479,14 @@ fn run_planted_broken_drag_order_fails(cx: &mut TestAppContext) {
     driver.wait_for_focus_handle("range-slider-lower");
     driver.pointer_scrub_at(0.9, "release");
 
-    let events: Vec<String> = trace
-        .lock()
-        .expect("trace lock")
-        .iter()
-        .filter_map(|e| e.get("event").and_then(Value::as_str).map(str::to_owned))
-        .collect();
+    let events: Vec<Value> = trace.lock().expect("trace lock").clone();
     let mut results = Vec::new();
-    assert_events(&["valueChange".to_owned(), "valueCommit".to_owned()], &events, 0, &mut results);
+    assert_events(
+        &[json!("valueChange"), json!("valueCommit")],
+        &events,
+        0,
+        &mut results,
+    );
     assert_eq!(results[0].verdict, "fail");
     assert_eq!(results[0].step_index, 0);
     assert_eq!(results[0].field, "events");
@@ -494,7 +517,7 @@ fn run_planted_broken_keyboard_order_fails(cx: &mut TestAppContext) {
 
     assert_eq!(*presses.lock().expect("presses lock"), 0);
     let mut results = Vec::new();
-    assert_events(&["press".to_owned()], &[], 0, &mut results);
+    assert_events(&[json!("press")], &[], 0, &mut results);
     assert_eq!(results[0].verdict, "fail");
     assert_eq!(results[0].step_index, 0);
 }
@@ -598,7 +621,7 @@ fn run_planted_inert_escape_fails(cx: &mut TestAppContext) {
 
     let mut results = Vec::new();
     assert_events(
-        &["openChange".to_owned(), "openChange".to_owned()],
+        &[json!("openChange"), json!("openChange")],
         &[],
         0,
         &mut results,
@@ -635,7 +658,7 @@ fn run_planted_inert_outside_dismissal_fails(cx: &mut TestAppContext) {
     driver.draw_frame();
 
     let mut results = Vec::new();
-    assert_events(&["openChange".to_owned()], &[], 0, &mut results);
+    assert_events(&[json!("openChange")], &[], 0, &mut results);
     assert_eq!(results[0].verdict, "fail");
     assert_eq!(results[0].field, "events");
 }

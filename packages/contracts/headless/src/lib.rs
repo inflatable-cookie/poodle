@@ -17,6 +17,7 @@ pub mod color;
 pub mod date;
 pub mod disclosure;
 pub mod duration;
+pub mod history_center;
 pub mod hover;
 pub mod menu;
 pub mod modal;

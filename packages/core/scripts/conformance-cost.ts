@@ -83,6 +83,28 @@ const TEXT_INPUT_AUTHORITY: Array<[string, string]> = [
   ["TextInput corpus", "packages/core/src/conformance/text-input-cases.ts"],
 ];
 
+const HISTORY_CENTER_AUTHORITY: Array<[string, string]> = [
+  ["HistoryCenter interface", "packages/core/src/conformance/history-center.ts"],
+  ["HistoryCenter corpus", "packages/core/src/conformance/history-center-cases.ts"],
+];
+
+const HISTORY_CENTER_GENERATED_SOURCE: Array<[string, string]> = [
+  [
+    "Generated HistoryCenter Rust declaration",
+    "packages/contracts/components/src/generated/history-center/mod.rs",
+  ],
+];
+
+const HISTORY_CENTER_HARNESS: Array<[string, string]> = [
+  ["GPUI HistoryCenter host and driver", "packages/gpui/preview/src/conformance_history_center.rs"],
+];
+
+const HISTORY_CENTER_SUPPORTING_DELTAS: Array<[string, string]> = [
+  ["HistoryCenter behaviour core", "packages/contracts/headless/src/history_center.rs"],
+  ["HistoryCenter renderer", "packages/render/src/history_center.rs"],
+  ["HistoryCenter spec extension", "packages/contracts/components/src/history_center.rs"],
+];
+
 const CODEGEN: Array<[string, string]> = [
   ["Conformance parsing and validation", "packages/codegen/src/conformance.rs"],
   ["Rust declaration target", "packages/codegen/src/targets/conformance_rust.rs"],
@@ -116,6 +138,14 @@ const GENERATED_DATA: Array<[string, string]> = [
   ["Popover case fixture JSON", "packages/codegen/fixtures/conformance/popover-cases.json"],
   ["TextInput interface fixture JSON", "packages/codegen/fixtures/conformance/text-input-interface.json"],
   ["TextInput case fixture JSON", "packages/codegen/fixtures/conformance/text-input-cases.json"],
+  [
+    "HistoryCenter interface fixture JSON",
+    "packages/codegen/fixtures/conformance/history-center-interface.json",
+  ],
+  [
+    "HistoryCenter case fixture JSON",
+    "packages/codegen/fixtures/conformance/history-center-cases.json",
+  ],
   ["Primitive roster JSON", "packages/codegen/fixtures/conformance/primitive-capability-roster.json"],
 ];
 
@@ -295,6 +325,26 @@ const rangeSliderAuthority = sourceTable(
 const tabsAuthority = sourceTable("Tabs authored authority", TABS_AUTHORITY, "working");
 const popoverAuthority = sourceTable("Popover authored authority", POPOVER_AUTHORITY, "working");
 const textInputAuthority = sourceTable("TextInput authored authority", TEXT_INPUT_AUTHORITY, "working");
+const historyCenterAuthority = sourceTable(
+  "HistoryCenter authored authority",
+  HISTORY_CENTER_AUTHORITY,
+  "working",
+);
+const historyCenterGeneratedSource = sourceTable(
+  "Generated HistoryCenter source",
+  HISTORY_CENTER_GENERATED_SOURCE,
+  "working",
+);
+const historyCenterHarness = sourceTable(
+  "HistoryCenter pilot harness",
+  HISTORY_CENTER_HARNESS,
+  "working",
+);
+const historyCenterSupporting = sourceTable(
+  "HistoryCenter runtime deltas",
+  HISTORY_CENTER_SUPPORTING_DELTAS,
+  "delta",
+);
 const codegen = sourceTable("Codegen", CODEGEN, "delta");
 const buttonGeneratedSource = sourceTable("Generated Button source", BUTTON_GENERATED_SOURCE, "working");
 const tabsGeneratedSource = sourceTable("Generated Tabs source", TABS_GENERATED_SOURCE, "working");
@@ -327,7 +377,12 @@ const rangeSliderPilot = rangeSliderAuthority + rangeSliderHarness + rangeSlider
 const tabsPilot = tabsAuthority + tabsGeneratedSource + tabsHarness + tabsSupporting;
 const popoverPilot = popoverAuthority + popoverGeneratedSource + popoverHarness + popoverSupporting;
 const textInputPilot = textInputAuthority + textInputGeneratedSource + textInputHarness + textInputSupporting;
-const sourceMechanism = genericKernel + buttonPilot + rangeSliderPilot + tabsPilot + popoverPilot + textInputPilot + captureRepair;
+const historyCenterPilot =
+  historyCenterAuthority
+  + historyCenterGeneratedSource
+  + historyCenterHarness
+  + historyCenterSupporting;
+const sourceMechanism = genericKernel + buttonPilot + rangeSliderPilot + tabsPilot + popoverPilot + textInputPilot + historyCenterPilot + captureRepair;
 
 console.log("\n=== Summary ===");
 console.log(`source mechanism: ${sourceMechanism} LOC`);
@@ -346,10 +401,14 @@ console.log(`  TextInput pilot increment: ${textInputPilot} LOC`);
   console.log(`    authored authority: ${textInputAuthority} LOC`);
   console.log(`    generated source: ${textInputGeneratedSource} LOC`);
   console.log(`    harness and runtime deltas: ${textInputHarness + textInputSupporting} LOC`);
+console.log(`  HistoryCenter pilot increment: ${historyCenterPilot} LOC`);
+  console.log(`    authored authority: ${historyCenterAuthority} LOC`);
+  console.log(`    generated source: ${historyCenterGeneratedSource} LOC`);
+  console.log(`    harness and runtime deltas: ${historyCenterHarness + historyCenterSupporting} LOC`);
 console.log(`  GPUI capture repair: ${captureRepair} LOC`);
 console.log(`generated data: ${generatedBytes} bytes`);
 console.log(`replaced hand-written source: ${replaced} LOC`);
 console.log(
   `stop-condition evidence: pilot increments vs replaced — ` +
-    "triggered at g14.001; g14.003/004/005/006 reuse the generic kernel.",
+    "triggered at g14.001; g14.003/004/005/006/007 reuse the generic kernel.",
 );

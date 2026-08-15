@@ -23,6 +23,7 @@ use serde_json::{json, Value};
 const GEOMETRY_FIELDS: &[&str] = &[
     "height",
     "minWidth",
+    "maxHeight",
     "paddingLeft",
     "paddingRight",
     "radius",
@@ -71,6 +72,10 @@ pub enum IconSide {
 pub struct PartDecl {
     pub id: String,
     pub role: Option<String>,
+    /// What the part carries. A `text` part reads its whole subtree, matching
+    /// the web's `textContent`; a container that wraps its copy in a child is
+    /// still a part that carries text.
+    pub contains: Option<String>,
     pub resolve: NativeResolution,
     pub repeated: bool,
     /// The part this part is positioned relative to (an anchored surface's
@@ -127,6 +132,7 @@ impl InterfaceDoc {
                 .ok_or("part needs an id")?
                 .to_owned();
             let role = part.get("role").and_then(Value::as_str).map(str::to_owned);
+            let contains = part.get("contains").and_then(Value::as_str).map(str::to_owned);
             let native = part
                 .get("resolve")
                 .and_then(|r| r.get("native"))
@@ -185,6 +191,7 @@ impl InterfaceDoc {
             parts.push(PartDecl {
                 id,
                 role,
+                contains,
                 resolve,
                 repeated: part.get("repeat").is_some(),
                 relative_to: part.get("relativeTo").and_then(Value::as_str).map(str::to_owned),
@@ -361,6 +368,8 @@ fn label_text(root: &Node) -> Option<String> {
 fn role_of(node: &Node) -> Option<String> {
     match node.a11y.role {
         Some(poodle_node::NodeRole::TextInput) => Some("textbox".to_owned()),
+        // The node vocabulary names the listbox's child; ARIA names the role.
+        Some(poodle_node::NodeRole::ListBoxOption) => Some("option".to_owned()),
         Some(role) => Some(format!("{role:?}").to_ascii_lowercase()),
         None => None,
     }
@@ -448,6 +457,25 @@ fn observe_part(
     let is_root_label = matches!(decl.resolve, NativeResolution::RootLabel);
     let text = if is_root_label {
         label_text(root)
+    } else if decl.contains.as_deref() == Some("text") {
+        // The copy the part carries: its own text children, and nothing else.
+        // `texts()` walks the subtree and reports an icon's name and an
+        // input's value as text, neither of which a web `textContent` returns
+        // — an `<input>` reports nothing at all. Falling back to the subtree
+        // made GPUI observe a field's value as its text while the web observed
+        // none, which is a cross-runtime shape mismatch rather than evidence.
+        let own = match &node.kind {
+            NodeKind::Text { content } => content.clone(),
+            _ => node
+                .children
+                .iter()
+                .filter_map(|child| match &child.kind {
+                    NodeKind::Text { content } => Some(content.as_str()),
+                    _ => None,
+                })
+                .collect(),
+        };
+        (!own.is_empty()).then_some(own)
     } else {
         text_of(node)
     };
@@ -544,6 +572,12 @@ fn observe_part(
             Value::Null
         },
         "selected": node.a11y.selected.map(|value| json!(value)).unwrap_or(Value::Null),
+        // Hierarchy the renderer declares, never inferred from indentation.
+        "level": node.a11y.level.map(|value| json!(value)).unwrap_or(Value::Null),
+        "scrollable": json!(matches!(
+            node.style.descriptor.layout.overflow_y,
+            poodle_layout::LayoutOverflow::Scroll
+        )),
         "orientation": node.a11y.orientation.clone().map(Value::String).unwrap_or(Value::Null),
         "controls": node.a11y.controls.as_deref().map(|value| Value::String(normalize_relationship(value, iface))).unwrap_or(Value::Null),
         "labelledBy": node.a11y.labelled_by.as_deref().map(|value| Value::String(normalize_relationship(value, iface))).unwrap_or(Value::Null),
@@ -572,6 +606,8 @@ fn absent_part() -> Value {
         "focusVisible": null,
         "tabbable": null,
         "selected": null,
+        "level": null,
+        "scrollable": null,
         "orientation": null,
         "controls": null,
         "labelledBy": null,
@@ -676,6 +712,11 @@ fn geometry_of(node: &Node) -> Value {
         "minWidth".to_owned(),
         json!(node.style.min_width.unwrap_or(0.0)),
     );
+    // A bounded scroll region's own cap. Absent means "grows"; the web side
+    // reports `none` as null for the same reason.
+    if let Some(max_height) = node.style.max_height {
+        geometry.insert("maxHeight".to_owned(), json!(max_height));
+    }
     geometry.insert(
         "paddingLeft".to_owned(),
         json!(descriptor.layout.spacing.padding.left),
@@ -1003,7 +1044,8 @@ pub trait NativeHarness {
     fn observe(&self) -> Value;
     fn press(&mut self, part: &str, input: &str);
     fn focus(&mut self, part: &str);
-    fn trace(&self) -> Vec<String>;
+    /// Recorded commands as `{ event, payload }` entries, in order.
+    fn trace(&self) -> Vec<Value>;
 }
 
 /// Evaluates one case's steps against the harness. Steps are the raw
@@ -1054,13 +1096,7 @@ pub fn evaluate_steps(
                 let expected = step
                     .get("events")
                     .and_then(Value::as_array)
-                    .map(|events| {
-                        events
-                            .iter()
-                            .filter_map(Value::as_str)
-                            .map(str::to_owned)
-                            .collect::<Vec<_>>()
-                    })
+                    .cloned()
                     .unwrap_or_default();
                 let actual = harness.trace();
                 assert_events(&expected, &actual, index, &mut out);
@@ -1079,14 +1115,59 @@ pub fn evaluate_steps(
     out
 }
 
-/// Strict event-order comparison.
+/// The corpus's serialized command expectations for one `expectEvents` step.
+pub fn expected_events(step: &Value) -> Vec<Value> {
+    step.get("events")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default()
+}
+
+/// Strict command-order comparison, payload-aware.
+///
+/// `expected` holds the corpus's serialized entries: a bare event name, or
+/// `{ name, payload }` when the case pins the payload the command carried.
+/// `trace` holds the runtime's recorded commands (`{ event, payload }`). The
+/// trace is projected onto the shape each position asked about, so a
+/// name-only expectation still compares the name and nothing else, while a
+/// payload expectation compares the named fields too. Position is part of the
+/// claim: an extra or missing command fails on length alone.
 pub fn assert_events(
-    expected: &[String],
-    actual: &[String],
+    expected: &[Value],
+    trace: &[Value],
     step_index: usize,
     out: &mut Vec<AssertionResult>,
 ) {
-    let pass = expected == actual;
+    let actual: Vec<Value> = trace
+        .iter()
+        .enumerate()
+        .map(|(index, entry)| {
+            let name = entry
+                .get("event")
+                .and_then(Value::as_str)
+                .unwrap_or_default();
+            match expected.get(index).and_then(|shape| shape.get("payload")) {
+                Some(Value::Object(fields)) => {
+                    let observed = entry.get("payload");
+                    let payload: serde_json::Map<String, Value> = fields
+                        .keys()
+                        .map(|field| {
+                            (
+                                field.clone(),
+                                observed
+                                    .and_then(|payload| payload.get(field))
+                                    .cloned()
+                                    .unwrap_or(Value::Null),
+                            )
+                        })
+                        .collect();
+                    json!({ "name": name, "payload": payload })
+                }
+                _ => json!(name),
+            }
+        })
+        .collect();
+    let pass = expected == actual.as_slice();
     out.push(result(
         step_index,
         None,
@@ -1270,14 +1351,19 @@ pub fn assert_part(
         .unwrap_or(Value::Null);
 
     if observed.is_null() {
+        // A repeated part that expanded to no keys is not in the map at all.
+        // "The row is gone" is a claim a case is entitled to make, so absence
+        // satisfies an expectation of absence rather than reporting that the
+        // runtime could not see something that is not there.
+        let expects_absent = expect.get("present").and_then(Value::as_bool) == Some(false);
         out.push(result(
             step_index,
             Some(part),
             "present".to_owned(),
-            "fail",
-            Some(json!(true)),
-            None,
-            Some(format!("not observed by {runtime}")),
+            if expects_absent { "pass" } else { "fail" },
+            Some(json!(expects_absent.then_some(false).unwrap_or(true))),
+            expects_absent.then(|| json!(false)),
+            (!expects_absent).then(|| format!("not observed by {runtime}")),
         ));
         return;
     }
@@ -1330,6 +1416,8 @@ pub fn assert_part(
         "overlay",
         "focusedText",
         "layerCount",
+        "level",
+        "scrollable",
         "orientation",
         "controls",
         "labelledBy",

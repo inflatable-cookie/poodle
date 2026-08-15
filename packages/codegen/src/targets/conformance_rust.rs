@@ -87,11 +87,20 @@ fn generated_enum(prop: &PortableProp) -> Option<String> {
         .clone()
         .unwrap_or_else(|| pascal_case(&prop.name));
     let values = prop.kind.values.as_deref().unwrap_or_default();
+    // The `#[default]` variant is the prop's own declared default. A nullable
+    // enum defaults to `None` on the struct, so its enum still needs a
+    // variant to derive `Default` from: the first declared value serves, and
+    // the field never reaches it.
+    let default_value = prop
+        .default
+        .as_str()
+        .filter(|value| values.iter().any(|candidate| candidate == value))
+        .or_else(|| values.first().map(String::as_str));
     let mut out =
         format!("#[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]\npub enum {name} {{\n");
     for value in values {
         let variant = variant_name(value);
-        let default = if value == "default" {
+        let default = if Some(value.as_str()) == default_value {
             "#[default] "
         } else {
             ""

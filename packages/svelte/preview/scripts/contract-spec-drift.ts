@@ -60,6 +60,16 @@ const WEB_ONLY_PROPS = new Set([
   // the focus/adapter-capability boundary (spec 063 IR-05; corpus CROSS-17,
   // NEG-03). Remove this entry when the IR rules on declarative focus intent.
   "initialFocus",
+  // HistoryCenter's two result feeds (g14.007). The portable claim is that
+  // the host answers `loadContinuations` / `loadContinuationRun` and the
+  // answer reaches the picker; the conformance corpus asserts exactly that on
+  // Svelte, React and GPUI. *How* the answer arrives is shell mechanism: the
+  // web shells take it as a reference-diffed prop because that suits
+  // data-down flow, while a native host holds the fork tree in its own state
+  // and hands the renderer a resolved view. Same boundary as TextInput's DOM
+  // vs GPUI editing paths. Marked as a known delta in the contract.
+  "continuationsResult",
+  "runResult",
   "asRole",
   "autocapitalize",
   "autocorrect",
