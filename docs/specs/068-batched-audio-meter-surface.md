@@ -78,9 +78,18 @@ rather than published as undocumented API:
 A `destroyed` flag was considered and rejected: components cache slots and read
 `view.active` instead, so nothing needs to ask the bus about its own lifecycle.
 
-`unregister` takes the handle returned by `register` and compares identity, not
-`(id, slot)`. Slots are reused, so an `(id, slot)` comparison would let a stale
-handle deactivate a later registration that happens to reuse both.
+`unregister` takes the handle returned by `register`. Handle identity and the
+minted `(id, slot)` are both invariants, and neither replaces the other:
+
+- identity is required because slots are reused, so an `(id, slot)` comparison
+  alone would let a stale handle deactivate a later registration that inherited
+  both;
+- the bus acts on the id and slot it recorded at `register`, never on the
+  handle's current fields, so a tampered handle cannot free a slot it never
+  owned or strand an id in the index.
+
+The returned handle is frozen. It is an opaque receipt, not a mutable
+descriptor.
 
 `pushFrames` consumes repeated `[slot, peak, meanSquare]` triples. Slot is the
 small non-negative integer returned by `register`, exactly representable in a

@@ -50,6 +50,22 @@ Four blockers from the orchestrator's first pass, all fixed on this branch:
    shipping undocumented surface. **That amendment is the reviewable decision
    here — reject it and these three move behind an internal controller type.**
 
+## Review Round 2 Correction (2026-08-15)
+
+One blocker: the round-1 identity fix *replaced* field validation instead of
+adding to it, so a caller could mutate a live handle's `slot` or `id` and
+corrupt bus internals — `slot = 999` then `unregister` freed a slot the bus
+never allocated, and the next registration was minted onto it beyond capacity.
+
+Both invariants now hold, neither standing in for the other. `register` records
+the minted `(id, slot)` privately and returns a frozen handle; `unregister`
+resolves the handle to that record and acts on the recorded values, then
+re-checks them against live state. Tampering throws at the mutation site, and
+even a hand-built look-alike with matching getters is rejected because it was
+never minted. Regressions cover mutated `slot`, mutated `id`, and a look-alike
+carrying currently-valid values; the reviewer's exact repro now leaves slot 0
+active, capacity at 32, and the replacement registration on slot 0.
+
 The identity fix immediately caught a live consumer of the old behavior: both
 specimens synthesized `{ id, slot }` handles for their remove-meter control,
 which the browser probe failed on until they were changed to keep the handles

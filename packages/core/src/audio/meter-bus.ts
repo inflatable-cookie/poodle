@@ -128,8 +128,12 @@ class MeterBusImpl implements MeterBus {
   #scheduler: MeterFrameScheduler;
   #destroyed = false;
 
-  /** Handles minted by this bus and not yet unregistered. */
-  #liveChannels = new WeakSet<MeterBusChannel>();
+  /**
+   * Handles minted by this bus and not yet unregistered, mapped to the id and
+   * slot they were minted with. The recorded values — not the handle's own
+   * fields — are what `unregister` acts on.
+   */
+  #liveChannels = new WeakMap<MeterBusChannel, { id: MeterBusChannelId; slot: number }>();
   #ids: Array<MeterBusChannelId | null>;
   #slotById = new Map<MeterBusChannelId, number>();
   #freeSlots: number[] = [];
@@ -254,24 +258,34 @@ class MeterBusImpl implements MeterBus {
     this.#batchStamp[slot] = 0;
     this.#rmsHead[slot] = 0;
     this.#rmsCount[slot] = 0;
-    const channel: MeterBusChannel = { id, slot };
-    this.#liveChannels.add(channel);
+    // Frozen so a caller cannot mutate the handle it was given, and recorded
+    // privately so the bus never has to trust the object's current fields.
+    const channel: MeterBusChannel = Object.freeze({ id, slot });
+    this.#liveChannels.set(channel, { id, slot });
     return channel;
   }
 
   unregister(channel: MeterBusChannel): void {
     this.#assertAlive();
-    // Identity, not (id, slot): slots are reused, so re-registering the same
-    // id after an unregister would otherwise let the first — now stale —
-    // handle deactivate its replacement. Membership in this set also rejects
-    // handles minted by another bus.
-    if (channel === null || typeof channel !== "object" || !this.#liveChannels.has(channel)) {
+    // Identity *and* fields, both from the bus's own record. Identity alone is
+    // not enough: slots are reused, so a stale handle must not deactivate the
+    // replacement that inherited its id and slot — and a handle whose fields
+    // were tampered with must not be able to free a slot it never owned.
+    // Reading the minted values back from `#liveChannels` makes the operation
+    // independent of whatever the object currently says.
+    const record = channel === null || typeof channel !== "object"
+      ? undefined
+      : this.#liveChannels.get(channel);
+    if (record === undefined) {
       throw new Error(`MeterBus: channel "${String(channel?.id)}" is not registered on this bus`);
     }
-    const slot = channel.slot;
+    const { id, slot } = record;
+    if (this.view.active[slot] !== 1 || this.#ids[slot] !== id) {
+      throw new Error(`MeterBus: channel "${String(id)}" is not registered on this bus`);
+    }
     this.#liveChannels.delete(channel);
     this.view.active[slot] = 0;
-    this.#slotById.delete(channel.id);
+    this.#slotById.delete(id);
     this.#ids[slot] = null;
     this.#freeSlots.push(slot);
   }

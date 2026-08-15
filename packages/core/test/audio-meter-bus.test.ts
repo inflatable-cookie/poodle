@@ -18,6 +18,7 @@ import {
   type AudioMeterContext,
   type AudioMeterMode,
   type MeterBus,
+  type MeterBusChannelId,
 } from "../src/audio";
 
 // Bus/standalone comparisons use one documented tolerance. Both paths run the
@@ -101,6 +102,39 @@ describe("meter bus registration", () => {
     expect(pushOne(bus, second.slot, { atMs: 10, peak: 0.5, meanSquare: 0.25, durationMs: 10 })).toBe(1);
     bus.unregister(second);
     expect(bus.view.active[second.slot]).toBe(0);
+  });
+
+  test("a mutated slot cannot corrupt bus internals", () => {
+    const bus = createMeterBus({ initialCapacity: 32, scheduler: createManualMeterFrameScheduler() });
+    const handle = bus.register("a", { mode: "vu" });
+    // The handle is frozen, so the tamper attempt itself fails in strict mode.
+    expect(() => { (handle as { slot: number }).slot = 999; }).toThrow(TypeError);
+    expect(handle.slot).toBe(0);
+    // And unregister acts on the minted slot regardless of the object's fields.
+    bus.unregister(handle);
+    expect(bus.view.active[0]).toBe(0);
+    const next = bus.register("b", { mode: "vu" });
+    expect(next.slot).toBe(0);
+    expect(bus.view.capacity).toBe(32);
+  });
+
+  test("a mutated id cannot strand a registration", () => {
+    const bus = createMeterBus({ scheduler: createManualMeterFrameScheduler() });
+    const handle = bus.register("a", { mode: "vu" });
+    expect(() => { (handle as { id: MeterBusChannelId }).id = "hijacked"; }).toThrow(TypeError);
+    expect(handle.id).toBe("a");
+    bus.unregister(handle);
+    // The original id is released, not left stranded in the id index.
+    expect(() => bus.resetClip("a")).toThrow(/not registered/);
+    expect(() => bus.register("a", { mode: "vu" })).not.toThrow();
+  });
+
+  test("a look-alike handle carrying live values is rejected", () => {
+    const bus = createMeterBus({ scheduler: createManualMeterFrameScheduler() });
+    const handle = bus.register("a", { mode: "vu" });
+    // Same shape and same values, but not the object the bus minted.
+    expect(() => bus.unregister({ id: handle.id, slot: handle.slot })).toThrow(/not registered/);
+    expect(bus.view.active[handle.slot]).toBe(1);
   });
 
   test("a handle minted by another bus is rejected", () => {
