@@ -636,7 +636,7 @@ mod tests {
             .with_rows(4)
             .with_validation_state(ValidationState::Pending);
 
-        assert_eq!(spec.rows, 4);
+        assert_eq!(spec.rows, Some(4));
         assert!(spec.is_multiline());
         assert_eq!(spec.aria_busy(), Some("true"));
         assert_eq!(spec.border_token(), semantic::COLOR_ACCENT_BASE);

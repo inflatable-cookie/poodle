@@ -78,6 +78,11 @@ const POPOVER_AUTHORITY: Array<[string, string]> = [
   ["Popover corpus", "packages/core/src/conformance/popover-cases.ts"],
 ];
 
+const TEXT_INPUT_AUTHORITY: Array<[string, string]> = [
+  ["TextInput interface", "packages/core/src/conformance/text-input.ts"],
+  ["TextInput corpus", "packages/core/src/conformance/text-input-cases.ts"],
+];
+
 const CODEGEN: Array<[string, string]> = [
   ["Conformance parsing and validation", "packages/codegen/src/conformance.rs"],
   ["Rust declaration target", "packages/codegen/src/targets/conformance_rust.rs"],
@@ -96,6 +101,10 @@ const POPOVER_GENERATED_SOURCE: Array<[string, string]> = [
   ["Generated Popover Rust declaration", "packages/contracts/components/src/generated/popover/mod.rs"],
 ];
 
+const TEXT_INPUT_GENERATED_SOURCE: Array<[string, string]> = [
+  ["Generated TextInput Rust declaration", "packages/contracts/components/src/generated/text-input/mod.rs"],
+];
+
 const GENERATED_DATA: Array<[string, string]> = [
   ["Interface fixture JSON", "packages/codegen/fixtures/conformance/button-interface.json"],
   ["Case fixture JSON", "packages/codegen/fixtures/conformance/button-cases.json"],
@@ -105,6 +114,8 @@ const GENERATED_DATA: Array<[string, string]> = [
   ["Tabs case fixture JSON", "packages/codegen/fixtures/conformance/tabs-cases.json"],
   ["Popover interface fixture JSON", "packages/codegen/fixtures/conformance/popover-interface.json"],
   ["Popover case fixture JSON", "packages/codegen/fixtures/conformance/popover-cases.json"],
+  ["TextInput interface fixture JSON", "packages/codegen/fixtures/conformance/text-input-interface.json"],
+  ["TextInput case fixture JSON", "packages/codegen/fixtures/conformance/text-input-cases.json"],
   ["Primitive roster JSON", "packages/codegen/fixtures/conformance/primitive-capability-roster.json"],
 ];
 
@@ -154,6 +165,15 @@ const POPOVER_HARNESS: Array<[string, string]> = [
   ["GPUI Popover adapter", "packages/gpui/preview/src/conformance_popover.rs"],
 ];
 
+const TEXT_INPUT_HARNESS: Array<[string, string]> = [
+  ["Svelte TextInput adapter", "test/conformance/web/svelte-text-input-adapter.ts"],
+  ["React TextInput adapter", "test/conformance/web/react-text-input-adapter.tsx"],
+  ["Svelte TextInput host", "test/conformance/web/hosts/TextInputHost.svelte"],
+  ["React TextInput host", "test/conformance/web/hosts/ReactTextInputHost.tsx"],
+  ["Web TextInput tests", "test/conformance/web/text-input.test.ts"],
+  ["GPUI TextInput adapter", "packages/gpui/preview/src/conformance_text_input.rs"],
+];
+
 const CAPTURE_REPAIR: Array<[string, string]> = [
   ["Native visual runner", "test/native-visual/run.ts"],
   ["Native visual capture", "test/native-visual/capture.ts"],
@@ -164,6 +184,7 @@ const GENERIC_SUPPORTING_DELTAS: Array<[string, string]> = [
   ["poodle-node observation vocabulary", "packages/contracts/node/src/lib.rs"],
   ["GPUI focus and activation backend", "packages/gpui/node-backend/src/lib.rs"],
   ["GPUI interaction backend", "packages/gpui/node-backend/src/interaction.rs"],
+  ["Web text editing actions", "test/conformance/web/text-actions.ts"],
 ];
 
 const BUTTON_SUPPORTING_DELTAS: Array<[string, string]> = [
@@ -190,6 +211,15 @@ const POPOVER_SUPPORTING_DELTAS: Array<[string, string]> = [
   ["React Popover shell", "packages/react/components/src/Popover.tsx"],
   ["GPUI node-backend layer registry", "packages/gpui/node-backend/src/layers.rs"],
   ["poodle-node dismiss/layer vocabulary", "packages/contracts/node/src/lib.rs"],
+];
+
+const TEXT_INPUT_SUPPORTING_DELTAS: Array<[string, string]> = [
+  ["TextInput renderer", "packages/render/src/text_input.rs"],
+  ["TextInput spec extension", "packages/contracts/components/src/text_input.rs"],
+  ["Svelte TextInput shell", "packages/svelte/components/src/TextInput.svelte"],
+  ["React TextInput shell", "packages/react/components/src/TextInput.tsx"],
+  ["GPUI IME handler", "packages/gpui/node-backend/src/ime.rs"],
+  ["GPUI input text buffer", "packages/gpui/node-backend/src/input_text.rs"],
 ];
 
 const WIRING: Array<[string, string]> = [
@@ -264,16 +294,19 @@ const rangeSliderAuthority = sourceTable(
 );
 const tabsAuthority = sourceTable("Tabs authored authority", TABS_AUTHORITY, "working");
 const popoverAuthority = sourceTable("Popover authored authority", POPOVER_AUTHORITY, "working");
+const textInputAuthority = sourceTable("TextInput authored authority", TEXT_INPUT_AUTHORITY, "working");
 const codegen = sourceTable("Codegen", CODEGEN, "delta");
 const buttonGeneratedSource = sourceTable("Generated Button source", BUTTON_GENERATED_SOURCE, "working");
 const tabsGeneratedSource = sourceTable("Generated Tabs source", TABS_GENERATED_SOURCE, "working");
 const popoverGeneratedSource = sourceTable("Generated Popover source", POPOVER_GENERATED_SOURCE, "working");
+const textInputGeneratedSource = sourceTable("Generated TextInput source", TEXT_INPUT_GENERATED_SOURCE, "working");
 const generatedBytes = dataTable(GENERATED_DATA);
 const genericRuntime = sourceTable("Generic observers and runners", GENERIC_RUNTIME, "working");
 const buttonHarness = sourceTable("Button pilot harness", BUTTON_HARNESS, "working");
 const rangeSliderHarness = sourceTable("RangeSlider pilot harness", RANGE_SLIDER_HARNESS, "working");
 const tabsHarness = sourceTable("Tabs pilot harness", TABS_HARNESS, "working");
 const popoverHarness = sourceTable("Popover pilot harness", POPOVER_HARNESS, "working");
+const textInputHarness = sourceTable("TextInput pilot harness", TEXT_INPUT_HARNESS, "working");
 const captureRepair = sourceTable("GPUI capture repair", CAPTURE_REPAIR, "working");
 const genericSupporting = sourceTable("Generic runtime deltas", GENERIC_SUPPORTING_DELTAS, "delta");
 const buttonSupporting = sourceTable("Button runtime deltas", BUTTON_SUPPORTING_DELTAS, "delta");
@@ -284,6 +317,7 @@ const rangeSliderSupporting = sourceTable(
 );
 const tabsSupporting = sourceTable("Tabs runtime deltas", TABS_SUPPORTING_DELTAS, "delta");
 const popoverSupporting = sourceTable("Popover runtime deltas", POPOVER_SUPPORTING_DELTAS, "delta");
+const textInputSupporting = sourceTable("TextInput runtime deltas", TEXT_INPUT_SUPPORTING_DELTAS, "delta");
 const wiring = sourceTable("Wiring", WIRING, "working");
 const replaced = sourceTable("Replaced hand-written source", REPLACED, "replaced");
 
@@ -292,7 +326,8 @@ const buttonPilot = buttonAuthority + buttonGeneratedSource + buttonHarness + bu
 const rangeSliderPilot = rangeSliderAuthority + rangeSliderHarness + rangeSliderSupporting;
 const tabsPilot = tabsAuthority + tabsGeneratedSource + tabsHarness + tabsSupporting;
 const popoverPilot = popoverAuthority + popoverGeneratedSource + popoverHarness + popoverSupporting;
-const sourceMechanism = genericKernel + buttonPilot + rangeSliderPilot + tabsPilot + popoverPilot + captureRepair;
+const textInputPilot = textInputAuthority + textInputGeneratedSource + textInputHarness + textInputSupporting;
+const sourceMechanism = genericKernel + buttonPilot + rangeSliderPilot + tabsPilot + popoverPilot + textInputPilot + captureRepair;
 
 console.log("\n=== Summary ===");
 console.log(`source mechanism: ${sourceMechanism} LOC`);
@@ -304,13 +339,17 @@ console.log(`    harness and runtime deltas: ${buttonHarness + buttonSupporting}
 console.log(`  RangeSlider pilot increment: ${rangeSliderPilot} LOC`);
 console.log(`  Tabs pilot increment: ${tabsPilot} LOC`);
 console.log(`  Popover pilot increment: ${popoverPilot} LOC`);
-console.log(`    authored authority: ${popoverAuthority} LOC`);
-console.log(`    generated source: ${popoverGeneratedSource} LOC`);
-console.log(`    harness and runtime deltas: ${popoverHarness + popoverSupporting} LOC`);
+  console.log(`    authored authority: ${popoverAuthority} LOC`);
+  console.log(`    generated source: ${popoverGeneratedSource} LOC`);
+  console.log(`    harness and runtime deltas: ${popoverHarness + popoverSupporting} LOC`);
+console.log(`  TextInput pilot increment: ${textInputPilot} LOC`);
+  console.log(`    authored authority: ${textInputAuthority} LOC`);
+  console.log(`    generated source: ${textInputGeneratedSource} LOC`);
+  console.log(`    harness and runtime deltas: ${textInputHarness + textInputSupporting} LOC`);
 console.log(`  GPUI capture repair: ${captureRepair} LOC`);
 console.log(`generated data: ${generatedBytes} bytes`);
 console.log(`replaced hand-written source: ${replaced} LOC`);
 console.log(
   `stop-condition evidence: pilot increments vs replaced — ` +
-    "triggered at g14.001; g14.003/004/005 reuse the generic kernel.",
+    "triggered at g14.001; g14.003/004/005/006 reuse the generic kernel.",
 );

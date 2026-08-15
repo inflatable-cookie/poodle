@@ -232,6 +232,26 @@ impl<'a> HeadlessDriver<'a> {
         self.pointer_release(target);
     }
 
+    /// One press/release at a fraction along the mount box (0 = left, 1 = right).
+    pub fn pointer_activate_at(&mut self, fraction: f32) {
+        let x = MOUNT_BOX_LEFT + fraction.clamp(0.0, 1.0) * MOUNT_BOX_WIDTH;
+        let y = MOUNT_BOX_TOP + MOUNT_BOX_HEIGHT / 2.0;
+        let target = point(px(x), px(y));
+        self.pointer_press(target);
+        self.pointer_release(target);
+    }
+
+    /// One press/release at the last-painted bounds of a named element.
+    pub fn pointer_activate_id(&mut self, element_id: &str) {
+        match poodle_gpui_node_backend::bounds_for(element_id) {
+            Some(bounds) => {
+                self.pointer_press(bounds.center());
+                self.pointer_release(bounds.center());
+            }
+            None => self.pointer_activate_at(0.92),
+        }
+    }
+
     /// Pointer scrub at a fraction along the mount box (0 = left, 1 = right).
     ///
     /// Matches GPUI scrub wiring: mouse-down → Press, move while held →

@@ -6,3 +6,5 @@
 pub mod button;
 pub mod popover;
 pub mod tabs;
+#[path = "generated/text-input/mod.rs"]
+pub mod text_input;

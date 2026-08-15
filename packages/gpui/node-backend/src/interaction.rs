@@ -126,6 +126,18 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
             .absolute()
             .size_full(),
         );
+    } else if node.id.is_some() {
+        let element_id = element_id_string(node);
+        el = el.child(
+            gpui::canvas(
+                move |bounds, _window, _cx| {
+                    super::layers::record_element_bounds(&element_id, bounds);
+                },
+                |_, _, _, _| {},
+            )
+            .absolute()
+            .size_full(),
+        );
     }
     if node.interaction.disabled {
         record_probe_channel("semantic.disabled.blocked");

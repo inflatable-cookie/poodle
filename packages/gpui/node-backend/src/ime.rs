@@ -122,11 +122,11 @@ impl InputHandler for NodeInputHandler {
         new_text: &str,
         _new_selected_range: Option<Range<usize>>,
         _window: &mut Window,
-        _cx: &mut App,
+        cx: &mut App,
     ) {
-        // Composition in progress: the text is provisional and will be
-        // replaced again as the user keeps typing. It still goes into the value
-        // so it is visible, and the marked range records what to replace next.
+        // Composition in progress: the text is provisional. It must not
+        // commit through insert — paint splices the composing preview, and
+        // the single valueChange lands on replace_text_in_range.
         let (start, end) = match range_utf16 {
             Some(range) => (
                 char_for_utf16(&self.value, range.start),
@@ -134,18 +134,8 @@ impl InputHandler for NodeInputHandler {
             ),
             None => super::input_text::marked_range(&self.id).unwrap_or(self.selection),
         };
-        if let Some(select) = &self.select {
-            select(start, end);
-        }
-        if let Some(insert) = &self.insert {
-            insert(new_text);
-        }
-        let marked_end = start + new_text.chars().count();
-        if new_text.is_empty() {
-            super::input_text::clear_marked(&self.id);
-        } else {
-            super::input_text::set_marked(&self.id, (start, marked_end));
-        }
+        mark_composing(&self.id, (start, end), new_text);
+        cx.refresh_windows();
     }
 
     fn unmark_text(&mut self, _window: &mut Window, _cx: &mut App) {
@@ -174,6 +164,29 @@ impl InputHandler for NodeInputHandler {
         let chars = super::input_text::char_index_for_position(&self.id, point)?;
         Some(utf16_for_char(&self.value, chars))
     }
+}
+
+/// Store composing preview without committing. Used by InputHandler mark and
+/// by the generic conformance compose action.
+pub fn mark_composing(id: &str, selection: (usize, usize), text: &str) {
+    let start = super::input_text::marked_range(id)
+        .map(|(s, _)| s)
+        .unwrap_or(selection.0.min(selection.1));
+    if text.is_empty() {
+        super::input_text::set_marked(id, (start, start));
+        super::input_text::set_composing(id, String::new());
+        return;
+    }
+    let end = start + text.chars().count();
+    super::input_text::set_marked(id, (start, end));
+    super::input_text::set_composing(id, text.to_owned());
+}
+
+/// End composition and return the committed text. The caller runs insert.
+pub fn take_composing(id: &str) -> Option<String> {
+    let text = super::input_text::composing_text(id).filter(|t| !t.is_empty());
+    super::input_text::clear_marked(id);
+    text
 }
 
 #[cfg(test)]

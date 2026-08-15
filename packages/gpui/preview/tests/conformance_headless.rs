@@ -1,7 +1,7 @@
 //! Headless GPUI conformance board (spec 066, g14.023).
 //!
-//! Executes the whole active cohort — Button, RangeSlider, Tabs, and the
-//! primitive substrate — on GPUI 0.2.2's in-memory test platform
+//! Executes the whole active cohort — Button, RangeSlider, Tabs, Popover,
+//! TextInput, and the primitive substrate — on GPUI 0.2.2's in-memory test platform
 //! (`TestAppContext`, `VisualTestContext`, `TestWindow`). No OS window is
 //! created, no application is activated, and no keyboard focus is taken.
 //!
@@ -42,6 +42,8 @@ mod conformance_range_slider;
 mod conformance_support;
 #[path = "../src/conformance_tabs.rs"]
 mod conformance_tabs;
+#[path = "../src/conformance_text_input.rs"]
+mod conformance_text_input;
 #[path = "../src/primitive_probes_gpui.rs"]
 mod primitive_probes_gpui;
 
@@ -77,6 +79,7 @@ fn parse_corpus(suffix: &str) -> (String, Vec<Value>) {
         "-range-slider" => conformance_support::RANGE_SLIDER_CASES,
         "-tabs" => conformance_support::TABS_CASES,
         "-popover" => conformance_support::POPOVER_CASES,
+        "-text-input" => conformance_support::TEXT_INPUT_CASES,
         _ => panic!("unknown corpus suffix {suffix}"),
     };
     let cases: Value = serde_json::from_str(raw).expect("committed corpus parses");
@@ -99,6 +102,7 @@ fn parse_interface(suffix: &str) -> InterfaceDoc {
         "-range-slider" => conformance_support::RANGE_SLIDER_INTERFACE,
         "-tabs" => conformance_support::TABS_INTERFACE,
         "-popover" => conformance_support::POPOVER_INTERFACE,
+        "-text-input" => conformance_support::TEXT_INPUT_INTERFACE,
         _ => panic!("unknown interface suffix {suffix}"),
     };
     let value: Value = serde_json::from_str(raw).expect("committed interface parses");
@@ -165,6 +169,20 @@ fn run_complete_board(cx: &mut TestAppContext) {
         None,
     );
     write_report("gpui-popover.json", &conformance_popover::popover_report(&component, &results));
+    failures.extend(results.iter().filter(|o| !o.pass).map(|o| o.case_id.clone()));
+
+    let (component, cases) = parse_corpus("-text-input");
+    let results = conformance_text_input::drive_text_input_cases(
+        &mut driver,
+        parse_interface("-text-input"),
+        cases,
+        None,
+        None,
+    );
+    write_report(
+        "gpui-text-input.json",
+        &conformance_text_input::text_input_report(&component, &results),
+    );
     failures.extend(results.iter().filter(|o| !o.pass).map(|o| o.case_id.clone()));
 
     let probes = primitive_probes_gpui::drive_primitive_probes(&mut driver);
@@ -909,5 +927,95 @@ fn run_planted_wrong_placement_offset_fails(cx: &mut TestAppContext) {
         observation,
         "geometry.topGap",
         "popover/offset",
+    );
+}
+
+// ── TextInput planted failures (g14.006) ───────────────────────────────────
+
+fn planted_text_input_fails(
+    cx: &mut TestAppContext,
+    case_id: &str,
+    defect: conformance_text_input::PlantedDefect,
+    field: &str,
+) {
+    let node = Arc::new(Mutex::new(Node::container()));
+    let mut driver = HeadlessDriver::new(cx, node);
+    let (_, cases) = parse_corpus("-text-input");
+    let results = conformance_text_input::drive_text_input_cases(
+        &mut driver,
+        parse_interface("-text-input"),
+        cases,
+        Some(case_id.to_owned()),
+        Some(defect),
+    );
+    assert_eq!(results.len(), 1, "planted run must execute {case_id}");
+    assert!(
+        !results[0].pass,
+        "planted defect in {case_id} passed: {:?}",
+        results[0].assertions
+    );
+    assert!(
+        results[0]
+            .failures
+            .iter()
+            .any(|failure| failure.get("field").and_then(Value::as_str) == Some(field)),
+        "planted defect in {case_id} did not fail on {field}: {:?}",
+        results[0].failures
+    );
+}
+
+#[test]
+fn planted_dropped_edit_fails() {
+    run_headless(run_planted_dropped_edit_fails);
+}
+
+fn run_planted_dropped_edit_fails(cx: &mut TestAppContext) {
+    planted_text_input_fails(
+        cx,
+        "text-input/type",
+        conformance_text_input::PlantedDefect::DroppedEdit,
+        "value",
+    );
+}
+
+#[test]
+fn planted_dropped_selection_fails() {
+    run_headless(run_planted_dropped_selection_fails);
+}
+
+fn run_planted_dropped_selection_fails(cx: &mut TestAppContext) {
+    planted_text_input_fails(
+        cx,
+        "text-input/selection-replace",
+        conformance_text_input::PlantedDefect::DroppedSelection,
+        "selectionEnd",
+    );
+}
+
+#[test]
+fn planted_dropped_ime_commit_fails() {
+    run_headless(run_planted_dropped_ime_commit_fails);
+}
+
+fn run_planted_dropped_ime_commit_fails(cx: &mut TestAppContext) {
+    planted_text_input_fails(
+        cx,
+        "text-input/ime-commit",
+        conformance_text_input::PlantedDefect::DroppedImeCommit,
+        "value",
+    );
+}
+
+#[test]
+fn planted_submit_before_value_change_fails() {
+    run_headless(run_planted_submit_before_value_change_fails);
+}
+
+fn run_planted_submit_before_value_change_fails(cx: &mut TestAppContext) {
+    planted_text_input_fails(
+        cx,
+        "text-input/type-then-submit",
+        conformance_text_input::PlantedDefect::SubmitBeforeValueChange,
+        "events",
     );
 }

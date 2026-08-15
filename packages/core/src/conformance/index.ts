@@ -9,4 +9,6 @@ export * from "./tabs";
 export * from "./tabs-cases";
 export * from "./popover";
 export * from "./popover-cases";
+export * from "./text-input";
+export * from "./text-input-cases";
 export * from "./project";

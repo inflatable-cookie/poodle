@@ -14,12 +14,18 @@ import { isValidSlugFormat, slugify, validationStatusToState } from "@inflatable
 
 import "@inflatable-cookie/poodle-core/styles/text-input.css";
 
+import type {
+  TextInputPortableEvents,
+  TextInputPortableProps,
+} from "@inflatable-cookie/poodle-core/conformance/text-input";
+
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import { Spinner } from "./Spinner";
 import type {
   ControlDensity,
   ControlSize,
+  IconProp,
   InputValidationStatus,
   InputValidator,
   SemanticControlSizeRole,
@@ -28,7 +34,12 @@ import type {
   ValidationState,
 } from "./types";
 
-export interface TextInputProps {
+const carrierProps = ["leadingIcon", "trailingIcon"] as const satisfies
+  readonly (keyof TextInputPortableProps)[];
+type Portable = Omit<TextInputPortableProps, (typeof carrierProps)[number]>;
+type PortableEvents = TextInputPortableEvents;
+
+export interface TextInputProps extends Partial<Portable> {
   id?: string;
   value?: string | null;
   defaultValue?: string;
@@ -42,6 +53,7 @@ export interface TextInputProps {
   pattern?: string;
   spellCheck?: boolean;
   autoCapitalize?: string;
+  autoCorrect?: "on" | "off";
   enterKeyHint?: "enter" | "done" | "go" | "next" | "previous" | "search" | "send" | null;
   debounce?: number | null;
   validate?: InputValidator;
@@ -67,11 +79,13 @@ export interface TextInputProps {
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
   showClearButton?: boolean;
-  onValueChange?: (value: string) => void;
+  leadingIcon?: IconProp | null;
+  trailingIcon?: IconProp | null;
+  onValueChange?: PortableEvents["valueChange"];
   onValidationChange?: (detail: TextInputValidationChange) => void;
-  onSubmit?: (value: string) => void;
-  onCancel?: () => void;
-  onClear?: () => void;
+  onSubmit?: PortableEvents["submit"];
+  onCancel?: PortableEvents["cancel"];
+  onClear?: PortableEvents["clear"];
   onKeyDown?: (event: KeyboardEvent) => void;
   onFocus?: (event: FocusEvent) => void;
   onBlur?: (event: FocusEvent) => void;
@@ -113,6 +127,7 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
     pattern,
     spellCheck,
     autoCapitalize,
+    autoCorrect,
     enterKeyHint = null,
     debounce = null,
     validate,
@@ -138,6 +153,8 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
     sizeRole = "control",
     density = null,
     showClearButton = true,
+    leadingIcon = null,
+    trailingIcon = null,
     onValueChange,
     onValidationChange,
     onSubmit,
@@ -184,8 +201,8 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
   const isSlug = type === "slug";
   const isMultiline = type === "multiline" || (type === "text" && rows !== null && rows > 1);
   const nativeInputType = isSlug ? "text" : type;
-  const hasLeadingAffordance = Boolean(leadingSlot) || isSearch;
-  const hasTrailingAffordance = Boolean(trailingSlot);
+  const hasLeadingAffordance = Boolean(leadingSlot) || Boolean(leadingIcon) || isSearch;
+  const hasTrailingAffordance = Boolean(trailingSlot) || Boolean(trailingIcon);
   const isControlled = value !== undefined;
   const currentValue = isControlled ? (value ?? "") : uncontrolledValue;
   const canClear = isSearch && showClearButton && !disabled && !readOnly && currentValue.length > 0;
@@ -451,6 +468,8 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
         data-size={resolvedSize}
         data-density={resolvedDensity}
         data-type={type}
+        data-has-leading={hasLeadingAffordance || undefined}
+        data-has-trailing={hasTrailingAffordance || undefined}
         style={rootStyle}
       >
         {prefix ? <span className="poodle-text-input__affix poodle-text-input__affix--prefix">{prefix}</span> : null}
@@ -458,8 +477,20 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
         <div className="poodle-text-input__field">
           {leadingSlot ? (
             <span className="poodle-text-input__affordance poodle-text-input__affordance--leading">{leadingSlot}</span>
+          ) : leadingIcon ? (
+            <span
+              className="poodle-text-input__affordance poodle-text-input__affordance--leading"
+              aria-hidden="true"
+              data-icon={typeof leadingIcon === "string" ? leadingIcon : undefined}
+            >
+              <Icon icon={leadingIcon} />
+            </span>
           ) : isSearch ? (
-            <span className="poodle-text-input__affordance poodle-text-input__affordance--leading" aria-hidden="true">
+            <span
+              className="poodle-text-input__affordance poodle-text-input__affordance--leading"
+              aria-hidden="true"
+              data-icon="search"
+            >
               <Icon icon="search" />
             </span>
           ) : null}
@@ -475,6 +506,7 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
               autoComplete={autoComplete}
               spellCheck={spellCheck}
               autoCapitalize={autoCapitalize}
+              autoCorrect={autoCorrect}
               rows={rows ?? 4}
               style={resize !== "vertical" ? { resize } : undefined}
               maxLength={maxLength ?? undefined}
@@ -512,6 +544,7 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
               pattern={pattern}
               spellCheck={isSlug ? false : spellCheck}
               autoCapitalize={isSlug ? "off" : autoCapitalize}
+              autoCorrect={isSlug ? "off" : autoCorrect}
               enterKeyHint={enterKeyHint ?? undefined}
               maxLength={maxLength ?? undefined}
               disabled={disabled}
@@ -536,6 +569,14 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
 
           {trailingSlot ? (
             <span className="poodle-text-input__affordance poodle-text-input__affordance--trailing">{trailingSlot}</span>
+          ) : trailingIcon ? (
+            <span
+              className="poodle-text-input__affordance poodle-text-input__affordance--trailing"
+              aria-hidden="true"
+              data-icon={typeof trailingIcon === "string" ? trailingIcon : undefined}
+            >
+              <Icon icon={trailingIcon} />
+            </span>
           ) : null}
 
           {canClear ? (
@@ -555,6 +596,7 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
                 .filter(Boolean)
                 .join(" ")}
               aria-hidden="true"
+              data-icon={validationIcon ?? undefined}
             >
               {effectiveValidationState === "pending" ? (
                 <Spinner variant="ring" sizeRole="chrome" tone="current" />

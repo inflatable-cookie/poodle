@@ -278,6 +278,19 @@ impl InterfaceDoc {
 
 // ── Part resolution (data-driven) ──────────────────────────────────────────
 
+/// True when another `self`-resolved part is this same node. Native
+/// runtimes collapse wrapper chrome onto the control; identity then belongs
+/// to the named part, not to `root`. Label/`root-label` sharing the root is
+/// not collapse — that part reads text off the root on purpose.
+fn collapsed_chrome_root(iface: &InterfaceDoc, part_id: &str, node: &Node, root: &Node) -> bool {
+    part_id == "root"
+        && iface.parts.iter().any(|decl| {
+            decl.id != "root"
+                && matches!(decl.resolve, NativeResolution::SelfNode)
+                && std::ptr::eq(node, root)
+        })
+}
+
 /// Resolves a stable part in the node tree by the interface's descriptor.
 pub fn find_part<'a>(iface: &InterfaceDoc, root: &'a Node, part_id: &str) -> Option<&'a Node> {
     let decl = iface.part_decl(part_id)?;
@@ -346,10 +359,11 @@ fn label_text(root: &Node) -> Option<String> {
 /// role observation `null` and the owning assertion fails — never a
 /// silent fallback.
 fn role_of(node: &Node) -> Option<String> {
-    node.a11y
-        .role
-        .as_ref()
-        .map(|role| format!("{role:?}").to_ascii_lowercase())
+    match node.a11y.role {
+        Some(poodle_node::NodeRole::TextInput) => Some("textbox".to_owned()),
+        Some(role) => Some(format!("{role:?}").to_ascii_lowercase()),
+        None => None,
+    }
 }
 
 fn rgba(color: &poodle_node::ColorValue) -> String {
@@ -406,6 +420,10 @@ fn observe_part(
     bounds_by_id: &dyn Fn(&str) -> Option<(f32, f32, f32, f32)>,
 ) -> Value {
     let is_root = part_id == "root";
+    // Collapsed native chrome: root and another identity part are the same
+    // node. Keep wrapper shape on root (present/states/tokenRoles, not the
+    // tab stop); the named part carries role/value/focusable.
+    let chrome_root = collapsed_chrome_root(iface, part_id, node, root);
     let mut geometry = geometry_of(node);
     if decl.relative_to.is_some() {
         let relative = relative_bounds_of(part_id, iface, root, node, bounds_by_id);
@@ -441,6 +459,7 @@ fn observe_part(
                 | NativeResolution::IdTemplate { .. }
                 | NativeResolution::SelfNode
         );
+    let report_identity = identity_part && !chrome_root;
     let focused = if identity_part {
         // Disabled controls are not focusable; report unfocused even if the
         // harness's pointer pressed them (browser semantics, and the same
@@ -459,12 +478,12 @@ fn observe_part(
     };
     json!({
         "present": true,
-        "role": if identity_part {
+        "role": if report_identity {
             role_of(node).map(|r| json!(r)).unwrap_or(Value::Null)
         } else {
             Value::Null
         },
-        "name": if identity_part && (!is_root || decl.role.is_some()) {
+        "name": if report_identity && (!is_root || decl.role.is_some()) {
             node.a11y
                 .label
                 .clone()
@@ -477,10 +496,23 @@ fn observe_part(
         },
         "text": if is_root { Value::Null } else { text.map(|t| json!(t)).unwrap_or(Value::Null) },
         "icon": icon_of(node),
-        "value": if identity_part {
-            node.a11y.value.map(|v| json!(v)).unwrap_or(Value::Null)
+        "value": if report_identity {
+            match &node.kind {
+                NodeKind::Input { value, .. } => json!(value),
+                _ => node.a11y.value.map(|v| json!(v)).unwrap_or(Value::Null),
+            }
         } else {
             Value::Null
+        },
+        "selectionStart": if chrome_root {
+            Value::Null
+        } else {
+            node.caret.map(|c| json!(c.selection.0)).unwrap_or(Value::Null)
+        },
+        "selectionEnd": if chrome_root {
+            Value::Null
+        } else {
+            node.caret.map(|c| json!(c.selection.1)).unwrap_or(Value::Null)
         },
         "states": states,
         "tokenRoles": token_roles,
@@ -489,18 +521,24 @@ fn observe_part(
         "parent": parent_part_of(part_id, iface, root, node)
             .map(Value::String)
             .unwrap_or(Value::Null),
-        "focusable": if identity_part {
+        "focusable": if chrome_root {
+            json!(false)
+        } else if identity_part {
             json!(node.interaction.focusable && !node.interaction.disabled)
         } else {
             Value::Null
         },
         "focused": focused.map(|f| json!(f)).unwrap_or(Value::Null),
-        "focusVisible": if identity_part {
+        "focusVisible": if chrome_root {
+            json!(false)
+        } else if identity_part {
             focus_visible_of(node, focused)
         } else {
             Value::Null
         },
-        "tabbable": if identity_part {
+        "tabbable": if chrome_root {
+            json!(false)
+        } else if identity_part {
             json!(node.interaction.focusable && !node.interaction.disabled && node.a11y.tab_index.unwrap_or(0) == 0)
         } else {
             Value::Null
@@ -522,6 +560,8 @@ fn absent_part() -> Value {
         "text": null,
         "icon": null,
         "value": null,
+        "selectionStart": null,
+        "selectionEnd": null,
         "states": {},
         "tokenRoles": {},
         "expanded": null,
@@ -752,6 +792,11 @@ fn focused_text_of(root: &Node, focus_by_id: &dyn Fn(&str) -> Option<bool>) -> O
             && node.interaction.focusable
             && !node.interaction.disabled
         {
+            // Web `<input>`/`<textarea>` textContent is empty; value lives on
+            // the value channel, not focusedText.
+            if matches!(node.kind, NodeKind::Input { .. }) {
+                return None;
+            }
             let joined = node.texts().join("");
             // The web observer reports null for a focus target without
             // readable text (empty textContent); mirror that.
@@ -1136,6 +1181,77 @@ mod tests {
         assert_eq!(runtime_identity(&node), "tabs:first:tab:overview");
         assert_eq!(node.id.as_deref(), Some("tabs:overview"));
     }
+
+    #[test]
+    fn collapsed_root_keeps_wrapper_identity() {
+        let mut node = Node::input("hello", "");
+        node.interaction.focusable = true;
+        node.a11y.role = Some(poodle_node::NodeRole::TextInput);
+        let iface = InterfaceDoc::parse(&json!({
+            "parts": [
+                { "id": "root", "resolve": { "native": { "kind": "self" } } },
+                { "id": "control", "role": "textbox", "resolve": { "native": { "kind": "self" } } }
+            ],
+            "states": [],
+            "tokenRoles": []
+        }))
+        .expect("iface");
+        let observation = observe_tree("test", "collapsed", &iface, &node, Some(true));
+        let root = &observation["parts"]["root"];
+        let control = &observation["parts"]["control"];
+        assert_eq!(root["role"], Value::Null);
+        assert_eq!(root["value"], Value::Null);
+        assert_eq!(root["focusable"], json!(false));
+        assert_eq!(root["tabbable"], json!(false));
+        assert_eq!(root["focused"], json!(true));
+        assert_eq!(root["focusVisible"], json!(false));
+        assert_eq!(root["focusedText"], Value::Null);
+        assert_eq!(control["role"], json!("textbox"));
+        assert_eq!(control["value"], json!("hello"));
+        assert_eq!(control["focusable"], json!(true));
+        assert_eq!(control["parent"], json!("root"));
+    }
+
+    #[test]
+    fn sole_root_keeps_control_identity() {
+        let mut node = Node::container();
+        node.interaction.focusable = true;
+        node.a11y.role = Some(poodle_node::NodeRole::Button);
+        let iface = InterfaceDoc::parse(&json!({
+            "parts": [
+                { "id": "root", "role": "button", "resolve": { "native": { "kind": "self" } } }
+            ],
+            "states": [],
+            "tokenRoles": []
+        }))
+        .expect("iface");
+        let observation = observe_tree("test", "button", &iface, &node, Some(true));
+        let root = &observation["parts"]["root"];
+        assert_eq!(root["focusable"], json!(true));
+        assert_eq!(root["role"], json!("button"));
+        assert_eq!(root["focused"], json!(true));
+    }
+
+    #[test]
+    fn root_label_does_not_collapse_chrome() {
+        let mut node = Node::container().child(Node::text("Save"));
+        node.interaction.focusable = true;
+        node.a11y.role = Some(poodle_node::NodeRole::Button);
+        let iface = InterfaceDoc::parse(&json!({
+            "parts": [
+                { "id": "root", "role": "button", "resolve": { "native": { "kind": "self" } } },
+                { "id": "label", "resolve": { "native": { "kind": "root-label" } } }
+            ],
+            "states": [],
+            "tokenRoles": []
+        }))
+        .expect("iface");
+        let observation = observe_tree("test", "button", &iface, &node, Some(true));
+        let root = &observation["parts"]["root"];
+        assert_eq!(root["focusable"], json!(true));
+        assert_eq!(root["role"], json!("button"));
+        assert_eq!(root["name"], json!("Save"));
+    }
 }
 
 pub fn assert_part(
@@ -1217,6 +1333,8 @@ pub fn assert_part(
         "orientation",
         "controls",
         "labelledBy",
+        "selectionStart",
+        "selectionEnd",
     ] {
         if let Some(expected) = expect.get(field) {
             let actual = observed.get(field);

@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-15 — `docs:check`'s recursive Markdown scan enters
+  `packages/gpui/preview/target/`; when it runs beside Cargo, a temporary rmeta
+  directory can disappear between `readdir` calls and fail docs lint with
+  `ENOENT`. Exclude build-output directories from the operator-guide scan or
+  tolerate vanished entries. Affects parallel docs + Rust validation.
+
 - 2026-08-14 — Empty catalogue collection vocabularies emit
   `CatalogueCollectionId = never`. Mapping that union in shared preview
   nav fails `effigy check:svelte`, which type-checks preview files via

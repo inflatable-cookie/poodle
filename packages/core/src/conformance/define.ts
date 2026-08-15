@@ -408,6 +408,9 @@ export type SerializedCaseStep =
       fraction?: number;
       phase?: string;
       target?: string;
+      text?: string;
+      start?: number;
+      end?: number;
     }
   | { kind: "expectPart"; part: string; expect: Record<string, unknown> }
   | { kind: "expectEvents"; events: string[] };
@@ -506,8 +509,13 @@ export interface PartExpectation<I extends InterfaceConfig> {
   text?: string;
   /** The icon name the part carries (observed on all runtimes). */
   icon?: string;
-  /** Observed numeric value: a scalar thumb or a controlled pair on root. */
-  value?: number | readonly [number, number];
+  /** Observed value: a scalar thumb, a controlled pair, or editable text. */
+  value?: number | readonly [number, number] | string;
+  /** Caret/selection start, in UTF-16 code units. Runtime adapters translate
+   * when their editor stores another index unit. */
+  selectionStart?: number;
+  /** Caret/selection end, in UTF-16 code units. Equal to start is a caret. */
+  selectionEnd?: number;
   present?: boolean;
   focusable?: boolean;
   focused?: boolean;
@@ -554,6 +562,15 @@ export type CaseStep<I extends InterfaceConfig> =
     }
   | { kind: "action"; name: "dismiss"; part: CasePartId<I> }
   | { kind: "action"; name: "pointer"; part: CasePartId<I>; target: "inside" | "outside" }
+  | { kind: "action"; name: "insert"; part: CasePartId<I>; text: string }
+  | { kind: "action"; name: "select"; part: CasePartId<I>; start: number; end: number }
+  | {
+      kind: "action";
+      name: "compose";
+      part: CasePartId<I>;
+      text: string;
+      phase: "start" | "update" | "commit";
+    }
   | { kind: "expectPart"; part: CasePartId<I>; expect: PartExpectation<I> }
   | { kind: "expectEvents"; events: EventNamesOf<I>[] };
 
@@ -841,6 +858,27 @@ export function serializeCases<I extends InterfaceConfig>(
           if (step.name === "dismiss") {
             return { kind: "action", name: "dismiss", part: step.part };
           }
+          if (step.name === "insert") {
+            return { kind: "action", name: "insert", part: step.part, text: step.text };
+          }
+          if (step.name === "select") {
+            return {
+              kind: "action",
+              name: "select",
+              part: step.part,
+              start: step.start,
+              end: step.end,
+            };
+          }
+          if (step.name === "compose") {
+            return {
+              kind: "action",
+              name: "compose",
+              part: step.part,
+              text: step.text,
+              phase: step.phase,
+            };
+          }
           return {
             kind: "action",
             name: step.name,
@@ -894,6 +932,35 @@ export function actionPointer<I extends InterfaceConfig>(
   target: "inside" | "outside",
 ): CaseStep<I> {
   return { kind: "action", name: "pointer", part, target };
+}
+
+/** Insert text through the runtime's real editing path (DOM input or native
+ * key/IME dispatch). Never a direct host state write. */
+export function actionInsert<I extends InterfaceConfig>(
+  part: CasePartId<I>,
+  text: string,
+): CaseStep<I> {
+  return { kind: "action", name: "insert", part, text };
+}
+
+/** Set the caret or selection through the runtime's real selection path.
+ * Offsets use UTF-16 code units, matching DOM and platform text APIs. */
+export function actionSelect<I extends InterfaceConfig>(
+  part: CasePartId<I>,
+  start: number,
+  end: number,
+): CaseStep<I> {
+  return { kind: "action", name: "select", part, start, end };
+}
+
+/** Drive composition/IME: start and update must not commit; commit is the
+ * single valueChange. Mechanism is runtime-owned; the committed value is not. */
+export function actionCompose<I extends InterfaceConfig>(
+  part: CasePartId<I>,
+  text: string,
+  phase: "start" | "update" | "commit",
+): CaseStep<I> {
+  return { kind: "action", name: "compose", part, text, phase };
 }
 
 export function expectPart<I extends InterfaceConfig>(

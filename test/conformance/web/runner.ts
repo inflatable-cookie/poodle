@@ -32,8 +32,11 @@ export interface PartObservation {
   name: string | null;
   text: string | null;
   icon: string | null;
-  /** Scalar thumb value or controlled pair on root. */
-  value: number | [number, number] | null;
+  /** Scalar thumb value, controlled pair, or editable text. */
+  value: number | [number, number] | string | null;
+  /** Caret/selection offsets, in characters. */
+  selectionStart: number | null;
+  selectionEnd: number | null;
   states: Record<string, boolean | null>;
   tokenRoles: Record<string, string | null>;
   expanded: boolean | null;
@@ -103,6 +106,12 @@ export interface RuntimeAdapter {
   dismiss(part: string): Promise<void>;
   /** A real pointer interaction with inside/outside intent relative to a part. */
   pointer(part: string, target: "inside" | "outside"): Promise<void>;
+  /** Insert text through the runtime's real editing path. */
+  insert?(part: string, text: string): Promise<void>;
+  /** Set caret/selection through the runtime's real selection path. */
+  select?(part: string, start: number, end: number): Promise<void>;
+  /** Drive composition/IME start, update, or commit. */
+  compose?(part: string, text: string, phase: "start" | "update" | "commit"): Promise<void>;
   /** Flush pending framework state/effects so observation sees final DOM. */
   flush(): Promise<void>;
   trace(): TraceEntry[];
@@ -208,6 +217,7 @@ function roleOf(el: HTMLElement): string | null {
   if (explicit) return explicit;
   if (el.tagName === "BUTTON") return "button";
   if (el.tagName === "INPUT" && (el as HTMLInputElement).type === "range") return "slider";
+  if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") return "textbox";
   return null;
 }
 
@@ -218,16 +228,26 @@ function isFocusable(el: HTMLElement): boolean {
   return tag === "BUTTON" || tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA" || tag === "A";
 }
 
-function partValue(el: HTMLElement | null): number | null {
+function partValue(el: HTMLElement | null): number | string | null {
   if (!el) return null;
   if (el instanceof HTMLInputElement && el.type === "range") {
     const parsed = Number(el.value);
     return Number.isFinite(parsed) ? parsed : null;
   }
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+    return el.value;
+  }
   const now = el.getAttribute("aria-valuenow");
   if (now == null) return null;
   const parsed = Number(now);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function partSelection(el: HTMLElement | null): { start: number | null; end: number | null } {
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+    return { start: el.selectionStart, end: el.selectionEnd };
+  }
+  return { start: null, end: null };
 }
 
 function observeRootStates(
@@ -381,6 +401,8 @@ export function observeDom(
       text: !isRoot && part.contains === "text" ? (el?.textContent?.trim() || null) : null,
       icon: iconIdentity(part, el),
       value: partValue(el),
+      selectionStart: partSelection(el).start,
+      selectionEnd: partSelection(el).end,
       states: {},
       tokenRoles: {},
       expanded: el?.getAttribute("aria-expanded") === "true" ? true : el?.hasAttribute("aria-expanded") ? false : null,
@@ -544,6 +566,8 @@ export function assertPartObservation(
     "orientation",
     "controls",
     "labelledBy",
+    "selectionStart",
+    "selectionEnd",
   ] as const) {
     if (expect[field] !== undefined) {
       check(results, runtime, stepIndex, partId, field, expect[field], observed[field]);
@@ -552,11 +576,14 @@ export function assertPartObservation(
   if (expect.value !== undefined) {
     const expected = expect.value;
     const actual = observed.value;
-    const matches = Array.isArray(expected)
-      ? Array.isArray(actual) &&
-        expected.length === actual.length &&
-        expected.every((entry, index) => numbersMatch(entry, actual[index], 1e-9))
-      : numbersMatch(expected, actual, 1e-9);
+    const matches =
+      typeof expected === "string"
+        ? expected === actual
+        : Array.isArray(expected)
+          ? Array.isArray(actual) &&
+            expected.length === actual.length &&
+            expected.every((entry, index) => numbersMatch(entry, actual[index], 1e-9))
+          : numbersMatch(expected, actual, 1e-9);
     if (actual === null || actual === undefined) {
       results.push({
         stepIndex,
@@ -665,6 +692,20 @@ export async function runCase(
             step.part,
             typeof step.fraction === "number" ? step.fraction : 0,
             (step.phase as "press" | "drag" | "release") ?? "press",
+          );
+        } else if (step.name === "insert") {
+          await adapter.insert?.(step.part, step.text ?? "");
+        } else if (step.name === "select") {
+          await adapter.select?.(
+            step.part,
+            typeof step.start === "number" ? step.start : 0,
+            typeof step.end === "number" ? step.end : 0,
+          );
+        } else if (step.name === "compose") {
+          await adapter.compose?.(
+            step.part,
+            step.text ?? "",
+            (step.phase as "start" | "update" | "commit") ?? "commit",
           );
         }
         await adapter.flush();

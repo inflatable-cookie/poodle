@@ -108,7 +108,9 @@ fn generated_enum(prop: &PortableProp) -> Option<String> {
 fn prop_type(prop: &PortableProp) -> String {
     let base = match prop.kind.kind.as_str() {
         "boolean" => "bool".to_owned(),
-        "number" => "f32".to_owned(),
+        "number" => integer_rust_type(prop)
+            .map(str::to_owned)
+            .unwrap_or_else(|| "f32".to_owned()),
         "icon" => "String".to_owned(),
         "dimension" | "remDimension" => "crate::types::Dimension".to_owned(),
         "string" => "String".to_owned(),
@@ -148,15 +150,29 @@ fn struct_name(interface: &ComponentInterface) -> String {
 
 fn rust_named_type(name: &str) -> String {
     match name {
+        "usize" | "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" | "f32" | "f64" => {
+            name.to_owned()
+        }
         "ActiveEdge" | "ActiveFill" => format!("crate::tabs::{name}"),
         _ => format!("crate::types::{name}"),
     }
 }
 
+fn integer_rust_type(prop: &PortableProp) -> Option<&str> {
+    let name = prop.rust_type.as_deref().or(prop.kind.rust_type.as_deref())?;
+    matches!(
+        name,
+        "usize" | "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64"
+    )
+    .then_some(name)
+}
+
 fn render_struct(struct_name: &str, props: &[&PortableProp]) -> String {
-    // f32 props (numeric offsets etc.) are not Eq; the derive follows.
-    let has_number = props.iter().any(|prop| prop.kind.kind == "number");
-    let derive = if has_number {
+    // f32 props (numeric offsets etc.) are not Eq; integer rustType stays Eq.
+    let has_float = props
+        .iter()
+        .any(|prop| prop.kind.kind == "number" && integer_rust_type(prop).is_none());
+    let derive = if has_float {
         "#[derive(Clone, Debug, PartialEq)]"
     } else {
         "#[derive(Clone, Debug, Eq, PartialEq)]"
@@ -215,6 +231,15 @@ fn rust_default(prop: &PortableProp) -> String {
         let value = prop.default.as_f64().unwrap_or(0.0);
         return format!("{value:?}");
     }
+    if integer_rust_type(prop).is_some() {
+        let value = prop
+            .default
+            .as_u64()
+            .or_else(|| prop.default.as_i64().map(|n| n as u64))
+            .or_else(|| prop.default.as_f64().map(|n| n as u64))
+            .unwrap_or(0);
+        return format!("{value}");
+    }
     "Default::default()".to_owned()
 }
 
@@ -256,6 +281,11 @@ fn render_builder(prop: &PortableProp) -> String {
                 format!("self.{field} = Some(value);"),
             ),
         }
+    } else if ty == "String" {
+        (
+            "impl Into<String>".to_owned(),
+            format!("self.{field} = value.into();"),
+        )
     } else {
         (ty.clone(), format!("self.{field} = value;"))
     };

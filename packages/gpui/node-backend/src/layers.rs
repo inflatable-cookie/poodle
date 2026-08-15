@@ -101,6 +101,14 @@ pub fn bounds_for(element_id: &str) -> Option<Bounds<Pixels>> {
     ELEMENT_BOUNDS.with(|bounds| bounds.borrow().get(element_id).copied())
 }
 
+/// Record paint bounds for a named element. Overlay members also go through
+/// [`record_bounds`]; this covers ordinary identified parts (buttons, fields).
+pub fn record_element_bounds(element_id: &str, bounds: Bounds<Pixels>) {
+    ELEMENT_BOUNDS.with(|all| {
+        all.borrow_mut().insert(element_id.to_owned(), bounds);
+    });
+}
+
 /// How many open overlay layers are registered this frame.
 pub fn open_layer_count() -> usize {
     LAYERS.with(|layers| layers.borrow().len())

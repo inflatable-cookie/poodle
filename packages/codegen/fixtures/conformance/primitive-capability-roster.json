@@ -506,7 +506,9 @@
       ],
       "owner": "g14.006",
       "requiredObservations": [
-        "node.field"
+        "node.field",
+        "parts.value",
+        "parts.selection"
       ]
     },
     {
@@ -523,8 +525,26 @@
       "owner": "g14.006",
       "requiredObservations": [
         "node.field",
-        "gpui.event"
+        "gpui.event",
+        "trace"
       ]
+    },
+    {
+      "id": "input.ime",
+      "family": "input",
+      "covers": [
+        "composition start/update/commit",
+        "InputHandler.replace_and_mark_text_in_range",
+        "InputHandler.replace_text_in_range",
+        "marked range"
+      ],
+      "owner": "g14.006",
+      "requiredObservations": [
+        "node.field",
+        "trace",
+        "parts.value"
+      ],
+      "notes": "Mechanism is runtime-owned (DOM composition vs platform InputHandler). Commit must emit one valueChange; start/update must not."
     }
   ]
 }

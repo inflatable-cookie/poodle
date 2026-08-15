@@ -664,5 +664,7 @@ where
 mod ime;
 mod input_text;
 
+pub use ime::{mark_composing, take_composing};
+
 #[cfg(test)]
 mod tests;

@@ -1,7 +1,7 @@
 # Text Input
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-15
 
 ## 1. Purpose
 
@@ -96,6 +96,8 @@ Updated: 2026-07-10
 | `suffix` | `string \| null` | `null` | no | static text after input (e.g. "kg") |
 | `maxLength` | `number \| null` | `null` | no | maximum character count |
 | `showCharCount` | `boolean` | `false` | no | display live character counter |
+| `leadingIcon` | `IconProp \| null` | `null` | no | leading icon; the `leading` composition region takes precedence when both are supplied |
+| `trailingIcon` | `IconProp \| null` | `null` | no | trailing icon; the `trailing` composition region takes precedence when both are supplied |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
