@@ -1,7 +1,7 @@
 # g14.006 — TextInput Runtime-boundary Proof
 
-Status: planned
-Depends on: `g14.005`
+Status: complete — accepted in PR #20
+Depends on: `g14.005` — accepted in PR #18
 
 ## Outcome
 
