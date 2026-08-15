@@ -5,26 +5,33 @@ Depends on: `g14.021`
 
 ## Outcome
 
-Close g14 with the component corpus enforced by the adopted conformance system
-and no false-start authority left active.
+Close g14 as a rejected architecture pilot that still improved components,
+native substrate behaviour, headless testing, and specimen ownership. Leave a
+clean planning checkpoint for the next parity design and the still-incomplete
+active-runtime component suites.
 
 ## Acceptance
 
-- Every rostered component is complete or explicitly assigned to a later
-  generation; no unowned gap.
+- The rejected conformance plane is absent from active source and standing
+  architecture; historical evidence remains readable.
+- Every retained component/backend fix and regression has a live owner.
+- Licence and model-connection web references remain approved; native/runtime
+  gaps are explicitly replanned rather than falsely completed.
+- The human-centred specimen catalogue lane has one honest next state and no
+  exhaustive corpus projection.
 - Architecture, specs, contracts, package docs, task selectors, and roadmap
-  front doors agree.
-- Full active-cohort conformance, web, Rust, native, docs, health, and diff
-  boards pass. Paired Jetstream gates remain explicit deferred evidence rather
-  than a closeout prerequisite.
-- Each active runtime's curated specimen and conformance-capture workflows are
-  reproducible and visibly distinct.
-- Generation evidence records defects caught, parity gaps closed, total cost,
-  known limits, and the later Jetstream admission program.
+  front doors agree on the post-reject system.
+- Active Svelte, React, Rust, GPUI, docs, health, and diff boards pass or carry
+  a named non-g14 baseline owner. Jetstream remains deferred.
+- Generation evidence records defects caught, parity gaps still open, total
+  pilot cost, cleanup cost, known limits, and the question the next design
+  must answer.
 
 ## Stop Conditions
 
-- Closeout uses declared absence, placeholder implementation, or skipped
-  active runtime as a pass.
-- A retired experiment remains required by active generation tooling without
-  explicit promotion.
+- Closeout presents the pilot as adopted, the active cohort as complete, or a
+  deleted gate as proof of parity.
+- A retained experiment remains required by active tooling without explicit
+  promotion.
+- Closeout starts designing the replacement architecture instead of exposing
+  a clean decision point.

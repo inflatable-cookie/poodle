@@ -1,17 +1,17 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-14
+Updated: 2026-08-15
 
 Roadmaps record Poodle's executable milestone work. `g14` is active.
 
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary.
-- `g14` builds executable component conformance across Svelte, React, and
-  GPUI: portable interfaces, shared cases/specimens, normalized observations,
-  certified primitives, and a strict completion gate. Jetstream is deferred to
-  a later backend-admission runway over the same Rust boundary.
+- `g14` tested executable component conformance across Svelte, React, and
+  GPUI. `g14.008` rejected the mechanism after its cost and coverage audit.
+  The generation is now preserving fixes and removing the failed authority.
+  Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
 - The first g14 machine-pinning/scene runway was reset after five merged
@@ -35,7 +35,7 @@ Roadmaps record Poodle's executable milestone work. `g14` is active.
 - `g11` — Svelte modernization and shared web machinery
 - `g12` — React parity, verification depth, native hardening, audio family
 - `g13` — retired Rust-authored component/scene IR pilot
-- `g14` — executable active-cohort component conformance
+- `g14` — rejected executable-conformance pilot; cleanup active
 
 ## Rules
 

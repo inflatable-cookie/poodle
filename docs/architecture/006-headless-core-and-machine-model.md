@@ -1,7 +1,7 @@
 # 006 Headless Core And Machine Model
 
 Status: active
-Updated: 2026-08-14
+Updated: 2026-08-15
 Promoted from: `docs/specs/062-headless-core-and-dual-layer-strategy.md` (g11.004)
 
 ## Shape
@@ -59,8 +59,7 @@ state machine. They are not the cross-runtime contract by themselves. A
 component can drift in interface shape, composition, accessibility, renderer
 output, focus, or specimen structure while its machine trace stays green.
 
-The component conformance system therefore exercises machines through shared
-component cases and compares their normalized observable results. Generated
-machine interfaces and existing vectors are provisional inputs to that system
-until g14 classifies them. See
+The g14 shared-case/normalized-observation attempt was rejected. Keep machine
+tests as focused evidence for the behaviour they own; do not promote them into
+proof of full component parity. The failed system is recorded in
 [009 Cross-Runtime Component Conformance](009-cross-runtime-component-conformance.md).

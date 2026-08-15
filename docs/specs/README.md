@@ -1,7 +1,7 @@
 # Specs
 
 Status: active
-Updated: 2026-08-14
+Updated: 2026-08-15
 
 Specs define repository-wide rules that are broader than one component:
 tokens, artifact generation, parity evidence, accessibility, packaging,
@@ -33,13 +33,13 @@ Important current cross-cutting references include:
 - `044-deprecation-change-control-and-release-channel-operations.md`
 - `062-headless-core-and-dual-layer-strategy.md`
 - `063-rust-authored-component-and-scene-ir.md` — retired g13 pilot record;
-  superseded by architecture 009/spec 066
+  its architecture 009/spec 066 successor was also rejected
 - `064-cross-runtime-machine-pinning.md` — retired g14 false-start record;
-  superseded by `066`
+  its `066` successor was also rejected
 - `065-scene-authoring-and-specimen-fixtures.md` — retired scene-fixture
-  contract; its one-authored-structure requirement moves to `066`
-- `066-executable-component-conformance.md` — provisional g14 contract for
-  portable interfaces, shared cases/specimens, observations, and completion
+  contract; human-centred specimen work continues under roadmap `g14.026`
+- `066-executable-component-conformance.md` — rejected g14 pilot contract;
+  retained as measured evidence, not current authority
 - `067-model-connection-management.md` — shaping contract for reusable model
   route setup, configured connection rows, and model catalogue curation
 - `068-batched-audio-meter-surface.md` — approved contract for the web

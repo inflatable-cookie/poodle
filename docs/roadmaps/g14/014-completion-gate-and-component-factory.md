@@ -1,7 +1,7 @@
 # g14.014 — Completion Gate And Component Factory
 
-Status: blocked pending `g14.008` adopt
-Depends on: `g14.009`–`g14.013`
+Status: retired — `g14.008` rejected the pilot mechanism
+Superseded by: `g14.021`
 
 ## Outcome
 

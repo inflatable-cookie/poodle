@@ -261,6 +261,10 @@ const WIRING: Array<[string, string]> = [
 const REPLACED: Array<[string, string]> = [
   ["Hand-written ButtonSpec declaration", "packages/contracts/components/src/button.rs"],
   ["Hand-written PopoverSpec declaration", "packages/contracts/components/src/popover.rs"],
+  ["Hand-written TextInputSpec declaration", "packages/contracts/components/src/text_input.rs"],
+  ["Popover Rust vector harness", "packages/contracts/headless/tests/conformance.rs"],
+  ["Popover machine vectors", "packages/contracts/headless/vectors/machines.json"],
+  ["Popover TypeScript vector harness", "packages/core/test/conformance.test.ts"],
   ["Svelte Button specimen fixtures", "packages/svelte/preview/src/specimens/ButtonSpecimen.svelte"],
   ["React Button specimen fixtures", "packages/react/preview/src/gallery/specimens/ButtonSpecimen.tsx"],
   ["GPUI Button specimen fixtures", "packages/gpui/preview/src/specimens/button.rs"],

@@ -54,7 +54,8 @@ Run `effigy svelte:preview` and `effigy react:preview`.
 
 - Feedback requires backend policy, credentials, discovery, persistence, or an
   external-repository change.
-- Review starts shared cases, Rust, GPUI, or Jetstream before g14.008 adopt.
+- Review starts shared execution infrastructure, Rust, GPUI, or Jetstream
+  inside this operator-review card.
 - A second unbounded redesign pass is proposed instead of revisiting the spec.
 
 ## Completion Protocol
@@ -65,6 +66,6 @@ the operator can inspect both live previews. Do not dispatch a review worker.
 ## Completion Record
 
 The operator approved the Svelte and React reference delivered by merge
-`48c6ec37` after the bounded refinement in `ed6fd412`. g14.020 owns the
-remaining shared-case, Rust, and GPUI work and stays blocked until g14.008
-records **adopt**.
+`48c6ec37` after the bounded refinement in `ed6fd412`. The Rust and GPUI work
+remains incomplete; `g14.020` must be rewritten after the rejected pilot
+cleanup.

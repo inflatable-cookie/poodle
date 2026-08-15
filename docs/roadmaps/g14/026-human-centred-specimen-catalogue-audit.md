@@ -1,17 +1,16 @@
 # g14.026 — Human-Centred Specimen Catalogue Audit
 
-Status: blocked pending `g14.008`
-Depends on: `g14.008`, `g14.025`
+Status: blocked pending `g14.021`
+Depends on: `g14.021`, `g14.025`
 Governing refs: `../../contracts/001-working-rules.md`,
-`../../architecture/009-cross-runtime-component-conformance.md`,
-`../../specs/066-executable-component-conformance.md`
+`025-preview-catalogue-taxonomy-and-generated-navigation.md`
 
 ## Outcome
 
 Freeze a human-centred specimen standard, inspect every catalogue page, and
 compile bounded curation tranches. Pilot the standard on Button, RangeSlider,
-and Tabs. Decide whether the adopted conformance corpus earns a separate
-`Conformance` tab without turning the catalogue into another test report.
+and Tabs. Confirm the rejected corpus projection is absent rather than turning
+the catalogue into another test report.
 
 This card audits and proves the shape. It does not attempt a one-PR rewrite of
 the entire catalogue.
@@ -27,8 +26,7 @@ the entire catalogue.
         composition; no Cartesian product
       - `Sizes` — control-size evidence only where size applies
       - `Densities` — density evidence only where density applies
-      - `Conformance` — optional exhaustive case projection, only after an
-        `adopt` or bounded `revise` verdict
+      - `Conformance` — omitted after the `g14.008` reject verdict
 - [ ] Define one renderer-neutral specimen plan for ordered tabs, sections,
       captions, and shared fixture references. Keep runtime component
       rendering local.
@@ -59,7 +57,7 @@ Allowed shared data:
 
 - tab and section IDs/order
 - titles, captions, descriptions, and example IDs
-- references to reusable fixtures or conformance cases
+- references to reusable teaching fixtures
 - axis eligibility and capture identity
 
 Not allowed:
@@ -75,22 +73,17 @@ language, keep the page's bounded renderer adapter and share only its outline.
 
 ## Conformance-tab Decision
 
-The `g14.008` verdict controls this branch:
+`g14.008` rejected the executable corpus. Omit the tab and confirm
+`g14.021` retired projection-only catalogue wiring before this audit begins.
 
-- **adopt** — pilot a lazy `Conformance` tab that enumerates the full case
-  corpus and clearly labels it diagnostic
-- **revise** — include only the corrected corpus named by the verdict
-- **reject** — omit the tab and retire projection-only catalogue wiring
-
-The conformance tab never becomes the default tab and never contributes
-examples to `Examples`, `Sizes`, or `Densities`.
+No conformance tab is introduced.
 
 ## Deliverables
 
 - complete page-by-page inventory with a curation grade and named defects
 - specimen-plan contract and smallest useful schema/adapters
 - operator-approved Button, RangeSlider, and Tabs pilot pages
-- decision and evidence for the optional `Conformance` tab
+- evidence that projection-only `Conformance` wiring is absent
 - bounded rollout roadmap files for the remaining catalogue
 - one August batch log with before/after screenshots and source-cost evidence
 
@@ -103,7 +96,7 @@ examples to `Examples`, `Sizes`, or `Densities`.
 - Shared structure changes reach Svelte, React, and GPUI without copying
   section metadata three times.
 - Runtime adapters render real components; the plan contains no behaviour.
-- Exhaustive cases, if exposed, live only under `Conformance`.
+- No exhaustive case projection appears in the catalogue.
 - The remaining work is split into reviewable tranches rather than one
   catalogue-wide rewrite.
 
@@ -122,8 +115,8 @@ examples to `Examples`, `Sizes`, or `Densities`.
 - catalogue inventory and new bounded roadmap files
 - this roadmap, the g14 index, one August batch log, and `PAPERCUTS.md`
 
-Do not change component public APIs, component semantics, the executable case
-corpus, normalized observations, Jetstream runtime code, or release workflows.
+Do not change component public APIs, component semantics, rejected
+conformance machinery, Jetstream runtime code, or release workflows.
 
 ## Validation
 

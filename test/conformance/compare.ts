@@ -22,6 +22,7 @@ import { rangeSliderCases } from "../../packages/core/src/conformance/range-slid
 import { tabsCases } from "../../packages/core/src/conformance/tabs-cases";
 import { popoverCases } from "../../packages/core/src/conformance/popover-cases";
 import { textInputCases } from "../../packages/core/src/conformance/text-input-cases";
+import { historyCenterCases } from "../../packages/core/src/conformance/history-center-cases";
 import type { SerializedCase } from "../../packages/core/src/conformance/define";
 
 interface AssertionResult {
@@ -64,6 +65,7 @@ const COMPONENT_CORPORA: Array<{
   { label: "tabs", reportSuffix: "-tabs", cases: tabsCases },
   { label: "popover", reportSuffix: "-popover", cases: popoverCases },
   { label: "text-input", reportSuffix: "-text-input", cases: textInputCases },
+  { label: "history-center", reportSuffix: "-history-center", cases: historyCenterCases },
 ];
 
 function loadReport(runtime: string, reportSuffix: string): RuntimeReport | null {
@@ -88,6 +90,8 @@ const IDENTITY_FIELDS = [
   "overlay",
   "focusedText",
   "layerCount",
+  "level",
+  "scrollable",
   "orientation",
   "controls",
   "labelledBy",
@@ -96,6 +100,7 @@ const IDENTITY_FIELDS = [
 const GEOMETRY_FIELDS = [
   "height",
   "minWidth",
+  "maxHeight",
   "paddingLeft",
   "paddingRight",
   "radius",

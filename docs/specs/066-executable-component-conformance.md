@@ -1,10 +1,21 @@
 # 066 Executable Component Conformance
 
-Status: provisional — g14 pilot contract
-Updated: 2026-08-14
+Status: rejected — `g14.008`
+Updated: 2026-08-15
 Owner: Poodle core
 Depends on: `../architecture/009-cross-runtime-component-conformance.md`,
 `../contracts/001-working-rules.md`
+
+## Pilot Verdict
+
+The pilot failed this spec's own replacement, coverage, neutrality, and
+generic-runner rules. Its corrected cost is 22,746 source LOC against 472 LOC
+replaced. HistoryCenter was absent from the comparator; adding it produces
+1,205 cross-runtime differences. The mechanism is rejected rather than
+revised because fixing every failed dimension would define a new system.
+
+This spec remains historical evidence. Do not add components, fields, cases,
+or adapters to it. Cleanup and retained-test disposition live in `g14.021`.
 
 ## Purpose
 

@@ -1,7 +1,7 @@
 # g14.012 — Overlays And Input Rollout
 
-Status: blocked pending `g14.008` adopt
-Depends on: `g14.011`
+Status: retired — `g14.008` rejected the pilot mechanism
+Superseded by: `g14.021`
 
 ## Outcome
 

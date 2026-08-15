@@ -1,7 +1,7 @@
 # 065 Scene Authoring And Specimen Fixtures
 
-Status: retired — superseded by spec 066
-Updated: 2026-08-14
+Status: retired — follow-up spec 066 also rejected
+Updated: 2026-08-15
 Owner: Poodle core
 
 ## Record
@@ -15,10 +15,11 @@ Rust specimen model and separated specimen fixtures from executable component
 cases. Its cost report excluded schema, generator, generated output,
 interpreters, tests, and wiring.
 
-The durable requirement moves to
-[066 Executable Component Conformance](066-executable-component-conformance.md):
-one typed case owns fixture data, actions/assertions, and specimen structure;
-four thin preview adapters project it. Existing scene artifacts are
-experimental until g14.001 classifies them.
+The attempted follow-up moved fixture data into
+[066 Executable Component Conformance](066-executable-component-conformance.md),
+which `g14.008` also rejected. The durable requirement is narrower: curated
+specimen pages should teach the same component across runtimes without a
+universal scene or exhaustive case projection. `g14.026` owns that later
+human-centred audit.
 
 Do not dispatch work from this document.

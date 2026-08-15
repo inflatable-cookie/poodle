@@ -95,8 +95,8 @@ Run them with `effigy svelte:preview` and `effigy react:preview`.
 
 - Feedback requires new licence policy, enforcement, authority data, or a
   Longhorn dependency.
-- The review starts Rust declarations, shared conformance cases, GPUI, or
-  Jetstream work before `g14.008` adopts the pipeline.
+- The review starts Rust declarations, shared execution infrastructure, GPUI,
+  or Jetstream work inside this operator-review card.
 - A static native mock is proposed only to create an early screenshot.
 - Svelte and React need different component semantics to satisfy the review.
 
@@ -111,5 +111,6 @@ validation; do not dispatch a separate worker.
 ## Completion Record
 
 The operator approved the refined Svelte and React reference after the bounded
-review batch landed through commits `d5f2bba1` and `5180ac16`. g14.017 owns the
-remaining shared-case, Rust, and GPUI work.
+review batch landed through commits `d5f2bba1` and `5180ac16`. The Rust and
+GPUI work remains incomplete; `g14.017` must be rewritten after the rejected
+pilot cleanup.

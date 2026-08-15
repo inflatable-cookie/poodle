@@ -1,7 +1,11 @@
 # g14.017 — Licence Active-runtime Completion
 
-Status: blocked pending `g14.008` adopt and `g14.016`
-Depends on: `g14.008`, `g14.016`
+Status: blocked — rewrite after `g14.021`; web reference approved
+Depends on: `g14.016`, `g14.021`
+
+Disposition: do not dispatch this version. `g14.008` rejected the pipeline it
+assumes. Preserve its component requirements, then recompile the native work
+after cleanup without the portable-interface/shared-corpus claim.
 
 ## Outcome
 

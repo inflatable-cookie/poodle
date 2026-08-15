@@ -5,27 +5,20 @@ Updated: 2026-08-15
 ## Active Track
 
 - `g14`
-  - Status: active
+  - Status: active — rejected pilot cleanup
   - Range: `001` to `026`
-  - Governing architecture:
-    `docs/architecture/009-cross-runtime-component-conformance.md`
-  - Governing spec: `docs/specs/066-executable-component-conformance.md`
-  - Goal: no silent portable drift across Svelte, React, and Rust through
-    GPUI. One portable interface and case/specimen corpus; two implementation
-    substrates; three executed observations; strict active-cohort completion.
-    Jetstream remains a deferred backend over the same Rust boundary.
-  - Runway: `001`–`005` are accepted; `006`–`007` prove the remaining component
-    profiles; `008` records adopt/revise/reject. `009`–`014` remain blocked
-    until adopt. `015`–`017` stage and complete the licence surface;
-    `018`–`020` do the same for model connections; `021` cleans the estate,
-    `022` closes the generation, interposed `023` replaces foreground GPUI
-    conformance before profile `005`, completed `024` adds the batched
-    AudioMeter web rendering tier, completed `025` provides the generated
-    preview catalogue taxonomy and active-runtime navigation, and `026` holds
-    the post-verdict human-centred specimen audit.
-  - Next: dispatch `g14.006`. `g14.019`, `g14.024`, and `g14.025` are complete;
-    model-connection reference, batched metering, and preview navigation are
-    approved. `g14.026` remains blocked pending the `008` verdict.
+  - Verdict: `g14.008` **rejected** architecture 009/spec 066 as Poodle's
+    standing component-conformance mechanism.
+  - Evidence: 22,746 source LOC against 472 LOC replaced; HistoryCenter absent
+    from the comparator; 1,205 differences after correction; manual component
+    registries and incomplete authority consumption.
+  - Retained result: component/backend fixes, focused regression claims,
+    headless GPUI execution, and the human-centred specimen boundary.
+  - Runway: `009`–`014` are retired. `017`, `020`, `022`, and `026` are
+    blocked behind cleanup. Independent web-reference, batched-meter, and
+    catalogue-taxonomy lanes are complete.
+  - Next: dispatch `g14.021` only. It preserves evidence and removes the
+    rejected plane without designing its replacement.
 
 ## Latest Completed Track
 
@@ -35,7 +28,7 @@ Updated: 2026-08-15
   - Verdict: **revise**, followed by retirement/unwind of the component IR.
   - Durable evidence: Svelte remains the reference; the web and native pairs
     keep one substrate each; behaviour codegen failed its cost/replacement
-    test; specimen structure should still be authored once.
+    test; specimen structure still needs a smaller coordination method.
   - Historical spec: `docs/specs/063-rust-authored-component-and-scene-ir.md`.
 
 ## Completed Foundations
@@ -43,38 +36,14 @@ Updated: 2026-08-15
 - `g12` — React parity, verification depth, native hardening, package
   consolidation, complete audio family (`001`–`027`)
 - `g11` — Svelte modernization, framework-free web machines, appearance
-  recipes, Rust mirrors, React adapter pilot (`001`–`008`)
-- `g10` — Jetstream feasibility and GPUI production hardening (`001`–`021`)
-- `g09` — native package consolidation and sizing/density (`001`–`009`)
-- `g08` — GPUI production quality and compliance (`001`–`011`)
-- `g07` — GPUI renderer build-out and adapter expansion (`001`–`015`)
-- `g06` — renderer contracts, typed tokens, layout/events, style IR (`001`–`015`)
-- `g05` — GPUI foundation and parity baseline (`001`–`014`)
-- `g04` — Underlay parity, specialist families, editing/media (`001`–`018`)
-- `g03` — hardening, migration, parity automation, adoption (`001`–`014`)
-- `g02` — composites, documentation, packaging, release baseline (`001`–`016`)
-- `g01` — repository foundations, tokens, primitives, shells (`001`–`014`)
+  consolidation, audio controls (`001`–`022`)
+- `g10` — Jetstream feasibility and GPUI production hardening (`001`–`020`)
+- `g09` — native package consolidation, typed size/density migration,
+  cross-runtime parity (`001`–`020`)
+- `g01`–`g08` — historical foundation and parity generations
 
-## Working Rule
+## Archive Policy
 
-When roadmap files disagree:
-
-1. Treat this index as the top-level status source.
-2. Treat `docs/roadmaps/README.md` as the front door.
-3. Treat `g13` and the first g14 runway as historical evidence.
-4. Treat the redesigned `g14/README.md` as the only executable runway.
-
-## Rollover Policy
-
-Create a generation only when maintainers explicitly reset sequencing. Before
-rollover: close or rehome every live card, refresh both front doors, promote or
-retire provisional specs, and name one first task.
-
-## Current Program Posture
-
-The implementation baseline remains pair-wise: shared TypeScript behaviour and
-styles for Svelte/React; shared Rust spec/render/node composition for native
-backends. g14 executes that plane through GPUI while keeping the boundary
-neutral for later Jetstream admission. It shares interface declarations,
-cases, specimen structure, and observations; it does not compile behaviour or
-impose one renderer model on web and native.
+Completed generations stay in `docs/roadmaps/gNN/`. Superseded or abandoned
+runways move to `docs/roadmaps/archive/` when they would otherwise obscure the
+active sequence. Historical execution logs remain in `docs/logs/`.

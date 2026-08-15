@@ -1,10 +1,24 @@
 # 009 Cross-Runtime Component Conformance
 
-Status: active
-Updated: 2026-08-14
+Status: rejected as standing architecture — `g14.008`
+Updated: 2026-08-15
 Owner: Poodle core
 Depends on: `001-poodle-system-shape.md`,
 `../contracts/001-working-rules.md`
+
+## Pilot Verdict
+
+`g14.008` rejected this conformance-plane design. The pilot measured 22,746
+LOC against 472 LOC replaced, omitted HistoryCenter from its comparator, and
+exposed 1,205 cross-runtime differences when that omission was corrected.
+Manual component registries, incomplete interface consumption, and
+backend-named shared probes also violated this decision's boundaries.
+
+Poodle still requires semantic parity and dependable component construction.
+This document records the rejected approach; it is not authority for new
+components or rollout. `g14.021` removes the pilot machinery while retaining
+component fixes and focused regressions. A replacement architecture needs a
+fresh decision after cleanup.
 
 ## Decision
 

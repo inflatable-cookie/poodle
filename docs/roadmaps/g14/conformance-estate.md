@@ -1,8 +1,16 @@
 # g14 Conformance Estate
 
-Status: active baseline
-Measured: 2026-08-14
+Status: historical pilot record — rejected by `g14.008`
+Measured: 2026-08-15
 Owner: Poodle orchestrator
+
+## Verdict
+
+The g14 executable conformance mechanism is rejected. The authoritative
+evidence and every surface disposition live in
+`008-pilot-verdict.md`. Sections below preserve the sequence of the pilot; a
+provisional `keep` statement is not standing authority. `g14.021` owns the
+cleanup.
 
 ## Problem Baseline
 
@@ -152,9 +160,9 @@ generated JSON:
 - replaced Button declaration plus the temporary specimen projection delta:
   619 LOC. Curated specimen deletion no longer counts as pilot savings.
 
-The stop condition is triggered. The orchestrator accepts `g14.001` as a
-feasibility proof, not a rollout verdict. Cards `002`–`007` must reuse or
-extract the pilot harness; `008` still decides adoption.
+The stop condition is triggered. The orchestrator accepted `g14.001` as a
+feasibility proof, not a rollout verdict. Cards `002`–`007` reused the pilot
+harness; `008` later rejected adoption.
 
 ## Primitive Substrate Status (g14.002)
 
@@ -360,9 +368,10 @@ comes back as host-supplied records.
 
 See `docs/logs/2026-08/15-g14-007-history-center-composite-proof.md`.
 
-## Experimental Surface Disposition
+## Experimental Surface Disposition (Historical Pre-verdict Record)
 
-No experimental surface is architecture merely because it merged.
+No experimental surface is architecture merely because it merged. The final
+disposition in `008-pilot-verdict.md` supersedes this provisional table.
 
 | Surface | Provisional disposition | Deciding milestone |
 | --- | --- | --- |
@@ -398,9 +407,9 @@ conformance kernel is still under proof. Web delivery is not completion.
 
 | Component | Web reference | Review | Native/shared cases | Completion state |
 | --- | --- | --- | --- | --- |
-| `LicenceStatus` | g14.015 landed | g14.016 | g14.017 after adopt | incomplete |
-| `LicenceActivation` | g14.015 landed | g14.016 | g14.017 after adopt | incomplete |
-| `LicenceSeats` | g14.015 landed | g14.016 | g14.017 after adopt | incomplete |
+| `LicenceStatus` | g14.015 landed | g14.016 | replan after g14.021 | incomplete |
+| `LicenceActivation` | g14.015 landed | g14.016 | replan after g14.021 | incomplete |
+| `LicenceSeats` | g14.015 landed | g14.016 | replan after g14.021 | incomplete |
 
 `LicenceCentre` is an explicit non-goal. The downstream comparison between
 Poodle's structural field mirrors and Longhorn's generated field maps remains
@@ -415,10 +424,10 @@ remain external authorities.
 
 | Component | Web reference | Review | Native/shared cases | Completion state |
 | --- | --- | --- | --- | --- |
-| `ModelConnectionPicker` | g14.018 | g14.019 | g14.020 after adopt | incomplete |
-| `ModelConnectionSetup` | g14.018 | g14.019 | g14.020 after adopt | incomplete |
-| `ModelConnectionCard` | g14.018 | g14.019 | g14.020 after adopt | incomplete |
-| `ModelCatalogueEditor` | g14.018 | g14.019 | g14.020 after adopt | incomplete |
+| `ModelConnectionPicker` | g14.018 | g14.019 | replan after g14.021 | incomplete |
+| `ModelConnectionSetup` | g14.018 | g14.019 | replan after g14.021 | incomplete |
+| `ModelConnectionCard` | g14.018 | g14.019 | replan after g14.021 | incomplete |
+| `ModelCatalogueEditor` | g14.018 | g14.019 | replan after g14.021 | incomplete |
 
 The existing `ModelPicker` stays the per-thread model/options control. No
 provider registry, route fallback, credential authority, provider schema, or

@@ -1,7 +1,7 @@
 # 001 Poodle System Shape
 
 Status: active
-Updated: 2026-08-14
+Updated: 2026-08-15
 
 ## Purpose
 
@@ -79,18 +79,19 @@ The durable implementation shape is pair-wise:
 The pairs do not maintain four independent component implementations. They
 also do not share executable behaviour across the TypeScript/Rust boundary.
 
-The current completion cohort is Svelte, React, and GPUI plus the portable
-Rust declaration and renderer-neutral node output. Jetstream remains a target,
-but its backend integration is deferred until a dedicated admission runway can
-exercise the same cases without requiring every Poodle worktree to clone or
-link the sibling engine repository. Deferral does not make Jetstream passing.
+Svelte, React, and GPUI are the current implementation cohort. Jetstream
+remains a target, but its backend integration is deferred until a dedicated
+admission runway can exercise real renderer behaviour without requiring every
+Poodle worktree to clone or link the sibling engine repository. Deferral does
+not make Jetstream passing.
 
-A separate conformance plane binds both pairs to the component contracts. It
-owns portable interface declarations, shared cases and specimen structure,
-and normalized observations. It may generate types and serialized fixtures;
-it must not generate component behaviour or become a renderer. Runtime-owned
-mechanisms may differ, but their observable result must satisfy the same case.
-See [009 Cross-Runtime Component Conformance](009-cross-runtime-component-conformance.md).
+The g14 attempt to bind the cohort through one generated portable interface,
+case corpus, normalized observation, and completion gate was rejected on cost
+and correctness evidence. Component contracts, shared substrate tests,
+runtime interaction tests, and explicit parity audits remain the active
+evidence until a replacement architecture is decided. See the rejected
+[009 Cross-Runtime Component Conformance](009-cross-runtime-component-conformance.md)
+record and `g14.008` verdict.
 
 ## Web Architecture
 
