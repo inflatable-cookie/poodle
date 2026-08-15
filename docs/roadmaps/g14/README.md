@@ -86,8 +86,8 @@ the adopted cases before promotion.
 5. [023 — Headless GPUI conformance execution](023-headless-gpui-conformance-execution.md) — complete; accepted in PR #17
 6. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md) — complete; accepted in PR #18
 7. [006 — TextInput runtime-boundary proof](006-text-input-runtime-boundary-proof.md) — complete; accepted in PR #20
-8. [007 — HistoryCenter composite proof](007-history-center-composite-proof.md) — next
-9. [008 — Pilot verdict](008-pilot-verdict.md)
+8. [007 — HistoryCenter composite proof](007-history-center-composite-proof.md) — complete; accepted in PR #21
+9. [008 — Pilot verdict](008-pilot-verdict.md) — next; orchestrator evidence audit
 10. [009 — Foundation and display rollout](009-foundation-display-rollout.md)
 11. [010 — Controls and forms rollout](010-controls-forms-rollout.md)
 12. [011 — Collections and navigation rollout](011-collections-navigation-rollout.md)
@@ -123,10 +123,12 @@ metadata and navigation; Jetstream's interactive shell remains deferred.
 
 ## First Task
 
-`g14.006` is complete. PR #20 accepted the TextInput runtime-boundary profile
-after contract repair, non-BMP selection translation, geometry evidence, and
-multiline web parity were reviewed. `007` is next. Jetstream stays outside the
-active cohort. Local validation remains headless.
+`g14.007` is complete. PR #21 accepted the HistoryCenter composite profile
+after the shared host-record vocabulary, headless GPUI execution, packed web
+surfaces, and native contract posture were reviewed. `008` is next: an
+orchestrator evidence audit and adopt/revise/reject verdict, not a worker
+implementation lane. Jetstream stays outside the active cohort. Local
+validation remains headless.
 
 The model-connection web reference is approved. Native/conformance completion
 stays open under `020` until the pilot records **adopt**.

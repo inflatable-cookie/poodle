@@ -1,6 +1,6 @@
 # g14.007 — HistoryCenter Composite Proof
 
-Status: planned
+Status: complete — accepted in PR #21
 Depends on: `g14.006`
 
 ## Outcome
