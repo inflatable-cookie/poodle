@@ -96,7 +96,7 @@ export default defineConfig({
           name: "conformance",
           environment: "happy-dom",
           globals: true,
-          include: ["test/conformance/web/**/*.test.ts"],
+          include: ["test/conformance/web/**/*.test.ts", "test/conformance/web/**/*.test.tsx"],
           setupFiles: ["./test/vitest.setup.ts"],
         },
       },

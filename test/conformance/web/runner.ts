@@ -19,7 +19,7 @@ import type {
 // the bare entry are not reliably resolvable from the test tree in a clean
 // checkout (bun resolves them against a stale package cache).
 import { dismissLayerStackLength } from "../../../packages/core/src/dom/dismiss";
-import { channelsOf, geometryFields, geometryOf } from "./observer";
+import { channelsOf, geometryOf } from "./observer";
 
 export interface TraceEntry {
   event: string;
@@ -57,6 +57,10 @@ export interface PartObservation {
   focusedText: string | null;
   /** Root-only: the number of open overlay layers. */
   layerCount: number | null;
+  /** Hierarchy level (1-based) the part announces. */
+  level: number | null;
+  /** The part is a bounded scroll region rather than an unbounded column. */
+  scrollable: boolean | null;
   geometry: Record<string, number | null>;
   channels: Record<string, string | null>;
 }
@@ -133,8 +137,17 @@ function resolveWebPart(
         : null;
       const find = (scope: ParentNode): HTMLElement | null => {
         if (key && part.resolve.web.keyAttribute) {
-          return Array.from(scope.querySelectorAll<HTMLElement>(part.resolve.web.className))
-            .find((candidate) => candidate.getAttribute(part.resolve.web.keyAttribute!) === key) ?? null;
+          const { keyAttribute, keyScope, className } = part.resolve.web;
+          if (keyScope) {
+            // The key lives on an ancestor the composite owns; the element
+            // itself belongs to a composed component and cannot carry it.
+            const owner = Array.from(scope.querySelectorAll<HTMLElement>(keyScope)).find(
+              (candidate) => candidate.getAttribute(keyAttribute) === key,
+            );
+            return owner?.querySelector<HTMLElement>(className) ?? null;
+          }
+          return Array.from(scope.querySelectorAll<HTMLElement>(className))
+            .find((candidate) => candidate.getAttribute(keyAttribute) === key) ?? null;
         }
         return scope.querySelector<HTMLElement>(part.resolve.web.className);
       };
@@ -156,6 +169,20 @@ function resolveWebPart(
   return null;
 }
 
+/** Resolve a part id through the interface's descriptors. Adapters drive
+ * interactions; they do not know class names, so this is how they reach an
+ * element without restating what the interface already declares. */
+export function resolvePart(
+  root: HTMLElement,
+  iface: SerializedComponentInterface,
+  partId: string,
+): HTMLElement | null {
+  const separator = partId.indexOf(":");
+  const base = separator === -1 ? partId : partId.slice(0, separator);
+  const decl = iface.parts.find((part) => part.id === base);
+  return decl ? resolveWebPart(root, decl, partId) : null;
+}
+
 function expandedParts(
   iface: SerializedComponentInterface,
   root: HTMLElement,
@@ -166,8 +193,16 @@ function expandedParts(
       expanded.push({ id: decl.id, decl });
       continue;
     }
+    // Document-wide: a composite's repeated rows can live in a portalled
+    // overlay surface outside the component subtree. The corpus mounts one
+    // instance at a time, so the key space stays this component's.
+    const scope: ParentNode = root.ownerDocument;
+    // Keys come from whatever carries them: the element itself, or the
+    // ancestor the composite owns when the element belongs to a composed
+    // component.
+    const carrier = decl.resolve.web.keyScope ?? decl.resolve.web.className;
     const keys = new Set(
-      Array.from(root.querySelectorAll<HTMLElement>(decl.resolve.web.className))
+      Array.from(scope.querySelectorAll<HTMLElement>(carrier))
         .map((candidate) => candidate.getAttribute(decl.resolve.web.keyAttribute!))
         .filter((key): key is string => Boolean(key)),
     );
@@ -215,6 +250,11 @@ function iconIdentity(
 function roleOf(el: HTMLElement): string | null {
   const explicit = el.getAttribute("role");
   if (explicit) return explicit;
+  // Implicit semantics a browser reports and an accessibility tree carries.
+  // A native runtime declares List/ListItem outright, so leaving these null
+  // would make identical structures disagree across runtimes.
+  if (el.tagName === "UL" || el.tagName === "OL") return "list";
+  if (el.tagName === "LI") return "listitem";
   if (el.tagName === "BUTTON") return "button";
   if (el.tagName === "INPUT" && (el as HTMLInputElement).type === "range") return "slider";
   if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") return "textbox";
@@ -241,6 +281,25 @@ function partValue(el: HTMLElement | null): number | string | null {
   if (now == null) return null;
   const parsed = Number(now);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+/** The announced hierarchy level, 1-based. Absent is null — never inferred
+ * from indentation, which assistive technology cannot see. */
+function partLevel(el: HTMLElement | null): number | null {
+  const raw = el?.getAttribute("aria-level");
+  if (raw == null) return null;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+/** A bounded scroll region: the element scrolls its own overflow rather than
+ * growing. Reported for every resolved element so "not a scroll region" is an
+ * observation, not an absence. */
+function partScrollable(el: HTMLElement | null): boolean | null {
+  if (!el) return null;
+  const style = el.ownerDocument.defaultView?.getComputedStyle(el);
+  if (!style) return null;
+  return style.overflowY === "auto" || style.overflowY === "scroll";
 }
 
 function partSelection(el: HTMLElement | null): { start: number | null; end: number | null } {
@@ -425,6 +484,8 @@ export function observeDom(
       selected: el && identity && el.hasAttribute("aria-selected")
         ? el.getAttribute("aria-selected") === "true"
         : null,
+      level: partLevel(el),
+      scrollable: partScrollable(el),
       orientation: el?.getAttribute("aria-orientation") ?? null,
       controls: normalizeRelationship(el?.getAttribute("aria-controls") ?? null, iface, root),
       labelledBy: normalizeRelationship(el?.getAttribute("aria-labelledby") ?? null, iface, root),
@@ -526,13 +587,18 @@ export function assertPartObservation(
 ): AssertionResult[] {
   const results: AssertionResult[] = [];
   if (!observed) {
+    // A repeated part that expanded to no keys is not in the map at all.
+    // "The row is gone" is a claim a case is entitled to make, so absence
+    // satisfies an expectation of absence rather than reporting that the
+    // runtime could not see something that is not there.
+    const expectsAbsent = expect.present === false;
     results.push({
       stepIndex,
       part: partId,
       field: "present",
-      verdict: "fail",
-      expected: true,
-      reason: `not observed by ${runtime}`,
+      verdict: expectsAbsent ? "pass" : "fail",
+      expected: expectsAbsent ? false : true,
+      ...(expectsAbsent ? { actual: false } : { reason: `not observed by ${runtime}` }),
     });
     return results;
   }
@@ -563,6 +629,8 @@ export function assertPartObservation(
     "overlay",
     "focusedText",
     "layerCount",
+    "level",
+    "scrollable",
     "orientation",
     "controls",
     "labelledBy",
@@ -633,7 +701,13 @@ export function assertPartObservation(
   if (expect.geometry !== undefined && tolerance === undefined) {
     throw new Error(`${runtime} step ${stepIndex} ${partId}.geometry: missing authored tolerance`);
   }
-  for (const field of geometryFields) {
+  // Every authored field, not a fixed computed-style list: relative logical
+  // bounds (`topGap` …) are authored by the overlay profiles and were being
+  // dropped here, so the native runtime checked them and the web runtimes did
+  // not. Field names are already closed over the geometry vocabulary at case
+  // authoring and again in the Rust validator.
+  for (const field of Object.keys(geometry)) {
+    if (field === "tolerance") continue;
     const expected = geometry[field];
     if (expected === undefined) continue;
     check(
@@ -650,12 +724,36 @@ export function assertPartObservation(
   return results;
 }
 
+/** The trace projected onto what the corpus asked about: a name-only
+ * expectation compares the name, a payload expectation compares the name plus
+ * the payload fields it named. Fields the corpus did not name are not
+ * compared — but a command the corpus did not expect still fails, because the
+ * projection is positional and the lengths must match. */
+function projectTrace(
+  trace: TraceEntry[],
+  expected: SerializedExpectedEvent[],
+): Array<string | { name: string; payload: Record<string, unknown> }> {
+  return trace.map((entry, index) => {
+    const shape = expected[index];
+    if (shape === undefined || typeof shape === "string") return entry.event;
+    const payload: Record<string, unknown> = {};
+    for (const field of Object.keys(shape.payload)) {
+      payload[field] = entry.payload?.[field] ?? null;
+    }
+    return { name: entry.event, payload };
+  });
+}
+
+export type SerializedExpectedEvent =
+  | string
+  | { name: string; payload: Record<string, string | number | boolean | null> };
+
 export function assertEvents(
   trace: TraceEntry[],
-  expected: string[],
+  expected: SerializedExpectedEvent[],
   stepIndex: number,
 ): AssertionResult[] {
-  const actual = trace.map((entry) => entry.event);
+  const actual = projectTrace(trace, expected);
   if (JSON.stringify(actual) === JSON.stringify(expected)) {
     return [{ stepIndex, part: null, field: "events", verdict: "pass", expected, actual }];
   }

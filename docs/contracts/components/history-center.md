@@ -722,6 +722,7 @@ inset step, font sizes) are internal and not part of the recipe contract.
 | Rejection dismissal is component-local | The fixed surface has no rejection-dismiss callback; the notice is transient inline UI | this contract | revisit if hosts need dismissal control |
 | No virtualisation | Out of scope: paging only; Tree's virtual scroll is Svelte-only and would break the native port | card scope | `020` |
 | Native runtimes | Out of scope: this card is the web reference; native parity is `020` | card scope | `020` |
+| `continuationsResult` / `runResult` are web-shell props | The portable claim is that the host answers `onLoadContinuations` / `onLoadContinuationRun` and the answer reaches the picker — asserted on Svelte, React and GPUI by the g14.007 conformance corpus. How the answer arrives is shell mechanism: the web shells take a reference-diffed prop because that suits data-down flow, while a native host holds the fork tree in its own state and hands the renderer a resolved view. Same boundary as TextInput's DOM vs GPUI editing paths. | g14.007 | none; revisit if a portable result-feed shape is ever needed |
 
 ## 13. Approval And Adoption Notes
 

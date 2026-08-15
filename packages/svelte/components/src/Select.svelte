@@ -497,6 +497,7 @@
                     type="button"
                   class="poodle-select__option"
                   id={`${listboxId}-option-${flatIdx}`}
+                  data-value={option.value}
                   role="option"
                   aria-selected={currentValue === option.value ? "true" : "false"}
                   data-highlighted={highlightIndex === flatIdx}
@@ -544,6 +545,7 @@
                     type="button"
                   class="poodle-select__option"
                   id={`${listboxId}-option-${flatIdx}`}
+                  data-value={option.value}
                   role="option"
                   aria-selected={currentValue === option.value ? "true" : "false"}
                   data-highlighted={highlightIndex === flatIdx}
@@ -584,6 +586,7 @@
               type="button"
               class="poodle-select__option"
               id={`${listboxId}-option-${index}`}
+              data-value={option.value}
               role="option"
               aria-selected={currentValue === option.value ? "true" : "false"}
               data-highlighted={highlightIndex === index}

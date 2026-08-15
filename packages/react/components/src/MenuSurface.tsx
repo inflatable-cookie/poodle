@@ -110,6 +110,7 @@ export const MenuSurface = forwardRef<MenuSurfaceHandle, MenuSurfaceProps>(funct
             type="button"
             className="poodle-menu-surface__item"
             disabled={item.disabled === true}
+            data-value={item.value}
             data-kind={item.kind ?? "action"}
             data-tone={item.tone ?? "default"}
             role={item.kind === "checkbox" || item.kind === "radio" ? `menuitem${item.kind}` : "menuitem"}

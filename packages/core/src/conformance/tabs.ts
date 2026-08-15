@@ -106,7 +106,7 @@ export const tabsInterface = defineComponentInterface({
     {
       id: "trigger",
       role: "tab",
-      repeat: { prop: "items", key: "value", webIdPrefix: "poodle-tab-" },
+      repeat: { sources: [{ prop: "items" }], key: "value", webIdPrefix: "poodle-tab-" },
       resolve: {
         web: { kind: "class", className: ".poodle-tabs__tab", keyAttribute: "data-value" },
         native: { kind: "id-template", template: "tabs:{key}" },
@@ -116,7 +116,7 @@ export const tabsInterface = defineComponentInterface({
       id: "panel",
       role: "tabpanel",
       contains: "text",
-      repeat: { prop: "items", key: "value", webIdPrefix: "poodle-tabpanel-" },
+      repeat: { sources: [{ prop: "items" }], key: "value", webIdPrefix: "poodle-tabpanel-" },
       resolve: {
         web: { kind: "class", className: ".poodle-tabs__panel", keyAttribute: "data-value" },
         native: { kind: "id-template", template: "tabs-panel:{key}" },

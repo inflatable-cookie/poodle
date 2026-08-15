@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
 use poodle_render::conformance::{
-    assert_events, assert_part, observe_tree_with_focus, InterfaceDoc,
+    assert_events, assert_part, expected_events, observe_tree_with_focus, InterfaceDoc,
 };
 use poodle_render::{tabs_with_panel, TabsHandlers};
 use poodle_specs::TabsSpec;
@@ -237,31 +237,8 @@ pub fn drive_tabs_cases(
                     }
                 }
                 "expectEvents" => {
-                    let expected = step
-                        .get("events")
-                        .and_then(Value::as_array)
-                        .map(|events| {
-                            events
-                                .iter()
-                                .filter_map(Value::as_str)
-                                .map(str::to_owned)
-                                .collect::<Vec<_>>()
-                        })
-                        .unwrap_or_default();
-                    let actual = host
-                        .lock()
-                        .expect("host lock")
-                        .trace
-                        .lock()
-                        .expect("trace lock")
-                        .iter()
-                        .filter_map(|entry| {
-                            entry
-                                .get("event")
-                                .and_then(Value::as_str)
-                                .map(str::to_owned)
-                        })
-                        .collect::<Vec<_>>();
+                    let expected = expected_events(step);
+                    let actual = host.lock().expect("host lock").trace.lock().expect("trace lock").clone();
                     let mut results = Vec::new();
                     assert_events(&expected, &actual, index, &mut results);
                     for result in results {

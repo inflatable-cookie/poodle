@@ -1016,6 +1016,14 @@ impl TabStripItem {
     }
 }
 
+/// History record shapes live in the behaviour core beside the row
+/// derivation and the machine that consumes them; `poodle-specs` re-exports
+/// them so the generated `HistoryCenterSpec` can name them as `crate::types`
+/// like every other collection item type.
+pub use poodle_headless::history_center::{
+    HistoryContinuation, HistoryEntry, HistoryEntryPosition, HistoryPathPage,
+};
+
 #[cfg(test)]
 mod semantic_size_tests {
     use super::*;

@@ -3,6 +3,7 @@
 export const geometryFields = [
   "height",
   "minWidth",
+  "maxHeight",
   "paddingLeft",
   "paddingRight",
   "radius",
@@ -22,6 +23,7 @@ export function geometryOf(root: HTMLElement): Record<string, number | null> {
   return {
     height: parseLength(style.height),
     minWidth: parseLength(style.minWidth),
+    maxHeight: parseLength(style.maxHeight),
     paddingLeft: parseLength(style.paddingLeft),
     paddingRight: parseLength(style.paddingRight),
     radius: parseLength(style.borderRadius),

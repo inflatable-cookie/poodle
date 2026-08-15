@@ -639,8 +639,17 @@
   });
 </script>
 
-<div class="poodle-history-center-popover" data-scope="history-center" data-part="root">
+<div
+  class="poodle-history-center-popover"
+  data-scope="history-center"
+  data-part="root"
+  data-placement={placement}
+  data-status={status}
+  data-size={resolvedSize}
+  data-density={resolvedDensity}
+>
   <span class="poodle-history-center__trigger" data-part="trigger">
+    <span class="poodle-history-center__undo">
     <IconButton
       icon="undo"
       ariaLabel={undoLabel}
@@ -651,6 +660,7 @@
       disabled={!canUndo || busy}
       onClick={onUndo}
     />
+    </span>
 
     <Popover
       open={isOpen}
@@ -758,6 +768,7 @@
                   <button
                     type="button"
                     class="poodle-history-center__entry-content"
+                    data-entry={row.entry.id}
                     data-open={openAt ? "true" : undefined}
                     tabindex={rowFocused(row) ? 0 : -1}
                     onclick={() => handleRowClick(row)}
@@ -782,6 +793,7 @@
                       type="button"
                       class="poodle-history-center__fork"
                       data-part="fork-disclosure"
+                      data-entry={row.entry.id}
                       data-open={openAt ? "true" : undefined}
                       aria-label={openAt
                         ? `Hide ${row.forkCount} ${row.forkCount === 1 ? "continuation" : "continuations"}`
@@ -825,12 +837,17 @@
                          the Select's place (b032 R3). The trigger and the
                          options both carry the fork label and its branch
                          name. -->
-                    <div class="poodle-history-center__picker-controls" data-part="picker-select">
+                    <div
+                      class="poodle-history-center__picker-controls"
+                      data-part="picker-select"
+                      data-anchor={row.anchorEntryId}
+                    >
                       {#if renameTarget !== null && renamingBranchId === renameTarget.branchId}
                         <input
                           bind:this={renameInputElement}
                           class="poodle-history-center__rename-input"
                           data-part="picker-rename-input"
+                          data-anchor={row.anchorEntryId}
                           aria-label={`Rename branch ${renameTarget.name}`}
                           maxlength={maxBranchNameBytes}
                           bind:value={renameValue}
@@ -890,7 +907,11 @@
                            run already navigates and checks that fork out, so none of these is
                            the row's primary action — checkout here exists only to activate a
                            fork without moving the current position. -->
-                      <span class="poodle-history-center__picker-actions" data-part="picker-actions">
+                      <span
+                        class="poodle-history-center__picker-actions"
+                        data-part="picker-actions"
+                        data-anchor={row.anchorEntryId}
+                      >
                         <Menu
                           items={pickerActions(picked, renameTarget)}
                           size="xs"
@@ -932,11 +953,16 @@
               <Spinner variant="ring" size="sm" tone="muted" />
               <span>{statusMessage ?? "Loading history…"}</span>
             </div>
+          {:else if status === "failed"}
+            <div class="poodle-history-center__loading" role="status">
+              <span>{statusMessage ?? "History failed to load."}</span>
+            </div>
           {/if}
         {/if}
       </section>
     </Popover>
 
+    <span class="poodle-history-center__redo">
     <IconButton
       icon="redo"
       ariaLabel={redoLabel}
@@ -947,6 +973,7 @@
       disabled={!canRedo || busy}
       onClick={onRedo}
     />
+    </span>
   </span>
 
   <!-- One dialog for the whole component, not one per row: only ever a single

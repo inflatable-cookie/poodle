@@ -3,6 +3,7 @@ mod alert_dialog;
 mod avatar;
 mod badge;
 mod banner;
+mod history_center;
 mod r#box;
 mod breadcrumbs;
 mod bulk_action_bar;
@@ -284,6 +285,7 @@ pub use tabs::{ActiveEdge, ActiveFill, TabsOverflowStrategy, TabsShedPart, TabsS
 pub use text::{TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone, TextWeight};
 /// Deprecated: use `TextInputSpec` with `rows > 1` instead.
 pub type TextAreaSpec = TextInputSpec;
+pub use history_center::{HistoryCenterRejection, HistoryCenterSpec, HistoryCenterStatus};
 pub use text_input::TextInputSpec;
 pub use text_link::{TextLinkSpec, TextLinkTone};
 pub use time_ago::{TimeAgoFutureFormat, TimeAgoSpec, TimeAgoTooltipFormat};
@@ -307,6 +309,7 @@ pub use types::{
     BadgeVariant, ButtonTone, ButtonVariant, CalendarWeekStart, CheckState, ChoiceOption,
     ControlDensity, ControlSize, DateRangeValue, DateTimeRangeValue, DateTimeValue, DialogKind,
     DialogWidth, Dimension, Direction, DrawerEdge, FormActionAlign, FormActionDangerItem,
+    HistoryContinuation, HistoryEntry, HistoryEntryPosition, HistoryPathPage,
     InlineTypographyMode, Inset, MenuEntry, MenuItemKind, MenubarEntry, NavigationMenuEntry,
     Orientation, Overflow, OverlayPlacement, PaddingScale, PopoverInitialFocus,
     PopoverSurfaceWidth, RuleTone, SemanticControlSizeRole, SeparatorOrientation, StatusTone,

@@ -331,6 +331,35 @@ observation boundary.
 
 See `docs/logs/2026-08/14-g14-006-text-input-runtime-boundary-proof.md`.
 
+## Composite Profile Status (g14.007)
+
+HistoryCenter is the first host-coordinated composite: the component owns no
+history, validates no protocol rule, and decides nothing about undo. Data
+arrives as `pages`, every operation leaves as a named command, and the answer
+comes back as host-supplied records.
+
+- **Authority** — `history-center.ts` + 23 typed cases. One generated
+  `HistoryCenterSpec`; the record shapes are structural mirrors of the
+  authority's, and no Longhorn type reaches Poodle.
+- **Generic vocabulary** — nested collection fields, repeat sources spanning
+  several record channels, declared host record channels, command payload
+  expectations, and `level` / `scrollable` / `maxHeight` observation. None of
+  it mentions HistoryCenter; the generic kernel grew 55 LOC in total.
+- **Execution** — Svelte, React and GPUI each run all 23 cases and pass.
+  Disclosure, selection, checkout, rename with Escape-cancel, roving focus,
+  nested forks to four levels, and command payload/order are all executed
+  through real interactions.
+- **Native** — the behaviour core (`poodle-headless::history_center`) holds the
+  flat visible-row derivation and the machine; `poodle-render::history_center`
+  composes the tree; the GPUI specimen drives it from the preview catalogue.
+- **Planted failures** — flattened hierarchy, wrong command payload,
+  unfocusable row, unbounded list, and an inert disclosure each fail.
+- **Capabilities** — no new primitive capability was needed. The composite is
+  built from rows the substrate already certifies.
+- **Cost** — 5,101 LOC pilot increment; see the log for the split.
+
+See `docs/logs/2026-08/15-g14-007-history-center-composite-proof.md`.
+
 ## Experimental Surface Disposition
 
 No experimental surface is architecture merely because it merged.
@@ -356,6 +385,7 @@ No experimental surface is architecture merely because it merged.
 | **g14.004 Tabs identified-collection proof** | keep — stable keyed repeated anatomy and navigation profile | g14.010 |
 | **g14.005 Popover overlay/focus proof** | keep — the first overlay profile: layer registry, dismissal routes, placement, focus entry/restore | g14.010 |
 | **g14.006 TextInput runtime-boundary proof** | keep — the first input profile: typing, selection, IME commit, portable vs DOM/GPUI mechanisms | g14.010 |
+| **g14.007 HistoryCenter composite proof** | keep — the first composite: host-coordinated commands, structured fixture data, hierarchy and scroll observation | g14.013 |
 | **hand-written TextInputSpec declaration surface** | replaced by `generated/text-input/mod.rs` + extension module | done |
 | **curated Tabs specimens (3 active runtimes)** | restored; retain useful overflow/reorder, close, decoration, panel, and scale examples, then audit under the human-centred rubric | g14.026 |
 | **hand-written TabsSpec + Tabs machine vectors** | retain residual overflow/history/close/reorder claims not replaced by g14.004 | g14.010 / g14.011 |

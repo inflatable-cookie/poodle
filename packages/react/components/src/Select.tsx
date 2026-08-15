@@ -303,6 +303,7 @@ export function Select({
         type="button"
         className="poodle-select__option"
         id={`${listboxId}-option-${flatIdx}`}
+        data-value={option.value}
         role="option"
         aria-selected={currentValue === option.value}
         data-highlighted={highlightIndex === flatIdx}

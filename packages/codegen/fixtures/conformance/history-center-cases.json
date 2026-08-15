@@ -1,0 +1,2898 @@
+{
+  "schemaVersion": 1,
+  "component": "history-center",
+  "cases": [
+    {
+      "id": "history-center/empty-no-pages",
+      "fixture": {
+        "props": {
+          "pages": null,
+          "defaultOpen": true
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Empty",
+        "caption": "No history supplied",
+        "axes": [],
+        "captureId": "history-center/empty-no-pages"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true,
+            "role": "dialog"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "empty",
+          "expect": {
+            "present": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true,
+              "empty": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/empty-zero-rows",
+      "fixture": {
+        "props": {
+          "pages": [],
+          "defaultOpen": true
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Empty",
+        "caption": "Pages supplied but no entries",
+        "axes": [],
+        "captureId": "history-center/empty-zero-rows"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "empty",
+          "expect": {
+            "present": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "empty": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/linear-rows",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 1
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Linear",
+        "caption": "A flat spine, oldest first",
+        "axes": [
+          "size"
+        ],
+        "captureId": "history-center/linear-rows"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "row:e1",
+          "expect": {
+            "present": true,
+            "level": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:e2",
+          "expect": {
+            "present": true,
+            "level": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:e3",
+          "expect": {
+            "present": true,
+            "level": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "entry:e1",
+          "expect": {
+            "present": true,
+            "role": "button",
+            "name": "Import stems"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "entry:e3",
+          "expect": {
+            "present": true,
+            "name": "Raise gain"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "disclosure:e3",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker:e2",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "empty",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "list",
+          "expect": {
+            "present": true,
+            "role": "list",
+            "scrollable": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/linear-page-seam",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": true,
+              "entries": [
+                {
+                  "id": "e4",
+                  "label": "Bounce",
+                  "position": "current",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            },
+            {
+              "offset": 2,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": true,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "past",
+                  "continuationCount": 1
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Linear",
+        "caption": "Two pages joined into one timeline",
+        "axes": [],
+        "captureId": "history-center/linear-page-seam"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "row:e1",
+          "expect": {
+            "present": true,
+            "level": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:e2",
+          "expect": {
+            "present": true,
+            "level": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:e3",
+          "expect": {
+            "present": true,
+            "level": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:e4",
+          "expect": {
+            "present": true,
+            "level": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "entry:e1",
+          "expect": {
+            "name": "Import stems"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "entry:e4",
+          "expect": {
+            "name": "Bounce"
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/navigate-spine-entry",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 1
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Navigation",
+        "caption": "Activating a spine row",
+        "axes": [],
+        "captureId": "history-center/navigate-spine-entry"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "entry:e1",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "navigateEntry",
+              "payload": {
+                "branchId": "",
+                "entryId": "e1"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/current-entry",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 1
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Position",
+        "caption": "The current position is marked",
+        "axes": [],
+        "captureId": "history-center/current-entry"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "row:e2",
+          "expect": {
+            "present": true,
+            "level": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "entry:e2",
+          "expect": {
+            "name": "Trim tail"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "entry:e1",
+          "expect": {
+            "name": "Import stems"
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/open-and-dismiss",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 1
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            }
+          ],
+          "canUndo": true,
+          "canRedo": true
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Disclosure",
+        "caption": "Open from the trigger, close with Escape",
+        "axes": [
+          "placement"
+        ],
+        "captureId": "history-center/open-and-dismiss"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": false
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "list-trigger",
+          "expect": {
+            "present": true,
+            "role": "button",
+            "expanded": false
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "list-trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "openChange",
+              "payload": {
+                "open": true
+              }
+            }
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "list-trigger",
+          "expect": {
+            "expanded": true
+          }
+        },
+        {
+          "kind": "action",
+          "name": "dismiss",
+          "part": "surface"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "openChange",
+              "payload": {
+                "open": true
+              }
+            },
+            {
+              "name": "openChange",
+              "payload": {
+                "open": false
+              }
+            }
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": false
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "list-trigger",
+          "expect": {
+            "focused": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/undo-redo-commands",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 1
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            }
+          ],
+          "canUndo": true,
+          "canRedo": true
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Commands",
+        "caption": "Undo and redo are plain commands",
+        "axes": [],
+        "captureId": "history-center/undo-redo-commands"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "undo",
+          "expect": {
+            "present": true,
+            "role": "button",
+            "name": "Undo"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "redo",
+          "expect": {
+            "present": true,
+            "role": "button",
+            "name": "Redo"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "undoDisabled": false,
+              "redoDisabled": false
+            }
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "undo",
+          "input": "pointer"
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "redo",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "undo",
+            "redo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "history-center/busy-disables-commands",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 1
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            }
+          ],
+          "canUndo": true,
+          "canRedo": true,
+          "busy": true
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Commands",
+        "caption": "An authority operation disables both triggers",
+        "axes": [],
+        "captureId": "history-center/busy-disables-commands"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "undoDisabled": true,
+              "redoDisabled": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "undo",
+          "expect": {
+            "focusable": false
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "undo",
+          "input": "pointer"
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "redo",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "history-center/loading-status",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 1
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true,
+          "status": "loading"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Status",
+        "caption": "Loading announces politely",
+        "axes": [],
+        "captureId": "history-center/loading-status"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "status",
+          "expect": {
+            "present": true,
+            "role": "status"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "tokenRoles": {
+              "status": "loading"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/failed-status",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 1
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true,
+          "status": "failed",
+          "statusMessage": "History source unavailable"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Status",
+        "caption": "A failed source shows its message",
+        "axes": [],
+        "captureId": "history-center/failed-status"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "status",
+          "expect": {
+            "present": true,
+            "role": "status",
+            "text": "History source unavailable"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "tokenRoles": {
+              "status": "failed"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/rejection-notice",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 1
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true,
+          "rejection": "AlreadyAtTarget"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Status",
+        "caption": "A mapped rejection is displayed",
+        "axes": [],
+        "captureId": "history-center/rejection-notice"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "rejection",
+          "expect": {
+            "present": true,
+            "role": "status",
+            "text": "Already at the requested target"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "rejected": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/roving-focus",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 1
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Navigation",
+        "caption": "Arrow keys rove the visible rows",
+        "axes": [],
+        "captureId": "history-center/roving-focus"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "key",
+          "part": "entry:e1",
+          "key": "Home"
+        },
+        {
+          "kind": "expectPart",
+          "part": "entry:e1",
+          "expect": {
+            "focused": true,
+            "tabbable": true
+          }
+        },
+        {
+          "kind": "action",
+          "name": "key",
+          "part": "entry:e1",
+          "key": "ArrowDown"
+        },
+        {
+          "kind": "expectPart",
+          "part": "entry:e2",
+          "expect": {
+            "focused": true,
+            "tabbable": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "entry:e1",
+          "expect": {
+            "tabbable": false
+          }
+        },
+        {
+          "kind": "action",
+          "name": "key",
+          "part": "entry:e2",
+          "key": "End"
+        },
+        {
+          "kind": "expectPart",
+          "part": "entry:e3",
+          "expect": {
+            "focused": true
+          }
+        },
+        {
+          "kind": "action",
+          "name": "key",
+          "part": "entry:e3",
+          "key": "Home"
+        },
+        {
+          "kind": "expectPart",
+          "part": "entry:e1",
+          "expect": {
+            "focused": true
+          }
+        },
+        {
+          "kind": "action",
+          "name": "key",
+          "part": "entry:e1",
+          "key": "Enter"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "navigateEntry",
+              "payload": {
+                "branchId": "",
+                "entryId": "e1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "history-center/multiple-fork-disclosure",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 3
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1,
+                  "checkpoint": true
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {},
+        "host": {
+          "continuations": [
+            {
+              "anchorEntryId": "e2",
+              "entryId": "e3",
+              "label": "Raise gain",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "main"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f1",
+              "label": "Widen stereo",
+              "preferred": false,
+              "entryCount": 2,
+              "branchId": "branch-wide",
+              "branchName": "Wide mix"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f2",
+              "label": "Duck bass",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-duck",
+              "branchName": "Duck bass"
+            }
+          ],
+          "runEntries": [
+            {
+              "fromEntryId": "f1",
+              "id": "f1b",
+              "label": "Add shimmer",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1",
+              "id": "f1",
+              "label": "Widen stereo",
+              "position": "future",
+              "continuationCount": 1
+            },
+            {
+              "fromEntryId": "f2",
+              "id": "f2",
+              "label": "Duck bass",
+              "position": "future",
+              "continuationCount": 0
+            },
+            {
+              "fromEntryId": "f1b1",
+              "id": "f1b1",
+              "label": "Tame sibilance",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1b1a",
+              "id": "f1b1a",
+              "label": "Soften air",
+              "position": "future",
+              "continuationCount": 0
+            }
+          ]
+        }
+      },
+      "specimen": {
+        "group": "Forks",
+        "caption": "Two forks disclose a picker",
+        "axes": [],
+        "captureId": "history-center/multiple-fork-disclosure"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "disclosure:e2",
+          "expect": {
+            "present": true,
+            "role": "button",
+            "expanded": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker:e2",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectPart",
+          "part": "disclosure:e2",
+          "expect": {
+            "expanded": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker:e2",
+          "expect": {
+            "present": true,
+            "level": 2
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "picker-select:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker-option:f1",
+          "expect": {
+            "present": true,
+            "role": "option"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker-option:f2",
+          "expect": {
+            "present": true,
+            "role": "option"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker-option:e3",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "loadContinuations",
+              "payload": {
+                "entryId": "e2"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "f1"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1",
+          "expect": {
+            "present": true,
+            "level": 2
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1b",
+          "expect": {
+            "present": true,
+            "level": 2
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:e1",
+          "expect": {
+            "level": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:e3",
+          "expect": {
+            "level": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/fork-run-navigation",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 3
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1,
+                  "checkpoint": true
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {},
+        "host": {
+          "continuations": [
+            {
+              "anchorEntryId": "e2",
+              "entryId": "e3",
+              "label": "Raise gain",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "main"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f1",
+              "label": "Widen stereo",
+              "preferred": false,
+              "entryCount": 2,
+              "branchId": "branch-wide",
+              "branchName": "Wide mix"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f2",
+              "label": "Duck bass",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-duck",
+              "branchName": "Duck bass"
+            }
+          ],
+          "runEntries": [
+            {
+              "fromEntryId": "f1",
+              "id": "f1b",
+              "label": "Add shimmer",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1",
+              "id": "f1",
+              "label": "Widen stereo",
+              "position": "future",
+              "continuationCount": 1
+            },
+            {
+              "fromEntryId": "f2",
+              "id": "f2",
+              "label": "Duck bass",
+              "position": "future",
+              "continuationCount": 0
+            },
+            {
+              "fromEntryId": "f1b1",
+              "id": "f1b1",
+              "label": "Tame sibilance",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1b1a",
+              "id": "f1b1a",
+              "label": "Soften air",
+              "position": "future",
+              "continuationCount": 0
+            }
+          ]
+        }
+      },
+      "specimen": {
+        "group": "Forks",
+        "caption": "A fork run row navigates on its own branch",
+        "axes": [],
+        "captureId": "history-center/fork-run-navigation"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "entry:f1b",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "loadContinuations",
+              "payload": {
+                "entryId": "e2"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "f1"
+              }
+            },
+            {
+              "name": "navigateEntry",
+              "payload": {
+                "branchId": "branch-wide",
+                "entryId": "f1b"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "history-center/select-other-fork",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 3
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1,
+                  "checkpoint": true
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {},
+        "host": {
+          "continuations": [
+            {
+              "anchorEntryId": "e2",
+              "entryId": "e3",
+              "label": "Raise gain",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "main"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f1",
+              "label": "Widen stereo",
+              "preferred": false,
+              "entryCount": 2,
+              "branchId": "branch-wide",
+              "branchName": "Wide mix"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f2",
+              "label": "Duck bass",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-duck",
+              "branchName": "Duck bass"
+            }
+          ],
+          "runEntries": [
+            {
+              "fromEntryId": "f1",
+              "id": "f1b",
+              "label": "Add shimmer",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1",
+              "id": "f1",
+              "label": "Widen stereo",
+              "position": "future",
+              "continuationCount": 1
+            },
+            {
+              "fromEntryId": "f2",
+              "id": "f2",
+              "label": "Duck bass",
+              "position": "future",
+              "continuationCount": 0
+            },
+            {
+              "fromEntryId": "f1b1",
+              "id": "f1b1",
+              "label": "Tame sibilance",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1b1a",
+              "id": "f1b1a",
+              "label": "Soften air",
+              "position": "future",
+              "continuationCount": 0
+            }
+          ]
+        }
+      },
+      "specimen": {
+        "group": "Forks",
+        "caption": "Picking the other fork previews its run",
+        "axes": [],
+        "captureId": "history-center/select-other-fork"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "picker-select:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker-option:f1",
+          "expect": {
+            "selected": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker-option:f2",
+          "expect": {
+            "selected": false
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "picker-option:f2",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "loadContinuations",
+              "payload": {
+                "entryId": "e2"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "f1"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "f2"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "picker-select:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker-option:f2",
+          "expect": {
+            "selected": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker-option:f1",
+          "expect": {
+            "selected": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f2",
+          "expect": {
+            "present": true,
+            "level": 2
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1b",
+          "expect": {
+            "present": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/checkout-selected-fork",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 3
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1,
+                  "checkpoint": true
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {},
+        "host": {
+          "continuations": [
+            {
+              "anchorEntryId": "e2",
+              "entryId": "e3",
+              "label": "Raise gain",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "main"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f1",
+              "label": "Widen stereo",
+              "preferred": false,
+              "entryCount": 2,
+              "branchId": "branch-wide",
+              "branchName": "Wide mix"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f2",
+              "label": "Duck bass",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-duck",
+              "branchName": "Duck bass"
+            }
+          ],
+          "runEntries": [
+            {
+              "fromEntryId": "f1",
+              "id": "f1b",
+              "label": "Add shimmer",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1",
+              "id": "f1",
+              "label": "Widen stereo",
+              "position": "future",
+              "continuationCount": 1
+            },
+            {
+              "fromEntryId": "f2",
+              "id": "f2",
+              "label": "Duck bass",
+              "position": "future",
+              "continuationCount": 0
+            },
+            {
+              "fromEntryId": "f1b1",
+              "id": "f1b1",
+              "label": "Tame sibilance",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1b1a",
+              "id": "f1b1a",
+              "label": "Soften air",
+              "position": "future",
+              "continuationCount": 0
+            }
+          ]
+        }
+      },
+      "specimen": {
+        "group": "Forks",
+        "caption": "Checkout commits the shown fork",
+        "axes": [],
+        "captureId": "history-center/checkout-selected-fork"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "picker-actions:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectPart",
+          "part": "action-checkout",
+          "expect": {
+            "present": true,
+            "role": "menuitem"
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "action-checkout",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "loadContinuations",
+              "payload": {
+                "entryId": "e2"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "f1"
+              }
+            },
+            {
+              "name": "checkoutContinuation",
+              "payload": {
+                "entryId": "f1"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker:e2",
+          "expect": {
+            "present": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/rename-selected-branch",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 3
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1,
+                  "checkpoint": true
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true,
+          "maxBranchNameBytes": 32
+        },
+        "regions": {},
+        "host": {
+          "continuations": [
+            {
+              "anchorEntryId": "e2",
+              "entryId": "e3",
+              "label": "Raise gain",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "main"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f1",
+              "label": "Widen stereo",
+              "preferred": false,
+              "entryCount": 2,
+              "branchId": "branch-wide",
+              "branchName": "Wide mix"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f2",
+              "label": "Duck bass",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-duck",
+              "branchName": "Duck bass"
+            }
+          ],
+          "runEntries": [
+            {
+              "fromEntryId": "f1",
+              "id": "f1b",
+              "label": "Add shimmer",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1",
+              "id": "f1",
+              "label": "Widen stereo",
+              "position": "future",
+              "continuationCount": 1
+            },
+            {
+              "fromEntryId": "f2",
+              "id": "f2",
+              "label": "Duck bass",
+              "position": "future",
+              "continuationCount": 0
+            },
+            {
+              "fromEntryId": "f1b1",
+              "id": "f1b1",
+              "label": "Tame sibilance",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1b1a",
+              "id": "f1b1a",
+              "label": "Soften air",
+              "position": "future",
+              "continuationCount": 0
+            }
+          ]
+        }
+      },
+      "specimen": {
+        "group": "Forks",
+        "caption": "Rename the branch the picker shows",
+        "axes": [],
+        "captureId": "history-center/rename-selected-branch"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "picker-actions:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "action-rename",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectPart",
+          "part": "rename-input:e2",
+          "expect": {
+            "present": true,
+            "role": "textbox",
+            "value": "Wide mix"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker-select:e2",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "action",
+          "name": "insert",
+          "part": "rename-input:e2",
+          "text": "Wide mix v2"
+        },
+        {
+          "kind": "action",
+          "name": "key",
+          "part": "rename-input:e2",
+          "key": "Enter"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "loadContinuations",
+              "payload": {
+                "entryId": "e2"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "f1"
+              }
+            },
+            {
+              "name": "renameBranch",
+              "payload": {
+                "branchId": "branch-wide",
+                "name": "Wide mix v2"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "rename-input:e2",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker-actions:e2",
+          "expect": {
+            "focused": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/rename-escape-cancels",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 3
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1,
+                  "checkpoint": true
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {},
+        "host": {
+          "continuations": [
+            {
+              "anchorEntryId": "e2",
+              "entryId": "e3",
+              "label": "Raise gain",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "main"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f1",
+              "label": "Widen stereo",
+              "preferred": false,
+              "entryCount": 2,
+              "branchId": "branch-wide",
+              "branchName": "Wide mix"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f2",
+              "label": "Duck bass",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-duck",
+              "branchName": "Duck bass"
+            }
+          ],
+          "runEntries": [
+            {
+              "fromEntryId": "f1",
+              "id": "f1b",
+              "label": "Add shimmer",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1",
+              "id": "f1",
+              "label": "Widen stereo",
+              "position": "future",
+              "continuationCount": 1
+            },
+            {
+              "fromEntryId": "f2",
+              "id": "f2",
+              "label": "Duck bass",
+              "position": "future",
+              "continuationCount": 0
+            },
+            {
+              "fromEntryId": "f1b1",
+              "id": "f1b1",
+              "label": "Tame sibilance",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1b1a",
+              "id": "f1b1a",
+              "label": "Soften air",
+              "position": "future",
+              "continuationCount": 0
+            }
+          ]
+        }
+      },
+      "specimen": {
+        "group": "Forks",
+        "caption": "Escape cancels a rename without emitting",
+        "axes": [],
+        "captureId": "history-center/rename-escape-cancels"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "picker-actions:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "action-rename",
+          "input": "pointer"
+        },
+        {
+          "kind": "action",
+          "name": "insert",
+          "part": "rename-input:e2",
+          "text": "Discarded"
+        },
+        {
+          "kind": "action",
+          "name": "key",
+          "part": "rename-input:e2",
+          "key": "Escape"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "loadContinuations",
+              "payload": {
+                "entryId": "e2"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "f1"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "rename-input:e2",
+          "expect": {
+            "present": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/single-fork-auto-chosen",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "s2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 2
+                },
+                {
+                  "id": "s1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {},
+        "host": {
+          "continuations": [
+            {
+              "anchorEntryId": "s2",
+              "entryId": "s3",
+              "label": "Raise gain",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "main"
+            },
+            {
+              "anchorEntryId": "s2",
+              "entryId": "g1",
+              "label": "Only fork",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-only",
+              "branchName": "Only"
+            }
+          ],
+          "runEntries": [
+            {
+              "fromEntryId": "g1",
+              "id": "g1",
+              "label": "Only fork",
+              "position": "future",
+              "continuationCount": 0
+            }
+          ]
+        }
+      },
+      "specimen": {
+        "group": "Forks",
+        "caption": "One fork needs no choice",
+        "axes": [],
+        "captureId": "history-center/single-fork-auto-chosen"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:s2",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker:s2",
+          "expect": {
+            "present": true,
+            "level": 2
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker-select:s2",
+          "expect": {
+            "present": true,
+            "focusable": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker-actions:s2",
+          "expect": {
+            "present": true,
+            "focusable": true
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "loadContinuations",
+              "payload": {
+                "entryId": "s2"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "g1"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:g1",
+          "expect": {
+            "present": true,
+            "level": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/nested-fork-depth",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 3
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1,
+                  "checkpoint": true
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {},
+        "host": {
+          "continuations": [
+            {
+              "anchorEntryId": "e2",
+              "entryId": "e3",
+              "label": "Raise gain",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "main"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f1",
+              "label": "Widen stereo",
+              "preferred": false,
+              "entryCount": 2,
+              "branchId": "branch-wide",
+              "branchName": "Wide mix"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f2",
+              "label": "Duck bass",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-duck",
+              "branchName": "Duck bass"
+            },
+            {
+              "anchorEntryId": "f1b",
+              "entryId": "f1b0",
+              "label": "Keep sibilance",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "branch-wide"
+            },
+            {
+              "anchorEntryId": "f1b",
+              "entryId": "f1b1",
+              "label": "Tame sibilance",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-tame",
+              "branchName": "Tame"
+            },
+            {
+              "anchorEntryId": "f1b1",
+              "entryId": "f1b1p",
+              "label": "Keep air",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "branch-tame"
+            },
+            {
+              "anchorEntryId": "f1b1",
+              "entryId": "f1b1a",
+              "label": "Soften air",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-air",
+              "branchName": "Air"
+            }
+          ],
+          "runEntries": [
+            {
+              "fromEntryId": "f1",
+              "id": "f1b",
+              "label": "Add shimmer",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1",
+              "id": "f1",
+              "label": "Widen stereo",
+              "position": "future",
+              "continuationCount": 1
+            },
+            {
+              "fromEntryId": "f2",
+              "id": "f2",
+              "label": "Duck bass",
+              "position": "future",
+              "continuationCount": 0
+            },
+            {
+              "fromEntryId": "f1b1",
+              "id": "f1b1",
+              "label": "Tame sibilance",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1b1a",
+              "id": "f1b1a",
+              "label": "Soften air",
+              "position": "future",
+              "continuationCount": 0
+            }
+          ]
+        }
+      },
+      "specimen": {
+        "group": "Forks",
+        "caption": "A fork inside a fork run",
+        "axes": [],
+        "captureId": "history-center/nested-fork-depth"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1b",
+          "expect": {
+            "present": true,
+            "level": 2
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:f1b",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "loadContinuations",
+              "payload": {
+                "entryId": "e2"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "f1"
+              }
+            },
+            {
+              "name": "loadContinuations",
+              "payload": {
+                "entryId": "f1b"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "f1b1"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker:f1b",
+          "expect": {
+            "present": true,
+            "level": 3
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1b1",
+          "expect": {
+            "present": true,
+            "level": 3
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker:e2",
+          "expect": {
+            "present": true,
+            "level": 2
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1",
+          "expect": {
+            "level": 2
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:e1",
+          "expect": {
+            "level": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/deep-depth-uncapped",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 3
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1,
+                  "checkpoint": true
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {},
+        "host": {
+          "continuations": [
+            {
+              "anchorEntryId": "e2",
+              "entryId": "e3",
+              "label": "Raise gain",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "main"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f1",
+              "label": "Widen stereo",
+              "preferred": false,
+              "entryCount": 2,
+              "branchId": "branch-wide",
+              "branchName": "Wide mix"
+            },
+            {
+              "anchorEntryId": "e2",
+              "entryId": "f2",
+              "label": "Duck bass",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-duck",
+              "branchName": "Duck bass"
+            },
+            {
+              "anchorEntryId": "f1b",
+              "entryId": "f1b0",
+              "label": "Keep sibilance",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "branch-wide"
+            },
+            {
+              "anchorEntryId": "f1b",
+              "entryId": "f1b1",
+              "label": "Tame sibilance",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-tame",
+              "branchName": "Tame"
+            },
+            {
+              "anchorEntryId": "f1b1",
+              "entryId": "f1b1p",
+              "label": "Keep air",
+              "preferred": true,
+              "entryCount": 1,
+              "branchId": "branch-tame"
+            },
+            {
+              "anchorEntryId": "f1b1",
+              "entryId": "f1b1a",
+              "label": "Soften air",
+              "preferred": false,
+              "entryCount": 1,
+              "branchId": "branch-air",
+              "branchName": "Air"
+            }
+          ],
+          "runEntries": [
+            {
+              "fromEntryId": "f1",
+              "id": "f1b",
+              "label": "Add shimmer",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1",
+              "id": "f1",
+              "label": "Widen stereo",
+              "position": "future",
+              "continuationCount": 1
+            },
+            {
+              "fromEntryId": "f2",
+              "id": "f2",
+              "label": "Duck bass",
+              "position": "future",
+              "continuationCount": 0
+            },
+            {
+              "fromEntryId": "f1b1",
+              "id": "f1b1",
+              "label": "Tame sibilance",
+              "position": "future",
+              "continuationCount": 2
+            },
+            {
+              "fromEntryId": "f1b1a",
+              "id": "f1b1a",
+              "label": "Soften air",
+              "position": "future",
+              "continuationCount": 0
+            }
+          ]
+        }
+      },
+      "specimen": {
+        "group": "Forks",
+        "caption": "Depth is never clamped",
+        "axes": [],
+        "captureId": "history-center/deep-depth-uncapped"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:f1b",
+          "input": "pointer"
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:f1b1",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:e2",
+          "expect": {
+            "level": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1b",
+          "expect": {
+            "level": 2
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1b1",
+          "expect": {
+            "present": true,
+            "level": 3
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1b1a",
+          "expect": {
+            "present": true,
+            "level": 4
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            {
+              "name": "loadContinuations",
+              "payload": {
+                "entryId": "e2"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "f1"
+              }
+            },
+            {
+              "name": "loadContinuations",
+              "payload": {
+                "entryId": "f1b"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "f1b1"
+              }
+            },
+            {
+              "name": "loadContinuations",
+              "payload": {
+                "entryId": "f1b1"
+              }
+            },
+            {
+              "name": "loadContinuationRun",
+              "payload": {
+                "fromEntryId": "f1b1a"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "disclosure:e2",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1b1a",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1b1",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:f1",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "picker:e2",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "row:e2",
+          "expect": {
+            "present": true,
+            "level": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "history-center/narrow-surface-bounds",
+      "fixture": {
+        "props": {
+          "pages": [
+            {
+              "offset": 0,
+              "precedingContinuationCount": 0,
+              "truncatedBefore": false,
+              "truncatedAfter": false,
+              "entries": [
+                {
+                  "id": "e3",
+                  "label": "Raise gain",
+                  "position": "future",
+                  "continuationCount": 0
+                },
+                {
+                  "id": "e2",
+                  "label": "Trim tail",
+                  "position": "current",
+                  "continuationCount": 3
+                },
+                {
+                  "id": "e1",
+                  "label": "Import stems",
+                  "position": "past",
+                  "continuationCount": 1,
+                  "checkpoint": true
+                }
+              ]
+            }
+          ],
+          "defaultOpen": true
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Layout",
+        "caption": "The surface is bounded and the list scrolls",
+        "axes": [],
+        "captureId": "history-center/narrow-surface-bounds"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true,
+            "overlay": true,
+            "parent": "root"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "list",
+          "expect": {
+            "present": true,
+            "scrollable": true
+          }
+        }
+      ]
+    }
+  ]
+}

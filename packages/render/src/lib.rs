@@ -85,6 +85,7 @@ pub mod form_dialog;
 pub mod form_layout;
 pub mod form_shell;
 pub mod grid;
+pub mod history_center;
 pub mod hover_card;
 pub mod icon;
 pub mod icon_button;
@@ -248,6 +249,9 @@ pub use form_dialog::{form_dialog, FormDialogHandlers};
 pub use form_layout::form_layout;
 pub use form_shell::form_shell;
 pub use grid::grid;
+pub use history_center::{
+    history_center, HistoryCenterHandlers, HistoryCenterRename, HistoryCenterView,
+};
 pub use hover_card::hover_card;
 pub use icon::icon;
 pub use icon_button::icon_button;

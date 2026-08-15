@@ -21,6 +21,8 @@ import { popoverInterface } from "../src/conformance/popover";
 import { popoverCases } from "../src/conformance/popover-cases";
 import { textInputInterface } from "../src/conformance/text-input";
 import { textInputCases } from "../src/conformance/text-input-cases";
+import { historyCenterInterface } from "../src/conformance/history-center";
+import { historyCenterCases } from "../src/conformance/history-center-cases";
 import { serializePrimitiveRoster } from "../src/conformance/primitives";
 
 const CHECK = process.argv.includes("--check");
@@ -83,6 +85,16 @@ const artifacts: Array<{ path: string; document: string; label: string }> = [
     path: join(fixturesRoot, "text-input-cases.json"),
     document: `${JSON.stringify(textInputCases, null, 2)}\n`,
     label: "text-input cases",
+  },
+  {
+    path: join(fixturesRoot, "history-center-interface.json"),
+    document: `${JSON.stringify(serializeInterface(historyCenterInterface), null, 2)}\n`,
+    label: "history-center interface",
+  },
+  {
+    path: join(fixturesRoot, "history-center-cases.json"),
+    document: `${JSON.stringify(historyCenterCases, null, 2)}\n`,
+    label: "history-center cases",
   },
   {
     path: join(fixturesRoot, "primitive-capability-roster.json"),
