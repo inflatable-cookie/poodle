@@ -1,7 +1,7 @@
 # HistoryCenter
 
 Status: active contract
-Updated: 2026-08-12
+Updated: 2026-08-15
 
 ## 1. Purpose
 
@@ -599,7 +599,10 @@ region (R6) and the picker (R1) — one event, both sites.
 - focus exit: on close, `Popover` restores trigger focus.
 - live-region behavior: rejection and status notices announce politely; the
   archive list itself is not a live region.
-- GPUI-native accessibility mapping notes: see `020` (native parity).
+- GPUI maps the same list, list-item, hierarchy, focus, selection, and command
+  semantics through the shared `poodle-render::history_center` composition.
+  The g14.007 corpus executes those mappings on the headless GPUI test
+  platform alongside Svelte and React.
 
 ## 7. Layout
 
@@ -683,13 +686,16 @@ inset step, font sizes) are internal and not part of the recipe contract.
 
 ## 10. GPUI Notes
 
-- Native parity is card `020` and is required by the runtime parity rule —
-  this card delivers the web reference only.
-- expected crate/module surface: `HistoryCenterSpec` plus the shared
-  `poodle-render` node tree; open/expansion/rename/rejection state remains
-  host-owned per `MessageCenter` precedent.
+- GPUI parity landed in g14.007. `poodle-headless::history_center` owns the
+  portable visible-row derivation and interaction machine;
+  `poodle-render::history_center` owns the shared node composition. GPUI binds
+  that tree to its backend rather than reimplementing the component.
+- `HistoryCenterSpec` carries portable inputs. Open, expansion, rename,
+  rejection, and host-result state remain host-owned per the `MessageCenter`
+  precedent.
 - theme access strategy: recipe hooks map to spec fields / token overrides.
-- known GPUI-native deltas: documented in `020`.
+- Jetstream execution remains program-deferred under the active-cohort rule;
+  it must consume the same shared Rust composition when that lane resumes.
 
 ## 11. Parity Checklist
 
@@ -717,17 +723,18 @@ inset step, font sizes) are internal and not part of the recipe contract.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Checkpoint creation is deferred | Ruling 6: checkpoints render as pins in v1; creating one is not in v1 | maintainer ruling | `020` parity card re-evaluates |
+| Checkpoint creation is deferred | Ruling 6: checkpoints render as pins in v1; creating one is not in v1 | maintainer ruling | revisit only through a contract revision |
 | Protocol constants not imported | `MAXIMUM_FORK_BRANCH_NAME_BYTES`/`MAXIMUM_FORK_PROJECTION_PAGE_SIZE` live in the Longhorn crate; the component enforces no protocol rule, `maxBranchNameBytes` is a client-side affordance only | maintainer ruling | bridge validates |
 | Rejection dismissal is component-local | The fixed surface has no rejection-dismiss callback; the notice is transient inline UI | this contract | revisit if hosts need dismissal control |
-| No virtualisation | Out of scope: paging only; Tree's virtual scroll is Svelte-only and would break the native port | card scope | `020` |
-| Native runtimes | Out of scope: this card is the web reference; native parity is `020` | card scope | `020` |
+| No virtualisation | Out of scope: paging plus a bounded scrolling list is the shared implementation; virtualisation would add a second rendering policy | card scope | revisit only with measured need across runtimes |
+| Jetstream execution | Jetstream is outside the active cohort; GPUI already executes the shared Rust composition | working-rules deferral | resume in the dedicated Jetstream parity lane |
 | `continuationsResult` / `runResult` are web-shell props | The portable claim is that the host answers `onLoadContinuations` / `onLoadContinuationRun` and the answer reaches the picker — asserted on Svelte, React and GPUI by the g14.007 conformance corpus. How the answer arrives is shell mechanism: the web shells take a reference-diffed prop because that suits data-down flow, while a native host holds the fork tree in its own state and hands the renderer a resolved view. Same boundary as TextInput's DOM vs GPUI editing paths. | g14.007 | none; revisit if a portable result-feed shape is ever needed |
 
 ## 13. Approval And Adoption Notes
 
-- contract status: `implemented` (Svelte + React web reference; native pending `020`)
-- approvers: Poodle core (card `019`)
+- contract status: `implemented` (Svelte + React + shared Rust/GPUI;
+  Jetstream program-deferred)
+- approvers: Poodle core (cards `019`, `028`–`034`, g14.007)
 - downstream adopters: Longhorn bridge (session → props mapping), consumer
   hosts that own undo/redo semantics
-- future follow-up: `020` HistoryCenter native parity (required)
+- future follow-up: Jetstream execution when the deferred runtime lane resumes
