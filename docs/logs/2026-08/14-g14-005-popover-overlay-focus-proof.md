@@ -16,12 +16,14 @@ placement, focus entry, and focus restoration.
   focus strategies, surface width strategy and bounds, and the trigger +
   children regions. Svelte and React shells bind to the inferred portable
   prop/event types; the two web-only extensions stay beside the adapters.
-- **Corpus** — `popover-cases.ts` (22 cases) covering closed default,
+- **Corpus** — `popover-cases.ts` (23 cases) covering closed default,
   uncontrolled pointer/keyboard open, controlled ownership, disabled
   inertness (including the programmatic open-direction), all three focus
   strategies, every close path with trigger focus restoration, the outside
   guard, the nested dismiss-stack contract (two cases), the placement
-  families and end rule, offset, trigger-width, and semantics/tokens.
+  families and end rule, offset, trigger-width, the width-bound override
+  (the rem portable unit, proven mounted on both runtimes), and
+  semantics/tokens.
 - **Generated declaration** — `generated/popover/mod.rs` replaces the
   hand-written `PopoverSpec`; the extension keeps the token recipes and
   derived queries. The Rust target gained `number` prop support and the
@@ -30,22 +32,34 @@ placement, focus entry, and focus restoration.
   inside/outside `pointer` actions, `part-present` state rule,
   `relativeTo` part anchors, the relative logical-bounds geometry fields,
   `parent`/`overlay`/`expanded`/`focusedText`/`layerCount` observations,
-  and opaque `host` fixture data (the nested-layer proof). The web runner,
-  native observer, and comparator implement them with no component
-  identifier.
+  and opaque `host` fixture data (nested-layer proof, focusable content
+  lists). The web runner, native observer, and comparator implement them
+  with no component identifier.
 - **Web execution** — real DOM pointer/keyboard/focus/Escape/outside routes
   through the shared dismissable-layer stack and the portalled anchored
   surface; the harness supplies happy-dom's missing layout (a minimal box
   stub + an anchor-box stylesheet) so placement resolves collision-free. The
-  surface part resolves through the portal.
+  surface part resolves through the portal. Layer parenthood and stack order
+  derive from real layer containment (`hostElement` roots + the layers'
+  `contains`), so nested overlays register correctly whatever the framework
+  effect order and wherever the surfaces were portalled; registered-peer and
+  reversed-portal-order tests pin the behavior (`test/headless-dom/
+  dismiss-layers.test.ts`).
 - **Native execution** — the renderer composition owns trigger, surface,
   shared `floating_overlay` placement (authored offset as the gap), token
   roles, accessibility metadata, and the dismiss/layer intent. The
-  node-backend gained a generic layer registry (rebuilt per painted frame,
-  rendered bounds recorded at paint, parent chains from tree order) plus
-  window-level Escape/outside dispatch on the mount host. The preview
-  specimen renders through the shared composition; the local GPUI
-  floating-overlay copy is gone.
+  node-backend gained a generic overlay host: a layer registry rebuilt at
+  the host's render-frame boundary (a real page converts many components
+  per frame — the registry is frame-scoped, not conversion-scoped),
+  rendered bounds recorded at paint, parent chains from tree order, a
+  paint-time focus-request queue for machine focus effects, and
+  window-level Escape/outside dispatch attached through one reusable
+  `attach_overlay_host` used by the production preview root and the
+  conformance mount host alike. The preview specimen renders through the
+  shared composition (with per-instance ids and the machine running
+  dismissal and focus effects); the local GPUI floating-overlay copy is
+  gone, and the specimen's trigger is the composition's own interactive
+  button — no second focusable wrapper.
 - **Primitive rows** — `overlay.intent`, `semantic.expanded`,
   `overlay.dismiss`, and `overlay.layer` gained render-neutral, web, and
   GPUI probes and join the gated owned rows (21/21 owned passing).
@@ -76,9 +90,12 @@ renderer-neutral Rust + compare + primitive report): green, all headless.
 
 - **Nested overlay registration order (web)**: the inner popover's dismiss
   layer registered before the outer's (Svelte effects and React child-first
-  effects), so Escape dismissed the outer first. Svelte now registers in a
-  pre-effect; React defers registration by a microtask past the commit's
-  effect flush. Innermost-first dismissal holds on both.
+  effects), so Escape dismissed the outer first. The dismiss stack now
+  derives parenthood and order from real layer containment (the layers'
+  `contains` over the host roots), so the outer inserts below the inner
+  whatever the effect order and wherever the portalled surfaces landed.
+  Innermost-first dismissal holds on both runtimes, with registered-peer and
+  reversed-portal-order tests pinning it.
 - **Controlled open while disabled (web)**: a controlled `open: true` host
   with `disabled: true` rendered the surface despite the machine's guard.
   Both shells now gate the visible state with `!disabled`.

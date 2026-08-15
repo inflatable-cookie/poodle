@@ -9,9 +9,10 @@ pub const POPOVER_SURFACE_MIN_WIDTH_REM: f32 = 14.0;
 /// targets, so they resolve the `24rem` arm).
 pub const POPOVER_SURFACE_MAX_WIDTH_REM: f32 = 24.0;
 
-/// Parses a `Dimension` like `"14rem"` into rem. Surface width bounds are
-/// authored in rem (contract §7); anything else falls back to the contract
-/// default.
+/// Parses a `Dimension` like `"14rem"` into rem. The portable unit is rem
+/// (the interface's contract): a non-rem value is a web-shell CSS length that
+/// does not port, and falls back to the contract default rather than being
+/// interpreted as rem.
 fn rem_of(dimension: &Option<crate::types::Dimension>, default: f32) -> f32 {
     let Some(dimension) = dimension else {
         return default;

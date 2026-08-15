@@ -258,14 +258,19 @@ entry and restoration, and the overlay capability rows.
   inertness, all three focus strategies, every close path (trigger, Escape,
   outside) with trigger focus restoration, the outside guard, the nested
   dismiss-stack contract (innermost-first Escape and ancestry-spared outside
-  dismissal), placement families and the start/end rule, offset and
-  trigger-width bounds, and semantics/token evidence.
+  dismissal), placement families and the start/end rule, offset,
+  trigger-width bounds, the rem width-bound override, and
+  semantics/token evidence.
 - **Native** — the renderer composition owns trigger, surface, placement,
   accessibility metadata, token roles, and the layer/dismiss intent; the
-  node-backend's generic layer registry rebuilds from the painted tree each
-  frame, records rendered bounds, and routes Escape (innermost) and outside
-  pointers (containment + ancestry) through the real event tree. The preview
-  specimen renders through the same shared composition.
+  node-backend's generic overlay host rebuilds the layer registry at the
+  host's render-frame boundary (not per converted component), records
+  rendered bounds, applies machine focus effects through a paint-time focus
+  queue, and routes Escape (innermost) and outside pointers (containment +
+  ancestry) through the real event tree via a reusable `attach_overlay_host`
+  used by the production preview root and the conformance mount host alike.
+  The preview specimen renders through the same shared composition with
+  per-instance ids and its own machine-driven dismissal and focus.
 - **Capability rows** — `overlay.intent`, `semantic.expanded`,
   `overlay.dismiss`, and `overlay.layer` are executed on every active layer
   (web, render-neutral, GPUI) and join the gated owned rows in the primitive
@@ -282,8 +287,8 @@ entry and restoration, and the overlay capability rows.
 - **Vector disposition** — the four Popover machine vectors are deleted;
   their claims are covered by the mounted corpus, and the machine itself is
   exercised by both web runtimes and the Rust mirror through the corpus.
-- **Cost** — 1,821 LOC Popover pilot increment and 36,548 bytes of Popover
-  fixture JSON (`effigy conformance:cost`).
+- **Cost** — the Popover pilot increment and fixture JSON are reported by
+  `effigy conformance:cost` (23 cases).
 
 See `docs/logs/2026-08/14-g14-005-popover-overlay-focus-proof.md`.
 

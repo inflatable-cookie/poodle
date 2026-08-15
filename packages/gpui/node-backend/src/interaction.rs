@@ -52,6 +52,13 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
                         // handle would sit unattached and never see a focus.
                         cx.refresh_windows();
                     }
+                    // A queued focus request (a machine focus effect from the
+                    // overlay host) is applied here, in the paint pass, once
+                    // the target element exists and has a handle.
+                    if super::layers::take_focus_request(&id) {
+                        handle.focus(window);
+                        cx.refresh_windows();
+                    }
                     let now = handle.is_focused(window);
                     let changed = FOCUS_STATES.with(|states| {
                         let mut states = states.borrow_mut();

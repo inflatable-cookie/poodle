@@ -61,6 +61,9 @@ export const popoverInterface = defineComponentInterface({
       default: "content",
       rustType: "PopoverSurfaceWidth",
     },
+    // Portable surface width bounds are authored in rem (the native targets
+    // resolve rem; arbitrary CSS lengths are a web-shell extension that does
+    // not port). The corpus proves an override case against both runtimes.
     { name: "surfaceMinWidth", type: { kind: "dimension" }, default: null, nullable: true },
     { name: "surfaceMaxWidth", type: { kind: "dimension" }, default: null, nullable: true },
     // Web-only extension: the wrapper observes clicks without adding a second

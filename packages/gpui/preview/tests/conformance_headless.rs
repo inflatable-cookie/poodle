@@ -483,6 +483,52 @@ fn run_planted_broken_keyboard_order_fails(cx: &mut TestAppContext) {
 
 // ── Popover planted failures (g14.005) ─────────────────────────────────────
 
+/// The layer registry is frame-scoped, not conversion-scoped: a real page
+/// converts many components independently per frame, and every overlay must
+/// register within that one frame.
+#[test]
+fn layers_survive_independent_conversions_within_a_frame() {
+    run_headless(run_layers_survive_independent_conversions_within_a_frame);
+}
+
+fn run_layers_survive_independent_conversions_within_a_frame(cx: &mut TestAppContext) {
+    let _ = cx;
+    // Two independent popover compositions converted separately — as a real
+    // page converts its components — inside ONE frame.
+    poodle_gpui_node_backend::overlay_frame_begin();
+    let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
+    let first = poodle_render::popover(
+        &PopoverSpec::new().with_open(true),
+        &theme,
+        &poodle_render::PopoverHandlers {
+            on_activate: None,
+            on_dismiss: Some(Arc::new(|_| {})),
+            instance_id: Some("multi-frame-a".to_owned()),
+        },
+        Some(poodle_node::Node::text("A trigger")),
+        Some(poodle_node::Node::text("A panel")),
+    );
+    let second = poodle_render::popover(
+        &PopoverSpec::new().with_open(true),
+        &theme,
+        &poodle_render::PopoverHandlers {
+            on_activate: None,
+            on_dismiss: Some(Arc::new(|_| {})),
+            instance_id: Some("multi-frame-b".to_owned()),
+        },
+        Some(poodle_node::Node::text("B trigger")),
+        Some(poodle_node::Node::text("B panel")),
+    );
+    let _ = poodle_gpui_node_backend::to_gpui(&first);
+    let _ = poodle_gpui_node_backend::to_gpui(&second);
+    assert_eq!(
+        poodle_gpui_node_backend::open_layer_count(),
+        2,
+        "both independently converted overlays must register in the same frame"
+    );
+    poodle_gpui_node_backend::overlay_frame_end();
+}
+
 /// Assert that a planted defect fails the corpus's own expectation, naming
 /// runtime/case/step/field.
 fn assert_defect_fails(

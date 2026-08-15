@@ -45,6 +45,7 @@
     "./conformance/button": "./src/conformance/button.ts",
     "./conformance/tabs": "./src/conformance/tabs.ts",
     "./conformance/popover": "./src/conformance/popover.ts",
+    "./dom/dismiss": "./src/dom/dismiss.ts",
     "./tokens/runtime": "./src/tokens/runtime.ts",
     "./tokens/css": "./src/tokens/css.ts",
     "./tokens/styles.css": "./src/tokens/generated/css/poodle-tokens.css",

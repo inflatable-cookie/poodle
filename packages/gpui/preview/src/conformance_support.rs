@@ -90,6 +90,12 @@ pub fn popover_spec_from_fixture(fixture: &Value) -> PopoverSpec {
             PopoverSurfaceWidth::Content
         });
     }
+    if let Some(min_width) = props.get("surfaceMinWidth").and_then(Value::as_str) {
+        spec = spec.with_surface_min_width(poodle_specs::Dimension::new(min_width));
+    }
+    if let Some(max_width) = props.get("surfaceMaxWidth").and_then(Value::as_str) {
+        spec = spec.with_surface_max_width(poodle_specs::Dimension::new(max_width));
+    }
     spec
 }
 
@@ -104,42 +110,31 @@ pub fn popover_content_from_fixture(fixture: &Value, instance_id: &str) -> Optio
         .cloned()
         .unwrap_or_else(|| serde_json::json!({}));
     let raw = regions.get("children").and_then(Value::as_str).unwrap_or_default();
-    if raw.is_empty() {
+    let focusables = fixture
+        .pointer("/host/focusables")
+        .and_then(Value::as_array)
+        .map(|items| {
+            items
+                .iter()
+                .filter_map(Value::as_str)
+                .map(str::to_owned)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    if raw.is_empty() && focusables.is_empty() {
         return None;
     }
     let mut content = Node::container();
-    let mut text = String::new();
-    let mut focusable_index = 0usize;
-    fn flush_text(text: &mut String, content: &mut Node) {
-        if !text.is_empty() {
-            *content = std::mem::take(content).child(Node::text(std::mem::take(text)));
-        }
+    if !raw.is_empty() {
+        content = content.child(Node::text(raw));
     }
-    // Walk the region for inline `<button>label</button>` markup; plain text
-    // between buttons accumulates into the text run.
-    let mut rest = raw;
-    loop {
-        let Some(start) = rest.find("<button>") else {
-            text.push_str(rest);
-            break;
-        };
-        text.push_str(&rest[..start]);
-        flush_text(&mut text, &mut content);
-        let after = &rest[start + "<button>".len()..];
-        let Some(end) = after.find("</button>") else {
-            text.push_str(after);
-            break;
-        };
-        let label = &after[..end];
-        let mut button = Node::button(label);
+    for (index, label) in focusables.into_iter().enumerate() {
+        let mut button = Node::button(label.clone());
         button.interaction.focusable = true;
-        button.id = Some(format!("{instance_id}:popover-content-focusable-{focusable_index}"));
-        button.a11y.label = Some(label.to_owned());
-        focusable_index += 1;
+        button.id = Some(format!("{instance_id}:popover-content-focusable-{index}"));
+        button.a11y.label = Some(label);
         content = content.child(button);
-        rest = &after[end + "</button>".len()..];
     }
-    flush_text(&mut text, &mut content);
     Some(content)
 }
 

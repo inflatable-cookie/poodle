@@ -121,11 +121,11 @@ export function Popover({
       dismissOnOutsideInteract,
       onDismiss: (reason) =>
         sendRef.current(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
-      // DOM ancestry keeps a nested popover's layer below its host's, so the
-      // innermost layer dismisses first whatever the effect order. The
-      // portalled surface is where nested popovers live, so it is the
-      // ancestry anchor.
-      hostElement: surfaceRef.current,
+      // Parenthood and stack order derive from real layer containment: the
+      // layer's `contains` covers both the root and the portalled surface,
+      // so a nested popover's root is contained by its host's layer no
+      // matter where the surfaces were portalled to.
+      hostElement: rootElement,
     });
   }, [isOpen, dismissOnOutsideInteract, rootElement]);
 

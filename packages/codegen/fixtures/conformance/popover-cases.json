@@ -372,7 +372,13 @@
         },
         "regions": {
           "trigger": "Open popover",
-          "children": "<button>First option</button><button>Second option</button>"
+          "children": "Quick settings panel"
+        },
+        "host": {
+          "focusables": [
+            "First option",
+            "Second option"
+          ]
         }
       },
       "specimen": {
@@ -1414,6 +1420,78 @@
           "expect": {
             "geometry": {
               "topGap": 12,
+              "tolerance": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/surface-width-bounds",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "surfaceMinWidth": "20rem",
+          "surfaceMaxWidth": "22rem"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Placement",
+        "caption": "Width bounds override",
+        "axes": [],
+        "captureId": "popover/surface-width-bounds"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "expanded": true,
+            "controls": "surface",
+            "parent": "root"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true,
+            "role": "dialog",
+            "name": "Quick settings",
+            "overlay": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "geometry": {
+              "minWidth": 320,
               "tolerance": 1
             }
           }

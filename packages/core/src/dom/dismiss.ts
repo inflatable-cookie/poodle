@@ -176,34 +176,45 @@ function syncListeners(): void {
  * Register an open overlay. Returns an unregister function; call it on close
  * and on unmount.
  *
- * Records the layer on top of the stack at registration time as `parent` —
- * the layer this one opened inside. Registration order is the ancestry, not
- * the DOM: a portalled surface is not a descendant of its host, so the stack
- * is the only place the relationship is visible.
+ * Parenthood is derived from real layer containment, not registration order:
+ * a layer's parent is the innermost layer already registered whose
+ * `contains` covers the new layer's `hostElement` — the layer this one
+ * opened inside. Peers (no layer contains the host) get no parent; layers
+ * without a host element keep the registration-top default, since only the
+ * host-aware popover-like layers can be located by containment.
  *
- * When the layer declares a `hostElement`, the stack also checks DOM
- * ancestry: a layer whose host contains an already-registered layer's host
- * opened AROUND it, so it inserts BELOW the contained layer (innermost
- * closes first) regardless of framework effect order.
+ * When the new layer's own containment covers an already-registered layer's
+ * host, this layer opened AROUND it, so it inserts BELOW the contained layer
+ * (innermost closes first) whatever the framework's effect order.
  */
 export function registerDismissLayer(layer: DismissLayer): () => void {
-  const insertAt = layer.hostElement
+  const host = layer.hostElement ?? null;
+  let parent: DismissLayer | null = null;
+  if (host) {
+    for (let index = stack.length - 1; index >= 0; index -= 1) {
+      if (stack[index].contains(host as Node)) {
+        parent = stack[index];
+        break;
+      }
+    }
+  } else {
+    parent = stack[stack.length - 1] ?? null;
+  }
+  layer.parent = parent;
+
+  const insertAt = host
     ? stack.findIndex(
         (existing) =>
           existing.hostElement &&
-          existing.hostElement !== layer.hostElement &&
-          layer.hostElement!.contains(existing.hostElement),
+          existing.hostElement !== host &&
+          layer.contains(existing.hostElement as Node),
       )
     : -1;
-  // The layer above this one at registration is its recorded parent. When
-  // the layer wraps another (DOM ancestry), it takes the wrapped layer's
-  // place below it and the wrapped layers' ancestry points back at it.
-  layer.parent = insertAt >= 0 ? (stack[insertAt]?.parent ?? null) : (stack[stack.length - 1] ?? null);
   if (insertAt >= 0) {
     stack.splice(insertAt, 0, layer);
-    for (let i = insertAt + 1; i < stack.length; i += 1) {
-      const existing = stack[i];
-      if (existing.hostElement && layer.hostElement!.contains(existing.hostElement)) {
+    for (let index = insertAt + 1; index < stack.length; index += 1) {
+      const existing = stack[index];
+      if (existing.hostElement && layer.contains(existing.hostElement as Node)) {
         existing.parent = layer;
       }
     }

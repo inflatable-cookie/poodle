@@ -10,8 +10,8 @@
  * and semantics/token evidence.
  *
  * Fixture conventions (hosts interpret, generic code never reads):
- * - the `children` region may contain `<button>label</button>` markup so the
- *   focus-first strategy has a real focusable target in the content;
+ * - `host.focusables` lists the focusable content items the hosts compose as
+ *   real focusable elements (the focus-first strategy's targets);
  * - `host.nested` declares a second popover instance the host composes inside
  *   the content (the nested dismiss-stack proof);
  * - web hosts give the trigger a fixed anchor box so placement resolves
@@ -139,7 +139,7 @@ const cases = [
   }),
   componentCase(popoverInterface, {
     id: "popover/focus-first",
-    fixture: fixture({}, { children: "<button>First option</button><button>Second option</button>" }),
+    fixture: fixture({}, {}, { focusables: ["First option", "Second option"] }),
     specimen: { group: "Focus", caption: "First focusable", captureId: "popover/focus-first", axes: [] },
     steps: [
       actionPress<I>("trigger", "pointer"),
@@ -323,6 +323,18 @@ const cases = [
     steps: [
       ...openPath(),
       expectPart<I>("surface", { geometry: { topGap: 12, tolerance: 1 } }),
+    ],
+  }),
+  componentCase(popoverInterface, {
+    id: "popover/surface-width-bounds",
+    fixture: fixture({ surfaceMinWidth: "20rem", surfaceMaxWidth: "22rem" }),
+    specimen: { group: "Placement", caption: "Width bounds override", captureId: "popover/surface-width-bounds", axes: [] },
+    steps: [
+      ...openPath(),
+      // The rem-only portable unit resolves to the same pixels on both
+      // runtimes; the web shell accepts any CSS length, but the portable
+      // contract is rem.
+      expectPart<I>("surface", { geometry: { minWidth: 320, tolerance: 1 } }),
     ],
   }),
   componentCase(popoverInterface, {

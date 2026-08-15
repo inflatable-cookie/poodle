@@ -1,16 +1,17 @@
 //! Dismissable-layer registry (spec 066, g14.005) — the generic backend half
-//! of the overlay dismiss-stack contract.
+//! of the overlay dismiss-stack contract, plus the reusable production
+//! overlay host.
 //!
 //! Renderer-neutral nodes declare dismissal intent through
 //! `Interaction.on_dismiss` (the layer's reason handler) and
 //! `Interaction.dismiss_layer` (the layer id every node of one containment
-//! unit — an overlay's trigger and surface — shares). Each frame this module
-//! rebuilds the stack from the painted tree:
+//! unit — an overlay's trigger and surface — shares). Every render frame this
+//! module rebuilds the stack from the converted tree:
 //!
 //! - layers are ordered by tree position (outer before inner), matching the
 //!   web's registration order for nested overlays;
-//! - a layer's `parent` is the innermost layer already open when the walk
-//!   first meets it — the web stack records the same ancestry at
+//! - a layer's `parent` is the innermost layer already registered when the
+//!   walk first meets it — the web stack records the same ancestry at
 //!   registration;
 //! - the containment set of a layer is the rendered bounds of every node
 //!   sharing its id, recorded in the paint pass.
@@ -19,11 +20,19 @@
 //! dismisses every layer that neither contains the position nor is an
 //! ancestor of a layer that does — the shared dismiss-stack contract
 //! (`packages/core/src/dom/dismiss.ts::resolveDismiss`), executed through the
-//! real event tree by the mount host. No component identifier lives here.
+//! real event tree. No component identifier lives here.
+//!
+//! The registry is frame-scoped, and the frame boundary is the host's render
+//! pass — not an individual tree conversion, because a real page converts
+//! many components independently per frame. [`overlay_frame_begin`] is called
+//! once at the start of each rendered frame by both the production preview
+//! root and the headless conformance driver; [`attach_overlay_host`] wires
+//! the window-level dismissal listeners onto a root element for the same two
+//! hosts.
 
 use std::cell::RefCell;
 
-use gpui::{App, Bounds, Pixels, Point};
+use gpui::{App, Bounds, KeyDownEvent, MouseButton, MouseDownEvent, Pixels, Point};
 use poodle_node::{DismissHandler, DismissReason};
 
 /// One registered overlay layer for the current frame.
@@ -45,9 +54,46 @@ thread_local! {
     /// Rendered bounds per element id, rebuilt each frame.
     static ELEMENT_BOUNDS: RefCell<std::collections::HashMap<String, Bounds<Pixels>>> =
         RefCell::new(std::collections::HashMap::new());
-    /// to_gpui recursion depth: the registry is frame-scoped, and the frame
-    /// boundary is the outermost to_gpui call.
-    static FRAME_DEPTH: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+    /// Focus requests queued by component hosts (machine focus effects):
+    /// applied by the target element's paint-time focus canvas, once.
+    static FOCUS_REQUESTS: RefCell<std::collections::HashSet<String>> =
+        RefCell::new(std::collections::HashSet::new());
+}
+
+/// Begin a rendered frame: the layer registry and bounds are rebuilt per
+/// frame, and the boundary is the host's render pass — not a `to_gpui` call,
+/// because a real page converts many components independently per frame.
+///
+/// The focus queue is NOT cleared here: focus requests made between frames
+/// (machine effects from event dispatch) must survive until the next frame's
+/// paint applies them. [`overlay_frame_end`] drops whatever was never
+/// applied.
+pub fn overlay_frame_begin() {
+    LAYERS.with(|layers| layers.borrow_mut().clear());
+    ELEMENT_BOUNDS.with(|bounds| bounds.borrow_mut().clear());
+}
+
+/// End a rendered frame: drop focus requests the frame's paint never applied
+/// (the target element never appeared). Called by the headless driver after
+/// each draw; the production host's requests always target painted elements.
+pub fn overlay_frame_end() {
+    FOCUS_REQUESTS.with(|requests| requests.borrow_mut().clear());
+}
+
+/// Queue a focus request for the element with this id. The target element's
+/// focus canvas applies it at paint time (the element must exist and be
+/// tracked), so requests made during event dispatch land after the frame
+/// that mounts the target.
+pub fn request_focus(element_id: &str) {
+    FOCUS_REQUESTS.with(|requests| {
+        requests.borrow_mut().insert(element_id.to_owned());
+    });
+}
+
+/// Claim a pending focus request for the element, if any. Called by the
+/// element's focus canvas in the paint pass, which owns the window.
+pub fn take_focus_request(element_id: &str) -> bool {
+    FOCUS_REQUESTS.with(|requests| requests.borrow_mut().remove(element_id))
 }
 
 /// The rendered bounds of the element with this id, as of the last frame.
@@ -60,25 +106,9 @@ pub fn open_layer_count() -> usize {
     LAYERS.with(|layers| layers.borrow().len())
 }
 
-/// Begin a frame: called at the outermost `to_gpui` call so the registry is
-/// rebuilt exactly once per painted tree. Returns true when this call is the
-/// outermost (the frame boundary).
-pub fn begin_frame() -> bool {
-    let depth = FRAME_DEPTH.with(|depth| depth.get());
-    if depth == 0 {
-        LAYERS.with(|layers| layers.borrow_mut().clear());
-        ELEMENT_BOUNDS.with(|bounds| bounds.borrow_mut().clear());
-    }
-    FRAME_DEPTH.with(|depth| depth.set(depth.get() + 1));
-    depth == 0
-}
-
-/// End a frame, mirroring the outermost `to_gpui` call.
-pub fn end_frame() {
-    FRAME_DEPTH.with(|depth| depth.set(depth.get().saturating_sub(1)));
-}
-
-/// Rebuild the layer stack from the painted tree, in tree order.
+/// Rebuild the layer stack from the converted tree, in tree order. Runs for
+/// every independently converted root within the frame; the registry
+/// dedupes by layer id.
 pub fn collect_layers(node: &poodle_node::Node, innermost: Option<&str>) {
     if let Some(id) = node.interaction.dismiss_layer.as_deref() {
         LAYERS.with(|layers| {
@@ -176,4 +206,26 @@ pub fn dismiss_layers_at(position: Point<Pixels>, cx: &mut App) {
         }
     }
     cx.refresh_windows();
+}
+
+/// Attach the window-level overlay host listeners to a root element: every
+/// pointer-down is routed through the layer registry (outside dismissal) and
+/// Escape dismisses the innermost layer. The production preview root and the
+/// conformance mount host use the same wiring, so overlay dismissal behaves
+/// identically in the real runtime and the headless driver.
+pub fn attach_overlay_host<E>(el: E) -> E
+where
+    E: gpui::InteractiveElement + 'static,
+{
+    el.on_mouse_down(
+        MouseButton::Left,
+        move |event: &MouseDownEvent, _window, cx| {
+            dismiss_layers_at(event.position, cx);
+        },
+    )
+    .on_key_down(move |event: &KeyDownEvent, _window, cx| {
+        if event.keystroke.key.as_str() == "escape" {
+            dismiss_innermost(cx);
+        }
+    })
 }

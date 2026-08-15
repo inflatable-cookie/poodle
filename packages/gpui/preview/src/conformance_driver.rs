@@ -48,35 +48,27 @@ impl Focusable for ConformanceRoot {
 impl Render for ConformanceRoot {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         let node = self.node.lock().expect("node lock").clone();
-        div()
-            .size_full()
-            .track_focus(&self.focus)
-            // The window-level half of the dismiss-stack contract: every
-            // pointer press and Escape is routed through the node backend's
-            // layer registry (generic — no component identifier here), so
-            // overlay dismissal executes through the real event tree.
-            .on_mouse_down(
-                gpui::MouseButton::Left,
-                move |event: &gpui::MouseDownEvent, _window, cx| {
-                    poodle_gpui_node_backend::dismiss_layers_at(event.position, cx);
-                },
-            )
-            .on_key_down(move |event: &gpui::KeyDownEvent, _window, cx| {
-                if event.keystroke.key.as_str() == "escape" {
-                    poodle_gpui_node_backend::dismiss_innermost(cx);
-                }
-            })
-            .child(
-                div()
-                    .w(px(MOUNT_BOX_WIDTH))
-                    .h(px(MOUNT_BOX_HEIGHT))
-                    .ml(px(MOUNT_BOX_LEFT))
-                    .mt(px(MOUNT_BOX_TOP))
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .child(poodle_gpui_node_backend::to_gpui(&node)),
-            )
+        // The window-level overlay host: every pointer press and Escape is
+        // routed through the node backend's layer registry (generic — no
+        // component identifier here), so overlay dismissal executes through
+        // the real event tree. The production preview root uses the same
+        // wiring.
+        poodle_gpui_node_backend::attach_overlay_host(
+            div()
+                .size_full()
+                .track_focus(&self.focus)
+                .child(
+                    div()
+                        .w(px(MOUNT_BOX_WIDTH))
+                        .h(px(MOUNT_BOX_HEIGHT))
+                        .ml(px(MOUNT_BOX_LEFT))
+                        .mt(px(MOUNT_BOX_TOP))
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .child(poodle_gpui_node_backend::to_gpui(&node)),
+                ),
+        )
     }
 }
 
@@ -130,8 +122,10 @@ impl<'a> HeadlessDriver<'a> {
     /// views that were not explicitly invalidated — paint-time side effects
     /// (the node backend's focus canvases) would only run on some frames. The
     /// root view is notified (invalidated) up front so every draw is a full
-    /// repaint and the backend observations are deterministic.
+    /// repaint and the backend observations are deterministic. The overlay
+    /// frame boundary (layer registry, bounds, focus queue) is this draw.
     pub fn draw_frame(&mut self) {
+        poodle_gpui_node_backend::overlay_frame_begin();
         self.root
             .update(self.cx, |_root, cx| cx.notify());
         self.cx.update(|window, cx| {
@@ -139,6 +133,9 @@ impl<'a> HeadlessDriver<'a> {
             let _ = window.draw(cx);
         });
         self.cx.run_until_parked();
+        // Focus requests the frame's paint never applied are stale (the
+        // target element never appeared).
+        poodle_gpui_node_backend::overlay_frame_end();
     }
 
     /// Drain the executor until every task is parked.

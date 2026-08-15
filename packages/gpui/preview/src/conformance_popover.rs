@@ -45,6 +45,7 @@ struct CaseHost {
     theme: GpuiThemeProvider,
     trigger_text: String,
     content_text: String,
+    focusables: Vec<String>,
     nested: Option<(String, String)>,
     /// The nested popover's instance state, persistent across rebuilds (its
     /// own machine transitions must survive the composition's rebuilds).
@@ -76,6 +77,7 @@ impl CaseHost {
             if let Some(node) = popover_content_from_fixture(
                 &serde_json::json!({
                     "regions": { "children": self.content_text },
+                    "host": { "focusables": self.focusables },
                 }),
                 &self.instance_id,
             ) {
@@ -280,9 +282,11 @@ fn element_id(instance_id: &str, part: &str) -> String {
     format!("{instance_id}:{part}")
 }
 
-/// Execute the machine's focus effects through the real backend focus API.
+/// Execute the machine's focus effects through the shared overlay-host
+/// focus queue: the target element's paint-time focus canvas applies the
+/// request after the frame that mounts it. Same production path the preview
+/// host uses.
 fn apply_focus_effects(
-    driver: &mut HeadlessDriver<'_>,
     instance_id: &str,
     node: &Node,
     effects: Vec<PopoverEffect>,
@@ -290,7 +294,10 @@ fn apply_focus_effects(
     for effect in effects {
         match effect {
             PopoverEffect::RestoreTriggerFocus => {
-                driver.focus_element(&element_id(instance_id, "popover-trigger"));
+                poodle_gpui_node_backend::request_focus(&element_id(
+                    instance_id,
+                    "popover-trigger",
+                ));
             }
             PopoverEffect::FocusOnOpen { strategy } => {
                 let surface = node.find(&|n| n.id.as_deref() == Some("popover-surface"));
@@ -303,8 +310,7 @@ fn apply_focus_effects(
                                 .or_else(|| surface.id.clone())
                                 .unwrap_or_default();
                             if !id.is_empty() {
-                                driver.wait_for_focus_handle(&id);
-                                driver.focus_element(&id);
+                                poodle_gpui_node_backend::request_focus(&id);
                             }
                         }
                     }
@@ -318,8 +324,7 @@ fn apply_focus_effects(
                                 .or_else(|| target.id.clone())
                                 .unwrap_or_default();
                             if !id.is_empty() {
-                                driver.wait_for_focus_handle(&id);
-                                driver.focus_element(&id);
+                                poodle_gpui_node_backend::request_focus(&id);
                             }
                         }
                     }
@@ -461,6 +466,17 @@ pub fn drive_popover_cases(
                         .to_owned(),
                 )
             });
+        let focusables = fixture
+            .pointer("/host/focusables")
+            .and_then(Value::as_array)
+            .map(|items| {
+                items
+                    .iter()
+                    .filter_map(Value::as_str)
+                    .map(str::to_owned)
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
         let node = Arc::new(Mutex::new(Node::container()));
         let outer_trace = Arc::new(Mutex::new(Vec::new()));
         let host = Arc::new(Mutex::new(CaseHost {
@@ -475,6 +491,7 @@ pub fn drive_popover_cases(
             theme: GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE),
             trigger_text,
             content_text,
+            focusables,
             nested_state: nested.as_ref().map(|_| {
                 Arc::new(InstanceState {
                     open: Arc::new(Mutex::new(true)),
@@ -668,13 +685,13 @@ fn rebuild_and_apply(driver: &mut HeadlessDriver<'_>, host: &Mutex<CaseHost>) {
     *host_guard.node.lock().expect("node lock") = built;
     driver.draw_frame();
     let node = host_guard.node.lock().expect("node lock").clone();
-    apply_focus_effects(driver, &host_guard.instance_id, &node, pending);
+    apply_focus_effects(&host_guard.instance_id, &node, pending);
     apply_focus_effects(
-        driver,
         &format!("{}-nested", host_guard.instance_id),
         &node,
         nested_pending,
     );
+    driver.draw_frame();
 }
 
 pub fn popover_report(component: &str, outcomes: &[CaseOutcome]) -> Value {

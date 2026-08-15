@@ -704,12 +704,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   measurement instead of the guess.
 
 - 2026-08-15 — g14.005 (Popover overlay/focus proof) recorded three
-  environment/harness notes worth keeping visible: (1) bun 1.3.14 did not
-  hoist the `@inflatable-cookie/*` workspace links into the root
-  `node_modules` in this worktree, so the conformance tests silently
-  resolved `@inflatable-cookie/poodle-core` from a stale global bun install;
-  manual symlinks fixed the local run, and a fresh CI install is unaffected.
-  (2) happy-dom 20.11.2 implements no layout at all (`getBoundingClientRect`
+  environment/harness notes worth keeping visible: (1) the web runner's
+  layer-count observation imports through a string subpath export
+  (`@inflatable-cookie/poodle-core/dom/dismiss`); the bare package entry is
+  a conditional export that bun's resolver cannot match from the test tree
+  in a clean checkout, which the initial CI run caught — a local global bun
+  install had masked the gap. (2) happy-dom 20.11.2 implements no layout at all (`getBoundingClientRect`
   is always zero), so the web leg of the placement/offset/width claims runs
   against a box-model stub plus an anchor-box stylesheet — the same
   browser-default-simulation posture as the keydown → click harness; the

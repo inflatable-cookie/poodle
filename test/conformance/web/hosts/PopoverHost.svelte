@@ -38,6 +38,9 @@
   const nested = $derived(
     fixture.host?.nested as { trigger?: string; children?: string } | undefined,
   );
+  const focusables = $derived(
+    (fixture.host?.focusables as string[] | undefined) ?? [],
+  );
 </script>
 
 <Popover {...props} onOpenChange={handleOpenChange}>
@@ -46,6 +49,9 @@
   {/snippet}
   {#snippet children()}
     {@html fixture.regions.children}
+    {#each focusables as focusable, index (index)}
+      <button type="button" tabindex="-1">{@html focusable}</button>
+    {/each}
     {#if nested}
       <Popover defaultOpen onOpenChange={onOpenChange}>
         {#snippet trigger()}

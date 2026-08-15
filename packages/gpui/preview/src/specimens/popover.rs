@@ -1,14 +1,12 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
-use crate::node_compat::{Button, Eyebrow, Popover};
+use crate::node_compat::{Eyebrow, Popover};
 use crate::PreviewRoot;
 use gpui::*;
 use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{LayoutDirection, Node};
-use poodle_specs::{
-    ButtonSpec, ButtonVariant, EyebrowSpec, OverlayPlacement, PopoverSpec, PopoverSurfaceWidth,
-};
+use poodle_specs::{EyebrowSpec, OverlayPlacement, PopoverSpec, PopoverSurfaceWidth};
 
 /// One labelled popover example. The popover renders through the shared
 /// poodle-render composition; the toggle handler delivers through the
@@ -26,6 +24,7 @@ fn popover_case(
     let is_open = state.specimens.is_on(key);
     let queue = std::sync::Arc::clone(&state.node_events);
     Popover::from_spec(spec.with_open(is_open), theme)
+        .with_instance_id(key)
         .on_open_change(Arc::new(move |open| {
             queue
                 .lock()
@@ -35,15 +34,9 @@ fn popover_case(
                     value: open,
                 });
         }))
-        .with_trigger(
-            Button::from_spec(
-                ButtonSpec::new()
-                    .with_variant(ButtonVariant::Secondary)
-                    .with_label(trigger_label),
-                theme,
-            )
-            .with_id(format!("{key}-trigger")),
-        )
+        // The composition owns the interactive trigger (role button,
+        // focusable); the specimen only supplies its label.
+        .with_trigger(Node::text(trigger_label))
         .with_content(content)
 }
 

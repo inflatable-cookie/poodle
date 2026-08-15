@@ -30,6 +30,7 @@ export function ReactPopoverHost({
   };
 
   const nested = fixture.host?.nested as { trigger?: string; children?: string } | undefined;
+  const focusables = (fixture.host?.focusables as string[] | undefined) ?? [];
 
   return (
     <Popover
@@ -38,6 +39,11 @@ export function ReactPopoverHost({
       trigger={<div dangerouslySetInnerHTML={{ __html: fixture.regions.trigger }} />}
     >
       <div dangerouslySetInnerHTML={{ __html: fixture.regions.children }} />
+      {focusables.map((focusable) => (
+        <button key={focusable} type="button" tabIndex={-1}>
+          {focusable}
+        </button>
+      ))}
       {nested ? (
         <Popover
           defaultOpen

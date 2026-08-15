@@ -45,7 +45,10 @@ mod layers;
 mod style;
 
 use interaction::apply_listeners;
-pub use layers::{bounds_for, dismiss_innermost, dismiss_layers_at, open_layer_count};
+pub use layers::{
+    attach_overlay_host, bounds_for, dismiss_innermost, dismiss_layers_at, open_layer_count,
+    overlay_frame_begin, overlay_frame_end, request_focus,
+};
 use style::{
     apply_cursor, apply_layout, apply_paint, apply_patch, apply_position, apply_state_patches,
     apply_text,
@@ -148,14 +151,13 @@ fn element_id(node: &Node) -> ElementId {
 
 /// Interpret one node (and its subtree) as a GPUI element.
 pub fn to_gpui(node: &Node) -> AnyElement {
-    // Frame-scoped registries (layers, bounds): cleared at the outermost
-    // to_gpui call and rebuilt from this frame's tree.
-    if layers::begin_frame() {
-        layers::collect_layers(node, None);
-    }
-    let out = to_gpui_impl(node);
-    layers::end_frame();
-    out
+    // Layer registration runs for every independently converted root; the
+    // frame-scoped registries are cleared by the host's overlay_frame_begin
+    // once per rendered frame (the production preview and the conformance
+    // driver both call it), so a real page's multiple conversions all land
+    // in the same frame's registry.
+    layers::collect_layers(node, None);
+    to_gpui_impl(node)
 }
 
 fn to_gpui_impl(node: &Node) -> AnyElement {

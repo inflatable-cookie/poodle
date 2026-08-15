@@ -15,7 +15,10 @@ import type {
   SerializedCase,
   SerializedComponentInterface,
 } from "@inflatable-cookie/poodle-core/conformance";
-import { dismissLayerStackLength } from "@inflatable-cookie/poodle-core";
+// Resolved through a string subpath export like every other poodle-core
+// import — the bare package entry is not resolvable from the test tree in a
+// clean install.
+import { dismissLayerStackLength } from "@inflatable-cookie/poodle-core/dom/dismiss";
 import { channelsOf, geometryFields, geometryOf } from "./observer";
 
 export interface TraceEntry {
