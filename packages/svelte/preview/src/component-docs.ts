@@ -5332,11 +5332,30 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
 <Fader bind:value min={-60} max={12} detents={[0]} format={{ type: "db" }} ariaLabel="Gain" />`,
   },
+  "meter-surface": {
+  props: [
+    { name: "bus", type: "MeterBus | null", default: "null", description: "The one MeterBus this surface paints from; null renders an inert container." },
+    { name: "painter", type: "MeterSurfacePainter | null", default: "null", description: "Injectable painter seam; null uses the default Canvas2D painter." },
+  ],
+  usage: `<script lang="ts">
+  import { createMeterBus } from "@inflatable-cookie/poodle-core";
+  import { AudioMeter, MeterSurface } from "@inflatable-cookie/poodle-svelte";
+  const bus = createMeterBus();
+  const left = bus.register("ch-1", { mode: "ppm" });
+</script>
+
+<MeterSurface {bus}>
+  <AudioMeter surface={bus} channel="ch-1" ariaLabel="Channel 1" />
+</MeterSurface>`,
+  },
   "audio-meter": {
   props: [
     { name: "context", type: "AudioMeterContext", description: "Left or mono meter machine context." },
     { name: "rightContext", type: "AudioMeterContext | null", default: "null", description: "Optional right-channel machine context." },
     { name: "style", type: '"bar" | "segments"', default: '"segments"', description: "Standard themed renderer style." },
+    { name: "surface", type: "MeterBus | null", default: "null", description: "Opt-in batched web renderer; null keeps standalone painting." },
+    { name: "channel", type: "MeterBusChannelId | null", default: "null", description: "Registered bus channel id; required in surface mode." },
+    { name: "rightChannel", type: "MeterBusChannelId | null", default: "null", description: "Optional registered stereo channel in surface mode." },
   ],
   usage: `<script lang="ts">
   import { createAudioMeterContext } from "@inflatable-cookie/poodle-core";

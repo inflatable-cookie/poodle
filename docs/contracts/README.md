@@ -150,6 +150,7 @@ contract references the rule rather than restating it:
 - `components/meta-bar.md`
 - `components/meta-item.md`
 - `components/meter.md`
+- `components/meter-surface.md`
 - `components/metric-tile.md`
 - `components/mod-matrix-grid.md`
 - `components/model-catalogue-editor.md`

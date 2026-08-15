@@ -3477,6 +3477,12 @@
         "description": "Explicit density override. Supports compact, default, and comfortable."
       },
       {
+        "name": "initialFocus",
+        "type": "\"auto\" | \"none\" | string",
+        "default": "\"auto\"",
+        "description": "Where focus lands when the dialog opens. \"auto\" focuses the first focusable element in the body (the surface itself when the body has none); \"none\" focuses nothing; a string is a CSS selector resolved within the surface, falling back to \"auto\" when unmatched."
+      },
+      {
         "name": "dismissOnEscape",
         "type": "boolean",
         "default": "true",
@@ -4513,6 +4519,12 @@
         "description": "Whether the upload input is disabled."
       },
       {
+        "name": "describedBy",
+        "type": "string | null",
+        "default": "null",
+        "description": "ID of descriptive content for the file control and any focusable dropzone shell."
+      },
+      {
         "name": "files",
         "type": "FileUploadItem[]",
         "default": "[]",
@@ -5219,6 +5231,12 @@
         "description": "When false, hides the built-in submit/cancel buttons and expects a custom actions snippet."
       },
       {
+        "name": "initialFocus",
+        "type": "\"auto\" | \"none\" | string",
+        "default": "\"auto\"",
+        "description": "Where focus lands when the dialog opens. The default focuses the first focusable element in the form body — the first field. A consumer-supplied value wins."
+      },
+      {
         "name": "ariaLabel",
         "type": "string | null",
         "default": "null",
@@ -5788,6 +5806,640 @@
     "slots": [],
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { ListCardCounter } from \"@inflatable-cookie/poodle-svelte\";\n  import { messageSquare } from \"lucide-svelte\";\n</script>\n\n<ListCardCounter icon={messageSquare} count={12} tooltip=\"12 comments\" href=\"/comments\" />"
+  },
+  "licence-status": {
+    "props": [
+      {
+        "name": "usability",
+        "type": "LicenceUsability",
+        "description": "Required. The authority's usability projection; every state renders distinctly."
+      },
+      {
+        "name": "trustBasis",
+        "type": "LicenceTrustBasis",
+        "description": "Required. How the licence was verified. Contains no credential."
+      },
+      {
+        "name": "useUntil",
+        "type": "number | null",
+        "description": "Required. Use-coverage end in Unix seconds, or null for no end date. Always its own row."
+      },
+      {
+        "name": "updateUntil",
+        "type": "number | null",
+        "description": "Required. Update-coverage end in Unix seconds, or null for no end date. Always its own row."
+      },
+      {
+        "name": "usable",
+        "type": "boolean",
+        "description": "Required. A supplied read, reported through data state only. It gates nothing."
+      },
+      {
+        "name": "attention",
+        "type": "LicenceAttention",
+        "description": "Required. Authority emphasis; never re-derived from the other reads."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "default": "\"Licence\"",
+        "description": "Accessible name for the section."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { LicenceStatus } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<LicenceStatus\n  usability={{ state: \"inGrace\", until: renewalDeadline }}\n  trustBasis={{ kind: \"remoteAssertion\", checked: lastCheck }}\n  useUntil={useWindowEnd}\n  updateUntil={null}\n  usable={licence.usable}\n  attention={licence.attention}\n/>"
+  },
+  "licence-activation": {
+    "props": [
+      {
+        "name": "mode",
+        "type": "\"key\" | \"account\"",
+        "description": "Required. Selects the host application's activation product model."
+      },
+      {
+        "name": "keyFormat",
+        "type": "LicenceKeyFormat",
+        "description": "Required in key mode; rejected in account mode. Host-supplied parser and typo predicate."
+      },
+      {
+        "name": "keyCodeInput",
+        "type": "LicenceKeyCodeInputOptions | null",
+        "default": "null",
+        "description": "Key mode only. Opts into fixed-length segmented entry; groups are positive lengths that partition the total length."
+      },
+      {
+        "name": "accountTokenProvider",
+        "type": "LicenceAccountTokenProvider",
+        "description": "Required in account mode; rejected in key mode. Host-supplied activation adapter; it does not imply a browser flow."
+      },
+      {
+        "name": "pending",
+        "type": "boolean",
+        "default": "false",
+        "description": "Disables submission while the host command runs."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Disables every field and action."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "default": "\"Activate licence\"",
+        "description": "Form heading."
+      },
+      {
+        "name": "machineLabel",
+        "type": "string | null",
+        "description": "Opt-in machine name. Supply a hostname to seed the inline editor, null for its unnamed-machine placeholder, or omit the prop entirely to hide it."
+      },
+      {
+        "name": "activateLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Overrides the mode/view-specific submit label."
+      },
+      {
+        "name": "fileAccept",
+        "type": "string | null",
+        "default": "null",
+        "description": "Account mode only. Narrows accepted offline licence files."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      }
+    ],
+    "slots": [
+      {
+        "name": "accountContent",
+        "description": "Account-mode host content. Receives the disabled state and renders inside Poodle's form; omit it for an external account journey."
+      }
+    ],
+    "events": [
+      {
+        "name": "onActivate",
+        "payload": "((detail: { credential: LicenceCredential; label: string | null }) => void) | undefined",
+        "description": "A valid route form was submitted; file bytes are already base64 without a data-URL prefix."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  import { Field, LicenceActivation, TextInput } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<LicenceActivation\n  mode=\"account\"\n  accountTokenProvider={{ acquire: () => login(email, password) }}\n  activateLabel=\"Activate\"\n  machineLabel={hostname ?? null}\n  pending={activating}\n  onActivate={({ credential, label }) => activate(credential, label)}\n>\n  {#snippet accountContent(disabled)}\n    <Field id=\"licence-email\" label=\"Email address\">\n      <TextInput id=\"licence-email\" bind:value={email} {disabled} />\n    </Field>\n    <Field id=\"licence-password\" label=\"Password\">\n      <TextInput id=\"licence-password\" type=\"password\" bind:value={password} {disabled} />\n    </Field>\n  {/snippet}\n</LicenceActivation>"
+  },
+  "licence-seats": {
+    "props": [
+      {
+        "name": "seats",
+        "type": "readonly LicenceSeat[]",
+        "default": "[]",
+        "description": "Authority-reported seats. Empty renders nothing, not a synthetic count."
+      },
+      {
+        "name": "pendingMachineId",
+        "type": "string | null",
+        "default": "null",
+        "description": "Disables that one row's release while its command runs."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "default": "\"Activated machines\"",
+        "description": "Section heading and accessible name."
+      },
+      {
+        "name": "releaseLabel",
+        "type": "string",
+        "default": "\"Release\"",
+        "description": "Row action label; also the confirmation's confirm label."
+      },
+      {
+        "name": "confirmRelease",
+        "type": "boolean",
+        "default": "true",
+        "description": "Confirms with a warning dialog before emitting."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      }
+    ],
+    "slots": [],
+    "events": [
+      {
+        "name": "onRename",
+        "payload": "((detail: { machineId: string; label: string | null }) => void) | undefined",
+        "description": "An inline machine-name edit was committed. Blank names emit null; the host persists the result."
+      },
+      {
+        "name": "onRelease",
+        "payload": "((detail: { machineId: string }) => void) | undefined",
+        "description": "Release of a seat other than this machine was confirmed. This machine has no release action."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  import { LicenceSeats } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<LicenceSeats\n  seats={licence.seats}\n  pendingMachineId={releasing}\n  onRename={({ machineId, label }) => renameSeat(machineId, label)}\n  onRelease={({ machineId }) => releaseSeat(machineId)}\n/>"
+  },
+  "model-connection-picker": {
+    "props": [
+      {
+        "name": "options",
+        "type": "ModelConnectionOption[]",
+        "default": "[]",
+        "description": "Host-ordered exact route options with opaque ids, availability, and configuration requirement."
+      },
+      {
+        "name": "value",
+        "type": "string | null | undefined",
+        "default": "undefined",
+        "description": "Controlled selected option id."
+      },
+      {
+        "name": "defaultValue",
+        "type": "string | null",
+        "default": "null",
+        "description": "Uncontrolled initial selection."
+      },
+      {
+        "name": "query",
+        "type": "string | undefined",
+        "default": "undefined",
+        "description": "Controlled search text."
+      },
+      {
+        "name": "defaultQuery",
+        "type": "string",
+        "default": "\"\"",
+        "description": "Uncontrolled initial search text."
+      },
+      {
+        "name": "state",
+        "type": "ModelConnectionPickerState",
+        "default": "\"ready\"",
+        "description": "Catalogue posture: ready, loading, error, empty, or no-results."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "default": "\"Choose a connection\"",
+        "description": "PickerShell heading."
+      },
+      {
+        "name": "description",
+        "type": "string | null",
+        "default": "null",
+        "description": "Supporting copy."
+      },
+      {
+        "name": "searchPlaceholder",
+        "type": "string",
+        "default": "\"Search connections\"",
+        "description": "Query field placeholder."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Root accessible name; falls back to title."
+      },
+      {
+        "name": "isDisabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Disables search and options."
+      },
+      {
+        "name": "variant",
+        "type": "\"inline\" | \"popover\" | \"modal\"",
+        "default": "\"inline\"",
+        "description": "Forwarded to PickerShell."
+      }
+    ],
+    "slots": [
+      {
+        "name": "leading",
+        "description": "Provider mark for each option; default is a generic connection icon."
+      },
+      {
+        "name": "footer",
+        "description": "Optional workflow guidance or actions below the option list."
+      }
+    ],
+    "events": [
+      {
+        "name": "onValueChange",
+        "payload": "((id: string) => void) | null",
+        "description": "User selected an enabled available route; emits the exact option id."
+      },
+      {
+        "name": "onQueryChange",
+        "payload": "((query: string) => void) | null",
+        "description": "Search text changed."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  import { ModelConnectionPicker } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<ModelConnectionPicker\n  options={routes}\n  value={selectedId}\n  query={search}\n  onValueChange={(id) => selectRoute(id)}\n  onQueryChange={setSearch}\n/>"
+  },
+  "model-connection-setup": {
+    "props": [
+      {
+        "name": "stage",
+        "type": "\"choose\" | \"configure\" | undefined",
+        "default": "undefined",
+        "description": "Controlled workflow stage."
+      },
+      {
+        "name": "defaultStage",
+        "type": "\"choose\" | \"configure\"",
+        "default": "\"choose\"",
+        "description": "Uncontrolled initial stage."
+      },
+      {
+        "name": "options",
+        "type": "ModelConnectionOption[]",
+        "default": "[]",
+        "description": "Forwarded to the picker; each option declares whether configuration is required."
+      },
+      {
+        "name": "value",
+        "type": "string | null | undefined",
+        "default": "undefined",
+        "description": "Controlled selected option id."
+      },
+      {
+        "name": "defaultValue",
+        "type": "string | null",
+        "default": "null",
+        "description": "Uncontrolled initial selection."
+      },
+      {
+        "name": "query",
+        "type": "string | undefined",
+        "default": "undefined",
+        "description": "Controlled picker query."
+      },
+      {
+        "name": "pickerState",
+        "type": "ModelConnectionPickerState",
+        "default": "\"ready\"",
+        "description": "Picker catalogue posture during choose."
+      },
+      {
+        "name": "canSubmit",
+        "type": "boolean",
+        "default": "false",
+        "description": "Host-approved Add eligibility on configure."
+      },
+      {
+        "name": "isPending",
+        "type": "boolean",
+        "default": "false",
+        "description": "Locks workflow actions during host work."
+      },
+      {
+        "name": "pendingLabel",
+        "type": "string",
+        "default": "\"Checking connection\"",
+        "description": "Announced pending copy."
+      },
+      {
+        "name": "error",
+        "type": "string | null",
+        "default": "null",
+        "description": "Safe form-level error."
+      },
+      {
+        "name": "success",
+        "type": "string | null",
+        "default": "null",
+        "description": "Safe form-level success."
+      }
+    ],
+    "slots": [
+      {
+        "name": "leading",
+        "description": "Provider mark passed to the picker and selected-route summary."
+      },
+      {
+        "name": "configuration",
+        "description": "Host-owned setup content for the selected route. Receives option and pending state."
+      },
+      {
+        "name": "configureAside",
+        "description": "Optional secondary guidance beside configuration content."
+      }
+    ],
+    "events": [
+      {
+        "name": "onStageChange",
+        "payload": "((stage: ModelConnectionSetupStage) => void) | null",
+        "description": "Continue or Back accepted."
+      },
+      {
+        "name": "onValueChange",
+        "payload": "((id: string) => void) | null",
+        "description": "Picker selection changed."
+      },
+      {
+        "name": "onQueryChange",
+        "payload": "((query: string) => void) | null",
+        "description": "Picker query changed."
+      },
+      {
+        "name": "onSubmit",
+        "payload": "((id: string) => void) | null",
+        "description": "Add activated for the selected id."
+      },
+      {
+        "name": "onCancel",
+        "payload": "(() => void) | null",
+        "description": "Cancel activated; host owns overlay closure."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  import { Field, ModelConnectionSetup, TextInput } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<ModelConnectionSetup\n  options={routes}\n  stage={stage}\n  value={selectedId}\n  canSubmit={valid}\n  isPending={checking}\n  onStageChange={setStage}\n  onSubmit={(id) => addConnection(id)}\n>\n  {#snippet configuration({ isPending })}\n    <Field id=\"api-key\" label=\"API key\">\n      <TextInput id=\"api-key\" type=\"password\" bind:value={apiKey} disabled={isPending} />\n    </Field>\n  {/snippet}\n</ModelConnectionSetup>"
+  },
+  "model-connection-card": {
+    "props": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "Required. Opaque configured-connection id."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Required. Instance label or provider label."
+      },
+      {
+        "name": "providerLabel",
+        "type": "string",
+        "description": "Required. Provider family display label."
+      },
+      {
+        "name": "routeLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Exact route display label."
+      },
+      {
+        "name": "version",
+        "type": "string | null",
+        "default": "null",
+        "description": "Observed safe version text."
+      },
+      {
+        "name": "accessSummary",
+        "type": "string | null",
+        "default": "null",
+        "description": "Sanitized auth/access summary; never a credential."
+      },
+      {
+        "name": "readiness",
+        "type": "ModelConnectionReadiness",
+        "default": "\"unknown\"",
+        "description": "Display posture only."
+      },
+      {
+        "name": "readinessLabel",
+        "type": "string",
+        "default": "\"Status unknown\"",
+        "description": "Visible and accessible readiness meaning."
+      },
+      {
+        "name": "open",
+        "type": "boolean | undefined",
+        "default": "undefined",
+        "description": "Controlled disclosure."
+      },
+      {
+        "name": "defaultOpen",
+        "type": "boolean",
+        "default": "false",
+        "description": "Uncontrolled initial disclosure."
+      },
+      {
+        "name": "isEnabled",
+        "type": "boolean",
+        "default": "true",
+        "description": "Host preference; separate from readiness."
+      },
+      {
+        "name": "isEnableDisabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Disables only the Switch."
+      },
+      {
+        "name": "isDisabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Disables card controls."
+      }
+    ],
+    "slots": [
+      {
+        "name": "leading",
+        "description": "Provider mark for the connection."
+      },
+      {
+        "name": "badges",
+        "description": "Optional route maturity or host labels beside the title."
+      },
+      {
+        "name": "closedAccessory",
+        "description": "Closed-only region intended for UpdateCenter or equivalent."
+      },
+      {
+        "name": "actions",
+        "description": "Optional host actions or menu."
+      },
+      {
+        "name": "details",
+        "description": "Open settings region: forms, access actions, ModelCatalogueEditor, diagnostics."
+      }
+    ],
+    "events": [
+      {
+        "name": "onOpenChange",
+        "payload": "((open: boolean) => void) | null",
+        "description": "Disclosure control activated."
+      },
+      {
+        "name": "onEnabledChange",
+        "payload": "((enabled: boolean) => void) | null",
+        "description": "Enable switch activated."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  import { ModelConnectionCard, UpdateCenter } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<ModelConnectionCard\n  id={connection.id}\n  title={connection.title}\n  providerLabel={connection.providerLabel}\n  routeLabel={connection.routeLabel}\n  readiness={connection.readiness}\n  readinessLabel={connection.readinessLabel}\n  isEnabled={connection.enabled}\n  onEnabledChange={(enabled) => setEnabled(connection.id, enabled)}\n>\n  {#snippet closedAccessory()}\n    <UpdateCenter presence=\"attention\" {...updateOffer} />\n  {/snippet}\n  {#snippet details()}\n    <!-- host settings, catalogue editor, access actions -->\n  {/snippet}\n</ModelConnectionCard>"
+  },
+  "model-catalogue-editor": {
+    "props": [
+      {
+        "name": "items",
+        "type": "ModelCatalogueItem[]",
+        "default": "[]",
+        "description": "Shown items use source order; hidden order is not meaningful."
+      },
+      {
+        "name": "state",
+        "type": "ModelCatalogueState",
+        "default": "\"ready\"",
+        "description": "Catalogue posture: ready, loading, unavailable, empty, error, or sessionNegotiated."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "default": "\"Models\"",
+        "description": "Visible heading."
+      },
+      {
+        "name": "hiddenTitle",
+        "type": "string",
+        "default": "\"Hidden models\"",
+        "description": "Collapsed hidden-section heading."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Falls back to title."
+      },
+      {
+        "name": "isDisabled",
+        "type": "boolean",
+        "default": "false",
+        "description": "Disables editing; list remains readable."
+      },
+      {
+        "name": "isPending",
+        "type": "boolean",
+        "default": "false",
+        "description": "Temporary mutation lock."
+      },
+      {
+        "name": "isDragEnabled",
+        "type": "boolean",
+        "default": "true",
+        "description": "Pointer drag; keyboard and move buttons remain."
+      },
+      {
+        "name": "showMoveActions",
+        "type": "boolean",
+        "default": "true",
+        "description": "Explicit up/down IconButtons."
+      },
+      {
+        "name": "stateTitle",
+        "type": "string | null",
+        "default": "null",
+        "description": "Host override for non-ready heading."
+      },
+      {
+        "name": "stateMessage",
+        "type": "string | null",
+        "default": "null",
+        "description": "Host-safe posture explanation."
+      }
+    ],
+    "slots": [
+      {
+        "name": "leading",
+        "description": "Optional model or provider mark per row."
+      },
+      {
+        "name": "customAction",
+        "description": "Custom model or refresh action beside the header."
+      },
+      {
+        "name": "rowMeta",
+        "description": "Optional safe capability metadata per row."
+      }
+    ],
+    "events": [
+      {
+        "name": "onOrderChange",
+        "payload": "((orderedIds: string[]) => void) | null",
+        "description": "Complete shown-id order after a move."
+      },
+      {
+        "name": "onVisibilityChange",
+        "payload": "((change: { id: string; visible: boolean }) => void) | null",
+        "description": "Hide or restore request."
+      },
+      {
+        "name": "onInfo",
+        "payload": "((id: string) => void) | null",
+        "description": "Per-row info action when supplied."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  import { ModelCatalogueEditor } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<ModelCatalogueEditor\n  items={catalogue}\n  onOrderChange={(orderedIds) => persistOrder(orderedIds)}\n  onVisibilityChange={({ id, visible }) => persistVisibility(id, visible)}\n  onInfo={(id) => showModelInfo(id)}\n/>"
   },
   "log-list": {
     "props": [
@@ -6527,6 +7179,18 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the navigation region."
+      },
+      {
+        "name": "activeEdge",
+        "type": "\"none\" | \"outline\" | \"underline\"",
+        "default": "\"none\"",
+        "description": "Selection edge on the open trigger: none draws no edge, outline draws the accent border (the border the trigger carried by default before g13.016), underline draws the accent edge along the trigger's bottom."
+      },
+      {
+        "name": "activeFill",
+        "type": "\"none\" | \"tint\" | \"solid\"",
+        "default": "\"tint\"",
+        "description": "Selection treatment on the open trigger: none draws no selection fill (the edge and the selected text colour carry selection alone), tint is the accent-tinted fill; solid fills with accent-base and swaps the foreground to text-inverse."
       },
       {
         "name": "onValueChange",
@@ -7756,10 +8420,28 @@
         "description": "Number of visible digit slots and max code length."
       },
       {
+        "name": "groups",
+        "type": "readonly number[] | null",
+        "default": "null",
+        "description": "Optional complete partition of length. Adds a visual gap after every group except the last without changing the value."
+      },
+      {
+        "name": "separator",
+        "type": "string | null",
+        "default": "null",
+        "description": "Optional presentation-only text rendered at each valid group boundary."
+      },
+      {
         "name": "mask",
         "type": "boolean",
         "default": "false",
         "description": "When true, display dots instead of digits in the visual slots."
+      },
+      {
+        "name": "numbersOnly",
+        "type": "boolean",
+        "default": "true",
+        "description": "When false, accepts arbitrary characters instead of filtering to digits."
       },
       {
         "name": "ariaLabel",
@@ -7798,6 +8480,12 @@
         "description": "Field-level validation state. Invalid is also inferred automatically when error is present."
       },
       {
+        "name": "validate",
+        "type": "InputValidator | undefined",
+        "default": "undefined",
+        "description": "Runs when the sanitized value reaches length. Its valid result drives the completion tick or cross."
+      },
+      {
         "name": "onValueChange",
         "type": "((value: string) => void) | undefined",
         "default": "undefined",
@@ -7812,7 +8500,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { CodeInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let code = \"\";\n</script>\n\n<CodeInput\n  id=\"verify-code\"\n  value={code}\n  label=\"Verification code\"\n  hint=\"Enter the 6-digit code from your authenticator app.\"\n  onValueChange={(value) => (code = value)}\n  onComplete={(value) => verify(value)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { CodeInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let code = \"\";\n  const validateCode = (value: string) => ({ valid: value === \"123456\" });\n</script>\n\n<CodeInput\n  id=\"verify-code\"\n  value={code}\n  label=\"Verification code\"\n  hint=\"Enter the 6-digit code from your authenticator app.\"\n  groups={[3, 3]}\n  validate={validateCode}\n  onValueChange={(value) => (code = value)}\n  onComplete={(value) => verify(value)}\n/>"
   },
   "password-requirements": {
     "props": [
@@ -9086,6 +9774,102 @@
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { SidebarNav } from \"@inflatable-cookie/poodle-svelte\";\n\n  const groups = [\n    {\n      id: \"main\",\n      label: \"Navigation\",\n      items: [\n        { value: \"dashboard\", label: \"Dashboard\" },\n        { value: \"projects\", label: \"Projects\", href: \"/projects\" },\n        { value: \"settings\", label: \"Settings\" },\n      ],\n    },\n  ];\n\n  let active = \"dashboard\";\n</script>\n\n<SidebarNav {groups} value={active} ariaLabel=\"Main navigation\" onValueChange={(value) => (active = value)} />"
   },
+  "settings-shell": {
+    "props": [
+      {
+        "name": "groups",
+        "type": "SettingsNavGroup[]",
+        "default": "[]",
+        "description": "Navigation groups; empty renders the nav empty state."
+      },
+      {
+        "name": "activePageId",
+        "type": "string | null",
+        "default": "null",
+        "description": "Currently active page in the navigation rail."
+      },
+      {
+        "name": "pageTitle",
+        "type": "string | null",
+        "default": "null",
+        "description": "Accessible name of the page region. Not drawn — the nav rail already names the page."
+      },
+      {
+        "name": "searchQuery",
+        "type": "string",
+        "default": "\"\"",
+        "description": "Search field value; bindable. Narrows the rail via host-filtered groups; the shell never filters."
+      },
+      {
+        "name": "open",
+        "type": "boolean | null",
+        "default": "null",
+        "description": "Controlled open state; null means uncontrolled, seeded by defaultOpen."
+      },
+      {
+        "name": "defaultOpen",
+        "type": "boolean",
+        "default": "false",
+        "description": "Uncontrolled initial open state."
+      },
+      {
+        "name": "title",
+        "type": "string | null",
+        "default": "\"Settings\"",
+        "description": "Visible dialog title."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Dialog accessible name; falls back to title. Set it per app so several open windows are distinguishable."
+      },
+      {
+        "name": "closeLabel",
+        "type": "string",
+        "default": "\"Close settings\"",
+        "description": "Accessible label for the dialog close button."
+      },
+      {
+        "name": "closeRefusedReason",
+        "type": "string | null",
+        "default": "null",
+        "description": "Host-supplied refused-close reason; renders as an announced warning callout and keeps the shell open on close attempts."
+      },
+      {
+        "name": "onNavigate",
+        "type": "(pageId: string, anchorId?: string | null) => void",
+        "default": "undefined",
+        "description": "Fired on nav item activation."
+      },
+      {
+        "name": "onRequestClose",
+        "type": "() => void",
+        "default": "undefined",
+        "description": "Fired on every close attempt; the host decides."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "(open: boolean) => void",
+        "default": "undefined",
+        "description": "Open-state request."
+      },
+      {
+        "name": "onSearchQueryChange",
+        "type": "(value: string) => void",
+        "default": "undefined",
+        "description": "Search value change."
+      }
+    ],
+    "slots": [
+      {
+        "name": "page",
+        "description": "The current page body; always a snippet."
+      }
+    ],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { SettingsShell } from \"@inflatable-cookie/poodle-svelte\";\n  import type { SettingsNavGroup } from \"@inflatable-cookie/poodle-svelte\";\n\n  const allGroups: SettingsNavGroup[] = [\n    { id: \"general\", label: \"General\", items: [{ value: \"general\", label: \"General\" }] },\n  ];\n\n  let open = true;\n  let query = \"\";\n\n  // The host filters: only it knows a query can match an anchor inside a page.\n  $: groups = query ? allGroups.filter((g) => matches(g, query)) : allGroups;\n</script>\n\n<SettingsShell\n  bind:open\n  {groups}\n  activePageId=\"general\"\n  pageTitle=\"General\"\n  ariaLabel=\"Nucleus settings\"\n  bind:searchQuery={query}\n  onNavigate={(pageId) => console.log(pageId)}\n  onRequestClose={() => console.log(\"close requested\")}\n>\n  <p>Settings page content.</p>\n</SettingsShell>"
+  },
   "tree": {
     "props": [
       {
@@ -10004,8 +10788,26 @@
       {
         "name": "variant",
         "type": "TabVariant",
-        "default": "\"underline\"",
+        "default": "\"card\"",
         "description": "Visual style variant of the tabs."
+      },
+      {
+        "name": "activeEdge",
+        "type": "\"none\" | \"outline\" | \"underline\"",
+        "default": "\"none\"",
+        "description": "Selection edge on the active tab: none draws no edge, outline draws the accent border (the former card selected-border value), underline draws the accent edge along the inline-end side (the former strip indicator)."
+      },
+      {
+        "name": "activeFill",
+        "type": "\"none\" | \"tint\" | \"solid\"",
+        "default": "\"tint\"",
+        "description": "Selection treatment on the active tab: none draws no selection fill (the edge and the selected text colour carry selection alone — block + none + underline is the former strip), tint is the accent-tinted fill, solid fills the tab with accent-base and switches the foreground to text-inverse."
+      },
+      {
+        "name": "bordered",
+        "type": "boolean",
+        "default": "false",
+        "description": "Card variant only: draws the separating border on the list and the outer padding that holds the tabs off it."
       },
       {
         "name": "orientation",
@@ -10154,6 +10956,12 @@
         "type": "boolean",
         "default": "false",
         "description": "Whether the input is read-only."
+      },
+      {
+        "name": "autofocus",
+        "type": "boolean",
+        "default": "false",
+        "description": "Web-only native autofocus attribute. Falsy omits the attribute; excluded from TextInputSpec."
       },
       {
         "name": "required",
@@ -10347,7 +11155,7 @@
         "description": "Fires when the input loses focus."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { TextInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let email = \"\";\n  async function validateEmail(value: string) {\n    return value.includes(\"@\")\n      ? { valid: true }\n      : { valid: false, message: \"Enter a valid email address.\" };\n  }\n</script>\n\n<TextInput\n  id=\"email\"\n  bind:value={email}\n  placeholder=\"you@example.com\"\n  type=\"email\"\n  autocomplete=\"email\"\n  validate={validateEmail}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { TextInput } from \"@inflatable-cookie/poodle-svelte\";\n\n  let email = \"\";\n  let emailInput: TextInput | undefined;\n  async function validateEmail(value: string) {\n    return value.includes(\"@\")\n      ? { valid: true }\n      : { valid: false, message: \"Enter a valid email address.\" };\n  }\n</script>\n\n<TextInput\n  bind:this={emailInput}\n  id=\"email\"\n  bind:value={email}\n  placeholder=\"you@example.com\"\n  type=\"email\"\n  autocomplete=\"email\"\n  autofocus\n  validate={validateEmail}\n/>\n\n<button onclick={() => emailInput?.focus()}>Focus email</button>"
   },
   "time-ago": {
     "props": [
@@ -10374,6 +11182,24 @@
         "type": "boolean",
         "default": "true",
         "description": "Use short format (e.g. 5m ago) instead of long format (e.g. 5 minutes ago)."
+      },
+      {
+        "name": "futureFormat",
+        "type": "\"in\" | \"from-now\"",
+        "default": "\"in\"",
+        "description": "Render future times as in 5m or 5m from now to fit surrounding copy."
+      },
+      {
+        "name": "futurePrefix",
+        "type": "string | null",
+        "default": "null",
+        "description": "Optional phrase before future output, such as ends in 5m."
+      },
+      {
+        "name": "pastPrefix",
+        "type": "string | null",
+        "default": "null",
+        "description": "Optional phrase before past output, such as ended 5m ago."
       },
       {
         "name": "tooltipFormat",
@@ -11837,6 +12663,482 @@
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { MessageCenter, type MessageCenterItem } from \"@inflatable-cookie/poodle-svelte\";\n\n  let items: MessageCenterItem[] = [\n    { id: \"render\", title: \"Render complete\", message: \"Preview is ready.\", read: false, tone: \"success\" },\n  ];\n</script>\n\n<MessageCenter\n  {items}\n  onReadChange={(id, read) => items = items.map((item) => item.id === id ? { ...item, read } : item)}\n  onRemove={(id) => items = items.filter((item) => item.id !== id)}\n/>"
   },
+  "history-center": {
+    "props": [
+      {
+        "name": "entries",
+        "type": "HistoryEntry[]",
+        "default": "[]",
+        "description": "Caller-owned page of history entries."
+      },
+      {
+        "name": "totalEntries",
+        "type": "number",
+        "default": "0",
+        "description": "Total entry count shown in the header."
+      },
+      {
+        "name": "hasMoreEntries",
+        "type": "boolean",
+        "default": "false",
+        "description": "Shows the entries load-more action."
+      },
+      {
+        "name": "branches",
+        "type": "HistoryBranch[] | null",
+        "default": "null",
+        "description": "Fork branch rows; null hides all branch and checkpoint UI."
+      },
+      {
+        "name": "totalBranches",
+        "type": "number",
+        "default": "0",
+        "description": "Total branch count shown in the header when branches are supplied."
+      },
+      {
+        "name": "hasMoreBranches",
+        "type": "boolean",
+        "default": "false",
+        "description": "Shows the branches load-more action."
+      },
+      {
+        "name": "canUndo",
+        "type": "boolean",
+        "default": "false",
+        "description": "Enables the undo trigger."
+      },
+      {
+        "name": "canRedo",
+        "type": "boolean",
+        "default": "false",
+        "description": "Enables the redo trigger."
+      },
+      {
+        "name": "busy",
+        "type": "boolean",
+        "default": "false",
+        "description": "Disables undo and redo while an authority operation runs."
+      },
+      {
+        "name": "status",
+        "type": "\"idle\" | \"loading\" | \"failed\"",
+        "default": "\"idle\"",
+        "description": "Source status; loading shows a spinner row, failed shows statusMessage."
+      },
+      {
+        "name": "statusMessage",
+        "type": "string | null",
+        "default": "null",
+        "description": "Copy for the failed status row."
+      },
+      {
+        "name": "rejection",
+        "type": "string | null",
+        "default": "null",
+        "description": "Transient inline notice; never silent, never sticky."
+      },
+      {
+        "name": "maxBranchNameBytes",
+        "type": "number",
+        "default": "256",
+        "description": "Client-side affordance only; caps inline rename input length."
+      },
+      {
+        "name": "open",
+        "type": "boolean | null",
+        "default": "null",
+        "description": "Controlled open state; bindable."
+      },
+      {
+        "name": "defaultOpen",
+        "type": "boolean",
+        "default": "false",
+        "description": "Initial uncontrolled open state."
+      },
+      {
+        "name": "placement",
+        "type": "OverlayPlacement",
+        "default": "\"bottom-end\"",
+        "description": "Popover placement hint."
+      },
+      {
+        "name": "undoLabel",
+        "type": "string",
+        "default": "\"Undo\"",
+        "description": "Undo trigger accessible name and tooltip."
+      },
+      {
+        "name": "redoLabel",
+        "type": "string",
+        "default": "\"Redo\"",
+        "description": "Redo trigger accessible name and tooltip."
+      },
+      {
+        "name": "listLabel",
+        "type": "string",
+        "default": "\"History\"",
+        "description": "List trigger accessible name, tooltip, and list region label."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "default": "\"History\"",
+        "description": "Surface heading and default accessible label."
+      },
+      {
+        "name": "emptyMessage",
+        "type": "string",
+        "default": "\"No history entries yet.\"",
+        "description": "Empty-state copy."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Overrides the surface label."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"chrome\"",
+        "description": "Semantic size role used when inheriting presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "onUndo",
+        "type": "(() => void) | null",
+        "default": "null",
+        "description": "Undo command; the host owns what undo does."
+      },
+      {
+        "name": "onRedo",
+        "type": "(() => void) | null",
+        "default": "null",
+        "description": "Redo command; the host owns what redo does."
+      },
+      {
+        "name": "onOpenChange",
+        "type": "((open: boolean) => void) | null",
+        "default": "null",
+        "description": "Open-state request callback."
+      },
+      {
+        "name": "onSelectEntry",
+        "type": "((id: string) => void) | null",
+        "default": "null",
+        "description": "Entry row activation."
+      },
+      {
+        "name": "onCheckout",
+        "type": "((branchId: string, entryId: string) => void) | null",
+        "default": "null",
+        "description": "Branch row activation; carries the fork context."
+      },
+      {
+        "name": "onRenameBranch",
+        "type": "((branchId: string, name: string) => void) | null",
+        "default": "null",
+        "description": "Committed inline branch rename."
+      },
+      {
+        "name": "onLoadMoreEntries",
+        "type": "((offset: number) => void) | null",
+        "default": "null",
+        "description": "Requests the next entries page; offset is the supplied count."
+      },
+      {
+        "name": "onLoadMoreBranches",
+        "type": "((offset: number) => void) | null",
+        "default": "null",
+        "description": "Requests the next branches page; offset is the supplied count."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { HistoryCenter, type HistoryBranch, type HistoryEntry } from \"@inflatable-cookie/poodle-svelte\";\n\n  let entries: HistoryEntry[] = [\n    { id: \"mix-1\", label: \"Committed mix 1\", position: \"past\" },\n    { id: \"fork\", label: \"Fork point\", position: \"past\", branchCount: 2 },\n    { id: \"draft\", label: \"Current draft\", position: \"current\" },\n  ];\n\n  let branches: HistoryBranch[] = [\n    { id: \"b-lead\", name: \"feature/lead\", entryCount: 3, current: true },\n  ];\n</script>\n\n<HistoryCenter\n  {entries}\n  {branches}\n  canUndo\n  onSelectEntry={(id) => console.log(\"select\", id)}\n  onCheckout={(branchId, entryId) => console.log(\"checkout\", branchId, entryId)}\n  onRenameBranch={(branchId, name) => branches = branches.map((branch) => branch.id === branchId ? { ...branch, name } : branch)}\n  onLoadMoreEntries={(offset) => console.log(\"load more\", offset)}\n/>"
+  },
+  "update-status": {
+    "props": [
+      {
+        "name": "status",
+        "type": "UpdateControllerStatus",
+        "default": "{ kind: \"idle\" }",
+        "description": "The check lifecycle: idle, loading, ready, or failed."
+      },
+      {
+        "name": "availability",
+        "type": "UpdateAvailabilityProjection | undefined",
+        "default": "undefined",
+        "description": "The resolved availability, when the check is ready."
+      },
+      {
+        "name": "progress",
+        "type": "UpdateProgressProjection | undefined",
+        "default": "undefined",
+        "description": "Install progress; non-idle progress supersedes the availability line."
+      },
+      {
+        "name": "channel",
+        "type": "Channel | undefined",
+        "default": "undefined",
+        "description": "The channel the install follows."
+      },
+      {
+        "name": "installedVersion",
+        "type": "string | undefined",
+        "default": "undefined",
+        "description": "The running version."
+      },
+      {
+        "name": "deferral",
+        "type": "UpdateDeferral | undefined",
+        "default": "undefined",
+        "description": "A postponed install and its reason, rendered neutrally."
+      },
+      {
+        "name": "lastRejection",
+        "type": "UpdateRejectionCode | undefined",
+        "default": "undefined",
+        "description": "The last rejection code; the only fault, in danger styling."
+      },
+      {
+        "name": "aheadOfChannel",
+        "type": "UpdateAheadOfChannel | undefined",
+        "default": "undefined",
+        "description": "Preferred source for the ahead-of-channel message."
+      },
+      {
+        "name": "pending",
+        "type": "boolean",
+        "default": "false",
+        "description": "Disables actions while a command is in flight."
+      },
+      {
+        "name": "observe",
+        "type": "((observer: () => void) => () => void) | null",
+        "default": "null",
+        "description": "The authority's subscription; re-derives on each notification."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"control\"",
+        "description": "Semantic size role used when inheriting presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "installLabel",
+        "type": "string",
+        "default": "\"Install and restart\"",
+        "description": "Install action label."
+      },
+      {
+        "name": "deferLabel",
+        "type": "string",
+        "default": "\"Later\"",
+        "description": "Defer action label."
+      },
+      {
+        "name": "checkLabel",
+        "type": "string",
+        "default": "\"Check for updates\"",
+        "description": "Check action label."
+      },
+      {
+        "name": "retryLabel",
+        "type": "string",
+        "default": "\"Try again\"",
+        "description": "Retry action label."
+      },
+      {
+        "name": "confirmInstall",
+        "type": "boolean",
+        "default": "true",
+        "description": "Whether install-and-restart confirms before emitting."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { UpdateStatus } from \"@inflatable-cookie/poodle-svelte\";\n\n  let status = { kind: \"ready\" } as const;\n  let availability = {\n    state: \"offer\", version: \"1.4.0\", reason: \"staged\", notes: \"Bug fixes and improvements.\",\n  } as const;\n</script>\n\n<UpdateStatus\n  {status}\n  {availability}\n  onInstall={startInstall}\n  onDefer={postpone}\n  onCheck={checkNow}\n/>"
+  },
+  "update-center": {
+    "props": [
+      {
+        "name": "presence",
+        "type": "UpdatePresence",
+        "description": "Required. 'hidden' collapses the component entirely."
+      },
+      {
+        "name": "status",
+        "type": "UpdateControllerStatus",
+        "default": "{ kind: \"idle\" }",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "availability",
+        "type": "UpdateAvailabilityProjection | undefined",
+        "default": "undefined",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "progress",
+        "type": "UpdateProgressProjection | undefined",
+        "default": "undefined",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "channel",
+        "type": "Channel | undefined",
+        "default": "undefined",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "installedVersion",
+        "type": "string | undefined",
+        "default": "undefined",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "deferral",
+        "type": "UpdateDeferral | undefined",
+        "default": "undefined",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "lastRejection",
+        "type": "UpdateRejectionCode | undefined",
+        "default": "undefined",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "aheadOfChannel",
+        "type": "UpdateAheadOfChannel | undefined",
+        "default": "undefined",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "pending",
+        "type": "boolean",
+        "default": "false",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "observe",
+        "type": "((observer: () => void) => () => void) | null",
+        "default": "null",
+        "description": "The authority's subscription."
+      },
+      {
+        "name": "open",
+        "type": "boolean | null",
+        "default": "null",
+        "description": "Controlled popover open state."
+      },
+      {
+        "name": "defaultOpen",
+        "type": "boolean",
+        "default": "false",
+        "description": "Initial uncontrolled open state."
+      },
+      {
+        "name": "placement",
+        "type": "OverlayPlacement",
+        "default": "\"bottom-end\"",
+        "description": "Popover placement hint."
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "default": "\"Updates\"",
+        "description": "Surface heading and trigger accessible name."
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Overrides the surface label."
+      },
+      {
+        "name": "triggerLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Overrides the trigger accessible name."
+      },
+      {
+        "name": "size",
+        "type": "ControlSize | null",
+        "default": "null",
+        "description": "Explicit semantic size override."
+      },
+      {
+        "name": "sizeRole",
+        "type": "SemanticControlSizeRole",
+        "default": "\"chrome\"",
+        "description": "Semantic size role used when inheriting presentation scale."
+      },
+      {
+        "name": "density",
+        "type": "ControlDensity | null",
+        "default": "null",
+        "description": "Explicit density override."
+      },
+      {
+        "name": "installLabel",
+        "type": "string",
+        "default": "\"Install and restart\"",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "deferLabel",
+        "type": "string",
+        "default": "\"Later\"",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "checkLabel",
+        "type": "string",
+        "default": "\"Check for updates\"",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "retryLabel",
+        "type": "string",
+        "default": "\"Try again\"",
+        "description": "Passed to UpdateStatus."
+      },
+      {
+        "name": "confirmInstall",
+        "type": "boolean",
+        "default": "true",
+        "description": "Passed to UpdateStatus."
+      }
+    ],
+    "slots": [],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { UpdateCenter } from \"@inflatable-cookie/poodle-svelte\";\n\n  let presence = \"attention\" as const;\n</script>\n\n<UpdateCenter\n  {presence}\n  status={{ kind: \"ready\" }}\n  availability={{ state: \"offer\", version: \"1.4.0\", reason: \"staged\", notes: null }}\n  onInstall={startInstall}\n/>"
+  },
   "action-discovery-panel": {
     "props": [
       {
@@ -11923,12 +13225,22 @@
         "type": "string | null",
         "default": "null",
         "description": "Accessible label for the header."
+      },
+      {
+        "name": "element",
+        "type": "HTMLElement | null",
+        "default": "null",
+        "description": "Bindable escape hatch: the rendered header DOM element, for attaching host behaviour (for example window dragging)."
       }
     ],
     "slots": [
       {
         "name": "identity",
         "description": "Custom content snippet for the identity/logo area."
+      },
+      {
+        "name": "center",
+        "description": "Optional centre region. Its presence switches the grid to the symmetric side-column layout and groups actions + utility into the trailing column."
       },
       {
         "name": "actions",
@@ -11940,7 +13252,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AppHeader } from \"@inflatable-cookie/poodle-svelte\";\n  import { Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AppHeader title=\"My App\" subtitle=\"Dashboard\">\n  {#snippet actions()}\n    <Button variant=\"primary\">New</Button>\n  {/snippet}\n</AppHeader>"
+    "usage": "<script lang=\"ts\">\n  import { AppHeader } from \"@inflatable-cookie/poodle-svelte\";\n  import { Button } from \"@inflatable-cookie/poodle-svelte\";\n\n  let headerElement = $state<HTMLElement | null>(null);\n\n  $effect(() => {\n    const header = headerElement;\n    if (!header) return;\n    // Host-owned behaviour — Poodle implements no gesture. For example:\n    // a window-drag handler, or double-click-to-maximize.\n    const onDblClick = () => console.log(\"toggle maximize\");\n    header.addEventListener(\"dblclick\", onDblClick);\n    return () => header.removeEventListener(\"dblclick\", onDblClick);\n  });\n</script>\n\n<AppHeader bind:element={headerElement} title=\"My App\" subtitle=\"Dashboard\">\n  {#snippet actions()}\n    <Button variant=\"primary\">New</Button>\n  {/snippet}\n</AppHeader>"
   },
   "knob": {
     "props": [
@@ -11994,6 +13306,23 @@
     ],
     "usage": "<script lang=\"ts\">\n  import { Fader } from \"@inflatable-cookie/poodle-svelte\";\n  let value = 0;\n</script>\n\n<Fader bind:value min={-60} max={12} detents={[0]} format={{ type: \"db\" }} ariaLabel=\"Gain\" />"
   },
+  "meter-surface": {
+    "props": [
+      {
+        "name": "bus",
+        "type": "MeterBus | null",
+        "default": "null",
+        "description": "The one MeterBus this surface paints from; null renders an inert container."
+      },
+      {
+        "name": "painter",
+        "type": "MeterSurfacePainter | null",
+        "default": "null",
+        "description": "Injectable painter seam; null uses the default Canvas2D painter."
+      }
+    ],
+    "usage": "<script lang=\"ts\">\n  import { createMeterBus } from \"@inflatable-cookie/poodle-core\";\n  import { AudioMeter, MeterSurface } from \"@inflatable-cookie/poodle-svelte\";\n  const bus = createMeterBus();\n  const left = bus.register(\"ch-1\", { mode: \"ppm\" });\n</script>\n\n<MeterSurface {bus}>\n  <AudioMeter surface={bus} channel=\"ch-1\" ariaLabel=\"Channel 1\" />\n</MeterSurface>"
+  },
   "audio-meter": {
     "props": [
       {
@@ -12012,6 +13341,24 @@
         "type": "\"bar\" | \"segments\"",
         "default": "\"segments\"",
         "description": "Standard themed renderer style."
+      },
+      {
+        "name": "surface",
+        "type": "MeterBus | null",
+        "default": "null",
+        "description": "Opt-in batched web renderer; null keeps standalone painting."
+      },
+      {
+        "name": "channel",
+        "type": "MeterBusChannelId | null",
+        "default": "null",
+        "description": "Registered bus channel id; required in surface mode."
+      },
+      {
+        "name": "rightChannel",
+        "type": "MeterBusChannelId | null",
+        "default": "null",
+        "description": "Optional registered stereo channel in surface mode."
       }
     ],
     "usage": "<script lang=\"ts\">\n  import { createAudioMeterContext } from \"@inflatable-cookie/poodle-core\";\n  import { AudioMeter } from \"@inflatable-cookie/poodle-svelte\";\n  let meter = createAudioMeterContext({ mode: \"ppm\" });\n</script>\n\n<AudioMeter bind:context={meter} ariaLabel=\"Master level\" />"

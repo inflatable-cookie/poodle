@@ -12,6 +12,7 @@ import { MessageCenterSpecimen } from "./specimens/MessageCenterSpecimen";
 import { HistoryCenterSpecimen } from "./specimens/HistoryCenterSpecimen";
 import { AudioPlayerSpecimen } from "./specimens/AudioPlayerSpecimen";
 import { AudioMeterSpecimen } from "./specimens/AudioMeterSpecimen";
+import { MeterSurfaceSpecimen } from "./specimens/MeterSurfaceSpecimen";
 import { AudioSwitchSpecimen } from "./specimens/AudioSwitchSpecimen";
 
 import { BlockEditorSpecimen } from "./specimens/BlockEditorSpecimen";
@@ -185,6 +186,7 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "history-center": HistoryCenterSpecimen,
   "audio-player": AudioPlayerSpecimen,
   "audio-meter": AudioMeterSpecimen,
+  "meter-surface": MeterSurfaceSpecimen,
   "audio-switch": AudioSwitchSpecimen,
   "avatar": SceneSpecimen,
   "block-editor": BlockEditorSpecimen,

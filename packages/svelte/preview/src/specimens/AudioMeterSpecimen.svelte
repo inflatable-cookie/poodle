@@ -11,6 +11,7 @@
   const reset = audioMeterTransition(clipped, { type: "RESET_CLIP" }).context;
 </script>
 <SpecimenLayout variantDirection="row"><div class="page">
+  <section><h3>Batched rendering</h3><p class="note">High-count consoles opt into the <a href="#components/meter-surface">MeterSurface specimen</a>; this page stays the standalone evidence.</p></section>
   <section><h3>VU — 300 ms integration</h3><AudioMeter context={vu} ariaLabel="VU meter" /></section>
   <section><h3>PPM</h3><AudioMeter context={ppm} ariaLabel="PPM meter" /></section>
   <section><h3>Sample peak</h3><AudioMeter context={samplePeak} ariaLabel="Sample peak meter" /></section>
@@ -24,4 +25,4 @@
   {#snippet sizes(size)}<AudioMeter context={ppm} {size} ariaLabel={`Meter ${size} size`} />{/snippet}
   {#snippet densities(density)}<AudioMeter context={ppm} {density} ariaLabel={`Meter ${density} density`} />{/snippet}
 </SpecimenLayout>
-<style>.page { display: grid; gap: 1.5rem; } section { display: grid; gap: .75rem; } h3 { margin: 0; color: var(--poodle-color-text-secondary); font-size: .75rem; } .row { display: flex; align-items: end; gap: 1.5rem; flex-wrap: wrap; }</style>
+<style>.page { display: grid; gap: 1.5rem; } section { display: grid; gap: .75rem; } h3 { margin: 0; color: var(--poodle-color-text-secondary); font-size: .75rem; } .note { margin: 0; color: var(--poodle-color-text-secondary); font-size: .8125rem; } .row { display: flex; align-items: end; gap: 1.5rem; flex-wrap: wrap; }</style>

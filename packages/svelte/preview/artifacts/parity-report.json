@@ -177,10 +177,10 @@
     "summary": [
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
-        "exportCount": 211,
-        "componentCount": 174,
+        "exportCount": 212,
+        "componentCount": 175,
         "helperCount": 37,
-        "previewedCount": 211,
+        "previewedCount": 212,
         "contractOnlyCount": 0
       }
     ],
@@ -1709,6 +1709,19 @@
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "Meter",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "MeterSurface",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",

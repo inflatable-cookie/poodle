@@ -21,3 +21,7 @@
 .poodle-audio-meter[data-size="xl"] { --poodle-audio-meter-length: 13rem; --poodle-audio-meter-track-size: 1rem; }
 .poodle-audio-meter[data-density="compact"] { --poodle-audio-meter-gap: 0.125rem; }
 .poodle-audio-meter[data-density="comfortable"] { --poodle-audio-meter-gap: 0.375rem; }
+.poodle-audio-meter[data-surface] { width: calc(var(--poodle-audio-meter-track-size) * 2 + var(--poodle-audio-meter-gap)); }
+.poodle-audio-meter[data-surface][data-channels="stereo"] { width: calc(var(--poodle-audio-meter-track-size) * 4 + var(--poodle-audio-meter-gap) * 3); }
+.poodle-audio-meter[data-surface][data-orientation="horizontal"] { width: var(--poodle-audio-meter-length); height: 1rem; }
+.poodle-audio-meter[data-surface][data-orientation="horizontal"][data-channels="stereo"] { height: calc(2rem + var(--poodle-audio-meter-gap)); }

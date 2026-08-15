@@ -220,6 +220,18 @@
 "test:visual" = "bun test/visual/run.ts --tier=axis"
 "test:visual-smoke" = "bun test/visual/run.ts --tier=smoke"
 "test:visual-sweep" = "bun test/visual/run.ts --tier=sweep"
+# g14.024 batched meter surface: headless Chromium + WebKit behavior matrix over
+# both previews. Needs playwright browsers + vite dev servers; stays out of
+# ci:web like the visual gate.
+"test:meter-surface-browser-chromium" = "bun test/visual/meter-surface-probe.ts --browser=chromium"
+"test:meter-surface-browser-webkit" = "bun test/visual/meter-surface-probe.ts --browser=webkit"
+"test:meter-surface-browser" = [
+  { task = "test:meter-surface-browser-chromium" },
+  { task = "test:meter-surface-browser-webkit" },
+]
+# Reference performance evidence for g14.024 (recorded in the implementation
+# log, not a CI threshold).
+"test:meter-surface-perf" = "bun test/visual/meter-surface-perf.ts"
 # Same capture, never fails the process — writes diffs + summary to test/visual/out.
 "visual:report" = "bun test/visual/run.ts --tier=sweep --report"
 "ci:visual" = [{ task = "test:visual" }]
