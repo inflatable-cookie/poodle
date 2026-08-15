@@ -42,18 +42,31 @@
   // Surface tier: the registered bus is state authority and the root stays a
   // layout/accessibility box painted by the enclosing MeterSurface canvas.
   const registry = getMeterSurfaceRegistry();
-  untrack(() => {
-    if (surface === null) return;
-    if (channel === null) throw new Error("AudioMeter: surface mode requires a registered `channel` id");
+
+  function validateSurfaceOwnership(
+    bus: MeterBus | null,
+    left: MeterBusChannelId | null,
+    right: MeterBusChannelId | null,
+  ): void {
+    if (bus === null) return;
+    if (left === null) throw new Error("AudioMeter: surface mode requires a registered `channel` id");
     if (registry === null) throw new Error("AudioMeter: surface mode requires an enclosing MeterSurface");
-    if (registry.bus !== surface) throw new Error("AudioMeter: `surface` must be the bus of the enclosing MeterSurface");
-    surface.slotOf(channel);
-    if (rightChannel !== null) surface.slotOf(rightChannel);
-  });
+    if (registry.bus !== bus) throw new Error("AudioMeter: `surface` must be the bus of the enclosing MeterSurface");
+    bus.slotOf(left);
+    if (right !== null) bus.slotOf(right);
+  }
+
+  // Validated at init so a bad initial configuration fails where the caller
+  // can see it, and again on every ownership change so a later transition
+  // into surface mode is held to the same rule.
+  untrack(() => validateSurfaceOwnership(surface, channel, rightChannel));
 
   const surfaceStereo = $derived(surface !== null && rightChannel !== null);
   let meterEl: HTMLDivElement | undefined = $state();
   let placeholder: MeterPlaceholderHandle | null = null;
+  // Slots are resolved once per registration and cached: after the bus is
+  // destroyed no id resolves, and the ARIA sampler must not throw there.
+  let slots: { left: number; right: number | null } | null = null;
   let ariaMin = $state(-60);
   let ariaMax = $state(0);
   let ariaNow = $state(-60);
@@ -61,37 +74,59 @@
   const feedScratch = new Float32Array(3);
 
   function sampleSurfaceAria(): void {
-    if (surface === null || channel === null || surface.destroyed) return;
+    if (surface === null || slots === null) return;
     const view = surface.view;
-    const leftSlot = surface.slotOf(channel);
-    const leftDb = view.ballisticDb[leftSlot]!;
+    if (view.active[slots.left] !== 1) return;
+    const leftDb = view.ballisticDb[slots.left]!;
     const leftText = formatAudioValue(leftDb, { type: "db", decimals: 1 });
-    ariaMin = view.minDb[leftSlot]!;
-    ariaMax = view.maxDb[leftSlot]!;
+    ariaMin = view.minDb[slots.left]!;
+    ariaMax = view.maxDb[slots.left]!;
     ariaNow = leftDb;
-    ariaText = rightChannel === null
+    ariaText = slots.right === null
       ? leftText
-      : `Left ${leftText}, right ${formatAudioValue(view.ballisticDb[surface.slotOf(rightChannel)]!, { type: "db", decimals: 1 })}`;
+      : `Left ${leftText}, right ${formatAudioValue(view.ballisticDb[slots.right]!, { type: "db", decimals: 1 })}`;
   }
 
+  // Registration is keyed on tier and channel ownership. Leaving surface mode,
+  // switching bus, or replacing a channel tears the old record down before any
+  // new one is created — otherwise the canvas would keep painting a stale
+  // placeholder and the shared ARIA sampler would keep firing for it.
   $effect(() => {
-    if (surface === null || channel === null || registry === null || meterEl === undefined) return;
-    const spec = {
-      slot: surface.slotOf(channel),
-      rightSlot: rightChannel === null ? null : surface.slotOf(rightChannel),
-      style, orientation, segments,
+    const bus = surface;
+    const left = channel;
+    const right = rightChannel;
+    const element = meterEl;
+    validateSurfaceOwnership(bus, left, right);
+    if (bus === null || left === null || registry === null || element === undefined) return;
+    const resolved = { left: bus.slotOf(left), right: right === null ? null : bus.slotOf(right) };
+    slots = resolved;
+    const handle = registry.registerMeter(
+      element,
+      { slot: resolved.left, rightSlot: resolved.right, ...untrack(() => ({ style, orientation, segments })) },
+      sampleSurfaceAria,
+    );
+    placeholder = handle;
+    sampleSurfaceAria();
+    return () => {
+      handle.detach();
+      if (placeholder === handle) placeholder = null;
+      slots = null;
     };
-    if (placeholder === null) {
-      placeholder = registry.registerMeter(meterEl, spec, sampleSurfaceAria);
-      sampleSurfaceAria();
-    } else {
-      placeholder.update(spec);
-    }
+  });
+
+  // Geometry-only changes update in place rather than churning registration.
+  $effect(() => {
+    const geometry = { style, orientation, segments };
+    untrack(() => {
+      if (placeholder === null || slots === null) return;
+      placeholder.update({ slot: slots.left, rightSlot: slots.right, ...geometry });
+    });
   });
 
   onDestroy(() => {
     placeholder?.detach();
     placeholder = null;
+    slots = null;
   });
 
   const leftVisual = $derived(audioMeterVisualState(context));
@@ -103,9 +138,9 @@
 
   export function push(frame: MeterFeedFrame, channelSide: "left" | "right" = "left"): void {
     if (surface !== null) {
-      const id = channelSide === "right" ? rightChannel : channel;
-      if (id === null) return;
-      feedScratch[0] = surface.slotOf(id);
+      const slot = channelSide === "right" ? slots?.right ?? null : slots?.left ?? null;
+      if (slot === null) return;
+      feedScratch[0] = slot;
       feedScratch[1] = frame.peak;
       feedScratch[2] = frame.meanSquare;
       surface.pushFrames(feedScratch, frame.atMs, frame.durationMs);

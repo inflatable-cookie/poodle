@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createMeterBus,
-  type AudioMeterMode, type MeterBus, type MeterFrameScheduler,
+  type AudioMeterMode, type MeterBus, type MeterBusChannel, type MeterFrameScheduler,
 } from "@inflatable-cookie/poodle-core";
 import { AudioMeter, MeterSurface } from "@inflatable-cookie/poodle-react";
 import { AudioSpecimenGroup as Group, AudioSpecimenPage as Page } from "./AudioSpecimen";
@@ -22,6 +22,9 @@ interface Scene {
   bus: MeterBus;
   meters: SceneMeter[];
   version: number;
+  // Keep the handles `register` returns: `unregister` compares handle
+  // identity, so a synthesized `{ id, slot }` is (correctly) rejected.
+  handles: Map<string, MeterBusChannel>;
 }
 
 interface Workload {
@@ -102,10 +105,13 @@ export function MeterSurfaceSpecimen() {
   function createScene(nextCount: number, previous: Scene | null): Scene {
     previous?.bus.destroy();
     const bus = createMeterBus({ scheduler, initialCapacity: 160 });
-    const meters = buildMeters(nextCount, (id, index) => bus.register(id, { mode: MODES[index % MODES.length]! }));
+    const handles = new Map<string, MeterBusChannel>();
+    const meters = buildMeters(nextCount, (id, index) => {
+      handles.set(id, bus.register(id, { mode: MODES[index % MODES.length]! }));
+    });
     workloadRef.current.samples = [];
     workloadRef.current.frameCount = 0;
-    return { bus, meters, version: (previous?.version ?? 0) + 1 };
+    return { bus, meters, version: (previous?.version ?? 0) + 1, handles };
   }
 
   useEffect(() => {
@@ -180,8 +186,16 @@ export function MeterSurfaceSpecimen() {
     const verticals = scene.meters.filter((meter) => meter.orientation === "vertical");
     if (verticals.length <= 1) return;
     const meter = verticals[verticals.length - 1]!;
-    scene.bus.unregister({ id: meter.id, slot: scene.bus.slotOf(meter.id) });
-    if (meter.right !== null) scene.bus.unregister({ id: meter.right, slot: scene.bus.slotOf(meter.right) });
+    const leftHandle = scene.handles.get(meter.id);
+    if (leftHandle !== undefined) {
+      scene.bus.unregister(leftHandle);
+      scene.handles.delete(meter.id);
+    }
+    const rightHandle = meter.right === null ? undefined : scene.handles.get(meter.right);
+    if (rightHandle !== undefined && meter.right !== null) {
+      scene.bus.unregister(rightHandle);
+      scene.handles.delete(meter.right);
+    }
     setScene({ ...scene, meters: scene.meters.filter((candidate) => candidate !== meter) });
   }
 
@@ -189,7 +203,7 @@ export function MeterSurfaceSpecimen() {
     if (scene === null) return;
     const index = scene.meters.filter((meter) => meter.orientation === "vertical").length;
     const id = `m${index}-added`;
-    scene.bus.register(id, { mode: MODES[index % MODES.length]! });
+    scene.handles.set(id, scene.bus.register(id, { mode: MODES[index % MODES.length]! }));
     const vertical = scene.meters.filter((meter) => meter.orientation === "vertical");
     const horizontal = scene.meters.filter((meter) => meter.orientation === "horizontal");
     setScene({ ...scene, meters: [...vertical, { id, right: null, style: "segments", orientation: "vertical", label: `Added ${index + 1}` } as SceneMeter, ...horizontal] });

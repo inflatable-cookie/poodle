@@ -14,12 +14,17 @@
     painter = null,
     rightChannel = null,
     showSecond = true,
+    firstSurface = true,
+    firstChannel = "a",
   }: {
     bus: MeterBus;
     meterBus?: MeterBus | null;
     painter?: MeterSurfacePainter | null;
     rightChannel?: string | null;
     showSecond?: boolean;
+    /** false renders the first meter in standalone tier inside the surface. */
+    firstSurface?: boolean;
+    firstChannel?: string;
   } = $props();
 
   const surfaceBus = $derived(meterBus ?? bus);
@@ -31,7 +36,14 @@
 </script>
 
 <MeterSurface {bus} {painter}>
-  <AudioMeter bind:this={meterA} surface={surfaceBus} channel="a" {rightChannel} ariaLabel="Channel A" segments={12} />
+  <AudioMeter
+    bind:this={meterA}
+    surface={firstSurface ? surfaceBus : null}
+    channel={firstSurface ? firstChannel : null}
+    rightChannel={firstSurface ? rightChannel : null}
+    ariaLabel="Channel A"
+    segments={12}
+  />
   {#if showSecond}
     <AudioMeter surface={surfaceBus} channel="b" ariaLabel="Channel B" segments={12} />
   {/if}

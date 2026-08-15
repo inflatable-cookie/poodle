@@ -2,7 +2,7 @@
   import { onDestroy } from "svelte";
   import {
     createMeterBus,
-    type AudioMeterMode, type MeterBus, type MeterFrameScheduler,
+    type AudioMeterMode, type MeterBus, type MeterBusChannel, type MeterFrameScheduler,
   } from "@inflatable-cookie/poodle-core";
   import { AudioMeter, MeterSurface } from "@inflatable-cookie/poodle-svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
@@ -50,13 +50,18 @@
   let feed = new Float32Array(0);
   let phases: number[] = [];
 
+  // Keep the handle `register` returns: `unregister` compares handle identity,
+  // so a synthesized `{ id, slot }` is (correctly) rejected.
+  let channelHandles = new Map<string, MeterBusChannel>();
+
   function registerSceneChannel(id: string, index: number): void {
-    bus.register(id, { mode: MODES[index % MODES.length]! });
+    channelHandles.set(id, bus.register(id, { mode: MODES[index % MODES.length]! }));
   }
 
   function buildScene(nextCount: number): void {
     bus.destroy();
     bus = createMeterBus({ scheduler, initialCapacity: 160 });
+    channelHandles = new Map();
     const next: SceneMeter[] = [];
     for (let index = 0; index < nextCount; index += 1) {
       const id = `m${index}`;
@@ -184,8 +189,16 @@
   function removeLastMeter(): void {
     const meter = [...meters].reverse().find((candidate) => candidate.orientation === "vertical");
     if (meter === undefined || meters.filter((candidate) => candidate.orientation === "vertical").length <= 1) return;
-    bus.unregister({ id: meter.id, slot: bus.slotOf(meter.id) });
-    if (meter.right !== null) bus.unregister({ id: meter.right, slot: bus.slotOf(meter.right) });
+    const leftHandle = channelHandles.get(meter.id);
+    const rightHandle = meter.right === null ? undefined : channelHandles.get(meter.right);
+    if (leftHandle !== undefined) {
+      bus.unregister(leftHandle);
+      channelHandles.delete(meter.id);
+    }
+    if (rightHandle !== undefined && meter.right !== null) {
+      bus.unregister(rightHandle);
+      channelHandles.delete(meter.right);
+    }
     meters = meters.filter((candidate) => candidate !== meter);
     rebuildFeed();
   }

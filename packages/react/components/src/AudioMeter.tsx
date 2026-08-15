@@ -57,50 +57,70 @@ export const AudioMeter = forwardRef<AudioMeterHandle, AudioMeterProps>(function
     min: -60, max: 0, now: -60, text: formatAudioValue(-60, { type: "db", decimals: 1 }),
   }));
 
+  // Slots are resolved once per registration and cached: the aria sampler and
+  // the push/resetClip handles must not call `slotOf` on every use, and after
+  // the bus is destroyed no id is resolvable at all.
+  const slotsRef = useRef<{ left: number; right: number | null } | null>(null);
+
   const sampleSurfaceAria = useCallback(() => {
-    if (surface === null || channel === null || surface.destroyed) return;
+    const slots = slotsRef.current;
+    if (surface === null || slots === null) return;
     const view = surface.view;
-    const leftSlot = surface.slotOf(channel);
-    const leftDb = view.ballisticDb[leftSlot]!;
+    if (view.active[slots.left] !== 1) return;
+    const leftDb = view.ballisticDb[slots.left]!;
     const leftText = formatAudioValue(leftDb, { type: "db", decimals: 1 });
     setSurfaceAria({
-      min: view.minDb[leftSlot]!,
-      max: view.maxDb[leftSlot]!,
+      min: view.minDb[slots.left]!,
+      max: view.maxDb[slots.left]!,
       now: leftDb,
-      text: rightChannel === null
+      text: slots.right === null
         ? leftText
-        : `Left ${leftText}, right ${formatAudioValue(view.ballisticDb[surface.slotOf(rightChannel)]!, { type: "db", decimals: 1 })}`,
+        : `Left ${leftText}, right ${formatAudioValue(view.ballisticDb[slots.right]!, { type: "db", decimals: 1 })}`,
     });
-  }, [surface, channel, rightChannel]);
+  }, [surface]);
 
+  // Registration is keyed on tier and channel ownership. Leaving surface mode,
+  // switching bus, or replacing a channel tears the old record down before any
+  // new one is created — otherwise the canvas would keep painting a stale
+  // placeholder and the shared ARIA sampler would keep firing for it.
   useEffect(() => {
     const element = rootRef.current;
     if (surface === null || channel === null || registry === null || element === null) return;
-    const spec = {
-      slot: surface.slotOf(channel),
-      rightSlot: rightChannel === null ? null : surface.slotOf(rightChannel),
-      style, orientation, segments,
+    const slots = {
+      left: surface.slotOf(channel),
+      right: rightChannel === null ? null : surface.slotOf(rightChannel),
     };
-    if (placeholderRef.current === null) {
-      placeholderRef.current = registry.registerMeter(element, spec, sampleSurfaceAria);
-      sampleSurfaceAria();
-    } else {
-      placeholderRef.current.update(spec);
-    }
-  }, [surface, channel, rightChannel, registry, style, orientation, segments, sampleSurfaceAria]);
+    slotsRef.current = slots;
+    placeholderRef.current = registry.registerMeter(
+      element,
+      { slot: slots.left, rightSlot: slots.right, style, orientation, segments },
+      sampleSurfaceAria,
+    );
+    sampleSurfaceAria();
+    return () => {
+      placeholderRef.current?.detach();
+      placeholderRef.current = null;
+      slotsRef.current = null;
+    };
+    // `style`/`orientation`/`segments` are applied by the update effect below
+    // so a geometry tweak does not churn the registration.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [surface, channel, rightChannel, registry, sampleSurfaceAria]);
 
-  useEffect(() => () => {
-    placeholderRef.current?.detach();
-    placeholderRef.current = null;
-  }, []);
+  useEffect(() => {
+    const slots = slotsRef.current;
+    if (placeholderRef.current === null || slots === null) return;
+    placeholderRef.current.update({ slot: slots.left, rightSlot: slots.right, style, orientation, segments });
+  }, [style, orientation, segments]);
 
   useImperativeHandle(ref, () => ({
     push(frame, channelSide = "left") {
       if (surface !== null) {
-        const id = channelSide === "right" ? rightChannel : channel;
-        if (id === null) return;
+        const slots = slotsRef.current;
+        const slot = channelSide === "right" ? slots?.right ?? null : slots?.left ?? null;
+        if (slot === null) return;
         const scratch = scratchRef.current ?? (scratchRef.current = new Float32Array(3));
-        scratch[0] = surface.slotOf(id);
+        scratch[0] = slot;
         scratch[1] = frame.peak;
         scratch[2] = frame.meanSquare;
         surface.pushFrames(scratch, frame.atMs, frame.durationMs);

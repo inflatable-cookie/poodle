@@ -69,7 +69,6 @@ export interface MeterBus {
   slotOf(id: MeterBusChannelId): number;
   subscribe(listener: (timeMs: number) => void): () => void;
   destroy(): void;
-  readonly destroyed: boolean;
   readonly view: MeterBusView;
 }
 
@@ -129,6 +128,8 @@ class MeterBusImpl implements MeterBus {
   #scheduler: MeterFrameScheduler;
   #destroyed = false;
 
+  /** Handles minted by this bus and not yet unregistered. */
+  #liveChannels = new WeakSet<MeterBusChannel>();
   #ids: Array<MeterBusChannelId | null>;
   #slotById = new Map<MeterBusChannelId, number>();
   #freeSlots: number[] = [];
@@ -214,10 +215,6 @@ class MeterBusImpl implements MeterBus {
     };
   }
 
-  get destroyed(): boolean {
-    return this.#destroyed;
-  }
-
   register(id: MeterBusChannelId, input: MeterBusRegistration): MeterBusChannel {
     this.#assertAlive();
     if (typeof id !== "string" && typeof id !== "number") {
@@ -257,15 +254,22 @@ class MeterBusImpl implements MeterBus {
     this.#batchStamp[slot] = 0;
     this.#rmsHead[slot] = 0;
     this.#rmsCount[slot] = 0;
-    return { id, slot };
+    const channel: MeterBusChannel = { id, slot };
+    this.#liveChannels.add(channel);
+    return channel;
   }
 
   unregister(channel: MeterBusChannel): void {
     this.#assertAlive();
-    const slot = channel.slot;
-    if (!Number.isInteger(slot) || slot < 0 || slot >= this.#capacity || this.view.active[slot] !== 1 || this.#ids[slot] !== channel.id) {
-      throw new Error(`MeterBus: channel "${String(channel.id)}" is not registered on this bus`);
+    // Identity, not (id, slot): slots are reused, so re-registering the same
+    // id after an unregister would otherwise let the first — now stale —
+    // handle deactivate its replacement. Membership in this set also rejects
+    // handles minted by another bus.
+    if (channel === null || typeof channel !== "object" || !this.#liveChannels.has(channel)) {
+      throw new Error(`MeterBus: channel "${String(channel?.id)}" is not registered on this bus`);
     }
+    const slot = channel.slot;
+    this.#liveChannels.delete(channel);
     this.view.active[slot] = 0;
     this.#slotById.delete(channel.id);
     this.#ids[slot] = null;
@@ -293,7 +297,14 @@ class MeterBusImpl implements MeterBus {
       if (view.enabled[slot] !== 1) continue;
       const lastFrameAt = this.#lastFrameAtMs[slot]!;
       const hasFrame = !Number.isNaN(lastFrameAt);
-      if (!isMeterFrameValid(atMs, peak, meanSquare, durationMs, hasFrame ? lastFrameAt : null)) continue;
+      // Staleness is judged against the slot's advance clock, not just its
+      // last telemetry stamp. An idle time step moves state forward to
+      // `#lastAdvanceMs`; accepting a batch stamped before that would rewind
+      // the clock, clamp a negative elapsed to zero, and diverge from the
+      // same push/time trace applied in order.
+      const lastAdvance = this.#lastAdvanceMs[slot]!;
+      const staleFloor = hasFrame ? (Number.isNaN(lastAdvance) ? lastFrameAt : Math.max(lastFrameAt, lastAdvance)) : null;
+      if (!isMeterFrameValid(atMs, peak, meanSquare, durationMs, staleFloor)) continue;
       this.#applyFrame(slot, hasFrame, atMs, peak, meanSquare, durationMs);
       accepted += 1;
     }

@@ -126,6 +126,59 @@ describe("AudioMeter surface tier (react)", () => {
     expect(root.getAttribute("aria-valuetext")).not.toBe("0 dB");
   });
 
+  it("detaches the canvas registration when a meter leaves surface mode", () => {
+    const { bus, painter, log, scheduler } = setup();
+    const tree = (surfaceMode: boolean) => (
+      <MeterSurface bus={bus} painter={painter}>
+        <AudioMeter surface={surfaceMode ? bus : null} channel={surfaceMode ? "a" : null} ariaLabel="Channel A" segments={12} />
+        <AudioMeter surface={bus} channel="b" ariaLabel="Channel B" segments={12} />
+      </MeterSurface>
+    );
+    const { rerender, container } = render(tree(true));
+    act(() => scheduler.fire(16));
+    expect(log.paints.at(-1)).toBe(2);
+
+    rerender(tree(false));
+    act(() => scheduler.fire(32));
+    expect(log.paints.at(-1)).toBe(1);
+    const standalone = container.querySelector(".poodle-audio-meter:not([data-surface])")!;
+    expect(standalone.querySelectorAll(".poodle-audio-meter-visual").length).toBe(1);
+  });
+
+  it("registers when a meter enters surface mode later", () => {
+    const { bus, painter, log, scheduler } = setup();
+    const tree = (surfaceMode: boolean) => (
+      <MeterSurface bus={bus} painter={painter}>
+        <AudioMeter surface={surfaceMode ? bus : null} channel={surfaceMode ? "a" : null} ariaLabel="Channel A" segments={12} />
+      </MeterSurface>
+    );
+    const { rerender } = render(tree(false));
+    act(() => scheduler.fire(16));
+    expect(log.paints.at(-1)).toBe(0);
+
+    rerender(tree(true));
+    act(() => scheduler.fire(32));
+    expect(log.paints.at(-1)).toBe(1);
+  });
+
+  it("re-registers onto the new slot when the channel is replaced", () => {
+    const { bus, painter, log, scheduler, a, b } = setup();
+    const tree = (id: string) => (
+      <MeterSurface bus={bus} painter={painter}>
+        <AudioMeter surface={bus} channel={id} ariaLabel="Channel" segments={12} />
+      </MeterSurface>
+    );
+    const { rerender } = render(tree("a"));
+    act(() => scheduler.fire(16));
+    expect(log.lastPass!.count).toBe(1);
+    expect(log.lastPass!.slot[0]).toBe(a.slot);
+
+    rerender(tree("b"));
+    act(() => scheduler.fire(32));
+    expect(log.lastPass!.count).toBe(1);
+    expect(log.lastPass!.slot[0]).toBe(b.slot);
+  });
+
   it("fails clearly on missing surface context and unregistered channels", () => {
     const { bus, painter } = setup();
     const consoleError = console.error;

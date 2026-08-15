@@ -14,6 +14,58 @@ overlay per scroll container. Standalone AudioMeter markup, defaults,
 behavior, and accessibility are unchanged — the standalone Svelte/React
 component tests and core goldens pass untouched except for new coverage.
 
+## Review Round 1 Corrections (2026-08-15)
+
+Four blockers from the orchestrator's first pass, all fixed on this branch:
+
+1. **Stale handles could unregister a replacement.** `unregister` compared
+   `(id, slot)`, and slots are reused, so `register("x")` → `unregister` →
+   `register("x")` → `unregister(firstHandle)` deactivated the second
+   registration. The bus now tracks handle identity in a `WeakSet` minted at
+   `register`; a stale or foreign handle throws. Regression covers same-id
+   reuse and cross-bus handles, not just the previous different-id case.
+2. **Leaving surface mode left a live canvas registration.** Both framework
+   effects returned early when `surface`/`channel` went null, while detach only
+   ran on destroy, so the standalone visuals returned while the canvas kept
+   painting the placeholder and the shared ARIA sampler kept firing for it.
+   Registration is now keyed on tier and channel ownership with a teardown on
+   every change; geometry-only props update in place. Svelte also validates
+   ownership on later transitions, not just at init. Regressions cover
+   surface → standalone, standalone → surface, and channel replacement in both
+   frameworks.
+3. **A delayed batch could rewind the bus clock.** `pushFrames` compared `atMs`
+   only against the last telemetry stamp, so a batch arriving after an idle
+   advance was accepted, clamped its negative elapsed to zero, and wrote the
+   older timestamp back — diverging from the same trace applied in order.
+   Staleness is now judged against the slot's advance clock. Spec 068 states
+   the rule; the regression asserts the delayed trace is rejected and the final
+   state matches the in-order trace exactly.
+4. **Published API exceeded approved spec 068.** `destroyed` is removed
+   outright — components cache their slots at registration and read
+   `view.active`, so nothing asks the bus about its own lifecycle, and this
+   also takes `slotOf` out of the ARIA and push paths. `slotOf`, `subscribe`,
+   and `setEnabled` are genuinely required (a component holds a channel id, not
+   a handle; one loop must serve many surfaces; enable/disable must exist in
+   both tiers), so spec 068 is amended in place with that rationale rather than
+   shipping undocumented surface. **That amendment is the reviewable decision
+   here — reject it and these three move behind an internal controller type.**
+
+The identity fix immediately caught a live consumer of the old behavior: both
+specimens synthesized `{ id, slot }` handles for their remove-meter control,
+which the browser probe failed on until they were changed to keep the handles
+`register` returns. That is the bug class blocker 1 describes, found in this
+repo's own code.
+
+Rebased onto `ca2bb631`. Two conflicts, both additive: PAPERCUTS kept both
+entries. `component-registry.ts` is now derived from the canonical catalogue,
+which also feeds the GPUI and Jetstream preview catalogues — putting
+`MeterSurface` there would violate the card's fixed decision, so the Svelte
+registry gains a small exported `webOnlyComponents` supplement (mirrored by the
+React gallery, taught to the catalogue audit and the surface audit) and the
+canonical fixture stays untouched. The catalogue audit keeps the canonical
+invariant exact and asserts the supplement is absent from the manifest, rather
+than relaxing the check to a superset.
+
 ## API
 
 - `poodle-core`: `createMeterBus` (`register`/`unregister`/`pushFrames`
@@ -111,10 +163,12 @@ Chromium and WebKit 26.5, DPR 1, 1280×900 viewport.
 
 | Browser | Preview | Samples | Mean | p50 | p95 | Max |
 | --- | --- | --- | --- | --- | --- | --- |
-| Chromium | Svelte | 2,343 | 0.166 ms | 0.2 ms | 0.3 ms | 2.1 ms |
-| Chromium | React | 2,343 | 0.162 ms | 0.2 ms | 0.3 ms | 0.8 ms |
-| WebKit | Svelte | 1,145 | 0.429 ms | 0 ms | 1 ms | 2 ms |
-| WebKit | React | 1,145 | 0.379 ms | 0 ms | 1 ms | 2 ms |
+| Chromium | Svelte | 2,345 | 0.117 ms | 0.1 ms | 0.3 ms | 1.4 ms |
+| Chromium | React | 2,345 | 0.129 ms | 0.1 ms | 0.3 ms | 0.7 ms |
+| WebKit | Svelte | 1,143 | 0.264 ms | 0 ms | 1 ms | 2 ms |
+| WebKit | React | 1,144 | 0.239 ms | 0 ms | 1 ms | 1 ms |
+
+Re-recorded after the review-round-1 corrections; unchanged in character.
 
 All 128 vertical meters plus the page's 4 horizontal examples register 148
 channels (stereo on every eighth meter); culling keeps the painted subset to
@@ -126,7 +180,7 @@ no WebGL2 follow-up is justified by this evidence.
 
 Read the WebKit percentiles as coarse: WebKit clamps `performance.now()` to
 1 ms resolution, so its per-frame deltas quantize to 0/1/2 ms and only the
-mean (0.38–0.43 ms, averaged over ~1,100 frames) carries sub-millisecond
+mean (0.24–0.26 ms, averaged over ~1,140 frames) carries sub-millisecond
 information. Its lower sample count comes from the same 20 s window yielding
 fewer measured frames. Chromium's finer clock gives the more precise picture;
 both agree the frame cost sits well below budget. Max values include the
@@ -140,8 +194,11 @@ These are single-machine review evidence, not a CI threshold.
   across six vitest projects), `effigy test:parity`, `effigy test:a11y`
 - `effigy check:svelte` (0 errors), `effigy docs:lint`, `effigy docs:check`
 - `effigy docs:callback-drift` green; `effigy docs:contract-drift` reports
-  only the recorded main baseline (Button `children`/`leading`/`trailing`) —
-  no AudioMeter or MeterSurface drift
+  only the inherited main baseline — no AudioMeter or MeterSurface drift.
+  That baseline is now 5 props across 2 components (Button
+  `children`/`leading`/`trailing` plus Tabs `actions`/`children`); Tabs joined
+  it on main after this branch was cut. Verified by running the selector on a
+  clean `origin/main` worktree, which reports the identical 5/2 result.
 - `effigy test:web-pack-install` green with new packed fixtures importing
   `MeterBus` and both `MeterSurface` exports from public entries
 - `effigy ci:web`, `git diff --check`

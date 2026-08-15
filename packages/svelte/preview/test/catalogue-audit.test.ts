@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { allComponents } from "../src/component-registry";
+import { allComponents, webOnlyComponents } from "../src/component-registry";
 import {
   componentsBySection,
   isFamilyDisclosed,
@@ -64,17 +64,37 @@ const FIXED_SHELL = [
 ];
 
 describe("preview catalogue audit", () => {
+  // Web-only entries are catalogued by the web previews but deliberately absent
+  // from the canonical manifest, which is the portable inventory and also feeds
+  // the GPUI/Jetstream catalogues (spec 068 / g14.024: `MeterSurface` has no
+  // native counterpart). They are audited here as their own closed set so the
+  // canonical invariant stays exact rather than loosened to "superset".
+  const webOnlySlugs = webOnlyComponents.map((component) => component.slug);
+  const canonicalEntries = allComponents.filter(
+    (component) => !webOnlySlugs.includes(component.slug),
+  );
+
   it("classifies every canonical entry once", () => {
-    expect(allComponents).toHaveLength(manifest.components.length);
-    const slugs = allComponents.map((component) => component.slug);
+    expect(canonicalEntries).toHaveLength(manifest.components.length);
+    const slugs = canonicalEntries.map((component) => component.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
     expect(slugs).toEqual(
       manifest.components.map((component) => component.slug),
     );
   });
 
+  it("keeps the web-only supplement out of the canonical manifest", () => {
+    expect(webOnlySlugs).toEqual(["meter-surface"]);
+    for (const slug of webOnlySlugs) {
+      expect(manifest.components.find((entry) => entry.slug === slug)).toBeUndefined();
+      expect(allComponents.find((component) => component.slug === slug)).toBeDefined();
+    }
+    const slugs = allComponents.map((component) => component.slug);
+    expect(new Set(slugs).size).toBe(slugs.length);
+  });
+
   it("keeps generated runtime entries on the same section/family/kind", () => {
-    for (const component of allComponents) {
+    for (const component of canonicalEntries) {
       const canonical = manifest.components.find(
         (entry) => entry.slug === component.slug,
       );

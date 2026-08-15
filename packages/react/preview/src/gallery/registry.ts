@@ -3,6 +3,10 @@ import {
   type CatalogueNavEntry,
 } from "../../../../svelte/preview/src/catalogue-nav";
 import { canonicalComponents } from "../generated/catalogue/catalogue";
+// The web-only supplement is declared once, in the canonical (Svelte) preview
+// registry, and mirrored here so both galleries catalogue the same surfaces
+// without either entering the portable inventory.
+import { webOnlyComponents } from "../../../../svelte/preview/src/component-registry";
 
 export type ComponentEntry = CatalogueNavEntry & {
   packageName: string;
@@ -17,7 +21,7 @@ const embeddedOnlySpecimens = new Set([
   "ToolCallGroup",
 ]);
 
-export const allComponents: ComponentEntry[] = canonicalComponents
+export const allComponents: ComponentEntry[] = [...canonicalComponents, ...webOnlyComponents]
   .filter((component) => !svelteOnlyComponents.has(component.displayName))
   .map((component) => ({
     ...decorateCanonical(component),

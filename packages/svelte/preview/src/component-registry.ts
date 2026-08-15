@@ -24,7 +24,7 @@ export type ComponentEntry = CatalogueNavEntry & {
  * React catalogues can document and exercise such surfaces without claiming a
  * portable component.
  */
-const webOnlyComponents: CanonicalComponent[] = [
+export const webOnlyComponents: CanonicalComponent[] = [
   {
     slug: "meter-surface",
     displayName: "MeterSurface",

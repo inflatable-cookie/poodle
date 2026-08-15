@@ -89,6 +89,31 @@ describe("meter bus registration", () => {
     expect(() => bus.register("b", { mode: "nope" as AudioMeterMode })).toThrow(RangeError);
   });
 
+  test("a stale handle cannot unregister the replacement that reuses its slot", () => {
+    const bus = createMeterBus({ scheduler: createManualMeterFrameScheduler() });
+    const first = bus.register("same", { mode: "sample-peak" });
+    bus.unregister(first);
+    const second = bus.register("same", { mode: "sample-peak" });
+    // Slot reuse means `second` has the same id and slot as `first`.
+    expect(second.slot).toBe(first.slot);
+    expect(() => bus.unregister(first)).toThrow(/not registered/);
+    expect(bus.view.active[second.slot]).toBe(1);
+    expect(pushOne(bus, second.slot, { atMs: 10, peak: 0.5, meanSquare: 0.25, durationMs: 10 })).toBe(1);
+    bus.unregister(second);
+    expect(bus.view.active[second.slot]).toBe(0);
+  });
+
+  test("a handle minted by another bus is rejected", () => {
+    const bus = createMeterBus({ scheduler: createManualMeterFrameScheduler() });
+    const other = createMeterBus({ scheduler: createManualMeterFrameScheduler() });
+    bus.register("a", { mode: "vu" });
+    const foreign = other.register("a", { mode: "vu" });
+    expect(() => bus.unregister(foreign)).toThrow(/not registered/);
+    expect(bus.view.active[0]).toBe(1);
+    expect(() => bus.unregister({ id: "a", slot: 0 })).toThrow(/not registered/);
+    expect(bus.view.active[0]).toBe(1);
+  });
+
   test("unregister frees the slot and rejects use-after-unregister", () => {
     const bus = createMeterBus({ scheduler: createManualMeterFrameScheduler() });
     const channel = bus.register("a", { mode: "sample-peak" });
@@ -313,6 +338,33 @@ describe("meter bus and standalone parity", () => {
     expect(scheduler.pendingCount()).toBe(0);
   });
 
+  test("a batch stamped before the advance clock cannot rewind bus state", () => {
+    // A delayed telemetry batch must not be applied after the frame loop has
+    // already advanced past its timestamp: clamping the negative elapsed to
+    // zero would make the batched trace diverge from the same push/time
+    // sequence applied in order.
+    const build = (delayed: boolean) => {
+      const scheduler = createManualMeterFrameScheduler();
+      const bus = createMeterBus({ scheduler });
+      const channel = bus.register("vu", { mode: "vu" });
+      const unsubscribe = bus.subscribe(() => {});
+      pushOne(bus, channel.slot, quantize({ atMs: 100, peak: 0.9, meanSquare: 0.5, durationMs: 66 }));
+      scheduler.fire(600);
+      const staleAccepted = delayed
+        ? pushOne(bus, channel.slot, quantize({ atMs: 500, peak: 0.2, meanSquare: 0.04, durationMs: 66 }))
+        : 0;
+      pushOne(bus, channel.slot, quantize({ atMs: 700, peak: 0.3, meanSquare: 0.09, durationMs: 66 }));
+      const ballisticDb = bus.view.ballisticDb[channel.slot]!;
+      unsubscribe();
+      return { ballisticDb, staleAccepted };
+    };
+
+    const inOrder = build(false);
+    const withDelayed = build(true);
+    expect(withDelayed.staleAccepted).toBe(0);
+    expect(withDelayed.ballisticDb).toBe(inOrder.ballisticDb);
+  });
+
   test("a push after idle advancement resumes from the advanced state", () => {
     const scheduler = createManualMeterFrameScheduler();
     const bus = createMeterBus({ scheduler });
@@ -352,7 +404,6 @@ describe("meter bus lifecycle and scheduling", () => {
     const channel = bus.register("a", { mode: "vu" });
     bus.subscribe(() => {});
     bus.destroy();
-    expect(bus.destroyed).toBe(true);
     expect(scheduler.pendingCount()).toBe(0);
     expect(bus.view.active[channel.slot]).toBe(0);
     expect(() => pushOne(bus, channel.slot, { atMs: 10, peak: 1, meanSquare: 1, durationMs: 10 })).toThrow(/destroyed/);

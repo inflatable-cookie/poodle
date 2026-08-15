@@ -125,6 +125,64 @@ describe("AudioMeter surface tier", () => {
     expect(root.getAttribute("aria-valuetext")).not.toBe("0 dB");
   });
 
+  it("detaches the canvas registration when a meter leaves surface mode", async () => {
+    const { bus, painter, log, scheduler } = setup();
+    const { rerender, container } = render(MeterSurfaceHarness, { bus, painter, firstSurface: true });
+    await tick();
+    scheduler.fire(16);
+    expect(log.paints.at(-1)).toBe(2);
+
+    await rerender({ bus, painter, firstSurface: false });
+    await tick();
+    scheduler.fire(32);
+    // Only the still-surface meter is painted; the standalone one is not.
+    expect(log.paints.at(-1)).toBe(1);
+    const standalone = container.querySelector('.poodle-audio-meter:not([data-surface])')!;
+    expect(standalone.querySelectorAll(".poodle-audio-meter-visual").length).toBe(1);
+  });
+
+  it("registers when a meter enters surface mode later", async () => {
+    const { bus, painter, log, scheduler } = setup();
+    const { rerender } = render(MeterSurfaceHarness, { bus, painter, firstSurface: false });
+    await tick();
+    scheduler.fire(16);
+    expect(log.paints.at(-1)).toBe(1);
+
+    await rerender({ bus, painter, firstSurface: true });
+    await tick();
+    scheduler.fire(32);
+    expect(log.paints.at(-1)).toBe(2);
+  });
+
+  it("re-registers onto the new slot when the channel is replaced", async () => {
+    const { bus, painter, log, scheduler, a, b } = setup();
+    const { rerender } = render(MeterSurfaceHarness, { bus, painter, showSecond: false, firstChannel: "a" });
+    await tick();
+    scheduler.fire(16);
+    expect(log.lastPass!.count).toBe(1);
+    expect(log.lastPass!.slot[0]).toBe(a.slot);
+
+    await rerender({ bus, painter, showSecond: false, firstChannel: "b" });
+    await tick();
+    scheduler.fire(32);
+    // Exactly one record, pointing at the replacement slot — not two.
+    expect(log.lastPass!.count).toBe(1);
+    expect(log.lastPass!.slot[0]).toBe(b.slot);
+  });
+
+  it("validates a later transition into surface mode", async () => {
+    const scheduler = createManualMeterFrameScheduler();
+    const bus = createMeterBus({ scheduler });
+    bus.register("a", { mode: "sample-peak" });
+    bus.register("b", { mode: "sample-peak" });
+    const { painter } = createFakePainter();
+    const { rerender } = render(MeterSurfaceHarness, { bus, painter, showSecond: false, firstSurface: false });
+    await tick();
+    await expect(
+      rerender({ bus, painter, showSecond: false, firstSurface: true, firstChannel: "missing" }),
+    ).rejects.toThrow(/not registered/);
+  });
+
   it("fails clearly on missing surface context, wrong bus, and unregistered channels", () => {
     const scheduler = createManualMeterFrameScheduler();
     const bus = createMeterBus({ scheduler });
