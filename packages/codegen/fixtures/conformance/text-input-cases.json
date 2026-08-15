@@ -24,6 +24,10 @@
           "kind": "expectPart",
           "part": "root",
           "expect": {
+            "geometry": {
+              "radius": 6,
+              "tolerance": 1
+            },
             "tokenRoles": {
               "size": "md",
               "density": "default",
@@ -75,6 +79,10 @@
           "kind": "expectPart",
           "part": "root",
           "expect": {
+            "geometry": {
+              "radius": 6,
+              "tolerance": 1
+            },
             "tokenRoles": {
               "size": "md",
               "density": "default",
@@ -127,6 +135,10 @@
           "kind": "expectPart",
           "part": "root",
           "expect": {
+            "geometry": {
+              "radius": 6,
+              "tolerance": 1
+            },
             "tokenRoles": {
               "size": "md",
               "density": "default",
@@ -179,6 +191,10 @@
           "kind": "expectPart",
           "part": "root",
           "expect": {
+            "geometry": {
+              "radius": 6,
+              "tolerance": 1
+            },
             "tokenRoles": {
               "size": "md",
               "density": "default",
@@ -520,7 +536,7 @@
       "id": "text-input/selection-replace",
       "fixture": {
         "props": {
-          "value": "hello",
+          "value": "a💡b",
           "ariaLabel": "Select field"
         },
         "regions": {}
@@ -541,16 +557,16 @@
           "kind": "action",
           "name": "select",
           "part": "control",
-          "start": 0,
-          "end": 5
+          "start": 1,
+          "end": 3
         },
         {
           "kind": "expectPart",
           "part": "control",
           "expect": {
-            "value": "hello",
-            "selectionStart": 0,
-            "selectionEnd": 5
+            "value": "a💡b",
+            "selectionStart": 1,
+            "selectionEnd": 3
           }
         },
         {
@@ -569,9 +585,9 @@
           "kind": "expectPart",
           "part": "control",
           "expect": {
-            "value": "y",
-            "selectionStart": 1,
-            "selectionEnd": 1
+            "value": "ayb",
+            "selectionStart": 2,
+            "selectionEnd": 2
           }
         }
       ]

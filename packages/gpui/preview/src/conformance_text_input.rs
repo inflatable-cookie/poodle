@@ -139,21 +139,38 @@ impl CaseHost {
     }
 }
 
+fn utf16_for_char(text: &str, char_index: usize) -> usize {
+    text.chars().take(char_index).map(char::len_utf16).sum()
+}
+
+fn char_for_utf16(text: &str, utf16: usize) -> usize {
+    let mut seen = 0;
+    for (chars, c) in text.chars().enumerate() {
+        if seen >= utf16 {
+            return chars;
+        }
+        seen += c.len_utf16();
+    }
+    text.chars().count()
+}
+
 fn observe_case(host: &CaseHost, iface: &InterfaceDoc) -> Value {
     let node = host.node.lock().expect("node lock").clone();
     let focus_by_id = |id: &str| poodle_gpui_node_backend::focus_state_for(id);
-    let mut observation =
-        observe_tree_with_focus("gpui", "text-input", iface, &node, &focus_by_id);
+    let mut observation = observe_tree_with_focus("gpui", "text-input", iface, &node, &focus_by_id);
     let value = host.value.lock().expect("value lock").clone();
     let (start, end) = *host.selection.lock().expect("selection lock");
-    if let Some(parts) = observation
-        .get_mut("parts")
-        .and_then(Value::as_object_mut)
-    {
+    if let Some(parts) = observation.get_mut("parts").and_then(Value::as_object_mut) {
         if let Some(entry) = parts.get_mut("control").and_then(Value::as_object_mut) {
             entry.insert("value".to_owned(), json!(value));
-            entry.insert("selectionStart".to_owned(), json!(start));
-            entry.insert("selectionEnd".to_owned(), json!(end));
+            entry.insert(
+                "selectionStart".to_owned(),
+                json!(utf16_for_char(&value, start)),
+            );
+            entry.insert(
+                "selectionEnd".to_owned(),
+                json!(utf16_for_char(&value, end)),
+            );
         }
     }
     observation["trace"] = json!(host.trace.lock().expect("trace lock").clone());
@@ -203,7 +220,21 @@ fn drive_insert(driver: &mut HeadlessDriver<'_>, host: &Arc<Mutex<CaseHost>>, te
     }
 }
 
-fn drive_select(driver: &mut HeadlessDriver<'_>, host: &Arc<Mutex<CaseHost>>, start: usize, end: usize) {
+fn drive_select(
+    driver: &mut HeadlessDriver<'_>,
+    host: &Arc<Mutex<CaseHost>>,
+    start: usize,
+    end: usize,
+) {
+    let value = host
+        .lock()
+        .expect("host lock")
+        .value
+        .lock()
+        .expect("value lock")
+        .clone();
+    let start = char_for_utf16(&value, start);
+    let end = char_for_utf16(&value, end);
     driver.keyboard_key(ROOT_ELEMENT_ID, "home");
     host.lock().expect("host lock").rebuild();
     driver.draw_frame();
@@ -226,7 +257,12 @@ fn drive_compose(
     text: &str,
     phase: &str,
 ) {
-    let selection = *host.lock().expect("host lock").selection.lock().expect("selection lock");
+    let selection = *host
+        .lock()
+        .expect("host lock")
+        .selection
+        .lock()
+        .expect("selection lock");
     match phase {
         "start" | "update" => {
             poodle_gpui_node_backend::mark_composing(VALUE_ELEMENT_ID, selection, text);
@@ -268,7 +304,11 @@ pub fn drive_text_input_cases(
 ) -> Vec<CaseOutcome> {
     let mut outcomes = Vec::new();
     for case in &cases {
-        let case_id = case.get("id").and_then(Value::as_str).unwrap_or("?").to_owned();
+        let case_id = case
+            .get("id")
+            .and_then(Value::as_str)
+            .unwrap_or("?")
+            .to_owned();
         if let Some(only) = &only {
             if only != &case_id {
                 continue;
@@ -336,13 +376,17 @@ pub fn drive_text_input_cases(
                             drive_insert(driver, &host, text);
                         }
                         "select" => {
-                            let start = step.get("start").and_then(Value::as_u64).unwrap_or(0) as usize;
+                            let start =
+                                step.get("start").and_then(Value::as_u64).unwrap_or(0) as usize;
                             let end = step.get("end").and_then(Value::as_u64).unwrap_or(0) as usize;
                             drive_select(driver, &host, start, end);
                         }
                         "compose" => {
                             let text = step.get("text").and_then(Value::as_str).unwrap_or("");
-                            let phase = step.get("phase").and_then(Value::as_str).unwrap_or("commit");
+                            let phase = step
+                                .get("phase")
+                                .and_then(Value::as_str)
+                                .unwrap_or("commit");
                             drive_compose(driver, &host, text, phase);
                         }
                         "press" => {
@@ -361,7 +405,15 @@ pub fn drive_text_input_cases(
                     let expect = step.get("expect").cloned().unwrap_or(Value::Null);
                     let observation = observe_case(&host.lock().expect("host lock"), &iface);
                     let mut results = Vec::new();
-                    assert_part(&iface, part, &expect, index, observation, "gpui", &mut results);
+                    assert_part(
+                        &iface,
+                        part,
+                        &expect,
+                        index,
+                        observation,
+                        "gpui",
+                        &mut results,
+                    );
                     for r in &results {
                         assertions.push(serde_json::to_value(r).expect("result serializes"));
                         if r.verdict == "fail" {
@@ -386,7 +438,10 @@ pub fn drive_text_input_cases(
                         .expect("trace lock")
                         .iter()
                         .filter_map(|entry| {
-                            entry.get("event").and_then(Value::as_str).map(str::to_owned)
+                            entry
+                                .get("event")
+                                .and_then(Value::as_str)
+                                .map(str::to_owned)
                         })
                         .collect();
                     let mut results = Vec::new();

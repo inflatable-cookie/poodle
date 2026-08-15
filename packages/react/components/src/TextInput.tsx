@@ -506,6 +506,7 @@ export const TextInput = forwardRef<TextInputHandle, TextInputProps>(function Te
               autoComplete={autoComplete}
               spellCheck={spellCheck}
               autoCapitalize={autoCapitalize}
+              autoCorrect={autoCorrect}
               rows={rows ?? 4}
               style={resize !== "vertical" ? { resize } : undefined}
               maxLength={maxLength ?? undefined}

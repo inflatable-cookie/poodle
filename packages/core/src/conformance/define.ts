@@ -511,9 +511,10 @@ export interface PartExpectation<I extends InterfaceConfig> {
   icon?: string;
   /** Observed value: a scalar thumb, a controlled pair, or editable text. */
   value?: number | readonly [number, number] | string;
-  /** Caret/selection start, in characters. */
+  /** Caret/selection start, in UTF-16 code units. Runtime adapters translate
+   * when their editor stores another index unit. */
   selectionStart?: number;
-  /** Caret/selection end, in characters. Equal to start is a caret. */
+  /** Caret/selection end, in UTF-16 code units. Equal to start is a caret. */
   selectionEnd?: number;
   present?: boolean;
   focusable?: boolean;
@@ -942,7 +943,8 @@ export function actionInsert<I extends InterfaceConfig>(
   return { kind: "action", name: "insert", part, text };
 }
 
-/** Set the caret or selection through the runtime's real selection path. */
+/** Set the caret or selection through the runtime's real selection path.
+ * Offsets use UTF-16 code units, matching DOM and platform text APIs. */
 export function actionSelect<I extends InterfaceConfig>(
   part: CasePartId<I>,
   start: number,

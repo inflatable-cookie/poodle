@@ -25,7 +25,10 @@ actions and observations do not.
   `with_selection`, and aliases (`with_focused`, `with_input_type`). Integer
   `rustType` stays Eq-safe; `usize` is not namespaced under `crate::types`.
 - **Generic vocabulary** — `insert` / `select` / `compose` actions; string
-  `value` and selection observations. No TextInput identifier in runners.
+  `value` and selection observations. Portable selection uses UTF-16 offsets;
+  the GPUI adapter translates to its scalar-indexed editor. The selection case
+  crosses a non-BMP character so that boundary cannot drift silently. No
+  TextInput identifier lives in generic runners.
   Web insert is one `input` event. GPUI insert is per-character
   `on_edit_key`; one `valueChange` is recorded per insert action. IME
   start/update must not commit; commit is the single insert.
@@ -41,9 +44,13 @@ actions and observations do not.
   render-neutral, and GPUI join the gated owned rows.
 - **Failure proof** — dropped edit, dropped selection, dropped IME commit,
   and submit-before-valueChange each fail the expected field.
-- **Cost** — TextInput pilot increment 1,863 LOC (745 authored authority,
-  230 generated source, 888 harness and runtime deltas) and 33,146 bytes of
-  TextInput fixture JSON. Mechanism total 16,948 LOC.
+- **Geometry** — default display cases compare the authored root radius across
+  all active runtimes.
+- **Review repair** — direct icon props are contracted; React multiline passes
+  `autocorrect` like Svelte.
+- **Cost** — TextInput pilot increment 1,918 LOC (746 authored authority,
+  230 generated source, 942 harness and runtime deltas) and 33,538 bytes of
+  TextInput fixture JSON. Mechanism total 17,003 LOC.
 
 ## Before / after runtime
 

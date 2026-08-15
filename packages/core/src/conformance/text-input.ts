@@ -12,6 +12,8 @@
  * stay beside the web adapters. Native caret props (`selectionStart`,
  * `selectionEnd`, `isFocused`) are native extensions: generated into the
  * Rust spec so hosts can store caret state, never into PortablePropsOf.
+ * Portable selection actions and observations use UTF-16 code-unit offsets;
+ * the GPUI adapter translates them to its scalar-indexed editor state.
  */
 
 import { defineComponentInterface } from "./define";
@@ -98,8 +100,10 @@ export const textInputInterface = defineComponentInterface({
     { name: "leadingIcon", type: { kind: "icon" }, default: null, nullable: true },
     { name: "trailingIcon", type: { kind: "icon" }, default: null, nullable: true },
     { name: "id", type: { kind: "string" }, default: null, nullable: true },
-    // Native caret: the host stores these; web reads the DOM. Generated into
-    // the Rust spec, excluded from PortablePropsOf.
+    // Native caret: the host stores scalar-character offsets; web reads its
+    // UTF-16 DOM selection. The conformance adapter translates at the portable
+    // action/observation boundary. Generated into the Rust spec, excluded from
+    // PortablePropsOf.
     {
       name: "selectionStart",
       type: { kind: "number" },

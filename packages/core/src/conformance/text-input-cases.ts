@@ -38,6 +38,7 @@ function displayCase(
     specimen: { group, caption, captureId: `text-input/${id}`, axes: ["theme"] },
     steps: [
       expectPart("root", {
+        geometry: { radius: 6, tolerance: 1 },
         tokenRoles: {
           size: String(props.size ?? "md"),
           density: String(props.density ?? "default"),
@@ -221,11 +222,12 @@ const cases = [
     ],
   }),
 
-  // Selection replaces on insert.
+  // Selection replaces on insert. The non-BMP fixture proves the portable
+  // UTF-16 offsets are translated by the scalar-indexed Rust editor.
   componentCase(textInputInterface, {
     id: "text-input/selection-replace",
     fixture: {
-      props: { value: "hello", ariaLabel: "Select field" },
+      props: { value: "a💡b", ariaLabel: "Select field" },
       regions: {},
     },
     specimen: {
@@ -236,11 +238,11 @@ const cases = [
     },
     steps: [
       actionFocus("control"),
-      actionSelect("control", 0, 5),
-      expectPart("control", { value: "hello", selectionStart: 0, selectionEnd: 5 }),
+      actionSelect("control", 1, 3),
+      expectPart("control", { value: "a💡b", selectionStart: 1, selectionEnd: 3 }),
       actionInsert("control", "y"),
       expectEvents(["valueChange"]),
-      expectPart("control", { value: "y", selectionStart: 1, selectionEnd: 1 }),
+      expectPart("control", { value: "ayb", selectionStart: 2, selectionEnd: 2 }),
     ],
   }),
 
