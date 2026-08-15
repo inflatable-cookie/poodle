@@ -46,8 +46,8 @@ Updated: 2026-07-10
 | `block` | `boolean` | `false` | no | makes the trigger and root expand to available width |
 | `disabled` | `boolean` | `false` | no | disables the trigger — blocks `setOpen`, sets `data-disabled`/`aria-disabled="true"`, `tabindex=-1`, and `cursor: not-allowed` |
 | `surfaceWidth` | `"content" \| "trigger"` | `"content"` | no | surface width strategy; `"trigger"` makes the surface `width: 100%` / `min-width: 100%` of the trigger (emits `data-surface-width`) |
-| `surfaceMinWidth` | `string \| null` | `null` | no | overrides `--poodle-popover-surface-min-width` (default `14rem`) |
-| `surfaceMaxWidth` | `string \| null` | `null` | no | overrides `--poodle-popover-surface-max-width` (default `min(24rem, 90vw)`) |
+| `surfaceMinWidth` | `string \| null` | `null` | no | overrides `--poodle-popover-surface-min-width` (default `14rem`); the portable value is a rem length — see §12 |
+| `surfaceMaxWidth` | `string \| null` | `null` | no | overrides `--poodle-popover-surface-max-width` (default `min(24rem, 90vw)`); the portable value is a rem length — see §12 |
 | `onOpenChange` | `(open: boolean) => void` | `undefined` | no | called when the open state changes |
 | `onSurfaceGeometryChange` | `(change: OverlaySurfaceGeometryChange) => void` | `undefined` | no | web-only, host-neutral viewport snapshot stream for the private built-in surface |
 
@@ -370,6 +370,7 @@ in viewport coordinates. See `002-anchored-overlays.md`.
 | `onSurfaceGeometryChange` is Svelte/React-only | it reports CSS viewport geometry for a web surface; native hosts own their renderer geometry | accepted | do not copy browser geometry callbacks into native specs |
 | exact placement fallback order may differ | overlay engine internals vary | allowed | keep trigger relation, dismissal, and focus rules strict |
 | color-mix transparency blending | GPUI may use direct alpha blending instead of CSS color-mix | allowed | same visual result required |
+| width bounds are rem lengths in the portable surface | the contract's `surfaceMinWidth`/`surfaceMaxWidth` accept any CSS length on the web shell, but the portable surface cannot interpret arbitrary CSS values; the portable subset is a rem length (`Nrem`), validated at the portable boundary (the case corpus and the Rust codegen reject anything else), and arbitrary CSS lengths remain a web-shell extension beside the adapters | accepted by g14.005 (contract contradiction reported in the batch log) | keep the portable rem subset validated; revisit only with a portable CSS-length parser |
 
 ## 13. Specimen Definitions
 

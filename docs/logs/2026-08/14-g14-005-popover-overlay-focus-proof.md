@@ -6,7 +6,7 @@ Batch log, 2026-08-15. Card:
 ## What changed
 
 The first complete overlay profile ran through the landed conformance kernel:
-one portable Popover interface + 22 typed cases executed headless in Svelte,
+one portable Popover interface + 23 typed cases executed headless in Svelte,
 React, and GPUI, through real layer registration, dismissal routes,
 placement, focus entry, and focus restoration.
 
@@ -79,9 +79,9 @@ placement, focus entry, and focus restoration.
 
 | Board | Before | After |
 | --- | --- | --- |
-| Active cohort | 39 cases × 3 runtimes (Button, RangeSlider, Tabs) | 61 cases × 3 runtimes (… + 22 Popover) |
+| Active cohort | 39 cases × 3 runtimes (Button, RangeSlider, Tabs) | 62 cases × 3 runtimes (… + 23 Popover) |
 | Primitive owned rows | 17 passing | 21 passing (overlay rows join the gate) |
-| GPUI headless tests | 10 | 17 (7 planted popover defects) |
+| GPUI headless tests | 10 | 18 (7 planted popover defects + layer-frame and driver tests) |
 
 `effigy conformance:complete` (authority checks + web + full GPUI execution +
 renderer-neutral Rust + compare + primitive report): green, all headless.
@@ -116,6 +116,13 @@ renderer-neutral Rust + compare + primitive report): green, all headless.
   assertions are `topGap == offset`, alignment deltas, and width match with
   named tolerances, so the anchor box never leaks a runtime-specific
   constant into the corpus.
+- The width-bound contract contradiction is resolved and recorded: the
+  contract's `surfaceMinWidth`/`surfaceMaxWidth` accept any CSS length on
+  the web shell, but the portable surface cannot interpret arbitrary CSS
+  values. Contract §12 now defines the portable subset (a rem length),
+  validated at the portable boundary — the case corpus and the Rust codegen
+  reject anything else (regression tests included) and the native parser
+  asserts rather than silently defaulting.
 - The `host` fixture extension (opaque per-component composition data) is
   documented in the corpus module; later overlay profiles (Menu, Modal) will
   use the same seam for nested-layer cases.

@@ -61,9 +61,10 @@ export const popoverInterface = defineComponentInterface({
       default: "content",
       rustType: "PopoverSurfaceWidth",
     },
-    // Portable surface width bounds are authored in rem (the native targets
-    // resolve rem; arbitrary CSS lengths are a web-shell extension that does
-    // not port). The corpus proves an override case against both runtimes.
+    // Portable surface width bounds are rem lengths only (the contract's
+    // §12 subset): the corpus and the Rust codegen validate the `Nrem`
+    // shape, so an unsupported value is an authoring error, never a silent
+    // default. Arbitrary CSS lengths stay a web-shell extension.
     { name: "surfaceMinWidth", type: { kind: "dimension" }, default: null, nullable: true },
     { name: "surfaceMaxWidth", type: { kind: "dimension" }, default: null, nullable: true },
     // Web-only extension: the wrapper observes clicks without adding a second

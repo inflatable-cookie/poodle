@@ -463,6 +463,11 @@ export interface CaseSpecimen<I extends InterfaceConfig> {
   captureId: string;
 }
 
+/** The portable dimension subset: a rem length (`14rem`, `20.5rem`). Any
+ * other shape is rejected at case authoring and by the Rust codegen, so an
+ * unsupported value never silently becomes a default. */
+const REM_DIMENSION = /^[0-9]+(\.[0-9]+)?rem$/;
+
 export type GeometryField =
   | "height"
   | "minWidth"
@@ -586,6 +591,13 @@ export function validateCase<I extends InterfaceConfig>(
     }
     if (prop.type.kind === "number" && value !== null && typeof value !== "number") {
       throw new Error(`case '${config.id}' prop '${key}' must be a number`);
+    }
+    if (prop.type.kind === "dimension" && value !== null) {
+      if (typeof value !== "string" || !REM_DIMENSION.test(value)) {
+        throw new Error(
+          `case '${config.id}' prop '${key}' value '${String(value)}' is not a portable rem length (the §12 subset)`,
+        );
+      }
     }
     if (prop.type.kind === "numberPair" && value !== null) {
       if (!Array.isArray(value) || value.length !== 2 || value.some((entry) => typeof entry !== "number")) {

@@ -242,7 +242,7 @@ Popover extends the kernel from controls and collections to the first overlay
 profile: real layer registration, dismissal routes, placement families, focus
 entry and restoration, and the overlay capability rows.
 
-- **Authority** — `popover.ts` + 22 typed cases. One generated `PopoverSpec`
+- **Authority** — `popover.ts` + 23 typed cases. One generated `PopoverSpec`
   replaces the hand-written declaration; the extension keeps the token
   recipes and derived queries. The web extensions (`triggerIsInteractive`,
   `onSurfaceGeometryChange`) stay beside the adapters and never enter the

@@ -10,18 +10,26 @@ pub const POPOVER_SURFACE_MIN_WIDTH_REM: f32 = 14.0;
 pub const POPOVER_SURFACE_MAX_WIDTH_REM: f32 = 24.0;
 
 /// Parses a `Dimension` like `"14rem"` into rem. The portable unit is rem
-/// (the interface's contract): a non-rem value is a web-shell CSS length that
-/// does not port, and falls back to the contract default rather than being
-/// interpreted as rem.
+/// (contract §12): a non-rem value is a web-shell CSS length that does not
+/// port, and it is an authoring error — never a silent default. The case
+/// corpus and the Rust codegen reject such values before they reach this
+/// parser, so an assert here means a caller violated the portable contract.
 fn rem_of(dimension: &Option<crate::types::Dimension>, default: f32) -> f32 {
     let Some(dimension) = dimension else {
         return default;
     };
     let raw = dimension.as_str().trim();
     let Some(value) = raw.strip_suffix("rem").map(str::trim) else {
-        return default;
+        panic!(
+            "PopoverSpec surface width bound `{raw}` is not a portable rem length (contract §12);              arbitrary CSS lengths are a web-shell extension"
+        );
     };
-    value.parse::<f32>().unwrap_or(default)
+    match value.parse::<f32>() {
+        Ok(rem) if rem.is_finite() && rem >= 0.0 => rem,
+        _ => panic!(
+            "PopoverSpec surface width bound `{raw}` is not a portable rem length (contract §12)"
+        ),
+    }
 }
 
 impl PopoverSpec {

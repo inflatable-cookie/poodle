@@ -12,6 +12,26 @@ use serde::Deserialize;
 use crate::error::Result;
 use crate::CodegenError;
 
+/** True for a portable dimension value: a rem length (`14rem`, `20.5rem`).
+ * Anything else is rejected at codegen, so an unsupported value never
+ * silently becomes a default (popover contract §12). */
+fn is_portable_dimension(raw: &str) -> bool {
+    let Some(value) = raw.strip_suffix("rem").map(str::trim) else {
+        return false;
+    };
+    let mut digits = value.split('.');
+    let whole = digits.next().unwrap_or_default();
+    if whole.is_empty() || !whole.chars().all(|ch| ch.is_ascii_digit()) {
+        return false;
+    }
+    match digits.next() {
+        None => true,
+        Some(frac) => {
+            digits.next().is_none() && !frac.is_empty() && frac.chars().all(|ch| ch.is_ascii_digit())
+        }
+    }
+}
+
 const GEOMETRY_FIELDS: [&str; 14] = [
     "height",
     "minWidth",
@@ -336,9 +356,19 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
                             }
                         }
                     }
-                    "string" | "icon" | "dimension" => {
+                    "string" | "icon" => {
                         if !value.is_string() {
                             findings.push(at(format!("prop '{key}' expects a string")));
+                        }
+                    }
+                    "dimension" => {
+                        if !value
+                            .as_str()
+                            .is_some_and(|raw| is_portable_dimension(raw))
+                        {
+                            findings.push(at(format!(
+                                "prop '{key}' value is not a portable rem length (the popover §12 subset)"
+                            )));
                         }
                     }
                     "enum" => {
@@ -715,6 +745,45 @@ mod tests {
             findings,
             ["geometry tolerance must be an authored finite non-negative number"]
         );
+    }
+
+    #[test]
+    fn rust_validator_rejects_non_rem_dimensions() {
+        let interface: ComponentInterface = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "id": "probe", "profile": "overlay",
+            "props": [{ "name": "surfaceMinWidth", "type": { "kind": "dimension" }, "default": null, "nullable": true }],
+            "events": [], "regions": [],
+            "parts": [{ "id": "root", "resolve": { "web": { "kind": "self" }, "native": { "kind": "self" } } }],
+            "states": [], "tokenRoles": [], "axes": [], "capabilities": []
+        })).unwrap();
+        let cases: ComponentCases = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "component": "probe", "cases": [{
+                "id": "probe/planted", "fixture": { "props": { "surfaceMinWidth": "320px" } },
+                "specimen": { "axes": [] },
+                "steps": []
+            }]
+        })).unwrap();
+        let error = validate_cases(&interface, &cases).unwrap_err();
+        assert!(error.to_string().contains("portable rem length"));
+    }
+
+    #[test]
+    fn rust_validator_accepts_rem_dimensions() {
+        let interface: ComponentInterface = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "id": "probe", "profile": "overlay",
+            "props": [{ "name": "surfaceMinWidth", "type": { "kind": "dimension" }, "default": null, "nullable": true }],
+            "events": [], "regions": [],
+            "parts": [{ "id": "root", "resolve": { "web": { "kind": "self" }, "native": { "kind": "self" } } }],
+            "states": [], "tokenRoles": [], "axes": [], "capabilities": []
+        })).unwrap();
+        let cases: ComponentCases = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "component": "probe", "cases": [{
+                "id": "probe/ok", "fixture": { "props": { "surfaceMinWidth": "20.5rem" } },
+                "specimen": { "axes": [] },
+                "steps": []
+            }]
+        })).unwrap();
+        validate_cases(&interface, &cases).expect("rem dimensions validate");
     }
 
     #[test]
