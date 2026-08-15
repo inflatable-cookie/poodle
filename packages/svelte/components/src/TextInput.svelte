@@ -1,6 +1,10 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/text-input.css";
   import { isValidSlugFormat, slugify, validationStatusToState } from "@inflatable-cookie/poodle-core";
+  import type {
+    TextInputPortableEvents,
+    TextInputPortableProps,
+  } from "@inflatable-cookie/poodle-core/conformance/text-input";
   import { onDestroy, type Snippet } from "svelte";
   import type { HTMLInputAttributes } from "svelte/elements";
 
@@ -10,6 +14,7 @@
   import type {
     ControlDensity,
     ControlSize,
+    IconProp,
     InputValidationStatus,
     InputValidator,
     SemanticControlSizeRole,
@@ -18,7 +23,12 @@
     ValidationState,
   } from "./types";
 
-  interface Props {
+  const carrierProps = ["leadingIcon", "trailingIcon"] as const satisfies
+    readonly (keyof TextInputPortableProps)[];
+  type Portable = Omit<TextInputPortableProps, (typeof carrierProps)[number]>;
+  type PortableEvents = TextInputPortableEvents;
+
+  interface Props extends Partial<Portable> {
     id?: string;
     value?: string | null;
     defaultValue?: string;
@@ -75,11 +85,13 @@
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
     showClearButton?: boolean;
-    onValueChange?: ((value: string) => void) | undefined;
+    leadingIcon?: IconProp | null;
+    trailingIcon?: IconProp | null;
+    onValueChange?: PortableEvents["valueChange"] | undefined;
     onValidationChange?: ((detail: TextInputValidationChange) => void) | undefined;
-    onSubmit?: ((value: string) => void) | undefined;
-    onCancel?: (() => void) | undefined;
-    onClear?: (() => void) | undefined;
+    onSubmit?: PortableEvents["submit"] | undefined;
+    onCancel?: PortableEvents["cancel"] | undefined;
+    onClear?: PortableEvents["clear"] | undefined;
     onKeyDown?: ((event: KeyboardEvent) => void) | undefined;
     onFocus?: ((event: FocusEvent) => void) | undefined;
     onBlur?: ((event: FocusEvent) => void) | undefined;
@@ -139,6 +151,8 @@
     sizeRole = "control",
     density = null,
     showClearButton = true,
+    leadingIcon = null,
+    trailingIcon = null,
     onValueChange = undefined,
     onValidationChange = undefined,
     onSubmit = undefined,
@@ -173,8 +187,8 @@
   const isSlug = $derived(type === "slug");
   const isMultiline = $derived(type === "multiline" || (type === "text" && rows !== null && rows > 1));
   const nativeInputType = $derived(isSlug ? "text" : type);
-  const hasLeadingAffordance = $derived(Boolean(leadingSnippet) || isSearch);
-  const hasTrailingAffordance = $derived(Boolean(trailingSnippet));
+  const hasLeadingAffordance = $derived(Boolean(leadingSnippet) || Boolean(leadingIcon) || isSearch);
+  const hasTrailingAffordance = $derived(Boolean(trailingSnippet) || Boolean(trailingIcon));
   const isControlled = $derived(value !== undefined);
   const currentValue = $derived(isControlled ? (value ?? "") : uncontrolledValue);
   const canClear = $derived(isSearch && showClearButton && !disabled && !readOnly && currentValue.length > 0);
@@ -522,6 +536,8 @@
   data-size={resolvedSize}
   data-density={resolvedDensity}
   data-type={type}
+  data-has-leading={hasLeadingAffordance || undefined}
+  data-has-trailing={hasTrailingAffordance || undefined}
   style={`--poodle-text-input-control-padding-start: ${controlPaddingStart}; --poodle-text-input-control-padding-end: ${controlPaddingEnd}; --poodle-text-input-multiline-padding-end: ${multilineBottomPadding}; --poodle-text-input-clear-inset-inline-end: ${clearInsetInlineEnd}; --poodle-text-input-trailing-inset-inline-end: ${trailingInsetInlineEnd};`}
 >
   {#if prefix}
@@ -533,8 +549,20 @@
       <span class="poodle-text-input__affordance poodle-text-input__affordance--leading">
         {@render leadingSnippet()}
       </span>
+    {:else if leadingIcon}
+      <span
+        class="poodle-text-input__affordance poodle-text-input__affordance--leading"
+        aria-hidden="true"
+        data-icon={typeof leadingIcon === "string" ? leadingIcon : undefined}
+      >
+        <Icon icon={leadingIcon} />
+      </span>
     {:else if isSearch}
-      <span class="poodle-text-input__affordance poodle-text-input__affordance--leading" aria-hidden="true">
+      <span
+        class="poodle-text-input__affordance poodle-text-input__affordance--leading"
+        aria-hidden="true"
+        data-icon="search"
+      >
         <Icon icon="search" />
       </span>
     {/if}
@@ -615,6 +643,14 @@
       <span class="poodle-text-input__affordance poodle-text-input__affordance--trailing">
         {@render trailingSnippet()}
       </span>
+    {:else if trailingIcon}
+      <span
+        class="poodle-text-input__affordance poodle-text-input__affordance--trailing"
+        aria-hidden="true"
+        data-icon={typeof trailingIcon === "string" ? trailingIcon : undefined}
+      >
+        <Icon icon={trailingIcon} />
+      </span>
     {/if}
 
     {#if canClear}
@@ -635,6 +671,7 @@
         class:poodle-text-input__validation-indicator--valid={effectiveValidationState === "valid"}
         class:poodle-text-input__validation-indicator--invalid={effectiveValidationState === "invalid"}
         aria-hidden="true"
+        data-icon={validationIcon}
       >
         {#if effectiveValidationState === "pending"}
           <Spinner variant="ring" sizeRole="chrome" tone="current" />

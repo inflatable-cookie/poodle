@@ -3309,12 +3309,12 @@ impl TextInput {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -3344,6 +3344,7 @@ impl TextInput {
                 on_change: self.on_change,
                 on_selection_change: self.on_selection_change,
                 on_focus_change: self.on_focus_change,
+                ..poodle_render::TextInputHandlers::default()
             },
         );
         if let Some(id) = self.id_suffix {

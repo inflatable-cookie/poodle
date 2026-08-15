@@ -74,6 +74,26 @@ pub const OVERLAY_PROBE_INTERFACE_JSON: &str = r#"{
   "tokenRoles": []
 }"#;
 
+/// Input probe interface (g14.006): a textbox with value and selection.
+pub const INPUT_PROBE_INTERFACE_JSON: &str = r#"{
+  "parts": [
+    {
+      "id": "root",
+      "role": "textbox",
+      "resolve": { "native": { "kind": "self" } }
+    },
+    {
+      "id": "control",
+      "role": "textbox",
+      "resolve": { "native": { "kind": "self" } }
+    }
+  ],
+  "states": [],
+  "tokenRoles": []
+}"#;
+
+pub const INPUT_PROBE_ELEMENT_ID: &str = "input-probe-root";
+
 /// The overlay probe fixture: a hand-built trigger + overlay surface pair
 /// carrying the overlay vocabulary — expanded projection, the overlay style
 /// flag, the dismiss handler, and the layer id.
@@ -100,6 +120,34 @@ pub fn overlay_probe_interface() -> InterfaceDoc {
     let interface: Value =
         serde_json::from_str(OVERLAY_PROBE_INTERFACE_JSON).expect("overlay probe interface parses");
     InterfaceDoc::parse(&interface).expect("overlay probe interface valid")
+}
+
+/// Hand-built input fixture carrying the editing vocabulary: Input kind,
+/// caret, and the key/insert/submit/cancel doors. GPUI mounts a real
+/// TextInput for the event graft.
+pub fn input_probe_fixture() -> Node {
+    let mut root = Node::input("hello", "hint");
+    root.id = Some(INPUT_PROBE_ELEMENT_ID.to_owned());
+    root.a11y.role = Some(NodeRole::TextInput);
+    root.a11y.label = Some("Input probe".to_owned());
+    root.interaction.focusable = true;
+    root.interaction.on_edit_key = Some(Arc::new(|_, _| {}));
+    root.interaction.on_edit_insert = Some(Arc::new(|_| {}));
+    root.interaction.on_submit = Some(Arc::new(|| {}));
+    root.interaction.on_cancel = Some(Arc::new(|| {}));
+    root.interaction.on_text_change = Some(Arc::new(|_| {}));
+    root.interaction.on_select_range = Some(Arc::new(|_, _, _| {}));
+    root.with_caret(
+        (2, 5),
+        ColorValue(1.0, 1.0, 1.0, 1.0),
+        ColorValue(0.2, 0.4, 0.8, 0.3),
+    )
+}
+
+pub fn input_probe_interface() -> InterfaceDoc {
+    let interface: Value =
+        serde_json::from_str(INPUT_PROBE_INTERFACE_JSON).expect("input probe interface parses");
+    InterfaceDoc::parse(&interface).expect("input probe interface valid")
 }
 
 /// One executed primitive probe row (`primitive-probe-evidence.v1`).
@@ -839,6 +887,91 @@ pub fn run_overlay_probes(node: &Node) -> Vec<ProbeEvidence> {
     ]
 }
 
+fn probe_input_value(node: &Node, iface: &InterfaceDoc) -> ProbeEvidence {
+    let kind_value = match &node.kind {
+        NodeKind::Input { value, .. } => Some(value.clone()),
+        _ => None,
+    };
+    let caret = node.caret.map(|c| c.selection);
+    let observation = observe_tree("render-neutral", "input-probe", iface, node, Some(true));
+    let parts_value = observation.pointer("/parts/control/value").cloned();
+    let selection = observation.pointer("/parts/control/selectionStart").cloned();
+    let fields = json!({
+        "node.kind.value": kind_value,
+        "node.caret": caret,
+        "parts.value": parts_value,
+        "parts.selection": selection,
+    });
+    if kind_value.as_deref() == Some("hello")
+        && caret == Some((2, 5))
+        && parts_value.and_then(|v| v.as_str().map(str::to_owned)).as_deref() == Some("hello")
+        && selection.and_then(|v| v.as_u64()) == Some(2)
+    {
+        ProbeEvidence::pass_observed(
+            "input.value",
+            "node-input-value",
+            fields,
+            &["node.field", "parts.value", "parts.selection"],
+        )
+    } else {
+        ProbeEvidence::fail("input.value", "node-input-value", fields, "parts.value")
+    }
+}
+
+fn probe_input_editing(node: &Node) -> ProbeEvidence {
+    let fields = json!({
+        "on_edit_key": node.interaction.on_edit_key.is_some(),
+        "on_edit_insert": node.interaction.on_edit_insert.is_some(),
+        "on_select_range": node.interaction.on_select_range.is_some(),
+        "on_submit": node.interaction.on_submit.is_some(),
+        "on_cancel": node.interaction.on_cancel.is_some(),
+        "on_text_change": node.interaction.on_text_change.is_some(),
+    });
+    if node.interaction.on_edit_key.is_some()
+        && node.interaction.on_edit_insert.is_some()
+        && node.interaction.on_select_range.is_some()
+        && node.interaction.on_submit.is_some()
+        && node.interaction.on_cancel.is_some()
+    {
+        ProbeEvidence::pass_observed(
+            "input.editing",
+            "node-edit-channels",
+            fields,
+            &["node.field"],
+        )
+    } else {
+        ProbeEvidence::fail("input.editing", "node-edit-channels", fields, "edit channels")
+    }
+}
+
+fn probe_input_ime(node: &Node) -> ProbeEvidence {
+    let wired = node.interaction.on_edit_insert.is_some();
+    let fields = json!({
+        "on_edit_insert": wired,
+        "kind": matches!(node.kind, NodeKind::Input { .. }),
+    });
+    if wired && matches!(node.kind, NodeKind::Input { .. }) {
+        ProbeEvidence::pass_observed(
+            "input.ime",
+            "node-ime-commit-door",
+            fields,
+            &["node.field"],
+        )
+    } else {
+        ProbeEvidence::fail("input.ime", "node-ime-commit-door", fields, "on_edit_insert")
+    }
+}
+
+/// The input rows' renderer-neutral evidence.
+pub fn run_input_probes(node: &Node) -> Vec<ProbeEvidence> {
+    let iface = input_probe_interface();
+    vec![
+        probe_input_value(node, &iface),
+        probe_input_editing(node),
+        probe_input_ime(node),
+    ]
+}
+
 fn probe_focus_neutral(node: &Node, iface: &InterfaceDoc) -> ProbeEvidence {
     let focused = observe_tree("render-neutral", "primitive-probe", iface, node, Some(true));
     let unfocused = observe_tree(
@@ -942,6 +1075,7 @@ mod tests {
         let probes = [
             run_neutral_probes(&node),
             run_overlay_probes(&overlay_probe_fixture()),
+            run_input_probes(&input_probe_fixture()),
         ]
         .concat();
         let failures: Vec<_> = probes.iter().filter(|p| p.verdict == "fail").collect();
@@ -963,6 +1097,7 @@ mod tests {
         let probes = [
             run_neutral_probes(&node),
             run_overlay_probes(&overlay_probe_fixture()),
+            run_input_probes(&input_probe_fixture()),
         ]
         .concat();
         let report = neutral_evidence_report(&probes);

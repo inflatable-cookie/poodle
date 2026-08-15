@@ -21,6 +21,7 @@ import { buttonCases } from "../../packages/core/src/conformance/button-cases";
 import { rangeSliderCases } from "../../packages/core/src/conformance/range-slider-cases";
 import { tabsCases } from "../../packages/core/src/conformance/tabs-cases";
 import { popoverCases } from "../../packages/core/src/conformance/popover-cases";
+import { textInputCases } from "../../packages/core/src/conformance/text-input-cases";
 import type { SerializedCase } from "../../packages/core/src/conformance/define";
 
 interface AssertionResult {
@@ -62,6 +63,7 @@ const COMPONENT_CORPORA: Array<{
   { label: "range-slider", reportSuffix: "-range-slider", cases: rangeSliderCases },
   { label: "tabs", reportSuffix: "-tabs", cases: tabsCases },
   { label: "popover", reportSuffix: "-popover", cases: popoverCases },
+  { label: "text-input", reportSuffix: "-text-input", cases: textInputCases },
 ];
 
 function loadReport(runtime: string, reportSuffix: string): RuntimeReport | null {
@@ -89,6 +91,7 @@ const IDENTITY_FIELDS = [
   "orientation",
   "controls",
   "labelledBy",
+  "value",
 ] as const;
 const GEOMETRY_FIELDS = [
   "height",
@@ -181,6 +184,14 @@ function fieldOf(obs: unknown, partId: string, field: string): unknown {
   return (obs as ObservationShape).parts?.[partId]?.[field];
 }
 
+function identityEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a !== null && b !== null && typeof a === "object" && typeof b === "object") {
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
+  return false;
+}
+
 function compareFrame(
   problems: string[],
   caseId: string,
@@ -214,7 +225,7 @@ function compareFrame(
       const reference = fieldOf(refObs, partId, field);
       for (const runtime of observers) {
         const value = fieldOf(perRuntime.get(runtime), partId, field);
-        if (reference !== value) {
+        if (!identityEqual(reference, value)) {
           problems.push(
             `${runtime} ${caseId} obs ${index} ${partId}.${field}: expected ${JSON.stringify(reference)}, got ${JSON.stringify(value)}`,
           );

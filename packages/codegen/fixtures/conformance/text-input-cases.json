@@ -1,0 +1,1007 @@
+{
+  "schemaVersion": 1,
+  "component": "text-input",
+  "cases": [
+    {
+      "id": "text-input/default",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Name",
+          "placeholder": "Jane Doe"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Basics",
+        "caption": "Default",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "text-input/default"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "tokenRoles": {
+              "size": "md",
+              "density": "default",
+              "validation": "none",
+              "type": "text"
+            },
+            "states": {
+              "disabled": false,
+              "prefixPresent": false,
+              "suffixPresent": false
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "role": "textbox",
+            "name": "Name",
+            "focusable": true,
+            "value": ""
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "text-input/controlled-value",
+      "fixture": {
+        "props": {
+          "value": "hello",
+          "ariaLabel": "Greeting"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Basics",
+        "caption": "Controlled value",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "text-input/controlled-value"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "tokenRoles": {
+              "size": "md",
+              "density": "default",
+              "validation": "none",
+              "type": "text"
+            },
+            "states": {
+              "disabled": false,
+              "prefixPresent": false,
+              "suffixPresent": false
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "role": "textbox",
+            "name": "Greeting",
+            "focusable": true,
+            "value": "hello"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "text-input/disabled",
+      "fixture": {
+        "props": {
+          "value": "locked",
+          "disabled": true,
+          "ariaLabel": "Disabled field"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "States",
+        "caption": "Disabled",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "text-input/disabled"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "tokenRoles": {
+              "size": "md",
+              "density": "default",
+              "validation": "none",
+              "type": "text"
+            },
+            "states": {
+              "disabled": true,
+              "prefixPresent": false,
+              "suffixPresent": false
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "role": "textbox",
+            "name": "Disabled field",
+            "focusable": false,
+            "value": "locked"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "text-input/invalid",
+      "fixture": {
+        "props": {
+          "value": "nope",
+          "validationState": "invalid",
+          "ariaLabel": "Email"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "States",
+        "caption": "Invalid",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "text-input/invalid"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "tokenRoles": {
+              "size": "md",
+              "density": "default",
+              "validation": "invalid",
+              "type": "text"
+            },
+            "states": {
+              "disabled": false,
+              "prefixPresent": false,
+              "suffixPresent": false
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "role": "textbox",
+            "name": "Email",
+            "focusable": true,
+            "value": "nope"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "text-input/invalid-indicator",
+      "fixture": {
+        "props": {
+          "value": "nope",
+          "validationState": "invalid",
+          "showValidationStatus": true,
+          "ariaLabel": "Email"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "States",
+        "caption": "Invalid indicator",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "text-input/invalid-indicator"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "tokenRoles": {
+              "validation": "invalid"
+            },
+            "states": {
+              "indicatorPresent": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "validationIndicator",
+          "expect": {
+            "present": true
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "text-input/affixes",
+      "fixture": {
+        "props": {
+          "value": "12",
+          "prefix": "$",
+          "suffix": "kg",
+          "ariaLabel": "Price"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Adornment",
+        "caption": "Prefix and suffix",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "text-input/affixes"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "prefixPresent": true,
+              "suffixPresent": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "prefix",
+          "expect": {
+            "present": true,
+            "text": "$"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "suffix",
+          "expect": {
+            "present": true,
+            "text": "kg"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "12"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "text-input/adornments",
+      "fixture": {
+        "props": {
+          "value": "query",
+          "ariaLabel": "Search field",
+          "leadingIcon": "search",
+          "trailingIcon": "x"
+        },
+        "regions": {
+          "leading": "search",
+          "trailing": "x"
+        }
+      },
+      "specimen": {
+        "group": "Adornment",
+        "caption": "Leading and trailing icons",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "text-input/adornments"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "leading",
+          "expect": {
+            "present": true,
+            "icon": "search"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trailing",
+          "expect": {
+            "present": true,
+            "icon": "x"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "query"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "text-input/char-count",
+      "fixture": {
+        "props": {
+          "value": "abc",
+          "maxLength": 10,
+          "showCharCount": true,
+          "ariaLabel": "Limited"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Adornment",
+        "caption": "Character count",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "text-input/char-count"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "charCount",
+          "expect": {
+            "present": true,
+            "text": "3/10"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "abc"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "text-input/type",
+      "fixture": {
+        "props": {
+          "value": "",
+          "ariaLabel": "Type field"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Type",
+        "axes": [],
+        "captureId": "text-input/type"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": ""
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "focus",
+          "part": "control"
+        },
+        {
+          "kind": "action",
+          "name": "insert",
+          "part": "control",
+          "text": "hello"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "valueChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "hello",
+            "selectionStart": 5,
+            "selectionEnd": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "text-input/controlled-type",
+      "fixture": {
+        "props": {
+          "value": "ab",
+          "ariaLabel": "Controlled type"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Controlled type",
+        "axes": [],
+        "captureId": "text-input/controlled-type"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "ab"
+          }
+        },
+        {
+          "kind": "action",
+          "name": "focus",
+          "part": "control"
+        },
+        {
+          "kind": "action",
+          "name": "select",
+          "part": "control",
+          "start": 2,
+          "end": 2
+        },
+        {
+          "kind": "action",
+          "name": "insert",
+          "part": "control",
+          "text": "c"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "valueChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "abc"
+          }
+        }
+      ]
+    },
+    {
+      "id": "text-input/selection-replace",
+      "fixture": {
+        "props": {
+          "value": "hello",
+          "ariaLabel": "Select field"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Selection replace",
+        "axes": [],
+        "captureId": "text-input/selection-replace"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "focus",
+          "part": "control"
+        },
+        {
+          "kind": "action",
+          "name": "select",
+          "part": "control",
+          "start": 0,
+          "end": 5
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "hello",
+            "selectionStart": 0,
+            "selectionEnd": 5
+          }
+        },
+        {
+          "kind": "action",
+          "name": "insert",
+          "part": "control",
+          "text": "y"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "valueChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "y",
+            "selectionStart": 1,
+            "selectionEnd": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "text-input/disabled-inert",
+      "fixture": {
+        "props": {
+          "value": "stay",
+          "disabled": true,
+          "ariaLabel": "Inert field"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Disabled inert",
+        "axes": [],
+        "captureId": "text-input/disabled-inert"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "stay",
+            "focusable": false
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "insert",
+          "part": "control",
+          "text": "x"
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "stay"
+          }
+        }
+      ]
+    },
+    {
+      "id": "text-input/readonly-inert",
+      "fixture": {
+        "props": {
+          "value": "stay",
+          "readOnly": true,
+          "ariaLabel": "Read-only field"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Read-only inert",
+        "axes": [],
+        "captureId": "text-input/readonly-inert"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "stay",
+            "focusable": true
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "insert",
+          "part": "control",
+          "text": "x"
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "stay"
+          }
+        }
+      ]
+    },
+    {
+      "id": "text-input/focus",
+      "fixture": {
+        "props": {
+          "value": "hi",
+          "ariaLabel": "Focus field"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Focus",
+        "axes": [],
+        "captureId": "text-input/focus"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "focused": false
+          }
+        },
+        {
+          "kind": "action",
+          "name": "focus",
+          "part": "control"
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "focused": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "focused": true
+            }
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "text-input/submit",
+      "fixture": {
+        "props": {
+          "value": "done",
+          "ariaLabel": "Submit field"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Submit",
+        "axes": [],
+        "captureId": "text-input/submit"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "focus",
+          "part": "control"
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "key",
+          "part": "control",
+          "key": "Enter"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "submit"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "done"
+          }
+        }
+      ]
+    },
+    {
+      "id": "text-input/cancel",
+      "fixture": {
+        "props": {
+          "value": "draft",
+          "ariaLabel": "Cancel field"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Cancel",
+        "axes": [],
+        "captureId": "text-input/cancel"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "focus",
+          "part": "control"
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "key",
+          "part": "control",
+          "key": "Escape"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "cancel"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "text-input/type-then-submit",
+      "fixture": {
+        "props": {
+          "value": "",
+          "ariaLabel": "Order field"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Type then submit",
+        "axes": [],
+        "captureId": "text-input/type-then-submit"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "focus",
+          "part": "control"
+        },
+        {
+          "kind": "action",
+          "name": "insert",
+          "part": "control",
+          "text": "ok"
+        },
+        {
+          "kind": "action",
+          "name": "key",
+          "part": "control",
+          "key": "Enter"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "valueChange",
+            "submit"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "ok"
+          }
+        }
+      ]
+    },
+    {
+      "id": "text-input/search-clear",
+      "fixture": {
+        "props": {
+          "value": "query",
+          "type": "search",
+          "showClearButton": true,
+          "ariaLabel": "Search"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "Search clear",
+        "axes": [],
+        "captureId": "text-input/search-clear"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "clearPresent": true
+            },
+            "tokenRoles": {
+              "type": "search"
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "clear",
+          "expect": {
+            "present": true,
+            "role": "button"
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "clear",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "valueChange",
+            "clear"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": ""
+          }
+        }
+      ]
+    },
+    {
+      "id": "text-input/ime-commit",
+      "fixture": {
+        "props": {
+          "value": "",
+          "ariaLabel": "IME field"
+        },
+        "regions": {}
+      },
+      "specimen": {
+        "group": "Behaviour",
+        "caption": "IME commit",
+        "axes": [],
+        "captureId": "text-input/ime-commit"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "focus",
+          "part": "control"
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "action",
+          "name": "compose",
+          "part": "control",
+          "text": "ñ",
+          "phase": "start"
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": ""
+          }
+        },
+        {
+          "kind": "action",
+          "name": "compose",
+          "part": "control",
+          "text": "ñ",
+          "phase": "update"
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": ""
+          }
+        },
+        {
+          "kind": "action",
+          "name": "compose",
+          "part": "control",
+          "text": "ñ",
+          "phase": "commit"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "valueChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "control",
+          "expect": {
+            "value": "ñ"
+          }
+        }
+      ]
+    }
+  ]
+}

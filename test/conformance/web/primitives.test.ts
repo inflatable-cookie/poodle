@@ -16,19 +16,24 @@ import {
   popoverCases,
   popoverInterface,
   serializeInterface,
+  textInputCases,
+  textInputInterface,
   type PrimitiveCapabilityId,
 } from "../../../packages/core/src/conformance";
 import { installLayoutStub } from "./layout-stub";
 import { observeDom, runCase, type RuntimeAdapter } from "./runner";
 import { computedStyleOf, parseLength } from "./observer";
 import { ReactPopoverAdapter } from "./react-popover-adapter";
+import { ReactTextInputAdapter } from "./react-text-input-adapter";
 import { SvelteButtonAdapter } from "./svelte-adapter";
 import { SveltePopoverAdapter } from "./svelte-popover-adapter";
+import { SvelteTextInputAdapter } from "./svelte-text-input-adapter";
 import { ReactButtonAdapter } from "./react-adapter";
 
 const OUT_DIR = `${import.meta.dirname}/out`;
 const iface = serializeInterface(buttonInterface);
 const popoverIface = serializeInterface(popoverInterface);
+const textInputIface = serializeInterface(textInputInterface);
 
 const tokensCss = readFileSync(
   `${import.meta.dirname}/../../../packages/core/src/tokens/generated/css/poodle-tokens.css`,
@@ -40,6 +45,10 @@ const buttonCss = readFileSync(
 );
 const popoverCss = readFileSync(
   `${import.meta.dirname}/../../../packages/core/src/styles/popover.css`,
+  "utf8",
+);
+const textInputCss = readFileSync(
+  `${import.meta.dirname}/../../../packages/core/src/styles/text-input.css`,
   "utf8",
 );
 const anchoredCss = readFileSync(
@@ -60,7 +69,7 @@ function injectRealCss(): void {
   if (document.getElementById("conformance-web-css")) return;
   const style = document.createElement("style");
   style.id = "conformance-web-css";
-  style.textContent = `${tokensCss}\n${buttonCss}\n${popoverCss}\n${anchoredCss}\n@keyframes primitive-probe-spin { from { opacity: .98; } to { opacity: .97; } }`;
+  style.textContent = `${tokensCss}\n${buttonCss}\n${popoverCss}\n${anchoredCss}\n${textInputCss}\n@keyframes primitive-probe-spin { from { opacity: .98; } to { opacity: .97; } }`;
   document.head.appendChild(style);
 }
 
@@ -393,6 +402,49 @@ async function popoverBackedProbes(adapter: RuntimeAdapter): Promise<ProbeRow[]>
   return rows;
 }
 
+/** TextInput corpus cases that exercise the input rows on web (g14.006). */
+const TEXT_INPUT_PROBE_CASES: Array<{
+  caseId: string;
+  capabilities: Array<{ id: PrimitiveCapabilityId; observations: string[] }>;
+}> = [
+  {
+    caseId: "text-input/controlled-value",
+    capabilities: [{ id: "input.value", observations: ["parts.value", "parts.selection"] }],
+  },
+  {
+    caseId: "text-input/type",
+    capabilities: [{ id: "input.editing", observations: ["trace"] }],
+  },
+  {
+    caseId: "text-input/ime-commit",
+    capabilities: [{ id: "input.ime", observations: ["trace", "parts.value"] }],
+  },
+];
+
+async function textInputBackedProbes(adapter: RuntimeAdapter): Promise<ProbeRow[]> {
+  const rows: ProbeRow[] = [];
+  for (const mapping of TEXT_INPUT_PROBE_CASES) {
+    const caseData = textInputCases.cases.find((c) => c.id === mapping.caseId);
+    if (!caseData) {
+      for (const capability of mapping.capabilities) {
+        rows.push(fail(capability.id, mapping.caseId, {}, "case missing", capability.observations));
+      }
+      continue;
+    }
+    const { results } = await runCase(adapter, textInputIface, textInputCases.component, caseData);
+    const failures = results.filter((r) => r.verdict === "fail");
+    const ok = failures.length === 0;
+    for (const capability of mapping.capabilities) {
+      rows.push(
+        ok
+          ? pass(capability.id, mapping.caseId, { casePass: true, assertions: results.length }, capability.observations)
+          : fail(capability.id, mapping.caseId, { failures }, "text-input case", capability.observations),
+      );
+    }
+  }
+  return rows;
+}
+
 describe("primitive substrate (web)", () => {
   it("executes owned capabilities on Svelte and React", async () => {
     injectRealCss();
@@ -411,11 +463,14 @@ describe("primitive substrate (web)", () => {
       [new ReactButtonAdapter(), new ReactPopoverAdapter()],
     ];
     for (const [buttonAdapter, popoverAdapter] of pairs) {
+      const textAdapter =
+        buttonAdapter.runtime === "svelte" ? new SvelteTextInputAdapter() : new ReactTextInputAdapter();
       const fixtureRoot = mountSurfaceFixture();
       const probes = [
         ...fixtureProbes(fixtureRoot),
         ...(await buttonBackedProbes(buttonAdapter)),
         ...(await popoverBackedProbes(popoverAdapter)),
+        ...(await textInputBackedProbes(textAdapter)),
       ];
       writeEvidence(buttonAdapter.runtime, probes);
       const failed = probes.filter((p) => p.verdict === "fail");

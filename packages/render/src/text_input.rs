@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, StylePatch,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole, StylePatch,
     TextChangeHandler,
 };
 use poodle_specs::{
@@ -25,21 +25,22 @@ use crate::presentation::{
 use crate::spinner::spinner;
 
 /// Render a text input without an editing callback.
-///
-/// `on_clear` stays in the stable call shape while the old GPUI tier remains
-/// the native parity reference. That tier has no clear affordance, so this
-/// slice deliberately does not invent one on the replacement path.
-/// Selected-text wash: accent at 30%, the same strength the other selection
-/// surfaces use.
-const SELECTION_ALPHA: f32 = 0.30;
-
 pub fn text_input(
     spec: &TextInputSpec,
     theme: &dyn ThemeProvider,
-    _on_clear: Option<Arc<dyn Fn() + Send + Sync>>,
+    on_clear: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
-    text_input_with_change(spec, theme, None)
+    text_input_with_handlers(
+        spec,
+        theme,
+        TextInputHandlers {
+            on_clear,
+            ..TextInputHandlers::default()
+        },
+    )
 }
+
+const SELECTION_ALPHA: f32 = 0.30;
 
 /// Host callbacks for an editable field.
 ///
@@ -55,6 +56,9 @@ pub struct TextInputHandlers {
     /// it so the next render knows to draw a caret. The backend reports both
     /// directions: it owns focus, so it is the only layer that can see a blur.
     pub on_focus_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    pub on_submit: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_clear: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
 /// Render a text input with host-owned replacement-text updates.
@@ -81,10 +85,11 @@ pub fn text_input_with_handlers(
     handlers: TextInputHandlers,
 ) -> Node {
     let on_change = handlers.on_change.clone();
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = resolve_semantic_size(spec.size.unwrap_or_default(), spec.size_role);
     let control_height = theme.resolve_space(spec.control_height_token())
         + rem_to_px(size_height_offset_rem(effective_size));
-    let density_offset_rem = match spec.density {
+    let density = spec.density.unwrap_or_default();
+    let density_offset_rem = match density {
         ControlDensity::Compact => -0.125,
         ControlDensity::Default => 0.0,
         ControlDensity::Comfortable => 0.125,
@@ -136,11 +141,19 @@ pub fn text_input_with_handlers(
     }
 
     if let Some(prefix) = &spec.prefix {
-        inner = inner.child(affix(prefix, true, inline_gap, spec, theme));
+        let mut el = affix(prefix, true, inline_gap, spec, theme);
+        if let Some(text) = el.children.first_mut() {
+            text.id = Some("text-input-prefix".to_owned());
+        }
+        inner = inner.child(el);
     }
 
-    if let Some(name) = &spec.leading_icon {
+    let leading_name = spec.leading_icon.clone().or_else(|| {
+        (spec.input_type == "search").then(|| "search".to_owned())
+    });
+    if let Some(name) = &leading_name {
         let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
+        glyph.id = Some("text-input-leading".to_owned());
         glyph.style.descriptor.text_color = Some(icon_color);
         inner = inner.child(glyph);
     }
@@ -254,24 +267,69 @@ pub fn text_input_with_handlers(
             value.interaction.on_select_range = Some(Arc::clone(&handler));
             value_select = Some(handler);
         }
+        if !spec.is_read_only {
+            let text = spec.current_value().to_string();
+            let (start, end) = spec.selection_range();
+            let on_selection = handlers.on_selection_change.clone();
+            let change = on_change.clone();
+            value.interaction.on_edit_insert = Some(Arc::new(move |inserted: &str| {
+                let outcome = poodle_headless::text_input::insert_transition(
+                    &text,
+                    poodle_headless::text_input::EditState {
+                        anchor: start,
+                        head: end,
+                    },
+                    inserted,
+                );
+                if let Some(next) = outcome.value {
+                    if let Some(change) = &change {
+                        change(&next);
+                    }
+                }
+                if let Some(on_selection) = &on_selection {
+                    on_selection(outcome.state.anchor, outcome.state.head);
+                }
+            }));
+        }
     }
     inner = inner.child(value);
 
-    if spec.show_char_count {
-        let len = current_value.len();
-        let over = spec.max_length.is_some_and(|max| len > max);
-        let mut count = Node::text(match spec.max_length {
-            Some(max) => format!("{len}/{max}"),
-            None => len.to_string(),
-        });
-        count.style.descriptor.text_color = Some(theme.resolve_color(if over {
-            spec.char_count_over_color_token()
-        } else {
-            spec.char_count_color_token()
+    if let Some(name) = &spec.trailing_icon {
+        let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
+        glyph.id = Some("text-input-trailing".to_owned());
+        glyph.style.descriptor.text_color = Some(icon_color);
+        inner = inner.child(glyph);
+    }
+
+    let can_clear = spec.input_type == "search"
+        && spec.show_clear_button
+        && !spec.is_disabled
+        && !spec.is_read_only
+        && !current_value.is_empty();
+    if can_clear {
+        let mut clear = Node::button("");
+        clear.id = Some("text-input-clear".to_owned());
+        clear.a11y.role = Some(NodeRole::Button);
+        clear.a11y.label = Some("Clear search query".to_owned());
+        clear.interaction.focusable = true;
+        {
+            let s = &mut clear.style;
+            s.descriptor.layout.width = LayoutSizing::Fixed(theme.resolve_space("size.icon.sm"));
+            s.descriptor.layout.height = LayoutSizing::Fixed(theme.resolve_space("size.icon.sm"));
+        }
+        let change = on_change.clone();
+        let on_clear = handlers.on_clear.clone();
+        clear.interaction.on_activate = Some(Arc::new(move || {
+            if let Some(change) = &change {
+                change("");
+            }
+            if let Some(on_clear) = &on_clear {
+                on_clear();
+            }
         }));
-        count.style.text_size = Some(theme.resolve_space(spec.char_count_font_size_token()));
-        count.style.no_wrap = true;
-        inner = inner.child(count);
+        let mut glyph = icon(&IconSpec::new("x").with_size(IconSize::Sm), theme);
+        glyph.style.descriptor.text_color = Some(icon_color);
+        inner = inner.child(clear.child(glyph));
     }
 
     if spec.shows_validation_status {
@@ -283,6 +341,7 @@ pub fn text_input_with_handlers(
                     "x"
                 };
                 let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
+                glyph.id = Some("text-input-validation".to_owned());
                 glyph.style.descriptor.text_color =
                     Some(theme.resolve_color(spec.validation_indicator_color_token()));
                 inner = inner.child(glyph);
@@ -295,6 +354,7 @@ pub fn text_input_with_handlers(
                         .with_tone(SpinnerTone::Accent),
                     theme,
                 );
+                pending.id = Some("text-input-validation".to_owned());
                 pending.style.descriptor.text_color =
                     Some(theme.resolve_color(spec.validation_indicator_color_token()));
                 inner = inner.child(pending);
@@ -303,14 +363,30 @@ pub fn text_input_with_handlers(
         }
     }
 
-    if let Some(name) = &spec.trailing_icon {
-        let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
-        glyph.style.descriptor.text_color = Some(icon_color);
-        inner = inner.child(glyph);
+    if spec.show_char_count {
+        let len = current_value.chars().count();
+        let over = spec.max_length.is_some_and(|max| len > max);
+        let mut count = Node::text(match spec.max_length {
+            Some(max) => format!("{len}/{max}"),
+            None => len.to_string(),
+        });
+        count.id = Some("text-input-char-count".to_owned());
+        count.style.descriptor.text_color = Some(theme.resolve_color(if over {
+            spec.char_count_over_color_token()
+        } else {
+            spec.char_count_color_token()
+        }));
+        count.style.text_size = Some(theme.resolve_space(spec.char_count_font_size_token()));
+        count.style.no_wrap = true;
+        inner = inner.child(count);
     }
 
     if let Some(suffix) = &spec.suffix {
-        inner = inner.child(affix(suffix, false, inline_gap, spec, theme));
+        let mut el = affix(suffix, false, inline_gap, spec, theme);
+        if let Some(text) = el.children.first_mut() {
+            text.id = Some("text-input-suffix".to_owned());
+        }
+        inner = inner.child(el);
     }
 
     let mut root = Node::input(current_value, spec.placeholder.as_deref().unwrap_or(""));
@@ -423,6 +499,10 @@ pub fn text_input_with_handlers(
         // gain and never a loss — a field kept its caret after focus moved on.
         root.interaction.on_focus_change = handlers.on_focus_change.clone();
     }
+    if !spec.is_disabled {
+        root.interaction.on_submit = handlers.on_submit.clone();
+        root.interaction.on_cancel = handlers.on_cancel.clone();
+    }
     if spec.is_disabled {
         root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
         root.style.descriptor.cursor = CursorHint::NotAllowed;
@@ -431,6 +511,20 @@ pub fn text_input_with_handlers(
     if let Some(label) = spec.aria_label.as_deref() {
         root.a11y.label = Some(label.to_string());
     }
+    root.a11y.role = Some(NodeRole::TextInput);
+    root.roles.insert(
+        "size".to_owned(),
+        format!("{effective_size:?}").to_ascii_lowercase(),
+    );
+    root.roles.insert(
+        "density".to_owned(),
+        format!("{density:?}").to_ascii_lowercase(),
+    );
+    root.roles.insert(
+        "validation".to_owned(),
+        format!("{:?}", spec.validation_state).to_ascii_lowercase(),
+    );
+    root.roles.insert("type".to_owned(), spec.input_type.clone());
     root.child(inner)
 }
 

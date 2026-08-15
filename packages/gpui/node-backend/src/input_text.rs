@@ -68,6 +68,9 @@ thread_local! {
     /// The range currently being composed by an input method, as character
     /// indices. `None` means no composition is in progress.
     static MARKED: RefCell<HashMap<String, (usize, usize)>> = RefCell::new(HashMap::new());
+    /// Provisional composing text keyed by field id. Paint splices this over
+    /// the committed value; `on_edit_insert` must not run until commit.
+    static COMPOSING: RefCell<HashMap<String, String>> = RefCell::new(HashMap::new());
 }
 
 pub(crate) fn marked_range(id: &str) -> Option<(usize, usize)> {
@@ -83,6 +86,19 @@ pub(crate) fn set_marked(id: &str, range: (usize, usize)) {
 pub(crate) fn clear_marked(id: &str) {
     MARKED.with(|m| {
         m.borrow_mut().remove(id);
+    });
+    COMPOSING.with(|c| {
+        c.borrow_mut().remove(id);
+    });
+}
+
+pub(crate) fn composing_text(id: &str) -> Option<String> {
+    COMPOSING.with(|c| c.borrow().get(id).cloned())
+}
+
+pub(crate) fn set_composing(id: &str, text: String) {
+    COMPOSING.with(|c| {
+        c.borrow_mut().insert(id.to_string(), text);
     });
 }
 
@@ -237,6 +253,9 @@ pub(crate) fn forget(id: &str) {
     MARKED.with(|m| {
         m.borrow_mut().remove(id);
     });
+    COMPOSING.with(|c| {
+        c.borrow_mut().remove(id);
+    });
 }
 
 pub(crate) struct InputText {
@@ -312,8 +331,9 @@ impl Element for InputText {
     ) -> Self::PrepaintState {
         let style = window.text_style();
         let font_size = style.font_size.to_pixels(window.rem_size());
+        let display = display_with_composition(self);
         let run = TextRun {
-            len: self.display.len(),
+            len: display.len(),
             font: style.font(),
             color: self.color,
             background_color: None,
@@ -323,7 +343,7 @@ impl Element for InputText {
         let line =
             window
                 .text_system()
-                .shape_line(self.display.clone().into(), font_size, &[run], None);
+                .shape_line(display.clone().into(), font_size, &[run], None);
 
         // The caret is the height of the text, not the field — a field-height
         // caret in a padded input looks like a divider.
@@ -468,11 +488,32 @@ impl Element for InputText {
                     line,
                     bounds,
                     origin_x,
-                    text: self.display.clone(),
+                    text: display_with_composition(self),
                 },
             );
         });
     }
+}
+
+/// Paint shows composing text over the committed value without mutating it.
+fn display_with_composition(element: &InputText) -> String {
+    let Some(composing) = composing_text(&element.id) else {
+        return element.display.clone();
+    };
+    if composing.is_empty() {
+        return element.display.clone();
+    }
+    let start = marked_range(&element.id)
+        .map(|(s, _)| s)
+        .unwrap_or(element.selection.map(|(a, _)| a).unwrap_or(0));
+    let chars: Vec<char> = element.value.chars().collect();
+    let start = start.min(chars.len());
+    format!(
+        "{}{}{}",
+        chars[..start].iter().collect::<String>(),
+        composing,
+        chars[start..].iter().collect::<String>()
+    )
 }
 
 /// Convenience for the backend: build the element from a node's input kind.

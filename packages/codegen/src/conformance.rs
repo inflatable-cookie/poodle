@@ -200,6 +200,16 @@ pub enum CaseStep {
         key: Option<String>,
         #[serde(default)]
         target: Option<String>,
+        #[serde(default)]
+        text: Option<String>,
+        #[serde(default)]
+        start: Option<u64>,
+        #[serde(default)]
+        end: Option<u64>,
+        #[serde(default)]
+        phase: Option<String>,
+        #[serde(default)]
+        fraction: Option<f64>,
     },
     #[serde(rename = "expectPart")]
     ExpectPart {
@@ -446,7 +456,15 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
                     }
                     if !matches!(
                         name.as_str(),
-                        "press" | "focus" | "key" | "scrub" | "dismiss" | "pointer"
+                        "press"
+                            | "focus"
+                            | "key"
+                            | "scrub"
+                            | "dismiss"
+                            | "pointer"
+                            | "insert"
+                            | "select"
+                            | "compose"
                     ) {
                         findings.push(at(format!("unknown action '{name}'")));
                     }
@@ -665,12 +683,16 @@ pub fn load_cases(path: &Path) -> Result<ComponentCases> {
     Ok(cases)
 }
 
-/// Portable props only: extensions are not generated into the Rust surface.
+/// Portable props: unprefixed props plus native extensions (caret, residual
+/// compat fields). Web-only extensions stay out of the Rust surface.
 pub fn portable_props(interface: &ComponentInterface) -> Vec<&PortableProp> {
     interface
         .props
         .iter()
-        .filter(|prop| prop.extension.is_none())
+        .filter(|prop| match prop.extension.as_deref() {
+            None => true,
+            Some(extension) => extension.starts_with("native"),
+        })
         .collect()
 }
 
@@ -701,6 +723,23 @@ pub fn to_snake_case(name: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn portable_props_include_native_extensions_and_drop_web() {
+        let interface: ComponentInterface = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "id": "probe", "profile": "input",
+            "props": [
+                { "name": "value", "type": { "kind": "string" }, "default": null, "nullable": true },
+                { "name": "selectionStart", "type": { "kind": "number" }, "default": 0, "rustType": "usize", "extension": "native-caret" },
+                { "name": "spellcheck", "type": { "kind": "boolean" }, "default": false, "extension": "web-html" }
+            ],
+            "events": [], "regions": [],
+            "parts": [{ "id": "root", "resolve": { "web": { "kind": "self" }, "native": { "kind": "self" } } }],
+            "states": [], "tokenRoles": [], "axes": [], "capabilities": []
+        })).unwrap();
+        let names: Vec<&str> = portable_props(&interface).into_iter().map(|p| p.name.as_str()).collect();
+        assert_eq!(names, ["value", "selectionStart"]);
+    }
 
     #[test]
     fn snake_case_mechanical_transform() {

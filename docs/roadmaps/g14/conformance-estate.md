@@ -292,6 +292,45 @@ entry and restoration, and the overlay capability rows.
 
 See `docs/logs/2026-08/14-g14-005-popover-overlay-focus-proof.md`.
 
+## Input Profile Status (g14.006)
+
+TextInput is the first input profile: real typing, selection, IME commit, and
+the places DOM and GPUI legitimately differ, behind a portable action and
+observation boundary.
+
+- **Authority** — `text-input.ts` + 18 typed cases. One generated
+  `TextInputSpec` replaces the hand-written declaration; the extension keeps
+  token recipes, `current_value`, selection helpers, and `with_input_type` /
+  `with_focused` aliases. Native caret and residual compat fields generate
+  into the Rust spec so existing hosts compile; they are not in
+  `PortablePropsOf`. Web-html attributes never enter Rust.
+- **Generic vocabulary** — `insert` / `select` / `compose` actions, string
+  `value` plus `selectionStart` / `selectionEnd` observations. Runners have
+  no TextInput identifier. Web insert is one `input` event (happy-dom has no
+  keydown→input default). GPUI insert is per-character `on_edit_key`; the
+  adapter records one `valueChange` per insert action. IME start/update
+  buffer; commit is the single insert.
+- **Execution** — Svelte, React, and GPUI run controlled/uncontrolled value,
+  typing, selection replace, disabled/read-only inertness, focus, submit,
+  cancel, type-then-submit order, search clear (`valueChange` then `clear`),
+  affixes, adornment icons, char count, validation chrome, and IME commit.
+- **Native** — root is `Node::input` (control is the same node). The observer
+  projects wrapper identity onto root when another `self` part shares the
+  node. IME lives in the node-backend (`MARKED` + composing string); paint
+  splices preview; `replace_text_in_range` / `on_edit_insert` is the single
+  commit.
+- **Capability rows** — `input.value`, `input.editing`, `input.ime` execute
+  on web, render-neutral, and GPUI and join the gated owned rows.
+- **Planted failures** — dropped edit, dropped selection, dropped IME
+  commit, and submit-before-valueChange each fail the expected
+  runtime/case/step/field.
+- **Specimens** — curated TextInput pages stay; they are not the corpus.
+- **Deferred runtime** — Jetstream remains program-deferred.
+- **Cost** — 1,863 LOC TextInput pilot increment and 33,146 bytes of
+  TextInput fixture JSON.
+
+See `docs/logs/2026-08/14-g14-006-text-input-runtime-boundary-proof.md`.
+
 ## Experimental Surface Disposition
 
 No experimental surface is architecture merely because it merged.
@@ -316,6 +355,8 @@ No experimental surface is architecture merely because it merged.
 | **curated RangeSlider specimens (3 active runtimes)** | restored; keep as documentation, audit under g14.026 | g14.026 |
 | **g14.004 Tabs identified-collection proof** | keep — stable keyed repeated anatomy and navigation profile | g14.010 |
 | **g14.005 Popover overlay/focus proof** | keep — the first overlay profile: layer registry, dismissal routes, placement, focus entry/restore | g14.010 |
+| **g14.006 TextInput runtime-boundary proof** | keep — the first input profile: typing, selection, IME commit, portable vs DOM/GPUI mechanisms | g14.010 |
+| **hand-written TextInputSpec declaration surface** | replaced by `generated/text-input/mod.rs` + extension module | done |
 | **curated Tabs specimens (3 active runtimes)** | restored; retain useful overflow/reorder, close, decoration, panel, and scale examples, then audit under the human-centred rubric | g14.026 |
 | **hand-written TabsSpec + Tabs machine vectors** | retain residual overflow/history/close/reorder claims not replaced by g14.004 | g14.010 / g14.011 |
 | **generated specimen scenes (specimen-ts/rust targets)** | shell/nav support only; do not promote into a universal catalogue scene tree | g14.021 / g14.026 |

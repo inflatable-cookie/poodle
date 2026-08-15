@@ -19,6 +19,8 @@ import { tabsInterface } from "../src/conformance/tabs";
 import { tabsCases } from "../src/conformance/tabs-cases";
 import { popoverInterface } from "../src/conformance/popover";
 import { popoverCases } from "../src/conformance/popover-cases";
+import { textInputInterface } from "../src/conformance/text-input";
+import { textInputCases } from "../src/conformance/text-input-cases";
 import { serializePrimitiveRoster } from "../src/conformance/primitives";
 
 const CHECK = process.argv.includes("--check");
@@ -71,6 +73,16 @@ const artifacts: Array<{ path: string; document: string; label: string }> = [
     path: join(fixturesRoot, "popover-cases.json"),
     document: `${JSON.stringify(popoverCases, null, 2)}\n`,
     label: "popover cases",
+  },
+  {
+    path: join(fixturesRoot, "text-input-interface.json"),
+    document: `${JSON.stringify(serializeInterface(textInputInterface), null, 2)}\n`,
+    label: "text-input interface",
+  },
+  {
+    path: join(fixturesRoot, "text-input-cases.json"),
+    document: `${JSON.stringify(textInputCases, null, 2)}\n`,
+    label: "text-input cases",
   },
   {
     path: join(fixturesRoot, "primitive-capability-roster.json"),

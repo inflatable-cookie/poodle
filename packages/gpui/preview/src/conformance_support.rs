@@ -9,7 +9,7 @@ use poodle_specs::{
     ActiveEdge, ActiveFill, ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, ControlSize,
     Orientation, OverlayPlacement, PopoverInitialFocus, PopoverSpec, PopoverSurfaceWidth,
     RangeSliderSpec, SemanticControlSizeRole, SliderPolarity, SliderVariant, TabActivationMode,
-    TabDefinition, TabVariant, TabsSpec,
+    TabDefinition, TabVariant, TabsSpec, TextInputSpec, ValidationState,
 };
 use serde_json::Value;
 
@@ -29,6 +29,10 @@ pub const TABS_INTERFACE: &str =
 pub const POPOVER_CASES: &str = include_str!("../../../codegen/fixtures/conformance/popover-cases.json");
 pub const POPOVER_INTERFACE: &str =
     include_str!("../../../codegen/fixtures/conformance/popover-interface.json");
+pub const TEXT_INPUT_CASES: &str =
+    include_str!("../../../codegen/fixtures/conformance/text-input-cases.json");
+pub const TEXT_INPUT_INTERFACE: &str =
+    include_str!("../../../codegen/fixtures/conformance/text-input-interface.json");
 
 /// Fixture → PopoverSpec adapter (g14.005). All 12 placements, the numeric
 /// offset, the guard, the focus strategies, and the surface width strategy
@@ -446,6 +450,114 @@ pub fn tabs_spec_from_fixture(fixture: &Value) -> TabsSpec {
         density: Some(spec.density),
     }
     .into()
+}
+
+/// Fixture → TextInputSpec adapter (g14.006). Portable props plus native
+/// residual fields the generated Spec still carries; web-html extensions
+/// never appear.
+pub fn text_input_spec_from_fixture(fixture: &Value) -> TextInputSpec {
+    let props = fixture
+        .get("props")
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    let regions = fixture
+        .get("regions")
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    let mut spec = TextInputSpec::default().with_id("conformance-text-input");
+
+    if let Some(v) = props.get("value").and_then(Value::as_str) {
+        spec = spec.with_value(v);
+    } else if let Some(v) = props.get("defaultValue").and_then(Value::as_str) {
+        spec = spec.with_default_value(v);
+    }
+    if let Some(v) = props.get("placeholder").and_then(Value::as_str) {
+        spec = spec.with_placeholder(v);
+    }
+    if let Some(v) = props.get("disabled").and_then(Value::as_bool) {
+        spec = spec.with_disabled(v);
+    }
+    if let Some(v) = props.get("readOnly").and_then(Value::as_bool) {
+        spec = spec.with_read_only(v);
+    }
+    if let Some(v) = props.get("required").and_then(Value::as_bool) {
+        spec = spec.with_required(v);
+    }
+    if let Some(v) = props.get("showValidationStatus").and_then(Value::as_bool) {
+        spec = spec.with_show_validation_status(v);
+    }
+    if let Some(v) = props.get("showCharCount").and_then(Value::as_bool) {
+        spec = spec.with_show_char_count(v);
+    }
+    if let Some(v) = props.get("showClearButton").and_then(Value::as_bool) {
+        spec = spec.with_show_clear_button(v);
+    }
+    if let Some(v) = props.get("ariaLabel").and_then(Value::as_str) {
+        spec = spec.with_aria_label(v);
+    }
+    if let Some(v) = props.get("prefix").and_then(Value::as_str) {
+        spec = spec.with_prefix(v);
+    }
+    if let Some(v) = props.get("suffix").and_then(Value::as_str) {
+        spec = spec.with_suffix(v);
+    }
+    if let Some(v) = props.get("type").and_then(Value::as_str) {
+        spec = spec.with_type(v);
+    }
+    if let Some(v) = props.get("resize").and_then(Value::as_str) {
+        spec = spec.with_resize(v);
+    }
+    if let Some(v) = props.get("source").and_then(Value::as_str) {
+        spec = spec.with_source(v);
+    }
+    if let Some(n) = props.get("maxLength").and_then(Value::as_u64) {
+        spec = spec.with_max_length(n as usize);
+    }
+    if let Some(n) = props.get("rows").and_then(Value::as_u64) {
+        spec = spec.with_rows(n as u16);
+    }
+    if let Some(v) = props.get("validationState").and_then(Value::as_str) {
+        spec = spec.with_validation_state(match v {
+            "invalid" => ValidationState::Invalid,
+            "valid" => ValidationState::Valid,
+            "pending" => ValidationState::Pending,
+            _ => ValidationState::None,
+        });
+    }
+    if let Some(v) = props.get("size").and_then(Value::as_str) {
+        spec = spec.with_size(match v {
+            "xs" => ControlSize::Xs,
+            "sm" => ControlSize::Sm,
+            "lg" => ControlSize::Lg,
+            "xl" => ControlSize::Xl,
+            _ => ControlSize::Md,
+        });
+    }
+    if let Some(v) = props.get("sizeRole").and_then(Value::as_str) {
+        spec = spec.with_size_role(match v {
+            "chrome" => SemanticControlSizeRole::Chrome,
+            "prominent" => SemanticControlSizeRole::Prominent,
+            _ => SemanticControlSizeRole::Control,
+        });
+    }
+    if let Some(v) = props.get("density").and_then(Value::as_str) {
+        spec = spec.with_density(match v {
+            "compact" => ControlDensity::Compact,
+            "comfortable" => ControlDensity::Comfortable,
+            _ => ControlDensity::Default,
+        });
+    }
+    if let Some(v) = props.get("leadingIcon").and_then(Value::as_str) {
+        spec = spec.with_leading_icon(v);
+    } else if let Some(v) = regions.get("leading").and_then(Value::as_str) {
+        spec = spec.with_leading_icon(v);
+    }
+    if let Some(v) = props.get("trailingIcon").and_then(Value::as_str) {
+        spec = spec.with_trailing_icon(v);
+    } else if let Some(v) = regions.get("trailing").and_then(Value::as_str) {
+        spec = spec.with_trailing_icon(v);
+    }
+    spec
 }
 
 /// Enum values for an interface prop (axis expansion).

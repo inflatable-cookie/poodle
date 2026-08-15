@@ -184,6 +184,45 @@ pub fn drive_primitive_probes(driver: &mut HeadlessDriver<'_>) -> Vec<ProbeEvide
         let probe = overlay_backend_evidence(probe, layer_count, &escape_reasons, &overlay_observation);
         probes.push(probe);
     }
+
+    // ── Input rows (g14.006): a real TextInput, one keystroke through
+    // ── on_edit_key, and an IME mark that must not commit.
+    let typed: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+    let spec = poodle_specs::TextInputSpec::new()
+        .with_id("input-probe")
+        .with_value("");
+    let on_change = {
+        let typed = Arc::clone(&typed);
+        Arc::new(move |next: &str| {
+            typed.lock().expect("typed lock").push(next.to_owned());
+        })
+    };
+    let mut input_node = poodle_render::text_input_with_handlers(
+        &spec,
+        &poodle_gpui::GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE),
+        poodle_render::TextInputHandlers {
+            on_change: Some(on_change),
+            ..poodle_render::TextInputHandlers::default()
+        },
+    );
+    input_node.id = Some(poodle_render::primitive_probes::INPUT_PROBE_ELEMENT_ID.to_owned());
+    let input_mounted = Arc::new(Mutex::new(input_node));
+    driver.mount_node(Arc::clone(&input_mounted));
+    driver.wait_for_focus_handle(poodle_render::primitive_probes::INPUT_PROBE_ELEMENT_ID);
+    driver.focus_element(poodle_render::primitive_probes::INPUT_PROBE_ELEMENT_ID);
+    driver.keyboard_key(poodle_render::primitive_probes::INPUT_PROBE_ELEMENT_ID, "a");
+    let typed_values = typed.lock().expect("typed lock").clone();
+    poodle_gpui_node_backend::mark_composing(
+        "poodle-input-input-probe-value",
+        (0, 0),
+        "ñ",
+    );
+    let composing = poodle_gpui_node_backend::take_composing("poodle-input-input-probe-value");
+    for probe in poodle_render::primitive_probes::run_input_probes(&poodle_render::primitive_probes::input_probe_fixture())
+    {
+        probes.push(input_backend_evidence(probe, &typed_values, composing.as_deref()));
+    }
+
     driver.drain();
     probes
 }
@@ -282,6 +321,63 @@ fn overlay_backend_evidence(
                     "backend-layer",
                     serde_json::json!({ "layerCount": layer_count }),
                     "layer registry or observed layerCount",
+                )
+            }
+        }
+        _ => probe,
+    }
+}
+
+fn input_backend_evidence(
+    probe: ProbeEvidence,
+    typed: &[String],
+    composing: Option<&str>,
+) -> ProbeEvidence {
+    if probe.verdict == "fail" {
+        return probe;
+    }
+    match probe.capability_id.as_str() {
+        "input.value" => ProbeEvidence::pass_observed(
+            "input.value",
+            "backend-input-value",
+            serde_json::json!({ "neutral": probe.fields, "typed": typed }),
+            &["node.field", "parts.value", "parts.selection"],
+        ),
+        "input.editing" => {
+            if typed.iter().any(|value| value == "a") {
+                ProbeEvidence::pass_observed(
+                    "input.editing",
+                    "backend-key-insert",
+                    serde_json::json!({ "neutral": probe.fields, "typed": typed }),
+                    &["node.field", "gpui.event", "trace"],
+                )
+            } else {
+                ProbeEvidence::fail(
+                    "input.editing",
+                    "backend-key-insert",
+                    serde_json::json!({ "typed": typed }),
+                    "keystroke did not produce a valueChange",
+                )
+            }
+        }
+        "input.ime" => {
+            if composing == Some("ñ") && typed.iter().all(|value| value != "ñ") {
+                ProbeEvidence::pass_observed(
+                    "input.ime",
+                    "backend-ime-buffer",
+                    serde_json::json!({
+                        "neutral": probe.fields,
+                        "composing": composing,
+                        "typed": typed,
+                    }),
+                    &["node.field", "trace", "parts.value"],
+                )
+            } else {
+                ProbeEvidence::fail(
+                    "input.ime",
+                    "backend-ime-buffer",
+                    serde_json::json!({ "composing": composing, "typed": typed }),
+                    "IME mark committed or dropped the composing buffer",
                 )
             }
         }

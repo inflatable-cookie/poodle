@@ -46,6 +46,9 @@ export type ObservationField =
   | "parts.parent"
   | "parts.focusedText"
   | "parts.relativeBounds"
+  | "parts.value"
+  | "parts.selection"
+  | "parts.composing"
   | "trace"
   | "node.field"
   | "node.a11y"
@@ -497,7 +500,7 @@ export const PRIMITIVE_CAPABILITIES = [
       "SelectGranularity",
     ],
     owner: "g14.006",
-    requiredObservations: ["node.field"],
+    requiredObservations: ["node.field", "parts.value", "parts.selection"],
   },
   {
     id: "input.editing",
@@ -511,7 +514,21 @@ export const PRIMITIVE_CAPABILITIES = [
       "Interaction.on_cancel",
     ],
     owner: "g14.006",
-    requiredObservations: ["node.field", "gpui.event"],
+    requiredObservations: ["node.field", "gpui.event", "trace"],
+  },
+  {
+    id: "input.ime",
+    family: "input",
+    covers: [
+      "composition start/update/commit",
+      "InputHandler.replace_and_mark_text_in_range",
+      "InputHandler.replace_text_in_range",
+      "marked range",
+    ],
+    owner: "g14.006",
+    requiredObservations: ["node.field", "trace", "parts.value"],
+    notes:
+      "Mechanism is runtime-owned (DOM composition vs platform InputHandler). Commit must emit one valueChange; start/update must not.",
   },
 ] as const satisfies readonly PrimitiveCapability[];
 
@@ -544,7 +561,8 @@ export function assertKnownCapabilities(names: readonly string[], where: string)
  * render-neutral, and GPUI evidence exists. */
 export function ownedPrimitiveCapabilities(): readonly PrimitiveCapability[] {
   return PRIMITIVE_CAPABILITIES.filter(
-    (row) => row.owner === "g14.002" || row.owner === "g14.005",
+    (row) =>
+      row.owner === "g14.002" || row.owner === "g14.005" || row.owner === "g14.006",
   );
 }
 
