@@ -3,7 +3,7 @@
   import type {
     PopoverPortableEvents,
     PopoverPortableProps,
-  } from "@inflatable-cookie/poodle-core/conformance/popover";
+  } from "@inflatable-cookie/poodle-core/conformance";
   import {
     createInstanceId,
     getFocusableElements,

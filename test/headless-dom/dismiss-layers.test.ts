@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { registerDismissLayer, resolveDismiss, type DismissLayer } from "@inflatable-cookie/poodle-core/dom/dismiss";
+import { registerDismissLayer, resolveDismiss, type DismissLayer } from "../../packages/core/src/dom/dismiss";
 
 interface LayerHost {
   root: HTMLElement;

@@ -705,10 +705,10 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 - 2026-08-15 — g14.005 (Popover overlay/focus proof) recorded three
   environment/harness notes worth keeping visible: (1) the web runner's
-  layer-count observation imports through a string subpath export
-  (`@inflatable-cookie/poodle-core/dom/dismiss`); the bare package entry is
-  a conditional export that bun's resolver cannot match from the test tree
-  in a clean checkout, which the initial CI run caught — a local global bun
+  layer-count observation imports through a relative path
+  into the core source, like the hosts' component imports; package subpaths
+  and the bare entry resolve against a stale bun package cache in a clean
+  checkout, which the initial CI run caught — a local global bun
   install had masked the gap. (2) happy-dom 20.11.2 implements no layout at all (`getBoundingClientRect`
   is always zero), so the web leg of the placement/offset/width claims runs
   against a box-model stub plus an anchor-box stylesheet — the same

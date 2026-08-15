@@ -126,3 +126,8 @@ renderer-neutral Rust + compare + primitive report): green, all headless.
 - The old `image.regional` requirement on `overlay.intent` was replaced by
   executed `node.field`/`parts.overlay` evidence — regional images were not
   headless-executable and the card's validation is entirely headless.
+- The web runner's layer-count observation imports through a relative path
+  into the core source (like the hosts' component imports). Package subpath
+  imports and the bare package entry resolve against a stale bun package
+  cache in a clean checkout, which the initial CI run caught; the relative
+  import is resolution-robust everywhere.

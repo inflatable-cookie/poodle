@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import type {
   PopoverPortableEvents,
   PopoverPortableProps,
-} from "@inflatable-cookie/poodle-core/conformance/popover";
+} from "@inflatable-cookie/poodle-core/conformance";
 import {
   createInstanceId,
   getFocusableElements,

@@ -15,10 +15,10 @@ import type {
   SerializedCase,
   SerializedComponentInterface,
 } from "@inflatable-cookie/poodle-core/conformance";
-// Resolved through a string subpath export like every other poodle-core
-// import — the bare package entry is not resolvable from the test tree in a
-// clean install.
-import { dismissLayerStackLength } from "@inflatable-cookie/poodle-core/dom/dismiss";
+// Relative import like the hosts' component imports: package subpaths and
+// the bare entry are not reliably resolvable from the test tree in a clean
+// checkout (bun resolves them against a stale package cache).
+import { dismissLayerStackLength } from "../../../packages/core/src/dom/dismiss";
 import { channelsOf, geometryFields, geometryOf } from "./observer";
 
 export interface TraceEntry {
