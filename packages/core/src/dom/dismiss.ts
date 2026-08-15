@@ -39,6 +39,15 @@ export interface DismissLayer {
    * exercise `resolveDismiss` directly.
    */
   parent?: DismissLayer | null;
+  /**
+   * The layer's component root, when it has one. Registration order alone
+   * cannot place nested overlays: a host that opens a popover containing
+   * another popover registers its layer in whichever effect order the
+   * framework chose, and the contained layer can end up on top. The stack
+   * uses DOM ancestry to keep the OUTER below the layers it contains, so the
+   * innermost layer really is the last to close.
+   */
+  hostElement?: Element | null;
 }
 
 /**
@@ -171,10 +180,36 @@ function syncListeners(): void {
  * the layer this one opened inside. Registration order is the ancestry, not
  * the DOM: a portalled surface is not a descendant of its host, so the stack
  * is the only place the relationship is visible.
+ *
+ * When the layer declares a `hostElement`, the stack also checks DOM
+ * ancestry: a layer whose host contains an already-registered layer's host
+ * opened AROUND it, so it inserts BELOW the contained layer (innermost
+ * closes first) regardless of framework effect order.
  */
 export function registerDismissLayer(layer: DismissLayer): () => void {
-  layer.parent = stack[stack.length - 1] ?? null;
-  stack.push(layer);
+  const insertAt = layer.hostElement
+    ? stack.findIndex(
+        (existing) =>
+          existing.hostElement &&
+          existing.hostElement !== layer.hostElement &&
+          layer.hostElement!.contains(existing.hostElement),
+      )
+    : -1;
+  // The layer above this one at registration is its recorded parent. When
+  // the layer wraps another (DOM ancestry), it takes the wrapped layer's
+  // place below it and the wrapped layers' ancestry points back at it.
+  layer.parent = insertAt >= 0 ? (stack[insertAt]?.parent ?? null) : (stack[stack.length - 1] ?? null);
+  if (insertAt >= 0) {
+    stack.splice(insertAt, 0, layer);
+    for (let i = insertAt + 1; i < stack.length; i += 1) {
+      const existing = stack[i];
+      if (existing.hostElement && layer.hostElement!.contains(existing.hostElement)) {
+        existing.parent = layer;
+      }
+    }
+  } else {
+    stack.push(layer);
+  }
   syncListeners();
 
   return () => {
@@ -186,4 +221,10 @@ export function registerDismissLayer(layer: DismissLayer): () => void {
 
     syncListeners();
   };
+}
+
+/** The number of open dismissable layers — the web side's layer order /
+ * overlay-state observation channel (component-observation.v1). */
+export function dismissLayerStackLength(): number {
+  return stack.length;
 }

@@ -702,3 +702,20 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   pseudo-element onto a child, in a component whose other `@container` rules
   correctly target `__body` and `__header`. The baseline entry now records the
   measurement instead of the guess.
+
+- 2026-08-15 — g14.005 (Popover overlay/focus proof) recorded three
+  environment/harness notes worth keeping visible: (1) bun 1.3.14 did not
+  hoist the `@inflatable-cookie/*` workspace links into the root
+  `node_modules` in this worktree, so the conformance tests silently
+  resolved `@inflatable-cookie/poodle-core` from a stale global bun install;
+  manual symlinks fixed the local run, and a fresh CI install is unaffected.
+  (2) happy-dom 20.11.2 implements no layout at all (`getBoundingClientRect`
+  is always zero), so the web leg of the placement/offset/width claims runs
+  against a box-model stub plus an anchor-box stylesheet — the same
+  browser-default-simulation posture as the keydown → click harness; the
+  corpus asserts only relative gaps, alignment deltas, and width match with
+  named tolerances, so no runtime-specific constant leaks in. (3) gpui
+  0.2.2's mousedown focuses the hit element, so a pointer press on a
+  disabled trigger reports focused on both GPUI and happy-dom; the observers
+  treat disabled parts as unfocused on both runtimes (browser semantics),
+  which is what keeps the cross-runtime comparison green.

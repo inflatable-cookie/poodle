@@ -12,7 +12,6 @@ use poodle_headless::disclosure::*;
 use poodle_headless::hover::*;
 use poodle_headless::menu::*;
 use poodle_headless::modal::*;
-use poodle_headless::popover::*;
 use poodle_headless::single_select::*;
 use poodle_headless::slider::*;
 use poodle_headless::switch::*;
@@ -153,62 +152,6 @@ fn checkbox_conformance() {
             None,
             Some(json!({ "checked": next.checked })),
         );
-    }
-}
-
-#[test]
-fn popover_conformance() {
-    for case in vectors()["popover"].as_array().unwrap() {
-        let ctx = &case["context"];
-        let initial_focus = match s(ctx, "initialFocus") {
-            "content" => PopoverInitialFocus::Content,
-            "none" => PopoverInitialFocus::None,
-            _ => PopoverInitialFocus::FirstFocusable,
-        };
-        let context = PopoverContext {
-            disabled: b(ctx, "disabled"),
-            dismiss_on_outside_interact: b(ctx, "dismissOnOutsideInteract"),
-            initial_focus,
-        };
-        let state = if s(case, "state") == "open" {
-            PopoverState::Open
-        } else {
-            PopoverState::Closed
-        };
-        let event = match s(&case["event"], "type") {
-            "TOGGLE" => PopoverEvent::Toggle,
-            "OPEN" => PopoverEvent::Open,
-            "CLOSE" => PopoverEvent::Close,
-            "ESCAPE" => PopoverEvent::Escape,
-            "OUTSIDE_INTERACT" => PopoverEvent::OutsideInteract,
-            other => panic!("unknown popover event {other}"),
-        };
-
-        let (next_state, effects) = popover_transition(state, context, event);
-        let effects = effects
-            .iter()
-            .map(|effect| match effect {
-                PopoverEffect::EmitOpenChange { open } => {
-                    json!({ "type": "emitOpenChange", "open": open })
-                }
-                PopoverEffect::FocusOnOpen { strategy } => json!({
-                    "type": "focusOnOpen",
-                    "strategy": match strategy {
-                        PopoverInitialFocus::FirstFocusable => "first-focusable",
-                        PopoverInitialFocus::Content => "content",
-                        PopoverInitialFocus::None => "none",
-                    },
-                }),
-                PopoverEffect::RestoreTriggerFocus => json!({ "type": "restoreTriggerFocus" }),
-            })
-            .collect();
-        let state_name = if next_state == PopoverState::Open {
-            "open"
-        } else {
-            "closed"
-        };
-
-        assert_case("popover", case, effects, Some(state_name), None);
     }
 }
 

@@ -7,4 +7,6 @@ export * from "./range-slider";
 export * from "./range-slider-cases";
 export * from "./tabs";
 export * from "./tabs-cases";
+export * from "./popover";
+export * from "./popover-cases";
 export * from "./project";

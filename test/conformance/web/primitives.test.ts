@@ -13,16 +13,22 @@ import {
   buttonCases,
   buttonInterface,
   ownedPrimitiveCapabilities,
+  popoverCases,
+  popoverInterface,
   serializeInterface,
   type PrimitiveCapabilityId,
 } from "../../../packages/core/src/conformance";
+import { installLayoutStub } from "./layout-stub";
 import { observeDom, runCase, type RuntimeAdapter } from "./runner";
 import { computedStyleOf, parseLength } from "./observer";
+import { ReactPopoverAdapter } from "./react-popover-adapter";
 import { SvelteButtonAdapter } from "./svelte-adapter";
+import { SveltePopoverAdapter } from "./svelte-popover-adapter";
 import { ReactButtonAdapter } from "./react-adapter";
 
 const OUT_DIR = `${import.meta.dirname}/out`;
 const iface = serializeInterface(buttonInterface);
+const popoverIface = serializeInterface(popoverInterface);
 
 const tokensCss = readFileSync(
   `${import.meta.dirname}/../../../packages/core/src/tokens/generated/css/poodle-tokens.css`,
@@ -30,6 +36,14 @@ const tokensCss = readFileSync(
 );
 const buttonCss = readFileSync(
   `${import.meta.dirname}/../../../packages/core/src/styles/button.css`,
+  "utf8",
+);
+const popoverCss = readFileSync(
+  `${import.meta.dirname}/../../../packages/core/src/styles/popover.css`,
+  "utf8",
+);
+const anchoredCss = readFileSync(
+  `${import.meta.dirname}/../../../packages/core/src/styles/anchored-surface.css`,
   "utf8",
 );
 
@@ -46,7 +60,7 @@ function injectRealCss(): void {
   if (document.getElementById("conformance-web-css")) return;
   const style = document.createElement("style");
   style.id = "conformance-web-css";
-  style.textContent = `${tokensCss}\n${buttonCss}\n@keyframes primitive-probe-spin { from { opacity: .98; } to { opacity: .97; } }`;
+  style.textContent = `${tokensCss}\n${buttonCss}\n${popoverCss}\n${anchoredCss}\n@keyframes primitive-probe-spin { from { opacity: .98; } to { opacity: .97; } }`;
   document.head.appendChild(style);
 }
 
@@ -334,18 +348,80 @@ function writeEvidence(runtime: string, probes: ProbeRow[]): void {
   );
 }
 
+/** Popover corpus cases that exercise the overlay rows on web (g14.005):
+ * mounted overlay/layer evidence, the expanded projection, and real
+ * dismissal traces through the document-level routes. */
+const POPOVER_PROBE_CASES: Array<{
+  caseId: string;
+  capabilities: Array<{ id: PrimitiveCapabilityId; observations: string[] }>;
+}> = [
+  {
+    caseId: "popover/semantics-tokens",
+    capabilities: [
+      { id: "overlay.intent", observations: ["parts.overlay"] },
+      { id: "semantic.expanded", observations: ["parts.expanded"] },
+      { id: "overlay.layer", observations: ["parts.layerCount"] },
+    ],
+  },
+  {
+    caseId: "popover/escape",
+    capabilities: [{ id: "overlay.dismiss", observations: ["trace"] }],
+  },
+];
+
+async function popoverBackedProbes(adapter: RuntimeAdapter): Promise<ProbeRow[]> {
+  const rows: ProbeRow[] = [];
+  for (const mapping of POPOVER_PROBE_CASES) {
+    const caseData = popoverCases.cases.find((c) => c.id === mapping.caseId);
+    if (!caseData) {
+      for (const capability of mapping.capabilities) {
+        rows.push(fail(capability.id, mapping.caseId, {}, "case missing", capability.observations));
+      }
+      continue;
+    }
+    const { results } = await runCase(adapter, popoverIface, popoverCases.component, caseData);
+    const failures = results.filter((r) => r.verdict === "fail");
+    const ok = failures.length === 0;
+    for (const capability of mapping.capabilities) {
+      rows.push(
+        ok
+          ? pass(capability.id, mapping.caseId, { casePass: true, assertions: results.length }, capability.observations)
+          : fail(capability.id, mapping.caseId, { failures }, "popover case", capability.observations),
+      );
+    }
+  }
+  return rows;
+}
+
 describe("primitive substrate (web)", () => {
   it("executes owned capabilities on Svelte and React", async () => {
     injectRealCss();
+    installLayoutStub();
+    // The anchor box the web placement leg resolves against (see the popover
+    // conformance test); the overlay probes mount the real popover.
+    const anchorStyle = document.createElement("style");
+    anchorStyle.textContent = [
+      ".poodle-popover { position: absolute !important; top: 40px; left: 24px; width: 96px; height: 32px; }",
+      ".poodle-popover__trigger { position: absolute !important; top: 40px; left: 24px; width: 96px; height: 32px; }",
+    ].join("\n");
+    document.head.appendChild(anchorStyle);
 
-    for (const adapter of [new SvelteButtonAdapter(), new ReactButtonAdapter()] as RuntimeAdapter[]) {
+    const pairs: Array<[RuntimeAdapter, RuntimeAdapter]> = [
+      [new SvelteButtonAdapter(), new SveltePopoverAdapter()],
+      [new ReactButtonAdapter(), new ReactPopoverAdapter()],
+    ];
+    for (const [buttonAdapter, popoverAdapter] of pairs) {
       const fixtureRoot = mountSurfaceFixture();
-      const probes = [...fixtureProbes(fixtureRoot), ...(await buttonBackedProbes(adapter))];
-      writeEvidence(adapter.runtime, probes);
+      const probes = [
+        ...fixtureProbes(fixtureRoot),
+        ...(await buttonBackedProbes(buttonAdapter)),
+        ...(await popoverBackedProbes(popoverAdapter)),
+      ];
+      writeEvidence(buttonAdapter.runtime, probes);
       const failed = probes.filter((p) => p.verdict === "fail");
       expect(
         failed,
-        `${adapter.runtime}: ${failed.length} failing probe(s) — ${JSON.stringify(failed, null, 2)}`,
+        `${buttonAdapter.runtime}: ${failed.length} failing probe(s) — ${JSON.stringify(failed, null, 2)}`,
       ).toEqual([]);
     }
   });

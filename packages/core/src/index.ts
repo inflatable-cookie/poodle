@@ -179,6 +179,7 @@ export {
   type ModalResult,
 } from "./modal";
 export {
+  dismissLayerStackLength,
   layerContains,
   registerDismissLayer,
   resolveDismiss,

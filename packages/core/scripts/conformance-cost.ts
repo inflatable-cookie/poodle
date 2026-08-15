@@ -73,6 +73,11 @@ const TABS_AUTHORITY: Array<[string, string]> = [
   ["Tabs corpus", "packages/core/src/conformance/tabs-cases.ts"],
 ];
 
+const POPOVER_AUTHORITY: Array<[string, string]> = [
+  ["Popover interface", "packages/core/src/conformance/popover.ts"],
+  ["Popover corpus", "packages/core/src/conformance/popover-cases.ts"],
+];
+
 const CODEGEN: Array<[string, string]> = [
   ["Conformance parsing and validation", "packages/codegen/src/conformance.rs"],
   ["Rust declaration target", "packages/codegen/src/targets/conformance_rust.rs"],
@@ -87,6 +92,10 @@ const TABS_GENERATED_SOURCE: Array<[string, string]> = [
   ["Generated Tabs Rust declaration", "packages/contracts/components/src/generated/tabs/mod.rs"],
 ];
 
+const POPOVER_GENERATED_SOURCE: Array<[string, string]> = [
+  ["Generated Popover Rust declaration", "packages/contracts/components/src/generated/popover/mod.rs"],
+];
+
 const GENERATED_DATA: Array<[string, string]> = [
   ["Interface fixture JSON", "packages/codegen/fixtures/conformance/button-interface.json"],
   ["Case fixture JSON", "packages/codegen/fixtures/conformance/button-cases.json"],
@@ -94,6 +103,8 @@ const GENERATED_DATA: Array<[string, string]> = [
   ["RangeSlider case fixture JSON", "packages/codegen/fixtures/conformance/range-slider-cases.json"],
   ["Tabs interface fixture JSON", "packages/codegen/fixtures/conformance/tabs-interface.json"],
   ["Tabs case fixture JSON", "packages/codegen/fixtures/conformance/tabs-cases.json"],
+  ["Popover interface fixture JSON", "packages/codegen/fixtures/conformance/popover-interface.json"],
+  ["Popover case fixture JSON", "packages/codegen/fixtures/conformance/popover-cases.json"],
   ["Primitive roster JSON", "packages/codegen/fixtures/conformance/primitive-capability-roster.json"],
 ];
 
@@ -133,6 +144,16 @@ const TABS_HARNESS: Array<[string, string]> = [
   ["GPUI Tabs adapter", "packages/gpui/preview/src/conformance_tabs.rs"],
 ];
 
+const POPOVER_HARNESS: Array<[string, string]> = [
+  ["Svelte Popover adapter", "test/conformance/web/svelte-popover-adapter.ts"],
+  ["React Popover adapter", "test/conformance/web/react-popover-adapter.tsx"],
+  ["Svelte Popover host", "test/conformance/web/hosts/PopoverHost.svelte"],
+  ["React Popover host", "test/conformance/web/hosts/ReactPopoverHost.tsx"],
+  ["Web layout stub", "test/conformance/web/layout-stub.ts"],
+  ["Web Popover tests", "test/conformance/web/popover.test.ts"],
+  ["GPUI Popover adapter", "packages/gpui/preview/src/conformance_popover.rs"],
+];
+
 const CAPTURE_REPAIR: Array<[string, string]> = [
   ["Native visual runner", "test/native-visual/run.ts"],
   ["Native visual capture", "test/native-visual/capture.ts"],
@@ -163,6 +184,14 @@ const TABS_SUPPORTING_DELTAS: Array<[string, string]> = [
   ["React Tabs shell", "packages/react/components/src/Tabs.tsx"],
 ];
 
+const POPOVER_SUPPORTING_DELTAS: Array<[string, string]> = [
+  ["Popover renderer composition", "packages/render/src/popover.rs"],
+  ["Svelte Popover shell", "packages/svelte/components/src/Popover.svelte"],
+  ["React Popover shell", "packages/react/components/src/Popover.tsx"],
+  ["GPUI node-backend layer registry", "packages/gpui/node-backend/src/layers.rs"],
+  ["poodle-node dismiss/layer vocabulary", "packages/contracts/node/src/lib.rs"],
+];
+
 const WIRING: Array<[string, string]> = [
   ["Effigy selector section", "tasks/effigy.tasks.toml#conformance"],
   ["Cost report", "packages/core/scripts/conformance-cost.ts"],
@@ -171,6 +200,7 @@ const WIRING: Array<[string, string]> = [
 
 const REPLACED: Array<[string, string]> = [
   ["Hand-written ButtonSpec declaration", "packages/contracts/components/src/button.rs"],
+  ["Hand-written PopoverSpec declaration", "packages/contracts/components/src/popover.rs"],
   ["Svelte Button specimen fixtures", "packages/svelte/preview/src/specimens/ButtonSpecimen.svelte"],
   ["React Button specimen fixtures", "packages/react/preview/src/gallery/specimens/ButtonSpecimen.tsx"],
   ["GPUI Button specimen fixtures", "packages/gpui/preview/src/specimens/button.rs"],
@@ -233,14 +263,17 @@ const rangeSliderAuthority = sourceTable(
   "working",
 );
 const tabsAuthority = sourceTable("Tabs authored authority", TABS_AUTHORITY, "working");
+const popoverAuthority = sourceTable("Popover authored authority", POPOVER_AUTHORITY, "working");
 const codegen = sourceTable("Codegen", CODEGEN, "delta");
 const buttonGeneratedSource = sourceTable("Generated Button source", BUTTON_GENERATED_SOURCE, "working");
 const tabsGeneratedSource = sourceTable("Generated Tabs source", TABS_GENERATED_SOURCE, "working");
+const popoverGeneratedSource = sourceTable("Generated Popover source", POPOVER_GENERATED_SOURCE, "working");
 const generatedBytes = dataTable(GENERATED_DATA);
 const genericRuntime = sourceTable("Generic observers and runners", GENERIC_RUNTIME, "working");
 const buttonHarness = sourceTable("Button pilot harness", BUTTON_HARNESS, "working");
 const rangeSliderHarness = sourceTable("RangeSlider pilot harness", RANGE_SLIDER_HARNESS, "working");
 const tabsHarness = sourceTable("Tabs pilot harness", TABS_HARNESS, "working");
+const popoverHarness = sourceTable("Popover pilot harness", POPOVER_HARNESS, "working");
 const captureRepair = sourceTable("GPUI capture repair", CAPTURE_REPAIR, "working");
 const genericSupporting = sourceTable("Generic runtime deltas", GENERIC_SUPPORTING_DELTAS, "delta");
 const buttonSupporting = sourceTable("Button runtime deltas", BUTTON_SUPPORTING_DELTAS, "delta");
@@ -250,6 +283,7 @@ const rangeSliderSupporting = sourceTable(
   "delta",
 );
 const tabsSupporting = sourceTable("Tabs runtime deltas", TABS_SUPPORTING_DELTAS, "delta");
+const popoverSupporting = sourceTable("Popover runtime deltas", POPOVER_SUPPORTING_DELTAS, "delta");
 const wiring = sourceTable("Wiring", WIRING, "working");
 const replaced = sourceTable("Replaced hand-written source", REPLACED, "replaced");
 
@@ -257,7 +291,8 @@ const genericKernel = reusableAuthority + codegen + genericRuntime + genericSupp
 const buttonPilot = buttonAuthority + buttonGeneratedSource + buttonHarness + buttonSupporting;
 const rangeSliderPilot = rangeSliderAuthority + rangeSliderHarness + rangeSliderSupporting;
 const tabsPilot = tabsAuthority + tabsGeneratedSource + tabsHarness + tabsSupporting;
-const sourceMechanism = genericKernel + buttonPilot + rangeSliderPilot + tabsPilot + captureRepair;
+const popoverPilot = popoverAuthority + popoverGeneratedSource + popoverHarness + popoverSupporting;
+const sourceMechanism = genericKernel + buttonPilot + rangeSliderPilot + tabsPilot + popoverPilot + captureRepair;
 
 console.log("\n=== Summary ===");
 console.log(`source mechanism: ${sourceMechanism} LOC`);
@@ -268,10 +303,14 @@ console.log(`    authored authority: ${buttonAuthority} LOC`);
 console.log(`    harness and runtime deltas: ${buttonHarness + buttonSupporting} LOC`);
 console.log(`  RangeSlider pilot increment: ${rangeSliderPilot} LOC`);
 console.log(`  Tabs pilot increment: ${tabsPilot} LOC`);
+console.log(`  Popover pilot increment: ${popoverPilot} LOC`);
+console.log(`    authored authority: ${popoverAuthority} LOC`);
+console.log(`    generated source: ${popoverGeneratedSource} LOC`);
+console.log(`    harness and runtime deltas: ${popoverHarness + popoverSupporting} LOC`);
 console.log(`  GPUI capture repair: ${captureRepair} LOC`);
 console.log(`generated data: ${generatedBytes} bytes`);
 console.log(`replaced hand-written source: ${replaced} LOC`);
 console.log(
-  `stop-condition evidence: Button pilot increment ${buttonPilot} vs replaced ${replaced} — ` +
-    "triggered at g14.001. g14.003 and g14.004 reuse the generic kernel for RangeSlider and Tabs.",
+  `stop-condition evidence: pilot increments vs replaced — ` +
+    "triggered at g14.001; g14.003/004/005 reuse the generic kernel.",
 );

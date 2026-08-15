@@ -5354,7 +5354,10 @@ pub(crate) struct Popover {
     theme: GpuiThemeProvider,
     trigger: Option<poodle_node::Node>,
     content: Option<poodle_node::Node>,
-    on_open_change: Option<OpenChangeHandler>,
+    /// Context-free toggle handler: the shared composition's activation is a
+    /// node handler without a window, so the preview delivers through its
+    /// node-event queue instead.
+    on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
 
 impl Popover {
@@ -5380,9 +5383,9 @@ impl Popover {
 
     pub(crate) fn on_open_change(
         mut self,
-        handler: impl Fn(bool, &mut Window, &mut App) + 'static,
+        handler: Arc<dyn Fn(bool) + Send + Sync>,
     ) -> Self {
-        self.on_open_change = Some(Rc::new(handler));
+        self.on_open_change = Some(handler);
         self
     }
 }
@@ -5391,35 +5394,28 @@ impl IntoElement for Popover {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let placement = self.spec.placement;
-        let mut trigger = div()
-            .id(("poodle-popover-trigger", placement_index(placement)))
-            .child(
-                self.trigger
-                    .as_ref()
-                    .map(poodle_gpui_node_backend::to_gpui)
-                    .unwrap_or_else(|| div().into_any_element()),
-            );
-        if self.spec.block {
-            trigger = trigger.w_full();
-        }
-        if !self.spec.disabled {
-            if let Some(handler) = self.on_open_change {
-                let next_open = !self.spec.current_open();
-                trigger = trigger.on_click(move |_event, window, cx| {
-                    handler(next_open, window, cx);
-                });
-            }
-        }
-
-        let surface = (self.spec.current_open() && !self.spec.disabled).then(|| {
-            let mut node = poodle_render::popover(&self.spec, &self.theme, self.content);
-            if self.spec.surface_width.is_trigger() {
-                node.style.fill_width = true;
-            }
-            poodle_gpui_node_backend::to_gpui(&node)
-        });
-        floating_overlay(trigger.into_any_element(), surface, placement)
+        // The shared poodle-render composition owns trigger, surface,
+        // placement, accessibility metadata, and the layer/dismiss intent;
+        // the specimen host only supplies the trigger/content nodes and the
+        // toggle handler (delivered through the preview's node-event queue —
+        // node handlers carry no window context, so the queue is drained in
+        // the preview render loop).
+        let node = poodle_render::popover(
+            &self.spec,
+            &self.theme,
+            &poodle_render::PopoverHandlers {
+                on_activate: self.on_open_change.as_ref().map(|handler| {
+                    let handler = Arc::clone(handler);
+                    let next_open = !self.spec.current_open();
+                    Arc::new(move || handler(next_open)) as Arc<dyn Fn() + Send + Sync>
+                }),
+                on_dismiss: None,
+                instance_id: None,
+            },
+            self.trigger.clone(),
+            self.content.clone(),
+        );
+        poodle_gpui_node_backend::to_gpui(&node)
     }
 }
 

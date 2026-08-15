@@ -9,23 +9,24 @@
 use poodle_node::{LayoutDirection, LayoutSizing, Node, NodePosition};
 use poodle_specs::OverlayPlacement;
 
-/// Gap between anchor and floating surface (px).
-const OVERLAY_GAP_PX: f32 = 4.0;
+/// Default gap between anchor and floating surface (px), kept for callers
+/// that do not carry an authored offset.
+pub const OVERLAY_GAP_PX: f32 = 4.0;
 
 /// Wrap `anchor` in a relative container and, when `surface` is `Some`,
 /// position it absolutely according to `placement`.
 ///
 /// `anchor_h`: estimated anchor height (used for top/bottom families).
 /// `anchor_w`: estimated anchor width (used for left/right families).
+/// `gap`: the authored offset between the anchor and the surface.
 pub fn floating_overlay(
     anchor: Node,
     surface: Option<Node>,
     placement: OverlayPlacement,
     anchor_h: f32,
     anchor_w: f32,
+    gap: f32,
 ) -> Node {
-    let gap = OVERLAY_GAP_PX;
-
     let mut wrapper = Node::container();
     // Explicit Row (see switch.rs).
     wrapper.style.descriptor.layout.direction = LayoutDirection::Row;
@@ -118,6 +119,7 @@ mod tests {
             OverlayPlacement::BottomEnd,
             28.0,
             28.0,
+            OVERLAY_GAP_PX,
         );
 
         assert_eq!(
@@ -134,6 +136,25 @@ mod tests {
             NodePosition::Absolute {
                 top: Some(32.0),
                 right: Some(0.0),
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn gap_is_the_authored_offset() {
+        let node = floating_overlay(
+            Node::container(),
+            Some(Node::container()),
+            OverlayPlacement::Bottom,
+            28.0,
+            28.0,
+            12.0,
+        );
+        assert!(matches!(
+            node.children[1].position,
+            NodePosition::Absolute {
+                top: Some(40.0),
                 ..
             }
         ));

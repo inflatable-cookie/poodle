@@ -17,6 +17,8 @@ import { rangeSliderInterface } from "../src/conformance/range-slider";
 import { rangeSliderCases } from "../src/conformance/range-slider-cases";
 import { tabsInterface } from "../src/conformance/tabs";
 import { tabsCases } from "../src/conformance/tabs-cases";
+import { popoverInterface } from "../src/conformance/popover";
+import { popoverCases } from "../src/conformance/popover-cases";
 import { serializePrimitiveRoster } from "../src/conformance/primitives";
 
 const CHECK = process.argv.includes("--check");
@@ -59,6 +61,16 @@ const artifacts: Array<{ path: string; document: string; label: string }> = [
     path: join(fixturesRoot, "tabs-cases.json"),
     document: `${JSON.stringify(tabsCases, null, 2)}\n`,
     label: "tabs cases",
+  },
+  {
+    path: join(fixturesRoot, "popover-interface.json"),
+    document: `${JSON.stringify(serializeInterface(popoverInterface), null, 2)}\n`,
+    label: "popover interface",
+  },
+  {
+    path: join(fixturesRoot, "popover-cases.json"),
+    document: `${JSON.stringify(popoverCases, null, 2)}\n`,
+    label: "popover cases",
   },
   {
     path: join(fixturesRoot, "primitive-capability-roster.json"),

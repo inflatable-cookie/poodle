@@ -41,9 +41,11 @@ use poodle_node::{
 };
 
 mod interaction;
+mod layers;
 mod style;
 
 use interaction::apply_listeners;
+pub use layers::{bounds_for, dismiss_innermost, dismiss_layers_at, open_layer_count};
 use style::{
     apply_cursor, apply_layout, apply_paint, apply_patch, apply_position, apply_state_patches,
     apply_text,
@@ -146,6 +148,17 @@ fn element_id(node: &Node) -> ElementId {
 
 /// Interpret one node (and its subtree) as a GPUI element.
 pub fn to_gpui(node: &Node) -> AnyElement {
+    // Frame-scoped registries (layers, bounds): cleared at the outermost
+    // to_gpui call and rebuilt from this frame's tree.
+    if layers::begin_frame() {
+        layers::collect_layers(node, None);
+    }
+    let out = to_gpui_impl(node);
+    layers::end_frame();
+    out
+}
+
+fn to_gpui_impl(node: &Node) -> AnyElement {
     if !node.roles.is_empty() {
         record_probe_channel("semantic.token-roles.received");
     }
@@ -399,6 +412,12 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
 /// element state (click, drag, focus) forces a stateful div — gpui 0.2.2
 /// gates its listener model behind `Stateful`.
 fn build_box(node: &Node, base: Div) -> AnyElement {
+    // Nested overlay surfaces (a popover inside a popover) draw inside the
+    // enclosing deferred element; only the outermost overlay defers.
+    let was_deferred = DEFERRED_SCOPE.with(|scope| scope.get());
+    if node.style.overlay {
+        DEFERRED_SCOPE.with(|scope| scope.set(true));
+    }
     let element = if needs_state(node) {
         let el = base.id(element_id(node));
         let el = apply_shared(el, node);
@@ -409,7 +428,13 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
         maybe_animated(el, node)
     };
     if node.style.overlay {
-        deferred(element).with_priority(1).into_any_element()
+        DEFERRED_SCOPE.with(|scope| scope.set(was_deferred));
+        record_probe_channel("overlay.intent.painted");
+        if was_deferred {
+            element
+        } else {
+            deferred(element).with_priority(1).into_any_element()
+        }
     } else {
         element
     }
@@ -457,8 +482,14 @@ where
 // lazily in the paint pass (which has an `App`) and used from the next build
 // onward; keyed by element id, like every other per-node cache here.
 thread_local! {
-    // Whether the subtree currently being built sits inside a focused node.
+    /// Whether the subtree currently being built sits inside a focused node.
     static FOCUS_SCOPE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    /// Whether the subtree currently being built sits inside an overlay
+    /// (deferred) node. gpui 0.2.2 forbids calling `defer_draw` during its
+    /// deferred pass, so a nested overlay surface (a menu inside a popover)
+    /// draws within the enclosing deferred element instead of deferring
+    /// again.
+    static DEFERRED_SCOPE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
     // The id of the node that currently holds focus, if any.
     static FOCUSED_FIELD: RefCell<Option<String>> = const { RefCell::new(None) };
     static FOCUS_HANDLES: RefCell<std::collections::HashMap<String, gpui::FocusHandle>> =

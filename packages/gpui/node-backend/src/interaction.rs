@@ -3,15 +3,22 @@
 use super::*;
 
 pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
-    if let Some(tab_index) = node.a11y.tab_index {
-        // GPUI uses a non-negative index for ordering and a separate flag for
-        // whether the element participates in sequential traversal. Preserve
-        // DOM-style roving tabindex: -1 stays programmatically focusable.
-        el = el
-            .tab_index(tab_index.max(0) as isize)
-            .tab_stop(tab_index >= 0);
-    } else if node.interaction.focusable {
-        el = el.focusable();
+    // A disabled control is not focusable: gpui would otherwise take focus on
+    // pointer-down, and a browser never focuses a disabled control. The focus
+    // tracking canvas below still attaches (the patch may exist), so blur and
+    // focus remain observable through the registry.
+    if !node.interaction.disabled {
+        if let Some(tab_index) = node.a11y.tab_index {
+            // GPUI uses a non-negative index for ordering and a separate flag
+            // for whether the element participates in sequential traversal.
+            // Preserve DOM-style roving tabindex: -1 stays programmatically
+            // focusable.
+            el = el
+                .tab_index(tab_index.max(0) as isize)
+                .tab_stop(tab_index >= 0);
+        } else if node.interaction.focusable {
+            el = el.focusable();
+        }
     }
 
     // Real focus, observed both ways. gpui auto-creates a focus handle and
@@ -95,6 +102,23 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
                 record_probe_channel("surface.state-patches.focus");
             }
         }
+    }
+    // Overlay-layer membership: record this element's rendered bounds into
+    // the layer registry so outside-interaction containment and relative
+    // logical-bounds observation read real geometry.
+    if let Some(layer_id) = &node.interaction.dismiss_layer {
+        let element_id = element_id_string(node);
+        let layer = layer_id.clone();
+        el = el.child(
+            gpui::canvas(
+                move |bounds, _window, _cx| {
+                    super::layers::record_bounds(&element_id, &layer, bounds);
+                },
+                |_, _, _, _| {},
+            )
+            .absolute()
+            .size_full(),
+        );
     }
     if node.interaction.disabled {
         record_probe_channel("semantic.disabled.blocked");

@@ -96,7 +96,16 @@
         "component-observation.v1.parts.*.geometry.paddingLeft",
         "component-observation.v1.parts.*.geometry.paddingRight",
         "component-observation.v1.parts.*.geometry.radius",
-        "component-observation.v1.parts.*.geometry.borderWidth"
+        "component-observation.v1.parts.*.geometry.borderWidth",
+        "component-observation.v1.parts.*.geometry.topGap",
+        "component-observation.v1.parts.*.geometry.bottomGap",
+        "component-observation.v1.parts.*.geometry.leftGap",
+        "component-observation.v1.parts.*.geometry.rightGap",
+        "component-observation.v1.parts.*.geometry.hStart",
+        "component-observation.v1.parts.*.geometry.hEnd",
+        "component-observation.v1.parts.*.geometry.vStart",
+        "component-observation.v1.parts.*.geometry.widthGap",
+        "component-observation.v1.parts.*.parent"
       ],
       "owner": "g14.002",
       "requiredObservations": [
@@ -120,7 +129,7 @@
       "requiredObservations": [
         "node.field"
       ],
-      "notes": "Absolute placement result semantics owned by g14.005."
+      "notes": "Absolute placement result semantics executed by g14.005."
     },
     {
       "id": "surface.channels",
@@ -311,11 +320,13 @@
       "id": "semantic.expanded",
       "family": "semantic",
       "covers": [
-        "NodeA11y.expanded"
+        "NodeA11y.expanded",
+        "component-observation.v1.parts.*.expanded"
       ],
       "owner": "g14.005",
       "requiredObservations": [
-        "node.a11y"
+        "node.a11y",
+        "parts.expanded"
       ]
     },
     {
@@ -442,14 +453,46 @@
       "id": "overlay.intent",
       "family": "overlay",
       "covers": [
-        "NodeStyle.overlay"
+        "NodeStyle.overlay",
+        "component-observation.v1.parts.*.overlay"
       ],
       "owner": "g14.005",
       "requiredObservations": [
         "node.field",
-        "image.regional"
+        "parts.overlay"
       ],
-      "notes": "Channel certified as deferred; placement/dismissal/focus transfer owned by g14.005."
+      "notes": "Executed by g14.005 through the Popover overlay profile."
+    },
+    {
+      "id": "overlay.dismiss",
+      "family": "overlay",
+      "covers": [
+        "Interaction.on_dismiss",
+        "DismissReason",
+        "dismiss action",
+        "component-observation.v1.trace"
+      ],
+      "owner": "g14.005",
+      "requiredObservations": [
+        "node.field",
+        "trace",
+        "gpui.dismiss"
+      ]
+    },
+    {
+      "id": "overlay.layer",
+      "family": "overlay",
+      "covers": [
+        "Interaction.dismiss_layer",
+        "layer registration",
+        "component-observation.v1.parts.*.layerCount"
+      ],
+      "owner": "g14.005",
+      "requiredObservations": [
+        "node.field",
+        "parts.layerCount",
+        "gpui.layer"
+      ]
     },
     {
       "id": "input.value",

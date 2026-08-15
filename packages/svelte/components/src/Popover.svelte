@@ -1,5 +1,9 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/popover.css";
+  import type {
+    PopoverPortableEvents,
+    PopoverPortableProps,
+  } from "@inflatable-cookie/poodle-core/conformance/popover";
   import {
     createInstanceId,
     getFocusableElements,
@@ -16,21 +20,19 @@
   import { anchored } from "./anchored";
   import type { OverlayPlacement, PopoverInitialFocus } from "./types";
 
-  interface Props {
-    open?: boolean | null;
-    defaultOpen?: boolean;
-    placement?: OverlayPlacement;
-    offset?: number;
-    dismissOnOutsideInteract?: boolean;
-    initialFocus?: PopoverInitialFocus;
-    ariaLabel?: string | null;
-    block?: boolean;
+  /**
+   * Portable props and events come from the conformance interface authority
+   * (`packages/core/src/conformance/popover.ts`): renaming a portable prop or
+   * event there fails this interface. `triggerIsInteractive` and
+   * `onSurfaceGeometryChange` are documented web-only extensions kept beside
+   * this adapter.
+   */
+  type Portable = PopoverPortableProps;
+  type PortableEvents = PopoverPortableEvents;
+
+  interface Props extends Partial<Portable> {
     triggerIsInteractive?: boolean;
-    disabled?: boolean;
-    surfaceWidth?: "content" | "trigger";
-    surfaceMinWidth?: string | null;
-    surfaceMaxWidth?: string | null;
-    onOpenChange?: ((open: boolean) => void) | undefined;
+    onOpenChange?: PortableEvents["openChange"];
     onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler | undefined;
     trigger?: Snippet<[]>;
     children?: Snippet<[]>;
@@ -72,7 +74,10 @@
   });
 
   const isControlled = $derived(open !== null);
-  const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
+  // Disabled blocks open in every direction (contract §3): a controlled
+  // `open` request while disabled stays inert — the machine's own guard,
+  // mirrored here so the visible state can never disagree with it.
+  const isOpen = $derived(!disabled && (isControlled ? open === true : uncontrolledOpen));
   // Null until the surface is measured; the anchored action reports back
   // whichever candidate survived collision resolution.
   let placementFromAnchor = $state<OverlayPlacement | null>(null);
@@ -157,6 +162,11 @@
       contains: (target) => layerContains(target, rootElement, surfaceElement),
       dismissOnOutsideInteract,
       onDismiss: (reason) => send(reason === "escape" ? { type: "ESCAPE" } : { type: "OUTSIDE_INTERACT" }),
+      // DOM ancestry keeps a nested popover's layer below its host's, so the
+      // innermost layer dismisses first whatever the effect order. The
+      // portalled surface is where nested popovers live, so it is the
+      // ancestry anchor.
+      hostElement: surfaceElement,
     });
   });
 </script>

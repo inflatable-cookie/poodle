@@ -108,6 +108,7 @@ fn generated_enum(prop: &PortableProp) -> Option<String> {
 fn prop_type(prop: &PortableProp) -> String {
     let base = match prop.kind.kind.as_str() {
         "boolean" => "bool".to_owned(),
+        "number" => "f32".to_owned(),
         "icon" => "String".to_owned(),
         "dimension" => "crate::types::Dimension".to_owned(),
         "string" => "String".to_owned(),
@@ -153,7 +154,14 @@ fn rust_named_type(name: &str) -> String {
 }
 
 fn render_struct(struct_name: &str, props: &[&PortableProp]) -> String {
-    let mut out = format!("#[derive(Clone, Debug, Eq, PartialEq)]\npub struct {struct_name} {{\n");
+    // f32 props (numeric offsets etc.) are not Eq; the derive follows.
+    let has_number = props.iter().any(|prop| prop.kind.kind == "number");
+    let derive = if has_number {
+        "#[derive(Clone, Debug, PartialEq)]"
+    } else {
+        "#[derive(Clone, Debug, Eq, PartialEq)]"
+    };
+    let mut out = format!("{derive}\npub struct {struct_name} {{\n");
     for prop in props {
         out.push_str(&format!(
             "    pub {}: {},\n",
@@ -202,6 +210,10 @@ fn rust_default(prop: &PortableProp) -> String {
     if ty == "String" {
         let value = prop.default.as_str().unwrap_or_default();
         return format!("{value:?}.to_owned()");
+    }
+    if ty == "f32" {
+        let value = prop.default.as_f64().unwrap_or(0.0);
+        return format!("{value:?}");
     }
     "Default::default()".to_owned()
 }

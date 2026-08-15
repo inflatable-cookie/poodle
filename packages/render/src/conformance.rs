@@ -17,7 +17,9 @@ use poodle_layout::LayoutSizing;
 use poodle_node::{Node, NodeKind, NodeToggled};
 use serde_json::{json, Value};
 
-/// Geometry fields, mirroring the web observer's field set.
+/// Geometry fields, mirroring the web observer's field set. The relative
+/// logical-bounds fields (gaps against a part's `relativeTo` anchor) are
+/// computed from the two parts' rendered bounds when both resolve.
 const GEOMETRY_FIELDS: &[&str] = &[
     "height",
     "minWidth",
@@ -25,6 +27,14 @@ const GEOMETRY_FIELDS: &[&str] = &[
     "paddingRight",
     "radius",
     "borderWidth",
+    "topGap",
+    "bottomGap",
+    "leftGap",
+    "rightGap",
+    "hStart",
+    "hEnd",
+    "vStart",
+    "widthGap",
 ];
 
 // ── Interface document (parsed from the serialized interface JSON) ─────────
@@ -63,6 +73,9 @@ pub struct PartDecl {
     pub role: Option<String>,
     pub resolve: NativeResolution,
     pub repeated: bool,
+    /// The part this part is positioned relative to (an anchored surface's
+    /// trigger). Relative logical-bounds gaps are computed against it.
+    pub relative_to: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -174,6 +187,7 @@ impl InterfaceDoc {
                 role,
                 resolve,
                 repeated: part.get("repeat").is_some(),
+                relative_to: part.get("relativeTo").and_then(Value::as_str).map(str::to_owned),
             });
         }
 
@@ -343,22 +357,31 @@ fn rgba(color: &poodle_node::ColorValue) -> String {
 }
 
 /// Runtime relationships carry real node ids. Normalize id-template targets
-/// back to the corpus's semantic repeated-part ids before comparison.
+/// back to the corpus's semantic repeated-part ids before comparison; plain
+/// id-resolved parts match their declared id or its instance-scoped suffix
+/// (runtime ids read `{instance}:{semantic}`).
 fn normalize_relationship(value: &str, iface: &InterfaceDoc) -> String {
     for part in &iface.parts {
-        let NativeResolution::IdTemplate { template } = &part.resolve else {
-            continue;
-        };
-        let Some((prefix, suffix)) = template.split_once("{key}") else {
-            continue;
-        };
-        let Some(key) = value
-            .strip_prefix(prefix)
-            .and_then(|tail| tail.strip_suffix(suffix))
-        else {
-            continue;
-        };
-        return format!("{}:{key}", part.id);
+        match &part.resolve {
+            NativeResolution::IdTemplate { template } => {
+                let Some((prefix, suffix)) = template.split_once("{key}") else {
+                    continue;
+                };
+                let Some(key) = value
+                    .strip_prefix(prefix)
+                    .and_then(|tail| tail.strip_suffix(suffix))
+                else {
+                    continue;
+                };
+                return format!("{}:{key}", part.id);
+            }
+            NativeResolution::Id { id } => {
+                if value == id || value.ends_with(&format!(":{id}")) {
+                    return part.id.clone();
+                }
+            }
+            _ => {}
+        }
     }
     value.to_owned()
 }
@@ -380,9 +403,20 @@ fn observe_part(
     root: &Node,
     iface: &InterfaceDoc,
     focus_by_id: &dyn Fn(&str) -> Option<bool>,
+    bounds_by_id: &dyn Fn(&str) -> Option<(f32, f32, f32, f32)>,
 ) -> Value {
     let is_root = part_id == "root";
-    let (geometry, channels) = (geometry_of(node), channels_of(node));
+    let mut geometry = geometry_of(node);
+    if decl.relative_to.is_some() {
+        let relative = relative_bounds_of(part_id, iface, root, node, bounds_by_id);
+        if let (Some(geometry_obj), Some(relative)) = (geometry.as_object_mut(), relative.as_object())
+        {
+            for (field, value) in relative {
+                geometry_obj.insert(field.clone(), value.clone());
+            }
+        }
+    }
+    let channels = channels_of(node);
     let states = if is_root {
         states_of(iface, root, focus_by_id)
     } else {
@@ -408,9 +442,9 @@ fn observe_part(
                 | NativeResolution::SelfNode
         );
     let focused = if identity_part {
-        // Non-focusable identity parts are observed as unfocused (not
-        // "unobservable"): a prior case can leave a stale FOCUS_STATES entry
-        // for the same element id after remount.
+        // Disabled controls are not focusable; report unfocused even if the
+        // harness's pointer pressed them (browser semantics, and the same
+        // rule the web observer applies).
         if !node.interaction.focusable || node.interaction.disabled {
             Some(false)
         } else {
@@ -450,6 +484,11 @@ fn observe_part(
         },
         "states": states,
         "tokenRoles": token_roles,
+        "expanded": node.a11y.expanded.map(Value::Bool).unwrap_or(Value::Null),
+        "overlay": json!(node.style.overlay),
+        "parent": parent_part_of(part_id, iface, root, node)
+            .map(Value::String)
+            .unwrap_or(Value::Null),
         "focusable": if identity_part {
             json!(node.interaction.focusable && !node.interaction.disabled)
         } else {
@@ -485,6 +524,9 @@ fn absent_part() -> Value {
         "value": null,
         "states": {},
         "tokenRoles": {},
+        "expanded": null,
+        "overlay": null,
+        "parent": null,
         "focusable": null,
         "focused": null,
         "focusVisible": null,
@@ -624,6 +666,107 @@ fn channels_of(node: &Node) -> Value {
     serde_json::to_value(channels).expect("channels serialize")
 }
 
+/// Relative logical bounds of a part against its `relativeTo` anchor, from
+/// the two parts' rendered bounds: the gaps between facing edges (positive
+/// when the part is past the anchor in that direction), the start/end
+/// alignment deltas, and the width difference. Rendered bounds come from the
+/// runtime (the GPUI backend records them at paint); the computation itself
+/// is renderer-neutral.
+fn relative_bounds_of(
+    part_id: &str,
+    iface: &InterfaceDoc,
+    root: &Node,
+    part_node: &Node,
+    bounds_by_id: &dyn Fn(&str) -> Option<(f32, f32, f32, f32)>,
+) -> Value {
+    let Some(anchor) = iface.part_decl(part_id).and_then(|decl| decl.relative_to.clone()) else {
+        return Value::Null;
+    };
+    let Some(anchor_node) = find_part(iface, root, &anchor) else {
+        return Value::Null;
+    };
+    let Some((at, al, aw, ah)) = bounds_by_id(runtime_identity(anchor_node)) else {
+        return Value::Null;
+    };
+    let Some((pt, pl, pw, ph)) = bounds_by_id(runtime_identity(part_node)) else {
+        return Value::Null;
+    };
+    json!({
+        "topGap": pt - (at + ah),
+        "bottomGap": at - (pt + ph),
+        "leftGap": pl - (al + aw),
+        "rightGap": al - (pl + pw),
+        "hStart": pl - al,
+        "hEnd": (al + aw) - (pl + pw),
+        "vStart": pt - at,
+        "widthGap": pw - aw,
+    })
+}
+
+/// The part that hosts this part's layer: the nearest part node above the
+/// target in the tree. The root part has none; a non-root part that resolves
+/// to the root's own node (root-label etc.) is hosted by the root part, like
+/// its web counterpart which lives inside the root element.
+fn parent_part_of(part_id: &str, iface: &InterfaceDoc, root: &Node, target: &Node) -> Option<String> {
+    if part_id == "root" {
+        return None;
+    }
+    if std::ptr::eq(root, target) {
+        return Some("root".to_owned());
+    }
+    let part_nodes: Vec<(&Node, String)> = iface
+        .parts
+        .iter()
+        .filter_map(|decl| Some((find_part(iface, root, &decl.id)?, decl.id.clone())))
+        .collect();
+    fn walk<'a>(
+        node: &'a Node,
+        target: &'a Node,
+        part_nodes: &[(&'a Node, String)],
+        current: Option<&str>,
+    ) -> Option<String> {
+        if std::ptr::eq(node, target) {
+            return current.map(str::to_owned);
+        }
+        let entered = part_nodes
+            .iter()
+            .find(|(part_node, _)| std::ptr::eq(*part_node, node))
+            .map(|(_, id)| id.as_str())
+            .or(current);
+        for child in &node.children {
+            if let Some(found) = walk(child, target, part_nodes, entered) {
+                return Some(found);
+            }
+        }
+        None
+    }
+    walk(root, target, &part_nodes, None)
+}
+
+/// The subtree text of the first node the runtime reports focused — the
+/// focused-part progression's identity channel, mirroring the web observer's
+/// `document.activeElement.textContent`.
+fn focused_text_of(root: &Node, focus_by_id: &dyn Fn(&str) -> Option<bool>) -> Option<String> {
+    fn text_of_focused(node: &Node, focus_by_id: &dyn Fn(&str) -> Option<bool>) -> Option<String> {
+        if focus_by_id(runtime_identity(node)) == Some(true)
+            && node.interaction.focusable
+            && !node.interaction.disabled
+        {
+            let joined = node.texts().join("");
+            // The web observer reports null for a focus target without
+            // readable text (empty textContent); mirror that.
+            return if joined.is_empty() { None } else { Some(joined) };
+        }
+        for child in &node.children {
+            if let Some(text) = text_of_focused(child, focus_by_id) {
+                return Some(text);
+            }
+        }
+        None
+    }
+    text_of_focused(root, focus_by_id)
+}
+
 /// Observes the whole tree into `component-observation.v1` shape.
 pub fn observe_tree(
     runtime: &str,
@@ -651,6 +794,32 @@ pub fn observe_tree_with_focus(
     root: &Node,
     focus_by_id: &dyn Fn(&str) -> Option<bool>,
 ) -> Value {
+    observe_tree_with_context(runtime, component, iface, root, &ObserveContext {
+        focus_by_id,
+        // No overlay layers are open in a bare tree; the web side always
+        // reports a number, so the plain observer reports zero.
+        layer_count: &|| Some(0),
+        bounds_by_id: &|_| None,
+    })
+}
+
+/// Extra runtime channels the overlay profile reads: the open layer count
+/// (layer order / overlay state) and rendered element bounds (relative
+/// logical bounds). Supplied by the runtime; the computation stays neutral.
+pub struct ObserveContext<'a> {
+    pub focus_by_id: &'a dyn Fn(&str) -> Option<bool>,
+    pub layer_count: &'a dyn Fn() -> Option<usize>,
+    pub bounds_by_id: &'a dyn Fn(&str) -> Option<(f32, f32, f32, f32)>,
+}
+
+/// Observes with the full runtime context (focus, layers, rendered bounds).
+pub fn observe_tree_with_context(
+    runtime: &str,
+    component: &str,
+    iface: &InterfaceDoc,
+    root: &Node,
+    context: &ObserveContext<'_>,
+) -> Value {
     let mut parts = BTreeMap::new();
     for decl in &iface.parts {
         let part_ids = expanded_native_part_ids(decl, root);
@@ -659,7 +828,15 @@ pub fn observe_tree_with_focus(
             parts.insert(
                 part_id.clone(),
                 match observed {
-                    Some(node) => observe_part(&part_id, decl, node, root, iface, focus_by_id),
+                    Some(node) => observe_part(
+                        &part_id,
+                        decl,
+                        node,
+                        root,
+                        iface,
+                        context.focus_by_id,
+                        context.bounds_by_id,
+                    ),
                     None => absent_part(),
                 },
             );
@@ -678,6 +855,21 @@ pub fn observe_tree_with_focus(
                 obj.insert("value".to_owned(), json!([lower, upper]));
             }
         }
+    }
+    if let Some(root_part) = parts.get_mut("root").and_then(|p| p.as_object_mut()) {
+        root_part.insert(
+            "focusedText".to_owned(),
+            focused_text_of(root, context.focus_by_id)
+                .map(Value::String)
+                .unwrap_or(Value::Null),
+        );
+        root_part.insert(
+            "layerCount".to_owned(),
+            match (context.layer_count)() {
+                Some(count) => json!(count),
+                None => Value::Null,
+            },
+        );
     }
     json!({
         "runtime": runtime,
@@ -1017,6 +1209,11 @@ pub fn assert_part(
         "focusVisible",
         "tabbable",
         "selected",
+        "expanded",
+        "parent",
+        "overlay",
+        "focusedText",
+        "layerCount",
         "orientation",
         "controls",
         "labelledBy",

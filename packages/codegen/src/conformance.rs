@@ -12,13 +12,21 @@ use serde::Deserialize;
 use crate::error::Result;
 use crate::CodegenError;
 
-const GEOMETRY_FIELDS: [&str; 6] = [
+const GEOMETRY_FIELDS: [&str; 14] = [
     "height",
     "minWidth",
     "paddingLeft",
     "paddingRight",
     "radius",
     "borderWidth",
+    "topGap",
+    "bottomGap",
+    "leftGap",
+    "rightGap",
+    "hStart",
+    "hEnd",
+    "vStart",
+    "widthGap",
 ];
 
 /// One prop in the portable interface.
@@ -165,6 +173,10 @@ pub enum CaseStep {
         part: String,
         #[serde(default)]
         input: Option<String>,
+        #[serde(default)]
+        key: Option<String>,
+        #[serde(default)]
+        target: Option<String>,
     },
     #[serde(rename = "expectPart")]
     ExpectPart {
@@ -396,12 +408,27 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
 
         for step in &case.steps {
             match step {
-                CaseStep::Action { part, name, .. } => {
+                CaseStep::Action {
+                    part,
+                    name,
+                    target,
+                    ..
+                } => {
                     if !part_is_known(part) {
                         findings.push(at(format!("action targets unknown part '{part}'")));
                     }
-                    if !matches!(name.as_str(), "press" | "focus" | "key" | "scrub") {
+                    if !matches!(
+                        name.as_str(),
+                        "press" | "focus" | "key" | "scrub" | "dismiss" | "pointer"
+                    ) {
                         findings.push(at(format!("unknown action '{name}'")));
+                    }
+                    if name == "pointer"
+                        && !matches!(target.as_deref(), Some("inside") | Some("outside"))
+                    {
+                        findings.push(at(format!(
+                            "pointer action needs target inside|outside, got {target:?}"
+                        )));
                     }
                 }
                 CaseStep::ExpectPart { part, expect } => {

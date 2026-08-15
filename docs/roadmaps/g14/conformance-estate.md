@@ -236,6 +236,57 @@ collections:
 
 See `docs/logs/2026-08/14-g14-004-tabs-collection-navigation-proof.md`.
 
+## Overlay Profile Status (g14.005)
+
+Popover extends the kernel from controls and collections to the first overlay
+profile: real layer registration, dismissal routes, placement families, focus
+entry and restoration, and the overlay capability rows.
+
+- **Authority** — `popover.ts` + 22 typed cases. One generated `PopoverSpec`
+  replaces the hand-written declaration; the extension keeps the token
+  recipes and derived queries. The web extensions (`triggerIsInteractive`,
+  `onSurfaceGeometryChange`) stay beside the adapters and never enter the
+  portable surface.
+- **Generic vocabulary** — the `dismiss` and inside/outside `pointer`
+  actions, part `parent`/`overlay`/`expanded`/`focusedText`/`layerCount`
+  observations, relative logical-bounds geometry (`topGap` … `widthGap`
+  against an interface-declared `relativeTo` anchor), the `part-present`
+  state rule, and opaque `host` fixture data for the nested-layer proof.
+  None of it mentions Popover; later overlay profiles reuse it.
+- **Execution** — Svelte, React, and GPUI all run the same corpus headless:
+  uncontrolled pointer/keyboard open, controlled ownership, disabled
+  inertness, all three focus strategies, every close path (trigger, Escape,
+  outside) with trigger focus restoration, the outside guard, the nested
+  dismiss-stack contract (innermost-first Escape and ancestry-spared outside
+  dismissal), placement families and the start/end rule, offset and
+  trigger-width bounds, and semantics/token evidence.
+- **Native** — the renderer composition owns trigger, surface, placement,
+  accessibility metadata, token roles, and the layer/dismiss intent; the
+  node-backend's generic layer registry rebuilds from the painted tree each
+  frame, records rendered bounds, and routes Escape (innermost) and outside
+  pointers (containment + ancestry) through the real event tree. The preview
+  specimen renders through the same shared composition.
+- **Capability rows** — `overlay.intent`, `semantic.expanded`,
+  `overlay.dismiss`, and `overlay.layer` are executed on every active layer
+  (web, render-neutral, GPUI) and join the gated owned rows in the primitive
+  report.
+- **Defects caught** — the corpus surfaced two shipped web defects: the
+  nested overlay registration order (the inner layer registered before the
+  outer, so Escape dismissed the outer first) and the controlled host's
+  programmatic open while disabled (the surface rendered despite the
+  machine's guard). Both repaired in the Svelte and React shells.
+- **Planted failures** — inert Escape, inert outside dismissal, wrong
+  initial-focus target, missing focus restore, reversed nested-layer
+  dismissal, absent overlay/layer evidence, and wrong placement offset each
+  fail the expected runtime/case/step/field.
+- **Vector disposition** — the four Popover machine vectors are deleted;
+  their claims are covered by the mounted corpus, and the machine itself is
+  exercised by both web runtimes and the Rust mirror through the corpus.
+- **Cost** — 1,821 LOC Popover pilot increment and 36,548 bytes of Popover
+  fixture JSON (`effigy conformance:cost`).
+
+See `docs/logs/2026-08/14-g14-005-popover-overlay-focus-proof.md`.
+
 ## Experimental Surface Disposition
 
 No experimental surface is architecture merely because it merged.
@@ -259,6 +310,7 @@ No experimental surface is architecture merely because it merged.
 | **curated Button specimens (3 active runtimes)** | restored; keep as documentation, audit under g14.026 | g14.026 |
 | **curated RangeSlider specimens (3 active runtimes)** | restored; keep as documentation, audit under g14.026 | g14.026 |
 | **g14.004 Tabs identified-collection proof** | keep — stable keyed repeated anatomy and navigation profile | g14.010 |
+| **g14.005 Popover overlay/focus proof** | keep — the first overlay profile: layer registry, dismissal routes, placement, focus entry/restore | g14.010 |
 | **curated Tabs specimens (3 active runtimes)** | restored; retain useful overflow/reorder, close, decoration, panel, and scale examples, then audit under the human-centred rubric | g14.026 |
 | **hand-written TabsSpec + Tabs machine vectors** | retain residual overflow/history/close/reorder claims not replaced by g14.004 | g14.010 / g14.011 |
 | **generated specimen scenes (specimen-ts/rust targets)** | shell/nav support only; do not promote into a universal catalogue scene tree | g14.021 / g14.026 |

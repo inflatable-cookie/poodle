@@ -54,6 +54,14 @@ export class SvelteRangeSliderAdapter implements RuntimeAdapter {
     // RangeSlider corpus uses scrub/key, not press.
   }
 
+  async dismiss(_part: string): Promise<void> {
+    // The corpus of this profile does not exercise the dismissal route.
+  }
+
+  async pointer(_part: string, _target: "inside" | "outside"): Promise<void> {
+    // The corpus of this profile does not exercise outside pointer intent.
+  }
+
   async flush(): Promise<void> {
     flushSync();
   }

@@ -20,6 +20,7 @@ import { fileURLToPath } from "node:url";
 import { buttonCases } from "../../packages/core/src/conformance/button-cases";
 import { rangeSliderCases } from "../../packages/core/src/conformance/range-slider-cases";
 import { tabsCases } from "../../packages/core/src/conformance/tabs-cases";
+import { popoverCases } from "../../packages/core/src/conformance/popover-cases";
 import type { SerializedCase } from "../../packages/core/src/conformance/define";
 
 interface AssertionResult {
@@ -60,6 +61,7 @@ const COMPONENT_CORPORA: Array<{
   { label: "button", reportSuffix: "", cases: buttonCases },
   { label: "range-slider", reportSuffix: "-range-slider", cases: rangeSliderCases },
   { label: "tabs", reportSuffix: "-tabs", cases: tabsCases },
+  { label: "popover", reportSuffix: "-popover", cases: popoverCases },
 ];
 
 function loadReport(runtime: string, reportSuffix: string): RuntimeReport | null {
@@ -79,11 +81,31 @@ const IDENTITY_FIELDS = [
   "focusVisible",
   "tabbable",
   "selected",
+  "expanded",
+  "parent",
+  "overlay",
+  "focusedText",
+  "layerCount",
   "orientation",
   "controls",
   "labelledBy",
 ] as const;
-const GEOMETRY_FIELDS = ["height", "minWidth", "paddingLeft", "paddingRight", "radius", "borderWidth"] as const;
+const GEOMETRY_FIELDS = [
+  "height",
+  "minWidth",
+  "paddingLeft",
+  "paddingRight",
+  "radius",
+  "borderWidth",
+  "topGap",
+  "bottomGap",
+  "leftGap",
+  "rightGap",
+  "hStart",
+  "hEnd",
+  "vStart",
+  "widthGap",
+] as const;
 
 type GeometryFieldContract = Map<string, number>;
 type GeometryPartContract = Map<string, GeometryFieldContract>;

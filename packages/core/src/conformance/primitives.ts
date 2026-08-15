@@ -40,12 +40,20 @@ export type ObservationField =
   | "parts.focusVisible"
   | "parts.geometry"
   | "parts.channels"
+  | "parts.expanded"
+  | "parts.overlay"
+  | "parts.layerCount"
+  | "parts.parent"
+  | "parts.focusedText"
+  | "parts.relativeBounds"
   | "trace"
   | "node.field"
   | "node.a11y"
   | "gpui.focus"
   | "gpui.event"
   | "gpui.layout"
+  | "gpui.layer"
+  | "gpui.dismiss"
   | "image.regional";
 
 export interface PrimitiveCapability {
@@ -150,6 +158,15 @@ export const PRIMITIVE_CAPABILITIES = [
       "component-observation.v1.parts.*.geometry.paddingRight",
       "component-observation.v1.parts.*.geometry.radius",
       "component-observation.v1.parts.*.geometry.borderWidth",
+      "component-observation.v1.parts.*.geometry.topGap",
+      "component-observation.v1.parts.*.geometry.bottomGap",
+      "component-observation.v1.parts.*.geometry.leftGap",
+      "component-observation.v1.parts.*.geometry.rightGap",
+      "component-observation.v1.parts.*.geometry.hStart",
+      "component-observation.v1.parts.*.geometry.hEnd",
+      "component-observation.v1.parts.*.geometry.vStart",
+      "component-observation.v1.parts.*.geometry.widthGap",
+      "component-observation.v1.parts.*.parent",
     ],
     owner: "g14.002",
     requiredObservations: ["parts.geometry", "node.field"],
@@ -168,7 +185,7 @@ export const PRIMITIVE_CAPABILITIES = [
     ],
     owner: "g14.002",
     requiredObservations: ["node.field"],
-    notes: "Absolute placement result semantics owned by g14.005.",
+    notes: "Absolute placement result semantics executed by g14.005.",
   },
 
   // ── 3. surface ───────────────────────────────────────────────────────────
@@ -338,9 +355,9 @@ export const PRIMITIVE_CAPABILITIES = [
   {
     id: "semantic.expanded",
     family: "semantic",
-    covers: ["NodeA11y.expanded"],
+    covers: ["NodeA11y.expanded", "component-observation.v1.parts.*.expanded"],
     owner: "g14.005",
-    requiredObservations: ["node.a11y"],
+    requiredObservations: ["node.a11y", "parts.expanded"],
   },
 
   // ── 6. interaction ───────────────────────────────────────────────────────
@@ -436,10 +453,36 @@ export const PRIMITIVE_CAPABILITIES = [
   {
     id: "overlay.intent",
     family: "overlay",
-    covers: ["NodeStyle.overlay"],
+    covers: [
+      "NodeStyle.overlay",
+      "component-observation.v1.parts.*.overlay",
+    ],
     owner: "g14.005",
-    requiredObservations: ["node.field", "image.regional"],
-    notes: "Channel certified as deferred; placement/dismissal/focus transfer owned by g14.005.",
+    requiredObservations: ["node.field", "parts.overlay"],
+    notes: "Executed by g14.005 through the Popover overlay profile.",
+  },
+  {
+    id: "overlay.dismiss",
+    family: "overlay",
+    covers: [
+      "Interaction.on_dismiss",
+      "DismissReason",
+      "dismiss action",
+      "component-observation.v1.trace",
+    ],
+    owner: "g14.005",
+    requiredObservations: ["node.field", "trace", "gpui.dismiss"],
+  },
+  {
+    id: "overlay.layer",
+    family: "overlay",
+    covers: [
+      "Interaction.dismiss_layer",
+      "layer registration",
+      "component-observation.v1.parts.*.layerCount",
+    ],
+    owner: "g14.005",
+    requiredObservations: ["node.field", "parts.layerCount", "gpui.layer"],
   },
 
   // ── 9. input ─────────────────────────────────────────────────────────────
@@ -495,9 +538,14 @@ export function assertKnownCapabilities(names: readonly string[], where: string)
   }
 }
 
-/** Rows this card must execute across Svelte, React, Rust, and GPUI. */
+/** Rows this card must execute across Svelte, React, Rust, and GPUI. The
+ * g14.005 overlay rows join the g14.002 substrate rows once the overlay
+ * profile lands: a capability passes only after executed web,
+ * render-neutral, and GPUI evidence exists. */
 export function ownedPrimitiveCapabilities(): readonly PrimitiveCapability[] {
-  return PRIMITIVE_CAPABILITIES.filter((row) => row.owner === "g14.002");
+  return PRIMITIVE_CAPABILITIES.filter(
+    (row) => row.owner === "g14.002" || row.owner === "g14.005",
+  );
 }
 
 export function serializePrimitiveRoster(): unknown {

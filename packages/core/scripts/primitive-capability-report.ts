@@ -114,7 +114,7 @@ function rowReport(
   row: PrimitiveCapability,
   layers: Record<Layer, ProbeEvidenceFile | null>,
 ): Record<string, unknown> {
-  const owned = row.owner === "g14.002";
+  const owned = row.owner === "g14.002" || row.owner === "g14.005";
   const evidence: Record<string, LayerEvidence | { status: "deferred"; owner: string }> = {};
   if (owned) {
     evidence.svelte = layerFromFile(layers.svelte, row.id);
@@ -165,7 +165,7 @@ const layers: Record<Layer, ProbeEvidenceFile | null> = {
 };
 
 const rows = PRIMITIVE_CAPABILITIES.map((row) => rowReport(row, layers));
-const owned = rows.filter((row) => row.owner === "g14.002");
+const owned = rows.filter((row) => row.owner === "g14.002" || row.owner === "g14.005");
 const failingOwned = owned.filter((row) => row.status !== "passing");
 
 const report = {
@@ -206,7 +206,7 @@ const markdownLines = [
 ];
 
 for (const row of rows) {
-  if (row.owner !== "g14.002") {
+  if (row.owner !== "g14.002" && row.owner !== "g14.005") {
     markdownLines.push(
       `| \`${row.id}\` | ${row.family} | ${row.owner} | — | — | — | — | deferred |`,
     );

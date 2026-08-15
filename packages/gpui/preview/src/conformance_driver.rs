@@ -51,6 +51,21 @@ impl Render for ConformanceRoot {
         div()
             .size_full()
             .track_focus(&self.focus)
+            // The window-level half of the dismiss-stack contract: every
+            // pointer press and Escape is routed through the node backend's
+            // layer registry (generic — no component identifier here), so
+            // overlay dismissal executes through the real event tree.
+            .on_mouse_down(
+                gpui::MouseButton::Left,
+                move |event: &gpui::MouseDownEvent, _window, cx| {
+                    poodle_gpui_node_backend::dismiss_layers_at(event.position, cx);
+                },
+            )
+            .on_key_down(move |event: &gpui::KeyDownEvent, _window, cx| {
+                if event.keystroke.key.as_str() == "escape" {
+                    poodle_gpui_node_backend::dismiss_innermost(cx);
+                }
+            })
             .child(
                 div()
                     .w(px(MOUNT_BOX_WIDTH))
@@ -76,6 +91,7 @@ impl Render for ConformanceRoot {
 pub struct HeadlessDriver<'a> {
     cx: &'a mut VisualTestContext,
     root: Entity<ConformanceRoot>,
+    root_focus: FocusHandle,
 }
 
 impl<'a> HeadlessDriver<'a> {
@@ -89,7 +105,12 @@ impl<'a> HeadlessDriver<'a> {
             window.refresh();
             root
         });
-        let mut driver = Self { cx, root };
+        let root_focus = cx.update(|_window, cx| root.read(cx).focus.clone());
+        let mut driver = Self {
+            cx,
+            root,
+            root_focus,
+        };
         driver.draw_frame();
         driver
     }
@@ -234,7 +255,7 @@ impl<'a> HeadlessDriver<'a> {
     /// through the window's real dispatch tree.
     pub fn keyboard_key(&mut self, element_id: &str, key: &str) {
         self.focus_element(element_id);
-        self.dispatch_key(key);
+        self.dispatch_key_raw(key);
     }
 
     /// Enter activation on the focused element (keyboard press).
@@ -245,7 +266,23 @@ impl<'a> HeadlessDriver<'a> {
     /// Send one named keystroke (key down + key up) without moving focus —
     /// the event tree resolves the focus target itself. Used by planted
     /// failures to prove a wrong focus target stays inert.
+    ///
+    /// An unfocused window — or a focus handle from a previous mount — has an
+    /// empty or stale dispatch path, so window-level key handling (Escape →
+    /// overlay dismissal) would never fire. The mount host is focused first;
+    /// the same guarantee a document-level key listener has on the web.
     pub fn dispatch_key(&mut self, key: &str) {
+        self.cx.update(|window, _cx| {
+            let handle = self.root_focus.clone();
+            handle.focus(window);
+        });
+        self.dispatch_key_raw(key);
+    }
+
+    /// The keystroke half of [`Self::dispatch_key`], with focus untouched —
+    /// callers that already focused the target (keyboard activation, tabs
+    /// navigation) use this so the mount host never steals focus.
+    pub fn dispatch_key_raw(&mut self, key: &str) {
         let keystroke = Keystroke::parse(key).expect("keystroke parses");
         self.cx.simulate_event(KeyDownEvent {
             keystroke: keystroke.clone(),
