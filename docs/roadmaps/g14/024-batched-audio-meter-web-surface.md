@@ -1,6 +1,6 @@
 # g14.024 — Batched Audio Meter Web Surface
 
-Status: ready — independent web-performance lane
+Status: complete — accepted in PR #19; Canvas2D met the budget
 Depends on: approved spec 068 and the AudioMeter contract amendment
 Governing refs: `../../architecture/006-headless-core-and-machine-model.md`,
 `../../architecture/008-audio-control-family.md`,

@@ -1,6 +1,6 @@
 # g14.005 — Popover Overlay And Focus Proof
 
-Status: ready — next after `g14.023`
+Status: complete — accepted in PR #18
 Depends on: `g14.023` — accepted in PR #17
 Governing refs: `../../architecture/009-cross-runtime-component-conformance.md`,
 `../../specs/066-executable-component-conformance.md`,

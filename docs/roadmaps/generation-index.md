@@ -1,12 +1,12 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-14
+Updated: 2026-08-15
 
 ## Active Track
 
 - `g14`
   - Status: active
-  - Range: `001` to `025`
+  - Range: `001` to `026`
   - Governing architecture:
     `docs/architecture/009-cross-runtime-component-conformance.md`
   - Governing spec: `docs/specs/066-executable-component-conformance.md`
@@ -14,17 +14,18 @@ Updated: 2026-08-14
     GPUI. One portable interface and case/specimen corpus; two implementation
     substrates; three executed observations; strict active-cohort completion.
     Jetstream remains a deferred backend over the same Rust boundary.
-  - Runway: `001`–`004` are accepted; `005`–`007` prove the remaining component
+  - Runway: `001`–`005` are accepted; `006`–`007` prove the remaining component
     profiles; `008` records adopt/revise/reject. `009`–`014` remain blocked
     until adopt. `015`–`017` stage and complete the licence surface;
     `018`–`020` do the same for model connections; `021` cleans the estate,
     `022` closes the generation, interposed `023` replaces foreground GPUI
-    conformance before profile `005`, independent `024` adds the batched
-    AudioMeter web rendering tier, and completed `025` provides the generated
-    preview catalogue taxonomy and active-runtime navigation.
-  - Next: dispatch `g14.023`. `g14.019` and `g14.025` are complete;
-    model-connection reference and preview catalogue navigation are approved.
-    `g14.024` is active in its separate web-performance worktree.
+    conformance before profile `005`, completed `024` adds the batched
+    AudioMeter web rendering tier, completed `025` provides the generated
+    preview catalogue taxonomy and active-runtime navigation, and `026` holds
+    the post-verdict human-centred specimen audit.
+  - Next: dispatch `g14.006`. `g14.019`, `g14.024`, and `g14.025` are complete;
+    model-connection reference, batched metering, and preview navigation are
+    approved. `g14.026` remains blocked pending the `008` verdict.
 
 ## Latest Completed Track
 

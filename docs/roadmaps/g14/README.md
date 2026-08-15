@@ -84,8 +84,8 @@ the adopted cases before promotion.
 3. [003 — RangeSlider controlled-control proof](003-range-slider-controlled-control-proof.md) — complete; accepted in PR #13
 4. [004 — Tabs collection and navigation proof](004-tabs-collection-navigation-proof.md) — complete; accepted in PR #14
 5. [023 — Headless GPUI conformance execution](023-headless-gpui-conformance-execution.md) — complete; accepted in PR #17
-6. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md) — next
-7. [006 — TextInput runtime-boundary proof](006-text-input-runtime-boundary-proof.md)
+6. [005 — Popover overlay and focus proof](005-popover-overlay-focus-proof.md) — complete; accepted in PR #18
+7. [006 — TextInput runtime-boundary proof](006-text-input-runtime-boundary-proof.md) — next
 8. [007 — HistoryCenter composite proof](007-history-center-composite-proof.md)
 9. [008 — Pilot verdict](008-pilot-verdict.md)
 10. [009 — Foundation and display rollout](009-foundation-display-rollout.md)
@@ -102,7 +102,7 @@ the adopted cases before promotion.
 21. [020 — Model connection active-runtime completion](020-model-connection-active-runtime-completion.md)
 22. [021 — Experimental cleanup and gate consolidation](021-experimental-cleanup-and-gate-consolidation.md)
 23. [022 — Generation closeout](022-generation-closeout.md)
-24. [024 — Batched AudioMeter web surface](024-batched-audio-meter-web-surface.md) — ready; independent web-performance lane
+24. [024 — Batched AudioMeter web surface](024-batched-audio-meter-web-surface.md) — complete; accepted in PR #19
 25. [025 — Preview catalogue taxonomy and generated navigation](025-preview-catalogue-taxonomy-and-generated-navigation.md) — complete; accepted in PR #16
 26. [026 — Human-centred specimen catalogue audit](026-human-centred-specimen-catalogue-audit.md) — blocked pending `008`
 
@@ -117,24 +117,23 @@ No batch-card layer. No parallel work on the conformance kernel before the
 prior profile settles its vocabulary. Bounded web-reference lanes may run in
 parallel only when named here. `018` used that exception and is now complete.
 `019` stayed in the operator/orchestrator thread and is now complete. `024`
-may run independently under its explicit no-conformance/no-native boundary.
+used its explicit no-conformance/no-native independent lane and is complete.
 `025` used that independent lane and is now complete. It owns preview catalogue
 metadata and navigation; Jetstream's interactive shell remains deferred.
 
 ## First Task
 
-`g14.023` is complete: the foreground GPUI conformance runner is replaced
-with headless GPUI execution on GPUI's in-memory test platform, and
-`conformance:complete` runs the full cohort in any local worktree. `005` is
-next and resumes the component profiles. Jetstream stays outside the active
-cohort. Its local validation remains headless.
+`g14.005` is complete. PR #18 accepted the Popover overlay/focus profile after
+the portable width subset, production GPUI overlay host, containment-derived
+web ancestry, and evidence corrections were reviewed. `006` is next.
+Jetstream stays outside the active cohort. Local validation remains headless.
 
 The model-connection web reference is approved. Native/conformance completion
 stays open under `020` until the pilot records **adopt**.
 
-`g14.024` is ready for a separate worktree now. Give the worker the complete
-roadmap file; its Canvas2D, browser, allocation, and performance evidence must
-return as one PR for orchestrator review.
+`g14.024` is complete. PR #19 landed the batched web meter tier; Canvas2D met
+the 128-meter p95 budget in Chromium and WebKit, so no WebGL2 follow-up is
+justified now.
 
 `g14.025` is complete. PR #16 landed the generated catalogue authority and
 active-preview navigation after orchestrator taxonomy review.
