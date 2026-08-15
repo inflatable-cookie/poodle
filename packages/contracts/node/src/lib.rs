@@ -477,6 +477,18 @@ pub type SubmitHandler = Arc<dyn Fn() + Send + Sync>;
 /// Handler for a host-owned edit cancellation (Escape on an input).
 pub type CancelHandler = Arc<dyn Fn() + Send + Sync>;
 
+/// Which document-level route asked for the dismissal.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum DismissReason {
+    /// The Escape key, while the layer stack is non-empty.
+    Escape,
+    /// A pointer interaction that fell outside the layer's containment set.
+    Outside,
+}
+
+/// Document-level overlay dismissal handler.
+pub type DismissHandler = Arc<dyn Fn(DismissReason) + Send + Sync>;
+
 /// Interaction intent. Dispatching — hit-testing, ordering, focus — is the
 /// backend's job; this declares what the node wants when dispatch reaches it.
 #[derive(Clone, Default)]
@@ -554,6 +566,19 @@ pub struct Interaction {
     /// Secondary (right) activation, carrying the pointer anchor for a
     /// context menu.
     pub on_context: Option<Arc<dyn Fn(NodePoint) + Send + Sync>>,
+    /// Document-level overlay dismissal: while a node carrying this handler is
+    /// mounted the backend registers it on the dismissable layer stack and
+    /// routes Escape (innermost layer first) and outside pointer interactions
+    /// (layers that neither contain the pointer nor sit above a layer that
+    /// does — the shared dismiss-stack contract) through the real event tree.
+    /// The handler receives the reason; the component decides what closing
+    /// means (e.g. its own `dismissOnOutsideInteract` guard).
+    pub on_dismiss: Option<DismissHandler>,
+    /// The overlay layer this node belongs to. Every mounted node sharing a
+    /// layer id forms one containment unit (an overlay's trigger and surface);
+    /// the backend records their rendered bounds for outside-interaction
+    /// checks and orders layers by tree position.
+    pub dismiss_layer: Option<String>,
     /// Navigation and command keys, while this node holds focus.
     ///
     /// Returning an element id asks the backend to move focus there. The

@@ -1,44 +1,42 @@
-use crate::app_state::AppState;
-use crate::node_compat::{Button, Eyebrow, Popover};
-use crate::specimens::overlay_state;
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{Eyebrow, Popover};
 use crate::PreviewRoot;
 use gpui::*;
+use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{LayoutDirection, Node};
-use poodle_specs::{
-    ButtonSpec, ButtonVariant, EyebrowSpec, OverlayPlacement, PopoverSpec, PopoverSurfaceWidth,
-};
+use poodle_specs::{EyebrowSpec, OverlayPlacement, PopoverSpec, PopoverSurfaceWidth};
 
-/// One labelled popover example. The popover renders its open surface inline
-/// (the established GPUI specimen pattern); `on_open_change` toggles the
-/// preview's overlay state so the trigger flow stays interactive.
+/// One labelled popover example. The popover renders through the shared
+/// poodle-render composition; the toggle handler delivers through the
+/// preview's node-event queue (node handlers carry no window context, so the
+/// queue is drained in the render loop), keeping the trigger flow
+/// interactive.
 fn popover_case(
     state: &AppState,
     theme: &GpuiThemeProvider,
-    root: &WeakEntity<PreviewRoot>,
     key: &'static str,
     spec: PopoverSpec,
     trigger_label: &str,
     content: Node,
 ) -> Popover {
     let is_open = state.specimens.is_on(key);
+    let queue = std::sync::Arc::clone(&state.node_events);
     Popover::from_spec(spec.with_open(is_open), theme)
-        .on_open_change({
-            let root = root.clone();
-            move |open, _window, cx| {
-                overlay_state::set_toggle_via_entity(&root, key, open, cx);
-            }
-        })
-        .with_trigger(
-            Button::from_spec(
-                ButtonSpec::new()
-                    .with_variant(ButtonVariant::Secondary)
-                    .with_label(trigger_label),
-                theme,
-            )
-            .with_id(format!("{key}-trigger")),
-        )
+        .with_instance_id(key)
+        .on_open_change(Arc::new(move |open| {
+            queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetToggle {
+                    key: key.to_owned(),
+                    value: open,
+                });
+        }))
+        // The composition owns the interactive trigger (role button,
+        // focusable); the specimen only supplies its label.
+        .with_trigger(Node::text(trigger_label))
         .with_content(content)
 }
 
@@ -54,11 +52,10 @@ fn labelled(theme: &GpuiThemeProvider, label: &str, body: Popover) -> Div {
         .child(body)
 }
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
     let text_primary = theme.resolve_color("color.text.primary");
-    let root = cx.weak_entity();
 
     // Heading + paragraph content block (matches the Svelte specimen body).
     let heading_paragraph = |heading: &str, body: &str| -> Node {
@@ -93,7 +90,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             popover_case(
                 state,
                 theme,
-                &root,
                 "popover-default",
                 PopoverSpec::new().with_aria_label("Quick settings"),
                 "Open popover",
@@ -110,7 +106,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             popover_case(
                 state,
                 theme,
-                &root,
                 "popover-top",
                 PopoverSpec::new()
                     .with_placement(OverlayPlacement::Top)
@@ -137,7 +132,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(popover_case(
                             state,
                             theme,
-                            &root,
                             "popover-left",
                             PopoverSpec::new()
                                 .with_placement(OverlayPlacement::Left)
@@ -148,7 +142,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(popover_case(
                             state,
                             theme,
-                            &root,
                             "popover-right",
                             PopoverSpec::new()
                                 .with_placement(OverlayPlacement::Right)
@@ -165,7 +158,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             popover_case(
                 state,
                 theme,
-                &root,
                 "popover-surface-trigger",
                 PopoverSpec::new()
                     .with_surface_width(PopoverSurfaceWidth::Trigger)
@@ -181,11 +173,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             popover_case(
                 state,
                 theme,
-                &root,
                 "popover-surface-fixed",
                 PopoverSpec::new()
-                    .with_surface_min_width_rem(20.0)
-                    .with_surface_max_width_rem(20.0)
+                    .with_surface_min_width(poodle_specs::Dimension::new("20rem"))
+                    .with_surface_max_width(poodle_specs::Dimension::new("20rem"))
                     .with_aria_label("Fixed-width popover"),
                 "Fixed 20rem",
                 paragraph("Surface min-width and max-width are pinned to 20rem."),
@@ -198,7 +189,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             popover_case(
                 state,
                 theme,
-                &root,
                 "popover-disabled",
                 PopoverSpec::new()
                     .with_disabled(true)

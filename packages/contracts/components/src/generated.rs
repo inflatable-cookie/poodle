@@ -4,4 +4,5 @@
 //! live beside the generated file in the component module.
 
 pub mod button;
+pub mod popover;
 pub mod tabs;

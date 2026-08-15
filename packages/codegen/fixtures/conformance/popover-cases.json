@@ -1,0 +1,1648 @@
+{
+  "schemaVersion": 1,
+  "component": "popover",
+  "cases": [
+    {
+      "id": "popover/closed-default",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Basics",
+        "caption": "Closed default",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "popover/closed-default"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": false
+            },
+            "tokenRoles": {
+              "placement": "bottom-start",
+              "surfaceWidth": "content"
+            },
+            "layerCount": 0
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "role": "button",
+            "name": "Open popover",
+            "focusable": true,
+            "tabbable": true,
+            "focused": false,
+            "expanded": false,
+            "parent": "root"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        }
+      ]
+    },
+    {
+      "id": "popover/uncontrolled-open-pointer",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Basics",
+        "caption": "Pointer opens",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "popover/uncontrolled-open-pointer"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "expanded": true,
+            "controls": "surface",
+            "parent": "root"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true,
+            "role": "dialog",
+            "name": "Quick settings",
+            "overlay": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "layerCount": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "geometry": {
+              "topGap": 8,
+              "hStart": 0,
+              "tolerance": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/uncontrolled-open-keyboard",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Basics",
+        "caption": "Keyboard opens",
+        "axes": [],
+        "captureId": "popover/uncontrolled-open-keyboard"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "keyboard"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            },
+            "layerCount": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true,
+            "role": "dialog",
+            "name": "Quick settings"
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/controlled-ownership",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "open": false
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Ownership",
+        "caption": "Controlled host owns open",
+        "axes": [],
+        "captureId": "popover/controlled-ownership"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange",
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "focused": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/disabled-inert",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "disabled": true,
+          "open": true
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "States",
+        "caption": "Disabled stays inert",
+        "axes": [],
+        "captureId": "popover/disabled-inert"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": false
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "focusable": false,
+            "tabbable": false
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "keyboard"
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "action",
+          "name": "key",
+          "part": "trigger",
+          "key": "Space"
+        },
+        {
+          "kind": "expectEvents",
+          "events": []
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/focus-first",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        },
+        "host": {
+          "focusables": [
+            "First option",
+            "Second option"
+          ]
+        }
+      },
+      "specimen": {
+        "group": "Focus",
+        "caption": "First focusable",
+        "axes": [],
+        "captureId": "popover/focus-first"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "focusedText": "First option"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "focused": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "focused": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/focus-content",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "initialFocus": "content"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Focus",
+        "caption": "Surface focus",
+        "axes": [],
+        "captureId": "popover/focus-content"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "focused": true,
+            "focusable": true,
+            "tabbable": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "focusedText": "Quick settings panel"
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/focus-none",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "initialFocus": "none"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Focus",
+        "caption": "Focus untouched",
+        "axes": [],
+        "captureId": "popover/focus-none"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "focused": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "focused": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/explicit-close",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Dismissal",
+        "caption": "Trigger close restores focus",
+        "axes": [],
+        "captureId": "popover/explicit-close"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange",
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "focused": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/escape",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Dismissal",
+        "caption": "Escape closes",
+        "axes": [],
+        "captureId": "popover/escape"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "action",
+          "name": "dismiss",
+          "part": "root"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange",
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "focused": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/outside-interaction",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Dismissal",
+        "caption": "Outside pointer closes",
+        "axes": [],
+        "captureId": "popover/outside-interaction"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "action",
+          "name": "pointer",
+          "part": "root",
+          "target": "outside"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange",
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "focused": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/inside-interaction-stays",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Dismissal",
+        "caption": "Inside pointer keeps open",
+        "axes": [],
+        "captureId": "popover/inside-interaction-stays"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "action",
+          "name": "pointer",
+          "part": "surface",
+          "target": "inside"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "layerCount": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/outside-guard",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "dismissOnOutsideInteract": false
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Dismissal",
+        "caption": "Outside guard holds, Escape still closes",
+        "axes": [],
+        "captureId": "popover/outside-guard"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "action",
+          "name": "pointer",
+          "part": "root",
+          "target": "outside"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true
+          }
+        },
+        {
+          "kind": "action",
+          "name": "dismiss",
+          "part": "root"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange",
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/nested-escape",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        },
+        "host": {
+          "nested": {
+            "trigger": "Nested trigger",
+            "children": "Nested panel"
+          }
+        }
+      },
+      "specimen": {
+        "group": "Layers",
+        "caption": "Escape unwinds innermost first",
+        "axes": [],
+        "captureId": "popover/nested-escape"
+      },
+      "steps": [
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "layerCount": 0
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "layerCount": 2
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true
+          }
+        },
+        {
+          "kind": "action",
+          "name": "dismiss",
+          "part": "root"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange",
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "layerCount": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true
+          }
+        },
+        {
+          "kind": "action",
+          "name": "dismiss",
+          "part": "root"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange",
+            "openChange",
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "layerCount": 0
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "focused": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/nested-outside-ancestry",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        },
+        "host": {
+          "nested": {
+            "trigger": "Nested trigger",
+            "children": "Nested panel"
+          }
+        }
+      },
+      "specimen": {
+        "group": "Layers",
+        "caption": "Inside outer spares ancestry",
+        "axes": [],
+        "captureId": "popover/nested-outside-ancestry"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "layerCount": 2
+          }
+        },
+        {
+          "kind": "action",
+          "name": "pointer",
+          "part": "surface",
+          "target": "inside"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange",
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "layerCount": 1
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true
+          }
+        },
+        {
+          "kind": "action",
+          "name": "dismiss",
+          "part": "root"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange",
+            "openChange",
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "layerCount": 0
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/placement-top",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "placement": "top-start"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Placement",
+        "caption": "Top family",
+        "axes": [
+          "theme"
+        ],
+        "captureId": "popover/placement-top"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "expanded": true,
+            "controls": "surface",
+            "parent": "root"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true,
+            "role": "dialog",
+            "name": "Quick settings",
+            "overlay": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "tokenRoles": {
+              "placement": "top-start"
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "geometry": {
+              "bottomGap": 8,
+              "hStart": 0,
+              "tolerance": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/placement-right",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "placement": "right-start"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Placement",
+        "caption": "Right family",
+        "axes": [],
+        "captureId": "popover/placement-right"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "expanded": true,
+            "controls": "surface",
+            "parent": "root"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true,
+            "role": "dialog",
+            "name": "Quick settings",
+            "overlay": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "geometry": {
+              "leftGap": 8,
+              "vStart": 0,
+              "tolerance": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/placement-left",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "placement": "left-start"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Placement",
+        "caption": "Left family",
+        "axes": [],
+        "captureId": "popover/placement-left"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "expanded": true,
+            "controls": "surface",
+            "parent": "root"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true,
+            "role": "dialog",
+            "name": "Quick settings",
+            "overlay": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "geometry": {
+              "rightGap": 8,
+              "vStart": 0,
+              "tolerance": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/placement-end-rule",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "placement": "bottom-end"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Placement",
+        "caption": "End alignment",
+        "axes": [],
+        "captureId": "popover/placement-end-rule"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "expanded": true,
+            "controls": "surface",
+            "parent": "root"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true,
+            "role": "dialog",
+            "name": "Quick settings",
+            "overlay": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "geometry": {
+              "topGap": 8,
+              "hEnd": 0,
+              "tolerance": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/offset",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "offset": 12
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Placement",
+        "caption": "Offset gap",
+        "axes": [],
+        "captureId": "popover/offset"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "expanded": true,
+            "controls": "surface",
+            "parent": "root"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true,
+            "role": "dialog",
+            "name": "Quick settings",
+            "overlay": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "geometry": {
+              "topGap": 12,
+              "tolerance": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/surface-width-bounds",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "surfaceMinWidth": "20rem",
+          "surfaceMaxWidth": "22rem"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Placement",
+        "caption": "Width bounds override",
+        "axes": [],
+        "captureId": "popover/surface-width-bounds"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "expanded": true,
+            "controls": "surface",
+            "parent": "root"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true,
+            "role": "dialog",
+            "name": "Quick settings",
+            "overlay": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "geometry": {
+              "minWidth": 320,
+              "tolerance": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/surface-width-trigger",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "surfaceWidth": "trigger"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Placement",
+        "caption": "Trigger-width surface",
+        "axes": [],
+        "captureId": "popover/surface-width-trigger"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "expanded": true,
+            "controls": "surface",
+            "parent": "root"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "present": true,
+            "role": "dialog",
+            "name": "Quick settings",
+            "overlay": true
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "tokenRoles": {
+              "surfaceWidth": "trigger"
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "geometry": {
+              "widthGap": 0,
+              "tolerance": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "popover/semantics-tokens",
+      "fixture": {
+        "props": {
+          "ariaLabel": "Quick settings",
+          "placement": "bottom-end"
+        },
+        "regions": {
+          "trigger": "Open popover",
+          "children": "Quick settings panel"
+        }
+      },
+      "specimen": {
+        "group": "Semantics",
+        "caption": "Dialog role, name, and tokens",
+        "axes": [],
+        "captureId": "popover/semantics-tokens"
+      },
+      "steps": [
+        {
+          "kind": "action",
+          "name": "press",
+          "part": "trigger",
+          "input": "pointer"
+        },
+        {
+          "kind": "expectEvents",
+          "events": [
+            "openChange"
+          ]
+        },
+        {
+          "kind": "expectPart",
+          "part": "root",
+          "expect": {
+            "states": {
+              "open": true
+            },
+            "layerCount": 1,
+            "tokenRoles": {
+              "placement": "bottom-end",
+              "surfaceWidth": "content"
+            }
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "trigger",
+          "expect": {
+            "role": "button",
+            "expanded": true,
+            "controls": "surface",
+            "parent": "root"
+          }
+        },
+        {
+          "kind": "expectPart",
+          "part": "surface",
+          "expect": {
+            "role": "dialog",
+            "name": "Quick settings",
+            "overlay": true
+          }
+        }
+      ]
+    }
+  ]
+}

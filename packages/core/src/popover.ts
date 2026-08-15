@@ -102,6 +102,8 @@ export function popoverParts(
       "data-part": "root",
       "data-state": state,
       "data-block": props.block,
+      "data-placement": props.placement,
+      "data-surface-width": props.surfaceWidth,
     },
     trigger: {
       "data-part": "trigger",

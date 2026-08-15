@@ -282,7 +282,7 @@ pub use pagination_summary::pagination_summary;
 pub use password_requirements::password_requirements;
 pub use picker_shell::picker_shell;
 pub use pill::{pill, pill_with_remove};
-pub use popover::popover;
+pub use popover::{popover, popover_surface, PopoverHandlers, POPOVER_ANCHOR_HEIGHT_PX, POPOVER_ANCHOR_WIDTH_PX};
 pub use progress::progress;
 pub use radio_group::radio_group;
 pub use range_slider::{range_slider, RangeSliderHandlers};

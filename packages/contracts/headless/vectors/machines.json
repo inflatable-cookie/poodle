@@ -32,36 +32,6 @@
       "expect": { "context": { "checked": true }, "effects": [] }
     }
   ],
-  "popover": [
-    {
-      "name": "toggle opens with open-change then focus intent",
-      "state": "closed",
-      "context": { "disabled": false, "dismissOnOutsideInteract": true, "initialFocus": "first-focusable" },
-      "event": { "type": "TOGGLE" },
-      "expect": { "state": "open", "effects": [{ "type": "emitOpenChange", "open": true }, { "type": "focusOnOpen", "strategy": "first-focusable" }] }
-    },
-    {
-      "name": "escape closes with focus restore",
-      "state": "open",
-      "context": { "disabled": false, "dismissOnOutsideInteract": true, "initialFocus": "first-focusable" },
-      "event": { "type": "ESCAPE" },
-      "expect": { "state": "closed", "effects": [{ "type": "emitOpenChange", "open": false }, { "type": "restoreTriggerFocus" }] }
-    },
-    {
-      "name": "outside guard holds",
-      "state": "open",
-      "context": { "disabled": false, "dismissOnOutsideInteract": false, "initialFocus": "content" },
-      "event": { "type": "OUTSIDE_INTERACT" },
-      "expect": { "state": "open", "effects": [] }
-    },
-    {
-      "name": "disabled blocks open",
-      "state": "closed",
-      "context": { "disabled": true, "dismissOnOutsideInteract": true, "initialFocus": "none" },
-      "event": { "type": "OPEN" },
-      "expect": { "state": "closed", "effects": [] }
-    }
-  ],
   "modal": [
     {
       "name": "open emits change, focus entry, scroll lock in order",

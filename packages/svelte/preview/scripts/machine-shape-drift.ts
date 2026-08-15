@@ -71,13 +71,6 @@ const PINNED: Record<
     rsRunner: "packages/contracts/headless/tests/conformance.rs",
     rsEvidence: "fn modal_conformance",
   },
-  popover: {
-    file: "machines.json",
-    tsRunner: "packages/core/test/conformance.test.ts",
-    tsEvidence: 'case "popover"',
-    rsRunner: "packages/contracts/headless/tests/conformance.rs",
-    rsEvidence: "fn popover_conformance",
-  },
   singleSelect: {
     file: "machines.json",
     tsRunner: "packages/core/test/conformance.test.ts",
@@ -193,6 +186,8 @@ const PINNED: Record<
 const BASELINE: Record<string, string> = {
   "rs:text_input":
     "text editing model (caret/selection/keyboard-table contract), not a behavior machine; no Context/Event/Effect machine shape by design.",
+  "popover":
+    "pure-transition vectors reconciled into the mounted conformance corpus (g14.005): 22 Popover cases cover open/close/escape/outside/disabled claims across Svelte, React, and GPUI through the real machine; the machine stays, exercised by both web runtimes and the Rust mirror through the corpus.",
 };
 
 /** Canonical name for a module: strip separators, lowercase. */

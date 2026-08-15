@@ -12,14 +12,14 @@
  *   it sits in.
  * - **Outside interaction** dismisses *every* layer the interaction fell
  *   outside of, except a layer that contains the target and any ancestor of
- *   such a layer. The stack is not flat: `registerDismissLayer` records, at
- *   registration, the layer that was on top of the stack — the layer this one
- *   opened inside, its parent (portalling does not change that; registration
- *   order does). A click inside a nested layer therefore spares the whole
- *   chain back to the host, while true peers — layers with no parent link to
- *   the hit layer — still all dismiss. Closing everything the click was
- *   outside of is what the peer-dismissal change was for; ancestry just stops
- *   a nested layer from reading as a peer of its own host.
+ *   such a layer. The stack is not flat: a layer's parent is the innermost
+ *   layer already registered whose containment covers this layer's host — the
+ *   layer this one opened inside (host-aware layers; see
+ *   `registerDismissLayer`). A click inside a nested layer therefore spares
+ *   the whole chain back to the host, while true peers — layers with no
+ *   parent link to the hit layer — still all dismiss. Closing everything the
+ *   click was outside of is what the peer-dismissal change was for; ancestry
+ *   just stops a nested layer from reading as a peer of its own host.
  *
  * The stack logic is pure and unit-tested via `resolveDismiss`; the document
  * wiring below is the thin DOM binding.
@@ -33,12 +33,21 @@ export interface DismissLayer {
   /** Guard for outside-interaction dismissal (escape always dismisses). */
   dismissOnOutsideInteract: boolean;
   /**
-   * The layer that was on top of the stack when this one registered — the
-   * layer this one opened inside. Recorded by `registerDismissLayer`; optional
-   * because callers construct layers before registration and the pure tests
-   * exercise `resolveDismiss` directly.
+   * The layer this one opened inside: the innermost layer already registered
+   * whose `contains` covers this layer's `hostElement` (host-aware layers),
+   * or the registration top for layers without a host element. Recorded by
+   * `registerDismissLayer`; optional because callers construct layers before
+   * registration and the pure tests exercise `resolveDismiss` directly.
    */
   parent?: DismissLayer | null;
+  /**
+   * The layer's component root, when it has one. Parenthood and stack order
+   * derive from real layer containment, not registration order: the layer's
+   * `contains` covers both the root and any portalled surface, so a nested
+   * overlay's host is contained by its host's layer whatever the framework
+   * effect order and wherever the surfaces were portalled.
+   */
+  hostElement?: Element | null;
 }
 
 /**
@@ -84,9 +93,9 @@ export function resolveDismiss(
 /**
  * The set of layers an outside interaction must spare: every layer that
  * contains the target, plus every ancestor of those layers. Ancestry follows
- * the `parent` chain recorded at registration, not the DOM — a portalled
- * surface is not a descendant of its host, so DOM containment cannot express
- * the relationship.
+ * the `parent` chain derived from layer containment — a portalled surface is
+ * not a DOM descendant of its host, so the relationship lives in the layers'
+ * containment, not the DOM tree.
  */
 function sparedByAncestry(
   layers: readonly DismissLayer[],
@@ -167,14 +176,51 @@ function syncListeners(): void {
  * Register an open overlay. Returns an unregister function; call it on close
  * and on unmount.
  *
- * Records the layer on top of the stack at registration time as `parent` —
- * the layer this one opened inside. Registration order is the ancestry, not
- * the DOM: a portalled surface is not a descendant of its host, so the stack
- * is the only place the relationship is visible.
+ * Parenthood is derived from real layer containment, not registration order:
+ * a layer's parent is the innermost layer already registered whose
+ * `contains` covers the new layer's `hostElement` — the layer this one
+ * opened inside. Peers (no layer contains the host) get no parent; layers
+ * without a host element keep the registration-top default, since only the
+ * host-aware popover-like layers can be located by containment.
+ *
+ * When the new layer's own containment covers an already-registered layer's
+ * host, this layer opened AROUND it, so it inserts BELOW the contained layer
+ * (innermost closes first) whatever the framework's effect order.
  */
 export function registerDismissLayer(layer: DismissLayer): () => void {
-  layer.parent = stack[stack.length - 1] ?? null;
-  stack.push(layer);
+  const host = layer.hostElement ?? null;
+  let parent: DismissLayer | null = null;
+  if (host) {
+    for (let index = stack.length - 1; index >= 0; index -= 1) {
+      if (stack[index].contains(host as Node)) {
+        parent = stack[index];
+        break;
+      }
+    }
+  } else {
+    parent = stack[stack.length - 1] ?? null;
+  }
+  layer.parent = parent;
+
+  const insertAt = host
+    ? stack.findIndex(
+        (existing) =>
+          existing.hostElement &&
+          existing.hostElement !== host &&
+          layer.contains(existing.hostElement as Node),
+      )
+    : -1;
+  if (insertAt >= 0) {
+    stack.splice(insertAt, 0, layer);
+    for (let index = insertAt + 1; index < stack.length; index += 1) {
+      const existing = stack[index];
+      if (existing.hostElement && layer.contains(existing.hostElement as Node)) {
+        existing.parent = layer;
+      }
+    }
+  } else {
+    stack.push(layer);
+  }
   syncListeners();
 
   return () => {
@@ -186,4 +232,10 @@ export function registerDismissLayer(layer: DismissLayer): () => void {
 
     syncListeners();
   };
+}
+
+/** The number of open dismissable layers — the web side's layer order /
+ * overlay-state observation channel (component-observation.v1). */
+export function dismissLayerStackLength(): number {
+  return stack.length;
 }

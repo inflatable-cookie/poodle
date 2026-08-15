@@ -1,6 +1,6 @@
 use poodle_tokens::semantic;
 
-use crate::types::{OverlayPlacement, PopoverInitialFocus, PopoverSurfaceWidth};
+pub use crate::generated::popover::PopoverSpec;
 
 /// Default surface min-width in rem (contract §7 / §8 `14rem`).
 pub const POPOVER_SURFACE_MIN_WIDTH_REM: f32 = 14.0;
@@ -9,128 +9,56 @@ pub const POPOVER_SURFACE_MIN_WIDTH_REM: f32 = 14.0;
 /// targets, so they resolve the `24rem` arm).
 pub const POPOVER_SURFACE_MAX_WIDTH_REM: f32 = 24.0;
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct PopoverSpec {
-    pub open: Option<bool>,
-    pub default_open: bool,
-    pub placement: OverlayPlacement,
-    pub offset: u16,
-    pub dismiss_on_outside_interact: bool,
-    pub initial_focus: PopoverInitialFocus,
-    pub aria_label: Option<String>,
-    /// Disables the trigger — blocks open, sets `data-disabled`/`aria-disabled`,
-    /// `tabindex=-1`, and `cursor: not-allowed` (contract §3 `disabled`).
-    pub disabled: bool,
-    /// Expands trigger + root to available width (contract §3 `block`).
-    pub block: bool,
-    /// Surface width strategy (contract §3 `surfaceWidth`).
-    pub surface_width: PopoverSurfaceWidth,
-    /// Overrides the default `14rem` surface min-width, in rem
-    /// (contract §3 `surfaceMinWidth`). `None` → default.
-    pub surface_min_width_rem: Option<f32>,
-    /// Overrides the default `24rem` surface max-width, in rem
-    /// (contract §3 `surfaceMaxWidth`). `None` → default.
-    pub surface_max_width_rem: Option<f32>,
-}
-
-impl Default for PopoverSpec {
-    fn default() -> Self {
-        Self {
-            open: None,
-            default_open: false,
-            placement: OverlayPlacement::BottomStart,
-            offset: 8,
-            dismiss_on_outside_interact: true,
-            initial_focus: PopoverInitialFocus::FirstFocusable,
-            aria_label: None,
-            disabled: false,
-            block: false,
-            surface_width: PopoverSurfaceWidth::Content,
-            surface_min_width_rem: None,
-            surface_max_width_rem: None,
-        }
+/// Parses a `Dimension` like `"14rem"` into rem. The portable unit is rem
+/// (contract §12): a non-rem value is a web-shell CSS length that does not
+/// port, and it is an authoring error — never a silent default. The case
+/// corpus and the Rust codegen reject such values before they reach this
+/// parser, so an assert here means a caller violated the portable contract.
+fn rem_of(dimension: &Option<crate::types::Dimension>, default: f32) -> f32 {
+    let Some(dimension) = dimension else {
+        return default;
+    };
+    let raw = dimension.as_str();
+    let Some(value) = raw.strip_suffix("rem") else {
+        panic!(
+            "PopoverSpec surface width bound `{raw}` is not a portable rem length (contract §12); arbitrary CSS lengths are a web-shell extension"
+        );
+    };
+    let mut digits = value.split('.');
+    let whole = digits.next().unwrap_or_default();
+    let shape_is_valid = !whole.is_empty()
+        && whole.chars().all(|ch| ch.is_ascii_digit())
+        && match digits.next() {
+            None => true,
+            Some(frac) => {
+                digits.next().is_none()
+                    && !frac.is_empty()
+                    && frac.chars().all(|ch| ch.is_ascii_digit())
+            }
+        };
+    match value.parse::<f32>() {
+        Ok(rem) if shape_is_valid && rem.is_finite() => rem,
+        _ => panic!(
+            "PopoverSpec surface width bound `{raw}` is not a portable rem length (contract §12)"
+        ),
     }
 }
 
 impl PopoverSpec {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn with_open(mut self, open: bool) -> Self {
-        self.open = Some(open);
-        self
-    }
-
-    pub fn with_default_open(mut self, default_open: bool) -> Self {
-        self.default_open = default_open;
-        self
-    }
-
-    pub fn with_placement(mut self, placement: OverlayPlacement) -> Self {
-        self.placement = placement;
-        self
-    }
-
-    pub fn with_offset(mut self, offset: u16) -> Self {
-        self.offset = offset;
-        self
-    }
-
-    pub fn with_dismiss_on_outside_interact(mut self, dismiss_on_outside_interact: bool) -> Self {
-        self.dismiss_on_outside_interact = dismiss_on_outside_interact;
-        self
-    }
-
-    pub fn with_initial_focus(mut self, initial_focus: PopoverInitialFocus) -> Self {
-        self.initial_focus = initial_focus;
-        self
-    }
-
-    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
-        self.aria_label = Some(aria_label.into());
-        self
-    }
-
-    pub fn with_disabled(mut self, disabled: bool) -> Self {
-        self.disabled = disabled;
-        self
-    }
-
-    pub fn with_block(mut self, block: bool) -> Self {
-        self.block = block;
-        self
-    }
-
-    pub fn with_surface_width(mut self, surface_width: PopoverSurfaceWidth) -> Self {
-        self.surface_width = surface_width;
-        self
-    }
-
-    pub fn with_surface_min_width_rem(mut self, rem: f32) -> Self {
-        self.surface_min_width_rem = Some(rem);
-        self
-    }
-
-    pub fn with_surface_max_width_rem(mut self, rem: f32) -> Self {
-        self.surface_max_width_rem = Some(rem);
-        self
-    }
-
+    /// The effective open state: the controlled value when supplied, else the
+    /// uncontrolled default.
     pub fn current_open(&self) -> bool {
         self.open.unwrap_or(self.default_open)
     }
 
     /// Effective surface min-width in rem (override or contract default `14rem`).
     pub fn effective_surface_min_width_rem(&self) -> f32 {
-        self.surface_min_width_rem
-            .unwrap_or(POPOVER_SURFACE_MIN_WIDTH_REM)
+        rem_of(&self.surface_min_width, POPOVER_SURFACE_MIN_WIDTH_REM)
     }
 
     /// Effective surface max-width in rem (override or contract default `24rem`).
     pub fn effective_surface_max_width_rem(&self) -> f32 {
-        self.surface_max_width_rem
-            .unwrap_or(POPOVER_SURFACE_MAX_WIDTH_REM)
+        rem_of(&self.surface_max_width, POPOVER_SURFACE_MAX_WIDTH_REM)
     }
 
     pub fn surface_fill_token(&self) -> &'static str {
@@ -149,5 +77,24 @@ impl PopoverSpec {
 
     pub fn shadow_token(&self) -> &'static str {
         semantic::ELEVATION_OVERLAY
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::Dimension;
+
+    #[test]
+    fn portable_width_bound_accepts_rem() {
+        let spec = PopoverSpec::default().with_surface_min_width(Dimension::new("20.5rem"));
+        assert_eq!(spec.effective_surface_min_width_rem(), 20.5);
+    }
+
+    #[test]
+    #[should_panic(expected = "not a portable rem length")]
+    fn portable_width_bound_rejects_css_extensions() {
+        let spec = PopoverSpec::default().with_surface_min_width(Dimension::new("320px"));
+        let _ = spec.effective_surface_min_width_rem();
     }
 }

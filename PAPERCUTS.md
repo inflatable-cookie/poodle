@@ -708,3 +708,20 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   pseudo-element onto a child, in a component whose other `@container` rules
   correctly target `__body` and `__header`. The baseline entry now records the
   measurement instead of the guess.
+
+- 2026-08-15 — g14.005 (Popover overlay/focus proof) recorded three
+  environment/harness notes worth keeping visible: (1) the web runner's
+  layer-count observation imports through a relative path
+  into the core source, like the hosts' component imports; package subpaths
+  and the bare entry resolve against a stale bun package cache in a clean
+  checkout, which the initial CI run caught — a local global bun
+  install had masked the gap. (2) happy-dom 20.11.2 implements no layout at all (`getBoundingClientRect`
+  is always zero), so the web leg of the placement/offset/width claims runs
+  against a box-model stub plus an anchor-box stylesheet — the same
+  browser-default-simulation posture as the keydown → click harness; the
+  corpus asserts only relative gaps, alignment deltas, and width match with
+  named tolerances, so no runtime-specific constant leaks in. (3) gpui
+  0.2.2's mousedown focuses the hit element, so a pointer press on a
+  disabled trigger reports focused on both GPUI and happy-dom; the observers
+  treat disabled parts as unfocused on both runtimes (browser semantics),
+  which is what keeps the cross-runtime comparison green.

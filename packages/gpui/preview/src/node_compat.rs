@@ -5354,7 +5354,13 @@ pub(crate) struct Popover {
     theme: GpuiThemeProvider,
     trigger: Option<poodle_node::Node>,
     content: Option<poodle_node::Node>,
-    on_open_change: Option<OpenChangeHandler>,
+    /// Context-free toggle handler: the shared composition's activation is a
+    /// node handler without a window, so the preview delivers through its
+    /// node-event queue instead.
+    on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    /// Stable per-instance scope for backend state (focus, bounds, layers).
+    /// Distinct instances on one page must not collide.
+    instance_id: Option<String>,
 }
 
 impl Popover {
@@ -5365,7 +5371,13 @@ impl Popover {
             trigger: None,
             content: None,
             on_open_change: None,
+            instance_id: None,
         }
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.instance_id = Some(instance_id.into());
+        self
     }
 
     pub(crate) fn with_trigger(mut self, trigger: impl IntoCompatNode) -> Self {
@@ -5380,9 +5392,9 @@ impl Popover {
 
     pub(crate) fn on_open_change(
         mut self,
-        handler: impl Fn(bool, &mut Window, &mut App) + 'static,
+        handler: Arc<dyn Fn(bool) + Send + Sync>,
     ) -> Self {
-        self.on_open_change = Some(Rc::new(handler));
+        self.on_open_change = Some(handler);
         self
     }
 }
@@ -5391,35 +5403,136 @@ impl IntoElement for Popover {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let placement = self.spec.placement;
-        let mut trigger = div()
-            .id(("poodle-popover-trigger", placement_index(placement)))
-            .child(
-                self.trigger
-                    .as_ref()
-                    .map(poodle_gpui_node_backend::to_gpui)
-                    .unwrap_or_else(|| div().into_any_element()),
-            );
-        if self.spec.block {
-            trigger = trigger.w_full();
-        }
-        if !self.spec.disabled {
-            if let Some(handler) = self.on_open_change {
-                let next_open = !self.spec.current_open();
-                trigger = trigger.on_click(move |_event, window, cx| {
-                    handler(next_open, window, cx);
-                });
-            }
-        }
+        let instance_id = self.instance_id.clone();
+        let spec = self.spec.clone();
+        let trigger = self.trigger.clone();
+        let content = self.content.clone();
+        let on_open_change = self.on_open_change.clone();
+        let theme = self.theme.clone();
+        let surface_id = format!(
+            "{}:popover-surface",
+            instance_id.as_deref().unwrap_or_default()
+        );
+        let trigger_id = format!(
+            "{}:popover-trigger",
+            instance_id.as_deref().unwrap_or_default()
+        );
 
-        let surface = (self.spec.current_open() && !self.spec.disabled).then(|| {
-            let mut node = poodle_render::popover(&self.spec, &self.theme, self.content);
-            if self.spec.surface_width.is_trigger() {
-                node.style.fill_width = true;
+        // The production host runs the same machine the web shells and the
+        // conformance adapter run: the trigger and the dismiss routes emit
+        // `openChange` through the preview's node-event queue, and the focus
+        // effects (entry and restore) are queued for the overlay host's
+        // paint-time focus application.
+        let context = poodle_headless::popover::PopoverContext {
+            disabled: spec.disabled,
+            dismiss_on_outside_interact: spec.dismiss_on_outside_interact,
+            initial_focus: match spec.initial_focus {
+                poodle_specs::PopoverInitialFocus::Content => {
+                    poodle_headless::popover::PopoverInitialFocus::Content
+                }
+                poodle_specs::PopoverInitialFocus::None => {
+                    poodle_headless::popover::PopoverInitialFocus::None
+                }
+                poodle_specs::PopoverInitialFocus::FirstFocusable => {
+                    poodle_headless::popover::PopoverInitialFocus::FirstFocusable
+                }
+            },
+        };
+        let run_machine = {
+            use poodle_headless::popover::{
+                popover_transition, PopoverEffect, PopoverState,
+            };
+            let context = context;
+            let handler = on_open_change.clone();
+            let content = content.clone();
+            let surface_id = surface_id.clone();
+            let trigger_id = trigger_id.clone();
+            let current_open = spec.current_open();
+            move |event: poodle_headless::popover::PopoverEvent| {
+                let (_, effects) = popover_transition(
+                    if current_open {
+                        PopoverState::Open
+                    } else {
+                        PopoverState::Closed
+                    },
+                    context,
+                    event,
+                );
+                for effect in effects {
+                    match effect {
+                        PopoverEffect::EmitOpenChange { open } => {
+                            if let Some(handler) = &handler {
+                                handler(open);
+                            }
+                        }
+                        PopoverEffect::FocusOnOpen { strategy } => match strategy {
+                            poodle_headless::popover::PopoverInitialFocus::Content => {
+                                poodle_gpui_node_backend::request_focus(&surface_id);
+                            }
+                            poodle_headless::popover::PopoverInitialFocus::FirstFocusable => {
+                                let target = content
+                                    .as_ref()
+                                    .and_then(|content| {
+                                        content.find(&|n| n.interaction.focusable)
+                                    });
+                                if let Some(target) = target {
+                                    let id = target
+                                        .runtime_id
+                                        .clone()
+                                        .or_else(|| target.id.clone())
+                                        .unwrap_or_default();
+                                    if !id.is_empty() {
+                                        poodle_gpui_node_backend::request_focus(&id);
+                                    }
+                                }
+                            }
+                            poodle_headless::popover::PopoverInitialFocus::None => {}
+                        },
+                        PopoverEffect::RestoreTriggerFocus => {
+                            poodle_gpui_node_backend::request_focus(&trigger_id);
+                        }
+                    }
+                }
             }
-            poodle_gpui_node_backend::to_gpui(&node)
+        };
+
+        // The shared poodle-render composition owns trigger, surface,
+        // placement, accessibility metadata, and the layer/dismiss intent;
+        // the specimen host supplies the trigger/content nodes, the toggle
+        // handler, and the dismissal route (Escape/outside through the
+        // overlay host's layer registry).
+        let on_activate = on_open_change.as_ref().map(|_| {
+            let run = run_machine.clone();
+            Arc::new(move || run(poodle_headless::popover::PopoverEvent::Toggle))
+                as Arc<dyn Fn() + Send + Sync>
         });
-        floating_overlay(trigger.into_any_element(), surface, placement)
+        let on_dismiss = on_open_change
+            .as_ref()
+            .map(|_| {
+                let run = run_machine.clone();
+                Arc::new(move |reason| {
+                    run(match reason {
+                        poodle_node::DismissReason::Escape => {
+                            poodle_headless::popover::PopoverEvent::Escape
+                        }
+                        poodle_node::DismissReason::Outside => {
+                            poodle_headless::popover::PopoverEvent::OutsideInteract
+                        }
+                    })
+                }) as poodle_node::DismissHandler
+            });
+        let node = poodle_render::popover(
+            &spec,
+            &theme,
+            &poodle_render::PopoverHandlers {
+                on_activate,
+                on_dismiss,
+                instance_id,
+            },
+            trigger,
+            content,
+        );
+        poodle_gpui_node_backend::to_gpui(&node)
     }
 }
 

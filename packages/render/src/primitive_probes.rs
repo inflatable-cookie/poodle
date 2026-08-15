@@ -53,6 +53,55 @@ pub const PROBE_INTERFACE_JSON: &str = r#"{
   ]
 }"#;
 
+/// Overlay probe interface (g14.005): trigger + overlay surface parts, so
+/// the overlay rows observe through the generic observer like a real overlay
+/// profile does.
+pub const OVERLAY_PROBE_INTERFACE_JSON: &str = r#"{
+  "parts": [
+    {
+      "id": "root",
+      "role": "button",
+      "resolve": { "native": { "kind": "self" } }
+    },
+    {
+      "id": "surface",
+      "role": "dialog",
+      "relativeTo": "root",
+      "resolve": { "native": { "kind": "id", "id": "overlay-probe-surface" } }
+    }
+  ],
+  "states": [],
+  "tokenRoles": []
+}"#;
+
+/// The overlay probe fixture: a hand-built trigger + overlay surface pair
+/// carrying the overlay vocabulary — expanded projection, the overlay style
+/// flag, the dismiss handler, and the layer id.
+pub fn overlay_probe_fixture() -> Node {
+    let mut trigger = Node::container();
+    trigger.id = Some("overlay-probe-trigger".to_owned());
+    trigger.a11y.role = Some(NodeRole::Button);
+    trigger.a11y.expanded = Some(true);
+    trigger.a11y.label = Some("Overlay probe".to_owned());
+    trigger.interaction.focusable = true;
+    trigger.interaction.dismiss_layer = Some("overlay-probe-layer".to_owned());
+    trigger
+        .interaction
+        .on_dismiss = Some(Arc::new(|_reason| {}));
+    let mut surface = Node::container();
+    surface.id = Some("overlay-probe-surface".to_owned());
+    surface.a11y.role = Some(NodeRole::Dialog);
+    surface.style.overlay = true;
+    surface.interaction.dismiss_layer = Some("overlay-probe-layer".to_owned());
+    trigger.child(surface)
+}
+
+pub fn overlay_probe_interface() -> InterfaceDoc {
+    let interface: Value =
+        serde_json::from_str(OVERLAY_PROBE_INTERFACE_JSON).expect("overlay probe interface parses");
+    InterfaceDoc::parse(&interface).expect("overlay probe interface valid")
+}
+
 /// One executed primitive probe row (`primitive-probe-evidence.v1`).
 #[derive(Debug, Clone, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -643,6 +692,153 @@ pub fn run_neutral_probes(node: &Node) -> Vec<ProbeEvidence> {
     ]
 }
 
+// ── Overlay probes (g14.005) ──────────────────────────────────────────────
+
+/// The overlay intent channel: `NodeStyle.overlay` declared on the surface
+/// node and observed through the generic observer's `overlay` part field.
+pub fn probe_overlay_intent(node: &Node) -> ProbeEvidence {
+    let surface = node.find(&|n| n.id.as_deref() == Some("overlay-probe-surface"));
+    let declared = surface.map(|s| s.style.overlay).unwrap_or(false);
+    let iface = overlay_probe_interface();
+    let observation = observe_tree("render-neutral", "overlay-probe", &iface, node, None);
+    let observed = observation
+        .pointer("/parts/surface/overlay")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    let fields = json!({
+        "node.style.overlay": declared,
+        "parts.surface.overlay": observed,
+    });
+    if declared && observed {
+        ProbeEvidence::pass_observed(
+            "overlay.intent",
+            "node-overlay",
+            fields,
+            &["node.field", "parts.overlay"],
+        )
+    } else {
+        ProbeEvidence::fail(
+            "overlay.intent",
+            "node-overlay",
+            fields,
+            "node.style.overlay or parts.surface.overlay",
+        )
+    }
+}
+
+/// The expanded projection channel: `NodeA11y.expanded` declared and observed
+/// through the generic observer's `expanded` part field.
+pub fn probe_semantic_expanded(node: &Node) -> ProbeEvidence {
+    let declared = node.a11y.expanded.unwrap_or(false);
+    let iface = overlay_probe_interface();
+    let observation = observe_tree("render-neutral", "overlay-probe", &iface, node, None);
+    let observed = observation
+        .pointer("/parts/root/expanded")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    let fields = json!({
+        "node.a11y.expanded": declared,
+        "parts.root.expanded": observed,
+    });
+    if declared && observed {
+        ProbeEvidence::pass_observed(
+            "semantic.expanded",
+            "node-expanded",
+            fields,
+            &["node.a11y", "parts.expanded"],
+        )
+    } else {
+        ProbeEvidence::fail(
+            "semantic.expanded",
+            "node-expanded",
+            fields,
+            "node.a11y.expanded or parts.root.expanded",
+        )
+    }
+}
+
+/// The dismissal channel: `Interaction.on_dismiss` routes the two real
+/// reasons (Escape and outside) to the component's handler. The real event
+/// dispatch lives on the web and GPUI layers; this proves the neutral channel
+/// and reason routing.
+pub fn probe_overlay_dismiss(node: &Node) -> ProbeEvidence {
+    let declared = node
+        .find(&|n| n.id.as_deref() == Some("overlay-probe-trigger"))
+        .is_some_and(|trigger| trigger.interaction.on_dismiss.is_some());
+    use std::sync::{Arc, Mutex};
+    let received: Arc<Mutex<Vec<&'static str>>> = Arc::new(Mutex::new(Vec::new()));
+    let listener = Arc::clone(&received);
+    let probe_handler: poodle_node::DismissHandler = Arc::new(move |reason| {
+        listener.lock().expect("reason lock").push(match reason {
+            poodle_node::DismissReason::Escape => "escape",
+            poodle_node::DismissReason::Outside => "outside",
+        });
+    });
+    probe_handler(poodle_node::DismissReason::Escape);
+    probe_handler(poodle_node::DismissReason::Outside);
+    let reasons = received.lock().expect("reason lock").clone();
+    let fields = json!({ "on_dismiss_declared": declared, "reasons": reasons });
+    if declared && reasons == ["escape", "outside"] {
+        ProbeEvidence::pass_observed(
+            "overlay.dismiss",
+            "node-dismiss-reasons",
+            fields,
+            &["node.field"],
+        )
+    } else {
+        ProbeEvidence::fail(
+            "overlay.dismiss",
+            "node-dismiss-reasons",
+            fields,
+            "on_dismiss channel or reason routing",
+        )
+    }
+}
+
+/// The layer channel: `Interaction.dismiss_layer` declares layer membership
+/// on the trigger and surface nodes (the containment unit the backends
+/// register). Layer order/count observation is delivered by the runtime
+/// layers (web stack, GPUI registry).
+pub fn probe_overlay_layer(node: &Node) -> ProbeEvidence {
+    fn collect(node: &Node, ids: &mut Vec<String>) {
+        if let Some(layer) = &node.interaction.dismiss_layer {
+            ids.push(layer.clone());
+        }
+        for child in &node.children {
+            collect(child, ids);
+        }
+    }
+    let mut layer_ids = Vec::new();
+    collect(node, &mut layer_ids);
+    let fields = json!({ "dismiss_layers": layer_ids });
+    if layer_ids.len() == 2 && layer_ids.iter().all(|id| id == "overlay-probe-layer") {
+        ProbeEvidence::pass_observed(
+            "overlay.layer",
+            "node-layer-membership",
+            fields,
+            &["node.field"],
+        )
+    } else {
+        ProbeEvidence::fail(
+            "overlay.layer",
+            "node-layer-membership",
+            fields,
+            "dismiss_layer membership",
+        )
+    }
+}
+
+/// The overlay rows' renderer-neutral evidence, executed by the neutral probe
+/// board and the GPUI probe runner.
+pub fn run_overlay_probes(node: &Node) -> Vec<ProbeEvidence> {
+    vec![
+        probe_overlay_intent(node),
+        probe_semantic_expanded(node),
+        probe_overlay_dismiss(node),
+        probe_overlay_layer(node),
+    ]
+}
+
 fn probe_focus_neutral(node: &Node, iface: &InterfaceDoc) -> ProbeEvidence {
     let focused = observe_tree("render-neutral", "primitive-probe", iface, node, Some(true));
     let unfocused = observe_tree(
@@ -743,7 +939,11 @@ mod tests {
     fn primitive_substrate_neutral_probes_pass() {
         let handler: Arc<dyn Fn() + Send + Sync> = Arc::new(|| {});
         let node = build_probe_fixture(Some(handler));
-        let probes = run_neutral_probes(&node);
+        let probes = [
+            run_neutral_probes(&node),
+            run_overlay_probes(&overlay_probe_fixture()),
+        ]
+        .concat();
         let failures: Vec<_> = probes.iter().filter(|p| p.verdict == "fail").collect();
         assert!(
             failures.is_empty(),
@@ -760,7 +960,11 @@ mod tests {
     fn emit_neutral_primitive_evidence() {
         let handler: Arc<dyn Fn() + Send + Sync> = Arc::new(|| {});
         let node = build_probe_fixture(Some(handler));
-        let probes = run_neutral_probes(&node);
+        let probes = [
+            run_neutral_probes(&node),
+            run_overlay_probes(&overlay_probe_fixture()),
+        ]
+        .concat();
         let report = neutral_evidence_report(&probes);
         let out = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../test/conformance/web/out/primitive-render-neutral.json");

@@ -20,7 +20,7 @@ use crate::color::with_alpha;
 use crate::empty_state::empty_state;
 use crate::floating_overlay::floating_overlay;
 use crate::icon_button::icon_button;
-use crate::popover::popover;
+use crate::popover::popover_surface;
 use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
 use crate::progress::progress;
 use crate::status_indicator::status_indicator;
@@ -67,12 +67,19 @@ pub fn message_center(
             .with_open(true)
             .with_placement(spec.placement)
             .with_aria_label(spec.effective_aria_label())
-            .with_surface_min_width_rem(24.0)
-            .with_surface_max_width_rem(30.0);
-        popover(&popover_spec, theme, Some(content))
+            .with_surface_min_width(poodle_specs::Dimension::new("24rem"))
+            .with_surface_max_width(poodle_specs::Dimension::new("30rem"));
+        popover_surface(&popover_spec, theme, Some(content))
     });
 
-    floating_overlay(trigger, surface, spec.placement, anchor_size, anchor_size)
+    floating_overlay(
+        trigger,
+        surface,
+        spec.placement,
+        anchor_size,
+        anchor_size,
+        crate::floating_overlay::OVERLAY_GAP_PX,
+    )
 }
 
 fn trigger_with_indicator(trigger: Node, unread: usize, theme: &dyn ThemeProvider) -> Node {
@@ -475,7 +482,9 @@ mod tests {
             node.children[1].children[0].a11y.role,
             Some(NodeRole::Dialog)
         );
-        let content = &node.children[1].children[0].children[0];
+            // The surface's inner padded wrapper carries the panel spacing;
+            // the message centre content sits inside it.
+            let content = &node.children[1].children[0].children[0].children[0];
         assert_eq!(
             content.style.descriptor.layout.width,
             LayoutSizing::Fixed(rem_to_px(28.0))
@@ -508,7 +517,9 @@ mod tests {
         };
         let node = message_center(&spec, &theme(), handlers);
 
-        let content = &node.children[1].children[0].children[0];
+            // The surface's inner padded wrapper carries the panel spacing;
+            // the message centre content sits inside it.
+            let content = &node.children[1].children[0].children[0].children[0];
         let list = &content.children[1];
         assert_eq!(list.children.len(), 3);
 
@@ -571,7 +582,7 @@ mod tests {
         let late = message_center(&spec_at(80.0), &theme(), MessageCenterHandlers::default());
 
         let fraction = |node: &Node| {
-            node.children[1].children[0].children[0].children[1].children[0].children[0].children[1]
+            node.children[1].children[0].children[0].children[0].children[1].children[0].children[0].children[1]
                 .children
                 .iter()
                 .find_map(|child| match child.kind {

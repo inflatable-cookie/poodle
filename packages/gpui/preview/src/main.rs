@@ -376,6 +376,10 @@ fn sidebar_nav_size(size: ControlSize) -> SpecControlSize {
 
 impl Render for PreviewRoot {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        // The overlay host's frame boundary: the layer registry, bounds, and
+        // focus queue are rebuilt once per rendered frame, not per converted
+        // component — the same boundary the headless conformance driver uses.
+        poodle_gpui_node_backend::overlay_frame_begin();
         // Apply interactions node-backed specimens reported since the last frame.
         let specimen_changed = self.state.drain_node_events();
         if specimen_changed {
@@ -403,13 +407,18 @@ impl Render for PreviewRoot {
         let controls_h = px(80.0);
         let content_h = window_h - top_bar_h - controls_h;
 
-        div()
-            .size_full()
-            .flex()
-            .flex_col()
-            .font_family("Inter")
-            .bg(color_to_hsla(canvas_bg))
-            .text_color(color_to_hsla(text_primary))
+        // The window-level overlay host: every pointer-down and Escape is
+        // routed through the node backend's layer registry (the same wiring
+        // the conformance mount host uses), so production overlay dismissal
+        // executes through the real event tree.
+        poodle_gpui_node_backend::attach_overlay_host(
+            div()
+                .size_full()
+                .flex()
+                .flex_col()
+                .font_family("Inter")
+                .bg(color_to_hsla(canvas_bg))
+                .text_color(color_to_hsla(text_primary))
             // ── Top bar ──────────────────────────────────────────────
             .child(
                 div()
@@ -452,7 +461,8 @@ impl Render for PreviewRoot {
             // Section content is a direct child of root — no intermediate wrapper.
             // Each section is given an explicit pixel height so overflow_y_scroll
             // containers get a definite content-mask for hit testing.
-            .child(self.render_section_content(content_h, cx))
+            .child(self.render_section_content(content_h, cx)),
+        )
     }
 }
 

@@ -15,6 +15,10 @@ import type {
   SerializedCase,
   SerializedComponentInterface,
 } from "@inflatable-cookie/poodle-core/conformance";
+// Relative import like the hosts' component imports: package subpaths and
+// the bare entry are not reliably resolvable from the test tree in a clean
+// checkout (bun resolves them against a stale package cache).
+import { dismissLayerStackLength } from "../../../packages/core/src/dom/dismiss";
 import { channelsOf, geometryFields, geometryOf } from "./observer";
 
 export interface TraceEntry {
@@ -32,6 +36,12 @@ export interface PartObservation {
   value: number | [number, number] | null;
   states: Record<string, boolean | null>;
   tokenRoles: Record<string, string | null>;
+  expanded: boolean | null;
+  /** The part that hosts this part's layer (nearest part ancestor, else the
+   * component root for portalled surfaces). */
+  parent: string | null;
+  /** Overlay evidence: the part renders above normal content. */
+  overlay: boolean | null;
   focusable: boolean | null;
   focused: boolean | null;
   focusVisible: boolean | null;
@@ -40,6 +50,10 @@ export interface PartObservation {
   orientation: string | null;
   controls: string | null;
   labelledBy: string | null;
+  /** Root-only: the focused element's text (focused-part progression). */
+  focusedText: string | null;
+  /** Root-only: the number of open overlay layers. */
+  layerCount: number | null;
   geometry: Record<string, number | null>;
   channels: Record<string, string | null>;
 }
@@ -79,12 +93,16 @@ export interface RuntimeCaseReport {
 /** What a runtime adapter must provide: mount, observe, act, capture. */
 export interface RuntimeAdapter {
   readonly runtime: string;
-  mount(caseFixture: { props: Record<string, unknown>; regions: Record<string, string> }): void;
+  mount(caseFixture: { props: Record<string, unknown>; regions: Record<string, string>; host?: Record<string, unknown> }): void;
   rootElement(): HTMLElement | null;
   press(part: string, input: "pointer" | "keyboard"): Promise<void>;
   focus(part: string): void;
   key(part: string, key: string): Promise<void>;
   scrub(part: string, fraction: number, phase: "press" | "drag" | "release"): Promise<void>;
+  /** The harness's real dismissal route (document-level Escape). */
+  dismiss(part: string): Promise<void>;
+  /** A real pointer interaction with inside/outside intent relative to a part. */
+  pointer(part: string, target: "inside" | "outside"): Promise<void>;
   /** Flush pending framework state/effects so observation sees final DOM. */
   flush(): Promise<void>;
   trace(): TraceEntry[];
@@ -104,11 +122,20 @@ function resolveWebPart(
       const key = part.repeat && partId.startsWith(`${part.id}:`)
         ? partId.slice(part.id.length + 1)
         : null;
-      if (key && part.resolve.web.keyAttribute) {
-        return Array.from(root.querySelectorAll<HTMLElement>(part.resolve.web.className))
-          .find((candidate) => candidate.getAttribute(part.resolve.web.keyAttribute!) === key) ?? null;
-      }
-      return root.querySelector<HTMLElement>(part.resolve.web.className);
+      const find = (scope: ParentNode): HTMLElement | null => {
+        if (key && part.resolve.web.keyAttribute) {
+          return Array.from(scope.querySelectorAll<HTMLElement>(part.resolve.web.className))
+            .find((candidate) => candidate.getAttribute(part.resolve.web.keyAttribute!) === key) ?? null;
+        }
+        return scope.querySelector<HTMLElement>(part.resolve.web.className);
+      };
+      const inRoot = find(root);
+      if (inRoot) return inRoot;
+      // Portalled overlay surfaces leave the component subtree (the anchored
+      // surface mounts at the theme root), so a part resolution misses them.
+      // Fall back to the document — the corpus mounts one instance at a time,
+      // and first-match order still prefers the component's own subtree.
+      return find(root.ownerDocument);
     }
     case "icon": {
       const { position, gatedBy, selector } = part.resolve.web;
@@ -240,6 +267,12 @@ function observeRootStates(
         states[state.name] = el ? doc.activeElement === el : null;
         break;
       }
+      case "part-present": {
+        const decl = iface.parts.find((part) => part.id === state.part);
+        const el = decl ? resolveWebPart(root, decl) : null;
+        states[state.name] = el !== null;
+        break;
+      }
     }
   }
   return states;
@@ -251,9 +284,65 @@ function observeRootTokenRoles(
 ): Record<string, string | null> {
   const roles: Record<string, string | null> = {};
   for (const role of iface.tokenRoles) {
-    roles[role.name] = root.getAttribute(`data-${role.prop}`) ?? role.default ?? null;
+    // Data attributes are kebab-cased (`data-surface-width`), the prop is
+    // camelCase (`surfaceWidth`).
+    const attribute = `data-${role.prop.replace(/([A-Z])/g, (letter) => `-${letter.toLowerCase()}`)}`;
+    roles[role.name] = root.getAttribute(attribute) ?? role.default ?? null;
   }
   return roles;
+}
+
+/** The part that hosts this part's layer: the nearest ancestor element that
+ * resolves to an interface part, else the component root (portalled overlay
+ * surfaces render outside the subtree but still belong to its layer). */
+function parentPartOf(
+  el: HTMLElement,
+  root: HTMLElement,
+  partId: string,
+  iface: SerializedComponentInterface,
+): string | null {
+  if (el === root) return null;
+  let node = el.parentElement;
+  while (node && node !== root && root.contains(node)) {
+    for (const candidate of iface.parts) {
+      if (candidate.id === partId) continue;
+      const resolved = resolveWebPart(root, candidate, candidate.id);
+      if (resolved && resolved === node) return candidate.id;
+    }
+    node = node.parentElement;
+  }
+  if (node === root) return "root";
+  // Portalled: no part ancestor inside the component subtree.
+  return "root";
+}
+
+/** Relative logical bounds of a part against its `relativeTo` anchor, from
+ * the two elements' viewport boxes: facing-edge gaps, start/end alignment
+ * deltas, and the width difference. */
+function relativeBoundsOf(
+  partId: string,
+  iface: SerializedComponentInterface,
+  root: HTMLElement,
+): Record<string, number> | null {
+  const part = iface.parts.find((candidate) => candidate.id === partId);
+  if (!part?.relativeTo) return null;
+  const anchor = iface.parts.find((candidate) => candidate.id === part.relativeTo);
+  if (!anchor) return null;
+  const el = resolveWebPart(root, part, partId);
+  const anchorEl = resolveWebPart(root, anchor, anchor.id);
+  if (!el || !anchorEl) return null;
+  const r = el.getBoundingClientRect();
+  const a = anchorEl.getBoundingClientRect();
+  return {
+    topGap: r.top - a.bottom,
+    bottomGap: a.top - r.bottom,
+    leftGap: r.left - a.right,
+    rightGap: a.left - r.right,
+    hStart: r.left - a.left,
+    hEnd: a.right - r.right,
+    vStart: r.top - a.top,
+    widthGap: r.width - a.width,
+  };
 }
 
 /** Observes a mounted component root through the interface's descriptors. */
@@ -278,6 +367,13 @@ export function observeDom(
       ? el.getAttribute("aria-label") ||
         (part.role && !el.hasAttribute("aria-labelledby") ? el.textContent?.trim() || null : null)
       : null;
+    const geometry: Record<string, number | null> = el ? { ...geometryOf(el) } : {};
+    const relative = relativeBoundsOf(partId, iface, root);
+    if (relative) {
+      for (const [field, value] of Object.entries(relative)) {
+        geometry[field] = value;
+      }
+    }
     parts[partId] = {
       present: Boolean(el),
       role: el ? roleOf(el) : null,
@@ -287,12 +383,22 @@ export function observeDom(
       value: partValue(el),
       states: {},
       tokenRoles: {},
+      expanded: el?.getAttribute("aria-expanded") === "true" ? true : el?.hasAttribute("aria-expanded") ? false : null,
+      parent: el ? parentPartOf(el, root, partId, iface) : null,
+      overlay: el ? el.hasAttribute("data-poodle-anchored") : null,
       focusable: el && identity ? isFocusable(el) : null,
-      focused: el && identity ? root.ownerDocument.activeElement === el : null,
+      focused:
+        el && identity && !el.hasAttribute("aria-disabled")
+          ? root.ownerDocument.activeElement === el
+          : el && identity
+            ? false
+            : null,
       focusVisible:
-        el && identity
+        el && identity && !el.hasAttribute("aria-disabled")
           ? root.ownerDocument.activeElement === el && el.matches(":focus-visible")
-          : null,
+          : el && identity
+            ? false
+            : null,
       tabbable: el && identity ? isFocusable(el) && el.tabIndex === 0 : null,
       selected: el && identity && el.hasAttribute("aria-selected")
         ? el.getAttribute("aria-selected") === "true"
@@ -300,7 +406,7 @@ export function observeDom(
       orientation: el?.getAttribute("aria-orientation") ?? null,
       controls: normalizeRelationship(el?.getAttribute("aria-controls") ?? null, iface, root),
       labelledBy: normalizeRelationship(el?.getAttribute("aria-labelledby") ?? null, iface, root),
-      geometry: el ? geometryOf(el) : {},
+      geometry,
       channels: el ? channelsOf(el) : {},
     };
   }
@@ -329,6 +435,15 @@ export function observeDom(
   rootPart.focusVisible = states.focusVisible ?? rootPart.focusVisible;
   rootPart.geometry = geometryOf(root);
   rootPart.channels = channelsOf(root);
+  // Root-only identity channels: the focused element's text (focused-part
+  // progression) and the open overlay layer count (layer order / overlay
+  // state). Both are generic — the component never appears here.
+  const active = root.ownerDocument.activeElement;
+  rootPart.focusedText =
+    active && active !== root.ownerDocument.body && !active.hasAttribute("aria-disabled")
+      ? active.textContent?.trim() || null
+      : null;
+  rootPart.layerCount = dismissLayerStackLength();
   const lower = parts.lower?.value;
   const upper = parts.upper?.value;
   if (typeof lower === "number" && typeof upper === "number") {
@@ -421,6 +536,11 @@ export function assertPartObservation(
     "focusVisible",
     "tabbable",
     "selected",
+    "expanded",
+    "parent",
+    "overlay",
+    "focusedText",
+    "layerCount",
     "orientation",
     "controls",
     "labelledBy",
@@ -536,6 +656,10 @@ export async function runCase(
         if (step.name === "press") await adapter.press(step.part, (step.input as "pointer" | "keyboard") ?? "pointer");
         else if (step.name === "focus") adapter.focus(step.part);
         else if (step.name === "key") await adapter.key(step.part, step.key ?? "");
+        else if (step.name === "dismiss") await adapter.dismiss(step.part);
+        else if (step.name === "pointer") {
+          await adapter.pointer(step.part, (step.target as "inside" | "outside") ?? "inside");
+        }
         else if (step.name === "scrub") {
           await adapter.scrub(
             step.part,

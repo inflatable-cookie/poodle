@@ -12,13 +12,44 @@ use serde::Deserialize;
 use crate::error::Result;
 use crate::CodegenError;
 
-const GEOMETRY_FIELDS: [&str; 6] = [
+/** True for a portable dimension value: a rem length (`14rem`, `20.5rem`).
+ * Anything else is rejected at codegen, so an unsupported value never
+ * silently becomes a default (popover contract §12). */
+fn is_portable_rem_dimension(raw: &str) -> bool {
+    let Some(value) = raw.strip_suffix("rem") else {
+        return false;
+    };
+    let mut digits = value.split('.');
+    let whole = digits.next().unwrap_or_default();
+    if whole.is_empty() || !whole.chars().all(|ch| ch.is_ascii_digit()) {
+        return false;
+    }
+    let shape_is_valid = match digits.next() {
+        None => true,
+        Some(frac) => {
+            digits.next().is_none()
+                && !frac.is_empty()
+                && frac.chars().all(|ch| ch.is_ascii_digit())
+        }
+    };
+    shape_is_valid && value.parse::<f32>().is_ok_and(f32::is_finite)
+}
+
+const GEOMETRY_FIELDS: [&str; 14] = [
     "height",
     "minWidth",
     "paddingLeft",
     "paddingRight",
     "radius",
     "borderWidth",
+    "topGap",
+    "bottomGap",
+    "leftGap",
+    "rightGap",
+    "hStart",
+    "hEnd",
+    "vStart",
+    "widthGap",
 ];
 
 /// One prop in the portable interface.
@@ -165,6 +196,10 @@ pub enum CaseStep {
         part: String,
         #[serde(default)]
         input: Option<String>,
+        #[serde(default)]
+        key: Option<String>,
+        #[serde(default)]
+        target: Option<String>,
     },
     #[serde(rename = "expectPart")]
     ExpectPart {
@@ -329,6 +364,13 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
                             findings.push(at(format!("prop '{key}' expects a string")));
                         }
                     }
+                    "remDimension" => {
+                        if !value.as_str().is_some_and(is_portable_rem_dimension) {
+                            findings.push(at(format!(
+                                "prop '{key}' value is not a portable rem length"
+                            )));
+                        }
+                    }
                     "enum" => {
                         let Some(expected) = value.as_str() else {
                             findings.push(at(format!("prop '{key}' expects an enum string")));
@@ -396,12 +438,24 @@ pub fn validate_cases(interface: &ComponentInterface, cases: &ComponentCases) ->
 
         for step in &case.steps {
             match step {
-                CaseStep::Action { part, name, .. } => {
+                CaseStep::Action {
+                    part, name, target, ..
+                } => {
                     if !part_is_known(part) {
                         findings.push(at(format!("action targets unknown part '{part}'")));
                     }
-                    if !matches!(name.as_str(), "press" | "focus" | "key" | "scrub") {
+                    if !matches!(
+                        name.as_str(),
+                        "press" | "focus" | "key" | "scrub" | "dismiss" | "pointer"
+                    ) {
                         findings.push(at(format!("unknown action '{name}'")));
+                    }
+                    if name == "pointer"
+                        && !matches!(target.as_deref(), Some("inside") | Some("outside"))
+                    {
+                        findings.push(at(format!(
+                            "pointer action needs target inside|outside, got {target:?}"
+                        )));
                     }
                 }
                 CaseStep::ExpectPart { part, expect } => {
@@ -688,6 +742,66 @@ mod tests {
             findings,
             ["geometry tolerance must be an authored finite non-negative number"]
         );
+    }
+
+    #[test]
+    fn rust_validator_rejects_non_rem_dimensions() {
+        let interface: ComponentInterface = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "id": "probe", "profile": "overlay",
+            "props": [{ "name": "surfaceMinWidth", "type": { "kind": "remDimension" }, "default": null, "nullable": true }],
+            "events": [], "regions": [],
+            "parts": [{ "id": "root", "resolve": { "web": { "kind": "self" }, "native": { "kind": "self" } } }],
+            "states": [], "tokenRoles": [], "axes": [], "capabilities": []
+        })).unwrap();
+        let cases: ComponentCases = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "component": "probe", "cases": [{
+                "id": "probe/planted", "fixture": { "props": { "surfaceMinWidth": "320px" } },
+                "specimen": { "axes": [] },
+                "steps": []
+            }]
+        }))
+        .unwrap();
+        let error = validate_cases(&interface, &cases).unwrap_err();
+        assert!(error.to_string().contains("portable rem length"));
+    }
+
+    #[test]
+    fn rust_validator_accepts_rem_dimensions() {
+        let interface: ComponentInterface = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "id": "probe", "profile": "overlay",
+            "props": [{ "name": "surfaceMinWidth", "type": { "kind": "remDimension" }, "default": null, "nullable": true }],
+            "events": [], "regions": [],
+            "parts": [{ "id": "root", "resolve": { "web": { "kind": "self" }, "native": { "kind": "self" } } }],
+            "states": [], "tokenRoles": [], "axes": [], "capabilities": []
+        })).unwrap();
+        let cases: ComponentCases = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "component": "probe", "cases": [{
+                "id": "probe/ok", "fixture": { "props": { "surfaceMinWidth": "20.5rem" } },
+                "specimen": { "axes": [] },
+                "steps": []
+            }]
+        }))
+        .unwrap();
+        validate_cases(&interface, &cases).expect("rem dimensions validate");
+    }
+
+    #[test]
+    fn rust_validator_keeps_unconstrained_dimensions_opaque() {
+        let interface: ComponentInterface = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "id": "probe", "profile": "control",
+            "props": [{ "name": "maxWidth", "type": { "kind": "dimension" }, "default": null, "nullable": true }],
+            "events": [], "regions": [],
+            "parts": [{ "id": "root", "resolve": { "web": { "kind": "self" }, "native": { "kind": "self" } } }],
+            "states": [], "tokenRoles": [], "axes": [], "capabilities": []
+        })).unwrap();
+        let cases: ComponentCases = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1, "component": "probe", "cases": [{
+                "id": "probe/css-dimension", "fixture": { "props": { "maxWidth": "min(20rem, 90vw)" } },
+                "specimen": { "axes": [] },
+                "steps": []
+            }]
+        })).unwrap();
+        validate_cases(&interface, &cases).expect("plain dimensions remain contract-owned strings");
     }
 
     #[test]

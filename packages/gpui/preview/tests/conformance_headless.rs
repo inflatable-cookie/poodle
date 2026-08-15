@@ -23,16 +23,19 @@ use gpui::TestAppContext;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
 use poodle_render::conformance::{
-    assert_events, assert_part, observe_tree_with_focus, InterfaceDoc,
+    assert_events, assert_part, observe_tree_with_context, observe_tree_with_focus,
+    InterfaceDoc, ObserveContext,
 };
 use poodle_render::{range_slider, tabs_with_panel, RangeSliderHandlers, TabsHandlers};
-use poodle_specs::{RangeSliderSpec, TabDefinition, TabsSpec};
+use poodle_specs::{PopoverSpec, RangeSliderSpec, TabDefinition, TabsSpec};
 use serde_json::{json, Value};
 
 #[path = "../src/conformance_button.rs"]
 mod conformance_button;
 #[path = "../src/conformance_driver.rs"]
 mod conformance_driver;
+#[path = "../src/conformance_popover.rs"]
+mod conformance_popover;
 #[path = "../src/conformance_range_slider.rs"]
 mod conformance_range_slider;
 #[path = "../src/conformance_support.rs"]
@@ -73,6 +76,7 @@ fn parse_corpus(suffix: &str) -> (String, Vec<Value>) {
         "" => conformance_support::CASES,
         "-range-slider" => conformance_support::RANGE_SLIDER_CASES,
         "-tabs" => conformance_support::TABS_CASES,
+        "-popover" => conformance_support::POPOVER_CASES,
         _ => panic!("unknown corpus suffix {suffix}"),
     };
     let cases: Value = serde_json::from_str(raw).expect("committed corpus parses");
@@ -94,6 +98,7 @@ fn parse_interface(suffix: &str) -> InterfaceDoc {
         "" => conformance_support::INTERFACE,
         "-range-slider" => conformance_support::RANGE_SLIDER_INTERFACE,
         "-tabs" => conformance_support::TABS_INTERFACE,
+        "-popover" => conformance_support::POPOVER_INTERFACE,
         _ => panic!("unknown interface suffix {suffix}"),
     };
     let value: Value = serde_json::from_str(raw).expect("committed interface parses");
@@ -147,6 +152,19 @@ fn run_complete_board(cx: &mut TestAppContext) {
     let results =
         conformance_tabs::drive_tabs_cases(&mut driver, parse_interface("-tabs"), cases, None);
     write_report("gpui-tabs.json", &conformance_tabs::tabs_report(&component, &results));
+    failures.extend(results.iter().filter(|o| !o.pass).map(|o| o.case_id.clone()));
+
+    if !conformance_popover::registry_has_popover() {
+        panic!("completion: popover registration missing from the GPUI registry");
+    }
+    let (component, cases) = parse_corpus("-popover");
+    let results = conformance_popover::drive_popover_cases(
+        &mut driver,
+        parse_interface("-popover"),
+        cases,
+        None,
+    );
+    write_report("gpui-popover.json", &conformance_popover::popover_report(&component, &results));
     failures.extend(results.iter().filter(|o| !o.pass).map(|o| o.case_id.clone()));
 
     let probes = primitive_probes_gpui::drive_primitive_probes(&mut driver);
@@ -461,4 +479,435 @@ fn run_planted_broken_keyboard_order_fails(cx: &mut TestAppContext) {
     assert_events(&["press".to_owned()], &[], 0, &mut results);
     assert_eq!(results[0].verdict, "fail");
     assert_eq!(results[0].step_index, 0);
+}
+
+// ── Popover planted failures (g14.005) ─────────────────────────────────────
+
+/// The layer registry is frame-scoped, not conversion-scoped: a real page
+/// converts many components independently per frame, and every overlay must
+/// register within that one frame.
+#[test]
+fn layers_survive_independent_conversions_within_a_frame() {
+    run_headless(run_layers_survive_independent_conversions_within_a_frame);
+}
+
+fn run_layers_survive_independent_conversions_within_a_frame(cx: &mut TestAppContext) {
+    let _ = cx;
+    // Two independent popover compositions converted separately — as a real
+    // page converts its components — inside ONE frame.
+    poodle_gpui_node_backend::overlay_frame_begin();
+    let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
+    let first = poodle_render::popover(
+        &PopoverSpec::new().with_open(true),
+        &theme,
+        &poodle_render::PopoverHandlers {
+            on_activate: None,
+            on_dismiss: Some(Arc::new(|_| {})),
+            instance_id: Some("multi-frame-a".to_owned()),
+        },
+        Some(poodle_node::Node::text("A trigger")),
+        Some(poodle_node::Node::text("A panel")),
+    );
+    let second = poodle_render::popover(
+        &PopoverSpec::new().with_open(true),
+        &theme,
+        &poodle_render::PopoverHandlers {
+            on_activate: None,
+            on_dismiss: Some(Arc::new(|_| {})),
+            instance_id: Some("multi-frame-b".to_owned()),
+        },
+        Some(poodle_node::Node::text("B trigger")),
+        Some(poodle_node::Node::text("B panel")),
+    );
+    let _ = poodle_gpui_node_backend::to_gpui(&first);
+    let _ = poodle_gpui_node_backend::to_gpui(&second);
+    assert_eq!(
+        poodle_gpui_node_backend::open_layer_count(),
+        2,
+        "both independently converted overlays must register in the same frame"
+    );
+    poodle_gpui_node_backend::overlay_frame_end();
+}
+
+/// Assert that a planted defect fails the corpus's own expectation, naming
+/// runtime/case/step/field.
+fn assert_defect_fails(
+    iface: &InterfaceDoc,
+    part: &str,
+    expect: &Value,
+    observation: Value,
+    field: &str,
+    case_id: &str,
+) {
+    let mut results = Vec::new();
+    assert_part(iface, part, expect, 0, observation, "gpui", &mut results);
+    assert!(
+        results
+            .iter()
+            .any(|r| r.verdict == "fail" && r.field == field),
+        "planted defect in {case_id} did not fail on {field}: {results:?}"
+    );
+}
+
+/// Inert Escape: the layer's dismiss handler is missing, so the real Escape
+/// route leaves the popover open and the close event never fires.
+#[test]
+fn planted_inert_escape_fails() {
+    run_headless(run_planted_inert_escape_fails);
+}
+
+fn run_planted_inert_escape_fails(cx: &mut TestAppContext) {
+    let spec = PopoverSpec::new().with_aria_label("Inert");
+
+    // The planted variant: the layer's handler never runs the machine.
+    let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
+    let inert = poodle_render::popover(
+        &spec,
+        &theme,
+        &poodle_render::PopoverHandlers {
+            on_activate: None,
+            on_dismiss: None,
+            instance_id: Some("planted-inert-escape".to_owned()),
+        },
+        Some(poodle_node::Node::text("Open popover")),
+        Some(poodle_node::Node::text("Quick settings panel")),
+    );
+    let node = Arc::new(Mutex::new(inert));
+    let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+    driver.draw_frame();
+    driver.dispatch_key("escape");
+    driver.draw_frame();
+
+    let mut results = Vec::new();
+    assert_events(
+        &["openChange".to_owned(), "openChange".to_owned()],
+        &[],
+        0,
+        &mut results,
+    );
+    assert_eq!(results[0].verdict, "fail");
+    assert_eq!(results[0].field, "events");
+}
+
+/// Inert outside dismissal: an outside pointer press never reaches a layer
+/// handler, so the close event never fires.
+#[test]
+fn planted_inert_outside_dismissal_fails() {
+    run_headless(run_planted_inert_outside_dismissal_fails);
+}
+
+fn run_planted_inert_outside_dismissal_fails(cx: &mut TestAppContext) {
+    let spec = PopoverSpec::new();
+    let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
+    let inert = poodle_render::popover(
+        &spec,
+        &theme,
+        &poodle_render::PopoverHandlers {
+            on_activate: None,
+            on_dismiss: None,
+            instance_id: Some("planted-inert-outside".to_owned()),
+        },
+        Some(poodle_node::Node::text("Open popover")),
+        Some(poodle_node::Node::text("Quick settings panel")),
+    );
+    let node = Arc::new(Mutex::new(inert));
+    let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+    driver.draw_frame();
+    driver.pointer_press(gpui::point(gpui::px(2.0), gpui::px(2.0)));
+    driver.draw_frame();
+
+    let mut results = Vec::new();
+    assert_events(&["openChange".to_owned()], &[], 0, &mut results);
+    assert_eq!(results[0].verdict, "fail");
+    assert_eq!(results[0].field, "events");
+}
+
+/// Wrong initial-focus target: the focus entry moves focus to the SECOND
+/// focusable in the content; the corpus's focusedText expectation fails.
+#[test]
+fn planted_wrong_initial_focus_target_fails() {
+    run_headless(run_planted_wrong_initial_focus_target_fails);
+}
+
+fn run_planted_wrong_initial_focus_target_fails(cx: &mut TestAppContext) {
+    let spec = PopoverSpec::new().with_open(true).with_aria_label("Quick settings");
+    let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
+    let mut first = poodle_node::Node::button("First option");
+    first.interaction.focusable = true;
+    first.id = Some("planted-focus:first".to_owned());
+    first.a11y.label = Some("First option".to_owned());
+    first.style.focus = Some(poodle_node::StylePatch::default());
+    let mut second = poodle_node::Node::button("Second option");
+    second.interaction.focusable = true;
+    second.id = Some("planted-focus:second".to_owned());
+    second.a11y.label = Some("Second option".to_owned());
+    second.style.focus = Some(poodle_node::StylePatch::default());
+    let content = poodle_node::Node::container().child(first).child(second);
+    let node = poodle_render::popover(
+        &spec,
+        &theme,
+        &poodle_render::PopoverHandlers {
+            on_activate: None,
+            on_dismiss: None,
+            instance_id: Some("planted-focus".to_owned()),
+        },
+        Some(poodle_node::Node::text("Open popover")),
+        Some(content),
+    );
+    let node = Arc::new(Mutex::new(node));
+    let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+    driver.draw_frame();
+    // The defect: the SECOND focusable is focused.
+    driver.wait_for_focus_handle("planted-focus:second");
+    driver.focus_element("planted-focus:second");
+    driver.draw_frame();
+
+    let iface = parse_interface("-popover");
+    let focus_by_id = |id: &str| poodle_gpui_node_backend::focus_state_for(id);
+    let observation = observe_tree_with_focus("gpui", "popover", &iface, &node.lock().expect("node lock"), &focus_by_id);
+    assert_defect_fails(
+        &iface,
+        "root",
+        &json!({ "focusedText": "First option" }),
+        observation,
+        "focusedText",
+        "popover/focus-first",
+    );
+}
+
+/// Missing focus restore: a close path that never refocuses the trigger fails
+/// the corpus's restore assertion.
+#[test]
+fn planted_missing_focus_restore_fails() {
+    run_headless(run_planted_missing_focus_restore_fails);
+}
+
+fn run_planted_missing_focus_restore_fails(cx: &mut TestAppContext) {
+    use poodle_headless::popover::{
+        popover_transition, PopoverContext, PopoverEvent, PopoverInitialFocus, PopoverState,
+    };
+    let spec = PopoverSpec::new();
+    let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
+    let open = Arc::new(Mutex::new(true));
+    let trace = Arc::new(Mutex::new(Vec::new()));
+    let context = PopoverContext {
+        disabled: false,
+        dismiss_on_outside_interact: true,
+        initial_focus: PopoverInitialFocus::FirstFocusable,
+    };
+    // The defect: the close transition's focus-restore effect is dropped.
+    let trace_close = Arc::clone(&trace);
+    let open_close = Arc::clone(&open);
+    let on_dismiss: poodle_node::DismissHandler = Arc::new(move |reason| {
+        let (_, effects) = popover_transition(
+            if *open_close.lock().expect("open lock") {
+                PopoverState::Open
+            } else {
+                PopoverState::Closed
+            },
+            context,
+            match reason {
+                poodle_node::DismissReason::Escape => PopoverEvent::Escape,
+                poodle_node::DismissReason::Outside => PopoverEvent::OutsideInteract,
+            },
+        );
+        for effect in effects {
+            if let poodle_headless::popover::PopoverEffect::EmitOpenChange { open: next } = effect
+            {
+                *open_close.lock().expect("open lock") = next;
+                trace_close.lock().expect("trace lock").push(json!({
+                    "event": "openChange",
+                    "payload": { "open": next },
+                }));
+            }
+            // RestoreTriggerFocus deliberately dropped.
+        }
+    });
+    let node = poodle_render::popover(
+        &spec,
+        &theme,
+        &poodle_render::PopoverHandlers {
+            on_activate: None,
+            on_dismiss: Some(on_dismiss),
+            instance_id: Some("planted-restore".to_owned()),
+        },
+        Some(poodle_node::Node::text("Open popover")),
+        Some(poodle_node::Node::text("Quick settings panel")),
+    );
+    let node = Arc::new(Mutex::new(node));
+    let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+    driver.wait_for_focus_handle("planted-restore:popover-trigger");
+    driver.focus_element("planted-restore:popover-trigger");
+    driver.draw_frame();
+    driver.dispatch_key("escape");
+    driver.draw_frame();
+
+    let iface = parse_interface("-popover");
+    let focus_by_id = |id: &str| poodle_gpui_node_backend::focus_state_for(id);
+    let observation = observe_tree_with_focus("gpui", "popover", &iface, &node.lock().expect("node lock"), &focus_by_id);
+    assert_defect_fails(
+        &iface,
+        "trigger",
+        &json!({ "focused": true }),
+        observation,
+        "focused",
+        "popover/escape",
+    );
+}
+
+/// Reversed nested-layer dismissal: the outer layer registers first, so one
+/// Escape unwinds the whole stack — the corpus's innermost-first layer count
+/// fails.
+#[test]
+fn planted_reversed_nested_dismissal_fails() {
+    run_headless(run_planted_reversed_nested_dismissal_fails);
+}
+
+fn run_planted_reversed_nested_dismissal_fails(cx: &mut TestAppContext) {
+    let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
+    // The inner popover sits BEFORE the outer's trigger in the tree, so its
+    // layer registers first and the outer ends up on top — the reversed
+    // dismissal order.
+    let node = poodle_render::popover(
+        &PopoverSpec::new().with_open(true),
+        &theme,
+        &poodle_render::PopoverHandlers {
+            on_activate: None,
+            on_dismiss: Some(Arc::new(|_| {})),
+            instance_id: Some("planted-reversed:outer".to_owned()),
+        },
+        Some(poodle_node::Node::text("Open popover")),
+        Some(poodle_node::Node::text("Outer panel")),
+    );
+    // Rebuild the tree with the inner layer FIRST: swap the wrapper's
+    // children so the nested composition precedes the trigger.
+    let mut reversed = node.clone();
+    let inner_node = poodle_render::popover(
+        &PopoverSpec::new().with_open(true),
+        &theme,
+        &poodle_render::PopoverHandlers {
+            on_activate: None,
+            on_dismiss: Some(Arc::new(|_| {})),
+            instance_id: Some("planted-reversed:inner".to_owned()),
+        },
+        Some(poodle_node::Node::text("Nested trigger")),
+        Some(poodle_node::Node::text("Nested panel")),
+    );
+    reversed.children.insert(0, inner_node);
+    let node = Arc::new(Mutex::new(reversed));
+    let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+    driver.draw_frame();
+    // The layer stack reads [inner, outer] — the outermost registers last.
+    driver.dispatch_key("escape");
+    driver.draw_frame();
+
+    let iface = parse_interface("-popover");
+    let focus_by_id = |id: &str| poodle_gpui_node_backend::focus_state_for(id);
+    let observation = observe_tree_with_focus("gpui", "popover", &iface, &node.lock().expect("node lock"), &focus_by_id);
+    // The corpus's nested-escape expects exactly one layer after one Escape.
+    assert_defect_fails(
+        &iface,
+        "root",
+        &json!({ "layerCount": 1 }),
+        observation,
+        "layerCount",
+        "popover/nested-escape",
+    );
+}
+
+/// Absent overlay/layer evidence: a surface without the overlay flag fails
+/// the corpus's overlay observation.
+#[test]
+fn planted_absent_overlay_evidence_fails() {
+    run_headless(run_planted_absent_overlay_evidence_fails);
+}
+
+fn run_planted_absent_overlay_evidence_fails(cx: &mut TestAppContext) {
+    let spec = PopoverSpec::new().with_open(true).with_aria_label("Quick settings");
+    let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
+    let node = poodle_render::popover(
+        &spec,
+        &theme,
+        &poodle_render::PopoverHandlers::default(),
+        Some(poodle_node::Node::text("Open popover")),
+        Some(poodle_node::Node::text("Quick settings panel")),
+    );
+    // The defect: the surface loses its overlay intent. The unsafe cast is
+    // the planted-mutation seam — the observer must never see the flag.
+    if let Some(surface) = node.find(&|n| n.id.as_deref() == Some("popover-surface")) {
+        let surface = surface as *const poodle_node::Node as *mut poodle_node::Node;
+        unsafe { (*surface).style.overlay = false; }
+    }
+    let node = Arc::new(Mutex::new(node));
+    let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+    driver.draw_frame();
+
+    let iface = parse_interface("-popover");
+    let focus_by_id = |id: &str| poodle_gpui_node_backend::focus_state_for(id);
+    let observation = observe_tree_with_focus("gpui", "popover", &iface, &node.lock().expect("node lock"), &focus_by_id);
+    assert_defect_fails(
+        &iface,
+        "surface",
+        &json!({ "overlay": true }),
+        observation,
+        "overlay",
+        "popover/semantics-tokens",
+    );
+}
+
+/// Wrong placement offset: the surface gap ignores the authored offset, so the
+/// relative-geometry assertion fails on the gap field.
+#[test]
+fn planted_wrong_placement_offset_fails() {
+    run_headless(run_planted_wrong_placement_offset_fails);
+}
+
+fn run_planted_wrong_placement_offset_fails(cx: &mut TestAppContext) {
+    let spec = PopoverSpec::new().with_offset(12.0);
+    let _ = &spec;
+    let theme = GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE);
+    // The defect: the composition pins the gap to the default instead of the
+    // authored offset.
+    let node = poodle_render::popover(
+        &PopoverSpec::new().with_open(true).with_offset(8.0),
+        &theme,
+        &poodle_render::PopoverHandlers::default(),
+        Some(poodle_node::Node::text("Open popover")),
+        Some(poodle_node::Node::text("Quick settings panel")),
+    );
+    let node = Arc::new(Mutex::new(node));
+    let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+    driver.draw_frame();
+
+    let iface = parse_interface("-popover");
+    let focus_by_id = |id: &str| poodle_gpui_node_backend::focus_state_for(id);
+    let bounds_by_id = |id: &str| {
+        poodle_gpui_node_backend::bounds_for(id).map(|bounds| {
+            (
+                f32::from(bounds.origin.y),
+                f32::from(bounds.origin.x),
+                f32::from(bounds.size.width),
+                f32::from(bounds.size.height),
+            )
+        })
+    };
+    let observation = observe_tree_with_context(
+        "gpui",
+        "popover",
+        &iface,
+        &node.lock().expect("node lock"),
+        &ObserveContext {
+            focus_by_id: &focus_by_id,
+            layer_count: &(|| Some(poodle_gpui_node_backend::open_layer_count())),
+            bounds_by_id: &bounds_by_id,
+        },
+    );
+    assert_defect_fails(
+        &iface,
+        "surface",
+        &json!({ "geometry": { "topGap": 12, "tolerance": 1 } }),
+        observation,
+        "geometry.topGap",
+        "popover/offset",
+    );
 }

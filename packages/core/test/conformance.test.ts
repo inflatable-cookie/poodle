@@ -13,7 +13,6 @@ import { disclosureTransition } from "../src/disclosure.ts";
 import { hoverTransition } from "../src/hover.ts";
 import { menuTransition } from "../src/menu.ts";
 import { modalTransition } from "../src/modal.ts";
-import { popoverTransition } from "../src/popover.ts";
 import { singleSelectTransition } from "../src/single-select.ts";
 import { sliderTransition } from "../src/slider.ts";
 import { switchTransition } from "../src/switch.ts";
@@ -93,12 +92,6 @@ function runMachine(machine: string, vector: VectorCase): void {
         expect(result.context.items.map((item: { value: string }) => item.value)).toEqual(vector.expect.order);
       }
 
-      expect(result.effects).toEqual(vector.expect.effects as never);
-      return;
-    }
-    case "popover": {
-      const result = popoverTransition(vector.state as never, context, event);
-      expect(result.state).toBe(vector.expect.state as never);
       expect(result.effects).toEqual(vector.expect.effects as never);
       return;
     }

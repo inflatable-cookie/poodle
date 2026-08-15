@@ -34,6 +34,7 @@ export interface ItemFieldDecl {
 export type ScalarTypeDef =
   | ItemScalarTypeDef
   | { kind: "dimension" }
+  | { kind: "remDimension" }
   | { kind: "numberPair" }
   | { kind: "collection"; fields: readonly ItemFieldDecl[]; rustType: string }
   | { kind: "enum"; values: readonly string[] };
@@ -102,6 +103,9 @@ export interface PartDecl {
   /** Repeated part keyed by one field of a collection prop. Cases address it
    * as `<id>:<semantic-key>`; runtime indices never enter the corpus. */
   repeat?: { prop: string; key: string; webIdPrefix?: string };
+  /** The part this part is positioned relative to (an anchored surface's
+   * trigger). Observers record relative logical bounds gaps against it. */
+  relativeTo?: string;
   resolve: { web: WebResolution; native: NativeResolution };
 }
 
@@ -118,7 +122,8 @@ export interface StateDecl {
     | "active-element"
     | "focus-visible-pseudo"
     | "part-disabled-attr"
-    | "part-active-element";
+    | "part-active-element"
+    | "part-present";
   /** The data attribute name for `data-attr`. */
   attr?: string;
   /** How the native observer records the state. */
@@ -228,10 +233,18 @@ export function validateInterface(config: InterfaceConfig): void {
     }
   }
   if (!partIds.has("root")) throw new Error("interface needs a 'root' part");
+  for (const part of config.parts) {
+    if (part.relativeTo && !partIds.has(part.relativeTo)) {
+      throw new Error(`part '${part.id}' relativeTo names unknown part '${part.relativeTo}'`);
+    }
+  }
   for (const state of config.states) {
     if (names.has(`state:${state.name}`)) throw new Error(`duplicate state '${state.name}'`);
     names.add(`state:${state.name}`);
-    if (state.native === "part-present" && !state.part) {
+    if (
+      (state.native === "part-present" || state.web === "part-present") &&
+      !state.part
+    ) {
       throw new Error(`state '${state.name}' needs a part for part-present observation`);
     }
     if (
@@ -300,7 +313,7 @@ export type ScalarToTs<S extends ScalarTypeDef, Nullable extends boolean> =
           ? Nullable extends true ? CollectionItemToTs<S["fields"]>[] | null : CollectionItemToTs<S["fields"]>[]
         : S extends { kind: "enum"; values: readonly string[] }
           ? Nullable extends true ? S["values"][number] | null : S["values"][number]
-          : S extends { kind: "string" | "icon" | "dimension" }
+          : S extends { kind: "string" | "icon" | "dimension" | "remDimension" }
             ? Nullable extends true ? string | null : string
             : never;
 
@@ -394,6 +407,7 @@ export type SerializedCaseStep =
       key?: string;
       fraction?: number;
       phase?: string;
+      target?: string;
     }
   | { kind: "expectPart"; part: string; expect: Record<string, unknown> }
   | { kind: "expectEvents"; events: string[] };
@@ -410,7 +424,11 @@ export type SerializedFixtureProp =
 /** The loose, runtime-shaped case in the neutral JSON. */
 export interface SerializedCase {
   id: string;
-  fixture: { props: Record<string, SerializedFixtureProp>; regions: Record<string, string> };
+  fixture: {
+    props: Record<string, SerializedFixtureProp>;
+    regions: Record<string, string>;
+    host?: Record<string, unknown>;
+  };
   specimen: { group: string; caption: string; axes: string[]; captureId: string };
   steps: SerializedCaseStep[];
 }
@@ -426,6 +444,10 @@ export interface SerializedComponentCases {
 export type CaseFixture<I extends InterfaceConfig> = {
   props: Partial<{ [K in PortablePropNamesOf<I>]: FixtureValueOf<PropByName<I, K>> }>;
   regions: Partial<Record<RegionNamesOf<I>, string>>;
+  /** Opaque host composition data: interpreted only by per-component fixture
+   * hosts (e.g. which additional dismissable layer to compose inside the
+   * content). Generic runners and observers never read it. */
+  host?: Record<string, unknown>;
 };
 
 type PortablePropNamesOf<I extends InterfaceConfig> = Extract<
@@ -442,13 +464,36 @@ export interface CaseSpecimen<I extends InterfaceConfig> {
   captureId: string;
 }
 
+/** The portable dimension subset: a rem length (`14rem`, `20.5rem`). Any
+ * other shape is rejected at case authoring and by the Rust codegen, so an
+ * unsupported value never silently becomes a default. */
+const REM_DIMENSION = /^[0-9]+(\.[0-9]+)?rem$/;
+
+function isPortableRemDimension(value: string): boolean {
+  return REM_DIMENSION.test(value)
+    && Number.isFinite(Math.fround(Number(value.slice(0, -3))));
+}
+
 export type GeometryField =
   | "height"
   | "minWidth"
   | "paddingLeft"
   | "paddingRight"
   | "radius"
-  | "borderWidth";
+  | "borderWidth"
+  // Relative logical bounds against the part's `relativeTo` anchor: the gap
+  // between the part's edge and the anchor's facing edge (positive when the
+  // part is past the anchor in that direction), the start/end alignment
+  // deltas, and the width difference. Axis-agnostic names; the case authors
+  // the family that applies to its placement.
+  | "topGap"
+  | "bottomGap"
+  | "leftGap"
+  | "rightGap"
+  | "hStart"
+  | "hEnd"
+  | "vStart"
+  | "widthGap";
 
 export type GeometryExpectation = Partial<Record<GeometryField, number>> & {
   /** Explicit assertion-local bound. Blanket runtime tolerances are forbidden. */
@@ -469,9 +514,21 @@ export interface PartExpectation<I extends InterfaceConfig> {
   focusVisible?: boolean;
   tabbable?: boolean;
   selected?: boolean;
+  /** ARIA expanded projection (overlay triggers). */
+  expanded?: boolean;
   orientation?: "horizontal" | "vertical";
   controls?: string;
   labelledBy?: string;
+  /** The part that hosts this part's layer: the nearest part ancestor in the
+   * runtime tree, or the component root that hosts the layer when the part
+   * renders outside the tree (portalled / overlay surfaces). */
+  parent?: string;
+  /** Overlay evidence: the part renders above normal content. */
+  overlay?: boolean;
+  /** Root-only: the text of the currently focused element/node. */
+  focusedText?: string;
+  /** Root-only: the number of open overlay layers at/under this component. */
+  layerCount?: number;
   states?: Partial<Record<StateNamesOf<I>, boolean>>;
   tokenRoles?: Partial<Record<TokenRoleNamesOf<I>, string>>;
   geometry?: GeometryExpectation;
@@ -495,6 +552,8 @@ export type CaseStep<I extends InterfaceConfig> =
       fraction: number;
       phase: "press" | "drag" | "release";
     }
+  | { kind: "action"; name: "dismiss"; part: CasePartId<I> }
+  | { kind: "action"; name: "pointer"; part: CasePartId<I>; target: "inside" | "outside" }
   | { kind: "expectPart"; part: CasePartId<I>; expect: PartExpectation<I> }
   | { kind: "expectEvents"; events: EventNamesOf<I>[] };
 
@@ -538,6 +597,13 @@ export function validateCase<I extends InterfaceConfig>(
     }
     if (prop.type.kind === "number" && value !== null && typeof value !== "number") {
       throw new Error(`case '${config.id}' prop '${key}' must be a number`);
+    }
+    if (prop.type.kind === "remDimension" && value !== null) {
+      if (typeof value !== "string" || !isPortableRemDimension(value)) {
+        throw new Error(
+          `case '${config.id}' prop '${key}' value '${String(value)}' is not a portable rem length (the §12 subset)`,
+        );
+      }
     }
     if (prop.type.kind === "numberPair" && value !== null) {
       if (!Array.isArray(value) || value.length !== 2 || value.some((entry) => typeof entry !== "number")) {
@@ -632,6 +698,11 @@ export function validateCase<I extends InterfaceConfig>(
             throw new Error(`case '${config.id}' scrub action needs phase press|drag|release`);
           }
         }
+        if (step.name === "pointer") {
+          if (!("target" in step) || !["inside", "outside"].includes(step.target)) {
+            throw new Error(`case '${config.id}' pointer action needs target inside|outside`);
+          }
+        }
         break;
       }
       case "expectPart": {
@@ -695,6 +766,14 @@ const GEOMETRY_FIELDS = new Set<GeometryField>([
   "paddingRight",
   "radius",
   "borderWidth",
+  "topGap",
+  "bottomGap",
+  "leftGap",
+  "rightGap",
+  "hStart",
+  "hEnd",
+  "vStart",
+  "widthGap",
 ]);
 
 /** JSON-stable serialization: key order fixed by construction, no undefined. */
@@ -729,6 +808,7 @@ export function serializeCases<I extends InterfaceConfig>(
       fixture: {
         props: { ...c.fixture.props } as Record<string, SerializedFixtureProp>,
         regions: { ...c.fixture.regions } as Record<string, string>,
+        ...(c.fixture.host ? { host: c.fixture.host } : {}),
       },
       specimen: {
         group: c.specimen.group,
@@ -749,6 +829,17 @@ export function serializeCases<I extends InterfaceConfig>(
               fraction: step.fraction,
               phase: step.phase,
             };
+          }
+          if (step.name === "pointer") {
+            return {
+              kind: "action",
+              name: "pointer",
+              part: step.part,
+              target: step.target,
+            };
+          }
+          if (step.name === "dismiss") {
+            return { kind: "action", name: "dismiss", part: step.part };
           }
           return {
             kind: "action",
@@ -787,6 +878,22 @@ export function actionScrub<I extends InterfaceConfig>(
   phase: "press" | "drag" | "release" = "press",
 ): CaseStep<I> {
   return { kind: "action", name: "scrub", part, fraction, phase };
+}
+
+/** The harness's real dismissal route (document-level Escape on web, the
+ * window dispatch tree on native). Never a direct callback invocation. */
+export function actionDismiss<I extends InterfaceConfig>(part: CasePartId<I>): CaseStep<I> {
+  return { kind: "action", name: "dismiss", part };
+}
+
+/** A real pointer interaction with inside/outside intent relative to a part:
+ * inside = a press on the resolved part (its own element or subtree), outside
+ * = a press outside the mounted component. */
+export function actionPointer<I extends InterfaceConfig>(
+  part: CasePartId<I>,
+  target: "inside" | "outside",
+): CaseStep<I> {
+  return { kind: "action", name: "pointer", part, target };
 }
 
 export function expectPart<I extends InterfaceConfig>(

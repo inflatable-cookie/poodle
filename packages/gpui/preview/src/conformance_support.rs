@@ -4,10 +4,12 @@
 //! `#[path]`. Both canonical JSON fixtures are included directly from the
 //! TypeScript authority's checked output — never copied or restated here.
 
+use poodle_node::Node;
 use poodle_specs::{
     ActiveEdge, ActiveFill, ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, ControlSize,
-    Orientation, RangeSliderSpec, SemanticControlSizeRole, SliderPolarity, SliderVariant,
-    TabActivationMode, TabDefinition, TabVariant, TabsSpec,
+    Orientation, OverlayPlacement, PopoverInitialFocus, PopoverSpec, PopoverSurfaceWidth,
+    RangeSliderSpec, SemanticControlSizeRole, SliderPolarity, SliderVariant, TabActivationMode,
+    TabDefinition, TabVariant, TabsSpec,
 };
 use serde_json::Value;
 
@@ -24,6 +26,131 @@ pub const RANGE_SLIDER_INTERFACE: &str =
 pub const TABS_CASES: &str = include_str!("../../../codegen/fixtures/conformance/tabs-cases.json");
 pub const TABS_INTERFACE: &str =
     include_str!("../../../codegen/fixtures/conformance/tabs-interface.json");
+pub const POPOVER_CASES: &str = include_str!("../../../codegen/fixtures/conformance/popover-cases.json");
+pub const POPOVER_INTERFACE: &str =
+    include_str!("../../../codegen/fixtures/conformance/popover-interface.json");
+
+/// Fixture → PopoverSpec adapter (g14.005). All 12 placements, the numeric
+/// offset, the guard, the focus strategies, and the surface width strategy
+/// map mechanically; the web-only extension prop never appears here.
+pub fn popover_spec_from_fixture(fixture: &Value) -> PopoverSpec {
+    let props = fixture
+        .get("props")
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    let mut spec = PopoverSpec::new();
+    if let Some(open) = props.get("open").and_then(Value::as_bool) {
+        spec = spec.with_open(open);
+    }
+    if let Some(default_open) = props.get("defaultOpen").and_then(Value::as_bool) {
+        spec = spec.with_default_open(default_open);
+    }
+    if let Some(placement) = props.get("placement").and_then(Value::as_str) {
+        spec = spec.with_placement(match placement {
+            "top" => OverlayPlacement::Top,
+            "top-start" => OverlayPlacement::TopStart,
+            "top-end" => OverlayPlacement::TopEnd,
+            "bottom" => OverlayPlacement::Bottom,
+            "bottom-end" => OverlayPlacement::BottomEnd,
+            "left" => OverlayPlacement::Left,
+            "left-start" => OverlayPlacement::LeftStart,
+            "left-end" => OverlayPlacement::LeftEnd,
+            "right" => OverlayPlacement::Right,
+            "right-start" => OverlayPlacement::RightStart,
+            "right-end" => OverlayPlacement::RightEnd,
+            _ => OverlayPlacement::BottomStart,
+        });
+    }
+    if let Some(offset) = props.get("offset").and_then(Value::as_f64) {
+        spec = spec.with_offset(offset as f32);
+    }
+    if let Some(dismiss) = props.get("dismissOnOutsideInteract").and_then(Value::as_bool) {
+        spec = spec.with_dismiss_on_outside_interact(dismiss);
+    }
+    if let Some(strategy) = props.get("initialFocus").and_then(Value::as_str) {
+        spec = spec.with_initial_focus(match strategy {
+            "content" => PopoverInitialFocus::Content,
+            "none" => PopoverInitialFocus::None,
+            _ => PopoverInitialFocus::FirstFocusable,
+        });
+    }
+    if let Some(label) = props.get("ariaLabel").and_then(Value::as_str) {
+        spec = spec.with_aria_label(label);
+    }
+    if let Some(block) = props.get("block").and_then(Value::as_bool) {
+        spec = spec.with_block(block);
+    }
+    if let Some(disabled) = props.get("disabled").and_then(Value::as_bool) {
+        spec = spec.with_disabled(disabled);
+    }
+    if let Some(width) = props.get("surfaceWidth").and_then(Value::as_str) {
+        spec = spec.with_surface_width(if width == "trigger" {
+            PopoverSurfaceWidth::Trigger
+        } else {
+            PopoverSurfaceWidth::Content
+        });
+    }
+    if let Some(min_width) = props.get("surfaceMinWidth").and_then(Value::as_str) {
+        spec = spec.with_surface_min_width(poodle_specs::Dimension::new(min_width));
+    }
+    if let Some(max_width) = props.get("surfaceMaxWidth").and_then(Value::as_str) {
+        spec = spec.with_surface_max_width(poodle_specs::Dimension::new(max_width));
+    }
+    spec
+}
+
+/// Builds the popover content node from the fixture's `children` region.
+/// The region may carry inline `<button>label</button>` markup (the focus
+/// corpus's focusable content convention); plain text becomes a text node.
+/// Focusable buttons get stable ids so the real backend focus path can
+/// target them.
+pub fn popover_content_from_fixture(fixture: &Value, instance_id: &str) -> Option<Node> {
+    let regions = fixture
+        .get("regions")
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    let raw = regions.get("children").and_then(Value::as_str).unwrap_or_default();
+    let focusables = fixture
+        .pointer("/host/focusables")
+        .and_then(Value::as_array)
+        .map(|items| {
+            items
+                .iter()
+                .filter_map(Value::as_str)
+                .map(str::to_owned)
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    if raw.is_empty() && focusables.is_empty() {
+        return None;
+    }
+    let mut content = Node::container();
+    if !raw.is_empty() {
+        content = content.child(Node::text(raw));
+    }
+    for (index, label) in focusables.into_iter().enumerate() {
+        let mut button = Node::button(label.clone());
+        button.interaction.focusable = true;
+        button.id = Some(format!("{instance_id}:popover-content-focusable-{index}"));
+        button.a11y.label = Some(label);
+        content = content.child(button);
+    }
+    Some(content)
+}
+
+/// The trigger node for the composition, from the fixture's `trigger` region.
+pub fn popover_trigger_from_fixture(fixture: &Value) -> Option<Node> {
+    let regions = fixture
+        .get("regions")
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    let raw = regions.get("trigger").and_then(Value::as_str).unwrap_or_default();
+    if raw.is_empty() {
+        None
+    } else {
+        Some(Node::text(raw))
+    }
+}
 
 /// The fixture → spec adapter (the harness's mount step for Button).
 pub fn spec_from_fixture(fixture: &Value) -> ButtonSpec {

@@ -76,6 +76,14 @@ export class ReactRangeSliderAdapter implements RuntimeAdapter {
 
   async press(_part: string, _input: "pointer" | "keyboard"): Promise<void> {}
 
+  async dismiss(_part: string): Promise<void> {
+    // The corpus of this profile does not exercise the dismissal route.
+  }
+
+  async pointer(_part: string, _target: "inside" | "outside"): Promise<void> {
+    // The corpus of this profile does not exercise outside pointer intent.
+  }
+
   async flush(): Promise<void> {
     await act(async () => {});
   }

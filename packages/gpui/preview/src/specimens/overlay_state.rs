@@ -4,20 +4,6 @@ use gpui::*;
 
 use crate::PreviewRoot;
 
-pub(crate) fn set_toggle_via_entity(
-    root: &WeakEntity<PreviewRoot>,
-    key: impl Into<String>,
-    value: bool,
-    cx: &mut App,
-) {
-    let key = key.into();
-    root.update(cx, |this, cx| {
-        this.state.specimens.set_toggle(&key, value);
-        cx.notify();
-    })
-    .ok();
-}
-
 pub(crate) fn sync_hover_intent(
     root: &WeakEntity<PreviewRoot>,
     open_key: impl Into<String>,

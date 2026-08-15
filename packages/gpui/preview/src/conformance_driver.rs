@@ -48,20 +48,27 @@ impl Focusable for ConformanceRoot {
 impl Render for ConformanceRoot {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         let node = self.node.lock().expect("node lock").clone();
-        div()
-            .size_full()
-            .track_focus(&self.focus)
-            .child(
-                div()
-                    .w(px(MOUNT_BOX_WIDTH))
-                    .h(px(MOUNT_BOX_HEIGHT))
-                    .ml(px(MOUNT_BOX_LEFT))
-                    .mt(px(MOUNT_BOX_TOP))
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .child(poodle_gpui_node_backend::to_gpui(&node)),
-            )
+        // The window-level overlay host: every pointer press and Escape is
+        // routed through the node backend's layer registry (generic — no
+        // component identifier here), so overlay dismissal executes through
+        // the real event tree. The production preview root uses the same
+        // wiring.
+        poodle_gpui_node_backend::attach_overlay_host(
+            div()
+                .size_full()
+                .track_focus(&self.focus)
+                .child(
+                    div()
+                        .w(px(MOUNT_BOX_WIDTH))
+                        .h(px(MOUNT_BOX_HEIGHT))
+                        .ml(px(MOUNT_BOX_LEFT))
+                        .mt(px(MOUNT_BOX_TOP))
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .child(poodle_gpui_node_backend::to_gpui(&node)),
+                ),
+        )
     }
 }
 
@@ -76,6 +83,7 @@ impl Render for ConformanceRoot {
 pub struct HeadlessDriver<'a> {
     cx: &'a mut VisualTestContext,
     root: Entity<ConformanceRoot>,
+    root_focus: FocusHandle,
 }
 
 impl<'a> HeadlessDriver<'a> {
@@ -89,7 +97,12 @@ impl<'a> HeadlessDriver<'a> {
             window.refresh();
             root
         });
-        let mut driver = Self { cx, root };
+        let root_focus = cx.update(|_window, cx| root.read(cx).focus.clone());
+        let mut driver = Self {
+            cx,
+            root,
+            root_focus,
+        };
         driver.draw_frame();
         driver
     }
@@ -109,8 +122,10 @@ impl<'a> HeadlessDriver<'a> {
     /// views that were not explicitly invalidated — paint-time side effects
     /// (the node backend's focus canvases) would only run on some frames. The
     /// root view is notified (invalidated) up front so every draw is a full
-    /// repaint and the backend observations are deterministic.
+    /// repaint and the backend observations are deterministic. The overlay
+    /// frame boundary (layer registry, bounds, focus queue) is this draw.
     pub fn draw_frame(&mut self) {
+        poodle_gpui_node_backend::overlay_frame_begin();
         self.root
             .update(self.cx, |_root, cx| cx.notify());
         self.cx.update(|window, cx| {
@@ -118,6 +133,9 @@ impl<'a> HeadlessDriver<'a> {
             let _ = window.draw(cx);
         });
         self.cx.run_until_parked();
+        // Focus requests the frame's paint never applied are stale (the
+        // target element never appeared).
+        poodle_gpui_node_backend::overlay_frame_end();
     }
 
     /// Drain the executor until every task is parked.
@@ -234,7 +252,7 @@ impl<'a> HeadlessDriver<'a> {
     /// through the window's real dispatch tree.
     pub fn keyboard_key(&mut self, element_id: &str, key: &str) {
         self.focus_element(element_id);
-        self.dispatch_key(key);
+        self.dispatch_key_raw(key);
     }
 
     /// Enter activation on the focused element (keyboard press).
@@ -245,7 +263,23 @@ impl<'a> HeadlessDriver<'a> {
     /// Send one named keystroke (key down + key up) without moving focus —
     /// the event tree resolves the focus target itself. Used by planted
     /// failures to prove a wrong focus target stays inert.
+    ///
+    /// An unfocused window — or a focus handle from a previous mount — has an
+    /// empty or stale dispatch path, so window-level key handling (Escape →
+    /// overlay dismissal) would never fire. The mount host is focused first;
+    /// the same guarantee a document-level key listener has on the web.
     pub fn dispatch_key(&mut self, key: &str) {
+        self.cx.update(|window, _cx| {
+            let handle = self.root_focus.clone();
+            handle.focus(window);
+        });
+        self.dispatch_key_raw(key);
+    }
+
+    /// The keystroke half of [`Self::dispatch_key`], with focus untouched —
+    /// callers that already focused the target (keyboard activation, tabs
+    /// navigation) use this so the mount host never steals focus.
+    pub fn dispatch_key_raw(&mut self, key: &str) {
         let keystroke = Keystroke::parse(key).expect("keystroke parses");
         self.cx.simulate_event(KeyDownEvent {
             keystroke: keystroke.clone(),
