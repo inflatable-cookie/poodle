@@ -3,6 +3,7 @@ import type { Component } from "svelte";
 import AccordionSpecimen from "./AccordionSpecimen.svelte";
 import AudioPlayerSpecimen from "./AudioPlayerSpecimen.svelte";
 import AudioMeterSpecimen from "./AudioMeterSpecimen.svelte";
+import MeterSurfaceSpecimen from "./MeterSurfaceSpecimen.svelte";
 import AudioSwitchSpecimen from "./AudioSwitchSpecimen.svelte";
 import SceneSpecimen from "../components/SceneSpecimen.svelte";
 import EditableListSpecimen from "./EditableListSpecimen.svelte";
@@ -181,6 +182,7 @@ import SplitViewSpecimen from "./SplitViewSpecimen.svelte";
  */
 export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "audio-meter": AudioMeterSpecimen,
+  "meter-surface": MeterSurfaceSpecimen,
   "audio-switch": AudioSwitchSpecimen,
   "drag-number-field": DragNumberFieldSpecimen,
   "envelope-editor": EnvelopeEditorSpecimen,

@@ -19,6 +19,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   depth and failed Vite resolve. A workspace alias for the shared
   preview catalogue module would remove the depth trap.
 
+- 2026-08-14 — `packages/core`'s `check` script (`bun x tsc -p ./tsconfig.json`)
+  reports ~90 pre-existing strict errors on main (history-center, color, tree,
+  test fixtures), so it cannot serve as a green gate for new core modules.
+  Cards must rely on `conformance:typecheck`/`check:svelte` instead. Either fix
+  the strict backlog or scope the script to a passing config.
+
 - 2026-08-14 — `effigy docs:contract-drift` fails on main for Button's
   Svelte-only `children`, `leading`, and `trailing` props, while
   `effigy docs:check` stays green because the aggregate lint path treats that

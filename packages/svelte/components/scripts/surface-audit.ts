@@ -177,7 +177,19 @@ function inspectCoverage() {
   const manifest = JSON.parse(
     readFileSync(join(repoRoot, "packages/codegen/fixtures/preview-catalogue.json"), "utf8"),
   ) as { components: Array<{ slug: string }> };
-  const componentRegistrySlugs = new Set(manifest.components.map((component) => component.slug));
+  // The preview catalogue is the canonical manifest plus the Svelte registry's
+  // web-only supplement — entries deliberately absent from the portable
+  // inventory because they have no native counterpart (spec 068 / g14.024).
+  // Coverage means "catalogued by the preview", so both sources count.
+  const registrySource = readFileSync(join(previewRoot, "component-registry.ts"), "utf8");
+  const webOnlyBlock = registrySource.match(/webOnlyComponents[^=]*=\s*\[([\s\S]*?)\n\];/);
+  const webOnlySlugs = webOnlyBlock === null
+    ? []
+    : Array.from(webOnlyBlock[1]!.matchAll(/slug:\s*"([a-z0-9-]+)"/g)).map((match) => match[1]!);
+  const componentRegistrySlugs = new Set([
+    ...manifest.components.map((component) => component.slug),
+    ...webOnlySlugs,
+  ]);
   const docsSource = readFileSync(join(previewRoot, "component-docs.ts"), "utf8");
   const usageDocSlugs = new Set(
     Array.from(docsSource.matchAll(/^[ \t]{2}(?:"([a-z0-9-]+)"|([a-z][a-z0-9]*)):\s*\{/gm)).map(

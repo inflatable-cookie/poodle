@@ -77,10 +77,73 @@ export function createAudioMeterContext(input: Partial<AudioMeterContext> = {}):
   };
 }
 
-function smoothAmplitude(currentDb: number, targetAmplitude: number, elapsedMs: number, timeMs: number): number {
+// Pure per-channel scalar laws. Standalone `audioMeterTransition` and the
+// batched `MeterBus` both route through these; a constant or law change here
+// moves standalone goldens and bus parity evidence together.
+
+export function isMeterFrameValid(atMs: number, peak: number, meanSquare: number, durationMs: number, lastAtMs: number | null): boolean {
+  return Number.isFinite(atMs) && Number.isFinite(peak)
+    && Number.isFinite(meanSquare) && Number.isFinite(durationMs)
+    && peak >= 0 && meanSquare >= 0 && durationMs > 0
+    && !(lastAtMs !== null && atMs < lastAtMs);
+}
+
+export function meterElapsedMs(lastAtMs: number | null, atMs: number, durationMs: number): number {
+  return lastAtMs === null ? Math.max(durationMs, 0) : Math.max(atMs - lastAtMs, 0);
+}
+
+export function meterInputDb(peak: number, minDb: number): number {
+  return Math.max(amplitudeToDb(Math.max(peak, 0)), minDb);
+}
+
+export function meterSmoothedDb(currentDb: number, targetAmplitude: number, elapsedMs: number, timeMs: number): number {
   const current = dbToAmplitude(currentDb);
   const alpha = 1 - Math.exp(-Math.max(elapsedMs, 0) / timeMs);
   return amplitudeToDb(current + (targetAmplitude - current) * alpha);
+}
+
+export function meterVuStepDb(currentDb: number, meanSquare: number, elapsedMs: number): number {
+  return meterSmoothedDb(currentDb, Math.sqrt(Math.max(meanSquare, 0)), elapsedMs, VU_INTEGRATION_MS);
+}
+
+export function meterPpmStepDb(currentDb: number, peak: number, inputDb: number, elapsedMs: number): number {
+  return meterSmoothedDb(currentDb, peak, elapsedMs, inputDb >= currentDb ? PPM_ATTACK_MS : PPM_RELEASE_MS);
+}
+
+export function meterSamplePeakStepDb(currentDb: number, inputDb: number, elapsedMs: number, minDb: number): number {
+  return inputDb >= currentDb
+    ? inputDb
+    : Math.max(currentDb - (elapsedMs / 1000) * PEAK_DECAY_DB_PER_SECOND, inputDb, minDb);
+}
+
+export function meterWeightedRmsDb(weightedMeanSquareSum: number, durationSum: number, fallbackDb: number): number {
+  if (durationSum <= 0) return fallbackDb;
+  return amplitudeToDb(Math.sqrt(weightedMeanSquareSum / durationSum));
+}
+
+export function meterClampDb(db: number, minDb: number, maxDb: number): number {
+  return Math.max(Math.min(db, maxDb), minDb);
+}
+
+export function meterClipStep(clip: boolean, peak: number): boolean {
+  return clip || peak >= 1;
+}
+
+export function meterPeakHoldDecayDb(holdDb: number, holdUntilMs: number, sinceMs: number, atMs: number, minDb: number): number {
+  if (atMs <= holdUntilMs) return holdDb;
+  const decayStart = Math.max(sinceMs, holdUntilMs);
+  return Math.max(holdDb - ((atMs - decayStart) / 1000) * PEAK_DECAY_DB_PER_SECOND, minDb);
+}
+
+export function meterPeakHoldDbStep(holdDb: number | null, holdUntilMs: number | null, lastAtMs: number | null, inputDb: number, atMs: number, minDb: number): number {
+  if (holdDb === null || inputDb >= holdDb) return inputDb;
+  const holdUntil = holdUntilMs ?? atMs;
+  return meterPeakHoldDecayDb(holdDb, holdUntil, lastAtMs ?? holdUntil, atMs, minDb);
+}
+
+export function meterPeakHoldUntilStep(holdDb: number | null, holdUntilMs: number | null, inputDb: number, atMs: number): number {
+  if (holdDb === null || inputDb >= holdDb) return atMs + PEAK_HOLD_MS;
+  return holdUntilMs ?? atMs;
 }
 
 function pushRmsSlice(window: RmsSlice[], frame: MeterFeedFrame): RmsSlice[] {
@@ -104,20 +167,8 @@ function pushRmsSlice(window: RmsSlice[], frame: MeterFeedFrame): RmsSlice[] {
 
 function rmsDb(window: RmsSlice[], fallbackDb: number): number {
   const duration = window.reduce((sum, slice) => sum + slice.durationMs, 0);
-  if (duration <= 0) return fallbackDb;
-  const meanSquare = window.reduce((sum, slice) => sum + slice.meanSquare * slice.durationMs, 0) / duration;
-  return amplitudeToDb(Math.sqrt(meanSquare));
-}
-
-function updatePeakHold(context: AudioMeterContext, inputDb: number, atMs: number): Pick<AudioMeterContext, "peakHoldDb" | "peakHoldUntilMs"> {
-  if (context.peakHoldDb === null || inputDb >= context.peakHoldDb) {
-    return { peakHoldDb: inputDb, peakHoldUntilMs: atMs + PEAK_HOLD_MS };
-  }
-  const holdUntil = context.peakHoldUntilMs ?? atMs;
-  if (atMs <= holdUntil) return { peakHoldDb: context.peakHoldDb, peakHoldUntilMs: holdUntil };
-  const decayStart = Math.max(context.lastAtMs ?? holdUntil, holdUntil);
-  const decayed = context.peakHoldDb - ((atMs - decayStart) / 1000) * PEAK_DECAY_DB_PER_SECOND;
-  return { peakHoldDb: Math.max(decayed, context.minDb), peakHoldUntilMs: holdUntil };
+  const weighted = window.reduce((sum, slice) => sum + slice.meanSquare * slice.durationMs, 0);
+  return meterWeightedRmsDb(weighted, duration, fallbackDb);
 }
 
 export function audioMeterTransition(context: AudioMeterContext, event: AudioMeterEvent): AudioMeterResult {
@@ -128,47 +179,38 @@ export function audioMeterTransition(context: AudioMeterContext, event: AudioMet
     case "PUSH_FRAME": {
       if (!context.enabled) return { context, effects: [] };
       const frame = event.frame;
-      if (
-        !Number.isFinite(frame.atMs) || !Number.isFinite(frame.peak)
-        || !Number.isFinite(frame.meanSquare) || !Number.isFinite(frame.durationMs)
-        || frame.peak < 0 || frame.meanSquare < 0 || frame.durationMs <= 0
-        || (context.lastAtMs !== null && frame.atMs < context.lastAtMs)
-      ) return { context, effects: [] };
-      const elapsedMs = context.lastAtMs === null
-        ? Math.max(frame.durationMs, 0)
-        : Math.max(frame.atMs - context.lastAtMs, 0);
+      if (!isMeterFrameValid(frame.atMs, frame.peak, frame.meanSquare, frame.durationMs, context.lastAtMs)) {
+        return { context, effects: [] };
+      }
+      const elapsedMs = meterElapsedMs(context.lastAtMs, frame.atMs, frame.durationMs);
       const peak = Math.max(frame.peak, 0);
-      const inputDb = Math.max(amplitudeToDb(peak), context.minDb);
+      const inputDb = meterInputDb(frame.peak, context.minDb);
       const rmsWindow = pushRmsSlice(context.rmsWindow, frame);
       let ballisticDb: number;
 
       switch (context.mode) {
         case "vu":
-          ballisticDb = smoothAmplitude(context.ballisticDb, Math.sqrt(Math.max(frame.meanSquare, 0)), elapsedMs, VU_INTEGRATION_MS);
+          ballisticDb = meterVuStepDb(context.ballisticDb, frame.meanSquare, elapsedMs);
           break;
-        case "ppm": {
-          const time = inputDb >= context.ballisticDb ? PPM_ATTACK_MS : PPM_RELEASE_MS;
-          ballisticDb = smoothAmplitude(context.ballisticDb, peak, elapsedMs, time);
+        case "ppm":
+          ballisticDb = meterPpmStepDb(context.ballisticDb, peak, inputDb, elapsedMs);
           break;
-        }
         case "sample-peak":
-          ballisticDb = inputDb >= context.ballisticDb
-            ? inputDb
-            : Math.max(context.ballisticDb - (elapsedMs / 1000) * PEAK_DECAY_DB_PER_SECOND, inputDb, context.minDb);
+          ballisticDb = meterSamplePeakStepDb(context.ballisticDb, inputDb, elapsedMs, context.minDb);
           break;
         case "rms":
           ballisticDb = Math.max(rmsDb(rmsWindow, context.minDb), context.minDb);
           break;
       }
 
-      const hold = updatePeakHold(context, inputDb, frame.atMs);
       return { context: {
         ...context,
         lastAtMs: frame.atMs,
         inputDb,
-        ballisticDb: Math.max(Math.min(ballisticDb, context.maxDb), context.minDb),
-        ...hold,
-        clip: context.clip || peak >= 1,
+        ballisticDb: meterClampDb(ballisticDb, context.minDb, context.maxDb),
+        peakHoldDb: meterPeakHoldDbStep(context.peakHoldDb, context.peakHoldUntilMs, context.lastAtMs, inputDb, frame.atMs, context.minDb),
+        peakHoldUntilMs: meterPeakHoldUntilStep(context.peakHoldDb, context.peakHoldUntilMs, inputDb, frame.atMs),
+        clip: meterClipStep(context.clip, peak),
         rmsWindow,
       }, effects: [] };
     }

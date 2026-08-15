@@ -45,6 +45,7 @@ export const SKIPPED: Record<string, string> = {
   "video-player": "media element paint timing",
   "audio-player": "media element paint timing",
   "media-thumbnail": "remote/media-decode dependent paint",
+  "meter-surface": "live canvas meter animation loop",
 };
 
 /**
