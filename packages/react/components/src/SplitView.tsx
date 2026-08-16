@@ -26,6 +26,10 @@ export interface SplitViewProps {
   secondarySize?: number | null;
   primaryCollapsed?: boolean | undefined;
   secondaryCollapsed?: boolean | undefined;
+  /** The pane takes zero space without being a collapse: no toggle, no collapsed
+   * data attribute — for panes that are absent, not user-collapsed. */
+  primaryHidden?: boolean;
+  secondaryHidden?: boolean;
   primaryCollapsedSize?: number | null;
   secondaryCollapsedSize?: number | null;
   collapsePrimaryBelowSize?: number | null;
@@ -64,6 +68,8 @@ export function SplitView({
   secondarySize = null,
   primaryCollapsed,
   secondaryCollapsed,
+  primaryHidden = false,
+  secondaryHidden = false,
   primaryCollapsedSize = null,
   secondaryCollapsedSize = null,
   collapsePrimaryBelowSize = null,
@@ -105,6 +111,11 @@ export function SplitView({
   const isSecondaryCollapsed = hasControlledSecondaryCollapsed
     ? secondaryCollapsed === true
     : uncontrolledSecondaryCollapsed;
+  // Hidden panes take no space but are not collapses: they get no toggle and
+  // no collapsed data attribute, so hover-reveal never pins a pill for a pane
+  // nobody collapsed.
+  const isPrimaryGone = isPrimaryCollapsed || primaryHidden;
+  const isSecondaryGone = isSecondaryCollapsed || secondaryHidden;
 
   const isPrimaryRailed = isPrimaryCollapsed && primaryCollapsedSize != null;
   const isSecondaryRailed = isSecondaryCollapsed && secondaryCollapsedSize != null;
@@ -114,16 +125,16 @@ export function SplitView({
   const stateRef = useRef({ currentRatio, isPrimaryCollapsed, isSecondaryCollapsed });
   stateRef.current = { currentRatio, isPrimaryCollapsed, isSecondaryCollapsed };
 
-  const primaryFlex = isPrimaryCollapsed
+  const primaryFlex = isPrimaryGone
     ? primaryCollapsedSize != null
       ? `0 0 ${primaryCollapsedSize}px`
       : "0 0 0"
     : primarySize != null
       ? `0 0 ${primarySize}px`
-      : secondarySize != null || isSecondaryCollapsed
+      : secondarySize != null || isSecondaryGone
         ? "1 1 0"
         : `0 0 ${currentRatio * 100}%`;
-  const secondaryFlex = isSecondaryCollapsed
+  const secondaryFlex = isSecondaryGone
     ? secondaryCollapsedSize != null
       ? `0 0 ${secondaryCollapsedSize}px`
       : "0 0 0"
@@ -132,12 +143,12 @@ export function SplitView({
   const primaryStyle: CSSProperties = {
     flex: primaryFlex,
     overflow: "hidden",
-    ...(minPrimarySize != null && !isPrimaryCollapsed ? { [minSizeProperty]: `${minPrimarySize}px` } : {}),
+    ...(minPrimarySize != null && !isPrimaryGone ? { [minSizeProperty]: `${minPrimarySize}px` } : {}),
   };
   const secondaryStyle: CSSProperties = {
     flex: secondaryFlex,
     overflow: "hidden",
-    ...(minSecondarySize != null && !isSecondaryCollapsed ? { [minSizeProperty]: `${minSecondarySize}px` } : {}),
+    ...(minSecondarySize != null && !isSecondaryGone ? { [minSizeProperty]: `${minSecondarySize}px` } : {}),
   };
   const hasToggles = showCollapsePrimary || showCollapseSecondary;
   const beforeDirection = (orientation === "horizontal" ? "left" : "up") as CollapseDirection;
@@ -285,7 +296,7 @@ export function SplitView({
       ref={containerRef}
     >
       <div className="poodle-split-view__pane poodle-split-view__pane--primary" style={primaryStyle}>
-        {!isPrimaryCollapsed || isPrimaryRailed ? primary : null}
+        {!isPrimaryGone || isPrimaryRailed ? primary : null}
       </div>
 
       <div
@@ -305,7 +316,7 @@ export function SplitView({
 
         {hasToggles ? (
           <div className="poodle-split-view__toggles">
-            {showCollapsePrimary && !isSecondaryCollapsed ? (
+            {showCollapsePrimary && (!isSecondaryCollapsed || isPrimaryCollapsed) ? (
               <CollapseToggle
                 direction={beforeDirection}
                 collapsed={isPrimaryCollapsed}
@@ -314,7 +325,7 @@ export function SplitView({
                 onToggle={(next) => setPrimaryCollapsed(next)}
               />
             ) : null}
-            {showCollapseSecondary && !isPrimaryCollapsed ? (
+            {showCollapseSecondary && (!isPrimaryCollapsed || isSecondaryCollapsed) ? (
               <CollapseToggle
                 direction={afterDirection}
                 collapsed={isSecondaryCollapsed}
@@ -328,7 +339,7 @@ export function SplitView({
       </div>
 
       <div className="poodle-split-view__pane poodle-split-view__pane--secondary" style={secondaryStyle}>
-        {!isSecondaryCollapsed || isSecondaryRailed ? secondary : null}
+        {!isSecondaryGone || isSecondaryRailed ? secondary : null}
       </div>
     </div>
   );

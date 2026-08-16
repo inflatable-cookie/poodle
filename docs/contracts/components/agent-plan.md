@@ -233,10 +233,10 @@ Region.
 
 ## 12. GPUI And Jetstream Notes
 
-Deferred. Svelte is the first and only component implementation in this batch;
-the shared headless core, the conformance vectors, the spec structs and the
-`poodle-render` functions (`agent_plan`, `agent_plan_record`) already land, so
-a native variant is wiring, not design. See §14.
+Deferred. Svelte is the reference implementation and the React mirror landed
+in `g15.006`; the shared headless core, the conformance vectors, the spec
+structs and the `poodle-render` functions (`agent_plan`, `agent_plan_record`)
+already land, so a native variant is wiring, not design. See §14.
 
 ## 13. Parity Checklist
 
@@ -265,7 +265,7 @@ a native variant is wiring, not design. See §14.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| React/GPUI/Jetstream variants deferred — svelte is the first implementation | the consumer integrating plan mode (nucleus) is svelte-only today; the headless core, vectors, specs and shared renderer already landed, so each variant is wiring | pending review | build the variants when a second target needs them |
+| GPUI/Jetstream variants deferred — Svelte is the reference and the React mirror landed in `g15.006` | the consumer integrating plan mode (nucleus) is Svelte-only today; the headless core, vectors, specs and shared renderer already landed, so each native variant is wiring | pending review | build the native variants when a second target needs them |
 | Settled statuses render on `AgentPlan` at all | the badge covers the moment between the decision and the host appending the record; forbidding it would make that gap a blank flash | accepted (by design) | none |
 | `dismissible` defaults to `true`, unlike `AgentQuestion` | the turn is complete, so "don't do this" is an ordinary answer rather than an escape from a blocking prompt | pending review | none |
 
@@ -274,7 +274,7 @@ a native variant is wiring, not design. See §14.
 - contract status: `draft`
 - approvers: pending review
 - downstream adopters: nucleus (Codex plan mode), future agent surfaces
-- future follow-up: the React and native variants, diff view of a revised
+- future follow-up: the native variants, diff view of a revised
   plan against its original
 
 ## 16. Specimen Definitions

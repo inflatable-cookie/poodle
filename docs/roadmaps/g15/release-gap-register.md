@@ -33,12 +33,17 @@ roster's Downstream use column; Longhorn is the primary consumer).
 
 ## React Mirror Gaps
 
+`g15.006` closed the two missing implementations/export (AgentPlan,
+AgentPlanRecord), the six missing gallery specimens (AgentMessage, AgentPlan,
+AgentPlanRecord, ChangedFiles, ToolCall, ToolCallGroup), and the five residual
+focused React gaps (AgentPlan, Icon, IconProvider, Tree, SplitView); the
+roster now reads 175/0 React implementation, 175/0 React gallery, and 152/23
+focused React evidence. The remaining rows below are the focused React gaps
+paired with the Svelte evidence tranches.
+
 | Gap | Components | Owner |
 | --- | --- | --- |
-| No React implementation/export | AgentPlan, AgentPlanRecord | `g15.006` |
-| No React gallery specimen | AgentMessage, AgentPlan, AgentPlanRecord, ChangedFiles, ToolCall, ToolCallGroup | `g15.006` |
 | Focused React test gaps for the Svelte evidence tranches | paired with the same batches: each Svelte evidence tranche mirrors its contract cases on the React side | `g15.002`–`g15.005` |
-| Residual focused React gaps paired to existing Svelte evidence | AgentPlan, Icon, IconProvider, Tree, SplitView | `g15.006` |
 | Focused React test gaps paired with the final Svelte evidence tranche | AgentMessage, AgentPlanRecord, ChangedFiles, ToolCall, ToolCallGroup | `g15.005` |
 
 ## Shared Rust Composition and GPUI Gaps
@@ -73,8 +78,10 @@ evidence as focused owner-local tests, not by extending a shared comparator.
 `test:web-pack-install` proves packed-tarball reachability and mounting for 9
 Svelte components (DockRegion, LicenceActivation, LicenceSeats, LicenceStatus,
 ModelConnectionPicker, ModelConnectionSetup, ModelConnectionCard,
-ModelCatalogueEditor, MeterSurface) and 11 React components. Extending the
-mounted proof across the roster is folded into the release-certification card.
+ModelCatalogueEditor, MeterSurface) and 13 React components (AgentPlan and
+AgentPlanRecord added by `g15.006` as new root exports; the rest as recorded
+in `test/package-install/web-preview.ts`). Extending the mounted proof across
+the roster is folded into the release-certification card.
 
 ## Carried Requirements (recorded, not implemented)
 

@@ -7,6 +7,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-16 — React `SplitView` is missing the contract's `divider` prop and
+  the `--poodle-split-seam` root anchoring for the toggle pill: the pill is
+  positioned against the divider box, which a collapsed or hidden sibling can
+  leave degenerate, and `data-divider` never renders. The roster counts React
+  SplitView "complete" on impl/export/gallery/test axes, so the deltas are not
+  inventory gaps; they are contract-parity deltas for a follow-up card.
+  Found by g15.006 while writing the SplitView focused evidence (the
+  both-collapsed recoverability and `primaryHidden`/`secondaryHidden` deltas
+  were fixed there; these remain).
+
 - 2026-08-16 — two `effigy docs:check` runs in separate worktrees can race on
   `gate-tree-guard` state: one run reached `--compare` after the shared snapshot
   had disappeared and failed with "no snapshot found", while the other passed.
