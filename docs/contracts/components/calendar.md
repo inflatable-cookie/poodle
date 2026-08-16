@@ -126,7 +126,9 @@ Behavior classification: machine-backed via core machinery
 
 All date and time math lives in `@inflatable-cookie/poodle-core` (`date.ts`), promoted
 wholesale from the Svelte date module: ISO parse/format, day/month
-arithmetic (`addMonths` anchors to the 1st — month paging semantics),
+arithmetic (`addMonths` anchors to the 1st — month paging semantics;
+`addMonthsPreservingDay` keeps the day of month, clamped to the target
+month's length, and backs the PageUp/PageDown focus movement),
 comparison, range normalization (endpoints ordered), calendar-grid
 construction (`buildCalendarWeeks`, full 7-day rows, `startOfWeek`,
 Home/End boundary deltas), date-time and zoned value normalization, and

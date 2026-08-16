@@ -1,7 +1,18 @@
 import { fireEvent, render } from "@testing-library/svelte";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import DateRangePicker from "../src/DateRangePicker.svelte";
+
+// The picker seeds its visible month from today, so the calendar is pinned to
+// a fixed date; the suite must not expire as the real clock moves on.
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-03-10T12:00:00Z"));
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 function surfaceOf(): HTMLElement | null {
   return document.querySelector(".poodle-date-range-picker__surface");

@@ -127,14 +127,21 @@ live change, `change` fires exactly one commit carrying the final pair.
   focus day via `addMonths`, which anchors to the 1st of the target month,
   so PageDown from Mar 14 landed focus on Apr 1. The contract's keyboard
   table documents "moves focus to same day next month" (`calendar.md` §6),
-  so this was a code-vs-contract defect the new evidence exposed, not a
-  contract ambiguity. Added `addMonthsPreservingDay` to
-  `@inflatable-cookie/poodle-core` (`date.ts`; the existing `addMonths` stays
-  day-1-anchored for the nav buttons, and its conformance vectors are
-  untouched), re-exported it through the Svelte date module, and switched
-  both calendars' PageUp/PageDown handling to it. The web evidence now
-  asserts the contract case: PageDown from Mar 14 lands focus on Apr 14.
-  No contract change was required.
+   so this was a code-vs-contract defect the new evidence exposed, not a
+   contract ambiguity. Added `addMonthsPreservingDay` to
+   `@inflatable-cookie/poodle-core` (`date.ts`; the existing `addMonths` stays
+   day-1-anchored for the nav buttons, and its conformance vectors are
+   untouched), re-exported it through the Svelte date module, and switched
+   both calendars' PageUp/PageDown handling to it. The web evidence now
+   asserts the contract case: PageDown from Mar 14 lands focus on Apr 14.
+   No contract change was required. This is an additive core-root API
+   (`export * from "./date"` in `src/index.ts`), so per spec 022 the release
+   metadata records it: `@inflatable-cookie/poodle-core` gains one additive
+   public-intent export, backed by direct core tests (month-end clamping,
+   leap year, PageUp direction, year rollover) in
+   `packages/core/test/date.test.ts` and a packed-root import/execution case
+   in the web-pack-install fixture. The Calendar contract's machinery
+   description now names the helper.
 - **React `ResizeHandle` end position** — the contract documents `onResizeEnd`
   as "final `clientX`/`clientY` position" (`resize-handle.md` §5). Svelte
   (reference) computes it from the `mouseup` event; React reported the last
@@ -166,8 +173,11 @@ live change, `change` fires exactly one commit carrying the final pair.
 - The picker family's portalled surface (`AnchoredSurface`/`anchored`
   action) is not reachable from the render container; evidence queries
   `document` for the surface. The date-range pickers seed their calendar
-  month from today, so their evidence pages back to the pinned March 2026
-  via the calendar's previous-month button before clicking days.
+  month from today, so their suites pin system time to `2026-03-10`
+  (`vi.useFakeTimers({ toFake: ["Date"] })` + `vi.setSystemTime`) and the
+  evidence pages to March 2026 via the calendar's previous-month button
+  before clicking days. Pinning keeps the suites from expiring as the real
+  clock moves past the fixed evidence dates.
 - `ColorPicker`-style slider anatomy (`role="slider"` with
   `aria-valuetext`) is asserted via the label, not the underlying input,
   matching the contract's gradient-pad semantics.
@@ -179,6 +189,8 @@ live change, `change` fires exactly one commit carrying the final pair.
 | Batch A narrow round (touched files) | pass |
 | Batch B narrow round (touched files) | pass |
 | Batch C narrow round (touched files) | pass |
+| `bun test packages/core/test/date.test.ts` (new helper cases) | pass (15 tests) |
+| `effigy test:web-pack-install` (packed-root core import case) | pass (10 tests) |
 | `effigy check:svelte` | pass |
 | `effigy react:build` | pass |
 | `effigy test:components` | pass |
@@ -191,9 +203,11 @@ selector ran.
 ## Register and Roster Updates
 
 - `release-baseline-roster.md`: the 26 components' Focused Svelte test cells
-  and Focused React test cells now name the case files; summary counts moved
-  to Focused Svelte 116 present / 59 missing and Focused React 113 present /
-  62 missing.
+  and 25 of the 26 Focused React test cells now name the case files
+  (`RangeSlider.test.tsx` was already present on the base, so this tranche
+  closes 26 Svelte and 25 React gaps); summary counts moved to Focused
+  Svelte 116 present / 59 missing and Focused React 112 present / 63
+  missing.
 - `release-gap-register.md`: the Svelte focused-evidence blocker class count
   moved 85 → 59; the "Foundation forms, inputs & overlays" family row (26
   components) is closed with evidence recorded in the roster. No status line
@@ -204,9 +218,13 @@ selector ran.
 ## Change Footprint
 
 `packages/svelte/components/test/` (26 new test files + 4 harnesses),
-`packages/react/components/test/` (26 new test files; `RangeSlider.test.tsx`
-extended), `packages/core/src/date.ts` (`addMonthsPreservingDay`),
+`packages/react/components/test/` (25 new test files; `RangeSlider.test.tsx`
+extended), `packages/core/src/date.ts` (`addMonthsPreservingDay`, additive
+core-root export documented above) and its direct tests,
 `packages/react/components/src/ResizeHandle.tsx` (contract-true end
 position), both `Calendar.svelte`/`Calendar.tsx` (PageUp/PageDown day
-preservation), and the two focused-evidence docs. No contract, specimen,
-package export, workflow, or downstream repository changed.
+preservation), the Calendar contract's machinery description (names the new
+helper), the web-pack-install fixture (packed-root import/execution case for
+the new core export), and the two focused-evidence docs. No specimen,
+workflow, or downstream repository changed; the only package-surface change
+is the additive core-root export recorded in the log and roster.

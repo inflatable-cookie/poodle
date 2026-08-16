@@ -20,7 +20,7 @@ Public types and helpers are recorded separately and are **not** part of the den
 | Focused Svelte test (named file/case, beyond anatomy smoke) | 116 | 59 | 0 |
 | React implementation + export | 173 | 2 | 0 |
 | React gallery specimen | 169 | 6 | 0 |
-| Focused React test | 113 | 62 | 0 |
+| Focused React test | 112 | 63 | 0 |
 | Rust declaration (`<Name>Spec`, including documented aliases) | 163 | 11 | 1 |
 | Rust render module (`poodle-render`) | 161 | 13 | 1 |
 | GPUI specimen | 145 | 29 | 1 |
@@ -36,7 +36,7 @@ Public types and helpers are recorded separately and are **not** part of the den
 - **Contract**: one `docs/contracts/components/<kebab>.md` per component (kebab-case from the export name); 175 of 175 present, verified by direct file check.
 - **Specimen**: keys of `specimenMap` in `packages/svelte/preview/src/specimens/registry.ts` against the canonical slugs (174 portable + web-only `meter-surface`); 175 entries. 168 map to a dedicated `*Specimen.svelte`; 7 map to a shared specimen (5 `SceneSpecimen`, 1 `ListCardSpecimen` for `ListCardCounter`, 1 `MetaBarSpecimen` for `MetaItem`).
 - **Focused Svelte test**: component imports resolved across all files in `packages/svelte/components/test/` (`.test.ts` and harness `.svelte` files); a component counts when at least one named test file mounts and asserts it beyond the anatomy smoke. 116 count; 59 record `missing` (smoke-only).
-- **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (173); React gallery: `specimen-map.ts` keys against canonical slugs (169); focused React test: same import-resolution method over `packages/react/components/test/` (113; 62 missing).
+- **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (173); React gallery: `specimen-map.ts` keys against canonical slugs (169); focused React test: same import-resolution method over `packages/react/components/test/` (112; 63 missing).
 - **Rust declaration**: `pub struct <Name>Spec` searched recursively in `packages/contracts/components/src` (163). Three documented naming discrepancies count as present: `CallOutSpec` (`Callout`), `ShellStatusBarSpec` (`StatusBar`), `TimeFieldSpec` (`TimeInput`). `MeterSurface` has no declaration and records not-applicable per spec 068.
 - **Rust render**: module names in `packages/render/src/lib.rs` (161). Documented naming discrepancies count as present: `bx.rs` (`Box`), `shell_status_bar.rs` (`StatusBar`), `time_field.rs` (`TimeInput`), and the batched `audio.rs` covering the 12 audio widgets (13 audio components minus `MeterSurface`). `MeterSurface` records not-applicable.
 - **GPUI specimen**: file presence in `packages/gpui/preview/src/specimens/` per component (145). The batched `audio_controls.rs` covers 12 audio widgets; the 12 audio widgets are those covered — `audio_controls.rs` has no `meter_surface` function and `MeterSurface` records not-applicable. Counts do not include the `mod.rs` dispatch fallback (`missing_specimen`).
