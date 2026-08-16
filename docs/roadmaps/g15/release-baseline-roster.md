@@ -11,22 +11,37 @@ The v0.2.0 release denominator is **175 public Svelte component exports**, enume
 
 Public types and helpers are recorded separately and are **not** part of the denominator: the `types` block and the `file-upload`, `theme-controller`, `date`, `presentation`, `anchored`, `portal`, `embed-input`, `media-workflow`, `persistence`, and `icon-registry` exports. The canonical preview catalogue (174 portable slugs plus the web-only `meter-surface`) maps one-to-one onto this roster.
 
-| Surface | Count / 175 |
-| --- | ---: |
-| Implementation file present (`src/<Name>.svelte`) | 175 |
-| Export from index + packed `exports` map | 175 |
-| Contract (`docs/contracts/components/<name>.md`) | 175 |
-| Svelte preview specimen (dedicated file or scene-shared) | 175 |
-| Focused Svelte test (named file/case, beyond anatomy smoke) | 61 |
-| React implementation + export | 173 |
-| React gallery specimen | 169 |
-| Focused React test | 58 |
-| Rust declaration (`<Name>Spec`, including documented aliases) | 163 |
-| Rust render module (`poodle-render`) | 161 |
-| GPUI specimen | 146 |
-| `test:web-pack-install` Svelte mounted proof | 9 |
-| Downstream consumer use (union across 5 read-only consumers) | 93 |
-| Jetstream | 0 (program-deferred) |
+| Surface | present | missing | not-applicable |
+| --- | ---: | ---: | ---: |
+| Implementation file present (`src/<Name>.svelte`) | 175 | 0 | 0 |
+| Export from index + packed `exports` map | 175 | 0 | 0 |
+| Contract (`docs/contracts/components/<name>.md`) | 175 | 0 | 0 |
+| Svelte preview specimen (dedicated file or scene-shared) | 175 | 0 | 0 |
+| Focused Svelte test (named file/case, beyond anatomy smoke) | 61 | 114 | 0 |
+| React implementation + export | 173 | 2 | 0 |
+| React gallery specimen | 169 | 6 | 0 |
+| Focused React test | 58 | 117 | 0 |
+| Rust declaration (`<Name>Spec`, including documented aliases) | 163 | 11 | 1 |
+| Rust render module (`poodle-render`) | 161 | 13 | 1 |
+| GPUI specimen | 145 | 29 | 1 |
+| `test:web-pack-install` Svelte mounted proof | 9 | 166 (not exercised) | 0 |
+| Downstream consumer use (16 canonical consumers scanned) | 110 | 65 (no use found) | 0 |
+| Jetstream | 0 (program-deferred) | — | — |
+
+`not-applicable` is exactly one component on exactly one axis each: `MeterSurface` is web-only by fixed decision (spec 068) and has no Rust declaration, Rust render, or GPUI counterpart. It still counts as a member of the denominator (exported, contracted, implemented, specified in Svelte) and its `not-applicable` rows are recorded as such, not as missing or present.
+
+## Count Method (reproducible)
+
+- **Implementation / Export**: 175 `export { default as <Name> } from "./<Name>.svelte"` lines in `packages/svelte/components/src/index.ts`, each matched to a file of the same name; package `exports` map and `files` array checked once for packed reachability.
+- **Contract**: one `docs/contracts/components/<kebab>.md` per component (kebab-case from the export name); 175 of 175 present, verified by direct file check.
+- **Specimen**: keys of `specimenMap` in `packages/svelte/preview/src/specimens/registry.ts` against the canonical slugs (174 portable + web-only `meter-surface`); 175 entries. 168 map to a dedicated `*Specimen.svelte`; 7 map to a shared specimen (5 `SceneSpecimen`, 1 `ListCardSpecimen` for `ListCardCounter`, 1 `MetaBarSpecimen` for `MetaItem`).
+- **Focused Svelte test**: component imports resolved across all files in `packages/svelte/components/test/` (`.test.ts` and harness `.svelte` files); a component counts when at least one named test file mounts and asserts it beyond the anatomy smoke. 61 count; 114 record `missing` (smoke-only).
+- **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (173); React gallery: `specimen-map.ts` keys against canonical slugs (169); focused React test: same import-resolution method over `packages/react/components/test/` (58).
+- **Rust declaration**: `pub struct <Name>Spec` searched recursively in `packages/contracts/components/src` (163). Three documented naming discrepancies count as present: `CallOutSpec` (`Callout`), `ShellStatusBarSpec` (`StatusBar`), `TimeFieldSpec` (`TimeInput`). `MeterSurface` has no declaration and records not-applicable per spec 068.
+- **Rust render**: module names in `packages/render/src/lib.rs` (161). Documented naming discrepancies count as present: `bx.rs` (`Box`), `shell_status_bar.rs` (`StatusBar`), `time_field.rs` (`TimeInput`), and the batched `audio.rs` covering the 12 audio widgets (13 audio components minus `MeterSurface`). `MeterSurface` records not-applicable.
+- **GPUI specimen**: file presence in `packages/gpui/preview/src/specimens/` per component (145). The batched `audio_controls.rs` covers 12 audio widgets; the 12 audio widgets are those covered — `audio_controls.rs` has no `meter_surface` function and `MeterSurface` records not-applicable. Counts do not include the `mod.rs` dispatch fallback (`missing_specimen`).
+- **Pack-install**: components listed in the `mountedProof.svelte.components` array of `test/package-install/web-preview.ts` (9).
+- **Downstream use**: import statements of `@inflatable-cookie/poodle-svelte` / `-react` resolved (single- and multi-line) across source files of the 16 canonical consumers under `~/Dev/projects`: acowtancy, bovine-accelerator-desktop, compli-me, composer, contact-patch, figmatic, finch, longhorn, loophole, loophole-legacy, nucleus, songsprout, soundcheck, soundcheck-library, underlay, underlay-reference. Excluded: `poodle` itself (source), `jetstream` (program-deferred), worktree/absorbed duplicates (e.g. `soundcheck-wt`, `acowtancy/dairy-card011-worktree`), vendored/build/generated/fixture/example/archive paths, and test directories. No canonical consumer imports `poodle-react`; all component imports resolve to `poodle-svelte`.
 
 ## Posture Legend
 
@@ -40,201 +55,201 @@ Rust declarations use the documented naming discrepancies where they exist: `Cal
 
 | Component | Contract | Specimen | Focused Svelte test | Pack-install | Downstream use |
 | --- | --- | --- | --- | --- | --- |
-| `Accordion` | `docs/contracts/components/accordion.md` | `AccordionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `AgentChatInput` | `docs/contracts/components/agent-chat-input.md` | `AgentChatInputSpecimen.svelte` | `AgentChatInput.test.ts` | `missing` | none found (absence is not a release failure) |
-| `AudioPlayer` | `docs/contracts/components/audio-player.md` | `AudioPlayerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `AlertDialog` | `docs/contracts/components/alert-dialog.md` | `AlertDialogSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `underlay` |
-| `Avatar` | `docs/contracts/components/avatar.md` | shared `SceneSpecimen.svelte` (composed inside the hosting specimen) | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Box` | `docs/contracts/components/box.md` | `BoxSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Breadcrumbs` | `docs/contracts/components/breadcrumbs.md` | `BreadcrumbsSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `BulkActionBar` | `docs/contracts/components/bulk-action-bar.md` | `BulkActionBarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `Button` | `docs/contracts/components/button.md` | `ButtonSpecimen.svelte` | `Button.test.ts` | `missing` | `longhorn`, `underlay`, `soundcheck`, `soundcheck-library`, `bovine-accelerator-desktop` |
-| `Callout` | `docs/contracts/components/callout.md` | shared `SceneSpecimen.svelte` (composed inside the hosting specimen) | `missing` — anatomy smoke only | `missing` | `longhorn`, `underlay`, `soundcheck`, `soundcheck-library` |
-| `RemediationBanner` | `docs/contracts/components/remediation-banner.md` | `RemediationBannerSpecimen.svelte` | `WebParityCloseout.test.ts` | `missing` | none found (absence is not a release failure) |
-| `Card` | `docs/contracts/components/card.md` | `CardSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `Code` | `docs/contracts/components/code.md` | `CodeSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `ColorPicker` | `docs/contracts/components/color-picker.md` | `ColorPickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Checkbox` | `docs/contracts/components/checkbox.md` | `CheckboxSpecimen.svelte` | `interactions.test.ts` | `missing` | `underlay`, `soundcheck`, `soundcheck-library` |
-| `Calendar` | `docs/contracts/components/calendar.md` | `CalendarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `ContextMenu` | `docs/contracts/components/context-menu.md` | `ContextMenuSpecimen.svelte` | `ContextMenu.test.ts` | `missing` | `soundcheck-library` |
-| `CollapseToggle` | `docs/contracts/components/collapse-toggle.md` | `CollapseToggleSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Collapsible` | `docs/contracts/components/collapsible.md` | `CollapsibleSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `DetailItem` | `docs/contracts/components/detail-item.md` | `DetailItemSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `underlay` |
-| `DatePicker` | `docs/contracts/components/date-picker.md` | `DatePickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `DateRangePicker` | `docs/contracts/components/date-range-picker.md` | `DateRangePickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `DateTimePicker` | `docs/contracts/components/date-time-picker.md` | `DateTimePickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `DateTimeRangePicker` | `docs/contracts/components/date-time-range-picker.md` | `DateTimeRangePickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Dialog` | `docs/contracts/components/dialog.md` | `DialogSpecimen.svelte` | `DialogControlled.svelte.test.ts`, `DialogDismissOutside.svelte.test.ts`, `DialogInitialFocus.svelte.test.ts`, `PopoverInDialog.svelte.test.ts` | `missing` | `longhorn`, `underlay`, `soundcheck`, `soundcheck-library` |
-| `Drawer` | `docs/contracts/components/drawer.md` | `DrawerSpecimen.svelte` | `DrawerDismissOutside.svelte.test.ts` | `missing` | `underlay` |
-| `DurationInput` | `docs/contracts/components/duration-input.md` | `DurationInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `EditableLabel` | `docs/contracts/components/editable-label.md` | `EditableLabelSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `soundcheck`, `soundcheck-library` |
-| `Eyebrow` | `docs/contracts/components/eyebrow.md` | `EyebrowSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Field` | `docs/contracts/components/field.md` | `FieldSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `underlay` |
-| `FieldSet` | `docs/contracts/components/field-set.md` | `FieldSetSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
+| `Accordion` | `docs/contracts/components/accordion.md` | `AccordionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `finch` |
+| `AgentChatInput` | `docs/contracts/components/agent-chat-input.md` | `AgentChatInputSpecimen.svelte` | `AgentChatInput.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `AudioPlayer` | `docs/contracts/components/audio-player.md` | `AudioPlayerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
+| `AlertDialog` | `docs/contracts/components/alert-dialog.md` | `AlertDialogSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `contact-patch`, `underlay`, `underlay-reference` |
+| `Avatar` | `docs/contracts/components/avatar.md` | shared `SceneSpecimen.svelte` (generated scene) | `missing` — anatomy smoke only | `missing` | `acowtancy` |
+| `Box` | `docs/contracts/components/box.md` | `BoxSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
+| `Breadcrumbs` | `docs/contracts/components/breadcrumbs.md` | `BreadcrumbsSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `underlay` |
+| `BulkActionBar` | `docs/contracts/components/bulk-action-bar.md` | `BulkActionBarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `underlay` |
+| `Button` | `docs/contracts/components/button.md` | `ButtonSpecimen.svelte` | `Button.test.ts` | `missing` | `acowtancy`, `bovine-accelerator-desktop`, `compli-me`, `composer`, `contact-patch`, `figmatic`, `finch`, `longhorn`, `loophole`, `loophole-legacy`, `nucleus`, `songsprout`, `soundcheck`, `soundcheck-library`, `underlay`, `underlay-reference` |
+| `Callout` | `docs/contracts/components/callout.md` | shared `SceneSpecimen.svelte` (generated scene) | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `longhorn`, `loophole-legacy`, `nucleus`, `songsprout`, `soundcheck`, `soundcheck-library`, `underlay`, `underlay-reference` |
+| `RemediationBanner` | `docs/contracts/components/remediation-banner.md` | `RemediationBannerSpecimen.svelte` | `WebParityCloseout.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `Card` | `docs/contracts/components/card.md` | `CardSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `songsprout`, `underlay`, `underlay-reference` |
+| `Code` | `docs/contracts/components/code.md` | `CodeSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `underlay`, `underlay-reference` |
+| `ColorPicker` | `docs/contracts/components/color-picker.md` | `ColorPickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay-reference` |
+| `Checkbox` | `docs/contracts/components/checkbox.md` | `CheckboxSpecimen.svelte` | `interactions.test.ts` | `missing` | `finch`, `soundcheck`, `soundcheck-library`, `underlay` |
+| `Calendar` | `docs/contracts/components/calendar.md` | `CalendarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `ContextMenu` | `docs/contracts/components/context-menu.md` | `ContextMenuSpecimen.svelte` | `ContextMenu.test.ts` | `missing` | `figmatic`, `loophole-legacy`, `soundcheck-library` |
+| `CollapseToggle` | `docs/contracts/components/collapse-toggle.md` | `CollapseToggleSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `Collapsible` | `docs/contracts/components/collapsible.md` | `CollapsibleSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
+| `DetailItem` | `docs/contracts/components/detail-item.md` | `DetailItemSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `composer`, `contact-patch`, `longhorn`, `nucleus`, `underlay`, `underlay-reference` |
+| `DatePicker` | `docs/contracts/components/date-picker.md` | `DatePickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `DateRangePicker` | `docs/contracts/components/date-range-picker.md` | `DateRangePickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `DateTimePicker` | `docs/contracts/components/date-time-picker.md` | `DateTimePickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `DateTimeRangePicker` | `docs/contracts/components/date-time-range-picker.md` | `DateTimeRangePickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `Dialog` | `docs/contracts/components/dialog.md` | `DialogSpecimen.svelte` | `DialogControlled.svelte.test.ts`, `DialogDismissOutside.svelte.test.ts`, `DialogInitialFocus.svelte.test.ts`, `PopoverInDialog.svelte.test.ts` | `missing` | `acowtancy`, `finch`, `longhorn`, `loophole-legacy`, `nucleus`, `soundcheck-library`, `underlay`, `underlay-reference` |
+| `Drawer` | `docs/contracts/components/drawer.md` | `DrawerSpecimen.svelte` | `DrawerDismissOutside.svelte.test.ts` | `missing` | `acowtancy`, `underlay`, `underlay-reference` |
+| `DurationInput` | `docs/contracts/components/duration-input.md` | `DurationInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
+| `EditableLabel` | `docs/contracts/components/editable-label.md` | `EditableLabelSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `loophole`, `loophole-legacy`, `nucleus`, `soundcheck-library` |
+| `Eyebrow` | `docs/contracts/components/eyebrow.md` | `EyebrowSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
+| `Field` | `docs/contracts/components/field.md` | `FieldSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `longhorn`, `loophole-legacy`, `songsprout`, `underlay`, `underlay-reference` |
+| `FieldSet` | `docs/contracts/components/field-set.md` | `FieldSetSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `composer`, `contact-patch`, `underlay-reference` |
 | `FileUpload` | `docs/contracts/components/file-upload.md` | `FileUploadSpecimen.svelte` | `FileUpload.test.ts` | `missing` | `underlay` |
-| `FilterBuilder` | `docs/contracts/components/filter-builder.md` | `FilterBuilderSpecimen.svelte` | `FilterBuilder.test.ts` | `missing` | `soundcheck-library` |
-| `FormActions` | `docs/contracts/components/form-actions.md` | `FormActionsSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `underlay` |
-| `Grid` | `docs/contracts/components/grid.md` | `GridSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `HoverCard` | `docs/contracts/components/hover-card.md` | `HoverCardSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Icon` | `docs/contracts/components/icon.md` | `IconSpecimen.svelte` | `IconProviderHarness.svelte` | `missing` | `underlay`, `soundcheck`, `soundcheck-library` |
-| `IconButton` | `docs/contracts/components/icon-button.md` | `IconButtonSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay`, `soundcheck`, `soundcheck-library` |
-| `IconProvider` | `docs/contracts/components/icon-provider.md` | `IconProviderSpecimen.svelte` | `IconProviderHarness.svelte` | `missing` | `soundcheck` |
+| `FilterBuilder` | `docs/contracts/components/filter-builder.md` | `FilterBuilderSpecimen.svelte` | `FilterBuilder.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `FormActions` | `docs/contracts/components/form-actions.md` | `FormActionsSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `longhorn`, `songsprout`, `underlay`, `underlay-reference` |
+| `Grid` | `docs/contracts/components/grid.md` | `GridSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `loophole-legacy`, `songsprout`, `underlay`, `underlay-reference` |
+| `HoverCard` | `docs/contracts/components/hover-card.md` | `HoverCardSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `Icon` | `docs/contracts/components/icon.md` | `IconSpecimen.svelte` | `IconProviderHarness.svelte` | `missing` | `acowtancy`, `loophole-legacy`, `nucleus`, `soundcheck`, `soundcheck-library`, `underlay` |
+| `IconButton` | `docs/contracts/components/icon-button.md` | `IconButtonSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `figmatic`, `loophole-legacy`, `nucleus`, `soundcheck`, `soundcheck-library`, `underlay`, `underlay-reference` |
+| `IconProvider` | `docs/contracts/components/icon-provider.md` | `IconProviderSpecimen.svelte` | `IconProviderHarness.svelte` | `missing` | `acowtancy`, `compli-me`, `composer`, `figmatic`, `loophole-legacy`, `nucleus`, `underlay-reference` |
 | `Meter` | `docs/contracts/components/meter.md` | `MeterSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `soundcheck-library` |
-| `ListCard` | `docs/contracts/components/list-card.md` | `ListCardSpecimen.svelte` | `ListCard.test.ts` | `missing` | `underlay` |
-| `ListCardCounter` | `docs/contracts/components/list-card-counter.md` | shared `ListCardSpecimen.svelte` (composed inside the hosting specimen) | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `ListGrid` | `docs/contracts/components/list-grid.md` | `ListGridSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `Menu` | `docs/contracts/components/menu.md` | `MenuSpecimen.svelte` | `Menu.test.ts`, `OverlayGeometry.svelte.test.ts` | `missing` | `underlay`, `soundcheck-library` |
-| `MetaBar` | `docs/contracts/components/meta-bar.md` | `MetaBarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `MetaItem` | `docs/contracts/components/meta-item.md` | shared `MetaBarSpecimen.svelte` (composed inside the hosting specimen) | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `NumberInput` | `docs/contracts/components/number-input.md` | `NumberInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `OrderBy` | `docs/contracts/components/order-by.md` | `OrderBySpecimen.svelte` | `OrderBy.test.ts` | `missing` | `underlay`, `soundcheck-library` |
-| `NavCard` | `docs/contracts/components/nav-card.md` | `NavCardSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `NavigationMenu` | `docs/contracts/components/navigation-menu.md` | `NavigationMenuSpecimen.svelte` | `NavigationMenu.test.ts` | `missing` | none found (absence is not a release failure) |
-| `Pill` | `docs/contracts/components/pill.md` | shared `SceneSpecimen.svelte` (composed inside the hosting specimen) | `missing` — anatomy smoke only | `missing` | `underlay`, `soundcheck`, `soundcheck-library` |
-| `CodeInput` | `docs/contracts/components/code-input.md` | `CodeInputSpecimen.svelte` | `CodeInput.test.ts` | `missing` | `underlay` |
-| `Popover` | `docs/contracts/components/popover.md` | `PopoverSpecimen.svelte` | `OverlayGeometry.svelte.test.ts`, `PopoverInDialog.svelte.test.ts`, `PopoverRetained.svelte.test.ts` | `missing` | `underlay`, `soundcheck` |
+| `ListCard` | `docs/contracts/components/list-card.md` | `ListCardSpecimen.svelte` | `ListCard.test.ts` | `missing` | `figmatic`, `underlay`, `underlay-reference` |
+| `ListCardCounter` | `docs/contracts/components/list-card-counter.md` | shared specimen (composed inside hosting specimen) | `missing` — anatomy smoke only | `missing` | `underlay` |
+| `ListGrid` | `docs/contracts/components/list-grid.md` | `ListGridSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `underlay` |
+| `Menu` | `docs/contracts/components/menu.md` | `MenuSpecimen.svelte` | `Menu.test.ts`, `OverlayGeometry.svelte.test.ts` | `missing` | `figmatic`, `loophole-legacy`, `nucleus`, `soundcheck-library`, `underlay` |
+| `MetaBar` | `docs/contracts/components/meta-bar.md` | `MetaBarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `underlay`, `underlay-reference` |
+| `MetaItem` | `docs/contracts/components/meta-item.md` | shared specimen (composed inside hosting specimen) | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `underlay`, `underlay-reference` |
+| `NumberInput` | `docs/contracts/components/number-input.md` | `NumberInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `underlay` |
+| `OrderBy` | `docs/contracts/components/order-by.md` | `OrderBySpecimen.svelte` | `OrderBy.test.ts` | `missing` | `acowtancy` |
+| `NavCard` | `docs/contracts/components/nav-card.md` | `NavCardSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `songsprout`, `underlay` |
+| `NavigationMenu` | `docs/contracts/components/navigation-menu.md` | `NavigationMenuSpecimen.svelte` | `NavigationMenu.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `Pill` | `docs/contracts/components/pill.md` | shared `SceneSpecimen.svelte` (generated scene) | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `loophole-legacy`, `songsprout`, `soundcheck`, `soundcheck-library`, `underlay`, `underlay-reference` |
+| `CodeInput` | `docs/contracts/components/code-input.md` | `CodeInputSpecimen.svelte` | `CodeInput.test.ts` | `missing` | `acowtancy`, `compli-me`, `contact-patch`, `underlay`, `underlay-reference` |
+| `Popover` | `docs/contracts/components/popover.md` | `PopoverSpecimen.svelte` | `OverlayGeometry.svelte.test.ts`, `PopoverInDialog.svelte.test.ts`, `PopoverRetained.svelte.test.ts` | `missing` | `acowtancy`, `loophole-legacy`, `nucleus`, `underlay` |
 | `Pagination` | `docs/contracts/components/pagination.md` | `PaginationSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `PaginationSummary` | `docs/contracts/components/pagination-summary.md` | `PaginationSummarySpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
+| `PaginationSummary` | `docs/contracts/components/pagination-summary.md` | `PaginationSummarySpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
 | `PasswordRequirements` | `docs/contracts/components/password-requirements.md` | `PasswordRequirementsSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `Progress` | `docs/contracts/components/progress.md` | `ProgressSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `underlay`, `soundcheck` |
-| `Radio` | `docs/contracts/components/radio.md` | `RadioSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `RefSelect` | `docs/contracts/components/ref-select.md` | `RefSelectSpecimen.svelte` | `RefSelect.test.ts` | `missing` | none found (absence is not a release failure) |
-| `RadioGroup` | `docs/contracts/components/radio-group.md` | `RadioGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn` |
-| `Rating` | `docs/contracts/components/rating.md` | `RatingSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Region` | `docs/contracts/components/region.md` | `RegionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `ResizeHandle` | `docs/contracts/components/resize-handle.md` | `ResizeHandleSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `RangeSlider` | `docs/contracts/components/range-slider.md` | `RangeSliderSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `SegmentedControl` | `docs/contracts/components/segmented-control.md` | `SegmentedControlSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `soundcheck-library` |
-| `Select` | `docs/contracts/components/select.md` | `SelectSpecimen.svelte` | `Select.test.ts` | `missing` | `longhorn`, `underlay`, `soundcheck`, `soundcheck-library`, `bovine-accelerator-desktop` |
-| `ScrollShell` | `docs/contracts/components/scroll-shell.md` | `ScrollShellSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `soundcheck` |
-| `Separator` | `docs/contracts/components/separator.md` | `SeparatorSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `SplitButton` | `docs/contracts/components/split-button.md` | `SplitButtonSpecimen.svelte` | `SplitButton.test.ts` | `missing` | `underlay` |
-| `Skeleton` | `docs/contracts/components/skeleton.md` | `SkeletonSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Slider` | `docs/contracts/components/slider.md` | `SliderSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Spinner` | `docs/contracts/components/spinner.md` | shared `SceneSpecimen.svelte` (composed inside the hosting specimen) | `missing` — anatomy smoke only | `missing` | `longhorn`, `soundcheck`, `soundcheck-library` |
-| `Spacer` | `docs/contracts/components/spacer.md` | `SpacerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Stack` | `docs/contracts/components/stack.md` | `StackSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `underlay` |
-| `Stepper` | `docs/contracts/components/stepper.md` | `StepperSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `soundcheck` |
+| `Progress` | `docs/contracts/components/progress.md` | `ProgressSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `soundcheck`, `underlay`, `underlay-reference` |
+| `Radio` | `docs/contracts/components/radio.md` | `RadioSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `loophole-legacy` |
+| `RefSelect` | `docs/contracts/components/ref-select.md` | `RefSelectSpecimen.svelte` | `RefSelect.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `RadioGroup` | `docs/contracts/components/radio-group.md` | `RadioGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `nucleus` |
+| `Rating` | `docs/contracts/components/rating.md` | `RatingSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `Region` | `docs/contracts/components/region.md` | `RegionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `ResizeHandle` | `docs/contracts/components/resize-handle.md` | `ResizeHandleSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `RangeSlider` | `docs/contracts/components/range-slider.md` | `RangeSliderSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `SegmentedControl` | `docs/contracts/components/segmented-control.md` | `SegmentedControlSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `loophole-legacy`, `nucleus` |
+| `Select` | `docs/contracts/components/select.md` | `SelectSpecimen.svelte` | `Select.test.ts` | `missing` | `acowtancy`, `bovine-accelerator-desktop`, `composer`, `longhorn`, `loophole`, `loophole-legacy`, `nucleus`, `soundcheck`, `soundcheck-library`, `underlay`, `underlay-reference` |
+| `ScrollShell` | `docs/contracts/components/scroll-shell.md` | `ScrollShellSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `Separator` | `docs/contracts/components/separator.md` | `SeparatorSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `finch`, `loophole-legacy` |
+| `SplitButton` | `docs/contracts/components/split-button.md` | `SplitButtonSpecimen.svelte` | `SplitButton.test.ts` | `missing` | `acowtancy`, `contact-patch`, `underlay`, `underlay-reference` |
+| `Skeleton` | `docs/contracts/components/skeleton.md` | `SkeletonSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `Slider` | `docs/contracts/components/slider.md` | `SliderSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `loophole-legacy` |
+| `Spinner` | `docs/contracts/components/spinner.md` | shared `SceneSpecimen.svelte` (generated scene) | `missing` — anatomy smoke only | `missing` | `acowtancy`, `figmatic`, `soundcheck-library` |
+| `Spacer` | `docs/contracts/components/spacer.md` | `SpacerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `Stack` | `docs/contracts/components/stack.md` | `StackSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `figmatic`, `longhorn`, `underlay` |
+| `Stepper` | `docs/contracts/components/stepper.md` | `StepperSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
 
 ### Agent surfaces
 
 | Component | Contract | Specimen | Focused Svelte test | Pack-install | Downstream use |
 | --- | --- | --- | --- | --- | --- |
-| `AgentMessage` | `docs/contracts/components/agent-message.md` | `AgentMessageSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `AgentPlan` | `docs/contracts/components/agent-plan.md` | `AgentPlanSpecimen.svelte` | `AgentChatInputPlan.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `AgentPlanRecord` | `docs/contracts/components/agent-plan-record.md` | `AgentPlanRecordSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `AgentQuestion` | `docs/contracts/components/agent-question.md` | `AgentQuestionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `AgentQuestionRecord` | `docs/contracts/components/agent-question-record.md` | `AgentQuestionRecordSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `AgentSubagent` | `docs/contracts/components/agent-subagent.md` | `AgentSubagentSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `AgentTranscript` | `docs/contracts/components/agent-transcript.md` | `AgentTranscriptSpecimen.svelte` | `AgentTranscriptSubagent.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `ChangedFiles` | `docs/contracts/components/changed-files.md` | `ChangedFilesSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `ToolCall` | `docs/contracts/components/tool-call.md` | `ToolCallSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `ToolCallGroup` | `docs/contracts/components/tool-call-group.md` | `ToolCallGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
+| `AgentMessage` | `docs/contracts/components/agent-message.md` | `AgentMessageSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `AgentPlan` | `docs/contracts/components/agent-plan.md` | `AgentPlanSpecimen.svelte` | `AgentChatInputPlan.svelte.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `AgentPlanRecord` | `docs/contracts/components/agent-plan-record.md` | `AgentPlanRecordSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `AgentQuestion` | `docs/contracts/components/agent-question.md` | `AgentQuestionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `AgentQuestionRecord` | `docs/contracts/components/agent-question-record.md` | `AgentQuestionRecordSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `AgentSubagent` | `docs/contracts/components/agent-subagent.md` | `AgentSubagentSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `AgentTranscript` | `docs/contracts/components/agent-transcript.md` | `AgentTranscriptSpecimen.svelte` | `AgentTranscriptSubagent.svelte.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `ChangedFiles` | `docs/contracts/components/changed-files.md` | `ChangedFilesSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `ToolCall` | `docs/contracts/components/tool-call.md` | `ToolCallSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `ToolCallGroup` | `docs/contracts/components/tool-call-group.md` | `ToolCallGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
 
 ### Workstation systems
 
 | Component | Contract | Specimen | Focused Svelte test | Pack-install | Downstream use |
 | --- | --- | --- | --- | --- | --- |
-| `StatusBar` | `docs/contracts/components/status-bar.md` | `StatusBarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `soundcheck` |
-| `StatusIndicator` | `docs/contracts/components/status-indicator.md` | `StatusIndicatorSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `underlay` |
-| `Surface` | `docs/contracts/components/surface.md` | `SurfaceSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn` |
-| `Switch` | `docs/contracts/components/switch.md` | `SwitchSpecimen.svelte` | `interactions.test.ts` | `missing` | `underlay`, `bovine-accelerator-desktop` |
-| `Text` | `docs/contracts/components/text.md` | `TextSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `TextLink` | `docs/contracts/components/text-link.md` | `TextLinkSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `Tabs` | `docs/contracts/components/tabs.md` | `TabsSpecimen.svelte` | `interactions.test.ts` | `missing` | `longhorn`, `underlay`, `soundcheck`, `soundcheck-library` |
+| `StatusBar` | `docs/contracts/components/status-bar.md` | `StatusBarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `StatusIndicator` | `docs/contracts/components/status-indicator.md` | `StatusIndicatorSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `finch`, `longhorn`, `underlay` |
+| `Surface` | `docs/contracts/components/surface.md` | `SurfaceSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `longhorn`, `loophole-legacy`, `nucleus` |
+| `Switch` | `docs/contracts/components/switch.md` | `SwitchSpecimen.svelte` | `interactions.test.ts` | `missing` | `acowtancy`, `bovine-accelerator-desktop`, `loophole`, `loophole-legacy`, `nucleus` |
+| `Text` | `docs/contracts/components/text.md` | `TextSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `figmatic`, `nucleus` |
+| `TextLink` | `docs/contracts/components/text-link.md` | `TextLinkSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `underlay` |
+| `Tabs` | `docs/contracts/components/tabs.md` | `TabsSpecimen.svelte` | `interactions.test.ts` | `missing` | `acowtancy`, `compli-me`, `contact-patch`, `figmatic`, `longhorn`, `loophole-legacy`, `nucleus`, `songsprout`, `soundcheck-library`, `underlay`, `underlay-reference` |
 | `Table` | `docs/contracts/components/table.md` | `TableSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn` |
-| `TimeAgo` | `docs/contracts/components/time-ago.md` | `TimeAgoSpecimen.svelte` | `TimeAgo.test.ts` | `missing` | `underlay` |
-| `TextInput` | `docs/contracts/components/text-input.md` | `TextInputSpecimen.svelte` | `TextInput.test.ts` | `missing` | `longhorn`, `underlay`, `soundcheck`, `soundcheck-library` |
-| `TokenInput` | `docs/contracts/components/token-input.md` | `TokenInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `TimeInput` | `docs/contracts/components/time-input.md` | `TimeInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `TimeZoneSelect` | `docs/contracts/components/time-zone-select.md` | `TimeZoneSelectSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `ThemeSelect` | `docs/contracts/components/theme-select.md` | `ThemeSelectSpecimen.svelte` | `ThemeSelect.test.ts` | `missing` | none found (absence is not a release failure) |
-| `ToggleGroup` | `docs/contracts/components/toggle-group.md` | `ToggleGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Toolbar` | `docs/contracts/components/toolbar.md` | `ToolbarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `soundcheck-library` |
-| `Tooltip` | `docs/contracts/components/tooltip.md` | `TooltipSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `soundcheck-library` |
-| `TriStateSwitch` | `docs/contracts/components/tri-state-switch.md` | `TriStateSwitchSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Menubar` | `docs/contracts/components/menubar.md` | `MenubarSpecimen.svelte` | `Menubar.test.ts` | `missing` | none found (absence is not a release failure) |
-| `UiPresentationProvider` | `docs/contracts/components/ui-presentation-provider.md` | `UiPresentationProviderSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `soundcheck` |
-| `VideoPlayer` | `docs/contracts/components/video-player.md` | `VideoPlayerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `DateTimeZonePicker` | `docs/contracts/components/date-time-zone-picker.md` | `DateTimeZonePickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
+| `TimeAgo` | `docs/contracts/components/time-ago.md` | `TimeAgoSpecimen.svelte` | `TimeAgo.test.ts` | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `underlay`, `underlay-reference` |
+| `TextInput` | `docs/contracts/components/text-input.md` | `TextInputSpecimen.svelte` | `TextInput.test.ts` | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `longhorn`, `loophole-legacy`, `nucleus`, `songsprout`, `soundcheck`, `soundcheck-library`, `underlay`, `underlay-reference` |
+| `TokenInput` | `docs/contracts/components/token-input.md` | `TokenInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
+| `TimeInput` | `docs/contracts/components/time-input.md` | `TimeInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `TimeZoneSelect` | `docs/contracts/components/time-zone-select.md` | `TimeZoneSelectSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `ThemeSelect` | `docs/contracts/components/theme-select.md` | `ThemeSelectSpecimen.svelte` | `ThemeSelect.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `ToggleGroup` | `docs/contracts/components/toggle-group.md` | `ToggleGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `Toolbar` | `docs/contracts/components/toolbar.md` | `ToolbarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `loophole-legacy`, `soundcheck-library` |
+| `Tooltip` | `docs/contracts/components/tooltip.md` | `TooltipSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
+| `TriStateSwitch` | `docs/contracts/components/tri-state-switch.md` | `TriStateSwitchSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `Menubar` | `docs/contracts/components/menubar.md` | `MenubarSpecimen.svelte` | `Menubar.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `UiPresentationProvider` | `docs/contracts/components/ui-presentation-provider.md` | `UiPresentationProviderSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `loophole`, `loophole-legacy` |
+| `VideoPlayer` | `docs/contracts/components/video-player.md` | `VideoPlayerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `DateTimeZonePicker` | `docs/contracts/components/date-time-zone-picker.md` | `DateTimeZonePickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
 
 ### Composites
 
 | Component | Contract | Specimen | Focused Svelte test | Pack-install | Downstream use |
 | --- | --- | --- | --- | --- | --- |
-| `ActionDiscoveryPanel` | `docs/contracts/components/action-discovery-panel.md` | `ActionDiscoveryPanelSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `AppHeader` | `docs/contracts/components/app-header.md` | `AppHeaderSpecimen.svelte` | `AppHeader.svelte.test.ts` | `missing` | `soundcheck` |
-| `EditableList` | `docs/contracts/components/editable-list.md` | `EditableListSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `ErrorBoundary` | `docs/contracts/components/error-boundary.md` | `ErrorBoundarySpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
+| `ActionDiscoveryPanel` | `docs/contracts/components/action-discovery-panel.md` | `ActionDiscoveryPanelSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `AppHeader` | `docs/contracts/components/app-header.md` | `AppHeaderSpecimen.svelte` | `AppHeader.svelte.test.ts` | `missing` | `figmatic`, `nucleus` |
+| `EditableList` | `docs/contracts/components/editable-list.md` | `EditableListSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `composer` |
+| `ErrorBoundary` | `docs/contracts/components/error-boundary.md` | `ErrorBoundarySpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `contact-patch`, `songsprout`, `underlay-reference` |
 | `BlockEditor` | `docs/contracts/components/block-editor.md` | `BlockEditorSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `CardRadioGroup` | `docs/contracts/components/card-radio-group.md` | `CardRadioGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `soundcheck`, `soundcheck-library` |
-| `CardToggleGroup` | `docs/contracts/components/card-toggle-group.md` | `CardToggleGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `CommandPalette` | `docs/contracts/components/command-palette.md` | `CommandPaletteSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn` |
-| `ConfirmAction` | `docs/contracts/components/confirm-action.md` | `ConfirmActionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn` |
-| `DataTable` | `docs/contracts/components/data-table.md` | `DataTableSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `DetailSectionGroup` | `docs/contracts/components/detail-section-group.md` | `DetailSectionGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `DetailSection` | `docs/contracts/components/detail-section.md` | `DetailSectionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `DockRegion` | `docs/contracts/components/dock-region.md` | `DockRegionSpecimen.svelte` | `DockRegionDragOverGate.svelte.test.ts`, `DockRegionExternalDrag.svelte.test.ts`, `DockRegionTabPassThroughs.svelte.test.ts`, `DockRegionZoneDrop.svelte.test.ts` | `test:web-pack-install` | `longhorn` |
-| `DetailShell` | `docs/contracts/components/detail-shell.md` | `DetailShellSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `EmbedInput` | `docs/contracts/components/embed-input.md` | `EmbedInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `EmbedPreview` | `docs/contracts/components/embed-preview.md` | `EmbedPreviewSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `EmptyState` | `docs/contracts/components/empty-state.md` | shared `SceneSpecimen.svelte` (composed inside the hosting specimen) | `missing` — anatomy smoke only | `missing` | `underlay`, `soundcheck`, `soundcheck-library` |
-| `FilterToolbar` | `docs/contracts/components/filter-toolbar.md` | `FilterToolbarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `FormDialog` | `docs/contracts/components/form-dialog.md` | `FormDialogSpecimen.svelte` | `FormDialogInitialFocusHarness.svelte` | `missing` | `underlay` |
-| `FormLayout` | `docs/contracts/components/form-layout.md` | `FormLayoutSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `InlineListSection` | `docs/contracts/components/inline-list-section.md` | `InlineListSectionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `underlay` |
-| `DebugDialog` | `docs/contracts/components/debug-dialog.md` | `DebugDialogSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
+| `CardRadioGroup` | `docs/contracts/components/card-radio-group.md` | `CardRadioGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `soundcheck-library` |
+| `CardToggleGroup` | `docs/contracts/components/card-toggle-group.md` | `CardToggleGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `CommandPalette` | `docs/contracts/components/command-palette.md` | `CommandPaletteSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `nucleus` |
+| `ConfirmAction` | `docs/contracts/components/confirm-action.md` | `ConfirmActionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `nucleus` |
+| `DataTable` | `docs/contracts/components/data-table.md` | `DataTableSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `composer`, `underlay` |
+| `DetailSectionGroup` | `docs/contracts/components/detail-section-group.md` | `DetailSectionGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `underlay` |
+| `DetailSection` | `docs/contracts/components/detail-section.md` | `DetailSectionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `composer`, `finch`, `underlay` |
+| `DockRegion` | `docs/contracts/components/dock-region.md` | `DockRegionSpecimen.svelte` | `DockRegionDragOverGate.svelte.test.ts`, `DockRegionExternalDrag.svelte.test.ts`, `DockRegionTabPassThroughs.svelte.test.ts`, `DockRegionZoneDrop.svelte.test.ts` | `test:web-pack-install` | `longhorn`, `loophole-legacy` |
+| `DetailShell` | `docs/contracts/components/detail-shell.md` | `DetailShellSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `finch` |
+| `EmbedInput` | `docs/contracts/components/embed-input.md` | `EmbedInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `EmbedPreview` | `docs/contracts/components/embed-preview.md` | `EmbedPreviewSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
+| `EmptyState` | `docs/contracts/components/empty-state.md` | shared `SceneSpecimen.svelte` (generated scene) | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `figmatic`, `songsprout`, `soundcheck`, `soundcheck-library`, `underlay`, `underlay-reference` |
+| `FilterToolbar` | `docs/contracts/components/filter-toolbar.md` | `FilterToolbarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
+| `FormDialog` | `docs/contracts/components/form-dialog.md` | `FormDialogSpecimen.svelte` | `FormDialogInitialFocusHarness.svelte` | `missing` | `acowtancy`, `contact-patch`, `underlay`, `underlay-reference` |
+| `FormLayout` | `docs/contracts/components/form-layout.md` | `FormLayoutSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `composer` |
+| `InlineListSection` | `docs/contracts/components/inline-list-section.md` | `InlineListSectionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `longhorn`, `underlay` |
+| `DebugDialog` | `docs/contracts/components/debug-dialog.md` | `DebugDialogSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
 | `LicenceActivation` | `docs/contracts/components/licence-activation.md` | `LicenceActivationSpecimen.svelte` | `LicenceActivation.test.ts` | `test:web-pack-install` | `longhorn` |
 | `LicenceSeats` | `docs/contracts/components/licence-seats.md` | `LicenceSeatsSpecimen.svelte` | `LicenceSeats.test.ts` | `test:web-pack-install` | `longhorn` |
 | `LicenceStatus` | `docs/contracts/components/licence-status.md` | `LicenceStatusSpecimen.svelte` | `LicenceStatus.test.ts` | `test:web-pack-install` | `longhorn` |
-| `LogList` | `docs/contracts/components/log-list.md` | `LogListSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `ListContainer` | `docs/contracts/components/list-container.md` | `ListContainerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `MarkdownEditor` | `docs/contracts/components/markdown-editor.md` | `MarkdownEditorSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `PageLoading` | `docs/contracts/components/page-loading.md` | `PageLoadingSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `underlay` |
-| `MediaPicker` | `docs/contracts/components/media-picker.md` | `MediaPickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `MediaBrowsePanel` | `docs/contracts/components/media-browse-panel.md` | `MediaBrowsePanelSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `MediaPreview` | `docs/contracts/components/media-preview.md` | `MediaPreviewSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `MediaThumbnail` | `docs/contracts/components/media-thumbnail.md` | `MediaThumbnailSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `PageHeader` | `docs/contracts/components/page-header.md` | `PageHeaderSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay`, `soundcheck-library` |
-| `PickerShell` | `docs/contracts/components/picker-shell.md` | `PickerShellSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
+| `LogList` | `docs/contracts/components/log-list.md` | `LogListSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `contact-patch`, `underlay-reference` |
+| `ListContainer` | `docs/contracts/components/list-container.md` | `ListContainerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay-reference` |
+| `MarkdownEditor` | `docs/contracts/components/markdown-editor.md` | `MarkdownEditorSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `underlay`, `underlay-reference` |
+| `PageLoading` | `docs/contracts/components/page-loading.md` | `PageLoadingSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `underlay`, `underlay-reference` |
+| `MediaPicker` | `docs/contracts/components/media-picker.md` | `MediaPickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `MediaBrowsePanel` | `docs/contracts/components/media-browse-panel.md` | `MediaBrowsePanelSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `MediaPreview` | `docs/contracts/components/media-preview.md` | `MediaPreviewSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `MediaThumbnail` | `docs/contracts/components/media-thumbnail.md` | `MediaThumbnailSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `underlay` |
+| `PageHeader` | `docs/contracts/components/page-header.md` | `PageHeaderSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `figmatic`, `songsprout`, `soundcheck-library`, `underlay`, `underlay-reference` |
+| `PickerShell` | `docs/contracts/components/picker-shell.md` | `PickerShellSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
 | `RelationPicker` | `docs/contracts/components/relation-picker.md` | `RelationPickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `SelectionSummary` | `docs/contracts/components/selection-summary.md` | `SelectionSummarySpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
+| `SelectionSummary` | `docs/contracts/components/selection-summary.md` | `SelectionSummarySpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
 | `SettingsShell` | `docs/contracts/components/settings-shell.md` | `SettingsShellSpecimen.svelte` | `SettingsShell.test.ts` | `missing` | `longhorn` |
-| `SidebarNav` | `docs/contracts/components/sidebar-nav.md` | `SidebarNavSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `Tree` | `docs/contracts/components/tree.md` | `TreeSpecimen.svelte` | `Tree.test.ts` | `missing` | `soundcheck`, `soundcheck-library` |
-| `SplitView` | `docs/contracts/components/split-view.md` | `SplitViewSpecimen.svelte` | `SplitView.svelte.test.ts` | `missing` | `longhorn`, `soundcheck-library` |
-| `MetricTile` | `docs/contracts/components/metric-tile.md` | `MetricTileSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | none found (absence is not a release failure) |
-| `StateTile` | `docs/contracts/components/state-tile.md` | `StateTileSpecimen.svelte` | `WebParityCloseout.test.ts` | `missing` | none found (absence is not a release failure) |
-| `ValidationSummary` | `docs/contracts/components/validation-summary.md` | `ValidationSummarySpecimen.svelte` | `WebParityCloseout.test.ts` | `missing` | none found (absence is not a release failure) |
-| `ModelPicker` | `docs/contracts/components/model-picker.md` | `ModelPickerSpecimen.svelte` | `ModelPicker.test.ts` | `missing` | none found (absence is not a release failure) |
-| `ModelConnectionPicker` | `docs/contracts/components/model-connection-picker.md` | `ModelConnectionPickerSpecimen.svelte` | `ModelConnectionPicker.test.ts` | `test:web-pack-install` | none found (absence is not a release failure) |
-| `ModelConnectionSetup` | `docs/contracts/components/model-connection-setup.md` | `ModelConnectionSetupSpecimen.svelte` | `ModelConnectionSetup.test.ts` | `test:web-pack-install` | none found (absence is not a release failure) |
-| `ModelConnectionCard` | `docs/contracts/components/model-connection-card.md` | `ModelConnectionCardSpecimen.svelte` | `ModelConnectionCard.test.ts` | `test:web-pack-install` | none found (absence is not a release failure) |
-| `ModelCatalogueEditor` | `docs/contracts/components/model-catalogue-editor.md` | `ModelCatalogueEditorSpecimen.svelte` | `ModelCatalogueEditor.test.ts` | `test:web-pack-install` | none found (absence is not a release failure) |
-| `MessageCenter` | `docs/contracts/components/message-center.md` | `MessageCenterSpecimen.svelte` | `MessageCenter.test.ts` | `missing` | `soundcheck`, `bovine-accelerator-desktop` |
+| `SidebarNav` | `docs/contracts/components/sidebar-nav.md` | `SidebarNavSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `Tree` | `docs/contracts/components/tree.md` | `TreeSpecimen.svelte` | `Tree.test.ts` | `missing` | `figmatic` |
+| `SplitView` | `docs/contracts/components/split-view.md` | `SplitViewSpecimen.svelte` | `SplitView.svelte.test.ts` | `missing` | `longhorn`, `loophole-legacy`, `nucleus`, `soundcheck-library` |
+| `MetricTile` | `docs/contracts/components/metric-tile.md` | `MetricTileSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `underlay-reference` |
+| `StateTile` | `docs/contracts/components/state-tile.md` | `StateTileSpecimen.svelte` | `WebParityCloseout.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `ValidationSummary` | `docs/contracts/components/validation-summary.md` | `ValidationSummarySpecimen.svelte` | `WebParityCloseout.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `ModelPicker` | `docs/contracts/components/model-picker.md` | `ModelPickerSpecimen.svelte` | `ModelPicker.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `ModelConnectionPicker` | `docs/contracts/components/model-connection-picker.md` | `ModelConnectionPickerSpecimen.svelte` | `ModelConnectionPicker.test.ts` | `test:web-pack-install` | no consumer use found (absence is not a release failure) |
+| `ModelConnectionSetup` | `docs/contracts/components/model-connection-setup.md` | `ModelConnectionSetupSpecimen.svelte` | `ModelConnectionSetup.test.ts` | `test:web-pack-install` | no consumer use found (absence is not a release failure) |
+| `ModelConnectionCard` | `docs/contracts/components/model-connection-card.md` | `ModelConnectionCardSpecimen.svelte` | `ModelConnectionCard.test.ts` | `test:web-pack-install` | no consumer use found (absence is not a release failure) |
+| `ModelCatalogueEditor` | `docs/contracts/components/model-catalogue-editor.md` | `ModelCatalogueEditorSpecimen.svelte` | `ModelCatalogueEditor.test.ts` | `test:web-pack-install` | no consumer use found (absence is not a release failure) |
+| `MessageCenter` | `docs/contracts/components/message-center.md` | `MessageCenterSpecimen.svelte` | `MessageCenter.test.ts` | `missing` | `bovine-accelerator-desktop`, `figmatic`, `nucleus`, `soundcheck` |
 | `HistoryCenter` | `docs/contracts/components/history-center.md` | `HistoryCenterSpecimen.svelte` | `HistoryCenter.test.ts` | `missing` | `soundcheck` |
 | `UpdateStatus` | `docs/contracts/components/update-status.md` | `UpdateStatusSpecimen.svelte` | `UpdateStatus.test.ts` | `missing` | `longhorn` |
 | `UpdateCenter` | `docs/contracts/components/update-center.md` | `UpdateCenterSpecimen.svelte` | `UpdateCenter.test.ts` | `missing` | `longhorn` |
 | `ToastStack` | `docs/contracts/components/toast-stack.md` | `ToastStackSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn` |
-| `ToastHost` | `docs/contracts/components/toast-host.md` | `ToastHostSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `underlay` |
+| `ToastHost` | `docs/contracts/components/toast-host.md` | `ToastHostSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `contact-patch`, `longhorn`, `nucleus`, `songsprout`, `underlay`, `underlay-reference` |
 
 ### Audio controls
 
 | Component | Contract | Specimen | Focused Svelte test | Pack-install | Downstream use |
 | --- | --- | --- | --- | --- | --- |
-| `AudioMeter` | `docs/contracts/components/audio-meter.md` | `AudioMeterSpecimen.svelte` | `AudioControls.svelte.test.ts`, `MeterSurface.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `MeterSurface` | `docs/contracts/components/meter-surface.md` | `MeterSurfaceSpecimen.svelte` | `MeterSurface.svelte.test.ts` | `test:web-pack-install` | none found (absence is not a release failure) |
-| `AudioSwitch` | `docs/contracts/components/audio-switch.md` | `AudioSwitchSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `DragNumberField` | `docs/contracts/components/drag-number-field.md` | `DragNumberFieldSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `EnvelopeEditor` | `docs/contracts/components/envelope-editor.md` | `EnvelopeEditorSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `Fader` | `docs/contracts/components/fader.md` | `FaderSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `GainReductionMeter` | `docs/contracts/components/gain-reduction-meter.md` | `GainReductionMeterSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `Keyboard` | `docs/contracts/components/keyboard.md` | `KeyboardSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `Knob` | `docs/contracts/components/knob.md` | `KnobSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `ModMatrixGrid` | `docs/contracts/components/mod-matrix-grid.md` | `ModMatrixGridSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `ValueReadout` | `docs/contracts/components/value-readout.md` | `ValueReadoutSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `WaveformDisplay` | `docs/contracts/components/waveform-display.md` | `WaveformDisplaySpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
-| `XYPad` | `docs/contracts/components/xy-pad.md` | `XYPadSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | none found (absence is not a release failure) |
+| `AudioMeter` | `docs/contracts/components/audio-meter.md` | `AudioMeterSpecimen.svelte` | `AudioControls.svelte.test.ts`, `MeterSurface.svelte.test.ts` | `missing` | `loophole` |
+| `MeterSurface` | `docs/contracts/components/meter-surface.md` | `MeterSurfaceSpecimen.svelte` | `MeterSurface.svelte.test.ts` | `test:web-pack-install` | no consumer use found (absence is not a release failure) |
+| `AudioSwitch` | `docs/contracts/components/audio-switch.md` | `AudioSwitchSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `DragNumberField` | `docs/contracts/components/drag-number-field.md` | `DragNumberFieldSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | `loophole` |
+| `EnvelopeEditor` | `docs/contracts/components/envelope-editor.md` | `EnvelopeEditorSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `Fader` | `docs/contracts/components/fader.md` | `FaderSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | `loophole` |
+| `GainReductionMeter` | `docs/contracts/components/gain-reduction-meter.md` | `GainReductionMeterSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `Keyboard` | `docs/contracts/components/keyboard.md` | `KeyboardSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `Knob` | `docs/contracts/components/knob.md` | `KnobSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | `loophole` |
+| `ModMatrixGrid` | `docs/contracts/components/mod-matrix-grid.md` | `ModMatrixGridSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `ValueReadout` | `docs/contracts/components/value-readout.md` | `ValueReadoutSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | `loophole` |
+| `WaveformDisplay` | `docs/contracts/components/waveform-display.md` | `WaveformDisplaySpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `XYPad` | `docs/contracts/components/xy-pad.md` | `XYPadSpecimen.svelte` | `AudioControls.svelte.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 
 ## Cross-Runtime Surfaces (per component)
 

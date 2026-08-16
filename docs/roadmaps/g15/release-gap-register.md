@@ -7,7 +7,7 @@ Source: `docs/roadmaps/g15/release-baseline-roster.md` (frozen 175-component den
 
 Every incomplete surface below was measured from the tree; nothing is inferred
 from another runtime's pass. Owners are the roadmap cards compiled from these
-gaps (`g15.002`–`g15.013`). Absence of downstream use is recorded as context
+gaps (`g15.002`–`g15.014`). Absence of downstream use is recorded as context
 but is **not** a gap — see the note at the end.
 
 ## Svelte Release Blocker Class
@@ -36,13 +36,21 @@ roster's Downstream use column; Longhorn is the primary consumer).
 | --- | --- | --- |
 | No React implementation/export | AgentPlan, AgentPlanRecord | `g15.006` |
 | No React gallery specimen | AgentMessage, AgentPlan, AgentPlanRecord, ChangedFiles, ToolCall, ToolCallGroup | `g15.006` |
-| No focused React test (smoke only) | the React counterparts of the components in the Svelte focused-evidence tranches | `g15.006` (mirrors `g15.002`–`g15.005`) |
+| Focused React test gaps for the Svelte evidence tranches | paired with the same batches: each Svelte evidence tranche mirrors its contract cases on the React side | `g15.002`–`g15.005` |
+| Focused React test gaps for the mirror-closure components | AgentMessage, AgentPlan, AgentPlanRecord, ChangedFiles, ToolCall, ToolCallGroup | `g15.006` |
 
 ## Shared Rust Composition and GPUI Gaps
 
 Rust declarations (`<Name>Spec`) and render modules (`poodle-render`) are
 recorded independently; a component missing either is a native gap even when
-the other exists.
+the other exists. Counts below are `missing` only; `MeterSurface` is
+`not-applicable` on the Rust declaration, Rust render, and GPUI axes by fixed
+decision (spec 068) and is excluded from every missing count. Reproducible
+count method: `docs/roadmaps/g15/release-baseline-roster.md#count-method`.
+
+Summary of native gaps: Rust declaration 11 missing (+ 1 not-applicable),
+Rust render 13 missing (+ 1 not-applicable), GPUI specimen 29 missing
+(+ 1 not-applicable).
 
 | Family | Missing Rust declaration | Missing Rust render | Missing GPUI specimen | Owner |
 | --- | --- | --- | --- | --- |
@@ -80,9 +88,12 @@ mounted proof across the roster is folded into the release-certification card.
 
 - Jetstream is program-deferred for every component; no component registers a
   Jetstream gap.
-- 82 components have no downstream consumer use found. Absence of a consumer
-  is not a release failure (handoff boundary); it is recorded as context in the
-  roster.
+- 65 components have no downstream consumer use found across the 16 canonical
+  consumers. Absence of a consumer is not a release failure (handoff
+  boundary); it is recorded as context in the roster.
+- The `bun audit` nanoid advisory (GHSA-2v37-7h3g-55p8) is a security debt,
+  not a component gap; it is owned as a pre-certification remediation
+  prerequisite by `g15.013`.
 - `effigy doctor` baseline findings (generated-in-src, god-file,
-  stale-suppression, comment-ratio) and the pre-existing `bun audit` nanoid
-  advisory are known board health, not component gaps.
+  stale-suppression, comment-ratio) are known board health, not component
+  gaps.

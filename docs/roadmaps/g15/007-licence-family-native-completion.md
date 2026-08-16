@@ -24,6 +24,19 @@ pipeline.
 - new `poodle-render` implementations
 - new GPUI specimens and focused headless tests
 
+## Execution Plan
+
+- [ ] **Batch A — declarations:** hand-written `LicenceActivationSpec`,
+      `LicenceSeatsSpec`, `LicenceStatusSpec` in `poodle_specs` matching the
+      contract props tables (web-native props stay out of the portable spec).
+- [ ] **Batch B — render:** `poodle-render` implementations for all three; no
+      component-specific behaviour in generic runners.
+- [ ] **Batch C — GPUI and evidence:** GPUI specimens plus focused tests
+      (activation input path, inline seat rename, release, status display);
+      headless regression cases via `effigy regressions:native` where a
+      mounted window is required, otherwise focused `#[test]` cases in the
+      render crate.
+
 ## Goals
 
 - [ ] Hand-written `LicenceActivationSpec`, `LicenceSeatsSpec`,
@@ -60,6 +73,10 @@ pipeline.
 ## Writable Scope
 
 - Rust declarations, render modules, GPUI specimens, focused tests
+- bounded contract-first fixes to scoped defects the new evidence exposes
+- `release-baseline-roster.md` and `release-gap-register.md` (native rows only,
+  no status lines)
+- one August batch log under `docs/logs/2026-08/`
 - `PAPERCUTS.md` for newly discovered execution friction
 
 ## Validation

@@ -38,30 +38,30 @@ unproved, and what each runtime's evidence is — then ship.
 
 ## Sequence
 
-Only `001` is created. Later cards are compiled into bounded family tranches
-only after the inventory exists; no component rollout is pre-authored from
-memory.
+`001` is executed; its inventory froze the denominator and compiled the
+runway below. Later cards are listed in dependency order and are not
+dispatched until the orchestrator reviews and advances them.
 
 ## Runway
 
 Measured from `g15.001`'s frozen roster (`release-baseline-roster.md`) and gap
-register (`release-gap-register.md`). All follow-on cards are blocked pending
-orchestrator review; they are listed in dependency order and are not
-dispatched.
+register (`release-gap-register.md`). Dependency order only; orchestration
+and status advance are the orchestrator's.
 
-1. [001 — Release-baseline roster inventory](001-release-baseline-roster-inventory.md) — complete; frozen the 175-component denominator
-2. [002 — Svelte focused evidence: foundation display & shell](002-svelte-focused-evidence-display-shell.md) — **first executable tranche**; blocked
-3. [003 — Svelte focused evidence: forms, inputs & overlays](003-svelte-focused-evidence-forms-inputs-overlays.md) — blocked
-4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — blocked
-5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — blocked
-6. [006 — React mirror closure](006-react-mirror-closure.md) — blocked; mirrors `002`–`005`
-7. [007 — Licence family native completion](007-licence-family-native-completion.md) — blocked; carries `g14.017`
-8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — blocked; carries `g14.020`
-9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md) — blocked
-10. [010 — Display, workstation & agent GPUI specimens](010-display-workstation-agent-gpui-specimens.md) — blocked; GPUI closure after `007`–`009`
-11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — blocked; carries `g14.026`
-12. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — blocked; seam recorded, harness not designed
-13. [013 — v0.2.0 release certification](013-v020-release-certification.md) — blocked; depends on `002`–`006`
+1. [001 — Release-baseline roster inventory](001-release-baseline-roster-inventory.md)
+2. [002 — Svelte focused evidence: foundation display & shell](002-svelte-focused-evidence-display-shell.md) — proposed first executable tranche; pairs React evidence
+3. [003 — Svelte focused evidence: forms, inputs & overlays](003-svelte-focused-evidence-forms-inputs-overlays.md) — pairs React evidence
+4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — pairs React evidence
+5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — pairs React evidence
+6. [006 — React mirror implementation & gallery closure](006-react-mirror-closure.md) — depends on `001`; the two missing implementations and six gallery pages
+7. [007 — Licence family native completion](007-licence-family-native-completion.md) — carries `g14.017`
+8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — carries `g14.020`
+9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md)
+10. [010 — Display, workstation & agent GPUI specimens](010-display-workstation-agent-gpui-specimens.md) — GPUI closure after `007`–`009`
+11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — carries `g14.026`
+12. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — per the `g14.022` decision; headless capture required
+13. [013 — v0.2.0 release certification](013-v020-release-certification.md) — depends on `002`–`006` and `014`; requires a fully green `effigy qa` and an operator gate
+14. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — closes the `bun audit` nanoid advisory ahead of certification
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)

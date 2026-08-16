@@ -21,6 +21,16 @@ StateTile, ActionDiscoveryPanel, DockRegion, AgentMessage, AgentPlan,
 AgentPlanRecord, AgentQuestionRecord, AgentSubagent, ChangedFiles, ToolCall,
 ToolCallGroup
 
+## Execution Plan
+
+- [ ] **Batch A — display & status specimens (8):** Avatar, Callout,
+      RemediationBanner, MetaItem, Pill, Spinner, EmptyState, StateTile
+- [ ] **Batch B — workstation specimens (2):** ActionDiscoveryPanel,
+      DockRegion (DockRegion may reuse the retained headless driver)
+- [ ] **Batch C — agent specimens (8):** AgentMessage, AgentPlan,
+      AgentPlanRecord, AgentQuestionRecord, AgentSubagent, ChangedFiles,
+      ToolCall, ToolCallGroup
+
 ## Goals
 
 - [ ] One GPUI specimen per scoped component, composed from the existing
@@ -47,6 +57,10 @@ ToolCallGroup
 ## Writable Scope
 
 - GPUI specimen files and focused headless tests
+- bounded contract-first fixes to scoped defects the new evidence exposes
+- `release-baseline-roster.md` and `release-gap-register.md` (GPUI rows only,
+  no status lines)
+- one August batch log under `docs/logs/2026-08/`
 - `PAPERCUTS.md` for newly discovered execution friction
 
 ## Validation

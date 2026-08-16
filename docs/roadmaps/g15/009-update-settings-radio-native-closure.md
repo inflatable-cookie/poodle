@@ -26,6 +26,20 @@ composites; Radio precedes the composites that compose it.
 | IconProvider | — | yes | — |
 | UiPresentationProvider | — | yes | — |
 
+## Execution Plan
+
+- [ ] **Batch A — declarations and render:** hand-written specs and render
+      implementations for UpdateStatus, UpdateCenter, SettingsShell, and
+      Radio (Radio's single-option semantics without borrowing RadioGroup's
+      pass).
+- [ ] **Batch B — context-provider posture:** decide and document the
+      render-tier posture for IconProvider and UiPresentationProvider:
+      implement a child-passthrough node, or record a declared capability
+      absence with the contract's GPUI notes as the reason. Either way the
+      absence must be declared — a silent omission is drift on every side.
+- [ ] **Batch C — GPUI and evidence:** GPUI specimens and focused headless
+      evidence for the four workstation/primitive components.
+
 ## Goals
 
 - [ ] Add hand-written specs and render implementations for UpdateStatus,
@@ -59,6 +73,10 @@ composites; Radio precedes the composites that compose it.
 
 - Rust declarations, render modules, GPUI specimens, focused tests
 - contract notes only where a capability absence must be declared
+- bounded contract-first fixes to scoped defects the new evidence exposes
+- `release-baseline-roster.md` and `release-gap-register.md` (native rows only,
+  no status lines)
+- one August batch log under `docs/logs/2026-08/`
 - `PAPERCUTS.md` for newly discovered execution friction
 
 ## Validation
