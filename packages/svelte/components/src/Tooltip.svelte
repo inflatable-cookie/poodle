@@ -54,14 +54,44 @@
   const isControlled = $derived(open !== null);
   const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
 
+  let anchorResolved = $state(false);
+
+  // The anchor is normally established by hover/focus. A tooltip shown through
+  // `open`/`defaultOpen` never ran ENTER, so the machine sits in "closed" and
+  // the first-child anchor stays unresolved — the bubble renders but nothing
+  // is announced and Escape is inert. Resolve the default anchor once so a
+  // forced-open surface behaves exactly like a hovered one.
+  $effect(() => {
+    if (!isOpen || anchorResolved) {
+      return;
+    }
+
+    const anchor = getDefaultAnchor();
+    if (anchor) {
+      triggerElement = anchor;
+      anchorResolved = true;
+    }
+  });
+
   $effect(() => {
     if (isOpen && triggerElement) {
       // Announced only while shown: a stale describedby outlives the bubble.
       triggerElement.setAttribute("aria-describedby", tooltipId);
+    } else if (triggerElement) {
+      triggerElement.removeAttribute("aria-describedby");
     }
   });
 
   let machineState: HoverState = "closed";
+
+  // Seed the machine to "open" for a surface shown without hover: DISMISS from
+  // "closed" is inert, so Escape would otherwise leave a forced-open tooltip
+  // visibly stuck with no close reported.
+  $effect(() => {
+    if (isOpen && machineState === "closed") {
+      machineState = "open";
+    }
+  });
 
   function send(event: HoverMachineEvent): void {
     const result = hoverTransition(machineState, { openDelayMs: delayMs, closeDelayMs: 0 }, event);

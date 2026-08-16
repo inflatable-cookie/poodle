@@ -52,6 +52,20 @@ export function Tooltip({
   const isControlled = open !== null;
   const isOpen = isControlled ? open === true : uncontrolledOpen;
 
+  // The anchor is normally established by hover/focus. A tooltip shown through
+  // `open`/`defaultOpen` never ran ENTER, so the machine stays "closed" and the
+  // first-child anchor stays unresolved — the portalled bubble would render
+  // nothing and Escape would be inert. Resolve the default anchor once so a
+  // forced-open surface behaves exactly like a hovered one.
+  useLayoutEffect(() => {
+    if (!isOpen || anchorElement) return;
+    const defaultAnchor = getDefaultAnchor();
+    if (defaultAnchor) {
+      triggerRef.current = defaultAnchor;
+      setAnchorElement(defaultAnchor);
+    }
+  }, [isOpen, anchorElement]);
+
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -113,10 +127,22 @@ export function Tooltip({
   }
 
   useLayoutEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      triggerRef.current?.removeAttribute("aria-describedby");
+      return;
+    }
     // Announced only while shown: a stale describedby outlives the bubble.
     triggerRef.current?.setAttribute("aria-describedby", tooltipId);
-  }, [isOpen, tooltipId]);
+  }, [isOpen, tooltipId, anchorElement]);
+
+  // Seed the machine to "open" for a surface shown without hover: DISMISS from
+  // "closed" is inert, so Escape would otherwise leave a forced-open tooltip
+  // visibly stuck with no close reported.
+  useEffect(() => {
+    if (isOpen && machineState.current === "closed") {
+      machineState.current = "open";
+    }
+  }, [isOpen]);
 
   useEffect(
     () => () => {
