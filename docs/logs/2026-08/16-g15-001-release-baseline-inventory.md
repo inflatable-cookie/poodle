@@ -111,12 +111,12 @@ dependency order in `docs/roadmaps/g15/README.md`:
 - `g15.011` — Human-centred specimen catalogue audit (carries `g14.026`)
 - `g15.012` — Primitive-first visual conformance lane (per the `g14.022`
   decision; headless capture required)
-- `g15.013` — v0.2.0 release certification (requires green `effigy qa` and an
-  operator gate)
 - `g15.014` — Release-gate remediation: nanoid advisory prerequisite
+- `g15.013` — v0.2.0 release certification (requires green `effigy qa`,
+  `g15.014`, and an operator gate)
 
-None dispatched or implemented. No roadmap status line or `dispatch.md` was
-changed; the g15 README runway records dependency order only.
+None dispatched or implemented by the worker. Orchestrator review accepts
+`g15.001` and advances `g15.002` to ready; `dispatch.md` remains unchanged.
 
 ## Validation
 

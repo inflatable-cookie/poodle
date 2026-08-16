@@ -1,10 +1,10 @@
 # g15.012 — Primitive-First Visual Conformance Lane
 
-Status: **blocked** — pending orchestrator review of `g15.001`
+Status: **blocked** — orchestration hold; `g15.002` is the active card
 Depends on: `g15.001` (measured roster)
 Governing refs: `release-baseline-roster.md`,
-`../../roadmaps/g14/022-generation-closeout.md` (approved objective §Decision
-Lane), `../../roadmaps/g14/conformance-estate.md`,
+`../../roadmaps/g14/022-generation-closeout.md` (operator ruling on future
+visual conformance), `../../roadmaps/g14/conformance-estate.md`,
 `../../contracts/001-working-rules.md`
 
 ## Outcome
@@ -65,8 +65,8 @@ human review, not a completion gate and not a release prerequisite.
 - [ ] Headless capture evidence exists for the first primitive batch with
       renderer-aware tolerances; native visual compare remains local-only and
       operator-owned where it cannot be headless.
-- [ ] No component authority, completion gate, or cross-runtime comparator is
-      introduced.
+- [ ] No semantic/behaviour authority or completion gate is introduced; the
+      bounded renderer-aware cross-runtime comparator remains diagnostic.
 
 ## Stop Conditions
 

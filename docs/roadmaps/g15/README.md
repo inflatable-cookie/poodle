@@ -1,6 +1,6 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.001` ready for dispatch
+Status: active — `g15.002` ready for dispatch
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -48,7 +48,7 @@ Measured from `g15.001`'s frozen roster (`release-baseline-roster.md`) and gap
 register (`release-gap-register.md`). Dependency order only; orchestration
 and status advance are the orchestrator's.
 
-1. [001 — Release-baseline roster inventory](001-release-baseline-roster-inventory.md)
+1. [001 — Release-baseline roster inventory](001-release-baseline-roster-inventory.md) — complete
 2. [002 — Svelte focused evidence: foundation display & shell](002-svelte-focused-evidence-display-shell.md) — proposed first executable tranche; pairs React evidence
 3. [003 — Svelte focused evidence: forms, inputs & overlays](003-svelte-focused-evidence-forms-inputs-overlays.md) — pairs React evidence
 4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — pairs React evidence
@@ -60,8 +60,8 @@ and status advance are the orchestrator's.
 10. [010 — Display, workstation & agent GPUI specimens](010-display-workstation-agent-gpui-specimens.md) — GPUI closure after `007`–`009`
 11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — carries `g14.026`
 12. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — per the `g14.022` decision; headless capture required
-13. [013 — v0.2.0 release certification](013-v020-release-certification.md) — depends on `002`–`006` and `014`; requires a fully green `effigy qa` and an operator gate
-14. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — closes the `bun audit` nanoid advisory ahead of certification
+13. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — closes the `bun audit` nanoid advisory ahead of certification
+14. [013 — v0.2.0 release certification](013-v020-release-certification.md) — depends on `002`–`006` and `014`; requires a fully green `effigy qa` and an operator gate
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)
@@ -90,4 +90,5 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Dispatch `g15.001` — the release-baseline roster inventory.
+Dispatch `g15.002` — Svelte focused evidence for foundation display and shell
+primitives, paired with the same contract evidence in React.

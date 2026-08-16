@@ -13,9 +13,9 @@ v0.2.0 release-baseline generation.
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
   `g14.022` completed the closeout. The generation is complete.
-- `g15` is the release-first v0.2.0 runway. Its first card — the
-  release-baseline roster inventory — is ready for dispatch. Jetstream remains
-  deferred.
+- `g15` is the release-first v0.2.0 runway. The release-baseline roster
+  inventory is complete; `g15.002`, the first focused-evidence tranche, is
+  ready for dispatch. Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
 - The first g14 machine-pinning/scene runway was reset after five merged
@@ -40,7 +40,7 @@ v0.2.0 release-baseline generation.
 - `g12` — React parity, verification depth, native hardening, audio family
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
-- `g15` — active v0.2.0 release baseline; first card ready
+- `g15` — active v0.2.0 release baseline; `g15.002` ready
 
 ## Rules
 

@@ -1,6 +1,6 @@
 # g15.013 — v0.2.0 Release Certification
 
-Status: **blocked** — pending orchestrator review of `g15.001`
+Status: **blocked** — depends on `g15.002`–`g15.006` and `g15.014`
 Depends on: `g15.002`–`g15.005` (Svelte focused evidence closure),
 `g15.006` (React mirror closure), `g15.014` (release-gate remediation —
 security prerequisite)

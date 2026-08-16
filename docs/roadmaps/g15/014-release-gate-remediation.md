@@ -1,6 +1,6 @@
 # g15.014 — Release-Gate Remediation: Security Advisory Prerequisite
 
-Status: **blocked** — pending orchestrator review of `g15.001`
+Status: **blocked** — orchestration hold; required before `g15.013`
 Depends on: `g15.001` (recorded the open advisory)
 Governing refs: `release-gap-register.md`, `release-baseline-roster.md`,
 `../../contracts/001-working-rules.md`

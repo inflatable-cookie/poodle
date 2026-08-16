@@ -1,6 +1,6 @@
 # g15.009 — Update, Settings, Radio & Context-Provider Native Closure
 
-Status: **blocked** — pending orchestrator review of `g15.001`
+Status: **blocked** — orchestration hold; `g15.002` is the active card
 Depends on: `g15.001` (measured gaps)
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`

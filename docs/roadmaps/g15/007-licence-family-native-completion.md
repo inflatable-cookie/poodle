@@ -1,6 +1,6 @@
 # g15.007 — Licence Family Native Completion
 
-Status: **blocked** — pending orchestrator review of `g15.001`
+Status: **blocked** — orchestration hold; `g15.002` is the active card
 Depends on: `g15.001` (measured gaps); carries `g14.017` requirements with
 approved web references (`g14.015`/`g14.016`) intact
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
