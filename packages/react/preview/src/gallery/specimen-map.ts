@@ -3,6 +3,9 @@ import type { ComponentType } from "react";
 import { SceneSpecimen } from "./SceneSpecimen";
 import { AccordionSpecimen } from "./specimens/AccordionSpecimen";
 import { ActionDiscoveryPanelSpecimen } from "./specimens/ActionDiscoveryPanelSpecimen";
+import { AgentMessageSpecimen } from "./specimens/AgentMessageSpecimen";
+import { AgentPlanRecordSpecimen } from "./specimens/AgentPlanRecordSpecimen";
+import { AgentPlanSpecimen } from "./specimens/AgentPlanSpecimen";
 import { AgentQuestionRecordSpecimen } from "./specimens/AgentQuestionRecordSpecimen";
 import { AgentQuestionSpecimen } from "./specimens/AgentQuestionSpecimen";
 import { AgentSubagentSpecimen } from "./specimens/AgentSubagentSpecimen";
@@ -21,6 +24,7 @@ import { BreadcrumbsSpecimen } from "./specimens/BreadcrumbsSpecimen";
 import { BulkActionBarSpecimen } from "./specimens/BulkActionBarSpecimen";
 import { ButtonSpecimen } from "./specimens/ButtonSpecimen";
 import { CalendarSpecimen } from "./specimens/CalendarSpecimen";
+import { ChangedFilesSpecimen } from "./specimens/ChangedFilesSpecimen";
 
 import { RemediationBannerSpecimen } from "./specimens/RemediationBannerSpecimen";
 import { CardRadioGroupSpecimen } from "./specimens/CardRadioGroupSpecimen";
@@ -151,6 +155,8 @@ import { TimeAgoSpecimen } from "./specimens/TimeAgoSpecimen";
 import { TimeInputSpecimen } from "./specimens/TimeInputSpecimen";
 import { ThemeSelectSpecimen } from "./specimens/ThemeSelectSpecimen";
 import { TimeZoneSelectSpecimen } from "./specimens/TimeZoneSelectSpecimen";
+import { ToolCallGroupSpecimen } from "./specimens/ToolCallGroupSpecimen";
+import { ToolCallSpecimen } from "./specimens/ToolCallSpecimen";
 import { ToastHostSpecimen } from "./specimens/ToastHostSpecimen";
 import { ToastStackSpecimen } from "./specimens/ToastStackSpecimen";
 import { ToggleGroupSpecimen } from "./specimens/ToggleGroupSpecimen";
@@ -177,6 +183,9 @@ import { allComponents } from "./registry";
 export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "accordion": AccordionSpecimen,
   "action-discovery-panel": ActionDiscoveryPanelSpecimen,
+  "agent-message": AgentMessageSpecimen,
+  "agent-plan": AgentPlanSpecimen,
+  "agent-plan-record": AgentPlanRecordSpecimen,
   "agent-question": AgentQuestionSpecimen,
   "agent-question-record": AgentQuestionRecordSpecimen,
   "agent-subagent": AgentSubagentSpecimen,
@@ -196,6 +205,7 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "button": ButtonSpecimen,
   "calendar": CalendarSpecimen,
   "callout": SceneSpecimen,
+  "changed-files": ChangedFilesSpecimen,
   "remediation-banner": RemediationBannerSpecimen,
   "card": CardSpecimen,
   "card-radio-group": CardRadioGroupSpecimen,
@@ -333,6 +343,8 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "toast-stack": ToastStackSpecimen,
   "toggle-group": ToggleGroupSpecimen,
   "token-input": TokenInputSpecimen,
+  "tool-call": ToolCallSpecimen,
+  "tool-call-group": ToolCallGroupSpecimen,
   "toolbar": ToolbarSpecimen,
   "tooltip": TooltipSpecimen,
   "tree": TreeSpecimen,

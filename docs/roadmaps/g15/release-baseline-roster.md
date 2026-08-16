@@ -18,9 +18,9 @@ Public types and helpers are recorded separately and are **not** part of the den
 | Contract (`docs/contracts/components/<name>.md`) | 175 | 0 | 0 |
 | Svelte preview specimen (dedicated file or scene-shared) | 175 | 0 | 0 |
 | Focused Svelte test (named file/case, beyond anatomy smoke) | 151 | 24 | 0 |
-| React implementation + export | 173 | 2 | 0 |
-| React gallery specimen | 169 | 6 | 0 |
-| Focused React test | 147 | 28 | 0 |
+| React implementation + export | 175 | 0 | 0 |
+| React gallery specimen | 175 | 0 | 0 |
+| Focused React test | 152 | 23 | 0 |
 | Rust declaration (`<Name>Spec`, including documented aliases) | 163 | 11 | 1 |
 | Rust render module (`poodle-render`) | 161 | 13 | 1 |
 | GPUI specimen | 145 | 29 | 1 |
@@ -36,7 +36,7 @@ Public types and helpers are recorded separately and are **not** part of the den
 - **Contract**: one `docs/contracts/components/<kebab>.md` per component (kebab-case from the export name); 175 of 175 present, verified by direct file check.
 - **Specimen**: keys of `specimenMap` in `packages/svelte/preview/src/specimens/registry.ts` against the canonical slugs (174 portable + web-only `meter-surface`); 175 entries. 168 map to a dedicated `*Specimen.svelte`; 7 map to a shared specimen (5 `SceneSpecimen`, 1 `ListCardSpecimen` for `ListCardCounter`, 1 `MetaBarSpecimen` for `MetaItem`).
 - **Focused Svelte test**: component imports resolved across all files in `packages/svelte/components/test/` (`.test.ts` and harness `.svelte` files); a component counts when at least one named test file mounts and asserts it beyond the anatomy smoke. 151 count; 24 record `missing` (smoke-only).
-- **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (173); React gallery: `specimen-map.ts` keys against canonical slugs (169); focused React test: same import-resolution method over `packages/react/components/test/` (147; 28 missing).
+- **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (175); React gallery: `specimen-map.ts` keys against canonical slugs (175); focused React test: same import-resolution method over `packages/react/components/test/` (152; 23 missing).
 - **Rust declaration**: `pub struct <Name>Spec` searched recursively in `packages/contracts/components/src` (163). Three documented naming discrepancies count as present: `CallOutSpec` (`Callout`), `ShellStatusBarSpec` (`StatusBar`), `TimeFieldSpec` (`TimeInput`). `MeterSurface` has no declaration and records not-applicable per spec 068.
 - **Rust render**: module names in `packages/render/src/lib.rs` (161). Documented naming discrepancies count as present: `bx.rs` (`Box`), `shell_status_bar.rs` (`StatusBar`), `time_field.rs` (`TimeInput`), and the batched `audio.rs` covering the 12 audio widgets (13 audio components minus `MeterSurface`). `MeterSurface` records not-applicable.
 - **GPUI specimen**: file presence in `packages/gpui/preview/src/specimens/` per component (145). The batched `audio_controls.rs` covers 12 audio widgets; the 12 audio widgets are those covered — `audio_controls.rs` has no `meter_surface` function and `MeterSurface` records not-applicable. Counts do not include the `mod.rs` dispatch fallback (`missing_specimen`).
@@ -295,9 +295,9 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 | `FormActions` | complete | complete | `FormActions.test.tsx` | `FormActionsSpec` (`packages/contracts/components/src/form_actions.rs`) | `packages/render/src/form_actions.rs` | `packages/gpui/preview/src/specimens/form_actions.rs` |
 | `Grid` | complete | complete | `Grid.test.tsx` | `GridSpec` (`packages/contracts/components/src/grid.rs`) | `packages/render/src/grid.rs` | `packages/gpui/preview/src/specimens/grid.rs` |
 | `HoverCard` | complete | complete | `HoverCard.test.tsx` | `HoverCardSpec` (`packages/contracts/components/src/hover_card.rs`) | `packages/render/src/hover_card.rs` | `packages/gpui/preview/src/specimens/hover_card.rs` |
-| `Icon` | complete | complete | `missing` — smoke only | `IconSpec` (`packages/contracts/components/src/icon.rs`) | `packages/render/src/icon.rs` | `packages/gpui/preview/src/specimens/icon.rs` |
+| `Icon` | complete | complete | `IconProvider.test.tsx` | `IconSpec` (`packages/contracts/components/src/icon.rs`) | `packages/render/src/icon.rs` | `packages/gpui/preview/src/specimens/icon.rs` |
 | `IconButton` | complete | complete | `IconButton.test.tsx` | `IconButtonSpec` (`packages/contracts/components/src/icon_button.rs`) | `packages/render/src/icon_button.rs` | `packages/gpui/preview/src/specimens/icon_button.rs` |
-| `IconProvider` | complete | complete | `missing` — smoke only | `IconProviderSpec` (`packages/contracts/components/src/icon_provider.rs`) | `missing` | `packages/gpui/preview/src/specimens/icon_provider.rs` |
+| `IconProvider` | complete | complete | `IconProvider.test.tsx` | `IconProviderSpec` (`packages/contracts/components/src/icon_provider.rs`) | `missing` | `packages/gpui/preview/src/specimens/icon_provider.rs` |
 | `Meter` | complete | complete | `Meter.test.tsx` | `MeterSpec` (`packages/contracts/components/src/meter.rs`) | `packages/render/src/meter.rs` | `packages/gpui/preview/src/specimens/meter.rs` |
 | `ListCard` | complete | complete | `ListCard.test.tsx` | `ListCardSpec` (`packages/contracts/components/src/list_card.rs`) | `packages/render/src/list_card.rs` | `packages/gpui/preview/src/specimens/list_card.rs` |
 | `ListCardCounter` | complete | complete | `ListCardCounter.test.tsx` | `ListCardCounterSpec` (`packages/contracts/components/src/list_card_counter.rs`) | `packages/render/src/list_card_counter.rs` | `packages/gpui/preview/src/specimens/list_card_counter.rs` |
@@ -339,16 +339,16 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 
 | Component | React impl/export | React gallery | Focused React test | Rust declaration | Rust render | GPUI specimen |
 | --- | --- | --- | --- | --- | --- | --- |
-| `AgentMessage` | complete | `missing` | `missing` — smoke only | `AgentMessageSpec` (`packages/contracts/components/src/agent_message.rs`) | `packages/render/src/agent_message.rs` | `missing` |
-| `AgentPlan` | `missing` | `missing` | `missing` — smoke only | `AgentPlanSpec` (`packages/contracts/components/src/agent_plan.rs`) | `packages/render/src/agent_plan.rs` | `missing` |
-| `AgentPlanRecord` | `missing` | `missing` | `missing` — smoke only | `AgentPlanRecordSpec` (`packages/contracts/components/src/agent_plan_record.rs`) | `packages/render/src/agent_plan_record.rs` | `missing` |
+| `AgentMessage` | complete | complete | `missing` — smoke only | `AgentMessageSpec` (`packages/contracts/components/src/agent_message.rs`) | `packages/render/src/agent_message.rs` | `missing` |
+| `AgentPlan` | complete | complete | `AgentPlan.test.tsx` | `AgentPlanSpec` (`packages/contracts/components/src/agent_plan.rs`) | `packages/render/src/agent_plan.rs` | `missing` |
+| `AgentPlanRecord` | complete | complete | `missing` — smoke only | `AgentPlanRecordSpec` (`packages/contracts/components/src/agent_plan_record.rs`) | `packages/render/src/agent_plan_record.rs` | `missing` |
 | `AgentQuestion` | complete | complete | `missing` — smoke only | `AgentQuestionSpec` (`packages/contracts/components/src/agent_question.rs`) | `packages/render/src/agent_question.rs` | `packages/gpui/preview/src/specimens/agent_question.rs` |
 | `AgentQuestionRecord` | complete | complete | `missing` — smoke only | `AgentQuestionRecordSpec` (`packages/contracts/components/src/agent_question_record.rs`) | `packages/render/src/agent_question_record.rs` | `missing` |
 | `AgentSubagent` | complete | complete | `AgentSubagent.test.tsx` | `AgentSubagentSpec` (`packages/contracts/components/src/agent_subagent.rs`) | `packages/render/src/agent_subagent.rs` | `missing` |
 | `AgentTranscript` | complete | complete | `AgentSubagent.test.tsx` | `AgentTranscriptSpec` (`packages/contracts/components/src/agent_transcript.rs`) | `packages/render/src/agent_transcript.rs` | `packages/gpui/preview/src/specimens/agent_transcript.rs` |
-| `ChangedFiles` | complete | `missing` | `missing` — smoke only | `ChangedFilesSpec` (`packages/contracts/components/src/changed_files.rs`) | `packages/render/src/changed_files.rs` | `missing` |
-| `ToolCall` | complete | `missing` | `missing` — smoke only | `ToolCallSpec` (`packages/contracts/components/src/tool_call.rs`) | `packages/render/src/tool_call.rs` | `missing` |
-| `ToolCallGroup` | complete | `missing` | `missing` — smoke only | `ToolCallGroupSpec` (`packages/contracts/components/src/tool_call_group.rs`) | `packages/render/src/tool_call_group.rs` | `missing` |
+| `ChangedFiles` | complete | complete | `missing` — smoke only | `ChangedFilesSpec` (`packages/contracts/components/src/changed_files.rs`) | `packages/render/src/changed_files.rs` | `missing` |
+| `ToolCall` | complete | complete | `missing` — smoke only | `ToolCallSpec` (`packages/contracts/components/src/tool_call.rs`) | `packages/render/src/tool_call.rs` | `missing` |
+| `ToolCallGroup` | complete | complete | `missing` — smoke only | `ToolCallGroupSpec` (`packages/contracts/components/src/tool_call_group.rs`) | `packages/render/src/tool_call_group.rs` | `missing` |
 
 ### Workstation systems
 
@@ -420,8 +420,8 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 | `SelectionSummary` | complete | complete | `SelectionSummary.test.tsx` | `SelectionSummarySpec` (`packages/contracts/components/src/selection_summary.rs`) | `packages/render/src/selection_summary.rs` | `packages/gpui/preview/src/specimens/selection_summary_specimen.rs` |
 | `SettingsShell` | complete | complete | `SettingsShell.test.tsx` | `missing` | `missing` | `missing` |
 | `SidebarNav` | complete | complete | `SidebarNav.test.tsx` | `SidebarNavSpec` (`packages/contracts/components/src/sidebar_nav.rs`) | `packages/render/src/sidebar_nav.rs` | `packages/gpui/preview/src/specimens/sidebar_nav.rs` |
-| `Tree` | complete | complete | `missing` — smoke only | `TreeSpec` (`packages/contracts/components/src/tree.rs`) | `packages/render/src/tree.rs` | `packages/gpui/preview/src/specimens/tree.rs` |
-| `SplitView` | complete | complete | `missing` — smoke only | `SplitViewSpec` (`packages/contracts/components/src/split_view.rs`) | `packages/render/src/split_view.rs` | `packages/gpui/preview/src/specimens/split_view_specimen.rs` |
+| `Tree` | complete | complete | `Tree.test.tsx` | `TreeSpec` (`packages/contracts/components/src/tree.rs`) | `packages/render/src/tree.rs` | `packages/gpui/preview/src/specimens/tree.rs` |
+| `SplitView` | complete | complete | `SplitView.test.tsx` | `SplitViewSpec` (`packages/contracts/components/src/split_view.rs`) | `packages/render/src/split_view.rs` | `packages/gpui/preview/src/specimens/split_view_specimen.rs` |
 | `MetricTile` | complete | complete | `MetricTile.test.tsx` | `MetricTileSpec` (`packages/contracts/components/src/metric_tile.rs`) | `packages/render/src/metric_tile.rs` | `packages/gpui/preview/src/specimens/metric_tile_specimen.rs` |
 | `StateTile` | complete | complete | `WebParityCloseout.test.tsx` | `StateTileSpec` (`packages/contracts/components/src/state_tile.rs`) | `packages/render/src/state_tile.rs` | `missing` |
 | `ValidationSummary` | complete | complete | `WebParityCloseout.test.tsx` | `ValidationSummarySpec` (`packages/contracts/components/src/validation_summary.rs`) | `packages/render/src/validation_summary.rs` | `packages/gpui/preview/src/specimens/validation_summary.rs` |

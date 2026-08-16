@@ -120,7 +120,13 @@ export function AgentMessage({
               >
                 {block.items.map((item, itemIndex) => (
                   <li key={itemIndex} className="poodle-agent-message__list-item">
-                    {renderBlocks(item)}
+                    {/* Single-paragraph items render their inlines directly:
+                        the marker sits on the text line with inside
+                        positioning, and a redundant <p> would push the content
+                        below the marker. */}
+                    {item.length === 1 && item[0].type === "paragraph"
+                      ? renderInlines(item[0].children)
+                      : renderBlocks(item)}
                   </li>
                 ))}
               </List>

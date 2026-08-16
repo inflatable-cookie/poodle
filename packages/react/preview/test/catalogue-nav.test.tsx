@@ -22,7 +22,7 @@ describe("React catalogue navigation", () => {
       document.querySelector(
         '.poodle-catalogue-sidebar [data-catalogue-family="agent-tools"] .poodle-catalogue-family__count',
       )?.textContent,
-    ).toBe("9");
+    ).toBe("11");
     expect(
       screen.getAllByRole("link", { name: /Button/ }).length,
     ).toBeGreaterThan(0);

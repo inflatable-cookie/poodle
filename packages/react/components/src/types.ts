@@ -753,7 +753,7 @@ export type {
 // AgentChatInput
 // ---------------------------------------------------------------------------
 
-export type AgentChatStatus = "idle" | "busy";
+export type AgentChatStatus = "idle" | "busy" | "questioning" | "reviewing-plan";
 
 export type { AgentChatAttachment } from "@inflatable-cookie/poodle-core";
 
@@ -787,6 +787,9 @@ export type RefOption = {
 export type {
   AgentSubagentItem,
   AgentSubagentStatus,
+  AgentPlanDecision,
+  AgentPlanSettledStatus,
+  AgentPlanStatus,
   AgentQuestionOption,
   AgentQuestionItem,
   AgentQuestionOutcome,

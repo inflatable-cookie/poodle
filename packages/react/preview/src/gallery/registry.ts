@@ -13,21 +13,13 @@ export type ComponentEntry = CatalogueNavEntry & {
   hasSpecimen: boolean;
 };
 
-const svelteOnlyComponents = new Set(["AgentPlan", "AgentPlanRecord"]);
-const embeddedOnlySpecimens = new Set([
-  "AgentMessage",
-  "ChangedFiles",
-  "ToolCall",
-  "ToolCallGroup",
-]);
-
-export const allComponents: ComponentEntry[] = [...canonicalComponents, ...webOnlyComponents]
-  .filter((component) => !svelteOnlyComponents.has(component.displayName))
-  .map((component) => ({
+export const allComponents: ComponentEntry[] = [...canonicalComponents, ...webOnlyComponents].map(
+  (component) => ({
     ...decorateCanonical(component),
     packageName: "@inflatable-cookie/poodle-react",
-    hasSpecimen: !embeddedOnlySpecimens.has(component.displayName),
-  }));
+    hasSpecimen: true,
+  }),
+);
 
 export function findComponent(
   componentSlug: string,
