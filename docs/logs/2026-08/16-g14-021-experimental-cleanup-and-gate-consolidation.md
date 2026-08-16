@@ -14,7 +14,9 @@ five generated Rust declarations are hand-written again, the four web shells
 that inferred their props from the pilot interface declare them, and
 `effigy ci:conformance` is now a small honest native regression board.
 
-No shipped API changed. No component behaviour changed. The 1,205 HistoryCenter
+No released component API changed. The unreleased pilot-only
+`@inflatable-cookie/poodle-core/conformance*` exports were removed with their
+implementation. No component behaviour changed. The 1,205 HistoryCenter
 comparison failures are not "fixed" — the comparator that produced them is
 deleted along with the plane it compared, and its evidence stays in `g14.008`.
 
@@ -58,7 +60,7 @@ means the defect was in the pilot's own machinery, not in shipped code.
 | --- | --- |
 | Nested overlay registration order — Escape dismissed the outer first | `packages/core/test/dismiss.test.ts` (16 cases incl. registered peers, portalled ancestry, three-level nesting) — pre-existing |
 | Controlled `open` while `disabled` rendered the surface | `PopoverRetained.svelte.test.ts` / `PopoverRetained.test.tsx` — "keeps a controlled open request inert while disabled" |
-| Node-backend panicked on a popover inside a popover (`defer_draw` during deferred drawing) | `headless_regressions.rs::overlay_layers_survive_independent_conversions_within_one_frame` |
+| Node-backend panicked on a popover inside a popover (`defer_draw` during deferred drawing) | `headless_regressions.rs::a_nested_popover_paints_without_nesting_deferred_draws` |
 | Nested open state rebuilt fresh each frame | **retired** — the pilot's GPUI adapter held the state, not shipped code. |
 
 ### TextInput (g14.006)
@@ -133,7 +135,7 @@ vector** target. Untouched — different mechanism, same word.
 
 ## Retained selector scope
 
-- `regressions:native` — the focused headless GPUI board (5 tests).
+- `regressions:native` — the focused headless GPUI board (6 tests).
 - `ci:conformance` — an alias for it, kept only because
   `.github/workflows/ci-conformance.yml` calls that name. Its output and its
   task comment state the scope: native regressions, nothing about portable
@@ -160,7 +162,7 @@ operator approval; `g14.022` decides whether to rename or delete it.
 
 ## Validation
 
-- `effigy ci:conformance` — 5 native regressions pass
+- `effigy ci:conformance` — 6 native regressions pass
 - `effigy check:gpui` — pass
 - `effigy check:svelte` — 0 errors
 - `effigy react:build` — pass

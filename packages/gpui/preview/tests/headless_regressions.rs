@@ -244,3 +244,45 @@ fn overlay_layers_survive_independent_conversions_within_one_frame() {
         poodle_gpui_node_backend::overlay_frame_end();
     });
 }
+
+/// g14.005 retained regression. GPUI forbids starting a second deferred draw
+/// while it is painting the first. A popover nested inside another popover is
+/// therefore painted inside the enclosing deferred scope rather than calling
+/// `defer_draw` again. This must execute a real paint: converting the tree
+/// alone cannot catch the backend panic.
+#[test]
+fn a_nested_popover_paints_without_nesting_deferred_draws() {
+    run_headless(|cx| {
+        let inner = poodle_render::popover(
+            &PopoverSpec::new().with_open(true),
+            &theme(),
+            &poodle_render::PopoverHandlers {
+                on_activate: None,
+                on_dismiss: Some(Arc::new(|_| {})),
+                instance_id: Some("nested-paint:inner".to_owned()),
+            },
+            Some(Node::text("Inner trigger")),
+            Some(Node::text("Inner panel")),
+        );
+        let outer = poodle_render::popover(
+            &PopoverSpec::new().with_open(true),
+            &theme(),
+            &poodle_render::PopoverHandlers {
+                on_activate: None,
+                on_dismiss: Some(Arc::new(|_| {})),
+                instance_id: Some("nested-paint:outer".to_owned()),
+            },
+            Some(Node::text("Outer trigger")),
+            Some(Node::container().child(inner)),
+        );
+        let node = Arc::new(Mutex::new(outer));
+        let mut driver = HeadlessDriver::new(cx, node);
+
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::open_layer_count(),
+            2,
+            "the outer and nested popover must both survive the paint",
+        );
+    });
+}

@@ -1,6 +1,6 @@
 # g14 — Executable Component Conformance
 
-Status: active — cleanup delivered, pending orchestrator review
+Status: active — cleanup complete; closeout next
 Posture: migration
 Opened: 2026-08-14
 Verdict: `g14.008` **rejected** the executable conformance mechanism
@@ -79,8 +79,8 @@ not build on rejected authority or projection wiring.
 19. [018 — Model connection web reference](018-model-connection-web-reference.md) — complete
 20. [019 — Model connection reference review](019-model-connection-reference-review.md) — complete; reference approved
 21. [020 — Model connection active-runtime completion](020-model-connection-active-runtime-completion.md) — blocked; rewrite after `021`
-22. [021 — Rejected pilot cleanup and evidence retention](021-experimental-cleanup-and-gate-consolidation.md) — delivered; pending orchestrator review
-23. [022 — Generation closeout](022-generation-closeout.md) — **next**, once `021` merges
+22. [021 — Rejected pilot cleanup and evidence retention](021-experimental-cleanup-and-gate-consolidation.md) — complete
+23. [022 — Generation closeout](022-generation-closeout.md) — **next**
 24. [024 — Batched AudioMeter web surface](024-batched-audio-meter-web-surface.md) — complete
 25. [025 — Preview catalogue taxonomy and generated navigation](025-preview-catalogue-taxonomy-and-generated-navigation.md) — complete
 26. [026 — Human-centred specimen catalogue audit](026-human-centred-specimen-catalogue-audit.md) — blocked pending `021`
@@ -92,17 +92,16 @@ to a fresh thread/worktree when its dependencies are met. Workers do not write
 `dispatch.md` or change roadmap status. The orchestrator reviews the PR,
 records evidence, merges, then opens the next file.
 
-`g14.021` is delivered and awaiting review. Nothing else dispatches until it
-merges: `017`, `020`, `022`, and `026` all depend on knowing what authority and
-test infrastructure survived, which is now recorded in `conformance-estate.md`
-and the g14.021 log.
+`g14.021` is complete. `017`, `020`, and `026` now have the surviving authority
+and test-infrastructure record they were waiting for. `022` closes the
+generation before those deferred lanes are rewritten or resumed.
 
 ## Current Task
 
-Review and merge `g14.021`, then dispatch `g14.022`. Two decisions carry
-forward to it: whether `.github/workflows/ci-conformance.yml` is renamed or
-deleted (a workflow edit needs explicit operator approval), and what execution
-method replaces the rejected pipeline for `017` and `020`.
+Dispatch `g14.022`. Two decisions carry forward to it: whether
+`.github/workflows/ci-conformance.yml` is renamed or deleted (a workflow edit
+needs explicit operator approval), and what execution method replaces the
+rejected pipeline for `017` and `020`.
 
 Local validation stays headless. Never run a `*-windowed` conformance
 selector.

@@ -87,7 +87,8 @@
 # plane, no primitive certification, and no six-profile cross-runtime claim
 # exists any more. What survived is the headless GPUI execution the pilot
 # paid for, and the defects it caught now have owners beside the code they
-# belong to (`docs/logs/2026-08/16-g14-021-experimental-cleanup.md`).
+# belong to
+# (`docs/logs/2026-08/16-g14-021-experimental-cleanup-and-gate-consolidation.md`).
 #
 # This board is exactly that residue: the small set of native regressions
 # that only appear once a `poodle-node` tree is mounted in a real GPUI window
