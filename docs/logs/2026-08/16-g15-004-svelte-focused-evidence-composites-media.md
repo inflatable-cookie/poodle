@@ -110,7 +110,7 @@ Representative load-bearing cases per family (full list lives in the files):
   preview, custom renderer, Bold wrap insertion.
 - **Batch C**: CardRadioGroup radiogroup semantics, checked dot, roving
   tabindex, arrow-key navigation over enabled items; CardToggleGroup
-  aria-pressed, deactivation clearing to null, reselect re-emission; 
+  aria-pressed, deactivation clearing to null, reselect re-emission;
   CommandPalette modal dialog, query reporting, option selection, no-results
   status copy, Escape/close/Enter flows, invocation hint; ConfirmAction
   trigger-to-confirm/cancel, custom trigger, danger tone derivation;

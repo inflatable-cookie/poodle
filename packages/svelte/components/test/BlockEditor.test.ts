@@ -22,7 +22,7 @@ describe("BlockEditor (svelte)", () => {
     const root = container.querySelector(".poodle-block-editor") as HTMLElement;
     expect(root.getAttribute("aria-label")).toBe("Page blocks");
 
-    const groups = [...container.querySelectorAll(".poodle-block-editor__block")];
+    const groups = [...container.querySelectorAll(".poodle-block-editor__block")] as HTMLElement[];
     expect(groups.length).toBe(2);
     expect(groups[0].getAttribute("aria-label")).toBe("text block");
     expect(groups[0].dataset.type).toBe("text");
@@ -30,7 +30,9 @@ describe("BlockEditor (svelte)", () => {
 
   it("falls back to a textarea renderer when no block snippet is given", () => {
     const { container } = render(BlockEditor, { props: { blocks, blockTypes } });
-    const textareas = [...container.querySelectorAll("textarea.poodle-block-editor__input")];
+    const textareas = [
+      ...container.querySelectorAll("textarea.poodle-block-editor__input"),
+    ] as HTMLTextAreaElement[];
     expect(textareas.length).toBe(2);
     expect(textareas[0].value).toBe("First");
   });
@@ -50,7 +52,9 @@ describe("BlockEditor (svelte)", () => {
     const onChange = vi.fn();
     const { container } = render(BlockEditor, { props: { blocks, blockTypes, onChange } });
 
-    const moveUpFirst = [...container.querySelectorAll('button[aria-label="Move up"]')][0];
+    const moveUpFirst = [
+      ...container.querySelectorAll('button[aria-label="Move up"]'),
+    ][0] as HTMLButtonElement;
     expect(moveUpFirst.disabled).toBe(true);
 
     const moveDownFirst = [...container.querySelectorAll('button[aria-label="Move down"]')][0] as HTMLButtonElement;
@@ -59,7 +63,9 @@ describe("BlockEditor (svelte)", () => {
     const afterMove = onChange.mock.calls[0][0] as EditorBlock[];
     expect(afterMove.map((block) => block.id)).toEqual(["b2", "b1"]);
 
-    const moveDownLast = [...container.querySelectorAll('button[aria-label="Move down"]')][1];
+    const moveDownLast = [
+      ...container.querySelectorAll('button[aria-label="Move down"]'),
+    ][1] as HTMLButtonElement;
     expect(moveDownLast.disabled).toBe(true);
   });
 

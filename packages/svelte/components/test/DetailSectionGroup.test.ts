@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import DetailSectionGroup from "../src/DetailSectionGroup.svelte";
 import { asSnippet } from "./snippet";
+import DetailSectionGroupHarness from "./DetailSectionGroupHarness.svelte";
 
 describe("DetailSectionGroup (svelte)", () => {
   it("projects layout and max-columns data attributes", () => {
@@ -29,6 +30,21 @@ describe("DetailSectionGroup (svelte)", () => {
     });
     const root = container.querySelector(".poodle-detail-section-group") as HTMLElement;
     expect(root.getAttribute("aria-label")).toBe("Record groups");
+  });
+
+  it("renders child content into the grid", () => {
+    // Compiled child content is asserted through the harness: raw test thunks
+    // materialize as comment nodes under happy-dom.
+    const { container } = render(DetailSectionGroupHarness, {
+      props: { layout: "stack", maxColumns: 3 },
+    });
+    const grid = container.querySelector(
+      ".poodle-detail-section-group__grid",
+    ) as HTMLElement;
+    const children = [...grid.querySelectorAll(".harness-child")];
+    expect(children.length).toBe(2);
+    expect((children[0] as HTMLElement).textContent).toContain("Project details");
+    expect((children[1] as HTMLElement).textContent).toContain("Billing");
   });
 
   it("renders children into the grid", () => {

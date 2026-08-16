@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import InlineListSection from "../src/InlineListSection.svelte";
 import { asSnippet } from "./snippet";
+import InlineListSectionHarness from "./InlineListSectionHarness.svelte";
 
 const versions = [
   { id: "v1", label: "abc123" },
@@ -10,19 +11,20 @@ const versions = [
 ];
 
 describe("InlineListSection (svelte)", () => {
-  it("renders the titled section with items via the item snippet", () => {
-    const { container } = render(InlineListSection, {
-      props: {
-        title: "Versions",
-        items: versions,
-        item: asSnippet((entry: { label: string }) => `<span>${entry.label}</span>`),
-      },
+  it("renders the titled section with item content via the item snippet", () => {
+    // Compiled snippet content is asserted through the harness: raw test
+    // thunks materialize as comment nodes under happy-dom.
+    const { container } = render(InlineListSectionHarness, {
+      props: { title: "Versions", items: versions },
     });
     const section = container.querySelector(".poodle-inline-list-section") as HTMLElement;
     expect(section.getAttribute("aria-label")).toBe("Versions");
     const heading = section.querySelector("h4") as HTMLElement;
     expect(heading.textContent).toBe("Versions");
-    expect(section.querySelectorAll(".poodle-inline-list-section__item").length).toBe(2);
+    const rendered = [...section.querySelectorAll(".harness-version")].map(
+      (el) => el.textContent,
+    );
+    expect(rendered).toEqual(["abc123", "def456"]);
   });
 
   it("wraps the section in a card when framed and drops it when not", () => {

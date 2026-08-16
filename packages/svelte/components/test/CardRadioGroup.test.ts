@@ -27,7 +27,9 @@ describe("CardRadioGroup (svelte)", () => {
 
   it("shows the indicator dot on the checked option only", () => {
     const { container } = render(CardRadioGroup, { props: { items, value: "pro" } });
-    const indicators = [...container.querySelectorAll(".poodle-card-radio-group__indicator")];
+    const indicators = [
+      ...container.querySelectorAll(".poodle-card-radio-group__indicator"),
+    ] as HTMLElement[];
     expect(indicators[0].dataset.checked).toBe("false");
     expect(indicators[1].dataset.checked).toBe("true");
     expect(indicators[1].querySelector(".poodle-card-radio-group__dot")).not.toBeNull();

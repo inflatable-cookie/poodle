@@ -3,10 +3,10 @@ import { writable } from "svelte/store";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import ToastHost from "../src/ToastHost.svelte";
-import type { ToastHostStore } from "../src/types";
+import type { ToastHostStore, ToastHostStoreItem } from "../src/types";
 
-function makeStore(initial: Parameters<typeof writable>[0] = []) {
-  const store = writable(initial);
+function makeStore(initial: ToastHostStoreItem[] = []) {
+  const store = writable<ToastHostStoreItem[]>(initial);
   const hostStore: ToastHostStore = {
     toasts: store,
     dismiss: (id) =>
@@ -54,8 +54,8 @@ describe("ToastHost (svelte)", () => {
   it("auto-dismisses non-sticky toasts after the configured delay", async () => {
     vi.useFakeTimers();
     const { store, hostStore } = makeStore([
-      { id: "t1", title: "Saved", tone: "success" },
-      { id: "t2", title: "Deploy failed", tone: "danger" },
+      { id: "t1", title: "Saved", message: "Done.", tone: "success" },
+      { id: "t2", title: "Deploy failed", message: "Boom.", tone: "danger" },
     ]);
     render(ToastHost, { props: { store: hostStore, autoDismissMs: 100 } });
 
@@ -70,7 +70,7 @@ describe("ToastHost (svelte)", () => {
   it("keeps sticky toasts until explicitly dismissed", async () => {
     vi.useFakeTimers();
     const { store, hostStore } = makeStore([
-      { id: "t1", title: "Sticky", tone: "warning", sticky: true },
+      { id: "t1", title: "Sticky", message: "Sticky.", tone: "warning", sticky: true },
     ]);
     render(ToastHost, { props: { store: hostStore, autoDismissMs: 100 } });
     await vi.advanceTimersByTimeAsync(300);
@@ -84,7 +84,7 @@ describe("ToastHost (svelte)", () => {
   it("dismisses through the store and reports onDismiss", async () => {
     const onDismiss = vi.fn();
     const { hostStore } = makeStore([
-      { id: "t1", title: "Saved", tone: "success" },
+      { id: "t1", title: "Saved", message: "Done.", tone: "success" },
     ]);
     const { container } = render(ToastHost, { props: { store: hostStore, onDismiss } });
     await waitFor(() => {
@@ -101,7 +101,7 @@ describe("ToastHost (svelte)", () => {
   it("forwards the action callback from the toast action button", async () => {
     const onAction = vi.fn();
     const { hostStore } = makeStore([
-      { id: "t1", title: "New version", actionLabel: "Update", tone: "info" },
+      { id: "t1", title: "New version", message: "v2.1", actionLabel: "Update", tone: "info" },
     ]);
     const { container } = render(ToastHost, { props: { store: hostStore, onAction } });
     await waitFor(() => {

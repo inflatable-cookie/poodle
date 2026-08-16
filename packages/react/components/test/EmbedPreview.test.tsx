@@ -1,10 +1,25 @@
 import { render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { EmbedPreview } from "../src/EmbedPreview";
 
 const youtube = { provider: "youtube", id: "dQw4w9WgXcQ" };
 const vimeo = { provider: "vimeo", id: "76979871", embedType: "video" as const };
+
+// happy-dom loads iframe pages for real; the embed cases would emit fetch
+// NetworkError/AbortError noise. The fetch interceptor answers every iframe
+// request with an empty 204, keeping the suites hermetic while the URL and
+// sandbox assertions still run.
+beforeEach(() => {
+  const settings = (
+    window as unknown as { happyDOM?: { settings?: { fetch?: { interceptor?: unknown } } } }
+  ).happyDOM?.settings;
+  if (settings?.fetch) {
+    settings.fetch.interceptor = {
+      beforeAsyncRequest: async () => new Response("", { status: 204 }),
+    };
+  }
+});
 
 describe("EmbedPreview (react)", () => {
   it("shows the loading state before any other state", () => {
