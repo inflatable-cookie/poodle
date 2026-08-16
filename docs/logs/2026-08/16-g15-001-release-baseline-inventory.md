@@ -1,6 +1,6 @@
 # g15.001 — Release-baseline roster inventory
 
-Status: complete — PR #<pending>
+Status: complete — PR #24
 Date: 2026-08-16
 Card: `docs/roadmaps/g15/001-release-baseline-roster-inventory.md`
 Governing refs: `docs/roadmaps/g15/001-release-baseline-roster-inventory.md`,
