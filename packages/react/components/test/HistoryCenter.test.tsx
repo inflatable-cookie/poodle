@@ -1290,6 +1290,30 @@ describe("HistoryCenter (react)", () => {
     expect(screen.getByText("Authority unreachable")).toBeTruthy();
   });
 
+  // g14.007 retained regression: the status row only rendered on the empty
+  // branch, so a history that loaded entries and then failed to load more
+  // showed nothing — no message, no spinner, a list that quietly stopped
+  // growing. Both web shells carried it.
+  it("still reports loading and failed status when rows are already listed", () => {
+    const { unmount } = render(<HistoryCenter pages={twoForkPages} status="loading" defaultOpen />);
+
+    expect(document.querySelectorAll("[data-row-kind]").length).toBeGreaterThan(0);
+    expect(screen.getByText("Loading history…")).toBeTruthy();
+
+    unmount();
+    render(
+      <HistoryCenter
+        pages={twoForkPages}
+        status="failed"
+        statusMessage="Authority unreachable"
+        defaultOpen
+      />,
+    );
+
+    expect(document.querySelectorAll("[data-row-kind]").length).toBeGreaterThan(0);
+    expect(screen.getByText("Authority unreachable")).toBeTruthy();
+  });
+
   it("exposes depth to assistive tech through aria-level on every row", () => {
     const { rerender } = render(<HistoryCenter pages={singleForkPages} defaultOpen />);
 

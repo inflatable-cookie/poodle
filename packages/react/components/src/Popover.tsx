@@ -1,8 +1,4 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import type {
-  PopoverPortableEvents,
-  PopoverPortableProps,
-} from "@inflatable-cookie/poodle-core/conformance";
 import {
   createInstanceId,
   getFocusableElements,
@@ -19,20 +15,32 @@ import "@inflatable-cookie/poodle-core/styles/popover.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
 import { reactifyPart } from "./parts";
+import type { OverlayPlacement, PopoverInitialFocus } from "./types";
 
 /**
- * Portable props and events come from the conformance interface authority
- * (`packages/core/src/conformance/popover.ts`): renaming a portable prop or
- * event there fails this interface. `triggerIsInteractive` and
- * `onSurfaceGeometryChange` are documented web-only extensions kept beside
- * this adapter.
+ * The contracted Popover surface. `trigger` and the content take React nodes;
+ * `triggerIsInteractive` and `onSurfaceGeometryChange` are documented web-only
+ * extensions kept beside this adapter.
+ *
+ * Contract: `docs/contracts/components/popover.md`. The Svelte pair is
+ * `packages/svelte/components/src/Popover.svelte`; the Rust counterpart is
+ * `poodle_specs::PopoverSpec`.
  */
-type Portable = PopoverPortableProps;
-type PortableEvents = PopoverPortableEvents;
-
-export interface PopoverProps extends Partial<Portable> {
+export interface PopoverProps {
+  open?: boolean | null;
+  defaultOpen?: boolean;
+  placement?: OverlayPlacement;
+  offset?: number;
+  dismissOnOutsideInteract?: boolean;
+  initialFocus?: PopoverInitialFocus;
+  ariaLabel?: string | null;
+  block?: boolean;
+  disabled?: boolean;
+  surfaceWidth?: "content" | "trigger";
+  surfaceMinWidth?: string | null;
+  surfaceMaxWidth?: string | null;
   triggerIsInteractive?: boolean;
-  onOpenChange?: PortableEvents["openChange"];
+  onOpenChange?: (open: boolean) => void;
   onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler;
   trigger?: ReactNode;
   children?: ReactNode;

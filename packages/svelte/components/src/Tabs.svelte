@@ -12,11 +12,6 @@
     type TabsContext as HeadlessTabsContext,
     type TabsEvent as HeadlessTabsEvent,
   } from "@inflatable-cookie/poodle-core";
-  import type {
-    TabsPortableEvents,
-    TabsPortableProps,
-  } from "@inflatable-cookie/poodle-core/conformance/tabs";
-
   import { anchored } from "./anchored";
   import { default as Button } from "./Button.svelte";
   import { default as Icon } from "./Icon.svelte";
@@ -35,12 +30,36 @@
   } from "./presentation";
 
   import type {
+    ControlDensity,
+    ControlSize,
+    Orientation,
+    SemanticControlSizeRole,
     TabItem,
   } from "./types";
 
-  interface Props extends Partial<Omit<TabsPortableProps, "items">> {
+  /**
+   * The contracted Tabs surface. `items` takes the framework's `TabItem`
+   * shape; everything else is the contract's own vocabulary.
+   *
+   * Contract: `docs/contracts/components/tabs.md`. The Rust counterpart is
+   * `poodle_specs::TabsSpec`.
+   */
+  interface Props {
+    value?: string | null;
     defaultValue?: string | null;
     items?: TabItem[];
+    variant?: "card" | "pill" | "block";
+    activeEdge?: "none" | "outline" | "underline";
+    activeFill?: "none" | "tint" | "solid";
+    orientation?: Orientation;
+    activationMode?: "automatic" | "manual";
+    bordered?: boolean;
+    fullWidth?: boolean;
+    reorderable?: boolean;
+    ariaLabel?: string | null;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
     /**
      * Selection edge on the active tab: `"none"` draws no edge, `"outline"`
      * draws the accent border around the active item (the former `card`
@@ -73,7 +92,7 @@
     collapseLabel?: string | null;
     showTooltips?: boolean;
     historyKey?: string | null;
-    onValueChange?: TabsPortableEvents["valueChange"] | undefined;
+    onValueChange?: ((value: string) => void) | undefined;
     onReorder?: ((items: string[]) => void) | undefined;
     onClose?: ((value: string) => void) | undefined;
     onDragPrepare?: ((value: string, event: PointerEvent) => void) | undefined;

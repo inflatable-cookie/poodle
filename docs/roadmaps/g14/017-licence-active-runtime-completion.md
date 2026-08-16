@@ -47,6 +47,34 @@ admission.
 - [ ] Land or cite the Longhorn-owned bridge assertion comparing both public
       field-map surfaces.
 
+## Surviving Native Infrastructure (recorded by `g14.021`)
+
+Recorded, not designed. `g14.021` removed the pipeline this card's plan
+assumes; what a rewrite can actually build on is:
+
+- `poodle-render` — the shared native composition tier. One implementation per
+  component, interpreted by the GPUI and Jetstream backends. Unchanged, and
+  still where native component work belongs.
+- `poodle-specs` — hand-written Rust declarations again. No codegen step, no
+  interface JSON, no byte-exact authority check.
+- `packages/gpui/preview/src/headless_driver.rs` — the in-memory GPUI test
+  platform: mount a `poodle-node` tree, drive real pointer/key/drag input
+  through the real dispatch tree, read real backend focus. No OS window, no
+  focus theft, ~0.05s. Exercised by `tests/headless_regressions.rs` through
+  `effigy regressions:native`.
+- `effigy test:native-visual` — pixel compare/refresh with `--control-size`.
+  Local-only; needs a window.
+- The existing drift gates (`docs:spec-drift`, `drift:roles`, `drift:events`,
+  `drift:handlers`) — each covers one projection, none proves completion.
+
+What does **not** exist any more: portable interface modules, typed case
+corpora, normalized observation, the primitive capability report, the
+cross-runtime comparator, and `conformance:complete`. Every acceptance
+criterion and plan step above that names one of them needs restating before
+this card is dispatchable.
+
+`g14.022` decides the replacement execution method. Do not design it here.
+
 ## Acceptance Criteria
 
 - [ ] All g14.015 semantic/copy/privacy acceptance cases pass the active cohort.

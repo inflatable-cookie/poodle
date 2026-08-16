@@ -21,7 +21,6 @@ mod json_common;
 pub mod catalogue_rust;
 pub mod catalogue_ts;
 pub mod conformance;
-pub mod conformance_rust;
 pub mod docs;
 pub mod json;
 pub mod machine_rust;

@@ -1,443 +1,111 @@
 # g14 Conformance Estate
 
-Status: historical pilot record — rejected by `g14.008`
-Measured: 2026-08-15
+Status: retained-estate ledger — pilot rejected by `g14.008`, removed by `g14.021`
+Updated: 2026-08-16
 Owner: Poodle orchestrator
 
-## Verdict
+## What this is
 
-The g14 executable conformance mechanism is rejected. The authoritative
-evidence and every surface disposition live in
-`008-pilot-verdict.md`. Sections below preserve the sequence of the pilot; a
-provisional `keep` statement is not standing authority. `g14.021` owns the
-cleanup.
+The g14 executable conformance mechanism is rejected and gone. This page is
+the short ledger of what survived it and where each thing lives now.
 
-## Problem Baseline
+Authoritative documents:
 
-Poodle has no component-level gate that proves the same portable interface,
-executable fixture, behaviour, and semantic output across the active Svelte,
-React, and GPUI cohort while preserving a renderer-neutral Rust boundary.
-Catalogue specimen structure is a separate human-facing documentation concern.
+- verdict and rule-by-rule evidence: `008-pilot-verdict.md`
+- defect ledger, deleted inventory, retained selectors:
+  `../../logs/2026-08/16-g14-021-experimental-cleanup-and-gate-consolidation.md`
+- rejected design records, kept for traceability:
+  `../../architecture/009-cross-runtime-component-conformance.md`,
+  `../../specs/066-executable-component-conformance.md`
+- the pilot's own delivery logs, `g14.001`–`g14.007`, unchanged
 
-The previous frozen baseline measured:
+A provisional `keep` in an old log is not standing authority. Nothing below
+claims cross-runtime parity.
 
-- 168 Svelte component files
-- 16 GPUI and 17 Jetstream registration gaps; 18-component union
-- 21 name-mapped TS/Rust vector pairs, but only four canonical transition
-  machines in both languages
-- approximately 86k lines of hand-written specimen code across four runtimes
-- 14 drift gates, each covering one projection rather than component
-  completion
+## Retained estate
 
-Those figures are point-in-time evidence, not a completion denominator. The
-g14.001 executable roster is now established from source: the Button corpus
-(`packages/core/src/conformance/button-cases.ts`) enumerates 20 cases across
-the three active runtimes, executed by the opt-in
-`effigy conformance:complete` selector.
+| Surface | Where it lives |
+| --- | --- |
+| Component, renderer, node, focus, input, overlay, and accessibility fixes | shipped; unchanged by the cleanup |
+| Headless GPUI test platform — in-memory, no window, no focus theft | `packages/gpui/preview/src/headless_driver.rs` |
+| Native regressions only a mounted window can prove | `packages/gpui/preview/tests/headless_regressions.rs`, via `effigy regressions:native` |
+| Every product/backend defect the pilot caught | named owners in the g14.021 log's defect ledger |
+| Hand-written Rust declarations | `poodle_specs::{ButtonSpec, PopoverSpec, TextInputSpec, HistoryCenterSpec, TabsSpec, RangeSliderSpec}` |
+| Curated Svelte, React, and GPUI specimens | unchanged; audited under `g14.026` |
+| Native visual compare/refresh and `--control-size` | `effigy test:native-visual` |
 
-## Current Gates And Holes
+## Removed estate
 
-| Claim | Current evidence | Silent hole |
-| --- | --- | --- |
-| Svelte props match contracts | `docs:contract-drift` | React, Rust, composition regions, portable methods |
-| value domains align | `docs:value-domain-drift` | report-only by default; currently 19 disagreements and 10 unresolved types under enforcement |
-| callbacks match contracts | `docs:callback-drift` | React and native event shape/timing |
-| Rust specs match contracts | `docs:spec-drift` | behaviour, defaults interpreted by renderer, web implementation |
-| native roles appear | `drift:roles` | placement, state, accessible name, GPUI evidence |
-| native has a handler | `drift:events` / `drift:handlers` | correct handler, payload, timing, actual backend action |
-| machine names have vectors | `docs:machine-shape-drift` | vector depth and equal output; currently fails after generated imports |
-| React specimen registered | `docs:react-specimen-drift` | specimen content and GPUI |
-| capability declaration has a trace | `docs:capability-drift` | undeclared capability vocabulary and actual parity |
-| visual baselines exist | web and native snapshot tools | shared fixture identity; stale GPUI captures; Jetstream overwrite workflow |
-| **Button completes the conformance kernel** | `ci:conformance` (20 cases × Svelte, React, GPUI, all headless) | profile pilots 2–6 |
+Portable interface modules, typed case corpora, generated interface/case/roster
+JSON, generated Rust declarations, the conformance codegen parser and Rust
+target, Svelte/React corpus hosts and adapters, GPUI corpus adapters and
+fixture support, the normalized observation comparator and its manual component
+registries, the primitive capability roster/probes/report, the corpus
+projection, the cost script, the planted-failure suite, and every
+`conformance:*` selector except the workflow-compatible `ci:conformance` alias.
 
-Operator ruling, 2026-08-14: the foreground GPUI proof is not acceptable as a
-normal worker validation path. Local invocation is now hard-guarded; g14.023
-migrates the same backend execution and observations onto GPUI's in-memory test
-platform before the remaining profiles continue. Landed 2026-08-15:
-`conformance:complete` and `ci:conformance` execute the full cohort headless
-in any local worktree, and the AppKit activation/calibration/retry path is
-deleted.
+Full path inventory is in the g14.021 log.
 
-`docs:check` currently stays green while the machine-shape selector is red.
-`check:svelte` currently has three `AppHeaderCenterHarness.svelte` Snippet
-identity errors. These failures predate the redesigned runway; g14.001
-recorded them as baseline (they are untouched by this card).
+## Standing gates
 
-## Conformance Kernel Status (g14.001)
+No gate claims component completion across runtimes. What exists:
 
-One portable interface + one typed case corpus → Svelte / React / GPUI
-execution → normalized observations → one failing completion gate (spec 066,
-architecture 009, active-cohort working rules). Curated catalogue specimens
-remain a separate documentation surface; an exhaustive projection may later
-appear in a dedicated `Conformance` tab.
-Delivered for Button:
+| Claim | Gate |
+| --- | --- |
+| Svelte props match contracts | `docs:contract-drift` |
+| value domains align | `docs:value-domain-drift` (report-only by default) |
+| callbacks match contracts | `docs:callback-drift` |
+| Rust specs match contracts | `docs:spec-drift` |
+| native roles appear | `drift:roles` |
+| native has a handler | `drift:events` / `drift:handlers` |
+| machine names have vectors | `docs:machine-shape-drift` |
+| React specimen registered | `docs:react-specimen-drift` |
+| capability declarations trace to source | `docs:capability-drift` |
+| visual baselines exist | `test:native-visual`, web snapshot tools |
+| component behaviour, per runtime | `check:svelte`, `react:build`, the component test boards, `cargo test -p poodle-render`, `regressions:native` |
 
-- **Portable interface module** — `packages/core/src/conformance/button.ts`.
-  The single authority: `defineComponentInterface` takes a `const` generic
-  and mapped types derive portable props, events, part ids, states, token
-  roles, and axes — no hand-written type mirror exists anywhere. Svelte and
-  React bind their shells to the derived types (`satisfies`-checked carrier
-  names, `PortableEventsOf` key access), so a rename fails the shells.
-- **Typed case corpus** — `packages/core/src/conformance/button-cases.ts`
-  (20 cases), authored through `componentCase(buttonInterface, ...)`:
-  fixture props, regions, parts, states, events, token roles, axes, and
-  enum values are closed over the interface at authoring time, re-validated
-  by the serializer, and validated again by the Rust codegen against the
-  interface JSON. Unknown names are errors, never ignored. Nullable props
-  stay `Option` in generated Rust — absence is `None`/`null` on both
-  surfaces, pinned by the `default-pressed-toggle` case.
-- **Generated Rust declaration** — `packages/contracts/components/src/generated/button/mod.rs`
-  replaces the hand-written `ButtonSpec` struct/default/builders; the token
-  recipes live in the extension module beside it.
-- **Runtime harnesses** — web runners (Svelte + React, real DOM + real
-  events + real CSS geometry), GPUI runner (GPUI 0.2.2's in-memory test
-  platform: TestAppContext / VisualTestContext / TestWindow, real backend
-  focus through the node-backend's focus registry, real Enter key
-  activation through the window's dispatch tree).
-- **Observation** — `component-observation.v1` per runtime, data-driven from
-  the interface's part descriptors and observation rules. No component
-  identifier, class name, icon name, or part list lives in shared runner or
-  observer code. Token roles travel on the `poodle-node` `roles` channel
-  the renderer stamps; roles are read from `a11y.role`; labels through
-  `Node::intrinsic_text()`. Icon identity is observed and asserted on all
-  three runtimes through the web `data-icon` channels and the native Icon
-  nodes. The orchestrator compares the normalized observations
-  field-for-field (shape + value), not just asserted fields.
-- **Strict verdicts** — `pass`/`fail` only. A required field a runtime
-  cannot observe fails that runtime's case, naming runtime/case/step/field
-  and the reason; no cross-runtime "someone exercised it" vacuity exists.
-- **Standing enforcement** — `docs:check` and `ci:web` carry read-only
-  authority checks and web execution. A dedicated path-scoped macOS PR
-  workflow runs `ci:conformance`, including full GPUI execution and
-  normalized comparison. `qa`, `ci:conformance`, and `ci:native` are all
-  headless.
-- **Catalogue correction** — g14 initially replaced all three active Button
-  specimen pages with corpus projections. Commit `8ac863b4` restored the last
-  curated pages. The corpus remains executable harness authority, not the
-  catalogue's teaching structure.
-- **Completion** — `effigy conformance:complete` passes
-  the active cohort and reports Jetstream program-deferred, never passing.
-  Removing the GPUI registration fails completion; an inert backend binding
-  fails the executed cases. Planted-failure tests cover an inert listener,
-  a wrong focus target, a missing selected state, and broken drag/keyboard
-  event order (g14.023).
+Each still covers one projection. That is the honest state: the hole
+`g14.001`'s problem baseline described is open, and closing it needs a
+different architecture than the one that was tried.
 
-### Defects the corpus caught (fixed, not waived)
-
-- GPUI double-activation: the node-backend bound Enter/Space `on_key_down`
-  while gpui itself synthesizes Enter/Space KeyUp → click on focused
-  clickable elements — one Enter fired the handler twice. The redundant
-  binding is removed; the click binding is the single activation path.
-- Native never projected `aria-pressed`/`aria-expanded`/focus-visible:
-  `poodle-render::button` now sets `a11y.toggled`, `a11y.expanded`, and a
-  focus style, and stamps token roles.
-
-### Recorded native gaps (not required Button cases)
-
-- `fit`, `truncate`, `max_width` are declared portable but `poodle-render`
-  does not consume them (web-only behaviour today). Tracked for `g14.014`.
-- Keyboard activation on web: happy-dom implements no browser default
-  actions, so the web harness performs the browser default (keydown then
-  click); GPUI proves the real keyboard confirm path.
-
-### Driver notes (recorded, not architecture)
-
-- The headless GPUI driver (g14.023) runs on the in-memory test platform and
-  takes no OS focus. Every draw invalidates the mount view so paint-time
-  backend observations are deterministic, and all input goes through
-  `TestWindow`'s real dispatch callback (hit testing, focus chain,
-  listeners). The legacy AppKit activation, click calibration, first-click
-  retry, and foreground opt-in plumbing are deleted.
-
-### Cost ruling
-
-The final exhaustive report records 4,522 source LOC plus 33,392 bytes of
-generated JSON:
-
-- generic kernel: 2,947 LOC
-- Button pilot increment: 1,575 LOC, including 1,052 LOC of Button harness
-- replaced Button declaration plus the temporary specimen projection delta:
-  619 LOC. Curated specimen deletion no longer counts as pilot savings.
-
-The stop condition is triggered. The orchestrator accepted `g14.001` as a
-feasibility proof, not a rollout verdict. Cards `002`–`007` reused the pilot
-harness; `008` later rejected adoption.
-
-## Primitive Substrate Status (g14.002)
-
-Finite typed roster → web / render-neutral / GPUI probes →
-`primitive-capability-report.v1` → completion rejects missing owned evidence.
-
-- **Authority** — `packages/core/src/conformance/primitives.ts`. Component
-  capability names validate against the roster at interface authoring.
-- **Report** — `effigy conformance:primitives-report` emits the machine gate
-  and Markdown matrix. Jetstream is program-deferred outside rows. GPUI
-  mounted accessibility is contract-003 forced-acceptance outside passing
-  rows.
-- **Probes** — shared headless GPUI driver; hand-built node fixtures (not a
-  public dummy component); web fixtures + Button cases through the existing
-  adapters.
-- **Legacy capability tooling** — `capabilities.json` + `capability-drift.ts`
-  adapted as non-passing debt evidence. `timers` retired from the primitive
-  roster.
-- **Native visual** — compare is read-only; refresh preserves
-  `*.previous.png` and writes a refresh manifest; `--control-size` is live
-  end to end.
-
-See `docs/logs/2026-08/14-g14-002-primitive-substrate-certification.md`.
-
-## Controlled-control Status (g14.003)
-
-RangeSlider proves a controlled two-part value through the same kernel:
-
-- **Authority** — `range-slider.ts` + 10 typed cases; scrub/key/value vocabulary
-  stays generic (no RangeSlider-specific runner branches).
-- **Execution** — Svelte / React / GPUI all green; compare covers button +
-  range-slider corpora (30 cases × 3 runtimes).
-- **Native** — dual identified thumbs, keyboard, scrub Release; GPUI scrub uses
-  captured `on_drag_move` for real out-of-bounds drags plus the mouse-move
-  fallback on the headless platform.
-- **Specimens** — the three curated RangeSlider pages remain documentation;
-  exhaustive cases execute through the conformance harness and may later gain
-  a separate diagnostic projection under g14.026.
-- **Disposition** — two-thumb claims live in RangeSlider cases; single-value
-  `slider` vectors remain. Jetstream stays program-deferred.
-- **Known boundary** — `RangeSliderSpec.law` is a structured
-  `AudioValueLaw`, outside the pilot's scalar/number-pair interface vocabulary.
-  The profile does not claim full interface replacement until g14.010 rules on
-  structured portable values.
-
-See `docs/logs/2026-08/14-g14-003-range-slider-controlled-control-proof.md`.
-
-## Identified-collection Status (g14.004)
-
-Tabs extends the kernel from fixed parts to ordered, semantically identified
-collections:
-
-- **Authority** — `tabs.ts` + 9 typed cases; `items` is a structured collection
-  and repeated trigger/panel parts resolve as `<part>:<item.value>`, independent
-  of fixture order.
-- **Execution** — Svelte / React / GPUI run controlled selection, disabled
-  items, horizontal/vertical arrows, wrap, Home/End, automatic/manual
-  activation, focus, relationships, events, token roles, and bounded geometry.
-- **Native focus boundary** — stable per-instance runtime ids isolate GPUI
-  focus handles without changing portable semantic ids or relationships;
-  renderer key effects return focus targets, GPUI executes them, and roving
-  `tab_index` reaches real GPUI tab stops. The conformance driver no longer
-  completes focus after key dispatch.
-- **Generic vocabulary** — collection prop fields, repeated parts, keyed web
-  resolution, native id templates, selected/tabbable/orientation/controls/
-  labelled-by observations. The runners contain no Tabs component branch or
-  second item corpus.
-- **Specimens** — the three curated Tabs pages retain explicit examples for
-  supported behavior. Web keeps overflow and close/reorder operator evidence;
-  GPUI keeps observable close and residual presentation examples, without
-  claiming unsupported native reorder or overflow behavior. Exhaustive cases
-  stay in the conformance harness and may later gain a separate diagnostic
-  projection under g14.026.
-- **Cost** — 1,126 LOC Tabs pilot increment and 23,010 bytes of Tabs fixture JSON.
-- **Residual surfaces** — `TabsSpec` remains because overflow, history,
-  close/reorder, tooltips, and host actions are outside this bounded profile.
-  Headless Tabs vectors remain for close/reorder claims not replaced here.
-- **Deferred runtime** — Jetstream remains program-deferred.
-
-See `docs/logs/2026-08/14-g14-004-tabs-collection-navigation-proof.md`.
-
-## Overlay Profile Status (g14.005)
-
-Popover extends the kernel from controls and collections to the first overlay
-profile: real layer registration, dismissal routes, placement families, focus
-entry and restoration, and the overlay capability rows.
-
-- **Authority** — `popover.ts` + 23 typed cases. One generated `PopoverSpec`
-  replaces the hand-written declaration; the extension keeps the token
-  recipes and derived queries. The web extensions (`triggerIsInteractive`,
-  `onSurfaceGeometryChange`) stay beside the adapters and never enter the
-  portable surface.
-- **Generic vocabulary** — the `dismiss` and inside/outside `pointer`
-  actions, part `parent`/`overlay`/`expanded`/`focusedText`/`layerCount`
-  observations, relative logical-bounds geometry (`topGap` … `widthGap`
-  against an interface-declared `relativeTo` anchor), the `part-present`
-  state rule, and opaque `host` fixture data for the nested-layer proof.
-  None of it mentions Popover; later overlay profiles reuse it.
-- **Execution** — Svelte, React, and GPUI all run the same corpus headless:
-  uncontrolled pointer/keyboard open, controlled ownership, disabled
-  inertness, all three focus strategies, every close path (trigger, Escape,
-  outside) with trigger focus restoration, the outside guard, the nested
-  dismiss-stack contract (innermost-first Escape and ancestry-spared outside
-  dismissal), placement families and the start/end rule, offset,
-  trigger-width bounds, the rem width-bound override, and
-  semantics/token evidence.
-- **Native** — the renderer composition owns trigger, surface, placement,
-  accessibility metadata, token roles, and the layer/dismiss intent; the
-  node-backend's generic overlay host rebuilds the layer registry at the
-  host's render-frame boundary (not per converted component), records
-  rendered bounds, applies machine focus effects through a paint-time focus
-  queue, and routes Escape (innermost) and outside pointers (containment +
-  ancestry) through the real event tree via a reusable `attach_overlay_host`
-  used by the production preview root and the conformance mount host alike.
-  The preview specimen renders through the same shared composition with
-  per-instance ids and its own machine-driven dismissal and focus.
-- **Capability rows** — `overlay.intent`, `semantic.expanded`,
-  `overlay.dismiss`, and `overlay.layer` are executed on every active layer
-  (web, render-neutral, GPUI) and join the gated owned rows in the primitive
-  report.
-- **Defects caught** — the corpus surfaced two shipped web defects: the
-  nested overlay registration order (the inner layer registered before the
-  outer, so Escape dismissed the outer first) and the controlled host's
-  programmatic open while disabled (the surface rendered despite the
-  machine's guard). Both repaired in the Svelte and React shells.
-- **Planted failures** — inert Escape, inert outside dismissal, wrong
-  initial-focus target, missing focus restore, reversed nested-layer
-  dismissal, absent overlay/layer evidence, and wrong placement offset each
-  fail the expected runtime/case/step/field.
-- **Vector disposition** — the four Popover machine vectors are deleted;
-  their claims are covered by the mounted corpus, and the machine itself is
-  exercised by both web runtimes and the Rust mirror through the corpus.
-- **Cost** — the Popover pilot increment and fixture JSON are reported by
-  `effigy conformance:cost` (23 cases).
-
-See `docs/logs/2026-08/14-g14-005-popover-overlay-focus-proof.md`.
-
-## Input Profile Status (g14.006)
-
-TextInput is the first input profile: real typing, selection, IME commit, and
-the places DOM and GPUI legitimately differ, behind a portable action and
-observation boundary.
-
-- **Authority** — `text-input.ts` + 18 typed cases. One generated
-  `TextInputSpec` replaces the hand-written declaration; the extension keeps
-  token recipes, `current_value`, selection helpers, and `with_input_type` /
-  `with_focused` aliases. Native caret and residual compat fields generate
-  into the Rust spec so existing hosts compile; they are not in
-  `PortablePropsOf`. Web-html attributes never enter Rust.
-- **Generic vocabulary** — `insert` / `select` / `compose` actions, string
-  `value` plus `selectionStart` / `selectionEnd` observations. Runners have
-  no TextInput identifier. Web insert is one `input` event (happy-dom has no
-  keydown→input default). GPUI insert is per-character `on_edit_key`; the
-  adapter records one `valueChange` per insert action. IME start/update
-  buffer; commit is the single insert.
-- **Execution** — Svelte, React, and GPUI run controlled/uncontrolled value,
-  typing, selection replace, disabled/read-only inertness, focus, submit,
-  cancel, type-then-submit order, search clear (`valueChange` then `clear`),
-  affixes, adornment icons, char count, validation chrome, and IME commit.
-- **Native** — root is `Node::input` (control is the same node). The observer
-  projects wrapper identity onto root when another `self` part shares the
-  node. IME lives in the node-backend (`MARKED` + composing string); paint
-  splices preview; `replace_text_in_range` / `on_edit_insert` is the single
-  commit.
-- **Capability rows** — `input.value`, `input.editing`, `input.ime` execute
-  on web, render-neutral, and GPUI and join the gated owned rows.
-- **Planted failures** — dropped edit, dropped selection, dropped IME
-  commit, and submit-before-valueChange each fail the expected
-  runtime/case/step/field.
-- **Specimens** — curated TextInput pages stay; they are not the corpus.
-- **Deferred runtime** — Jetstream remains program-deferred.
-- **Cost** — 1,863 LOC TextInput pilot increment and 33,146 bytes of
-  TextInput fixture JSON.
-
-See `docs/logs/2026-08/14-g14-006-text-input-runtime-boundary-proof.md`.
-
-## Composite Profile Status (g14.007)
-
-HistoryCenter is the first host-coordinated composite: the component owns no
-history, validates no protocol rule, and decides nothing about undo. Data
-arrives as `pages`, every operation leaves as a named command, and the answer
-comes back as host-supplied records.
-
-- **Authority** — `history-center.ts` + 23 typed cases. One generated
-  `HistoryCenterSpec`; the record shapes are structural mirrors of the
-  authority's, and no Longhorn type reaches Poodle.
-- **Generic vocabulary** — nested collection fields, repeat sources spanning
-  several record channels, declared host record channels, command payload
-  expectations, and `level` / `scrollable` / `maxHeight` observation. None of
-  it mentions HistoryCenter; the generic kernel grew 55 LOC in total.
-- **Execution** — Svelte, React and GPUI each run all 23 cases and pass.
-  Disclosure, selection, checkout, rename with Escape-cancel, roving focus,
-  nested forks to four levels, and command payload/order are all executed
-  through real interactions.
-- **Native** — the behaviour core (`poodle-headless::history_center`) holds the
-  flat visible-row derivation and the machine; `poodle-render::history_center`
-  composes the tree; the GPUI specimen drives it from the preview catalogue.
-- **Planted failures** — flattened hierarchy, wrong command payload,
-  unfocusable row, unbounded list, and an inert disclosure each fail.
-- **Capabilities** — no new primitive capability was needed. The composite is
-  built from rows the substrate already certifies.
-- **Cost** — 5,101 LOC pilot increment; see the log for the split.
-
-See `docs/logs/2026-08/15-g14-007-history-center-composite-proof.md`.
-
-## Experimental Surface Disposition (Historical Pre-verdict Record)
-
-No experimental surface is architecture merely because it merged. The final
-disposition in `008-pilot-verdict.md` supersedes this provisional table.
-
-| Surface | Provisional disposition | Deciding milestone |
-| --- | --- | --- |
-| RangeSlider native slider role | keep | done |
-| Rust component/scene IR shell artifacts | retire or isolate from active component path | g14.001 |
-| five generated display specimens | adapt fixture content into cases or retire | g14.001 / g14.009 |
-| Rust display specimen component definitions | retire; must not duplicate portable interface authority | g14.001 |
-| generated machine interfaces | adapt only if the kernel replaces declarations and fixes its standing gate | g14.001 |
-| machine vectors | adapt as case inputs where they prove component behaviour | profile pilots |
-| capability registry | adapt as debt/evidence; execution authority is primitive-capability-report.v1 | g14.002 |
-| prop/callback/spec drift scripts | consolidate behind component completion | g14.014 |
-| native registration and snapshot tooling | repair and feed completion evidence | g14.002 done / g14.014 |
-| stale specs 063–065 and old roadmap | archived/retired | done |
-| **g14.001 conformance kernel (typed interface, corpus, observers, GPUI runner)** | keep — the replacement-pass proof; profile pilots 2–6 reuse it | g14.010 |
-| **g14.002 primitive capability roster + report** | keep — substrate certification beneath profile pilots | g14.010 |
-| **g14.003 RangeSlider controlled-control proof** | keep — second profile pilot; reuses Button harness path | g14.010 |
-| **hand-written ButtonSpec declaration surface** | replaced by `generated/button/mod.rs` + extension module | done |
-| **curated Button specimens (3 active runtimes)** | restored; keep as documentation, audit under g14.026 | g14.026 |
-| **curated RangeSlider specimens (3 active runtimes)** | restored; keep as documentation, audit under g14.026 | g14.026 |
-| **g14.004 Tabs identified-collection proof** | keep — stable keyed repeated anatomy and navigation profile | g14.010 |
-| **g14.005 Popover overlay/focus proof** | keep — the first overlay profile: layer registry, dismissal routes, placement, focus entry/restore | g14.010 |
-| **g14.006 TextInput runtime-boundary proof** | keep — the first input profile: typing, selection, IME commit, portable vs DOM/GPUI mechanisms | g14.010 |
-| **g14.007 HistoryCenter composite proof** | keep — the first composite: host-coordinated commands, structured fixture data, hierarchy and scroll observation | g14.013 |
-| **hand-written TextInputSpec declaration surface** | replaced by `generated/text-input/mod.rs` + extension module | done |
-| **curated Tabs specimens (3 active runtimes)** | restored; retain useful overflow/reorder, close, decoration, panel, and scale examples, then audit under the human-centred rubric | g14.026 |
-| **hand-written TabsSpec + Tabs machine vectors** | retain residual overflow/history/close/reorder claims not replaced by g14.004 | g14.010 / g14.011 |
-| **generated specimen scenes (specimen-ts/rust targets)** | shell/nav support only; do not promote into a universal catalogue scene tree | g14.021 / g14.026 |
+`ci:conformance` is a legacy alias for `regressions:native`, kept because
+`.github/workflows/ci-conformance.yml` calls that name. `g14.022` rules on
+whether renaming it is worth the operator approval a workflow edit needs.
 
 ## Staged Licence Intake
 
-The licence surface enters through a bounded web-reference tranche while the
-conformance kernel is still under proof. Web delivery is not completion.
+Web delivery is not completion.
 
-| Component | Web reference | Review | Native/shared cases | Completion state |
-| --- | --- | --- | --- | --- |
-| `LicenceStatus` | g14.015 landed | g14.016 | replan after g14.021 | incomplete |
-| `LicenceActivation` | g14.015 landed | g14.016 | replan after g14.021 | incomplete |
-| `LicenceSeats` | g14.015 landed | g14.016 | replan after g14.021 | incomplete |
+| Component | Web reference | Review | Native completion |
+| --- | --- | --- | --- |
+| `LicenceStatus` | g14.015 landed | g14.016 | g14.017, replanned after g14.021 |
+| `LicenceActivation` | g14.015 landed | g14.016 | g14.017, replanned after g14.021 |
+| `LicenceSeats` | g14.015 landed | g14.016 | g14.017, replanned after g14.021 |
 
-`LicenceCentre` is an explicit non-goal. The downstream comparison between
-Poodle's structural field mirrors and Longhorn's generated field maps remains
-Longhorn-owned; g14.015 exports the Poodle side but cannot claim that gate.
-Jetstream is program-deferred rather than a per-component known delta.
+`LicenceCentre` is an explicit non-goal. The comparison between Poodle's
+structural field mirrors and Longhorn's generated field maps stays
+Longhorn-owned. Jetstream is program-deferred.
 
 ## Staged Model-Connection Intake
 
-The model-connection suite enters through the same bounded web-reference
-posture. Poodle owns presentation and interaction only; Nucleus and Swallowtail
-remain external authorities.
+Same posture. Poodle owns presentation and interaction only; Nucleus and
+Swallowtail remain external authorities.
 
-| Component | Web reference | Review | Native/shared cases | Completion state |
-| --- | --- | --- | --- | --- |
-| `ModelConnectionPicker` | g14.018 | g14.019 | replan after g14.021 | incomplete |
-| `ModelConnectionSetup` | g14.018 | g14.019 | replan after g14.021 | incomplete |
-| `ModelConnectionCard` | g14.018 | g14.019 | replan after g14.021 | incomplete |
-| `ModelCatalogueEditor` | g14.018 | g14.019 | replan after g14.021 | incomplete |
+| Component | Web reference | Review | Native completion |
+| --- | --- | --- | --- |
+| `ModelConnectionPicker` | g14.018 | g14.019 | g14.020, replanned after g14.021 |
+| `ModelConnectionSetup` | g14.018 | g14.019 | g14.020, replanned after g14.021 |
+| `ModelConnectionCard` | g14.018 | g14.019 | g14.020, replanned after g14.021 |
+| `ModelCatalogueEditor` | g14.018 | g14.019 | g14.020, replanned after g14.021 |
 
-The existing `ModelPicker` stays the per-thread model/options control. No
-provider registry, route fallback, credential authority, provider schema, or
-model-default policy enters this intake. Jetstream remains program-deferred.
+`ModelPicker` stays the per-thread model/options control. No provider
+registry, route fallback, credential authority, provider schema, or
+model-default policy enters this intake.
 
 ## Cleanup Rule
 
 Every active claim ends with one canonical gate. A legacy gate may stay while
-coverage migrates, but it needs an owner and retirement condition. Generated
-artifacts stay out of hand-edited source roots where possible (the poodle-specs
-`generated/` module is generated and gated byte-exact). Known generated-source
-and god-file health findings are owned by g14.021 rather than normalized as
-permanent warnings.
+coverage migrates, but it needs an owner and a retirement condition. The g14
+pilot is the standing example of what happens when a mechanism accumulates
+component-specific registries in five places: one of them silently omitted a
+corpus and the completion board went green anyway.

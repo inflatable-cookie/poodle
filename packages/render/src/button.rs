@@ -650,6 +650,65 @@ mod tests {
             .is_some());
     }
 
+    /// g14.001 retained regression. Native Button projected no toggle state,
+    /// no disclosure state, and no focus-visible treatment, so a pressed
+    /// toggle, an open disclosure trigger, and a keyboard-focused control were
+    /// all indistinguishable from an idle one — on the backend and to
+    /// assistive technology alike. Absence stays absence: a non-toggle button
+    /// omits `toggled` exactly as the web omits `aria-pressed`.
+    #[test]
+    fn toggle_disclosure_and_focus_state_reach_the_accessibility_channel() {
+        let plain = button(&ButtonSpec::new().with_label("Save"), &theme(), None);
+        assert_eq!(plain.a11y.toggled, None);
+        assert_eq!(plain.a11y.expanded, None);
+        assert_eq!(plain.a11y.role, Some(poodle_node::NodeRole::Button));
+        // The focus-visible treatment is also the observation channel for the
+        // state, so a focusable control without one is unobservable.
+        assert!(plain.interaction.focusable);
+        assert!(plain.style.focus.is_some());
+
+        let pressed = button(
+            &ButtonSpec::new().with_label("Mute").with_pressed(true),
+            &theme(),
+            None,
+        );
+        assert_eq!(pressed.a11y.toggled, Some(poodle_node::NodeToggled::True));
+
+        let unpressed = button(
+            &ButtonSpec::new().with_label("Mute").with_pressed(false),
+            &theme(),
+            None,
+        );
+        assert_eq!(unpressed.a11y.toggled, Some(poodle_node::NodeToggled::False));
+
+        let disclosure = button(
+            &ButtonSpec::new().with_label("Details").with_aria_expanded(true),
+            &theme(),
+            None,
+        );
+        assert_eq!(disclosure.a11y.expanded, Some(true));
+    }
+
+    /// g14.001 retained regression: the semantic token roles the web projects
+    /// through `data-*` had no native counterpart, so nothing downstream could
+    /// tell a primary from a ghost without reading resolved pixels.
+    #[test]
+    fn semantic_token_roles_are_stamped_with_resolved_values() {
+        let spec = ButtonSpec::new()
+            .with_label("Save")
+            .with_variant(poodle_specs::ButtonVariant::Primary)
+            .with_size(ControlSize::Lg)
+            .with_density(ControlDensity::Compact);
+        let node = button(&spec, &theme(), None);
+
+        assert_eq!(node.roles.get("variant").map(String::as_str), Some("primary"));
+        assert_eq!(node.roles.get("tone").map(String::as_str), Some("default"));
+        // Resolved, not the declared base: the web pair reports the same.
+        assert_eq!(node.roles.get("size").map(String::as_str), Some("lg"));
+        assert_eq!(node.roles.get("density").map(String::as_str), Some("compact"));
+        assert_eq!(node.roles.get("fit").map(String::as_str), Some("default"));
+    }
+
     #[test]
     fn clicking_reports_through_the_handler() {
         use std::sync::Mutex;

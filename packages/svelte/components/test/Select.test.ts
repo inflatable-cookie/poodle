@@ -49,3 +49,21 @@ describe("Select (svelte) ghost variant", () => {
     expect(container.querySelector(".poodle-select__indicator-button")).not.toBeNull();
   });
 });
+
+/**
+ * g14.007 retained regression. An option identified only by
+ * `${listboxId}-option-${index}` cannot be addressed stably by anything — a
+ * consumer's test, an automation script, or a parity harness. `Tabs` already
+ * exposed `data-value`; `Select` and `Menu` now match it.
+ */
+describe("Select (svelte) option identity", () => {
+  it("addresses every option by its value", async () => {
+    const { container } = render(Select, { props: { options, native: false } });
+    await fireEvent.click(container.querySelector(".poodle-select__trigger") as HTMLElement);
+
+    const values = [...document.querySelectorAll('[role="option"]')].map((el) =>
+      el.getAttribute("data-value"),
+    );
+    expect(values).toEqual(["alpha", "beta"]);
+  });
+});

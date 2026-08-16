@@ -1,5 +1,5 @@
 import { createRef } from "react";
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { TextInput, type TextInputHandle } from "../src/TextInput";
@@ -44,5 +44,30 @@ describe("TextInput (react)", () => {
     const input = container.querySelector("input")!;
     ref.current?.focus();
     expect(document.activeElement).toBe(input);
+  });
+});
+
+/**
+ * g14.006 retained regression: clearing a search field is two portable
+ * signals in one order — the value change first, then the clear command. A
+ * host that reads only `clear` and a host that reads only `valueChange` both
+ * have to see the field empty.
+ */
+describe("TextInput (react) search clear", () => {
+  it("emits valueChange with the empty value before clear", () => {
+    const order: string[] = [];
+    const { container } = render(
+      <TextInput
+        id="search"
+        type="search"
+        value="kick"
+        onValueChange={(value) => order.push(`valueChange:${value}`)}
+        onClear={() => order.push("clear")}
+      />,
+    );
+
+    fireEvent.click(container.querySelector(".poodle-text-input__clear") as HTMLElement);
+
+    expect(order).toEqual(["valueChange:", "clear"]);
   });
 });

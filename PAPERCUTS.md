@@ -7,6 +7,19 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-16 — `icon_button` renders no focus patch, and the GPUI backend
+  creates a focus handle only for a focusable node that carries one. Every
+  IconButton is therefore unfocusable and unreachable by keyboard on native
+  unless its caller stamps a ring itself, which `poodle-render::history_center`
+  now does for undo, redo and the picker actions. Fix it in `icon_button` and
+  drop the per-composition workaround. Found by g14.007, retained by g14.021.
+
+- 2026-08-16 — `packages/core`'s `check` script still reports ~90 pre-existing
+  strict errors, and the narrow `conformance:typecheck` selector that cards
+  leaned on instead is gone with the rejected pilot (g14.021). New core modules
+  now have no type gate short of `check:svelte`. Fix the strict backlog or
+  scope the script to a passing config.
+
 - 2026-08-15 — `docs:check`'s recursive Markdown scan enters
   `packages/gpui/preview/target/`; when it runs beside Cargo, a temporary rmeta
   directory can disappear between `readdir` calls and fail docs lint with
@@ -28,8 +41,9 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 - 2026-08-14 — `packages/core`'s `check` script (`bun x tsc -p ./tsconfig.json`)
   reports ~90 pre-existing strict errors on main (history-center, color, tree,
   test fixtures), so it cannot serve as a green gate for new core modules.
-  Cards must rely on `conformance:typecheck`/`check:svelte` instead. Either fix
-  the strict backlog or scope the script to a passing config.
+  Cards relied on `conformance:typecheck`/`check:svelte` instead; the former is
+  gone (g14.021). Either fix the strict backlog or scope the script to a
+  passing config.
 
 - 2026-08-14 — `effigy docs:contract-drift` fails on main for Button's
   Svelte-only `children`, `leading`, and `trailing` props, while

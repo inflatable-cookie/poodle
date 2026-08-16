@@ -31,7 +31,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use poodle_codegen::{
-    catalogue, check_outputs, conformance, generate, load_and_validate, machine_interfaces, models,
+    catalogue, check_outputs, generate, load_and_validate, machine_interfaces, models,
     targets, write_outputs, CodegenError,
 };
 
@@ -68,14 +68,6 @@ fn usage() -> String {
                context types (spec 064 mechanism 1). Not an IrModel; the\n\
                machine targets are select-only.\n\
      \n\
-     usage: poodle-codegen --conformance <INTERFACE> --cases <CORPUS> --out <DIR> --target conformance-rust [--check]\n\
-     \n\
-     --conformance  serialized portable interface (spec 066), authored in\n\
-               TypeScript and emitted as JSON by the conformance serializer.\n\
-               `conformance-rust` renders the portable declaration into the\n\
-               consuming crate's generated tree. Select-only, like the\n\
-               machine targets.\n\
-     \n\
      usage: poodle-codegen --catalogue <FILE> --out <DIR> --target <catalogue-ts|catalogue-rust> [--check]\n\
      \n\
      --catalogue  renderer-neutral preview catalogue manifest. Not an IrModel;\n\
@@ -90,8 +82,6 @@ struct Args {
     author_specimens: Option<PathBuf>,
     machine_interfaces: Option<PathBuf>,
     catalogue: Option<PathBuf>,
-    conformance_interface: Option<PathBuf>,
-    conformance_cases: Option<PathBuf>,
     target: Option<String>,
     check: bool,
 }
@@ -102,8 +92,6 @@ fn parse_args() -> Result<Args, String> {
     let mut author_specimens = None;
     let mut machine_interfaces = None;
     let mut catalogue = None;
-    let mut conformance_interface = None;
-    let mut conformance_cases = None;
     let mut target = None;
     let mut check = false;
     let mut positional = Vec::new();
@@ -141,18 +129,6 @@ fn parse_args() -> Result<Args, String> {
                         .ok_or("--catalogue requires a manifest path")?,
                 ));
             }
-            "--conformance" => {
-                conformance_interface = Some(PathBuf::from(
-                    args.next()
-                        .ok_or("--conformance requires an interface path")?,
-                ));
-            }
-            "--cases" => {
-                conformance_cases = Some(PathBuf::from(
-                    args.next()
-                        .ok_or("--cases requires a corpus path")?,
-                ));
-            }
             "--target" => {
                 target = Some(
                     args.next()
@@ -168,16 +144,14 @@ fn parse_args() -> Result<Args, String> {
     let author_mode = author_shell.is_some() || author_specimens.is_some();
     let machine_mode = machine_interfaces.is_some();
     let catalogue_mode = catalogue.is_some();
-    let conformance_mode = conformance_interface.is_some() || conformance_cases.is_some();
-
-    if [conformance_mode, author_mode, machine_mode, catalogue_mode]
+    if [author_mode, machine_mode, catalogue_mode]
         .iter()
         .filter(|flag| **flag)
         .count()
         > 1
     {
         return Err(
-            "run --catalogue, --conformance, --author-*, and --machine-interfaces separately"
+            "run --catalogue, --author-*, and --machine-interfaces separately"
                 .to_owned(),
         );
     }
@@ -210,8 +184,6 @@ fn parse_args() -> Result<Args, String> {
             author_specimens: None,
             machine_interfaces: None,
             catalogue,
-            conformance_interface: None,
-            conformance_cases: None,
             target,
             check,
         });
@@ -247,52 +219,6 @@ fn parse_args() -> Result<Args, String> {
             author_specimens: None,
             machine_interfaces,
             catalogue: None,
-            conformance_interface: None,
-            conformance_cases: None,
-            target,
-            check,
-        });
-    }
-
-    if conformance_mode {
-        let (interface, cases) = match (conformance_interface, conformance_cases) {
-            (Some(interface), Some(cases)) => (interface, cases),
-            _ => {
-                return Err(
-                    "--conformance requires both --conformance <interface> and --cases <corpus>"
-                        .to_owned(),
-                );
-            }
-        };
-        if !positional.is_empty() {
-            return Err("conformance mode takes no positional FIXTURE argument".to_owned());
-        }
-        if out.is_none() {
-            return Err("--out is required with --conformance".to_owned());
-        }
-        match target.as_deref() {
-            Some(targets::conformance_rust::ID) => {}
-            Some(id) => {
-                return Err(format!(
-                    "conformance --target must be conformance-rust, not '{id}'"
-                ));
-            }
-            None => {
-                return Err(
-                    "--target is required with --conformance (conformance-rust)"
-                        .to_owned(),
-                );
-            }
-        }
-        return Ok(Args {
-            fixture: None,
-            out,
-            author_shell: None,
-            author_specimens: None,
-            machine_interfaces: None,
-            catalogue: None,
-            conformance_interface: Some(interface),
-            conformance_cases: Some(cases),
             target,
             check,
         });
@@ -329,8 +255,6 @@ fn parse_args() -> Result<Args, String> {
         author_specimens,
         machine_interfaces,
         catalogue: None,
-        conformance_interface: None,
-        conformance_cases: None,
         target,
         check,
     })
@@ -358,9 +282,6 @@ fn run(args: &Args) -> Result<(), CodegenError> {
     }
     if let Some(manifest) = &args.catalogue {
         return run_catalogue(manifest, args);
-    }
-    if let (Some(interface), Some(cases)) = (&args.conformance_interface, &args.conformance_cases) {
-        return run_conformance(interface, cases, args);
     }
     run_emit(
         args.fixture.as_ref().expect("emit mode carries a fixture"),
@@ -475,64 +396,6 @@ fn run_catalogue(manifest: &Path, args: &Args) -> Result<(), CodegenError> {
             "Generated {} files (target: {target_id}, catalogue schema {}).",
             files.len(),
             document.schema_version
-        );
-    }
-    Ok(())
-}
-
-/// Conformance mode (spec 066): renders the portable declaration into a
-/// consuming crate (`conformance-rust`). Same check/write split as the other
-/// modes; `--check` never writes.
-fn run_conformance(
-    interface_path: &Path,
-    cases_path: &Path,
-    args: &Args,
-) -> Result<(), CodegenError> {
-    let interface = conformance::load_interface(interface_path)?;
-    let cases = conformance::load_cases(cases_path)?;
-    conformance::validate_cases(&interface, &cases)?;
-    let source_path = interface_path.to_string_lossy().into_owned();
-    let target_id = args
-        .target
-        .as_deref()
-        .expect("parse requires --target in conformance mode");
-    let (files, output_root) = match target_id {
-        targets::conformance_rust::ID => (
-            targets::conformance_rust::render(&interface, &source_path)?,
-            targets::conformance_rust::OUTPUT_ROOT,
-        ),
-        other => {
-            return Err(CodegenError::UnknownTarget {
-                id: other.to_owned(),
-                known: vec![targets::conformance_rust::ID.to_owned()],
-            });
-        }
-    };
-    let out = args.out.as_ref().expect("parse requires --out");
-    let root = out.join(output_root);
-
-    if args.check {
-        let report = check_outputs(&root, &files)?;
-        if !report.is_clean() {
-            return Err(CodegenError::Gate {
-                message: format!(
-                    "generated conformance artifacts are stale under {} (target {target_id}):\n{}",
-                    root.display(),
-                    report.message()
-                ),
-            });
-        }
-        println!(
-            "Verified {} files (target: {target_id}, interface {}).",
-            files.len(),
-            interface.id
-        );
-    } else {
-        write_outputs(&root, &files)?;
-        println!(
-            "Generated {} files (target: {target_id}, interface {}).",
-            files.len(),
-            interface.id
         );
     }
     Ok(())

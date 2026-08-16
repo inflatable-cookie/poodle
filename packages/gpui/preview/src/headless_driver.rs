@@ -1,22 +1,23 @@
-//! Generic headless GPUI conformance driver (spec 066, g14.023).
+//! Generic headless GPUI test driver (g14.023, retained by g14.021).
 //!
 //! Reusable mount, frame, focus, pointer, drag, and keyboard machinery for
-//! component cases and primitive substrate probes on GPUI 0.2.2's in-memory
-//! test platform (`TestAppContext`, `VisualTestContext`, `TestWindow`).
-//! No component identifier, part list, or case corpus lives here.
+//! native regressions on GPUI 0.2.2's in-memory test platform
+//! (`TestAppContext`, `VisualTestContext`, `TestWindow`). No component
+//! identifier, part list, or fixture corpus lives here.
 //!
 //! All input goes through GPUI's real dispatch tree: mouse events are
 //! hit-tested against the rendered frame, keys walk the focus chain, and the
 //! node backend's listeners are the ones that react. No component handler is
 //! ever invoked as a test shortcut, and no OS window is created or activated.
+//!
+//! This is infrastructure the rejected conformance pilot paid for and
+//! `g14.008` ruled worth keeping. It is not a parity architecture: it mounts a
+//! `poodle-node` tree and drives real input at it.
 
-use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 use gpui::*;
 use poodle_node::Node;
-use poodle_render::primitive_probes::ProbeEvidence;
-use serde_json::{json, Value};
 
 /// Content coordinates of the fixed-size box mounted nodes are centered in.
 pub const MOUNT_BOX_LEFT: f32 = 32.0;
@@ -32,27 +33,27 @@ pub fn mount_box_center() -> Point<Pixels> {
 }
 
 /// The root view: a fixed-size, center-aligned box containing the current
-/// node. The root carries its own focus handle so cases can blur whatever the
+/// node. The root carries its own focus handle so tests can blur whatever the
 /// backend holds.
-pub struct ConformanceRoot {
+pub struct HeadlessRoot {
     pub node: Arc<Mutex<Node>>,
     pub focus: FocusHandle,
 }
 
-impl Focusable for ConformanceRoot {
+impl Focusable for HeadlessRoot {
     fn focus_handle(&self, _cx: &App) -> FocusHandle {
         self.focus.clone()
     }
 }
 
-impl Render for ConformanceRoot {
+impl Render for HeadlessRoot {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         let node = self.node.lock().expect("node lock").clone();
         // The window-level overlay host: every pointer press and Escape is
         // routed through the node backend's layer registry (generic — no
         // component identifier here), so overlay dismissal executes through
         // the real event tree. The production preview root uses the same
-        // wiring.
+        // wiring, so dismissal behaves identically here and in the real app.
         poodle_gpui_node_backend::attach_overlay_host(
             div()
                 .size_full()
@@ -82,7 +83,7 @@ impl Render for ConformanceRoot {
 /// by a draw before input is simulated.
 pub struct HeadlessDriver<'a> {
     cx: &'a mut VisualTestContext,
-    root: Entity<ConformanceRoot>,
+    root: Entity<HeadlessRoot>,
     root_focus: FocusHandle,
 }
 
@@ -90,7 +91,7 @@ impl<'a> HeadlessDriver<'a> {
     /// Mount the given node into a fresh test-platform window.
     pub fn new(cx: &'a mut TestAppContext, node: Arc<Mutex<Node>>) -> Self {
         let (root, cx) = cx.add_window_view(|window, cx| {
-            let root = ConformanceRoot {
+            let root = HeadlessRoot {
                 node: Arc::clone(&node),
                 focus: cx.focus_handle(),
             };
@@ -281,8 +282,7 @@ impl<'a> HeadlessDriver<'a> {
     }
 
     /// Send one named keystroke (key down + key up) without moving focus —
-    /// the event tree resolves the focus target itself. Used by planted
-    /// failures to prove a wrong focus target stays inert.
+    /// the event tree resolves the focus target itself.
     ///
     /// An unfocused window — or a focus handle from a previous mount — has an
     /// empty or stale dispatch path, so window-level key handling (Escape →
@@ -297,8 +297,8 @@ impl<'a> HeadlessDriver<'a> {
     }
 
     /// The keystroke half of [`Self::dispatch_key`], with focus untouched —
-    /// callers that already focused the target (keyboard activation, tabs
-    /// navigation) use this so the mount host never steals focus.
+    /// callers that already focused the target use this so the mount host
+    /// never steals focus.
     pub fn dispatch_key_raw(&mut self, key: &str) {
         let keystroke = Keystroke::parse(key).expect("keystroke parses");
         self.cx.simulate_event(KeyDownEvent {
@@ -308,47 +308,5 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.simulate_event(KeyUpEvent { keystroke });
         self.cx.run_until_parked();
         self.draw_frame();
-    }
-
-    /// Key down without the paired key up — the planted event-order defect.
-    pub fn dispatch_key_down_only(&mut self, key: &str) {
-        let keystroke = Keystroke::parse(key).expect("keystroke parses");
-        self.cx.simulate_event(KeyDownEvent {
-            keystroke,
-            is_held: false,
-        });
-        self.cx.run_until_parked();
-        self.draw_frame();
-    }
-}
-
-// ── Report helpers ─────────────────────────────────────────────────────────
-
-pub fn primitive_evidence_report(probes: &[ProbeEvidence]) -> Value {
-    json!({
-        "schema": "primitive-probe-evidence.v1",
-        "runtime": "gpui",
-        "probes": probes,
-    })
-}
-
-pub fn write_or_print_report(out: Option<&PathBuf>, report: &Value) {
-    match out {
-        Some(path) => {
-            if let Some(parent) = path.parent() {
-                std::fs::create_dir_all(parent).expect("report parent directory creates");
-            }
-            std::fs::write(
-                path,
-                serde_json::to_string_pretty(report).expect("report serializes"),
-            )
-            .expect("report writes");
-        }
-        None => {
-            println!(
-                "{}",
-                serde_json::to_string_pretty(report).expect("report serializes")
-            );
-        }
     }
 }

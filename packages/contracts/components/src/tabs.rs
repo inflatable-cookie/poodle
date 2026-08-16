@@ -153,28 +153,6 @@ impl Default for TabsSpec {
     }
 }
 
-impl From<crate::generated::tabs::TabsPortableSpec> for TabsSpec {
-    fn from(portable: crate::generated::tabs::TabsPortableSpec) -> Self {
-        Self {
-            tabs: portable.tabs,
-            value: portable.value,
-            variant: portable.variant,
-            active_edge: portable.active_edge,
-            active_fill: portable.active_fill,
-            orientation: portable.orientation,
-            activation_mode: portable.activation_mode,
-            aria_label: portable.aria_label,
-            is_reorderable: portable.is_reorderable,
-            is_bordered: portable.is_bordered,
-            is_full_width: portable.is_full_width,
-            size: portable.size.unwrap_or_default(),
-            size_role: portable.size_role,
-            density: portable.density.unwrap_or_default(),
-            ..Self::default()
-        }
-    }
-}
-
 impl TabsSpec {
     pub fn new(tabs: Vec<TabDefinition>) -> Self {
         Self {

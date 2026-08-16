@@ -691,6 +691,30 @@ mod tests {
         assert_eq!(node.a11y.role, Some(NodeRole::Group));
     }
 
+    /// g14.004 retained regression. The embedded controls declared no
+    /// orientation, so a vertical fader announced itself as a horizontal
+    /// slider and arrow-key expectations were unstated. Found through Tabs,
+    /// which embeds them; fixed where it belongs.
+    #[test]
+    fn embedded_thumbs_announce_their_orientation() {
+        for orientation in [
+            poodle_specs::Orientation::Horizontal,
+            poodle_specs::Orientation::Vertical,
+        ] {
+            let embedded = spec()
+                .with_embedded_control(poodle_specs::SliderPolarity::Unipolar)
+                .with_orientation(orientation);
+            let node = range_slider(&embedded, &theme(), RangeSliderHandlers::default());
+            let expected = format!("{orientation:?}").to_ascii_lowercase();
+            for id in ["range-slider-lower", "range-slider-upper"] {
+                let thumb = node
+                    .find(&|n| n.id.as_deref() == Some(id))
+                    .unwrap_or_else(|| panic!("{id} exists"));
+                assert_eq!(thumb.a11y.orientation.as_deref(), Some(expected.as_str()));
+            }
+        }
+    }
+
     #[test]
     fn unnamed_controls_still_name_their_thumbs() {
         let node = range_slider(&spec(), &theme(), RangeSliderHandlers::default());

@@ -80,74 +80,26 @@
       { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --catalogue packages/codegen/fixtures/preview-catalogue.json --out packages/jetstream/preview/src --target catalogue-rust --check" },
     ]
 
-    # Conformance kernel (g14.001, spec 066): the Button proof loop — portable
-# interface + typed case corpus -> three active runtimes -> component-observation.v1
-# -> one completion gate. The authority lives in TypeScript
-# (packages/core/src/conformance/); `conformance:build` serializes it to the
-# neutral JSON fixtures and generates the Rust declaration surface; `*:check`
-# twins are read-only and gate the tree. Gates may only reach `*:check` and
-# the test/compare selectors — write-mode generation is never composed into
-# a gate (the 45caae82 lesson).
-"conformance:serialize" = "bun packages/core/scripts/conformance-serialize.ts"
-"conformance:serialize-check" = "bun packages/core/scripts/conformance-serialize.ts --check"
-"conformance:codegen" = [
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/contracts/components/src --target conformance-rust" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/tabs-interface.json --cases packages/codegen/fixtures/conformance/tabs-cases.json --out packages/contracts/components/src --target conformance-rust" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/popover-interface.json --cases packages/codegen/fixtures/conformance/popover-cases.json --out packages/contracts/components/src --target conformance-rust" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/text-input-interface.json --cases packages/codegen/fixtures/conformance/text-input-cases.json --out packages/contracts/components/src --target conformance-rust" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/history-center-interface.json --cases packages/codegen/fixtures/conformance/history-center-cases.json --out packages/contracts/components/src --target conformance-rust" },
-]
-"conformance:codegen-check" = [
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/button-interface.json --cases packages/codegen/fixtures/conformance/button-cases.json --out packages/contracts/components/src --target conformance-rust --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/tabs-interface.json --cases packages/codegen/fixtures/conformance/tabs-cases.json --out packages/contracts/components/src --target conformance-rust --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/popover-interface.json --cases packages/codegen/fixtures/conformance/popover-cases.json --out packages/contracts/components/src --target conformance-rust --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/text-input-interface.json --cases packages/codegen/fixtures/conformance/text-input-cases.json --out packages/contracts/components/src --target conformance-rust --check" },
-  { run = "cargo run --quiet --manifest-path packages/codegen/Cargo.toml --bin poodle-codegen -- --conformance packages/codegen/fixtures/conformance/history-center-interface.json --cases packages/codegen/fixtures/conformance/history-center-cases.json --out packages/contracts/components/src --target conformance-rust --check" },
-]
-"conformance:build" = [
-  { task = "conformance:serialize" },
-  { task = "conformance:codegen" },
-]
-# Read-only enforcement surface: fixture + generated artifact drift + type
-# gate. Runs inside docs:check and ci:web. The executed GPUI proof is the
-# in-memory test-platform board (`conformance:test-gpui`), safe everywhere.
-"conformance:check" = [
-  { task = "conformance:serialize-check" },
-  { task = "conformance:codegen-check" },
-  { task = "conformance:typecheck" },
-]
-# The typed authority must type-check: Bun strips types at runtime, so a
-# green execution run with a broken schema is not evidence. Narrow — only
-# the conformance source files, so unrelated core baseline errors never
-# gate this check.
-"conformance:typecheck" = "bunx tsc --noEmit --ignoreConfig packages/core/src/conformance/define.ts packages/core/src/conformance/primitives.ts packages/core/src/conformance/button.ts packages/core/src/conformance/button-cases.ts packages/core/src/conformance/range-slider.ts packages/core/src/conformance/range-slider-cases.ts packages/core/src/conformance/tabs.ts packages/core/src/conformance/tabs-cases.ts packages/core/src/conformance/popover.ts packages/core/src/conformance/popover-cases.ts packages/core/src/conformance/text-input.ts packages/core/src/conformance/text-input-cases.ts packages/core/src/conformance/history-center.ts packages/core/src/conformance/history-center-cases.ts packages/core/src/conformance/project.ts --strict --skipLibCheck --moduleResolution bundler --module esnext --target es2022"
-"conformance:test-web" = "bunx vitest run --project conformance"
-# HEADLESS GPUI board (g14.023): the complete active cohort runs on GPUI's
-# in-memory test platform (TestAppContext / VisualTestContext / TestWindow)
-# through the real render/backend/event tree. No OS window, no focus, safe in
-# an ordinary local session. Writes the reports the comparator reads.
-"conformance:test-gpui" = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test conformance_headless"
-"conformance:test-primitives-rust" = "cargo test --quiet --manifest-path packages/render/Cargo.toml primitive_probes::tests"
-"conformance:primitives-report" = "bun packages/core/scripts/primitive-capability-report.ts"
-"conformance:test" = [
-  { task = "conformance:test-web" },
-  { task = "conformance:test-gpui" },
-]
-"conformance:compare" = "bun test/conformance/compare.ts"
-# The active-cohort completion gate: authority, web, renderer-neutral Rust,
-# and full GPUI execution, all headless. Jetstream is program-deferred
-# (working rules).
-"conformance:complete" = [
-  { task = "conformance:check" },
-  { task = "conformance:test-web" },
-  { task = "conformance:test-gpui" },
-  { task = "conformance:test-primitives-rust" },
-  { task = "conformance:compare" },
-  { task = "conformance:primitives-report" },
-]
-"conformance:cost" = "bun packages/core/scripts/conformance-cost.ts"
-# Stable CI entrypoint: the headless complete board, locally and in CI alike.
-"ci:conformance" = [{ task = "conformance:complete" }]
+    # Focused native regression board (g14.021).
+#
+# The g14 executable-conformance pilot was REJECTED by g14.008: no portable
+# interface authority, no shared case corpus, no normalized observation
+# plane, no primitive certification, and no six-profile cross-runtime claim
+# exists any more. What survived is the headless GPUI execution the pilot
+# paid for, and the defects it caught now have owners beside the code they
+# belong to (`docs/logs/2026-08/16-g14-021-experimental-cleanup.md`).
+#
+# This board is exactly that residue: the small set of native regressions
+# that only appear once a `poodle-node` tree is mounted in a real GPUI window
+# and driven with real input. It proves nothing about Svelte, React, or
+# cross-runtime parity — those live on `check:svelte`, `react:build`, and the
+# component test boards.
+"regressions:native" = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions"
+# Workflow-compatible entrypoint. `.github/workflows/` still calls
+# `effigy ci:conformance`; g14.022 decides whether renaming it is worth the
+# operator approval a workflow edit needs. The name is legacy — the scope is
+# the focused native regression board above and nothing more.
+"ci:conformance" = [{ task = "regressions:native" }]
 
 # Preview (documentation site)
 "svelte:build" = "bun run --cwd packages/svelte/preview build"
@@ -412,12 +364,6 @@
   { task = "docs:lint" },
   { task = "docs:react-specimen-drift" },
   { task = "docs:capability-drift" },
-  # Conformance kernel (g14.001): read-only authority drift + type gate +
-  # web execution. Full GPUI execution runs headless on `conformance:complete`.
-  { task = "conformance:serialize-check" },
-  { task = "conformance:codegen-check" },
-  { task = "conformance:typecheck" },
-  { task = "conformance:test-web" },
   { task = "react:docs" },
   { task = "report:parity" },
   { task = "report:accessibility" },
@@ -457,9 +403,9 @@
   { task = "check:gpui" },
   { task = "gpui:test" },
   { task = "test:jetstream-adapter" },
-  # The conformance kernel's GPUI execution is headless (g14.023): the real
-  # in-memory test-platform board runs here without a window or focus.
-  { task = "conformance:test-gpui" },
+  # Focused native regressions on GPUI's in-memory test platform (g14.023,
+  # retained by g14.021): no window, no focus, no OS activation.
+  { task = "regressions:native" },
 ]
 
 # Paired-repository Jetstream admission board. The preview, accessibility
@@ -484,12 +430,6 @@
   { task = "drift:recipes" },
   { task = "svelte:surface-audit" },
   { task = "docs:lint" },
-  # Conformance kernel (g14.001): read-only authority drift + type gate +
-  # web execution. Full GPUI execution runs headless on `conformance:complete`.
-  { task = "conformance:serialize-check" },
-  { task = "conformance:codegen-check" },
-  { task = "conformance:typecheck" },
-  { task = "conformance:test-web" },
   { task = "react:docs" },
   { task = "report:parity" },
   { task = "report:accessibility" },

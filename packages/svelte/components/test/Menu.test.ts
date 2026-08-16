@@ -37,3 +37,16 @@ describe("Menu (svelte) dismissOnOutsideInteract", () => {
     expect(surfaceOf()).not.toBeNull();
   });
 });
+
+/** g14.007 retained regression — see the Select pair for the claim. */
+describe("Menu (svelte) item identity", () => {
+  it("addresses every item by its value", async () => {
+    const { container } = render(Menu, { props: { items } });
+    await fireEvent.click(container.querySelector(".poodle-menu__trigger") as HTMLElement);
+
+    const values = [...document.querySelectorAll('[role="menuitem"]')].map((el) =>
+      el.getAttribute("data-value"),
+    );
+    expect(values).toEqual(["rename", "delete"]);
+  });
+});

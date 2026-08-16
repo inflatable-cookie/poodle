@@ -1,7 +1,7 @@
 # 066 Executable Component Conformance
 
-Status: rejected — `g14.008`
-Updated: 2026-08-15
+Status: rejected — `g14.008`; machinery removed by `g14.021`
+Updated: 2026-08-16
 Owner: Poodle core
 Depends on: `../architecture/009-cross-runtime-component-conformance.md`,
 `../contracts/001-working-rules.md`
@@ -15,7 +15,10 @@ replaced. HistoryCenter was absent from the comparator; adding it produces
 revised because fixing every failed dimension would define a new system.
 
 This spec remains historical evidence. Do not add components, fields, cases,
-or adapters to it. Cleanup and retained-test disposition live in `g14.021`.
+or adapters to it. `g14.021` deleted every surface it defines; the retained
+estate and the defect ledger are in
+`../roadmaps/g14/conformance-estate.md` and
+`../logs/2026-08/16-g14-021-experimental-cleanup-and-gate-consolidation.md`.
 
 ## Purpose
 

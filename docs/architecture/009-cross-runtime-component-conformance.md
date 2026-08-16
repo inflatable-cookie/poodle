@@ -1,7 +1,7 @@
 # 009 Cross-Runtime Component Conformance
 
-Status: rejected as standing architecture — `g14.008`
-Updated: 2026-08-15
+Status: rejected as standing architecture — `g14.008`; machinery removed by `g14.021`
+Updated: 2026-08-16
 Owner: Poodle core
 Depends on: `001-poodle-system-shape.md`,
 `../contracts/001-working-rules.md`
@@ -16,9 +16,13 @@ backend-named shared probes also violated this decision's boundaries.
 
 Poodle still requires semantic parity and dependable component construction.
 This document records the rejected approach; it is not authority for new
-components or rollout. `g14.021` removes the pilot machinery while retaining
-component fixes and focused regressions. A replacement architecture needs a
-fresh decision after cleanup.
+components or rollout. `g14.021` removed the pilot machinery, keeping the
+component fixes, the defects it caught (now owned by focused tests), and the
+headless GPUI test platform — see
+`../roadmaps/g14/conformance-estate.md` and
+`../logs/2026-08/16-g14-021-experimental-cleanup-and-gate-consolidation.md`.
+Nothing described below exists in the tree any more. A replacement
+architecture needs a fresh decision.
 
 ## Decision
 
