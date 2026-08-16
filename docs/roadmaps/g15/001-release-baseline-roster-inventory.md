@@ -1,6 +1,6 @@
 # g15.001 — Release-Baseline Roster Inventory
 
-Status: ready for dispatch
+Status: complete — accepted in PR #24
 Depends on: `g14.022` (closeout), `g14.021` (cleanup evidence)
 Governing refs: `../g14/022-generation-closeout.md`,
 `../g14/conformance-estate.md`, `../../contracts/001-working-rules.md`,
