@@ -4,7 +4,11 @@ import { describe, expect, it, vi } from "vitest";
 import { defaultLucideIconSet } from "@inflatable-cookie/poodle-core/icons";
 import "@inflatable-cookie/poodle-core/styles/licence.css";
 import "@inflatable-cookie/poodle-core/styles/model-connection.css";
-import type { LicenceKeyFormat, LicenceSeat } from "@inflatable-cookie/poodle-core";
+import {
+  addMonthsPreservingDay,
+  type LicenceKeyFormat,
+  type LicenceSeat,
+} from "@inflatable-cookie/poodle-core";
 import {
   Button,
   Icon,
@@ -43,6 +47,12 @@ const connectionOptions = [
 ];
 
 describe("packed @inflatable-cookie/poodle-react", () => {
+  it("executes the additive core-root date API from the packed tarball", () => {
+    const day = new Date(Date.UTC(2026, 2, 14));
+    expect(addMonthsPreservingDay(day, 1).getUTCDate()).toBe(14);
+    expect(addMonthsPreservingDay(day, 1).getUTCMonth()).toBe(3);
+    expect(addMonthsPreservingDay(new Date(Date.UTC(2026, 0, 31)), 1).getUTCDate()).toBe(28);
+  });
   it("resolves the licence stylesheet and mounts every licence export", () => {
     const view = render(
       <>

@@ -51,9 +51,11 @@ export function ResizeHandle({
       onResizeMove?.(move.delta);
     }
 
-    function handlePointerUp(): void {
+    function handlePointerUp(upEvent: MouseEvent): void {
+      const upPosition = resizeAxisPosition(orientation, upEvent.clientX, upEvent.clientY);
+      lastPosition.current = upPosition;
       setIsDragging(false);
-      onResizeEnd?.(lastPosition.current);
+      onResizeEnd?.(upPosition);
       cleanupRef.current?.();
       cleanupRef.current = null;
     }

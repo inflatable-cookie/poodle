@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
   addDays,
   addMonths,
+  addMonthsPreservingDay,
   buildCalendarWeeks,
   compareDateTimeValue,
   compareIsoDate,
@@ -31,6 +32,26 @@ describe("iso parse/format/arithmetic", () => {
   test("addDays crosses boundaries; addMonths anchors to the 1st (month paging)", () => {
     expect(formatIsoDate(addDays(parseIsoDate("2026-01-31")!, 1))).toBe("2026-02-01");
     expect(formatIsoDate(addMonths(parseIsoDate("2026-12-15")!, 1))).toBe("2027-01-01");
+  });
+
+  test("addMonthsPreservingDay keeps the day when paging months", () => {
+    expect(formatIsoDate(addMonthsPreservingDay(parseIsoDate("2026-03-14")!, 1))).toBe("2026-04-14");
+    expect(formatIsoDate(addMonthsPreservingDay(parseIsoDate("2026-03-14")!, -1))).toBe("2026-02-14");
+  });
+
+  test("addMonthsPreservingDay clamps to the target month's last day", () => {
+    expect(formatIsoDate(addMonthsPreservingDay(parseIsoDate("2026-01-31")!, 1))).toBe("2026-02-28");
+    expect(formatIsoDate(addMonthsPreservingDay(parseIsoDate("2026-03-31")!, -1))).toBe("2026-02-28");
+  });
+
+  test("addMonthsPreservingDay handles leap years", () => {
+    expect(formatIsoDate(addMonthsPreservingDay(parseIsoDate("2024-02-29")!, 1))).toBe("2024-03-29");
+    expect(formatIsoDate(addMonthsPreservingDay(parseIsoDate("2024-01-31")!, 1))).toBe("2024-02-29");
+  });
+
+  test("addMonthsPreservingDay rolls over years in both directions", () => {
+    expect(formatIsoDate(addMonthsPreservingDay(parseIsoDate("2026-12-15")!, 1))).toBe("2027-01-15");
+    expect(formatIsoDate(addMonthsPreservingDay(parseIsoDate("2026-01-15")!, -1))).toBe("2025-12-15");
   });
 
   test("compare and monthAnchor", () => {
