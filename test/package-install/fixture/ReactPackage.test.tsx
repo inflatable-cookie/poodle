@@ -10,6 +10,8 @@ import {
   type LicenceSeat,
 } from "@inflatable-cookie/poodle-core";
 import {
+  AgentPlan,
+  AgentPlanRecord,
   Button,
   Icon,
   IconProvider,
@@ -129,5 +131,20 @@ describe("packed @inflatable-cookie/poodle-react", () => {
     expect(onClick).toHaveBeenCalledOnce();
     expect(button.querySelector("svg path")).not.toBeNull();
     expect(view.getByRole("img", { name: "Complete" })).toBeTruthy();
+  });
+
+  it("mounts the AgentPlan pair (new root exports) from the packed tarball", () => {
+    const view = render(
+      <>
+        <AgentPlan plan="1. Add the surface\n2. Wire the callbacks" />
+        <AgentPlanRecord plan="1. Add the surface\n2. Wire the callbacks" status="accepted" />
+      </>,
+    );
+
+    expect(view.container.querySelector(".poodle-agent-plan")).toBeTruthy();
+    expect(view.getByRole("button", { name: "Accept plan" })).toBeTruthy();
+    expect(view.getByRole("button", { name: "Revise" })).toBeTruthy();
+    expect(view.container.querySelector(".poodle-agent-plan-record")).toBeTruthy();
+    expect(view.getByRole("button", { name: "Show plan" })).toBeTruthy();
   });
 });

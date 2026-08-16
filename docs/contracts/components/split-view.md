@@ -495,8 +495,8 @@ None.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| The zero-footprint seam (`divider` prop, default off) is Svelte-only; React and the natives still paint the divider line | the seam behavior was proven in the Svelte host first | pending review | port to the other runtimes when one is next touched |
-| The both-collapsed expand-toggle rule is Svelte-only; other runtimes hide both toggles when both panes are collapsed | the trap was proven against the Svelte host | pending review | port with the seam work |
+| The zero-footprint seam (default off) is shared by the web targets; React still lacks the `divider` opt-in and the root `--poodle-split-seam` anchoring, and the natives still paint the divider line | the seam behavior was proven in the Svelte host first; React matches the default-off anatomy but not the opt-in or the collapsed-pane seam tracking | pending review | port the `divider` opt-in and seam anchoring to React, and the default-off to the natives, when one is next touched |
+| The both-collapsed expand-toggle rule is web parity | the trap was proven against the Svelte host and the React mirror now matches; the natives hide both toggles when both panes are collapsed | pending review | port to the natives with the seam work |
 | The natives' hover-reveal zone is the toggle cluster's own bounds, not the divider's grab strip — the pointer must reach the pill rather than the seam around it | the shared render tier has no absolute positioning for the cluster, so it sits inline beside the handle rather than overlaying it; there is no "hovering a sibling reveals me" primitive in the node vocabulary | pending review | widen when the node vocabulary gains group-hover |
 | The natives have no `:focus-within` equivalent, so a keyboard-focused toggle is not revealed | GPUI has no accessibility/focus routing for the split, and Jetstream's focus does not feed the hover patch | pending review | revisit with native keyboard resize |
 

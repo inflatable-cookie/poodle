@@ -57,8 +57,9 @@ against the Svelte reference and the contract; none changed the shared
   attribute), mirroring Svelte.
 - **React `AgentChatStatus` type** — narrowed to `"idle" | "busy"` while the
   implementation already handled `"questioning"` and `"reviewing-plan"`; the
-  stale type made the plan region unreachable by types. Now matches Svelte's
-  `"idle" | "busy" | "questioning" | "reviewing-plan"`.
+  stale type made the plan region unreachable by types. Widened to match
+  Svelte's `"idle" | "busy" | "questioning" | "reviewing-plan"` (additive — see
+  Public-Package Record).
 
 ## Observations (no change made)
 
@@ -75,6 +76,29 @@ against the Svelte reference and the contract; none changed the shared
   in the React catalogue from 9 to 11; `catalogue-nav.test.tsx` was updated to
   match.
 
+## Public-Package Record (spec 022)
+
+- **Package:** `@inflatable-cookie/poodle-react` (`packages/react/components`).
+  `@inflatable-cookie/poodle-core` and `@inflatable-cookie/poodle-svelte` are
+  unchanged.
+- **Public entry point:** the root export map (`src/index.ts`, reachable
+  through the package `.` entry and the shipped `src`). Adds two named
+  exports — `AgentPlan`, `AgentPlanRecord` — and widens the public
+  `AgentChatStatus` union to `"idle" | "busy" | "questioning" | "reviewing-plan"`
+  (the two statuses the implementation already handled). `AgentPlanStatus`,
+  `AgentPlanSettledStatus`, and `AgentPlanDecision` are now re-exported from
+  the public types as well.
+- **Classification:** additive. New exports; the `AgentChatStatus` change only
+  widens a union, so every previously valid value and call remains valid. No
+  existing export changed signature or behavior.
+- **Downstream re-check:** the roster's downstream-use scan found no canonical
+  consumer importing `poodle-react`, so there is no re-check to issue today. A
+  downstream adopting the plan region can now import both components and pass
+  the widened statuses. The packed-tarball proof was extended to cover the new
+  exports: `test:web-pack-install` now mounts `AgentPlan` and `AgentPlanRecord`
+  from the packed `poodle-react` tarball, and the React mounted-proof list grew
+  11 → 13 (recorded in `release-gap-register.md`'s Package-Install Surface).
+
 ## Validation
 
 | Command | Result |
@@ -82,6 +106,7 @@ against the Svelte reference and the contract; none changed the shared
 | Batch A narrow round (`vitest run` on the four new focused test files) | pass (13 tests) |
 | `effigy react:build` | pass |
 | `effigy docs:react-specimen-drift` | pass (175 specimens registered) |
+| `effigy test:web-pack-install` | pass (5 files, 11 tests; AgentPlan pair mounts from the packed tarball) |
 | `effigy test:components` | pass (288 files, 2340 tests) |
 | `git diff --check` | pass |
 
@@ -111,7 +136,31 @@ selector ran.
 `packages/react/components/test/` (4 new focused test files),
 `packages/react/preview/src/gallery/specimens/` (6 new specimens),
 `specimen-map.ts` and `registry.ts` (registered the six; retired the two
-exclusion sets), `catalogue-nav.test.tsx` (family count 9 → 11), the two
-focused-evidence docs, this log, and `PAPERCUTS.md`. No Svelte component,
-contract, specimen, package export, workflow, or downstream repository
-changed.
+exclusion sets), `catalogue-nav.test.tsx` (family count 9 → 11),
+`test/package-install/` (packed React proof extended with the AgentPlan pair),
+the contracts' stale Known Delta rows reconciled (`agent-message.md`,
+`agent-plan.md`, `agent-plan-record.md`, `split-view.md`; see review repair
+below), the two focused-evidence docs, this log, and `PAPERCUTS.md`. The
+`poodle-react` package export map is additive (see Public-Package Record). No
+Svelte component, contract prose beyond the delta reconciliation, specimen,
+workflow, or downstream repository changed.
+
+## Review Repair (PR #28, blockers)
+
+- **Contracts reconciled to the tree.** `agent-message.md`'s Known Delta no
+  longer claims the single-paragraph list-item unwrap is Svelte-only — the web
+  targets share it and only the natives keep block-wrapped items.
+  `agent-plan.md` (§12, Known Delta, approval notes) and
+  `agent-plan-record.md` (Known Delta) no longer defer the React variant;
+  `split-view.md` records that the web targets share the zero-footprint default
+  and both-collapsed recovery, with React's remaining `divider` opt-in / root
+  seam anchoring gap and the natives' still-divergent rows kept as follow-up
+  debt. `agent-plan-record.md`'s `onToggle` note now states the framework-neutral
+  controlled/uncontrolled rule (host drives state when `expanded` is supplied;
+  component-owned otherwise) instead of contradicting the prop table.
+- **Public-package record added.** See "Public-Package Record (spec 022)":
+  package, entry point, additive classification, and downstream re-check, plus
+  the extended packed-tarball proof (`effigy test:web-pack-install`).
+- **Gap-register summary narrowed.** The `g15.006` closure sentence no longer
+  claims "all React rows evidence-present"; it states the explicit 152/23
+  focused-React posture.

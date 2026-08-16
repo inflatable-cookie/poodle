@@ -97,7 +97,7 @@ renders what it is given.
 
 | Callback | When It Fires | Payload | Notes |
 |----------|---------------|---------|-------|
-| `onToggle` | The record's disclosure toggles | `boolean` | The next expanded state. The component owns the state and reports it; the host does not have to echo it back |
+| `onToggle` | The record's disclosure toggles | `boolean` | The next expanded state. Controlled when `expanded` is supplied: the host drives state and the component reports without mutating it. Otherwise component-owned, and the host does not have to echo the value back |
 
 ## 5. States
 
@@ -171,7 +171,7 @@ renders what it is given.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| React/GPUI/Jetstream variants deferred — svelte is the first implementation | the consumer integrating plan mode (nucleus) is svelte-only today; the spec structs and the shared `poodle-render` function already landed | pending review | build the variants when a second target needs them |
+| GPUI/Jetstream variants deferred — Svelte is the reference and the React mirror landed in `g15.006` | the consumer integrating plan mode (nucleus) is Svelte-only today; the spec structs and the shared `poodle-render` function already landed | pending review | build the native variants when a second target needs them |
 | No re-decide affordance on any target | a second decision surface would let the reader change a decision the agent has already acted on | accepted (by design) | none |
 
 ## 11. Approval And Adoption Notes

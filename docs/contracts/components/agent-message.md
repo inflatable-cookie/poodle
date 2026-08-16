@@ -290,7 +290,7 @@ Density drives block spacing and list indent only, never line height.
 | Natives show no streaming caret | neither native re-renders per token during spec resolution | accepted | host drives re-render |
 | Tables degrade to text on every target | out of the v1 subset; adding them means a table block model and four renderers | accepted | promote if a consumer needs them |
 | No syntax highlighting | `Code` does not highlight either; adding it is a `Code` decision, not a message one | accepted | tracked on the Code contract |
-| Single-paragraph list-item unwrap and flush-left inside markers are Svelte-only | React/GPUI/Jetstream keep block-wrapped items and outside markers | pending review | port to the other runtimes when one is next touched |
+| Single-paragraph list-item unwrap and flush-left inside markers are web-implementation-only | the web targets (Svelte and React) flatten the item so the marker sits on the text line; the natives keep block-wrapped items and outside markers | pending review | port to the natives when one is next touched |
 | Natives have no `onLinkClick` | inline nodes flatten to text on both, so there is no link element to hang a handler on. A handler for something that is not drawn is exactly the dead-handler pattern | accepted, tracked | arrives with rich inline runs |
 
 ## 13. Approval And Adoption Notes
