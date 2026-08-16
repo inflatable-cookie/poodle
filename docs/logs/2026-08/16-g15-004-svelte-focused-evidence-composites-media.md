@@ -189,15 +189,36 @@ fix; the only implementation-adjacent work was test-side URL stubbing
 No `*-windowed` selector, `test:native-visual`, `qa:jetstream`, or Jetstream
 selector ran.
 
+## Review Repair (PR #26, changes requested)
+
+- **Type errors on clean checkout** — `querySelectorAll` results in
+  `BlockEditor`, `CardRadioGroup`, `ToastStack`, and `ToastHost` suites were
+  typed as generic `Element`; they now carry `HTMLElement`/`HTMLButtonElement`/
+  `HTMLTextAreaElement` casts, and the `ToastHost` store fixtures supply the
+  required `message` field. `effigy check:svelte` is green on the pushed tree.
+- **Composition claims strengthened** — `InlineListSection` and
+  `DetailSectionGroup` now assert actual projected content through compiled
+  harnesses (`InlineListSectionHarness.svelte`, `DetailSectionGroupHarness.svelte`),
+  matching the React evidence, instead of only counting wrappers.
+- **Hermetic EmbedPreview** — happy-dom was attempting real iframe page loads
+  (YouTube, Vimeo, example.com), emitting `NetworkError`/`AbortError` noise.
+  The suites now install the happy-dom fetch interceptor (`beforeAsyncRequest`
+  returning an empty 204), keeping the URL and sandbox assertions while
+  emitting no network output on either runtime.
+- **Trailing whitespace** removed from the batch log (line 113).
+
 ## Register and Roster Updates
 
 - `release-baseline-roster.md`: the 35 components' Focused Svelte test cells
-  and Focused React test cells now name the case files; summary counts moved
-  to Focused Svelte 125 present / 50 missing and Focused React 122 present /
-  53 missing.
+  and Focused React test cells now name the case files. After rebasing onto
+  `g15.003`'s merged totals (Svelte 116 present / 59 missing, React 112
+  present / 63 missing), the combined additive counts are Focused Svelte 151
+  present / 24 missing and Focused React 147 present / 28 missing.
 - `release-gap-register.md`: the Svelte focused-evidence blocker class count
-  moved 85 → 50; the "Composites & media" family row (35 components) is closed
-  with evidence recorded in the roster. No status line was changed.
+  moved 59 → 24 after combining both tranches; the "Composites & media"
+  family row (35 components) is closed with evidence recorded in the roster,
+  leaving the workstation and agent families for `g15.005`. No status line
+  was changed.
 - `docs/roadmaps/g15/004-…` card, `README.md`, and `dispatch.md` were not
   modified by the worker.
 
