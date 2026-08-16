@@ -30,8 +30,8 @@ export function Table({
   const rowHeaderColumnId = columns.find((column) => column.isRowHeader)?.id ?? columns[0]?.id ?? null;
 
   return (
-    <div className="poodle-table-shell" data-size={resolvedSize} data-density={resolvedDensity} aria-label={ariaLabel ?? undefined}>
-      <table className="poodle-table">
+    <div className="poodle-table-shell" data-size={resolvedSize} data-density={resolvedDensity}>
+      <table className="poodle-table" aria-label={ariaLabel ?? undefined}>
         {caption ? <caption className="poodle-table__caption">{caption}</caption> : null}
 
         <thead>

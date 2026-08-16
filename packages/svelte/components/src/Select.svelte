@@ -137,7 +137,7 @@
   const flatOptions = $derived(flattenOptions(normalizedOptions));
   const hasPlaceholderOption = $derived(flatOptions.some((entry) => entry.value === placeholderValue));
   const hasCurrentOption = $derived(flatOptions.some((entry) => entry.value === currentValue));
-  const hasSelection = $derived(currentValue !== "" && currentValue !== clearValue);
+  const hasSelection = $derived(currentValue !== "" && currentValue !== placeholderValue);
   const showClear = $derived(clearable && hasSelection && !disabled);
   const isGrouped = $derived(normalizedOptions.length > 0 && "options" in normalizedOptions[0]);
   const normalizedGroups = $derived(isGrouped ? (normalizedOptions as SelectOptionGroup[]) : []);

@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, type CSSProperties, type ReactNode } from "react";
 
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -25,9 +25,18 @@ export function UiPresentationProvider({
   sizeScale = "md",
   children,
 }: Partial<UiPresentationContextValue> & { children: ReactNode }) {
+  const providerStyle: CSSProperties = {
+    "--poodle-size-control-height": `${controlHeightRem(sizeScale)}rem`,
+    "--poodle-space-control-x": `${controlSpaceXRem(density)}rem`,
+    "--poodle-space-panel-x": `${panelSpaceXRem(density)}rem`,
+    "--poodle-space-panel-y": `${panelSpaceYRem(density)}rem`,
+  } as CSSProperties;
+
   return (
     <UiPresentationContext.Provider value={{ density, sizeScale }}>
-      {children}
+      <div className="poodle-ui-presentation-provider" style={providerStyle}>
+        {children}
+      </div>
     </UiPresentationContext.Provider>
   );
 }
@@ -72,6 +81,24 @@ export function controlHeightRem(size: ControlSize): number {
   if (size === "lg") return 2.75;
   if (size === "xl") return 3.25;
   return 2.25;
+}
+
+export function controlSpaceXRem(density: ControlDensity): number {
+  if (density === "compact") return 0.5;
+  if (density === "comfortable") return 1;
+  return 0.75;
+}
+
+export function panelSpaceXRem(density: ControlDensity): number {
+  if (density === "compact") return 0.75;
+  if (density === "comfortable") return 1.25;
+  return 1;
+}
+
+export function panelSpaceYRem(density: ControlDensity): number {
+  if (density === "compact") return 0.5;
+  if (density === "comfortable") return 1;
+  return 0.75;
 }
 
 export function resolveSupportingVisualSize(size: ControlSize): ControlSize {

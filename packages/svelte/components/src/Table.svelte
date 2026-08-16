@@ -32,8 +32,8 @@
   );
 </script>
 
-<div class="poodle-table-shell" data-size={resolvedSize} data-density={resolvedDensity} aria-label={ariaLabel ?? undefined}>
-  <table class="poodle-table">
+<div class="poodle-table-shell" data-size={resolvedSize} data-density={resolvedDensity}>
+  <table class="poodle-table" aria-label={ariaLabel ?? undefined}>
     {#if caption}
       <caption class="poodle-table__caption">{caption}</caption>
     {/if}
