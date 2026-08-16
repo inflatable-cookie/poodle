@@ -1,6 +1,6 @@
 # g14.026 — Human-Centred Specimen Catalogue Audit
 
-Status: blocked pending `g14.021`
+Status: held for g14.022 carry-forward; prerequisites complete
 Depends on: `g14.021`, `g14.025`
 Governing refs: `../../contracts/001-working-rules.md`,
 `025-preview-catalogue-taxonomy-and-generated-navigation.md`

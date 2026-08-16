@@ -1,6 +1,6 @@
 # g14.017 — Licence Active-runtime Completion
 
-Status: blocked — rewrite after `g14.021`; web reference approved
+Status: held for g14.022 carry-forward; web reference approved
 Depends on: `g14.016`, `g14.021`
 
 Disposition: do not dispatch this version. `g14.008` rejected the pipeline it

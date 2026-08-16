@@ -53,8 +53,9 @@ hand-written authorities, and removed the rejected plane
 
 The independent Licence (`015`–`017`), model-connection (`018`–`020`), batched
 meter (`024`), catalogue taxonomy (`025`), and specimen audit (`026`) lanes
-remain separately tracked. `017`, `020`, and `026` wait for `021` so they do
-not build on rejected authority or projection wiring.
+remain separately tracked. `017`, `020`, and `026` are held for the closeout's
+carry-forward ruling so they do not build on rejected authority or projection
+wiring.
 
 ## Runway
 
@@ -75,15 +76,15 @@ not build on rejected authority or projection wiring.
 15. [014 — Completion gate and component factory](014-completion-gate-and-component-factory.md) — retired
 16. [015 — Licence web reference](015-licence-web-reference.md) — complete
 17. [016 — Licence reference review](016-licence-reference-review.md) — complete; reference approved
-18. [017 — Licence active-runtime completion](017-licence-active-runtime-completion.md) — blocked; rewrite after `021`
+18. [017 — Licence active-runtime completion](017-licence-active-runtime-completion.md) — held for `022` carry-forward
 19. [018 — Model connection web reference](018-model-connection-web-reference.md) — complete
 20. [019 — Model connection reference review](019-model-connection-reference-review.md) — complete; reference approved
-21. [020 — Model connection active-runtime completion](020-model-connection-active-runtime-completion.md) — blocked; rewrite after `021`
+21. [020 — Model connection active-runtime completion](020-model-connection-active-runtime-completion.md) — held for `022` carry-forward
 22. [021 — Rejected pilot cleanup and evidence retention](021-experimental-cleanup-and-gate-consolidation.md) — complete
 23. [022 — Generation closeout](022-generation-closeout.md) — **next**
 24. [024 — Batched AudioMeter web surface](024-batched-audio-meter-web-surface.md) — complete
 25. [025 — Preview catalogue taxonomy and generated navigation](025-preview-catalogue-taxonomy-and-generated-navigation.md) — complete
-26. [026 — Human-centred specimen catalogue audit](026-human-centred-specimen-catalogue-audit.md) — blocked pending `021`
+26. [026 — Human-centred specimen catalogue audit](026-human-centred-specimen-catalogue-audit.md) — held for `022` carry-forward
 
 ## Dispatch Rule
 

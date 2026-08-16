@@ -1,11 +1,11 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-15
+Updated: 2026-08-16
 
 ## Active Track
 
 - `g14`
-  - Status: active — rejected pilot cleanup
+  - Status: active — cleanup complete; closeout ready
   - Range: `001` to `026`
   - Verdict: `g14.008` **rejected** architecture 009/spec 066 as Poodle's
     standing component-conformance mechanism.
@@ -14,11 +14,13 @@ Updated: 2026-08-15
     registries and incomplete authority consumption.
   - Retained result: component/backend fixes, focused regression claims,
     headless GPUI execution, and the human-centred specimen boundary.
-  - Runway: `009`–`014` are retired. `017`, `020`, `022`, and `026` are
-    blocked behind cleanup. Independent web-reference, batched-meter, and
+  - Runway: `009`–`014` are retired. `021` preserved the evidence and removed
+    the rejected plane. `017`, `020`, and `026` are held for the closeout's
+    carry-forward ruling. Independent web-reference, batched-meter, and
     catalogue-taxonomy lanes are complete.
-  - Next: dispatch `g14.021` only. It preserves evidence and removes the
-    rejected plane without designing its replacement.
+  - Next: dispatch `g14.022`. It closes g14 and leaves one v0.2.0
+    release-baseline inventory card without designing the replacement parity
+    architecture.
 
 ## Latest Completed Track
 

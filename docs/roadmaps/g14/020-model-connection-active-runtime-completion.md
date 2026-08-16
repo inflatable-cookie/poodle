@@ -1,6 +1,6 @@
 # g14.020 — Model Connection Active-Runtime Completion
 
-Status: blocked — rewrite after `g14.021`; web reference approved
+Status: held for g14.022 carry-forward; web reference approved
 Depends on: `g14.019`, `g14.021`
 Governing ref: `../../specs/067-model-connection-management.md`
 
