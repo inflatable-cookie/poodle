@@ -14,18 +14,17 @@ but is **not** a gap — see the note at the end.
 
 Contract, implementation, export, and specimen posture are complete for all
 175 components. The only open Svelte-denominator surface is **focused
-component evidence**: 59 components mount in the anatomy smoke but have no
+component evidence**: 24 components mount in the anatomy smoke but have no
 named focused test file/case asserting contract behaviour (the 29 foundation
-display & shell components closed by `g15.002` and the 26 foundation forms,
-inputs & overlays closed by `g15.003` now have focused evidence on both
-Svelte and React sides — see `release-baseline-roster.md` for the named case
-files).
+display & shell components closed by `g15.002`, the 26 foundation forms,
+inputs & overlays closed by `g15.003`, and the 35 composites & media
+components closed by `g15.004` now have focused evidence on both Svelte and
+React sides — see `release-baseline-roster.md` for the named case files).
 
-### Svelte focused evidence (59) — owned by `g15.004`–`g15.005`
+### Svelte focused evidence (24) — owned by `g15.005`
 
 | Family | Components without focused evidence | Count |
 | --- | --- | ---: |
-| Composites & media | ActionDiscoveryPanel, EditableList, ErrorBoundary, BlockEditor, CardRadioGroup, CardToggleGroup, CommandPalette, ConfirmAction, DataTable, DetailSectionGroup, DetailSection, DetailShell, EmbedInput, EmbedPreview, EmptyState, FilterToolbar, FormLayout, InlineListSection, DebugDialog, LogList, ListContainer, MarkdownEditor, PageLoading, MediaPicker, MediaBrowsePanel, MediaPreview, MediaThumbnail, PageHeader, PickerShell, RelationPicker, SelectionSummary, SidebarNav, MetricTile, ToastStack, ToastHost | 35 |
 | Workstation systems | StatusBar, StatusIndicator, Surface, Text, TextLink, Table, TokenInput, TimeInput, TimeZoneSelect, ToggleGroup, Toolbar, Tooltip, TriStateSwitch, UiPresentationProvider, VideoPlayer, DateTimeZonePicker | 16 |
 | Agent surfaces | AgentMessage, AgentPlanRecord, AgentQuestion, AgentQuestionRecord, AgentSubagent, ChangedFiles, ToolCall, ToolCallGroup | 8 |
 
