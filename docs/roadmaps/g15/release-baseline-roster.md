@@ -17,10 +17,10 @@ Public types and helpers are recorded separately and are **not** part of the den
 | Export from index + packed `exports` map | 175 | 0 | 0 |
 | Contract (`docs/contracts/components/<name>.md`) | 175 | 0 | 0 |
 | Svelte preview specimen (dedicated file or scene-shared) | 175 | 0 | 0 |
-| Focused Svelte test (named file/case, beyond anatomy smoke) | 116 | 59 | 0 |
+| Focused Svelte test (named file/case, beyond anatomy smoke) | 151 | 24 | 0 |
 | React implementation + export | 173 | 2 | 0 |
 | React gallery specimen | 169 | 6 | 0 |
-| Focused React test | 112 | 63 | 0 |
+| Focused React test | 147 | 28 | 0 |
 | Rust declaration (`<Name>Spec`, including documented aliases) | 163 | 11 | 1 |
 | Rust render module (`poodle-render`) | 161 | 13 | 1 |
 | GPUI specimen | 145 | 29 | 1 |
@@ -35,8 +35,8 @@ Public types and helpers are recorded separately and are **not** part of the den
 - **Implementation / Export**: 175 `export { default as <Name> } from "./<Name>.svelte"` lines in `packages/svelte/components/src/index.ts`, each matched to a file of the same name; package `exports` map and `files` array checked once for packed reachability.
 - **Contract**: one `docs/contracts/components/<kebab>.md` per component (kebab-case from the export name); 175 of 175 present, verified by direct file check.
 - **Specimen**: keys of `specimenMap` in `packages/svelte/preview/src/specimens/registry.ts` against the canonical slugs (174 portable + web-only `meter-surface`); 175 entries. 168 map to a dedicated `*Specimen.svelte`; 7 map to a shared specimen (5 `SceneSpecimen`, 1 `ListCardSpecimen` for `ListCardCounter`, 1 `MetaBarSpecimen` for `MetaItem`).
-- **Focused Svelte test**: component imports resolved across all files in `packages/svelte/components/test/` (`.test.ts` and harness `.svelte` files); a component counts when at least one named test file mounts and asserts it beyond the anatomy smoke. 116 count; 59 record `missing` (smoke-only).
-- **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (173); React gallery: `specimen-map.ts` keys against canonical slugs (169); focused React test: same import-resolution method over `packages/react/components/test/` (112; 63 missing).
+- **Focused Svelte test**: component imports resolved across all files in `packages/svelte/components/test/` (`.test.ts` and harness `.svelte` files); a component counts when at least one named test file mounts and asserts it beyond the anatomy smoke. 151 count; 24 record `missing` (smoke-only).
+- **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (173); React gallery: `specimen-map.ts` keys against canonical slugs (169); focused React test: same import-resolution method over `packages/react/components/test/` (147; 28 missing).
 - **Rust declaration**: `pub struct <Name>Spec` searched recursively in `packages/contracts/components/src` (163). Three documented naming discrepancies count as present: `CallOutSpec` (`Callout`), `ShellStatusBarSpec` (`StatusBar`), `TimeFieldSpec` (`TimeInput`). `MeterSurface` has no declaration and records not-applicable per spec 068.
 - **Rust render**: module names in `packages/render/src/lib.rs` (161). Documented naming discrepancies count as present: `bx.rs` (`Box`), `shell_status_bar.rs` (`StatusBar`), `time_field.rs` (`TimeInput`), and the batched `audio.rs` covering the 12 audio widgets (13 audio components minus `MeterSurface`). `MeterSurface` records not-applicable.
 - **GPUI specimen**: file presence in `packages/gpui/preview/src/specimens/` per component (145). The batched `audio_controls.rs` covers 12 audio widgets; the 12 audio widgets are those covered — `audio_controls.rs` has no `meter_surface` function and `MeterSurface` records not-applicable. Counts do not include the `mod.rs` dispatch fallback (`missing_specimen`).
@@ -177,48 +177,48 @@ Rust declarations use the documented naming discrepancies where they exist: `Cal
 
 | Component | Contract | Specimen | Focused Svelte test | Pack-install | Downstream use |
 | --- | --- | --- | --- | --- | --- |
-| `ActionDiscoveryPanel` | `docs/contracts/components/action-discovery-panel.md` | `ActionDiscoveryPanelSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `ActionDiscoveryPanel` | `docs/contracts/components/action-discovery-panel.md` | `ActionDiscoveryPanelSpecimen.svelte` | `ActionDiscoveryPanel.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 | `AppHeader` | `docs/contracts/components/app-header.md` | `AppHeaderSpecimen.svelte` | `AppHeader.svelte.test.ts` | `missing` | `figmatic`, `nucleus` |
-| `EditableList` | `docs/contracts/components/editable-list.md` | `EditableListSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `composer` |
-| `ErrorBoundary` | `docs/contracts/components/error-boundary.md` | `ErrorBoundarySpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `contact-patch`, `songsprout`, `underlay-reference` |
-| `BlockEditor` | `docs/contracts/components/block-editor.md` | `BlockEditorSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `CardRadioGroup` | `docs/contracts/components/card-radio-group.md` | `CardRadioGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `soundcheck-library` |
-| `CardToggleGroup` | `docs/contracts/components/card-toggle-group.md` | `CardToggleGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `CommandPalette` | `docs/contracts/components/command-palette.md` | `CommandPaletteSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `nucleus` |
-| `ConfirmAction` | `docs/contracts/components/confirm-action.md` | `ConfirmActionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn`, `nucleus` |
-| `DataTable` | `docs/contracts/components/data-table.md` | `DataTableSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `composer`, `underlay` |
-| `DetailSectionGroup` | `docs/contracts/components/detail-section-group.md` | `DetailSectionGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `underlay` |
-| `DetailSection` | `docs/contracts/components/detail-section.md` | `DetailSectionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `composer`, `finch`, `underlay` |
+| `EditableList` | `docs/contracts/components/editable-list.md` | `EditableListSpecimen.svelte` | `EditableList.test.ts` | `missing` | `composer` |
+| `ErrorBoundary` | `docs/contracts/components/error-boundary.md` | `ErrorBoundarySpecimen.svelte` | `ErrorBoundary.test.ts` | `missing` | `acowtancy`, `contact-patch`, `songsprout`, `underlay-reference` |
+| `BlockEditor` | `docs/contracts/components/block-editor.md` | `BlockEditorSpecimen.svelte` | `BlockEditor.test.ts` | `missing` | `underlay` |
+| `CardRadioGroup` | `docs/contracts/components/card-radio-group.md` | `CardRadioGroupSpecimen.svelte` | `CardRadioGroup.test.ts` | `missing` | `acowtancy`, `soundcheck-library` |
+| `CardToggleGroup` | `docs/contracts/components/card-toggle-group.md` | `CardToggleGroupSpecimen.svelte` | `CardToggleGroup.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `CommandPalette` | `docs/contracts/components/command-palette.md` | `CommandPaletteSpecimen.svelte` | `CommandPalette.test.ts` | `missing` | `longhorn`, `nucleus` |
+| `ConfirmAction` | `docs/contracts/components/confirm-action.md` | `ConfirmActionSpecimen.svelte` | `ConfirmAction.test.ts` | `missing` | `longhorn`, `nucleus` |
+| `DataTable` | `docs/contracts/components/data-table.md` | `DataTableSpecimen.svelte` | `DataTable.test.ts` | `missing` | `acowtancy`, `composer`, `underlay` |
+| `DetailSectionGroup` | `docs/contracts/components/detail-section-group.md` | `DetailSectionGroupSpecimen.svelte` | `DetailSectionGroup.test.ts` | `missing` | `acowtancy`, `underlay` |
+| `DetailSection` | `docs/contracts/components/detail-section.md` | `DetailSectionSpecimen.svelte` | `DetailSection.test.ts` | `missing` | `acowtancy`, `composer`, `finch`, `underlay` |
 | `DockRegion` | `docs/contracts/components/dock-region.md` | `DockRegionSpecimen.svelte` | `DockRegionDragOverGate.svelte.test.ts`, `DockRegionExternalDrag.svelte.test.ts`, `DockRegionTabPassThroughs.svelte.test.ts`, `DockRegionZoneDrop.svelte.test.ts` | `test:web-pack-install` | `longhorn`, `loophole-legacy` |
-| `DetailShell` | `docs/contracts/components/detail-shell.md` | `DetailShellSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `finch` |
-| `EmbedInput` | `docs/contracts/components/embed-input.md` | `EmbedInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `EmbedPreview` | `docs/contracts/components/embed-preview.md` | `EmbedPreviewSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
-| `EmptyState` | `docs/contracts/components/empty-state.md` | shared `SceneSpecimen.svelte` (generated scene) | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `figmatic`, `songsprout`, `soundcheck`, `soundcheck-library`, `underlay`, `underlay-reference` |
-| `FilterToolbar` | `docs/contracts/components/filter-toolbar.md` | `FilterToolbarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
+| `DetailShell` | `docs/contracts/components/detail-shell.md` | `DetailShellSpecimen.svelte` | `DetailShell.test.ts` | `missing` | `finch` |
+| `EmbedInput` | `docs/contracts/components/embed-input.md` | `EmbedInputSpecimen.svelte` | `EmbedInput.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `EmbedPreview` | `docs/contracts/components/embed-preview.md` | `EmbedPreviewSpecimen.svelte` | `EmbedPreview.test.ts` | `missing` | `acowtancy` |
+| `EmptyState` | `docs/contracts/components/empty-state.md` | shared `SceneSpecimen.svelte` (generated scene) | `EmptyState.test.ts` | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `figmatic`, `songsprout`, `soundcheck`, `soundcheck-library`, `underlay`, `underlay-reference` |
+| `FilterToolbar` | `docs/contracts/components/filter-toolbar.md` | `FilterToolbarSpecimen.svelte` | `FilterToolbar.test.ts` | `missing` | `acowtancy` |
 | `FormDialog` | `docs/contracts/components/form-dialog.md` | `FormDialogSpecimen.svelte` | `FormDialogInitialFocusHarness.svelte` | `missing` | `acowtancy`, `contact-patch`, `underlay`, `underlay-reference` |
-| `FormLayout` | `docs/contracts/components/form-layout.md` | `FormLayoutSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `composer` |
-| `InlineListSection` | `docs/contracts/components/inline-list-section.md` | `InlineListSectionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `longhorn`, `underlay` |
-| `DebugDialog` | `docs/contracts/components/debug-dialog.md` | `DebugDialogSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `FormLayout` | `docs/contracts/components/form-layout.md` | `FormLayoutSpecimen.svelte` | `FormLayout.test.ts` | `missing` | `acowtancy`, `composer` |
+| `InlineListSection` | `docs/contracts/components/inline-list-section.md` | `InlineListSectionSpecimen.svelte` | `InlineListSection.test.ts` | `missing` | `acowtancy`, `longhorn`, `underlay` |
+| `DebugDialog` | `docs/contracts/components/debug-dialog.md` | `DebugDialogSpecimen.svelte` | `DebugDialog.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 | `LicenceActivation` | `docs/contracts/components/licence-activation.md` | `LicenceActivationSpecimen.svelte` | `LicenceActivation.test.ts` | `test:web-pack-install` | `longhorn` |
 | `LicenceSeats` | `docs/contracts/components/licence-seats.md` | `LicenceSeatsSpecimen.svelte` | `LicenceSeats.test.ts` | `test:web-pack-install` | `longhorn` |
 | `LicenceStatus` | `docs/contracts/components/licence-status.md` | `LicenceStatusSpecimen.svelte` | `LicenceStatus.test.ts` | `test:web-pack-install` | `longhorn` |
-| `LogList` | `docs/contracts/components/log-list.md` | `LogListSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `contact-patch`, `underlay-reference` |
-| `ListContainer` | `docs/contracts/components/list-container.md` | `ListContainerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay-reference` |
-| `MarkdownEditor` | `docs/contracts/components/markdown-editor.md` | `MarkdownEditorSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `underlay`, `underlay-reference` |
-| `PageLoading` | `docs/contracts/components/page-loading.md` | `PageLoadingSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `underlay`, `underlay-reference` |
-| `MediaPicker` | `docs/contracts/components/media-picker.md` | `MediaPickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `MediaBrowsePanel` | `docs/contracts/components/media-browse-panel.md` | `MediaBrowsePanelSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `MediaPreview` | `docs/contracts/components/media-preview.md` | `MediaPreviewSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `MediaThumbnail` | `docs/contracts/components/media-thumbnail.md` | `MediaThumbnailSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `underlay` |
-| `PageHeader` | `docs/contracts/components/page-header.md` | `PageHeaderSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `figmatic`, `songsprout`, `soundcheck-library`, `underlay`, `underlay-reference` |
-| `PickerShell` | `docs/contracts/components/picker-shell.md` | `PickerShellSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `RelationPicker` | `docs/contracts/components/relation-picker.md` | `RelationPickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `underlay` |
-| `SelectionSummary` | `docs/contracts/components/selection-summary.md` | `SelectionSummarySpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `LogList` | `docs/contracts/components/log-list.md` | `LogListSpecimen.svelte` | `LogList.test.ts` | `missing` | `contact-patch`, `underlay-reference` |
+| `ListContainer` | `docs/contracts/components/list-container.md` | `ListContainerSpecimen.svelte` | `ListContainer.test.ts` | `missing` | `underlay-reference` |
+| `MarkdownEditor` | `docs/contracts/components/markdown-editor.md` | `MarkdownEditorSpecimen.svelte` | `MarkdownEditor.test.ts` | `missing` | `acowtancy`, `underlay`, `underlay-reference` |
+| `PageLoading` | `docs/contracts/components/page-loading.md` | `PageLoadingSpecimen.svelte` | `PageLoading.test.ts` | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `underlay`, `underlay-reference` |
+| `MediaPicker` | `docs/contracts/components/media-picker.md` | `MediaPickerSpecimen.svelte` | `MediaPicker.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `MediaBrowsePanel` | `docs/contracts/components/media-browse-panel.md` | `MediaBrowsePanelSpecimen.svelte` | `MediaBrowsePanel.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `MediaPreview` | `docs/contracts/components/media-preview.md` | `MediaPreviewSpecimen.svelte` | `MediaPreview.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `MediaThumbnail` | `docs/contracts/components/media-thumbnail.md` | `MediaThumbnailSpecimen.svelte` | `MediaThumbnail.test.ts` | `missing` | `acowtancy`, `underlay` |
+| `PageHeader` | `docs/contracts/components/page-header.md` | `PageHeaderSpecimen.svelte` | `PageHeader.test.ts` | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `figmatic`, `songsprout`, `soundcheck-library`, `underlay`, `underlay-reference` |
+| `PickerShell` | `docs/contracts/components/picker-shell.md` | `PickerShellSpecimen.svelte` | `PickerShell.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `RelationPicker` | `docs/contracts/components/relation-picker.md` | `RelationPickerSpecimen.svelte` | `RelationPicker.test.ts` | `missing` | `underlay` |
+| `SelectionSummary` | `docs/contracts/components/selection-summary.md` | `SelectionSummarySpecimen.svelte` | `SelectionSummary.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 | `SettingsShell` | `docs/contracts/components/settings-shell.md` | `SettingsShellSpecimen.svelte` | `SettingsShell.test.ts` | `missing` | `longhorn` |
-| `SidebarNav` | `docs/contracts/components/sidebar-nav.md` | `SidebarNavSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `SidebarNav` | `docs/contracts/components/sidebar-nav.md` | `SidebarNavSpecimen.svelte` | `SidebarNav.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 | `Tree` | `docs/contracts/components/tree.md` | `TreeSpecimen.svelte` | `Tree.test.ts` | `missing` | `figmatic` |
 | `SplitView` | `docs/contracts/components/split-view.md` | `SplitViewSpecimen.svelte` | `SplitView.svelte.test.ts` | `missing` | `longhorn`, `loophole-legacy`, `nucleus`, `soundcheck-library` |
-| `MetricTile` | `docs/contracts/components/metric-tile.md` | `MetricTileSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `underlay-reference` |
+| `MetricTile` | `docs/contracts/components/metric-tile.md` | `MetricTileSpecimen.svelte` | `MetricTile.test.ts` | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `underlay-reference` |
 | `StateTile` | `docs/contracts/components/state-tile.md` | `StateTileSpecimen.svelte` | `WebParityCloseout.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 | `ValidationSummary` | `docs/contracts/components/validation-summary.md` | `ValidationSummarySpecimen.svelte` | `WebParityCloseout.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 | `ModelPicker` | `docs/contracts/components/model-picker.md` | `ModelPickerSpecimen.svelte` | `ModelPicker.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
@@ -230,8 +230,8 @@ Rust declarations use the documented naming discrepancies where they exist: `Cal
 | `HistoryCenter` | `docs/contracts/components/history-center.md` | `HistoryCenterSpecimen.svelte` | `HistoryCenter.test.ts` | `missing` | `soundcheck` |
 | `UpdateStatus` | `docs/contracts/components/update-status.md` | `UpdateStatusSpecimen.svelte` | `UpdateStatus.test.ts` | `missing` | `longhorn` |
 | `UpdateCenter` | `docs/contracts/components/update-center.md` | `UpdateCenterSpecimen.svelte` | `UpdateCenter.test.ts` | `missing` | `longhorn` |
-| `ToastStack` | `docs/contracts/components/toast-stack.md` | `ToastStackSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn` |
-| `ToastHost` | `docs/contracts/components/toast-host.md` | `ToastHostSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `compli-me`, `contact-patch`, `longhorn`, `nucleus`, `songsprout`, `underlay`, `underlay-reference` |
+| `ToastStack` | `docs/contracts/components/toast-stack.md` | `ToastStackSpecimen.svelte` | `ToastStack.test.ts` | `missing` | `longhorn` |
+| `ToastHost` | `docs/contracts/components/toast-host.md` | `ToastHostSpecimen.svelte` | `ToastHost.test.ts` | `missing` | `acowtancy`, `compli-me`, `contact-patch`, `longhorn`, `nucleus`, `songsprout`, `underlay`, `underlay-reference` |
 
 ### Audio controls
 
@@ -381,48 +381,48 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 
 | Component | React impl/export | React gallery | Focused React test | Rust declaration | Rust render | GPUI specimen |
 | --- | --- | --- | --- | --- | --- | --- |
-| `ActionDiscoveryPanel` | complete | complete | `missing` — smoke only | `ActionDiscoveryPanelSpec` (`packages/contracts/components/src/action_discovery_panel.rs`) | `packages/render/src/action_discovery_panel.rs` | `missing` |
+| `ActionDiscoveryPanel` | complete | complete | `ActionDiscoveryPanel.test.tsx` | `ActionDiscoveryPanelSpec` (`packages/contracts/components/src/action_discovery_panel.rs`) | `packages/render/src/action_discovery_panel.rs` | `missing` |
 | `AppHeader` | complete | complete | `AppHeader.test.tsx` | `AppHeaderSpec` (`packages/contracts/components/src/app_header.rs`) | `packages/render/src/app_header.rs` | `packages/gpui/preview/src/specimens/app_header.rs` |
-| `EditableList` | complete | complete | `missing` — smoke only | `EditableListSpec` (`packages/contracts/components/src/editable_list.rs`) | `packages/render/src/editable_list.rs` | `packages/gpui/preview/src/specimens/editable_list_specimen.rs` |
-| `ErrorBoundary` | complete | complete | `missing` — smoke only | `ErrorBoundarySpec` (`packages/contracts/components/src/error_boundary.rs`) | `packages/render/src/error_boundary.rs` | `packages/gpui/preview/src/specimens/error_boundary_specimen.rs` |
-| `BlockEditor` | complete | complete | `missing` — smoke only | `BlockEditorSpec` (`packages/contracts/components/src/block_editor.rs`) | `packages/render/src/block_editor.rs` | `packages/gpui/preview/src/specimens/block_editor_specimen.rs` |
-| `CardRadioGroup` | complete | complete | `missing` — smoke only | `CardRadioGroupSpec` (`packages/contracts/components/src/card_radio_group.rs`) | `packages/render/src/card_radio_group.rs` | `packages/gpui/preview/src/specimens/card_radio_group_specimen.rs` |
-| `CardToggleGroup` | complete | complete | `missing` — smoke only | `CardToggleGroupSpec` (`packages/contracts/components/src/card_toggle_group.rs`) | `packages/render/src/card_toggle_group.rs` | `packages/gpui/preview/src/specimens/card_toggle_group_specimen.rs` |
-| `CommandPalette` | complete | complete | `missing` — smoke only | `CommandPaletteSpec` (`packages/contracts/components/src/command_palette.rs`) | `packages/render/src/command_palette.rs` | `packages/gpui/preview/src/specimens/command_palette.rs` |
-| `ConfirmAction` | complete | complete | `missing` — smoke only | `ConfirmActionSpec` (`packages/contracts/components/src/confirm_action.rs`) | `packages/render/src/confirm_action.rs` | `packages/gpui/preview/src/specimens/confirm_action_specimen.rs` |
-| `DataTable` | complete | complete | `missing` — smoke only | `DataTableSpec` (`packages/contracts/components/src/data_table.rs`) | `packages/render/src/data_table.rs` | `packages/gpui/preview/src/specimens/data_table.rs` |
-| `DetailSectionGroup` | complete | complete | `missing` — smoke only | `DetailSectionGroupSpec` (`packages/contracts/components/src/detail_section_group.rs`) | `packages/render/src/detail_section_group.rs` | `packages/gpui/preview/src/specimens/detail_section_group_specimen.rs` |
-| `DetailSection` | complete | complete | `missing` — smoke only | `DetailSectionSpec` (`packages/contracts/components/src/detail_section.rs`) | `packages/render/src/detail_section.rs` | `packages/gpui/preview/src/specimens/detail_section_specimen.rs` |
+| `EditableList` | complete | complete | `EditableList.test.tsx` | `EditableListSpec` (`packages/contracts/components/src/editable_list.rs`) | `packages/render/src/editable_list.rs` | `packages/gpui/preview/src/specimens/editable_list_specimen.rs` |
+| `ErrorBoundary` | complete | complete | `ErrorBoundary.test.tsx` | `ErrorBoundarySpec` (`packages/contracts/components/src/error_boundary.rs`) | `packages/render/src/error_boundary.rs` | `packages/gpui/preview/src/specimens/error_boundary_specimen.rs` |
+| `BlockEditor` | complete | complete | `BlockEditor.test.tsx` | `BlockEditorSpec` (`packages/contracts/components/src/block_editor.rs`) | `packages/render/src/block_editor.rs` | `packages/gpui/preview/src/specimens/block_editor_specimen.rs` |
+| `CardRadioGroup` | complete | complete | `CardRadioGroup.test.tsx` | `CardRadioGroupSpec` (`packages/contracts/components/src/card_radio_group.rs`) | `packages/render/src/card_radio_group.rs` | `packages/gpui/preview/src/specimens/card_radio_group_specimen.rs` |
+| `CardToggleGroup` | complete | complete | `CardToggleGroup.test.tsx` | `CardToggleGroupSpec` (`packages/contracts/components/src/card_toggle_group.rs`) | `packages/render/src/card_toggle_group.rs` | `packages/gpui/preview/src/specimens/card_toggle_group_specimen.rs` |
+| `CommandPalette` | complete | complete | `CommandPalette.test.tsx` | `CommandPaletteSpec` (`packages/contracts/components/src/command_palette.rs`) | `packages/render/src/command_palette.rs` | `packages/gpui/preview/src/specimens/command_palette.rs` |
+| `ConfirmAction` | complete | complete | `ConfirmAction.test.tsx` | `ConfirmActionSpec` (`packages/contracts/components/src/confirm_action.rs`) | `packages/render/src/confirm_action.rs` | `packages/gpui/preview/src/specimens/confirm_action_specimen.rs` |
+| `DataTable` | complete | complete | `DataTable.test.tsx` | `DataTableSpec` (`packages/contracts/components/src/data_table.rs`) | `packages/render/src/data_table.rs` | `packages/gpui/preview/src/specimens/data_table.rs` |
+| `DetailSectionGroup` | complete | complete | `DetailSectionGroup.test.tsx` | `DetailSectionGroupSpec` (`packages/contracts/components/src/detail_section_group.rs`) | `packages/render/src/detail_section_group.rs` | `packages/gpui/preview/src/specimens/detail_section_group_specimen.rs` |
+| `DetailSection` | complete | complete | `DetailSection.test.tsx` | `DetailSectionSpec` (`packages/contracts/components/src/detail_section.rs`) | `packages/render/src/detail_section.rs` | `packages/gpui/preview/src/specimens/detail_section_specimen.rs` |
 | `DockRegion` | complete | complete | `DockRegionDragOverGate.test.tsx`, `DockRegionTabPassThroughs.test.tsx`, `DockRegionZoneDrop.test.tsx` | `DockRegionSpec` (`packages/contracts/components/src/dock_region.rs`) | `packages/render/src/dock_region.rs` | `missing` |
-| `DetailShell` | complete | complete | `missing` — smoke only | `DetailShellSpec` (`packages/contracts/components/src/detail_shell.rs`) | `packages/render/src/detail_shell.rs` | `packages/gpui/preview/src/specimens/detail_shell.rs` |
-| `EmbedInput` | complete | complete | `missing` — smoke only | `EmbedInputSpec` (`packages/contracts/components/src/embed_input.rs`) | `packages/render/src/embed_input.rs` | `packages/gpui/preview/src/specimens/embed_input_specimen.rs` |
-| `EmbedPreview` | complete | complete | `missing` — smoke only | `EmbedPreviewSpec` (`packages/contracts/components/src/embed_preview.rs`) | `packages/render/src/embed_preview.rs` | `packages/gpui/preview/src/specimens/embed_preview_specimen.rs` |
-| `EmptyState` | complete | complete | `missing` — smoke only | `EmptyStateSpec` (`packages/contracts/components/src/empty_state.rs`) | `packages/render/src/empty_state.rs` | `missing` |
-| `FilterToolbar` | complete | complete | `missing` — smoke only | `FilterToolbarSpec` (`packages/contracts/components/src/filter_toolbar.rs`) | `packages/render/src/filter_toolbar.rs` | `packages/gpui/preview/src/specimens/filter_toolbar_specimen.rs` |
+| `DetailShell` | complete | complete | `DetailShell.test.tsx` | `DetailShellSpec` (`packages/contracts/components/src/detail_shell.rs`) | `packages/render/src/detail_shell.rs` | `packages/gpui/preview/src/specimens/detail_shell.rs` |
+| `EmbedInput` | complete | complete | `EmbedInput.test.tsx` | `EmbedInputSpec` (`packages/contracts/components/src/embed_input.rs`) | `packages/render/src/embed_input.rs` | `packages/gpui/preview/src/specimens/embed_input_specimen.rs` |
+| `EmbedPreview` | complete | complete | `EmbedPreview.test.tsx` | `EmbedPreviewSpec` (`packages/contracts/components/src/embed_preview.rs`) | `packages/render/src/embed_preview.rs` | `packages/gpui/preview/src/specimens/embed_preview_specimen.rs` |
+| `EmptyState` | complete | complete | `EmptyState.test.tsx` | `EmptyStateSpec` (`packages/contracts/components/src/empty_state.rs`) | `packages/render/src/empty_state.rs` | `missing` |
+| `FilterToolbar` | complete | complete | `FilterToolbar.test.tsx` | `FilterToolbarSpec` (`packages/contracts/components/src/filter_toolbar.rs`) | `packages/render/src/filter_toolbar.rs` | `packages/gpui/preview/src/specimens/filter_toolbar_specimen.rs` |
 | `FormDialog` | complete | complete | `DialogInitialFocus.test.tsx` | `FormDialogSpec` (`packages/contracts/components/src/form_dialog.rs`) | `packages/render/src/form_dialog.rs` | `packages/gpui/preview/src/specimens/form_dialog_specimen.rs` |
-| `FormLayout` | complete | complete | `missing` — smoke only | `FormLayoutSpec` (`packages/contracts/components/src/form_layout.rs`) | `packages/render/src/form_layout.rs` | `packages/gpui/preview/src/specimens/form_layout.rs` |
-| `InlineListSection` | complete | complete | `missing` — smoke only | `InlineListSectionSpec` (`packages/contracts/components/src/inline_list_section.rs`) | `packages/render/src/inline_list_section.rs` | `packages/gpui/preview/src/specimens/inline_list_section_specimen.rs` |
-| `DebugDialog` | complete | complete | `missing` — smoke only | `DebugDialogSpec` (`packages/contracts/components/src/debug_dialog.rs`) | `packages/render/src/debug_dialog.rs` | `packages/gpui/preview/src/specimens/debug_dialog_specimen.rs` |
+| `FormLayout` | complete | complete | `FormLayout.test.tsx` | `FormLayoutSpec` (`packages/contracts/components/src/form_layout.rs`) | `packages/render/src/form_layout.rs` | `packages/gpui/preview/src/specimens/form_layout.rs` |
+| `InlineListSection` | complete | complete | `InlineListSection.test.tsx` | `InlineListSectionSpec` (`packages/contracts/components/src/inline_list_section.rs`) | `packages/render/src/inline_list_section.rs` | `packages/gpui/preview/src/specimens/inline_list_section_specimen.rs` |
+| `DebugDialog` | complete | complete | `DebugDialog.test.tsx` | `DebugDialogSpec` (`packages/contracts/components/src/debug_dialog.rs`) | `packages/render/src/debug_dialog.rs` | `packages/gpui/preview/src/specimens/debug_dialog_specimen.rs` |
 | `LicenceActivation` | complete | complete | `LicenceActivation.test.tsx` | `missing` | `missing` | `missing` |
 | `LicenceSeats` | complete | complete | `LicenceSeats.test.tsx` | `missing` | `missing` | `missing` |
 | `LicenceStatus` | complete | complete | `LicenceStatus.test.tsx` | `missing` | `missing` | `missing` |
-| `LogList` | complete | complete | `missing` — smoke only | `LogListSpec` (`packages/contracts/components/src/log_list.rs`) | `packages/render/src/log_list.rs` | `packages/gpui/preview/src/specimens/log_list_specimen.rs` |
-| `ListContainer` | complete | complete | `missing` — smoke only | `ListContainerSpec` (`packages/contracts/components/src/list_container.rs`) | `packages/render/src/list_container.rs` | `packages/gpui/preview/src/specimens/list_container_specimen.rs` |
-| `MarkdownEditor` | complete | complete | `missing` — smoke only | `MarkdownEditorSpec` (`packages/contracts/components/src/markdown_editor.rs`) | `packages/render/src/markdown_editor.rs` | `packages/gpui/preview/src/specimens/markdown_editor_specimen.rs` |
-| `PageLoading` | complete | complete | `missing` — smoke only | `PageLoadingSpec` (`packages/contracts/components/src/page_loading.rs`) | `packages/render/src/page_loading.rs` | `packages/gpui/preview/src/specimens/page_loading_specimen.rs` |
-| `MediaPicker` | complete | complete | `missing` — smoke only | `MediaPickerSpec` (`packages/contracts/components/src/media_picker.rs`) | `packages/render/src/media_picker.rs` | `packages/gpui/preview/src/specimens/media_picker_specimen.rs` |
-| `MediaBrowsePanel` | complete | complete | `missing` — smoke only | `MediaBrowsePanelSpec` (`packages/contracts/components/src/media_browse_panel.rs`) | `packages/render/src/media_browse_panel.rs` | `packages/gpui/preview/src/specimens/media_browse_panel_specimen.rs` |
-| `MediaPreview` | complete | complete | `missing` — smoke only | `MediaPreviewSpec` (`packages/contracts/components/src/media_preview.rs`) | `packages/render/src/media_preview.rs` | `packages/gpui/preview/src/specimens/media_preview_specimen.rs` |
-| `MediaThumbnail` | complete | complete | `missing` — smoke only | `MediaThumbnailSpec` (`packages/contracts/components/src/media_thumbnail.rs`) | `packages/render/src/media_thumbnail.rs` | `packages/gpui/preview/src/specimens/media_thumbnail_specimen.rs` |
-| `PageHeader` | complete | complete | `missing` — smoke only | `PageHeaderSpec` (`packages/contracts/components/src/page_header.rs`) | `packages/render/src/page_header.rs` | `packages/gpui/preview/src/specimens/page_header_specimen.rs` |
-| `PickerShell` | complete | complete | `missing` — smoke only | `PickerShellSpec` (`packages/contracts/components/src/picker_shell.rs`) | `packages/render/src/picker_shell.rs` | `packages/gpui/preview/src/specimens/picker_shell_specimen.rs` |
-| `RelationPicker` | complete | complete | `missing` — smoke only | `RelationPickerSpec` (`packages/contracts/components/src/relation_picker.rs`) | `packages/render/src/relation_picker.rs` | `packages/gpui/preview/src/specimens/relation_picker_specimen.rs` |
-| `SelectionSummary` | complete | complete | `missing` — smoke only | `SelectionSummarySpec` (`packages/contracts/components/src/selection_summary.rs`) | `packages/render/src/selection_summary.rs` | `packages/gpui/preview/src/specimens/selection_summary_specimen.rs` |
+| `LogList` | complete | complete | `LogList.test.tsx` | `LogListSpec` (`packages/contracts/components/src/log_list.rs`) | `packages/render/src/log_list.rs` | `packages/gpui/preview/src/specimens/log_list_specimen.rs` |
+| `ListContainer` | complete | complete | `ListContainer.test.tsx` | `ListContainerSpec` (`packages/contracts/components/src/list_container.rs`) | `packages/render/src/list_container.rs` | `packages/gpui/preview/src/specimens/list_container_specimen.rs` |
+| `MarkdownEditor` | complete | complete | `MarkdownEditor.test.tsx` | `MarkdownEditorSpec` (`packages/contracts/components/src/markdown_editor.rs`) | `packages/render/src/markdown_editor.rs` | `packages/gpui/preview/src/specimens/markdown_editor_specimen.rs` |
+| `PageLoading` | complete | complete | `PageLoading.test.tsx` | `PageLoadingSpec` (`packages/contracts/components/src/page_loading.rs`) | `packages/render/src/page_loading.rs` | `packages/gpui/preview/src/specimens/page_loading_specimen.rs` |
+| `MediaPicker` | complete | complete | `MediaPicker.test.tsx` | `MediaPickerSpec` (`packages/contracts/components/src/media_picker.rs`) | `packages/render/src/media_picker.rs` | `packages/gpui/preview/src/specimens/media_picker_specimen.rs` |
+| `MediaBrowsePanel` | complete | complete | `MediaBrowsePanel.test.tsx` | `MediaBrowsePanelSpec` (`packages/contracts/components/src/media_browse_panel.rs`) | `packages/render/src/media_browse_panel.rs` | `packages/gpui/preview/src/specimens/media_browse_panel_specimen.rs` |
+| `MediaPreview` | complete | complete | `MediaPreview.test.tsx` | `MediaPreviewSpec` (`packages/contracts/components/src/media_preview.rs`) | `packages/render/src/media_preview.rs` | `packages/gpui/preview/src/specimens/media_preview_specimen.rs` |
+| `MediaThumbnail` | complete | complete | `MediaThumbnail.test.tsx` | `MediaThumbnailSpec` (`packages/contracts/components/src/media_thumbnail.rs`) | `packages/render/src/media_thumbnail.rs` | `packages/gpui/preview/src/specimens/media_thumbnail_specimen.rs` |
+| `PageHeader` | complete | complete | `PageHeader.test.tsx` | `PageHeaderSpec` (`packages/contracts/components/src/page_header.rs`) | `packages/render/src/page_header.rs` | `packages/gpui/preview/src/specimens/page_header_specimen.rs` |
+| `PickerShell` | complete | complete | `PickerShell.test.tsx` | `PickerShellSpec` (`packages/contracts/components/src/picker_shell.rs`) | `packages/render/src/picker_shell.rs` | `packages/gpui/preview/src/specimens/picker_shell_specimen.rs` |
+| `RelationPicker` | complete | complete | `RelationPicker.test.tsx` | `RelationPickerSpec` (`packages/contracts/components/src/relation_picker.rs`) | `packages/render/src/relation_picker.rs` | `packages/gpui/preview/src/specimens/relation_picker_specimen.rs` |
+| `SelectionSummary` | complete | complete | `SelectionSummary.test.tsx` | `SelectionSummarySpec` (`packages/contracts/components/src/selection_summary.rs`) | `packages/render/src/selection_summary.rs` | `packages/gpui/preview/src/specimens/selection_summary_specimen.rs` |
 | `SettingsShell` | complete | complete | `SettingsShell.test.tsx` | `missing` | `missing` | `missing` |
-| `SidebarNav` | complete | complete | `missing` — smoke only | `SidebarNavSpec` (`packages/contracts/components/src/sidebar_nav.rs`) | `packages/render/src/sidebar_nav.rs` | `packages/gpui/preview/src/specimens/sidebar_nav.rs` |
+| `SidebarNav` | complete | complete | `SidebarNav.test.tsx` | `SidebarNavSpec` (`packages/contracts/components/src/sidebar_nav.rs`) | `packages/render/src/sidebar_nav.rs` | `packages/gpui/preview/src/specimens/sidebar_nav.rs` |
 | `Tree` | complete | complete | `missing` — smoke only | `TreeSpec` (`packages/contracts/components/src/tree.rs`) | `packages/render/src/tree.rs` | `packages/gpui/preview/src/specimens/tree.rs` |
 | `SplitView` | complete | complete | `missing` — smoke only | `SplitViewSpec` (`packages/contracts/components/src/split_view.rs`) | `packages/render/src/split_view.rs` | `packages/gpui/preview/src/specimens/split_view_specimen.rs` |
-| `MetricTile` | complete | complete | `missing` — smoke only | `MetricTileSpec` (`packages/contracts/components/src/metric_tile.rs`) | `packages/render/src/metric_tile.rs` | `packages/gpui/preview/src/specimens/metric_tile_specimen.rs` |
+| `MetricTile` | complete | complete | `MetricTile.test.tsx` | `MetricTileSpec` (`packages/contracts/components/src/metric_tile.rs`) | `packages/render/src/metric_tile.rs` | `packages/gpui/preview/src/specimens/metric_tile_specimen.rs` |
 | `StateTile` | complete | complete | `WebParityCloseout.test.tsx` | `StateTileSpec` (`packages/contracts/components/src/state_tile.rs`) | `packages/render/src/state_tile.rs` | `missing` |
 | `ValidationSummary` | complete | complete | `WebParityCloseout.test.tsx` | `ValidationSummarySpec` (`packages/contracts/components/src/validation_summary.rs`) | `packages/render/src/validation_summary.rs` | `packages/gpui/preview/src/specimens/validation_summary.rs` |
 | `ModelPicker` | complete | complete | `ModelPicker.test.tsx` | `ModelPickerSpec` (`packages/contracts/components/src/model_picker.rs`) | `packages/render/src/model_picker.rs` | `packages/gpui/preview/src/specimens/model_picker_specimen.rs` |
@@ -434,8 +434,8 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 | `HistoryCenter` | complete | complete | `HistoryCenter.test.tsx` | `HistoryCenterSpec` (`packages/contracts/components/src/history_center.rs`) | `packages/render/src/history_center.rs` | `packages/gpui/preview/src/specimens/history_center_specimen.rs` |
 | `UpdateStatus` | complete | complete | `UpdateStatus.test.tsx` | `missing` | `missing` | `missing` |
 | `UpdateCenter` | complete | complete | `UpdateCenter.test.tsx` | `missing` | `missing` | `missing` |
-| `ToastStack` | complete | complete | `missing` — smoke only | `ToastStackSpec` (`packages/contracts/components/src/toast_stack.rs`) | `packages/render/src/toast_stack.rs` | `packages/gpui/preview/src/specimens/toast_stack_specimen.rs` |
-| `ToastHost` | complete | complete | `missing` — smoke only | `ToastHostSpec` (`packages/contracts/components/src/toast_host.rs`) | `packages/render/src/toast_host.rs` | `packages/gpui/preview/src/specimens/toast_host.rs` |
+| `ToastStack` | complete | complete | `ToastStack.test.tsx` | `ToastStackSpec` (`packages/contracts/components/src/toast_stack.rs`) | `packages/render/src/toast_stack.rs` | `packages/gpui/preview/src/specimens/toast_stack_specimen.rs` |
+| `ToastHost` | complete | complete | `ToastHost.test.tsx` | `ToastHostSpec` (`packages/contracts/components/src/toast_host.rs`) | `packages/render/src/toast_host.rs` | `packages/gpui/preview/src/specimens/toast_host.rs` |
 
 ### Audio controls
 
