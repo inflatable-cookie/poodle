@@ -20,6 +20,7 @@ out/
 .env.*
 !.env.example
 !.env.*.example
+/.agents.local.env
 
 # Private credentials and signing material
 *.key

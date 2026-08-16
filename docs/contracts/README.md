@@ -1,7 +1,7 @@
 # Contracts
 
 Status: active
-Updated: 2026-04-11
+Updated: 2026-08-16
 
 Contracts are the docs-first source of truth for Poodle components.
 
@@ -43,6 +43,8 @@ contract references the rule rather than restating it:
   accessibility API, so `aria_label` is carried but inert there
 - `004-shared-control-types.md` — types shared by more than one component
   contract are defined once and referenced, never restated with fewer members
+- `005-agent-local-paths.md` — local-only agent paths and manual worktree
+  locations are explicit, ignored, and operator-selected
 
 ## Current Contracts
 
