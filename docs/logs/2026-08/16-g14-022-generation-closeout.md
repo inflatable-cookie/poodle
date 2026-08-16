@@ -1,6 +1,6 @@
 # g14.022 — Generation closeout
 
-Status: delivered — pending orchestrator review
+Status: complete — orchestrator approved
 Date: 2026-08-16
 Card: `docs/roadmaps/g14/022-generation-closeout.md`
 Governing refs: `docs/roadmaps/g14/008-pilot-verdict.md`,
@@ -16,10 +16,9 @@ closeout delivered:
 
 - every live g14 status resolved: `017` and `020` are superseded execution
   plans with approved web references preserved; `026` carries forward into the
-  next runway with its rubric intact; `022` itself is delivered pending review
+  next runway with its rubric intact; `022` is complete
 - a next-generation front door (`docs/roadmaps/g15/README.md`) and exactly one
-  release-baseline roster inventory card (`g15.001`), blocked pending this
-  closeout's merge
+  release-baseline roster inventory card (`g15.001`), ready for dispatch
 - a stale-reference sweep that left standing surfaces consistent with the
   post-reject system
 - a CI recommendation for the stale `ci-conformance.yml` workflow, recorded
@@ -41,26 +40,26 @@ validation ran.
 | HistoryCenter comparator correction | 1,205 cross-runtime differences |
 | Admission rules failed | 4 of 5, including the cost stop condition |
 
-### Cleanup delta (`g14.021`, merge `59d93d2f` against `52039d6f`)
+### Cleanup delta (`g14.021`, merge `59d93d2f` against reject base `71160b8a`)
 
-Raw total: 164 files, +2,705 / -34,285. Split honestly — generated deletion is
+Raw total: 144 files, +2,151 / -33,992. Split honestly — generated deletion is
 not implementation cost saved:
 
 | Surface | Added | Deleted |
 | --- | ---: | ---: |
-| Hand-written source, tests, and config (core, render, gpui, codegen source, Svelte/React, contracts, task/CI config) | +1,783 | -21,048 |
+| Hand-written source, tests, and config (core, render, gpui, codegen source, Svelte/React, contracts, task/CI config) | +1,767 | -21,055 |
 | Generated artifacts (codegen conformance fixtures JSON, generated Rust declarations) | 0 | -12,475 |
-| Docs (verdict, cleanup log, retained-estate ledger) | +922 | -762 |
-| **Total** | **+2,705** | **-34,285** |
+| Docs (verdict, cleanup log, retained-estate ledger) | +384 | -462 |
+| **Total** | **+2,151** | **-33,992** |
 
-The rejected-plane paths alone account for -27,950 deleted with zero additions:
-`packages/core/src/conformance/**`, `test/conformance/**`,
-`packages/core/scripts/conformance-*`, `packages/codegen/src/conformance*`,
-`packages/codegen/fixtures/conformance/**`, generated Rust declarations, and
-the GPUI corpus adapters. The six retained headless regressions replace the
-pilot's completion gate; they are 6 `#[test]` cases in
+The dominant deletions are the rejected-plane paths:
+`packages/core/src/conformance/**`, `test/conformance/**`, the conformance
+scripts and primitive report, codegen conformance source and fixtures,
+generated Rust declarations, render probes, and the GPUI corpus adapters. The
+six retained headless regressions replace the pilot's completion gate; they are
+6 `#[test]` cases in
 `packages/gpui/preview/tests/headless_regressions.rs`, run by
-`effigy regressions:native` (~0.05s each, in-memory, no window).
+`effigy regressions:native` (about 0.05s for the board, in-memory, no window).
 
 ### Retained estate confirmed live
 
@@ -79,9 +78,9 @@ pilot's completion gate; they are 6 `#[test]` cases in
 - The rejected pilot plane is absent from source, package exports, and task
   selectors. Historical surfaces (architecture 009, spec 066, delivery logs,
   `g14.001`–`007` cards) remain readable and explicitly rejected.
-- Standing docs were already consistent after `g14.021`; the sweep found one
-  stale front-door claim (`docs/specs/README.md` still pointed specimen work
-  at `g14.026` as current) and repaired it to the carry-forward.
+- The sweep repaired the stale specimen front-door claim and the four active
+  model-connection contracts that still described the rejected g14 adoption
+  pipeline as future work.
 - The g13 machine-vector codegen (`packages/codegen/src/targets/conformance.rs`)
   is untouched — different mechanism, same word.
 
@@ -97,7 +96,7 @@ These remain open after closeout and are explicitly not closed:
 - a primitive-first visual conformance lane (seam recorded in
   `conformance-estate.md` and the g15 card; harness not designed)
 - a v0.2.0 release baseline: the complete Svelte roster inventory and frozen
-  denominator (`g15.001`, blocked pending this closeout)
+  denominator (`g15.001`, ready for dispatch)
 
 ## Known Limits
 

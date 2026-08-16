@@ -1,6 +1,6 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: blocked — first card waits on the `g14.022` closeout merge
+Status: active — `g15.001` ready for dispatch
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -21,6 +21,14 @@ architectures were tried and rejected (g13's Rust IR, g14's executable
 conformance). g15 does not design a third one. It inventories, closes the
 honest gaps, and ships.
 
+## Release Support Versus Parity Completion
+
+The full Svelte roster is the v0.2.0 release denominator. Certifying that
+package does not certify active-cohort parity across Svelte, React, Rust, and
+GPUI. Missing mirrors and native implementations remain explicit gaps under
+the working rules; experimental packages keep experimental labels, and Poodle
+does not claim full cross-runtime completion while those gaps remain.
+
 ## Why It Matters
 
 Longhorn and most projects under `~/Dev/projects` depend on Poodle. v0.2.0
@@ -30,14 +38,13 @@ unproved, and what each runtime's evidence is — then ship.
 
 ## Sequence
 
-Only `001` is created. Nothing is dispatched until the g14 closeout merges and
-the orchestrator reviews it. Later cards are compiled into bounded family
-tranches only after the inventory exists; no component rollout is pre-authored
-from memory.
+Only `001` is created. Later cards are compiled into bounded family tranches
+only after the inventory exists; no component rollout is pre-authored from
+memory.
 
 ## Runway
 
-1. [001 — Release-baseline roster inventory](001-release-baseline-roster-inventory.md) — blocked on `g14.022` closeout merge
+1. [001 — Release-baseline roster inventory](001-release-baseline-roster-inventory.md) — ready for dispatch
 
 ## Carry-Forward Envelope (recorded, not implemented)
 
@@ -63,6 +70,4 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Dispatch `g15.001` — the release-baseline roster inventory — after the
-`g14.022` closeout merges and the orchestrator reviews it. Until then the
-generation stays blocked.
+Dispatch `g15.001` — the release-baseline roster inventory.

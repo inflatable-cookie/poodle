@@ -1,6 +1,6 @@
 # g14 — Executable Component Conformance
 
-Status: delivered — pending orchestrator review (`g14.022`)
+Status: complete (`g14.022`)
 Posture: migration — closed
 Opened: 2026-08-14
 Verdict: `g14.008` **rejected** the executable conformance mechanism
@@ -85,7 +85,7 @@ human-centred rubric intact. The generation's closeout log is
 20. [019 — Model connection reference review](019-model-connection-reference-review.md) — complete; reference approved
 21. [020 — Model connection active-runtime completion](020-model-connection-active-runtime-completion.md) — **superseded** by `022`; native completion recompiled under the next runway
 22. [021 — Rejected pilot cleanup and evidence retention](021-experimental-cleanup-and-gate-consolidation.md) — complete
-23. [022 — Generation closeout](022-generation-closeout.md) — **delivered; pending orchestrator review**
+23. [022 — Generation closeout](022-generation-closeout.md) — complete
 24. [024 — Batched AudioMeter web surface](024-batched-audio-meter-web-surface.md) — complete
 25. [025 — Preview catalogue taxonomy and generated navigation](025-preview-catalogue-taxonomy-and-generated-navigation.md) — complete
 26. [026 — Human-centred specimen catalogue audit](026-human-centred-specimen-catalogue-audit.md) — **carried forward** into the next release runway
@@ -97,13 +97,11 @@ to a fresh thread/worktree when its dependencies are met. Workers do not write
 `dispatch.md` or change roadmap status. The orchestrator reviews the PR,
 records evidence, merges, then opens the next file.
 
-`g14.022` delivered the closeout; the generation is pending orchestrator
-review. The next runway (g15) opens a release-first v0.2.0 baseline and is not
-dispatched until this closeout merges.
+`g14.022` completed the closeout. The next runway (g15) is the active,
+release-first v0.2.0 baseline.
 
 ## Current Task
 
-Generation closed at dispatch boundary. The next-generation README and one
-release-baseline inventory card exist under `../g15/` and are blocked pending
-the `g14.022` closeout merge. `017`, `020`, and `026` carry forward into that
-runway; do not dispatch them as g14 work.
+Generation complete. The release-baseline inventory is ready under `../g15/`.
+`017`, `020`, and `026` carry forward into that runway; do not dispatch them as
+g14 work.

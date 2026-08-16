@@ -182,7 +182,8 @@ single-select transition, radio roving focus, and id wiring.
 
 ## 10. GPUI Notes
 
-- Deferred until the g14 pilot adopts the active-runtime pipeline.
+- Not implemented in GPUI. The g14 adoption pipeline was rejected; native
+  completion must be planned from this contract under the g15 release runway.
 - Preserve exact id selection, radio semantics, local filtering, and roving
   focus; brand marks remain consumer-rendered content.
 
@@ -206,11 +207,11 @@ single-select transition, radio roving focus, and id wiring.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Native implementation deferred | g14 pilot verdict not yet recorded | approved staging delta | close in active-runtime tranche |
+| Native implementation missing | rejected g14 pilot supplied no adoption path | open runtime gap; not parity-certified | g15 release-gap inventory |
 
 ## 13. Approval And Adoption Notes
 
 - contract status: `approved`
 - approver: operator, 2026-08-14
 - downstream adopter: Nucleus
-- future follow-up: executable g14 cases after adoption verdict
+- future follow-up: compile native completion from the g15 release-gap inventory

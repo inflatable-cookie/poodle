@@ -1,6 +1,6 @@
 # g15.001 — Release-Baseline Roster Inventory
 
-Status: blocked — pending `g14.022` closeout merge
+Status: ready for dispatch
 Depends on: `g14.022` (closeout), `g14.021` (cleanup evidence)
 Governing refs: `../g14/022-generation-closeout.md`,
 `../g14/conformance-estate.md`, `../../contracts/001-working-rules.md`,
@@ -14,19 +14,24 @@ posture per surface. The result is the release baseline: what is certified,
 what is missing, and who owns each gap. It is not a third parity
 architecture and it does not compile rollout work from memory.
 
-This card is the first executable step of the v0.2.0 release runway. It is
-blocked until the g14 closeout merges and the orchestrator reviews it.
+This card is the first executable step of the v0.2.0 release runway.
 
 ## Denominator Ruling (operator-approved, `g14.022`)
 
 - The v0.2.0 denominator is **every public Svelte component export**,
-  enumerated from `packages/svelte/components/src/index.ts` and the package
-  `exports` map — not a representative subset.
+  enumerated from component-valued exports in
+  `packages/svelte/components/src/index.ts` and checked for packed reachability
+  through the package `exports` map — not a representative subset. Public
+  types and helpers are recorded separately; they are not components in the
+  denominator.
 - React remains tightly paired with Svelte through shared CSS and
   framework-free web behaviour. Record React mirror coverage honestly; do not
   let an experimental React gap make the Svelte denominator vague.
 - Native release evidence names an explicit certified GPUI subset until the
   full Rust roster is complete. Do not call that full cross-runtime parity.
+- Svelte v0.2.0 certification is not active-cohort parity completion. React,
+  Rust, and GPUI gaps remain open under the working rules and experimental
+  packages keep honest labels.
 - Jetstream is program-deferred. Its eventual admission is renderer and
   backend work, not an assumed consequence of `poodle-node` reuse.
 - Contracts remain semantic authority. Curated specimens remain
@@ -45,8 +50,8 @@ blocked until the g14 closeout merges and the orchestrator reviews it.
       does not borrow another runtime's pass.
 - [ ] Produce the release-gap register: every component whose surfaces are
       not all present or not all evidenced, with a named owner.
-- [ ] Leave one clear next task: bounded family tranches compiled only after
-      this inventory exists.
+- [ ] Compile a visible next runway of bounded family tranches from measured
+      gaps only after this inventory exists.
 
 ## Surface Posture Fields
 
@@ -59,9 +64,23 @@ For each roster component, record one of `complete` / `partial` / `missing` /
 | Implementation | Svelte component in `packages/svelte/components/src/`; `check:svelte` |
 | Export | `packages/svelte/components/src/index.ts` and package `exports` map |
 | Specimen | Svelte preview catalogue entry; React gallery mirror where applicable |
-| Focused test | component test boards (`test:components`), `cargo test -p poodle-render`, `regressions:native` |
+| Focused Svelte evidence | exact component test file/case, or `missing`; an aggregate green selector is not component proof |
+| React mirror | exact implementation, export, specimen, and focused test where the component is in scope |
+| Rust declaration/render | exact declaration, render path, and focused test; record each independently |
+| GPUI surface | exact backend/specimen/headless test; `regressions:native` counts only where a named regression exercises this component |
 | Package-install | `test:web-pack-install` consumer smoke over the packed tarball |
-| Downstream use | surface-audit and known consumer posture; direction Longhorn → Poodle |
+| Downstream use | read-only contextual evidence from known consumers; absence is not a release failure; direction Longhorn → Poodle |
+
+Record whole-board validation separately from the per-component inventory.
+One runtime never borrows another runtime's test, export, or specimen pass.
+
+## Deliverables
+
+- `release-baseline-roster.md` — frozen denominator and per-surface evidence
+- `release-gap-register.md` — every incomplete surface, owner, and disposition
+- bounded family-tranche roadmap cards compiled from the measured register;
+  do not pre-author their contents from memory
+- one August batch log recording method, commands, uncertainties, and result
 
 ## Carry-Forward Requirements (recorded, not implemented)
 
@@ -85,8 +104,8 @@ For each roster component, record one of `complete` / `partial` / `missing` /
 - [ ] The release-gap register names a live owner per gap.
 - [ ] No component API, runtime code, specimen, or workflow was changed to
       produce the inventory.
-- [ ] The next runway card is one of the bounded family tranches, not a
-      pre-authored component rollout.
+- [ ] The g15 runway contains bounded family tranches compiled from measured
+      gaps, with the first executable tranche clearly identified.
 
 ## Stop Conditions
 
@@ -100,7 +119,7 @@ For each roster component, record one of `complete` / `partial` / `missing` /
 ## Writable Scope
 
 - the release inventory and gap register
-- this roadmap and the g15 index
+- this roadmap, the measured family-tranche cards, and the g15 index
 - one August batch log
 - `PAPERCUTS.md` only for newly discovered execution friction
 
@@ -111,6 +130,7 @@ For each roster component, record one of `complete` / `partial` / `missing` /
 - `effigy check:svelte`
 - `effigy react:build`
 - `effigy test:components`
+- `effigy test:web-pack-install`
 - `effigy qa` — headless local release board
 - `effigy doctor` — record baseline findings without fixing them
 - `git diff --check`

@@ -5,7 +5,7 @@ Updated: 2026-08-16
 ## Active Track
 
 - `g15`
-  - Status: blocked — first card waits on the `g14.022` closeout merge
+  - Status: active — `g15.001` ready for dispatch
   - Posture: release-first v0.2.0 baseline
   - Range: `001`
   - Verdict: none yet — the generation is a release baseline, not a
@@ -14,11 +14,12 @@ Updated: 2026-08-16
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch the release-baseline roster inventory card after the
-    closeout merges.
+  - Next: dispatch the release-baseline roster inventory card.
+
+## Latest Completed Track
 
 - `g14`
-  - Status: delivered — pending orchestrator review (`g14.022`)
+  - Status: complete (`g14.022`)
   - Range: `001` to `026`
   - Verdict: `g14.008` **rejected** architecture 009/spec 066 as Poodle's
     standing component-conformance mechanism.
@@ -33,8 +34,6 @@ Updated: 2026-08-16
     recompiles under the g15 runway. `026` is carried forward into g15 with
     its human-centred rubric intact. `022` closed the generation
     (`docs/logs/2026-08/16-g14-022-generation-closeout.md`).
-
-## Latest Completed Track
 
 - `g13`
   - Status: completed

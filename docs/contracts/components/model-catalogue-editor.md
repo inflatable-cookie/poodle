@@ -174,7 +174,8 @@ and disclosure transition for the hidden section.
 
 ## 10. GPUI Notes
 
-- Deferred until g14 adoption.
+- Not implemented in GPUI. The g14 adoption pipeline was rejected; native
+  completion must be planned from this contract under the g15 release runway.
 - Pointer drag may use native mechanics, but explicit and keyboard moves remain
   required for strict parity.
 
@@ -198,7 +199,7 @@ and disclosure transition for the hidden section.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Native implementation deferred | g14 pilot verdict not yet recorded | approved staging delta | active-runtime tranche |
+| Native implementation missing | rejected g14 pilot supplied no adoption path | open runtime gap; not parity-certified | g15 release-gap inventory |
 
 ## 13. Approval And Adoption Notes
 

@@ -1,6 +1,6 @@
 # g14.022 — Generation Closeout
 
-Status: delivered — pending orchestrator review
+Status: complete
 Log: `../../logs/2026-08/16-g14-022-generation-closeout.md`
 Depends on: `g14.021`
 Governing refs: `008-pilot-verdict.md`,
@@ -41,55 +41,55 @@ component APIs or implementations.
 
 ## Batch 1 — Closeout Audit
 
-- [ ] Read the g14.008 verdict, g14.021 cleanup log, retained-estate ledger,
+- [x] Read the g14.008 verdict, g14.021 cleanup log, retained-estate ledger,
       architecture 009, and spec 066 before editing status surfaces.
-- [ ] Confirm the rejected pilot plane is absent from active source, package
+- [x] Confirm the rejected pilot plane is absent from active source, package
       exports, task selectors, and standing docs. Historical roadmaps, logs,
       architecture, and specs remain readable and explicitly rejected.
-- [ ] Confirm every product/backend defect credited to the pilot has the live
+- [x] Confirm every product/backend defect credited to the pilot has the live
       owner named in the g14.021 ledger.
-- [ ] Record the final evidence honestly:
+- [x] Record the final evidence honestly:
   - pilot: 22,746 source LOC against 472 LOC replaced
   - corrected comparator: 1,205 HistoryCenter differences
   - cleanup: raw additions/deletions split between source, tests, generated
     artifacts, and docs; do not treat generated deletion as implementation
     cost saved
   - six retained headless native regressions
-- [ ] Inspect retained visual infrastructure without running any local
+- [x] Inspect retained visual infrastructure without running any local
       windowed capture. Record the generic pieces available to a later lane.
-- [ ] Run a stale-reference sweep. Repair active front doors only; do not
+- [x] Run a stale-reference sweep. Repair active front doors only; do not
       rewrite historical point-in-time evidence.
 
 ## Batch 2 — Resolve The Remaining g14 Cards
 
-- [ ] Mark `g14.017` and `g14.020` as superseded execution plans. Preserve
+- [x] Mark `g14.017` and `g14.020` as superseded execution plans. Preserve
       their approved web references and component requirements, but state that
       native completion must be recompiled under the next release runway.
-- [ ] Mark `g14.026` as carried forward rather than completed. Preserve its
+- [x] Mark `g14.026` as carried forward rather than completed. Preserve its
       human-centred rubric and bounded shared specimen-plan boundary.
-- [ ] Close or rehome every other live g14 status. Retired cards stay retired;
+- [x] Close or rehome every other live g14 status. Retired cards stay retired;
       completed independent lanes stay completed.
-- [ ] Update `g14/README.md`, `roadmaps/README.md`, and
+- [x] Update `g14/README.md`, `roadmaps/README.md`, and
       `roadmaps/generation-index.md` so no surface still names cleanup or
       g14.021 as current work.
 
 ## Batch 3 — Leave The v0.2.0 Planning Checkpoint
 
-- [ ] Create the next-generation front door and exactly one initial roadmap
+- [x] Create the next-generation front door and exactly one initial roadmap
       card. Keep it release-first, not architecture-first.
-- [ ] The initial card must inventory the complete Svelte public roster and
+- [x] The initial card must inventory the complete Svelte public roster and
       freeze the v0.2.0 denominator from source/package exports. For each
       component it should record contract, implementation, export, specimen,
       focused test, package-install, and downstream-use posture.
-- [ ] Record React mirror coverage, the certified GPUI subset, and deferred
+- [x] Record React mirror coverage, the certified GPUI subset, and deferred
       Jetstream separately. Missing evidence remains missing; one runtime does
       not borrow another runtime's pass.
-- [ ] Compile later work into bounded family tranches only after the inventory
+- [x] Compile later work into bounded family tranches only after the inventory
       exists. Do not pre-author a component rollout from memory.
-- [ ] Carry the approved Licence and model-connection web suites, the specimen
+- [x] Carry the approved Licence and model-connection web suites, the specimen
       catalogue audit, primitive-first visual conformance, and native
       completion into the next-generation envelope without implementing them.
-- [ ] Leave one clear next task: execute the roster/release-baseline inventory.
+- [x] Leave one clear next task: execute the roster/release-baseline inventory.
 
 ## CI Workflow Decision
 
@@ -97,11 +97,11 @@ component APIs or implementations.
 job name, and cache key describe the removed pilot, while its command now runs
 only `regressions:native`. `ci:native` already includes that board.
 
-- [ ] Inspect branch-protection/check-name implications and record a concrete
+- [x] Inspect branch-protection/check-name implications and record a concrete
       recommendation: delete the redundant workflow, or replace it with an
       honestly named focused-native workflow if a separate required check is
       still needed.
-- [ ] Do **not** edit `.github/workflows/` in this worker PR. Workflow mutation
+- [x] Do **not** edit `.github/workflows/` in this worker PR. Workflow mutation
       needs explicit operator approval. Keep `ci:conformance` as a compatibility
       alias until the orchestrator acts on the recommendation.
 
