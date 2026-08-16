@@ -5,18 +5,18 @@ Updated: 2026-08-16
 ## Active Track
 
 - `g15`
-  - Status: active — `g15.001`–`g15.003` complete; changes requested on
-    `g15.004` PR #26
+  - Status: active — `g15.001`–`g15.004` complete; `g15.006` ready
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `014`
-  - Verdict: `g15.001`–`g15.003` accepted — the generation is a measured
+  - Verdict: `g15.001`–`g15.004` accepted — the generation is a measured
     release baseline, not a parity architecture
   - Evidence: the v0.2.0 denominator is every public Svelte component
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: rebase and repair PR #26; reconcile shared evidence totals to 151
-    Svelte present / 24 missing and 147 React present / 28 missing.
+  - Next: dispatch `g15.006`, then `g15.005`. The first supplies the missing
+    React `AgentPlanRecord` implementation and closes five residual React
+    evidence gaps; the second closes the final Svelte and React evidence gaps.
 
 ## Latest Completed Track
 

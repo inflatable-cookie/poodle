@@ -1,7 +1,8 @@
 # g15.005 — Svelte Focused Evidence: Workstation Systems & Agent Surfaces
 
-Status: **blocked** — orchestration hold; `g15.004` remains in review repair
-Depends on: `g15.001`
+Status: **blocked** — `g15.006` must land the missing React `AgentPlanRecord`
+implementation before this paired-evidence tranche can execute
+Depends on: `g15.001`, `g15.006`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
 
@@ -15,6 +16,8 @@ transcript semantics, keyboard and focus behaviour, accessibility projection
 side so the mirror evidence moves with the reference. Agent surfaces are
 largely downstream-shared vocabulary; their focused tests assert transcript
 semantics without turning component tests into a cross-runtime corpus.
+`g15.006` lands the missing React `AgentPlanRecord` shell first; this card owns
+the paired Svelte/React focused case for it and the other 23 scoped components.
 
 ## Minimum Evidence Threshold
 
@@ -66,6 +69,9 @@ Run the narrow test round at the end of each batch.
       roster's Focused Svelte / Focused React test cells name the case files.
 - [ ] No contract changed except as a required consequence of a scoped fix,
       and then only with the fix itself and a contract-first update.
+- [ ] The post-card roster reads 175/0 focused Svelte evidence and 175/0
+      focused React evidence. From the `g15.006` baseline this card closes 24
+      Svelte gaps and 23 React gaps; AgentSubagent already has React evidence.
 
 ## Stop Conditions
 

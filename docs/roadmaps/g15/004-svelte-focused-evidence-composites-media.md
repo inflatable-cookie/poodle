@@ -1,8 +1,6 @@
 # g15.004 — Svelte Focused Evidence: Composites & Media
 
-Status: **changes requested** — PR #26; rebase onto merged PR #27, repair
-typecheck/diff failures, composition evidence, hermetic iframe tests, and
-reconcile the combined focused-evidence totals
+Status: **complete** — accepted and merged in PR #26 (`ea518272`)
 Depends on: `g15.001`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
@@ -30,16 +28,16 @@ side so the mirror evidence moves with the reference.
 
 ## Execution Plan
 
-- [ ] **Batch A — data & list composites (9):** DataTable, DetailSection,
+- [x] **Batch A — data & list composites (9):** DataTable, DetailSection,
       DetailSectionGroup, DetailShell, ListContainer, LogList,
       SelectionSummary, SidebarNav, MetricTile
-- [ ] **Batch B — media & content editors (8):** EmbedInput, EmbedPreview,
+- [x] **Batch B — media & content editors (8):** EmbedInput, EmbedPreview,
       MediaPicker, MediaBrowsePanel, MediaPreview, MediaThumbnail,
       BlockEditor, MarkdownEditor
-- [ ] **Batch C — selection & feedback composites (8):** CardRadioGroup,
+- [x] **Batch C — selection & feedback composites (8):** CardRadioGroup,
       CardToggleGroup, CommandPalette, ConfirmAction, EmptyState,
       ErrorBoundary, ToastStack, ToastHost
-- [ ] **Batch D — workflow & shell composites (10):** ActionDiscoveryPanel,
+- [x] **Batch D — workflow & shell composites (10):** ActionDiscoveryPanel,
       DebugDialog, EditableList, FilterToolbar, FormLayout,
       InlineListSection, PageHeader, PageLoading, PickerShell,
       RelationPicker
@@ -52,25 +50,25 @@ each batch.
 
 ## Goals
 
-- [ ] One focused Svelte test file (or named family cases) per component
+- [x] One focused Svelte test file (or named family cases) per component
       meeting the threshold above.
-- [ ] The same contract cases mirrored as focused React tests in the same
+- [x] The same contract cases mirrored as focused React tests in the same
       batch.
-- [ ] Bounded fixes to scoped implementation defects the new tests expose,
+- [x] Bounded fixes to scoped implementation defects the new tests expose,
       contract-first per the working rules: update the contract before
       changing observable inputs, defaults, states, events, keyboard
       behaviour, accessibility, layout intent, or token use.
-- [ ] Record each batch in one August batch log under `docs/logs/2026-08/`.
+- [x] Record each batch in one August batch log under `docs/logs/2026-08/`.
 
 ## Acceptance
 
-- [ ] Every scoped component has a named focused test case beyond the anatomy
+- [x] Every scoped component has a named focused test case beyond the anatomy
       smoke, on both Svelte and React sides.
-- [ ] `effigy check:svelte`, `effigy react:build`, `effigy test:components`,
+- [x] `effigy check:svelte`, `effigy react:build`, `effigy test:components`,
       `effigy docs:check` pass.
-- [ ] The register's row for each component flips to evidence-present, and the
+- [x] The register's row for each component flips to evidence-present, and the
       roster's Focused Svelte / Focused React test cells name the case files.
-- [ ] No contract changed except as a required consequence of a scoped fix,
+- [x] No contract changed except as a required consequence of a scoped fix,
       and then only with the fix itself and a contract-first update.
 
 ## Stop Conditions

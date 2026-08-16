@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Poodle orchestrator
-Updated: 2026-08-14
+Updated: 2026-08-16
 
 The orchestrator is the only writer. Workers write their scoped deliverables,
 batch log, and papercuts; they do not edit this ledger or roadmap/card status.
@@ -22,7 +22,7 @@ worktree. Paired Jetstream integration is explicit under `ci:jetstream` and
 
 | Batch | Card | Branch | Model | Status | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| `g15-r004-composites-media-evidence` | `g15/004-svelte-focused-evidence-composites-media.md` | `t3code/composites-media-evidence` | capable coding model, medium reasoning | changes-requested | PR #26 at `9dc1fde2`; review record: `https://github.com/inflatable-cookie/poodle/pull/26#issuecomment-5309324812`. Rebase onto merged PR #27, repair the Svelte check and range-diff failures, strengthen composition and iframe-test evidence, then reconcile shared totals to 151 Svelte present / 24 missing and 147 React present / 28 missing. |
+| `g15-r004-composites-media-evidence` | `g15/004-svelte-focused-evidence-composites-media.md` | `t3code/composites-media-evidence` | capable coding model, medium reasoning | merged | PR #26 accepted at `1b5ce921`; merge `ea518272`. Closed 35 paired focused-evidence gaps. Review repair made the pushed gates green, strengthened Svelte composition evidence, made embed tests hermetic, and reconciled the combined roster to 151/24 Svelte and 147/28 React. |
 | `g15-r003-forms-overlays-evidence` | `g15/003-svelte-focused-evidence-forms-inputs-overlays.md` | `t3code/svelte-evidence-forms-overlays` | t3code thread | merged | PR #27 accepted at `3fae3cc2`; merge `f86f3bd2`. Closed 26 Svelte and 25 React focused-evidence gaps. Review repair corrected counts, documented and packed-tested the additive core date API, added month-edge cases, and pinned picker clocks. |
 | `g14-r001-conformance-kernel-button` | `g14/001-conformance-kernel-and-button-proof.md` | `t3code/g14-conformance-kernel-button-proof` | maintainer thread | review-blocked | PR #10 / `1ce3710e` delivered against the superseded four-runtime card. Review found unbound TS types and cases, Button-specific shared observation, cross-runtime vacuity, direct node-callback activation instead of GPUI input, required Jetstream, and 5,145 mechanism lines against 844 replaced. Do not merge; use `docs/logs/2026-08/14-083242-g14-001-rework-handoff.md` with the revised card. |
 | `g14-r015-licence-web-reference` | `g14/015-licence-web-reference.md` | `t3code/add-g14-licence-web-reference` | maintainer thread | merged | Merge `fd32d7d5`; Svelte/React reference and matching standalone specimens landed. Active native/shared-case completion remains g14.017. |

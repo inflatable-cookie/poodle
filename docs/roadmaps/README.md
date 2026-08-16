@@ -14,8 +14,9 @@ v0.2.0 release-baseline generation.
   `g14.021` preserved the useful fixes and removed the failed authority;
   `g14.022` completed the closeout. The generation is complete.
 - `g15` is the release-first v0.2.0 runway. The release-baseline roster and
-  first two focused-evidence tranches are complete; PR #26 (`g15.004`) has
-  changes requested. Jetstream remains deferred.
+  first three focused-evidence tranches are complete; `g15.006` is the next
+  ready card, followed by the final Svelte evidence tranche in `g15.005`.
+  Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
 - The first g14 machine-pinning/scene runway was reset after five merged
@@ -40,8 +41,8 @@ v0.2.0 release-baseline generation.
 - `g12` — React parity, verification depth, native hardening, audio family
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
-- `g15` — active v0.2.0 release baseline; `g15.003` complete and `g15.004`
-  in review repair
+- `g15` — active v0.2.0 release baseline; `g15.001`–`g15.004` complete and
+  `g15.006` ready
 
 ## Rules
 

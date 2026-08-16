@@ -1,6 +1,6 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.003` complete; `g15.004` changes requested
+Status: active — `g15.001`–`g15.004` complete; `g15.006` ready
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -52,9 +52,9 @@ and status advance are the orchestrator's.
 1. [001 — Release-baseline roster inventory](001-release-baseline-roster-inventory.md) — complete
 2. [002 — Svelte focused evidence: foundation display & shell](002-svelte-focused-evidence-display-shell.md) — complete; 29 paired evidence gaps closed
 3. [003 — Svelte focused evidence: forms, inputs & overlays](003-svelte-focused-evidence-forms-inputs-overlays.md) — complete; 26 Svelte and 25 React evidence gaps closed
-4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — changes requested on PR #26
-5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — pairs React evidence
-6. [006 — React mirror implementation & gallery closure](006-react-mirror-closure.md) — depends on `001`; the two missing implementations and six gallery pages
+4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — complete; 35 paired evidence gaps closed
+5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — follows `006`; pairs the final 24 Svelte/React evidence gaps
+6. [006 — React mirror implementation & gallery closure](006-react-mirror-closure.md) — ready; runs before `005` to supply its missing React implementation and close five residual React evidence gaps
 7. [007 — Licence family native completion](007-licence-family-native-completion.md) — carries `g14.017`
 8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — carries `g14.020`
 9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md)
@@ -91,6 +91,8 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Repair PR #26 against its orchestrator review. Rebase it onto merged PR #27,
-then reconcile the shared roster/register totals to 151 Svelte present / 24
-missing and 147 React present / 28 missing before its final gate.
+Dispatch `g15.006` from current `origin/main`. It closes the two missing React
+implementations, six gallery pages, and five residual focused-evidence gaps.
+The expected post-card React counts are 175/0 implementation, 175/0 gallery,
+and 152/23 focused evidence. Then `g15.005` closes the final 24 Svelte and 23
+React evidence gaps, leaving both focused-evidence axes at 175/0.

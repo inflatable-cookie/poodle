@@ -1,6 +1,6 @@
 # g15.007 — Licence Family Native Completion
 
-Status: **blocked** — orchestration hold; `g15.004` remains in review repair
+Status: **blocked** — orchestration hold; `g15.006` then `g15.005` are next
 Depends on: `g15.001` (measured gaps); carries `g14.017` requirements with
 approved web references (`g14.015`/`g14.016`) intact
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,

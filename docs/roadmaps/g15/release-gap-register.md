@@ -38,7 +38,8 @@ roster's Downstream use column; Longhorn is the primary consumer).
 | No React implementation/export | AgentPlan, AgentPlanRecord | `g15.006` |
 | No React gallery specimen | AgentMessage, AgentPlan, AgentPlanRecord, ChangedFiles, ToolCall, ToolCallGroup | `g15.006` |
 | Focused React test gaps for the Svelte evidence tranches | paired with the same batches: each Svelte evidence tranche mirrors its contract cases on the React side | `g15.002`–`g15.005` |
-| Focused React test gaps for the mirror-closure components | AgentMessage, AgentPlan, AgentPlanRecord, ChangedFiles, ToolCall, ToolCallGroup | `g15.006` |
+| Residual focused React gaps paired to existing Svelte evidence | AgentPlan, Icon, IconProvider, Tree, SplitView | `g15.006` |
+| Focused React test gaps paired with the final Svelte evidence tranche | AgentMessage, AgentPlanRecord, ChangedFiles, ToolCall, ToolCallGroup | `g15.005` |
 
 ## Shared Rust Composition and GPUI Gaps
 

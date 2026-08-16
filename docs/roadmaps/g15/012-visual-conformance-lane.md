@@ -1,6 +1,6 @@
 # g15.012 — Primitive-First Visual Conformance Lane
 
-Status: **blocked** — orchestration hold; `g15.004` remains in review repair
+Status: **blocked** — orchestration hold; `g15.006` then `g15.005` are next
 Depends on: `g15.001` (measured roster)
 Governing refs: `release-baseline-roster.md`,
 `../../roadmaps/g14/022-generation-closeout.md` (operator ruling on future
