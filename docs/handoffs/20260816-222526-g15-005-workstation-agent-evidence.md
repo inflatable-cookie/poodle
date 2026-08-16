@@ -47,8 +47,9 @@ Here is the state this worker is inheriting:
 - **Worker worktree:** `/Users/tom/.t3/worktrees/poodle/g15-005-workstation-agent-evidence`
 - **Worktree creation command:** `git fetch origin && git worktree add /Users/tom/.t3/worktrees/poodle/g15-005-workstation-agent-evidence -b t3code/g15-005-workstation-agent-evidence origin/main`
 - **Worker worktree policy:** use the named clean non-`main` worktree when it
-  matches; otherwise create a unique temporary worktree and branch from
-  `origin/main` before editing
+  matches; otherwise preserve the current checkout, read `.agents.local.env`,
+  and require its operator-selected `AGENTS_WORKTREE_CONTAINER_DIR` before
+  creating a unique worktree and branch from `origin/main`
 - **Active spec lane:** none; component contracts and working rules are
   canonical
 - **Roadmap milestone:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/README.md`
@@ -59,7 +60,7 @@ Here is the state this worker is inheriting:
 - **Parallel safety check:** no concurrent lane is assumed; the roster and gap
   register are shared final-count surfaces, so do not overwrite newer totals
   if another PR lands while this run is active
-- **Canonical refs:** `/Users/tom/Dev/projects/poodle/docs/contracts/001-working-rules.md`, `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/release-baseline-roster.md`, `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/release-gap-register.md`, and the 24 named contracts under `/Users/tom/Dev/projects/poodle/docs/contracts/components/`
+- **Canonical refs:** `/Users/tom/Dev/projects/poodle/docs/contracts/001-working-rules.md`, `/Users/tom/Dev/projects/poodle/docs/contracts/005-agent-local-paths.md`, `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/release-baseline-roster.md`, `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/release-gap-register.md`, and the 24 named contracts under `/Users/tom/Dev/projects/poodle/docs/contracts/components/`
 - **Model capability profile:** capable coding model, medium reasoning; stop
   rather than guess on public API or contract ambiguity
 - **Tool/runtime restrictions:** never run a `*-windowed`,
@@ -148,11 +149,15 @@ before moving to batch B.
    match `/Users/tom/.t3/worktrees/poodle/g15-005-workstation-agent-evidence`
    and `t3code/g15-005-workstation-agent-evidence`, its status is empty, its
    branch is not `main`, and its `HEAD` is `origin/main`.
-3. If any condition fails, do not edit the current checkout. Create a unique
-   temporary worktree and branch from pushed `origin/main`, for example:
-   `TEMP_SUFFIX="$(date +%Y%m%d%H%M%S)-$$"; TEMP_WORKTREE="${TMPDIR:-/tmp}/northstar-worker-${TEMP_SUFFIX}"; TEMP_BRANCH="t3code/g15-005-workstation-agent-evidence-tmp-${TEMP_SUFFIX}"; git worktree add -b "$TEMP_BRANCH" "$TEMP_WORKTREE" "$(git rev-parse origin/main)"`
-   Record the actual fallback path and branch, and use only that worktree.
-   Never clean, reset, stash over, or discard the original checkout's state.
+3. If any condition fails, do not edit the current checkout. Preserve it, read
+   `.agents.local.env` as data, and require an absolute
+   `AGENTS_WORKTREE_CONTAINER_DIR` outside the repository. If the file or key
+   is absent or invalid, ask the operator for the absolute manual-worktree
+   container and stop. Never guess `/tmp`, `TMPDIR`, or a repository-adjacent
+   path. Once the path is valid, create a unique worktree and branch from
+   pushed `origin/main` beneath that container, record the actual path and
+   branch, and continue only there. Never clean, reset, stash over, or discard
+   the original checkout's state.
 4. From the selected worktree, confirm `git rev-parse HEAD` equals
    `git rev-parse origin/main`, confirm
    `git merge-base --is-ancestor c5f63180f83cc672da3e7ad0a8e1cea49a96bf15 HEAD`
