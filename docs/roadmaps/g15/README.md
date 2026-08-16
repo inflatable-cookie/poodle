@@ -44,7 +44,27 @@ memory.
 
 ## Runway
 
-1. [001 — Release-baseline roster inventory](001-release-baseline-roster-inventory.md) — ready for dispatch
+Measured from `g15.001`'s frozen roster (`release-baseline-roster.md`) and gap
+register (`release-gap-register.md`). All follow-on cards are blocked pending
+orchestrator review; they are listed in dependency order and are not
+dispatched.
+
+1. [001 — Release-baseline roster inventory](001-release-baseline-roster-inventory.md) — complete; frozen the 175-component denominator
+2. [002 — Svelte focused evidence: foundation display & shell](002-svelte-focused-evidence-display-shell.md) — **first executable tranche**; blocked
+3. [003 — Svelte focused evidence: forms, inputs & overlays](003-svelte-focused-evidence-forms-inputs-overlays.md) — blocked
+4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — blocked
+5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — blocked
+6. [006 — React mirror closure](006-react-mirror-closure.md) — blocked; mirrors `002`–`005`
+7. [007 — Licence family native completion](007-licence-family-native-completion.md) — blocked; carries `g14.017`
+8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — blocked; carries `g14.020`
+9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md) — blocked
+10. [010 — Display, workstation & agent GPUI specimens](010-display-workstation-agent-gpui-specimens.md) — blocked; GPUI closure after `007`–`009`
+11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — blocked; carries `g14.026`
+12. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — blocked; seam recorded, harness not designed
+13. [013 — v0.2.0 release certification](013-v020-release-certification.md) — blocked; depends on `002`–`006`
+
+Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
+[release-gap-register.md](release-gap-register.md)
 
 ## Carry-Forward Envelope (recorded, not implemented)
 
