@@ -1,6 +1,7 @@
 # g15.003 — Svelte Focused Evidence: Foundation Forms, Inputs & Overlays
 
-Status: **in progress** — `t3code/svelte-evidence-forms-overlays`
+Status: **changes requested** — PR #27; evidence counts, public date-helper
+surface, edge coverage, and clock pinning need repair
 Depends on: `g15.001`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`

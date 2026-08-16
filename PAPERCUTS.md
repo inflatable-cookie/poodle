@@ -7,6 +7,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-16 — two `effigy docs:check` runs in separate worktrees can race on
+  `gate-tree-guard` state: one run reached `--compare` after the shared snapshot
+  had disappeared and failed with "no snapshot found", while the other passed.
+  Namespace guard snapshots by worktree and process, or make snapshot/compare
+  one atomic invocation. Found while reviewing g15.003 and g15.004 in parallel.
+
+- 2026-08-16 — cards that say only `git diff --check` can report green after
+  all work is committed while committed trailing whitespace remains: the bare
+  command checks the empty working-tree diff. Final worker gates should compare
+  the integration range, for example `git diff --check origin/main...HEAD`.
+  Found on PR #26's committed g15.004 batch log.
+
 - 2026-08-16 — `icon_button` renders no focus patch, and the GPUI backend
   creates a focus handle only for a focusable node that carries one. Every
   IconButton is therefore unfocusable and unreachable by keyboard on native

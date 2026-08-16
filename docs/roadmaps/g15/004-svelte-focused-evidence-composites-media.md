@@ -1,6 +1,7 @@
 # g15.004 — Svelte Focused Evidence: Composites & Media
 
-Status: **ready for parallel dispatch**
+Status: **changes requested** — PR #26; pushed typecheck/diff failures,
+composition evidence, and hermetic iframe tests need repair
 Depends on: `g15.001`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
