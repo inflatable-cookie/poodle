@@ -1,11 +1,12 @@
 # g14 — Executable Component Conformance
 
-Status: active — cleanup complete; closeout next
-Posture: migration
+Status: delivered — pending orchestrator review (`g14.022`)
+Posture: migration — closed
 Opened: 2026-08-14
 Verdict: `g14.008` **rejected** the executable conformance mechanism
 Governing refs: `008-pilot-verdict.md`,
-`../../contracts/001-working-rules.md`
+`../../contracts/001-working-rules.md`,
+`../../logs/2026-08/16-g14-022-generation-closeout.md`
 
 ## Generation Result
 
@@ -49,13 +50,16 @@ this generation.
 execution. `008` recorded reject. `021` retained the evidence, restored the
 hand-written authorities, and removed the rejected plane
 (`../../logs/2026-08/16-g14-021-experimental-cleanup-and-gate-consolidation.md`).
-`022` closes the generation.
+`022` closed the generation.
 
 The independent Licence (`015`–`017`), model-connection (`018`–`020`), batched
 meter (`024`), catalogue taxonomy (`025`), and specimen audit (`026`) lanes
-remain separately tracked. `017`, `020`, and `026` are held for the closeout's
-carry-forward ruling so they do not build on rejected authority or projection
-wiring.
+remain separately tracked. `022` gave them their final dispositions: the
+approved web references (`015`/`016`, `018`/`019`) stand, `017` and `020` are
+**superseded** execution plans whose native completion recompiles under the
+next release runway, and `026` is **carried forward** into that runway with its
+human-centred rubric intact. The generation's closeout log is
+`../../logs/2026-08/16-g14-022-generation-closeout.md`.
 
 ## Runway
 
@@ -76,15 +80,15 @@ wiring.
 15. [014 — Completion gate and component factory](014-completion-gate-and-component-factory.md) — retired
 16. [015 — Licence web reference](015-licence-web-reference.md) — complete
 17. [016 — Licence reference review](016-licence-reference-review.md) — complete; reference approved
-18. [017 — Licence active-runtime completion](017-licence-active-runtime-completion.md) — held for `022` carry-forward
+18. [017 — Licence active-runtime completion](017-licence-active-runtime-completion.md) — **superseded** by `022`; native completion recompiled under the next runway
 19. [018 — Model connection web reference](018-model-connection-web-reference.md) — complete
 20. [019 — Model connection reference review](019-model-connection-reference-review.md) — complete; reference approved
-21. [020 — Model connection active-runtime completion](020-model-connection-active-runtime-completion.md) — held for `022` carry-forward
+21. [020 — Model connection active-runtime completion](020-model-connection-active-runtime-completion.md) — **superseded** by `022`; native completion recompiled under the next runway
 22. [021 — Rejected pilot cleanup and evidence retention](021-experimental-cleanup-and-gate-consolidation.md) — complete
-23. [022 — Generation closeout](022-generation-closeout.md) — **next**
+23. [022 — Generation closeout](022-generation-closeout.md) — **delivered; pending orchestrator review**
 24. [024 — Batched AudioMeter web surface](024-batched-audio-meter-web-surface.md) — complete
 25. [025 — Preview catalogue taxonomy and generated navigation](025-preview-catalogue-taxonomy-and-generated-navigation.md) — complete
-26. [026 — Human-centred specimen catalogue audit](026-human-centred-specimen-catalogue-audit.md) — held for `022` carry-forward
+26. [026 — Human-centred specimen catalogue audit](026-human-centred-specimen-catalogue-audit.md) — **carried forward** into the next release runway
 
 ## Dispatch Rule
 
@@ -93,16 +97,13 @@ to a fresh thread/worktree when its dependencies are met. Workers do not write
 `dispatch.md` or change roadmap status. The orchestrator reviews the PR,
 records evidence, merges, then opens the next file.
 
-`g14.021` is complete. `017`, `020`, and `026` now have the surviving authority
-and test-infrastructure record they were waiting for. `022` closes the
-generation before those deferred lanes are rewritten or resumed.
+`g14.022` delivered the closeout; the generation is pending orchestrator
+review. The next runway (g15) opens a release-first v0.2.0 baseline and is not
+dispatched until this closeout merges.
 
 ## Current Task
 
-Dispatch `g14.022`. Two decisions carry forward to it: whether
-`.github/workflows/ci-conformance.yml` is renamed or deleted (a workflow edit
-needs explicit operator approval), and what execution method replaces the
-rejected pipeline for `017` and `020`.
-
-Local validation stays headless. Never run a `*-windowed` conformance
-selector.
+Generation closed at dispatch boundary. The next-generation README and one
+release-baseline inventory card exist under `../g15/` and are blocked pending
+the `g14.022` closeout merge. `017`, `020`, and `026` carry forward into that
+runway; do not dispatch them as g14 work.

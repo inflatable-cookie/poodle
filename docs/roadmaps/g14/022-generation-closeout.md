@@ -1,6 +1,7 @@
 # g14.022 — Generation Closeout
 
-Status: ready
+Status: delivered — pending orchestrator review
+Log: `../../logs/2026-08/16-g14-022-generation-closeout.md`
 Depends on: `g14.021`
 Governing refs: `008-pilot-verdict.md`,
 `../../logs/2026-08/16-g14-021-experimental-cleanup-and-gate-consolidation.md`,

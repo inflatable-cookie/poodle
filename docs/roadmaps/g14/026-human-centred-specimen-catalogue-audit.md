@@ -1,9 +1,15 @@
 # g14.026 — Human-Centred Specimen Catalogue Audit
 
-Status: held for g14.022 carry-forward; prerequisites complete
+Status: **carried forward** — closed by `g14.022` into the next release
+runway; not completed here
 Depends on: `g14.021`, `g14.025`
 Governing refs: `../../contracts/001-working-rules.md`,
 `025-preview-catalogue-taxonomy-and-generated-navigation.md`
+
+Disposition: this card is carried forward rather than completed. Its
+human-centred rubric, bounded shared specimen-plan boundary, and
+no-`Conformance`-tab rule survive unchanged into the next generation's
+specimen-catalogue lane. Do not treat it as closed work.
 
 ## Outcome
 

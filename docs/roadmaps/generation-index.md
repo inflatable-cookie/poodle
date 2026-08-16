@@ -4,8 +4,21 @@ Updated: 2026-08-16
 
 ## Active Track
 
+- `g15`
+  - Status: blocked — first card waits on the `g14.022` closeout merge
+  - Posture: release-first v0.2.0 baseline
+  - Range: `001`
+  - Verdict: none yet — the generation is a release baseline, not a
+    parity architecture
+  - Evidence: the v0.2.0 denominator is every public Svelte component
+    export, not a representative subset. React mirror coverage, a certified
+    GPUI subset, and deferred Jetstream are recorded separately; one runtime
+    does not borrow another runtime's pass.
+  - Next: dispatch the release-baseline roster inventory card after the
+    closeout merges.
+
 - `g14`
-  - Status: active — cleanup complete; closeout ready
+  - Status: delivered — pending orchestrator review (`g14.022`)
   - Range: `001` to `026`
   - Verdict: `g14.008` **rejected** architecture 009/spec 066 as Poodle's
     standing component-conformance mechanism.
@@ -14,13 +27,12 @@ Updated: 2026-08-16
     registries and incomplete authority consumption.
   - Retained result: component/backend fixes, focused regression claims,
     headless GPUI execution, and the human-centred specimen boundary.
-  - Runway: `009`–`014` are retired. `021` preserved the evidence and removed
-    the rejected plane. `017`, `020`, and `026` are held for the closeout's
-    carry-forward ruling. Independent web-reference, batched-meter, and
-    catalogue-taxonomy lanes are complete.
-  - Next: dispatch `g14.022`. It closes g14 and leaves one v0.2.0
-    release-baseline inventory card without designing the replacement parity
-    architecture.
+  - Disposition: `009`–`014` are retired. `021` preserved the evidence and
+    removed the rejected plane. `017` and `020` are superseded execution
+    plans; their approved web references stand and native completion
+    recompiles under the g15 runway. `026` is carried forward into g15 with
+    its human-centred rubric intact. `022` closed the generation
+    (`docs/logs/2026-08/16-g14-022-generation-closeout.md`).
 
 ## Latest Completed Track
 
