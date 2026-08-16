@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState, type ChangeEvent, type FormEvent, t
 import {
   addDays,
   addMonths,
+  addMonthsPreservingDay,
   buildCalendarWeeks,
   compareIsoDate,
   dayDeltaForWeekBoundary,
@@ -231,10 +232,10 @@ export function Calendar({
       nextDate = addDays(date, dayDeltaForWeekBoundary(iso, weekStartsOn, "end"));
     } else if (event.key === "PageDown") {
       event.preventDefault();
-      nextDate = addMonths(date, 1);
+      nextDate = addMonthsPreservingDay(date, 1);
     } else if (event.key === "PageUp") {
       event.preventDefault();
-      nextDate = addMonths(date, -1);
+      nextDate = addMonthsPreservingDay(date, -1);
     } else if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       selectDate(iso);

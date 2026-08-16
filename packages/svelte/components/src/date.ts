@@ -10,6 +10,7 @@ export {
   todayIsoDate,
   addDays,
   addMonths,
+  addMonthsPreservingDay,
   startOfMonth,
   monthAnchorIso,
   compareIsoDate,
