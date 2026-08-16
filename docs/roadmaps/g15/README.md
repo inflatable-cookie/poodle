@@ -1,6 +1,6 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.001`–`g15.004` complete; `g15.006` ready
+Status: active — `g15.001`–`g15.004` and `g15.006` complete; `g15.005` ready
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -53,8 +53,8 @@ and status advance are the orchestrator's.
 2. [002 — Svelte focused evidence: foundation display & shell](002-svelte-focused-evidence-display-shell.md) — complete; 29 paired evidence gaps closed
 3. [003 — Svelte focused evidence: forms, inputs & overlays](003-svelte-focused-evidence-forms-inputs-overlays.md) — complete; 26 Svelte and 25 React evidence gaps closed
 4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — complete; 35 paired evidence gaps closed
-5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — follows `006`; pairs the final 24 Svelte/React evidence gaps
-6. [006 — React mirror implementation & gallery closure](006-react-mirror-closure.md) — ready; runs before `005` to supply its missing React implementation and close five residual React evidence gaps
+5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — ready; pairs the final 24 Svelte and 23 React evidence gaps
+6. [006 — React mirror implementation & gallery closure](006-react-mirror-closure.md) — complete; React implementation/gallery are 175/0 and focused evidence is 152/23
 7. [007 — Licence family native completion](007-licence-family-native-completion.md) — carries `g14.017`
 8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — carries `g14.020`
 9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md)
@@ -91,8 +91,7 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Dispatch `g15.006` from current `origin/main`. It closes the two missing React
-implementations, six gallery pages, and five residual focused-evidence gaps.
-The expected post-card React counts are 175/0 implementation, 175/0 gallery,
-and 152/23 focused evidence. Then `g15.005` closes the final 24 Svelte and 23
-React evidence gaps, leaving both focused-evidence axes at 175/0.
+Dispatch `g15.005` from current `origin/main`. It closes the final 24 Svelte
+and 23 React focused-evidence gaps, leaving both focused-evidence axes at
+175/0. The required React `AgentPlanRecord` implementation and the 152/23
+focused-React baseline landed in `g15.006` / PR #28.

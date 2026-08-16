@@ -1,6 +1,6 @@
 # g15.006 — React Mirror Implementation and Gallery Closure
 
-Status: **ready** — next dispatch
+Status: **complete** — accepted and merged in PR #28 (`664d34a5`)
 Depends on: `g15.001` (measured gaps). Focused React test evidence for the
 rest of the roster is paired into the Svelte evidence tranches; `g15.005`
 follows this card because it needs the React `AgentPlanRecord` implementation.
@@ -33,37 +33,38 @@ not duplicated here.
 
 ## Execution Plan
 
-- [ ] **Batch A — implementations and exports:** React counterparts of
+- [x] **Batch A — implementations and exports:** React counterparts of
       AgentPlan and AgentPlanRecord (idiomatic thin shells over the shared
       web substrate), matching Svelte semantics and the contract props
       tables.
-- [ ] **Batch B — gallery specimens:** AgentMessage, AgentPlan,
+- [x] **Batch B — gallery specimens:** AgentMessage, AgentPlan,
       AgentPlanRecord, ChangedFiles, ToolCall, ToolCallGroup pages in the
       React gallery, structure/copy agreeing with the Svelte pages per the
       working rules.
-- [ ] **Batch C — residual focused evidence:** one load-bearing React case for
+- [x] **Batch C — residual focused evidence:** one load-bearing React case for
       AgentPlan, Icon, IconProvider, Tree, and SplitView, paired with their
       existing Svelte evidence. `g15.005` owns the remaining gallery-gap
       components' paired evidence.
 
 ## Goals
 
-- [ ] React `exports` map and index cover the full 175 roster.
-- [ ] React gallery covers all 175 components.
-- [ ] AgentPlan, Icon, IconProvider, Tree, and SplitView have named focused
+- [x] React `exports` map and index cover the full 175 roster.
+- [x] React gallery covers all 175 components.
+- [x] AgentPlan, Icon, IconProvider, Tree, and SplitView have named focused
       React tests paired with their existing Svelte evidence; `g15.005` owns
       the remaining gallery-gap components' cases.
-- [ ] Keep the shared web substrate in `poodle-core` unchanged unless a
+- [x] Keep the shared web substrate in `poodle-core` unchanged unless a
       measured defect is found; any change there is a separate reviewed
       change.
 
 ## Acceptance
 
-- [ ] `effigy react:build` and `effigy test:components` pass.
-- [ ] The register's React rows flip to evidence-present; the roster's React
+- [x] `effigy react:build` and `effigy test:components` pass.
+- [x] The register's React rows flip to evidence-present; the roster's React
       cells name the new files.
-- [ ] No Svelte component, contract, or specimen changed.
-- [ ] The post-card roster reads 175/0 React implementation, 175/0 React
+- [x] No Svelte component or specimen changed; contract edits only reconcile
+      stale Known Delta and controlled-state prose exposed by the scoped fixes.
+- [x] The post-card roster reads 175/0 React implementation, 175/0 React
       gallery, and 152/23 focused React evidence.
 
 ## Stop Conditions
