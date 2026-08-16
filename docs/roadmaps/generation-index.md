@@ -5,7 +5,8 @@ Updated: 2026-08-16
 ## Active Track
 
 - `g15`
-  - Status: active — `g15.001`–`g15.002` complete; `g15.003` ready for dispatch
+  - Status: active — `g15.001`–`g15.002` complete; `g15.003` in progress;
+    `g15.004` ready for parallel dispatch
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `014`
   - Verdict: `g15.001`–`g15.002` accepted — the generation is a measured
@@ -14,7 +15,7 @@ Updated: 2026-08-16
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch `g15.003`, the forms/input/overlay evidence tranche.
+  - Next: continue `g15.003` and dispatch `g15.004` in parallel.
 
 ## Latest Completed Track
 

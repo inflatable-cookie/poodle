@@ -1,6 +1,6 @@
 # g15.004 — Svelte Focused Evidence: Composites & Media
 
-Status: **blocked** — orchestration hold; `g15.003` is the active card
+Status: **ready for parallel dispatch**
 Depends on: `g15.001`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`

@@ -1,6 +1,6 @@
 # g15.005 — Svelte Focused Evidence: Workstation Systems & Agent Surfaces
 
-Status: **blocked** — orchestration hold; `g15.003` is the active card
+Status: **blocked** — orchestration hold; `g15.003` and `g15.004` are active lanes
 Depends on: `g15.001`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`

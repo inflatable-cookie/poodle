@@ -1,6 +1,6 @@
 # g15.003 — Svelte Focused Evidence: Foundation Forms, Inputs & Overlays
 
-Status: **ready for dispatch**
+Status: **in progress** — `t3code/svelte-evidence-forms-overlays`
 Depends on: `g15.001`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`

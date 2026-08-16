@@ -1,6 +1,6 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.003` ready for dispatch
+Status: active — `g15.003` in progress; `g15.004` ready for parallel dispatch
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -51,8 +51,8 @@ and status advance are the orchestrator's.
 
 1. [001 — Release-baseline roster inventory](001-release-baseline-roster-inventory.md) — complete
 2. [002 — Svelte focused evidence: foundation display & shell](002-svelte-focused-evidence-display-shell.md) — complete; 29 paired evidence gaps closed
-3. [003 — Svelte focused evidence: forms, inputs & overlays](003-svelte-focused-evidence-forms-inputs-overlays.md) — ready; pairs React evidence
-4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — pairs React evidence
+3. [003 — Svelte focused evidence: forms, inputs & overlays](003-svelte-focused-evidence-forms-inputs-overlays.md) — in progress; pairs React evidence
+4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — ready for parallel dispatch; pairs React evidence
 5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — pairs React evidence
 6. [006 — React mirror implementation & gallery closure](006-react-mirror-closure.md) — depends on `001`; the two missing implementations and six gallery pages
 7. [007 — Licence family native completion](007-licence-family-native-completion.md) — carries `g14.017`
@@ -91,5 +91,6 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Dispatch `g15.003` — Svelte focused evidence for foundation forms, inputs,
-and overlays, paired with the same contract evidence in React.
+Continue `g15.003` and dispatch `g15.004` in parallel. Review whichever PR
+arrives first, then rebase or reconcile the second PR's additive roster and
+gap-register edits without losing either tranche's counts.

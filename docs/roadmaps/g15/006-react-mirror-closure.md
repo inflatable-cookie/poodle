@@ -1,6 +1,6 @@
 # g15.006 — React Mirror Implementation and Gallery Closure
 
-Status: **blocked** — orchestration hold; `g15.003` is the active card
+Status: **blocked** — orchestration hold; `g15.003` and `g15.004` are active lanes
 Depends on: `g15.001` (measured gaps). Focused React test evidence for the
 rest of the roster is paired into the Svelte evidence tranches
 (`g15.002`–`g15.005`) so the mirror never drifts from the reference.

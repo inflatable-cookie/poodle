@@ -1,6 +1,6 @@
 # g15.009 — Update, Settings, Radio & Context-Provider Native Closure
 
-Status: **blocked** — orchestration hold; `g15.003` is the active card
+Status: **blocked** — orchestration hold; `g15.003` and `g15.004` are active lanes
 Depends on: `g15.001` (measured gaps)
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
