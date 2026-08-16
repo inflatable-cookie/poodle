@@ -19,14 +19,17 @@ describe("Pill (react)", () => {
     expect(root.style.getPropertyValue("--poodle-pill-accent")).toBe("#ff9900");
   });
 
-  it("projects muted and adaptive-width states", () => {
+  it("projects muted, adaptive-width, and dot anatomy", () => {
     const { container } = render(
-      <Pill muted adaptiveWidth>
+      <Pill muted adaptiveWidth dot>
         Beta
       </Pill>,
     );
     const root = container.querySelector(".poodle-pill") as HTMLElement;
     expect(root.dataset.muted).toBe("true");
     expect(root.dataset.adaptiveWidth).toBe("true");
+    expect(container.querySelector(".poodle-pill__dot")?.getAttribute("aria-hidden")).toBe(
+      "true",
+    );
   });
 });

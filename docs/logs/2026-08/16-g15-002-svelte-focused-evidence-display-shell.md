@@ -126,9 +126,12 @@ Representative load-bearing cases per family (full list lives in the files):
 
 ## Bounded Fixes (contract-first)
 
-No scoped implementation defect was found. Every final assertion passes
-against the shipped implementations, and no contract changed for any
-component.
+- **React `Pill.dot` parity** — orchestrator review found that the Svelte case
+  exercised the contract's optional status dot while the React mirror omitted
+  that case because `PillProps` did not expose `dot`. React now accepts the
+  documented prop and renders the same `aria-hidden` `.poodle-pill__dot`
+  anatomy. The paired test now asserts the same contract case. The contract
+  already defined the behaviour, so no contract change was required.
 
 ## Observations (no change made)
 
@@ -176,7 +179,7 @@ selector ran.
 
 ## Change Footprint
 
-`packages/svelte/components/test/` (28 new test files + 2 harnesses) and
-`packages/react/components/test/` (29 new test files), plus the two
-focused-evidence docs. No component implementation, contract, specimen,
+`packages/svelte/components/test/` (28 new test files + 2 harnesses),
+`packages/react/components/test/` (29 new test files), React `Pill`, and the
+two focused-evidence docs. No Svelte implementation, contract, specimen,
 package export, workflow, or downstream repository changed.
