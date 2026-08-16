@@ -1,0 +1,42 @@
+import { fireEvent, render } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+
+import { Callout } from "../src/Callout";
+
+describe("Callout (react)", () => {
+  it("renders title and message with the tone data attribute", () => {
+    const { container } = render(<Callout tone="danger" title="Failed" message="Try again" />);
+    const root = container.querySelector(".poodle-callout") as HTMLElement;
+    expect(root.dataset.tone).toBe("danger");
+    expect(container.querySelector(".poodle-callout__content strong")?.textContent).toBe("Failed");
+    expect(container.querySelector(".poodle-callout__content p")?.textContent).toBe("Try again");
+  });
+
+  it("projects an alert or status live region from announceMode", () => {
+    const assertive = render(<Callout announceMode="assertive" message="m" />);
+    const assertiveRoot = assertive.container.querySelector(".poodle-callout") as HTMLElement;
+    expect(assertiveRoot.getAttribute("role")).toBe("alert");
+    expect(assertiveRoot.getAttribute("aria-live")).toBe("assertive");
+
+    const polite = render(<Callout announceMode="polite" message="m" />);
+    const politeRoot = polite.container.querySelector(".poodle-callout") as HTMLElement;
+    expect(politeRoot.getAttribute("role")).toBe("status");
+    expect(politeRoot.getAttribute("aria-live")).toBe("polite");
+
+    const silent = render(<Callout message="m" />);
+    expect(silent.container.querySelector(".poodle-callout")?.getAttribute("role")).toBeNull();
+  });
+
+  it("renders the dismiss button only when dismissible and emits onDismiss", () => {
+    const onDismiss = vi.fn();
+    const plain = render(<Callout message="m" />);
+    expect(plain.container.querySelector(".poodle-callout__dismiss")).toBeNull();
+
+    const { container } = render(<Callout message="m" dismissible onDismiss={onDismiss} />);
+    const dismiss = container.querySelector(".poodle-callout__dismiss") as HTMLButtonElement;
+    expect(dismiss.getAttribute("aria-label")).toBe("Dismiss message");
+
+    fireEvent.click(dismiss);
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+  });
+});
