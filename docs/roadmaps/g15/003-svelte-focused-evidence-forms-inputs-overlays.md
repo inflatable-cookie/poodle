@@ -1,7 +1,6 @@
 # g15.003 — Svelte Focused Evidence: Foundation Forms, Inputs & Overlays
 
-Status: **changes requested** — PR #27; evidence counts, public date-helper
-surface, edge coverage, and clock pinning need repair
+Status: **complete** — accepted and merged in PR #27 (`f86f3bd2`)
 Depends on: `g15.001`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
@@ -29,13 +28,13 @@ side so the mirror evidence moves with the reference.
 
 ## Execution Plan
 
-- [ ] **Batch A — form primitives (10):** EditableLabel, Field, FieldSet,
+- [x] **Batch A — form primitives (10):** EditableLabel, Field, FieldSet,
       FormActions, IconButton, Meter, NumberInput, PasswordRequirements,
       Radio, RadioGroup
-- [ ] **Batch B — value inputs & date/time pickers (8):** AudioPlayer,
+- [x] **Batch B — value inputs & date/time pickers (8):** AudioPlayer,
       ColorPicker, Calendar, DatePicker, DateRangePicker, DateTimePicker,
       DateTimeRangePicker, DurationInput
-- [ ] **Batch C — range, segmentation & shell chrome (8):** ResizeHandle,
+- [x] **Batch C — range, segmentation & shell chrome (8):** ResizeHandle,
       RangeSlider, SegmentedControl, ScrollShell, Separator, Slider,
       Pagination, PaginationSummary
 
@@ -47,25 +46,25 @@ native case. Run the narrow test round at the end of each batch.
 
 ## Goals
 
-- [ ] One focused Svelte test file (or named family cases) per component
+- [x] One focused Svelte test file (or named family cases) per component
       meeting the threshold above.
-- [ ] The same contract cases mirrored as focused React tests in the same
+- [x] The same contract cases mirrored as focused React tests in the same
       batch.
-- [ ] Bounded fixes to scoped implementation defects the new tests expose,
+- [x] Bounded fixes to scoped implementation defects the new tests expose,
       contract-first per the working rules: update the contract before
       changing observable inputs, defaults, states, events, keyboard
       behaviour, accessibility, layout intent, or token use.
-- [ ] Record each batch in one August batch log under `docs/logs/2026-08/`.
+- [x] Record each batch in one August batch log under `docs/logs/2026-08/`.
 
 ## Acceptance
 
-- [ ] Every scoped component has a named focused test case beyond the anatomy
+- [x] Every scoped component has a named focused test case beyond the anatomy
       smoke, on both Svelte and React sides.
-- [ ] `effigy check:svelte`, `effigy react:build`, `effigy test:components`,
+- [x] `effigy check:svelte`, `effigy react:build`, `effigy test:components`,
       `effigy docs:check` pass.
-- [ ] The register's row for each component flips to evidence-present, and the
+- [x] The register's row for each component flips to evidence-present, and the
       roster's Focused Svelte / Focused React test cells name the case files.
-- [ ] No contract changed except as a required consequence of a scoped fix,
+- [x] No contract changed except as a required consequence of a scoped fix,
       and then only with the fix itself and a contract-first update.
 
 ## Stop Conditions

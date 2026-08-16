@@ -1,6 +1,6 @@
 # g15.010 — Display, Workstation & Agent GPUI Specimen Closure
 
-Status: **blocked** — orchestration hold; `g15.003` and `g15.004` are active lanes
+Status: **blocked** — orchestration hold; `g15.004` remains in review repair
 Depends on: `g15.001` (measured gaps); GPUI-only closure after the native
 tranches `g15.007`–`g15.009` land their families
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,

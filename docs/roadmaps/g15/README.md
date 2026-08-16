@@ -1,6 +1,6 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.003` and `g15.004` changes requested
+Status: active — `g15.003` complete; `g15.004` changes requested
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -51,7 +51,7 @@ and status advance are the orchestrator's.
 
 1. [001 — Release-baseline roster inventory](001-release-baseline-roster-inventory.md) — complete
 2. [002 — Svelte focused evidence: foundation display & shell](002-svelte-focused-evidence-display-shell.md) — complete; 29 paired evidence gaps closed
-3. [003 — Svelte focused evidence: forms, inputs & overlays](003-svelte-focused-evidence-forms-inputs-overlays.md) — changes requested on PR #27
+3. [003 — Svelte focused evidence: forms, inputs & overlays](003-svelte-focused-evidence-forms-inputs-overlays.md) — complete; 26 Svelte and 25 React evidence gaps closed
 4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — changes requested on PR #26
 5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — pairs React evidence
 6. [006 — React mirror implementation & gallery closure](006-react-mirror-closure.md) — depends on `001`; the two missing implementations and six gallery pages
@@ -91,6 +91,6 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Repair PR #27 and PR #26 against their orchestrator review comments. Review
-both pushed heads again. Merge the first accepted PR, then rebase and reconcile
-the second PR's additive roster/register totals before its final gate.
+Repair PR #26 against its orchestrator review. Rebase it onto merged PR #27,
+then reconcile the shared roster/register totals to 151 Svelte present / 24
+missing and 147 React present / 28 missing before its final gate.

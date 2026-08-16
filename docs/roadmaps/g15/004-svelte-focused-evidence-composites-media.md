@@ -1,7 +1,8 @@
 # g15.004 — Svelte Focused Evidence: Composites & Media
 
-Status: **changes requested** — PR #26; pushed typecheck/diff failures,
-composition evidence, and hermetic iframe tests need repair
+Status: **changes requested** — PR #26; rebase onto merged PR #27, repair
+typecheck/diff failures, composition evidence, hermetic iframe tests, and
+reconcile the combined focused-evidence totals
 Depends on: `g15.001`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
