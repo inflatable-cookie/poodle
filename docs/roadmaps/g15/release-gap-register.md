@@ -14,14 +14,16 @@ but is **not** a gap — see the note at the end.
 
 Contract, implementation, export, and specimen posture are complete for all
 175 components. The only open Svelte-denominator surface is **focused
-component evidence**: 114 components mount in the anatomy smoke but have no
-named focused test file/case asserting contract behaviour.
+component evidence**: 85 components mount in the anatomy smoke but have no
+named focused test file/case asserting contract behaviour (the 29
+foundation display & shell components closed by `g15.002` now have focused
+evidence on both Svelte and React sides — see
+`release-baseline-roster.md` for the named case files).
 
-### Svelte focused evidence (114) — owned by `g15.002`–`g15.005`
+### Svelte focused evidence (85) — owned by `g15.003`–`g15.005`
 
 | Family | Components without focused evidence | Count |
 | --- | --- | ---: |
-| Foundation display & shell | Accordion, AlertDialog, Avatar, Box, Breadcrumbs, BulkActionBar, Callout, Card, Code, CollapseToggle, Collapsible, DetailItem, Eyebrow, Grid, HoverCard, ListCardCounter, ListGrid, MetaBar, MetaItem, NavCard, Pill, Progress, Rating, Region, Skeleton, Spacer, Stack, Stepper, Spinner | 29 |
 | Foundation forms, inputs & overlays | AudioPlayer, ColorPicker, Calendar, DatePicker, DateRangePicker, DateTimePicker, DateTimeRangePicker, DurationInput, EditableLabel, Field, FieldSet, FormActions, IconButton, Meter, NumberInput, Pagination, PaginationSummary, PasswordRequirements, Radio, RadioGroup, ResizeHandle, RangeSlider, SegmentedControl, ScrollShell, Separator, Slider | 26 |
 | Composites & media | ActionDiscoveryPanel, EditableList, ErrorBoundary, BlockEditor, CardRadioGroup, CardToggleGroup, CommandPalette, ConfirmAction, DataTable, DetailSectionGroup, DetailSection, DetailShell, EmbedInput, EmbedPreview, EmptyState, FilterToolbar, FormLayout, InlineListSection, DebugDialog, LogList, ListContainer, MarkdownEditor, PageLoading, MediaPicker, MediaBrowsePanel, MediaPreview, MediaThumbnail, PageHeader, PickerShell, RelationPicker, SelectionSummary, SidebarNav, MetricTile, ToastStack, ToastHost | 35 |
 | Workstation systems | StatusBar, StatusIndicator, Surface, Text, TextLink, Table, TokenInput, TimeInput, TimeZoneSelect, ToggleGroup, Toolbar, Tooltip, TriStateSwitch, UiPresentationProvider, VideoPlayer, DateTimeZonePicker | 16 |

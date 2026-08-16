@@ -1,6 +1,6 @@
 # g15.011 — Human-Centred Specimen Catalogue Audit
 
-Status: **blocked** — orchestration hold; `g15.002` is the active card
+Status: **blocked** — orchestration hold; `g15.003` is the active card
 Depends on: `g15.001` (measured roster); carries forward `g14.026` with its
 rubric and bounded shared specimen-plan boundary intact
 Governing refs: `release-baseline-roster.md`,

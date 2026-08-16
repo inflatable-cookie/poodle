@@ -1,6 +1,6 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.002` ready for dispatch
+Status: active — `g15.003` ready for dispatch
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -38,9 +38,10 @@ unproved, and what each runtime's evidence is — then ship.
 
 ## Sequence
 
-`001` is executed; its inventory froze the denominator and compiled the
-runway below. Later cards are listed in dependency order and are not
-dispatched until the orchestrator reviews and advances them.
+`001` and `002` are executed; the inventory froze the denominator and the
+first evidence tranche closed 29 paired gaps. Later cards are listed in
+dependency order and are not dispatched until the orchestrator reviews and
+advances them.
 
 ## Runway
 
@@ -49,8 +50,8 @@ register (`release-gap-register.md`). Dependency order only; orchestration
 and status advance are the orchestrator's.
 
 1. [001 — Release-baseline roster inventory](001-release-baseline-roster-inventory.md) — complete
-2. [002 — Svelte focused evidence: foundation display & shell](002-svelte-focused-evidence-display-shell.md) — proposed first executable tranche; pairs React evidence
-3. [003 — Svelte focused evidence: forms, inputs & overlays](003-svelte-focused-evidence-forms-inputs-overlays.md) — pairs React evidence
+2. [002 — Svelte focused evidence: foundation display & shell](002-svelte-focused-evidence-display-shell.md) — complete; 29 paired evidence gaps closed
+3. [003 — Svelte focused evidence: forms, inputs & overlays](003-svelte-focused-evidence-forms-inputs-overlays.md) — ready; pairs React evidence
 4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — pairs React evidence
 5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — pairs React evidence
 6. [006 — React mirror implementation & gallery closure](006-react-mirror-closure.md) — depends on `001`; the two missing implementations and six gallery pages
@@ -90,5 +91,5 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Dispatch `g15.002` — Svelte focused evidence for foundation display and shell
-primitives, paired with the same contract evidence in React.
+Dispatch `g15.003` — Svelte focused evidence for foundation forms, inputs,
+and overlays, paired with the same contract evidence in React.

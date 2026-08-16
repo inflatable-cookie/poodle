@@ -1,6 +1,6 @@
 # g15.003 — Svelte Focused Evidence: Foundation Forms, Inputs & Overlays
 
-Status: **blocked** — orchestration hold; `g15.002` is the active card
+Status: **ready for dispatch**
 Depends on: `g15.001`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`

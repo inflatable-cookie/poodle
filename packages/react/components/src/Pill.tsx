@@ -25,6 +25,7 @@ export interface PillProps {
   accent?: string | null;
   muted?: boolean;
   adaptiveWidth?: boolean;
+  dot?: boolean;
   ariaLabel?: string | null;
   children?: ReactNode;
 }
@@ -40,6 +41,7 @@ export function Pill({
   accent = null,
   muted = false,
   adaptiveWidth = false,
+  dot = false,
   ariaLabel = null,
   children,
 }: PillProps) {
@@ -71,6 +73,7 @@ export function Pill({
       aria-label={ariaLabel ?? undefined}
       style={style}
     >
+      {dot ? <span className="poodle-pill__dot" aria-hidden="true" /> : null}
       {children}
     </span>
   );

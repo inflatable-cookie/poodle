@@ -1,6 +1,6 @@
 # g15.002 — Svelte Focused Evidence: Foundation Display & Shell Primitives
 
-Status: **ready for dispatch**
+Status: complete — accepted in PR #25
 Depends on: `g15.001`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
@@ -30,12 +30,12 @@ gallery pages.
 
 ## Execution Plan
 
-- [ ] **Batch A — layout & content primitives (10):** Avatar, Box, Card, Code,
+- [x] **Batch A — layout & content primitives (10):** Avatar, Box, Card, Code,
       Eyebrow, Grid, Region, Skeleton, Spacer, Stack
-- [ ] **Batch B — disclosure, navigation & feedback (10):** Accordion,
+- [x] **Batch B — disclosure, navigation & feedback (10):** Accordion,
       Breadcrumbs, CollapseToggle, Collapsible, DetailItem, HoverCard,
       NavCard, Progress, Spinner, Stepper
-- [ ] **Batch C — selection, chrome & alerting (9):** AlertDialog,
+- [x] **Batch C — selection, chrome & alerting (9):** AlertDialog,
       BulkActionBar, Callout, ListCardCounter, ListGrid, MetaBar, MetaItem,
       Pill, Rating
 
@@ -45,25 +45,25 @@ acowtancy lead). Run the narrow test round at the end of each batch.
 
 ## Goals
 
-- [ ] One focused Svelte test file (or named family cases) per component
+- [x] One focused Svelte test file (or named family cases) per component
       meeting the threshold above.
-- [ ] The same contract cases mirrored as focused React tests in the same
+- [x] The same contract cases mirrored as focused React tests in the same
       batch (React stays tightly paired through the shared web substrate).
-- [ ] Bounded fixes to scoped implementation defects the new tests expose,
+- [x] Bounded fixes to scoped implementation defects the new tests expose,
       contract-first per the working rules: update the contract before
       changing observable inputs, defaults, states, events, keyboard
       behaviour, accessibility, layout intent, or token use.
-- [ ] Record each batch in one August batch log under `docs/logs/2026-08/`.
+- [x] Record each batch in one August batch log under `docs/logs/2026-08/`.
 
 ## Acceptance
 
-- [ ] Every scoped component has a named focused test case beyond the anatomy
+- [x] Every scoped component has a named focused test case beyond the anatomy
       smoke, on both Svelte and React sides.
-- [ ] `effigy check:svelte`, `effigy react:build`, `effigy test:components`,
+- [x] `effigy check:svelte`, `effigy react:build`, `effigy test:components`,
       `effigy docs:check` pass.
-- [ ] The register's row for each component flips to evidence-present, and the
+- [x] The register's row for each component flips to evidence-present, and the
       roster's Focused Svelte / Focused React test cells name the case files.
-- [ ] No contract changed except as a required consequence of a scoped fix,
+- [x] No contract changed except as a required consequence of a scoped fix,
       and then only with the fix itself and a contract-first update.
 
 ## Stop Conditions
