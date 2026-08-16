@@ -1,6 +1,105 @@
+//! Popover — an anchored overlay surface with its own dismiss layer.
+//!
+//! This module is the single authority for the Popover declaration surface:
+//! the struct, its defaults and builders, then the token recipes and derived
+//! queries beside them. `g14.005` briefly generated the first half from a
+//! TypeScript interface; `g14.008` rejected that path and `g14.021` restored
+//! the hand-written declaration.
+//!
+//! Contract: `docs/contracts/components/popover.md`
+
 use poodle_tokens::semantic;
 
-pub use crate::generated::popover::PopoverSpec;
+#[derive(Clone, Debug, PartialEq)]
+pub struct PopoverSpec {
+    pub open: Option<bool>,
+    pub default_open: bool,
+    pub placement: crate::types::OverlayPlacement,
+    pub offset: f32,
+    pub dismiss_on_outside_interact: bool,
+    pub initial_focus: crate::types::PopoverInitialFocus,
+    pub aria_label: Option<String>,
+    pub block: bool,
+    pub disabled: bool,
+    pub surface_width: crate::types::PopoverSurfaceWidth,
+    pub surface_min_width: Option<crate::types::Dimension>,
+    pub surface_max_width: Option<crate::types::Dimension>,
+}
+
+impl Default for PopoverSpec {
+    fn default() -> Self {
+        Self {
+            open: None,
+            default_open: false,
+            placement: crate::types::OverlayPlacement::BottomStart,
+            offset: 8.0,
+            dismiss_on_outside_interact: true,
+            initial_focus: crate::types::PopoverInitialFocus::FirstFocusable,
+            aria_label: None,
+            block: false,
+            disabled: false,
+            surface_width: crate::types::PopoverSurfaceWidth::Content,
+            surface_min_width: None,
+            surface_max_width: None,
+        }
+    }
+}
+
+impl PopoverSpec {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_open(mut self, value: bool) -> Self {
+        self.open = Some(value);
+        self
+    }
+    pub fn with_default_open(mut self, value: bool) -> Self {
+        self.default_open = value;
+        self
+    }
+    pub fn with_placement(mut self, value: crate::types::OverlayPlacement) -> Self {
+        self.placement = value;
+        self
+    }
+    pub fn with_offset(mut self, value: f32) -> Self {
+        self.offset = value;
+        self
+    }
+    pub fn with_dismiss_on_outside_interact(mut self, value: bool) -> Self {
+        self.dismiss_on_outside_interact = value;
+        self
+    }
+    pub fn with_initial_focus(mut self, value: crate::types::PopoverInitialFocus) -> Self {
+        self.initial_focus = value;
+        self
+    }
+    pub fn with_aria_label(mut self, value: impl Into<String>) -> Self {
+        self.aria_label = Some(value.into());
+        self
+    }
+    pub fn with_block(mut self, value: bool) -> Self {
+        self.block = value;
+        self
+    }
+    pub fn with_disabled(mut self, value: bool) -> Self {
+        self.disabled = value;
+        self
+    }
+    pub fn with_surface_width(mut self, value: crate::types::PopoverSurfaceWidth) -> Self {
+        self.surface_width = value;
+        self
+    }
+    pub fn with_surface_min_width(mut self, value: impl Into<crate::types::Dimension>) -> Self {
+        self.surface_min_width = Some(value.into());
+        self
+    }
+    pub fn with_surface_max_width(mut self, value: impl Into<crate::types::Dimension>) -> Self {
+        self.surface_max_width = Some(value.into());
+        self
+    }
+}
+
 
 /// Default surface min-width in rem (contract §7 / §8 `14rem`).
 pub const POPOVER_SURFACE_MIN_WIDTH_REM: f32 = 14.0;

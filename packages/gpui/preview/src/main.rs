@@ -378,7 +378,7 @@ impl Render for PreviewRoot {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         // The overlay host's frame boundary: the layer registry, bounds, and
         // focus queue are rebuilt once per rendered frame, not per converted
-        // component — the same boundary the headless conformance driver uses.
+        // component — the same boundary the headless test driver uses.
         poodle_gpui_node_backend::overlay_frame_begin();
         // Apply interactions node-backed specimens reported since the last frame.
         let specimen_changed = self.state.drain_node_events();
@@ -409,7 +409,7 @@ impl Render for PreviewRoot {
 
         // The window-level overlay host: every pointer-down and Escape is
         // routed through the node backend's layer registry (the same wiring
-        // the conformance mount host uses), so production overlay dismissal
+        // the headless mount host uses), so production overlay dismissal
         // executes through the real event tree.
         poodle_gpui_node_backend::attach_overlay_host(
             div()

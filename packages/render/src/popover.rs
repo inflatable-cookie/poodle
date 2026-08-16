@@ -28,9 +28,9 @@ use crate::presentation::rem_to_px;
 pub const POPOVER_ANCHOR_WIDTH_PX: f32 = 96.0;
 pub const POPOVER_ANCHOR_HEIGHT_PX: f32 = 32.0;
 
-/// Stable semantic part ids the portable interface's native resolution names.
-/// Backends key per-instance state on `runtime_id`; the semantic ids stay
-/// readable for observers and relationships.
+/// Stable semantic part ids. Backends key per-instance state on `runtime_id`;
+/// the semantic ids stay readable, and accessibility relationships point at
+/// them.
 pub const POPOVER_TRIGGER_ID: &str = "popover-trigger";
 pub const POPOVER_SURFACE_ID: &str = "popover-surface";
 

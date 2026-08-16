@@ -41,10 +41,6 @@
       "svelte": "./src/tokens/index.ts",
       "default": "./src/tokens/index.ts"
     },
-    "./conformance": "./src/conformance/index.ts",
-    "./conformance/button": "./src/conformance/button.ts",
-    "./conformance/tabs": "./src/conformance/tabs.ts",
-    "./conformance/text-input": "./src/conformance/text-input.ts",
     "./tokens/runtime": "./src/tokens/runtime.ts",
     "./tokens/css": "./src/tokens/css.ts",
     "./tokens/styles.css": "./src/tokens/generated/css/poodle-tokens.css",

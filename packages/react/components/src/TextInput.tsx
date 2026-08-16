@@ -14,11 +14,6 @@ import { isValidSlugFormat, slugify, validationStatusToState } from "@inflatable
 
 import "@inflatable-cookie/poodle-core/styles/text-input.css";
 
-import type {
-  TextInputPortableEvents,
-  TextInputPortableProps,
-} from "@inflatable-cookie/poodle-core/conformance/text-input";
-
 import { Icon } from "./Icon";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import { Spinner } from "./Spinner";
@@ -34,12 +29,16 @@ import type {
   ValidationState,
 } from "./types";
 
-const carrierProps = ["leadingIcon", "trailingIcon"] as const satisfies
-  readonly (keyof TextInputPortableProps)[];
-type Portable = Omit<TextInputPortableProps, (typeof carrierProps)[number]>;
-type PortableEvents = TextInputPortableEvents;
-
-export interface TextInputProps extends Partial<Portable> {
+/**
+ * The contracted TextInput surface. Every prop is declared here; the icon
+ * props take framework values (`IconProp`/`ReactNode`) and the remaining HTML
+ * input attributes are documented web-only extensions.
+ *
+ * Contract: `docs/contracts/components/text-input.md`. The Svelte pair is
+ * `packages/svelte/components/src/TextInput.svelte`; the Rust counterpart is
+ * `poodle_specs::TextInputSpec`.
+ */
+export interface TextInputProps {
   id?: string;
   value?: string | null;
   defaultValue?: string;
@@ -81,11 +80,11 @@ export interface TextInputProps extends Partial<Portable> {
   showClearButton?: boolean;
   leadingIcon?: IconProp | null;
   trailingIcon?: IconProp | null;
-  onValueChange?: PortableEvents["valueChange"];
+  onValueChange?: (value: string) => void;
   onValidationChange?: (detail: TextInputValidationChange) => void;
-  onSubmit?: PortableEvents["submit"];
-  onCancel?: PortableEvents["cancel"];
-  onClear?: PortableEvents["clear"];
+  onSubmit?: (value: string) => void;
+  onCancel?: () => void;
+  onClear?: () => void;
   onKeyDown?: (event: KeyboardEvent) => void;
   onFocus?: (event: FocusEvent) => void;
   onBlur?: (event: FocusEvent) => void;

@@ -1,10 +1,6 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/text-input.css";
   import { isValidSlugFormat, slugify, validationStatusToState } from "@inflatable-cookie/poodle-core";
-  import type {
-    TextInputPortableEvents,
-    TextInputPortableProps,
-  } from "@inflatable-cookie/poodle-core/conformance/text-input";
   import { onDestroy, type Snippet } from "svelte";
   import type { HTMLInputAttributes } from "svelte/elements";
 
@@ -23,12 +19,15 @@
     ValidationState,
   } from "./types";
 
-  const carrierProps = ["leadingIcon", "trailingIcon"] as const satisfies
-    readonly (keyof TextInputPortableProps)[];
-  type Portable = Omit<TextInputPortableProps, (typeof carrierProps)[number]>;
-  type PortableEvents = TextInputPortableEvents;
-
-  interface Props extends Partial<Portable> {
+  /**
+   * The contracted TextInput surface. Every prop is declared here; the icon
+   * props take framework values (`IconProp`/snippets) and the remaining
+   * `HTMLInputAttributes` are documented web-only extensions.
+   *
+   * Contract: `docs/contracts/components/text-input.md`. The Rust counterpart
+   * is `poodle_specs::TextInputSpec`.
+   */
+  interface Props {
     id?: string;
     value?: string | null;
     defaultValue?: string;
@@ -87,11 +86,11 @@
     showClearButton?: boolean;
     leadingIcon?: IconProp | null;
     trailingIcon?: IconProp | null;
-    onValueChange?: PortableEvents["valueChange"] | undefined;
+    onValueChange?: ((value: string) => void) | undefined;
     onValidationChange?: ((detail: TextInputValidationChange) => void) | undefined;
-    onSubmit?: PortableEvents["submit"] | undefined;
-    onCancel?: PortableEvents["cancel"] | undefined;
-    onClear?: PortableEvents["clear"] | undefined;
+    onSubmit?: ((value: string) => void) | undefined;
+    onCancel?: (() => void) | undefined;
+    onClear?: (() => void) | undefined;
     onKeyDown?: ((event: KeyboardEvent) => void) | undefined;
     onFocus?: ((event: FocusEvent) => void) | undefined;
     onBlur?: ((event: FocusEvent) => void) | undefined;

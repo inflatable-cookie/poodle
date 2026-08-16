@@ -2,13 +2,11 @@
 //! trigger cluster (undo / list / redo) plus a popover rendering the flat
 //! history list, with node-owned fork disclosure.
 //!
-//! The portable declaration surface — struct, defaults, builders — is
-//! generated from the conformance interface module
-//! (`packages/core/src/conformance/history-center.ts`) into
-//! [`crate::generated::history_center`] (regenerate with
-//! `effigy conformance:build`, gated by `effigy conformance:check`). This
-//! module is the hand-written extension beside it: token recipes and derived
-//! queries.
+//! This module is the single authority for the HistoryCenter declaration
+//! surface: the struct, its defaults and builders, then the token recipes and
+//! derived queries beside them. `g14.007` briefly generated the first half
+//! from a TypeScript interface; `g14.008` rejected that path and `g14.021`
+//! restored the hand-written declaration.
 //!
 //! The component is authority-agnostic. Data arrives through `pages`;
 //! commands leave through the renderer's handlers. It validates no protocol
@@ -20,9 +18,157 @@
 
 use crate::types::{ControlDensity, ControlSize};
 
-pub use crate::generated::history_center::{
-    HistoryCenterRejection, HistoryCenterSpec, HistoryCenterStatus,
-};
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
+pub enum HistoryCenterStatus {
+    #[default] Idle,
+    Loading,
+    Failed,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
+pub enum HistoryCenterRejection {
+    #[default] AlreadyAtTarget,
+    UnknownEntry,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct HistoryCenterSpec {
+    pub pages: Option<Vec<crate::types::HistoryPathPage>>,
+    pub can_undo: bool,
+    pub can_redo: bool,
+    pub is_busy: bool,
+    pub status: HistoryCenterStatus,
+    pub status_message: Option<String>,
+    pub rejection: Option<HistoryCenterRejection>,
+    pub open: Option<bool>,
+    pub default_open: bool,
+    pub placement: crate::types::OverlayPlacement,
+    pub undo_label: String,
+    pub redo_label: String,
+    pub list_label: String,
+    pub title: String,
+    pub empty_message: String,
+    pub aria_label: Option<String>,
+    pub max_branch_name_bytes: usize,
+    pub size: Option<crate::types::ControlSize>,
+    pub size_role: crate::types::SemanticControlSizeRole,
+    pub density: Option<crate::types::ControlDensity>,
+}
+
+impl Default for HistoryCenterSpec {
+    fn default() -> Self {
+        Self {
+            pages: None,
+            can_undo: false,
+            can_redo: false,
+            is_busy: false,
+            status: HistoryCenterStatus::Idle,
+            status_message: None,
+            rejection: None,
+            open: None,
+            default_open: false,
+            placement: crate::types::OverlayPlacement::BottomEnd,
+            undo_label: "Undo".to_owned(),
+            redo_label: "Redo".to_owned(),
+            list_label: "History".to_owned(),
+            title: "History".to_owned(),
+            empty_message: "No history entries yet.".to_owned(),
+            aria_label: None,
+            max_branch_name_bytes: 256,
+            size: None,
+            size_role: crate::types::SemanticControlSizeRole::Chrome,
+            density: None,
+        }
+    }
+}
+
+impl HistoryCenterSpec {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_pages(mut self, value: Vec<crate::types::HistoryPathPage>) -> Self {
+        self.pages = Some(value);
+        self
+    }
+    pub fn with_can_undo(mut self, value: bool) -> Self {
+        self.can_undo = value;
+        self
+    }
+    pub fn with_can_redo(mut self, value: bool) -> Self {
+        self.can_redo = value;
+        self
+    }
+    pub fn with_busy(mut self, value: bool) -> Self {
+        self.is_busy = value;
+        self
+    }
+    pub fn with_status(mut self, value: HistoryCenterStatus) -> Self {
+        self.status = value;
+        self
+    }
+    pub fn with_status_message(mut self, value: impl Into<String>) -> Self {
+        self.status_message = Some(value.into());
+        self
+    }
+    pub fn with_rejection(mut self, value: HistoryCenterRejection) -> Self {
+        self.rejection = Some(value);
+        self
+    }
+    pub fn with_open(mut self, value: bool) -> Self {
+        self.open = Some(value);
+        self
+    }
+    pub fn with_default_open(mut self, value: bool) -> Self {
+        self.default_open = value;
+        self
+    }
+    pub fn with_placement(mut self, value: crate::types::OverlayPlacement) -> Self {
+        self.placement = value;
+        self
+    }
+    pub fn with_undo_label(mut self, value: impl Into<String>) -> Self {
+        self.undo_label = value.into();
+        self
+    }
+    pub fn with_redo_label(mut self, value: impl Into<String>) -> Self {
+        self.redo_label = value.into();
+        self
+    }
+    pub fn with_list_label(mut self, value: impl Into<String>) -> Self {
+        self.list_label = value.into();
+        self
+    }
+    pub fn with_title(mut self, value: impl Into<String>) -> Self {
+        self.title = value.into();
+        self
+    }
+    pub fn with_empty_message(mut self, value: impl Into<String>) -> Self {
+        self.empty_message = value.into();
+        self
+    }
+    pub fn with_aria_label(mut self, value: impl Into<String>) -> Self {
+        self.aria_label = Some(value.into());
+        self
+    }
+    pub fn with_max_branch_name_bytes(mut self, value: usize) -> Self {
+        self.max_branch_name_bytes = value;
+        self
+    }
+    pub fn with_size(mut self, value: crate::types::ControlSize) -> Self {
+        self.size = Some(value);
+        self
+    }
+    pub fn with_size_role(mut self, value: crate::types::SemanticControlSizeRole) -> Self {
+        self.size_role = value;
+        self
+    }
+    pub fn with_density(mut self, value: crate::types::ControlDensity) -> Self {
+        self.density = Some(value);
+        self
+    }
+}
+
 
 impl HistoryCenterSpec {
     /// The resolved control size: the explicit size when set, else the

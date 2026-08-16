@@ -1,13 +1,11 @@
 //! TextInput — a text field: affixes, icons, validation, char count.
 //!
-//! The portable declaration surface — struct, defaults, builders — is
-//! generated from the conformance interface module
-//! (`packages/core/src/conformance/text-input.ts`) into
-//! [`crate::generated::text_input`] (regenerate with `effigy conformance:build`,
-//! gated by `effigy conformance:check`). This module is the hand-written
-//! extension beside the generated surface: token recipes and derived
-//! queries. Native caret/compat fields stay on the generated spec so existing
-//! hosts compile; they are not in `PortablePropsOf`.
+//! This module is the single authority for the TextInput declaration surface:
+//! the struct, its defaults and builders, then the token recipes and derived
+//! queries beside them. Native caret and residual compatibility fields sit on
+//! the same struct — hosts depend on both. `g14.006` briefly generated the
+//! first half from a TypeScript interface; `g14.008` rejected that path and
+//! `g14.021` restored the hand-written declaration.
 //!
 //! Contract: `docs/contracts/components/text-input.md`
 
@@ -15,7 +13,240 @@ use poodle_tokens::semantic;
 
 use crate::types::ValidationState;
 
-pub use crate::generated::text_input::TextInputSpec;
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TextInputSpec {
+    pub value: Option<String>,
+    pub default_value: String,
+    pub placeholder: Option<String>,
+    pub is_disabled: bool,
+    pub is_read_only: bool,
+    pub is_required: bool,
+    pub validation_state: crate::types::ValidationState,
+    pub shows_validation_status: bool,
+    pub aria_label: Option<String>,
+    pub prefix: Option<String>,
+    pub suffix: Option<String>,
+    pub max_length: Option<usize>,
+    pub show_char_count: bool,
+    pub size: Option<crate::types::ControlSize>,
+    pub size_role: crate::types::SemanticControlSizeRole,
+    pub density: Option<crate::types::ControlDensity>,
+    pub input_type: String,
+    pub rows: Option<u16>,
+    pub resize: String,
+    pub source: Option<String>,
+    pub show_clear_button: bool,
+    pub leading_icon: Option<String>,
+    pub trailing_icon: Option<String>,
+    pub id: Option<String>,
+    pub selection_start: usize,
+    pub selection_end: usize,
+    pub is_focused: bool,
+    pub name: Option<String>,
+    pub autocomplete: Option<String>,
+    pub pattern: Option<String>,
+    pub input_mode: Option<String>,
+    pub debounce_ms: u32,
+    pub description_id: Option<String>,
+    pub error_message_id: Option<String>,
+    pub submit_enabled: bool,
+    pub cancel_enabled: bool,
+}
+
+impl Default for TextInputSpec {
+    fn default() -> Self {
+        Self {
+            value: None,
+            default_value: "".to_owned(),
+            placeholder: None,
+            is_disabled: false,
+            is_read_only: false,
+            is_required: false,
+            validation_state: crate::types::ValidationState::None,
+            shows_validation_status: true,
+            aria_label: None,
+            prefix: None,
+            suffix: None,
+            max_length: None,
+            show_char_count: false,
+            size: None,
+            size_role: crate::types::SemanticControlSizeRole::Control,
+            density: None,
+            input_type: "text".to_owned(),
+            rows: None,
+            resize: "vertical".to_owned(),
+            source: None,
+            show_clear_button: true,
+            leading_icon: None,
+            trailing_icon: None,
+            id: None,
+            selection_start: 0,
+            selection_end: 0,
+            is_focused: false,
+            name: None,
+            autocomplete: None,
+            pattern: None,
+            input_mode: None,
+            debounce_ms: 0,
+            description_id: None,
+            error_message_id: None,
+            submit_enabled: false,
+            cancel_enabled: false,
+        }
+    }
+}
+
+impl TextInputSpec {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_value(mut self, value: impl Into<String>) -> Self {
+        self.value = Some(value.into());
+        self
+    }
+    pub fn with_default_value(mut self, value: impl Into<String>) -> Self {
+        self.default_value = value.into();
+        self
+    }
+    pub fn with_placeholder(mut self, value: impl Into<String>) -> Self {
+        self.placeholder = Some(value.into());
+        self
+    }
+    pub fn with_disabled(mut self, value: bool) -> Self {
+        self.is_disabled = value;
+        self
+    }
+    pub fn with_read_only(mut self, value: bool) -> Self {
+        self.is_read_only = value;
+        self
+    }
+    pub fn with_required(mut self, value: bool) -> Self {
+        self.is_required = value;
+        self
+    }
+    pub fn with_validation_state(mut self, value: crate::types::ValidationState) -> Self {
+        self.validation_state = value;
+        self
+    }
+    pub fn with_show_validation_status(mut self, value: bool) -> Self {
+        self.shows_validation_status = value;
+        self
+    }
+    pub fn with_aria_label(mut self, value: impl Into<String>) -> Self {
+        self.aria_label = Some(value.into());
+        self
+    }
+    pub fn with_prefix(mut self, value: impl Into<String>) -> Self {
+        self.prefix = Some(value.into());
+        self
+    }
+    pub fn with_suffix(mut self, value: impl Into<String>) -> Self {
+        self.suffix = Some(value.into());
+        self
+    }
+    pub fn with_max_length(mut self, value: usize) -> Self {
+        self.max_length = Some(value);
+        self
+    }
+    pub fn with_show_char_count(mut self, value: bool) -> Self {
+        self.show_char_count = value;
+        self
+    }
+    pub fn with_size(mut self, value: crate::types::ControlSize) -> Self {
+        self.size = Some(value);
+        self
+    }
+    pub fn with_size_role(mut self, value: crate::types::SemanticControlSizeRole) -> Self {
+        self.size_role = value;
+        self
+    }
+    pub fn with_density(mut self, value: crate::types::ControlDensity) -> Self {
+        self.density = Some(value);
+        self
+    }
+    pub fn with_type(mut self, value: impl Into<String>) -> Self {
+        self.input_type = value.into();
+        self
+    }
+    pub fn with_rows(mut self, value: u16) -> Self {
+        self.rows = Some(value);
+        self
+    }
+    pub fn with_resize(mut self, value: impl Into<String>) -> Self {
+        self.resize = value.into();
+        self
+    }
+    pub fn with_source(mut self, value: impl Into<String>) -> Self {
+        self.source = Some(value.into());
+        self
+    }
+    pub fn with_show_clear_button(mut self, value: bool) -> Self {
+        self.show_clear_button = value;
+        self
+    }
+    pub fn with_leading_icon(mut self, value: impl Into<String>) -> Self {
+        self.leading_icon = Some(value.into());
+        self
+    }
+    pub fn with_trailing_icon(mut self, value: impl Into<String>) -> Self {
+        self.trailing_icon = Some(value.into());
+        self
+    }
+    pub fn with_id(mut self, value: impl Into<String>) -> Self {
+        self.id = Some(value.into());
+        self
+    }
+    pub fn with_selection_start(mut self, value: usize) -> Self {
+        self.selection_start = value;
+        self
+    }
+    pub fn with_selection_end(mut self, value: usize) -> Self {
+        self.selection_end = value;
+        self
+    }
+    pub fn with_is_focused(mut self, value: bool) -> Self {
+        self.is_focused = value;
+        self
+    }
+    pub fn with_name(mut self, value: impl Into<String>) -> Self {
+        self.name = Some(value.into());
+        self
+    }
+    pub fn with_autocomplete(mut self, value: impl Into<String>) -> Self {
+        self.autocomplete = Some(value.into());
+        self
+    }
+    pub fn with_pattern(mut self, value: impl Into<String>) -> Self {
+        self.pattern = Some(value.into());
+        self
+    }
+    pub fn with_input_mode(mut self, value: impl Into<String>) -> Self {
+        self.input_mode = Some(value.into());
+        self
+    }
+    pub fn with_debounce_ms(mut self, value: u32) -> Self {
+        self.debounce_ms = value;
+        self
+    }
+    pub fn with_description_id(mut self, value: impl Into<String>) -> Self {
+        self.description_id = Some(value.into());
+        self
+    }
+    pub fn with_error_message_id(mut self, value: impl Into<String>) -> Self {
+        self.error_message_id = Some(value.into());
+        self
+    }
+    pub fn with_submit_enabled(mut self, value: bool) -> Self {
+        self.submit_enabled = value;
+        self
+    }
+    pub fn with_cancel_enabled(mut self, value: bool) -> Self {
+        self.cancel_enabled = value;
+        self
+    }
+}
+
 
 impl TextInputSpec {
     /// Place the caret, or select a range when the two differ.
@@ -25,12 +256,12 @@ impl TextInputSpec {
         self
     }
 
-    /// Alias for the generated `with_is_focused` builder.
+    /// Alias for the `with_is_focused` builder.
     pub fn with_focused(self, is_focused: bool) -> Self {
         self.with_is_focused(is_focused)
     }
 
-    /// Alias for the generated `with_type` builder (`input_type` field).
+    /// Alias for the `with_type` builder (`input_type` field).
     pub fn with_input_type(self, value: impl Into<String>) -> Self {
         self.with_type(value)
     }

@@ -31,3 +31,36 @@ describe("RangeSlider (react)", () => {
     expect(onValueCommit).toHaveBeenCalledOnce();
   });
 });
+
+/**
+ * g14.003 retained regression: the React shell shipped without the container
+ * `role="group"` the Svelte shell had, so a screen reader heard two unrelated
+ * sliders instead of one labelled range.
+ */
+describe("RangeSlider (react) semantics", () => {
+  it("groups the two thumbs under one container", () => {
+    const { container } = render(<RangeSlider value={[20, 80]} ariaLabel="Gain range" />);
+
+    const group = container.querySelector('[role="group"]');
+    expect(group).not.toBeNull();
+
+    // The label lives on the thumbs, which is where the value is; the group is
+    // what stops them being heard as two unrelated sliders. Standard thumbs are
+    // real range inputs, so they carry the implicit slider role.
+    const thumbs = [...group!.querySelectorAll('input[type="range"]')];
+    expect(thumbs.map((thumb) => thumb.getAttribute("aria-label"))).toEqual([
+      "Gain range minimum",
+      "Gain range maximum",
+    ]);
+  });
+
+  it("groups the embedded thumbs the same way", () => {
+    const { container } = render(
+      <RangeSlider value={[20, 80]} variant="embedded" ariaLabel="Gain range" />,
+    );
+
+    const group = container.querySelector('[role="group"]');
+    expect(group).not.toBeNull();
+    expect(group!.querySelectorAll('[role="slider"]').length).toBe(2);
+  });
+});

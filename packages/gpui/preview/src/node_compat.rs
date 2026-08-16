@@ -5420,7 +5420,7 @@ impl IntoElement for Popover {
         );
 
         // The production host runs the same machine the web shells and the
-        // conformance adapter run: the trigger and the dismiss routes emit
+        // headless adapter run: the trigger and the dismiss routes emit
         // `openChange` through the preview's node-event queue, and the focus
         // effects (entry and restore) are queued for the overlay host's
         // paint-time focus application.

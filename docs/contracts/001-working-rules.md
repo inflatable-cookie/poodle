@@ -34,13 +34,13 @@ prefer the narrower current authority and repair the stale document.
 - Keep `Examples` representative and curated. Do not replace it with an
   exhaustive case corpus or repeat size and density matrices already owned by
   dedicated tabs.
-- Executable conformance cases own exhaustive fixtures, actions, assertions,
-  and diagnostic evidence. A preview may expose those cases in a separate
-  `Conformance` tab; they do not define the catalogue's teaching structure.
+- Exhaustive fixtures, actions, and assertions belong in focused tests beside
+  the component, not in the catalogue. The g14 pilot's shared case corpus and
+  its projected `Conformance` tab are gone (`g14.008`, `g14.021`).
 - A renderer-neutral specimen plan may share ordered tabs, sections, captions,
   and fixture references across runtimes. Runtime adapters still render real
   components and may own bounded presentation needed by their renderer.
-- Review specimens as documentation. Passing conformance does not make a
+- Review specimens as documentation. A green test board does not make a
   specimen page useful, and an attractive specimen does not prove parity.
 
 ## Shared Implementation

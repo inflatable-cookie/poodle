@@ -1,6 +1,6 @@
-//! HistoryCenter specimen (g14.007). The same composition the conformance
-//! corpus executes, driven by the preview's own toggle state: disclose a fork,
-//! pick between two, check one out, rename a branch.
+//! HistoryCenter specimen (g14.007). The shared `poodle-render` composition,
+//! driven by the preview's own toggle state: disclose a fork, pick between
+//! two, check one out, rename a branch.
 //!
 //! The history is fixture data, not a store. Every operation leaves as a
 //! command and the specimen answers it the way a host would — which is the

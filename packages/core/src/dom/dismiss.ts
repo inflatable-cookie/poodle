@@ -234,8 +234,8 @@ export function registerDismissLayer(layer: DismissLayer): () => void {
   };
 }
 
-/** The number of open dismissable layers — the web side's layer order /
- * overlay-state observation channel (component-observation.v1). */
+/** The number of open dismissable layers. The native counterpart is
+ * `poodle_gpui_node_backend::open_layer_count`. */
 export function dismissLayerStackLength(): number {
   return stack.length;
 }

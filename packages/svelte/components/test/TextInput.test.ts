@@ -1,4 +1,4 @@
-import { render } from "@testing-library/svelte";
+import { fireEvent, render } from "@testing-library/svelte";
 import { describe, expect, it } from "vitest";
 
 import TextInput from "../src/TextInput.svelte";
@@ -35,5 +35,30 @@ describe("TextInput (svelte)", () => {
     const input = container.querySelector("input")!;
     (component as unknown as { focus: () => void }).focus();
     expect(document.activeElement).toBe(input);
+  });
+});
+
+/**
+ * g14.006 retained regression: clearing a search field is two portable
+ * signals in one order — the value change first, then the clear command. A
+ * host that reads only `clear` and a host that reads only `valueChange` both
+ * have to see the field empty.
+ */
+describe("TextInput (svelte) search clear", () => {
+  it("emits valueChange with the empty value before clear", async () => {
+    const order: string[] = [];
+    const { container } = render(TextInput, {
+      props: {
+        id: "search",
+        type: "search",
+        value: "kick",
+        onValueChange: (value: string) => order.push(`valueChange:${value}`),
+        onClear: () => order.push("clear"),
+      },
+    });
+
+    await fireEvent.click(container.querySelector(".poodle-text-input__clear") as HTMLElement);
+
+    expect(order).toEqual(["valueChange:", "clear"]);
   });
 });

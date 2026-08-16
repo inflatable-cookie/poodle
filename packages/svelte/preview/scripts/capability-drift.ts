@@ -1,12 +1,11 @@
 /**
  * docs:capability-drift — legacy static capability gate (g13.018).
  *
- * g14.002 disposition: **adapt**. This script remains as cheap debt detection
- * against `capabilities.json` source traces. It cannot mark a primitive
- * capability passing. Execution authority is
- * `primitive-capability-report.v1` (`effigy conformance:primitives-report`).
- * The `timers` row is retired from the primitive roster (host timing, not
- * render vocabulary) but may still appear here as legacy debt.
+ * This script is cheap debt detection against `capabilities.json` source
+ * traces. It cannot mark a capability passing: it checks declarations against
+ * sources, not behaviour. g14.002's `primitive-capability-report.v1` briefly
+ * claimed that execution authority; g14.008 rejected it and g14.021 removed
+ * it, so no report supersedes this gate today.
  *
  * The two expressiveness gaps the g13.008 revise verdict named, fixed, and
  * now pinned: per-runtime capability provision *including absence*, and

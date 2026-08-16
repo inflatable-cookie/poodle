@@ -1,6 +1,7 @@
 # g14.021 — Rejected Pilot Cleanup And Evidence Retention
 
-Status: ready
+Status: complete
+Log: `../../logs/2026-08/16-g14-021-experimental-cleanup-and-gate-consolidation.md`
 Depends on: `g14.008`
 Governing refs: `008-pilot-verdict.md`,
 `../../contracts/001-working-rules.md`

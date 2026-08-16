@@ -39,9 +39,9 @@ use crate::popover::popover_surface;
 use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
 use crate::spinner::spinner;
 
-/// Stable semantic part ids, matching the portable interface's native
-/// resolution descriptors. Backends key per-instance state on `runtime_id`;
-/// the semantic ids stay readable for observers and relationships.
+/// Stable semantic part ids. Backends key per-instance state on `runtime_id`;
+/// the semantic ids stay readable, and accessibility relationships point at
+/// them.
 pub const HISTORY_CENTER_UNDO_ID: &str = "history-center:undo";
 pub const HISTORY_CENTER_REDO_ID: &str = "history-center:redo";
 pub const HISTORY_CENTER_LIST_TRIGGER_ID: &str = "history-center:list-trigger";
@@ -1443,5 +1443,128 @@ mod tests {
         let trigger = find(&node, HISTORY_CENTER_LIST_TRIGGER_ID).expect("the trigger renders");
         assert_eq!(trigger.a11y.expanded, Some(false));
         assert!(find(&node, HISTORY_CENTER_SURFACE_ID).is_none());
+    }
+
+    /// g14.007 retained regression. `icon_button` carries no focus patch, and
+    /// the GPUI backend creates a focus handle only for a focusable node that
+    /// has one — so undo, redo and the picker's actions trigger were
+    /// unreachable by keyboard and unfocusable by the backend. The composition
+    /// stamps its own ring. The `icon_button` gap itself is tracked in
+    /// PAPERCUTS.
+    #[test]
+    fn every_focusable_control_carries_the_ring_the_backend_keys_handles_on() {
+        let pages = spine();
+        let node = history_center(
+            &open_spec(),
+            &theme(),
+            &view_for(&pages, &[]),
+            &HistoryCenterHandlers::default(),
+        );
+
+        for id in [
+            HISTORY_CENTER_UNDO_ID,
+            HISTORY_CENTER_REDO_ID,
+            HISTORY_CENTER_LIST_TRIGGER_ID,
+        ] {
+            let control = find(&node, id).unwrap_or_else(|| panic!("{id} renders"));
+            assert!(
+                control.style.focus.is_some(),
+                "{id} has no focus ring, so the backend never creates a handle for it",
+            );
+        }
+
+        let entry = find(&node, &history_center_entry_id("e2")).expect("entry button renders");
+        assert!(entry.interaction.focusable);
+        assert!(entry.style.focus.is_some());
+    }
+
+    /// g14.007 retained regression. Roving focus moved the tab stop without
+    /// moving backend focus: the tab stop has to follow the machine's
+    /// `focus_row`, not the list order, or arrow navigation is invisible to
+    /// the platform.
+    #[test]
+    fn the_tab_stop_follows_the_machines_roving_focus() {
+        let pages = spine();
+        let mut view = view_for(&pages, &[]);
+        view.focus_row = Some(HistoryCenterRowId::new(
+            HistoryCenterRowKind::Entry,
+            "e2".to_owned(),
+        ));
+
+        let node = history_center(
+            &open_spec(),
+            &theme(),
+            &view,
+            &HistoryCenterHandlers::default(),
+        );
+
+        let tab_index_of = |entry_id: &str| {
+            find(&node, &history_center_entry_id(entry_id))
+                .unwrap_or_else(|| panic!("entry {entry_id} renders"))
+                .a11y
+                .tab_index
+        };
+        assert_eq!(tab_index_of("e2"), Some(0));
+        assert_eq!(tab_index_of("e1"), Some(-1));
+        assert_eq!(tab_index_of("e3"), Some(-1));
+    }
+
+    /// g14.007 retained regression: the open rename is a real editing surface.
+    /// Keystrokes reach the host's buffer through the same path any text field
+    /// uses — a key *name* is not content ("space" is one space, not the word)
+    /// and Shift is what makes a capital letter. Dropping either committed
+    /// "wide mix v2" or "Widespacemixspacev2" for "Wide mix v2".
+    #[test]
+    fn the_rename_input_reports_keys_as_content_with_shift_and_space_intact() {
+        use std::sync::Mutex;
+
+        let typed: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&typed);
+        let pages = spine();
+        let level = HistoryCenterOpenFork {
+            anchor_entry_id: "e2".to_owned(),
+            continuations: Some(vec![HistoryContinuation::new("f1", "Widen", "wide")]),
+            pick: Some(HistoryContinuation::new("f1", "Widen", "wide")),
+            chosen: None,
+            run_pages: Vec::new(),
+            inner: Vec::new(),
+        };
+        let mut view = view_for(&pages, &[level]);
+        view.rename = Some(HistoryCenterRename {
+            anchor_entry_id: "e2".to_owned(),
+            branch_id: "wide".to_owned(),
+            value: "Wide".to_owned(),
+        });
+
+        let node = history_center(
+            &open_spec(),
+            &theme(),
+            &view,
+            &HistoryCenterHandlers {
+                on_rename_key: Some(Arc::new(move |key| {
+                    sink.lock().expect("typed").push(key.to_owned())
+                })),
+                ..HistoryCenterHandlers::default()
+            },
+        );
+
+        let input = find(&node, &history_center_rename_input_id("e2")).expect("rename input");
+        assert!(input.interaction.focusable);
+        let on_key = input.interaction.on_edit_key.clone().expect("editing path");
+
+        on_key("space", poodle_node::NodeModifiers::default());
+        on_key(
+            "m",
+            poodle_node::NodeModifiers {
+                shift: true,
+                ..poodle_node::NodeModifiers::default()
+            },
+        );
+        on_key("i", poodle_node::NodeModifiers::default());
+
+        assert_eq!(
+            typed.lock().expect("typed").as_slice(),
+            [" ".to_owned(), "M".to_owned(), "i".to_owned()],
+        );
     }
 }

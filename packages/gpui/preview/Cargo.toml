@@ -59,10 +59,10 @@ name = "catalogue"
 path = "tests/catalogue.rs"
 
 [[test]]
-name = "conformance_headless"
-path = "tests/conformance_headless.rs"
+name = "headless_regressions"
+path = "tests/headless_regressions.rs"
 
-# The headless conformance board runs through GPUI's in-memory test platform
+# The focused native regressions run through GPUI's in-memory test platform
 # (TestAppContext / VisualTestContext / TestWindow). test-support is a
 # dev-dependency so ordinary builds and the preview bin never pull it in.
 [dev-dependencies]

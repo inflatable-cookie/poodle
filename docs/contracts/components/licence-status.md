@@ -138,9 +138,11 @@ pure core view data. It owns no entitlement or licence transition.
 ## 8. Framework And Runtime Parity
 
 Svelte and React share types, view derivation, copy, CSS, and tests. The web
-reference is incomplete until g14.017 adds the portable interface, shared
-cases/specimens, Rust spec/renderer, and GPUI evidence. Jetstream remains a
-separate deferred backend admission and is not claimed by that milestone.
+reference is incomplete until g14.017 adds the Rust spec, the shared renderer
+composition, specimens, and GPUI evidence. `g14.008` rejected the conformance
+mechanism that card was originally written against; g14.017 is replanned and
+its execution method is undecided. Jetstream remains a separate deferred
+backend admission and is not claimed by that milestone.
 
 ## 9. Acceptance Cases
 

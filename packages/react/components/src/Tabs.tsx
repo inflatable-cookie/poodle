@@ -19,11 +19,6 @@ import {
   type TabsContext as HeadlessTabsContext,
   type TabsEvent as HeadlessTabsEvent,
 } from "@inflatable-cookie/poodle-core";
-import type {
-  TabsPortableEvents,
-  TabsPortableProps,
-} from "@inflatable-cookie/poodle-core/conformance/tabs";
-
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Button } from "./Button";
 import { Icon } from "./Icon";
@@ -40,15 +35,40 @@ import {
   useUiPresentation,
 } from "./presentation";
 import type {
+  ControlDensity,
+  ControlSize,
+  Orientation,
+  SemanticControlSizeRole,
   TabItem,
 } from "./types";
 
 /** @deprecated Use TabItem instead (pilot-era alias). */
 export type TabsItem = TabItem;
 
-export interface TabsProps extends Partial<Omit<TabsPortableProps, "items">> {
+/**
+ * The contracted Tabs surface. `items` takes the framework's `TabItem` shape;
+ * everything else is the contract's own vocabulary.
+ *
+ * Contract: `docs/contracts/components/tabs.md`. The Svelte pair is
+ * `packages/svelte/components/src/Tabs.svelte`; the Rust counterpart is
+ * `poodle_specs::TabsSpec`.
+ */
+export interface TabsProps {
+  value?: string | null;
   defaultValue?: string | null;
   items?: TabItem[];
+  variant?: "card" | "pill" | "block";
+  activeEdge?: "none" | "outline" | "underline";
+  activeFill?: "none" | "tint" | "solid";
+  orientation?: Orientation;
+  activationMode?: "automatic" | "manual";
+  bordered?: boolean;
+  fullWidth?: boolean;
+  reorderable?: boolean;
+  ariaLabel?: string | null;
+  size?: ControlSize | null;
+  sizeRole?: SemanticControlSizeRole;
+  density?: ControlDensity | null;
   /**
    * Selection edge on the active tab: `"none"` draws no edge, `"outline"`
    * draws the accent border around the active item (the former `card`
@@ -77,7 +97,7 @@ export interface TabsProps extends Partial<Omit<TabsPortableProps, "items">> {
   collapseLabel?: string | null;
   showTooltips?: boolean;
   historyKey?: string | null;
-  onValueChange?: TabsPortableEvents["valueChange"] | undefined;
+  onValueChange?: ((value: string) => void) | undefined;
   onReorder?: ((items: string[]) => void) | undefined;
   // Forwarded so a host (DockRegion) can run its own drag session on top of
   // the reorder plumbing; the tab still reorders locally either way.

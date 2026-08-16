@@ -1,10 +1,5 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/button.css";
-  import type {
-    ButtonInterface,
-    ButtonPortableEvents,
-    ButtonPortableProps,
-  } from "@inflatable-cookie/poodle-core/conformance/button";
   import type { Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
@@ -14,40 +9,41 @@
     resolveSupportingVisualSize,
   } from "./presentation";
   import { default as Spinner } from "./Spinner.svelte";
-  import type { IconProp } from "./types";
+  import type {
+    ButtonTone,
+    ButtonVariant,
+    ControlDensity,
+    ControlSize,
+    IconProp,
+    SemanticControlSizeRole,
+  } from "./types";
 
   /**
-   * Portable props and events come from the conformance interface authority
-   * (`packages/core/src/conformance/button.ts`): renaming a portable prop or
-   * event there fails this interface and the component body without editing
-   * a second type mirror. The label region is rendered through `children`;
-   * web-only HTML and styling props stay extensions here.
+   * The contracted Button surface. `label` is carried through `children` and
+   * the icon props take framework values (`IconProp`/snippets), so those three
+   * names are declared here rather than mirrored from a shared prop type;
+   * web-only HTML and styling props are extensions.
+   *
+   * Contract: `docs/contracts/components/button.md`. The Rust counterpart is
+   * `poodle_specs::ButtonSpec`.
    */
-  /**
-   * The props the web shell carries through framework channels (label →
-   * children, icons → snippets/IconProp). The `satisfies` check binds these
-   * names to the interface: renaming a portable prop fails this file.
-   */
-  const carrierProps = ["label", "leadingIcon", "trailingIcon"] as const satisfies
-    readonly (keyof ButtonPortableProps)[];
-  type Portable = Omit<ButtonPortableProps, (typeof carrierProps)[number]>;
-  type PortableEvents = ButtonPortableEvents;
-
-  /**
-   * The web handler for a semantic event: the public callback keeps its
-   * framework shape (the contract's `MouseEvent`), while the name binds
-   * mechanically to the interface — renaming the semantic `press` event
-   * fails this file without a second type mirror.
-   */
-  type WebHandler<
-    N extends keyof PortableEvents,
-  > = Extract<ButtonInterface["events"][number], { name: N }> extends {
-    webCarrier: "mouse-event";
-  }
-    ? (event: MouseEvent) => void
-    : PortableEvents[N];
-
-  interface Props extends Partial<Portable> {
+  interface Props {
+    variant?: ButtonVariant;
+    tone?: ButtonTone;
+    size?: ControlSize | null;
+    sizeRole?: SemanticControlSizeRole;
+    density?: ControlDensity | null;
+    disabled?: boolean;
+    loading?: boolean;
+    chevron?: boolean;
+    truncate?: boolean;
+    fit?: "default" | "content";
+    maxWidth?: string | null;
+    pressed?: boolean | null;
+    defaultPressed?: boolean | null;
+    ariaLabel?: string | null;
+    ariaExpanded?: boolean | null;
+    describedBy?: string | null;
     type?: HTMLButtonElement["type"];
     form?: string | null;
     formaction?: string | null;
@@ -63,10 +59,10 @@
     trailingIcon?: IconProp | null;
     className?: string;
     style?: string | null;
-    onClick?: WebHandler<"press"> | null;
+    onClick?: ((event: MouseEvent) => void) | null;
     onFocus?: ((event: FocusEvent) => void) | null;
     onBlur?: ((event: FocusEvent) => void) | null;
-    onPressedChange?: PortableEvents["pressedChange"] | null;
+    onPressedChange?: ((pressed: boolean) => void) | null;
     children?: Snippet<[]>;
     leading?: Snippet<[]>;
     trailing?: Snippet<[]>;
