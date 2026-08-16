@@ -1,12 +1,14 @@
 import { fireEvent, render } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
+import type { TranscriptToolCall } from "../src/types";
+
 import ToolCallGroup from "../src/ToolCallGroup.svelte";
 
-const calls = [
-  { id: "tc-1", label: "Ran command", detail: "one", status: "success" as const },
-  { id: "tc-2", label: "Ran command", detail: "two", status: "success" as const },
-  { id: "tc-3", label: "Ran command", detail: "three", status: "success" as const },
+const calls: TranscriptToolCall[] = [
+  { kind: "tool-call" as const, id: "tc-1", label: "Ran command", detail: "one", status: "success" as const },
+  { kind: "tool-call" as const, id: "tc-2", label: "Ran command", detail: "two", status: "success" as const },
+  { kind: "tool-call" as const, id: "tc-3", label: "Ran command", detail: "three", status: "success" as const },
 ];
 
 describe("ToolCallGroup (svelte)", () => {
@@ -46,8 +48,8 @@ describe("ToolCallGroup (svelte)", () => {
       props: {
         id: "run-1",
         calls: [
-          { id: "tc-1", label: "Ran command", status: "running" as const },
-          { id: "tc-2", label: "Ran command", status: "error" as const },
+          { kind: "tool-call" as const, id: "tc-1", label: "Ran command", status: "running" as const },
+          { kind: "tool-call" as const, id: "tc-2", label: "Ran command", status: "error" as const },
         ],
       },
     });
@@ -62,8 +64,8 @@ describe("ToolCallGroup (svelte)", () => {
       props: {
         id: "run-1",
         calls: [
-          { id: "tc-1", label: "Ran command", status: "running" as const },
-          { id: "tc-2", label: "Ran command", status: "success" as const },
+          { kind: "tool-call" as const, id: "tc-1", label: "Ran command", status: "running" as const },
+          { kind: "tool-call" as const, id: "tc-2", label: "Ran command", status: "success" as const },
         ],
       },
     });
@@ -76,7 +78,7 @@ describe("ToolCallGroup (svelte)", () => {
     const { container } = render(ToolCallGroup, {
       props: {
         id: "run-1",
-        calls: [{ id: "tc-1", label: "Ran command", output: "ok", status: "success" as const }],
+        calls: [{ kind: "tool-call" as const, id: "tc-1", label: "Ran command", output: "ok", status: "success" as const }],
         onCallToggle,
       },
     });

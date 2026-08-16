@@ -28,14 +28,14 @@ describe("Tooltip (svelte)", () => {
     expect(bubbleOf()).toBeNull();
   });
 
-  it("wires aria-describedby on the trigger only while open", () => {
+  it("wires aria-describedby on the trigger only while open", async () => {
     const { container, rerender } = render(TooltipHarness, { props: { open: true } });
     const trigger = triggerOf(container);
     const bubble = bubbleOf();
     expect(bubble?.id).toBeTruthy();
     expect(trigger.getAttribute("aria-describedby")).toBe(bubble?.id);
 
-    rerender({ props: { open: false } });
+    await rerender({ open: false });
     expect(trigger.getAttribute("aria-describedby")).toBeNull();
   });
 
@@ -46,6 +46,18 @@ describe("Tooltip (svelte)", () => {
     const root = container.querySelector(".poodle-tooltip") as HTMLElement;
 
     fireEvent.pointerEnter(root);
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(300);
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
+  it("reports open changes driven by focus on an uncontrolled tooltip", async () => {
+    vi.useFakeTimers();
+    const onOpenChange = vi.fn();
+    const { container } = render(TooltipHarness, { props: { onOpenChange } });
+
+    await fireEvent.focusIn(triggerOf(container));
     expect(onOpenChange).not.toHaveBeenCalled();
 
     await vi.advanceTimersByTimeAsync(300);

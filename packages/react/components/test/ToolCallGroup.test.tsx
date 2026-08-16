@@ -1,12 +1,14 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import type { TranscriptToolCall } from "../src/types";
+
 import { ToolCallGroup } from "../src/ToolCallGroup";
 
-const calls = [
-  { id: "tc-1", label: "Ran command", detail: "one", status: "success" as const },
-  { id: "tc-2", label: "Ran command", detail: "two", status: "success" as const },
-  { id: "tc-3", label: "Ran command", detail: "three", status: "success" as const },
+const calls: TranscriptToolCall[] = [
+  { kind: "tool-call" as const, id: "tc-1", label: "Ran command", detail: "one", status: "success" as const },
+  { kind: "tool-call" as const, id: "tc-2", label: "Ran command", detail: "two", status: "success" as const },
+  { kind: "tool-call" as const, id: "tc-3", label: "Ran command", detail: "three", status: "success" as const },
 ];
 
 describe("ToolCallGroup (react)", () => {
@@ -44,8 +46,8 @@ describe("ToolCallGroup (react)", () => {
       <ToolCallGroup
         id="run-1"
         calls={[
-          { id: "tc-1", label: "Ran command", status: "running" as const },
-          { id: "tc-2", label: "Ran command", status: "error" as const },
+          { kind: "tool-call" as const, id: "tc-1", label: "Ran command", status: "running" as const },
+          { kind: "tool-call" as const, id: "tc-2", label: "Ran command", status: "error" as const },
         ]}
       />,
     );
@@ -62,8 +64,8 @@ describe("ToolCallGroup (react)", () => {
       <ToolCallGroup
         id="run-1"
         calls={[
-          { id: "tc-1", label: "Ran command", status: "running" as const },
-          { id: "tc-2", label: "Ran command", status: "success" as const },
+          { kind: "tool-call" as const, id: "tc-1", label: "Ran command", status: "running" as const },
+          { kind: "tool-call" as const, id: "tc-2", label: "Ran command", status: "success" as const },
         ]}
       />,
     );
@@ -76,7 +78,7 @@ describe("ToolCallGroup (react)", () => {
     const { container } = render(
       <ToolCallGroup
         id="run-1"
-        calls={[{ id: "tc-1", label: "Ran command", output: "ok", status: "success" as const }]}
+        calls={[{ kind: "tool-call" as const, id: "tc-1", label: "Ran command", output: "ok", status: "success" as const }]}
         onCallToggle={onCallToggle}
       />,
     );

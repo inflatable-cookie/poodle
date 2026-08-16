@@ -12,39 +12,40 @@ but is **not** a gap — see the note at the end.
 
 ## Svelte Release Blocker Class
 
-Contract, implementation, export, and specimen posture are complete for all
-175 components. The only open Svelte-denominator surface is **focused
-component evidence**: 24 components mount in the anatomy smoke but have no
-named focused test file/case asserting contract behaviour (the 29 foundation
-display & shell components closed by `g15.002`, the 26 foundation forms,
-inputs & overlays closed by `g15.003`, and the 35 composites & media
-components closed by `g15.004` now have focused evidence on both Svelte and
-React sides — see `release-baseline-roster.md` for the named case files).
+Contract, implementation, export, specimen, and **focused component evidence**
+posture are complete for all 175 components. The last open Svelte-denominator
+surface closed with `g15.005`: the 29 foundation display & shell components
+(`g15.002`), the 26 foundation forms, inputs & overlays (`g15.003`), the 35
+composites & media components (`g15.004`), and the final 24 workstation systems
+and agent surfaces (`g15.005`) all carry focused evidence on both Svelte and
+React sides — see `release-baseline-roster.md` for the named case files.
 
-### Svelte focused evidence (24) — owned by `g15.005`
+### Svelte focused evidence (24) — closed by `g15.005`
 
-| Family | Components without focused evidence | Count |
-| --- | --- | ---: |
-| Workstation systems | StatusBar, StatusIndicator, Surface, Text, TextLink, Table, TokenInput, TimeInput, TimeZoneSelect, ToggleGroup, Toolbar, Tooltip, TriStateSwitch, UiPresentationProvider, VideoPlayer, DateTimeZonePicker | 16 |
-| Agent surfaces | AgentMessage, AgentPlanRecord, AgentQuestion, AgentQuestionRecord, AgentSubagent, ChangedFiles, ToolCall, ToolCallGroup | 8 |
+| Family | Components | Count | Posture |
+| --- | --- | ---: | --- |
+| Workstation systems | StatusBar, StatusIndicator, Surface, Text, TextLink, Table, TokenInput, TimeInput, TimeZoneSelect, ToggleGroup, Toolbar, Tooltip, TriStateSwitch, UiPresentationProvider, VideoPlayer, DateTimeZonePicker | 16 | complete — `packages/svelte/components/test/<Name>.test.ts` |
+| Agent surfaces | AgentMessage, AgentPlanRecord, AgentQuestion, AgentQuestionRecord, AgentSubagent, ChangedFiles, ToolCall, ToolCallGroup | 8 | complete — `packages/svelte/components/test/<Name>.test.ts` |
 
-Priority within each tranche: downstream-used components first (see the
-roster's Downstream use column; Longhorn is the primary consumer).
+No Svelte-denominator gap class remains open. The roster reads 175/0 focused
+Svelte evidence.
 
 ## React Mirror Gaps
 
 `g15.006` closed the two missing implementations/export (AgentPlan,
 AgentPlanRecord), the six missing gallery specimens (AgentMessage, AgentPlan,
 AgentPlanRecord, ChangedFiles, ToolCall, ToolCallGroup), and the five residual
-focused React gaps (AgentPlan, Icon, IconProvider, Tree, SplitView); the
-roster now reads 175/0 React implementation, 175/0 React gallery, and 152/23
-focused React evidence. The remaining rows below are the focused React gaps
-paired with the Svelte evidence tranches.
+focused React gaps (AgentPlan, Icon, IconProvider, Tree, SplitView). `g15.005`
+then closed the final 23 focused React gaps alongside its Svelte tranche. The
+roster reads 175/0 React implementation, 175/0 React gallery, and 175/0 focused
+React evidence.
 
-| Gap | Components | Owner |
-| --- | --- | --- |
-| Focused React test gaps for the Svelte evidence tranches | paired with the same batches: each Svelte evidence tranche mirrors its contract cases on the React side | `g15.002`–`g15.005` |
-| Focused React test gaps paired with the final Svelte evidence tranche | AgentMessage, AgentPlanRecord, ChangedFiles, ToolCall, ToolCallGroup | `g15.005` |
+| Gap | Components | Owner | Posture |
+| --- | --- | --- | --- |
+| Focused React test gaps for the Svelte evidence tranches | paired with the same batches: each Svelte evidence tranche mirrors its contract cases on the React side | `g15.002`–`g15.005` | complete — `packages/react/components/test/<Name>.test.tsx` |
+| Focused React test gaps paired with the final Svelte evidence tranche | the 24 `g15.005` components less `AgentSubagent`, which already carried React evidence | `g15.005` | complete — 23 mirrored case files |
+
+No React mirror gap class remains open.
 
 ## Shared Rust Composition and GPUI Gaps
 

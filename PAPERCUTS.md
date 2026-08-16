@@ -767,3 +767,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   disabled trigger reports focused on both GPUI and happy-dom; the observers
   treat disabled parts as unfocused on both runtimes (browser semantics),
   which is what keeps the cross-runtime comparison green.
+
+- 2026-08-17 — g15.005 (workstation & agent evidence) found that **no repo
+  selector typechecks React test files.** `effigy react:build` builds
+  `packages/react/preview` only, and there is no `check:react` counterpart to
+  `check:svelte`; `packages/react/components` has no `tsconfig.json`. The
+  ToolCallGroup fixtures in this card were missing the required
+  `TranscriptToolCall` discriminant on both sides — `check:svelte` caught the
+  Svelte copy and nothing caught the React copy. The React fixtures were fixed
+  by hand off the Svelte error. A React typecheck gate would have caught both,
+  and would also have caught the JSX-attribute `\n` fixture bug in the same
+  tranche (a string attribute keeps `\n` literal, so the whole markdown fixture
+  collapsed to one line and the assertion measured nothing). Recording the gap
+  rather than inventing a gate here: adding one is a board-health change, not
+  component evidence.

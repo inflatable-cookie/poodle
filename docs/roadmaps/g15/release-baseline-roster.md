@@ -17,10 +17,10 @@ Public types and helpers are recorded separately and are **not** part of the den
 | Export from index + packed `exports` map | 175 | 0 | 0 |
 | Contract (`docs/contracts/components/<name>.md`) | 175 | 0 | 0 |
 | Svelte preview specimen (dedicated file or scene-shared) | 175 | 0 | 0 |
-| Focused Svelte test (named file/case, beyond anatomy smoke) | 151 | 24 | 0 |
+| Focused Svelte test (named file/case, beyond anatomy smoke) | 175 | 0 | 0 |
 | React implementation + export | 175 | 0 | 0 |
 | React gallery specimen | 175 | 0 | 0 |
-| Focused React test | 152 | 23 | 0 |
+| Focused React test | 175 | 0 | 0 |
 | Rust declaration (`<Name>Spec`, including documented aliases) | 163 | 11 | 1 |
 | Rust render module (`poodle-render`) | 161 | 13 | 1 |
 | GPUI specimen | 145 | 29 | 1 |
@@ -35,8 +35,8 @@ Public types and helpers are recorded separately and are **not** part of the den
 - **Implementation / Export**: 175 `export { default as <Name> } from "./<Name>.svelte"` lines in `packages/svelte/components/src/index.ts`, each matched to a file of the same name; package `exports` map and `files` array checked once for packed reachability.
 - **Contract**: one `docs/contracts/components/<kebab>.md` per component (kebab-case from the export name); 175 of 175 present, verified by direct file check.
 - **Specimen**: keys of `specimenMap` in `packages/svelte/preview/src/specimens/registry.ts` against the canonical slugs (174 portable + web-only `meter-surface`); 175 entries. 168 map to a dedicated `*Specimen.svelte`; 7 map to a shared specimen (5 `SceneSpecimen`, 1 `ListCardSpecimen` for `ListCardCounter`, 1 `MetaBarSpecimen` for `MetaItem`).
-- **Focused Svelte test**: component imports resolved across all files in `packages/svelte/components/test/` (`.test.ts` and harness `.svelte` files); a component counts when at least one named test file mounts and asserts it beyond the anatomy smoke. 151 count; 24 record `missing` (smoke-only).
-- **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (175); React gallery: `specimen-map.ts` keys against canonical slugs (175); focused React test: same import-resolution method over `packages/react/components/test/` (152; 23 missing).
+- **Focused Svelte test**: component imports resolved across all files in `packages/svelte/components/test/` (`.test.ts` and harness `.svelte` files); a component counts when at least one named test file mounts and asserts it beyond the anatomy smoke. 175 count; 0 record `missing` — `g15.005` closed the final 24 (workstation systems and agent surfaces).
+- **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (175); React gallery: `specimen-map.ts` keys against canonical slugs (175); focused React test: same import-resolution method over `packages/react/components/test/` (175; 0 missing — `g15.005` closed the final 23; `AgentSubagent` already had React evidence).
 - **Rust declaration**: `pub struct <Name>Spec` searched recursively in `packages/contracts/components/src` (163). Three documented naming discrepancies count as present: `CallOutSpec` (`Callout`), `ShellStatusBarSpec` (`StatusBar`), `TimeFieldSpec` (`TimeInput`). `MeterSurface` has no declaration and records not-applicable per spec 068.
 - **Rust render**: module names in `packages/render/src/lib.rs` (161). Documented naming discrepancies count as present: `bx.rs` (`Box`), `shell_status_bar.rs` (`StatusBar`), `time_field.rs` (`TimeInput`), and the batched `audio.rs` covering the 12 audio widgets (13 audio components minus `MeterSurface`). `MeterSurface` records not-applicable.
 - **GPUI specimen**: file presence in `packages/gpui/preview/src/specimens/` per component (145). The batched `audio_controls.rs` covers 12 audio widgets; the 12 audio widgets are those covered — `audio_controls.rs` has no `meter_surface` function and `MeterSurface` records not-applicable. Counts do not include the `mod.rs` dispatch fallback (`missing_specimen`).
@@ -135,43 +135,43 @@ Rust declarations use the documented naming discrepancies where they exist: `Cal
 
 | Component | Contract | Specimen | Focused Svelte test | Pack-install | Downstream use |
 | --- | --- | --- | --- | --- | --- |
-| `AgentMessage` | `docs/contracts/components/agent-message.md` | `AgentMessageSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `AgentMessage` | `docs/contracts/components/agent-message.md` | `AgentMessageSpecimen.svelte` | `AgentMessage.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 | `AgentPlan` | `docs/contracts/components/agent-plan.md` | `AgentPlanSpecimen.svelte` | `AgentChatInputPlan.svelte.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
-| `AgentPlanRecord` | `docs/contracts/components/agent-plan-record.md` | `AgentPlanRecordSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `AgentQuestion` | `docs/contracts/components/agent-question.md` | `AgentQuestionSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `AgentQuestionRecord` | `docs/contracts/components/agent-question-record.md` | `AgentQuestionRecordSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `AgentSubagent` | `docs/contracts/components/agent-subagent.md` | `AgentSubagentSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `AgentPlanRecord` | `docs/contracts/components/agent-plan-record.md` | `AgentPlanRecordSpecimen.svelte` | `AgentPlanRecord.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `AgentQuestion` | `docs/contracts/components/agent-question.md` | `AgentQuestionSpecimen.svelte` | `AgentQuestion.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `AgentQuestionRecord` | `docs/contracts/components/agent-question-record.md` | `AgentQuestionRecordSpecimen.svelte` | `AgentQuestionRecord.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `AgentSubagent` | `docs/contracts/components/agent-subagent.md` | `AgentSubagentSpecimen.svelte` | `AgentSubagent.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 | `AgentTranscript` | `docs/contracts/components/agent-transcript.md` | `AgentTranscriptSpecimen.svelte` | `AgentTranscriptSubagent.svelte.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
-| `ChangedFiles` | `docs/contracts/components/changed-files.md` | `ChangedFilesSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `ToolCall` | `docs/contracts/components/tool-call.md` | `ToolCallSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `ToolCallGroup` | `docs/contracts/components/tool-call-group.md` | `ToolCallGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `ChangedFiles` | `docs/contracts/components/changed-files.md` | `ChangedFilesSpecimen.svelte` | `ChangedFiles.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `ToolCall` | `docs/contracts/components/tool-call.md` | `ToolCallSpecimen.svelte` | `ToolCall.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `ToolCallGroup` | `docs/contracts/components/tool-call-group.md` | `ToolCallGroupSpecimen.svelte` | `ToolCallGroup.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 
 ### Workstation systems
 
 | Component | Contract | Specimen | Focused Svelte test | Pack-install | Downstream use |
 | --- | --- | --- | --- | --- | --- |
-| `StatusBar` | `docs/contracts/components/status-bar.md` | `StatusBarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `StatusIndicator` | `docs/contracts/components/status-indicator.md` | `StatusIndicatorSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `finch`, `longhorn`, `underlay` |
-| `Surface` | `docs/contracts/components/surface.md` | `SurfaceSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `longhorn`, `loophole-legacy`, `nucleus` |
+| `StatusBar` | `docs/contracts/components/status-bar.md` | `StatusBarSpecimen.svelte` | `StatusBar.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `StatusIndicator` | `docs/contracts/components/status-indicator.md` | `StatusIndicatorSpecimen.svelte` | `StatusIndicator.test.ts` | `missing` | `finch`, `longhorn`, `underlay` |
+| `Surface` | `docs/contracts/components/surface.md` | `SurfaceSpecimen.svelte` | `Surface.test.ts` | `missing` | `acowtancy`, `longhorn`, `loophole-legacy`, `nucleus` |
 | `Switch` | `docs/contracts/components/switch.md` | `SwitchSpecimen.svelte` | `interactions.test.ts` | `missing` | `acowtancy`, `bovine-accelerator-desktop`, `loophole`, `loophole-legacy`, `nucleus` |
-| `Text` | `docs/contracts/components/text.md` | `TextSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `figmatic`, `nucleus` |
-| `TextLink` | `docs/contracts/components/text-link.md` | `TextLinkSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy`, `underlay` |
+| `Text` | `docs/contracts/components/text.md` | `TextSpecimen.svelte` | `Text.test.ts` | `missing` | `acowtancy`, `figmatic`, `nucleus` |
+| `TextLink` | `docs/contracts/components/text-link.md` | `TextLinkSpecimen.svelte` | `TextLink.test.ts` | `missing` | `acowtancy`, `underlay` |
 | `Tabs` | `docs/contracts/components/tabs.md` | `TabsSpecimen.svelte` | `interactions.test.ts` | `missing` | `acowtancy`, `compli-me`, `contact-patch`, `figmatic`, `longhorn`, `loophole-legacy`, `nucleus`, `songsprout`, `soundcheck-library`, `underlay`, `underlay-reference` |
-| `Table` | `docs/contracts/components/table.md` | `TableSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `longhorn` |
+| `Table` | `docs/contracts/components/table.md` | `TableSpecimen.svelte` | `Table.test.ts` | `missing` | `longhorn` |
 | `TimeAgo` | `docs/contracts/components/time-ago.md` | `TimeAgoSpecimen.svelte` | `TimeAgo.test.ts` | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `underlay`, `underlay-reference` |
 | `TextInput` | `docs/contracts/components/text-input.md` | `TextInputSpecimen.svelte` | `TextInput.test.ts` | `missing` | `acowtancy`, `compli-me`, `composer`, `contact-patch`, `longhorn`, `loophole-legacy`, `nucleus`, `songsprout`, `soundcheck`, `soundcheck-library`, `underlay`, `underlay-reference` |
-| `TokenInput` | `docs/contracts/components/token-input.md` | `TokenInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
-| `TimeInput` | `docs/contracts/components/time-input.md` | `TimeInputSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `TimeZoneSelect` | `docs/contracts/components/time-zone-select.md` | `TimeZoneSelectSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `TokenInput` | `docs/contracts/components/token-input.md` | `TokenInputSpecimen.svelte` | `TokenInput.test.ts` | `missing` | `acowtancy` |
+| `TimeInput` | `docs/contracts/components/time-input.md` | `TimeInputSpecimen.svelte` | `TimeInput.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `TimeZoneSelect` | `docs/contracts/components/time-zone-select.md` | `TimeZoneSelectSpecimen.svelte` | `TimeZoneSelect.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 | `ThemeSelect` | `docs/contracts/components/theme-select.md` | `ThemeSelectSpecimen.svelte` | `ThemeSelect.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
-| `ToggleGroup` | `docs/contracts/components/toggle-group.md` | `ToggleGroupSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `Toolbar` | `docs/contracts/components/toolbar.md` | `ToolbarSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `loophole-legacy`, `soundcheck-library` |
-| `Tooltip` | `docs/contracts/components/tooltip.md` | `TooltipSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `acowtancy` |
-| `TriStateSwitch` | `docs/contracts/components/tri-state-switch.md` | `TriStateSwitchSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `ToggleGroup` | `docs/contracts/components/toggle-group.md` | `ToggleGroupSpecimen.svelte` | `ToggleGroup.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `Toolbar` | `docs/contracts/components/toolbar.md` | `ToolbarSpecimen.svelte` | `Toolbar.test.ts` | `missing` | `loophole-legacy`, `soundcheck-library` |
+| `Tooltip` | `docs/contracts/components/tooltip.md` | `TooltipSpecimen.svelte` | `Tooltip.test.ts` | `missing` | `acowtancy` |
+| `TriStateSwitch` | `docs/contracts/components/tri-state-switch.md` | `TriStateSwitchSpecimen.svelte` | `TriStateSwitch.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 | `Menubar` | `docs/contracts/components/menubar.md` | `MenubarSpecimen.svelte` | `Menubar.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
-| `UiPresentationProvider` | `docs/contracts/components/ui-presentation-provider.md` | `UiPresentationProviderSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | `loophole`, `loophole-legacy` |
-| `VideoPlayer` | `docs/contracts/components/video-player.md` | `VideoPlayerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
-| `DateTimeZonePicker` | `docs/contracts/components/date-time-zone-picker.md` | `DateTimeZonePickerSpecimen.svelte` | `missing` — anatomy smoke only | `missing` | no consumer use found (absence is not a release failure) |
+| `UiPresentationProvider` | `docs/contracts/components/ui-presentation-provider.md` | `UiPresentationProviderSpecimen.svelte` | `UiPresentationProvider.test.ts` | `missing` | `loophole`, `loophole-legacy` |
+| `VideoPlayer` | `docs/contracts/components/video-player.md` | `VideoPlayerSpecimen.svelte` | `VideoPlayer.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
+| `DateTimeZonePicker` | `docs/contracts/components/date-time-zone-picker.md` | `DateTimeZonePickerSpecimen.svelte` | `DateTimeZonePicker.test.ts` | `missing` | no consumer use found (absence is not a release failure) |
 
 ### Composites
 
@@ -339,43 +339,43 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 
 | Component | React impl/export | React gallery | Focused React test | Rust declaration | Rust render | GPUI specimen |
 | --- | --- | --- | --- | --- | --- | --- |
-| `AgentMessage` | complete | complete | `missing` — smoke only | `AgentMessageSpec` (`packages/contracts/components/src/agent_message.rs`) | `packages/render/src/agent_message.rs` | `missing` |
+| `AgentMessage` | complete | complete | `AgentMessage.test.tsx` | `AgentMessageSpec` (`packages/contracts/components/src/agent_message.rs`) | `packages/render/src/agent_message.rs` | `missing` |
 | `AgentPlan` | complete | complete | `AgentPlan.test.tsx` | `AgentPlanSpec` (`packages/contracts/components/src/agent_plan.rs`) | `packages/render/src/agent_plan.rs` | `missing` |
-| `AgentPlanRecord` | complete | complete | `missing` — smoke only | `AgentPlanRecordSpec` (`packages/contracts/components/src/agent_plan_record.rs`) | `packages/render/src/agent_plan_record.rs` | `missing` |
-| `AgentQuestion` | complete | complete | `missing` — smoke only | `AgentQuestionSpec` (`packages/contracts/components/src/agent_question.rs`) | `packages/render/src/agent_question.rs` | `packages/gpui/preview/src/specimens/agent_question.rs` |
-| `AgentQuestionRecord` | complete | complete | `missing` — smoke only | `AgentQuestionRecordSpec` (`packages/contracts/components/src/agent_question_record.rs`) | `packages/render/src/agent_question_record.rs` | `missing` |
+| `AgentPlanRecord` | complete | complete | `AgentPlanRecord.test.tsx` | `AgentPlanRecordSpec` (`packages/contracts/components/src/agent_plan_record.rs`) | `packages/render/src/agent_plan_record.rs` | `missing` |
+| `AgentQuestion` | complete | complete | `AgentQuestion.test.tsx` | `AgentQuestionSpec` (`packages/contracts/components/src/agent_question.rs`) | `packages/render/src/agent_question.rs` | `packages/gpui/preview/src/specimens/agent_question.rs` |
+| `AgentQuestionRecord` | complete | complete | `AgentQuestionRecord.test.tsx` | `AgentQuestionRecordSpec` (`packages/contracts/components/src/agent_question_record.rs`) | `packages/render/src/agent_question_record.rs` | `missing` |
 | `AgentSubagent` | complete | complete | `AgentSubagent.test.tsx` | `AgentSubagentSpec` (`packages/contracts/components/src/agent_subagent.rs`) | `packages/render/src/agent_subagent.rs` | `missing` |
 | `AgentTranscript` | complete | complete | `AgentSubagent.test.tsx` | `AgentTranscriptSpec` (`packages/contracts/components/src/agent_transcript.rs`) | `packages/render/src/agent_transcript.rs` | `packages/gpui/preview/src/specimens/agent_transcript.rs` |
-| `ChangedFiles` | complete | complete | `missing` — smoke only | `ChangedFilesSpec` (`packages/contracts/components/src/changed_files.rs`) | `packages/render/src/changed_files.rs` | `missing` |
-| `ToolCall` | complete | complete | `missing` — smoke only | `ToolCallSpec` (`packages/contracts/components/src/tool_call.rs`) | `packages/render/src/tool_call.rs` | `missing` |
-| `ToolCallGroup` | complete | complete | `missing` — smoke only | `ToolCallGroupSpec` (`packages/contracts/components/src/tool_call_group.rs`) | `packages/render/src/tool_call_group.rs` | `missing` |
+| `ChangedFiles` | complete | complete | `ChangedFiles.test.tsx` | `ChangedFilesSpec` (`packages/contracts/components/src/changed_files.rs`) | `packages/render/src/changed_files.rs` | `missing` |
+| `ToolCall` | complete | complete | `ToolCall.test.tsx` | `ToolCallSpec` (`packages/contracts/components/src/tool_call.rs`) | `packages/render/src/tool_call.rs` | `missing` |
+| `ToolCallGroup` | complete | complete | `ToolCallGroup.test.tsx` | `ToolCallGroupSpec` (`packages/contracts/components/src/tool_call_group.rs`) | `packages/render/src/tool_call_group.rs` | `missing` |
 
 ### Workstation systems
 
 | Component | React impl/export | React gallery | Focused React test | Rust declaration | Rust render | GPUI specimen |
 | --- | --- | --- | --- | --- | --- | --- |
-| `StatusBar` | complete | complete | `missing` — smoke only | `ShellStatusBarSpec` (`shell_status_bar.rs`, documented rename) | `packages/render/src/shell_status_bar.rs` | `packages/gpui/preview/src/specimens/status_bar.rs` |
-| `StatusIndicator` | complete | complete | `missing` — smoke only | `StatusIndicatorSpec` (`packages/contracts/components/src/status_indicator.rs`) | `packages/render/src/status_indicator.rs` | `packages/gpui/preview/src/specimens/status_indicator.rs` |
-| `Surface` | complete | complete | `missing` — smoke only | `SurfaceSpec` (`packages/contracts/components/src/surface.rs`) | `packages/render/src/surface.rs` | `packages/gpui/preview/src/specimens/surface.rs` |
+| `StatusBar` | complete | complete | `StatusBar.test.tsx` | `ShellStatusBarSpec` (`shell_status_bar.rs`, documented rename) | `packages/render/src/shell_status_bar.rs` | `packages/gpui/preview/src/specimens/status_bar.rs` |
+| `StatusIndicator` | complete | complete | `StatusIndicator.test.tsx` | `StatusIndicatorSpec` (`packages/contracts/components/src/status_indicator.rs`) | `packages/render/src/status_indicator.rs` | `packages/gpui/preview/src/specimens/status_indicator.rs` |
+| `Surface` | complete | complete | `Surface.test.tsx` | `SurfaceSpec` (`packages/contracts/components/src/surface.rs`) | `packages/render/src/surface.rs` | `packages/gpui/preview/src/specimens/surface.rs` |
 | `Switch` | complete | complete | `interactions.test.tsx` | `SwitchSpec` (`packages/contracts/components/src/switch.rs`) | `packages/render/src/switch.rs` | `packages/gpui/preview/src/specimens/switch.rs` |
-| `Text` | complete | complete | `missing` — smoke only | `TextSpec` (`packages/contracts/components/src/text.rs`) | `packages/render/src/text.rs` | `packages/gpui/preview/src/specimens/text.rs` |
-| `TextLink` | complete | complete | `missing` — smoke only | `TextLinkSpec` (`packages/contracts/components/src/text_link.rs`) | `packages/render/src/text_link.rs` | `packages/gpui/preview/src/specimens/text_link.rs` |
+| `Text` | complete | complete | `Text.test.tsx` | `TextSpec` (`packages/contracts/components/src/text.rs`) | `packages/render/src/text.rs` | `packages/gpui/preview/src/specimens/text.rs` |
+| `TextLink` | complete | complete | `TextLink.test.tsx` | `TextLinkSpec` (`packages/contracts/components/src/text_link.rs`) | `packages/render/src/text_link.rs` | `packages/gpui/preview/src/specimens/text_link.rs` |
 | `Tabs` | complete | complete | `TabsRovingFocus.test.tsx` | `TabsSpec` (`packages/contracts/components/src/tabs.rs`) | `packages/render/src/tabs.rs` | `packages/gpui/preview/src/specimens/tabs.rs` |
-| `Table` | complete | complete | `missing` — smoke only | `TableSpec` (`packages/contracts/components/src/table.rs`) | `packages/render/src/table.rs` | `packages/gpui/preview/src/specimens/table.rs` |
+| `Table` | complete | complete | `Table.test.tsx` | `TableSpec` (`packages/contracts/components/src/table.rs`) | `packages/render/src/table.rs` | `packages/gpui/preview/src/specimens/table.rs` |
 | `TimeAgo` | complete | complete | `TimeAgo.test.tsx` | `TimeAgoSpec` (`packages/contracts/components/src/time_ago.rs`) | `packages/render/src/time_ago.rs` | `packages/gpui/preview/src/specimens/time_ago_specimen.rs` |
 | `TextInput` | complete | complete | `TextInput.test.tsx` | `TextInputSpec` (`packages/contracts/components/src/text_input.rs`) | `packages/render/src/text_input.rs` | `packages/gpui/preview/src/specimens/text_input.rs` |
-| `TokenInput` | complete | complete | `missing` — smoke only | `TokenInputSpec` (`packages/contracts/components/src/token_input.rs`) | `packages/render/src/token_input.rs` | `packages/gpui/preview/src/specimens/token_input.rs` |
-| `TimeInput` | complete | complete | `missing` — smoke only | `TimeFieldSpec` (`time_field.rs`, documented rename) | `packages/render/src/time_field.rs` | `packages/gpui/preview/src/specimens/time_field.rs` |
-| `TimeZoneSelect` | complete | complete | `missing` — smoke only | `TimeZoneSelectSpec` (`packages/contracts/components/src/time_zone_select.rs`) | `packages/render/src/time_zone_select.rs` | `packages/gpui/preview/src/specimens/time_zone_select.rs` |
+| `TokenInput` | complete | complete | `TokenInput.test.tsx` | `TokenInputSpec` (`packages/contracts/components/src/token_input.rs`) | `packages/render/src/token_input.rs` | `packages/gpui/preview/src/specimens/token_input.rs` |
+| `TimeInput` | complete | complete | `TimeInput.test.tsx` | `TimeFieldSpec` (`time_field.rs`, documented rename) | `packages/render/src/time_field.rs` | `packages/gpui/preview/src/specimens/time_field.rs` |
+| `TimeZoneSelect` | complete | complete | `TimeZoneSelect.test.tsx` | `TimeZoneSelectSpec` (`packages/contracts/components/src/time_zone_select.rs`) | `packages/render/src/time_zone_select.rs` | `packages/gpui/preview/src/specimens/time_zone_select.rs` |
 | `ThemeSelect` | complete | complete | `ThemeSelect.test.tsx` | `ThemeSelectSpec` (`packages/contracts/components/src/theme_select.rs`) | `packages/render/src/theme_select.rs` | `packages/gpui/preview/src/specimens/theme_select_specimen.rs` |
-| `ToggleGroup` | complete | complete | `missing` — smoke only | `ToggleGroupSpec` (`packages/contracts/components/src/toggle_group.rs`) | `packages/render/src/toggle_group.rs` | `packages/gpui/preview/src/specimens/toggle_group.rs` |
-| `Toolbar` | complete | complete | `missing` — smoke only | `ToolbarSpec` (`packages/contracts/components/src/toolbar.rs`) | `packages/render/src/toolbar.rs` | `packages/gpui/preview/src/specimens/toolbar.rs` |
-| `Tooltip` | complete | complete | `missing` — smoke only | `TooltipSpec` (`packages/contracts/components/src/tooltip.rs`) | `packages/render/src/tooltip.rs` | `packages/gpui/preview/src/specimens/tooltip.rs` |
-| `TriStateSwitch` | complete | complete | `missing` — smoke only | `TriStateSwitchSpec` (`packages/contracts/components/src/tri_state_switch.rs`) | `packages/render/src/tri_state_switch.rs` | `packages/gpui/preview/src/specimens/tri_state_switch.rs` |
+| `ToggleGroup` | complete | complete | `ToggleGroup.test.tsx` | `ToggleGroupSpec` (`packages/contracts/components/src/toggle_group.rs`) | `packages/render/src/toggle_group.rs` | `packages/gpui/preview/src/specimens/toggle_group.rs` |
+| `Toolbar` | complete | complete | `Toolbar.test.tsx` | `ToolbarSpec` (`packages/contracts/components/src/toolbar.rs`) | `packages/render/src/toolbar.rs` | `packages/gpui/preview/src/specimens/toolbar.rs` |
+| `Tooltip` | complete | complete | `Tooltip.test.tsx` | `TooltipSpec` (`packages/contracts/components/src/tooltip.rs`) | `packages/render/src/tooltip.rs` | `packages/gpui/preview/src/specimens/tooltip.rs` |
+| `TriStateSwitch` | complete | complete | `TriStateSwitch.test.tsx` | `TriStateSwitchSpec` (`packages/contracts/components/src/tri_state_switch.rs`) | `packages/render/src/tri_state_switch.rs` | `packages/gpui/preview/src/specimens/tri_state_switch.rs` |
 | `Menubar` | complete | complete | `Menubar.test.tsx` | `MenubarSpec` (`packages/contracts/components/src/menubar.rs`) | `packages/render/src/menubar.rs` | `packages/gpui/preview/src/specimens/menubar.rs` |
-| `UiPresentationProvider` | complete | complete | `missing` — smoke only | `UiPresentationProviderSpec` (`packages/contracts/components/src/ui_presentation_provider.rs`) | `missing` | `packages/gpui/preview/src/specimens/ui_presentation_provider.rs` |
-| `VideoPlayer` | complete | complete | `missing` — smoke only | `VideoPlayerSpec` (`packages/contracts/components/src/video_player.rs`) | `packages/render/src/video_player.rs` | `packages/gpui/preview/src/specimens/video_player_specimen.rs` |
-| `DateTimeZonePicker` | complete | complete | `missing` — smoke only | `DateTimeZonePickerSpec` (`packages/contracts/components/src/date_time_zone_picker.rs`) | `packages/render/src/date_time_zone_picker.rs` | `packages/gpui/preview/src/specimens/date_time_zone_picker.rs` |
+| `UiPresentationProvider` | complete | complete | `UiPresentationProvider.test.tsx` | `UiPresentationProviderSpec` (`packages/contracts/components/src/ui_presentation_provider.rs`) | `missing` | `packages/gpui/preview/src/specimens/ui_presentation_provider.rs` |
+| `VideoPlayer` | complete | complete | `VideoPlayer.test.tsx` | `VideoPlayerSpec` (`packages/contracts/components/src/video_player.rs`) | `packages/render/src/video_player.rs` | `packages/gpui/preview/src/specimens/video_player_specimen.rs` |
+| `DateTimeZonePicker` | complete | complete | `DateTimeZonePicker.test.tsx` | `DateTimeZonePickerSpec` (`packages/contracts/components/src/date_time_zone_picker.rs`) | `packages/render/src/date_time_zone_picker.rs` | `packages/gpui/preview/src/specimens/date_time_zone_picker.rs` |
 
 ### Composites
 

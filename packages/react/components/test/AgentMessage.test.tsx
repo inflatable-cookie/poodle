@@ -26,7 +26,10 @@ const x = 1;
   });
 
   it("renders lists, blockquotes, and separators as real elements", () => {
-    const { container } = render(<AgentMessage markdown="- one\n- two\n\n> quoted\n\n---" />);
+    // Expression form, not a JSX string attribute: `"\n"` in an attribute
+    // literal stays a backslash and an `n`, collapsing the whole fixture to
+    // one line.
+    const { container } = render(<AgentMessage markdown={"- one\n- two\n\n> quoted\n\n---"} />);
     const root = container.querySelector(".poodle-agent-message") as HTMLElement;
     expect(root.querySelector("ul.poodle-agent-message__list")).not.toBeNull();
     expect(root.querySelectorAll(".poodle-agent-message__list-item").length).toBe(2);

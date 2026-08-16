@@ -71,6 +71,27 @@ describe("Tooltip (react)", () => {
     expect(onOpenChange).toHaveBeenCalledWith(true);
   });
 
+  it("reports open changes driven by hover on an uncontrolled tooltip", () => {
+    vi.useFakeTimers();
+    const onOpenChange = vi.fn();
+    const { container } = render(
+      <Tooltip content="Save" onOpenChange={onOpenChange}>
+        <button>Hover me</button>
+      </Tooltip>,
+    );
+    const root = container.querySelector(".poodle-tooltip") as HTMLElement;
+
+    // React synthesizes pointerenter from a bubbling pointerover, so the
+    // non-bubbling pointerenter event never reaches the handler.
+    fireEvent.pointerOver(root);
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
   it("closes on Escape and reports the change", () => {
     const onOpenChange = vi.fn();
     const { container } = render(

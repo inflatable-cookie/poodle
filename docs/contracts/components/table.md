@@ -108,7 +108,9 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - `<caption>` for visible table label; `aria-label` on `<table>` when no caption
 - Empty row cell uses `colspan` spanning all columns
 
-> Svelte-side gap: the Svelte implementation currently applies `aria-label` to the `.poodle-table-shell` `<div>` rather than the `<table>` element. The contract keeps the stronger requirement (`aria-label` on `<table>`); Svelte should be moved to match.
+`aria-label` belongs on the `<table>` element, never on the `.poodle-table-shell`
+`<div>`: the shell is a scroll container with no table semantics, so a name
+parked there does not name the grid. Both web runtimes place it on `<table>`.
 
 ### Keyboard
 
