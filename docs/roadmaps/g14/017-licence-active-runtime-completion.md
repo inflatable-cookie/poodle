@@ -1,11 +1,15 @@
 # g14.017 — Licence Active-runtime Completion
 
-Status: held for g14.022 carry-forward; web reference approved
+Status: **superseded** — execution plan closed by `g14.022`; web references
+(`g14.015`, `g14.016`) remain approved; native completion recompiled under the
+next release runway
 Depends on: `g14.016`, `g14.021`
 
-Disposition: do not dispatch this version. `g14.008` rejected the pipeline it
-assumes. Preserve its component requirements, then recompile the native work
-after cleanup without the portable-interface/shared-corpus claim.
+Disposition: this execution plan is superseded. `g14.008` rejected the
+pipeline it assumes. Its component requirements and approved web references
+remain valid and carry into the next generation; the native completion work
+must be recompiled against the release-baseline inventory without the
+portable-interface/shared-corpus claim.
 
 ## Outcome
 

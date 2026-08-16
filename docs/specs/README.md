@@ -37,7 +37,8 @@ Important current cross-cutting references include:
 - `064-cross-runtime-machine-pinning.md` — retired g14 false-start record;
   its `066` successor was also rejected
 - `065-scene-authoring-and-specimen-fixtures.md` — retired scene-fixture
-  contract; human-centred specimen work continues under roadmap `g14.026`
+  contract; human-centred specimen work continues under the g15
+  specimen-catalogue lane (carried forward from roadmap `g14.026`)
 - `066-executable-component-conformance.md` — rejected g14 pilot contract;
   retained as measured evidence, not current authority
 - `067-model-connection-management.md` — shaping contract for reusable model

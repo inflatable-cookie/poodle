@@ -1,12 +1,16 @@
 # g14.020 — Model Connection Active-Runtime Completion
 
-Status: held for g14.022 carry-forward; web reference approved
+Status: **superseded** — execution plan closed by `g14.022`; web references
+(`g14.018`, `g14.019`) remain approved; native completion recompiled under the
+next release runway
 Depends on: `g14.019`, `g14.021`
 Governing ref: `../../specs/067-model-connection-management.md`
 
-Disposition: do not dispatch this version. `g14.008` rejected the pipeline it
-assumes. Preserve its component requirements, then recompile the native work
-after cleanup without the portable-interface/shared-corpus claim.
+Disposition: this execution plan is superseded. `g14.008` rejected the
+pipeline it assumes. Its component requirements and approved web references
+remain valid and carry into the next generation; the native completion work
+must be recompiled against the release-baseline inventory without the
+portable-interface/shared-corpus claim.
 
 ## Outcome
 

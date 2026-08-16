@@ -3,15 +3,19 @@
 Status: reference
 Updated: 2026-08-16
 
-Roadmaps record Poodle's executable milestone work. `g14` is active.
+Roadmaps record Poodle's executable milestone work. `g15` is the active
+v0.2.0 release-baseline generation.
 
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
-  `g14.021` preserved the useful fixes and removed the failed authority.
-  `g14.022` is the ready closeout. Jetstream remains deferred.
+  `g14.021` preserved the useful fixes and removed the failed authority;
+  `g14.022` completed the closeout. The generation is complete.
+- `g15` is the release-first v0.2.0 runway. Its first card — the
+  release-baseline roster inventory — is ready for dispatch. Jetstream remains
+  deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
 - The first g14 machine-pinning/scene runway was reset after five merged
@@ -35,7 +39,8 @@ Roadmaps record Poodle's executable milestone work. `g14` is active.
 - `g11` — Svelte modernization and shared web machinery
 - `g12` — React parity, verification depth, native hardening, audio family
 - `g13` — retired Rust-authored component/scene IR pilot
-- `g14` — rejected executable-conformance pilot; closeout ready
+- `g14` — rejected executable-conformance pilot; generation complete
+- `g15` — active v0.2.0 release baseline; first card ready
 
 ## Rules
 

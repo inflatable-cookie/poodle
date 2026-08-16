@@ -158,7 +158,8 @@ or derive one state from the other.
 
 ## 10. GPUI Notes
 
-- Deferred until g14 adoption.
+- Not implemented in GPUI. The g14 adoption pipeline was rejected; native
+  completion must be planned from this contract under the g15 release runway.
 - Native card must preserve independent hit regions and focus restoration.
 
 ## 11. Parity Checklist
@@ -180,11 +181,11 @@ or derive one state from the other.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Native implementation deferred | g14 pilot verdict not yet recorded | approved staging delta | active-runtime tranche |
+| Native implementation missing | rejected g14 pilot supplied no adoption path | open runtime gap; not parity-certified | g15 release-gap inventory |
 
 ## 13. Approval And Adoption Notes
 
 - contract status: `approved`
 - approver: operator, 2026-08-14
 - downstream adopter: Nucleus
-- future follow-up: shared g14 cases after adoption verdict
+- future follow-up: compile native completion from the g15 release-gap inventory
