@@ -1,6 +1,7 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.001`–`g15.006` complete; `g15.014` ready
+Status: active — `g15.001`–`g15.006` complete; `g15.014` in flight;
+`g15.007` ready in parallel
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -55,13 +56,13 @@ and status advance are the orchestrator's.
 4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — complete; 35 paired evidence gaps closed
 5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — complete; final 24 Svelte and 23 React evidence gaps closed
 6. [006 — React mirror implementation & gallery closure](006-react-mirror-closure.md) — complete; React implementation/gallery are 175/0 and focused evidence is 152/23
-7. [007 — Licence family native completion](007-licence-family-native-completion.md) — carries `g14.017`
+7. [007 — Licence family native completion](007-licence-family-native-completion.md) — ready in parallel with `g15.014`; carries `g14.017`
 8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — carries `g14.020`
 9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md)
 10. [010 — Display, workstation & agent GPUI specimens](010-display-workstation-agent-gpui-specimens.md) — GPUI closure after `007`–`009`
 11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — carries `g14.026`
 12. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — per the `g14.022` decision; headless capture required
-13. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — ready as a parallel dependency-only lane; closes the `bun audit` nanoid advisory ahead of certification
+13. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — in flight; closes the `bun audit` nanoid advisory ahead of certification
 14. [013 — v0.2.0 release certification](013-v020-release-certification.md) — depends on `002`–`006` and `014`; requires a fully green `effigy qa` and an operator gate
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
@@ -91,6 +92,8 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Dispatch `g15.014` from current `origin/main` using
-`docs/handoffs/20260817-010454-g15-014-release-gate-remediation.md`. No other
-g15 lane advances until the orchestrator reviews that release-gate repair.
+Dispatch `g15.007` as the independent native lane while `g15.014` runs. The
+two share no implementation or authority files: `g15.014` owns dependency
+manifests/lockfiles; `g15.007` owns the Licence Rust/GPUI surface and its exact
+CodeInput/FileUpload prerequisites. Hold `g15.008` and later lanes until the
+orchestrator reviews `g15.007`.
