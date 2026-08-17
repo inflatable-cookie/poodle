@@ -36,10 +36,12 @@ use poodle_specs::{
     NavCardSpec, NavigationMenuSpec, NumberInputSpec, OrderBySpec, OverlayPlacement,
     PageHeaderSpec, PageLoadingSpec, PaginationSpec, PaginationSummarySpec,
     PasswordRequirementsSpec, PickerShellSpec, PillSpec, PopoverSpec, ProgressSpec, RadioGroupSpec,
-    RadioSpec, RangeSliderSpec, RatingSpec, RefSelectSpec, RegionSpec, RelationPickerSpec, ResizeHandleSpec,
+    RadioSpec, RangeSliderSpec, RatingSpec, RefSelectSpec, RegionSpec, RelationPickerSpec,
+    RemediationBannerSpec, ResizeHandleSpec,
     ScrollShellSpec, SelectSpec, SelectionSummarySpec, SeparatorSpec,
     ShellStatusBarSpec, SidebarNavSpec, SkeletonSpec, SliderSpec, SpacerSpec, SpinnerSpec,
-    StackSpec, StatusIndicatorSpec, StepperSpec, SurfaceSpec, SwitchSpec, TabStripSpec, TableSpec,
+    StackSpec, StateTileSpec, StatusIndicatorSpec, StepperSpec, SurfaceSpec, SwitchSpec,
+    TabStripSpec, TableSpec,
     SplitOrientation, SplitViewSpec, TabsSpec, TextInputSpec, TextLinkSpec, TextSpec,
     ThemeSelectSpec, TimeAgoSpec, TimeFieldSpec, TreeSpec,
     TimeZoneSelectSpec, ToastHostSpec, ToastStackSpec, TokenInputSpec, ToolbarSpec, TooltipSpec,
@@ -350,6 +352,44 @@ impl IntoCompatNode for Callout {
 }
 
 impl IntoElement for Callout {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
+    }
+}
+
+pub(crate) struct RemediationBanner {
+    spec: RemediationBannerSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::RemediationBannerHandlers,
+}
+
+impl RemediationBanner {
+    pub(crate) fn from_spec(spec: RemediationBannerSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::RemediationBannerHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_action = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_dismiss = Some(handler);
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        poodle_render::remediation_banner(&self.spec, &self.theme, self.handlers)
+    }
+}
+
+impl IntoElement for RemediationBanner {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
@@ -2957,6 +2997,28 @@ impl IntoElement for MetricTile {
 
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::metric_tile(&self.spec, &self.theme))
+    }
+}
+
+pub(crate) struct StateTile {
+    spec: StateTileSpec,
+    theme: GpuiThemeProvider,
+}
+
+impl StateTile {
+    pub(crate) fn from_spec(spec: StateTileSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
+    }
+}
+
+impl IntoElement for StateTile {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::state_tile(&self.spec, &self.theme))
     }
 }
 

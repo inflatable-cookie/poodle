@@ -8,7 +8,9 @@
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
+use poodle_node::{
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole, StylePatch,
+};
 use poodle_specs::{ButtonSpec, RemediationAction, RemediationBannerSpec};
 
 use crate::button::button;
@@ -133,9 +135,15 @@ pub fn remediation_banner(
         dismiss.style.descriptor.text_color = Some(text_secondary);
         dismiss.a11y.role = Some(NodeRole::Button);
         dismiss.a11y.label = Some(spec.dismiss_label.clone());
+        dismiss.interaction.focusable = true;
+        dismiss.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            text_color: None,
+            opacity: None,
+        });
         if let Some(on_dismiss) = handlers.on_dismiss {
             dismiss.style.descriptor.cursor = CursorHint::Pointer;
-            dismiss.interaction.focusable = true;
             dismiss.interaction.on_activate = Some(on_dismiss);
         }
         el = el.child(dismiss);

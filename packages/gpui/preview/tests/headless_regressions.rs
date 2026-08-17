@@ -1941,3 +1941,171 @@ fn settings_shell_navigates_and_refused_close_stays_open() {
         );
     });
 }
+
+// ── g15.010 Batch A regressions ───────────────────────────────────────────
+
+/// Callout dismiss is a focusable button. Keyboard activation reaches the
+/// host, which stores dismissed state and supplies the next spec.
+#[test]
+fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
+    use poodle_specs::CallOutSpec;
+
+    run_headless(|cx| {
+        fn build(dismissed: bool, mounted: Arc<Mutex<Node>>, flag: Arc<Mutex<bool>>) -> Node {
+            if dismissed {
+                return Node::text("Dismissed");
+            }
+            let mount = Arc::clone(&mounted);
+            let flag = Arc::clone(&flag);
+            poodle_render::callout(
+                &CallOutSpec::new()
+                    .with_title("Dismissible callout")
+                    .with_content("This callout can be dismissed by the user.")
+                    .dismissible(true),
+                &theme(),
+                Some(Arc::new(move || {
+                    *flag.lock().unwrap() = true;
+                    *mount.lock().unwrap() = build(true, Arc::clone(&mount), Arc::clone(&flag));
+                })),
+            )
+        }
+
+        let dismissed = Arc::new(Mutex::new(false));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted), Arc::clone(&dismissed));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        driver.wait_for_focus_handle("poodle-callout-dismiss");
+        driver.keyboard_activate("poodle-callout-dismiss");
+        assert!(*dismissed.lock().unwrap(), "dismiss reached the host");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Dismissed"),
+            "the next spec reflects dismissed host state"
+        );
+    });
+}
+
+/// RemediationBanner action and dismiss both travel through mounted input.
+/// The host stores the requested action id, then applies dismiss by omitting
+/// the banner from the next spec.
+#[test]
+fn remediation_banner_action_and_dismiss_rebuild_the_host_spec() {
+    use poodle_specs::{ButtonVariant, RemediationAction, RemediationBannerSpec, StatusTone};
+
+    run_headless(|cx| {
+        fn build(
+            dismissed: bool,
+            last_action: Option<String>,
+            mounted: Arc<Mutex<Node>>,
+            actions: Arc<Mutex<Vec<String>>>,
+            flag: Arc<Mutex<bool>>,
+        ) -> Node {
+            if dismissed {
+                let mut root = Node::container().child(Node::text("Dismissed"));
+                if let Some(action) = last_action {
+                    root = root.child(Node::text(format!("Last request: {action}")));
+                }
+                return root;
+            }
+            let mount = Arc::clone(&mounted);
+            let action_sink = Arc::clone(&actions);
+            let flag = Arc::clone(&flag);
+            let mut node = poodle_render::remediation_banner(
+                &RemediationBannerSpec::new(
+                    "We could not save your changes",
+                    "Your edits are still local. Retry the save or inspect the error details.",
+                )
+                .with_tone(StatusTone::Danger)
+                .with_primary_action(
+                    RemediationAction::new("retry", "Try again")
+                        .with_variant(ButtonVariant::Primary),
+                )
+                .with_dismissible(true),
+                &theme(),
+                poodle_render::RemediationBannerHandlers {
+                    on_action: Some(Arc::new({
+                        let mount = Arc::clone(&mount);
+                        let action_sink = Arc::clone(&action_sink);
+                        let flag = Arc::clone(&flag);
+                        move |id| {
+                            action_sink.lock().unwrap().push(id.to_string());
+                            *mount.lock().unwrap() = build(
+                                false,
+                                Some(id.to_string()),
+                                Arc::clone(&mount),
+                                Arc::clone(&action_sink),
+                                Arc::clone(&flag),
+                            );
+                        }
+                    })),
+                    on_dismiss: Some(Arc::new(move || {
+                        *flag.lock().unwrap() = true;
+                        let last = action_sink.lock().unwrap().last().cloned();
+                        *mount.lock().unwrap() = build(
+                            true,
+                            last,
+                            Arc::clone(&mount),
+                            Arc::clone(&action_sink),
+                            Arc::clone(&flag),
+                        );
+                    })),
+                },
+            );
+            if let Some(action) = last_action {
+                node = Node::container()
+                    .child(node)
+                    .child(Node::text(format!("Last request: {action}")));
+            }
+            node
+        }
+
+        let actions = Arc::new(Mutex::new(Vec::new()));
+        let dismissed = Arc::new(Mutex::new(false));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            false,
+            None,
+            Arc::clone(&mounted),
+            Arc::clone(&actions),
+            Arc::clone(&dismissed),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        driver.wait_for_focus_handle("remediation-action-retry");
+        driver.keyboard_activate("remediation-action-retry");
+        assert_eq!(actions.lock().unwrap().as_slice(), ["retry".to_string()]);
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Last request: retry"),
+            "action id is stored on the host and painted into the next spec"
+        );
+
+        driver.wait_for_focus_handle("remediation-banner-dismiss");
+        driver.keyboard_activate("remediation-banner-dismiss");
+        assert!(*dismissed.lock().unwrap(), "dismiss reached the host");
+        let texts: Vec<String> = mounted
+            .lock()
+            .unwrap()
+            .texts()
+            .into_iter()
+            .map(str::to_string)
+            .collect();
+        assert!(
+            texts.iter().any(|t| t == "Dismissed"),
+            "dismissed host state omits the banner"
+        );
+        assert!(
+            texts.iter().any(|t| t == "Last request: retry"),
+            "the stored action survives dismiss"
+        );
+    });
+}

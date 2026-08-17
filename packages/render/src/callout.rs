@@ -9,7 +9,7 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole,
+    NodeRole, StylePatch,
 };
 use poodle_specs::{
     CallOutSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, StatusTone,
@@ -171,6 +171,15 @@ pub fn callout(
         let dismiss_radius = (control_radius - border_width).max(0.0);
         let mut dismiss = Node::container();
         dismiss.id = Some("poodle-callout-dismiss".to_string());
+        dismiss.a11y.role = Some(NodeRole::Button);
+        dismiss.a11y.label = Some(spec.dismiss_label.clone());
+        dismiss.interaction.focusable = true;
+        dismiss.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            text_color: None,
+            opacity: None,
+        });
         {
             let s = &mut dismiss.style;
             s.descriptor.layout.width = LayoutSizing::Fixed(dismiss_size);
@@ -200,4 +209,33 @@ pub fn callout(
     }
     el.a11y.role = Some(NodeRole::Alert);
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn dismiss_control_is_a_named_focusable_button() {
+        let node = callout(
+            &CallOutSpec::new()
+                .with_title("Dismissible callout")
+                .with_content("This callout can be dismissed by the user.")
+                .dismissible(true),
+            &theme(),
+            Some(Arc::new(|| {})),
+        );
+        let dismiss = node
+            .find(&|child| child.id.as_deref() == Some("poodle-callout-dismiss"))
+            .expect("dismiss control");
+        assert_eq!(dismiss.a11y.role, Some(NodeRole::Button));
+        assert_eq!(dismiss.a11y.label.as_deref(), Some("Dismiss message"));
+        assert!(dismiss.interaction.focusable);
+        assert!(dismiss.style.focus.is_some());
+        assert!(dismiss.interaction.on_activate.is_some());
+    }
 }
