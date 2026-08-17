@@ -60,6 +60,7 @@ mod pill;
 mod popover;
 mod progress;
 mod radio_group;
+mod radio;
 mod range_slider;
 mod rating;
 mod region;
@@ -155,6 +156,7 @@ mod ref_select;
 mod relation_picker;
 mod remediation_banner;
 mod selection_summary;
+mod settings_shell;
 mod shell_status_bar;
 mod sidebar_nav;
 mod split_view;
@@ -164,6 +166,8 @@ mod toast_stack;
 mod tool_call;
 mod tool_call_group;
 mod tree;
+mod update_center;
+mod update_status;
 mod validation_summary;
 mod video_player;
 
@@ -265,6 +269,7 @@ pub use popover::PopoverSpec;
 pub use progress::ProgressSpec;
 pub use r#box::BoxSpec;
 pub use radio_group::RadioGroupSpec;
+pub use radio::RadioSpec;
 pub use ref_select::{RefKind, RefOption, RefSelectEmphasis, RefSelectSpec, RefSelectVariant};
 pub use tool_call::ToolCallSpec;
 pub use tool_call_group::ToolCallGroupSpec;
@@ -390,6 +395,7 @@ pub use relation_picker::{
 };
 pub use remediation_banner::RemediationBannerSpec;
 pub use selection_summary::SelectionSummarySpec;
+pub use settings_shell::SettingsShellSpec;
 pub use shell_status_bar::ShellStatusBarSpec;
 pub use sidebar_nav::{SidebarNavGroup, SidebarNavItem, SidebarNavSpec};
 pub use split_view::SplitViewSpec;
@@ -401,6 +407,8 @@ pub use tree::{
     compute_selection, reorder_nodes, DropPosition, TreeNode, TreeSelectionMode,
     TreeSelectionResult, TreeSpec, TreeVisibleRow,
 };
+pub use update_center::UpdateCenterSpec;
+pub use update_status::UpdateStatusSpec;
 pub use validation_summary::ValidationSummarySpec;
 pub use video_player::VideoPlayerSpec;
 

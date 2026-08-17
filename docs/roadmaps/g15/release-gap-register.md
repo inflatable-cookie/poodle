@@ -56,28 +56,31 @@ the other exists. Counts below are `missing` only; `MeterSurface` is
 decision (spec 068) and is excluded from every missing count. Reproducible
 count method: `docs/roadmaps/g15/release-baseline-roster.md#count-method`.
 
-Summary of native gaps: Rust declaration 4 missing (+ 1 not-applicable),
-Rust render 6 missing (+ 1 not-applicable), GPUI specimen 22 missing
+Summary of native gaps: Rust declaration 0 missing (+ 1 not-applicable),
+Rust render 0 missing (+ 1 not-applicable), GPUI specimen 18 missing
 (+ 1 not-applicable).
 
 | Family | Missing Rust declaration | Missing Rust render | Missing GPUI specimen | Owner |
 | --- | --- | --- | --- | --- |
 | Licence (approved `g14.017` requirements) | — closed by `g15.007` (`LicenceActivationSpec`, `LicenceSeatsSpec`, `LicenceStatusSpec`) | — closed by `g15.007` (`packages/render/src/licence_{activation,seats,status}.rs`) | — closed by `g15.007` (`packages/gpui/preview/src/specimens/licence_{activation,seats,status}.rs`) | `g15.007` |
 | Model connection (approved `g14.020` requirements) | — closed by `g15.008` (`ModelConnectionPickerSpec`, `ModelConnectionSetupSpec`, `ModelConnectionCardSpec`, `ModelCatalogueEditorSpec`) | — closed by `g15.008` (`packages/render/src/model_{connection_picker,connection_setup,connection_card,catalogue_editor}.rs`) | — closed by `g15.008` (`packages/gpui/preview/src/specimens/model_{connection_picker,connection_setup,connection_card,catalogue_editor}_specimen.rs`) | `g15.008` |
-| Update & settings | UpdateStatus, UpdateCenter, SettingsShell | same three | same three | `g15.009` |
-| Radio | Radio | Radio | Radio | `g15.009` |
-| Context providers (render passthrough only) | — | IconProvider, UiPresentationProvider | — | `g15.009` |
+| Update & settings | — closed by `g15.009` (`UpdateStatusSpec`, `UpdateCenterSpec`, `SettingsShellSpec`) | — closed by `g15.009` (`packages/render/src/{update_status,update_center,settings_shell}.rs`) | — closed by `g15.009` (`packages/gpui/preview/src/specimens/{update_status,update_center,settings_shell}.rs`) | `g15.009` |
+| Radio | — closed by `g15.009` (`RadioSpec`) | — closed by `g15.009` (`packages/render/src/radio.rs`) | — closed by `g15.009` (`packages/gpui/preview/src/specimens/radio.rs`) | `g15.009` |
+| Context providers (render passthrough only) | — | — closed by `g15.009` (`packages/render/src/{icon_provider,ui_presentation_provider}.rs`) | — | `g15.009` |
 | Display, workstation & agent specimens | — | — | Avatar, Callout, RemediationBanner, MetaItem, Pill, Spinner, EmptyState, StateTile, ActionDiscoveryPanel, DockRegion, AgentMessage, AgentPlan, AgentPlanRecord, AgentQuestionRecord, AgentSubagent, ChangedFiles, ToolCall, ToolCallGroup | `g15.010` |
 | MeterSurface | not-applicable — web-only by fixed decision (spec 068) | not-applicable | not-applicable | none |
 
 The headless regressions (`effigy regressions:native`) certify Button,
 RangeSlider, Popover, — since `g15.007` — grouped CodeInput, the generic
 FileUpload browse seam, LicenceActivation's segmented key path, LicenceSeats
-release, and LicenceStatus display, and — since `g15.008` — the
+release, and LicenceStatus display, — since `g15.008` — the
 ModelConnectionPicker's roving focus and disabled-route guard,
 ModelConnectionSetup's direct-add path, ModelConnectionCard's independent
 disclosure and focus restoration, and ModelCatalogueEditor's keyboard
-grab/move/cancel and focus-after-hide. Native tranches land their evidence as
+grab/move/cancel and focus-after-hide, and — since `g15.009` — Radio's
+single-option select-without-uncheck, UpdateStatus's confirm-then-install,
+UpdateCenter's hidden collapse and open status host, and SettingsShell's
+navigate plus refused close. Native tranches land their evidence as
 focused owner-local tests, not by extending a shared comparator.
 
 ## Package-Install Surface

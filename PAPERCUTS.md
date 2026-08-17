@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-17 — `effigy docs:check` dies at `report:parity`'s React preview
+  step in a worktree with no `node_modules`:
+  `bun run --cwd packages/react/preview parity:report` cannot resolve
+  `@inflatable-cookie/poodle-core/tokens`, while the same script under
+  `packages/svelte/preview` succeeds. `docs:lint` and `docs:spec-drift`
+  already passed. Found by g15.009 closeout.
+
 - 2026-08-17 — The headless GPUI driver's mount box is a fixed 160×60, and its
   content mask clips **hit testing** as well as paint: `bounds_for` happily
   reports an element at y=240, `pointer_activate_id` clicks its centre, and

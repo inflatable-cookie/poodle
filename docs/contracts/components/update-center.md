@@ -83,7 +83,7 @@ themselves.
 | `lastRejection` | `UpdateRejectionCode \| undefined` | `undefined` | Passed to `UpdateStatus`. |
 | `aheadOfChannel` | `UpdateAheadOfChannel \| undefined` | `undefined` | Passed to `UpdateStatus`. |
 | `pending` | `boolean` | `false` | Passed to `UpdateStatus`. |
-| `observe` | `((observer: () => void) => () => void) \| null` | `null` | The authority's subscription, re-derived here and passed through. |
+| `observe` | `((observer: () => void) => () => void) \| null` | `null` | **Web targets only** — the authority's subscription, re-derived here and passed through. A native host rerenders with fresh props (see Native Binding). |
 | `open` | `boolean \| null` | `null` | Controlled popover open state; bindable. |
 | `defaultOpen` | `boolean` | `false` | Initial uncontrolled open state. |
 | `placement` | `OverlayPlacement` | `"bottom-end"` | Popover placement hint. |
@@ -163,7 +163,21 @@ See `update-status.md` §8 for the rejection-notice hooks.
 ## 9. Framework Parity
 
 Svelte and React share the same prop surface, presence semantics, anatomy, and
-token usage. There is no native counterpart in this tranche.
+token usage. Native presence, copy, and the hosted status surface follow
+`poodle_render::update_center`.
+
+### Native Binding
+
+- Implemented: `UpdateCenterSpec`
+  (`packages/contracts/components/src/update_center.rs`),
+  `poodle_render::update_center`, GPUI specimen
+  `packages/gpui/preview/src/specimens/update_center.rs`.
+- Presence is an authority read, never derived here. `hidden` collapses the
+  tree; `quiet` is the trigger only; `attention` draws the indicator; a
+  downloading progress ring replaces the glyph (indeterminate when `fraction`
+  is `None`).
+- `observe` is **web targets only**. A native host rerenders with fresh
+  props. `confirm_open` is host-owned, same as UpdateStatus.
 
 ## 10. Usage
 

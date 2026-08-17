@@ -176,11 +176,21 @@ browser behavior (`name`), not machine state.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::primitives::radio`
-- expose radio role, group membership, checked state, and accessible name
-  through the native accessibility tree
-- keyboard selection via Space and native-style group roving must be
-  explicitly handled
+- Implemented: `RadioSpec` (`packages/contracts/components/src/radio.rs`),
+  `poodle_render::radio`, GPUI specimen
+  `packages/gpui/preview/src/specimens/radio.rs`.
+- Expose radio role, checked state, and accessible name through the native
+  accessibility tree. `name` and `value` stay on the spec as group-membership
+  data even though they are HTML attributes on the web.
+
+### Native Binding
+
+- Space/Enter select through the backend's activation path. An already-checked
+  radio is a no-op — the control never unchecks itself.
+- Group exclusivity and same-`name` arrow roving are **host-owned**. There is
+  no browser radio group; a native host clears siblings when one option
+  reports `true`. RadioGroup's pass is a different component and is not
+  borrowed here.
 
 ## 11. Parity Checklist
 

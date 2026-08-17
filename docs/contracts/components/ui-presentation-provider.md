@@ -221,6 +221,16 @@ Example for `density="default"`, `sizeScale="md"`:
 - Semantic size resolution must match the `resolveSemanticControlSize` table
 - Nesting behavior must match: inner providers override outer ones
 
+### Native Binding
+
+- Implemented as a child-passthrough: `UiPresentationProviderSpec`
+  (`packages/contracts/components/src/ui_presentation_provider.rs`),
+  `poodle_render::ui_presentation_provider`. GPUI specimen
+  `packages/gpui/preview/src/specimens/ui_presentation_provider.rs`.
+- Native descendants do **not** inherit presentation from the wrapper: each
+  spec owns its own size and density. The passthrough stamps `density` and
+  `size_scale` on `roles` so the non-cascade is declared rather than silent.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

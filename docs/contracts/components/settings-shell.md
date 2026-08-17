@@ -110,7 +110,7 @@ Shapes per §2. Search results carry the anchor only when the result has one.
 | `defaultOpen` | `boolean` | `false` | no | Uncontrolled initial open state |
 | `title` | `string \| null` | `"Settings"` | no | Dialog title; also the dialog's accessible name (via `aria-labelledby`) |
 | `closeLabel` | `string` | `"Close settings"` | no | Accessible label for the dialog close button |
-| `page` | `Snippet` | — | no | The current page body. **Always a snippet** — content never arrives through a data prop |
+| `page` | `Snippet` | — | no | The current page body. **Web snippet; native host Node slot** — content never arrives through a data prop (see Native Binding) |
 | `closeRefusedReason` | `string \| null` | `null` | no | The host's reason for refusing a close, shown as a warning `Callout`. Set means the shell stays open on a close attempt; `null` means a close attempt proceeds. Never invented by the shell — see §6 |
 
 ### Callbacks
@@ -320,9 +320,22 @@ Both runtimes:
 
 ## 13. GPUI Notes
 
-None — **web only**. `HistoryCenter` is the precedent for a web-only
-component; native parity is deferred to `g13.014`, and the component is
-recorded in the native registration gap inventory so the gap stays counted.
+- Implemented: `SettingsShellSpec`
+  (`packages/contracts/components/src/settings_shell.rs`),
+  `poodle_render::settings_shell`, GPUI specimen
+  `packages/gpui/preview/src/specimens/settings_shell.rs`.
+- The native surface is a Dialog: one close affordance, search in the custom
+  header, host-filtered nav, host-composed page.
+
+### Native Binding
+
+- `page` is a host-composed Node argument to `settings_shell`, not a spec
+  field. The shell always renders that slot; it never filters `groups`.
+- `search_query` is host-owned. Empty groups plus a live query is "No
+  matches"; empty groups with no query is "No settings pages".
+- Close always emits `on_request_close`. `close_refused_reason` set means the
+  shell does **not** emit `on_open_change(false)` and shows the reason as a
+  polite status Callout.
 
 ## 14. Parity Checklist
 

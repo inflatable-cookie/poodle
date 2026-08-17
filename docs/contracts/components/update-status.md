@@ -95,7 +95,7 @@ type UpdateRejectionCode =
 | `lastRejection` | `UpdateRejectionCode \| undefined` | `undefined` | The last rejection code. The only fault; rendered in danger styling. |
 | `aheadOfChannel` | `UpdateAheadOfChannel \| undefined` | `undefined` | The preferred source for the ahead-of-channel message (both versions). |
 | `pending` | `boolean` | `false` | Disables the actions while a command is in flight. |
-| `observe` | `((observer: () => void) => () => void) \| null` | `null` | The authority's subscription; the component re-derives on each notification. |
+| `observe` | `((observer: () => void) => () => void) \| null` | `null` | **Web targets only** — the authority's subscription; the component re-derives on each notification. A native host rerenders with fresh props (see Native Binding). |
 | `size` | `ControlSize \| null` | `null` | Explicit semantic size override. |
 | `sizeRole` | `SemanticControlSizeRole` | `"control"` | Semantic size role used when inheriting presentation scale. |
 | `density` | `ControlDensity \| null` | `null` | Explicit density override. |
@@ -192,7 +192,19 @@ Rendered once in core (`updateStatusView`), so the two renderers cannot drift:
 
 Svelte and React share the same prop surface, defaults, copy (via the shared
 `updateStatusView` derivation), events, and token usage. `observe` re-derives in
-both runtimes. There is no native counterpart in this tranche.
+both web runtimes. Native copy resolves once through
+`poodle_headless::update::update_status_view`.
+
+### Native Binding
+
+- Implemented: `UpdateStatusSpec`
+  (`packages/contracts/components/src/update_status.rs`),
+  `poodle_render::update_status`, GPUI specimen
+  `packages/gpui/preview/src/specimens/update_status.rs`.
+- `observe` is **web targets only**. A native host rerenders with fresh
+  authority reads; there is no subscription field on the spec.
+- `confirm_open` is host-owned overlay state. `confirmInstall` still decides
+  whether Install opens that overlay or emits `on_install` directly.
 
 ## 10. Usage
 
