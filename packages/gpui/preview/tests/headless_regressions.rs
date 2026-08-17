@@ -1941,3 +1941,816 @@ fn settings_shell_navigates_and_refused_close_stays_open() {
         );
     });
 }
+
+// ── g15.010 Batch A regressions ───────────────────────────────────────────
+
+/// Callout dismiss is a focusable button. Keyboard activation reaches the
+/// host, which stores dismissed state and supplies the next spec.
+#[test]
+fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
+    use poodle_specs::CallOutSpec;
+
+    run_headless(|cx| {
+        fn build(dismissed: bool, mounted: Arc<Mutex<Node>>, flag: Arc<Mutex<bool>>) -> Node {
+            if dismissed {
+                return Node::text("Dismissed");
+            }
+            let mount = Arc::clone(&mounted);
+            let flag = Arc::clone(&flag);
+            poodle_render::callout(
+                &CallOutSpec::new()
+                    .with_title("Dismissible callout")
+                    .with_content("This callout can be dismissed by the user.")
+                    .dismissible(true),
+                &theme(),
+                poodle_render::CalloutHandlers {
+                    on_dismiss: Some(Arc::new(move || {
+                        *flag.lock().unwrap() = true;
+                        *mount.lock().unwrap() =
+                            build(true, Arc::clone(&mount), Arc::clone(&flag));
+                    })),
+                    ..poodle_render::CalloutHandlers::default()
+                },
+            )
+        }
+
+        let dismissed = Arc::new(Mutex::new(false));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted), Arc::clone(&dismissed));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        driver.wait_for_focus_handle("poodle-callout-dismiss");
+        driver.keyboard_activate("poodle-callout-dismiss");
+        assert!(*dismissed.lock().unwrap(), "dismiss reached the host");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Dismissed"),
+            "the next spec reflects dismissed host state"
+        );
+    });
+}
+
+/// RemediationBanner action and dismiss both travel through mounted input.
+/// The host stores the requested action id, then applies dismiss by omitting
+/// the banner from the next spec.
+#[test]
+fn remediation_banner_action_and_dismiss_rebuild_the_host_spec() {
+    use poodle_specs::{ButtonVariant, RemediationAction, RemediationBannerSpec, StatusTone};
+
+    run_headless(|cx| {
+        fn build(
+            dismissed: bool,
+            last_action: Option<String>,
+            mounted: Arc<Mutex<Node>>,
+            actions: Arc<Mutex<Vec<String>>>,
+            flag: Arc<Mutex<bool>>,
+        ) -> Node {
+            if dismissed {
+                let mut root = Node::container().child(Node::text("Dismissed"));
+                if let Some(action) = last_action {
+                    root = root.child(Node::text(format!("Last request: {action}")));
+                }
+                return root;
+            }
+            let mount = Arc::clone(&mounted);
+            let action_sink = Arc::clone(&actions);
+            let flag = Arc::clone(&flag);
+            let mut node = poodle_render::remediation_banner(
+                &RemediationBannerSpec::new(
+                    "We could not save your changes",
+                    "Your edits are still local. Retry the save or inspect the error details.",
+                )
+                .with_tone(StatusTone::Danger)
+                .with_primary_action(
+                    RemediationAction::new("retry", "Try again")
+                        .with_variant(ButtonVariant::Primary),
+                )
+                .with_dismissible(true),
+                &theme(),
+                poodle_render::RemediationBannerHandlers {
+                    on_action: Some(Arc::new({
+                        let mount = Arc::clone(&mount);
+                        let action_sink = Arc::clone(&action_sink);
+                        let flag = Arc::clone(&flag);
+                        move |id| {
+                            action_sink.lock().unwrap().push(id.to_string());
+                            *mount.lock().unwrap() = build(
+                                false,
+                                Some(id.to_string()),
+                                Arc::clone(&mount),
+                                Arc::clone(&action_sink),
+                                Arc::clone(&flag),
+                            );
+                        }
+                    })),
+                    on_dismiss: Some(Arc::new(move || {
+                        *flag.lock().unwrap() = true;
+                        let last = action_sink.lock().unwrap().last().cloned();
+                        *mount.lock().unwrap() = build(
+                            true,
+                            last,
+                            Arc::clone(&mount),
+                            Arc::clone(&action_sink),
+                            Arc::clone(&flag),
+                        );
+                    })),
+                    ..poodle_render::RemediationBannerHandlers::default()
+                },
+            );
+            if let Some(action) = last_action {
+                node = Node::container()
+                    .child(node)
+                    .child(Node::text(format!("Last request: {action}")));
+            }
+            node
+        }
+
+        let actions = Arc::new(Mutex::new(Vec::new()));
+        let dismissed = Arc::new(Mutex::new(false));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            false,
+            None,
+            Arc::clone(&mounted),
+            Arc::clone(&actions),
+            Arc::clone(&dismissed),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        driver.wait_for_focus_handle("remediation-action-retry");
+        driver.keyboard_activate("remediation-action-retry");
+        assert_eq!(actions.lock().unwrap().as_slice(), ["retry".to_string()]);
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Last request: retry"),
+            "action id is stored on the host and painted into the next spec"
+        );
+
+        driver.wait_for_focus_handle("remediation-banner-dismiss");
+        driver.keyboard_activate("remediation-banner-dismiss");
+        assert!(*dismissed.lock().unwrap(), "dismiss reached the host");
+        let texts: Vec<String> = mounted
+            .lock()
+            .unwrap()
+            .texts()
+            .into_iter()
+            .map(str::to_string)
+            .collect();
+        assert!(
+            texts.iter().any(|t| t == "Dismissed"),
+            "dismissed host state omits the banner"
+        );
+        assert!(
+            texts.iter().any(|t| t == "Last request: retry"),
+            "the stored action survives dismiss"
+        );
+    });
+}
+
+// ── g15.010 Batch B regressions ───────────────────────────────────────────
+
+/// ActionDiscoveryPanel selection travels through mounted keyboard input.
+/// The host stores the chosen action id and supplies it on the next spec.
+#[test]
+fn action_discovery_selection_rebuilds_the_host_spec_through_mounted_input() {
+    use poodle_specs::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem};
+
+    run_headless(|cx| {
+        fn build(active: String, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = ActionDiscoveryPanelSpec::new(vec![ActionDiscoverySection::new(
+                "file",
+                "File",
+                vec![
+                    CommandActionItem::new("save", "Save"),
+                    CommandActionItem::new("open-file", "Open File"),
+                ],
+            )])
+            .with_active_id(&active);
+            let mount = Arc::clone(&mounted);
+            let panel = poodle_render::action_discovery_panel(
+                &spec,
+                &theme(),
+                poodle_render::ActionDiscoveryPanelHandlers {
+                    on_select: Some(Arc::new(move |id| {
+                        *mount.lock().unwrap() = build(id.to_string(), Arc::clone(&mount));
+                    })),
+                    ..poodle_render::ActionDiscoveryPanelHandlers::default()
+                },
+            );
+            Node::container()
+                .child(panel)
+                .child(Node::text(format!("Active: {active}")))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build("save".to_string(), Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        driver.wait_for_focus_handle("open-file");
+        driver.keyboard_activate("open-file");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Active: open-file"),
+            "the next spec reflects the host-owned active action"
+        );
+    });
+}
+
+/// DockRegion tab selection and collapse both travel through mounted input.
+/// The host stores the chosen tab and the collapsed flag, then paints them.
+#[test]
+fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
+    use poodle_specs::{DockEdge, DockRegionSpec, PanelTabItem};
+
+    run_headless(|cx| {
+        fn build(tab: String, collapsed: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = DockRegionSpec::new(
+                DockEdge::Left,
+                vec![
+                    PanelTabItem::new("explorer", "Explorer"),
+                    PanelTabItem::new("search", "Search"),
+                ],
+            )
+            .with_collapsible(true)
+            .with_collapsed(collapsed)
+            .with_value(&tab);
+            let tab_mount = Arc::clone(&mounted);
+            let collapse_mount = Arc::clone(&mounted);
+            let tab_for_collapse = tab.clone();
+            let collapsed_for_tab = collapsed;
+            let dock = poodle_render::dock_region(
+                &spec,
+                &theme(),
+                Some(Node::text(format!("Panel: {tab}"))),
+                poodle_render::DockRegionHandlers {
+                    on_tab_change: Some(Arc::new(move |value| {
+                        *tab_mount.lock().unwrap() = build(
+                            value.to_string(),
+                            collapsed_for_tab,
+                            Arc::clone(&tab_mount),
+                        );
+                    })),
+                    on_collapse_toggle: Some(Arc::new(move |next| {
+                        *collapse_mount.lock().unwrap() = build(
+                            tab_for_collapse.clone(),
+                            next,
+                            Arc::clone(&collapse_mount),
+                        );
+                    })),
+                    ..poodle_render::DockRegionHandlers::default()
+                },
+            );
+            Node::container()
+                .child(dock)
+                .child(Node::text(format!("Tab: {tab}")))
+                .child(Node::text(if collapsed {
+                    "Collapsed"
+                } else {
+                    "Expanded"
+                }))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build("explorer".to_string(), false, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        driver.wait_for_focus_handle("dock-tab-search");
+        driver.keyboard_activate("dock-tab-search");
+        let after_tab: Vec<String> = mounted
+            .lock()
+            .unwrap()
+            .texts()
+            .into_iter()
+            .map(str::to_string)
+            .collect();
+        assert!(
+            after_tab.iter().any(|t| t == "Tab: search"),
+            "tab change reached the host and painted the next spec"
+        );
+        assert!(
+            after_tab.iter().any(|t| t == "Expanded"),
+            "tab change leaves the dock expanded"
+        );
+
+        driver.wait_for_focus_handle("dock-collapse");
+        driver.keyboard_activate("dock-collapse");
+        let after_collapse: Vec<String> = mounted
+            .lock()
+            .unwrap()
+            .texts()
+            .into_iter()
+            .map(str::to_string)
+            .collect();
+        assert!(
+            after_collapse.iter().any(|t| t == "Collapsed"),
+            "collapse reached the host and painted the next spec"
+        );
+        assert!(
+            after_collapse.iter().any(|t| t == "Tab: search"),
+            "the stored tab survives collapse"
+        );
+    });
+}
+
+// ── g15.010 Batch C regressions ───────────────────────────────────────────
+
+/// AgentPlan accept/revise/dismiss travel through mounted keyboard input.
+#[test]
+fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
+    use poodle_headless::agent_plan::AgentPlanStatus;
+    use poodle_specs::AgentPlanSpec;
+
+    run_headless(|cx| {
+        fn build(status: AgentPlanStatus, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = AgentPlanSpec::new("1. Inspect the contract.\n2. Apply the change.")
+                .with_status(status);
+            let accept_mount = Arc::clone(&mounted);
+            let revise_mount = Arc::clone(&mounted);
+            let dismiss_mount = Arc::clone(&mounted);
+            let plan = poodle_render::agent_plan(
+                &spec,
+                &theme(),
+                poodle_render::AgentPlanHandlers {
+                    on_accept: Some(Arc::new(move || {
+                        *accept_mount.lock().unwrap() =
+                            build(AgentPlanStatus::Accepted, Arc::clone(&accept_mount));
+                    })),
+                    on_revise: Some(Arc::new(move || {
+                        *revise_mount.lock().unwrap() =
+                            build(AgentPlanStatus::Revised, Arc::clone(&revise_mount));
+                    })),
+                    on_dismiss: Some(Arc::new(move || {
+                        *dismiss_mount.lock().unwrap() =
+                            build(AgentPlanStatus::Dismissed, Arc::clone(&dismiss_mount));
+                    })),
+                    ..poodle_render::AgentPlanHandlers::default()
+                },
+            );
+            Node::container()
+                .child(plan)
+                .child(Node::text(format!("Decided: {}", status.as_str())))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(AgentPlanStatus::Pending, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("agent-plan-accept");
+        driver.keyboard_activate("agent-plan-accept");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Decided: accepted"),
+            "accept reached the host and painted the next spec"
+        );
+
+        *mounted.lock().unwrap() = build(AgentPlanStatus::Pending, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("agent-plan-revise");
+        driver.keyboard_activate("agent-plan-revise");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Decided: revised"),
+            "revise reached the host and painted the next spec"
+        );
+
+        *mounted.lock().unwrap() = build(AgentPlanStatus::Pending, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("agent-plan-dismiss");
+        driver.keyboard_activate("agent-plan-dismiss");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Decided: dismissed"),
+            "dismiss reached the host and painted the next spec"
+        );
+    });
+}
+
+/// AgentPlanRecord disclosure travels through mounted keyboard input.
+#[test]
+fn agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input() {
+    use poodle_headless::agent_plan::AgentPlanStatus;
+    use poodle_specs::AgentPlanRecordSpec;
+
+    run_headless(|cx| {
+        fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = AgentPlanRecordSpec::new(
+                "## Proposed plan\n\n1. Wire the host.",
+                AgentPlanStatus::Accepted,
+            )
+            .with_expanded(expanded);
+            let mount = Arc::clone(&mounted);
+            let record = poodle_render::agent_plan_record(
+                &spec,
+                &theme(),
+                poodle_render::AgentPlanRecordHandlers {
+                    on_toggle: Some(Arc::new(move |next| {
+                        *mount.lock().unwrap() = build(next, Arc::clone(&mount));
+                    })),
+                    instance_id: Some("mounted".to_string()),
+                },
+            );
+            Node::container()
+                .child(record)
+                .child(Node::text(if expanded {
+                    "Record: open"
+                } else {
+                    "Record: shut"
+                }))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let toggle = poodle_render::agent_plan_record_toggle_focus_id(Some("mounted"));
+        driver.wait_for_focus_handle(&toggle);
+        driver.keyboard_activate(&toggle);
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Record: open"),
+            "disclosure reached the host and painted the next spec"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&toggle),
+            Some(true),
+            "disclosure keeps the same backend focus handle across the rebuild"
+        );
+    });
+}
+
+/// Two AgentPlanRecords with the same status and no decided_at keep separate
+/// backend focus handles. Activating one does not activate the other.
+#[test]
+fn two_agent_plan_records_do_not_share_backend_focus_handles() {
+    use poodle_headless::agent_plan::AgentPlanStatus;
+    use poodle_specs::AgentPlanRecordSpec;
+
+    run_headless(|cx| {
+        fn record(
+            scope: &str,
+            expanded: bool,
+            mounted: &Arc<Mutex<Node>>,
+            left_open: bool,
+            right_open: bool,
+        ) -> Node {
+            let spec = AgentPlanRecordSpec::new(
+                "## Proposed plan\n\n1. Wire the host.",
+                AgentPlanStatus::Accepted,
+            )
+            .with_expanded(expanded);
+            let mount = Arc::clone(mounted);
+            let scope_owned = scope.to_string();
+            poodle_render::agent_plan_record(
+                &spec,
+                &theme(),
+                poodle_render::AgentPlanRecordHandlers {
+                    on_toggle: Some(Arc::new(move |next| {
+                        let (left, right) = if scope_owned == "left" {
+                            (next, right_open)
+                        } else {
+                            (left_open, next)
+                        };
+                        *mount.lock().unwrap() = build(left, right, Arc::clone(&mount));
+                    })),
+                    instance_id: Some(scope.to_string()),
+                },
+            )
+        }
+
+        fn build(left_open: bool, right_open: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            Node::container()
+                .child(record("left", left_open, &mounted, left_open, right_open))
+                .child(record("right", right_open, &mounted, left_open, right_open))
+                .child(Node::text(format!(
+                    "left:{} right:{}",
+                    if left_open { "open" } else { "shut" },
+                    if right_open { "open" } else { "shut" }
+                )))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, false, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let left = poodle_render::agent_plan_record_toggle_focus_id(Some("left"));
+        let right = poodle_render::agent_plan_record_toggle_focus_id(Some("right"));
+        driver.wait_for_focus_handle(&left);
+        driver.wait_for_focus_handle(&right);
+        driver.focus_element(&left);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&left), Some(true));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right),
+            Some(false),
+            "the second record keeps its own handle"
+        );
+
+        driver.keyboard_activate(&left);
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "left:open right:shut"),
+            "only the focused record activates"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left),
+            Some(true),
+            "the activated record retains focus after rebuild"
+        );
+
+        driver.keyboard_activate(&right);
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "left:open right:open"),
+            "the second record activates independently"
+        );
+    });
+}
+
+/// AgentSubagent disclosure travels through mounted keyboard input.
+#[test]
+fn agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input() {
+    use poodle_headless::agent_subagent::{AgentSubagentItem, AgentSubagentStatus};
+    use poodle_specs::AgentSubagentSpec;
+
+    run_headless(|cx| {
+        fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = AgentSubagentSpec::new(AgentSubagentItem {
+                id: "scout-running".to_string(),
+                label: "Scout".to_string(),
+                status: AgentSubagentStatus::Running,
+                activity_line: Some("Searching".to_string()),
+                summary: None,
+            })
+            .with_detail_lines(vec!["Matched 41 of 44 vectors".to_string()])
+            .with_expanded(expanded);
+            let mount = Arc::clone(&mounted);
+            let node = poodle_render::agent_subagent(
+                &spec,
+                &theme(),
+                poodle_render::AgentSubagentHandlers {
+                    on_toggle: Some(Arc::new(move |next| {
+                        *mount.lock().unwrap() = build(next, Arc::clone(&mount));
+                    })),
+                    on_open_child: None,
+                    instance_id: None,
+                },
+            );
+            Node::container()
+                .child(node)
+                .child(Node::text(if expanded {
+                    "Child: open"
+                } else {
+                    "Child: shut"
+                }))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("agent-subagent-toggle-scout-running");
+        driver.keyboard_activate("agent-subagent-toggle-scout-running");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Child: open"),
+            "disclosure reached the host and painted the next spec"
+        );
+    });
+}
+
+/// ChangedFiles disclosure and file selection travel through mounted input.
+#[test]
+fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
+    use poodle_headless::agent_transcript::ChangedFile;
+    use poodle_specs::ChangedFilesSpec;
+
+    run_headless(|cx| {
+        fn build(
+            expanded: bool,
+            selected: Option<String>,
+            mounted: Arc<Mutex<Node>>,
+        ) -> Node {
+            let spec = ChangedFilesSpec::new(
+                "worked",
+                vec![
+                    ChangedFile {
+                        path: "cp-api/Cargo.toml".to_string(),
+                        additions: 1,
+                        deletions: 0,
+                        status: None,
+                    },
+                    ChangedFile {
+                        path: "cp-docs/notes.md".to_string(),
+                        additions: 1,
+                        deletions: 0,
+                        status: None,
+                    },
+                ],
+            )
+            .with_expanded(expanded);
+            let toggle_mount = Arc::clone(&mounted);
+            let select_mount = Arc::clone(&mounted);
+            let expanded_for_select = expanded;
+            let selected_for_toggle = selected.clone();
+            let node = poodle_render::changed_files(
+                &spec,
+                &theme(),
+                poodle_render::ChangedFilesHandlers {
+                    on_toggle: Some(Arc::new(move |_| {
+                        *toggle_mount.lock().unwrap() = build(
+                            !expanded_for_select,
+                            selected_for_toggle.clone(),
+                            Arc::clone(&toggle_mount),
+                        );
+                    })),
+                    on_file_select: Some(Arc::new(move |path| {
+                        *select_mount.lock().unwrap() = build(
+                            true,
+                            Some(path.to_string()),
+                            Arc::clone(&select_mount),
+                        );
+                    })),
+                    instance_id: None,
+                },
+            );
+            let mut root = Node::container()
+                .child(node)
+                .child(Node::text(if expanded {
+                    "Files: open"
+                } else {
+                    "Files: shut"
+                }));
+            if let Some(path) = selected {
+                root = root.child(Node::text(format!("selected: {path}")));
+            }
+            root
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, None, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("changed-files-toggle-worked");
+        driver.keyboard_activate("changed-files-toggle-worked");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Files: open"),
+            "disclosure reached the host and painted the next spec"
+        );
+
+        driver.wait_for_focus_handle("changed-files-file-worked-cp-api:Cargo.toml");
+        driver.keyboard_activate("changed-files-file-worked-cp-api:Cargo.toml");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "selected: cp-api/Cargo.toml"),
+            "file selection reached the host and painted the next spec"
+        );
+    });
+}
+
+/// ToolCall output disclosure travels through mounted keyboard input.
+#[test]
+fn tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input() {
+    use poodle_specs::ToolCallSpec;
+
+    run_headless(|cx| {
+        fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = ToolCallSpec::new("with-output", "Ran command")
+                .with_detail("bun test")
+                .with_output("272 pass\n0 fail")
+                .with_expanded(expanded);
+            let mount = Arc::clone(&mounted);
+            let node = poodle_render::tool_call(
+                &spec,
+                &theme(),
+                poodle_render::ToolCallHandlers {
+                    on_toggle: Some(Arc::new(move |_| {
+                        *mount.lock().unwrap() = build(!expanded, Arc::clone(&mount));
+                    })),
+                    ..poodle_render::ToolCallHandlers::default()
+                },
+            );
+            Node::container()
+                .child(node)
+                .child(Node::text(if expanded {
+                    "Output: open"
+                } else {
+                    "Output: shut"
+                }))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("with-output");
+        driver.keyboard_activate("with-output");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Output: open"),
+            "disclosure reached the host and painted the next spec"
+        );
+    });
+}
+
+/// ToolCallGroup run disclosure travels through mounted keyboard input.
+#[test]
+fn tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input() {
+    use poodle_headless::agent_transcript::{ToolCallStatus, TranscriptToolCall};
+    use poodle_specs::ToolCallGroupSpec;
+
+    run_headless(|cx| {
+        fn call(id: &str, detail: &str) -> TranscriptToolCall {
+            TranscriptToolCall {
+                id: id.to_string(),
+                label: "Ran command".to_string(),
+                detail: Some(detail.to_string()),
+                status: ToolCallStatus::Success,
+                icon: None,
+                output: None,
+            }
+        }
+
+        fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = ToolCallGroupSpec::new("three", vec![call("a", "one"), call("b", "two"), call("c", "three")])
+                .with_expanded(expanded);
+            let mount = Arc::clone(&mounted);
+            let node = poodle_render::tool_call_group(
+                &spec,
+                &theme(),
+                poodle_render::ToolCallGroupHandlers {
+                    on_toggle: Some(Arc::new(move |_| {
+                        *mount.lock().unwrap() = build(!expanded, Arc::clone(&mount));
+                    })),
+                    on_call_toggle: None,
+                    instance_id: None,
+                },
+            );
+            Node::container()
+                .child(node)
+                .child(Node::text(if expanded {
+                    "Run: open"
+                } else {
+                    "Run: shut"
+                }))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("tool-call-group-toggle-three");
+        driver.keyboard_activate("tool-call-group-toggle-three");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Run: open"),
+            "run disclosure reached the host and painted the next spec"
+        );
+    });
+}

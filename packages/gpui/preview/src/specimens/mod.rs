@@ -8,6 +8,7 @@ pub(crate) mod scene_specimen;
 pub(crate) mod specimen_layout;
 
 mod bx;
+mod callout;
 mod grid;
 mod scroll_shell;
 mod separator;
@@ -19,6 +20,7 @@ mod surface;
 mod icon;
 mod icon_provider;
 mod ui_presentation_provider;
+mod avatar;
 
 // ── Action ────────────────────────────────────────────────
 mod button;
@@ -67,9 +69,14 @@ mod color_picker;
 mod eyebrow;
 mod file_upload;
 mod meter;
+mod meta_item;
+mod pill;
 mod progress;
 mod rating;
+mod remediation_banner;
 mod skeleton;
+mod spinner;
+mod state_tile;
 mod status_indicator;
 
 // ── Overlay ───────────────────────────────────────────────
@@ -91,6 +98,11 @@ mod tooltip;
 
 // ── Composites ────────────────────────────────────────────
 mod agent_chat_input_specimen;
+mod agent_message;
+mod agent_plan;
+mod agent_plan_record;
+mod agent_question_record;
+mod agent_subagent;
 mod audio_player_specimen;
 mod block_editor_specimen;
 mod breadcrumbs_specimen;
@@ -98,6 +110,7 @@ mod bulk_action_bar_specimen;
 mod card_radio_group_specimen;
 mod card_specimen;
 mod card_toggle_group_specimen;
+mod changed_files;
 mod confirm_action_specimen;
 mod data_table;
 mod debug_dialog_specimen;
@@ -106,6 +119,7 @@ mod detail_section_group_specimen;
 mod detail_section_specimen;
 mod detail_shell;
 mod duration_input_specimen;
+mod empty_state;
 mod editable_list_specimen;
 mod embed_input_specimen;
 mod embed_preview_specimen;
@@ -161,6 +175,8 @@ mod theme_select_specimen;
 mod time_ago_specimen;
 mod toast_host;
 mod toast_stack_specimen;
+mod tool_call;
+mod tool_call_group;
 mod tree;
 mod validation_summary;
 mod video_player_specimen;
@@ -171,10 +187,10 @@ mod region;
 mod resize_handle;
 
 // ── App Shell ─────────────────────────────────────────────
-mod action_discovery;
+mod action_discovery_panel;
 mod app_header;
 mod command_palette;
-mod dock_split;
+mod dock_region;
 mod status_bar;
 
 use crate::app_state::AppState;
@@ -277,11 +293,11 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "surface" => specimen_card("Surface", theme, surface::render(theme)),
         "separator" => specimen_card("Separator", theme, separator::render(theme)),
         "scroll-shell" => specimen_card("ScrollShell", theme, scroll_shell::render(theme)),
-        "callout" => specimen_card("Callout", theme, scene_specimen::render("callout", state, cx).expect("callout scene")),
+        "callout" => specimen_card("Callout", theme, callout::render(state, cx)),
         "spacer" => specimen_card("Spacer", theme, spacer::render(theme)),
 
         // ── Foundation ──────────────────────────────────────────
-        "avatar" => specimen_card("Avatar", theme, scene_specimen::render("avatar", state, cx).expect("avatar scene")),
+        "avatar" => specimen_card("Avatar", theme, avatar::render(state, cx)),
         "icon" => specimen_card("Icon", theme, icon::render(state, cx)),
         "icon-provider" => specimen_card("IconProvider", theme, icon_provider::render(theme)),
         "ui-presentation-provider" => specimen_card(
@@ -394,16 +410,22 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
 
         // ── Feedback ────────────────────────────────────────────
         "progress" => specimen_card("Progress", theme, progress::render(state, cx)),
-        "pill" => specimen_card("Pill", theme, scene_specimen::render("pill", state, cx).expect("pill scene")),
+        "pill" => specimen_card("Pill", theme, pill::render(state, cx)),
         "status-indicator" => {
             specimen_card("StatusIndicator", theme, status_indicator::render(theme))
         }
         "meter" => specimen_card("Meter", theme, meter::render(theme)),
         "meta-bar" => specimen_card("MetaBar", theme, meta_bar::render(theme)),
-        "meta-item" => specimen_card("MetaItem", theme, meta_bar::render_meta_item(theme)),
+        "meta-item" => specimen_card("MetaItem", theme, meta_item::render(theme)),
         "rating" => specimen_card("Rating", theme, rating::render(state, cx)),
         "skeleton" => specimen_card("Skeleton", theme, skeleton::render(theme)),
-        "spinner" => specimen_card("Spinner", theme, scene_specimen::render("spinner", state, cx).expect("spinner scene")),
+        "spinner" => specimen_card("Spinner", theme, spinner::render(state, cx)),
+        "remediation-banner" => specimen_card(
+            "RemediationBanner",
+            theme,
+            remediation_banner::render(state, cx),
+        ),
+        "state-tile" => specimen_card("StateTile", theme, state_tile::render(theme)),
         "eyebrow" => specimen_card("Eyebrow", theme, eyebrow::render(theme)),
         "time-ago" => specimen_card("TimeAgo", theme, time_ago_specimen::render(theme)),
         "duration-input" => specimen_card(
@@ -522,6 +544,26 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             theme,
             agent_chat_input_specimen::render(state, cx),
         ),
+        "agent-message" => specimen_card("AgentMessage", theme, agent_message::render(state, cx)),
+        "agent-plan" => specimen_card("AgentPlan", theme, agent_plan::render(state, cx)),
+        "agent-plan-record" => specimen_card(
+            "AgentPlanRecord",
+            theme,
+            agent_plan_record::render(state, cx),
+        ),
+        "agent-question-record" => specimen_card(
+            "AgentQuestionRecord",
+            theme,
+            agent_question_record::render(state, cx),
+        ),
+        "agent-subagent" => {
+            specimen_card("AgentSubagent", theme, agent_subagent::render(state, cx))
+        },
+        "changed-files" => specimen_card("ChangedFiles", theme, changed_files::render(state, cx)),
+        "tool-call" => specimen_card("ToolCall", theme, tool_call::render(state, cx)),
+        "tool-call-group" => {
+            specimen_card("ToolCallGroup", theme, tool_call_group::render(state, cx))
+        },
         "theme-select" => specimen_card(
             "ThemeSelect",
             theme,
@@ -541,7 +583,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             pagination_summary_specimen::render(theme),
         ),
         "metric-tile" => specimen_card("MetricTile", theme, metric_tile_specimen::render(theme)),
-        "empty-state" => specimen_card("EmptyState", theme, scene_specimen::render("empty-state", state, cx).expect("empty-state scene")),
+        "empty-state" => specimen_card("EmptyState", theme, empty_state::render(state, cx)),
         "error-boundary" => specimen_card(
             "ErrorBoundary",
             theme,
@@ -641,13 +683,13 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "command-palette" => {
             specimen_card("CommandPalette", theme, command_palette::render(state, cx))
         }
-        "dock-region" => specimen_card("DockRegion", theme, dock_split::render(state, cx)),
+        "dock-region" => specimen_card("DockRegion", theme, dock_region::render(state, cx)),
         "split-view" => specimen_card("SplitView", theme, split_view_specimen::render(state, cx)),
         "status-bar" => specimen_card("StatusBar", theme, status_bar::render(state, cx)),
         "action-discovery-panel" => specimen_card(
             "ActionDiscoveryPanel",
             theme,
-            action_discovery::render(state, cx),
+            action_discovery_panel::render(state, cx),
         ),
         "history-center" => specimen_card(
             "HistoryCenter",

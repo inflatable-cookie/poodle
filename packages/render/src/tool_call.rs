@@ -10,17 +10,39 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_transcript::ToolCallStatus;
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
+use poodle_node::{
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole, StylePatch,
+};
 use poodle_specs::ToolCallSpec;
 
 use crate::presentation::rem_to_px;
 
 /// Fires with the row id when it is opened or closed. A row with no output is
 /// not interactive at all, so nothing is attached to it.
+#[derive(Default)]
+pub struct ToolCallHandlers {
+    pub on_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Stable native instance scope. Two rows with the same spec id would
+    /// otherwise share one backend focus handle.
+    pub instance_id: Option<String>,
+}
+
+/// The backend-state id of the row.
+pub fn tool_call_focus_id(instance_id: Option<&str>, spec_id: &str) -> String {
+    match instance_id {
+        Some(scope) => format!("tool-call:{scope}:{spec_id}"),
+        None => spec_id.to_string(),
+    }
+}
+
+fn scoped(instance_id: Option<&str>, spec_id: &str) -> Option<String> {
+    instance_id.map(|scope| format!("tool-call:{scope}:{spec_id}"))
+}
+
 pub fn tool_call(
     spec: &ToolCallSpec,
     theme: &dyn ThemeProvider,
-    on_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    handlers: ToolCallHandlers,
 ) -> Node {
     let label_color = theme.resolve_color(spec.label_token());
     let detail_color = theme.resolve_color(spec.detail_token());
@@ -115,6 +137,7 @@ pub fn tool_call(
     // not.
     let mut root = Node::container();
     root.id = Some(spec.id.clone());
+    root.runtime_id = scoped(handlers.instance_id.as_deref(), &spec.id);
     root.style.descriptor.layout.direction = LayoutDirection::Column;
     root.style.fill_width = true;
     root.a11y.role = Some(NodeRole::ListItem);
@@ -136,7 +159,14 @@ pub fn tool_call(
 
     // Only a row with output can be opened, so only that row is clickable.
     if spec.has_output() {
-        if let Some(handler) = on_toggle {
+        root.interaction.focusable = true;
+        root.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            text_color: None,
+            opacity: None,
+        });
+        if let Some(handler) = handlers.on_toggle {
             let id = spec.id.clone();
             root.style.descriptor.cursor = CursorHint::Pointer;
             root.interaction.on_activate = Some(Arc::new(move || handler(&id)));
@@ -144,4 +174,41 @@ pub fn tool_call(
     }
 
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn spec() -> ToolCallSpec {
+        ToolCallSpec::new("with-output", "Ran command").with_output("ok")
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let first = tool_call(
+            &spec(),
+            &theme(),
+            ToolCallHandlers {
+                instance_id: Some("first".to_string()),
+                ..ToolCallHandlers::default()
+            },
+        );
+        let second = tool_call(
+            &spec(),
+            &theme(),
+            ToolCallHandlers {
+                instance_id: Some("second".to_string()),
+                ..ToolCallHandlers::default()
+            },
+        );
+        let expected = tool_call_focus_id(Some("first"), "with-output");
+        assert_eq!(first.runtime_id.as_deref(), Some(expected.as_str()));
+        assert_ne!(first.runtime_id, second.runtime_id);
+        assert_eq!(first.id.as_deref(), Some("with-output"));
+    }
 }

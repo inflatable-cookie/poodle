@@ -1,8 +1,7 @@
-//! The scene-driven specimen renderer (g14-b005 tranche one) — reads the
-//! generated display-specimen fixture (`generated/specimens.rs`, plain data
-//! with no Poodle imports) and renders the five display specimens from it.
-//! The hand-written callout/pill/spinner/avatar/empty-state specimens are
-//! replaced by this interpreter; the fixture is the one definition.
+//! Generated display-specimen interpreter. Catalogue routes now live in named
+//! per-component modules; this file remains so the fixture can still be
+//! rendered in isolation.
+#![allow(dead_code)]
 
 use crate::app_state::AppState;
 use crate::node_compat::{Avatar, Callout, EmptyState, Eyebrow, Pill, Spinner};

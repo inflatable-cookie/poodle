@@ -8,17 +8,44 @@
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
+use poodle_node::{
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole, StylePatch,
+};
 use poodle_specs::{ButtonSpec, RemediationAction, RemediationBannerSpec};
 
 use crate::button::button;
 use crate::color::mix_srgb;
 use crate::presentation::rem_to_px;
 
+const DISMISS_ID: &str = "remediation-banner-dismiss";
+
 #[derive(Default, Clone)]
 pub struct RemediationBannerHandlers {
     pub on_action: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_dismiss: Option<Arc<dyn Fn() + Send + Sync>>,
+    /// Stable native instance scope. Two banners with the same action ids
+    /// would otherwise share one backend focus handle.
+    pub instance_id: Option<String>,
+}
+
+/// The backend-state id of the dismiss control.
+pub fn remediation_banner_dismiss_focus_id(instance_id: Option<&str>) -> String {
+    match instance_id {
+        Some(scope) => format!("remediation-banner:{scope}:{DISMISS_ID}"),
+        None => DISMISS_ID.to_string(),
+    }
+}
+
+/// The backend-state id of one recovery action.
+pub fn remediation_banner_action_focus_id(instance_id: Option<&str>, action: &str) -> String {
+    match instance_id {
+        Some(scope) => format!("remediation-banner:{scope}:action:{action}"),
+        None => format!("remediation-action-{action}"),
+    }
+}
+
+fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
+    instance_id.map(|scope| format!("remediation-banner:{scope}:{part}"))
 }
 
 pub fn remediation_banner(
@@ -26,6 +53,7 @@ pub fn remediation_banner(
     theme: &dyn ThemeProvider,
     handlers: RemediationBannerHandlers,
 ) -> Node {
+    let instance_id = handlers.instance_id.clone();
     // ── Colors (all token-resolved) ──
     let tone_color = theme.resolve_color(spec.border_token());
     let panel = theme.resolve_color(spec.background_token());
@@ -113,12 +141,20 @@ pub fn remediation_banner(
         }
 
         if let Some(ref primary) = spec.primary_action {
-            actions_row =
-                actions_row.child(action_button(primary, theme, handlers.on_action.as_ref()));
+            actions_row = actions_row.child(action_button(
+                primary,
+                theme,
+                handlers.on_action.as_ref(),
+                instance_id.as_deref(),
+            ));
         }
         if let Some(ref secondary) = spec.secondary_action {
-            actions_row =
-                actions_row.child(action_button(secondary, theme, handlers.on_action.as_ref()));
+            actions_row = actions_row.child(action_button(
+                secondary,
+                theme,
+                handlers.on_action.as_ref(),
+                handlers.instance_id.as_deref(),
+            ));
         }
 
         content = content.child(actions_row);
@@ -129,13 +165,20 @@ pub fn remediation_banner(
     // ── Dismiss (contract §5: aria-label="Dismiss") ──
     if spec.is_dismissible {
         let mut dismiss = Node::icon("x", dismiss_size);
-        dismiss.id = Some("remediation-banner-dismiss".to_string());
+        dismiss.id = Some(DISMISS_ID.to_string());
+        dismiss.runtime_id = scoped(instance_id.as_deref(), DISMISS_ID);
         dismiss.style.descriptor.text_color = Some(text_secondary);
         dismiss.a11y.role = Some(NodeRole::Button);
         dismiss.a11y.label = Some(spec.dismiss_label.clone());
+        dismiss.interaction.focusable = true;
+        dismiss.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            text_color: None,
+            opacity: None,
+        });
         if let Some(on_dismiss) = handlers.on_dismiss {
             dismiss.style.descriptor.cursor = CursorHint::Pointer;
-            dismiss.interaction.focusable = true;
             dismiss.interaction.on_activate = Some(on_dismiss);
         }
         el = el.child(dismiss);
@@ -151,6 +194,7 @@ fn action_button(
     action: &RemediationAction,
     theme: &dyn ThemeProvider,
     on_action: Option<&Arc<dyn Fn(&str) + Send + Sync>>,
+    instance_id: Option<&str>,
 ) -> Node {
     let on_click = on_action.map(|handler| {
         let handler = Arc::clone(handler);
@@ -166,6 +210,7 @@ fn action_button(
         on_click,
     );
     b.id = Some(format!("remediation-action-{}", action.id));
+    b.runtime_id = scoped(instance_id, &format!("action:{}", action.id));
     b
 }
 
@@ -199,6 +244,7 @@ mod tests {
                 on_dismiss: Some(Arc::new(move || {
                     dismiss_seen.lock().unwrap().push("dismiss".to_string())
                 })),
+                instance_id: None,
             },
         );
 
@@ -213,5 +259,41 @@ mod tests {
 
         assert_eq!(seen.lock().unwrap().as_slice(), ["retry", "dismiss"]);
         assert_eq!(dismiss.a11y.label.as_deref(), Some("Dismiss"));
+        assert!(retry.runtime_id.is_none());
+        assert!(dismiss.runtime_id.is_none());
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let spec = RemediationBannerSpec::new("Save failed", "Try again.")
+            .with_primary_action(
+                RemediationAction::new("retry", "Retry").with_variant(ButtonVariant::Primary),
+            )
+            .with_dismissible(true);
+        let scoped_handlers = |scope: &str| RemediationBannerHandlers {
+            instance_id: Some(scope.to_string()),
+            ..RemediationBannerHandlers::default()
+        };
+        let first = remediation_banner(&spec, &theme(), scoped_handlers("first"));
+        let second = remediation_banner(&spec, &theme(), scoped_handlers("second"));
+        let action = remediation_banner_action_focus_id(Some("first"), "retry");
+        let dismiss = remediation_banner_dismiss_focus_id(Some("first"));
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some(action.as_str()))
+            .is_some());
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some(dismiss.as_str()))
+            .is_some());
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(remediation_banner_action_focus_id(Some("second"), "retry").as_str()))
+            .is_none());
+        assert!(first
+            .find(&|n| n.id.as_deref() == Some("remediation-action-retry"))
+            .is_some());
+        assert!(second
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(remediation_banner_dismiss_focus_id(Some("second")).as_str()))
+            .is_some());
     }
 }

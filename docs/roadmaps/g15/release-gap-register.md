@@ -57,7 +57,7 @@ decision (spec 068) and is excluded from every missing count. Reproducible
 count method: `docs/roadmaps/g15/release-baseline-roster.md#count-method`.
 
 Summary of native gaps: Rust declaration 0 missing (+ 1 not-applicable),
-Rust render 1 missing (+ 1 not-applicable), GPUI specimen 18 missing
+Rust render 1 missing (+ 1 not-applicable), GPUI specimen 0 missing
 (+ 1 not-applicable).
 
 | Family | Missing Rust declaration | Missing Rust render | Missing GPUI specimen | Owner |
@@ -67,7 +67,7 @@ Rust render 1 missing (+ 1 not-applicable), GPUI specimen 18 missing
 | Update & settings | — closed by `g15.009` (`UpdateStatusSpec`, `UpdateCenterSpec`, `SettingsShellSpec`) | — closed by `g15.009` (`packages/render/src/{update_status,update_center,settings_shell}.rs`) | — closed by `g15.009` (`packages/gpui/preview/src/specimens/{update_status,update_center,settings_shell}.rs`) | `g15.009` |
 | Radio | — closed by `g15.009` (`RadioSpec`) | — closed by `g15.009` (`packages/render/src/radio.rs`) | — closed by `g15.009` (`packages/gpui/preview/src/specimens/radio.rs`) | `g15.009` |
 | Context providers | — | IconProvider closed by `g15.009` (`packages/render/src/icon_provider.rs`); UiPresentationProvider remains a declared capability absence because ambient presentation cannot cross an already-built Node tree | — | follow-up required before `g15.013` |
-| Display, workstation & agent specimens | — | — | Avatar, Callout, RemediationBanner, MetaItem, Pill, Spinner, EmptyState, StateTile, ActionDiscoveryPanel, DockRegion, AgentMessage, AgentPlan, AgentPlanRecord, AgentQuestionRecord, AgentSubagent, ChangedFiles, ToolCall, ToolCallGroup | `g15.010` |
+| Display, workstation & agent specimens | — | — | — closed by `g15.010` (18 named GPUI specimen files under `packages/gpui/preview/src/specimens/`) | `g15.010` |
 | MeterSurface | not-applicable — web-only by fixed decision (spec 068) | not-applicable | not-applicable | none |
 
 The headless regressions (`effigy regressions:native`) certify Button,
@@ -80,7 +80,11 @@ disclosure and focus restoration, and ModelCatalogueEditor's keyboard
 grab/move/cancel and focus-after-hide, and — since `g15.009` — Radio's
 single-option select-without-uncheck, UpdateStatus's confirm-then-install,
 UpdateCenter's hidden collapse and open status host, and SettingsShell's
-navigate plus refused close. Native tranches land their evidence as
+navigate plus refused close, and — since `g15.010` — Callout dismiss,
+RemediationBanner action and dismiss, ActionDiscoveryPanel selection,
+DockRegion tab and collapse, AgentPlan accept/revise/dismiss,
+AgentPlanRecord and AgentSubagent disclosure, ChangedFiles disclosure and
+file selection, and ToolCall / ToolCallGroup disclosure. Native tranches land their evidence as
 focused owner-local tests, not by extending a shared comparator.
 
 ## Package-Install Surface

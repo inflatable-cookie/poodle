@@ -23,7 +23,7 @@ Public types and helpers are recorded separately and are **not** part of the den
 | Focused React test | 175 | 0 | 0 |
 | Rust declaration (`<Name>Spec`, including documented aliases) | 174 | 0 | 1 |
 | Rust render module (`poodle-render`) | 173 | 1 | 1 |
-| GPUI specimen | 156 | 18 | 1 |
+| GPUI specimen | 174 | 0 | 1 |
 | `test:web-pack-install` Svelte mounted proof | 9 | 166 (not exercised) | 0 |
 | Downstream consumer use (16 canonical consumers scanned) | 110 | 65 (no use found) | 0 |
 | Jetstream | 0 (program-deferred) | — | — |
@@ -39,7 +39,7 @@ Public types and helpers are recorded separately and are **not** part of the den
 - **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (175); React gallery: `specimen-map.ts` keys against canonical slugs (175); focused React test: same import-resolution method over `packages/react/components/test/` (175; 0 missing — `g15.005` closed the final 23; `AgentSubagent` already had React evidence).
 - **Rust declaration**: `pub struct <Name>Spec` searched recursively in `packages/contracts/components/src` (174 after `g15.009` closed UpdateStatus, UpdateCenter, SettingsShell, and Radio). Three documented naming discrepancies count as present: `CallOutSpec` (`Callout`), `ShellStatusBarSpec` (`StatusBar`), `TimeFieldSpec` (`TimeInput`). `MeterSurface` has no declaration and records not-applicable per spec 068.
 - **Rust render**: module names in `packages/render/src/lib.rs` (173 after `g15.009`). Documented naming discrepancies count as present: `bx.rs` (`Box`), `shell_status_bar.rs` (`StatusBar`), `time_field.rs` (`TimeInput`), and the batched `audio.rs` covering the 12 audio widgets (13 audio components minus `MeterSurface`). `UiPresentationProvider` remains a declared capability absence; `MeterSurface` records not-applicable.
-- **GPUI specimen**: file presence in `packages/gpui/preview/src/specimens/` per component (156 after `g15.009`). The batched `audio_controls.rs` covers 12 audio widgets; the 12 audio widgets are those covered — `audio_controls.rs` has no `meter_surface` function and `MeterSurface` records not-applicable. Counts do not include the `mod.rs` dispatch fallback (`missing_specimen`).
+- **GPUI specimen**: file presence in `packages/gpui/preview/src/specimens/` per component (174 after `g15.010`). The batched `audio_controls.rs` covers 12 audio widgets; the 12 audio widgets are those covered — `audio_controls.rs` has no `meter_surface` function and `MeterSurface` records not-applicable. Counts do not include the `mod.rs` dispatch fallback (`missing_specimen`).
 - **Pack-install**: components listed in the `mountedProof.svelte.components` array of `test/package-install/web-preview.ts` (9).
 - **Downstream use**: import statements of `@inflatable-cookie/poodle-svelte` / `-react` resolved (single- and multi-line) across source files of the 16 canonical consumers under `~/Dev/projects`: acowtancy, bovine-accelerator-desktop, compli-me, composer, contact-patch, figmatic, finch, longhorn, loophole, loophole-legacy, nucleus, songsprout, soundcheck, soundcheck-library, underlay, underlay-reference. Excluded: `poodle` itself (source), `jetstream` (program-deferred), worktree/absorbed duplicates (e.g. `soundcheck-wt`, `acowtancy/dairy-card011-worktree`), vendored/build/generated/fixture/example/archive paths, and test directories. No canonical consumer imports `poodle-react`; all component imports resolve to `poodle-svelte`.
 
@@ -263,13 +263,13 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 | `AgentChatInput` | complete | complete | `AgentChatInput.test.tsx` | `AgentChatInputSpec` (`packages/contracts/components/src/agent_chat_input.rs`) | `packages/render/src/agent_chat_input.rs` | `packages/gpui/preview/src/specimens/agent_chat_input_specimen.rs` |
 | `AudioPlayer` | complete | complete | `AudioPlayer.test.tsx` | `AudioPlayerSpec` (`packages/contracts/components/src/audio_player.rs`) | `packages/render/src/audio_player.rs` | `packages/gpui/preview/src/specimens/audio_player_specimen.rs` |
 | `AlertDialog` | complete | complete | `AlertDialog.test.tsx` | `AlertDialogSpec` (`packages/contracts/components/src/alert_dialog.rs`) | `packages/render/src/alert_dialog.rs` | `packages/gpui/preview/src/specimens/alert_dialog.rs` |
-| `Avatar` | complete | complete | `Avatar.test.tsx` | `AvatarSpec` (`packages/contracts/components/src/avatar.rs`) | `packages/render/src/avatar.rs` | `missing` |
+| `Avatar` | complete | complete | `Avatar.test.tsx` | `AvatarSpec` (`packages/contracts/components/src/avatar.rs`) | `packages/render/src/avatar.rs` | `packages/gpui/preview/src/specimens/avatar.rs` |
 | `Box` | complete | complete | `Box.test.tsx` | `BoxSpec` (`packages/contracts/components/src/box.rs`) | `packages/render/src/bx.rs` | `packages/gpui/preview/src/specimens/bx.rs` |
 | `Breadcrumbs` | complete | complete | `Breadcrumbs.test.tsx` | `BreadcrumbsSpec` (`packages/contracts/components/src/breadcrumbs.rs`) | `packages/render/src/breadcrumbs.rs` | `packages/gpui/preview/src/specimens/breadcrumbs_specimen.rs` |
 | `BulkActionBar` | complete | complete | `BulkActionBar.test.tsx` | `BulkActionBarSpec` (`packages/contracts/components/src/bulk_action_bar.rs`) | `packages/render/src/bulk_action_bar.rs` | `packages/gpui/preview/src/specimens/bulk_action_bar_specimen.rs` |
 | `Button` | complete | complete | `Button.test.tsx` | `ButtonSpec` (`packages/contracts/components/src/button.rs`) | `packages/render/src/button.rs` | `packages/gpui/preview/src/specimens/button.rs` |
-| `Callout` | complete | complete | `Callout.test.tsx` | `CallOutSpec` (`call_out.rs`, documented rename) | `packages/render/src/callout.rs` | `missing` |
-| `RemediationBanner` | complete | complete | `WebParityCloseout.test.tsx` | `RemediationBannerSpec` (`packages/contracts/components/src/remediation_banner.rs`) | `packages/render/src/remediation_banner.rs` | `missing` |
+| `Callout` | complete | complete | `Callout.test.tsx` | `CallOutSpec` (`call_out.rs`, documented rename) | `packages/render/src/callout.rs` | `packages/gpui/preview/src/specimens/callout.rs` |
+| `RemediationBanner` | complete | complete | `WebParityCloseout.test.tsx` | `RemediationBannerSpec` (`packages/contracts/components/src/remediation_banner.rs`) | `packages/render/src/remediation_banner.rs` | `packages/gpui/preview/src/specimens/remediation_banner.rs` |
 | `Card` | complete | complete | `Card.test.tsx` | `CardSpec` (`packages/contracts/components/src/card.rs`) | `packages/render/src/card.rs` | `packages/gpui/preview/src/specimens/card_specimen.rs` |
 | `Code` | complete | complete | `Code.test.tsx` | `CodeSpec` (`packages/contracts/components/src/code.rs`) | `packages/render/src/code.rs` | `packages/gpui/preview/src/specimens/code.rs` |
 | `ColorPicker` | complete | complete | `ColorPicker.test.tsx` | `ColorPickerSpec` (`packages/contracts/components/src/color_picker.rs`) | `packages/render/src/color_picker.rs` | `packages/gpui/preview/src/specimens/color_picker.rs` |
@@ -304,12 +304,12 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 | `ListGrid` | complete | complete | `ListGrid.test.tsx` | `ListGridSpec` (`packages/contracts/components/src/list_grid.rs`) | `packages/render/src/list_grid.rs` | `packages/gpui/preview/src/specimens/list_grid.rs` |
 | `Menu` | complete | complete | `Menu.test.tsx`, `OverlayGeometry.test.tsx` | `MenuSpec` (`packages/contracts/components/src/menu.rs`) | `packages/render/src/menu.rs` | `packages/gpui/preview/src/specimens/menu.rs` |
 | `MetaBar` | complete | complete | `MetaBar.test.tsx` | `MetaBarSpec` (`packages/contracts/components/src/meta_bar.rs`) | `packages/render/src/meta_bar.rs` | `packages/gpui/preview/src/specimens/meta_bar.rs` |
-| `MetaItem` | complete | complete | `MetaBar.test.tsx` | `MetaItemSpec` (`packages/contracts/components/src/meta_item.rs`) | `packages/render/src/meta_item.rs` | `missing` |
+| `MetaItem` | complete | complete | `MetaBar.test.tsx` | `MetaItemSpec` (`packages/contracts/components/src/meta_item.rs`) | `packages/render/src/meta_item.rs` | `packages/gpui/preview/src/specimens/meta_item.rs` |
 | `NumberInput` | complete | complete | `NumberInput.test.tsx` | `NumberInputSpec` (`packages/contracts/components/src/number_input.rs`) | `packages/render/src/number_input.rs` | `packages/gpui/preview/src/specimens/number_input.rs` |
 | `OrderBy` | complete | complete | `OrderBy.test.tsx` | `OrderBySpec` (`packages/contracts/components/src/order_by.rs`) | `packages/render/src/order_by.rs` | `packages/gpui/preview/src/specimens/order_by_specimen.rs` |
 | `NavCard` | complete | complete | `NavCard.test.tsx` | `NavCardSpec` (`packages/contracts/components/src/nav_card.rs`) | `packages/render/src/nav_card.rs` | `packages/gpui/preview/src/specimens/nav_card.rs` |
 | `NavigationMenu` | complete | complete | `NavigationMenu.test.tsx` | `NavigationMenuSpec` (`packages/contracts/components/src/navigation_menu.rs`) | `packages/render/src/navigation_menu.rs` | `packages/gpui/preview/src/specimens/navigation_menu.rs` |
-| `Pill` | complete | complete | `Pill.test.tsx` | `PillSpec` (`packages/contracts/components/src/pill.rs`) | `packages/render/src/pill.rs` | `missing` |
+| `Pill` | complete | complete | `Pill.test.tsx` | `PillSpec` (`packages/contracts/components/src/pill.rs`) | `packages/render/src/pill.rs` | `packages/gpui/preview/src/specimens/pill.rs` |
 | `CodeInput` | complete | complete | `CodeInput.test.tsx` | `CodeInputSpec` (`packages/contracts/components/src/code_input.rs`) | `packages/render/src/code_input.rs` | `packages/gpui/preview/src/specimens/code_input.rs` |
 | `Popover` | complete | complete | `OverlayGeometry.test.tsx`, `PopoverRetained.test.tsx` | `PopoverSpec` (`packages/contracts/components/src/popover.rs`) | `packages/render/src/popover.rs` | `packages/gpui/preview/src/specimens/popover.rs` |
 | `Pagination` | complete | complete | `Pagination.test.tsx` | `PaginationSpec` (`packages/contracts/components/src/pagination.rs`) | `packages/render/src/pagination.rs` | `packages/gpui/preview/src/specimens/pagination.rs` |
@@ -330,7 +330,7 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 | `SplitButton` | complete | complete | `SplitButton.test.tsx` | `SplitButtonSpec` (`packages/contracts/components/src/split_button.rs`) | `packages/render/src/split_button.rs` | `packages/gpui/preview/src/specimens/split_button.rs` |
 | `Skeleton` | complete | complete | `Skeleton.test.tsx` | `SkeletonSpec` (`packages/contracts/components/src/skeleton.rs`) | `packages/render/src/skeleton.rs` | `packages/gpui/preview/src/specimens/skeleton.rs` |
 | `Slider` | complete | complete | `Slider.test.tsx` | `SliderSpec` (`packages/contracts/components/src/slider.rs`) | `packages/render/src/slider.rs` | `packages/gpui/preview/src/specimens/slider.rs` |
-| `Spinner` | complete | complete | `Spinner.test.tsx` | `SpinnerSpec` (`packages/contracts/components/src/spinner.rs`) | `packages/render/src/spinner.rs` | `missing` |
+| `Spinner` | complete | complete | `Spinner.test.tsx` | `SpinnerSpec` (`packages/contracts/components/src/spinner.rs`) | `packages/render/src/spinner.rs` | `packages/gpui/preview/src/specimens/spinner.rs` |
 | `Spacer` | complete | complete | `Spacer.test.tsx` | `SpacerSpec` (`packages/contracts/components/src/spacer.rs`) | `packages/render/src/spacer.rs` | `packages/gpui/preview/src/specimens/spacer.rs` |
 | `Stack` | complete | complete | `Stack.test.tsx` | `StackSpec` (`packages/contracts/components/src/stack.rs`) | `packages/render/src/stack.rs` | `packages/gpui/preview/src/specimens/stack.rs` |
 | `Stepper` | complete | complete | `Stepper.test.tsx` | `StepperSpec` (`packages/contracts/components/src/stepper.rs`) | `packages/render/src/stepper.rs` | `packages/gpui/preview/src/specimens/stepper.rs` |
@@ -339,16 +339,16 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 
 | Component | React impl/export | React gallery | Focused React test | Rust declaration | Rust render | GPUI specimen |
 | --- | --- | --- | --- | --- | --- | --- |
-| `AgentMessage` | complete | complete | `AgentMessage.test.tsx` | `AgentMessageSpec` (`packages/contracts/components/src/agent_message.rs`) | `packages/render/src/agent_message.rs` | `missing` |
-| `AgentPlan` | complete | complete | `AgentPlan.test.tsx` | `AgentPlanSpec` (`packages/contracts/components/src/agent_plan.rs`) | `packages/render/src/agent_plan.rs` | `missing` |
-| `AgentPlanRecord` | complete | complete | `AgentPlanRecord.test.tsx` | `AgentPlanRecordSpec` (`packages/contracts/components/src/agent_plan_record.rs`) | `packages/render/src/agent_plan_record.rs` | `missing` |
+| `AgentMessage` | complete | complete | `AgentMessage.test.tsx` | `AgentMessageSpec` (`packages/contracts/components/src/agent_message.rs`) | `packages/render/src/agent_message.rs` | `packages/gpui/preview/src/specimens/agent_message.rs` |
+| `AgentPlan` | complete | complete | `AgentPlan.test.tsx` | `AgentPlanSpec` (`packages/contracts/components/src/agent_plan.rs`) | `packages/render/src/agent_plan.rs` | `packages/gpui/preview/src/specimens/agent_plan.rs` |
+| `AgentPlanRecord` | complete | complete | `AgentPlanRecord.test.tsx` | `AgentPlanRecordSpec` (`packages/contracts/components/src/agent_plan_record.rs`) | `packages/render/src/agent_plan_record.rs` | `packages/gpui/preview/src/specimens/agent_plan_record.rs` |
 | `AgentQuestion` | complete | complete | `AgentQuestion.test.tsx` | `AgentQuestionSpec` (`packages/contracts/components/src/agent_question.rs`) | `packages/render/src/agent_question.rs` | `packages/gpui/preview/src/specimens/agent_question.rs` |
-| `AgentQuestionRecord` | complete | complete | `AgentQuestionRecord.test.tsx` | `AgentQuestionRecordSpec` (`packages/contracts/components/src/agent_question_record.rs`) | `packages/render/src/agent_question_record.rs` | `missing` |
-| `AgentSubagent` | complete | complete | `AgentSubagent.test.tsx` | `AgentSubagentSpec` (`packages/contracts/components/src/agent_subagent.rs`) | `packages/render/src/agent_subagent.rs` | `missing` |
+| `AgentQuestionRecord` | complete | complete | `AgentQuestionRecord.test.tsx` | `AgentQuestionRecordSpec` (`packages/contracts/components/src/agent_question_record.rs`) | `packages/render/src/agent_question_record.rs` | `packages/gpui/preview/src/specimens/agent_question_record.rs` |
+| `AgentSubagent` | complete | complete | `AgentSubagent.test.tsx` | `AgentSubagentSpec` (`packages/contracts/components/src/agent_subagent.rs`) | `packages/render/src/agent_subagent.rs` | `packages/gpui/preview/src/specimens/agent_subagent.rs` |
 | `AgentTranscript` | complete | complete | `AgentSubagent.test.tsx` | `AgentTranscriptSpec` (`packages/contracts/components/src/agent_transcript.rs`) | `packages/render/src/agent_transcript.rs` | `packages/gpui/preview/src/specimens/agent_transcript.rs` |
-| `ChangedFiles` | complete | complete | `ChangedFiles.test.tsx` | `ChangedFilesSpec` (`packages/contracts/components/src/changed_files.rs`) | `packages/render/src/changed_files.rs` | `missing` |
-| `ToolCall` | complete | complete | `ToolCall.test.tsx` | `ToolCallSpec` (`packages/contracts/components/src/tool_call.rs`) | `packages/render/src/tool_call.rs` | `missing` |
-| `ToolCallGroup` | complete | complete | `ToolCallGroup.test.tsx` | `ToolCallGroupSpec` (`packages/contracts/components/src/tool_call_group.rs`) | `packages/render/src/tool_call_group.rs` | `missing` |
+| `ChangedFiles` | complete | complete | `ChangedFiles.test.tsx` | `ChangedFilesSpec` (`packages/contracts/components/src/changed_files.rs`) | `packages/render/src/changed_files.rs` | `packages/gpui/preview/src/specimens/changed_files.rs` |
+| `ToolCall` | complete | complete | `ToolCall.test.tsx` | `ToolCallSpec` (`packages/contracts/components/src/tool_call.rs`) | `packages/render/src/tool_call.rs` | `packages/gpui/preview/src/specimens/tool_call.rs` |
+| `ToolCallGroup` | complete | complete | `ToolCallGroup.test.tsx` | `ToolCallGroupSpec` (`packages/contracts/components/src/tool_call_group.rs`) | `packages/render/src/tool_call_group.rs` | `packages/gpui/preview/src/specimens/tool_call_group.rs` |
 
 ### Workstation systems
 
@@ -381,7 +381,7 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 
 | Component | React impl/export | React gallery | Focused React test | Rust declaration | Rust render | GPUI specimen |
 | --- | --- | --- | --- | --- | --- | --- |
-| `ActionDiscoveryPanel` | complete | complete | `ActionDiscoveryPanel.test.tsx` | `ActionDiscoveryPanelSpec` (`packages/contracts/components/src/action_discovery_panel.rs`) | `packages/render/src/action_discovery_panel.rs` | `missing` |
+| `ActionDiscoveryPanel` | complete | complete | `ActionDiscoveryPanel.test.tsx` | `ActionDiscoveryPanelSpec` (`packages/contracts/components/src/action_discovery_panel.rs`) | `packages/render/src/action_discovery_panel.rs` | `packages/gpui/preview/src/specimens/action_discovery_panel.rs` |
 | `AppHeader` | complete | complete | `AppHeader.test.tsx` | `AppHeaderSpec` (`packages/contracts/components/src/app_header.rs`) | `packages/render/src/app_header.rs` | `packages/gpui/preview/src/specimens/app_header.rs` |
 | `EditableList` | complete | complete | `EditableList.test.tsx` | `EditableListSpec` (`packages/contracts/components/src/editable_list.rs`) | `packages/render/src/editable_list.rs` | `packages/gpui/preview/src/specimens/editable_list_specimen.rs` |
 | `ErrorBoundary` | complete | complete | `ErrorBoundary.test.tsx` | `ErrorBoundarySpec` (`packages/contracts/components/src/error_boundary.rs`) | `packages/render/src/error_boundary.rs` | `packages/gpui/preview/src/specimens/error_boundary_specimen.rs` |
@@ -393,11 +393,11 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 | `DataTable` | complete | complete | `DataTable.test.tsx` | `DataTableSpec` (`packages/contracts/components/src/data_table.rs`) | `packages/render/src/data_table.rs` | `packages/gpui/preview/src/specimens/data_table.rs` |
 | `DetailSectionGroup` | complete | complete | `DetailSectionGroup.test.tsx` | `DetailSectionGroupSpec` (`packages/contracts/components/src/detail_section_group.rs`) | `packages/render/src/detail_section_group.rs` | `packages/gpui/preview/src/specimens/detail_section_group_specimen.rs` |
 | `DetailSection` | complete | complete | `DetailSection.test.tsx` | `DetailSectionSpec` (`packages/contracts/components/src/detail_section.rs`) | `packages/render/src/detail_section.rs` | `packages/gpui/preview/src/specimens/detail_section_specimen.rs` |
-| `DockRegion` | complete | complete | `DockRegionDragOverGate.test.tsx`, `DockRegionTabPassThroughs.test.tsx`, `DockRegionZoneDrop.test.tsx` | `DockRegionSpec` (`packages/contracts/components/src/dock_region.rs`) | `packages/render/src/dock_region.rs` | `missing` |
+| `DockRegion` | complete | complete | `DockRegionDragOverGate.test.tsx`, `DockRegionTabPassThroughs.test.tsx`, `DockRegionZoneDrop.test.tsx` | `DockRegionSpec` (`packages/contracts/components/src/dock_region.rs`) | `packages/render/src/dock_region.rs` | `packages/gpui/preview/src/specimens/dock_region.rs` |
 | `DetailShell` | complete | complete | `DetailShell.test.tsx` | `DetailShellSpec` (`packages/contracts/components/src/detail_shell.rs`) | `packages/render/src/detail_shell.rs` | `packages/gpui/preview/src/specimens/detail_shell.rs` |
 | `EmbedInput` | complete | complete | `EmbedInput.test.tsx` | `EmbedInputSpec` (`packages/contracts/components/src/embed_input.rs`) | `packages/render/src/embed_input.rs` | `packages/gpui/preview/src/specimens/embed_input_specimen.rs` |
 | `EmbedPreview` | complete | complete | `EmbedPreview.test.tsx` | `EmbedPreviewSpec` (`packages/contracts/components/src/embed_preview.rs`) | `packages/render/src/embed_preview.rs` | `packages/gpui/preview/src/specimens/embed_preview_specimen.rs` |
-| `EmptyState` | complete | complete | `EmptyState.test.tsx` | `EmptyStateSpec` (`packages/contracts/components/src/empty_state.rs`) | `packages/render/src/empty_state.rs` | `missing` |
+| `EmptyState` | complete | complete | `EmptyState.test.tsx` | `EmptyStateSpec` (`packages/contracts/components/src/empty_state.rs`) | `packages/render/src/empty_state.rs` | `packages/gpui/preview/src/specimens/empty_state.rs` |
 | `FilterToolbar` | complete | complete | `FilterToolbar.test.tsx` | `FilterToolbarSpec` (`packages/contracts/components/src/filter_toolbar.rs`) | `packages/render/src/filter_toolbar.rs` | `packages/gpui/preview/src/specimens/filter_toolbar_specimen.rs` |
 | `FormDialog` | complete | complete | `DialogInitialFocus.test.tsx` | `FormDialogSpec` (`packages/contracts/components/src/form_dialog.rs`) | `packages/render/src/form_dialog.rs` | `packages/gpui/preview/src/specimens/form_dialog_specimen.rs` |
 | `FormLayout` | complete | complete | `FormLayout.test.tsx` | `FormLayoutSpec` (`packages/contracts/components/src/form_layout.rs`) | `packages/render/src/form_layout.rs` | `packages/gpui/preview/src/specimens/form_layout.rs` |
@@ -423,7 +423,7 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 | `Tree` | complete | complete | `Tree.test.tsx` | `TreeSpec` (`packages/contracts/components/src/tree.rs`) | `packages/render/src/tree.rs` | `packages/gpui/preview/src/specimens/tree.rs` |
 | `SplitView` | complete | complete | `SplitView.test.tsx` | `SplitViewSpec` (`packages/contracts/components/src/split_view.rs`) | `packages/render/src/split_view.rs` | `packages/gpui/preview/src/specimens/split_view_specimen.rs` |
 | `MetricTile` | complete | complete | `MetricTile.test.tsx` | `MetricTileSpec` (`packages/contracts/components/src/metric_tile.rs`) | `packages/render/src/metric_tile.rs` | `packages/gpui/preview/src/specimens/metric_tile_specimen.rs` |
-| `StateTile` | complete | complete | `WebParityCloseout.test.tsx` | `StateTileSpec` (`packages/contracts/components/src/state_tile.rs`) | `packages/render/src/state_tile.rs` | `missing` |
+| `StateTile` | complete | complete | `WebParityCloseout.test.tsx` | `StateTileSpec` (`packages/contracts/components/src/state_tile.rs`) | `packages/render/src/state_tile.rs` | `packages/gpui/preview/src/specimens/state_tile.rs` |
 | `ValidationSummary` | complete | complete | `WebParityCloseout.test.tsx` | `ValidationSummarySpec` (`packages/contracts/components/src/validation_summary.rs`) | `packages/render/src/validation_summary.rs` | `packages/gpui/preview/src/specimens/validation_summary.rs` |
 | `ModelPicker` | complete | complete | `ModelPicker.test.tsx` | `ModelPickerSpec` (`packages/contracts/components/src/model_picker.rs`) | `packages/render/src/model_picker.rs` | `packages/gpui/preview/src/specimens/model_picker_specimen.rs` |
 | `ModelConnectionPicker` | complete | complete | `ModelConnection.test.tsx` | `ModelConnectionPickerSpec` (`packages/contracts/components/src/model_connection_picker.rs`) | `packages/render/src/model_connection_picker.rs` | `packages/gpui/preview/src/specimens/model_connection_picker_specimen.rs` |

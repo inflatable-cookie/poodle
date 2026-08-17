@@ -13,7 +13,7 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, MainAxisAlignment, Node, NodeRole,
-    ShadowLayer,
+    ShadowLayer, StylePatch,
 };
 use poodle_specs::{
     ActionDiscoveryPanelSpec, ControlDensity, ControlSize, DiscoveryState, EmptyStateSpec,
@@ -68,10 +68,30 @@ fn row_pad_rem(size: ControlSize) -> (f32, f32) {
 }
 
 /// `on_select` fires with the chosen action's id. Disabled actions never fire.
+#[derive(Default)]
+pub struct ActionDiscoveryPanelHandlers {
+    pub on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Stable native instance scope. Two panels with the same action ids
+    /// would otherwise share one backend focus handle.
+    pub instance_id: Option<String>,
+}
+
+/// The backend-state id of one action row.
+pub fn action_discovery_row_focus_id(instance_id: Option<&str>, action_id: &str) -> String {
+    match instance_id {
+        Some(scope) => format!("action-discovery-panel:{scope}:{action_id}"),
+        None => action_id.to_string(),
+    }
+}
+
+fn scoped(instance_id: Option<&str>, action_id: &str) -> Option<String> {
+    instance_id.map(|scope| format!("action-discovery-panel:{scope}:{action_id}"))
+}
+
 pub fn action_discovery_panel(
     spec: &ActionDiscoveryPanelSpec,
     theme: &dyn ThemeProvider,
-    on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    handlers: ActionDiscoveryPanelHandlers,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     let font_size = rem_to_px(size_font_rem(effective_size));
@@ -272,6 +292,7 @@ pub fn action_discovery_panel(
             row.a11y.role = Some(NodeRole::ListBoxOption);
             row.a11y.selected = Some(is_active);
             row.id = Some(action.id.clone());
+            row.runtime_id = scoped(handlers.instance_id.as_deref(), &action.id);
             {
                 let s = &mut row.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;
@@ -371,7 +392,13 @@ pub fn action_discovery_panel(
             } else {
                 row.style.descriptor.cursor = CursorHint::Pointer;
                 row.interaction.focusable = true;
-                if let Some(handler) = &on_select {
+                row.style.focus = Some(StylePatch {
+                    background: None,
+                    border_color: Some(accent),
+                    text_color: None,
+                    opacity: None,
+                });
+                if let Some(handler) = &handlers.on_select {
                     let handler = Arc::clone(handler);
                     let id = action.id.clone();
                     row.interaction.on_activate = Some(Arc::new(move || handler(&id)));
@@ -386,4 +413,55 @@ pub fn action_discovery_panel(
     }
 
     panel
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::{ActionDiscoverySection, CommandActionItem};
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn spec() -> ActionDiscoveryPanelSpec {
+        ActionDiscoveryPanelSpec::new(vec![ActionDiscoverySection::new(
+            "file",
+            "File",
+            vec![CommandActionItem::new("save", "Save")],
+        )])
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let first = action_discovery_panel(
+            &spec(),
+            &theme(),
+            ActionDiscoveryPanelHandlers {
+                instance_id: Some("first".to_string()),
+                ..ActionDiscoveryPanelHandlers::default()
+            },
+        );
+        let second = action_discovery_panel(
+            &spec(),
+            &theme(),
+            ActionDiscoveryPanelHandlers {
+                instance_id: Some("second".to_string()),
+                ..ActionDiscoveryPanelHandlers::default()
+            },
+        );
+        let expected = action_discovery_row_focus_id(Some("first"), "save");
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some(expected.as_str()))
+            .is_some());
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(action_discovery_row_focus_id(Some("second"), "save").as_str()))
+            .is_none());
+        assert!(first.find(&|n| n.id.as_deref() == Some("save")).is_some());
+        assert!(second
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(action_discovery_row_focus_id(Some("second"), "save").as_str()))
+            .is_some());
+    }
 }

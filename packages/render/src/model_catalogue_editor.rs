@@ -40,7 +40,7 @@ use poodle_specs::{
     PillTone, SemanticControlSizeRole, StatusTone, MODEL_CATALOGUE_HIDDEN_SECTION_ID,
 };
 
-use crate::callout::callout;
+use crate::callout::{callout, CalloutHandlers};
 use crate::collapsible::collapsible;
 use crate::empty_state::empty_state;
 use crate::icon_button::icon_button;
@@ -391,7 +391,7 @@ fn state_region(
                 .with_size(effective_size)
                 .with_density(spec.density),
             theme,
-            None,
+            CalloutHandlers::default(),
         );
     }
 

@@ -8,7 +8,7 @@ use poodle_adapter::ThemeProvider;
 use poodle_node::{ColorValue, LayoutDirection, Node};
 use poodle_specs::{CallOutSpec, FormActionsSpec, FormLayoutSpec, StatusTone};
 
-use crate::callout::callout;
+use crate::callout::{callout, CalloutHandlers};
 use crate::color::mix_srgb;
 use crate::form_actions::form_actions;
 
@@ -113,7 +113,7 @@ pub fn form_layout(
                 .with_tone(StatusTone::Danger)
                 .with_content(error),
             theme,
-            None,
+            CalloutHandlers::default(),
         ));
     }
 
@@ -123,7 +123,7 @@ pub fn form_layout(
                 .with_tone(StatusTone::Success)
                 .with_content(success),
             theme,
-            None,
+            CalloutHandlers::default(),
         ));
     }
 

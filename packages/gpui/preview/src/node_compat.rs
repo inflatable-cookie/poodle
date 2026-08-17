@@ -15,10 +15,12 @@ use gpui::{
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentQuestionSpec,
+    AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentMessageSpec, AgentPlanRecordSpec,
+    AgentPlanSpec, AgentQuestionRecordSpec, AgentQuestionSpec, AgentSubagentSpec,
     AgentTranscriptSpec, AlertDialogSpec, AppHeaderSpec, AudioPlayerSpec, AvatarSpec,
     BlockEditorSpec, BoxSpec, BreadcrumbsSpec,
-    BulkActionBarSpec, ButtonSpec, CalendarSpec, CallOutSpec, CardRadioGroupSpec, CheckboxSpec,
+    BulkActionBarSpec, ButtonSpec, CalendarSpec, CallOutSpec, CardRadioGroupSpec, ChangedFilesSpec,
+    CheckboxSpec,
     CodeInputSpec, CodeSpec, CollapseToggleSpec, CollapsibleSpec, ColorPickerSpec,
     CommandPaletteSpec, ConfirmActionSpec, ContextMenuSpec, ControlDensity, ControlSize,
     DataTableSpec, DatePickerSpec, DateRangePickerSpec, DateRangeValue, DockRegionSpec,
@@ -36,10 +38,12 @@ use poodle_specs::{
     NavCardSpec, NavigationMenuSpec, NumberInputSpec, OrderBySpec, OverlayPlacement,
     PageHeaderSpec, PageLoadingSpec, PaginationSpec, PaginationSummarySpec,
     PasswordRequirementsSpec, PickerShellSpec, PillSpec, PopoverSpec, ProgressSpec, RadioGroupSpec,
-    RadioSpec, RangeSliderSpec, RatingSpec, RefSelectSpec, RegionSpec, RelationPickerSpec, ResizeHandleSpec,
+    RadioSpec, RangeSliderSpec, RatingSpec, RefSelectSpec, RegionSpec, RelationPickerSpec,
+    RemediationBannerSpec, ResizeHandleSpec,
     ScrollShellSpec, SelectSpec, SelectionSummarySpec, SeparatorSpec,
     ShellStatusBarSpec, SidebarNavSpec, SkeletonSpec, SliderSpec, SpacerSpec, SpinnerSpec,
-    StackSpec, StatusIndicatorSpec, StepperSpec, SurfaceSpec, SwitchSpec, TabStripSpec, TableSpec,
+    StackSpec, StateTileSpec, StatusIndicatorSpec, StepperSpec, SurfaceSpec, SwitchSpec,
+    TabStripSpec, TableSpec, ToolCallGroupSpec, ToolCallSpec,
     SplitOrientation, SplitViewSpec, TabsSpec, TextInputSpec, TextLinkSpec, TextSpec,
     ThemeSelectSpec, TimeAgoSpec, TimeFieldSpec, TreeSpec,
     TimeZoneSelectSpec, ToastHostSpec, ToastStackSpec, TokenInputSpec, ToolbarSpec, TooltipSpec,
@@ -311,7 +315,7 @@ pub(crate) struct NavCard {
 pub(crate) struct Callout {
     spec: CallOutSpec,
     theme: GpuiThemeProvider,
-    on_dismiss: Option<Arc<dyn Fn() + Send + Sync>>,
+    handlers: poodle_render::CalloutHandlers,
 }
 
 impl Callout {
@@ -319,12 +323,17 @@ impl Callout {
         Self {
             spec,
             theme: theme.clone(),
-            on_dismiss: None,
+            handlers: poodle_render::CalloutHandlers::default(),
         }
     }
 
     pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.on_dismiss = Some(handler);
+        self.handlers.on_dismiss = Some(handler);
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
         self
     }
 
@@ -339,7 +348,7 @@ impl Callout {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::callout(&self.spec, &self.theme, self.on_dismiss)
+        poodle_render::callout(&self.spec, &self.theme, self.handlers)
     }
 }
 
@@ -350,6 +359,49 @@ impl IntoCompatNode for Callout {
 }
 
 impl IntoElement for Callout {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
+    }
+}
+
+pub(crate) struct RemediationBanner {
+    spec: RemediationBannerSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::RemediationBannerHandlers,
+}
+
+impl RemediationBanner {
+    pub(crate) fn from_spec(spec: RemediationBannerSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::RemediationBannerHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_action(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_action = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_dismiss = Some(handler);
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        poodle_render::remediation_banner(&self.spec, &self.theme, self.handlers)
+    }
+}
+
+impl IntoElement for RemediationBanner {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
@@ -609,6 +661,52 @@ pub(crate) struct AgentQuestion {
     handlers: poodle_render::AgentQuestionHandlers,
 }
 
+pub(crate) struct AgentMessage {
+    spec: AgentMessageSpec,
+    theme: GpuiThemeProvider,
+}
+
+pub(crate) struct AgentPlan {
+    spec: AgentPlanSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::AgentPlanHandlers,
+}
+
+pub(crate) struct AgentPlanRecord {
+    spec: AgentPlanRecordSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::AgentPlanRecordHandlers,
+}
+
+pub(crate) struct AgentQuestionRecord {
+    spec: AgentQuestionRecordSpec,
+    theme: GpuiThemeProvider,
+}
+
+pub(crate) struct AgentSubagent {
+    spec: AgentSubagentSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::AgentSubagentHandlers,
+}
+
+pub(crate) struct ChangedFiles {
+    spec: ChangedFilesSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::ChangedFilesHandlers,
+}
+
+pub(crate) struct ToolCall {
+    spec: ToolCallSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::ToolCallHandlers,
+}
+
+pub(crate) struct ToolCallGroup {
+    spec: ToolCallGroupSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::ToolCallGroupHandlers,
+}
+
 pub(crate) struct AgentTranscript {
     spec: AgentTranscriptSpec,
     theme: GpuiThemeProvider,
@@ -666,7 +764,7 @@ pub(crate) struct DebugDialog {
 pub(crate) struct ActionDiscoveryPanel {
     spec: ActionDiscoveryPanelSpec,
     theme: GpuiThemeProvider,
-    on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    handlers: poodle_render::ActionDiscoveryPanelHandlers,
 }
 
 pub(crate) struct BulkActionBar {
@@ -931,6 +1029,266 @@ impl IntoElement for AgentQuestion {
     }
 }
 
+impl AgentMessage {
+    pub(crate) fn from_spec(spec: AgentMessageSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
+    }
+}
+
+impl IntoElement for AgentMessage {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_message(&self.spec, &self.theme))
+    }
+}
+
+impl AgentPlan {
+    pub(crate) fn from_spec(spec: AgentPlanSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::AgentPlanHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_accept(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_accept = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_revise(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_revise = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_dismiss = Some(handler);
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        poodle_render::agent_plan(&self.spec, &self.theme, self.handlers)
+    }
+}
+
+impl IntoCompatNode for AgentPlan {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
+    }
+}
+
+impl IntoElement for AgentPlan {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
+    }
+}
+
+impl AgentPlanRecord {
+    pub(crate) fn from_spec(spec: AgentPlanRecordSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::AgentPlanRecordHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_toggle = Some(handler);
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
+        self
+    }
+}
+
+impl IntoElement for AgentPlanRecord {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_plan_record(
+            &self.spec,
+            &self.theme,
+            self.handlers,
+        ))
+    }
+}
+
+impl AgentQuestionRecord {
+    pub(crate) fn from_spec(spec: AgentQuestionRecordSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
+    }
+}
+
+impl IntoElement for AgentQuestionRecord {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_question_record(
+            &self.spec,
+            &self.theme,
+        ))
+    }
+}
+
+impl AgentSubagent {
+    pub(crate) fn from_spec(spec: AgentSubagentSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::AgentSubagentHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_toggle = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_open_child(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_open_child = Some(handler);
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
+        self
+    }
+}
+
+impl IntoElement for AgentSubagent {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_subagent(
+            &self.spec,
+            &self.theme,
+            self.handlers,
+        ))
+    }
+}
+
+impl ChangedFiles {
+    pub(crate) fn from_spec(spec: ChangedFilesSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::ChangedFilesHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_toggle = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_file_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_file_select = Some(handler);
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
+        self
+    }
+}
+
+impl IntoElement for ChangedFiles {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::changed_files(
+            &self.spec,
+            &self.theme,
+            self.handlers,
+        ))
+    }
+}
+
+impl ToolCall {
+    pub(crate) fn from_spec(spec: ToolCallSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::ToolCallHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_toggle = Some(handler);
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
+        self
+    }
+}
+
+impl IntoElement for ToolCall {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::tool_call(
+            &self.spec,
+            &self.theme,
+            self.handlers,
+        ))
+    }
+}
+
+impl ToolCallGroup {
+    pub(crate) fn from_spec(spec: ToolCallGroupSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::ToolCallGroupHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_toggle = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_call_toggle(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_call_toggle = Some(handler);
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
+        self
+    }
+}
+
+impl IntoElement for ToolCallGroup {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::tool_call_group(
+            &self.spec,
+            &self.theme,
+            self.handlers,
+        ))
+    }
+}
+
 impl AgentTranscript {
     pub(crate) fn from_spec(spec: AgentTranscriptSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
@@ -1110,14 +1468,19 @@ impl ActionDiscoveryPanel {
         Self {
             spec,
             theme: theme.clone(),
-            on_select: None,
+            handlers: poodle_render::ActionDiscoveryPanelHandlers::default(),
         }
     }
 
-    pub(crate) fn with_id(self, _id: impl Into<String>) -> Self {
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.handlers.instance_id = Some(instance_id.into());
         self
     }
 
+    pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_select = Some(handler);
+        self
+    }
 }
 
 impl IntoElement for ActionDiscoveryPanel {
@@ -1127,7 +1490,7 @@ impl IntoElement for ActionDiscoveryPanel {
         poodle_gpui_node_backend::to_gpui(&poodle_render::action_discovery_panel(
             &self.spec,
             &self.theme,
-            self.on_select,
+            self.handlers,
         ))
     }
 }
@@ -2957,6 +3320,28 @@ impl IntoElement for MetricTile {
 
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::metric_tile(&self.spec, &self.theme))
+    }
+}
+
+pub(crate) struct StateTile {
+    spec: StateTileSpec,
+    theme: GpuiThemeProvider,
+}
+
+impl StateTile {
+    pub(crate) fn from_spec(spec: StateTileSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
+    }
+}
+
+impl IntoElement for StateTile {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::state_tile(&self.spec, &self.theme))
     }
 }
 
@@ -7029,6 +7414,7 @@ pub(crate) struct DockRegion {
     content: Option<poodle_node::Node>,
     on_tab_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_collapse_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    instance_id: Option<String>,
 }
 
 impl DockRegion {
@@ -7039,6 +7425,7 @@ impl DockRegion {
             content: None,
             on_tab_change: None,
             on_collapse_toggle: None,
+            instance_id: None,
         }
     }
 
@@ -7052,10 +7439,21 @@ impl DockRegion {
         self
     }
 
+    pub(crate) fn on_collapse_toggle(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.on_collapse_toggle = Some(handler);
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.instance_id = Some(instance_id.into());
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
         let handlers = poodle_render::DockRegionHandlers {
             on_tab_change: self.on_tab_change,
             on_collapse_toggle: self.on_collapse_toggle,
+            instance_id: self.instance_id,
         };
         poodle_render::dock_region(&self.spec, &self.theme, self.content, handlers)
     }

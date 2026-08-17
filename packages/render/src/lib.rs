@@ -185,14 +185,21 @@ pub mod validation_summary;
 pub mod video_player;
 
 pub use accordion::{accordion, accordion_with_content};
-pub use action_discovery_panel::action_discovery_panel;
+pub use action_discovery_panel::{
+    action_discovery_panel, action_discovery_row_focus_id, ActionDiscoveryPanelHandlers,
+};
 pub use agent_chat_input::{agent_chat_input, AgentChatInputHandlers};
 pub use agent_message::agent_message;
-pub use agent_plan::{agent_plan, AgentPlanHandlers};
-pub use agent_plan_record::{agent_plan_record, AgentPlanRecordHandlers};
+pub use agent_plan::{agent_plan, agent_plan_action_focus_id, AgentPlanHandlers};
+pub use agent_plan_record::{
+    agent_plan_record, agent_plan_record_toggle_focus_id, AgentPlanRecordHandlers,
+    AGENT_PLAN_RECORD_TOGGLE_ID,
+};
 pub use agent_question::{agent_question, AgentQuestionHandlers};
 pub use agent_question_record::agent_question_record;
-pub use agent_subagent::{agent_subagent, AgentSubagentHandlers};
+pub use agent_subagent::{
+    agent_subagent, agent_subagent_action_focus_id, AgentSubagentHandlers,
+};
 pub use agent_transcript::{agent_transcript, AgentTranscriptHandlers};
 pub use alert_dialog::{
     alert_dialog, alert_dialog_with_content, AlertDialogHandlers, DEFAULT_WORKING_LABEL,
@@ -212,7 +219,7 @@ pub use bulk_action_bar::{bulk_action_bar, BulkActionBarHandlers};
 pub use button::button;
 pub use bx::bx;
 pub use calendar::{calendar, CalendarHandlers};
-pub use callout::callout;
+pub use callout::{callout, callout_dismiss_focus_id, CalloutHandlers, CALLOUT_DISMISS_ID};
 pub use card::card;
 pub use card_radio_group::card_radio_group;
 pub use card_toggle_group::card_toggle_group;
@@ -238,7 +245,9 @@ pub use detail_section::detail_section;
 pub use detail_section_group::detail_section_group;
 pub use detail_shell::detail_shell;
 pub use dialog::{dialog, dialog_with_slots};
-pub use dock_region::{dock_region, DockRegionHandlers};
+pub use dock_region::{
+    dock_collapse_focus_id, dock_region, dock_tab_focus_id, DockRegionHandlers,
+};
 pub use drawer::drawer;
 pub use duration_input::{duration_input, duration_input_with_handlers, DurationInputHandlers};
 pub use editable_label::{editable_label, editable_label_with_handlers, EditableLabelHandlers};
@@ -327,7 +336,10 @@ pub use rating::rating;
 pub use ref_select::ref_select;
 pub use region::region;
 pub use relation_picker::{relation_picker, RelationPickerHandlers};
-pub use remediation_banner::{remediation_banner, RemediationBannerHandlers};
+pub use remediation_banner::{
+    remediation_banner, remediation_banner_action_focus_id, remediation_banner_dismiss_focus_id,
+    RemediationBannerHandlers,
+};
 pub use resize_handle::{resize_handle, ResizePhase};
 pub use scroll_shell::scroll_shell;
 pub use segmented_control::segmented_control;
@@ -365,7 +377,7 @@ pub use toast_host::toast_host;
 pub use toast_stack::{toast_stack, ToastStackHandlers};
 pub use toggle_group::toggle_group;
 pub use token_input::token_input;
-pub use tool_call::tool_call;
+pub use tool_call::{tool_call, tool_call_focus_id, ToolCallHandlers};
 pub use tool_call_group::{tool_call_group, ToolCallGroupHandlers};
 pub use toolbar::toolbar;
 pub use tooltip::tooltip;

@@ -16,7 +16,7 @@ use poodle_specs::{
     StatusTone, SurfaceBorder, SurfaceSpec, SurfaceTone, TextInputSpec,
 };
 
-use crate::callout::callout;
+use crate::callout::{callout, CalloutHandlers};
 use crate::dialog::dialog_with_slots;
 use crate::empty_state::empty_state;
 use crate::presentation::rem_to_px;
@@ -213,7 +213,7 @@ fn page_column(spec: &SettingsShellSpec, theme: &dyn ThemeProvider, page: Option
                 .with_content(reason)
                 .with_announce_mode(CalloutAnnounceMode::Polite),
             theme,
-            None,
+            CalloutHandlers::default(),
         );
         notice.a11y.role = Some(NodeRole::Status);
         col = col.child(notice);
