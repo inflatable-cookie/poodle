@@ -33,7 +33,7 @@ use poodle_specs::{
 };
 
 use crate::button::button;
-use crate::callout::callout;
+use crate::callout::{callout, CalloutHandlers};
 use crate::model_connection_picker::{
     model_connection_option_focus_id, model_connection_picker_with_slots,
     ModelConnectionPickerHandlers, ModelConnectionPickerSlots,
@@ -280,7 +280,7 @@ pub fn model_connection_setup_with_slots(
                     .with_size(effective_size)
                     .with_density(spec.density),
                 theme,
-                None,
+                CalloutHandlers::default(),
             ));
         }
         if let Some(success) = spec.success.as_deref() {
@@ -292,7 +292,7 @@ pub fn model_connection_setup_with_slots(
                     .with_size(effective_size)
                     .with_density(spec.density),
                 theme,
-                None,
+                CalloutHandlers::default(),
             ));
         }
 

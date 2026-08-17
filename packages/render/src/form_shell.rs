@@ -12,7 +12,7 @@ use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::{CallOutSpec, FormActionAlign, FormShellSpec, StatusTone};
 
-use crate::callout::callout;
+use crate::callout::{callout, CalloutHandlers};
 
 /// Semibold heading/label weight (typography constant, 600).
 const SEMIBOLD: u16 = 600;
@@ -71,7 +71,7 @@ pub fn form_shell(
                 .with_tone(resolved_tone)
                 .with_content(message),
             theme,
-            None,
+            CalloutHandlers::default(),
         ));
     }
 

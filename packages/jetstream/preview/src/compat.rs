@@ -168,7 +168,11 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> El {
 }
 
 pub fn js_callout(spec: &CallOutSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::callout(spec, theme, None))
+    El(pr::callout(
+        spec,
+        theme,
+        pr::CalloutHandlers::default(),
+    ))
 }
 
 pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<El>) -> El {

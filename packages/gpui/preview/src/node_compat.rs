@@ -348,7 +348,7 @@ impl Callout {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::callout_with_handlers(&self.spec, &self.theme, self.handlers)
+        poodle_render::callout(&self.spec, &self.theme, self.handlers)
     }
 }
 

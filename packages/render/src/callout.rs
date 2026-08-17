@@ -61,21 +61,6 @@ fn tone_icon(tone: StatusTone) -> &'static str {
 pub fn callout(
     spec: &CallOutSpec,
     theme: &dyn ThemeProvider,
-    on_dismiss: Option<Arc<dyn Fn() + Send + Sync>>,
-) -> Node {
-    callout_with_handlers(
-        spec,
-        theme,
-        CalloutHandlers {
-            on_dismiss,
-            instance_id: None,
-        },
-    )
-}
-
-pub fn callout_with_handlers(
-    spec: &CallOutSpec,
-    theme: &dyn ThemeProvider,
     handlers: CalloutHandlers,
 ) -> Node {
     let on_dismiss = handlers.on_dismiss;
@@ -270,7 +255,10 @@ mod tests {
                 .with_content("This callout can be dismissed by the user.")
                 .dismissible(true),
             &theme(),
-            Some(Arc::new(|| {})),
+            CalloutHandlers {
+                on_dismiss: Some(Arc::new(|| {})),
+                ..CalloutHandlers::default()
+            },
         );
         let dismiss = node
             .find(&|child| child.id.as_deref() == Some("poodle-callout-dismiss"))
@@ -288,7 +276,7 @@ mod tests {
         let spec = CallOutSpec::new()
             .with_title("Dismissible callout")
             .dismissible(true);
-        let first = callout_with_handlers(
+        let first = callout(
             &spec,
             &theme(),
             CalloutHandlers {
@@ -296,7 +284,7 @@ mod tests {
                 ..CalloutHandlers::default()
             },
         );
-        let second = callout_with_handlers(
+        let second = callout(
             &spec,
             &theme(),
             CalloutHandlers {

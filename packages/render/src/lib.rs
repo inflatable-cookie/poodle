@@ -219,9 +219,7 @@ pub use bulk_action_bar::{bulk_action_bar, BulkActionBarHandlers};
 pub use button::button;
 pub use bx::bx;
 pub use calendar::{calendar, CalendarHandlers};
-pub use callout::{
-    callout, callout_dismiss_focus_id, callout_with_handlers, CalloutHandlers, CALLOUT_DISMISS_ID,
-};
+pub use callout::{callout, callout_dismiss_focus_id, CalloutHandlers, CALLOUT_DISMISS_ID};
 pub use card::card;
 pub use card_radio_group::card_radio_group;
 pub use card_toggle_group::card_toggle_group;

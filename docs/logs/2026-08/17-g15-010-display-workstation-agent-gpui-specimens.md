@@ -84,11 +84,28 @@ presentation state: AgentPlanRecord's toggle is `agent-plan-record-toggle`
 whether the record is open or shut. Two records with the same status and
 no `decided_at` stay distinct when the host supplies instance ids.
 
+## Public-intent Rust API
+
+- Package: `poodle-render`.
+- Classification: operator-approved breaking pre-v0.2 source cleanup.
+- `callout`, `action_discovery_panel`, and `tool_call` now consistently take
+  typed handler structs. `CalloutHandlers`, `ActionDiscoveryPanelHandlers`,
+  and `ToolCallHandlers` are the canonical callback and instance-scope inputs;
+  no compatibility entry point remains.
+- `RemediationBannerHandlers`, `DockRegionHandlers`, `AgentPlanHandlers`,
+  `AgentPlanRecordHandlers`, `AgentSubagentHandlers`, `ChangedFilesHandlers`,
+  and `ToolCallGroupHandlers` gain `instance_id` for stable backend focus
+  scope. The new semantic focus-id helpers and constants are additive.
+- A read-only scan across `/Users/tom/Dev/projects` found no direct external
+  Rust call sites. Downstream native consumers must still recompile and should
+  supply stable `instance_id` values wherever repeated interactive instances
+  can share semantic ids.
+
 ## Validation run
 
 - focused `poodle-gpui-preview` headless cases for Batches A–C
 - `effigy check:gpui`
-- `effigy regressions:native`
+- `effigy regressions:native` — 40 passed
 - `effigy docs:check`
 - `effigy qa` (headless)
 - `git diff --check origin/main...HEAD`

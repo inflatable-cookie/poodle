@@ -17,7 +17,7 @@ use poodle_specs::{
     ListContainerState, PageHeaderSpec, PaginationSpec, PaginationSummarySpec, StatusTone,
 };
 
-use crate::callout::callout;
+use crate::callout::{callout, CalloutHandlers};
 use crate::empty_state::empty_state;
 use crate::page_header::page_header;
 use crate::pagination::pagination;
@@ -165,7 +165,10 @@ pub fn list_container(
             let spec = CallOutSpec::new()
                 .with_tone(StatusTone::Pending)
                 .with_content(msg);
-            container = container.child(region(region_gap, callout(&spec, theme, None)));
+            container = container.child(region(
+                region_gap,
+                callout(&spec, theme, CalloutHandlers::default()),
+            ));
         }
         ListContainerState::Error => {
             // Contract: Callout tone="danger", title={errorTitle},
@@ -181,7 +184,10 @@ pub fn list_container(
             if let Some(ref msg) = spec.error_message {
                 callout_spec = callout_spec.with_content(msg.clone());
             }
-            container = container.child(region(region_gap, callout(&callout_spec, theme, None)));
+            container = container.child(region(
+                region_gap,
+                callout(&callout_spec, theme, CalloutHandlers::default()),
+            ));
         }
         ListContainerState::Empty => {
             // Contract: EmptyState title/message/variant. ListContainerSpec

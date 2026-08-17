@@ -1963,10 +1963,14 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
                     .with_content("This callout can be dismissed by the user.")
                     .dismissible(true),
                 &theme(),
-                Some(Arc::new(move || {
-                    *flag.lock().unwrap() = true;
-                    *mount.lock().unwrap() = build(true, Arc::clone(&mount), Arc::clone(&flag));
-                })),
+                poodle_render::CalloutHandlers {
+                    on_dismiss: Some(Arc::new(move || {
+                        *flag.lock().unwrap() = true;
+                        *mount.lock().unwrap() =
+                            build(true, Arc::clone(&mount), Arc::clone(&flag));
+                    })),
+                    ..poodle_render::CalloutHandlers::default()
+                },
             )
         }
 

@@ -16,7 +16,7 @@ use poodle_specs::{
 };
 
 use crate::button::button;
-use crate::callout::callout;
+use crate::callout::{callout, CalloutHandlers};
 use crate::color::with_alpha;
 use crate::media_thumbnail::media_thumbnail;
 use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
@@ -94,7 +94,7 @@ pub fn media_browse_panel(
                 .with_size_role(spec.size_role)
                 .with_density(spec.density),
             theme,
-            None,
+            CalloutHandlers::default(),
         );
         return el.child(centered_state(alert, true));
     }

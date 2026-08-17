@@ -24,7 +24,7 @@ use poodle_specs::{
     StatusTone,
 };
 
-use crate::callout::callout;
+use crate::callout::{callout, CalloutHandlers};
 use crate::color::{mix_srgb, with_alpha};
 use crate::pagination::pagination;
 use crate::presentation::{
@@ -224,7 +224,7 @@ pub fn log_list(
                         .with_tone(StatusTone::Danger)
                         .with_content(error.clone()),
                     theme,
-                    None,
+                    CalloutHandlers::default(),
                 )),
             );
         }
