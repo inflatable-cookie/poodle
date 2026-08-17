@@ -148,3 +148,28 @@ admission.
 | Delta | Status | Follow-up |
 | --- | --- | --- |
 | no native implementation in web-reference PR | incomplete, not accepted parity | g14.017 |
+
+## 11. Rust Binding Notes (g15.007)
+
+Status: **bound** — native implementation lands with `g15.007` (specs,
+`poodle-render`, GPUI specimen, headless evidence).
+
+- `LicenceSeatsSpec` is cloneable data: authority seats, pending machine id,
+  copy, and the controlled per-row confirm/edit open state (Rust targets own
+  overlay/edit open state, like every composed control).
+- Rows derive once through `poodle_headless::licence::licence_seat_rows`.
+  Raw `machine_id` values are callback data and list keys only: every visible
+  and accessible identity is the supplied label or `Unnamed machine`, and two
+  unnamed rows look alike on purpose. No hostname, platform, last-seen,
+  limit, or entitlement policy appears.
+- `LicenceSeatsHandlers` owns the callbacks: `on_rename(machine_id,
+  trimmed_label | null)`, edit start, `on_release(machine_id)`, and the
+  release trigger/cancel. Rename persistence, the release command, and the
+  resulting seat refresh are host-owned; Poodle never optimistically rewrites
+  authority state.
+- Release composes the warning ConfirmAction by default (trigger: ghost
+  danger trash IconButton whose accessible name carries the action and
+  machine identity) or releases directly when `confirmRelease=false`. Pending
+  affects only the matching row's action.
+- The GPUI specimen is interactive through the preview host loop; mounted
+  regressions drive rename and release through the real dispatch tree.

@@ -7,6 +7,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-17 — The headless GPUI test platform renders a view several times
+  per `window.draw`, so an interactive node without a declared `id` does not
+  keep a stable element across a click (press and release land on different
+  element states and the click is dropped). The production preview renders
+  once per platform frame and is unaffected. Mounted regressions in
+  `tests/headless_regressions.rs` therefore assign explicit ids to the
+  interactive nodes they drive — the pattern every retained regression there
+  already used — and the driver's `reset_element_ids` per frame does not by
+  itself fix id-less nodes. Found by g15.007 Batch A while proving grouped
+  CodeInput and FileUpload browse in a mounted window.
+
 - 2026-08-17 — The same Northstar card and handoff can be dispatched twice
   without warning while its dispatch-ledger entry is already `in-flight`,
   producing competing PRs #30 and #31 for `g15.014`. Add a duplicate-launch

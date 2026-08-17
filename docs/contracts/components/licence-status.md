@@ -160,3 +160,30 @@ backend admission and is not claimed by that milestone.
 | Delta | Status | Follow-up |
 | --- | --- | --- |
 | no native implementation in web-reference PR | incomplete, not accepted parity | g14.017 |
+
+## 11. Rust Binding Notes (g15.007)
+
+Status: **bound** — native implementation lands with `g15.007` (specs,
+`poodle-render`, GPUI specimen, headless evidence).
+
+- `LicenceStatusSpec` is cloneable data: the authority projection, trust
+  basis, both coverage windows (integer Unix seconds), `usable`, `attention`,
+  and the section title. All authority timestamps convert to milliseconds at
+  the shared view boundary (`poodle_headless::licence::licence_timestamp_milliseconds`).
+- Display decisions resolve once through
+  `poodle_headless::licence::licence_status_view` (the port of
+  `licenceStatusView`): titles, tone, row terms, and which timestamp goes
+  where. `inGrace` stays calm (no warning/danger), `clockRefused` is a clock
+  remedy with no expiry/purchase wording, and use/update coverage stay
+  separate rows in every null/value combination.
+- Relative time renders through the shared `TimeAgoSpec::format_relative`
+  thresholds (`ends in …` / `ended … ago`). The quiet `inGrace` line renders
+  the absolute time/date via `format_display_time_date`. **Recorded binding
+  difference:** the pure Rust mirror has no timezone database, so the
+  absolute line formats the same instant in UTC; the web uses local time.
+  Honest and named in the g15.007 batch log.
+- `usable` and `attention` reach the tree as semantic token roles (the
+  native `data-*` counterpart) and gate nothing: no row hides, no control
+  disables, no licence read becomes a permission.
+- The root is a labelled `Region`; the GPUI specimen renders every state and
+  mounted regressions assert the calm copy and data-state roles.
