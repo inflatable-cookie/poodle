@@ -1436,9 +1436,10 @@ fn model_catalogue_editor_hide_moves_real_focus_to_the_next_shown_model() {
     });
 }
 
-/// The setup's configure heading is a real focus destination, not just a
-/// named one: entering configure moves the window's focus onto it, and the
-/// id Back names resolves to a node the backend created a handle for.
+/// The setup's configure heading and selected option are real focus
+/// destinations. The mounted host applies each controlled stage request before
+/// the next paint, so both focus moves must come from the component request —
+/// never from a test-side focus shortcut.
 #[test]
 fn model_connection_setup_stage_focus_lands_on_real_handles() {
     use poodle_headless::model_connection::{
@@ -1450,9 +1451,13 @@ fn model_connection_setup_stage_focus_lands_on_real_handles() {
     use poodle_specs::ModelConnectionSetupSpec;
 
     run_headless(|cx| {
-        let requested = Arc::new(Mutex::new(Vec::new()));
-
-        let build = |stage: ModelConnectionSetupStage, requested: Arc<Mutex<Vec<String>>>| {
+        fn build(
+            stage: ModelConnectionSetupStage,
+            mounted: Arc<Mutex<Node>>,
+            requested: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
+            let stage_mount = Arc::clone(&mounted);
+            let stage_requests = Arc::clone(&requested);
             let mut node = poodle_render::model_connection_setup(
                 &ModelConnectionSetupSpec::new()
                     .with_options(model_connection_picker_fixtures())
@@ -1460,7 +1465,14 @@ fn model_connection_setup_stage_focus_lands_on_real_handles() {
                     .with_value(Some("openai-responses".to_string())),
                 &theme(),
                 poodle_render::ModelConnectionSetupHandlers {
-                    on_stage_change: Some(Arc::new(|_| {})),
+                    on_stage_change: Some(Arc::new(move |next| {
+                        let next_node = build(
+                            next,
+                            Arc::clone(&stage_mount),
+                            Arc::clone(&stage_requests),
+                        );
+                        *stage_mount.lock().unwrap() = next_node;
+                    })),
                     on_focus_request: Some(Arc::new(move |id: &str| {
                         requested.lock().unwrap().push(id.to_string());
                         poodle_gpui_node_backend::request_focus(id);
@@ -1470,20 +1482,24 @@ fn model_connection_setup_stage_focus_lands_on_real_handles() {
                 },
             );
             node.id = Some(FIXTURE_ID.to_owned());
-            Arc::new(Mutex::new(node))
-        };
+            node
+        }
+
+        let requested = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            ModelConnectionSetupStage::Choose,
+            Arc::clone(&mounted),
+            Arc::clone(&requested),
+        );
 
         let heading = model_connection_setup_title_focus_id(Some("mounted"));
         let continue_id = model_connection_setup_action_id(Some("mounted"), "continue");
         let back_id = model_connection_setup_action_id(Some("mounted"), "back");
 
-        // choose → configure: the heading is in both stages, so the request
-        // lands in the frame that follows the activation.
-        let choose = build(ModelConnectionSetupStage::Choose, Arc::clone(&requested));
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&choose));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
         driver.wait_for_focus_handle(&continue_id);
         driver.keyboard_activate(&continue_id);
-        driver.draw_frame();
         assert_eq!(requested.lock().unwrap().as_slice(), [heading.clone()]);
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for(&heading),
@@ -1491,11 +1507,9 @@ fn model_connection_setup_stage_focus_lands_on_real_handles() {
             "the heading actually receives the focus it was sent"
         );
 
-        // configure → choose: Back names the selected option, which only
-        // exists once the host applies the stage. Mount that stage and prove
-        // the named id is a handle the backend really created.
-        let configure = build(ModelConnectionSetupStage::Configure, Arc::clone(&requested));
-        driver.mount_node(Arc::clone(&configure));
+        // configure → choose: the host applies the stage request inside the
+        // callback, before the driver's post-activation paint. The selected
+        // option therefore exists in time to consume the queued focus request.
         driver.wait_for_focus_handle(&back_id);
         driver.keyboard_activate(&back_id);
         let back_target = requested
@@ -1504,14 +1518,11 @@ fn model_connection_setup_stage_focus_lands_on_real_handles() {
             .last()
             .cloned()
             .expect("Back names a destination");
-
-        driver.mount_node(Arc::clone(&choose));
         driver.wait_for_focus_handle(&back_target);
-        driver.focus_element(&back_target);
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for(&back_target),
             Some(true),
-            "Back's destination is a node the backend can focus"
+            "Back's request restores real focus after the host applies choose"
         );
     });
 }

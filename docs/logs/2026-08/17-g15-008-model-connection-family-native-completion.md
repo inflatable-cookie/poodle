@@ -59,9 +59,10 @@ The four release blockers are addressed in the landed branch:
    focus patch, and `mark_hidden_disclosure` stamps the id, the scoped runtime
    id, and the ring on the trigger itself. Two mounted regressions cover the
    paths the old suite missed:
-   `model_connection_setup_stage_focus_lands_on_real_handles` (choose →
-   configure focuses the heading for real; Back's destination resolves to a
-   handle the backend created) and
+   `model_connection_setup_stage_focus_lands_on_real_handles` (a mounted host
+   applies the controlled stage before each paint, so choose → configure
+   focuses the heading and Back restores focus to the selected option without
+   any test-side focus call) and
    `model_catalogue_editor_hiding_the_last_row_focuses_the_hidden_disclosure`.
    Render-level counterparts assert both nodes are focusable *and* patched.
 2. **Native focus ids are instance-scoped.** Each handler struct gains
@@ -141,10 +142,11 @@ One runtime does not borrow another's pass.
 - **Rust specs** (`cargo test -p poodle-specs`, 260 passed): unchanged suite
   re-run; the four new specs compile into it.
 - **GPUI mounted regressions** (`effigy regressions:native`, 25 passed): the
-  16 retained plus nine new. Three came from review — setup stage focus
-  landing on real handles in both directions, hiding the last shown row
-  focusing the hidden disclosure, and two pickers over the same routes keeping
-  separate focus handles. The original six — the picker's roving focus moving
+  16 retained plus nine new. Three came from review — a controlled setup host
+  applying each stage before paint and proving component-driven focus in both
+  directions, hiding the last shown row focusing the hidden disclosure, and
+  two pickers over the same routes keeping separate focus handles. The original
+  six — the picker's roving focus moving
   real backend
   focus past the disabled routes; a real pointer click on an unsupported route
   selecting nothing while the available one beside it selects; the setup's
