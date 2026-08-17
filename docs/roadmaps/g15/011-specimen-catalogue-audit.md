@@ -23,6 +23,34 @@ become test reports.
 - pilot rework of Button, RangeSlider, and Tabs
 - one renderer-neutral specimen plan (outline-level only)
 
+## Audit Record
+
+Write the complete inventory to
+`docs/roadmaps/g15/specimen-catalogue-audit.md`. Use one row per component
+with separate Svelte, React, and GPUI grades, named cross-runtime drift, and
+one disposition. A missing or unusable runtime page is graded, not skipped.
+
+Use this fixed grade vocabulary:
+
+- **A — ready:** concise teaching page, meaningful interaction, and no named
+  curation defect.
+- **B — usable:** teaches the component but has a small named presentation,
+  copy, interaction, or runtime-alignment defect.
+- **C — curate:** overloaded, unclear, misleading, substantially drifted, or
+  missing important teaching value.
+- **D — missing/broken:** no real specimen, dead primary interaction, or page
+  cannot be used as documentation.
+
+Use one disposition: `keep`, `pilot-fix`, `curation-tranche`, or
+`contract/runtime-blocker`. Record evidence briefly; do not paste screenshots
+or source dumps into the table.
+
+Write the shared outline to
+`docs/roadmaps/g15/specimen-plan-outline.md`. It may describe ordered tabs,
+sections, captions, example IDs, reusable fixture references, and axis
+eligibility. It is a planning artifact only: this card adds no schema,
+codegen, generated adapter, or runtime consumer.
+
 ## Goals
 
 - [ ] Every generated catalogue entry has an explicit grade and disposition;
@@ -40,6 +68,8 @@ become test reports.
 - [ ] Evidence that no `Conformance` projection tab exists.
 - [ ] Remaining work split into reviewable curation tranches (new bounded
       cards), not one catalogue-wide rewrite.
+- [ ] The operator reviews the three live pilot pages before the worker calls
+      them approved. Unreviewed pages remain an explicit PR item.
 
 ## Stop Conditions
 
@@ -50,6 +80,8 @@ become test reports.
 ## Writable Scope
 
 - specimen-plan outline, curation grades, pilot pages, new curation cards
+- one August batch log with audit totals, pilot changes, source-cost evidence,
+  and the operator-review state
 - `PAPERCUTS.md` for newly discovered execution friction
 
 ## Validation
