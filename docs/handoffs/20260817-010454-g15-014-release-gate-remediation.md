@@ -2,6 +2,8 @@
 title: g15.014 release-gate remediation worker handoff
 kind: northstar-handoff
 handoff_mode: worker-pr-loop
+worker_mode: implementation
+dispatch_authority: orchestrator
 handoff: single-file-path-only
 status: ready-to-launch
 owner: Poodle orchestrator

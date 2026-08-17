@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-17 — The same Northstar card and handoff can be dispatched twice
+  without warning while its dispatch-ledger entry is already `in-flight`,
+  producing competing PRs #30 and #31 for `g15.014`. Add a duplicate-launch
+  guard keyed by repository plus card/handoff identity, and surface the active
+  worker or PR before starting another run. Affects orchestrator worker
+  dispatch.
+
 - 2026-08-16 — React `SplitView` is missing the contract's `divider` prop and
   the `--poodle-split-seam` root anchoring for the toggle pill: the pill is
   positioned against the divider box, which a collapsed or hidden sibling can
