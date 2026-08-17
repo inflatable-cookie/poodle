@@ -7,6 +7,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-17 — `bun update nanoid` (or any transitive advisory target) does not
+  close an advisory the root `overrides` pins: it adds the package as a root
+  direct `dependencies` entry at the still-vulnerable resolution and leaves
+  `bun.lock` unchanged on the fix version. A card remediating a
+  version-pinned transitive advisory should bump the `overrides` range and run
+  `bun install` instead, keeping the diff to the override + one lockfile
+  resolution entry. Found by g15.014 (nanoid GHSA-2v37-7h3g-55p8).
+
 - 2026-08-16 — React `SplitView` is missing the contract's `divider` prop and
   the `--poodle-split-seam` root anchoring for the toggle pill: the pill is
   positioned against the divider box, which a collapsed or hidden sibling can
