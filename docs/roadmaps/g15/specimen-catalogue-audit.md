@@ -189,6 +189,13 @@ The three pilots were chosen to be representative, and they were. Their rows in
 the table carry the mechanically measured defects; these are the judgments the
 mechanical pass cannot make.
 
+**Review state: approved.** The operator reviewed all three reworked pages in
+the live Svelte and React previews on 2026-08-17 and accepted them, including
+the four judgement calls flagged for them: the remaining tab-control density on
+the Tabs page, the removal of its hand-rolled collapse-toggle demo, GPUI Tabs
+staying at eight sections to keep `Full-width` and the native-only reorder drag
+states, and the sentence-style captions.
+
 ### Button
 
 - `Variants`, `Danger tone`, and `Success tone` are a variant × tone
