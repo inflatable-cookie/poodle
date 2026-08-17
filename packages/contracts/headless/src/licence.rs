@@ -538,27 +538,22 @@ pub fn licence_seat_rows(
         .collect()
 }
 
-// ── Absolute local time for the quiet `inGrace` line ─────────────────────
+// ── Absolute time for the quiet `inGrace` line ────────────────────────────
 
-/// Format an authority timestamp as the web's `formatDisplayTimeDate` does —
-/// `HH:MM MM/DD/YYYY`. The web formats in the user's local timezone; the pure
-/// Rust mirror has no timezone database, so it formats the same instant in
-/// UTC. Recorded as an intentional native binding difference (g15.007).
-pub fn format_display_time_date(epoch_seconds: i64) -> String {
-    let days = epoch_seconds.div_euclid(86_400);
-    let seconds_of_day = epoch_seconds.rem_euclid(86_400);
-    let hour = seconds_of_day / 3_600;
-    let minute = (seconds_of_day % 3_600) / 60;
-
-    let (year, month, day) = civil_from_days(days);
-
+/// Format an already-resolved civil time as the web's `formatDisplayTimeDate`
+/// does — `HH:MM MM/DD/YYYY`. Pure and timezone-free: the caller resolves
+/// the instant into local civil parts at the runtime boundary (the renderer
+/// uses the platform's `localtime`), so the observable line is the user's
+/// local time exactly as on the web.
+pub fn format_time_date_parts(year: i64, month: i64, day: i64, hour: i64, minute: i64) -> String {
     format!("{hour:02}:{minute:02} {month:02}/{day:02}/{year:04}")
 }
 
 /// Convert days since 1970-01-01 to a proleptic Gregorian (year, month, day).
 /// Howard Hinnant's `civil_from_days` algorithm, the inverse of the epoch
-/// math in `poodle_headless::date`.
-fn civil_from_days(days_since_epoch: i64) -> (i64, i64, i64) {
+/// math in `poodle_headless::date`. Used by the renderer's non-Unix fallback;
+/// Unix targets resolve local parts through the platform instead.
+pub fn civil_from_days(days_since_epoch: i64) -> (i64, i64, i64) {
     let z = days_since_epoch + 719_468;
     let era = z.div_euclid(146_097);
     let doe = z.rem_euclid(146_097);
@@ -799,14 +794,20 @@ mod tests {
     }
 
     #[test]
-    fn format_display_time_date_renders_modern_dates_not_1970() {
-        // 2027-01-15 03:45 UTC, ten-digit authority seconds.
+    fn time_date_parts_format_like_the_web() {
+        assert_eq!(format_time_date_parts(2027, 1, 15, 3, 45), "03:45 01/15/2027");
+        assert_eq!(format_time_date_parts(1970, 1, 1, 0, 0), "00:00 01/01/1970");
+    }
+
+    #[test]
+    fn civil_from_days_round_trips_modern_dates_not_1970() {
+        // 2027-01-15 03:45 UTC is a ten-digit authority seconds value.
         let secs = 1_799_999_100i64;
-        let rendered = format_display_time_date(secs);
-        assert!(rendered.contains("2027"), "rendered: {rendered}");
-        assert!(!rendered.starts_with("19"), "rendered: {rendered}");
+        let (year, month, day) = civil_from_days(secs.div_euclid(86_400));
+        assert_eq!((year, month, day), (2027, 1, 15));
         // The epoch itself renders as 1970 only when given the epoch.
-        assert_eq!(format_display_time_date(0), "00:00 01/01/1970");
+        let (year, month, day) = civil_from_days(0);
+        assert_eq!((year, month, day), (1970, 1, 1));
     }
 
     #[test]

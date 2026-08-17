@@ -51,7 +51,9 @@ pub fn file_accepts(accept: Option<&str>, file_name: &str, mime_type: Option<&st
 /// did not configure one — the same default the Svelte/React targets enforce.
 pub const DEFAULT_MAX_FILE_SIZE: u64 = 10 * 1024 * 1024;
 
-/// Mirror of `formatFileSize` (B/KB/MB/GB with one decimal). Distinct from
+/// Mirror of `formatFileSize` (B/KB/MB/GB) with core's exact spelling:
+/// one decimal via `toFixed(1)`, then the trailing `.0` stripped by
+/// `parseFloat` — so `10 MB`, `2 KB`, `512 B`, not `10.0 MB`. Distinct from
 /// the specs' list-row formatter, which is the `bytes`/`KB`/`MB` copy the
 /// file list itself displays.
 pub fn format_file_size(bytes: u64) -> String {
@@ -62,7 +64,11 @@ pub fn format_file_size(bytes: u64) -> String {
     let sizes = ["B", "KB", "MB", "GB"];
     let value = bytes as f64;
     let i = (value.log(k).floor() as usize).min(sizes.len() - 1);
-    format!("{:.1} {}", value / k.powi(i as i32), sizes[i])
+    let scaled = value / k.powi(i as i32);
+    // toFixed(1) rounds to one decimal; parseFloat strips a trailing `.0`.
+    let fixed = format!("{scaled:.1}");
+    let rendered = fixed.strip_suffix(".0").unwrap_or(&fixed);
+    format!("{rendered} {}", sizes[i])
 }
 
 /// Mirror of `validateUploadFile` without the host `validate` closure: the
@@ -158,7 +164,7 @@ mod tests {
     fn size_rule_precedes_accept_and_uses_the_web_copy() {
         assert_eq!(
             validate_upload_file("big.lic", None, 5 * 1024 * 1024, Some(1024), None),
-            Some("File too large. Maximum size is 1.0 KB".to_string())
+            Some("File too large. Maximum size is 1 KB".to_string())
         );
         assert_eq!(
             validate_upload_file("ok.lic", None, 512, Some(1024), Some(".lic")),
@@ -175,16 +181,33 @@ mod tests {
         assert_eq!(DEFAULT_MAX_FILE_SIZE, 10 * 1024 * 1024);
         assert_eq!(
             validate_upload_file("big.bin", None, DEFAULT_MAX_FILE_SIZE + 1, None, None),
-            Some("File too large. Maximum size is 10.0 MB".to_string())
+            Some("File too large. Maximum size is 10 MB".to_string())
         );
     }
 
+    /// Cross-implementation vectors: the exact error copy must match the
+    /// web target's `validateUploadFile` / `formatFileSize` output (core
+    /// `toFixed(1)` + `parseFloat`), so a rejection means the same string on
+    /// every runtime.
     #[test]
-    fn format_file_size_mirrors_core() {
+    fn error_copy_vectors_match_the_web_exactly() {
         assert_eq!(format_file_size(0), "0 B");
-        assert_eq!(format_file_size(512), "512.0 B");
-        assert_eq!(format_file_size(2048), "2.0 KB");
-        assert_eq!(format_file_size(5 * 1024 * 1024), "5.0 MB");
+        assert_eq!(format_file_size(512), "512 B");
+        assert_eq!(format_file_size(1024), "1 KB");
+        assert_eq!(format_file_size(2048), "2 KB");
+        assert_eq!(format_file_size(1536), "1.5 KB");
+        assert_eq!(format_file_size(5 * 1024 * 1024), "5 MB");
+        assert_eq!(format_file_size(10 * 1024 * 1024), "10 MB");
+        assert_eq!(format_file_size(10 * 1024 * 1024 + 1), "10 MB");
+        assert_eq!(format_file_size(1024 * 1024 * 1024), "1 GB");
+        assert_eq!(
+            validate_upload_file("a.bin", None, 2 * 1024 * 1024, Some(1 * 1024 * 1024), None),
+            Some("File too large. Maximum size is 1 MB".to_string())
+        );
+        assert_eq!(
+            validate_upload_file("a.txt", None, 1, Some(1024), Some("image/*")),
+            Some("File type not accepted. Accepted types: image/*".to_string())
+        );
     }
 
     #[test]

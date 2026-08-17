@@ -19,7 +19,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use poodle_adapter::ThemeProvider;
 use poodle_headless::licence::{
-    format_display_time_date, licence_status_view, LicenceStatusInput, LicenceStatusView,
+    civil_from_days, format_time_date_parts, licence_status_view, LicenceStatusInput,
+    LicenceStatusView,
 };
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole};
 use poodle_specs::{LicenceStatusSpec, StatusIndicatorSpec, StatusTone, TimeAgoSpec};
@@ -32,6 +33,43 @@ fn now_seconds() -> i64 {
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs() as i64)
         .unwrap_or(0)
+}
+
+/// Resolve an authority timestamp into **local** civil parts, matching the
+/// web's `toLocaleTimeString`/`toLocaleDateString` treatment of the quiet
+/// `inGrace` line. Unix targets use the platform's `localtime`; other
+/// platforms fall back to the same instant in UTC (the GPUI target is Unix).
+fn local_time_parts(epoch_seconds: i64) -> (i64, i64, i64, i64, i64) {
+    #[cfg(unix)]
+    {
+        let mut tm: libc::tm = unsafe { std::mem::zeroed() };
+        let t = epoch_seconds as libc::time_t;
+        if !unsafe { libc::localtime_r(&t, &mut tm) }.is_null() {
+            return (
+                tm.tm_year as i64 + 1900,
+                tm.tm_mon as i64 + 1,
+                tm.tm_mday as i64,
+                tm.tm_hour as i64,
+                tm.tm_min as i64,
+            );
+        }
+    }
+    let days = epoch_seconds.div_euclid(86_400);
+    let seconds_of_day = epoch_seconds.rem_euclid(86_400);
+    let (year, month, day) = civil_from_days(days);
+    (
+        year,
+        month,
+        day,
+        seconds_of_day / 3_600,
+        (seconds_of_day % 3_600) / 60,
+    )
+}
+
+/// The absolute local time/date for the quiet `inGrace` line.
+fn absolute_time_text(timestamp_ms: i64) -> String {
+    let (year, month, day, hour, minute) = local_time_parts(timestamp_ms / 1_000);
+    format_time_date_parts(year, month, day, hour, minute)
 }
 
 /// Relative text for a timestamp row: `ends in 5m` / `ended 2d ago`, through
@@ -144,7 +182,7 @@ pub fn licence_status(spec: &LicenceStatusSpec, theme: &dyn ThemeProvider) -> No
             Some(timestamp_ms) => format!(
                 "{} {}",
                 detail.text,
-                format_display_time_date(timestamp_ms / 1_000)
+                absolute_time_text(timestamp_ms)
             ),
             None => detail.text.clone(),
         };
