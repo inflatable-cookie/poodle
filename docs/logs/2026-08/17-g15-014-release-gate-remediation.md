@@ -1,6 +1,6 @@
 # g15.014 — Release-Gate Remediation: Security Advisory Prerequisite
 
-Status: complete — remediation landed, `effigy qa` green (PR pending)
+Status: complete — PR #31 merged as `7a93a7c8`; `effigy qa` green
 Date: 2026-08-17
 Card: `docs/roadmaps/g15/014-release-gate-remediation.md`
 Handoff: `docs/handoffs/20260817-010454-g15-014-release-gate-remediation.md`

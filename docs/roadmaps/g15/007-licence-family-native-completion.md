@@ -1,6 +1,6 @@
 # g15.007 — Licence Family Native Completion
 
-Status: **ready** — independent native lane; may run beside `g15.014`
+Status: **in flight** — worker dispatched; awaiting PR
 Depends on: `g15.001` (measured gaps); carries `g14.017` requirements with
 approved web references (`g14.015`/`g14.016`) intact
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,

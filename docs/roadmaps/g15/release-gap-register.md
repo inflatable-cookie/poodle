@@ -92,7 +92,7 @@ the roster is folded into the release-certification card.
 | Model-connection native completion (`g14.020`) | web references approved and landed (`g14.018`/`g14.019`); native missing | `g15.008` |
 | Human-centred specimen catalogue audit (`g14.026`) | rubric and boundary intact; unexecuted | `g15.011` |
 | Primitive-first visual conformance lane | seam recorded in `conformance-estate.md`; harness not designed | `g15.012` |
-| Release-gate remediation | `bun audit` nanoid advisory remains open | `g15.014` |
+| Release-gate remediation | closed by PR #31 — `nanoid@3.3.18`; `bun audit` clean | `g15.014` |
 | v0.2.0 release certification | after all Svelte-denominator blockers close | `g15.013` |
 
 ## Not Gaps
@@ -102,9 +102,9 @@ the roster is folded into the release-certification card.
 - 65 components have no downstream consumer use found across the 16 canonical
   consumers. Absence of a consumer is not a release failure (handoff
   boundary); it is recorded as context in the roster.
-- The `bun audit` nanoid advisory (GHSA-2v37-7h3g-55p8) is a security debt,
-  not a component gap; it is owned as a pre-certification remediation
-  prerequisite by `g15.014` before `g15.013` certification.
+- The former `bun audit` nanoid advisory (GHSA-2v37-7h3g-55p8) was security
+  debt rather than a component gap. `g15.014` closed it in PR #31 before
+  `g15.013` certification.
 - `effigy doctor` baseline findings (generated-in-src, god-file,
   stale-suppression, comment-ratio) are known board health, not component
   gaps.

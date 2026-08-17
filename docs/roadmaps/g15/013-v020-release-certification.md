@@ -1,6 +1,7 @@
 # g15.013 — v0.2.0 Release Certification
 
-Status: **blocked** — depends on `g15.002`–`g15.006` and `g15.014`
+Status: **ready** — prerequisites complete; dispatch after `g15.007` releases
+shared roster/register rows
 Depends on: `g15.002`–`g15.005` (Svelte focused evidence closure),
 `g15.006` (React mirror closure), `g15.014` (release-gate remediation —
 security prerequisite)
@@ -23,7 +24,7 @@ remediation to have landed first.
 
 - [x] `g15.002`–`g15.006` landed: every Svelte-denominator surface complete
       and evidenced for all 175 components; React mirror rows closed.
-- [ ] `g15.014` (release-gate remediation) landed: the `bun audit` nanoid
+- [x] `g15.014` (release-gate remediation) landed: the `bun audit` nanoid
       advisory (GHSA-2v37-7h3g-55p8) through the React preview's Vite
       dependency resolved, or the dependency replaced, with the advisory
       cleared from `effigy qa`.

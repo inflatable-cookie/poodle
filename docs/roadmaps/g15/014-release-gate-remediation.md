@@ -1,6 +1,6 @@
 # g15.014 — Release-Gate Remediation: Security Advisory Prerequisite
 
-Status: **ready** — parallel dependency-only lane; required before `g15.013`
+Status: **complete** — merged in PR #31 (`7a93a7c8`); `g15.013` unblocked
 Depends on: `g15.001` (recorded the open advisory)
 Governing refs: `release-gap-register.md`, `release-baseline-roster.md`,
 `../../contracts/001-working-rules.md`
@@ -23,27 +23,27 @@ and touches no component behaviour.
 
 ## Execution Plan
 
-- [ ] **Batch A — locate and plan:** identify the exact dependency path
+- [x] **Batch A — locate and plan:** identify the exact dependency path
       (`@inflatable-cookie/poodle-react-preview → vite → … → nanoid`), check
       whether the fix is a bump, an override, or a replacement, and record
       the plan and affected lockfile surfaces.
-- [ ] **Batch B — remediate and verify:** apply the dependency change,
+- [x] **Batch B — remediate and verify:** apply the dependency change,
       regenerate the lockfile, and run `effigy qa` to confirm `bun audit`
       passes while every other lane stays green.
 
 ## Goals
 
-- [ ] `bun audit` passes inside `effigy qa`.
-- [ ] The remediation is the smallest dependency-surface change that closes
+- [x] `bun audit` passes inside `effigy qa`.
+- [x] The remediation is the smallest dependency-surface change that closes
       the advisory; no unrelated dependency churn.
-- [ ] All non-audit lanes remain green after the change.
+- [x] All non-audit lanes remain green after the change.
 
 ## Acceptance
 
-- [ ] `effigy qa` passes fully green, including `bun audit`.
-- [ ] The change is confined to dependency manifests/lockfiles (and any
+- [x] `effigy qa` passes fully green, including `bun audit`.
+- [x] The change is confined to dependency manifests/lockfiles (and any
       version-pinned config the upgrade requires).
-- [ ] `effigy react:build`, `effigy test:components`, and `effigy docs:check`
+- [x] `effigy react:build`, `effigy test:components`, and `effigy docs:check`
       pass.
 
 ## Stop Conditions
