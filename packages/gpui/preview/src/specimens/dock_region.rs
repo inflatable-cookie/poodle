@@ -128,6 +128,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div().h(px(160.0)).flex().child(
                 div().w(px(220.0)).h_full().child(
                     DockRegion::from_spec(expanded, theme)
+                        .with_instance_id("expanded")
                         .on_tab_change(set_text(&state.node_events, "dock-active-tab"))
                         .with_content(panel_body(
                             format!("Panel content for {active_tab}."),
@@ -142,7 +143,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             div()
                 .h(px(100.0))
                 .flex()
-                .child(DockRegion::from_spec(collapsed, theme).with_content(Node::container())),
+                .child(DockRegion::from_spec(collapsed, theme)
+                    .with_instance_id("collapsed")
+                    .with_content(Node::container())),
         ))
         .child(group(
             "Interactive collapse toggle",
@@ -156,6 +159,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .h_full()
                         .child(
                             DockRegion::from_spec(toggle, theme)
+                                .with_instance_id("toggle")
                                 .on_tab_change(set_text(&state.node_events, "dock-toggle-tab"))
                                 .on_collapse_toggle(Arc::new(move |collapsed| {
                                     collapse_events.lock().unwrap().push(
@@ -177,6 +181,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             theme,
             div().h(px(140.0)).child(
                 DockRegion::from_spec(bottom, theme)
+                    .with_instance_id("bottom")
                     .on_tab_change(set_text(&state.node_events, "dock-bottom-tab"))
                     .with_content(panel_body(
                         format!("Bottom panel: {bottom_tab}"),

@@ -73,6 +73,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_expanded(expanded),
                         theme,
                     )
+                    .with_instance_id("running")
                     .on_toggle(Arc::new(move |next| {
                         toggle_events
                             .lock()
@@ -168,6 +169,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .with_size(size),
                 theme,
             )
+            .with_instance_id(format!("size-{size:?}"))
             .into_any_element()
         },
         |density, theme: &GpuiThemeProvider| {
@@ -181,6 +183,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .with_density(density),
                 theme,
             )
+            .with_instance_id(format!("density-{density:?}"))
             .into_any_element()
         },
     )

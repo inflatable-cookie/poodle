@@ -2054,6 +2054,7 @@ fn remediation_banner_action_and_dismiss_rebuild_the_host_spec() {
                             Arc::clone(&flag),
                         );
                     })),
+                    ..poodle_render::RemediationBannerHandlers::default()
                 },
             );
             if let Some(action) = last_action {
@@ -2133,9 +2134,12 @@ fn action_discovery_selection_rebuilds_the_host_spec_through_mounted_input() {
             let panel = poodle_render::action_discovery_panel(
                 &spec,
                 &theme(),
-                Some(Arc::new(move |id| {
-                    *mount.lock().unwrap() = build(id.to_string(), Arc::clone(&mount));
-                })),
+                poodle_render::ActionDiscoveryPanelHandlers {
+                    on_select: Some(Arc::new(move |id| {
+                        *mount.lock().unwrap() = build(id.to_string(), Arc::clone(&mount));
+                    })),
+                    ..poodle_render::ActionDiscoveryPanelHandlers::default()
+                },
             );
             Node::container()
                 .child(panel)
@@ -2201,6 +2205,7 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
                             Arc::clone(&collapse_mount),
                         );
                     })),
+                    ..poodle_render::DockRegionHandlers::default()
                 },
             );
             Node::container()
@@ -2286,6 +2291,7 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
                         *dismiss_mount.lock().unwrap() =
                             build(AgentPlanStatus::Dismissed, Arc::clone(&dismiss_mount));
                     })),
+                    ..poodle_render::AgentPlanHandlers::default()
                 },
             );
             Node::container()
@@ -2357,6 +2363,7 @@ fn agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input() {
                     on_toggle: Some(Arc::new(move |next| {
                         *mount.lock().unwrap() = build(next, Arc::clone(&mount));
                     })),
+                    instance_id: Some("mounted".to_string()),
                 },
             );
             Node::container()
@@ -2371,8 +2378,9 @@ fn agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input() {
         let mounted = Arc::new(Mutex::new(Node::container()));
         *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
-        driver.wait_for_focus_handle("agent-plan-record-toggle-accepted-shut");
-        driver.keyboard_activate("agent-plan-record-toggle-accepted-shut");
+        let toggle = poodle_render::agent_plan_record_toggle_focus_id(Some("mounted"));
+        driver.wait_for_focus_handle(&toggle);
+        driver.keyboard_activate(&toggle);
         assert!(
             mounted
                 .lock()
@@ -2381,6 +2389,105 @@ fn agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input() {
                 .iter()
                 .any(|t| *t == "Record: open"),
             "disclosure reached the host and painted the next spec"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&toggle),
+            Some(true),
+            "disclosure keeps the same backend focus handle across the rebuild"
+        );
+    });
+}
+
+/// Two AgentPlanRecords with the same status and no decided_at keep separate
+/// backend focus handles. Activating one does not activate the other.
+#[test]
+fn two_agent_plan_records_do_not_share_backend_focus_handles() {
+    use poodle_headless::agent_plan::AgentPlanStatus;
+    use poodle_specs::AgentPlanRecordSpec;
+
+    run_headless(|cx| {
+        fn record(
+            scope: &str,
+            expanded: bool,
+            mounted: &Arc<Mutex<Node>>,
+            left_open: bool,
+            right_open: bool,
+        ) -> Node {
+            let spec = AgentPlanRecordSpec::new(
+                "## Proposed plan\n\n1. Wire the host.",
+                AgentPlanStatus::Accepted,
+            )
+            .with_expanded(expanded);
+            let mount = Arc::clone(mounted);
+            let scope_owned = scope.to_string();
+            poodle_render::agent_plan_record(
+                &spec,
+                &theme(),
+                poodle_render::AgentPlanRecordHandlers {
+                    on_toggle: Some(Arc::new(move |next| {
+                        let (left, right) = if scope_owned == "left" {
+                            (next, right_open)
+                        } else {
+                            (left_open, next)
+                        };
+                        *mount.lock().unwrap() = build(left, right, Arc::clone(&mount));
+                    })),
+                    instance_id: Some(scope.to_string()),
+                },
+            )
+        }
+
+        fn build(left_open: bool, right_open: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            Node::container()
+                .child(record("left", left_open, &mounted, left_open, right_open))
+                .child(record("right", right_open, &mounted, left_open, right_open))
+                .child(Node::text(format!(
+                    "left:{} right:{}",
+                    if left_open { "open" } else { "shut" },
+                    if right_open { "open" } else { "shut" }
+                )))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, false, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let left = poodle_render::agent_plan_record_toggle_focus_id(Some("left"));
+        let right = poodle_render::agent_plan_record_toggle_focus_id(Some("right"));
+        driver.wait_for_focus_handle(&left);
+        driver.wait_for_focus_handle(&right);
+        driver.focus_element(&left);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&left), Some(true));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right),
+            Some(false),
+            "the second record keeps its own handle"
+        );
+
+        driver.keyboard_activate(&left);
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "left:open right:shut"),
+            "only the focused record activates"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left),
+            Some(true),
+            "the activated record retains focus after rebuild"
+        );
+
+        driver.keyboard_activate(&right);
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "left:open right:open"),
+            "the second record activates independently"
         );
     });
 }
@@ -2411,6 +2518,7 @@ fn agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input() {
                         *mount.lock().unwrap() = build(next, Arc::clone(&mount));
                     })),
                     on_open_child: None,
+                    instance_id: None,
                 },
             );
             Node::container()
@@ -2491,6 +2599,7 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
                             Arc::clone(&select_mount),
                         );
                     })),
+                    instance_id: None,
                 },
             );
             let mut root = Node::container()
@@ -2550,9 +2659,12 @@ fn tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input() {
             let node = poodle_render::tool_call(
                 &spec,
                 &theme(),
-                Some(Arc::new(move |_| {
-                    *mount.lock().unwrap() = build(!expanded, Arc::clone(&mount));
-                })),
+                poodle_render::ToolCallHandlers {
+                    on_toggle: Some(Arc::new(move |_| {
+                        *mount.lock().unwrap() = build(!expanded, Arc::clone(&mount));
+                    })),
+                    ..poodle_render::ToolCallHandlers::default()
+                },
             );
             Node::container()
                 .child(node)
@@ -2610,6 +2722,7 @@ fn tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input() {
                         *mount.lock().unwrap() = build(!expanded, Arc::clone(&mount));
                     })),
                     on_call_toggle: None,
+                    instance_id: None,
                 },
             );
             Node::container()

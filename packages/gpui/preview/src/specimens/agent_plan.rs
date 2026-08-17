@@ -43,6 +43,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .unwrap_or("pending"),
     );
     let live = AgentPlan::from_spec(AgentPlanSpec::new(PLAN).with_status(status), theme)
+        .with_instance_id("live")
         .on_accept(set_status(state, AgentPlanStatus::Accepted))
         .on_revise(set_status(state, AgentPlanStatus::Revised))
         .on_dismiss(set_status(state, AgentPlanStatus::Dismissed));

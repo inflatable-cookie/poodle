@@ -29,6 +29,29 @@ pub struct DockRegionHandlers {
     pub on_tab_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Fires with the collapsed state the region is moving **to**.
     pub on_collapse_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    /// Stable native instance scope. Two docks with the same tab values
+    /// would otherwise share one backend focus handle.
+    pub instance_id: Option<String>,
+}
+
+/// The backend-state id of one dock tab.
+pub fn dock_tab_focus_id(instance_id: Option<&str>, value: &str) -> String {
+    match instance_id {
+        Some(scope) => format!("dock-region:{scope}:tab:{value}"),
+        None => format!("dock-tab-{value}"),
+    }
+}
+
+/// The backend-state id of the collapse control.
+pub fn dock_collapse_focus_id(instance_id: Option<&str>) -> String {
+    match instance_id {
+        Some(scope) => format!("dock-region:{scope}:collapse"),
+        None => "dock-collapse".to_string(),
+    }
+}
+
+fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
+    instance_id.map(|scope| format!("dock-region:{scope}:{part}"))
 }
 
 pub fn dock_region(
@@ -97,6 +120,7 @@ pub fn dock_region(
 
             let mut tab_btn = Node::button("");
             tab_btn.id = Some(format!("dock-tab-{value}"));
+            tab_btn.runtime_id = scoped(handlers.instance_id.as_deref(), &format!("tab:{value}"));
             {
                 let s = &mut tab_btn.style;
                 // Icon and label are separate children behind a gap, not one
@@ -183,6 +207,7 @@ pub fn dock_region(
         };
         let mut t = Node::button(glyph);
         t.id = Some("dock-collapse".to_string());
+        t.runtime_id = scoped(handlers.instance_id.as_deref(), "collapse");
         {
             let s = &mut t.style;
             s.descriptor.text_color = Some(text_muted);
@@ -469,4 +494,51 @@ pub fn dock_region(
         }
     }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::PanelTabItem;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn spec() -> DockRegionSpec {
+        DockRegionSpec::new(
+            DockEdge::Left,
+            vec![PanelTabItem::new("search", "Search")],
+        )
+        .with_collapsible(true)
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let scoped = |scope: &str| DockRegionHandlers {
+            instance_id: Some(scope.to_string()),
+            ..DockRegionHandlers::default()
+        };
+        let first = dock_region(&spec(), &theme(), None, scoped("first"));
+        let second = dock_region(&spec(), &theme(), None, scoped("second"));
+        let tab = dock_tab_focus_id(Some("first"), "search");
+        let collapse = dock_collapse_focus_id(Some("first"));
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some(tab.as_str()))
+            .is_some());
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some(collapse.as_str()))
+            .is_some());
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(dock_tab_focus_id(Some("second"), "search").as_str()))
+            .is_none());
+        assert!(first
+            .find(&|n| n.id.as_deref() == Some("dock-tab-search"))
+            .is_some());
+        assert!(second
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(dock_collapse_focus_id(Some("second")).as_str()))
+            .is_some());
+    }
 }

@@ -61,20 +61,28 @@ documented native vocabulary gap.
 - **StateTile sparkline:** reserved empty slot; the host owns the chart.
 - **ActionDiscoveryPanel:** loading is shown as a representative posture; the
   Svelte teaching page does not put loading in Examples.
-- **DockRegion:** no native drag, reorder, or panel-drop. One collapsible
-  dock on the page because collapse id is `dock-collapse`.
+- **DockRegion:** no native drag, reorder, or panel-drop. Tabs and collapse
+  use scoped `runtime_id` so several docks can share tab values.
 - **AgentMessage / AgentQuestionRecord:** display projections. No web-only
   link click or answer ownership.
-- **AgentPlan:** one pending plan on the page (hosted in the composer) so
-  accept/revise/dismiss ids stay unique.
+- **AgentPlan:** accept/revise/dismiss keep semantic ids; hosts that mount
+  more than one pending plan pass `instance_id` so backend focus stays
+  distinct.
 
 ## Renderer a11y for mounted input
 
-`tracks_focus` needs `focusable` **and** `style.focus`. Named ids plus a
-focus ring were added on Callout/RemediationBanner dismiss, ActionDiscovery
-rows, DockRegion tabs/collapse, AgentPlan actions, AgentPlanRecord and
-AgentSubagent toggles, ChangedFiles header/file/chip, ToolCall rows with
-output, and ToolCallGroup run toggle.
+`tracks_focus` needs `focusable` **and** `style.focus`. Named semantic ids
+plus a focus ring were added on Callout/RemediationBanner dismiss,
+ActionDiscovery rows, DockRegion tabs/collapse, AgentPlan actions,
+AgentPlanRecord and AgentSubagent toggles, ChangedFiles header/file/chip,
+ToolCall rows with output, and ToolCallGroup run toggle.
+
+Backend focus is keyed by `runtime_id` then `id`. Those newly tracked
+controls now take a host `instance_id` and set a scoped `runtime_id`,
+keeping the semantic `id` readable. Identity never includes mutable
+presentation state: AgentPlanRecord's toggle is `agent-plan-record-toggle`
+whether the record is open or shut. Two records with the same status and
+no `decided_at` stay distinct when the host supplies instance ids.
 
 ## Validation run
 

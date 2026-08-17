@@ -24,7 +24,11 @@ pub fn js_action_discovery_panel(
     spec: &ActionDiscoveryPanelSpec,
     theme: &JetstreamThemeProvider,
 ) -> El {
-    El(pr::action_discovery_panel(spec, theme, None))
+    El(pr::action_discovery_panel(
+        spec,
+        theme,
+        pr::ActionDiscoveryPanelHandlers::default(),
+    ))
 }
 
 pub fn js_message_center(spec: &MessageCenterSpec, theme: &JetstreamThemeProvider) -> El {

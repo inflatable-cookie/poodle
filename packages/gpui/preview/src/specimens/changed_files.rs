@@ -85,7 +85,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 key: "changed-files-selected".to_string(),
                                 value: path.to_string(),
                             });
-                    })),
+                    }))
+                    .with_instance_id("worked"),
                 )
                 .child(div().child(if selected.is_empty() {
                     "no file selected".to_string()

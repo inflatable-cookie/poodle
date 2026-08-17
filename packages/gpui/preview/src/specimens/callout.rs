@@ -51,6 +51,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .unwrap()
                 .push(NodeSpecimenEvent::Toggle("callout-dismissed".to_string()));
         }))
+        .with_instance_id("live")
         .into_any_element()
     };
 

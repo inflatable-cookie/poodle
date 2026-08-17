@@ -103,6 +103,7 @@ pub fn agent_transcript(
                 let group_handlers = ToolCallGroupHandlers {
                     on_toggle: handlers.on_tool_run_toggle.as_ref().map(Arc::clone),
                     on_call_toggle: handlers.on_tool_call_toggle.as_ref().map(Arc::clone),
+                    instance_id: None,
                 };
                 root = root.child(tool_call_group(&group, theme, group_handlers));
             }
@@ -115,6 +116,7 @@ pub fn agent_transcript(
                 let card_handlers = ChangedFilesHandlers {
                     on_toggle: handlers.on_changed_files_toggle.as_ref().map(Arc::clone),
                     on_file_select: handlers.on_file_select.as_ref().map(Arc::clone),
+                    instance_id: None,
                 };
                 root = root.child(changed_files(&card, theme, card_handlers));
             }
@@ -148,6 +150,7 @@ pub fn agent_transcript(
                         let id = group_id.clone();
                         Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>
                     }),
+                    instance_id: None,
                 };
                 root = root.child(crate::agent_subagent::agent_subagent(
                     &card,

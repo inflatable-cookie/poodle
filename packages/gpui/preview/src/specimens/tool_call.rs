@@ -103,7 +103,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .lock()
                             .unwrap()
                             .push(NodeSpecimenEvent::Toggle(format!("tool-call-{id}")));
-                    })),
+                    }))
+                    .with_instance_id("with-output"),
                 ),
         ))
         .into_any_element();

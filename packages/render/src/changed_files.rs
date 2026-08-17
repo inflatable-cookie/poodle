@@ -22,6 +22,17 @@ pub struct ChangedFilesHandlers {
     pub on_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Fires with a file's path when one is chosen (tree row or chip).
     pub on_file_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Stable native instance scope. Two cards with the same spec id would
+    /// otherwise share one backend focus handle.
+    pub instance_id: Option<String>,
+}
+
+fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
+    instance_id.map(|scope| format!("changed-files:{scope}:{part}"))
+}
+
+fn path_token(path: &str) -> String {
+    path.replace('/', ":")
 }
 
 pub fn changed_files(
@@ -75,6 +86,10 @@ pub fn changed_files(
 
     let mut header = Node::button("");
     header.id = Some(format!("changed-files-toggle-{}", spec.id));
+    header.runtime_id = scoped(
+        handlers.instance_id.as_deref(),
+        &format!("toggle:{}", spec.id),
+    );
     // Counts are colour-coded, and colour alone is not a signal.
     header.a11y.label = Some(spec.accessible_name());
     header.a11y.role = Some(NodeRole::Button);
@@ -182,8 +197,12 @@ pub fn changed_files(
             row.id = Some(format!(
                 "changed-files-file-{}-{}",
                 spec.id,
-                node.path.replace('/', ":")
+                path_token(&node.path)
             ));
+            row.runtime_id = scoped(
+                handlers.instance_id.as_deref(),
+                &format!("file:{}:{}", spec.id, path_token(&node.path)),
+            );
             row.a11y.role = Some(NodeRole::TreeItem);
             {
                 let s = &mut row.style;
@@ -273,8 +292,12 @@ pub fn changed_files(
             chip.id = Some(format!(
                 "changed-files-chip-{}-{}",
                 spec.id,
-                file.path.replace('/', ":")
+                path_token(&file.path)
             ));
+            chip.runtime_id = scoped(
+                handlers.instance_id.as_deref(),
+                &format!("chip:{}:{}", spec.id, path_token(&file.path)),
+            );
             {
                 let s = &mut chip.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;
@@ -320,4 +343,50 @@ pub fn changed_files(
     }
 
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_headless::agent_transcript::ChangedFile;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn spec() -> ChangedFilesSpec {
+        ChangedFilesSpec::new(
+            "worked",
+            vec![ChangedFile {
+                path: "src/lib.rs".to_string(),
+                additions: 1,
+                deletions: 0,
+                status: None,
+            }],
+        )
+        .with_expanded(true)
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let scoped = |scope: &str| ChangedFilesHandlers {
+            instance_id: Some(scope.to_string()),
+            ..ChangedFilesHandlers::default()
+        };
+        let first = changed_files(&spec(), &theme(), scoped("first"));
+        let second = changed_files(&spec(), &theme(), scoped("second"));
+        let toggle = "changed-files:first:toggle:worked";
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some(toggle))
+            .is_some());
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some("changed-files:second:toggle:worked"))
+            .is_none());
+        assert!(first
+            .find(&|n| n.id.as_deref() == Some("changed-files-toggle-worked"))
+            .is_some());
+        assert!(second
+            .find(&|n| n.runtime_id.as_deref() == Some("changed-files:second:file:worked:src:lib.rs"))
+            .is_some());
+    }
 }

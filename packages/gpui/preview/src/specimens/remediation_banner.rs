@@ -63,7 +63,8 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .push(NodeSpecimenEvent::Toggle(
                     "remediation-banner-dismissed".to_string(),
                 ));
-        }));
+        }))
+        .with_instance_id("recovery");
         let mut stack = div().flex().flex_col().gap(px(8.0)).child(banner);
         if let Some(action) = last_action {
             stack = stack.child(div().child(format!("Last request: {action}")));

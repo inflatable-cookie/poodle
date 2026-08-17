@@ -19,6 +19,24 @@ use crate::presentation::rem_to_px;
 pub struct AgentPlanRecordHandlers {
     /// Fires with the next expanded state when the disclosure is used.
     pub on_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    /// Stable native instance scope. Records share status and often have no
+    /// `decided_at`; two of them would otherwise share one backend focus
+    /// handle. Identity never includes `is_expanded`.
+    pub instance_id: Option<String>,
+}
+
+pub const AGENT_PLAN_RECORD_TOGGLE_ID: &str = "agent-plan-record-toggle";
+
+/// The backend-state id of the disclosure control.
+pub fn agent_plan_record_toggle_focus_id(instance_id: Option<&str>) -> String {
+    match instance_id {
+        Some(scope) => format!("agent-plan-record:{scope}:toggle"),
+        None => AGENT_PLAN_RECORD_TOGGLE_ID.to_string(),
+    }
+}
+
+fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
+    instance_id.map(|scope| format!("agent-plan-record:{scope}:{part}"))
 }
 
 pub fn agent_plan_record(
@@ -103,17 +121,9 @@ pub fn agent_plan_record(
     } else {
         spec.expand_label.clone()
     };
-    let mut toggle_id = format!(
-        "agent-plan-record-toggle-{}-{}",
-        spec.status.as_str(),
-        if spec.is_expanded { "open" } else { "shut" }
-    );
-    if let Some(at) = &spec.decided_at {
-        toggle_id.push('-');
-        toggle_id.extend(at.chars().filter(|c| c.is_ascii_alphanumeric()));
-    }
     let mut toggle = Node::button("");
-    toggle.id = Some(toggle_id);
+    toggle.id = Some(AGENT_PLAN_RECORD_TOGGLE_ID.to_string());
+    toggle.runtime_id = scoped(handlers.instance_id.as_deref(), "toggle");
     toggle.a11y.label = Some(toggle_label.clone());
     toggle.a11y.role = Some(NodeRole::Button);
     toggle.a11y.expanded = Some(spec.is_expanded);
@@ -139,4 +149,79 @@ pub fn agent_plan_record(
     }
 
     root.child(toggle)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_headless::agent_plan::AgentPlanStatus;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn spec(expanded: bool) -> AgentPlanRecordSpec {
+        AgentPlanRecordSpec::new("## Plan", AgentPlanStatus::Accepted).with_expanded(expanded)
+    }
+
+    #[test]
+    fn toggle_identity_does_not_include_expanded_state() {
+        let shut = agent_plan_record(&spec(false), &theme(), AgentPlanRecordHandlers::default());
+        let open = agent_plan_record(&spec(true), &theme(), AgentPlanRecordHandlers::default());
+        let shut_toggle = shut
+            .find(&|n| n.id.as_deref() == Some(AGENT_PLAN_RECORD_TOGGLE_ID))
+            .expect("shut toggle");
+        let open_toggle = open
+            .find(&|n| n.id.as_deref() == Some(AGENT_PLAN_RECORD_TOGGLE_ID))
+            .expect("open toggle");
+        assert_eq!(shut_toggle.id, open_toggle.id);
+        assert_eq!(shut_toggle.runtime_id, open_toggle.runtime_id);
+        assert!(shut_toggle.runtime_id.is_none());
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let first = agent_plan_record(
+            &spec(false),
+            &theme(),
+            AgentPlanRecordHandlers {
+                instance_id: Some("first".to_string()),
+                ..AgentPlanRecordHandlers::default()
+            },
+        );
+        let second = agent_plan_record(
+            &spec(false),
+            &theme(),
+            AgentPlanRecordHandlers {
+                instance_id: Some("second".to_string()),
+                ..AgentPlanRecordHandlers::default()
+            },
+        );
+        let expected = agent_plan_record_toggle_focus_id(Some("first"));
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some(expected.as_str()))
+            .is_some());
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(agent_plan_record_toggle_focus_id(Some("second")).as_str()))
+            .is_none());
+        assert!(first
+            .find(&|n| n.id.as_deref() == Some(AGENT_PLAN_RECORD_TOGGLE_ID))
+            .is_some());
+        let open_first = agent_plan_record(
+            &spec(true),
+            &theme(),
+            AgentPlanRecordHandlers {
+                instance_id: Some("first".to_string()),
+                ..AgentPlanRecordHandlers::default()
+            },
+        );
+        assert!(open_first
+            .find(&|n| n.runtime_id.as_deref() == Some(expected.as_str()))
+            .is_some());
+        assert!(second
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(agent_plan_record_toggle_focus_id(Some("second")).as_str()))
+            .is_some());
+    }
 }

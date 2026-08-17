@@ -27,6 +27,25 @@ pub struct AgentSubagentHandlers {
     pub on_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
     /// Fires when the reader clicks through to the child's work.
     pub on_open_child: Option<Arc<dyn Fn() + Send + Sync>>,
+    /// Stable native instance scope. Two surfaces showing the same child
+    /// would otherwise share one backend focus handle.
+    pub instance_id: Option<String>,
+}
+
+/// The backend-state id of one subagent action (`toggle` / `open`).
+pub fn agent_subagent_action_focus_id(
+    instance_id: Option<&str>,
+    kind: &str,
+    item_id: &str,
+) -> String {
+    match instance_id {
+        Some(scope) => format!("agent-subagent:{scope}:{kind}:{item_id}"),
+        None => format!("agent-subagent-{kind}-{item_id}"),
+    }
+}
+
+fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
+    instance_id.map(|scope| format!("agent-subagent:{scope}:{part}"))
 }
 
 pub fn agent_subagent(
@@ -149,9 +168,11 @@ pub fn agent_subagent(
     actions.style.descriptor.layout.spacing.gap = rem_to_px(0.75);
 
     let item_id = spec.item.id.clone();
+    let instance = handlers.instance_id.clone();
     let action = |kind: &str, label: String, handler: Option<Arc<dyn Fn() + Send + Sync>>| {
         let mut button = Node::button("");
         button.id = Some(format!("agent-subagent-{kind}-{item_id}"));
+        button.runtime_id = scoped(instance.as_deref(), &format!("{kind}:{item_id}"));
         button.a11y.label = Some(label.clone());
         button.a11y.role = Some(NodeRole::Button);
         button.style.descriptor.layout.direction = LayoutDirection::Row;
@@ -204,4 +225,50 @@ pub fn agent_subagent(
     actions = actions.child(open);
 
     root.child(actions)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_headless::agent_subagent::{AgentSubagentItem, AgentSubagentStatus};
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn spec() -> AgentSubagentSpec {
+        AgentSubagentSpec::new(AgentSubagentItem {
+            id: "scout".to_string(),
+            label: "Scout".to_string(),
+            status: AgentSubagentStatus::Running,
+            activity_line: Some("Searching".to_string()),
+            summary: None,
+        })
+        .with_detail_lines(vec!["Matched".to_string()])
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let scoped = |scope: &str| AgentSubagentHandlers {
+            instance_id: Some(scope.to_string()),
+            ..AgentSubagentHandlers::default()
+        };
+        let first = agent_subagent(&spec(), &theme(), scoped("first"));
+        let second = agent_subagent(&spec(), &theme(), scoped("second"));
+        let toggle = agent_subagent_action_focus_id(Some("first"), "toggle", "scout");
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some(toggle.as_str()))
+            .is_some());
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(agent_subagent_action_focus_id(Some("second"), "toggle", "scout").as_str()))
+            .is_none());
+        assert!(first
+            .find(&|n| n.id.as_deref() == Some("agent-subagent-toggle-scout"))
+            .is_some());
+        assert!(second
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(agent_subagent_action_focus_id(Some("second"), "open", "scout").as_str()))
+            .is_some());
+    }
 }

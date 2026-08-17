@@ -27,6 +27,21 @@ pub struct AgentPlanHandlers {
     pub on_revise: Option<Arc<dyn Fn() + Send + Sync>>,
     /// Fires when the plan is dismissed.
     pub on_dismiss: Option<Arc<dyn Fn() + Send + Sync>>,
+    /// Stable native instance scope. Two pending plans would otherwise share
+    /// one backend focus handle per action.
+    pub instance_id: Option<String>,
+}
+
+/// The backend-state id of one plan action (`accept` / `revise` / `dismiss`).
+pub fn agent_plan_action_focus_id(instance_id: Option<&str>, action: &str) -> String {
+    match instance_id {
+        Some(scope) => format!("agent-plan:{scope}:{action}"),
+        None => format!("agent-plan-{action}"),
+    }
+}
+
+fn scoped(instance_id: Option<&str>, action: &str) -> Option<String> {
+    instance_id.map(|scope| format!("agent-plan:{scope}:{action}"))
 }
 
 pub fn agent_plan(
@@ -65,12 +80,14 @@ pub fn agent_plan(
         actions.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         actions.style.descriptor.layout.spacing.gap = action_gap;
 
+        let instance = handlers.instance_id.clone();
         let action = |kind: &str,
                       label: String,
                       primary: bool,
                       handler: Option<Arc<dyn Fn() + Send + Sync>>| {
             let mut button = Node::button("");
             button.id = Some(format!("agent-plan-{kind}"));
+            button.runtime_id = scoped(instance.as_deref(), kind);
             button.a11y.label = Some(label.clone());
             button.a11y.role = Some(NodeRole::Button);
             {
@@ -147,4 +164,40 @@ pub fn agent_plan(
     }
 
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_headless::agent_plan::AgentPlanStatus;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let spec = AgentPlanSpec::new("1. Inspect.").with_status(AgentPlanStatus::Pending);
+        let scoped = |scope: &str| AgentPlanHandlers {
+            instance_id: Some(scope.to_string()),
+            ..AgentPlanHandlers::default()
+        };
+        let first = agent_plan(&spec, &theme(), scoped("first"));
+        let second = agent_plan(&spec, &theme(), scoped("second"));
+        let accept = agent_plan_action_focus_id(Some("first"), "accept");
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some(accept.as_str()))
+            .is_some());
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(agent_plan_action_focus_id(Some("second"), "accept").as_str()))
+            .is_none());
+        assert!(first
+            .find(&|n| n.id.as_deref() == Some("agent-plan-accept"))
+            .is_some());
+        assert!(second
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(agent_plan_action_focus_id(Some("second"), "revise").as_str()))
+            .is_some());
+    }
 }

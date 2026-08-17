@@ -109,7 +109,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             theme,
             framed(
                 theme,
-                ActionDiscoveryPanel::from_spec(grouped, theme).on_select(Arc::new(move |id| {
+                ActionDiscoveryPanel::from_spec(grouped, theme)
+                    .with_instance_id("grouped")
+                    .on_select(Arc::new(move |id| {
                     events.lock().unwrap().push(NodeSpecimenEvent::SetText {
                         key: "action-discovery-active".to_string(),
                         value: id.to_string(),
@@ -154,14 +156,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         |size, theme: &GpuiThemeProvider| {
             framed(
                 theme,
-                ActionDiscoveryPanel::from_spec(compact_panel().with_size(size), theme),
+                ActionDiscoveryPanel::from_spec(compact_panel().with_size(size), theme)
+                    .with_instance_id(format!("size-{size:?}")),
             )
             .into_any_element()
         },
         |density, theme: &GpuiThemeProvider| {
             framed(
                 theme,
-                ActionDiscoveryPanel::from_spec(compact_panel().with_density(density), theme),
+                ActionDiscoveryPanel::from_spec(compact_panel().with_density(density), theme)
+                    .with_instance_id(format!("density-{density:?}")),
             )
             .into_any_element()
         },

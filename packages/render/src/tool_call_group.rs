@@ -21,6 +21,13 @@ pub struct ToolCallGroupHandlers {
     pub on_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Fires with the call id when one call's output is opened or closed.
     pub on_call_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Stable native instance scope. Two runs with the same spec id would
+    /// otherwise share one backend focus handle.
+    pub instance_id: Option<String>,
+}
+
+fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
+    instance_id.map(|scope| format!("tool-call-group:{scope}:{part}"))
 }
 
 pub fn tool_call_group(
@@ -64,8 +71,18 @@ pub fn tool_call_group(
             call_spec = call_spec.with_output(output.clone());
         }
 
-        let on_call = handlers.on_call_toggle.as_ref().map(Arc::clone);
-        list = list.child(tool_call(&call_spec, theme, on_call));
+        let child_scope = handlers
+            .instance_id
+            .clone()
+            .unwrap_or_else(|| spec.id.clone());
+        list = list.child(tool_call(
+            &call_spec,
+            theme,
+            crate::tool_call::ToolCallHandlers {
+                on_toggle: handlers.on_call_toggle.as_ref().map(Arc::clone),
+                instance_id: Some(child_scope),
+            },
+        ));
     }
 
     // The container is on the run, not the row: a thirty-call run has to read as
@@ -107,6 +124,10 @@ pub fn tool_call_group(
 
         let mut toggle = Node::button("");
         toggle.id = Some(format!("tool-call-group-toggle-{}", spec.id));
+        toggle.runtime_id = scoped(
+            handlers.instance_id.as_deref(),
+            &format!("toggle:{}", spec.id),
+        );
         toggle.a11y.label = Some(spec.toggle_accessible_name());
         toggle.a11y.role = Some(NodeRole::Button);
         toggle.a11y.expanded = Some(spec.is_expanded);
@@ -145,4 +166,63 @@ pub fn tool_call_group(
     }
 
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_headless::agent_transcript::{ToolCallStatus, TranscriptToolCall};
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn spec() -> ToolCallGroupSpec {
+        ToolCallGroupSpec::new(
+            "three",
+            vec![
+                TranscriptToolCall {
+                    id: "a".to_string(),
+                    label: "Ran command".to_string(),
+                    detail: Some("cargo build".to_string()),
+                    status: ToolCallStatus::Success,
+                    icon: None,
+                    output: None,
+                },
+                TranscriptToolCall {
+                    id: "b".to_string(),
+                    label: "Ran command".to_string(),
+                    detail: Some("cargo test".to_string()),
+                    status: ToolCallStatus::Success,
+                    icon: None,
+                    output: Some("ok".to_string()),
+                },
+            ],
+        )
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let scoped = |scope: &str| ToolCallGroupHandlers {
+            instance_id: Some(scope.to_string()),
+            ..ToolCallGroupHandlers::default()
+        };
+        let first = tool_call_group(&spec(), &theme(), scoped("first"));
+        let second = tool_call_group(&spec(), &theme(), scoped("second"));
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some("tool-call-group:first:toggle:three"))
+            .is_some());
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some("tool-call-group:second:toggle:three"))
+            .is_none());
+        assert!(first
+            .find(&|n| n.id.as_deref() == Some("tool-call-group-toggle-three"))
+            .is_some());
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some("tool-call:first:b"))
+            .is_some());
+        assert!(second
+            .find(&|n| n.runtime_id.as_deref() == Some("tool-call:second:b"))
+            .is_some());
+    }
 }

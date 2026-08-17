@@ -86,6 +86,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .unwrap()
                     .push(NodeSpecimenEvent::Toggle(format!("tool-call-group-{id}")));
             }))
+            .with_instance_id("three")
             .on_call_toggle(Arc::new(move |id| {
                 call_events
                     .lock()

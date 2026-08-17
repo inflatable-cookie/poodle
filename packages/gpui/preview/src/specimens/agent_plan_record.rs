@@ -38,6 +38,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 AgentPlanRecordSpec::new(PLAN, AgentPlanStatus::Accepted).with_expanded(expanded),
                 theme,
             )
+            .with_instance_id("accepted")
             .on_toggle(Arc::new(move |next| {
                 events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
                     key: "agent-plan-record-expanded".to_string(),
@@ -52,7 +53,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 AgentPlanRecordSpec::new(PLAN, AgentPlanStatus::Revised)
                     .with_decision_label("Revised with operator feedback"),
                 theme,
-            ),
+            )
+            .with_instance_id("revised"),
         ))
         .child(group(
             "Dismissed",
@@ -60,7 +62,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             AgentPlanRecord::from_spec(
                 AgentPlanRecordSpec::new(PLAN, AgentPlanStatus::Dismissed),
                 theme,
-            ),
+            )
+            .with_instance_id("dismissed"),
         ))
         .child(group(
             "With provenance",
@@ -69,7 +72,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 AgentPlanRecordSpec::new(PLAN, AgentPlanStatus::Accepted)
                     .with_decided_at("2026-08-07 10:00"),
                 theme,
-            ),
+            )
+            .with_instance_id("provenance"),
         ))
         .into_any_element();
 
@@ -83,6 +87,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 AgentPlanRecordSpec::new(PLAN, AgentPlanStatus::Accepted).with_size(size),
                 theme,
             )
+            .with_instance_id(format!("size-{size:?}"))
             .into_any_element()
         },
         |density, theme: &GpuiThemeProvider| {
@@ -90,6 +95,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 AgentPlanRecordSpec::new(PLAN, AgentPlanStatus::Accepted).with_density(density),
                 theme,
             )
+            .with_instance_id(format!("density-{density:?}"))
             .into_any_element()
         },
     )
