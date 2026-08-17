@@ -20,6 +20,7 @@ pub mod duration;
 pub mod file_upload;
 pub mod history_center;
 pub mod hover;
+pub mod licence;
 pub mod menu;
 pub mod modal;
 pub mod nav;
