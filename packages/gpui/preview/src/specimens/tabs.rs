@@ -1,13 +1,14 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, Tabs};
+use crate::specimens::specimen_layout::specimen_layout;
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ActiveEdge, ControlDensity, ControlSize, EyebrowSpec, Orientation, ActiveFill, TabDefinition,
-    TabVariant, TabsSpec,
+    ActiveEdge, ActiveFill, EyebrowSpec, Orientation, TabDefinition, TabVariant, TabsSpec,
 };
 use std::sync::Arc;
 
@@ -413,50 +414,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_id("specimen-fullwidth")
         .on_change(node_value_handler(state, "tabs-fullwidth-value"));
 
-    // 9. SIZE MATRIX (xs → xl, card variant)
-    let size_specs = [
-        ("xs", ControlSize::Xs),
-        ("sm", ControlSize::Sm),
-        ("md", ControlSize::Md),
-        ("lg", ControlSize::Lg),
-        ("xl", ControlSize::Xl),
-    ];
-    let mut size_row = div().flex().flex_col().gap(px(12.0)).max_w(px(360.0));
-    for (label, size) in size_specs {
-        let spec = TabsSpec::new(vec![
-            TabDefinition::new("details", "Details"),
-            TabDefinition::new("usage", "Usage").with_count(12),
-            TabDefinition::new("versions", "Versions").with_count(3),
-        ])
-        .with_variant(TabVariant::Card)
-        .with_size(size)
-        .with_value("details")
-        .with_aria_label(format!("{label} tabs"));
-        size_row =
-            size_row.child(Tabs::from_spec(spec, theme).with_id(format!("specimen-size-{label}")));
-    }
-
-    // 10. DENSITY MATRIX (compact / default / comfortable, card variant)
-    let density_specs = [
-        ("compact", ControlDensity::Compact),
-        ("default", ControlDensity::Default),
-        ("comfortable", ControlDensity::Comfortable),
-    ];
-    let mut density_row = div().flex().flex_col().gap(px(12.0)).max_w(px(360.0));
-    for (label, density) in density_specs {
-        let spec = TabsSpec::new(vec![
-            TabDefinition::new("details", "Details"),
-            TabDefinition::new("usage", "Usage").with_count(12),
-            TabDefinition::new("versions", "Versions").with_count(3),
-        ])
-        .with_variant(TabVariant::Card)
-        .with_density(density)
-        .with_value("details")
-        .with_aria_label(format!("{label} tabs"));
-        density_row = density_row
-            .child(Tabs::from_spec(spec, theme).with_id(format!("specimen-density-{label}")));
-    }
-
     // 11. REORDER DRAG STATES (drag-source + drop-target)
     // Contract §4: drag-source = opacity 0.4; drop-target = inset accent ring
     // (GPUI fallback: 2px accent border). Host-set transient state, here pinned
@@ -489,7 +446,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     .with_id("specimen-drag-card-outline");
 
     // ASSEMBLE
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -500,7 +457,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Card variant (default, with indicator line)"),
+                    EyebrowSpec::new()
+                        .with_content("Tabs over a panel — counts, a separator, and a flush variant"),
                     theme,
                 ))
                 .child(basic_card_component),
@@ -512,7 +470,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Card variant (closable, reorderable)"),
+                    EyebrowSpec::new()
+                        .with_content("Editable tabs — close one, or drag to reorder"),
                     theme,
                 ))
                 .child(card_component),
@@ -532,83 +491,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Card variant with counts, separators"),
+                    EyebrowSpec::new().with_content("Counts and separators"),
                     theme,
                 ))
                 .child(counts_component),
         )
-        // 2c. Card variant with active outline
+        // Variants — one row per variant, same items.
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Card variant (active outline)"),
+                    EyebrowSpec::new().with_content("Variants — card, pill, and block"),
                     theme,
                 ))
-                .child(outline_component),
-        )
-        // 2d. Card variant with solid fill
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Card variant (solid fill)"),
-                    theme,
-                ))
-                .child(solid_component),
-        )
-        // 3. Pill variant
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Pill variant (with icons)"),
-                    theme,
-                ))
-                .child(pill_component),
-        )
-        // 3b. Block variant
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Block variant (full-width, separators)"),
-                    theme,
-                ))
+                .child(pill_component)
                 .child(block_component),
         )
-        // 3c. Block variant (active outline)
+        // Marking the active tab.
+        // `activeEdge` and `activeFill` are variant-agnostic, so the four
+        // permutation sections this replaced taught one idea four times.
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Block variant (active outline)"),
+                    EyebrowSpec::new()
+                        .with_content("Marking the active tab — an edge, a fill, or both"),
                     theme,
                 ))
-                .child(block_outline_component),
-        )
-        // 3d. Block variant (active underline, no fill — the former strip)
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content(
-                        "Block variant (active underline, no fill — the former strip)",
-                    ),
-                    theme,
-                ))
+                .child(outline_component)
+                .child(solid_component)
+                .child(block_outline_component)
                 .child(
                     div()
                         .rounded(px(6.0))
@@ -634,7 +550,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Card variant (no border)"),
+                    EyebrowSpec::new()
+                        .with_content("Without a border — for titlebars and toolbars"),
                     theme,
                 ))
                 .child(card_icon_component),
@@ -647,7 +564,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
                     EyebrowSpec::new()
-                        .with_content("Block variant — vertical (icon-only, collapsed panel)"),
+                        .with_content("Vertical — a side panel's tab rail"),
                     theme,
                 ))
                 .child(
@@ -769,31 +686,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(div().w_full().child(full_width_component)),
         )
-        // 9. Sizes
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Sizes (xs → xl)"),
-                    theme,
-                ))
-                .child(size_row),
-        )
-        // 10. Densities
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Densities (compact / default / comfortable)"),
-                    theme,
-                ))
-                .child(density_row),
-        )
-        // 11. Reorder drag states (drag-source dimmed, drop-target ringed)
+        // Reorder drag states (drag-source dimmed, drop-target ringed).
+        // Native-specific evidence for contract §4: the transient drag visuals
+        // are host-set, so they are pinned on the spec here rather than
+        // produced by a gesture. The web pages have no equivalent.
         .child(
             div()
                 .flex()
@@ -808,4 +704,46 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(drag_underline)
                 .child(drag_card),
         )
+        .into_any_element();
+
+    // The axis sweeps used to be sections 9 and 10 of the page body. They are
+    // panes now: Examples teaches the component, the tabs carry the matrices.
+    let axis_items = || {
+        vec![
+            TabDefinition::new("details", "Details"),
+            TabDefinition::new("usage", "Usage").with_count(12),
+            TabDefinition::new("versions", "Versions").with_count(3),
+        ]
+    };
+
+    specimen_layout(
+        state,
+        cx,
+        "tabs",
+        examples,
+        move |size, theme: &GpuiThemeProvider| {
+            let spec = TabsSpec::new(axis_items())
+                .with_variant(TabVariant::Card)
+                .with_size(size)
+                .with_value("details")
+                .with_aria_label(format!("{size:?} tabs"));
+            div()
+                .max_w(px(360.0))
+                .child(Tabs::from_spec(spec, theme).with_id(format!("specimen-size-{size:?}")))
+                .into_any_element()
+        },
+        move |density, theme: &GpuiThemeProvider| {
+            let spec = TabsSpec::new(axis_items())
+                .with_variant(TabVariant::Card)
+                .with_density(density)
+                .with_value("details")
+                .with_aria_label(format!("{density:?} tabs"));
+            div()
+                .max_w(px(360.0))
+                .child(
+                    Tabs::from_spec(spec, theme).with_id(format!("specimen-density-{density:?}")),
+                )
+                .into_any_element()
+        },
+    )
 }

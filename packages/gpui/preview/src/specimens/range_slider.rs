@@ -6,7 +6,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{EyebrowSpec, RangeSliderSpec, SliderPolarity};
+use poodle_specs::{EyebrowSpec, Orientation, RangeSliderSpec, SliderPolarity};
 use std::sync::Arc;
 
 fn range_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(f64, f64) + Send + Sync> {
@@ -109,7 +109,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Default"),
+                    EyebrowSpec::new().with_content("A lower and upper bound the reader drags"),
                     theme,
                 ))
                 .child(
@@ -144,7 +144,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With step"),
+                    EyebrowSpec::new()
+                        .with_content("Stepped — the thumbs land on whole increments"),
                     theme,
                 ))
                 .child(
@@ -210,13 +211,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )),
         )
+        // --- Embedded variant ---
+        // Both polarities in one section: they are the same variant answering
+        // the same question, and the web pages now show them together too.
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Embedded unipolar control"),
+                    EyebrowSpec::new().with_content(
+                        "Embedded variant — unipolar fills from the floor, bipolar from centre",
+                    ),
                     theme,
                 ))
                 .child(
@@ -232,17 +238,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         "range-slider-embedded-unipolar",
                         range_fraction_change(state, "range-slider-embedded-unipolar"),
                     ),
-                ),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Embedded bipolar control"),
-                    theme,
-                ))
+                )
                 .child(
                     RangeSlider::from_spec(
                         RangeSliderSpec::new(embedded_bipolar_lo, embedded_bipolar_hi)
@@ -258,24 +254,41 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     ),
                 ),
         )
-        // --- Custom min / max + step ---
-        // Bounds 0..500, [100, 350], step 50; fill from 20% to 70%.
+        // --- Vertical ---
+        // The contract covers vertical orientation with its own sizing rules
+        // and no page taught it. Added by the g15.011 pilot.
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Custom min / max + step (0–500, step 50)"),
+                    EyebrowSpec::new().with_content("Vertical — the same control on the other axis"),
                     theme,
                 ))
-                .child(RangeSlider::from_spec(
-                    RangeSliderSpec::new(100.0, 350.0)
-                        .with_bounds(0.0, 500.0)
-                        .with_step(50.0)
-                        .with_aria_label("Budget range"),
-                    theme,
-                )),
+                .child(
+                    div()
+                        .flex()
+                        .flex_row()
+                        .gap(px(32.0))
+                        .h(px(192.0))
+                        .child(RangeSlider::from_spec(
+                            RangeSliderSpec::new(30.0, 70.0)
+                                .with_bounds(0.0, 100.0)
+                                .with_orientation(Orientation::Vertical)
+                                .with_aria_label("Vertical range"),
+                            theme,
+                        ))
+                        .child(RangeSlider::from_spec(
+                            RangeSliderSpec::new(-0.4, 0.6)
+                                .with_bounds(-1.0, 1.0)
+                                .with_step(0.01)
+                                .with_embedded_control(SliderPolarity::Bipolar)
+                                .with_orientation(Orientation::Vertical)
+                                .with_aria_label("Vertical embedded range"),
+                            theme,
+                        )),
+                ),
         )
         // --- Disabled ---
         .child(
@@ -302,76 +315,32 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "range-slider",
         examples,
+        // Sizes pane: one control per step. Three per step was an exhaustive
+        // matrix inside the tab that exists to keep matrices out of Examples.
         |size, theme: &GpuiThemeProvider| {
-            let unipolar_key = format!("range-slider-size-unipolar-{size:?}");
-            let bipolar_key = format!("range-slider-size-bipolar-{size:?}");
-            let read_range = |key: &str, fallback: (f64, f64)| {
-                (
-                    state
-                        .specimens
-                        .text
-                        .get(&format!("{key}-lo"))
-                        .and_then(|value| value.parse().ok())
-                        .unwrap_or(fallback.0),
-                    state
-                        .specimens
-                        .text
-                        .get(&format!("{key}-hi"))
-                        .and_then(|value| value.parse().ok())
-                        .unwrap_or(fallback.1),
-                )
-            };
-            let unipolar = read_range(&unipolar_key, (0.2, 0.75));
-            let bipolar = read_range(&bipolar_key, (-0.5, 0.5));
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(
-                    RangeSlider::from_spec(
-                        RangeSliderSpec::new(unipolar.0, unipolar.1)
-                            .with_bounds(0.0, 1.0)
-                            .with_step(0.01)
-                            .with_aria_label("Standard range"),
-                        theme,
-                    )
-                    .size(size)
-                    .on_change(
-                        format!("{unipolar_key}-standard"),
-                        range_fraction_change(state, unipolar_key.clone()),
-                    ),
-                )
-                .child(
-                    RangeSlider::from_spec(
-                        RangeSliderSpec::new(unipolar.0, unipolar.1)
-                            .with_bounds(0.0, 1.0)
-                            .with_step(0.01)
-                            .with_embedded_control(SliderPolarity::Unipolar)
-                            .with_aria_label("Embedded unipolar range"),
-                        theme,
-                    )
-                    .size(size)
-                    .on_change(
-                        format!("{unipolar_key}-embedded"),
-                        range_fraction_change(state, unipolar_key),
-                    ),
-                )
-                .child(
-                    RangeSlider::from_spec(
-                        RangeSliderSpec::new(bipolar.0, bipolar.1)
-                            .with_bounds(-1.0, 1.0)
-                            .with_step(0.01)
-                            .with_embedded_control(SliderPolarity::Bipolar)
-                            .with_aria_label("Embedded bipolar range"),
-                        theme,
-                    )
-                    .size(size)
-                    .on_change(
-                        bipolar_key.clone(),
-                        range_fraction_change(state, bipolar_key),
-                    ),
-                )
-                .into_any_element()
+            let key = format!("range-slider-size-{size:?}");
+            let lo = state
+                .specimens
+                .text
+                .get(&format!("{key}-lo"))
+                .and_then(|value| value.parse().ok())
+                .unwrap_or(0.2);
+            let hi = state
+                .specimens
+                .text
+                .get(&format!("{key}-hi"))
+                .and_then(|value| value.parse().ok())
+                .unwrap_or(0.75);
+            RangeSlider::from_spec(
+                RangeSliderSpec::new(lo, hi)
+                    .with_bounds(0.0, 1.0)
+                    .with_step(0.01)
+                    .with_aria_label("Range"),
+                theme,
+            )
+            .size(size)
+            .on_change(key.clone(), range_fraction_change(state, key))
+            .into_any_element()
         },
         |density, theme: &GpuiThemeProvider| {
             RangeSlider::from_spec(
