@@ -1435,4 +1435,3 @@ fn model_catalogue_editor_hide_moves_real_focus_to_the_next_shown_model() {
         );
     });
 }
-
