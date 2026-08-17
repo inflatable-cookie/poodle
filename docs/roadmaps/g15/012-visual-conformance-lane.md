@@ -1,6 +1,6 @@
 # g15.012 — Primitive-First Visual Conformance Lane
 
-Status: **blocked** — orchestration hold; `g15.007` is next
+Status: **blocked** — release-first hold; `g15.013` is next
 Depends on: `g15.001` (measured roster)
 Governing refs: `release-baseline-roster.md`,
 `../../roadmaps/g14/022-generation-closeout.md` (operator ruling on future

@@ -1,10 +1,9 @@
 # g15.013 — v0.2.0 Release Certification
 
-Status: **ready** — prerequisites complete; dispatch after `g15.007` releases
-shared roster/register rows
+Status: **ready** — next; prerequisites and shared-row hold complete
 Depends on: `g15.002`–`g15.005` (Svelte focused evidence closure),
-`g15.006` (React mirror closure), `g15.014` (release-gate remediation —
-security prerequisite)
+`g15.006` (React mirror closure), `g15.007` (shared roster/register update),
+`g15.014` (release-gate remediation — security prerequisite)
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
 
@@ -28,6 +27,8 @@ remediation to have landed first.
       advisory (GHSA-2v37-7h3g-55p8) through the React preview's Vite
       dependency resolved, or the dependency replaced, with the advisory
       cleared from `effigy qa`.
+- [x] `g15.007` landed: Licence native rows and the shared release roster and
+      gap register are current before certification begins.
 
 ## Execution Plan
 

@@ -15,9 +15,8 @@ v0.2.0 release-baseline generation.
   `g14.022` completed the closeout. The generation is complete.
 - `g15` is the release-first v0.2.0 runway. The release-baseline roster, all
   four focused-evidence tranches, and React mirror closure are complete;
-  dependency-only `g15.014` is complete and native Licence card `g15.007` is
-  in flight. Release certification `g15.013` is unblocked but stays held until
-  `g15.007` releases its shared roster/register rows. Jetstream remains deferred.
+  dependency-only `g15.014` and native Licence card `g15.007` are complete.
+  Release certification `g15.013` is ready next. Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
 - The first g14 machine-pinning/scene runway was reset after five merged
@@ -42,8 +41,8 @@ v0.2.0 release-baseline generation.
 - `g12` — React parity, verification depth, native hardening, audio family
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
-- `g15` — active v0.2.0 release baseline; `g15.001`–`g15.006` and `g15.014`
-  complete, `g15.007` in flight, `g15.013` unblocked
+- `g15` — active v0.2.0 release baseline; `g15.001`–`g15.007` and `g15.014`
+  complete, `g15.013` ready next
 
 ## Rules
 

@@ -1,6 +1,6 @@
 # g15.011 — Human-Centred Specimen Catalogue Audit
 
-Status: **blocked** — orchestration hold; `g15.007` is next
+Status: **blocked** — release-first hold; `g15.013` is next
 Depends on: `g15.001` (measured roster); carries forward `g14.026` with its
 rubric and bounded shared specimen-plan boundary intact
 Governing refs: `release-baseline-roster.md`,

@@ -1,7 +1,7 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.001`–`g15.006` and `g15.014` complete; `g15.007`
-in flight; `g15.013` unblocked
+Status: active — `g15.001`–`g15.007` and `g15.014` complete; `g15.013`
+ready next
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -56,14 +56,14 @@ and status advance are the orchestrator's.
 4. [004 — Svelte focused evidence: composites & media](004-svelte-focused-evidence-composites-media.md) — complete; 35 paired evidence gaps closed
 5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — complete; final 24 Svelte and 23 React evidence gaps closed
 6. [006 — React mirror implementation & gallery closure](006-react-mirror-closure.md) — complete; React implementation/gallery are 175/0 and focused evidence is 152/23
-7. [007 — Licence family native completion](007-licence-family-native-completion.md) — in flight; carries `g14.017`
+7. [007 — Licence family native completion](007-licence-family-native-completion.md) — complete; PR #32 closed the Licence native family and prerequisites
 8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — carries `g14.020`
 9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md)
 10. [010 — Display, workstation & agent GPUI specimens](010-display-workstation-agent-gpui-specimens.md) — GPUI closure after `007`–`009`
 11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — carries `g14.026`
 12. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — per the `g14.022` decision; headless capture required
 13. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
-14. [013 — v0.2.0 release certification](013-v020-release-certification.md) — ready after `014`; hold dispatch until `007` releases shared roster/register rows
+14. [013 — v0.2.0 release certification](013-v020-release-certification.md) — ready next; all prerequisites and shared-row holds cleared
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)
@@ -92,7 +92,6 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Review and merge the in-flight `g15.007` worker PR. `g15.013` is now unblocked,
-but remains serial until `g15.007` releases the roster/register rows both cards
-may update. Hold `g15.008` and later native lanes until the orchestrator reviews
-`g15.007`.
+Dispatch `g15.013` for v0.2.0 release certification. Hold `g15.008`–`g15.012`
+as post-certification parity and catalogue lanes until the certification PR is
+reviewed; release mutation remains behind the explicit operator gate.

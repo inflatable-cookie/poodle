@@ -5,6 +5,7 @@ Card: `docs/roadmaps/g15/007-licence-family-native-completion.md`
 Worktree: `t3code/complete-licence-native-support` (worker lane, parallel with
 `g15.014`)
 Handoff: `docs/handoffs/20260817-070944-g15-007-licence-native-completion.md`
+Accepted: PR #32 at `900dfecb`; merge `a6017abb`
 
 ## Summary
 

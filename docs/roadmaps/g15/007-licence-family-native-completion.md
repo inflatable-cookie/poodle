@@ -1,6 +1,6 @@
 # g15.007 — Licence Family Native Completion
 
-Status: **in flight** — worker dispatched; awaiting PR
+Status: **complete** — accepted and merged in PR #32 (`a6017abb`)
 Depends on: `g15.001` (measured gaps); carries `g14.017` requirements with
 approved web references (`g14.015`/`g14.016`) intact
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
@@ -53,17 +53,17 @@ account work, and host-owned account content do not enter `<Name>Spec`.
 
 ## Execution Plan
 
-- [ ] **Batch A — native prerequisites:** port CodeInput's explicit `groups`,
+- [x] **Batch A — native prerequisites:** port CodeInput's explicit `groups`,
       optional `separator`, and full-value success/failure indication through
       Rust spec/render/GPUI; add generic GPUI FileUpload single-file
       selection/read plumbing with a headless injected-result path.
-- [ ] **Batch B — declarations:** hand-written `LicenceActivationSpec`,
+- [x] **Batch B — declarations:** hand-written `LicenceActivationSpec`,
       `LicenceSeatsSpec`, `LicenceStatusSpec` in `poodle_specs` matching the
       contract props tables and the native binding boundary above (web-native
       props stay out of the portable spec).
-- [ ] **Batch C — render:** `poodle-render` implementations for all three; no
+- [x] **Batch C — render:** `poodle-render` implementations for all three; no
       component-specific behaviour in generic runners.
-- [ ] **Batch D — GPUI and evidence:** GPUI specimens plus focused tests
+- [x] **Batch D — GPUI and evidence:** GPUI specimens plus focused tests
       (activation input path, inline seat rename, release, status display);
       headless regression cases via `effigy regressions:native` where a
       mounted window is required, otherwise focused `#[test]` cases in the
@@ -71,32 +71,32 @@ account work, and host-owned account content do not enter `<Name>Spec`.
 
 ## Goals
 
-- [ ] Hand-written `LicenceActivationSpec`, `LicenceSeatsSpec`,
+- [x] Hand-written `LicenceActivationSpec`, `LicenceSeatsSpec`,
       `LicenceStatusSpec` matching the contract props tables (web-native props
       stay out of the portable spec).
-- [ ] `poodle-render` implementations for all three; no component-specific
+- [x] `poodle-render` implementations for all three; no component-specific
       behaviour in generic runners.
-- [ ] GPUI specimens and focused tests: activation input path, inline seat
+- [x] GPUI specimens and focused tests: activation input path, inline seat
       rename, release, status display; never render machine IDs; label-only
       visible identity.
-- [ ] Headless regression cases via `effigy regressions:native` where a
+- [x] Headless regression cases via `effigy regressions:native` where a
       mounted window is required; otherwise focused `#[test]` cases in the
       render crate.
-- [ ] Preserve approved curated specimens unchanged.
-- [ ] CodeInput no longer infers a 3+3 split; explicit valid partitions,
+- [x] Preserve approved curated specimens unchanged.
+- [x] CodeInput no longer infers a 3+3 split; explicit valid partitions,
       separators, and completion results work in native rendering.
-- [ ] GPUI file activation uses a real path-prompt/read/base64 route in the
+- [x] GPUI file activation uses a real path-prompt/read/base64 route in the
       live adapter and the same generic seam with injected fixture bytes in
       headless evidence.
 
 ## Acceptance
 
-- [ ] Every active-cohort surface (spec, render, GPUI) has evidence named in
+- [x] Every active-cohort surface (spec, render, GPUI) has evidence named in
       the card log; one runtime does not borrow another's pass.
-- [ ] `cargo test -p poodle-render`, `effigy check:gpui`, and
+- [x] `cargo test -p poodle-render`, `effigy check:gpui`, and
       `effigy regressions:native` pass.
-- [ ] Jetstream reported as program-deferred, not as an accepted absence.
-- [ ] Longhorn's adapter assertions stay Longhorn-owned; no Poodle → Longhorn
+- [x] Jetstream reported as program-deferred, not as an accepted absence.
+- [x] Longhorn's adapter assertions stay Longhorn-owned; no Poodle → Longhorn
       edge added.
 
 ## Stop Conditions
