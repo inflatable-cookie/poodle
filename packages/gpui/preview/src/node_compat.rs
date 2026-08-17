@@ -1158,6 +1158,10 @@ impl ActionDiscoveryPanel {
         self
     }
 
+    pub(crate) fn on_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_select = Some(handler);
+        self
+    }
 }
 
 impl IntoElement for ActionDiscoveryPanel {
@@ -7111,6 +7115,11 @@ impl DockRegion {
 
     pub(crate) fn on_tab_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
         self.on_tab_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_collapse_toggle(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.on_collapse_toggle = Some(handler);
         self
     }
 

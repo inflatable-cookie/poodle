@@ -2109,3 +2109,148 @@ fn remediation_banner_action_and_dismiss_rebuild_the_host_spec() {
         );
     });
 }
+
+// ── g15.010 Batch B regressions ───────────────────────────────────────────
+
+/// ActionDiscoveryPanel selection travels through mounted keyboard input.
+/// The host stores the chosen action id and supplies it on the next spec.
+#[test]
+fn action_discovery_selection_rebuilds_the_host_spec_through_mounted_input() {
+    use poodle_specs::{ActionDiscoveryPanelSpec, ActionDiscoverySection, CommandActionItem};
+
+    run_headless(|cx| {
+        fn build(active: String, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = ActionDiscoveryPanelSpec::new(vec![ActionDiscoverySection::new(
+                "file",
+                "File",
+                vec![
+                    CommandActionItem::new("save", "Save"),
+                    CommandActionItem::new("open-file", "Open File"),
+                ],
+            )])
+            .with_active_id(&active);
+            let mount = Arc::clone(&mounted);
+            let panel = poodle_render::action_discovery_panel(
+                &spec,
+                &theme(),
+                Some(Arc::new(move |id| {
+                    *mount.lock().unwrap() = build(id.to_string(), Arc::clone(&mount));
+                })),
+            );
+            Node::container()
+                .child(panel)
+                .child(Node::text(format!("Active: {active}")))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build("save".to_string(), Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        driver.wait_for_focus_handle("open-file");
+        driver.keyboard_activate("open-file");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Active: open-file"),
+            "the next spec reflects the host-owned active action"
+        );
+    });
+}
+
+/// DockRegion tab selection and collapse both travel through mounted input.
+/// The host stores the chosen tab and the collapsed flag, then paints them.
+#[test]
+fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
+    use poodle_specs::{DockEdge, DockRegionSpec, PanelTabItem};
+
+    run_headless(|cx| {
+        fn build(tab: String, collapsed: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = DockRegionSpec::new(
+                DockEdge::Left,
+                vec![
+                    PanelTabItem::new("explorer", "Explorer"),
+                    PanelTabItem::new("search", "Search"),
+                ],
+            )
+            .with_collapsible(true)
+            .with_collapsed(collapsed)
+            .with_value(&tab);
+            let tab_mount = Arc::clone(&mounted);
+            let collapse_mount = Arc::clone(&mounted);
+            let tab_for_collapse = tab.clone();
+            let collapsed_for_tab = collapsed;
+            let dock = poodle_render::dock_region(
+                &spec,
+                &theme(),
+                Some(Node::text(format!("Panel: {tab}"))),
+                poodle_render::DockRegionHandlers {
+                    on_tab_change: Some(Arc::new(move |value| {
+                        *tab_mount.lock().unwrap() = build(
+                            value.to_string(),
+                            collapsed_for_tab,
+                            Arc::clone(&tab_mount),
+                        );
+                    })),
+                    on_collapse_toggle: Some(Arc::new(move |next| {
+                        *collapse_mount.lock().unwrap() = build(
+                            tab_for_collapse.clone(),
+                            next,
+                            Arc::clone(&collapse_mount),
+                        );
+                    })),
+                },
+            );
+            Node::container()
+                .child(dock)
+                .child(Node::text(format!("Tab: {tab}")))
+                .child(Node::text(if collapsed {
+                    "Collapsed"
+                } else {
+                    "Expanded"
+                }))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build("explorer".to_string(), false, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        driver.wait_for_focus_handle("dock-tab-search");
+        driver.keyboard_activate("dock-tab-search");
+        let after_tab: Vec<String> = mounted
+            .lock()
+            .unwrap()
+            .texts()
+            .into_iter()
+            .map(str::to_string)
+            .collect();
+        assert!(
+            after_tab.iter().any(|t| t == "Tab: search"),
+            "tab change reached the host and painted the next spec"
+        );
+        assert!(
+            after_tab.iter().any(|t| t == "Expanded"),
+            "tab change leaves the dock expanded"
+        );
+
+        driver.wait_for_focus_handle("dock-collapse");
+        driver.keyboard_activate("dock-collapse");
+        let after_collapse: Vec<String> = mounted
+            .lock()
+            .unwrap()
+            .texts()
+            .into_iter()
+            .map(str::to_string)
+            .collect();
+        assert!(
+            after_collapse.iter().any(|t| t == "Collapsed"),
+            "collapse reached the host and painted the next spec"
+        );
+        assert!(
+            after_collapse.iter().any(|t| t == "Tab: search"),
+            "the stored tab survives collapse"
+        );
+    });
+}

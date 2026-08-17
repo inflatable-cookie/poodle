@@ -179,10 +179,10 @@ mod region;
 mod resize_handle;
 
 // ── App Shell ─────────────────────────────────────────────
-mod action_discovery;
+mod action_discovery_panel;
 mod app_header;
 mod command_palette;
-mod dock_split;
+mod dock_region;
 mod status_bar;
 
 use crate::app_state::AppState;
@@ -655,13 +655,13 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "command-palette" => {
             specimen_card("CommandPalette", theme, command_palette::render(state, cx))
         }
-        "dock-region" => specimen_card("DockRegion", theme, dock_split::render(state, cx)),
+        "dock-region" => specimen_card("DockRegion", theme, dock_region::render(state, cx)),
         "split-view" => specimen_card("SplitView", theme, split_view_specimen::render(state, cx)),
         "status-bar" => specimen_card("StatusBar", theme, status_bar::render(state, cx)),
         "action-discovery-panel" => specimen_card(
             "ActionDiscoveryPanel",
             theme,
-            action_discovery::render(state, cx),
+            action_discovery_panel::render(state, cx),
         ),
         "history-center" => specimen_card(
             "HistoryCenter",

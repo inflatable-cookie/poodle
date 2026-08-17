@@ -13,7 +13,7 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, MainAxisAlignment, Node, NodeRole,
-    ShadowLayer,
+    ShadowLayer, StylePatch,
 };
 use poodle_specs::{
     ActionDiscoveryPanelSpec, ControlDensity, ControlSize, DiscoveryState, EmptyStateSpec,
@@ -371,6 +371,12 @@ pub fn action_discovery_panel(
             } else {
                 row.style.descriptor.cursor = CursorHint::Pointer;
                 row.interaction.focusable = true;
+                row.style.focus = Some(StylePatch {
+                    background: None,
+                    border_color: Some(accent),
+                    text_color: None,
+                    opacity: None,
+                });
                 if let Some(handler) = &on_select {
                     let handler = Arc::clone(handler);
                     let id = action.id.clone();

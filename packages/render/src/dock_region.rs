@@ -11,7 +11,7 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, NodeRole,
+    MainAxisAlignment, Node, NodeRole, StylePatch,
 };
 use poodle_specs::{
     DockCollapsedPosture, DockEdge, DockEmphasis, DockRegionSpec, DockSizing, DockTabsPlacement,
@@ -160,6 +160,12 @@ pub fn dock_region(
             }
             let mut tab_btn = tab_btn;
             tab_btn.interaction.focusable = true;
+            tab_btn.style.focus = Some(StylePatch {
+                background: None,
+                border_color: Some(accent),
+                text_color: None,
+                opacity: None,
+            });
             if let Some(handler) = &handlers.on_tab_change {
                 let handler = Arc::clone(handler);
                 let value = value.to_string();
@@ -195,6 +201,12 @@ pub fn dock_region(
             }
         }
         t.interaction.focusable = true;
+        t.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(accent),
+            text_color: None,
+            opacity: None,
+        });
         if let Some(handler) = &handlers.on_collapse_toggle {
             let handler = Arc::clone(handler);
             let next = !spec.is_collapsed;
