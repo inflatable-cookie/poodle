@@ -1,7 +1,8 @@
 # g15.005 — Svelte Focused Evidence: Workstation Systems & Agent Surfaces
 
-Status: **ready** — next dispatch; `g15.006` supplied the React
-`AgentPlanRecord` implementation and the 152/23 focused-React baseline
+Status: **changes requested** — PR #29 is under repair after orchestrator
+review; `g15.006` supplied the React `AgentPlanRecord` implementation and the
+152/23 focused-React baseline
 Depends on: `g15.001`, `g15.006`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
