@@ -182,10 +182,30 @@ single-select transition, radio roving focus, and id wiring.
 
 ## 10. GPUI Notes
 
-- Not implemented in GPUI. The g14 adoption pipeline was rejected; native
-  completion must be planned from this contract under the g15 release runway.
-- Preserve exact id selection, radio semantics, local filtering, and roving
-  focus; brand marks remain consumer-rendered content.
+- Implemented: `ModelConnectionPickerSpec`
+  (`packages/contracts/components/src/model_connection_picker.rs`),
+  `poodle_render::model_connection_picker`, GPUI specimen
+  `packages/gpui/preview/src/specimens/model_connection_picker_specimen.rs`.
+- Exact id selection, radio semantics, local filtering, and roving focus are
+  preserved. Brand marks remain consumer-rendered content.
+
+### Native Binding
+
+- The spec carries controlled display data only. `value` and `query` are the
+  current values; the web `defaultValue`/`defaultQuery` seeds are **web
+  targets only** because GPUI/AppState owns the current value and rerenders
+  after `on_value_change` / `on_query_change`.
+- Filtering, grouping, selectability, shell-state resolution, result
+  announcements, and posture copy derive once through
+  `poodle_headless::model_connection`.
+- The `leading` snippet becomes host-composed nodes keyed by option id
+  (`ModelConnectionPickerSlots::leading`); the generic mark is the fallback,
+  not a provider catalogue.
+- Natives label by object, so an option's accessible name states provider,
+  route, description, and the supplied availability reason once, where the web
+  composes the same content from descendant text plus a visually-hidden line.
+- Enter and Space select through the backend's own activation path; `on_key`
+  carries only the arrow/Home/End roving moves, so Space is never bound twice.
 
 ## 11. Parity Checklist
 

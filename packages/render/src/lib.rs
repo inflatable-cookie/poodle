@@ -109,6 +109,10 @@ pub mod meta_bar;
 pub mod meta_item;
 pub mod meter;
 pub mod metric_tile;
+pub mod model_catalogue_editor;
+pub mod model_connection_card;
+pub mod model_connection_picker;
+pub mod model_connection_setup;
 pub mod model_picker;
 pub mod nav_card;
 pub mod navigation_menu;
@@ -278,6 +282,22 @@ pub use meta_bar::{meta_bar, meta_bar_sep};
 pub use meta_item::meta_item;
 pub use meter::meter;
 pub use metric_tile::metric_tile;
+pub use model_connection_picker::{
+    model_connection_option_id, model_connection_picker, model_connection_picker_with_slots,
+    ModelConnectionPickerHandlers, ModelConnectionPickerSlots,
+};
+pub use model_catalogue_editor::{
+    model_catalogue_editor, model_catalogue_editor_with_slots, ModelCatalogueEditorHandlers,
+    ModelCatalogueEditorSlots,
+};
+pub use model_connection_card::{
+    model_connection_card, model_connection_card_with_slots, ModelConnectionCardHandlers,
+    ModelConnectionCardSlots,
+};
+pub use model_connection_setup::{
+    model_connection_setup, model_connection_setup_with_slots, ModelConnectionSetupHandlers,
+    ModelConnectionSetupSlots, MODEL_CONNECTION_SETUP_TITLE_ID,
+};
 pub use model_picker::model_picker;
 pub use nav_card::{nav_card, nav_card_with_icon};
 pub use navigation_menu::navigation_menu;

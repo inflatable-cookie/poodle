@@ -157,9 +157,28 @@ machinery, id wiring, and polite status announcement.
 
 ## 10. GPUI Notes
 
-- Not implemented in GPUI. The g14 adoption pipeline was rejected; native
-  completion must be planned from this contract under the g15 release runway.
+- Implemented: `ModelConnectionSetupSpec`
+  (`packages/contracts/components/src/model_connection_setup.rs`),
+  `poodle_render::model_connection_setup`, GPUI specimen
+  `packages/gpui/preview/src/specimens/model_connection_setup_specimen.rs`.
 - Consumer-rendered configuration content remains the native composition seam.
+
+### Native Binding
+
+- Every workflow event runs through
+  `poodle_headless::model_connection::model_connection_setup_transition`, so
+  the pending guards, the direct-add path, and the emitted effects are shared
+  with the web.
+- `stage`, `value`, and `query` are controlled. The web
+  `defaultStage`/`defaultValue` seeds are **web targets only**: the host owns
+  the current values and rerenders after a callback.
+- `configuration` and `configureAside` become host-composed nodes
+  (`ModelConnectionSetupSlots`). Their values never enter a spec, a callback,
+  or the rendered tree — Poodle never manufactures a credential form.
+- Stage focus movement is a request: the renderer names the destination
+  (`MODEL_CONNECTION_SETUP_TITLE_ID` on the way into configure, the selected
+  option's row on the way out) through `on_focus_request`, and the backend
+  performs the move.
 
 ## 11. Parity Checklist
 

@@ -174,10 +174,32 @@ and disclosure transition for the hidden section.
 
 ## 10. GPUI Notes
 
-- Not implemented in GPUI. The g14 adoption pipeline was rejected; native
-  completion must be planned from this contract under the g15 release runway.
-- Pointer drag may use native mechanics, but explicit and keyboard moves remain
-  required for strict parity.
+- Implemented: `ModelCatalogueEditorSpec`
+  (`packages/contracts/components/src/model_catalogue_editor.rs`),
+  `poodle_render::model_catalogue_editor`, GPUI specimen
+  `packages/gpui/preview/src/specimens/model_catalogue_editor_specimen.rs`.
+- Pointer drag uses the vocabulary's `drag_payload`/`drop_zone` mechanics;
+  explicit and keyboard moves remain and emit the same payloads.
+
+### Native Binding
+
+- Derivations, the reorder result, the focus-after-hide rule, and every
+  announcement come from `poodle_headless::model_connection`. The Rust mirror
+  of core's `listReorderKeyIntent` lives there as
+  `model_catalogue_reorder_key_intent`.
+- Transient interaction state is host state on the spec — `grabbed_id`,
+  `drop_target_id`, `hidden_open`, and `live_message` — and the renderer asks
+  for the next value through `on_grab_change`, `on_drop_target_change`,
+  `on_hidden_open_change`, and `on_announce`.
+- Keyboard grab and drop ride the backend's own activation path (Enter and
+  Space), arrows ride `on_key`, and Escape rides `on_cancel`: the vocabulary
+  has no other Escape channel for a plain control, and binding Space in both
+  places would toggle the grab twice.
+- Focus after a move or a hide is a request naming the destination element id;
+  the backend performs the move. Hiding the last shown model also asks for the
+  hidden section to be disclosed, so the destination exists.
+- `leading` and `rowMeta` become host-composed nodes keyed by item id;
+  `customAction` is a single header node.
 
 ## 11. Parity Checklist
 
