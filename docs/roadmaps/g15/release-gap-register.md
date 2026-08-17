@@ -56,13 +56,13 @@ the other exists. Counts below are `missing` only; `MeterSurface` is
 decision (spec 068) and is excluded from every missing count. Reproducible
 count method: `docs/roadmaps/g15/release-baseline-roster.md#count-method`.
 
-Summary of native gaps: Rust declaration 11 missing (+ 1 not-applicable),
-Rust render 13 missing (+ 1 not-applicable), GPUI specimen 29 missing
+Summary of native gaps: Rust declaration 8 missing (+ 1 not-applicable),
+Rust render 10 missing (+ 1 not-applicable), GPUI specimen 26 missing
 (+ 1 not-applicable).
 
 | Family | Missing Rust declaration | Missing Rust render | Missing GPUI specimen | Owner |
 | --- | --- | --- | --- | --- |
-| Licence (approved `g14.017` requirements) | LicenceActivation, LicenceSeats, LicenceStatus | same three | same three | `g15.007` |
+| Licence (approved `g14.017` requirements) | — closed by `g15.007` (`LicenceActivationSpec`, `LicenceSeatsSpec`, `LicenceStatusSpec`) | — closed by `g15.007` (`packages/render/src/licence_{activation,seats,status}.rs`) | — closed by `g15.007` (`packages/gpui/preview/src/specimens/licence_{activation,seats,status}.rs`) | `g15.007` |
 | Model connection (approved `g14.020` requirements) | ModelConnectionPicker, ModelConnectionSetup, ModelConnectionCard, ModelCatalogueEditor | same four | same four | `g15.008` |
 | Update & settings | UpdateStatus, UpdateCenter, SettingsShell | same three | same three | `g15.009` |
 | Radio | Radio | Radio | Radio | `g15.009` |
@@ -70,9 +70,11 @@ Rust render 13 missing (+ 1 not-applicable), GPUI specimen 29 missing
 | Display, workstation & agent specimens | — | — | Avatar, Callout, RemediationBanner, MetaItem, Pill, Spinner, EmptyState, StateTile, ActionDiscoveryPanel, DockRegion, AgentMessage, AgentPlan, AgentPlanRecord, AgentQuestionRecord, AgentSubagent, ChangedFiles, ToolCall, ToolCallGroup | `g15.010` |
 | MeterSurface | not-applicable — web-only by fixed decision (spec 068) | not-applicable | not-applicable | none |
 
-The six retained headless regressions (`effigy regressions:native`) certify
-Button, RangeSlider, and Popover only. All native tranches must land their
-evidence as focused owner-local tests, not by extending a shared comparator.
+The headless regressions (`effigy regressions:native`) certify Button,
+RangeSlider, Popover, and — since `g15.007` — grouped CodeInput, the generic
+FileUpload browse seam, LicenceActivation's segmented key path, LicenceSeats
+release, and LicenceStatus display. Native tranches land their evidence as
+focused owner-local tests, not by extending a shared comparator.
 
 ## Package-Install Surface
 

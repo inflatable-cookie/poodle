@@ -326,4 +326,49 @@ admission.
 | Delta | Status | Follow-up |
 | --- | --- | --- |
 | no native implementation in web-reference PR | incomplete, not accepted parity | g14.017 |
-| grouped key entry depends on the new web CodeInput `groups` and `separator` props; Rust CodeInput still has its legacy inferred 3+3 split | staged, not accepted parity | g14.017 ports grouping and separators through the adopted interface before native LicenceActivation |
+| grouped key entry depended on the new web CodeInput `groups`/`separator` props; Rust CodeInput had a legacy inferred 3+3 split | closed by g15.007 Batch A (§11, code-input §12) | none — explicit groups, separators, and the completion result are native-bound |
+
+## 11. Rust Binding Notes (g15.007)
+
+Status: **bound** — native implementation lands with `g15.007` (specs,
+`poodle-render`, GPUI specimen, headless evidence).
+
+- `LicenceActivationSpec` is cloneable data: the activation model, the
+  account/offline route, the controlled key draft and its caret, the opt-in
+  machine-label draft, local message fields, and the selected file's name and
+  bare-base64 payload. Web-native props stay out of the portable spec.
+- `LicenceActivationHandlers` (render crate) owns the callbacks: controlled
+  key/label edits, the route switch, submit, the generic file browse/remove,
+  and the injected key parser used for the segmented entry's presentation
+  feedback. The pure submit decision runs through
+  `poodle_headless::licence::resolve_licence_submit`; the host executes it on
+  submit, updates the spec's local messages, and emits the exact structural
+  credential plus the trimmed label. A rejected key shows the distinct
+  typo/too-short copy and never emits.
+- Key mode composes CodeInput when `keyCodeInput` is supplied (explicit
+  groups/separator, `numbersOnly=false`, parser joined value). At full length
+  the injected parser drives the tick/cross; this never activates and never
+  replaces the submit-time parse. Free-form TextInput is the default.
+- Account mode composes optional host-owned `poodle-node` account content
+  beside the spec and emits an account-activation request; tokens never
+  enter render state. Offline mode composes the generic FileUpload browse
+  seam with the host's `fileAccept`; accept/size rules are enforced after
+  selection and rejections are reported honestly (GPUI 0.2.2 has no dialog
+  filter). File contents are base64 without a data-URL prefix and never
+  render.
+- `machineLabel` is an opt-in seed on the web; on Rust targets the host seeds
+  `spec.machine_label` and drives the draft. `None` hides the control; the
+  committed label is trimmed and `null` for blank — `unnamed machine` copy is
+  never emitted. Editing is controlled: typing updates the draft
+  (`on_machine_label_change`), commit/cancel close it through distinct
+  channels, and **Escape restores the value snapped at edit start** (the
+  host/ specimen holds the snapshot) — the web EditableLabel's revert rule.
+- Data-state roles (`mode`, `route`, `busy`) mirror the web's `data-*`
+  attributes; `pending` freezes the submit action (loading button).
+- The offline file read failure surfaces the approved
+  `LICENCE_FILE_UNREADABLE_MESSAGE` (`That file could not be read.`) rather
+  than a raw OS error; accept/size rejections keep their honest copy. Editing
+  the key clears the local validation copy (the web pair's `handleKeyChange`).
+- The composed EditableLabel input now accepts typed characters
+  (`on_edit_key`/`on_edit_insert` → the controlled draft) and carries a
+  focus ring — a bounded defect fix exposed by the machine-name evidence.

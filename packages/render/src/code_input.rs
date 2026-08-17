@@ -13,7 +13,7 @@ use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, ShadowLayer,
     TextAlign,
 };
-use poodle_specs::{CodeInputSpec, ControlDensity, ValidationState};
+use poodle_specs::{CodeInputCompletion, CodeInputSpec, ControlDensity, ValidationState};
 
 use crate::color::with_alpha;
 use crate::presentation::{
@@ -61,6 +61,7 @@ pub fn code_input_with_handlers(
     let accent_border = theme.resolve_color("color.accent.border");
     let focus_ring = theme.resolve_color("color.accent.focusRing");
     let danger = theme.resolve_color("color.status.danger");
+    let success = theme.resolve_color("color.status.success");
     let radius = theme.resolve_radius("radius.control");
 
     // Contract §7: only the invalid case (or an error) changes slot colors.
@@ -80,9 +81,13 @@ pub fn code_input_with_handlers(
         ControlDensity::Default => theme.resolve_space("space.inline.sm"),
         ControlDensity::Comfortable => theme.resolve_space("space.inline.md"),
     };
-    // Contract §7 split-after: fixed margin-right = space.inline.md at index 2
-    // when length == 6 (3+3 grouping).
+    // ── Explicit visual groups (contract §7) ──
+    // Break positions come from the spec's explicit partition of `length`
+    // (`--group-end` margin at every group end); the old inferred 3+3 split is
+    // gone. The separator renders at the same boundaries, presentation-only.
+    let group_ends = spec.group_end_indices();
     let split_margin = theme.resolve_space("space.inline.md");
+    let has_separator = spec.separator.as_deref().is_some_and(|s| !s.is_empty());
 
     // ── Distribute the sanitized value across slots (per numbers_only) ──
     let chars = spec.sanitized_chars();
@@ -148,8 +153,9 @@ pub fn code_input_with_handlers(
                     inset: false,
                 }];
             }
-            // 3+3 split for 6-digit codes.
-            if spec.length == 6 && i == 2 {
+            // Explicit group ends: the margin applies at every group boundary,
+            // not at an inferred split.
+            if group_ends.contains(&i) {
                 s.descriptor.layout.spacing.margin.right = split_margin;
             }
         }
@@ -179,6 +185,33 @@ pub fn code_input_with_handlers(
         }
 
         row = row.child(slot.child(value));
+
+        // Presentation-only group separator at each valid boundary: code
+        // typography in secondary text, never part of the accessible value.
+        if has_separator && group_ends.contains(&i) {
+            let mut sep = Node::text(spec.separator.as_deref().unwrap_or_default());
+            sep.style.text_size = Some(font_size);
+            sep.style.descriptor.text_color = Some(text_secondary);
+            sep.style.text_weight = Some(600);
+            row = row.child(sep);
+        }
+    }
+
+    // ── Completion result (contract §7) ──
+    // The tick/cross follows the last slot or group separator, belongs to the
+    // exact value the check ran against (stale results never render), and
+    // carries the polite check-passed/check-failed status label.
+    if let Some(completion) = spec.visible_completion() {
+        let (icon, color, status) = match completion {
+            CodeInputCompletion::Passed(_) => {
+                ("check", success, "Code check passed")
+            }
+            CodeInputCompletion::Failed(_) => ("x", danger, "Code check failed"),
+        };
+        let mut indicator = Node::icon(icon, font_size);
+        indicator.style.descriptor.text_color = Some(color);
+        indicator.a11y.label = Some(status.to_string());
+        row = row.child(indicator);
     }
 
     // Keys land on the slot row, not on any one slot: the value is one string
@@ -460,5 +493,150 @@ mod tests {
             .expect("paste target");
         (row.interaction.on_edit_insert.as_ref().unwrap())("123-456");
         assert_eq!(*seen.lock().unwrap(), vec!["123456".to_string()]);
+    }
+
+    /// The group-end margin applies only at explicit partition boundaries.
+    /// A six-character input without `groups` has no break anywhere.
+    #[test]
+    fn group_margins_follow_explicit_partitions_only() {
+        fn margin_rights(spec: &CodeInputSpec) -> Vec<usize> {
+            let node = code_input_with_handlers(spec, &theme(), CodeInputHandlers::default());
+            let row = node
+                .find(&|n| n.interaction.on_edit_key.is_some() || n.interaction.focusable)
+                .expect("slot row");
+            row.children
+                .iter()
+                .enumerate()
+                .filter(|(_, slot)| slot.style.descriptor.layout.spacing.margin.right > 0.0)
+                .map(|(i, _)| i)
+                .collect()
+        }
+
+        // No inference: length 6 without groups is uninterrupted.
+        assert!(margin_rights(&CodeInputSpec::new().with_length(6)).is_empty());
+
+        // Explicit 5x4: breaks after slots 4, 9, 14.
+        let grouped = CodeInputSpec::new().with_length(20).with_groups([5, 5, 5, 5]);
+        assert_eq!(margin_rights(&grouped), vec![4, 9, 14]);
+
+        // Explicit 3+3: the break after slot 2, exactly where the old
+        // inference put it — now because the caller said so.
+        let split = CodeInputSpec::new().with_length(6).with_groups([3, 3]);
+        assert_eq!(margin_rights(&split), vec![2]);
+
+        // An invalid partition has no breaks.
+        let invalid = CodeInputSpec::new().with_length(6).with_groups([2, 2]);
+        assert!(margin_rights(&invalid).is_empty());
+    }
+
+    /// Separators render only at valid group boundaries, never without a
+    /// valid multi-group pattern, and never enter the value.
+    #[test]
+    fn separators_follow_valid_group_boundaries() {
+        fn separator_count(spec: &CodeInputSpec) -> usize {
+            let node = code_input_with_handlers(spec, &theme(), CodeInputHandlers::default());
+            fn count(n: &Node, out: &mut usize) {
+                if matches!(&n.kind, poodle_node::NodeKind::Text { content } if content == "-") {
+                    *out += 1;
+                }
+                for c in &n.children {
+                    count(c, out);
+                }
+            }
+            let mut out = 0;
+            count(&node, &mut out);
+            out
+        }
+
+        let grouped = CodeInputSpec::new().with_length(20).with_groups([5, 5, 5, 5]);
+        assert_eq!(separator_count(&grouped), 0, "separator without separator");
+        assert_eq!(
+            separator_count(&grouped.clone().with_separator("-")),
+            3,
+            "one separator per boundary"
+        );
+
+        // A separator is ignored without a valid multi-group pattern.
+        assert_eq!(
+            separator_count(&CodeInputSpec::new().with_length(6).with_separator("-")),
+            0
+        );
+        assert_eq!(
+            separator_count(
+                &CodeInputSpec::new()
+                    .with_length(6)
+                    .with_groups([2, 2])
+                    .with_separator("-")
+            ),
+            0
+        );
+        // A separator never enters the value: the slots still distribute the
+        // joined code (a licence key is arbitrary text, not digits).
+        let node = code_input_with_handlers(
+            &CodeInputSpec::new()
+                .with_length(20)
+                .with_groups([5, 5, 5, 5])
+                .with_separator("-")
+                .with_numbers_only(false)
+                .with_value("ABCDEFGHIJKLMNOPQRST"),
+            &theme(),
+            CodeInputHandlers::default(),
+        );
+        let row = node
+            .find(&|n| n.interaction.focusable)
+            .expect("slot row");
+        let slot_chars: Vec<char> = row
+            .children
+            .iter()
+            .filter_map(|slot| {
+                slot.children.iter().find_map(|c| match &c.kind {
+                    poodle_node::NodeKind::Text { content } => {
+                        content.chars().next()
+                    }
+                    _ => None,
+                })
+            })
+            .collect();
+        assert_eq!(slot_chars.len(), 20, "the joined value stays intact");
+    }
+
+    /// The completion tick/cross renders only for the exact value the check
+    /// ran against; editing the code removes the indicator immediately.
+    #[test]
+    fn completion_indicator_renders_for_the_checked_value_only() {
+        fn indicator(node: &Node) -> Option<(&str, &str)> {
+            fn find(n: &Node) -> Option<(&str, &str)> {
+                if let poodle_node::NodeKind::Icon { name, .. } = &n.kind {
+                    if let Some(label) = n.a11y.label.as_deref() {
+                        return Some((name.as_str(), label));
+                    }
+                }
+                n.children.iter().find_map(find)
+            }
+            find(node)
+        }
+
+        let checked = CodeInputSpec::new()
+            .with_length(6)
+            .with_value("123456")
+            .with_completion_result(CodeInputCompletion::Passed("123456".to_string()));
+        let node = code_input_with_handlers(&checked, &theme(), CodeInputHandlers::default());
+        assert_eq!(indicator(&node), Some(("check", "Code check passed")));
+
+        let failed = checked.clone().with_completion_result(
+            CodeInputCompletion::Failed("123456".to_string()),
+        );
+        let node = code_input_with_handlers(&failed, &theme(), CodeInputHandlers::default());
+        assert_eq!(indicator(&node), Some(("x", "Code check failed")));
+
+        // The value changed: the result no longer belongs to it.
+        let edited = checked.clone().with_value("654321");
+        let node = code_input_with_handlers(&edited, &theme(), CodeInputHandlers::default());
+        assert_eq!(indicator(&node), None);
+
+        // A short code has no indicator either.
+        let partial = checked.clone().with_value("123");
+        let node = code_input_with_handlers(&partial, &theme(), CodeInputHandlers::default());
+        assert_eq!(indicator(&node), None);
     }
 }

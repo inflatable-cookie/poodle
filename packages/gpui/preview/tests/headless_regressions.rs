@@ -286,3 +286,762 @@ fn a_nested_popover_paints_without_nesting_deferred_draws() {
         );
     });
 }
+
+// ── g15.007 Batch A regressions ───────────────────────────────────────────
+
+/// The mounted-window regressions that drive interactive nodes give those
+/// nodes explicit ids — the same pattern every retained regression in this
+/// file uses. The production preview rebuilds id-less elements within each
+/// platform frame; the test platform renders a view several times per draw,
+/// so only a declared id keeps an element's state stable across a click.
+fn give_first_id(node: &mut Node, id: &str, predicate: &dyn Fn(&Node) -> bool) -> bool {
+    if predicate(node) {
+        node.id = Some(id.to_owned());
+        return true;
+    }
+    node.children
+        .iter_mut()
+        .any(|child| give_first_id(child, id, predicate))
+}
+
+/// A grouped code input stays one joined value through the real dispatch
+/// tree: the separator is presentation-only, so the code reaches the host
+/// without hyphens, and a full-length entry completes exactly once.
+#[test]
+fn a_grouped_code_input_types_and_completes_through_the_real_tree() {
+    use poodle_specs::CodeInputSpec;
+
+    run_headless(|cx| {
+        let changes = Arc::new(Mutex::new(Vec::new()));
+        let completes = Arc::new(Mutex::new(Vec::new()));
+        let changes_sink = Arc::clone(&changes);
+        let completes_sink = Arc::clone(&completes);
+
+        let mut node = poodle_render::code_input_with_handlers(
+            &CodeInputSpec::new()
+                .with_length(20)
+                .with_groups([5, 5, 5, 5])
+                .with_separator("-")
+                .with_numbers_only(false),
+            &theme(),
+            poodle_render::CodeInputHandlers {
+                on_value_change: Some(Arc::new(move |value: &str| {
+                    changes_sink.lock().unwrap().push(value.to_string())
+                })),
+                on_complete: Some(Arc::new(move |value: &str| {
+                    completes_sink.lock().unwrap().push(value.to_string())
+                })),
+                ..poodle_render::CodeInputHandlers::default()
+            },
+        );
+        // The slot row takes the keys; give it a stable identity for the
+        // mounted window.
+        assert!(give_first_id(
+            &mut node,
+            "code-input-row",
+            &|n| n.interaction.focusable,
+        ));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        // A real pointer press focuses the slot row, then keys walk the focus
+        // chain — no handler is invoked as a test shortcut.
+        driver.pointer_activate();
+        driver.dispatch_key_raw("1");
+        driver.dispatch_key_raw("2");
+        assert_eq!(
+            changes.lock().unwrap().as_slice(),
+            ["1", "2"],
+            "each key reaches the row as part of one joined value"
+        );
+
+        // Re-mount a full grouped code (the host re-render). Completing a
+        // full value through the real tree fires completion exactly once.
+        fn build_row(
+            value: &str,
+            changes_sink: Arc<Mutex<Vec<String>>>,
+            completes_sink: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
+            let mut node = poodle_render::code_input_with_handlers(
+                &CodeInputSpec::new()
+                    .with_length(4)
+                    .with_numbers_only(false)
+                    .with_value(value),
+                &theme(),
+                poodle_render::CodeInputHandlers {
+                    on_value_change: Some(Arc::new(move |next: &str| {
+                        changes_sink.lock().unwrap().push(next.to_string())
+                    })),
+                    on_complete: Some(Arc::new(move |next: &str| {
+                        completes_sink.lock().unwrap().push(next.to_string())
+                    })),
+                    ..poodle_render::CodeInputHandlers::default()
+                },
+            );
+            // A fresh id: the first mount's row state (and its focus handle)
+            // is gone with its element, and the driver keeps one window.
+            assert!(give_first_id(
+                &mut node,
+                "code-input-row-2",
+                &|n| n.interaction.focusable,
+            ));
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+        // The value is controlled host state: each keystroke is applied by
+        // rebuilding the row with the reported value before the next key —
+        // the real host loop, driven through the real dispatch tree.
+        let row = Arc::new(Mutex::new(build_row(
+            "",
+            Arc::clone(&changes),
+            Arc::clone(&completes),
+        )));
+        driver.mount_node(Arc::clone(&row));
+        let mut value = String::new();
+        for key in ["a", "b", "c", "d"] {
+            driver.pointer_activate();
+            driver.dispatch_key_raw(key);
+            value = changes
+                .lock()
+                .unwrap()
+                .last()
+                .cloned()
+                .expect("the row reported the keystroke");
+            *row.lock().unwrap() = build_row(&value, Arc::clone(&changes), Arc::clone(&completes));
+            driver.draw_frame();
+        }
+        assert_eq!(
+            value,
+            "abcd",
+            "the row accumulates the joined value through the host loop"
+        );
+        assert_eq!(
+            completes.lock().unwrap().as_slice(),
+            ["abcd"],
+            "completion fires on the transition into a full code, once"
+        );
+    });
+}
+
+/// The completion tick/cross belongs to the exact value it was computed for:
+/// a host re-render with an edited value removes the indicator in a mounted
+/// window, so a stale result can never render.
+#[test]
+fn a_stale_completion_result_cannot_render_in_a_mounted_window() {
+    use poodle_specs::{CodeInputCompletion, CodeInputSpec};
+
+    fn count_indicators(node: &Node) -> usize {
+        fn walk(n: &Node, out: &mut usize) {
+            if let poodle_node::NodeKind::Icon { name, .. } = &n.kind {
+                if name == "check" || name == "x" {
+                    if n.a11y.label.is_some() {
+                        *out += 1;
+                    }
+                }
+            }
+            for c in &n.children {
+                walk(c, out);
+            }
+        }
+        let mut out = 0;
+        walk(node, &mut out);
+        out
+    }
+
+    run_headless(|cx| {
+        let mut checked = poodle_render::code_input_with_handlers(
+            &CodeInputSpec::new()
+                .with_length(6)
+                .with_value("123456")
+                .with_completion_result(CodeInputCompletion::Passed("123456".to_string())),
+            &theme(),
+            poodle_render::CodeInputHandlers::default(),
+        );
+        checked.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(checked));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        driver.draw_frame();
+        assert_eq!(count_indicators(&node.lock().unwrap()), 1, "tick renders");
+
+        // The host edits the value away from the checked one and re-renders
+        // through the same mounted node.
+        *node.lock().unwrap() = poodle_render::code_input_with_handlers(
+            &CodeInputSpec::new()
+                .with_length(6)
+                .with_value("654321")
+                .with_completion_result(CodeInputCompletion::Passed("123456".to_string())),
+            &theme(),
+            poodle_render::CodeInputHandlers::default(),
+        );
+        driver.draw_frame();
+        assert_eq!(
+            count_indicators(&node.lock().unwrap()),
+            0,
+            "the indicator belongs to the value it was checked against"
+        );
+    });
+}
+
+/// Browse goes through the generic single-file seam: a pointer activation of
+/// the dropzone flows fixture bytes through the injected source and the same
+/// post-selection pipeline the live OS prompt uses.
+#[test]
+fn a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam() {
+    use poodle_gpui_node_backend::file_capability::{
+        InjectedFileSource, PickedFile, SingleFilePickSpec, SingleFileSource, finish_file_pick,
+    };
+
+    run_headless(|cx| {
+        let outcomes = Arc::new(Mutex::new(Vec::new()));
+        let on_browse = {
+            let outcomes = Arc::clone(&outcomes);
+            Arc::new(move || {
+                let mut source = InjectedFileSource::new(Ok(Some(PickedFile {
+                    path: "/fixtures/machine.lic".into(),
+                    name: "machine.lic".to_string(),
+                    bytes: b"fixture payload".to_vec(),
+                })));
+                let file = source
+                    .poll()
+                    .expect("fixture resolves immediately")
+                    .expect("no read error")
+                    .expect("not cancelled");
+                let outcome = finish_file_pick(
+                    file,
+                    &SingleFilePickSpec {
+                        prompt: "Choose a licence file".to_string(),
+                        accept: Some(".lic".to_string()),
+                        max_size: None,
+                    },
+                );
+                outcomes.lock().unwrap().push(outcome);
+            })
+        };
+        let mut node = poodle_render::file_upload_with_handlers(
+            &poodle_specs::FileUploadSpec::new().with_accept(".lic"),
+            &theme(),
+            poodle_render::FileUploadHandlers {
+                on_browse: Some(on_browse),
+                ..poodle_render::FileUploadHandlers::default()
+            },
+        );
+        // The dropzone carries the browse intent; give it a stable identity
+        // for the mounted window.
+        assert!(give_first_id(
+            &mut node,
+            "file-upload-dropzone",
+            &|n| n.interaction.on_activate.is_some(),
+        ));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+
+        driver.pointer_activate();
+        let outcomes = outcomes.lock().unwrap();
+        assert_eq!(outcomes.len(), 1, "one activation, one pick");
+        let selected = match &outcomes[0] {
+            poodle_gpui_node_backend::file_capability::FilePickOutcome::Selected {
+                name,
+                contents_base64,
+            } => (name.clone(), contents_base64.clone()),
+            other => panic!("expected a selection, got {other:?}"),
+        };
+        assert_eq!(selected.0, "machine.lic");
+        assert_eq!(
+            selected.1,
+            poodle_headless::file_upload::base64_encode(b"fixture payload"),
+            "the same bare-base64 payload the live route produces"
+        );
+        assert!(!selected.1.starts_with("data:"));
+    });
+}
+
+/// A dropzone browse that fails the accept rule reports the rejection
+/// honestly — GPUI 0.2.2 cannot filter in the OS dialog, so the refusal
+/// happens after selection through the same seam.
+#[test]
+fn a_dropzone_browse_reports_accept_rejection_honestly() {
+    use poodle_gpui_node_backend::file_capability::{
+        FilePickOutcome, InjectedFileSource, PickedFile, SingleFilePickSpec, SingleFileSource,
+        finish_file_pick,
+    };
+
+    run_headless(|cx| {
+        let outcomes = Arc::new(Mutex::new(Vec::new()));
+        let on_browse = {
+            let outcomes = Arc::clone(&outcomes);
+            Arc::new(move || {
+                let mut source = InjectedFileSource::new(Ok(Some(PickedFile {
+                    path: "/fixtures/machine.txt".into(),
+                    name: "machine.txt".to_string(),
+                    bytes: b"x".to_vec(),
+                })));
+                let file = source
+                    .poll()
+                    .expect("fixture resolves")
+                    .expect("no read error")
+                    .expect("not cancelled");
+                let outcome = finish_file_pick(
+                    file,
+                    &SingleFilePickSpec {
+                        prompt: "Choose a licence file".to_string(),
+                        accept: Some(".lic".to_string()),
+                        max_size: None,
+                    },
+                );
+                outcomes.lock().unwrap().push(outcome);
+            })
+        };
+        let mut node = poodle_render::file_upload_with_handlers(
+            &poodle_specs::FileUploadSpec::new().with_accept(".lic"),
+            &theme(),
+            poodle_render::FileUploadHandlers {
+                on_browse: Some(on_browse),
+                ..poodle_render::FileUploadHandlers::default()
+            },
+        );
+        assert!(give_first_id(
+            &mut node,
+            "file-upload-dropzone",
+            &|n| n.interaction.on_activate.is_some(),
+        ));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+
+        driver.pointer_activate();
+        let outcomes = outcomes.lock().unwrap();
+        assert_eq!(outcomes.len(), 1);
+        assert_eq!(
+            &outcomes[0],
+            &FilePickOutcome::Rejected(
+                "File type not accepted. Accepted types: .lic".to_string()
+            ),
+            "the rejection names the accept rule, not a fake OS filter"
+        );
+    });
+}
+
+// ── g15.007 Batch D regressions ───────────────────────────────────────────
+
+/// LicenceActivation's segmented key path: typing a full key through the
+/// real dispatch tree drives the composed CodeInput, the injected parser's
+/// tick renders at full length, and submit emits the exact structural
+/// credential through the shared resolver.
+#[test]
+fn licence_activation_key_entry_types_and_emits_through_the_real_tree() {
+    use poodle_headless::licence::{
+        LicenceActivationMode, LicenceActivationRoute, LicenceCredential, LicenceKeyFormat,
+        LicenceKeyProblem, LicenceKeyResult, LicenceSubmitDraft, LicenceSubmitResolution,
+        resolve_licence_submit,
+    };
+    use poodle_specs::{LicenceActivationSpec, LicenceKeyCodeInputOptions};
+
+    struct SpecimenKeyFormat;
+    impl LicenceKeyFormat for SpecimenKeyFormat {
+        fn parse(&self, input: &str) -> LicenceKeyResult {
+            let stripped: String = input.chars().filter(|c| *c != '-').collect();
+            if stripped.chars().count() < 20 {
+                return LicenceKeyResult::Err(LicenceKeyProblem::TooShort {
+                    minimum: 20,
+                    actual: stripped.chars().count(),
+                });
+            }
+            LicenceKeyResult::Ok {
+                key: stripped.clone(),
+                grouped: stripped,
+            }
+        }
+        fn is_probably_a_typo(&self, _problem: &LicenceKeyProblem) -> bool {
+            false
+        }
+    }
+
+    run_headless(|cx| {
+        let submits = Arc::new(Mutex::new(Vec::new()));
+        let changes = Arc::new(Mutex::new(Vec::new()));
+
+        let build = |key: String, submit_sink: Arc<Mutex<Vec<LicenceCredential>>>| {
+            let mut node = poodle_render::licence_activation_with_slots(
+                &LicenceActivationSpec::new()
+                    .with_mode(LicenceActivationMode::Key)
+                    .with_key_code_input(
+                        LicenceKeyCodeInputOptions::new(20).with_groups([5, 5, 5, 5]),
+                    )
+                    .with_key_draft(key.clone()),
+                &theme(),
+                None,
+                poodle_render::LicenceActivationHandlers {
+                    on_key_change: Some({
+                        let changes = Arc::clone(&changes);
+                        Arc::new(move |value: &str| {
+                            changes.lock().unwrap().push(value.to_string())
+                        })
+                    }),
+                    on_key_check: Some(Arc::new(|input: &str| SpecimenKeyFormat.parse(input))),
+                    on_submit: Some({
+                        let submit_sink = Arc::clone(&submit_sink);
+                        Arc::new(move || {
+                            let draft = LicenceSubmitDraft {
+                                route: LicenceActivationRoute::Key,
+                                key: key.clone(),
+                                token: None,
+                                file_contents_base64: None,
+                                label: String::new(),
+                            };
+                            if let LicenceSubmitResolution::Emit { credential, .. } =
+                                resolve_licence_submit(&draft, Some(&SpecimenKeyFormat))
+                            {
+                                submit_sink.lock().unwrap().push(credential);
+                            }
+                        })
+                    }),
+                    ..poodle_render::LicenceActivationHandlers::default()
+                },
+            );
+            assert!(give_first_id(&mut node, "la-code-row", &|n| n.interaction.focusable));
+            assert!(give_first_id(
+                &mut node,
+                "la-submit",
+                &|n| matches!(n.kind, poodle_node::NodeKind::Button { .. }),
+            ));
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        };
+
+        let node = Arc::new(Mutex::new(build(
+            String::new(),
+            Arc::clone(&submits),
+        )));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        // Type a full alphanumeric key through the real dispatch tree, with
+        // the host re-rendering the controlled draft after each keystroke.
+        let mut value = String::new();
+        for ch in "abcdefghijklmnopqrst".chars() {
+            driver.pointer_activate();
+            driver.dispatch_key_raw(&ch.to_string());
+            value = changes
+                .lock()
+                .unwrap()
+                .last()
+                .cloned()
+                .expect("the row reported the keystroke");
+            *node.lock().unwrap() = build(value.clone(), Arc::clone(&submits));
+            driver.draw_frame();
+        }
+        assert_eq!(value, "abcdefghijklmnopqrst");
+
+        // Full length resolves through the injected parser: the tick renders.
+        assert!(node
+            .lock()
+            .unwrap()
+            .find(&|n| n.a11y.label.as_deref() == Some("Code check passed"))
+            .is_some());
+
+        // Submit emits the exact structural key credential. The submit sits
+        // below the mount box, so it is focused and Enter-activated rather
+        // than pointer-clicked — the button carries a focus ring, so it
+        // tracks focus and gpui synthesizes the click from Enter.
+        driver.keyboard_activate("la-submit");
+        let submitted = submits.lock().unwrap();
+        assert_eq!(
+            submitted.as_slice(),
+            &[LicenceCredential::Key {
+                key: "abcdefghijklmnopqrst".to_string()
+            }],
+            "the raw accepted key is emitted exactly once"
+        );
+    });
+}
+
+/// LicenceSeats release flows through the composed ConfirmAction in a
+/// mounted window: the confirmed release emits the exact machine id and the
+/// raw id never appears in rendered or accessible text.
+#[test]
+fn licence_seats_release_flows_through_confirm_in_a_mounted_window() {
+    use poodle_headless::licence::LicenceSeat;
+    use poodle_specs::LicenceSeatsSpec;
+
+    run_headless(|cx| {
+        let released = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&released);
+        let mut node = poodle_render::licence_seats(
+            &LicenceSeatsSpec::new()
+                .with_seats(vec![
+                    LicenceSeat {
+                        machine_id: "id-a".to_string(),
+                        label: Some("Studio rig".to_string()),
+                        this_machine: true,
+                    },
+                    LicenceSeat {
+                        machine_id: "id-b".to_string(),
+                        label: None,
+                        this_machine: false,
+                    },
+                ])
+                .with_open_confirm(Some("id-b".to_string())),
+            &theme(),
+            poodle_render::LicenceSeatsHandlers {
+                on_release: Some(Arc::new(move |machine_id: &str| {
+                    sink.lock().unwrap().push(machine_id.to_string())
+                })),
+                ..poodle_render::LicenceSeatsHandlers::default()
+            },
+        );
+        // The confirm dialog is open (spec state), so its confirm button —
+        // labelled with the release label — is the release affordance.
+        assert!(give_first_id(
+            &mut node,
+            "seats-confirm",
+            &|n| matches!(&n.kind, poodle_node::NodeKind::Button { label } if label == "Release"),
+        ));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        driver.pointer_activate_id("seats-confirm");
+        assert_eq!(
+            released.lock().unwrap().as_slice(),
+            ["id-b"],
+            "the confirm button releases the exact machine id"
+        );
+        assert!(!node
+            .lock()
+            .unwrap()
+            .texts()
+            .iter()
+            .any(|t| t.contains("id-a") || t.contains("id-b")),
+            "raw machine ids never reach rendered or accessible text"
+        );
+    });
+}
+
+/// LicenceStatus renders the supplied state and authority reads in a mounted
+/// window: the calm inGrace treatment, the absolute quiet detail, and the
+/// data-state roles that gate nothing.
+#[test]
+fn licence_status_renders_state_and_authority_reads_in_a_mounted_window() {
+    use poodle_headless::licence::{LicenceTrustBasis, LicenceUsability};
+    use poodle_specs::LicenceStatusSpec;
+
+    run_headless(|cx| {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_secs() as i64)
+            .unwrap_or(0);
+        let mut node = poodle_render::licence_status(
+            &LicenceStatusSpec::new()
+                .with_usability(LicenceUsability::InGrace { until: now + 86_400 })
+                .with_trust_basis(LicenceTrustBasis::OfflineSignature)
+                .with_use_until(Some(now + 86_400))
+                .with_update_until(None)
+                .with_usable(true),
+            &theme(),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        driver.draw_frame();
+
+        let node = node.lock().unwrap();
+        let texts = node.texts();
+        assert!(
+            texts.iter().any(|t| *t == "Licence active"),
+            "inGrace keeps the calm title"
+        );
+        assert!(
+            texts.iter().any(|t| t.starts_with("Use continues until")),
+            "the quiet detail carries the absolute date"
+        );
+        assert_eq!(node.roles.get("state").map(String::as_str), Some("inGrace"));
+        assert_eq!(node.roles.get("usable").map(String::as_str), Some("true"));
+        assert_eq!(
+            node.a11y.label.as_deref(),
+            Some("Licence"),
+            "the section carries the accessible name"
+        );
+    });
+}
+
+/// LicenceActivation's account-mode submit is the defining action: pressing
+/// the Activate button through the real dispatch tree fires the host-owned
+/// acquisition request (the specimen's provider then cancels).
+#[test]
+fn licence_activation_account_submit_fires_through_the_real_tree() {
+    use poodle_headless::licence::LicenceActivationMode;
+    use poodle_specs::LicenceActivationSpec;
+
+    run_headless(|cx| {
+        let submits = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&submits);
+        let mut node = poodle_render::licence_activation_with_slots(
+            &LicenceActivationSpec::new()
+                .with_mode(LicenceActivationMode::Account)
+                .with_machine_label(Some("Studio Mac".to_string())),
+            &theme(),
+            Some(Node::text("host login form")),
+            poodle_render::LicenceActivationHandlers {
+                on_submit: Some(Arc::new(move || {
+                    *sink.lock().unwrap() += 1;
+                })),
+                ..poodle_render::LicenceActivationHandlers::default()
+            },
+        );
+        // The account-view submit carries the default copy; the header route
+        // switch is a different button, so target the submit by its label.
+        assert!(give_first_id(
+            &mut node,
+            "la-account-submit",
+            &|n| matches!(&n.kind, poodle_node::NodeKind::Button { label } if label == "Continue with account"),
+        ));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, node);
+
+        driver.keyboard_activate("la-account-submit");
+        assert_eq!(
+            *submits.lock().unwrap(),
+            1,
+            "the account Activate button fires the host request"
+        );
+    });
+}
+
+/// Editing the key clears the local validation copy: after a rejected
+/// submit the message shows, and a new keystroke removes it — the web pair's
+/// keyMessage-clearing rule, through the real dispatch tree.
+#[test]
+fn key_validation_copy_clears_on_edit_in_a_mounted_window() {
+    use poodle_headless::licence::LicenceActivationMode;
+    use poodle_specs::LicenceActivationSpec;
+
+    run_headless(|cx| {
+        let changed = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&changed);
+        let build = |message: Option<&str>| {
+            let mut node = poodle_render::licence_activation(
+                &LicenceActivationSpec::new()
+                    .with_mode(LicenceActivationMode::Key)
+                    .with_key_message(message.map(str::to_string)),
+                &theme(),
+                poodle_render::LicenceActivationHandlers {
+                    on_key_change: Some({
+                        let sink = Arc::clone(&sink);
+                        Arc::new(move |_value: &str| {
+                            *sink.lock().unwrap() += 1;
+                        })
+                    }),
+                    ..poodle_render::LicenceActivationHandlers::default()
+                },
+            );
+            assert!(give_first_id(
+                &mut node,
+                "la-key-input",
+                &|n| n.interaction.on_text_change.is_some(),
+            ));
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        };
+        let node = Arc::new(Mutex::new(build(Some("This key is too short."))));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        driver.draw_frame();
+        assert!(
+            node.lock().unwrap().has_text("This key is too short."),
+            "the rejected submit shows its copy"
+        );
+
+        // A new keystroke fires on_key_change; the host clears the stale copy
+        // (the web pair's handleKeyChange) and re-renders.
+        driver.pointer_activate_id("la-key-input");
+        driver.dispatch_key_raw("a");
+        assert_eq!(*changed.lock().unwrap(), 1, "the key edit fired");
+        *node.lock().unwrap() = build(None);
+        driver.draw_frame();
+        assert!(
+            !node.lock().unwrap().has_text("This key is too short."),
+            "editing the key removes the stale validation copy"
+        );
+        assert!(
+            node.lock()
+                .unwrap()
+                .find(&|n| n.roles.get("validation").map(String::as_str) == Some("invalid"))
+                .is_none(),
+            "editing the key removes invalid state rather than leaving an empty error"
+        );
+    });
+}
+
+/// Escape on the machine-name edit restores the committed value: after
+/// typing a new draft, Escape returns the display to the original label —
+/// the web EditableLabel's revert rule, through the real dispatch tree.
+#[test]
+fn a_machine_name_escape_restores_the_original_in_a_mounted_window() {
+    use poodle_headless::licence::LicenceActivationMode;
+    use poodle_specs::LicenceActivationSpec;
+
+    run_headless(|cx| {
+        let draft = Arc::new(Mutex::new("Studio Mac".to_string()));
+        let cancelled = Arc::new(Mutex::new(0usize));
+        let build = |label: &str, editing: bool| {
+            let mut node = poodle_render::licence_activation(
+                &LicenceActivationSpec::new()
+                    .with_mode(LicenceActivationMode::Account)
+                    .with_machine_label(Some(label.to_string()))
+                    .with_machine_label_editing(editing),
+                &theme(),
+                poodle_render::LicenceActivationHandlers {
+                    on_machine_label_change: Some({
+                        let draft = Arc::clone(&draft);
+                        Arc::new(move |value: &str| {
+                            *draft.lock().unwrap() = value.to_string();
+                        })
+                    }),
+                    on_machine_label_cancel: Some({
+                        let cancelled = Arc::clone(&cancelled);
+                        Arc::new(move || {
+                            *cancelled.lock().unwrap() += 1;
+                        })
+                    }),
+                    ..poodle_render::LicenceActivationHandlers::default()
+                },
+            );
+            if editing {
+                assert!(give_first_id(
+                    &mut node,
+                    "la-machine-input",
+                    &|n| n.interaction.on_text_change.is_some(),
+                ));
+            }
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        };
+        let node = Arc::new(Mutex::new(build("Studio Mac", true)));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        // Type a new draft into the editing input. It now carries a focus
+        // ring, so it tracks focus and can be focused by id regardless of
+        // where it sits in the wide form.
+        driver.focus_element("la-machine-input");
+        driver.dispatch_key_raw("2");
+        assert_eq!(
+            draft.lock().unwrap().as_str(),
+            "Studio Mac2",
+            "typing edits the draft"
+        );
+
+        // Escape fires the cancel channel; the host restores the committed
+        // value snapped at edit start and closes editing.
+        driver.dispatch_key_raw("escape");
+        assert_eq!(*cancelled.lock().unwrap(), 1, "escape reached the cancel channel");
+        *node.lock().unwrap() = build("Studio Mac", false);
+        driver.draw_frame();
+        assert!(
+            node.lock().unwrap().has_text("Studio Mac"),
+            "the original label is restored"
+        );
+        assert!(
+            !node.lock().unwrap().has_text("Studio Mac2"),
+            "the typed draft is discarded on escape"
+        );
+    });
+}

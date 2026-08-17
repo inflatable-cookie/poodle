@@ -7,6 +7,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-17 — The headless GPUI test platform renders a view several times
+  per `window.draw`, so an interactive node without a declared `id` does not
+  keep a stable element across a click (press and release land on different
+  element states and the click is dropped). The production preview renders
+  once per platform frame and is unaffected. Mounted regressions in
+  `tests/headless_regressions.rs` therefore assign explicit ids to the
+  interactive nodes they drive — the pattern every retained regression there
+  already used — and the driver's `reset_element_ids` per frame does not by
+  itself fix id-less nodes. Found by g15.007 Batch A while proving grouped
+  CodeInput and FileUpload browse in a mounted window.
+
 - 2026-08-17 — The same Northstar card and handoff can be dispatched twice
   without warning while its dispatch-ledger entry is already `in-flight`,
   producing competing PRs #30 and #31 for `g15.014`. Add a duplicate-launch
@@ -802,3 +813,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   absence of ARIA. A per-component check that every `.poodle-<name>` root's
   module imports the matching `styles/<name>.css` would close this; it is
   board health, not component evidence, so it is recorded rather than built.
+
+- 2026-08-17 — The optimized GPUI preview **test binary** can SIGBUS rustc
+  inside `gpui_macros`, including with a fresh `CARGO_TARGET_DIR` and
+  incremental compilation disabled. `effigy check:gpui` and the mounted
+  regression binary compile cleanly, so this is specific to the oversized
+  `poodle-preview` unit-test target. Its bin-unit cases need a smaller test
+  target or non-optimized test profile; adding more tests to the binary makes
+  the compiler failure easier to hit.

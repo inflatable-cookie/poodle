@@ -106,7 +106,7 @@
     <p class="poodle-licence-status__detail">
       {view.detail.text}{#if view.detail.timestamp !== null}&nbsp;<time
           datetime={new Date(view.detail.timestamp).toISOString()}
-        >{formatDisplayTimeDate(view.detail.timestamp)}</time>{/if}
+        >{formatDisplayTimeDate(view.detail.timestamp, "en-GB")}</time>{/if}
     </p>
   {/if}
 </section>

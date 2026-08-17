@@ -1,6 +1,17 @@
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, ValidationState};
 use poodle_tokens::semantic;
 
+/// The completion check's presentation result, bound to the exact value it was
+/// computed for (contract §5): the tick/cross belongs to the value passed to
+/// the validator, so editing or clearing the code removes the indicator.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum CodeInputCompletion {
+    /// The validator accepted this exact value; the success tick renders.
+    Passed(String),
+    /// The validator rejected this exact value; the danger cross renders.
+    Failed(String),
+}
+
 /// CodeInput -- a segmented code entry field with visual digit slots.
 ///
 /// Consolidates the former PinInput and TotpInput into a single component.
@@ -29,6 +40,17 @@ pub struct CodeInputSpec {
     /// allow arbitrary alphanumeric characters. Mirrors the Svelte
     /// `numbersOnly` prop.
     pub numbers_only: bool,
+    /// Explicit visual groups: one complete positive-integer partition of
+    /// `length`. Presentation-only — the value stays one joined string and an
+    /// invalid pattern renders no breaks. Never inferred from `length`.
+    pub groups: Option<Vec<usize>>,
+    /// Presentation-only text rendered at each valid group boundary. Ignored
+    /// without a valid multi-group pattern and never enters the value.
+    pub separator: Option<String>,
+    /// The full-length completion check and the exact value it belongs to.
+    /// Renders the success tick or danger cross after the slots only while the
+    /// current value is the one the check ran against.
+    pub completion_result: Option<CodeInputCompletion>,
     pub is_disabled: bool,
     pub aria_label: Option<String>,
     pub autocomplete: String,
@@ -52,6 +74,9 @@ impl Default for CodeInputSpec {
             selection_start: 0,
             selection_end: 0,
             numbers_only: true,
+            groups: None,
+            separator: None,
+            completion_result: None,
             is_disabled: false,
             aria_label: None,
             autocomplete: String::from("one-time-code"),
@@ -60,6 +85,20 @@ impl Default for CodeInputSpec {
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
         }
+    }
+}
+
+impl CodeInputCompletion {
+    /// The exact value the check ran against.
+    pub fn value(&self) -> &str {
+        match self {
+            CodeInputCompletion::Passed(value) | CodeInputCompletion::Failed(value) => value,
+        }
+    }
+
+    /// Whether this is a passing result (drives the tick vs cross glyph).
+    pub fn is_passed(&self) -> bool {
+        matches!(self, CodeInputCompletion::Passed(_))
     }
 }
 
@@ -111,6 +150,50 @@ impl CodeInputSpec {
     pub fn with_numbers_only(mut self, numbers_only: bool) -> Self {
         self.numbers_only = numbers_only;
         self
+    }
+
+    pub fn with_groups(mut self, groups: impl IntoIterator<Item = usize>) -> Self {
+        self.groups = Some(groups.into_iter().collect());
+        self
+    }
+
+    pub fn with_separator(mut self, separator: impl Into<String>) -> Self {
+        self.separator = Some(separator.into());
+        self
+    }
+
+    pub fn with_completion_result(mut self, result: CodeInputCompletion) -> Self {
+        self.completion_result = Some(result);
+        self
+    }
+
+    pub fn with_completion_opt(mut self, result: Option<CodeInputCompletion>) -> Self {
+        self.completion_result = result;
+        self
+    }
+
+    /// Slot indices that end a visual group, derived from the explicit
+    /// partition. Empty when the pattern is absent or not a complete
+    /// partition of `length` — grouping is never inferred.
+    pub fn group_end_indices(&self) -> Vec<usize> {
+        match &self.groups {
+            Some(groups) => poodle_headless::text_input::code_group_end_indices(self.length, groups),
+            None => Vec::new(),
+        }
+    }
+
+    /// The completion result, only while it belongs to the current value:
+    /// the indicator is removed the moment the value edits away from the one
+    /// the check ran against (contract §5).
+    pub fn visible_completion(&self) -> Option<&CodeInputCompletion> {
+        match &self.completion_result {
+            Some(result) => {
+                let value = result.value();
+                let current: String = self.sanitized_chars().into_iter().collect();
+                (current == *value).then_some(result)
+            }
+            None => None,
+        }
     }
 
     /// The current value sanitized per `numbers_only` and clamped to `length`.
@@ -245,5 +328,59 @@ impl CodeInputSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = density;
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Group ends come from the explicit partition, never from `length`
+    /// inference: a six-character input has no break without `groups`.
+    #[test]
+    fn grouping_is_explicit_and_never_inferred() {
+        assert_eq!(CodeInputSpec::new().with_length(6).group_end_indices(), vec![]);
+        assert_eq!(
+            CodeInputSpec::new().with_length(20).with_groups([5, 5, 5, 5]).group_end_indices(),
+            vec![4, 9, 14]
+        );
+        assert_eq!(
+            CodeInputSpec::new().with_length(6).with_groups([3, 3]).group_end_indices(),
+            vec![2]
+        );
+        // An invalid partition renders no breaks.
+        assert_eq!(
+            CodeInputSpec::new().with_length(6).with_groups([2, 2]).group_end_indices(),
+            vec![]
+        );
+    }
+
+    /// The completion indicator belongs to the exact value it was computed
+    /// for; editing away from it removes the indicator.
+    #[test]
+    fn completion_result_belongs_to_its_value() {
+        let spec = CodeInputSpec::new()
+            .with_length(6)
+            .with_value("123456")
+            .with_completion_result(CodeInputCompletion::Passed("123456".to_string()));
+        assert_eq!(spec.visible_completion(), Some(&CodeInputCompletion::Passed("123456".to_string())));
+        assert!(spec.visible_completion().unwrap().is_passed());
+
+        // Same length, different content: the indicator is gone.
+        let edited = spec.clone().with_value("654321");
+        assert_eq!(edited.visible_completion(), None);
+
+        // A failed result renders the cross and stays bound to its value.
+        let failed = CodeInputSpec::new()
+            .with_length(6)
+            .with_value("999999")
+            .with_completion_result(CodeInputCompletion::Failed("999999".to_string()));
+        assert!(!failed.visible_completion().unwrap().is_passed());
+    }
+
+    /// Without a completion result there is nothing to show.
+    #[test]
+    fn no_completion_means_no_indicator() {
+        assert_eq!(CodeInputSpec::new().with_length(6).visible_completion(), None);
     }
 }

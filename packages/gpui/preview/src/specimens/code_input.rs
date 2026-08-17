@@ -6,7 +6,22 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CodeInputSpec, EyebrowSpec};
+use poodle_specs::{CodeInputCompletion, CodeInputSpec, EyebrowSpec};
+
+/// The specimen's completion validator (host-owned, like the web specimen's):
+/// the 6-digit code is accepted only as `123456`; any other full value fails
+/// and shows the danger cross.
+fn six_digit_check(value: &str) -> Option<CodeInputCompletion> {
+    if value.chars().count() != 6 {
+        return None;
+    }
+    let result = if value == "123456" {
+        CodeInputCompletion::Passed(value.to_string())
+    } else {
+        CodeInputCompletion::Failed(value.to_string())
+    };
+    Some(result)
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -23,6 +38,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .specimens
         .text
         .get("code-input-pin")
+        .cloned()
+        .unwrap_or_default();
+    let key_value = state
+        .specimens
+        .text
+        .get("code-input-key")
         .cloned()
         .unwrap_or_default();
     let completed = state.specimens.is_on("code-input-complete");
@@ -83,6 +104,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         CodeInputSpec::new()
                             .with_value(&code_value)
                             .with_selection(caret("code-input-code").0, caret("code-input-code").1)
+                            .with_completion_opt(six_digit_check(&code_value))
                             .with_aria_label("Verification code"),
                         theme,
                     ),
@@ -173,6 +195,38 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_aria_label("Recovery code"),
                     theme,
                 )),
+        )
+        // --- Grouped key (explicit partition + separator, alphanumeric) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Grouped key"),
+                    theme,
+                ))
+                .child(live_code!(
+                    CodeInput::from_spec(
+                        CodeInputSpec::new()
+                            .with_length(20)
+                            .with_value(&key_value)
+                            .with_selection(caret("code-input-key").0, caret("code-input-key").1)
+                            .with_groups([5, 5, 5, 5])
+                            .with_separator("-")
+                            .with_numbers_only(false)
+                            .with_autocomplete("off")
+                            .with_aria_label("Licence key"),
+                        theme,
+                    ),
+                    "code-input-key"
+                ))
+                .child(
+                    div()
+                        .text_size(px(12.0))
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(format!("Entered: {}", key_value)),
+                ),
         )
         // --- 4-digit masked ---
         .child(

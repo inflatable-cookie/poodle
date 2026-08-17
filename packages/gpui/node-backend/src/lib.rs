@@ -44,6 +44,8 @@ mod interaction;
 mod layers;
 mod style;
 
+pub mod file_capability;
+
 use interaction::apply_listeners;
 pub use layers::{
     attach_overlay_host, bounds_for, dismiss_innermost, dismiss_layers_at, open_layer_count,

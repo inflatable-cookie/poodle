@@ -84,10 +84,39 @@ fn all_corners(node: &mut Node, r: f32) {
     c.bottom_left = r;
 }
 
+/// Host callbacks for the file upload surface.
+///
+/// `on_remove` carries the removed file's name — the identity the list itself
+/// displays. `on_browse` is the generic single-file selection intent: the
+/// dropzone/browse affordance reports "open the picker", and the runtime owns
+/// the dialog, the read, and the accept rule (g15.007 — see
+/// `poodle_gpui_node_backend::file_capability` for the GPUI seam). No OS or
+/// file logic lives in this builder.
+#[derive(Default, Clone)]
+pub struct FileUploadHandlers {
+    pub on_browse: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+}
+
 pub fn file_upload(
     spec: &FileUploadSpec,
     theme: &dyn ThemeProvider,
     on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+) -> Node {
+    file_upload_with_handlers(
+        spec,
+        theme,
+        FileUploadHandlers {
+            on_remove,
+            ..FileUploadHandlers::default()
+        },
+    )
+}
+
+pub fn file_upload_with_handlers(
+    spec: &FileUploadSpec,
+    theme: &dyn ThemeProvider,
+    handlers: FileUploadHandlers,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
 
@@ -188,6 +217,15 @@ pub fn file_upload(
     all_corners(&mut dropzone, radius);
     dropzone.interaction.focusable = true;
 
+    // Browse intent: the dropzone and its "browse" affordance request one
+    // file through the generic seam. The runtime owns the picker and the
+    // read; this builder only wires the intent (g15.007).
+    if let Some(on_browse) = handlers.on_browse.clone() {
+        if !spec.is_disabled {
+            dropzone.interaction.on_activate = Some(on_browse);
+        }
+    }
+
     // Drag-active: accent border, accent @ 8% tint (contract dropzone--active).
     if spec.is_dragging {
         dropzone.style.descriptor.border.color = accent;
@@ -237,7 +275,7 @@ pub fn file_upload(
             s.descriptor.layout.spacing.gap = rem_to_px(0.5);
         }
         for item in &spec.files {
-            list = list.child(file_item(spec, item, theme, on_remove.as_ref()));
+            list = list.child(file_item(spec, item, theme, handlers.on_remove.as_ref()));
         }
         root = root.child(list);
     }
@@ -465,5 +503,95 @@ fn build_hint_text(spec: &FileUploadSpec) -> Option<String> {
         None
     } else {
         Some(parts.join(" · "))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn activate_targets(node: &Node) -> Vec<&Node> {
+        fn walk<'a>(n: &'a Node, out: &mut Vec<&'a Node>) {
+            if n.interaction.on_activate.is_some() {
+                out.push(n);
+            }
+            for c in &n.children {
+                walk(c, out);
+            }
+        }
+        let mut out = Vec::new();
+        walk(node, &mut out);
+        out
+    }
+
+    /// The browse intent wires onto the dropzone: pressing the zone (pointer
+    /// or keyboard) requests one file through the generic seam.
+    #[test]
+    fn browse_intent_wires_the_dropzone_when_supplied() {
+        let pressed = std::sync::Arc::new(std::sync::Mutex::new(0usize));
+        let sink = std::sync::Arc::clone(&pressed);
+        let node = file_upload_with_handlers(
+            &FileUploadSpec::new(),
+            &theme(),
+            FileUploadHandlers {
+                on_browse: Some(std::sync::Arc::new(move || {
+                    *sink.lock().unwrap() += 1;
+                })),
+                ..FileUploadHandlers::default()
+            },
+        );
+        let targets = activate_targets(&node);
+        assert_eq!(targets.len(), 1, "exactly the dropzone browses");
+        (targets[0].interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(*pressed.lock().unwrap(), 1);
+    }
+
+    /// Without a browse handler the dropzone stays non-interactive, and a
+    /// disabled zone never browses.
+    #[test]
+    fn no_browse_handler_and_disabled_keep_the_zone_inert() {
+        let node = file_upload(&FileUploadSpec::new(), &theme(), None);
+        assert!(activate_targets(&node).is_empty());
+
+        let node = file_upload_with_handlers(
+            &FileUploadSpec::new().with_disabled(true),
+            &theme(),
+            FileUploadHandlers {
+                on_browse: Some(std::sync::Arc::new(|| {})),
+                ..FileUploadHandlers::default()
+            },
+        );
+        assert!(activate_targets(&node).is_empty());
+    }
+
+    /// Remove keeps its existing identity payload while browse is wired.
+    #[test]
+    fn remove_handlers_survive_beside_browse() {
+        let removed = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let sink = std::sync::Arc::clone(&removed);
+        let node = file_upload_with_handlers(
+            &FileUploadSpec::new().with_file(FileUploadItem::new("a", "x.lic", 1)),
+            &theme(),
+            FileUploadHandlers {
+                on_remove: Some(std::sync::Arc::new(move |name: &str| {
+                    sink.lock().unwrap().push(name.to_string())
+                })),
+                ..FileUploadHandlers::default()
+            },
+        );
+        let remove = node
+            .find(&|n| {
+                n.a11y
+                    .label
+                    .as_deref()
+                    .is_some_and(|l| l == "Remove x.lic")
+            })
+            .expect("remove button");
+        (remove.interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(removed.lock().unwrap().as_slice(), ["x.lic"]);
     }
 }

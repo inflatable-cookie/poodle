@@ -3,9 +3,59 @@
 //! Mirrors the current Svelte preview shell: theme, density, control size,
 //! component search, active section, and component selection.
 
+use gpui::App;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_node_backend::file_capability::{FilePickOutcome, SingleFilePickSpec};
+use poodle_headless::licence::LicenceSeat;
 use poodle_specs::{reorder_nodes, DropPosition, TreeNode};
 use std::collections::HashMap;
+
+/// Land one resolved pick outcome in specimen state under its key prefix.
+/// Returns whether any specimen key changed.
+fn apply_file_pick_outcome(
+    specimens: &mut SpecimenState,
+    key: &str,
+    outcome: &FilePickOutcome,
+    failed_message: Option<&str>,
+) -> bool {
+    let mut changed = false;
+    match outcome {
+        FilePickOutcome::Selected {
+            name,
+            contents_base64,
+        } => {
+            let name_key = format!("{key}-name");
+            let base64_key = format!("{key}-base64");
+            let error_key = format!("{key}-error");
+            changed |= specimens.text.get(&base64_key) != Some(contents_base64);
+            changed |= specimens.text.get(&name_key) != Some(name);
+            specimens.text.insert(name_key, name.clone());
+            specimens.text.insert(base64_key, contents_base64.clone());
+            changed |= specimens.text.remove(&error_key).is_some();
+        }
+        FilePickOutcome::Cancelled => {}
+        FilePickOutcome::Rejected(message) => {
+            // Honest accept/size copy is preserved verbatim.
+            let error_key = format!("{key}-error");
+            let base64_key = format!("{key}-base64");
+            changed |= specimens.text.get(&error_key) != Some(message);
+            specimens.text.insert(error_key, message.clone());
+            changed |= specimens.text.remove(&base64_key).is_some();
+        }
+        FilePickOutcome::Failed(message) => {
+            // A read failure is a local polite error on the component surface
+            // (the raw OS text never reaches the operator); the capability
+            // outcome stays honest, the visible copy is the approved message.
+            let visible = failed_message.unwrap_or(message).to_string();
+            let error_key = format!("{key}-error");
+            let base64_key = format!("{key}-base64");
+            changed |= specimens.text.get(&error_key) != Some(&visible);
+            specimens.text.insert(error_key, visible);
+            changed |= specimens.text.remove(&base64_key).is_some();
+        }
+    }
+    changed
+}
 
 /// Demo tree for the rename / context-menu / reorder specimen.
 pub fn docs_tree() -> Vec<TreeNode> {
@@ -495,6 +545,38 @@ pub enum NodeSpecimenEvent {
     /// specimen — selection, focus, expansion, rename, drag and menu — so it
     /// gets its own event rather than a dozen flat variants.
     Tree(TreeEvent),
+    /// The generic single-file browse seam reported a request (g15.007). The
+    /// host opens the OS prompt on its next frame and awaits the result; the
+    /// outcome lands in the specimen keys below.
+    FileBrowse {
+        key: String,
+        spec: SingleFilePickSpec,
+        /// The polite message to surface for a read failure on this component
+        /// surface (e.g. LicenceActivation's "That file could not be read.").
+        /// The generic capability outcome stays honest; only the visible copy
+        /// is remapped.
+        failed_message: Option<String>,
+    },
+    /// A route/mode change invalidated a selected or pending file read: the
+    /// completed bytes are cleared and in-flight/pending outcomes are made
+    /// stale by generation so they can never land.
+    FileInvalidate,
+    /// The machine-name edit was cancelled (Escape): the committed value
+    /// snapped at edit start is restored and editing closes.
+    MachineLabelCancel,
+    /// A LicenceSeats interaction.
+    LicenceSeats(LicenceSeatsEvent),
+}
+
+/// One requested single-file pick, waiting for the host to open its prompt.
+#[derive(Clone)]
+pub struct FilePickRequest {
+    /// Specimen-state key prefix; the resolved outcome lands in
+    /// `{key}-name`, `{key}-base64`, and `{key}-error`.
+    pub key: String,
+    pub spec: SingleFilePickSpec,
+    /// Polite copy for a read failure, surfaced instead of the raw OS text.
+    pub failed_message: Option<String>,
 }
 
 /// State changes the node-backed Tree specimen can request.
@@ -529,6 +611,59 @@ pub enum TreeEvent {
         to: String,
         position: DropPosition,
     },
+}
+
+/// Host state for the LicenceSeats specimen: the authority-reported seats
+/// and the controlled per-row confirm/edit open state.
+pub struct LicencePreviewState {
+    pub seats: Vec<LicenceSeat>,
+    pub editing_machine_id: Option<String>,
+    pub open_confirm_machine_id: Option<String>,
+}
+
+impl LicencePreviewState {
+    /// The web specimen's "mixed labels" set, kept label-only in render.
+    pub fn mixed() -> Self {
+        Self {
+            seats: vec![
+                LicenceSeat {
+                    machine_id: "cmd-9f3a2b7c".to_string(),
+                    label: Some("Studio Mac".to_string()),
+                    this_machine: true,
+                },
+                LicenceSeat {
+                    machine_id: "cmd-41ee80d2".to_string(),
+                    label: Some("Tour laptop".to_string()),
+                    this_machine: false,
+                },
+                LicenceSeat {
+                    machine_id: "cmd-77c1a5be".to_string(),
+                    label: None,
+                    this_machine: false,
+                },
+            ],
+            editing_machine_id: None,
+            open_confirm_machine_id: None,
+        }
+    }
+
+    pub fn rename(&mut self, machine_id: &str, label: Option<String>) {
+        if let Some(seat) = self.seats.iter_mut().find(|seat| seat.machine_id == machine_id) {
+            seat.label = label;
+        }
+        self.editing_machine_id = None;
+    }
+}
+
+/// State changes the LicenceSeats specimen can request.
+#[derive(Clone, Debug)]
+pub enum LicenceSeatsEvent {
+    Rename { machine_id: String, label: Option<String> },
+    Edit { machine_id: String },
+    ReleaseTrigger { machine_id: String },
+    ReleaseConfirm { machine_id: String },
+    /// No payload: cancellation applies to whatever row is open.
+    ReleaseCancel,
 }
 
 /// State changes the preview shell's own node-backed controls can request.
@@ -578,6 +713,19 @@ pub struct AppState {
     /// Pending events from node-backed specimens; drained at render start.
     pub node_events: std::sync::Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
     pub tree: TreePreviewState,
+    /// LicenceSeats specimen host state.
+    pub licence_seats: LicencePreviewState,
+    /// Single-file picks requested through the generic browse seam whose OS
+    /// prompt has not been opened yet.
+    pub pending_file_picks: Vec<FilePickRequest>,
+    /// Every key with a pick whose prompt was opened (completed or in
+    /// flight). An invalidation clears these keys' specimen state.
+    pub active_file_keys: Vec<String>,
+    /// Bumped whenever a route/mode change invalidates a file read. A pick
+    /// task captures the generation at spawn and only lands its outcome while
+    /// it still matches — a stale result can never repopulate a route the
+    /// operator left.
+    pub file_generation: u64,
 }
 
 impl AppState {
@@ -610,6 +758,10 @@ impl AppState {
             specimens: SpecimenState::new(),
             node_events: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
             tree: TreePreviewState::new(),
+            licence_seats: LicencePreviewState::mixed(),
+            pending_file_picks: Vec::new(),
+            active_file_keys: Vec::new(),
+            file_generation: 0,
         }
     }
 
@@ -734,6 +886,56 @@ impl AppState {
                         self.tree.clear_drop();
                     }
                 },
+                NodeSpecimenEvent::FileBrowse {
+                    key,
+                    spec,
+                    failed_message,
+                } => {
+                    // The OS prompt opens on the next frame via
+                    // `start_file_picks`, which owns the app context.
+                    self.pending_file_picks.push(FilePickRequest {
+                        key,
+                        spec,
+                        failed_message,
+                    });
+                }
+                NodeSpecimenEvent::FileInvalidate => {
+                    self.invalidate_file_picks();
+                }
+                NodeSpecimenEvent::MachineLabelCancel => {
+                    // Escape restores the value snapped when editing started
+                    // (the web EditableLabel reverts the draft) and closes
+                    // editing.
+                    let original = self
+                        .specimens
+                        .text
+                        .remove("la-machine-label-original")
+                        .unwrap_or_default();
+                    self.specimens
+                        .text
+                        .insert("la-machine-label".to_string(), original);
+                    self.specimens
+                        .toggles
+                        .insert("la-machine-editing".to_string(), false);
+                }
+                NodeSpecimenEvent::LicenceSeats(event) => match event {
+                    LicenceSeatsEvent::Rename { machine_id, label } => {
+                        self.licence_seats.rename(&machine_id, label);
+                    }
+                    LicenceSeatsEvent::Edit { machine_id } => {
+                        self.licence_seats.editing_machine_id = Some(machine_id);
+                    }
+                    LicenceSeatsEvent::ReleaseTrigger { machine_id } => {
+                        self.licence_seats.open_confirm_machine_id = Some(machine_id);
+                    }
+                    LicenceSeatsEvent::ReleaseConfirm { machine_id } => {
+                        self.licence_seats.seats.retain(|seat| seat.machine_id != machine_id);
+                        self.licence_seats.open_confirm_machine_id = None;
+                    }
+                    LicenceSeatsEvent::ReleaseCancel => {
+                        self.licence_seats.open_confirm_machine_id = None;
+                    }
+                },
                 NodeSpecimenEvent::Chrome(event) => match event {
                     ChromeEvent::Section(section) => self.section = section,
                     ChromeEvent::ThemeSelectOpen(open) => self.theme_select_open = open,
@@ -774,6 +976,81 @@ impl AppState {
         self.rebuild_theme();
     }
 
+    /// Invalidate every selected or pending file read (route/mode change).
+    ///
+    /// Bumps the pick generation so an in-flight OS dialog that resolves
+    /// later is stale and cannot land; clears the completed bytes for every
+    /// key that had a pick, and drops pending requests (they capture a stale
+    /// generation when started). Mirrors the contract: returning offline
+    /// requires a new file.
+    pub fn invalidate_file_picks(&mut self) {
+        self.file_generation += 1;
+        self.pending_file_picks.clear();
+        for key in std::mem::take(&mut self.active_file_keys) {
+            self.specimens.text.remove(&format!("{key}-name"));
+            self.specimens.text.remove(&format!("{key}-base64"));
+            self.specimens.text.remove(&format!("{key}-error"));
+        }
+    }
+
+    /// Open the OS prompts for every pending pick (g15.007).
+    ///
+    /// Each prompt's oneshot receiver is **awaited** in a GPUI task — dialog
+    /// completion itself schedules the render that consumes it, so a result
+    /// never waits on an unrelated repaint. The outcome runs the shared
+    /// post-selection pipeline and lands in specimen state as
+    /// `{key}-name` / `{key}-base64` / `{key}-error`, guarded by the
+    /// generation captured at spawn: a route change after the dialog opened
+    /// makes the result stale and it is dropped.
+    pub fn start_file_picks(
+        &mut self,
+        window: &mut gpui::Window,
+        cx: &mut App,
+        root: &gpui::WeakEntity<crate::PreviewRoot>,
+    ) {
+        let pending = std::mem::take(&mut self.pending_file_picks);
+        for request in pending {
+            let options = poodle_gpui_node_backend::file_capability::os_pick_options(&request.spec);
+            let receiver = cx.prompt_for_paths(options);
+            self.active_file_keys.push(request.key.clone());
+            let generation = self.file_generation;
+            let key = request.key.clone();
+            let spec = request.spec.clone();
+            let failed_message = request.failed_message.clone();
+            let root = root.clone();
+            window.spawn(cx, async move |cx| {
+                deliver_os_pick(
+                    &root,
+                    receiver,
+                    key,
+                    generation,
+                    spec,
+                    failed_message,
+                    cx,
+                )
+                .await;
+            })
+            .detach();
+        }
+    }
+
+    /// Apply a resolved pick outcome, but only while it belongs to the
+    /// current route. A stale generation (the operator switched away after
+    /// the dialog opened) drops the outcome entirely. A read failure lands
+    /// the request's polite message rather than the raw OS text.
+    pub fn apply_pick_outcome(
+        &mut self,
+        key: &str,
+        generation: u64,
+        outcome: &FilePickOutcome,
+        failed_message: Option<&str>,
+    ) {
+        if generation != self.file_generation {
+            return;
+        }
+        apply_file_pick_outcome(&mut self.specimens, key, outcome, failed_message);
+    }
+
     /// Rebuild the theme provider from the current preset, density, and control size.
     ///
     /// Layering order: base theme first, then density overrides, then control-size
@@ -784,5 +1061,239 @@ impl AppState {
         theme = theme.with_control_size(self.control_size.token_definition());
         theme = theme.with_contrast(self.contrast);
         self.theme = theme;
+    }
+}
+
+/// The completion-driven landing seam for one OS pick (g15.007).
+///
+/// Awaits the prompt's oneshot receiver — a dialog result *schedules* this
+/// task, never a poll — resolves it through the shared post-selection
+/// pipeline, and lands the outcome in the preview's specimen state through
+/// the root entity with an explicit notify. Guarded by the generation
+/// captured at spawn: a route change after the dialog opened drops the
+/// result entirely. This is the exact seam `start_file_picks` runs; tests
+/// drive it with an injected receiver completed after the first frame.
+pub async fn deliver_os_pick(
+    root: &gpui::WeakEntity<crate::PreviewRoot>,
+    receiver: futures::channel::oneshot::Receiver<anyhow::Result<Option<Vec<std::path::PathBuf>>>>,
+    key: String,
+    generation: u64,
+    spec: SingleFilePickSpec,
+    failed_message: Option<String>,
+    cx: &mut gpui::AsyncApp,
+) {
+    let selection = match receiver.await {
+        Ok(selection) => selection,
+        // The sender dropped without a selection: cancelled.
+        Err(_) => Ok(None),
+    };
+    let outcome = poodle_gpui_node_backend::file_capability::resolve_os_selection(selection, &spec);
+    let root = root.clone();
+    let _ = cx.update(|cx| {
+        root.update(cx, |this, cx| {
+            this.state
+                .apply_pick_outcome(&key, generation, &outcome, failed_message.as_deref());
+            cx.notify();
+        })
+    });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_gpui_node_backend::file_capability::FilePickOutcome;
+
+    fn request(key: &str) -> NodeSpecimenEvent {
+        NodeSpecimenEvent::FileBrowse {
+            key: key.to_string(),
+            spec: SingleFilePickSpec {
+                prompt: "Choose a licence file".to_string(),
+                accept: Some(".licence".to_string()),
+                max_size: None,
+            },
+            failed_message: None,
+        }
+    }
+
+    fn selected(name: &str) -> FilePickOutcome {
+        FilePickOutcome::Selected {
+            name: name.to_string(),
+            contents_base64: "c3R1ZmY=".to_string(),
+        }
+    }
+
+    /// A completed pick lands under the current generation; a route change
+    /// invalidates the bytes AND makes a late outcome stale by generation so
+    /// it can never repopulate a route the operator left.
+    #[test]
+    fn a_route_change_invalidates_file_state_and_stales_late_outcomes() {
+        let mut state = AppState::new();
+        // The operator selected a file; the task applies it.
+        state
+            .specimens
+            .text
+            .insert("la-file-name".to_string(), "machine.lic".to_string());
+        state
+            .specimens
+            .text
+            .insert("la-file-base64".to_string(), "c3R1ZmY=".to_string());
+        state.active_file_keys.push("la-file".to_string());
+        let generation = state.file_generation;
+        state.apply_pick_outcome("la-file", generation, &selected("machine.lic"), None);
+
+        // Switching away from offline invalidates the read: completed bytes
+        // are cleared and the generation bumps.
+        let mut events = Vec::new();
+        events.push(NodeSpecimenEvent::FileInvalidate);
+        state.drain_node_events_into(&mut events);
+        assert!(state
+            .specimens
+            .text
+            .get("la-file-base64")
+            .is_none(), "bytes cleared on route change");
+        assert!(state.specimens.text.get("la-file-name").is_none());
+        assert!(state.file_generation > generation, "generation bumped");
+
+        // The in-flight dialog resolves later with the old generation: stale,
+        // so it cannot land.
+        state.apply_pick_outcome("la-file", generation, &selected("machine.lic"), None);
+        assert!(
+            state.specimens.text.get("la-file-base64").is_none(),
+            "a late outcome after the route change must not land"
+        );
+
+        // A fresh pick with the current generation does land.
+        state.apply_pick_outcome(
+            "la-file",
+            state.file_generation,
+            &selected("machine.lic"),
+            None,
+        );
+        assert_eq!(
+            state.specimens.text.get("la-file-name").map(String::as_str),
+            Some("machine.lic")
+        );
+    }
+
+    /// A pending request is dropped by invalidation and a later resolution
+    /// for it is stale.
+    #[test]
+    fn a_pending_pick_is_dropped_by_route_change() {
+        let mut state = AppState::new();
+        let mut events = vec![request("la-file")];
+        state.drain_node_events_into(&mut events);
+        assert_eq!(state.pending_file_picks.len(), 1);
+
+        let mut events = vec![NodeSpecimenEvent::FileInvalidate];
+        state.drain_node_events_into(&mut events);
+        assert!(
+            state.pending_file_picks.is_empty(),
+            "pending requests are dropped on route change"
+        );
+    }
+
+    /// A read failure lands the request's polite message, never the raw OS
+    /// error; an accept/size rejection keeps its honest copy verbatim.
+    #[test]
+    fn a_read_failure_lands_the_polite_message_not_the_os_error() {
+        let mut state = AppState::new();
+        state.apply_pick_outcome(
+            "la-file",
+            state.file_generation,
+            &FilePickOutcome::Failed("No such file or directory (os error 2)".to_string()),
+            Some("That file could not be read."),
+        );
+        assert_eq!(
+            state
+                .specimens
+                .text
+                .get("la-file-error")
+                .map(String::as_str),
+            Some("That file could not be read."),
+            "the approved component message is pinned"
+        );
+        assert!(state.specimens.text.get("la-file-base64").is_none());
+
+        // Without a polite override the raw reason is retained (generic seam).
+        state.apply_pick_outcome(
+            "la-file",
+            state.file_generation,
+            &FilePickOutcome::Failed("raw os reason".to_string()),
+            None,
+        );
+        assert_eq!(
+            state
+                .specimens
+                .text
+                .get("la-file-error")
+                .map(String::as_str),
+            Some("raw os reason")
+        );
+
+        // An accept rejection keeps its honest copy.
+        state.apply_pick_outcome(
+            "la-file",
+            state.file_generation,
+            &FilePickOutcome::Rejected(
+                "File type not accepted. Accepted types: .licence".to_string(),
+            ),
+            Some("That file could not be read."),
+        );
+        assert_eq!(
+            state
+                .specimens
+                .text
+                .get("la-file-error")
+                .map(String::as_str),
+            Some("File type not accepted. Accepted types: .licence")
+        );
+    }
+
+    /// Escape restores the value snapped when editing started and closes the
+    /// edit; the draft typed in between is discarded.
+    #[test]
+    fn a_machine_label_cancel_restores_the_snapshot() {
+        let mut state = AppState::new();
+        state
+            .specimens
+            .text
+            .insert("la-machine-label".to_string(), "Studio Mac".to_string());
+        state
+            .specimens
+            .toggles
+            .insert("la-machine-editing".to_string(), true);
+        state
+            .specimens
+            .text
+            .insert("la-machine-label-original".to_string(), "Studio Mac".to_string());
+        // Typing edits the draft.
+        state
+            .specimens
+            .text
+            .insert("la-machine-label".to_string(), "Studio Mac 2".to_string());
+
+        let mut events = vec![NodeSpecimenEvent::MachineLabelCancel];
+        state.drain_node_events_into(&mut events);
+        assert_eq!(
+            state
+                .specimens
+                .text
+                .get("la-machine-label")
+                .map(String::as_str),
+            Some("Studio Mac"),
+            "the original label is restored, not the typed draft"
+        );
+        assert!(!state.specimens.is_on("la-machine-editing"));
+        assert!(state.specimens.text.get("la-machine-label-original").is_none());
+    }
+
+    impl AppState {
+        fn drain_node_events_into(&mut self, events: &mut Vec<NodeSpecimenEvent>) {
+            self.node_events
+                .lock()
+                .unwrap()
+                .extend(events.drain(..));
+            self.drain_node_events();
+        }
     }
 }
