@@ -98,6 +98,11 @@ mod tooltip;
 
 // ── Composites ────────────────────────────────────────────
 mod agent_chat_input_specimen;
+mod agent_message;
+mod agent_plan;
+mod agent_plan_record;
+mod agent_question_record;
+mod agent_subagent;
 mod audio_player_specimen;
 mod block_editor_specimen;
 mod breadcrumbs_specimen;
@@ -105,6 +110,7 @@ mod bulk_action_bar_specimen;
 mod card_radio_group_specimen;
 mod card_specimen;
 mod card_toggle_group_specimen;
+mod changed_files;
 mod confirm_action_specimen;
 mod data_table;
 mod debug_dialog_specimen;
@@ -169,6 +175,8 @@ mod theme_select_specimen;
 mod time_ago_specimen;
 mod toast_host;
 mod toast_stack_specimen;
+mod tool_call;
+mod tool_call_group;
 mod tree;
 mod validation_summary;
 mod video_player_specimen;
@@ -536,6 +544,26 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             theme,
             agent_chat_input_specimen::render(state, cx),
         ),
+        "agent-message" => specimen_card("AgentMessage", theme, agent_message::render(state, cx)),
+        "agent-plan" => specimen_card("AgentPlan", theme, agent_plan::render(state, cx)),
+        "agent-plan-record" => specimen_card(
+            "AgentPlanRecord",
+            theme,
+            agent_plan_record::render(state, cx),
+        ),
+        "agent-question-record" => specimen_card(
+            "AgentQuestionRecord",
+            theme,
+            agent_question_record::render(state, cx),
+        ),
+        "agent-subagent" => {
+            specimen_card("AgentSubagent", theme, agent_subagent::render(state, cx))
+        },
+        "changed-files" => specimen_card("ChangedFiles", theme, changed_files::render(state, cx)),
+        "tool-call" => specimen_card("ToolCall", theme, tool_call::render(state, cx)),
+        "tool-call-group" => {
+            specimen_card("ToolCallGroup", theme, tool_call_group::render(state, cx))
+        },
         "theme-select" => specimen_card(
             "ThemeSelect",
             theme,

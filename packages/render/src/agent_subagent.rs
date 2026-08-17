@@ -13,7 +13,7 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_subagent::{is_terminal_subagent_status, subagent_status_spins};
-use poodle_node::{CrossAxisAlignment, LayoutDirection, Node, NodeRole};
+use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
 use poodle_specs::{AgentSubagentSpec, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::color::TRANSPARENT;
@@ -148,13 +148,21 @@ pub fn agent_subagent(
     actions.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
     actions.style.descriptor.layout.spacing.gap = rem_to_px(0.75);
 
-    let action = |label: String, handler: Option<Arc<dyn Fn() + Send + Sync>>| {
+    let item_id = spec.item.id.clone();
+    let action = |kind: &str, label: String, handler: Option<Arc<dyn Fn() + Send + Sync>>| {
         let mut button = Node::button("");
+        button.id = Some(format!("agent-subagent-{kind}-{item_id}"));
         button.a11y.label = Some(label.clone());
         button.a11y.role = Some(NodeRole::Button);
         button.style.descriptor.layout.direction = LayoutDirection::Row;
         button.style.descriptor.background = Some(TRANSPARENT);
         button.interaction.focusable = true;
+        button.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            text_color: None,
+            opacity: None,
+        });
 
         let mut text = Node::text(label);
         text.style.text_size = Some(font_size);
@@ -162,6 +170,7 @@ pub fn agent_subagent(
         let mut button = button.child(text);
 
         if let Some(handler) = handler {
+            button.style.descriptor.cursor = CursorHint::Pointer;
             button.interaction.on_activate = Some(Arc::new(move || handler()));
         }
 
@@ -177,6 +186,7 @@ pub fn agent_subagent(
             spec.expand_label.clone()
         };
         let toggle = action(
+            "toggle",
             toggle_label,
             handlers.on_toggle.as_ref().map(|handler| {
                 let handler = Arc::clone(handler);
@@ -186,7 +196,11 @@ pub fn agent_subagent(
         actions = actions.child(toggle);
     }
 
-    let open = action(spec.open_child_label.clone(), handlers.on_open_child);
+    let open = action(
+        "open",
+        spec.open_child_label.clone(),
+        handlers.on_open_child,
+    );
     actions = actions.child(open);
 
     root.child(actions)

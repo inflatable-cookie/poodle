@@ -2254,3 +2254,386 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
         );
     });
 }
+
+// ── g15.010 Batch C regressions ───────────────────────────────────────────
+
+/// AgentPlan accept/revise/dismiss travel through mounted keyboard input.
+#[test]
+fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
+    use poodle_headless::agent_plan::AgentPlanStatus;
+    use poodle_specs::AgentPlanSpec;
+
+    run_headless(|cx| {
+        fn build(status: AgentPlanStatus, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = AgentPlanSpec::new("1. Inspect the contract.\n2. Apply the change.")
+                .with_status(status);
+            let accept_mount = Arc::clone(&mounted);
+            let revise_mount = Arc::clone(&mounted);
+            let dismiss_mount = Arc::clone(&mounted);
+            let plan = poodle_render::agent_plan(
+                &spec,
+                &theme(),
+                poodle_render::AgentPlanHandlers {
+                    on_accept: Some(Arc::new(move || {
+                        *accept_mount.lock().unwrap() =
+                            build(AgentPlanStatus::Accepted, Arc::clone(&accept_mount));
+                    })),
+                    on_revise: Some(Arc::new(move || {
+                        *revise_mount.lock().unwrap() =
+                            build(AgentPlanStatus::Revised, Arc::clone(&revise_mount));
+                    })),
+                    on_dismiss: Some(Arc::new(move || {
+                        *dismiss_mount.lock().unwrap() =
+                            build(AgentPlanStatus::Dismissed, Arc::clone(&dismiss_mount));
+                    })),
+                },
+            );
+            Node::container()
+                .child(plan)
+                .child(Node::text(format!("Decided: {}", status.as_str())))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(AgentPlanStatus::Pending, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("agent-plan-accept");
+        driver.keyboard_activate("agent-plan-accept");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Decided: accepted"),
+            "accept reached the host and painted the next spec"
+        );
+
+        *mounted.lock().unwrap() = build(AgentPlanStatus::Pending, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("agent-plan-revise");
+        driver.keyboard_activate("agent-plan-revise");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Decided: revised"),
+            "revise reached the host and painted the next spec"
+        );
+
+        *mounted.lock().unwrap() = build(AgentPlanStatus::Pending, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("agent-plan-dismiss");
+        driver.keyboard_activate("agent-plan-dismiss");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Decided: dismissed"),
+            "dismiss reached the host and painted the next spec"
+        );
+    });
+}
+
+/// AgentPlanRecord disclosure travels through mounted keyboard input.
+#[test]
+fn agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input() {
+    use poodle_headless::agent_plan::AgentPlanStatus;
+    use poodle_specs::AgentPlanRecordSpec;
+
+    run_headless(|cx| {
+        fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = AgentPlanRecordSpec::new(
+                "## Proposed plan\n\n1. Wire the host.",
+                AgentPlanStatus::Accepted,
+            )
+            .with_expanded(expanded);
+            let mount = Arc::clone(&mounted);
+            let record = poodle_render::agent_plan_record(
+                &spec,
+                &theme(),
+                poodle_render::AgentPlanRecordHandlers {
+                    on_toggle: Some(Arc::new(move |next| {
+                        *mount.lock().unwrap() = build(next, Arc::clone(&mount));
+                    })),
+                },
+            );
+            Node::container()
+                .child(record)
+                .child(Node::text(if expanded {
+                    "Record: open"
+                } else {
+                    "Record: shut"
+                }))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("agent-plan-record-toggle-accepted-shut");
+        driver.keyboard_activate("agent-plan-record-toggle-accepted-shut");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Record: open"),
+            "disclosure reached the host and painted the next spec"
+        );
+    });
+}
+
+/// AgentSubagent disclosure travels through mounted keyboard input.
+#[test]
+fn agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input() {
+    use poodle_headless::agent_subagent::{AgentSubagentItem, AgentSubagentStatus};
+    use poodle_specs::AgentSubagentSpec;
+
+    run_headless(|cx| {
+        fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = AgentSubagentSpec::new(AgentSubagentItem {
+                id: "scout-running".to_string(),
+                label: "Scout".to_string(),
+                status: AgentSubagentStatus::Running,
+                activity_line: Some("Searching".to_string()),
+                summary: None,
+            })
+            .with_detail_lines(vec!["Matched 41 of 44 vectors".to_string()])
+            .with_expanded(expanded);
+            let mount = Arc::clone(&mounted);
+            let node = poodle_render::agent_subagent(
+                &spec,
+                &theme(),
+                poodle_render::AgentSubagentHandlers {
+                    on_toggle: Some(Arc::new(move |next| {
+                        *mount.lock().unwrap() = build(next, Arc::clone(&mount));
+                    })),
+                    on_open_child: None,
+                },
+            );
+            Node::container()
+                .child(node)
+                .child(Node::text(if expanded {
+                    "Child: open"
+                } else {
+                    "Child: shut"
+                }))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("agent-subagent-toggle-scout-running");
+        driver.keyboard_activate("agent-subagent-toggle-scout-running");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Child: open"),
+            "disclosure reached the host and painted the next spec"
+        );
+    });
+}
+
+/// ChangedFiles disclosure and file selection travel through mounted input.
+#[test]
+fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
+    use poodle_headless::agent_transcript::ChangedFile;
+    use poodle_specs::ChangedFilesSpec;
+
+    run_headless(|cx| {
+        fn build(
+            expanded: bool,
+            selected: Option<String>,
+            mounted: Arc<Mutex<Node>>,
+        ) -> Node {
+            let spec = ChangedFilesSpec::new(
+                "worked",
+                vec![
+                    ChangedFile {
+                        path: "cp-api/Cargo.toml".to_string(),
+                        additions: 1,
+                        deletions: 0,
+                        status: None,
+                    },
+                    ChangedFile {
+                        path: "cp-docs/notes.md".to_string(),
+                        additions: 1,
+                        deletions: 0,
+                        status: None,
+                    },
+                ],
+            )
+            .with_expanded(expanded);
+            let toggle_mount = Arc::clone(&mounted);
+            let select_mount = Arc::clone(&mounted);
+            let expanded_for_select = expanded;
+            let selected_for_toggle = selected.clone();
+            let node = poodle_render::changed_files(
+                &spec,
+                &theme(),
+                poodle_render::ChangedFilesHandlers {
+                    on_toggle: Some(Arc::new(move |_| {
+                        *toggle_mount.lock().unwrap() = build(
+                            !expanded_for_select,
+                            selected_for_toggle.clone(),
+                            Arc::clone(&toggle_mount),
+                        );
+                    })),
+                    on_file_select: Some(Arc::new(move |path| {
+                        *select_mount.lock().unwrap() = build(
+                            true,
+                            Some(path.to_string()),
+                            Arc::clone(&select_mount),
+                        );
+                    })),
+                },
+            );
+            let mut root = Node::container()
+                .child(node)
+                .child(Node::text(if expanded {
+                    "Files: open"
+                } else {
+                    "Files: shut"
+                }));
+            if let Some(path) = selected {
+                root = root.child(Node::text(format!("selected: {path}")));
+            }
+            root
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, None, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("changed-files-toggle-worked");
+        driver.keyboard_activate("changed-files-toggle-worked");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Files: open"),
+            "disclosure reached the host and painted the next spec"
+        );
+
+        driver.wait_for_focus_handle("changed-files-file-worked-cp-api:Cargo.toml");
+        driver.keyboard_activate("changed-files-file-worked-cp-api:Cargo.toml");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "selected: cp-api/Cargo.toml"),
+            "file selection reached the host and painted the next spec"
+        );
+    });
+}
+
+/// ToolCall output disclosure travels through mounted keyboard input.
+#[test]
+fn tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input() {
+    use poodle_specs::ToolCallSpec;
+
+    run_headless(|cx| {
+        fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = ToolCallSpec::new("with-output", "Ran command")
+                .with_detail("bun test")
+                .with_output("272 pass\n0 fail")
+                .with_expanded(expanded);
+            let mount = Arc::clone(&mounted);
+            let node = poodle_render::tool_call(
+                &spec,
+                &theme(),
+                Some(Arc::new(move |_| {
+                    *mount.lock().unwrap() = build(!expanded, Arc::clone(&mount));
+                })),
+            );
+            Node::container()
+                .child(node)
+                .child(Node::text(if expanded {
+                    "Output: open"
+                } else {
+                    "Output: shut"
+                }))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("with-output");
+        driver.keyboard_activate("with-output");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Output: open"),
+            "disclosure reached the host and painted the next spec"
+        );
+    });
+}
+
+/// ToolCallGroup run disclosure travels through mounted keyboard input.
+#[test]
+fn tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input() {
+    use poodle_headless::agent_transcript::{ToolCallStatus, TranscriptToolCall};
+    use poodle_specs::ToolCallGroupSpec;
+
+    run_headless(|cx| {
+        fn call(id: &str, detail: &str) -> TranscriptToolCall {
+            TranscriptToolCall {
+                id: id.to_string(),
+                label: "Ran command".to_string(),
+                detail: Some(detail.to_string()),
+                status: ToolCallStatus::Success,
+                icon: None,
+                output: None,
+            }
+        }
+
+        fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            let spec = ToolCallGroupSpec::new("three", vec![call("a", "one"), call("b", "two"), call("c", "three")])
+                .with_expanded(expanded);
+            let mount = Arc::clone(&mounted);
+            let node = poodle_render::tool_call_group(
+                &spec,
+                &theme(),
+                poodle_render::ToolCallGroupHandlers {
+                    on_toggle: Some(Arc::new(move |_| {
+                        *mount.lock().unwrap() = build(!expanded, Arc::clone(&mount));
+                    })),
+                    on_call_toggle: None,
+                },
+            );
+            Node::container()
+                .child(node)
+                .child(Node::text(if expanded {
+                    "Run: open"
+                } else {
+                    "Run: shut"
+                }))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("tool-call-group-toggle-three");
+        driver.keyboard_activate("tool-call-group-toggle-three");
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Run: open"),
+            "run disclosure reached the host and painted the next spec"
+        );
+    });
+}

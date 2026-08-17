@@ -7,7 +7,9 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_transcript::ChangedFileNode;
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
+use poodle_node::{
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole, StylePatch,
+};
 use poodle_specs::ChangedFilesSpec;
 
 use crate::color::TRANSPARENT;
@@ -72,6 +74,7 @@ pub fn changed_files(
     let totals = spec.totals();
 
     let mut header = Node::button("");
+    header.id = Some(format!("changed-files-toggle-{}", spec.id));
     // Counts are colour-coded, and colour alone is not a signal.
     header.a11y.label = Some(spec.accessible_name());
     header.a11y.role = Some(NodeRole::Button);
@@ -89,6 +92,12 @@ pub fn changed_files(
         s.descriptor.background = Some(TRANSPARENT);
     }
     header.interaction.focusable = true;
+    header.style.focus = Some(StylePatch {
+        background: None,
+        border_color: Some(theme.resolve_color("color.accent.focusRing")),
+        text_color: None,
+        opacity: None,
+    });
 
     let mut chevron = Node::icon(
         if spec.is_expanded {
@@ -170,6 +179,11 @@ pub fn changed_files(
 
         for (depth, node) in flat {
             let mut row = Node::container();
+            row.id = Some(format!(
+                "changed-files-file-{}-{}",
+                spec.id,
+                node.path.replace('/', ":")
+            ));
             row.a11y.role = Some(NodeRole::TreeItem);
             {
                 let s = &mut row.style;
@@ -211,6 +225,13 @@ pub fn changed_files(
                 let handler = Arc::clone(handler);
                 let path = node.path.clone();
                 row.style.descriptor.cursor = CursorHint::Pointer;
+                row.interaction.focusable = true;
+                row.style.focus = Some(StylePatch {
+                    background: None,
+                    border_color: Some(theme.resolve_color("color.accent.focusRing")),
+                    text_color: None,
+                    opacity: None,
+                });
                 row.interaction.on_activate = Some(Arc::new(move || handler(&path)));
             }
 
@@ -249,6 +270,11 @@ pub fn changed_files(
                 .unwrap_or(&file.path)
                 .to_string();
             let mut chip = Node::container();
+            chip.id = Some(format!(
+                "changed-files-chip-{}-{}",
+                spec.id,
+                file.path.replace('/', ":")
+            ));
             {
                 let s = &mut chip.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;
@@ -277,6 +303,13 @@ pub fn changed_files(
                 let handler = Arc::clone(handler);
                 let path = file.path.clone();
                 chip.style.descriptor.cursor = CursorHint::Pointer;
+                chip.interaction.focusable = true;
+                chip.style.focus = Some(StylePatch {
+                    background: None,
+                    border_color: Some(theme.resolve_color("color.accent.focusRing")),
+                    text_color: None,
+                    opacity: None,
+                });
                 chip.interaction.on_activate = Some(Arc::new(move || handler(&path)));
             }
 

@@ -10,7 +10,9 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_transcript::ToolCallStatus;
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
+use poodle_node::{
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole, StylePatch,
+};
 use poodle_specs::ToolCallSpec;
 
 use crate::presentation::rem_to_px;
@@ -136,6 +138,13 @@ pub fn tool_call(
 
     // Only a row with output can be opened, so only that row is clickable.
     if spec.has_output() {
+        root.interaction.focusable = true;
+        root.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            text_color: None,
+            opacity: None,
+        });
         if let Some(handler) = on_toggle {
             let id = spec.id.clone();
             root.style.descriptor.cursor = CursorHint::Pointer;

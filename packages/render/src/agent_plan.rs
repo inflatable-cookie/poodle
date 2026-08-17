@@ -10,7 +10,7 @@
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole};
+use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
 use poodle_specs::{AgentMessageSpec, AgentPlanSpec};
 
 use crate::color::TRANSPARENT;
@@ -65,51 +65,71 @@ pub fn agent_plan(
         actions.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         actions.style.descriptor.layout.spacing.gap = action_gap;
 
-        let action =
-            |label: String, primary: bool, handler: Option<Arc<dyn Fn() + Send + Sync>>| {
-                let mut button = Node::button("");
-                button.a11y.label = Some(label.clone());
-                button.a11y.role = Some(NodeRole::Button);
-                {
-                    let s = &mut button.style;
-                    s.descriptor.layout.direction = LayoutDirection::Row;
-                    let pad = &mut s.descriptor.layout.spacing.padding;
-                    pad.top = rem_to_px(0.25);
-                    pad.bottom = rem_to_px(0.25);
-                    pad.left = rem_to_px(0.625);
-                    pad.right = rem_to_px(0.625);
-                    s.descriptor.border.width = hairline;
-                    s.descriptor.border.color = if primary { TRANSPARENT } else { border };
-                    s.descriptor.background = Some(if primary { accent } else { TRANSPARENT });
-                    let c = &mut s.descriptor.corner_radii;
-                    c.top_left = radius;
-                    c.top_right = radius;
-                    c.bottom_right = radius;
-                    c.bottom_left = radius;
-                }
-                button.interaction.focusable = true;
+        let action = |kind: &str,
+                      label: String,
+                      primary: bool,
+                      handler: Option<Arc<dyn Fn() + Send + Sync>>| {
+            let mut button = Node::button("");
+            button.id = Some(format!("agent-plan-{kind}"));
+            button.a11y.label = Some(label.clone());
+            button.a11y.role = Some(NodeRole::Button);
+            {
+                let s = &mut button.style;
+                s.descriptor.layout.direction = LayoutDirection::Row;
+                let pad = &mut s.descriptor.layout.spacing.padding;
+                pad.top = rem_to_px(0.25);
+                pad.bottom = rem_to_px(0.25);
+                pad.left = rem_to_px(0.625);
+                pad.right = rem_to_px(0.625);
+                s.descriptor.border.width = hairline;
+                s.descriptor.border.color = if primary { TRANSPARENT } else { border };
+                s.descriptor.background = Some(if primary { accent } else { TRANSPARENT });
+                let c = &mut s.descriptor.corner_radii;
+                c.top_left = radius;
+                c.top_right = radius;
+                c.bottom_right = radius;
+                c.bottom_left = radius;
+            }
+            button.interaction.focusable = true;
+            button.style.focus = Some(StylePatch {
+                background: None,
+                border_color: Some(theme.resolve_color("color.accent.focusRing")),
+                text_color: None,
+                opacity: None,
+            });
 
-                let mut text = Node::text(label);
-                text.style.text_size = Some(font_size);
-                text.style.descriptor.text_color = Some(if primary {
-                    theme.resolve_color(spec.primary_action_token())
-                } else {
-                    action_color
-                });
-                let mut button = button.child(text);
+            let mut text = Node::text(label);
+            text.style.text_size = Some(font_size);
+            text.style.descriptor.text_color = Some(if primary {
+                theme.resolve_color(spec.primary_action_token())
+            } else {
+                action_color
+            });
+            let mut button = button.child(text);
 
-                if let Some(handler) = handler {
-                    button.style.descriptor.cursor = CursorHint::Pointer;
-                    button.interaction.on_activate = Some(Arc::new(move || handler()));
-                }
+            if let Some(handler) = handler {
+                button.style.descriptor.cursor = CursorHint::Pointer;
+                button.interaction.on_activate = Some(Arc::new(move || handler()));
+            }
 
-                button
-            };
+            button
+        };
 
-        actions = actions.child(action(spec.accept_label.clone(), true, handlers.on_accept));
-        actions = actions.child(action(spec.revise_label.clone(), false, handlers.on_revise));
+        actions = actions.child(action(
+            "accept",
+            spec.accept_label.clone(),
+            true,
+            handlers.on_accept,
+        ));
+        actions = actions.child(action(
+            "revise",
+            spec.revise_label.clone(),
+            false,
+            handlers.on_revise,
+        ));
         if spec.is_dismissible {
             actions = actions.child(action(
+                "dismiss",
                 spec.dismiss_label.clone(),
                 false,
                 handlers.on_dismiss,

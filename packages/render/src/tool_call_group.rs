@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_transcript::ToolCallStatus;
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole};
+use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
 use poodle_specs::{ToolCallGroupSpec, ToolCallSpec};
 
 use crate::color::TRANSPARENT;
@@ -106,6 +106,7 @@ pub fn tool_call_group(
         };
 
         let mut toggle = Node::button("");
+        toggle.id = Some(format!("tool-call-group-toggle-{}", spec.id));
         toggle.a11y.label = Some(spec.toggle_accessible_name());
         toggle.a11y.role = Some(NodeRole::Button);
         toggle.a11y.expanded = Some(spec.is_expanded);
@@ -120,6 +121,12 @@ pub fn tool_call_group(
             s.descriptor.background = Some(TRANSPARENT);
         }
         toggle.interaction.focusable = true;
+        toggle.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            text_color: None,
+            opacity: None,
+        });
 
         let mut chevron = Node::icon("chevron-down", icon_size);
         chevron.style.descriptor.text_color = Some(toggle_color);

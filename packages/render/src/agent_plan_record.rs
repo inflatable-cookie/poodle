@@ -9,7 +9,7 @@
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole};
+use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
 use poodle_specs::{AgentMessageSpec, AgentPlanRecordSpec};
 
 use crate::presentation::rem_to_px;
@@ -103,13 +103,29 @@ pub fn agent_plan_record(
     } else {
         spec.expand_label.clone()
     };
+    let mut toggle_id = format!(
+        "agent-plan-record-toggle-{}-{}",
+        spec.status.as_str(),
+        if spec.is_expanded { "open" } else { "shut" }
+    );
+    if let Some(at) = &spec.decided_at {
+        toggle_id.push('-');
+        toggle_id.extend(at.chars().filter(|c| c.is_ascii_alphanumeric()));
+    }
     let mut toggle = Node::button("");
+    toggle.id = Some(toggle_id);
     toggle.a11y.label = Some(toggle_label.clone());
     toggle.a11y.role = Some(NodeRole::Button);
     toggle.a11y.expanded = Some(spec.is_expanded);
     toggle.style.descriptor.layout.direction = LayoutDirection::Row;
     toggle.style.descriptor.background = Some(crate::color::TRANSPARENT);
     toggle.interaction.focusable = true;
+    toggle.style.focus = Some(StylePatch {
+        background: None,
+        border_color: Some(theme.resolve_color("color.accent.focusRing")),
+        text_color: None,
+        opacity: None,
+    });
 
     let mut label = Node::text(toggle_label);
     label.style.text_size = Some(font_size);

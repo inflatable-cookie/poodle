@@ -15,10 +15,12 @@ use gpui::{
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentQuestionSpec,
+    AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentMessageSpec, AgentPlanRecordSpec,
+    AgentPlanSpec, AgentQuestionRecordSpec, AgentQuestionSpec, AgentSubagentSpec,
     AgentTranscriptSpec, AlertDialogSpec, AppHeaderSpec, AudioPlayerSpec, AvatarSpec,
     BlockEditorSpec, BoxSpec, BreadcrumbsSpec,
-    BulkActionBarSpec, ButtonSpec, CalendarSpec, CallOutSpec, CardRadioGroupSpec, CheckboxSpec,
+    BulkActionBarSpec, ButtonSpec, CalendarSpec, CallOutSpec, CardRadioGroupSpec, ChangedFilesSpec,
+    CheckboxSpec,
     CodeInputSpec, CodeSpec, CollapseToggleSpec, CollapsibleSpec, ColorPickerSpec,
     CommandPaletteSpec, ConfirmActionSpec, ContextMenuSpec, ControlDensity, ControlSize,
     DataTableSpec, DatePickerSpec, DateRangePickerSpec, DateRangeValue, DockRegionSpec,
@@ -41,7 +43,7 @@ use poodle_specs::{
     ScrollShellSpec, SelectSpec, SelectionSummarySpec, SeparatorSpec,
     ShellStatusBarSpec, SidebarNavSpec, SkeletonSpec, SliderSpec, SpacerSpec, SpinnerSpec,
     StackSpec, StateTileSpec, StatusIndicatorSpec, StepperSpec, SurfaceSpec, SwitchSpec,
-    TabStripSpec, TableSpec,
+    TabStripSpec, TableSpec, ToolCallGroupSpec, ToolCallSpec,
     SplitOrientation, SplitViewSpec, TabsSpec, TextInputSpec, TextLinkSpec, TextSpec,
     ThemeSelectSpec, TimeAgoSpec, TimeFieldSpec, TreeSpec,
     TimeZoneSelectSpec, ToastHostSpec, ToastStackSpec, TokenInputSpec, ToolbarSpec, TooltipSpec,
@@ -649,6 +651,52 @@ pub(crate) struct AgentQuestion {
     handlers: poodle_render::AgentQuestionHandlers,
 }
 
+pub(crate) struct AgentMessage {
+    spec: AgentMessageSpec,
+    theme: GpuiThemeProvider,
+}
+
+pub(crate) struct AgentPlan {
+    spec: AgentPlanSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::AgentPlanHandlers,
+}
+
+pub(crate) struct AgentPlanRecord {
+    spec: AgentPlanRecordSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::AgentPlanRecordHandlers,
+}
+
+pub(crate) struct AgentQuestionRecord {
+    spec: AgentQuestionRecordSpec,
+    theme: GpuiThemeProvider,
+}
+
+pub(crate) struct AgentSubagent {
+    spec: AgentSubagentSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::AgentSubagentHandlers,
+}
+
+pub(crate) struct ChangedFiles {
+    spec: ChangedFilesSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::ChangedFilesHandlers,
+}
+
+pub(crate) struct ToolCall {
+    spec: ToolCallSpec,
+    theme: GpuiThemeProvider,
+    on_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+}
+
+pub(crate) struct ToolCallGroup {
+    spec: ToolCallGroupSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::ToolCallGroupHandlers,
+}
+
 pub(crate) struct AgentTranscript {
     spec: AgentTranscriptSpec,
     theme: GpuiThemeProvider,
@@ -964,6 +1012,236 @@ impl IntoElement for AgentQuestion {
 
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::agent_question(
+            &self.spec,
+            &self.theme,
+            self.handlers,
+        ))
+    }
+}
+
+impl AgentMessage {
+    pub(crate) fn from_spec(spec: AgentMessageSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
+    }
+}
+
+impl IntoElement for AgentMessage {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_message(&self.spec, &self.theme))
+    }
+}
+
+impl AgentPlan {
+    pub(crate) fn from_spec(spec: AgentPlanSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::AgentPlanHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_accept(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_accept = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_revise(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_revise = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_dismiss(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_dismiss = Some(handler);
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        poodle_render::agent_plan(&self.spec, &self.theme, self.handlers)
+    }
+}
+
+impl IntoCompatNode for AgentPlan {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
+    }
+}
+
+impl IntoElement for AgentPlan {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
+    }
+}
+
+impl AgentPlanRecord {
+    pub(crate) fn from_spec(spec: AgentPlanRecordSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::AgentPlanRecordHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_toggle = Some(handler);
+        self
+    }
+}
+
+impl IntoElement for AgentPlanRecord {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_plan_record(
+            &self.spec,
+            &self.theme,
+            self.handlers,
+        ))
+    }
+}
+
+impl AgentQuestionRecord {
+    pub(crate) fn from_spec(spec: AgentQuestionRecordSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
+    }
+}
+
+impl IntoElement for AgentQuestionRecord {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_question_record(
+            &self.spec,
+            &self.theme,
+        ))
+    }
+}
+
+impl AgentSubagent {
+    pub(crate) fn from_spec(spec: AgentSubagentSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::AgentSubagentHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_toggle = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_open_child(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_open_child = Some(handler);
+        self
+    }
+}
+
+impl IntoElement for AgentSubagent {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_subagent(
+            &self.spec,
+            &self.theme,
+            self.handlers,
+        ))
+    }
+}
+
+impl ChangedFiles {
+    pub(crate) fn from_spec(spec: ChangedFilesSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::ChangedFilesHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_toggle = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_file_select(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_file_select = Some(handler);
+        self
+    }
+}
+
+impl IntoElement for ChangedFiles {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::changed_files(
+            &self.spec,
+            &self.theme,
+            self.handlers,
+        ))
+    }
+}
+
+impl ToolCall {
+    pub(crate) fn from_spec(spec: ToolCallSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            on_toggle: None,
+        }
+    }
+
+    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_toggle = Some(handler);
+        self
+    }
+}
+
+impl IntoElement for ToolCall {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::tool_call(
+            &self.spec,
+            &self.theme,
+            self.on_toggle,
+        ))
+    }
+}
+
+impl ToolCallGroup {
+    pub(crate) fn from_spec(spec: ToolCallGroupSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::ToolCallGroupHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_toggle = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_call_toggle(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_call_toggle = Some(handler);
+        self
+    }
+}
+
+impl IntoElement for ToolCallGroup {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::tool_call_group(
             &self.spec,
             &self.theme,
             self.handlers,
