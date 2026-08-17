@@ -75,6 +75,9 @@ pub enum NodeKind {
     Image { source: String },
     /// A determinate progress bar: the backend fills `fraction` of the track.
     Progress { fraction: f32 },
+    /// A determinate circular progress ring. The backend paints `fraction` of
+    /// the circumference, starting at twelve o'clock.
+    ProgressRing { fraction: f32 },
     /// A button widget: the backend's native pressable, carrying its label.
     /// Distinct from `Container` + `Text` because backends give buttons
     /// intrinsic behaviour (pressed visuals, activation semantics) that a
@@ -781,6 +784,13 @@ impl Node {
         }
     }
 
+    pub fn progress_ring(fraction: f32) -> Self {
+        Self {
+            kind: NodeKind::ProgressRing { fraction },
+            ..Self::default()
+        }
+    }
+
     /// Give an input a caret: a selection range and the colours to draw it in.
     ///
     /// Position is the *backend's* to compute — mapping a character index to an
@@ -842,7 +852,10 @@ impl Node {
                     out.push(label.as_str());
                 }
             }
-            NodeKind::Image { .. } | NodeKind::Progress { .. } | NodeKind::Container => {}
+            NodeKind::Image { .. }
+            | NodeKind::Progress { .. }
+            | NodeKind::ProgressRing { .. }
+            | NodeKind::Container => {}
         }
         for child in &self.children {
             child.collect_texts(out);
@@ -871,6 +884,7 @@ impl fmt::Debug for Node {
             NodeKind::Button { label } => format!("Button({label:?})"),
             NodeKind::Image { source } => format!("Image({source:?})"),
             NodeKind::Progress { fraction } => format!("Progress({fraction})"),
+            NodeKind::ProgressRing { fraction } => format!("ProgressRing({fraction})"),
             NodeKind::Input { value, .. } => format!("Input({value:?})"),
         };
         f.debug_struct("Node")

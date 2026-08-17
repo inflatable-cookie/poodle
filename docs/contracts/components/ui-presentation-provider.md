@@ -223,13 +223,16 @@ Example for `density="default"`, `sizeScale="md"`:
 
 ### Native Binding
 
-- Implemented as a child-passthrough: `UiPresentationProviderSpec`
-  (`packages/contracts/components/src/ui_presentation_provider.rs`),
-  `poodle_render::ui_presentation_provider`. GPUI specimen
-  `packages/gpui/preview/src/specimens/ui_presentation_provider.rs`.
-- Native descendants do **not** inherit presentation from the wrapper: each
-  spec owns its own size and density. The passthrough stamps `density` and
-  `size_scale` on `roles` so the non-cascade is declared rather than silent.
+- Declared capability absence: `UiPresentationProviderSpec` exists at
+  `packages/contracts/components/src/ui_presentation_provider.rs`, but
+  `poodle-render` cannot yet propagate ambient presentation through an
+  already-built child Node tree. A metadata-only passthrough is not an
+  implementation of this contract and does not count as component completion.
+- Native hosts can produce the same values by setting `size`, `size_role`, and
+  `density` on descendant specs explicitly. That is a host workaround, not the
+  provider's automatic inheritance contract.
+- The existing GPUI specimen labels its controls as explicit host equivalents;
+  it does not claim that wrapping caused the size or density change.
 
 ## 11. Parity Checklist
 
@@ -260,6 +263,10 @@ its own. Its effects are demonstrated by wrapping other component specimens
 with different `density` and `sizeScale` values.
 
 ### Integration Demonstration
+
+The table describes the web provider. Native currently shows the same visual
+values through explicit child specs and labels that workaround as such; it is
+not evidence of provider inheritance.
 
 | Label | Config | Expected Visual |
 |-------|--------|-----------------|

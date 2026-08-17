@@ -176,6 +176,12 @@ pub fn icon_button(
             text_color: None,
             opacity: None,
         });
+        el.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            text_color: None,
+            opacity: None,
+        });
         if let Some(handler) = on_click {
             el.interaction.on_activate = Some(Arc::new(move || handler()));
         }
@@ -184,6 +190,8 @@ pub fn icon_button(
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
     }
+    el.a11y.expanded = spec.is_expanded;
+    el.a11y.controls = spec.controls.clone();
     el
 }
 
@@ -519,6 +527,21 @@ mod tests {
     fn an_unset_icon_renders_no_glyph() {
         let node = icon_button(&IconButtonSpec::new(), &theme(), None);
         assert!(icon_child(&node).is_none(), "no icon, no glyph child");
+    }
+
+    #[test]
+    fn focus_and_disclosure_semantics_reach_the_node() {
+        let node = icon_button(
+            &IconButtonSpec::new()
+                .with_icon("chevron-down")
+                .with_expanded(true)
+                .with_controls("details"),
+            &theme(),
+            None,
+        );
+        assert!(node.style.focus.is_some(), "keyboard focus has a visible patch");
+        assert_eq!(node.a11y.expanded, Some(true));
+        assert_eq!(node.a11y.controls.as_deref(), Some("details"));
     }
 
     #[test]

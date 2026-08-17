@@ -65,26 +65,35 @@ pub fn update_center(
         .on_open_change
         .clone()
         .map(|handler| Arc::new(move || handler(!open)) as Arc<dyn Fn() + Send + Sync>);
-    let trigger_spec = IconButtonSpec::new()
+    let mut trigger_spec = IconButtonSpec::new()
         .with_variant(ButtonVariant::Ghost)
-        .with_icon("download")
         .with_aria_label(trigger_label)
         .with_tooltip(&spec.title)
         .with_expanded(open)
-        .with_size(spec.size)
-        .with_size_role(SemanticControlSizeRole::Chrome)
+        .with_size(effective_size)
+        .with_size_role(SemanticControlSizeRole::Control)
         .with_density(spec.density);
+    if !downloading {
+        trigger_spec = trigger_spec.with_icon("download");
+    }
     let mut trigger_button = icon_button(&trigger_spec, theme, open_handler);
     if let Some(scope) = &handlers.instance_id {
         trigger_button.id = Some(format!("{scope}-trigger"));
     } else {
         trigger_button.id = Some("update-center-trigger".to_string());
     }
-    if downloading {
+    if let Some(fraction) = download_fraction {
+        let mut ring = Node::progress_ring(fraction as f32);
+        ring.style.descriptor.layout.width = LayoutSizing::Fixed(16.0);
+        ring.style.descriptor.layout.height = LayoutSizing::Fixed(16.0);
+        ring.style.descriptor.border.color = theme.resolve_color("color.border.subtle");
+        ring.style.descriptor.text_color = Some(theme.resolve_color("color.accent.base"));
+        trigger_button = trigger_button.child(ring);
+    } else if downloading {
         trigger_button = trigger_button.child(spinner(
             &SpinnerSpec::new()
                 .with_variant(SpinnerVariant::Ring)
-                .with_size(SpinnerSize::Sm)
+                .with_size(SpinnerSize::Md)
                 .with_tone(SpinnerTone::Accent),
             theme,
         ));
@@ -262,8 +271,8 @@ mod tests {
     }
 
     #[test]
-    fn downloading_names_the_trigger_with_the_fraction() {
-        let node = update_center(
+    fn downloading_replaces_the_glyph_with_distinct_progress_rings() {
+        let determinate = update_center(
             &UpdateCenterSpec::new(UpdatePresence::Quiet)
                 .with_progress(UpdateProgressProjection::Downloading {
                     fraction: Some(0.42),
@@ -278,8 +287,53 @@ mod tests {
             node.children.iter().find_map(find_label)
         }
         assert_eq!(
-            find_label(&node),
+            find_label(&determinate),
             Some("Downloading update, 42%")
         );
+        assert!(determinate
+            .find(&|node| {
+                matches!(node.kind, poodle_node::NodeKind::ProgressRing { fraction } if fraction == 0.42)
+            })
+            .is_some());
+        assert!(determinate
+            .find(&|node| {
+                matches!(&node.kind, poodle_node::NodeKind::Icon { name, .. } if name == "download" || name == "spinner")
+            })
+            .is_none());
+
+        let indeterminate = update_center(
+            &UpdateCenterSpec::new(UpdatePresence::Quiet)
+                .with_progress(UpdateProgressProjection::Downloading { fraction: None }),
+            &theme(),
+            UpdateCenterHandlers::default(),
+        );
+        assert!(indeterminate
+            .find(&|node| {
+                matches!(&node.kind, poodle_node::NodeKind::Icon { name, .. } if name == "spinner")
+                    && node.style.animation.is_some()
+            })
+            .is_some());
+        assert!(indeterminate
+            .find(&|node| {
+                matches!(&node.kind, poodle_node::NodeKind::Icon { name, .. } if name == "download")
+                    || matches!(node.kind, poodle_node::NodeKind::ProgressRing { .. })
+            })
+            .is_none());
+    }
+
+    #[test]
+    fn non_default_size_role_keeps_anchor_and_trigger_aligned() {
+        let node = update_center(
+            &UpdateCenterSpec::new(UpdatePresence::Quiet)
+                .with_size(poodle_specs::ControlSize::Md)
+                .with_size_role(SemanticControlSizeRole::Control),
+            &theme(),
+            UpdateCenterHandlers::default(),
+        );
+        let trigger = node
+            .find(&|child| child.id.as_deref() == Some("update-center-trigger"))
+            .expect("trigger");
+        assert_eq!(node.style.descriptor.layout.width, trigger.style.descriptor.layout.width);
+        assert_eq!(node.style.descriptor.layout.height, trigger.style.descriptor.layout.height);
     }
 }

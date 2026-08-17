@@ -170,6 +170,12 @@ pub fn dialog_with_slots(
                 s.descriptor.corner_radii.bottom_right = r;
                 s.descriptor.corner_radii.bottom_left = r;
                 s.descriptor.cursor = CursorHint::Pointer;
+                s.focus = Some(poodle_node::StylePatch {
+                    background: None,
+                    border_color: Some(theme.resolve_color("color.accent.focusRing")),
+                    text_color: None,
+                    opacity: None,
+                });
             }
             close.interaction.focusable = true;
             let mut x = Node::icon("x", icon_size);

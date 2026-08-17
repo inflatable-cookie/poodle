@@ -271,6 +271,9 @@ pub fn update_status(
             .with_tone(AlertDialogTone::Warning)
             .with_confirm_label(spec.install_label.clone())
             .with_cancel_label("Cancel")
+            .with_size(spec.size)
+            .with_size_role(spec.size_role)
+            .with_density(spec.density)
             .with_open(true);
         let on_install = handlers.on_install.clone();
         let on_confirm = handlers.on_confirm_open_change.clone();
@@ -553,5 +556,29 @@ mod tests {
         });
         direct_btn.expect("direct install")();
         assert_eq!(*installs.lock().unwrap(), 1);
+    }
+
+    #[test]
+    fn confirmation_inherits_authored_presentation() {
+        let node = update_status(
+            &ready()
+                .with_confirm_open(true)
+                .with_size(ControlSize::Md)
+                .with_size_role(poodle_specs::SemanticControlSizeRole::Prominent)
+                .with_density(poodle_specs::ControlDensity::Compact),
+            &theme(),
+            UpdateStatusHandlers::default(),
+        );
+        let confirm = node
+            .find(&|child| {
+                matches!(&child.kind, NodeKind::Button { label } if label == "Install and restart")
+                    && child.id.as_deref() != Some("update-status-install")
+            })
+            .expect("confirmation button");
+        assert_eq!(confirm.roles.get("size").map(String::as_str), Some("lg"));
+        assert_eq!(
+            confirm.roles.get("density").map(String::as_str),
+            Some("compact")
+        );
     }
 }

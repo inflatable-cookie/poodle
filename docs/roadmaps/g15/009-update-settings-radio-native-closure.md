@@ -28,39 +28,39 @@ composites; Radio precedes the composites that compose it.
 
 ## Execution Plan
 
-- [x] **Batch A — declarations and render:** hand-written specs and render
+- [ ] **Batch A — declarations and render:** hand-written specs and render
       implementations for UpdateStatus, UpdateCenter, SettingsShell, and
       Radio (Radio's single-option semantics without borrowing RadioGroup's
       pass).
-- [x] **Batch B — context-provider posture:** decide and document the
+- [ ] **Batch B — context-provider posture:** decide and document the
       render-tier posture for IconProvider and UiPresentationProvider:
       implement a child-passthrough node, or record a declared capability
       absence with the contract's GPUI notes as the reason. Either way the
       absence must be declared — a silent omission is drift on every side.
-- [x] **Batch C — GPUI and evidence:** GPUI specimens and focused headless
+- [ ] **Batch C — GPUI and evidence:** GPUI specimens and focused headless
       evidence for the four workstation/primitive components.
 
 ## Goals
 
-- [x] Add hand-written specs and render implementations for UpdateStatus,
+- [ ] Add hand-written specs and render implementations for UpdateStatus,
       UpdateCenter, SettingsShell, and Radio.
-- [x] Decide and document the render-tier posture for IconProvider and
+- [ ] Decide and document the render-tier posture for IconProvider and
       UiPresentationProvider: implement a child-passthrough node, or record a
       declared capability absence with the contract's GPUI notes as the
       reason. Either way the absence must be declared — a silent omission is
       drift on every side.
-- [x] Add GPUI specimens and focused headless evidence for the four
+- [ ] Add GPUI specimens and focused headless evidence for the four
       workstation/primitive components.
-- [x] Radio's native evidence must cover single-option semantics without
+- [ ] Radio's native evidence must cover single-option semantics without
       borrowing RadioGroup's pass.
 
 ## Acceptance
 
-- [x] Every scoped surface has evidence named in the card log or a declared
+- [ ] Every scoped surface has evidence named in the card log or a declared
       capability absence with reason.
-- [x] `cargo test -p poodle-render`, `effigy check:gpui`, and
+- [ ] `cargo test -p poodle-render`, `effigy check:gpui`, and
       `effigy regressions:native` pass.
-- [x] Jetstream reported as program-deferred, not as an accepted absence.
+- [ ] Jetstream reported as program-deferred, not as an accepted absence.
 
 ## Stop Conditions
 

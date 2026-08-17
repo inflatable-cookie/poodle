@@ -304,22 +304,6 @@ fn give_first_id(node: &mut Node, id: &str, predicate: &dyn Fn(&Node) -> bool) -
         .any(|child| give_first_id(child, id, predicate))
 }
 
-/// The backend creates a focus handle only for `focusable` plus a focus
-/// patch. Composed chrome that is focusable but has no patch (Dialog's
-/// close control) needs one stamped before keyboard activation.
-fn stamp_focus(node: &mut Node, id: &str) -> bool {
-    if node.id.as_deref() == Some(id) {
-        node.style.focus = Some(poodle_node::StylePatch {
-            background: None,
-            border_color: None,
-            text_color: None,
-            opacity: None,
-        });
-        return true;
-    }
-    node.children.iter_mut().any(|child| stamp_focus(child, id))
-}
-
 /// A grouped code input stays one joined value through the real dispatch
 /// tree: the separator is presentation-only, so the code reaches the host
 /// without hyphens, and a full-length entry completes exactly once.
@@ -1793,6 +1777,37 @@ fn update_center_hidden_presence_mounts_nothing_and_open_shows_status() {
     use poodle_specs::UpdateCenterSpec;
 
     run_headless(|cx| {
+        let opens = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&opens);
+        let mut closed = poodle_render::update_center(
+            &UpdateCenterSpec::new(UpdatePresence::Quiet).with_open(false),
+            &theme(),
+            poodle_render::UpdateCenterHandlers {
+                instance_id: Some("mounted-center".to_string()),
+                on_open_change: Some(Arc::new(move |open| {
+                    sink.lock().unwrap().push(open);
+                })),
+                ..poodle_render::UpdateCenterHandlers::default()
+            },
+        );
+        closed.id = Some(FIXTURE_ID.to_owned());
+        let closed = Arc::new(Mutex::new(closed));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&closed));
+
+        driver.wait_for_focus_handle("mounted-center-trigger");
+        assert_eq!(
+            closed
+                .lock()
+                .unwrap()
+                .find(&|node| node.id.as_deref() == Some("mounted-center-trigger"))
+                .and_then(|node| node.a11y.expanded),
+            Some(false),
+        );
+        driver.keyboard_activate("mounted-center-trigger");
+        assert_eq!(opens.lock().unwrap().as_slice(), [true]);
+    });
+
+    run_headless(|cx| {
         let mut hidden = poodle_render::update_center(
             &UpdateCenterSpec::new(UpdatePresence::Hidden)
                 .with_status(UpdateControllerStatus::Ready)
@@ -1905,7 +1920,6 @@ fn settings_shell_navigates_and_refused_close_stays_open() {
             },
             Some(Node::text("General page")),
         );
-        assert!(stamp_focus(&mut node, "poodle-dialog-close"));
         node.id = Some(FIXTURE_ID.to_owned());
         let node = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));

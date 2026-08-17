@@ -57,7 +57,7 @@ decision (spec 068) and is excluded from every missing count. Reproducible
 count method: `docs/roadmaps/g15/release-baseline-roster.md#count-method`.
 
 Summary of native gaps: Rust declaration 0 missing (+ 1 not-applicable),
-Rust render 0 missing (+ 1 not-applicable), GPUI specimen 18 missing
+Rust render 1 missing (+ 1 not-applicable), GPUI specimen 18 missing
 (+ 1 not-applicable).
 
 | Family | Missing Rust declaration | Missing Rust render | Missing GPUI specimen | Owner |
@@ -66,7 +66,7 @@ Rust render 0 missing (+ 1 not-applicable), GPUI specimen 18 missing
 | Model connection (approved `g14.020` requirements) | — closed by `g15.008` (`ModelConnectionPickerSpec`, `ModelConnectionSetupSpec`, `ModelConnectionCardSpec`, `ModelCatalogueEditorSpec`) | — closed by `g15.008` (`packages/render/src/model_{connection_picker,connection_setup,connection_card,catalogue_editor}.rs`) | — closed by `g15.008` (`packages/gpui/preview/src/specimens/model_{connection_picker,connection_setup,connection_card,catalogue_editor}_specimen.rs`) | `g15.008` |
 | Update & settings | — closed by `g15.009` (`UpdateStatusSpec`, `UpdateCenterSpec`, `SettingsShellSpec`) | — closed by `g15.009` (`packages/render/src/{update_status,update_center,settings_shell}.rs`) | — closed by `g15.009` (`packages/gpui/preview/src/specimens/{update_status,update_center,settings_shell}.rs`) | `g15.009` |
 | Radio | — closed by `g15.009` (`RadioSpec`) | — closed by `g15.009` (`packages/render/src/radio.rs`) | — closed by `g15.009` (`packages/gpui/preview/src/specimens/radio.rs`) | `g15.009` |
-| Context providers (render passthrough only) | — | — closed by `g15.009` (`packages/render/src/{icon_provider,ui_presentation_provider}.rs`) | — | `g15.009` |
+| Context providers | — | IconProvider closed by `g15.009` (`packages/render/src/icon_provider.rs`); UiPresentationProvider remains a declared capability absence because ambient presentation cannot cross an already-built Node tree | — | follow-up required before `g15.013` |
 | Display, workstation & agent specimens | — | — | Avatar, Callout, RemediationBanner, MetaItem, Pill, Spinner, EmptyState, StateTile, ActionDiscoveryPanel, DockRegion, AgentMessage, AgentPlan, AgentPlanRecord, AgentQuestionRecord, AgentSubagent, ChangedFiles, ToolCall, ToolCallGroup | `g15.010` |
 | MeterSurface | not-applicable — web-only by fixed decision (spec 068) | not-applicable | not-applicable | none |
 

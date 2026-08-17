@@ -2,11 +2,10 @@
 //!
 //! Contract: `docs/contracts/components/ui-presentation-provider.md`
 //!
-//! The provider renders no visual chrome of its own (contract §4/§12). Its
-//! effect is demonstrated by wrapping real primitives at different `density`
-//! and `sizeScale` values and observing the descendant sizing/spacing cascade.
-//! This specimen covers all three contract §12 integration rows: compact/sm,
-//! comfortable/lg, and a NESTED override (outer default/md, inner compact/sm).
+//! The provider renders no visual chrome of its own (contract §4/§12). Native
+//! ambient propagation is a declared capability absence, so this specimen
+//! shows the explicit child-spec values a host must currently supply. It does
+//! not claim the passthrough wrapper caused a cascade.
 
 use crate::node_compat::{Button, Eyebrow, TextInput};
 use crate::providers::UiPresentationProvider;
@@ -33,11 +32,17 @@ fn scoped_controls(
             .flex()
             .gap(px(10.0))
             .child(Button::from_spec(
-                ButtonSpec::new().with_label(label.to_string()),
+                ButtonSpec::new()
+                    .with_label(label.to_string())
+                    .with_size(size)
+                    .with_density(density),
                 theme,
             ))
             .child(TextInput::from_spec(
-                TextInputSpec::new().with_default_value(label.to_string()),
+                TextInputSpec::new()
+                    .with_default_value(label.to_string())
+                    .with_size(size)
+                    .with_density(density),
                 theme,
             )),
     )
@@ -61,7 +66,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .flex()
         .flex_col()
         .gap(px(24.0))
-        // ── Compact / sm region ──
+        // Explicit host equivalent for compact / sm.
         .child(group(
             "Compact / sm region",
             theme,
@@ -72,7 +77,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 theme,
             ),
         ))
-        // ── Comfortable / lg region ──
+        // Explicit host equivalent for comfortable / lg.
         .child(group(
             "Comfortable / lg region",
             theme,
@@ -83,10 +88,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 theme,
             ),
         ))
-        // ── Nested override (contract §12 row 3) ──
-        // Outer provider sets default/md; an inner provider shadows it with
-        // compact/sm for its subtree only. Outer controls stay default/medium;
-        // inner controls render compact/small.
+        // Explicit host equivalent for a nested override. The provider
+        // wrappers remain layout-neutral; the child specs carry the values.
         .child(group(
             "Nested override",
             theme,
@@ -105,11 +108,17 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             .flex()
                             .gap(px(10.0))
                             .child(Button::from_spec(
-                                ButtonSpec::new().with_label("Outer default/md"),
+                                ButtonSpec::new()
+                                    .with_label("Outer default/md")
+                                    .with_size(ControlSize::Md)
+                                    .with_density(ControlDensity::Default),
                                 theme,
                             ))
                             .child(TextInput::from_spec(
-                                TextInputSpec::new().with_default_value("Outer scope"),
+                                TextInputSpec::new()
+                                    .with_default_value("Outer scope")
+                                    .with_size(ControlSize::Md)
+                                    .with_density(ControlDensity::Default),
                                 theme,
                             )),
                     )
