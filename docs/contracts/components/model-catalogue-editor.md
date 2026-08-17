@@ -174,10 +174,39 @@ and disclosure transition for the hidden section.
 
 ## 10. GPUI Notes
 
-- Not implemented in GPUI. The g14 adoption pipeline was rejected; native
-  completion must be planned from this contract under the g15 release runway.
-- Pointer drag may use native mechanics, but explicit and keyboard moves remain
-  required for strict parity.
+- Implemented: `ModelCatalogueEditorSpec`
+  (`packages/contracts/components/src/model_catalogue_editor.rs`),
+  `poodle_render::model_catalogue_editor`, GPUI specimen
+  `packages/gpui/preview/src/specimens/model_catalogue_editor_specimen.rs`.
+- Pointer drag uses the vocabulary's `drag_payload`/`drop_zone` mechanics;
+  explicit and keyboard moves remain and emit the same payloads.
+
+### Native Binding
+
+- Derivations, the reorder result, the focus-after-hide rule, and every
+  announcement come from `poodle_headless::model_connection`. The Rust mirror
+  of core's `listReorderKeyIntent` lives there as
+  `model_catalogue_reorder_key_intent`.
+- Transient interaction state is host state on the spec — `grabbed_id`,
+  `drop_target_id`, `hidden_open`, and `live_message` — and the renderer asks
+  for the next value through `on_grab_change`, `on_drop_target_change`,
+  `on_hidden_open_change`, and `on_announce`.
+- Keyboard grab and drop ride the backend's own activation path (Enter and
+  Space), arrows ride `on_key`, and Escape rides `on_cancel`: the vocabulary
+  has no other Escape channel for a plain control, and binding Space in both
+  places would toggle the grab twice.
+- Focus after a move or a hide is a request naming the destination element id;
+  the backend performs the move. Hiding the last shown model also asks for the
+  hidden section to be disclosed, so the destination exists. That destination
+  is `Collapsible`'s own focusable trigger — the outer region it returns is not
+  focusable — and the trigger is stamped with a focus patch so the backend
+  creates a handle for it.
+- `ModelCatalogueEditorHandlers::instance_id` is the backend-state scope.
+  Semantic row ids stay readable; the scope lives on `runtime_id`, and focus
+  destinations are named with `model_catalogue_handle_focus_id` /
+  `model_catalogue_hidden_focus_id`.
+- `leading` and `rowMeta` become host-composed nodes keyed by item id;
+  `customAction` is a single header node.
 
 ## 11. Parity Checklist
 
@@ -199,11 +228,14 @@ and disclosure transition for the hidden section.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Native implementation missing | rejected g14 pilot supplied no adoption path | open runtime gap; not parity-certified | g15 release-gap inventory |
+| — | — | no open deltas; native completion landed in `g15.008` | — |
 
 ## 13. Approval And Adoption Notes
 
 - contract status: `approved`
 - approver: operator, 2026-08-14
 - downstream adopter: Nucleus
+- native completion: landed in `g15.008` (Rust declaration, `poodle-headless`
+  behaviour mirror, `poodle-render` composition, GPUI specimen and mounted
+  evidence)
 - future follow-up: large-catalogue virtualization only after a concrete case

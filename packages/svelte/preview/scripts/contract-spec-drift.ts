@@ -131,6 +131,26 @@ const WEB_ONLY_PROPS = new Set([
 ]);
 
 /**
+ * Web-only props scoped to one component, for cases where the same prop name
+ * is a real spec field elsewhere.
+ *
+ * `WEB_ONLY_PROPS` above is global, so putting `defaultValue` in it would
+ * exempt the ~20 components that legitimately carry `default_value` and hide
+ * the next one that drops it. These entries exempt exactly one component each,
+ * and every one is marked **Web targets only** in its own props table.
+ */
+const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
+  // Model-connection family (g15.008). The native binding keeps the current
+  // value on the host: GPUI/AppState owns stage/value/query/open and rerenders
+  // after a callback requests a change, so an uncontrolled seed has nothing to
+  // seed. Stated in each contract's Native Binding note and in
+  // `docs/roadmaps/g15/008-model-connection-family-native-completion.md`.
+  "model-connection-card": ["defaultOpen"],
+  "model-connection-picker": ["defaultQuery", "defaultValue"],
+  "model-connection-setup": ["defaultStage", "defaultValue"],
+};
+
+/**
  * Real gaps: props the contract documents, Svelte implements, and the Spec does
  * not carry — so neither native target can render them. Tracked as debt in
  * `docs/roadmaps/g12/013-native-spec-surface-parity.md`, burned down there.
@@ -323,11 +343,13 @@ export function contractSpecDrift(): {
 
     const fields = reachableFields(`${entry.displayName}Spec`, structs);
     const allow = OPEN_GAPS[entry.slug] ?? [];
+    const webOnly = new Set(WEB_ONLY_BY_SLUG[entry.slug] ?? []);
     const aliases = ALIASES[entry.slug] ?? {};
     const missing = props
       .filter(
         (p) =>
           !WEB_ONLY_PROPS.has(p) &&
+          !webOnly.has(p) &&
           !covered(p, fields) &&
           !(aliases[p] && fields.has(aliases[p])) &&
           !allow.includes(p),

@@ -7,6 +7,46 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-17 — The headless GPUI driver's mount box is a fixed 160×60, and its
+  content mask clips **hit testing** as well as paint: `bounds_for` happily
+  reports an element at y=240, `pointer_activate_id` clicks its centre, and
+  nothing fires. Any mounted regression over a component taller than 60px has
+  to drive keyboard activation instead, or shrink its fixture until the target
+  lands inside the box. A driver option for a larger mount box (or one that
+  sizes to its child) would remove the guessing. Found by g15.008 Batch C.
+
+- 2026-08-17 — `poodle_render::collapsible` marks its trigger `focusable` but
+  renders no focus patch, so the GPUI backend creates no focus handle for it
+  and a composed Collapsible's disclosure is unreachable by keyboard and
+  cannot receive a focus request. `model_catalogue_editor` stamps the ring on
+  the trigger itself to make the hidden-section focus destination real. Same
+  class as the `icon_button` entry below; fix both in the primitives and drop
+  the per-composition workarounds. Found by g15.008 review round 1.
+
+- 2026-08-17 — `IconButtonSpec::with_expanded` and `with_controls` never reach
+  `Node.a11y`: `poodle_render::icon_button` ignores both, so a composed
+  disclosure has no `expanded` and no `controls` relationship unless its caller
+  restates them. `history_center`, `changed_files` and now
+  `model_connection_card` all set `node.a11y.expanded` themselves after
+  building the button. Project the spec fields in `icon_button` and drop the
+  three workarounds. Found by g15.008 Batch B.
+
+- 2026-08-17 — The vocabulary has no Escape channel for a plain control:
+  `NodeKey` carries arrows/Home/End/Space/F2 and nothing else, so a keyboard
+  reorder grab can only be cancelled through `Interaction::on_cancel`, which is
+  documented as "cancels the current input edit". `model_catalogue_editor` uses
+  it for cancel-grab because there is no alternative. Either add `NodeKey::
+  Escape` or widen `on_cancel`'s documented meaning to "cancel the current
+  gesture". Found by g15.008 Batch B.
+
+- 2026-08-17 — `contract-spec-drift` only had a *global* web-only prop set, so
+  exempting one component's `defaultValue` would have exempted the ~20
+  components that legitimately carry `default_value`. g15.008 added a
+  slug-scoped `WEB_ONLY_BY_SLUG` beside it for the model-connection family's
+  uncontrolled seeds. If more families land with native bindings that keep the
+  current value on the host, the two lists should probably become one
+  slug-aware structure rather than two.
+
 - 2026-08-17 — The headless GPUI test platform renders a view several times
   per `window.draw`, so an interactive node without a declared `id` does not
   keep a stable element across a click (press and release land on different

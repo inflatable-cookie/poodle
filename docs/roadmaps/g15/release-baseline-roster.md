@@ -21,9 +21,9 @@ Public types and helpers are recorded separately and are **not** part of the den
 | React implementation + export | 175 | 0 | 0 |
 | React gallery specimen | 175 | 0 | 0 |
 | Focused React test | 175 | 0 | 0 |
-| Rust declaration (`<Name>Spec`, including documented aliases) | 166 | 8 | 1 |
-| Rust render module (`poodle-render`) | 164 | 10 | 1 |
-| GPUI specimen | 148 | 26 | 1 |
+| Rust declaration (`<Name>Spec`, including documented aliases) | 170 | 4 | 1 |
+| Rust render module (`poodle-render`) | 168 | 6 | 1 |
+| GPUI specimen | 152 | 22 | 1 |
 | `test:web-pack-install` Svelte mounted proof | 9 | 166 (not exercised) | 0 |
 | Downstream consumer use (16 canonical consumers scanned) | 110 | 65 (no use found) | 0 |
 | Jetstream | 0 (program-deferred) | — | — |
@@ -37,9 +37,9 @@ Public types and helpers are recorded separately and are **not** part of the den
 - **Specimen**: keys of `specimenMap` in `packages/svelte/preview/src/specimens/registry.ts` against the canonical slugs (174 portable + web-only `meter-surface`); 175 entries. 168 map to a dedicated `*Specimen.svelte`; 7 map to a shared specimen (5 `SceneSpecimen`, 1 `ListCardSpecimen` for `ListCardCounter`, 1 `MetaBarSpecimen` for `MetaItem`).
 - **Focused Svelte test**: component imports resolved across all files in `packages/svelte/components/test/` (`.test.ts` and harness `.svelte` files); a component counts when at least one named test file mounts and asserts it beyond the anatomy smoke. 175 count; 0 record `missing` — `g15.005` closed the final 24 (workstation systems and agent surfaces).
 - **React implementation/export**: named component exports in `packages/react/components/src/index.ts` (175); React gallery: `specimen-map.ts` keys against canonical slugs (175); focused React test: same import-resolution method over `packages/react/components/test/` (175; 0 missing — `g15.005` closed the final 23; `AgentSubagent` already had React evidence).
-- **Rust declaration**: `pub struct <Name>Spec` searched recursively in `packages/contracts/components/src` (166 after `g15.007` closed the Licence trio). Three documented naming discrepancies count as present: `CallOutSpec` (`Callout`), `ShellStatusBarSpec` (`StatusBar`), `TimeFieldSpec` (`TimeInput`). `MeterSurface` has no declaration and records not-applicable per spec 068.
-- **Rust render**: module names in `packages/render/src/lib.rs` (164 after `g15.007`). Documented naming discrepancies count as present: `bx.rs` (`Box`), `shell_status_bar.rs` (`StatusBar`), `time_field.rs` (`TimeInput`), and the batched `audio.rs` covering the 12 audio widgets (13 audio components minus `MeterSurface`). `MeterSurface` records not-applicable.
-- **GPUI specimen**: file presence in `packages/gpui/preview/src/specimens/` per component (148 after `g15.007`). The batched `audio_controls.rs` covers 12 audio widgets; the 12 audio widgets are those covered — `audio_controls.rs` has no `meter_surface` function and `MeterSurface` records not-applicable. Counts do not include the `mod.rs` dispatch fallback (`missing_specimen`).
+- **Rust declaration**: `pub struct <Name>Spec` searched recursively in `packages/contracts/components/src` (170 after `g15.008` closed the model-connection family). Three documented naming discrepancies count as present: `CallOutSpec` (`Callout`), `ShellStatusBarSpec` (`StatusBar`), `TimeFieldSpec` (`TimeInput`). `MeterSurface` has no declaration and records not-applicable per spec 068.
+- **Rust render**: module names in `packages/render/src/lib.rs` (168 after `g15.008`). Documented naming discrepancies count as present: `bx.rs` (`Box`), `shell_status_bar.rs` (`StatusBar`), `time_field.rs` (`TimeInput`), and the batched `audio.rs` covering the 12 audio widgets (13 audio components minus `MeterSurface`). `MeterSurface` records not-applicable.
+- **GPUI specimen**: file presence in `packages/gpui/preview/src/specimens/` per component (152 after `g15.008`). The batched `audio_controls.rs` covers 12 audio widgets; the 12 audio widgets are those covered — `audio_controls.rs` has no `meter_surface` function and `MeterSurface` records not-applicable. Counts do not include the `mod.rs` dispatch fallback (`missing_specimen`).
 - **Pack-install**: components listed in the `mountedProof.svelte.components` array of `test/package-install/web-preview.ts` (9).
 - **Downstream use**: import statements of `@inflatable-cookie/poodle-svelte` / `-react` resolved (single- and multi-line) across source files of the 16 canonical consumers under `~/Dev/projects`: acowtancy, bovine-accelerator-desktop, compli-me, composer, contact-patch, figmatic, finch, longhorn, loophole, loophole-legacy, nucleus, songsprout, soundcheck, soundcheck-library, underlay, underlay-reference. Excluded: `poodle` itself (source), `jetstream` (program-deferred), worktree/absorbed duplicates (e.g. `soundcheck-wt`, `acowtancy/dairy-card011-worktree`), vendored/build/generated/fixture/example/archive paths, and test directories. No canonical consumer imports `poodle-react`; all component imports resolve to `poodle-svelte`.
 
@@ -426,10 +426,10 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 | `StateTile` | complete | complete | `WebParityCloseout.test.tsx` | `StateTileSpec` (`packages/contracts/components/src/state_tile.rs`) | `packages/render/src/state_tile.rs` | `missing` |
 | `ValidationSummary` | complete | complete | `WebParityCloseout.test.tsx` | `ValidationSummarySpec` (`packages/contracts/components/src/validation_summary.rs`) | `packages/render/src/validation_summary.rs` | `packages/gpui/preview/src/specimens/validation_summary.rs` |
 | `ModelPicker` | complete | complete | `ModelPicker.test.tsx` | `ModelPickerSpec` (`packages/contracts/components/src/model_picker.rs`) | `packages/render/src/model_picker.rs` | `packages/gpui/preview/src/specimens/model_picker_specimen.rs` |
-| `ModelConnectionPicker` | complete | complete | `ModelConnection.test.tsx` | `missing` | `missing` | `missing` |
-| `ModelConnectionSetup` | complete | complete | `ModelConnection.test.tsx` | `missing` | `missing` | `missing` |
-| `ModelConnectionCard` | complete | complete | `ModelConnection.test.tsx` | `missing` | `missing` | `missing` |
-| `ModelCatalogueEditor` | complete | complete | `ModelConnection.test.tsx` | `missing` | `missing` | `missing` |
+| `ModelConnectionPicker` | complete | complete | `ModelConnection.test.tsx` | `ModelConnectionPickerSpec` (`packages/contracts/components/src/model_connection_picker.rs`) | `packages/render/src/model_connection_picker.rs` | `packages/gpui/preview/src/specimens/model_connection_picker_specimen.rs` |
+| `ModelConnectionSetup` | complete | complete | `ModelConnection.test.tsx` | `ModelConnectionSetupSpec` (`packages/contracts/components/src/model_connection_setup.rs`) | `packages/render/src/model_connection_setup.rs` | `packages/gpui/preview/src/specimens/model_connection_setup_specimen.rs` |
+| `ModelConnectionCard` | complete | complete | `ModelConnection.test.tsx` | `ModelConnectionCardSpec` (`packages/contracts/components/src/model_connection_card.rs`) | `packages/render/src/model_connection_card.rs` | `packages/gpui/preview/src/specimens/model_connection_card_specimen.rs` |
+| `ModelCatalogueEditor` | complete | complete | `ModelConnection.test.tsx` | `ModelCatalogueEditorSpec` (`packages/contracts/components/src/model_catalogue_editor.rs`) | `packages/render/src/model_catalogue_editor.rs` | `packages/gpui/preview/src/specimens/model_catalogue_editor_specimen.rs` |
 | `MessageCenter` | complete | complete | `MessageCenter.test.tsx` | `MessageCenterSpec` (`packages/contracts/components/src/message_center.rs`) | `packages/render/src/message_center.rs` | `packages/gpui/preview/src/specimens/message_center_specimen.rs` |
 | `HistoryCenter` | complete | complete | `HistoryCenter.test.tsx` | `HistoryCenterSpec` (`packages/contracts/components/src/history_center.rs`) | `packages/render/src/history_center.rs` | `packages/gpui/preview/src/specimens/history_center_specimen.rs` |
 | `UpdateStatus` | complete | complete | `UpdateStatus.test.tsx` | `missing` | `missing` | `missing` |

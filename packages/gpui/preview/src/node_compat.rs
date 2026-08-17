@@ -3875,6 +3875,359 @@ impl IntoElement for LicenceActivation {
     }
 }
 
+// ── Model-connection family ────────────────────────────────────────────────
+//
+// Four bridges over the shared `poodle-render` compositions. Host content is
+// keyed by opaque id at this seam, never inside a spec, and every focus
+// request the components name is performed here by the backend.
+
+pub(crate) struct ModelConnectionPicker {
+    spec: poodle_specs::ModelConnectionPickerSpec,
+    theme: GpuiThemeProvider,
+    slots: poodle_render::ModelConnectionPickerSlots,
+    handlers: poodle_render::ModelConnectionPickerHandlers,
+}
+
+impl ModelConnectionPicker {
+    pub(crate) fn from_spec(
+        spec: poodle_specs::ModelConnectionPickerSpec,
+        theme: &GpuiThemeProvider,
+    ) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            slots: poodle_render::ModelConnectionPickerSlots::default(),
+            handlers: poodle_render::ModelConnectionPickerHandlers::default(),
+        }
+    }
+
+    /// Stable backend-state scope. Two pickers over the same routes would
+    /// otherwise share one focus handle per option id.
+    pub(crate) fn with_instance_id(mut self, instance_id: &str) -> Self {
+        self.handlers.instance_id = Some(instance_id.to_string());
+        self
+    }
+
+    pub(crate) fn with_leading(mut self, option_id: &str, mark: poodle_node::Node) -> Self {
+        self.slots.leading.insert(option_id.to_string(), mark);
+        self
+    }
+
+    pub(crate) fn with_footer(mut self, footer: poodle_node::Node) -> Self {
+        self.slots.footer = Some(footer);
+        self
+    }
+
+    pub(crate) fn on_value_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_value_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_query_change(mut self, handler: poodle_node::TextChangeHandler) -> Self {
+        self.handlers.on_query_change = Some(handler);
+        self
+    }
+}
+
+impl IntoElement for ModelConnectionPicker {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::model_connection_picker_with_slots(
+            &self.spec,
+            &self.theme,
+            self.slots,
+            self.handlers,
+        ))
+    }
+}
+
+pub(crate) struct ModelConnectionSetup {
+    spec: poodle_specs::ModelConnectionSetupSpec,
+    theme: GpuiThemeProvider,
+    slots: poodle_render::ModelConnectionSetupSlots,
+    handlers: poodle_render::ModelConnectionSetupHandlers,
+}
+
+impl ModelConnectionSetup {
+    pub(crate) fn from_spec(
+        spec: poodle_specs::ModelConnectionSetupSpec,
+        theme: &GpuiThemeProvider,
+    ) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            slots: poodle_render::ModelConnectionSetupSlots::default(),
+            handlers: poodle_render::ModelConnectionSetupHandlers::default(),
+        }
+    }
+
+    /// Stable backend-state scope, forwarded to the composed picker.
+    pub(crate) fn with_instance_id(mut self, instance_id: &str) -> Self {
+        self.handlers.instance_id = Some(instance_id.to_string());
+        self
+    }
+
+    pub(crate) fn with_leading(mut self, option_id: &str, mark: poodle_node::Node) -> Self {
+        self.slots
+            .picker
+            .leading
+            .insert(option_id.to_string(), mark);
+        self
+    }
+
+    /// The host's configuration body. Poodle never reads its values.
+    pub(crate) fn with_configuration(mut self, content: poodle_node::Node) -> Self {
+        self.slots.configuration = Some(content);
+        self
+    }
+
+    pub(crate) fn with_configure_aside(mut self, content: poodle_node::Node) -> Self {
+        self.slots.configure_aside = Some(content);
+        self
+    }
+
+    pub(crate) fn on_stage_change(
+        mut self,
+        handler: Arc<
+            dyn Fn(poodle_headless::model_connection::ModelConnectionSetupStage) + Send + Sync,
+        >,
+    ) -> Self {
+        self.handlers.on_stage_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_value_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_value_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_query_change(mut self, handler: poodle_node::TextChangeHandler) -> Self {
+        self.handlers.on_query_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_submit = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_cancel = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_focus_request(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_focus_request = Some(handler);
+        self
+    }
+}
+
+impl IntoElement for ModelConnectionSetup {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::model_connection_setup_with_slots(
+            &self.spec,
+            &self.theme,
+            self.slots,
+            self.handlers,
+        ))
+    }
+}
+
+pub(crate) struct ModelConnectionCard {
+    spec: poodle_specs::ModelConnectionCardSpec,
+    theme: GpuiThemeProvider,
+    slots: poodle_render::ModelConnectionCardSlots,
+    handlers: poodle_render::ModelConnectionCardHandlers,
+}
+
+impl ModelConnectionCard {
+    pub(crate) fn from_spec(
+        spec: poodle_specs::ModelConnectionCardSpec,
+        theme: &GpuiThemeProvider,
+    ) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            slots: poodle_render::ModelConnectionCardSlots::default(),
+            handlers: poodle_render::ModelConnectionCardHandlers::default(),
+        }
+    }
+
+    /// Stable backend-state scope, for two surfaces showing one connection.
+    pub(crate) fn with_instance_id(mut self, instance_id: &str) -> Self {
+        self.handlers.instance_id = Some(instance_id.to_string());
+        self
+    }
+
+    pub(crate) fn with_leading(mut self, mark: poodle_node::Node) -> Self {
+        self.slots.leading = Some(mark);
+        self
+    }
+
+    pub(crate) fn with_badges(mut self, badges: poodle_node::Node) -> Self {
+        self.slots.badges = Some(badges);
+        self
+    }
+
+    pub(crate) fn with_closed_accessory(mut self, accessory: poodle_node::Node) -> Self {
+        self.slots.closed_accessory = Some(accessory);
+        self
+    }
+
+    pub(crate) fn with_actions(mut self, actions: poodle_node::Node) -> Self {
+        self.slots.actions = Some(actions);
+        self
+    }
+
+    pub(crate) fn with_details(mut self, details: poodle_node::Node) -> Self {
+        self.slots.details = Some(details);
+        self
+    }
+
+    pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_open_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_enabled_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_enabled_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_focus_request(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_focus_request = Some(handler);
+        self
+    }
+}
+
+impl IntoElement for ModelConnectionCard {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::model_connection_card_with_slots(
+            &self.spec,
+            &self.theme,
+            self.slots,
+            self.handlers,
+        ))
+    }
+}
+
+pub(crate) struct ModelCatalogueEditor {
+    spec: poodle_specs::ModelCatalogueEditorSpec,
+    theme: GpuiThemeProvider,
+    slots: poodle_render::ModelCatalogueEditorSlots,
+    handlers: poodle_render::ModelCatalogueEditorHandlers,
+}
+
+impl ModelCatalogueEditor {
+    pub(crate) fn from_spec(
+        spec: poodle_specs::ModelCatalogueEditorSpec,
+        theme: &GpuiThemeProvider,
+    ) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            slots: poodle_render::ModelCatalogueEditorSlots::default(),
+            handlers: poodle_render::ModelCatalogueEditorHandlers::default(),
+        }
+    }
+
+    /// Stable backend-state scope. Two editors over the same catalogue would
+    /// otherwise share one focus handle per item id.
+    pub(crate) fn with_instance_id(mut self, instance_id: &str) -> Self {
+        self.handlers.instance_id = Some(instance_id.to_string());
+        self
+    }
+
+    pub(crate) fn with_leading(mut self, item_id: &str, mark: poodle_node::Node) -> Self {
+        self.slots.leading.insert(item_id.to_string(), mark);
+        self
+    }
+
+    pub(crate) fn with_row_meta(mut self, item_id: &str, meta: poodle_node::Node) -> Self {
+        self.slots.row_meta.insert(item_id.to_string(), meta);
+        self
+    }
+
+    pub(crate) fn with_custom_action(mut self, action: poodle_node::Node) -> Self {
+        self.slots.custom_action = Some(action);
+        self
+    }
+
+    pub(crate) fn on_order_change(mut self, handler: Arc<dyn Fn(&[String]) + Send + Sync>) -> Self {
+        self.handlers.on_order_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_visibility_change(
+        mut self,
+        handler: Arc<
+            dyn Fn(&poodle_headless::model_connection::ModelCatalogueVisibilityChange)
+                + Send
+                + Sync,
+        >,
+    ) -> Self {
+        self.handlers.on_visibility_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_info(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_info = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_grab_change(
+        mut self,
+        handler: Arc<dyn Fn(Option<&str>) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_grab_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_drop_target_change(
+        mut self,
+        handler: Arc<dyn Fn(Option<&str>) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_drop_target_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_hidden_open_change(
+        mut self,
+        handler: Arc<dyn Fn(bool) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_hidden_open_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_announce(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_announce = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_focus_request(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_focus_request = Some(handler);
+        self
+    }
+}
+
+impl IntoElement for ModelCatalogueEditor {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::model_catalogue_editor_with_slots(
+            &self.spec,
+            &self.theme,
+            self.slots,
+            self.handlers,
+        ))
+    }
+}
+
 pub(crate) struct Breadcrumbs {
     spec: BreadcrumbsSpec,
     theme: GpuiThemeProvider,

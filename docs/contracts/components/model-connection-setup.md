@@ -46,10 +46,10 @@ Governing spec: `../../specs/067-model-connection-management.md`
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `stage` | `"choose" \| "configure" \| undefined` | `undefined` | no | controlled stage |
-| `defaultStage` | `"choose" \| "configure"` | `"choose"` | no | uncontrolled initial stage |
+| `defaultStage` | `"choose" \| "configure"` | `"choose"` | no | **Web targets only** — uncontrolled initial stage; see Native Binding |
 | `options` | `ModelConnectionOption[]` | `[]` | no | forwarded to picker; `requiresConfiguration` selects direct or configured flow |
 | `value` | `string \| null \| undefined` | `undefined` | no | controlled selected option id |
-| `defaultValue` | `string \| null` | `null` | no | uncontrolled initial selection |
+| `defaultValue` | `string \| null` | `null` | no | **Web targets only** — uncontrolled initial selection; see Native Binding |
 | `query` | `string \| undefined` | `undefined` | no | controlled picker query |
 | `pickerState` | `PickerState` | `"ready"` | no | picker catalogue posture |
 | `title` | `string` | `"Add model connection"` | no | workflow heading |
@@ -157,9 +157,38 @@ machinery, id wiring, and polite status announcement.
 
 ## 10. GPUI Notes
 
-- Not implemented in GPUI. The g14 adoption pipeline was rejected; native
-  completion must be planned from this contract under the g15 release runway.
+- Implemented: `ModelConnectionSetupSpec`
+  (`packages/contracts/components/src/model_connection_setup.rs`),
+  `poodle_render::model_connection_setup`, GPUI specimen
+  `packages/gpui/preview/src/specimens/model_connection_setup_specimen.rs`.
 - Consumer-rendered configuration content remains the native composition seam.
+
+### Native Binding
+
+- Every workflow event runs through
+  `poodle_headless::model_connection::model_connection_setup_transition`, so
+  the pending guards, the direct-add path, and the emitted effects are shared
+  with the web.
+- `stage`, `value`, and `query` are controlled. The web
+  `defaultStage`/`defaultValue` seeds are **web targets only**: the host owns
+  the current values and rerenders after a callback.
+- `configuration` and `configureAside` become host-composed nodes
+  (`ModelConnectionSetupSlots`). The host's content is of course part of the
+  rendered tree — that is what composition means. The boundary is that Poodle
+  never inspects, retains, validates, or schemas its values, and never
+  manufactures a credential form of its own: no configuration value reaches a
+  spec field or a callback payload.
+- Stage focus movement is a request: the renderer names the destination
+  (the workflow heading on the way into configure, the selected option's row
+  on the way out) through `on_focus_request`, and the backend performs the
+  move. The heading carries a focus patch as well as `focusable`, because the
+  GPUI backend creates a tracked focus handle only for a focusable node that
+  draws differently when focused — without it the request would be dropped.
+- `ModelConnectionSetupHandlers::instance_id` is the backend-state scope,
+  forwarded to the composed picker. Focus destinations are named with the
+  scoped id (`model_connection_setup_title_focus_id`,
+  `model_connection_option_focus_id`); the semantic ids stay readable.
+  Workflow actions carry stable ids too (`model_connection_setup_action_id`).
 
 ## 11. Parity Checklist
 
@@ -181,11 +210,11 @@ machinery, id wiring, and polite status announcement.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Native implementation missing | rejected g14 pilot supplied no adoption path | open runtime gap; not parity-certified | g15 release-gap inventory |
+| — | — | no open deltas; native completion landed in `g15.008` | — |
 
 ## 13. Approval And Adoption Notes
 
 - contract status: `approved`
 - approver: operator, 2026-08-14
 - downstream adopter: Nucleus
-- future follow-up: compile native completion from the g15 release-gap inventory
+- native completion: landed in `g15.008` (Rust declaration, `poodle-headless` behaviour mirror, `poodle-render` composition, GPUI specimen and mounted evidence)

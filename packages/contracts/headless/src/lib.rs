@@ -23,6 +23,7 @@ pub mod hover;
 pub mod licence;
 pub mod menu;
 pub mod modal;
+pub mod model_connection;
 pub mod nav;
 pub mod pagination;
 pub mod popover;

@@ -57,7 +57,7 @@ Governing spec: `../../specs/067-model-connection-management.md`
 | `readiness` | `ModelConnectionReadiness` | `"unknown"` | no | display posture only |
 | `readinessLabel` | `string` | `"Status unknown"` | no | visible/accessibility meaning |
 | `open` | `boolean \| undefined` | `undefined` | no | controlled disclosure |
-| `defaultOpen` | `boolean` | `false` | no | uncontrolled initial disclosure |
+| `defaultOpen` | `boolean` | `false` | no | **Web targets only** — uncontrolled initial disclosure; see Native Binding |
 | `isEnabled` | `boolean` | `true` | no | host preference; not readiness |
 | `isEnableDisabled` | `boolean` | `false` | no | disables only the Switch |
 | `isDisabled` | `boolean` | `false` | no | disables card controls |
@@ -158,9 +158,32 @@ or derive one state from the other.
 
 ## 10. GPUI Notes
 
-- Not implemented in GPUI. The g14 adoption pipeline was rejected; native
-  completion must be planned from this contract under the g15 release runway.
-- Native card must preserve independent hit regions and focus restoration.
+- Implemented: `ModelConnectionCardSpec`
+  (`packages/contracts/components/src/model_connection_card.rs`),
+  `poodle_render::model_connection_card`, GPUI specimen
+  `packages/gpui/preview/src/specimens/model_connection_card_specimen.rs`.
+- Independent hit regions and focus restoration are preserved.
+
+### Native Binding
+
+- Disclosure is controlled through `is_open`; the web `defaultOpen` seed is
+  **web targets only** because the host owns the current state and rerenders
+  after `on_open_change`. Enabled state was already host-owned.
+- The disclosure request runs through the shared
+  `poodle_headless::disclosure` transition; closing additionally asks
+  `on_focus_request` to return focus to the disclosure control, which is the
+  native form of the web's focus restoration.
+- `details` and `disclosure` element ids are instance-scoped from the card's
+  opaque `id`, so repeated connection records never share a `controls`
+  relationship.
+- `leading`, `badges`, `closedAccessory`, `actions`, and `details` become
+  host-composed nodes (`ModelConnectionCardSlots`); the closed accessory is
+  mounted only while closed.
+- The provider label is stated on the identity group's accessible name rather
+  than as a third visible line, matching the web's visually-hidden copy.
+- `ModelConnectionCardHandlers::instance_id` scopes the backend-state ids on
+  top of the card's own opaque `id`, so two surfaces showing one connection do
+  not share a disclosure focus handle.
 
 ## 11. Parity Checklist
 
@@ -181,11 +204,11 @@ or derive one state from the other.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Native implementation missing | rejected g14 pilot supplied no adoption path | open runtime gap; not parity-certified | g15 release-gap inventory |
+| — | — | no open deltas; native completion landed in `g15.008` | — |
 
 ## 13. Approval And Adoption Notes
 
 - contract status: `approved`
 - approver: operator, 2026-08-14
 - downstream adopter: Nucleus
-- future follow-up: compile native completion from the g15 release-gap inventory
+- native completion: landed in `g15.008` (Rust declaration, `poodle-headless` behaviour mirror, `poodle-render` composition, GPUI specimen and mounted evidence)

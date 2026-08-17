@@ -13,9 +13,12 @@ import {
   modelConnectionPickerResultAnnouncement,
   modelConnectionPickerStateCopy,
   modelConnectionReadinessTone,
+  modelConnectionSelectedSummary,
   modelConnectionSetupCanContinue,
   modelConnectionSetupCanSubmit,
+  modelConnectionSetupSelectedOption,
   modelConnectionSetupTransition,
+  modelCatalogueStateCopy,
   MODEL_CATALOGUE_FIXTURES,
   MODEL_CONNECTION_PICKER_FIXTURES,
   requestModelCatalogueOrder,
@@ -207,6 +210,27 @@ describe("modelConnectionSetupTransition", () => {
     expect(result.effects).toEqual([{ type: "emitStageChange", stage: "choose" }]);
   });
 
+  test("reselecting the current value emits nothing", () => {
+    const result = modelConnectionSetupTransition(setup({ value: "openai-responses" }), {
+      type: "SELECT",
+      id: "openai-responses",
+    });
+    expect(result.effects).toEqual([]);
+  });
+
+  test("the selected summary repeats supplied labels only", () => {
+    const context = setup({ value: "openai-responses" });
+    const option = modelConnectionSetupSelectedOption(context);
+    expect(option?.id).toBe("openai-responses");
+    expect(modelConnectionSelectedSummary(option)).toEqual({
+      id: "openai-responses",
+      title: "OpenAI",
+      providerLabel: "OpenAI",
+      routeLabel: "Responses API",
+    });
+    expect(modelConnectionSelectedSummary(undefined)).toBeNull();
+  });
+
   test("select emits exact opaque ids only for selectable options", () => {
     const accepted = modelConnectionSetupTransition(setup(), {
       type: "SELECT",
@@ -260,6 +284,18 @@ describe("catalogue order and visibility", () => {
       id: "c",
     });
     expect(modelCatalogueFocusAfterHide(["a"], "a")).toEqual({ kind: "hidden-section" });
+  });
+
+  test("catalogue state copy keeps every posture distinct", () => {
+    const titles = (
+      ["ready", "loading", "unavailable", "empty", "error", "sessionNegotiated"] as const
+    ).map((state) => modelCatalogueStateCopy(state).title);
+    expect(new Set(titles).size).toBe(titles.length);
+    expect(modelCatalogueStateCopy("empty").title).toBe("No models");
+    expect(modelCatalogueStateCopy("sessionNegotiated").message).toBe(
+      "Models for this connection are negotiated after a session starts.",
+    );
+    expect(modelCatalogueStateCopy("ready").message).toBe("");
   });
 
   test("announcements name the model and outcome", () => {

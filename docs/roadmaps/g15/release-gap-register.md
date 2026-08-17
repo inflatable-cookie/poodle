@@ -56,14 +56,14 @@ the other exists. Counts below are `missing` only; `MeterSurface` is
 decision (spec 068) and is excluded from every missing count. Reproducible
 count method: `docs/roadmaps/g15/release-baseline-roster.md#count-method`.
 
-Summary of native gaps: Rust declaration 8 missing (+ 1 not-applicable),
-Rust render 10 missing (+ 1 not-applicable), GPUI specimen 26 missing
+Summary of native gaps: Rust declaration 4 missing (+ 1 not-applicable),
+Rust render 6 missing (+ 1 not-applicable), GPUI specimen 22 missing
 (+ 1 not-applicable).
 
 | Family | Missing Rust declaration | Missing Rust render | Missing GPUI specimen | Owner |
 | --- | --- | --- | --- | --- |
 | Licence (approved `g14.017` requirements) | — closed by `g15.007` (`LicenceActivationSpec`, `LicenceSeatsSpec`, `LicenceStatusSpec`) | — closed by `g15.007` (`packages/render/src/licence_{activation,seats,status}.rs`) | — closed by `g15.007` (`packages/gpui/preview/src/specimens/licence_{activation,seats,status}.rs`) | `g15.007` |
-| Model connection (approved `g14.020` requirements) | ModelConnectionPicker, ModelConnectionSetup, ModelConnectionCard, ModelCatalogueEditor | same four | same four | `g15.008` |
+| Model connection (approved `g14.020` requirements) | — closed by `g15.008` (`ModelConnectionPickerSpec`, `ModelConnectionSetupSpec`, `ModelConnectionCardSpec`, `ModelCatalogueEditorSpec`) | — closed by `g15.008` (`packages/render/src/model_{connection_picker,connection_setup,connection_card,catalogue_editor}.rs`) | — closed by `g15.008` (`packages/gpui/preview/src/specimens/model_{connection_picker,connection_setup,connection_card,catalogue_editor}_specimen.rs`) | `g15.008` |
 | Update & settings | UpdateStatus, UpdateCenter, SettingsShell | same three | same three | `g15.009` |
 | Radio | Radio | Radio | Radio | `g15.009` |
 | Context providers (render passthrough only) | — | IconProvider, UiPresentationProvider | — | `g15.009` |
@@ -71,9 +71,13 @@ Rust render 10 missing (+ 1 not-applicable), GPUI specimen 26 missing
 | MeterSurface | not-applicable — web-only by fixed decision (spec 068) | not-applicable | not-applicable | none |
 
 The headless regressions (`effigy regressions:native`) certify Button,
-RangeSlider, Popover, and — since `g15.007` — grouped CodeInput, the generic
+RangeSlider, Popover, — since `g15.007` — grouped CodeInput, the generic
 FileUpload browse seam, LicenceActivation's segmented key path, LicenceSeats
-release, and LicenceStatus display. Native tranches land their evidence as
+release, and LicenceStatus display, and — since `g15.008` — the
+ModelConnectionPicker's roving focus and disabled-route guard,
+ModelConnectionSetup's direct-add path, ModelConnectionCard's independent
+disclosure and focus restoration, and ModelCatalogueEditor's keyboard
+grab/move/cancel and focus-after-hide. Native tranches land their evidence as
 focused owner-local tests, not by extending a shared comparator.
 
 ## Package-Install Surface
@@ -90,8 +94,8 @@ the roster is folded into the release-certification card.
 
 | Requirement | Status | Owner |
 | --- | --- | --- |
-| Licence native completion (`g14.017`) | web references approved and landed (`g14.015`/`g14.016`); native missing | `g15.007` |
-| Model-connection native completion (`g14.020`) | web references approved and landed (`g14.018`/`g14.019`); native missing | `g15.008` |
+| Licence native completion (`g14.017`) | closed by `g15.007` — declarations, render, and GPUI specimens landed | `g15.007` |
+| Model-connection native completion (`g14.020`) | closed by `g15.008` — declarations, headless mirror, render, and GPUI specimens landed | `g15.008` |
 | Human-centred specimen catalogue audit (`g14.026`) | rubric and boundary intact; unexecuted | `g15.011` |
 | Primitive-first visual conformance lane | seam recorded in `conformance-estate.md`; harness not designed | `g15.012` |
 | Release-gate remediation | closed by PR #31 — `nanoid@3.3.18`; `bun audit` clean | `g15.014` |

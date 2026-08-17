@@ -51,9 +51,9 @@ Governing spec: `../../specs/067-model-connection-management.md`
 |------|------|---------|----------|-------|
 | `options` | `ModelConnectionOption[]` | `[]` | no | host-ordered exact route options |
 | `value` | `string \| null \| undefined` | `undefined` | no | controlled selected option id |
-| `defaultValue` | `string \| null` | `null` | no | uncontrolled initial selection |
+| `defaultValue` | `string \| null` | `null` | no | **Web targets only** — uncontrolled initial selection; the native binding keeps the current value on the host (see Native Binding) |
 | `query` | `string \| undefined` | `undefined` | no | controlled search text |
-| `defaultQuery` | `string` | `""` | no | uncontrolled initial search text |
+| `defaultQuery` | `string` | `""` | no | **Web targets only** — uncontrolled initial search text; see Native Binding |
 | `state` | `PickerState` | `"ready"` | no | catalogue posture |
 | `title` | `string` | `"Choose a connection"` | no | PickerShell heading |
 | `description` | `string \| null` | `null` | no | supporting copy |
@@ -182,10 +182,34 @@ single-select transition, radio roving focus, and id wiring.
 
 ## 10. GPUI Notes
 
-- Not implemented in GPUI. The g14 adoption pipeline was rejected; native
-  completion must be planned from this contract under the g15 release runway.
-- Preserve exact id selection, radio semantics, local filtering, and roving
-  focus; brand marks remain consumer-rendered content.
+- Implemented: `ModelConnectionPickerSpec`
+  (`packages/contracts/components/src/model_connection_picker.rs`),
+  `poodle_render::model_connection_picker`, GPUI specimen
+  `packages/gpui/preview/src/specimens/model_connection_picker_specimen.rs`.
+- Exact id selection, radio semantics, local filtering, and roving focus are
+  preserved. Brand marks remain consumer-rendered content.
+
+### Native Binding
+
+- The spec carries controlled display data only. `value` and `query` are the
+  current values; the web `defaultValue`/`defaultQuery` seeds are **web
+  targets only** because GPUI/AppState owns the current value and rerenders
+  after `on_value_change` / `on_query_change`.
+- Filtering, grouping, selectability, shell-state resolution, result
+  announcements, and posture copy derive once through
+  `poodle_headless::model_connection`.
+- The `leading` snippet becomes host-composed nodes keyed by option id
+  (`ModelConnectionPickerSlots::leading`); the generic mark is the fallback,
+  not a provider catalogue.
+- Natives label by object, so an option's accessible name states provider,
+  route, description, and the supplied availability reason once, where the web
+  composes the same content from descendant text plus a visually-hidden line.
+- Enter and Space select through the backend's own activation path; `on_key`
+  carries only the arrow/Home/End roving moves, so Space is never bound twice.
+- `ModelConnectionPickerHandlers::instance_id` is the backend-state scope. The
+  semantic `id` stays readable and unscoped; the scope lives on `runtime_id`,
+  which is what GPUI keys focus handles and editing state by. Without it two
+  pickers offering the same routes would share one handle per option id.
 
 ## 11. Parity Checklist
 
@@ -207,11 +231,11 @@ single-select transition, radio roving focus, and id wiring.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Native implementation missing | rejected g14 pilot supplied no adoption path | open runtime gap; not parity-certified | g15 release-gap inventory |
+| — | — | no open deltas; native completion landed in `g15.008` | — |
 
 ## 13. Approval And Adoption Notes
 
 - contract status: `approved`
 - approver: operator, 2026-08-14
 - downstream adopter: Nucleus
-- future follow-up: compile native completion from the g15 release-gap inventory
+- native completion: landed in `g15.008` (Rust declaration, `poodle-headless` behaviour mirror, `poodle-render` composition, GPUI specimen and mounted evidence)
