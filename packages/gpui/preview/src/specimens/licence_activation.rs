@@ -417,4 +417,3 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             ),
         ))
         }
-

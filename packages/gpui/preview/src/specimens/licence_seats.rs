@@ -163,4 +163,3 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             LicenceSeats::from_spec(LicenceSeatsSpec::new(), theme),
         ))
         }
-

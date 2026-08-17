@@ -133,4 +133,3 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             theme,
         )))
         }
-
