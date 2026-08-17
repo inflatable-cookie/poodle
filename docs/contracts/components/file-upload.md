@@ -523,7 +523,7 @@ interface ImageCompressionOptions {
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| native file dialog appearance varies by platform | OS-native dialog | allowed | ensure accept filter is applied |
+| native file dialog appearance varies by platform | OS-native dialog | allowed | accept filter applied post-selection with honest rejection (g15.007) |
 | image preview mechanism differs (blob URL vs native image loading) | platform API differences | allowed | preview must display and be revocable |
 | drag-and-drop visual feedback may differ slightly in GPUI | platform DnD API differences | allowed | must indicate active drop target state |
 
@@ -555,3 +555,33 @@ interface ImageCompressionOptions {
   profile image pickers
 - future follow-up: chunked upload support, drag reordering of file list,
   camera capture integration
+
+## 15. Rust Binding Notes (g15.007)
+
+Status: **bound** — generic single-file selection/read lands with `g15.007`
+Batch A.
+
+- The dropzone/browse affordance wires a generic browse intent:
+  `FileUploadHandlers.on_browse` fires on dropzone activation; the OS dialog,
+  the file read, and the accept rule are runtime-owned, never component
+  logic. LicenceActivation composes this capability; it contains no
+  OS-dialog code itself.
+- GPUI 0.2.2's `PathPromptOptions` has no accept-filter field. The configured
+  `accept` rule (and the web default 10 MB size rule) is therefore enforced
+  *after* selection and a rejection is reported honestly
+  (`poodle_gpui_node_backend::file_capability::finish_file_pick`), never
+  claimed as OS-filtered. Rule semantics mirror
+  `packages/core/src/file-upload.ts` (`poodle_headless::file_upload`):
+  `.ext` tokens match the extension; `type/*` and exact MIME rules need a MIME
+  read, which GPUI cannot supply — such rules refuse honestly rather than
+  guess.
+- Headless evidence injects a selected fixture path/bytes through the same
+  generic seam (`SingleFileSource` + `finish_file_pick`) that the live OS
+  prompt uses (`OsFilePrompt`), so a static filename or a prefilled
+  credential is never proof of the selection/read path.
+- The picked file's payload is encoded to bare base64 (no data-URL prefix)
+  through `poodle_headless::file_upload::base64_encode`; credential contents
+  never render.
+- The licence-file route (LicenceActivation) reads through this capability
+  with the host's `fileAccept` rule and reports read/accept failures with the
+  web reference's copy.

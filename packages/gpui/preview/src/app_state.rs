@@ -3,9 +3,47 @@
 //! Mirrors the current Svelte preview shell: theme, density, control size,
 //! component search, active section, and component selection.
 
+use gpui::App;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_gpui_node_backend::file_capability::{
+    finish_file_pick, FilePickOutcome, OsFilePrompt, SingleFilePickSpec, SingleFileSource,
+};
 use poodle_specs::{reorder_nodes, DropPosition, TreeNode};
 use std::collections::HashMap;
+
+/// Land one resolved pick outcome in specimen state under its key prefix.
+/// Returns whether any specimen key changed.
+fn apply_file_pick_outcome(
+    specimens: &mut SpecimenState,
+    key: &str,
+    outcome: &FilePickOutcome,
+) -> bool {
+    let mut changed = false;
+    match outcome {
+        FilePickOutcome::Selected {
+            name,
+            contents_base64,
+        } => {
+            let name_key = format!("{key}-name");
+            let base64_key = format!("{key}-base64");
+            let error_key = format!("{key}-error");
+            changed |= specimens.text.get(&base64_key) != Some(contents_base64);
+            changed |= specimens.text.get(&name_key) != Some(name);
+            specimens.text.insert(name_key, name.clone());
+            specimens.text.insert(base64_key, contents_base64.clone());
+            changed |= specimens.text.remove(&error_key).is_some();
+        }
+        FilePickOutcome::Cancelled => {}
+        FilePickOutcome::Rejected(message) | FilePickOutcome::Failed(message) => {
+            let error_key = format!("{key}-error");
+            let base64_key = format!("{key}-base64");
+            changed |= specimens.text.get(&error_key) != Some(message);
+            specimens.text.insert(error_key, message.clone());
+            changed |= specimens.text.remove(&base64_key).is_some();
+        }
+    }
+    changed
+}
 
 /// Demo tree for the rename / context-menu / reorder specimen.
 pub fn docs_tree() -> Vec<TreeNode> {
@@ -495,6 +533,29 @@ pub enum NodeSpecimenEvent {
     /// specimen — selection, focus, expansion, rename, drag and menu — so it
     /// gets its own event rather than a dozen flat variants.
     Tree(TreeEvent),
+    /// The generic single-file browse seam reported a request (g15.007). The
+    /// host starts the OS prompt on its next frame and applies the outcome to
+    /// the specimen keys below.
+    FileBrowse {
+        key: String,
+        spec: SingleFilePickSpec,
+    },
+}
+
+/// One requested single-file pick, waiting for the host to start its prompt.
+pub struct FilePickRequest {
+    /// Specimen-state key prefix; the resolved outcome lands in
+    /// `{key}-name`, `{key}-base64`, and `{key}-error`.
+    pub key: String,
+    pub spec: SingleFilePickSpec,
+}
+
+/// An in-flight pick whose OS prompt has been started.
+pub struct ActiveFilePick {
+    pub key: String,
+    /// The request's own configuration, reused for the post-selection rules.
+    pub spec: SingleFilePickSpec,
+    pub source: Box<dyn SingleFileSource>,
 }
 
 /// State changes the node-backed Tree specimen can request.
@@ -578,6 +639,11 @@ pub struct AppState {
     /// Pending events from node-backed specimens; drained at render start.
     pub node_events: std::sync::Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
     pub tree: TreePreviewState,
+    /// Single-file picks requested through the generic browse seam but whose
+    /// OS prompt has not been started yet.
+    pub pending_file_picks: Vec<FilePickRequest>,
+    /// Picks whose prompt is open; polled each frame until resolved.
+    pub active_file_picks: Vec<ActiveFilePick>,
 }
 
 impl AppState {
@@ -610,6 +676,8 @@ impl AppState {
             specimens: SpecimenState::new(),
             node_events: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
             tree: TreePreviewState::new(),
+            pending_file_picks: Vec::new(),
+            active_file_picks: Vec::new(),
         }
     }
 
@@ -734,6 +802,11 @@ impl AppState {
                         self.tree.clear_drop();
                     }
                 },
+                NodeSpecimenEvent::FileBrowse { key, spec } => {
+                    // Started on the next frame by `poll_file_picks`, which
+                    // owns the app context the OS prompt needs.
+                    self.pending_file_picks.push(FilePickRequest { key, spec });
+                }
                 NodeSpecimenEvent::Chrome(event) => match event {
                     ChromeEvent::Section(section) => self.section = section,
                     ChromeEvent::ThemeSelectOpen(open) => self.theme_select_open = open,
@@ -772,6 +845,44 @@ impl AppState {
     pub fn set_theme(&mut self, preset: ThemePreset) {
         self.theme_preset = preset;
         self.rebuild_theme();
+    }
+
+    /// Start and resolve the generic single-file picks (g15.007).
+    ///
+    /// Pending requests get their OS prompt started (this needs the app
+    /// context, which only a frame has); active prompts are polled, and a
+    /// resolved pick runs the shared post-selection pipeline before landing
+    /// in specimen state as `{key}-name` / `{key}-base64` / `{key}-error`.
+    /// Returns whether specimen content changed.
+    pub fn poll_file_picks(&mut self, cx: &mut App) -> bool {
+        let started = std::mem::take(&mut self.pending_file_picks);
+        for request in started {
+            self.active_file_picks.push(ActiveFilePick {
+                key: request.key,
+                spec: request.spec.clone(),
+                source: Box::new(OsFilePrompt::start(cx, &request.spec)),
+            });
+        }
+        let mut changed = false;
+        let mut resolved = Vec::new();
+        for (index, active) in self.active_file_picks.iter_mut().enumerate() {
+            let Some(result) = active.source.poll() else {
+                continue;
+            };
+            resolved.push(index);
+            let key = active.key.clone();
+            let spec = active.spec.clone();
+            let outcome = match result {
+                Ok(Some(file)) => finish_file_pick(file, &spec),
+                Ok(None) => FilePickOutcome::Cancelled,
+                Err(message) => FilePickOutcome::Failed(message),
+            };
+            changed |= apply_file_pick_outcome(&mut self.specimens, &key, &outcome);
+        }
+        for index in resolved.into_iter().rev() {
+            self.active_file_picks.remove(index);
+        }
+        changed
     }
 
     /// Rebuild the theme provider from the current preset, density, and control size.

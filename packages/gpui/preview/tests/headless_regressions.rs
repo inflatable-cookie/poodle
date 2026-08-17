@@ -286,3 +286,339 @@ fn a_nested_popover_paints_without_nesting_deferred_draws() {
         );
     });
 }
+
+// ── g15.007 Batch A regressions ───────────────────────────────────────────
+
+/// The mounted-window regressions that drive interactive nodes give those
+/// nodes explicit ids — the same pattern every retained regression in this
+/// file uses. The production preview rebuilds id-less elements within each
+/// platform frame; the test platform renders a view several times per draw,
+/// so only a declared id keeps an element's state stable across a click.
+fn give_first_id(node: &mut Node, id: &str, predicate: &dyn Fn(&Node) -> bool) -> bool {
+    if predicate(node) {
+        node.id = Some(id.to_owned());
+        return true;
+    }
+    node.children
+        .iter_mut()
+        .any(|child| give_first_id(child, id, predicate))
+}
+
+/// A grouped code input stays one joined value through the real dispatch
+/// tree: the separator is presentation-only, so the code reaches the host
+/// without hyphens, and a full-length entry completes exactly once.
+#[test]
+fn a_grouped_code_input_types_and_completes_through_the_real_tree() {
+    use poodle_specs::CodeInputSpec;
+
+    run_headless(|cx| {
+        let changes = Arc::new(Mutex::new(Vec::new()));
+        let completes = Arc::new(Mutex::new(Vec::new()));
+        let changes_sink = Arc::clone(&changes);
+        let completes_sink = Arc::clone(&completes);
+
+        let mut node = poodle_render::code_input_with_handlers(
+            &CodeInputSpec::new()
+                .with_length(20)
+                .with_groups([5, 5, 5, 5])
+                .with_separator("-")
+                .with_numbers_only(false),
+            &theme(),
+            poodle_render::CodeInputHandlers {
+                on_value_change: Some(Arc::new(move |value: &str| {
+                    changes_sink.lock().unwrap().push(value.to_string())
+                })),
+                on_complete: Some(Arc::new(move |value: &str| {
+                    completes_sink.lock().unwrap().push(value.to_string())
+                })),
+                ..poodle_render::CodeInputHandlers::default()
+            },
+        );
+        // The slot row takes the keys; give it a stable identity for the
+        // mounted window.
+        assert!(give_first_id(
+            &mut node,
+            "code-input-row",
+            &|n| n.interaction.focusable,
+        ));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        // A real pointer press focuses the slot row, then keys walk the focus
+        // chain — no handler is invoked as a test shortcut.
+        driver.pointer_activate();
+        driver.dispatch_key_raw("1");
+        driver.dispatch_key_raw("2");
+        assert_eq!(
+            changes.lock().unwrap().as_slice(),
+            ["1", "2"],
+            "each key reaches the row as part of one joined value"
+        );
+
+        // Re-mount a full grouped code (the host re-render). Completing a
+        // full value through the real tree fires completion exactly once.
+        let completes_sink2 = Arc::clone(&completes);
+        let changes_sink2 = Arc::clone(&changes);
+        fn build_row(
+            value: &str,
+            changes_sink: Arc<Mutex<Vec<String>>>,
+            completes_sink: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
+            let mut node = poodle_render::code_input_with_handlers(
+                &CodeInputSpec::new()
+                    .with_length(4)
+                    .with_numbers_only(false)
+                    .with_value(value),
+                &theme(),
+                poodle_render::CodeInputHandlers {
+                    on_value_change: Some(Arc::new(move |next: &str| {
+                        changes_sink.lock().unwrap().push(next.to_string())
+                    })),
+                    on_complete: Some(Arc::new(move |next: &str| {
+                        completes_sink.lock().unwrap().push(next.to_string())
+                    })),
+                    ..poodle_render::CodeInputHandlers::default()
+                },
+            );
+            // A fresh id: the first mount's row state (and its focus handle)
+            // is gone with its element, and the driver keeps one window.
+            assert!(give_first_id(
+                &mut node,
+                "code-input-row-2",
+                &|n| n.interaction.focusable,
+            ));
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+        // The value is controlled host state: each keystroke is applied by
+        // rebuilding the row with the reported value before the next key —
+        // the real host loop, driven through the real dispatch tree.
+        let row = Arc::new(Mutex::new(build_row(
+            "",
+            Arc::clone(&changes),
+            Arc::clone(&completes),
+        )));
+        driver.mount_node(Arc::clone(&row));
+        let mut value = String::new();
+        for key in ["a", "b", "c", "d"] {
+            driver.pointer_activate();
+            driver.dispatch_key_raw(key);
+            value = changes
+                .lock()
+                .unwrap()
+                .last()
+                .cloned()
+                .expect("the row reported the keystroke");
+            *row.lock().unwrap() = build_row(&value, Arc::clone(&changes), Arc::clone(&completes));
+            driver.draw_frame();
+        }
+        assert_eq!(
+            value,
+            "abcd",
+            "the row accumulates the joined value through the host loop"
+        );
+        assert_eq!(
+            completes.lock().unwrap().as_slice(),
+            ["abcd"],
+            "completion fires on the transition into a full code, once"
+        );
+    });
+}
+
+/// The completion tick/cross belongs to the exact value it was computed for:
+/// a host re-render with an edited value removes the indicator in a mounted
+/// window, so a stale result can never render.
+#[test]
+fn a_stale_completion_result_cannot_render_in_a_mounted_window() {
+    use poodle_specs::{CodeInputCompletion, CodeInputSpec};
+
+    fn count_indicators(node: &Node) -> usize {
+        fn walk(n: &Node, out: &mut usize) {
+            if let poodle_node::NodeKind::Icon { name, .. } = &n.kind {
+                if name == "check" || name == "x" {
+                    if n.a11y.label.is_some() {
+                        *out += 1;
+                    }
+                }
+            }
+            for c in &n.children {
+                walk(c, out);
+            }
+        }
+        let mut out = 0;
+        walk(node, &mut out);
+        out
+    }
+
+    run_headless(|cx| {
+        let mut checked = poodle_render::code_input_with_handlers(
+            &CodeInputSpec::new()
+                .with_length(6)
+                .with_value("123456")
+                .with_completion_result(CodeInputCompletion::Passed("123456".to_string())),
+            &theme(),
+            poodle_render::CodeInputHandlers::default(),
+        );
+        checked.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(checked));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        driver.draw_frame();
+        assert_eq!(count_indicators(&node.lock().unwrap()), 1, "tick renders");
+
+        // The host edits the value away from the checked one and re-renders
+        // through the same mounted node.
+        *node.lock().unwrap() = poodle_render::code_input_with_handlers(
+            &CodeInputSpec::new()
+                .with_length(6)
+                .with_value("654321")
+                .with_completion_result(CodeInputCompletion::Passed("123456".to_string())),
+            &theme(),
+            poodle_render::CodeInputHandlers::default(),
+        );
+        driver.draw_frame();
+        assert_eq!(
+            count_indicators(&node.lock().unwrap()),
+            0,
+            "the indicator belongs to the value it was checked against"
+        );
+    });
+}
+
+/// Browse goes through the generic single-file seam: a pointer activation of
+/// the dropzone flows fixture bytes through the injected source and the same
+/// post-selection pipeline the live OS prompt uses.
+#[test]
+fn a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam() {
+    use poodle_gpui_node_backend::file_capability::{
+        InjectedFileSource, PickedFile, SingleFilePickSpec, SingleFileSource, finish_file_pick,
+    };
+
+    run_headless(|cx| {
+        let outcomes = Arc::new(Mutex::new(Vec::new()));
+        let on_browse = {
+            let outcomes = Arc::clone(&outcomes);
+            Arc::new(move || {
+                let mut source = InjectedFileSource::new(Ok(Some(PickedFile {
+                    path: "/fixtures/machine.lic".into(),
+                    name: "machine.lic".to_string(),
+                    bytes: b"fixture payload".to_vec(),
+                })));
+                let file = source
+                    .poll()
+                    .expect("fixture resolves immediately")
+                    .expect("no read error")
+                    .expect("not cancelled");
+                let outcome = finish_file_pick(
+                    file,
+                    &SingleFilePickSpec {
+                        prompt: "Choose a licence file".to_string(),
+                        accept: Some(".lic".to_string()),
+                        max_size: None,
+                    },
+                );
+                outcomes.lock().unwrap().push(outcome);
+            })
+        };
+        let mut node = poodle_render::file_upload_with_handlers(
+            &poodle_specs::FileUploadSpec::new().with_accept(".lic"),
+            &theme(),
+            poodle_render::FileUploadHandlers {
+                on_browse: Some(on_browse),
+                ..poodle_render::FileUploadHandlers::default()
+            },
+        );
+        // The dropzone carries the browse intent; give it a stable identity
+        // for the mounted window.
+        assert!(give_first_id(
+            &mut node,
+            "file-upload-dropzone",
+            &|n| n.interaction.on_activate.is_some(),
+        ));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+
+        driver.pointer_activate();
+        let outcomes = outcomes.lock().unwrap();
+        assert_eq!(outcomes.len(), 1, "one activation, one pick");
+        let selected = match &outcomes[0] {
+            poodle_gpui_node_backend::file_capability::FilePickOutcome::Selected {
+                name,
+                contents_base64,
+            } => (name.clone(), contents_base64.clone()),
+            other => panic!("expected a selection, got {other:?}"),
+        };
+        assert_eq!(selected.0, "machine.lic");
+        assert_eq!(
+            selected.1,
+            poodle_headless::file_upload::base64_encode(b"fixture payload"),
+            "the same bare-base64 payload the live route produces"
+        );
+        assert!(!selected.1.starts_with("data:"));
+    });
+}
+
+/// A dropzone browse that fails the accept rule reports the rejection
+/// honestly — GPUI 0.2.2 cannot filter in the OS dialog, so the refusal
+/// happens after selection through the same seam.
+#[test]
+fn a_dropzone_browse_reports_accept_rejection_honestly() {
+    use poodle_gpui_node_backend::file_capability::{
+        FilePickOutcome, InjectedFileSource, PickedFile, SingleFilePickSpec, SingleFileSource,
+        finish_file_pick,
+    };
+
+    run_headless(|cx| {
+        let outcomes = Arc::new(Mutex::new(Vec::new()));
+        let on_browse = {
+            let outcomes = Arc::clone(&outcomes);
+            Arc::new(move || {
+                let mut source = InjectedFileSource::new(Ok(Some(PickedFile {
+                    path: "/fixtures/machine.txt".into(),
+                    name: "machine.txt".to_string(),
+                    bytes: b"x".to_vec(),
+                })));
+                let file = source
+                    .poll()
+                    .expect("fixture resolves")
+                    .expect("no read error")
+                    .expect("not cancelled");
+                let outcome = finish_file_pick(
+                    file,
+                    &SingleFilePickSpec {
+                        prompt: "Choose a licence file".to_string(),
+                        accept: Some(".lic".to_string()),
+                        max_size: None,
+                    },
+                );
+                outcomes.lock().unwrap().push(outcome);
+            })
+        };
+        let mut node = poodle_render::file_upload_with_handlers(
+            &poodle_specs::FileUploadSpec::new().with_accept(".lic"),
+            &theme(),
+            poodle_render::FileUploadHandlers {
+                on_browse: Some(on_browse),
+                ..poodle_render::FileUploadHandlers::default()
+            },
+        );
+        assert!(give_first_id(
+            &mut node,
+            "file-upload-dropzone",
+            &|n| n.interaction.on_activate.is_some(),
+        ));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+
+        driver.pointer_activate();
+        let outcomes = outcomes.lock().unwrap();
+        assert_eq!(outcomes.len(), 1);
+        assert_eq!(
+            &outcomes[0],
+            &FilePickOutcome::Rejected(
+                "File type not accepted. Accepted types: .lic".to_string()
+            ),
+            "the rejection names the accept rule, not a fake OS filter"
+        );
+    });
+}

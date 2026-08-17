@@ -226,6 +226,26 @@ mod tests {
         assert_eq!(code_slot_selection(0, 0), (0, 0));
     }
 
+    /// Group ends follow the explicit partition; the last group never gets a
+    /// trailing end.
+    #[test]
+    fn group_ends_follow_explicit_partitions() {
+        assert_eq!(code_group_end_indices(20, &[5, 5, 5, 5]), vec![4, 9, 14]);
+        assert_eq!(code_group_end_indices(6, &[3, 3]), vec![2]);
+        assert_eq!(code_group_end_indices(6, &[6]), Vec::<usize>::new());
+    }
+
+    /// A single group, a partial partition, a zero group, or an empty length
+    /// produces no breaks — grouping is never inferred from `length`.
+    #[test]
+    fn invalid_or_single_group_patterns_produce_no_breaks() {
+        assert_eq!(code_group_end_indices(6, &[]), Vec::<usize>::new());
+        assert_eq!(code_group_end_indices(6, &[2, 2]), Vec::<usize>::new());
+        assert_eq!(code_group_end_indices(6, &[0, 6]), Vec::<usize>::new());
+        assert_eq!(code_group_end_indices(6, &[7, 7]), Vec::<usize>::new());
+        assert_eq!(code_group_end_indices(0, &[3, 3]), Vec::<usize>::new());
+    }
+
     #[test]
     fn typing_over_a_selected_slot_replaces_it_in_place() {
         // "1234", slot 1 selected -> typing 9 gives "1934", caret after it.
@@ -788,6 +808,31 @@ pub fn code_slot_selection(index: usize, value_len: usize) -> (usize, usize) {
     let start = index.min(value_len);
     let end = if index < value_len { index + 1 } else { start };
     (start, end)
+}
+
+/// Slot indices that end a visual group.
+///
+/// A faithful port of `codeGroupEndIndices` in
+/// `packages/core/src/code-input.ts`: group lengths are accepted only as one
+/// complete positive-integer partition of `length`. An omitted, single-group,
+/// partial, or invalid pattern produces no breaks, keeping grouping
+/// presentation-only and leaving value and caret behaviour untouched.
+pub fn code_group_end_indices(length: usize, groups: &[usize]) -> Vec<usize> {
+    if length == 0
+        || groups.len() < 2
+        || groups.iter().any(|group| *group == 0)
+        || groups.iter().sum::<usize>() != length
+    {
+        return Vec::new();
+    }
+    let mut consumed = 0;
+    groups[..groups.len() - 1]
+        .iter()
+        .map(|group| {
+            consumed += group;
+            consumed - 1
+        })
+        .collect()
 }
 
 /// Typing into a code with a selection: overwrite from `start`, extending the

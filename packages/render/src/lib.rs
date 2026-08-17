@@ -238,7 +238,7 @@ pub use error_boundary::error_boundary;
 pub use eyebrow::eyebrow;
 pub use field::field;
 pub use field_set::field_set;
-pub use file_upload::file_upload;
+pub use file_upload::{file_upload, file_upload_with_handlers, FileUploadHandlers};
 pub use filter_builder::{filter_builder, FilterBuilderHandlers};
 pub use filter_toolbar::filter_toolbar;
 pub use floating_overlay::floating_overlay;

@@ -193,7 +193,7 @@ pub use card_toggle_group::{CardToggleGroupSpec, CardToggleOption};
 pub use changed_files::ChangedFilesSpec;
 pub use checkbox::CheckboxSpec;
 pub use code::{CodeInlineVariant, CodeSpec, CodeTypography};
-pub use code_input::CodeInputSpec;
+pub use code_input::{CodeInputCompletion, CodeInputSpec};
 pub use collapse_toggle::{CollapseDirection, CollapseToggleSpec};
 pub use collapsible::CollapsibleSpec;
 pub use color_picker::{ColorInputMode, ColorPickerSpec};

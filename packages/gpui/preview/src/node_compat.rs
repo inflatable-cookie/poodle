@@ -47,6 +47,9 @@ use poodle_specs::{
 };
 use poodle_tokens::typed::ColorValue;
 
+use crate::app_state::NodeSpecimenEvent;
+use poodle_gpui_node_backend::file_capability::SingleFilePickSpec;
+
 type OpenChangeHandler = Rc<dyn Fn(bool, &mut Window, &mut App)>;
 
 pub(crate) struct Eyebrow;
@@ -3604,6 +3607,7 @@ pub(crate) struct FileUpload {
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
     on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    on_browse: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
 impl FileUpload {
@@ -3613,11 +3617,53 @@ impl FileUpload {
             theme: theme.clone(),
             id_suffix: None,
             on_remove: None,
+            on_browse: None,
         }
     }
 
+    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.id_suffix = Some(id.into());
+        self
+    }
+
+    pub(crate) fn on_remove(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_remove = Some(handler);
+        self
+    }
+
+    /// Wire the generic browse seam: pressing the dropzone requests one file
+    /// through the shared capability (g15.007). The request is queued as an
+    /// event; the preview host starts the OS prompt on its next frame.
+    pub(crate) fn on_browse(
+        mut self,
+        queue: Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
+        key: impl Into<String>,
+        prompt: impl Into<String>,
+    ) -> Self {
+        let key = key.into();
+        let spec = SingleFilePickSpec {
+            prompt: prompt.into(),
+            accept: self.spec.accept.clone(),
+            max_size: self.spec.max_size,
+        };
+        self.on_browse = Some(Arc::new(move || {
+            queue.lock().unwrap().push(NodeSpecimenEvent::FileBrowse {
+                key: key.clone(),
+                spec: spec.clone(),
+            });
+        }));
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        let mut node = poodle_render::file_upload(&self.spec, &self.theme, self.on_remove);
+        let mut node = poodle_render::file_upload_with_handlers(
+            &self.spec,
+            &self.theme,
+            poodle_render::FileUploadHandlers {
+                on_browse: self.on_browse,
+                on_remove: self.on_remove,
+            },
+        );
         if let Some(id) = self.id_suffix {
             node.id = Some(format!("poodle-file-upload-{id}"));
         }

@@ -300,4 +300,31 @@ Density adjusts only the inter-slot gap: `compact` `0.25rem`, `default`
 
 | Delta | Status | Follow-up |
 | --- | --- | --- |
-| Rust spec/renderer still infer one 3+3 split for length 6 and cannot accept explicit groups, separators, or completion-result indication | staged web-reference delta; not accepted parity | g14.017 must port grouping and completion validation through the adopted interface before LicenceActivation native completion |
+| Rust CodeInput inferred a 3+3 split for length 6 and could not accept explicit groups, separators, or completion-result indication | closed by g15.007 Batch A (§12) | none — explicit groups/separators and the completion result are native-bound |
+
+## 12. Rust Binding Notes (g15.007)
+
+Status: **bound** — native grouping, separators, and completion result land with
+`g15.007` Batch A.
+
+- `CodeInputSpec.groups` (`Option<Vec<usize>>`) and `separator`
+  (`Option<String>`) mirror the web props exactly. `group_end_indices()`
+  accepts only one complete positive-integer partition of `length`
+  (`poodle_headless::text_input::code_group_end_indices`, the port of
+  `codeGroupEndIndices`); the native renderer no longer infers any split from
+  `length`. Separators render at valid boundaries only and never enter the
+  value.
+- Completion feedback is spec-carried: `CodeInputSpec.completion_result`
+  (`CodeInputCompletion::Passed(value) | Failed(value)`) binds the tick/cross
+  to the exact value the check ran against. The renderer shows the indicator
+  only while `current_value` equals that value — editing or clearing the code
+  removes it, so a stale result cannot render. On the web the validator runs
+  adapter-side; on Rust targets the host runs its parser and writes the
+  result into the spec (LicenceActivation's key mode composes exactly this:
+  `LicenceActivationHandlers.on_key_check` evaluates the injected parser at
+  full length).
+- Indicator copy stays polite: `Code check passed` / `Code check failed`,
+  never a verdict on the value's authenticity.
+- The GPUI specimen (specimens/code_input.rs) exercises the grouped-key
+  layout and live tick/cross; mounted-window regressions in
+  `tests/headless_regressions.rs` type through the real dispatch tree.
