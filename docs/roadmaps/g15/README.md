@@ -94,6 +94,8 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Prepare and dispatch `g15.011`. `g15.012` follows in runway order;
+Launch `g15.011` from
+`docs/handoffs/20260817-214451-g15-011-specimen-catalogue-audit.md`.
+`g15.012` follows in runway order;
 `g15.013` stays blocked as the final certification gate until every earlier
 card is complete. Release mutation remains behind the explicit operator gate.
