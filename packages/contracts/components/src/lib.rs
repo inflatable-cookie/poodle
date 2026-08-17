@@ -142,6 +142,10 @@ mod media_preview;
 mod media_thumbnail;
 mod message_center;
 mod metric_tile;
+mod model_catalogue_editor;
+mod model_connection_card;
+mod model_connection_picker;
+mod model_connection_setup;
 mod model_picker;
 mod page_header;
 mod page_loading;
@@ -236,6 +240,12 @@ pub use menubar::MenubarSpec;
 pub use meta_bar::MetaBarSpec;
 pub use meta_item::MetaItemSpec;
 pub use meter::{MeterLevel, MeterShape, MeterSpec, MeterTone};
+pub use model_catalogue_editor::{
+    ModelCatalogueEditorSpec, MODEL_CATALOGUE_HIDDEN_SECTION_ID,
+};
+pub use model_connection_card::ModelConnectionCardSpec;
+pub use model_connection_picker::ModelConnectionPickerSpec;
+pub use model_connection_setup::ModelConnectionSetupSpec;
 pub use model_picker::{
     ModelAxisBinding, ModelAxisControl, ModelAxisControlKind, ModelAxisKind, ModelAxisOption,
     ModelAxisRef, ModelAxisValue, ModelCapabilityAxis, ModelImage, ModelOption,

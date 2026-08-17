@@ -57,7 +57,7 @@ Governing spec: `../../specs/067-model-connection-management.md`
 | `readiness` | `ModelConnectionReadiness` | `"unknown"` | no | display posture only |
 | `readinessLabel` | `string` | `"Status unknown"` | no | visible/accessibility meaning |
 | `open` | `boolean \| undefined` | `undefined` | no | controlled disclosure |
-| `defaultOpen` | `boolean` | `false` | no | uncontrolled initial disclosure |
+| `defaultOpen` | `boolean` | `false` | no | **Web targets only** — uncontrolled initial disclosure; see Native Binding |
 | `isEnabled` | `boolean` | `true` | no | host preference; not readiness |
 | `isEnableDisabled` | `boolean` | `false` | no | disables only the Switch |
 | `isDisabled` | `boolean` | `false` | no | disables card controls |

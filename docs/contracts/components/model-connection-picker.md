@@ -51,9 +51,9 @@ Governing spec: `../../specs/067-model-connection-management.md`
 |------|------|---------|----------|-------|
 | `options` | `ModelConnectionOption[]` | `[]` | no | host-ordered exact route options |
 | `value` | `string \| null \| undefined` | `undefined` | no | controlled selected option id |
-| `defaultValue` | `string \| null` | `null` | no | uncontrolled initial selection |
+| `defaultValue` | `string \| null` | `null` | no | **Web targets only** — uncontrolled initial selection; the native binding keeps the current value on the host (see Native Binding) |
 | `query` | `string \| undefined` | `undefined` | no | controlled search text |
-| `defaultQuery` | `string` | `""` | no | uncontrolled initial search text |
+| `defaultQuery` | `string` | `""` | no | **Web targets only** — uncontrolled initial search text; see Native Binding |
 | `state` | `PickerState` | `"ready"` | no | catalogue posture |
 | `title` | `string` | `"Choose a connection"` | no | PickerShell heading |
 | `description` | `string \| null` | `null` | no | supporting copy |

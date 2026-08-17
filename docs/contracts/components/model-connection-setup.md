@@ -46,10 +46,10 @@ Governing spec: `../../specs/067-model-connection-management.md`
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `stage` | `"choose" \| "configure" \| undefined` | `undefined` | no | controlled stage |
-| `defaultStage` | `"choose" \| "configure"` | `"choose"` | no | uncontrolled initial stage |
+| `defaultStage` | `"choose" \| "configure"` | `"choose"` | no | **Web targets only** — uncontrolled initial stage; see Native Binding |
 | `options` | `ModelConnectionOption[]` | `[]` | no | forwarded to picker; `requiresConfiguration` selects direct or configured flow |
 | `value` | `string \| null \| undefined` | `undefined` | no | controlled selected option id |
-| `defaultValue` | `string \| null` | `null` | no | uncontrolled initial selection |
+| `defaultValue` | `string \| null` | `null` | no | **Web targets only** — uncontrolled initial selection; see Native Binding |
 | `query` | `string \| undefined` | `undefined` | no | controlled picker query |
 | `pickerState` | `PickerState` | `"ready"` | no | picker catalogue posture |
 | `title` | `string` | `"Add model connection"` | no | workflow heading |
