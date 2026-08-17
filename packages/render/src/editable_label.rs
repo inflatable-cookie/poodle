@@ -10,13 +10,13 @@
 //!     padding / border / radius and inlines the text.
 //!   - editing mode (`is_editing == true`): an input node seeded with the
 //!     current value + placeholder, accent-focusRing border, surface
-//!     background (flush → bottom border only). `max_length` is carried on
-//!     the spec for the host editor.
+//!     background (flush → bottom border only). The native end-caret editing
+//!     subset enforces `max_length` before reporting the controlled value.
 //!
-//! The activation gesture, commit (Enter / blur), cancel (Escape) and
-//! key-by-key editing are host-owned: the host drives `is_editing` / `value`
-//! and re-renders. `on_edit_start` fires when the display-mode label is
-//! pressed; already editing or disabled, there is nothing to start.
+//! Edit state, commit (Enter / blur), and cancel (Escape) are host-owned: the
+//! host drives `is_editing` / `value` and re-renders. Shared text transitions
+//! derive each next value. `on_edit_start` fires when the display-mode label
+//! is pressed; already editing or disabled, there is nothing to start.
 
 use std::sync::Arc;
 
@@ -77,6 +77,21 @@ fn density_pad_x_offset_rem(density: ControlDensity) -> f32 {
     }
 }
 
+fn limit_edit_value(value: String, max_length: Option<usize>) -> String {
+    let Some(max_length) = max_length else {
+        return value;
+    };
+    value.chars().take(max_length).collect()
+}
+
+fn end_edit_state(value: &str) -> poodle_headless::text_input::EditState {
+    let end = value.chars().count();
+    poodle_headless::text_input::EditState {
+        anchor: end,
+        head: end,
+    }
+}
+
 #[derive(Default, Clone)]
 pub struct EditableLabelHandlers {
     pub on_edit_start: Option<Arc<dyn Fn() + Send + Sync>>,
@@ -129,7 +144,8 @@ pub fn editable_label_with_handlers(
 
     let mut el = if spec.is_editing {
         // ── Editing mode: input node seeded with value + placeholder ────
-        // The host editor owns keystrokes and max_length enforcement.
+        // The native subset edits at the end of the controlled value. The
+        // component owns max_length because the host sees only the result.
         let edit_border = theme.resolve_color(spec.edit_border_token());
         let surface_bg = theme.resolve_color(spec.fill_token());
 
@@ -170,7 +186,16 @@ pub fn editable_label_with_handlers(
         }
         input.interaction.focusable = true;
         if !spec.is_disabled {
-            input.interaction.on_text_change = handlers.on_change.clone();
+            if let Some(change) = handlers.on_change.clone() {
+                let value = spec.value.clone();
+                let max_length = spec.max_length;
+                input.interaction.on_text_change = Some(Arc::new(move |next: &str| {
+                    let next = limit_edit_value(next.to_string(), max_length);
+                    if next != value {
+                        change(&next);
+                    }
+                }));
+            }
             input.interaction.on_cancel = handlers.on_cancel.clone();
             // The editing input rings in the accent focus colour when
             // focused — the same focus-visible signal a TextInput carries —
@@ -181,26 +206,50 @@ pub fn editable_label_with_handlers(
                 text_color: None,
                 opacity: None,
             });
-            // Typing reaches the controlled draft: the platform IME and
-            // paste land through `on_edit_insert`, direct keys through
-            // `on_edit_key`. The host re-renders with the reported value, so
-            // the captured draft is current at each keystroke.
+            // Typing reaches the controlled draft through the shared edit
+            // transitions. GPUI's admitted subset keeps the caret at the end;
+            // the host re-renders with the reported value after each edit.
             if let Some(change) = handlers.on_change.clone() {
-                let insert_change = change.clone();
-                input.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
-                    insert_change(text);
-                }));
                 let value = spec.value.clone();
-                input.interaction.on_edit_key = Some(Arc::new(move |key, _mods| {
-                    let mut next = value.clone();
-                    if key == "backspace" {
-                        next.pop();
-                    } else if key.chars().count() == 1 {
-                        next.push_str(key);
-                    } else {
-                        return;
+                let max_length = spec.max_length;
+                let insert_change = change.clone();
+                let insert_value = value.clone();
+                input.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
+                    let outcome = poodle_headless::text_input::insert_transition(
+                        &insert_value,
+                        end_edit_state(&insert_value),
+                        text,
+                    );
+                    if let Some(next) = outcome.value {
+                        let next = limit_edit_value(next, max_length);
+                        if next != insert_value {
+                            insert_change(&next);
+                        }
                     }
-                    change(&next);
+                }));
+                input.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
+                    let key = if key == "space" {
+                        " ".to_string()
+                    } else if mods.shift && key.chars().count() == 1 {
+                        key.to_uppercase()
+                    } else {
+                        key.to_string()
+                    };
+                    let Some(outcome) = poodle_headless::text_input::edit_transition(
+                        &value,
+                        end_edit_state(&value),
+                        &key,
+                        false,
+                        mods.accel,
+                    ) else {
+                        return;
+                    };
+                    if let Some(next) = outcome.value {
+                        let next = limit_edit_value(next, max_length);
+                        if next != value {
+                            change(&next);
+                        }
+                    }
                 }));
             }
             if let Some(handler) = &handlers.on_commit {
@@ -303,4 +352,113 @@ pub fn editable_label_with_handlers(
         }
     }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::{Arc, Mutex};
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn key_change(
+        spec: EditableLabelSpec,
+        key: &str,
+        modifiers: poodle_node::NodeModifiers,
+    ) -> Vec<String> {
+        let values = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&values);
+        let node = editable_label_with_handlers(
+            &spec.with_editing(true),
+            &theme(),
+            EditableLabelHandlers {
+                on_change: Some(Arc::new(move |value| {
+                    sink.lock().unwrap().push(value.to_string());
+                })),
+                ..EditableLabelHandlers::default()
+            },
+        );
+        (node.interaction.on_edit_key.as_ref().expect("key handler"))(key, modifiers);
+        let result = values.lock().unwrap().clone();
+        result
+    }
+
+    fn inserted_change(spec: EditableLabelSpec, inserted: &str) -> Vec<String> {
+        let values = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&values);
+        let node = editable_label_with_handlers(
+            &spec.with_editing(true),
+            &theme(),
+            EditableLabelHandlers {
+                on_change: Some(Arc::new(move |value| {
+                    sink.lock().unwrap().push(value.to_string());
+                })),
+                ..EditableLabelHandlers::default()
+            },
+        );
+        (node
+            .interaction
+            .on_edit_insert
+            .as_ref()
+            .expect("insert handler"))(inserted);
+        let result = values.lock().unwrap().clone();
+        result
+    }
+
+    #[test]
+    fn native_end_editing_maps_space_shift_and_backspace() {
+        assert_eq!(
+            key_change(
+                EditableLabelSpec::new().with_value("Studio"),
+                "space",
+                poodle_node::NodeModifiers::default(),
+            ),
+            ["Studio "]
+        );
+        assert_eq!(
+            key_change(
+                EditableLabelSpec::new().with_value("Studio"),
+                "m",
+                poodle_node::NodeModifiers {
+                    shift: true,
+                    ..poodle_node::NodeModifiers::default()
+                },
+            ),
+            ["StudioM"]
+        );
+        assert_eq!(
+            key_change(
+                EditableLabelSpec::new().with_value("Studio"),
+                "backspace",
+                poodle_node::NodeModifiers::default(),
+            ),
+            ["Studi"]
+        );
+    }
+
+    #[test]
+    fn inserted_text_appends_and_max_length_is_enforced() {
+        assert_eq!(
+            inserted_change(EditableLabelSpec::new().with_value("Studio"), " rig"),
+            ["Studio rig"]
+        );
+        assert_eq!(
+            inserted_change(
+                EditableLabelSpec::new()
+                    .with_value("Studio")
+                    .with_max_length(8),
+                " rig",
+            ),
+            ["Studio r"]
+        );
+        assert!(inserted_change(
+            EditableLabelSpec::new()
+                .with_value("Studio")
+                .with_max_length(6),
+            " rig",
+        )
+        .is_empty());
+    }
 }

@@ -540,41 +540,21 @@ pub fn licence_seat_rows(
 
 // ── Absolute time for the quiet `inGrace` line ────────────────────────────
 
-/// Format local civil parts as the web's `formatDisplayTimeDate` does (core
-/// `date.ts`), which uses the runtime locale for both the hour cycle and the
-/// date order. Pure and timezone-free: the caller resolves the instant into
-/// local civil parts at the runtime boundary and passes the runtime locale.
+/// Format local civil parts for LicenceStatus's quiet `inGrace` line.
 ///
-/// The reference's pinned cases:
-/// - `en_US` — a 12-hour clock with AM/PM (`12:45 PM`) and month/day order
-///   (`06/25/2026`);
-/// - every other locale (the en-GB shape) — a 24-hour clock (`12:45`) and
-///   day/month order (`25/06/2026`).
-pub fn format_time_date_locale(
+/// The component contract fixes the presentation to 24-hour time followed by
+/// day/month/year (`12:45 25/06/2026`). The caller still resolves the instant
+/// into local civil parts at the runtime boundary; fixing the presentation
+/// keeps the Svelte, React, and native surfaces identical without pretending a
+/// two-locale approximation is the user's locale.
+pub fn format_time_date_parts(
     year: i64,
     month: i64,
     day: i64,
     hour: i64,
     minute: i64,
-    locale: &str,
 ) -> String {
-    let locale = locale.to_ascii_lowercase();
-    let us = locale.starts_with("en_us");
-    let time = if us {
-        let (hour12, ampm) = match hour.rem_euclid(12) {
-            0 => (12, if hour < 12 { "AM" } else { "PM" }),
-            h => (h, if hour < 12 { "AM" } else { "PM" }),
-        };
-        format!("{hour12:02}:{minute:02} {ampm}")
-    } else {
-        format!("{hour:02}:{minute:02}")
-    };
-    let date = if us {
-        format!("{month:02}/{day:02}/{year:04}")
-    } else {
-        format!("{day:02}/{month:02}/{year:04}")
-    };
-    format!("{time} {date}")
+    format!("{hour:02}:{minute:02} {day:02}/{month:02}/{year:04}")
 }
 
 /// Convert days since 1970-01-01 to a proleptic Gregorian (year, month, day).
@@ -822,34 +802,14 @@ mod tests {
     }
 
     #[test]
-    fn time_date_locale_matches_the_web_for_us_and_gb() {
-        // en-GB: 24-hour clock, day/month order — the web's
-        // `toLocaleTimeString`/`toLocaleDateString` on an en-GB machine.
+    fn time_date_parts_use_the_fixed_component_format() {
         assert_eq!(
-            format_time_date_locale(2026, 6, 25, 12, 45, "en_GB.UTF-8"),
+            format_time_date_parts(2026, 6, 25, 12, 45),
             "12:45 25/06/2026"
         );
         assert_eq!(
-            format_time_date_locale(2026, 6, 25, 0, 5, "en_GB"),
+            format_time_date_parts(2026, 6, 25, 0, 5),
             "00:05 25/06/2026"
-        );
-        // en-US: 12-hour clock with AM/PM, month/day order.
-        assert_eq!(
-            format_time_date_locale(2026, 6, 25, 12, 45, "en_US.UTF-8"),
-            "12:45 PM 06/25/2026"
-        );
-        assert_eq!(
-            format_time_date_locale(2026, 6, 25, 0, 5, "en_US"),
-            "12:05 AM 06/25/2026"
-        );
-        assert_eq!(
-            format_time_date_locale(2026, 6, 25, 23, 59, "en_US"),
-            "11:59 PM 06/25/2026"
-        );
-        // A locale without a pinned shape uses the en-GB shape.
-        assert_eq!(
-            format_time_date_locale(2026, 6, 25, 9, 15, "de_DE.UTF-8"),
-            "09:15 25/06/2026"
         );
     }
 

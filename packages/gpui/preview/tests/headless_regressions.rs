@@ -961,6 +961,13 @@ fn key_validation_copy_clears_on_edit_in_a_mounted_window() {
             !node.lock().unwrap().has_text("This key is too short."),
             "editing the key removes the stale validation copy"
         );
+        assert!(
+            node.lock()
+                .unwrap()
+                .find(&|n| n.roles.get("validation").map(String::as_str) == Some("invalid"))
+                .is_none(),
+            "editing the key removes invalid state rather than leaving an empty error"
+        );
     });
 }
 

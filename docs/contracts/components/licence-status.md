@@ -88,7 +88,7 @@ Copy is resolved once in `poodle-core`; Svelte and React consume the same view.
 | State | Title | Treatment | Required meaning |
 | --- | --- | --- | --- |
 | `active` | `Licence active` | neutral/success | use is currently covered |
-| `inGrace` | `Licence active` | neutral; never warning/danger | renewal is pending; the quiet detail renders `until` as an absolute local time and date |
+| `inGrace` | `Licence active` | neutral; never warning/danger | renewal is pending; the quiet detail renders `until` as an absolute local time and date in `HH:mm DD/MM/YYYY` form |
 | `useWindowExpired` | `Use coverage ended` | actionable | use window ended at `at`; do not mention update coverage here |
 | `leaseLapsed` | `Licence confirmation required` | actionable | lease lapsed at `at`; do not call the licence expired |
 | `clockRefused` | `Check this machine's clock` | actionable warning | clock moved backwards; never expiry or purchase copy |
@@ -120,7 +120,9 @@ pure core view data. It owns no entitlement or licence transition.
 - Root is a labelled `<section>`.
 - State title is a heading under the host's heading context.
 - Coverage and trust values use a semantic definition list.
-- Timestamps use `<time>`/`TimeAgo` with absolute text available.
+- Timestamps use `<time>`/`TimeAgo` with absolute text available. The quiet
+  `inGrace` deadline uses local time with the fixed `HH:mm DD/MM/YYYY`
+  presentation in every runtime.
 - Initial content is not a live region. Hosts announce a material state change
   if their workflow requires it.
 - Colour is never the only distinction between states.
@@ -178,11 +180,12 @@ Status: **bound** — native implementation lands with `g15.007` (specs,
   separate rows in every null/value combination.
 - Relative time renders through the shared `TimeAgoSpec::format_relative`
   thresholds (`ends in …` / `ended … ago`). The quiet `inGrace` line renders
-  the absolute time/date in the user's local time **and locale**, matching the
-  web: the renderer resolves the authority instant through the platform's
-  `localtime` (Unix) and formats it with
-  `poodle_headless::licence::format_time_date_locale` using the runtime
-  locale (`en_US` → `12:45 PM 06/25/2026`; en-GB shape → `12:45 25/06/2026`).
+  the absolute time/date in the user's local timezone using one explicit
+  cross-runtime presentation: `HH:mm DD/MM/YYYY`. The renderer resolves the
+  authority instant through the platform's `localtime` (Unix) and formats the
+  civil parts with `poodle_headless::licence::format_time_date_parts`; Svelte
+  and React request the same en-GB-shaped presentation from the shared web
+  formatter.
 - `usable` and `attention` reach the tree as semantic token roles (the
   native `data-*` counterpart) and gate nothing: no row hides, no control
   disables, no licence read becomes a permission.

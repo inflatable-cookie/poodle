@@ -51,12 +51,13 @@ The review's six findings are addressed in the landed branch:
 
 ## Re-review round (orchestrator re-verdict, five remaining gaps)
 
-1. **Quiet inGrace line now matches the web locale.** The renderer resolves
-   the instant into local civil parts and formats them with
-   `poodle_headless::licence::format_time_date_locale` using the runtime
-   locale: `en_US` → `12:45 PM 06/25/2026`, en-GB shape → `12:45 25/06/2026`.
-   Evidence: `time_date_locale_matches_the_web_for_us_and_gb` (plus midnight/
-   noon and unknown-locale cases).
+1. **Quiet inGrace line now has one honest cross-runtime format.** The
+   renderer resolves the instant into local civil parts and formats them as
+   `HH:mm DD/MM/YYYY`; Svelte and React explicitly request the same shape from
+   the shared web formatter. This preserves local timezone treatment without
+   claiming a two-format US/UK branch represents arbitrary user locales.
+   Evidence: `time_date_parts_use_the_fixed_component_format` plus the paired
+   LicenceStatus component tests.
 2. **Escape restores the committed machine-name value.** The specimen snaps
    the committed label at edit start and restores it on cancel
    (`NodeSpecimenEvent::MachineLabelCancel`); the editable input also gains a
@@ -78,6 +79,22 @@ The review's six findings are addressed in the landed branch:
    hosts a real `PreviewRoot`, completes an injected receiver **after the
    first frame**, and asserts the specimen state landed through the root
    entity (with the generation guard and polite-message mapping).
+
+## Final re-review round
+
+1. **LicenceStatus no longer fakes locale support.** The quiet deadline keeps
+   the user's local timezone but uses the explicit `HH:mm DD/MM/YYYY` component
+   format in Svelte, React, and Rust. The generic web date formatter remains
+   locale-capable; LicenceStatus requests the fixed shape deliberately.
+2. **Key validation clears structurally.** Key edits and successful submits
+   enqueue `SetOptionalText { value: None }`, so `la-key-message` is removed
+   instead of surviving as `Some("")`. The mounted regression now asserts no
+   invalid validation role remains after the copy clears.
+3. **EditableLabel obeys its admitted native editing subset.** Direct keys and
+   inserted text run through the shared text-input edit transitions at the end
+   caret. Space, shifted characters, backspace, append semantics, and
+   `max_length` have focused render tests. Full selection/caret/IME behavior
+   remains outside this card, as the existing contract records.
 
 ## Batches
 
@@ -118,7 +135,8 @@ The review's six findings are addressed in the landed branch:
   indicator bound to the checked value; FileUpload browse wiring; licence
   status/seats/activation composition incl. no machine ids in rendered text,
   rename blank-to-null, release confirm, submit freeze, account/offline
-  submit firing, and distinct machine-label change/commit/cancel (224 passed).
+  submit firing, distinct machine-label change/commit/cancel, and EditableLabel
+  end-edit/max-length behavior (226 passed).
 - **GPUI node backend** (`cargo test -p poodle-gpui-node-backend`): the
   generic file seam — injected fixture through the same pipeline as the OS
   prompt, accept rejection honesty, size rule default, and
@@ -160,7 +178,7 @@ above.
 
 ## Validation run
 
-- `cargo test -p poodle-render` — 224 passed
+- `cargo test -p poodle-render` — 226 passed
 - `cargo test -p poodle-specs` — 260 passed
 - `cargo test -p poodle-headless` — 97 passed
 - `cargo test -p poodle-gpui-node-backend` — 19 passed
@@ -171,6 +189,8 @@ above.
 - `cargo test --bin poodle-preview file_pick_tests` — 1 passed (the production
   landing seam, completion after the first frame)
 - `cargo test --test catalogue` — 7 passed
+- `effigy test:components` — 335 files / 2,604 tests passed (paired
+  LicenceStatus fixed-format evidence included)
 
 Baseline (unchanged by this lane, confirmed identical on `origin/main`):
 the preview-lib `contract_usage_docs` unit tests fail parsing

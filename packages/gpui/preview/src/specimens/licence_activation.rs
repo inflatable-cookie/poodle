@@ -76,6 +76,16 @@ fn group(theme: &GpuiThemeProvider, label: &str, specimen: impl IntoElement) -> 
         .child(specimen)
 }
 
+fn clear_key_message(queue: &Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>) {
+    queue
+        .lock()
+        .unwrap()
+        .push(NodeSpecimenEvent::SetOptionalText {
+            key: "la-key-message".to_string(),
+            value: None,
+        });
+}
+
 /// Build the four machine-name handlers shared by the key and embedded
 /// instances. Edit start snaps the committed value; typing updates the
 /// controlled draft; commit keeps the draft and clears the snapshot; Escape
@@ -205,10 +215,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 poodle_headless::licence::LicenceSubmitResolution::Emit {
                     credential, ..
                 } => {
-                    queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                        key: "la-key-message".to_string(),
-                        value: String::new(),
-                    });
+                    clear_key_message(&queue);
                     queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
                         key: "la-emitted".to_string(),
                         value: emitted_caption(&credential),
@@ -253,10 +260,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             // Editing the key clears the local validation copy — the web pair
             // clears keyMessage on every change, so a stale rejection must
             // never survive against a new key.
-            queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                key: "la-key-message".to_string(),
-                value: String::new(),
-            });
+            clear_key_message(&queue);
         })
     })
     .on_key_selection_change({

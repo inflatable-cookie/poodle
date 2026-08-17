@@ -68,7 +68,7 @@ describe("LicenceStatus (react)", () => {
       new Date(USE_UNTIL * 1_000).toISOString(),
     );
     expect(detail.querySelector("time")?.textContent).toBe(
-      formatDisplayTimeDate(USE_UNTIL * 1_000),
+      formatDisplayTimeDate(USE_UNTIL * 1_000, "en-GB"),
     );
     expect(detail.textContent).not.toMatch(/ago|from now|\bin\s+\d/i);
   });

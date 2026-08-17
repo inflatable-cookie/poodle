@@ -813,3 +813,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   absence of ARIA. A per-component check that every `.poodle-<name>` root's
   module imports the matching `styles/<name>.css` would close this; it is
   board health, not component evidence, so it is recorded rather than built.
+
+- 2026-08-17 — The optimized GPUI preview **test binary** can SIGBUS rustc
+  inside `gpui_macros`, including with a fresh `CARGO_TARGET_DIR` and
+  incremental compilation disabled. `effigy check:gpui` and the mounted
+  regression binary compile cleanly, so this is specific to the oversized
+  `poodle-preview` unit-test target. Its bin-unit cases need a smaller test
+  target or non-optimized test profile; adding more tests to the binary makes
+  the compiler failure easier to hit.

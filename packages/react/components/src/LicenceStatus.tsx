@@ -116,7 +116,7 @@ export function LicenceStatus({
             <>
               &nbsp;
               <time dateTime={new Date(view.detail.timestamp).toISOString()}>
-                {formatDisplayTimeDate(view.detail.timestamp)}
+                {formatDisplayTimeDate(view.detail.timestamp, "en-GB")}
               </time>
             </>
           ) : null}
