@@ -1618,3 +1618,326 @@ fn two_model_connection_pickers_do_not_share_backend_focus_handles() {
         );
     });
 }
+
+// ── g15.009 Batch C regressions ───────────────────────────────────────────
+
+/// Radio selects on activate and never unchecks itself. Group exclusivity is
+/// host-owned on native; this case is the single-option control, not RadioGroup.
+#[test]
+fn radio_selects_on_activate_and_does_not_uncheck_itself() {
+    use poodle_specs::RadioSpec;
+
+    run_headless(|cx| {
+        let selected = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&selected);
+        let mut node = poodle_render::radio(
+            &RadioSpec::new()
+                .with_name("shipping")
+                .with_value("standard")
+                .with_label("Standard shipping"),
+            &theme(),
+            Some(Arc::new(move |checked| {
+                sink.lock().unwrap().push(checked);
+            })),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        driver.keyboard_activate(FIXTURE_ID);
+        assert_eq!(
+            selected.lock().unwrap().as_slice(),
+            [true],
+            "an unchecked radio selects"
+        );
+    });
+
+    run_headless(|cx| {
+        let selected = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&selected);
+        let mut node = poodle_render::radio(
+            &RadioSpec::new()
+                .with_name("shipping")
+                .with_value("standard")
+                .with_label("Standard shipping")
+                .with_checked(true),
+            &theme(),
+            Some(Arc::new(move |checked| {
+                sink.lock().unwrap().push(checked);
+            })),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, node);
+
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        driver.keyboard_activate(FIXTURE_ID);
+        assert!(
+            selected.lock().unwrap().is_empty(),
+            "an already-checked radio does not uncheck"
+        );
+    });
+}
+
+/// UpdateStatus's confirm path goes through the real tree: Install opens the
+/// host-owned confirm dialog, and confirming emits install.
+#[test]
+fn update_status_confirm_then_install_through_the_real_tree() {
+    use poodle_headless::update::{OfferReason, UpdateAvailabilityProjection, UpdateControllerStatus};
+    use poodle_specs::UpdateStatusSpec;
+
+    run_headless(|cx| {
+        fn offer() -> UpdateAvailabilityProjection {
+            UpdateAvailabilityProjection::Offer {
+                version: "1.4.0".to_string(),
+                reason: OfferReason::Staged,
+                notes: None,
+            }
+        }
+
+        fn build(
+            confirm_open: bool,
+            mounted: Arc<Mutex<Node>>,
+            installs: Arc<Mutex<usize>>,
+            confirms: Arc<Mutex<Vec<bool>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let install_sink = Arc::clone(&installs);
+            let confirm_sink = Arc::clone(&confirms);
+            let mut node = poodle_render::update_status(
+                &UpdateStatusSpec::new()
+                    .with_status(UpdateControllerStatus::Ready)
+                    .with_availability(offer())
+                    .with_confirm_open(confirm_open),
+                &theme(),
+                poodle_render::UpdateStatusHandlers {
+                    instance_id: Some("mounted".to_string()),
+                    on_install: Some(Arc::new(move || {
+                        *install_sink.lock().unwrap() += 1;
+                    })),
+                    on_confirm_open_change: Some(Arc::new(move |open| {
+                        confirm_sink.lock().unwrap().push(open);
+                        let next = build(
+                            open,
+                            Arc::clone(&mount),
+                            Arc::clone(&installs),
+                            Arc::clone(&confirms),
+                        );
+                        *mount.lock().unwrap() = next;
+                    })),
+                    ..poodle_render::UpdateStatusHandlers::default()
+                },
+            );
+            if confirm_open {
+                assert!(give_first_id(
+                    &mut node,
+                    "update-status-confirm",
+                    &|n| matches!(
+                        &n.kind,
+                        poodle_node::NodeKind::Button { label }
+                            if label == "Install and restart"
+                    ) && n.id.as_deref() != Some("mounted-install"),
+                ));
+            }
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let installs = Arc::new(Mutex::new(0usize));
+        let confirms = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            false,
+            Arc::clone(&mounted),
+            Arc::clone(&installs),
+            Arc::clone(&confirms),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        driver.wait_for_focus_handle("mounted-install");
+        driver.keyboard_activate("mounted-install");
+        assert_eq!(confirms.lock().unwrap().as_slice(), [true]);
+        assert_eq!(*installs.lock().unwrap(), 0, "confirm opens before install");
+
+        driver.wait_for_focus_handle("update-status-confirm");
+        driver.keyboard_activate("update-status-confirm");
+        assert_eq!(confirms.lock().unwrap().as_slice(), [true, false]);
+        assert_eq!(*installs.lock().unwrap(), 1);
+    });
+}
+
+/// Hidden presence collapses UpdateCenter to an empty container; attention
+/// plus open hosts UpdateStatus in the popover.
+#[test]
+fn update_center_hidden_presence_mounts_nothing_and_open_shows_status() {
+    use poodle_headless::update::{
+        OfferReason, UpdateAvailabilityProjection, UpdateControllerStatus, UpdatePresence,
+    };
+    use poodle_specs::UpdateCenterSpec;
+
+    run_headless(|cx| {
+        let opens = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&opens);
+        let mut closed = poodle_render::update_center(
+            &UpdateCenterSpec::new(UpdatePresence::Quiet).with_open(false),
+            &theme(),
+            poodle_render::UpdateCenterHandlers {
+                instance_id: Some("mounted-center".to_string()),
+                on_open_change: Some(Arc::new(move |open| {
+                    sink.lock().unwrap().push(open);
+                })),
+                ..poodle_render::UpdateCenterHandlers::default()
+            },
+        );
+        closed.id = Some(FIXTURE_ID.to_owned());
+        let closed = Arc::new(Mutex::new(closed));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&closed));
+
+        driver.wait_for_focus_handle("mounted-center-trigger");
+        assert_eq!(
+            closed
+                .lock()
+                .unwrap()
+                .find(&|node| node.id.as_deref() == Some("mounted-center-trigger"))
+                .and_then(|node| node.a11y.expanded),
+            Some(false),
+        );
+        driver.keyboard_activate("mounted-center-trigger");
+        assert_eq!(opens.lock().unwrap().as_slice(), [true]);
+    });
+
+    run_headless(|cx| {
+        let mut hidden = poodle_render::update_center(
+            &UpdateCenterSpec::new(UpdatePresence::Hidden)
+                .with_status(UpdateControllerStatus::Ready)
+                .with_availability(UpdateAvailabilityProjection::WithheldByRollout {
+                    version: "2.0.0".to_string(),
+                }),
+            &theme(),
+            poodle_render::UpdateCenterHandlers::default(),
+        );
+        hidden.id = Some(FIXTURE_ID.to_owned());
+        let hidden = Arc::new(Mutex::new(hidden));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&hidden));
+        driver.draw_frame();
+        let hidden = hidden.lock().unwrap();
+        assert!(hidden.texts().is_empty(), "hidden presence paints nothing");
+    });
+
+    run_headless(|cx| {
+        let mut open = poodle_render::update_center(
+            &UpdateCenterSpec::new(UpdatePresence::Attention)
+                .with_status(UpdateControllerStatus::Ready)
+                .with_availability(UpdateAvailabilityProjection::Offer {
+                    version: "1.4.0".to_string(),
+                    reason: OfferReason::Staged,
+                    notes: None,
+                })
+                .with_open(true),
+            &theme(),
+            poodle_render::UpdateCenterHandlers::default(),
+        );
+        open.id = Some(FIXTURE_ID.to_owned());
+        let open = Arc::new(Mutex::new(open));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&open));
+        driver.draw_frame();
+        let open = open.lock().unwrap();
+        let texts = open.texts();
+        assert!(
+            texts.iter().any(|t| *t == "Version 1.4.0 is available"),
+            "attention plus open hosts UpdateStatus; got {texts:?}"
+        );
+    });
+}
+
+/// SettingsShell navigation goes through the real sidebar ids, and a refused
+/// close keeps the dialog open.
+#[test]
+fn settings_shell_navigates_and_refused_close_stays_open() {
+    use poodle_specs::{SettingsShellSpec, SidebarNavGroup, SidebarNavItem};
+
+    fn groups() -> Vec<SidebarNavGroup> {
+        vec![SidebarNavGroup::new(
+            "workspace",
+            vec![
+                SidebarNavItem::new("general", "General"),
+                SidebarNavItem::new("appearance", "Appearance"),
+            ],
+        )
+        .with_label("Workspace")]
+    }
+
+    run_headless(|cx| {
+        let pages = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&pages);
+        let mut node = poodle_render::settings_shell(
+            &SettingsShellSpec::new()
+                .with_open(true)
+                .with_groups(groups())
+                .with_active_page_id("general"),
+            &theme(),
+            poodle_render::SettingsShellHandlers {
+                on_navigate: Some(Arc::new(move |id| {
+                    sink.lock().unwrap().push(id.to_string());
+                })),
+                ..poodle_render::SettingsShellHandlers::default()
+            },
+            Some(Node::text("General page")),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, node);
+
+        driver.wait_for_focus_handle("sidebar-nav-appearance");
+        driver.keyboard_activate("sidebar-nav-appearance");
+        assert_eq!(
+            pages.lock().unwrap().as_slice(),
+            ["appearance".to_string()]
+        );
+    });
+
+    run_headless(|cx| {
+        let closes = Arc::new(Mutex::new(0usize));
+        let opens = Arc::new(Mutex::new(Vec::new()));
+        let close_sink = Arc::clone(&closes);
+        let open_sink = Arc::clone(&opens);
+        let mut node = poodle_render::settings_shell(
+            &SettingsShellSpec::new()
+                .with_open(true)
+                .with_groups(groups())
+                .with_active_page_id("general")
+                .with_close_refused_reason("Unsaved changes on this page."),
+            &theme(),
+            poodle_render::SettingsShellHandlers {
+                on_request_close: Some(Arc::new(move || {
+                    *close_sink.lock().unwrap() += 1;
+                })),
+                on_open_change: Some(Arc::new(move |open| {
+                    open_sink.lock().unwrap().push(open);
+                })),
+                ..poodle_render::SettingsShellHandlers::default()
+            },
+            Some(Node::text("General page")),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        driver.wait_for_focus_handle("poodle-dialog-close");
+        driver.keyboard_activate("poodle-dialog-close");
+        assert_eq!(*closes.lock().unwrap(), 1);
+        assert!(
+            opens.lock().unwrap().is_empty(),
+            "refused close does not emit on_open_change(false)"
+        );
+        assert!(
+            node.lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| *t == "Unsaved changes on this page."),
+            "the refused reason stays in the tree"
+        );
+    });
+}

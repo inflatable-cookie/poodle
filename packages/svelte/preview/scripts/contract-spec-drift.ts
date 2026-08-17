@@ -148,6 +148,13 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   "model-connection-card": ["defaultOpen"],
   "model-connection-picker": ["defaultQuery", "defaultValue"],
   "model-connection-setup": ["defaultStage", "defaultValue"],
+  // Update family (g15.009). `observe` is a Svelte lazy-getter /
+  // React `useSyncExternalStore` subscription; a native host rerenders with
+  // fresh props. SettingsShell's `page` is a web snippet; native hosts pass a
+  // composed Node into `poodle_render::settings_shell`, not a spec field.
+  "update-status": ["observe"],
+  "update-center": ["observe"],
+  "settings-shell": ["page"],
 };
 
 /**
@@ -200,13 +207,15 @@ const ALIASES: Record<string, Record<string, string>> = {
   // The Spec stores the bounds as resolved rem, which is what a renderer wants;
   // the contract states them as CSS strings.
   popover: { surfaceMinWidth: "surface_min_width_rem", surfaceMaxWidth: "surface_max_width_rem" },
+  // IconProvider's web `icons` set is a name on the native spec — GPUI uses a
+  // shared registry, so the spec records which set was requested, not the
+  // SVG payload (g15.009).
+  "icon-provider": { icons: "icon_set_name" },
 };
 
 /** Components with no Spec struct at all, with the reason. */
 const NO_SPEC: Record<string, string> = {
   "error-boundary": "framework error boundary — no native equivalent",
-  "icon-provider": "context provider — renders no element",
-  "ui-presentation-provider": "context provider — renders no element",
   "toast-host": "imperative host, driven by the toast machine rather than a spec",
 };
 

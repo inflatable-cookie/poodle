@@ -126,6 +126,17 @@ visual output.
   default `IconSet`; it is not maintained as a second catalogue
 - No visual component; acts as a scope boundary for registry access
 
+### Native Binding
+
+- Implemented as a child-passthrough: `IconProviderSpec`
+  (`packages/contracts/components/src/icon_provider.rs`),
+  `poodle_render::icon_provider`. GPUI specimen
+  `packages/gpui/preview/src/specimens/icon_provider.rs`.
+- GPUI resolves icons through one shared registry, so the Node recipe returns
+  the child unchanged. Native descendants do **not** inherit a scoped set
+  from the wrapper; the spec records `icon_set_name` so the requested set is
+  visible, not silent.
+
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity

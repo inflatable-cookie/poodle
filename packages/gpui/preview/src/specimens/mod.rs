@@ -40,6 +40,7 @@ mod agent_question;
 mod agent_transcript;
 mod audio_controls;
 mod checkbox;
+mod radio;
 mod radio_group;
 mod range_slider;
 mod segmented_control;
@@ -132,6 +133,9 @@ mod media_preview_specimen;
 mod media_thumbnail_specimen;
 mod history_center_specimen;
 mod message_center_specimen;
+mod settings_shell;
+mod update_center;
+mod update_status;
 mod meta_bar;
 mod metric_tile_specimen;
 mod model_catalogue_editor_specimen;
@@ -313,6 +317,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
 
         // ── Selection ───────────────────────────────────────────
         "checkbox" => specimen_card("Checkbox", theme, checkbox::render(state, cx)),
+        "radio" => specimen_card("Radio", theme, radio::render(state, cx)),
         "radio-group" => specimen_card("RadioGroup", theme, radio_group::render(state, cx)),
         "switch" => specimen_card("Switch", theme, switch::render(state, cx)),
         "tri-state-switch" => {
@@ -653,6 +658,21 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             "MessageCenter",
             theme,
             message_center_specimen::render(state, cx),
+        ),
+        "update-status" => specimen_card(
+            "UpdateStatus",
+            theme,
+            update_status::render(state, cx),
+        ),
+        "update-center" => specimen_card(
+            "UpdateCenter",
+            theme,
+            update_center::render(state, cx),
+        ),
+        "settings-shell" => specimen_card(
+            "SettingsShell",
+            theme,
+            settings_shell::render(state, cx),
         ),
 
         // Fallback

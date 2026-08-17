@@ -27,11 +27,11 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use gpui::{
-    deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, svg, AnyElement,
-    App, AppContext, ClickEvent, CursorStyle, Div, ElementId, Hsla, InteractiveElement,
-    IntoElement, KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent,
-    ParentElement, SharedString, Stateful, StatefulInteractiveElement, StyleRefinement, Styled,
-    StyledImage, Window,
+    canvas, deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, svg,
+    AnyElement, App, AppContext, ClickEvent, CursorStyle, Div, ElementId, Hsla,
+    InteractiveElement, IntoElement, KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent,
+    MouseUpEvent, ParentElement, PathBuilder, SharedString, Stateful,
+    StatefulInteractiveElement, StyleRefinement, Styled, StyledImage, Window,
 };
 use poodle_node::{
     AnimEasing, AnimLoop, AnimProperty, ColorValue, CrossAxisAlignment, CursorHint, DropEdge,
@@ -328,6 +328,64 @@ fn to_gpui_impl(node: &Node) -> AnyElement {
                 .rounded_full()
                 .bg(fill_color);
             build_box(node, div().child(fill))
+        }
+        NodeKind::ProgressRing { fraction } => {
+            record_probe_channel("structure.identity.progress-ring");
+            let track_color = color(node.style.descriptor.border.color);
+            let fill_color = node
+                .style
+                .descriptor
+                .text_color
+                .map(color)
+                .unwrap_or_else(|| gpui::white());
+            let fraction = fraction.clamp(0.0, 1.0);
+            let ring = canvas(
+                move |_, _, _| {},
+                move |bounds, _, window, _| {
+                    let width = f32::from(bounds.size.width);
+                    let height = f32::from(bounds.size.height);
+                    let diameter = width.min(height);
+                    let stroke = px(2.0);
+                    let radius = (diameter - 2.0) / 2.0;
+                    let center = point(
+                        bounds.origin.x + px(width / 2.0),
+                        bounds.origin.y + px(height / 2.0),
+                    );
+                    let radii = point(px(radius), px(radius));
+                    let top = point(center.x, center.y - px(radius));
+                    let bottom = point(center.x, center.y + px(radius));
+
+                    let mut track = PathBuilder::stroke(stroke);
+                    track.move_to(top);
+                    track.arc_to(radii, px(0.0), false, true, bottom);
+                    track.arc_to(radii, px(0.0), false, true, top);
+                    if let Ok(path) = track.build() {
+                        window.paint_path(path, track_color);
+                    }
+
+                    if fraction > 0.0 {
+                        let angle = -std::f32::consts::FRAC_PI_2
+                            + std::f32::consts::TAU * fraction;
+                        let end = point(
+                            center.x + px(radius * angle.cos()),
+                            center.y + px(radius * angle.sin()),
+                        );
+                        let mut fill = PathBuilder::stroke(stroke);
+                        fill.move_to(top);
+                        if fraction >= 1.0 {
+                            fill.arc_to(radii, px(0.0), false, true, bottom);
+                            fill.arc_to(radii, px(0.0), false, true, top);
+                        } else {
+                            fill.arc_to(radii, px(0.0), fraction > 0.5, true, end);
+                        }
+                        if let Ok(path) = fill.build() {
+                            window.paint_path(path, fill_color);
+                        }
+                    }
+                },
+            )
+            .size_full();
+            build_box(node, div().child(ring))
         }
         NodeKind::Icon { name, size } => {
             record_probe_channel("content.text-icon.icon");

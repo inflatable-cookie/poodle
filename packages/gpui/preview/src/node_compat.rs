@@ -36,7 +36,7 @@ use poodle_specs::{
     NavCardSpec, NavigationMenuSpec, NumberInputSpec, OrderBySpec, OverlayPlacement,
     PageHeaderSpec, PageLoadingSpec, PaginationSpec, PaginationSummarySpec,
     PasswordRequirementsSpec, PickerShellSpec, PillSpec, PopoverSpec, ProgressSpec, RadioGroupSpec,
-    RangeSliderSpec, RatingSpec, RefSelectSpec, RegionSpec, RelationPickerSpec, ResizeHandleSpec,
+    RadioSpec, RangeSliderSpec, RatingSpec, RefSelectSpec, RegionSpec, RelationPickerSpec, ResizeHandleSpec,
     ScrollShellSpec, SelectSpec, SelectionSummarySpec, SeparatorSpec,
     ShellStatusBarSpec, SidebarNavSpec, SkeletonSpec, SliderSpec, SpacerSpec, SpinnerSpec,
     StackSpec, StatusIndicatorSpec, StepperSpec, SurfaceSpec, SwitchSpec, TabStripSpec, TableSpec,
@@ -6679,6 +6679,46 @@ impl IntoElement for RadioGroup {
 
     fn into_element(self) -> Self::Element {
         let mut node = poodle_render::radio_group(&self.spec, &self.theme, self.on_change);
+        if let Some(id) = self.id {
+            node.id = Some(id);
+        }
+        poodle_gpui_node_backend::to_gpui(&node)
+    }
+}
+
+pub(crate) struct Radio {
+    spec: RadioSpec,
+    theme: GpuiThemeProvider,
+    id: Option<String>,
+    on_checked_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+}
+
+impl Radio {
+    pub(crate) fn from_spec(spec: RadioSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            id: None,
+            on_checked_change: None,
+        }
+    }
+
+    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.id = Some(id.into());
+        self
+    }
+
+    pub(crate) fn on_checked_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.on_checked_change = Some(handler);
+        self
+    }
+}
+
+impl IntoElement for Radio {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        let mut node = poodle_render::radio(&self.spec, &self.theme, self.on_checked_change);
         if let Some(id) = self.id {
             node.id = Some(id);
         }
