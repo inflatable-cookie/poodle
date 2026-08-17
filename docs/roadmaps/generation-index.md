@@ -5,8 +5,8 @@ Updated: 2026-08-17
 ## Active Track
 
 - `g15`
-  - Status: active — `g15.001`–`g15.007` and `g15.014` complete;
-    `g15.008` ready next; `g15.013` final
+  - Status: active — `g15.001`–`g15.008` and `g15.014` complete;
+    `g15.009` ready next; `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `014`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
@@ -15,11 +15,11 @@ Updated: 2026-08-17
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: prepare and dispatch `g15.008`, then continue through `g15.012` in
+  - Next: prepare and dispatch `g15.009`, then continue through `g15.012` in
     runway order. The web release roster reads 175/175 focused evidence in
     both Svelte and React, the independent `bun audit` advisory is closed, and
-    `g15.007` has released the shared roster/register rows. `g15.013` remains
-    the final certification gate.
+    `g15.007` and `g15.008` have released their native roster/register rows.
+    `g15.013` remains the final certification gate.
 
 ## Latest Completed Track
 

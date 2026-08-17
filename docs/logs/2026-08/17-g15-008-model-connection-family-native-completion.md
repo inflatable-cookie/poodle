@@ -4,7 +4,7 @@ Date: 2026-08-17
 Card: `docs/roadmaps/g15/008-model-connection-family-native-completion.md`
 Worktree: `t3code/complete-model-connection` (worker lane, serial)
 Handoff: `docs/handoffs/20260817-122537-g15-008-model-connection-native-completion.md`
-PR: #33 (review round 1 addressed below)
+PR: #33 — accepted at `9dd051c3`, merged as `6b36c7d3`
 
 ## Summary
 

@@ -1,6 +1,6 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.001`–`g15.007` and `g15.014` complete; `g15.008`
+Status: active — `g15.001`–`g15.008` and `g15.014` complete; `g15.009`
 ready next
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
@@ -59,8 +59,8 @@ and status advance are the orchestrator's.
 5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — complete; final 24 Svelte and 23 React evidence gaps closed
 6. [006 — React mirror implementation & gallery closure](006-react-mirror-closure.md) — complete; React implementation/gallery are 175/0 and focused evidence is 152/23
 7. [007 — Licence family native completion](007-licence-family-native-completion.md) — complete; PR #32 closed the Licence native family and prerequisites
-8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — ready next; carries `g14.020`
-9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md) — follows `008`
+8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — complete; PR #33 closed the model-connection native family
+9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md) — ready next
 10. [010 — Display, workstation & agent GPUI specimens](010-display-workstation-agent-gpui-specimens.md) — GPUI closure after `007`–`009`
 11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — carries `g14.026`
 12. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — per the `g14.022` decision; headless capture required
@@ -94,6 +94,6 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Prepare and dispatch `g15.008`. `g15.009`–`g15.012` follow in runway order;
+Prepare and dispatch `g15.009`. `g15.010`–`g15.012` follow in runway order;
 `g15.013` stays blocked as the final certification gate until every earlier
 card is complete. Release mutation remains behind the explicit operator gate.

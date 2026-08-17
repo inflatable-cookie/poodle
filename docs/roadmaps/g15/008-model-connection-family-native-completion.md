@@ -1,6 +1,6 @@
 # g15.008 — Model-Connection Family Native Completion
 
-Status: **ready** — next; `g15.007` accepted and merged
+Status: **complete** — accepted and merged in PR #33 (`6b36c7d3`)
 Depends on: `g15.001` (measured gaps); carries `g14.020` requirements with
 approved web references (`g14.018`/`g14.019`) intact
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
@@ -66,52 +66,52 @@ behaviour:
 
 ## Execution Plan
 
-- [ ] **Batch A — declarations and behaviour:** hand-written `ModelConnectionPickerSpec`,
+- [x] **Batch A — declarations and behaviour:** hand-written `ModelConnectionPickerSpec`,
       `ModelConnectionSetupSpec`, `ModelConnectionCardSpec`,
       `ModelCatalogueEditorSpec` in `poodle_specs` matching the contract props
       tables through the binding boundary above; pure `poodle-headless`
       behaviour mirrors and paired owner-local vectors.
-- [ ] **Batch B — render and host bindings:** `poodle-render` implementations,
+- [x] **Batch B — render and host bindings:** `poodle-render` implementations,
       handler structs, and host-composition seams for all four;
       model-catalogue editing stays structural, never schema-authoritative.
-- [ ] **Batch C — GPUI and evidence:** GPUI specimens plus focused tests for
+- [x] **Batch C — GPUI and evidence:** GPUI specimens plus focused tests for
       picker, setup flow, card, and catalogue editor surfaces.
-- [ ] **Batch D — release evidence:** reconcile the four native roster/register
+- [x] **Batch D — release evidence:** reconcile the four native roster/register
       rows and write the card log with evidence named per runtime.
 
 ## Goals
 
-- [ ] Hand-written `<Name>Spec` declarations matching the contract props
+- [x] Hand-written `<Name>Spec` declarations matching the contract props
       tables.
-- [ ] `poodle-render` implementations for all four; model-catalogue editing
+- [x] `poodle-render` implementations for all four; model-catalogue editing
       stays structural, never schema-authoritative.
-- [ ] GPUI specimens and focused tests for picker, setup flow, card, and
+- [x] GPUI specimens and focused tests for picker, setup flow, card, and
       catalogue editor surfaces.
-- [ ] Pure Rust behaviour mirrors and paired TS/Rust vectors cover the
+- [x] Pure Rust behaviour mirrors and paired TS/Rust vectors cover the
       observable state transitions without introducing cross-runtime
       machinery.
-- [ ] Preserve approved curated specimens unchanged.
+- [x] Preserve approved curated specimens unchanged.
 
 ## Acceptance
 
-- [ ] Every active-cohort surface has evidence named in the card log; one
+- [x] Every active-cohort surface has evidence named in the card log; one
       runtime does not borrow another's pass.
-- [ ] Picker evidence covers filtering order, exact selection, disabled guards,
+- [x] Picker evidence covers filtering order, exact selection, disabled guards,
       radio/roving focus behaviour, and empty/loading/error/ready postures.
-- [ ] Setup evidence covers both direct submission when configuration is not
+- [x] Setup evidence covers both direct submission when configuration is not
       required and configured-stage transitions, including pending guards.
-- [ ] Card evidence covers independent open/enabled state, closed accessory
+- [x] Card evidence covers independent open/enabled state, closed accessory
       composition, disabled presentation, and focus restoration after close.
-- [ ] Catalogue evidence covers explicit moves, keyboard grab/move/drop,
+- [x] Catalogue evidence covers explicit moves, keyboard grab/move/drop,
       admitted pointer drag, complete ordered-ID payloads, hide/restore
       payloads, focus-after-hide, announcements, and distinct empty/error/
       disabled states.
-- [ ] Specs contain safe controlled data only; credentials never cross the
+- [x] Specs contain safe controlled data only; credentials never cross the
       component boundary and repeated host composition is keyed by opaque IDs.
-- [ ] `cargo test -p poodle-render`, `effigy check:gpui`, and
+- [x] `cargo test -p poodle-render`, `effigy check:gpui`, and
       `effigy regressions:native` pass.
-- [ ] Jetstream reported as program-deferred, not as an accepted absence.
-- [ ] No provider registry, credential store, or model-default policy added.
+- [x] Jetstream reported as program-deferred, not as an accepted absence.
+- [x] No provider registry, credential store, or model-default policy added.
 
 ## Stop Conditions
 
