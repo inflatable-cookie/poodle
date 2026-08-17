@@ -5,20 +5,18 @@ Updated: 2026-08-17
 ## Active Track
 
 - `g15`
-  - Status: active — `g15.001`–`g15.004` and `g15.006` complete; `g15.005`
-    changes requested in PR #29; `g15.014` ready in parallel
+  - Status: active — `g15.001`–`g15.006` complete; `g15.014` ready
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `014`
-  - Verdict: `g15.001`–`g15.004` and `g15.006` accepted — the generation is a measured
+  - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
     release baseline, not a parity architecture
   - Evidence: the v0.2.0 denominator is every public Svelte component
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: repair and re-review `g15.005` / PR #29 while `g15.014` closes the
-    independent `bun audit` advisory. `g15.006` supplied the React
-    `AgentPlanRecord` implementation and closed the residual React
-    implementation/gallery lane.
+  - Next: dispatch `g15.014` to close the independent `bun audit` advisory.
+    The web release roster now reads 175/175 focused evidence in both Svelte
+    and React.
 
 ## Latest Completed Track
 

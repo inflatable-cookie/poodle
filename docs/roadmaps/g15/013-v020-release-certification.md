@@ -21,7 +21,7 @@ remediation to have landed first.
 
 ## Prerequisites
 
-- [ ] `g15.002`–`g15.006` landed: every Svelte-denominator surface complete
+- [x] `g15.002`–`g15.006` landed: every Svelte-denominator surface complete
       and evidenced for all 175 components; React mirror rows closed.
 - [ ] `g15.014` (release-gate remediation) landed: the `bun audit` nanoid
       advisory (GHSA-2v37-7h3g-55p8) through the React preview's Vite

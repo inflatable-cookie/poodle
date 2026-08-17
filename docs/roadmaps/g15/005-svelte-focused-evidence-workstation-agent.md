@@ -1,8 +1,7 @@
 # g15.005 — Svelte Focused Evidence: Workstation Systems & Agent Surfaces
 
-Status: **changes requested** — PR #29 is under repair after orchestrator
-review; `g15.006` supplied the React `AgentPlanRecord` implementation and the
-152/23 focused-React baseline
+Status: **complete** — merged in PR #29 (`1b40b944`); focused Svelte and React
+evidence now read 175/0 gaps
 Depends on: `g15.001`, `g15.006`
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
@@ -34,13 +33,13 @@ the paired Svelte/React focused case for it and the other 23 scoped components.
 
 ## Execution Plan
 
-- [ ] **Batch A — typography, status & toolbar systems (8):** StatusBar,
+- [x] **Batch A — typography, status & toolbar systems (8):** StatusBar,
       StatusIndicator, Surface, Text, TextLink, Toolbar, Tooltip,
       ToggleGroup
-- [ ] **Batch B — workstation inputs, tables & pickers (8):** Table,
+- [x] **Batch B — workstation inputs, tables & pickers (8):** Table,
       TokenInput, TimeInput, TimeZoneSelect, TriStateSwitch,
       UiPresentationProvider, VideoPlayer, DateTimeZonePicker
-- [ ] **Batch C — agent surfaces (8):** AgentMessage, AgentPlanRecord,
+- [x] **Batch C — agent surfaces (8):** AgentMessage, AgentPlanRecord,
       AgentQuestion, AgentQuestionRecord, AgentSubagent, ChangedFiles,
       ToolCall, ToolCallGroup
 
@@ -50,27 +49,27 @@ Run the narrow test round at the end of each batch.
 
 ## Goals
 
-- [ ] One focused Svelte test file (or named family cases) per component
+- [x] One focused Svelte test file (or named family cases) per component
       meeting the threshold above.
-- [ ] The same contract cases mirrored as focused React tests in the same
+- [x] The same contract cases mirrored as focused React tests in the same
       batch.
-- [ ] Bounded fixes to scoped implementation defects the new tests expose,
+- [x] Bounded fixes to scoped implementation defects the new tests expose,
       contract-first per the working rules: update the contract before
       changing observable inputs, defaults, states, events, keyboard
       behaviour, accessibility, layout intent, or token use.
-- [ ] Record each batch in one August batch log under `docs/logs/2026-08/`.
+- [x] Record each batch in one August batch log under `docs/logs/2026-08/`.
 
 ## Acceptance
 
-- [ ] Every scoped component has a named focused test case beyond the anatomy
+- [x] Every scoped component has a named focused test case beyond the anatomy
       smoke, on both Svelte and React sides.
-- [ ] `effigy check:svelte`, `effigy react:build`, `effigy test:components`,
+- [x] `effigy check:svelte`, `effigy react:build`, `effigy test:components`,
       `effigy docs:check` pass.
-- [ ] The register's row for each component flips to evidence-present, and the
+- [x] The register's row for each component flips to evidence-present, and the
       roster's Focused Svelte / Focused React test cells name the case files.
-- [ ] No contract changed except as a required consequence of a scoped fix,
+- [x] No contract changed except as a required consequence of a scoped fix,
       and then only with the fix itself and a contract-first update.
-- [ ] The post-card roster reads 175/0 focused Svelte evidence and 175/0
+- [x] The post-card roster reads 175/0 focused Svelte evidence and 175/0
       focused React evidence. From the `g15.006` baseline this card closes 24
       Svelte gaps and 23 React gaps; AgentSubagent already has React evidence.
 

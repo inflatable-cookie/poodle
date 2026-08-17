@@ -1,6 +1,6 @@
 # g15.008 — Model-Connection Family Native Completion
 
-Status: **blocked** — orchestration hold; `g15.006` then `g15.005` are next
+Status: **blocked** — orchestration hold; `g15.014` is next
 Depends on: `g15.001` (measured gaps); carries `g14.020` requirements with
 approved web references (`g14.018`/`g14.019`) intact
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,

@@ -1,6 +1,6 @@
 # g15.005 — Svelte focused evidence: workstation systems & agent surfaces
 
-Status: complete — all three batches landed (PR pending)
+Status: complete — merged in PR #29 (`1b40b944`)
 Date: 2026-08-17
 Card: `docs/roadmaps/g15/005-svelte-focused-evidence-workstation-agent.md`
 Governing refs: `docs/roadmaps/g15/release-baseline-roster.md`,
@@ -223,7 +223,7 @@ stylesheet import, which no test in this repo can observe — see above.
 | --- | --- |
 | `effigy test:components` | pass (335 files, 2604 tests) |
 | `effigy check:svelte` | pass (880 files, 0 errors, 4 baseline warnings) |
-| `effigy react:build` | pass (772 modules) |
+| `effigy react:build` | pass (773 modules) |
 | `effigy docs:check` | pass |
 | `git diff --check origin/main...HEAD` | pass |
 | Fix-coverage check (revert all four source fixes, re-run paired suites) | 11 cases failed as expected, then passed once restored |
@@ -235,4 +235,5 @@ Jetstream selector ran.
 
 The roster reads 175/0 focused Svelte evidence and 175/0 focused React
 evidence. No Svelte-denominator gap class and no React mirror gap class remains
-open for the v0.2.0 release baseline.
+open for the v0.2.0 release baseline. Orchestrator review accepted rebased head
+`c25bf020`; PR #29 merged as `1b40b944`.
