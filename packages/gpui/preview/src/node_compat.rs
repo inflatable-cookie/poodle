@@ -29,8 +29,8 @@ use poodle_specs::{
     EmptyStateSpec, ErrorBoundarySpec, EyebrowSpec, FieldSetSpec, FieldSpec, FileUploadSpec,
     FilterBuilderSpec, FilterToolbarSpec, FormActionsSpec, FormDialogSpec, FormLayoutSpec,
     FormShellSpec, GridSpec, HoverCardSpec, IconButtonSpec, IconSpec, InlineListSectionSpec,
-    ListCardCounterSpec, ListCardSpec, ListContainerSpec, ListGridSpec, LogListSpec,
-    MarkdownEditorSpec,
+    ListCardCounterSpec, ListCardSpec, ListContainerSpec, ListGridSpec, LicenceActivationSpec,
+    LicenceSeatsSpec, LicenceStatusSpec, LogListSpec, MarkdownEditorSpec,
     MediaBrowsePanelSpec, MediaPickerSpec, MediaPreviewSpec, MediaThumbnailSpec, MenuSpec,
     MenubarSpec, MetaBarSpec, MetaItemSpec, MeterSpec, MetricTileSpec, ModelPickerSpec,
     NavCardSpec, NavigationMenuSpec, NumberInputSpec, OrderBySpec, OverlayPlacement,
@@ -3672,6 +3672,188 @@ impl FileUpload {
 }
 
 impl IntoElement for FileUpload {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
+    }
+}
+
+pub(crate) struct LicenceStatus {
+    spec: LicenceStatusSpec,
+    theme: GpuiThemeProvider,
+}
+
+impl LicenceStatus {
+    pub(crate) fn from_spec(spec: LicenceStatusSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+        }
+    }
+
+    pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
+        self.spec.size = size;
+        self
+    }
+
+    pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
+        self.spec.density = density;
+        self
+    }
+}
+
+impl IntoElement for LicenceStatus {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::licence_status(&self.spec, &self.theme))
+    }
+}
+
+pub(crate) struct LicenceSeats {
+    spec: LicenceSeatsSpec,
+    theme: GpuiThemeProvider,
+    handlers: poodle_render::LicenceSeatsHandlers,
+}
+
+impl LicenceSeats {
+    pub(crate) fn from_spec(spec: LicenceSeatsSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            handlers: poodle_render::LicenceSeatsHandlers::default(),
+        }
+    }
+
+    pub(crate) fn on_rename(mut self, handler: Arc<dyn Fn(&str, Option<&str>) + Send + Sync>) -> Self {
+        self.handlers.on_rename = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_rename_edit(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_rename_edit = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_release(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_release = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_release_trigger(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_release_trigger = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_release_cancel(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_release_cancel = Some(handler);
+        self
+    }
+}
+
+impl IntoElement for LicenceSeats {
+    type Element = AnyElement;
+
+    fn into_element(self) -> Self::Element {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::licence_seats(
+            &self.spec,
+            &self.theme,
+            self.handlers,
+        ))
+    }
+}
+
+pub(crate) struct LicenceActivation {
+    spec: LicenceActivationSpec,
+    theme: GpuiThemeProvider,
+    account_content: Option<poodle_node::Node>,
+    handlers: poodle_render::LicenceActivationHandlers,
+}
+
+impl LicenceActivation {
+    pub(crate) fn from_spec(spec: LicenceActivationSpec, theme: &GpuiThemeProvider) -> Self {
+        Self {
+            spec,
+            theme: theme.clone(),
+            account_content: None,
+            handlers: poodle_render::LicenceActivationHandlers::default(),
+        }
+    }
+
+    pub(crate) fn with_account_content(mut self, content: poodle_node::Node) -> Self {
+        self.account_content = Some(content);
+        self
+    }
+
+    pub(crate) fn on_key_change(mut self, handler: poodle_node::TextChangeHandler) -> Self {
+        self.handlers.on_key_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_key_selection_change(
+        mut self,
+        handler: Arc<dyn Fn(usize, usize) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_key_selection_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_machine_label_change(
+        mut self,
+        handler: Arc<dyn Fn(&str) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_machine_label_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_machine_label_edit(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_machine_label_edit = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_view_change(
+        mut self,
+        handler: Arc<dyn Fn(poodle_headless::licence::LicenceActivationRoute) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_view_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_submit(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_submit = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_file_browse(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_file_browse = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_file_remove(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_file_remove = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_key_check(
+        mut self,
+        handler: Arc<dyn Fn(&str) -> poodle_headless::licence::LicenceKeyResult + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_key_check = Some(handler);
+        self
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        poodle_render::licence_activation_with_slots(
+            &self.spec,
+            &self.theme,
+            self.account_content,
+            self.handlers,
+        )
+    }
+}
+
+impl IntoElement for LicenceActivation {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {

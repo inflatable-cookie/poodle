@@ -117,6 +117,9 @@ mod form_layout;
 mod form_shell;
 mod inline_list_section_specimen;
 mod inline_remediation_specimen;
+mod licence_activation;
+mod licence_seats;
+mod licence_status;
 mod list_card;
 mod list_card_counter;
 mod list_container_specimen;
@@ -569,6 +572,21 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             "MediaBrowsePanel",
             theme,
             media_browse_panel_specimen::render(theme),
+        ),
+        "licence-activation" => specimen_card(
+            "LicenceActivation",
+            theme,
+            licence_activation::render(state, cx),
+        ),
+        "licence-seats" => specimen_card(
+            "LicenceSeats",
+            theme,
+            licence_seats::render(state, cx),
+        ),
+        "licence-status" => specimen_card(
+            "LicenceStatus",
+            theme,
+            licence_status::render(theme),
         ),
         "list-container" => specimen_card(
             "ListContainer",

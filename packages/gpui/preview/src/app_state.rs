@@ -8,6 +8,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_node_backend::file_capability::{
     finish_file_pick, FilePickOutcome, OsFilePrompt, SingleFilePickSpec, SingleFileSource,
 };
+use poodle_headless::licence::LicenceSeat;
 use poodle_specs::{reorder_nodes, DropPosition, TreeNode};
 use std::collections::HashMap;
 
@@ -540,6 +541,8 @@ pub enum NodeSpecimenEvent {
         key: String,
         spec: SingleFilePickSpec,
     },
+    /// A LicenceSeats interaction.
+    LicenceSeats(LicenceSeatsEvent),
 }
 
 /// One requested single-file pick, waiting for the host to start its prompt.
@@ -592,6 +595,59 @@ pub enum TreeEvent {
     },
 }
 
+/// Host state for the LicenceSeats specimen: the authority-reported seats
+/// and the controlled per-row confirm/edit open state.
+pub struct LicencePreviewState {
+    pub seats: Vec<LicenceSeat>,
+    pub editing_machine_id: Option<String>,
+    pub open_confirm_machine_id: Option<String>,
+}
+
+impl LicencePreviewState {
+    /// The web specimen's "mixed labels" set, kept label-only in render.
+    pub fn mixed() -> Self {
+        Self {
+            seats: vec![
+                LicenceSeat {
+                    machine_id: "cmd-9f3a2b7c".to_string(),
+                    label: Some("Studio Mac".to_string()),
+                    this_machine: true,
+                },
+                LicenceSeat {
+                    machine_id: "cmd-41ee80d2".to_string(),
+                    label: Some("Tour laptop".to_string()),
+                    this_machine: false,
+                },
+                LicenceSeat {
+                    machine_id: "cmd-77c1a5be".to_string(),
+                    label: None,
+                    this_machine: false,
+                },
+            ],
+            editing_machine_id: None,
+            open_confirm_machine_id: None,
+        }
+    }
+
+    pub fn rename(&mut self, machine_id: &str, label: Option<String>) {
+        if let Some(seat) = self.seats.iter_mut().find(|seat| seat.machine_id == machine_id) {
+            seat.label = label;
+        }
+        self.editing_machine_id = None;
+    }
+}
+
+/// State changes the LicenceSeats specimen can request.
+#[derive(Clone, Debug)]
+pub enum LicenceSeatsEvent {
+    Rename { machine_id: String, label: Option<String> },
+    Edit { machine_id: String },
+    ReleaseTrigger { machine_id: String },
+    ReleaseConfirm { machine_id: String },
+    /// No payload: cancellation applies to whatever row is open.
+    ReleaseCancel,
+}
+
 /// State changes the preview shell's own node-backed controls can request.
 #[derive(Clone, Debug)]
 pub enum ChromeEvent {
@@ -639,6 +695,8 @@ pub struct AppState {
     /// Pending events from node-backed specimens; drained at render start.
     pub node_events: std::sync::Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
     pub tree: TreePreviewState,
+    /// LicenceSeats specimen host state.
+    pub licence_seats: LicencePreviewState,
     /// Single-file picks requested through the generic browse seam but whose
     /// OS prompt has not been started yet.
     pub pending_file_picks: Vec<FilePickRequest>,
@@ -676,6 +734,7 @@ impl AppState {
             specimens: SpecimenState::new(),
             node_events: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
             tree: TreePreviewState::new(),
+            licence_seats: LicencePreviewState::mixed(),
             pending_file_picks: Vec::new(),
             active_file_picks: Vec::new(),
         }
@@ -807,6 +866,24 @@ impl AppState {
                     // owns the app context the OS prompt needs.
                     self.pending_file_picks.push(FilePickRequest { key, spec });
                 }
+                NodeSpecimenEvent::LicenceSeats(event) => match event {
+                    LicenceSeatsEvent::Rename { machine_id, label } => {
+                        self.licence_seats.rename(&machine_id, label);
+                    }
+                    LicenceSeatsEvent::Edit { machine_id } => {
+                        self.licence_seats.editing_machine_id = Some(machine_id);
+                    }
+                    LicenceSeatsEvent::ReleaseTrigger { machine_id } => {
+                        self.licence_seats.open_confirm_machine_id = Some(machine_id);
+                    }
+                    LicenceSeatsEvent::ReleaseConfirm { machine_id } => {
+                        self.licence_seats.seats.retain(|seat| seat.machine_id != machine_id);
+                        self.licence_seats.open_confirm_machine_id = None;
+                    }
+                    LicenceSeatsEvent::ReleaseCancel => {
+                        self.licence_seats.open_confirm_machine_id = None;
+                    }
+                },
                 NodeSpecimenEvent::Chrome(event) => match event {
                     ChromeEvent::Section(section) => self.section = section,
                     ChromeEvent::ThemeSelectOpen(open) => self.theme_select_open = open,

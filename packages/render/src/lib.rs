@@ -258,7 +258,7 @@ pub use icon::icon;
 pub use icon_button::icon_button;
 pub use inline_list_section::inline_list_section;
 pub use inline_remediation::inline_remediation;
-pub use licence_activation::{licence_activation, LicenceActivationHandlers};
+pub use licence_activation::{licence_activation, licence_activation_with_slots, LicenceActivationHandlers};
 pub use licence_seats::{licence_seats, LicenceSeatsHandlers};
 pub use licence_status::licence_status;
 pub use list_card::{list_card, ListCardSlots};

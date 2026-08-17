@@ -229,6 +229,16 @@ impl LicenceActivationSpec {
         self
     }
 
+    pub fn with_file_name(mut self, name: impl Into<String>) -> Self {
+        self.file_name = Some(name.into());
+        self
+    }
+
+    pub fn with_file_contents_base64(mut self, contents_base64: impl Into<String>) -> Self {
+        self.file_contents_base64 = Some(contents_base64.into());
+        self
+    }
+
     pub fn with_machine_label_editing(mut self, editing: bool) -> Self {
         self.machine_label_editing = editing;
         self
