@@ -49,6 +49,36 @@ The review's six findings are addressed in the landed branch:
    cross-implementation error-copy vectors in
    `error_copy_vectors_match_the_web_exactly`.
 
+## Re-review round (orchestrator re-verdict, five remaining gaps)
+
+1. **Quiet inGrace line now matches the web locale.** The renderer resolves
+   the instant into local civil parts and formats them with
+   `poodle_headless::licence::format_time_date_locale` using the runtime
+   locale: `en_US` → `12:45 PM 06/25/2026`, en-GB shape → `12:45 25/06/2026`.
+   Evidence: `time_date_locale_matches_the_web_for_us_and_gb` (plus midnight/
+   noon and unknown-locale cases).
+2. **Escape restores the committed machine-name value.** The specimen snaps
+   the committed label at edit start and restores it on cancel
+   (`NodeSpecimenEvent::MachineLabelCancel`); the editable input also gains a
+   focus ring and typing wiring (`on_edit_key`/`on_edit_insert` → the
+   controlled draft), so the edit can actually be typed and reverted. Evidence:
+   `a_machine_name_escape_restores_the_original_in_a_mounted_window` and the
+   `a_machine_label_cancel_restores_the_snapshot` bin-unit test.
+3. **Read failure is a local polite error.** `FilePickOutcome::Failed` lands
+   the request's `failed_message` (`That file could not be read.`) rather than
+   the raw OS text; accept/size `Rejected` copy is preserved verbatim.
+   Evidence: `a_read_failure_lands_the_polite_message_not_the_os_error`.
+4. **Key validation copy clears on edit.** The specimen's `on_key_change`
+   clears `la-key-message` (the web pair's `handleKeyChange`); the free-form
+   key view now actually renders the error copy. Evidence:
+   `key_validation_copy_clears_on_edit_in_a_mounted_window`.
+5. **The async regression drives the production seam.** `deliver_os_pick` is
+   extracted and is exactly what `start_file_picks` runs; the bin-unit test
+   `a_completed_pick_lands_through_the_production_seam_after_the_first_frame`
+   hosts a real `PreviewRoot`, completes an injected receiver **after the
+   first frame**, and asserts the specimen state landed through the root
+   entity (with the generation guard and polite-message mapping).
+
 ## Batches
 
 - **Batch A — native prerequisites.** CodeInput lost its inferred 3+3 split:
@@ -94,16 +124,18 @@ The review's six findings are addressed in the landed branch:
   prompt, accept rejection honesty, size rule default, and
   `resolve_os_selection` reading a real temporary file, plus correct
   cancellation/failure handling (19 passed).
-- **Mounted headless regressions** (`effigy regressions:native`): 15 passed —
+- **Mounted headless regressions** (`effigy regressions:native`): 16 passed —
   the six retained plus grouped CodeInput typing/completion, stale completion
   cannot render, dropzone browse through the injected seam (selection and
   rejection), LicenceActivation segmented key path (type → tick → submit
   emits the exact key), LicenceSeats release through ConfirmAction,
   LicenceStatus display with authority reads as data state, the account-view
-  submit firing through the real tree, and the OS pick result landing after
-  the receiver completes (async completion-driven delivery).
-- **Preview bin unit tests** (`cargo test --bin poodle-preview app_state`):
-  the route-change invalidation and stale-outcome generation guard (2 passed).
+  submit firing through the real tree, key-validation copy clearing on edit,
+  and the machine-name Escape restoring the original label.
+- **Preview bin unit tests**: `app_state` (route-change invalidation,
+  stale-outcome guard, polite read-failure copy, machine-label restore —
+  4 passed) and `file_pick_tests` (the production landing seam completing
+  after the first frame — 1 passed).
 - **GPUI preview** (`cargo check -p poodle-gpui-preview`): the three new
   specimens compile into the catalogue (`licence-activation`,
   `licence-seats`, `licence-status`).
@@ -133,8 +165,11 @@ above.
 - `cargo test -p poodle-headless` — 97 passed
 - `cargo test -p poodle-gpui-node-backend` — 19 passed
 - `cargo check -p poodle-gpui-preview` — clean
-- `cargo test --test headless_regressions` — 15 passed
-- `cargo test --bin poodle-preview app_state` — 2 passed (staleness/invalidation)
+- `cargo test --test headless_regressions` — 16 passed
+- `cargo test --bin poodle-preview app_state` — 4 passed (staleness/invalidation,
+  polite read-failure copy, machine-label restore)
+- `cargo test --bin poodle-preview file_pick_tests` — 1 passed (the production
+  landing seam, completion after the first frame)
 - `cargo test --test catalogue` — 7 passed
 
 Baseline (unchanged by this lane, confirmed identical on `origin/main`):

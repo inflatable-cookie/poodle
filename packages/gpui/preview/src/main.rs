@@ -2,6 +2,7 @@
 //!
 //! Matches the Svelte preview app layout: top bar with pill tabs,
 //! display controls bar, and section-specific content areas.
+#![recursion_limit = "512"]
 
 mod app_state;
 mod component_registry;
@@ -2474,4 +2475,114 @@ fn main() {
             cx.activate(true);
         }
     });
+}
+#[cfg(test)]
+mod file_pick_tests {
+    // Explicit imports only: `use super::*` would glob in gpui's `test` proc
+    // macro and shadow the built-in `#[test]` (gpui-macros 0.2.2 crashes on
+    // current rustc). Same discipline as tests/headless_regressions.rs.
+    use crate::app_state::{deliver_os_pick, FilePickRequest, NodeSpecimenEvent};
+    use crate::PreviewRoot;
+    use gpui::{App, AsyncApp, TestAppContext};
+    use poodle_gpui_node_backend::file_capability::SingleFilePickSpec;
+
+    /// The completion-driven landing seam (`deliver_os_pick`, the exact path
+    /// `start_file_picks` runs): a dialog result that completes **after the
+    /// first frame** is picked up by the awaited task and lands in the
+    /// preview's specimen state through the root entity — never a poll.
+    #[test]
+    fn a_completed_pick_lands_through_the_production_seam_after_the_first_frame() {
+        let mut cx = TestAppContext::single();
+        let (root, mut cx) = cx.add_window_view(|_window, cx| PreviewRoot::new(cx));
+        let root_weak = root.downgrade();
+
+        // A browse event creates the pending request, exactly as the live
+        // seam receives it.
+        cx.update(|_window, app: &mut App| {
+            root.update(app, |root, _cx| {
+                root.state
+                    .node_events
+                    .lock()
+                    .unwrap()
+                    .push(NodeSpecimenEvent::FileBrowse {
+                        key: "la-file".to_string(),
+                        spec: SingleFilePickSpec {
+                            prompt: "Choose a licence file".to_string(),
+                            accept: Some(".licence".to_string()),
+                            max_size: None,
+                        },
+                        failed_message: Some(
+                            poodle_headless::licence::LICENCE_FILE_UNREADABLE_MESSAGE.to_string(),
+                        ),
+                    });
+                root.state.drain_node_events();
+            });
+        });
+        let (key, spec, failed_message) = cx.read(|app: &App| {
+            let state = &root.read(app).state;
+            let request: &FilePickRequest = &state.pending_file_picks[0];
+            (
+                request.key.clone(),
+                request.spec.clone(),
+                request.failed_message.clone(),
+            )
+        });
+        let generation = cx.read(|app: &App| root.read(app).state.file_generation);
+        cx.update(|_window, app: &mut App| {
+            root.update(app, |root, _cx| root.state.pending_file_picks.clear());
+        });
+
+        // A real file the completion delivers.
+        let dir = std::env::temp_dir().join(format!("poodle-seam-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("temp dir");
+        let path = dir.join("machine.licence");
+        std::fs::write(&path, b"seam payload").expect("fixture file");
+        let (sender, receiver) = futures::channel::oneshot::channel();
+
+        // Start the pick the way `start_file_picks` does (minus the OS
+        // prompt, which the test platform cannot open).
+        let root_weak = root_weak.clone();
+        cx.update(|_window, app: &mut App| {
+            app.spawn(async move |cx: &mut AsyncApp| {
+                deliver_os_pick(
+                    &root_weak,
+                    receiver,
+                    key,
+                    generation,
+                    spec,
+                    failed_message,
+                    cx,
+                )
+                .await;
+            })
+            .detach();
+        });
+
+        // First frame: the dialog is still open, nothing has landed.
+        cx.run_until_parked();
+        let landed = cx.read(|app: &App| {
+            root.read(app).state.specimens.text.contains_key("la-file-name")
+        });
+        assert!(!landed, "no result before the dialog completes");
+
+        // The dialog completes after the first frame; the awaited seam
+        // delivers it through the root entity.
+        let _ = sender.send(Ok(Some(vec![path.clone()])));
+        cx.run_until_parked();
+        std::fs::remove_dir_all(&dir).ok();
+        let state = cx.read(|app: &App| {
+            let s = &root.read(app).state.specimens;
+            (
+                s.text.get("la-file-name").cloned(),
+                s.text.get("la-file-base64").cloned(),
+                s.text.contains_key("la-file-error"),
+            )
+        });
+        assert_eq!(state.0.as_deref(), Some("machine.licence"));
+        assert_eq!(
+            state.1.as_deref(),
+            Some(poodle_headless::file_upload::base64_encode(b"seam payload").as_str())
+        );
+        assert!(!state.2, "no error on a successful pick");
+    }
 }

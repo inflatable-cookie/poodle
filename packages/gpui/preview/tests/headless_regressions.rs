@@ -907,60 +907,134 @@ fn licence_activation_account_submit_fires_through_the_real_tree() {
     });
 }
 
-/// The OS pick lifecycle is completion-driven: a dialog result that arrives
-/// **after the first frame** is picked up by the awaited task and lands —
-/// it never waits on a poll or an unrelated repaint.
+/// Editing the key clears the local validation copy: after a rejected
+/// submit the message shows, and a new keystroke removes it — the web pair's
+/// keyMessage-clearing rule, through the real dispatch tree.
 #[test]
-fn a_file_pick_result_lands_after_the_receiver_completes() {
-    use poodle_gpui_node_backend::file_capability::{
-        FilePickOutcome, SingleFilePickSpec, resolve_os_selection,
-    };
+fn key_validation_copy_clears_on_edit_in_a_mounted_window() {
+    use poodle_headless::licence::LicenceActivationMode;
+    use poodle_specs::LicenceActivationSpec;
 
     run_headless(|cx| {
-        let dir = std::env::temp_dir().join(format!("poodle-async-{}", std::process::id()));
-        std::fs::create_dir_all(&dir).expect("temp dir");
-        let path = dir.join("machine.lic");
-        std::fs::write(&path, b"async payload").expect("fixture file");
-        let (sender, receiver) = futures::channel::oneshot::channel();
-        let spec = SingleFilePickSpec {
-            prompt: "Choose a licence file".to_string(),
-            accept: Some(".lic".to_string()),
-            max_size: None,
+        let changed = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&changed);
+        let build = |message: Option<&str>| {
+            let mut node = poodle_render::licence_activation(
+                &LicenceActivationSpec::new()
+                    .with_mode(LicenceActivationMode::Key)
+                    .with_key_message(message.map(str::to_string)),
+                &theme(),
+                poodle_render::LicenceActivationHandlers {
+                    on_key_change: Some({
+                        let sink = Arc::clone(&sink);
+                        Arc::new(move |_value: &str| {
+                            *sink.lock().unwrap() += 1;
+                        })
+                    }),
+                    ..poodle_render::LicenceActivationHandlers::default()
+                },
+            );
+            assert!(give_first_id(
+                &mut node,
+                "la-key-input",
+                &|n| n.interaction.on_text_change.is_some(),
+            ));
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
         };
-        let landed = Arc::new(Mutex::new(None));
-        let sink = Arc::clone(&landed);
-        cx.update(|app: &mut gpui::App| {
-            app.spawn(async move |_app: &mut gpui::AsyncApp| {
-                let selection = receiver.await.unwrap_or(Ok(None));
-                let outcome = resolve_os_selection(selection, &spec);
-                *sink.lock().unwrap() = Some(outcome);
-            })
-            .detach();
-        });
-
-        // First frame: the dialog is still open, nothing has completed.
-        cx.run_until_parked();
+        let node = Arc::new(Mutex::new(build(Some("This key is too short."))));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        driver.draw_frame();
         assert!(
-            landed.lock().unwrap().is_none(),
-            "no result before the dialog completes"
+            node.lock().unwrap().has_text("This key is too short."),
+            "the rejected submit shows its copy"
         );
 
-        // The dialog completes after the first frame; the awaited task is
-        // what drives the delivery.
-        let _ = sender.send(Ok(Some(vec![path.clone()])));
-        cx.run_until_parked();
-        std::fs::remove_dir_all(&dir).ok();
-        let outcome = landed
-            .lock()
-            .unwrap()
-            .clone()
-            .expect("the completed pick landed after the first frame");
-        assert_eq!(
-            outcome,
-            FilePickOutcome::Selected {
-                name: "machine.lic".to_string(),
-                contents_base64: poodle_headless::file_upload::base64_encode(b"async payload"),
+        // A new keystroke fires on_key_change; the host clears the stale copy
+        // (the web pair's handleKeyChange) and re-renders.
+        driver.pointer_activate_id("la-key-input");
+        driver.dispatch_key_raw("a");
+        assert_eq!(*changed.lock().unwrap(), 1, "the key edit fired");
+        *node.lock().unwrap() = build(None);
+        driver.draw_frame();
+        assert!(
+            !node.lock().unwrap().has_text("This key is too short."),
+            "editing the key removes the stale validation copy"
+        );
+    });
+}
+
+/// Escape on the machine-name edit restores the committed value: after
+/// typing a new draft, Escape returns the display to the original label —
+/// the web EditableLabel's revert rule, through the real dispatch tree.
+#[test]
+fn a_machine_name_escape_restores_the_original_in_a_mounted_window() {
+    use poodle_headless::licence::LicenceActivationMode;
+    use poodle_specs::LicenceActivationSpec;
+
+    run_headless(|cx| {
+        let draft = Arc::new(Mutex::new("Studio Mac".to_string()));
+        let cancelled = Arc::new(Mutex::new(0usize));
+        let build = |label: &str, editing: bool| {
+            let mut node = poodle_render::licence_activation(
+                &LicenceActivationSpec::new()
+                    .with_mode(LicenceActivationMode::Account)
+                    .with_machine_label(Some(label.to_string()))
+                    .with_machine_label_editing(editing),
+                &theme(),
+                poodle_render::LicenceActivationHandlers {
+                    on_machine_label_change: Some({
+                        let draft = Arc::clone(&draft);
+                        Arc::new(move |value: &str| {
+                            *draft.lock().unwrap() = value.to_string();
+                        })
+                    }),
+                    on_machine_label_cancel: Some({
+                        let cancelled = Arc::clone(&cancelled);
+                        Arc::new(move || {
+                            *cancelled.lock().unwrap() += 1;
+                        })
+                    }),
+                    ..poodle_render::LicenceActivationHandlers::default()
+                },
+            );
+            if editing {
+                assert!(give_first_id(
+                    &mut node,
+                    "la-machine-input",
+                    &|n| n.interaction.on_text_change.is_some(),
+                ));
             }
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        };
+        let node = Arc::new(Mutex::new(build("Studio Mac", true)));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        // Type a new draft into the editing input. It now carries a focus
+        // ring, so it tracks focus and can be focused by id regardless of
+        // where it sits in the wide form.
+        driver.focus_element("la-machine-input");
+        driver.dispatch_key_raw("2");
+        assert_eq!(
+            draft.lock().unwrap().as_str(),
+            "Studio Mac2",
+            "typing edits the draft"
+        );
+
+        // Escape fires the cancel channel; the host restores the committed
+        // value snapped at edit start and closes editing.
+        driver.dispatch_key_raw("escape");
+        assert_eq!(*cancelled.lock().unwrap(), 1, "escape reached the cancel channel");
+        *node.lock().unwrap() = build("Studio Mac", false);
+        driver.draw_frame();
+        assert!(
+            node.lock().unwrap().has_text("Studio Mac"),
+            "the original label is restored"
+        );
+        assert!(
+            !node.lock().unwrap().has_text("Studio Mac2"),
+            "the typed draft is discarded on escape"
         );
     });
 }
