@@ -7,6 +7,10 @@ use gpui::App;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_node_backend::file_capability::{FilePickOutcome, SingleFilePickSpec};
 use poodle_headless::licence::LicenceSeat;
+use poodle_headless::model_connection::{
+    model_catalogue_fixtures, model_connection_picker_fixtures, ModelCatalogueItem,
+    ModelConnectionSetupStage,
+};
 use poodle_specs::{reorder_nodes, DropPosition, TreeNode};
 use std::collections::HashMap;
 
@@ -566,6 +570,124 @@ pub enum NodeSpecimenEvent {
     MachineLabelCancel,
     /// A LicenceSeats interaction.
     LicenceSeats(LicenceSeatsEvent),
+    /// A model-connection family interaction (picker, setup, card, catalogue).
+    ModelConnection(ModelConnectionEvent),
+}
+
+/// State changes the model-connection specimens can request. One enum for the
+/// four components because they share one host-state struct, exactly as the
+/// Swallowtail route that will consume them would.
+#[derive(Clone, Debug)]
+pub enum ModelConnectionEvent {
+    PickerValue(String),
+    PickerQuery(String),
+    SetupStage(ModelConnectionSetupStage),
+    SetupValue(String),
+    SetupQuery(String),
+    SetupSubmit(String),
+    SetupCancel,
+    CardOpen { id: String, open: bool },
+    CardEnabled { id: String, enabled: bool },
+    /// The complete shown-id order the editor asked for.
+    CatalogueOrder(Vec<String>),
+    CatalogueVisibility { id: String, visible: bool },
+    CatalogueGrab(Option<String>),
+    CatalogueDropTarget(Option<String>),
+    CatalogueHiddenOpen(bool),
+    CatalogueAnnounce(String),
+    CatalogueInfo(String),
+    /// A component named an element id it wants focused. The backend performs
+    /// the move; the component never touches focus itself.
+    FocusRequest(String),
+}
+
+/// Host state for the model-connection specimens. Poodle owns none of this:
+/// the preview plays the part Nucleus will, holding the current values and
+/// applying every requested change itself.
+pub struct ModelConnectionPreviewState {
+    pub picker_value: Option<String>,
+    pub picker_query: String,
+    pub setup_stage: ModelConnectionSetupStage,
+    pub setup_value: Option<String>,
+    pub setup_query: String,
+    /// The last submit or cancel the workflow reported, shown as safe copy.
+    pub setup_outcome: Option<String>,
+    /// Disclosure and enable preference per configured-connection id.
+    pub card_open: HashMap<String, bool>,
+    pub card_enabled: HashMap<String, bool>,
+    pub catalogue_items: Vec<ModelCatalogueItem>,
+    pub grabbed_id: Option<String>,
+    pub drop_target_id: Option<String>,
+    pub hidden_open: bool,
+    pub live_message: String,
+    /// The last info request, so the optional action proves it reaches a host.
+    pub info_id: Option<String>,
+}
+
+impl ModelConnectionPreviewState {
+    pub fn new() -> Self {
+        Self {
+            picker_value: None,
+            picker_query: String::new(),
+            setup_stage: ModelConnectionSetupStage::Choose,
+            setup_value: None,
+            setup_query: String::new(),
+            setup_outcome: None,
+            card_open: HashMap::new(),
+            card_enabled: HashMap::new(),
+            catalogue_items: model_catalogue_fixtures(),
+            grabbed_id: None,
+            drop_target_id: None,
+            hidden_open: false,
+            live_message: String::new(),
+            info_id: None,
+        }
+    }
+
+    pub fn options() -> Vec<poodle_headless::model_connection::ModelConnectionOption> {
+        model_connection_picker_fixtures()
+    }
+
+    pub fn card_is_open(&self, id: &str) -> bool {
+        self.card_open.get(id).copied().unwrap_or(false)
+    }
+
+    pub fn card_is_enabled(&self, id: &str, default: bool) -> bool {
+        self.card_enabled.get(id).copied().unwrap_or(default)
+    }
+
+    /// Apply a requested shown order. Hidden entries keep their own slots, so
+    /// reordering the shown models never disturbs what is hidden.
+    fn apply_order(&mut self, order: &[String]) {
+        let mut shown = order.iter();
+        let mut next = Vec::with_capacity(self.catalogue_items.len());
+        for item in &self.catalogue_items {
+            if !item.visible {
+                next.push(item.clone());
+                continue;
+            }
+            let Some(id) = shown.next() else { continue };
+            let Some(moved) = self.catalogue_items.iter().find(|entry| &entry.id == id) else {
+                continue;
+            };
+            next.push(moved.clone());
+        }
+        self.catalogue_items = next;
+    }
+
+    fn apply_visibility(&mut self, id: &str, visible: bool) {
+        for item in &mut self.catalogue_items {
+            if item.id == id {
+                item.visible = visible;
+            }
+        }
+    }
+}
+
+impl Default for ModelConnectionPreviewState {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 /// One requested single-file pick, waiting for the host to open its prompt.
@@ -715,6 +837,8 @@ pub struct AppState {
     pub tree: TreePreviewState,
     /// LicenceSeats specimen host state.
     pub licence_seats: LicencePreviewState,
+    /// Model-connection family specimen host state.
+    pub model_connection: ModelConnectionPreviewState,
     /// Single-file picks requested through the generic browse seam whose OS
     /// prompt has not been opened yet.
     pub pending_file_picks: Vec<FilePickRequest>,
@@ -759,6 +883,7 @@ impl AppState {
             node_events: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
             tree: TreePreviewState::new(),
             licence_seats: LicencePreviewState::mixed(),
+            model_connection: ModelConnectionPreviewState::new(),
             pending_file_picks: Vec::new(),
             active_file_keys: Vec::new(),
             file_generation: 0,
@@ -936,6 +1061,50 @@ impl AppState {
                         self.licence_seats.open_confirm_machine_id = None;
                     }
                 },
+                NodeSpecimenEvent::ModelConnection(event) => {
+                    let state = &mut self.model_connection;
+                    match event {
+                        ModelConnectionEvent::PickerValue(id) => state.picker_value = Some(id),
+                        ModelConnectionEvent::PickerQuery(query) => state.picker_query = query,
+                        ModelConnectionEvent::SetupStage(stage) => state.setup_stage = stage,
+                        ModelConnectionEvent::SetupValue(id) => state.setup_value = Some(id),
+                        ModelConnectionEvent::SetupQuery(query) => state.setup_query = query,
+                        ModelConnectionEvent::SetupSubmit(id) => {
+                            state.setup_outcome = Some(format!("Requested {id}"));
+                        }
+                        ModelConnectionEvent::SetupCancel => {
+                            state.setup_stage = ModelConnectionSetupStage::Choose;
+                            state.setup_value = None;
+                            state.setup_outcome = Some("Cancelled".to_string());
+                        }
+                        ModelConnectionEvent::CardOpen { id, open } => {
+                            state.card_open.insert(id, open);
+                        }
+                        ModelConnectionEvent::CardEnabled { id, enabled } => {
+                            state.card_enabled.insert(id, enabled);
+                        }
+                        ModelConnectionEvent::CatalogueOrder(order) => state.apply_order(&order),
+                        ModelConnectionEvent::CatalogueVisibility { id, visible } => {
+                            state.apply_visibility(&id, visible);
+                        }
+                        ModelConnectionEvent::CatalogueGrab(id) => state.grabbed_id = id,
+                        ModelConnectionEvent::CatalogueDropTarget(id) => {
+                            state.drop_target_id = id;
+                        }
+                        ModelConnectionEvent::CatalogueHiddenOpen(open) => {
+                            state.hidden_open = open;
+                        }
+                        ModelConnectionEvent::CatalogueAnnounce(message) => {
+                            state.live_message = message;
+                        }
+                        ModelConnectionEvent::CatalogueInfo(id) => state.info_id = Some(id),
+                        ModelConnectionEvent::FocusRequest(id) => {
+                            // The backend owns the focus operation; the
+                            // component only named the destination.
+                            poodle_gpui_node_backend::request_focus(&id);
+                        }
+                    }
+                }
                 NodeSpecimenEvent::Chrome(event) => match event {
                     ChromeEvent::Section(section) => self.section = section,
                     ChromeEvent::ThemeSelectOpen(open) => self.theme_select_open = open,

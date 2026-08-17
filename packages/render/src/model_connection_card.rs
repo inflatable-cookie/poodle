@@ -24,6 +24,7 @@ use poodle_headless::model_connection::{
 };
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
+    StylePatch,
 };
 use poodle_specs::{
     ButtonVariant, ControlSize, IconButtonSpec, ModelConnectionCardSpec, SemanticControlSizeRole,
@@ -359,6 +360,15 @@ fn disclosure_button(
         activate,
     );
     node.id = Some(disclosure_id);
+    // `icon_button` renders no focus patch, and the GPUI backend only creates
+    // a focus handle for a focusable node that carries one — so without this
+    // the disclosure is unreachable by keyboard and focus cannot be restored
+    // to it (PAPERCUTS: icon-button focus patch). Same workaround
+    // `poodle-render::history_center` already carries.
+    node.style.focus = Some(StylePatch {
+        border_color: Some(theme.resolve_color("color.accent.focusRing")),
+        ..StylePatch::default()
+    });
     // `IconButtonSpec`'s expanded/controls flags do not reach `Node.a11y`
     // through `icon_button` (PAPERCUTS: icon-button-expanded-controls), so the
     // disclosure states its own relationship, as HistoryCenter and

@@ -7,6 +7,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-17 — The headless GPUI driver's mount box is a fixed 160×60, and its
+  content mask clips **hit testing** as well as paint: `bounds_for` happily
+  reports an element at y=240, `pointer_activate_id` clicks its centre, and
+  nothing fires. Any mounted regression over a component taller than 60px has
+  to drive keyboard activation instead, or shrink its fixture until the target
+  lands inside the box. A driver option for a larger mount box (or one that
+  sizes to its child) would remove the guessing. Found by g15.008 Batch C.
+
 - 2026-08-17 — `IconButtonSpec::with_expanded` and `with_controls` never reach
   `Node.a11y`: `poodle_render::icon_button` ignores both, so a composed
   disclosure has no `expanded` and no `controls` relationship unless its caller

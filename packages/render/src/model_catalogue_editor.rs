@@ -32,7 +32,7 @@ use poodle_headless::model_connection::{
 };
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
-    NodeKey, NodeRole,
+    NodeKey, NodeRole, StylePatch,
 };
 use poodle_specs::{
     ButtonVariant, CallOutSpec, CalloutAnnounceMode, CollapsibleSpec, ControlSize, EmptyStateSpec,
@@ -248,6 +248,19 @@ pub fn model_catalogue_editor_with_slots(
     root
 }
 
+/// `icon_button` renders no focus patch, and the GPUI backend only creates a
+/// focus handle for a focusable node that carries one — so every utility here
+/// would be unreachable by keyboard, and a keyboard reorder could not receive
+/// focus at all (PAPERCUTS: icon-button focus patch). Same workaround
+/// `poodle-render::history_center` already carries.
+fn focusable_chrome(mut node: Node, theme: &dyn ThemeProvider) -> Node {
+    node.style.focus = Some(StylePatch {
+        border_color: Some(theme.resolve_color("color.accent.focusRing")),
+        ..StylePatch::default()
+    });
+    node
+}
+
 fn count_line(shown: usize, hidden: usize) -> String {
     if hidden > 0 {
         format!("{shown} shown, {hidden} hidden")
@@ -361,7 +374,7 @@ fn shown_row(
     let move_to = move_emitter(spec, shown.to_vec(), shown_ids.to_vec(), Arc::clone(handlers));
 
     // ── Reorder handle: grab, keyboard move, and the pointer drag source ──
-    let mut handle = icon_button(
+    let handle = icon_button(
         &IconButtonSpec::new()
             .with_icon("grip-vertical")
             .with_variant(ButtonVariant::Ghost)
@@ -399,6 +412,7 @@ fn shown_row(
             }) as Arc<dyn Fn() + Send + Sync>
         }),
     );
+    let mut handle = focusable_chrome(handle, theme);
     handle.id = Some(spec.row_handle_id(&item.id));
     handle.a11y.toggled = Some(if is_grabbed {
         poodle_node::NodeToggled::True
@@ -520,7 +534,7 @@ fn shown_row(
     if let Some(handler) = &handlers.on_info {
         let handler = Arc::clone(handler);
         let id = item.id.clone();
-        let mut info = icon_button(
+        let info = icon_button(
             &IconButtonSpec::new()
                 .with_icon("info")
                 .with_variant(ButtonVariant::Ghost)
@@ -532,12 +546,13 @@ fn shown_row(
             theme,
             (!locked).then(|| Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>),
         );
+        let mut info = focusable_chrome(info, theme);
         info.id = Some(format!("model-catalogue-editor:{}:info", item.id));
         utilities = utilities.child(info);
     }
     if spec.show_move_actions {
         let up_disabled = row_locked || index == 0;
-        let mut up = icon_button(
+        let up = icon_button(
             &IconButtonSpec::new()
                 .with_icon("arrow-up")
                 .with_variant(ButtonVariant::Ghost)
@@ -554,10 +569,11 @@ fn shown_row(
                 }) as Arc<dyn Fn() + Send + Sync>
             }),
         );
+        let mut up = focusable_chrome(up, theme);
         up.id = Some(format!("model-catalogue-editor:{}:up", item.id));
 
         let down_disabled = row_locked || index + 1 == shown.len();
-        let mut down = icon_button(
+        let down = icon_button(
             &IconButtonSpec::new()
                 .with_icon("arrow-down")
                 .with_variant(ButtonVariant::Ghost)
@@ -574,10 +590,11 @@ fn shown_row(
                 }) as Arc<dyn Fn() + Send + Sync>
             }),
         );
+        let mut down = focusable_chrome(down, theme);
         down.id = Some(format!("model-catalogue-editor:{}:down", item.id));
         utilities = utilities.child(up).child(down);
     }
-    let mut hide = icon_button(
+    let hide = icon_button(
         &IconButtonSpec::new()
             .with_icon("eye")
             .with_variant(ButtonVariant::Ghost)
@@ -620,6 +637,7 @@ fn shown_row(
             }) as Arc<dyn Fn() + Send + Sync>
         }),
     );
+    let mut hide = focusable_chrome(hide, theme);
     hide.id = Some(format!("model-catalogue-editor:{}:hide", item.id));
     let utilities = utilities.child(hide);
 
@@ -711,7 +729,7 @@ fn hidden_row(
         label_row = label_row.child(secondary_text(theme, provider));
     }
 
-    let mut restore = icon_button(
+    let restore = icon_button(
         &IconButtonSpec::new()
             .with_icon("undo")
             .with_variant(ButtonVariant::Ghost)
@@ -735,6 +753,7 @@ fn hidden_row(
             }) as Arc<dyn Fn() + Send + Sync>
         }),
     );
+    let mut restore = focusable_chrome(restore, theme);
     restore.id = Some(format!("model-catalogue-editor:{}:restore", item.id));
 
     let mut row = Node::container();

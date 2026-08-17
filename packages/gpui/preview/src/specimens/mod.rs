@@ -134,6 +134,10 @@ mod history_center_specimen;
 mod message_center_specimen;
 mod meta_bar;
 mod metric_tile_specimen;
+mod model_catalogue_editor_specimen;
+mod model_connection_card_specimen;
+mod model_connection_picker_specimen;
+mod model_connection_setup_specimen;
 mod model_picker_specimen;
 mod nav_card;
 mod order_by_specimen;
@@ -481,6 +485,26 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             "FilterBuilder",
             theme,
             filter_builder_specimen::render(state, cx),
+        ),
+        "model-connection-picker" => specimen_card(
+            "ModelConnectionPicker",
+            theme,
+            model_connection_picker_specimen::render(state, cx),
+        ),
+        "model-connection-setup" => specimen_card(
+            "ModelConnectionSetup",
+            theme,
+            model_connection_setup_specimen::render(state, cx),
+        ),
+        "model-connection-card" => specimen_card(
+            "ModelConnectionCard",
+            theme,
+            model_connection_card_specimen::render(state, cx),
+        ),
+        "model-catalogue-editor" => specimen_card(
+            "ModelCatalogueEditor",
+            theme,
+            model_catalogue_editor_specimen::render(state, cx),
         ),
         "model-picker" => specimen_card(
             "ModelPicker",

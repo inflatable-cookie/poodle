@@ -1045,3 +1045,394 @@ fn a_machine_name_escape_restores_the_original_in_a_mounted_window() {
         );
     });
 }
+
+// ── Model-connection family (g15.008) ──────────────────────────────────────
+
+/// The picker's roving focus is real backend focus: an arrow key on the
+/// mounted option moves the window's focus to the next enabled option and
+/// selects it, and the disabled routes in between are skipped.
+#[test]
+fn model_connection_picker_roving_focus_moves_real_backend_focus() {
+    use poodle_headless::model_connection::model_connection_picker_fixtures;
+    use poodle_render::model_connection_option_id;
+    use poodle_specs::ModelConnectionPickerSpec;
+
+    run_headless(|cx| {
+        let chosen = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&chosen);
+        let mut node = poodle_render::model_connection_picker(
+            &ModelConnectionPickerSpec::new()
+                .with_options(model_connection_picker_fixtures())
+                .with_value(Some("anthropic-messages".to_string())),
+            &theme(),
+            poodle_render::ModelConnectionPickerHandlers {
+                on_value_change: Some(Arc::new(move |id: &str| {
+                    sink.lock().unwrap().push(id.to_string())
+                })),
+                ..poodle_render::ModelConnectionPickerHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        let from = model_connection_option_id("anthropic-messages");
+        // `ollama-local` is the next *enabled* option: `codex-app` is checking
+        // and disabled, so the roving move must step over it.
+        let to = model_connection_option_id("ollama-local");
+        driver.wait_for_focus_handle(&from);
+        driver.keyboard_key(&from, "down");
+
+        assert_eq!(
+            chosen.lock().unwrap().as_slice(),
+            ["ollama-local"],
+            "the move selects the option it moved to"
+        );
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&to),
+            Some(true),
+            "the backend moved real focus to the named destination"
+        );
+    });
+}
+
+/// A disabled route is inert in a mounted window: a real pointer click on the
+/// unsupported option's rendered bounds selects nothing, while the available
+/// one beside it selects on the same gesture.
+///
+/// Two options only: the mount box centres its child, so a full catalogue
+/// overflows above the window and its top rows cannot be hit-tested.
+#[test]
+fn model_connection_picker_ignores_a_click_on_an_unsupported_route() {
+    use poodle_headless::model_connection::{
+        ModelConnectionAvailability, ModelConnectionOption,
+    };
+    use poodle_render::model_connection_option_id;
+    use poodle_specs::ModelConnectionPickerSpec;
+
+    run_headless(|cx| {
+        let chosen = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&chosen);
+        let options = vec![
+            ModelConnectionOption::new("vendor-legacy", "Legacy Vendor", "Hosted")
+                .with_availability(
+                    ModelConnectionAvailability::Unsupported,
+                    "Unsupported on this platform",
+                )
+                .with_disabled(true),
+            ModelConnectionOption::new("openai-responses", "OpenAI", "Hosted"),
+        ];
+        let mut node = poodle_render::model_connection_picker(
+            &ModelConnectionPickerSpec::new().with_options(options),
+            &theme(),
+            poodle_render::ModelConnectionPickerHandlers {
+                on_value_change: Some(Arc::new(move |id: &str| {
+                    sink.lock().unwrap().push(id.to_string())
+                })),
+                ..poodle_render::ModelConnectionPickerHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        driver.pointer_activate_id(&model_connection_option_id("vendor-legacy"));
+        assert!(
+            chosen.lock().unwrap().is_empty(),
+            "an unsupported route cannot be chosen by pointer either"
+        );
+
+        driver.pointer_activate_id(&model_connection_option_id("openai-responses"));
+        assert_eq!(chosen.lock().unwrap().as_slice(), ["openai-responses"]);
+    });
+}
+
+/// The setup workflow's direct-add path in a mounted window: pressing Add on
+/// a route that needs no configuration submits from choose and never asks for
+/// a configure stage.
+#[test]
+fn model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window() {
+    use poodle_headless::model_connection::{
+        model_connection_picker_fixtures, ModelConnectionAvailability,
+    };
+    use poodle_specs::ModelConnectionSetupSpec;
+
+    run_headless(|cx| {
+        let submits = Arc::new(Mutex::new(Vec::new()));
+        let stages = Arc::new(Mutex::new(Vec::new()));
+        let submit_sink = Arc::clone(&submits);
+        let stage_sink = Arc::clone(&stages);
+        let options = model_connection_picker_fixtures()
+            .into_iter()
+            .map(|option| {
+                if option.id == "codex-app" {
+                    option
+                        .with_availability(ModelConnectionAvailability::Available, "Available")
+                        .with_disabled(false)
+                } else {
+                    option
+                }
+            })
+            .collect();
+        let mut node = poodle_render::model_connection_setup(
+            &ModelConnectionSetupSpec::new()
+                .with_options(options)
+                .with_value(Some("codex-app".to_string()))
+                .with_can_submit(true),
+            &theme(),
+            poodle_render::ModelConnectionSetupHandlers {
+                on_submit: Some(Arc::new(move |id: &str| {
+                    submit_sink.lock().unwrap().push(id.to_string())
+                })),
+                on_stage_change: Some(Arc::new(move |stage| {
+                    stage_sink.lock().unwrap().push(stage)
+                })),
+                ..poodle_render::ModelConnectionSetupHandlers::default()
+            },
+        );
+        assert!(give_first_id(
+            &mut node,
+            "setup-add",
+            &|n| matches!(&n.kind, poodle_node::NodeKind::Button { label } if label == "Add connection"),
+        ));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        driver.pointer_activate_id("setup-add");
+        assert_eq!(submits.lock().unwrap().as_slice(), ["codex-app"]);
+        assert!(
+            stages.lock().unwrap().is_empty(),
+            "a direct route skips the configure stage entirely"
+        );
+    });
+}
+
+/// The card's two dimensions stay independent through the real event tree,
+/// and closing the details region returns real backend focus to the
+/// disclosure control.
+#[test]
+fn model_connection_card_closes_and_returns_real_focus_to_the_disclosure() {
+    use poodle_headless::model_connection::ModelConnectionReadiness;
+    use poodle_specs::ModelConnectionCardSpec;
+
+    run_headless(|cx| {
+        let opens = Arc::new(Mutex::new(Vec::new()));
+        let enables = Arc::new(Mutex::new(Vec::new()));
+        let open_sink = Arc::clone(&opens);
+        let enable_sink = Arc::clone(&enables);
+        let spec = ModelConnectionCardSpec::new("conn-openai-work", "OpenAI · Work", "OpenAI")
+            .with_route_label("Responses API")
+            .with_access_summary("API key on file")
+            .with_readiness(ModelConnectionReadiness::Ready, "Ready")
+            .with_open(true);
+        let disclosure_id = spec.disclosure_id();
+        let mut node = poodle_render::model_connection_card_with_slots(
+            &spec,
+            &theme(),
+            poodle_render::ModelConnectionCardSlots {
+                details: Some(poodle_node::Node::text("Host details")),
+                ..poodle_render::ModelConnectionCardSlots::default()
+            },
+            poodle_render::ModelConnectionCardHandlers {
+                on_open_change: Some(Arc::new(move |open| open_sink.lock().unwrap().push(open))),
+                on_enabled_change: Some(Arc::new(move |enabled| {
+                    enable_sink.lock().unwrap().push(enabled)
+                })),
+                on_focus_request: Some(Arc::new(|id: &str| {
+                    // The bridge the preview uses: the component names the
+                    // destination, the backend performs the move.
+                    poodle_gpui_node_backend::request_focus(id);
+                })),
+                ..poodle_render::ModelConnectionCardHandlers::default()
+            },
+        );
+        assert!(give_first_id(
+            &mut node,
+            "card-switch",
+            &|n| n.a11y.label.as_deref() == Some("Enable OpenAI · Work"),
+        ));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        driver.pointer_activate_id(&disclosure_id);
+        assert_eq!(opens.lock().unwrap().as_slice(), [false]);
+        assert!(
+            enables.lock().unwrap().is_empty(),
+            "disclosing never touches the enable preference"
+        );
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&disclosure_id),
+            Some(true),
+            "closing returns real focus to the disclosure control"
+        );
+
+        driver.pointer_activate_id("card-switch");
+        assert_eq!(enables.lock().unwrap().as_slice(), [false]);
+        assert_eq!(
+            opens.lock().unwrap().as_slice(),
+            [false],
+            "the enable preference never touches disclosure"
+        );
+    });
+}
+
+/// The catalogue editor's keyboard reorder through the real dispatch tree:
+/// activating the handle grabs, an arrow moves the grabbed row and emits the
+/// complete shown order, and Escape cancels the grab.
+#[test]
+fn model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window() {
+    use poodle_headless::model_connection::model_catalogue_fixtures;
+    use poodle_specs::ModelCatalogueEditorSpec;
+
+    run_headless(|cx| {
+        let orders = Arc::new(Mutex::new(Vec::new()));
+        let grabs = Arc::new(Mutex::new(Vec::new()));
+        let announcements = Arc::new(Mutex::new(Vec::new()));
+
+        let build = |grabbed: Option<String>,
+                     orders: Arc<Mutex<Vec<Vec<String>>>>,
+                     grabs: Arc<Mutex<Vec<Option<String>>>>,
+                     announcements: Arc<Mutex<Vec<String>>>| {
+            let mut node = poodle_render::model_catalogue_editor(
+                &ModelCatalogueEditorSpec::new()
+                    .with_items(model_catalogue_fixtures())
+                    .with_grabbed(grabbed),
+                &theme(),
+                poodle_render::ModelCatalogueEditorHandlers {
+                    on_order_change: Some(Arc::new(move |order: &[String]| {
+                        orders.lock().unwrap().push(order.to_vec())
+                    })),
+                    on_grab_change: Some(Arc::new(move |id: Option<&str>| {
+                        grabs.lock().unwrap().push(id.map(str::to_string))
+                    })),
+                    on_announce: Some(Arc::new(move |message: &str| {
+                        announcements.lock().unwrap().push(message.to_string())
+                    })),
+                    ..poodle_render::ModelCatalogueEditorHandlers::default()
+                },
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            Arc::new(Mutex::new(node))
+        };
+
+        let handle = "model-catalogue-editor:model-beta:handle";
+        let node = build(
+            None,
+            Arc::clone(&orders),
+            Arc::clone(&grabs),
+            Arc::clone(&announcements),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        // Enter on the handle grabs the row through the backend's own
+        // activation path.
+        driver.wait_for_focus_handle(handle);
+        driver.keyboard_activate(handle);
+        assert_eq!(
+            grabs.lock().unwrap().as_slice(),
+            [Some("model-beta".to_string())]
+        );
+
+        // The host applied the grab; the next render moves on arrow keys.
+        let grabbed = build(
+            Some("model-beta".to_string()),
+            Arc::clone(&orders),
+            Arc::clone(&grabs),
+            Arc::clone(&announcements),
+        );
+        driver.mount_node(Arc::clone(&grabbed));
+        driver.wait_for_focus_handle(handle);
+        driver.keyboard_key(handle, "down");
+        assert_eq!(
+            orders.lock().unwrap().last().expect("an order").as_slice(),
+            [
+                "model-alpha".to_string(),
+                "model-gamma".to_string(),
+                "model-beta".to_string(),
+                "model-dup-a".to_string(),
+            ],
+            "the move emits the complete shown-id order"
+        );
+
+        // Escape cancels the live grab through the real key dispatch.
+        driver.keyboard_key(handle, "escape");
+        assert_eq!(grabs.lock().unwrap().last().expect("a grab"), &None);
+        assert!(announcements
+            .lock()
+            .unwrap()
+            .contains(&"Cancelled keyboard move.".to_string()));
+    });
+}
+
+/// Hiding a shown model in a mounted window emits only a visibility request
+/// and moves real backend focus to the next shown model's handle.
+///
+/// Three rows only, for the same hit-testing reason as the picker above.
+#[test]
+fn model_catalogue_editor_hide_moves_real_focus_to_the_next_shown_model() {
+    use poodle_headless::model_connection::{ModelCatalogueItem, ModelCatalogueVisibilityChange};
+    use poodle_specs::ModelCatalogueEditorSpec;
+
+    run_headless(|cx| {
+        let changes = Arc::new(Mutex::new(Vec::new()));
+        let orders = Arc::new(Mutex::new(Vec::new()));
+        let change_sink = Arc::clone(&changes);
+        let order_sink = Arc::clone(&orders);
+        let items = vec![
+            ModelCatalogueItem::new("model-alpha", "Frontier Alpha"),
+            ModelCatalogueItem::new("model-beta", "Frontier Beta"),
+            ModelCatalogueItem::new("model-gamma", "Gateway Gamma"),
+        ];
+        let mut node = poodle_render::model_catalogue_editor(
+            &ModelCatalogueEditorSpec::new().with_items(items),
+            &theme(),
+            poodle_render::ModelCatalogueEditorHandlers {
+                on_visibility_change: Some(Arc::new(
+                    move |change: &ModelCatalogueVisibilityChange| {
+                        change_sink
+                            .lock()
+                            .unwrap()
+                            .push((change.id.clone(), change.visible))
+                    },
+                )),
+                on_order_change: Some(Arc::new(move |order: &[String]| {
+                    order_sink.lock().unwrap().push(order.to_vec())
+                })),
+                on_focus_request: Some(Arc::new(|id: &str| {
+                    poodle_gpui_node_backend::request_focus(id);
+                })),
+                ..poodle_render::ModelCatalogueEditorHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        // Keyboard activation, not pointer: the mount box clips hit testing
+        // to its own 160x60 content mask, and a three-row editor is taller
+        // than that. Enter reaches the button through the real focus chain.
+        let hide = "model-catalogue-editor:model-beta:hide";
+        driver.wait_for_focus_handle(hide);
+        driver.keyboard_activate(hide);
+        assert_eq!(
+            changes.lock().unwrap().as_slice(),
+            [("model-beta".to_string(), false)]
+        );
+        assert!(
+            orders.lock().unwrap().is_empty(),
+            "hiding never reorders the catalogue"
+        );
+
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("model-catalogue-editor:model-gamma:handle"),
+            Some(true),
+            "focus follows to the next shown model"
+        );
+    });
+}
+
