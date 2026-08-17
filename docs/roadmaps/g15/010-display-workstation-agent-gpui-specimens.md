@@ -1,6 +1,6 @@
 # g15.010 — Display, Workstation & Agent GPUI Specimen Closure
 
-Status: **ready** — `g15.008`–`g15.009` accepted and merged
+Status: **complete** — PR #35 merged as `a2bf1a99`
 Depends on: `g15.001` (measured gaps); GPUI-only closure after the native
 tranches `g15.007`–`g15.009` land their families
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
@@ -23,38 +23,38 @@ ToolCallGroup
 
 ## Execution Plan
 
-- [ ] **Batch A — display & status specimens (8):** Avatar, Callout,
+- [x] **Batch A — display & status specimens (8):** Avatar, Callout,
       RemediationBanner, MetaItem, Pill, Spinner, EmptyState, StateTile
-- [ ] **Batch B — workstation specimens (2):** ActionDiscoveryPanel,
+- [x] **Batch B — workstation specimens (2):** ActionDiscoveryPanel,
       DockRegion (DockRegion may reuse the retained headless driver)
-- [ ] **Batch C — agent specimens (8):** AgentMessage, AgentPlan,
+- [x] **Batch C — agent specimens (8):** AgentMessage, AgentPlan,
       AgentPlanRecord, AgentQuestionRecord, AgentSubagent, ChangedFiles,
       ToolCall, ToolCallGroup
 
 ## Goals
 
-- [ ] One GPUI specimen per scoped component, composed from the existing
+- [x] One GPUI specimen per scoped component, composed from the existing
       `poodle-render` output through the node backend.
-- [ ] Each page is a concise teaching specimen shaped by the approved Svelte
+- [x] Each page is a concise teaching specimen shaped by the approved Svelte
       page: representative examples, honest labels, and no exhaustive
       size/density/state matrix in the primary view.
-- [ ] Focused headless cases where the specimen exercises interaction;
+- [x] Focused headless cases where the specimen exercises interaction;
       infrastructure-only proofs do not count as component evidence.
-- [ ] Interactive specimens keep state in the preview host and feed the next
+- [x] Interactive specimens keep state in the preview host and feed the next
       controlled spec. Calling a Node callback without the host update is not
       live specimen evidence.
-- [ ] DockRegion specimen may reuse the retained headless driver; no new
+- [x] DockRegion specimen may reuse the retained headless driver; no new
       shared corpus or registry beyond the generated catalogue.
 
 ## Acceptance
 
-- [ ] Every scoped component has a named GPUI specimen file in the preview
+- [x] Every scoped component has a named GPUI specimen file in the preview
       catalogue.
-- [ ] Each scoped route renders its real specimen rather than
+- [x] Each scoped route renders its real specimen rather than
       `missing_specimen`, and representative interactive routes work through
       mounted keyboard or pointer input.
-- [ ] `effigy check:gpui`, `effigy regressions:native` pass.
-- [ ] The roster's GPUI column flips to evidence-present for all 18.
+- [x] `effigy check:gpui`, `effigy regressions:native` pass.
+- [x] The roster's GPUI column flips to evidence-present for all 18.
 
 ## Stop Conditions
 

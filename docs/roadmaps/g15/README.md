@@ -1,6 +1,6 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.001`–`g15.009` and `g15.014` complete; `g15.010`
+Status: active — `g15.001`–`g15.010` and `g15.014` complete; `g15.011`
 ready next
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
@@ -61,8 +61,8 @@ and status advance are the orchestrator's.
 7. [007 — Licence family native completion](007-licence-family-native-completion.md) — complete; PR #32 closed the Licence native family and prerequisites
 8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — complete; PR #33 closed the model-connection native family
 9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md) — complete; PR #34 closed the scoped native surfaces and declared UiPresentationProvider's remaining cascade gap
-10. [010 — Display, workstation & agent GPUI specimens](010-display-workstation-agent-gpui-specimens.md) — ready next
-11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — carries `g14.026`
+10. [010 — Display, workstation & agent GPUI specimens](010-display-workstation-agent-gpui-specimens.md) — complete; PR #35 closed all 18 measured GPUI specimen gaps
+11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — ready next; carries `g14.026`
 12. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — per the `g14.022` decision; headless capture required
 13. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
 14. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after `008`–`012`
@@ -94,6 +94,6 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Prepare and dispatch `g15.010`. `g15.011`–`g15.012` follow in runway order;
+Prepare and dispatch `g15.011`. `g15.012` follows in runway order;
 `g15.013` stays blocked as the final certification gate until every earlier
 card is complete. Release mutation remains behind the explicit operator gate.

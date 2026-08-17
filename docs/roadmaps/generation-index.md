@@ -5,8 +5,8 @@ Updated: 2026-08-17
 ## Active Track
 
 - `g15`
-  - Status: active — `g15.001`–`g15.008` and `g15.014` complete;
-    `g15.009` ready next; `g15.013` final
+  - Status: active — `g15.001`–`g15.010` and `g15.014` complete;
+    `g15.011` ready next; `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `014`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured

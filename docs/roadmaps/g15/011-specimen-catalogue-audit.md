@@ -1,6 +1,6 @@
 # g15.011 — Human-Centred Specimen Catalogue Audit
 
-Status: **blocked** — `g15.010` must complete first
+Status: **ready** — `g15.010` accepted and merged
 Depends on: `g15.001` (measured roster), `g15.010` (final GPUI specimen set);
 carries forward `g14.026` with its
 rubric and bounded shared specimen-plan boundary intact

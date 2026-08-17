@@ -112,3 +112,14 @@ no `decided_at` stay distinct when the host supplies instance ids.
 
 No `*-windowed` selector, `test:native-visual`, `qa:jetstream`, or Jetstream
 selector was run.
+
+## Review and merge
+
+- PR #35 was accepted at `176f6f4f` and merged as `a2bf1a99`.
+- Review repaired backend focus collisions for repeated instances and kept
+  AgentPlanRecord identity stable across disclosure changes.
+- The operator approved the pre-v0.2 `poodle-render` handler migration; the
+  final revision removed the Callout compatibility twin and documented the
+  breaking surface and downstream recheck.
+- The final revision passed the full headless `effigy qa` board and GitHub
+  `active-cohort` on the accepted SHA.
