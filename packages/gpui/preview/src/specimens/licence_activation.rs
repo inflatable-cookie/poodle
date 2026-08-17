@@ -209,6 +209,25 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             });
         })
     })
+    .on_machine_label_commit({
+        let queue = Arc::clone(&queue);
+        Arc::new(move |_value: &str| {
+            // Commit closes the edit state (a keystroke never does).
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                key: "la-machine-editing".to_string(),
+                value: false,
+            });
+        })
+    })
+    .on_machine_label_cancel({
+        let queue = Arc::clone(&queue);
+        Arc::new(move || {
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                key: "la-machine-editing".to_string(),
+                value: false,
+            });
+        })
+    })
     .on_submit(key_submit);
 
     // Embedded account activation: host-owned account content beside the
@@ -269,6 +288,59 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(email_field)
         .child(password_field);
 
+    let account_message = state.specimens.text.get("la-account-message").cloned();
+    let embedded_route_message = file_error.clone().or(account_message.clone());
+
+    // The embedded specimen's Activate is driven by Poodle's submit: account
+    // mode fires a host-owned acquisition request against the host form
+    // state (the stand-in provider cancels, so no token is emitted), and the
+    // offline route runs the shared resolver against the selected file.
+    let embedded_submit = {
+        let queue = Arc::clone(&queue);
+        let file_b64 = file_contents_base64.clone();
+        let machine_label = machine_label.clone();
+        Arc::new(move || {
+            if route == LicenceActivationRoute::AccountToken {
+                queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                    key: "la-account-message".to_string(),
+                    value: "Account activation requested".to_string(),
+                });
+                return;
+            }
+            let draft = LicenceSubmitDraft {
+                route: LicenceActivationRoute::LicenceFile,
+                key: String::new(),
+                token: None,
+                file_contents_base64: file_b64.clone(),
+                label: machine_label.clone(),
+            };
+            match resolve_licence_submit(&draft, None) {
+                poodle_headless::licence::LicenceSubmitResolution::Emit {
+                    credential, ..
+                } => {
+                    queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                        key: "la-emitted".to_string(),
+                        value: emitted_caption(&credential),
+                    });
+                    queue
+                        .lock()
+                        .unwrap()
+                        .push(NodeSpecimenEvent::SetOptionalText {
+                            key: "la-file-error".to_string(),
+                            value: None,
+                        });
+                }
+                poodle_headless::licence::LicenceSubmitResolution::Reject { message } => {
+                    queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                        key: "la-file-error".to_string(),
+                        value: message,
+                    });
+                }
+                poodle_headless::licence::LicenceSubmitResolution::Quiet => {}
+            }
+        })
+    };
+
     let embedded = LicenceActivation::from_spec(
         LicenceActivationSpec::new()
             .with_mode(LicenceActivationMode::Account)
@@ -279,7 +351,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_machine_label_editing(machine_editing)
             .with_file_name(file_name.clone().unwrap_or_default())
             .with_file_contents_base64(file_contents_base64.clone().unwrap_or_default())
-            .with_route_message(file_error.clone()),
+            .with_route_message(embedded_route_message.clone()),
         theme,
     )
     .with_account_content(account_content)
@@ -290,6 +362,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 key: "la-offline".to_string(),
                 value: target == LicenceActivationRoute::LicenceFile,
             });
+            // Switching routes invalidates a selected or pending file read:
+            // returning offline requires a new file.
+            queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::FileInvalidate);
+            queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetOptionalText {
+                    key: "la-account-message".to_string(),
+                    value: None,
+                });
         })
     })
     .on_machine_label_edit({
@@ -313,6 +398,25 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             });
         })
     })
+    .on_machine_label_commit({
+        let queue = Arc::clone(&queue);
+        Arc::new(move |_value: &str| {
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                key: "la-machine-editing".to_string(),
+                value: false,
+            });
+        })
+    })
+    .on_machine_label_cancel({
+        let queue = Arc::clone(&queue);
+        Arc::new(move || {
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                key: "la-machine-editing".to_string(),
+                value: false,
+            });
+        })
+    })
+    .on_submit(embedded_submit)
     .on_file_browse({
         let queue = Arc::clone(&queue);
         Arc::new(move || {

@@ -40,8 +40,14 @@ pub struct LicenceActivationHandlers {
     pub on_key_change: Option<TextChangeHandler>,
     /// The segmented key's caret moved (Rust targets own the caret).
     pub on_key_selection_change: Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
-    /// The machine-name draft changed (controlled edit).
+    /// The machine-name draft changed while editing (controlled edit).
     pub on_machine_label_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// A machine-name edit was committed (Enter/blur). The host closes the
+    /// edit state and emits the trimmed label.
+    pub on_machine_label_commit: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// A machine-name edit was cancelled (Escape). The host closes the edit
+    /// state without committing.
+    pub on_machine_label_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
     /// A machine-name edit was started.
     pub on_machine_label_edit: Option<Arc<dyn Fn() + Send + Sync>>,
     /// The account/offline route switch was pressed.
@@ -310,8 +316,12 @@ fn machine_name(
         theme,
         EditableLabelHandlers {
             on_edit_start: handlers.on_machine_label_edit.clone(),
+            // Typing updates the controlled draft; commit and cancel are
+            // distinct so a host can close the edit state only on commit or
+            // escape, never on a keystroke.
             on_change: handlers.on_machine_label_change.clone(),
-            on_commit: handlers.on_machine_label_change.clone(),
+            on_commit: handlers.on_machine_label_commit.clone(),
+            on_cancel: handlers.on_machine_label_cancel.clone(),
             ..EditableLabelHandlers::default()
         },
     );
@@ -590,5 +600,152 @@ mod tests {
             "loading freezes the submit action"
         );
         assert!(submit.interaction.disabled);
+    }
+
+    /// The submit button is the defining action in every route: account
+    /// mode fires the host-owned acquisition request, and the offline route
+    /// fires the submit that the host resolves into the file credential.
+    #[test]
+    fn submit_fires_in_account_and_offline_routes() {
+        let account_submits = Arc::new(std::sync::Mutex::new(0usize));
+        let sink = Arc::clone(&account_submits);
+        let account = LicenceActivationSpec::new()
+            .with_mode(LicenceActivationMode::Account)
+            .with_machine_label(Some("Studio Mac".to_string()));
+        let node = licence_activation_with_slots(
+            &account,
+            &theme(),
+            Some(Node::text("host login form")),
+            LicenceActivationHandlers {
+                on_submit: Some(Arc::new(move || {
+                    *sink.lock().unwrap() += 1;
+                })),
+                ..LicenceActivationHandlers::default()
+            },
+        );
+        let submit = node
+            .find(&|n| {
+                matches!(&n.kind, poodle_node::NodeKind::Button { label } if label == "Continue with account")
+            })
+            .expect("the account submit button");
+        (submit.interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(*account_submits.lock().unwrap(), 1, "account submit fires");
+
+        let offline_submits = Arc::new(std::sync::Mutex::new(0usize));
+        let sink = Arc::clone(&offline_submits);
+        let offline = LicenceActivationSpec::new()
+            .with_mode(LicenceActivationMode::Account)
+            .with_route(LicenceActivationRoute::LicenceFile)
+            .with_file("machine.lic", "c3R1ZmY=");
+        let node = licence_activation(
+            &offline,
+            &theme(),
+            LicenceActivationHandlers {
+                on_submit: Some(Arc::new(move || {
+                    *sink.lock().unwrap() += 1;
+                })),
+                ..LicenceActivationHandlers::default()
+            },
+        );
+        let submit = node
+            .find(&|n| {
+                matches!(&n.kind, poodle_node::NodeKind::Button { label } if label == "Activate")
+            })
+            .expect("the offline submit button");
+        (submit.interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(*offline_submits.lock().unwrap(), 1, "offline submit fires");
+    }
+
+    /// Machine-name typing updates the controlled draft; commit and cancel
+    /// are distinct so the host can close the edit state only on commit or
+    /// escape, never on a keystroke.
+    #[test]
+    fn machine_label_change_commit_and_cancel_are_distinct() {
+        let events = Arc::new(std::sync::Mutex::new(Vec::new()));
+        let sink = Arc::clone(&events);
+        let spec = LicenceActivationSpec::new()
+            .with_mode(LicenceActivationMode::Key)
+            .with_machine_label(Some("rig".to_string()))
+            .with_machine_label_editing(true);
+        let node = licence_activation(
+            &spec,
+            &theme(),
+            LicenceActivationHandlers {
+                on_machine_label_change: Some({
+                    let sink = Arc::clone(&events);
+                    Arc::new(move |value: &str| {
+                        sink.lock().unwrap().push(format!("change:{value}"))
+                    })
+                }),
+                on_machine_label_commit: Some({
+                    let sink = Arc::clone(&events);
+                    Arc::new(move |value: &str| {
+                        sink.lock().unwrap().push(format!("commit:{value}"))
+                    })
+                }),
+                on_machine_label_cancel: Some({
+                    let sink = Arc::clone(&events);
+                    Arc::new(move || {
+                        sink.lock().unwrap().push("cancel".to_string())
+                    })
+                }),
+                ..LicenceActivationHandlers::default()
+            },
+        );
+        // The editing input carries the three channels separately.
+        let input = node
+            .find(&|n| n.interaction.on_text_change.is_some())
+            .expect("the editing input");
+        (input.interaction.on_text_change.as_ref().unwrap())("rig-2");
+        assert_eq!(events.lock().unwrap().as_slice(), ["change:rig-2"], "typing is a change");
+        // The host re-renders with the committed draft, then commit fires
+        // with that value — distinct from the change channel.
+        let node = licence_activation(
+            &spec.clone().with_machine_label(Some("rig-2".to_string())),
+            &theme(),
+            LicenceActivationHandlers {
+                on_machine_label_change: Some({
+                    let sink = Arc::clone(&events);
+                    Arc::new(move |value: &str| {
+                        sink.lock().unwrap().push(format!("change:{value}"))
+                    })
+                }),
+                on_machine_label_commit: Some({
+                    let sink = Arc::clone(&events);
+                    Arc::new(move |value: &str| {
+                        sink.lock().unwrap().push(format!("commit:{value}"))
+                    })
+                }),
+                ..LicenceActivationHandlers::default()
+            },
+        );
+        let input = node
+            .find(&|n| n.interaction.on_text_change.is_some())
+            .expect("the editing input");
+        (input.interaction.on_submit.as_ref().expect("commit via submit"))();
+        assert_eq!(
+            events.lock().unwrap().as_slice(),
+            ["change:rig-2", "commit:rig-2"],
+            "typing and commit are distinct, in order"
+        );
+
+        // Cancel is its own channel and closes the edit without committing.
+        let events = Arc::new(std::sync::Mutex::new(Vec::new()));
+        let sink = Arc::clone(&events);
+        let node = licence_activation(
+            &spec,
+            &theme(),
+            LicenceActivationHandlers {
+                on_machine_label_cancel: Some(Arc::new(move || {
+                    sink.lock().unwrap().push("cancel".to_string())
+                })),
+                ..LicenceActivationHandlers::default()
+            },
+        );
+        let input = node
+            .find(&|n| n.interaction.on_cancel.is_some())
+            .expect("the editing input");
+        (input.interaction.on_cancel.as_ref().unwrap())();
+        assert_eq!(events.lock().unwrap().as_slice(), ["cancel"]);
     }
 }

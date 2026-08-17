@@ -862,3 +862,105 @@ fn licence_status_renders_state_and_authority_reads_in_a_mounted_window() {
         );
     });
 }
+
+/// LicenceActivation's account-mode submit is the defining action: pressing
+/// the Activate button through the real dispatch tree fires the host-owned
+/// acquisition request (the specimen's provider then cancels).
+#[test]
+fn licence_activation_account_submit_fires_through_the_real_tree() {
+    use poodle_headless::licence::LicenceActivationMode;
+    use poodle_specs::LicenceActivationSpec;
+
+    run_headless(|cx| {
+        let submits = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&submits);
+        let mut node = poodle_render::licence_activation_with_slots(
+            &LicenceActivationSpec::new()
+                .with_mode(LicenceActivationMode::Account)
+                .with_machine_label(Some("Studio Mac".to_string())),
+            &theme(),
+            Some(Node::text("host login form")),
+            poodle_render::LicenceActivationHandlers {
+                on_submit: Some(Arc::new(move || {
+                    *sink.lock().unwrap() += 1;
+                })),
+                ..poodle_render::LicenceActivationHandlers::default()
+            },
+        );
+        // The account-view submit carries the default copy; the header route
+        // switch is a different button, so target the submit by its label.
+        assert!(give_first_id(
+            &mut node,
+            "la-account-submit",
+            &|n| matches!(&n.kind, poodle_node::NodeKind::Button { label } if label == "Continue with account"),
+        ));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, node);
+
+        driver.keyboard_activate("la-account-submit");
+        assert_eq!(
+            *submits.lock().unwrap(),
+            1,
+            "the account Activate button fires the host request"
+        );
+    });
+}
+
+/// The OS pick lifecycle is completion-driven: a dialog result that arrives
+/// **after the first frame** is picked up by the awaited task and lands —
+/// it never waits on a poll or an unrelated repaint.
+#[test]
+fn a_file_pick_result_lands_after_the_receiver_completes() {
+    use poodle_gpui_node_backend::file_capability::{
+        FilePickOutcome, SingleFilePickSpec, resolve_os_selection,
+    };
+
+    run_headless(|cx| {
+        let dir = std::env::temp_dir().join(format!("poodle-async-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("temp dir");
+        let path = dir.join("machine.lic");
+        std::fs::write(&path, b"async payload").expect("fixture file");
+        let (sender, receiver) = futures::channel::oneshot::channel();
+        let spec = SingleFilePickSpec {
+            prompt: "Choose a licence file".to_string(),
+            accept: Some(".lic".to_string()),
+            max_size: None,
+        };
+        let landed = Arc::new(Mutex::new(None));
+        let sink = Arc::clone(&landed);
+        cx.update(|app: &mut gpui::App| {
+            app.spawn(async move |_app: &mut gpui::AsyncApp| {
+                let selection = receiver.await.unwrap_or(Ok(None));
+                let outcome = resolve_os_selection(selection, &spec);
+                *sink.lock().unwrap() = Some(outcome);
+            })
+            .detach();
+        });
+
+        // First frame: the dialog is still open, nothing has completed.
+        cx.run_until_parked();
+        assert!(
+            landed.lock().unwrap().is_none(),
+            "no result before the dialog completes"
+        );
+
+        // The dialog completes after the first frame; the awaited task is
+        // what drives the delivery.
+        let _ = sender.send(Ok(Some(vec![path.clone()])));
+        cx.run_until_parked();
+        std::fs::remove_dir_all(&dir).ok();
+        let outcome = landed
+            .lock()
+            .unwrap()
+            .clone()
+            .expect("the completed pick landed after the first frame");
+        assert_eq!(
+            outcome,
+            FilePickOutcome::Selected {
+                name: "machine.lic".to_string(),
+                contents_base64: poodle_headless::file_upload::base64_encode(b"async payload"),
+            }
+        );
+    });
+}

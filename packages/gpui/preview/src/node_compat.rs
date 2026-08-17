@@ -3807,6 +3807,19 @@ impl LicenceActivation {
         self
     }
 
+    pub(crate) fn on_machine_label_commit(
+        mut self,
+        handler: Arc<dyn Fn(&str) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_machine_label_commit = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_machine_label_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_machine_label_cancel = Some(handler);
+        self
+    }
+
     pub(crate) fn on_machine_label_edit(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
         self.handlers.on_machine_label_edit = Some(handler);
         self
