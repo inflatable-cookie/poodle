@@ -67,3 +67,7 @@ path = "tests/headless_regressions.rs"
 # dev-dependency so ordinary builds and the preview bin never pull it in.
 [dev-dependencies]
 gpui = { version = "0.2.2", features = ["test-support"] }
+# The async file-pick lifecycle regression constructs an OS-prompt oneshot
+# receiver directly and completes it after the first frame (g15.007). Already
+# in the graph as gpui's own dependency.
+futures = "0.3"

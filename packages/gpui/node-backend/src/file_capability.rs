@@ -4,9 +4,11 @@
 //! node activation; what happens next is a runtime-owned capability. This
 //! module is that capability for GPUI, and it is deliberately generic:
 //!
-//! - The live adapter opens the real OS path prompt
-//!   ([`OsFilePrompt::start`] → `App::prompt_for_paths`), reads the selected
-//!   file, and runs the shared post-selection pipeline.
+//! - The live adapter opens the real OS path prompt (`App::prompt_for_paths`),
+//!   **awaits** its oneshot receiver in a GPUI task (completion-driven — a
+//!   dialog result schedules the render that consumes it, never a poll), reads
+//!   the selected file, and runs the shared post-selection pipeline
+//!   ([`resolve_os_selection`] → [`finish_file_pick`]).
 //! - Headless evidence injects fixture paths/bytes through the same
 //!   [`SingleFileSource`] seam and the same [`finish_file_pick`] pipeline —
 //!   a static filename or a prefilled credential is never proof.
@@ -17,8 +19,6 @@
 //! as OS-filtered.
 
 use std::path::PathBuf;
-
-use gpui::App;
 
 use poodle_headless::file_upload::validate_upload_file;
 
@@ -58,74 +58,56 @@ pub enum FilePickOutcome {
     Failed(String),
 }
 
-/// Where one file pick comes from. The OS source owns the modal prompt and
-/// its asynchronous receiver; headless evidence injects fixture bytes through
-/// this same trait.
-pub trait SingleFileSource {
-    /// Continue the pick. `None` means still pending — poll again on a later
-    /// frame. `Some(Ok(Some(file)))`, `Some(Ok(None))` (cancelled), and
-    /// `Some(Err(..))` (read failed) resolve it.
-    fn poll(&mut self) -> Option<Result<Option<PickedFile>, String>>;
-}
-
-/// The live source: GPUI's OS path prompt plus the file read.
+/// The OS path prompt options for a single file.
 ///
-/// `App::prompt_for_paths` returns a oneshot receiver immediately and the
-/// platform delivers asynchronously, so [`Self::start`] begins the prompt and
-/// later polls try the receiver. The test platform does not implement the
-/// prompt, so headless evidence never routes through this source.
-pub struct OsFilePrompt {
-    receiver: futures::channel::oneshot::Receiver<anyhow::Result<Option<Vec<PathBuf>>>>,
-}
-
-impl OsFilePrompt {
-    /// Open the OS path prompt for one file and return the source that will
-    /// resolve it. Call with the app context (a render frame has one); poll
-    /// from later frames.
-    pub fn start(cx: &mut App, spec: &SingleFilePickSpec) -> Self {
-        let options = gpui::PathPromptOptions {
-            files: true,
-            directories: false,
-            multiple: false,
-            prompt: Some(spec.prompt.clone().into()),
-        };
-        Self {
-            receiver: cx.prompt_for_paths(options),
-        }
+/// `prompt_for_paths` hands back a oneshot receiver; the caller **awaits** it
+/// in a GPUI task so completion drives the render (see the preview's
+/// `AppState::start_file_picks`). Polling the receiver is deliberately not
+/// provided here: `try_recv` has no wakeup, so a dialog result would otherwise
+/// sit until an unrelated repaint.
+pub fn os_pick_options(spec: &SingleFilePickSpec) -> gpui::PathPromptOptions {
+    gpui::PathPromptOptions {
+        files: true,
+        directories: false,
+        multiple: false,
+        prompt: Some(spec.prompt.clone().into()),
     }
 }
 
-impl SingleFileSource for OsFilePrompt {
-    fn poll(&mut self) -> Option<Result<Option<PickedFile>, String>> {
-        let payload = match self.receiver.try_recv() {
-            // Receiver still parked: the dialog is open.
-            Err(_) => return None,
-            Ok(payload) => payload,
-        };
-        let selection = payload?;
-        let paths = match selection {
-            Ok(paths) => paths,
-            Err(error) => return Some(Err(error.to_string())),
-        };
-        let Some(paths) = paths else {
-            return Some(Ok(None));
-        };
-        let Some(path) = paths.into_iter().next() else {
-            return Some(Ok(None));
-        };
-        let name = path
-            .file_name()
-            .map(|n| n.to_string_lossy().into_owned())
-            .unwrap_or_else(|| path.display().to_string());
-        match std::fs::read(&path) {
-            Ok(bytes) => Some(Ok(Some(PickedFile { path, name, bytes }))),
-            Err(error) => Some(Err(error.to_string())),
-        }
+/// Resolve a completed OS selection into a pick outcome: first path, read,
+/// then the shared accept/size/base64 pipeline.
+///
+/// The payload is what `App::prompt_for_paths`'s receiver carries —
+/// `Ok(Some(paths))` selected, `Ok(None)` cancelled (the sender was dropped
+/// with nothing), `Err(..)` a platform failure. Called from the awaited task,
+/// and unit-tested with real temporary files so the live read path is
+/// exercised, not just the injected one.
+pub fn resolve_os_selection(
+    selection: anyhow::Result<Option<Vec<PathBuf>>>,
+    spec: &SingleFilePickSpec,
+) -> FilePickOutcome {
+    let Some(paths) = selection.map_err(|error| error.to_string()).ok() else {
+        return FilePickOutcome::Failed("The file dialog could not be opened.".to_string());
+    };
+    let Some(paths) = paths else {
+        return FilePickOutcome::Cancelled;
+    };
+    let Some(path) = paths.into_iter().next() else {
+        return FilePickOutcome::Cancelled;
+    };
+    let name = path
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_else(|| path.display().to_string());
+    match std::fs::read(&path) {
+        Ok(bytes) => finish_file_pick(PickedFile { path, name, bytes }, spec),
+        Err(error) => FilePickOutcome::Failed(error.to_string()),
     }
 }
 
 /// Injected source for headless evidence and hosts that supply fixture
-/// selection/bytes — the same seam the OS prompt uses, minus the dialog.
+/// selection/bytes — the same post-selection seam the OS prompt uses, minus
+/// the dialog and its async lifecycle.
 pub struct InjectedFileSource {
     file: Result<Option<PickedFile>, String>,
 }
@@ -134,6 +116,11 @@ impl InjectedFileSource {
     pub fn new(file: Result<Option<PickedFile>, String>) -> Self {
         Self { file }
     }
+}
+
+/// Where a *synchronous* pick outcome comes from, for headless evidence.
+pub trait SingleFileSource {
+    fn poll(&mut self) -> Option<Result<Option<PickedFile>, String>>;
 }
 
 impl SingleFileSource for InjectedFileSource {
@@ -247,5 +234,50 @@ mod tests {
             source.poll().expect("resolved").expect_err("errored"),
             "no such file"
         );
+    }
+
+    /// The live OS resolution reads a real file through the same pipeline as
+    /// the injected seam — this exercises the read path the synchronous
+    /// fixtures bypass.
+    #[test]
+    fn os_selection_reads_a_real_file_through_the_seam() {
+        let dir = std::env::temp_dir().join(format!("poodle-pick-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("temp dir");
+        let path = dir.join("machine.lic");
+        std::fs::write(&path, b"live payload").expect("fixture file");
+        let outcome = resolve_os_selection(Ok(Some(vec![path.clone()])), &spec());
+        std::fs::remove_dir_all(&dir).ok();
+        assert_eq!(
+            outcome,
+            FilePickOutcome::Selected {
+                name: "machine.lic".to_string(),
+                contents_base64: poodle_headless::file_upload::base64_encode(b"live payload"),
+            }
+        );
+    }
+
+    /// `Ok(None)` — the sender dropped without a selection — is a
+    /// cancellation, not a pending dialog.
+    #[test]
+    fn os_selection_cancellation_is_not_pending() {
+        assert_eq!(resolve_os_selection(Ok(None), &spec()), FilePickOutcome::Cancelled);
+        assert_eq!(
+            resolve_os_selection(Ok(Some(vec![])), &spec()),
+            FilePickOutcome::Cancelled
+        );
+    }
+
+    /// A platform error and an unreadable path both report honestly.
+    #[test]
+    fn os_selection_failures_are_reported() {
+        assert!(matches!(
+            resolve_os_selection(Err(anyhow::anyhow!("picker failed")), &spec()),
+            FilePickOutcome::Failed(_)
+        ));
+        let missing = std::env::temp_dir().join("poodle-pick-missing.lic");
+        assert!(matches!(
+            resolve_os_selection(Ok(Some(vec![missing])), &spec()),
+            FilePickOutcome::Failed(_)
+        ));
     }
 }

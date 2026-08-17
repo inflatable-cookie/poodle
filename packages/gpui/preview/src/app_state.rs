@@ -5,9 +5,7 @@
 
 use gpui::App;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_gpui_node_backend::file_capability::{
-    finish_file_pick, FilePickOutcome, OsFilePrompt, SingleFilePickSpec, SingleFileSource,
-};
+use poodle_gpui_node_backend::file_capability::{FilePickOutcome, SingleFilePickSpec};
 use poodle_headless::licence::LicenceSeat;
 use poodle_specs::{reorder_nodes, DropPosition, TreeNode};
 use std::collections::HashMap;
@@ -535,30 +533,26 @@ pub enum NodeSpecimenEvent {
     /// gets its own event rather than a dozen flat variants.
     Tree(TreeEvent),
     /// The generic single-file browse seam reported a request (g15.007). The
-    /// host starts the OS prompt on its next frame and applies the outcome to
-    /// the specimen keys below.
+    /// host opens the OS prompt on its next frame and awaits the result; the
+    /// outcome lands in the specimen keys below.
     FileBrowse {
         key: String,
         spec: SingleFilePickSpec,
     },
+    /// A route/mode change invalidated a selected or pending file read: the
+    /// completed bytes are cleared and in-flight/pending outcomes are made
+    /// stale by generation so they can never land.
+    FileInvalidate,
     /// A LicenceSeats interaction.
     LicenceSeats(LicenceSeatsEvent),
 }
 
-/// One requested single-file pick, waiting for the host to start its prompt.
+/// One requested single-file pick, waiting for the host to open its prompt.
 pub struct FilePickRequest {
     /// Specimen-state key prefix; the resolved outcome lands in
     /// `{key}-name`, `{key}-base64`, and `{key}-error`.
     pub key: String,
     pub spec: SingleFilePickSpec,
-}
-
-/// An in-flight pick whose OS prompt has been started.
-pub struct ActiveFilePick {
-    pub key: String,
-    /// The request's own configuration, reused for the post-selection rules.
-    pub spec: SingleFilePickSpec,
-    pub source: Box<dyn SingleFileSource>,
 }
 
 /// State changes the node-backed Tree specimen can request.
@@ -697,11 +691,17 @@ pub struct AppState {
     pub tree: TreePreviewState,
     /// LicenceSeats specimen host state.
     pub licence_seats: LicencePreviewState,
-    /// Single-file picks requested through the generic browse seam but whose
-    /// OS prompt has not been started yet.
+    /// Single-file picks requested through the generic browse seam whose OS
+    /// prompt has not been opened yet.
     pub pending_file_picks: Vec<FilePickRequest>,
-    /// Picks whose prompt is open; polled each frame until resolved.
-    pub active_file_picks: Vec<ActiveFilePick>,
+    /// Every key with a pick whose prompt was opened (completed or in
+    /// flight). An invalidation clears these keys' specimen state.
+    pub active_file_keys: Vec<String>,
+    /// Bumped whenever a route/mode change invalidates a file read. A pick
+    /// task captures the generation at spawn and only lands its outcome while
+    /// it still matches — a stale result can never repopulate a route the
+    /// operator left.
+    pub file_generation: u64,
 }
 
 impl AppState {
@@ -736,7 +736,8 @@ impl AppState {
             tree: TreePreviewState::new(),
             licence_seats: LicencePreviewState::mixed(),
             pending_file_picks: Vec::new(),
-            active_file_picks: Vec::new(),
+            active_file_keys: Vec::new(),
+            file_generation: 0,
         }
     }
 
@@ -862,9 +863,12 @@ impl AppState {
                     }
                 },
                 NodeSpecimenEvent::FileBrowse { key, spec } => {
-                    // Started on the next frame by `poll_file_picks`, which
-                    // owns the app context the OS prompt needs.
+                    // The OS prompt opens on the next frame via
+                    // `start_file_picks`, which owns the app context.
                     self.pending_file_picks.push(FilePickRequest { key, spec });
+                }
+                NodeSpecimenEvent::FileInvalidate => {
+                    self.invalidate_file_picks();
                 }
                 NodeSpecimenEvent::LicenceSeats(event) => match event {
                     LicenceSeatsEvent::Rename { machine_id, label } => {
@@ -924,42 +928,81 @@ impl AppState {
         self.rebuild_theme();
     }
 
-    /// Start and resolve the generic single-file picks (g15.007).
+    /// Invalidate every selected or pending file read (route/mode change).
     ///
-    /// Pending requests get their OS prompt started (this needs the app
-    /// context, which only a frame has); active prompts are polled, and a
-    /// resolved pick runs the shared post-selection pipeline before landing
-    /// in specimen state as `{key}-name` / `{key}-base64` / `{key}-error`.
-    /// Returns whether specimen content changed.
-    pub fn poll_file_picks(&mut self, cx: &mut App) -> bool {
-        let started = std::mem::take(&mut self.pending_file_picks);
-        for request in started {
-            self.active_file_picks.push(ActiveFilePick {
-                key: request.key,
-                spec: request.spec.clone(),
-                source: Box::new(OsFilePrompt::start(cx, &request.spec)),
-            });
+    /// Bumps the pick generation so an in-flight OS dialog that resolves
+    /// later is stale and cannot land; clears the completed bytes for every
+    /// key that had a pick, and drops pending requests (they capture a stale
+    /// generation when started). Mirrors the contract: returning offline
+    /// requires a new file.
+    pub fn invalidate_file_picks(&mut self) {
+        self.file_generation += 1;
+        self.pending_file_picks.clear();
+        for key in std::mem::take(&mut self.active_file_keys) {
+            self.specimens.text.remove(&format!("{key}-name"));
+            self.specimens.text.remove(&format!("{key}-base64"));
+            self.specimens.text.remove(&format!("{key}-error"));
         }
-        let mut changed = false;
-        let mut resolved = Vec::new();
-        for (index, active) in self.active_file_picks.iter_mut().enumerate() {
-            let Some(result) = active.source.poll() else {
-                continue;
-            };
-            resolved.push(index);
-            let key = active.key.clone();
-            let spec = active.spec.clone();
-            let outcome = match result {
-                Ok(Some(file)) => finish_file_pick(file, &spec),
-                Ok(None) => FilePickOutcome::Cancelled,
-                Err(message) => FilePickOutcome::Failed(message),
-            };
-            changed |= apply_file_pick_outcome(&mut self.specimens, &key, &outcome);
+    }
+
+    /// Open the OS prompts for every pending pick (g15.007).
+    ///
+    /// Each prompt's oneshot receiver is **awaited** in a GPUI task — dialog
+    /// completion itself schedules the render that consumes it, so a result
+    /// never waits on an unrelated repaint. The outcome runs the shared
+    /// post-selection pipeline and lands in specimen state as
+    /// `{key}-name` / `{key}-base64` / `{key}-error`, guarded by the
+    /// generation captured at spawn: a route change after the dialog opened
+    /// makes the result stale and it is dropped.
+    pub fn start_file_picks(
+        &mut self,
+        window: &mut gpui::Window,
+        cx: &mut App,
+        root: &gpui::WeakEntity<crate::PreviewRoot>,
+    ) {
+        let pending = std::mem::take(&mut self.pending_file_picks);
+        for request in pending {
+            let options = poodle_gpui_node_backend::file_capability::os_pick_options(&request.spec);
+            let receiver = cx.prompt_for_paths(options);
+            self.active_file_keys.push(request.key.clone());
+            let generation = self.file_generation;
+            let key = request.key.clone();
+            let spec = request.spec.clone();
+            let root = root.clone();
+            window.spawn(cx, async move |cx| {
+                // The platform delivers asynchronously; awaiting is what
+                // drives the completion (never a poll).
+                let selection = match receiver.await {
+                    Ok(selection) => selection,
+                    // The sender dropped without a selection: cancelled.
+                    Err(_) => Ok(None),
+                };
+                let outcome =
+                    poodle_gpui_node_backend::file_capability::resolve_os_selection(
+                        selection,
+                        &spec,
+                    );
+                cx.update(|_window, cx| {
+                    root.update(cx, |this, cx| {
+                        this.state.apply_pick_outcome(&key, generation, &outcome);
+                        cx.notify();
+                    })
+                    .ok();
+                })
+                .ok();
+            })
+            .detach();
         }
-        for index in resolved.into_iter().rev() {
-            self.active_file_picks.remove(index);
+    }
+
+    /// Apply a resolved pick outcome, but only while it belongs to the
+    /// current route. A stale generation (the operator switched away after
+    /// the dialog opened) drops the outcome entirely.
+    pub fn apply_pick_outcome(&mut self, key: &str, generation: u64, outcome: &FilePickOutcome) {
+        if generation != self.file_generation {
+            return;
         }
-        changed
+        apply_file_pick_outcome(&mut self.specimens, key, outcome);
     }
 
     /// Rebuild the theme provider from the current preset, density, and control size.
@@ -972,5 +1015,111 @@ impl AppState {
         theme = theme.with_control_size(self.control_size.token_definition());
         theme = theme.with_contrast(self.contrast);
         self.theme = theme;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_gpui_node_backend::file_capability::FilePickOutcome;
+
+    fn request(key: &str) -> NodeSpecimenEvent {
+        NodeSpecimenEvent::FileBrowse {
+            key: key.to_string(),
+            spec: SingleFilePickSpec {
+                prompt: "Choose a licence file".to_string(),
+                accept: Some(".licence".to_string()),
+                max_size: None,
+            },
+        }
+    }
+
+    fn selected(name: &str) -> FilePickOutcome {
+        FilePickOutcome::Selected {
+            name: name.to_string(),
+            contents_base64: "c3R1ZmY=".to_string(),
+        }
+    }
+
+    /// A completed pick lands under the current generation; a route change
+    /// invalidates the bytes AND makes a late outcome stale by generation so
+    /// it can never repopulate a route the operator left.
+    #[test]
+    fn a_route_change_invalidates_file_state_and_stales_late_outcomes() {
+        let mut state = AppState::new();
+        // The operator selected a file; the task applies it.
+        state
+            .specimens
+            .text
+            .insert("la-file-name".to_string(), "machine.lic".to_string());
+        state
+            .specimens
+            .text
+            .insert("la-file-base64".to_string(), "c3R1ZmY=".to_string());
+        state.active_file_keys.push("la-file".to_string());
+        let generation = state.file_generation;
+        assert_eq!(
+            state.apply_pick_outcome("la-file", generation, &selected("machine.lic")),
+            (),
+        );
+
+        // Switching away from offline invalidates the read: completed bytes
+        // are cleared and the generation bumps.
+        let mut events = Vec::new();
+        events.push(NodeSpecimenEvent::FileInvalidate);
+        state.drain_node_events_into(&mut events);
+        assert!(state
+            .specimens
+            .text
+            .get("la-file-base64")
+            .is_none(), "bytes cleared on route change");
+        assert!(state.specimens.text.get("la-file-name").is_none());
+        assert!(state.file_generation > generation, "generation bumped");
+
+        // The in-flight dialog resolves later with the old generation: stale,
+        // so it cannot land.
+        state.apply_pick_outcome("la-file", generation, &selected("machine.lic"));
+        assert!(
+            state.specimens.text.get("la-file-base64").is_none(),
+            "a late outcome after the route change must not land"
+        );
+
+        // A fresh pick with the current generation does land.
+        state.apply_pick_outcome(
+            "la-file",
+            state.file_generation,
+            &selected("machine.lic"),
+        );
+        assert_eq!(
+            state.specimens.text.get("la-file-name").map(String::as_str),
+            Some("machine.lic")
+        );
+    }
+
+    /// A pending request is dropped by invalidation and a later resolution
+    /// for it is stale.
+    #[test]
+    fn a_pending_pick_is_dropped_by_route_change() {
+        let mut state = AppState::new();
+        let mut events = vec![request("la-file")];
+        state.drain_node_events_into(&mut events);
+        assert_eq!(state.pending_file_picks.len(), 1);
+
+        let mut events = vec![NodeSpecimenEvent::FileInvalidate];
+        state.drain_node_events_into(&mut events);
+        assert!(
+            state.pending_file_picks.is_empty(),
+            "pending requests are dropped on route change"
+        );
+    }
+
+    impl AppState {
+        fn drain_node_events_into(&mut self, events: &mut Vec<NodeSpecimenEvent>) {
+            self.node_events
+                .lock()
+                .unwrap()
+                .extend(events.drain(..));
+            self.drain_node_events();
+        }
     }
 }

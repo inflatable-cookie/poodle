@@ -385,12 +385,12 @@ impl Render for PreviewRoot {
         if specimen_changed {
             self.component_page_list.reset(3);
         }
-        // Start and resolve the generic single-file picks (g15.007): pending
-        // requests open their OS prompt here, active prompts are polled, and
-        // resolved outcomes land in specimen state for the next frame.
-        if self.state.poll_file_picks(cx) {
-            self.component_page_list.reset(3);
-        }
+        // Open the OS prompts for any pending single-file picks and await
+        // them in tasks (g15.007): dialog completion drives the render, and
+        // a route change makes a late result stale so it cannot land.
+        let root_weak = cx.entity().downgrade();
+        self.state
+            .start_file_picks(window, cx, &root_weak);
         // Restart the backend's generated-id counter so a node that declares no
         // id keeps the same ElementId between frames. gpui keys a click's
         // pending mouse-down by element id, and a real click spans frames.
