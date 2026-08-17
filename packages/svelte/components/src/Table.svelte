@@ -30,10 +30,14 @@
   const rowHeaderColumnId = $derived(
     columns.find((column) => column.isRowHeader)?.id ?? columns[0]?.id ?? null,
   );
+  // `ariaLabel` is the fallback name, not an override: a visible <caption>
+  // already names the table, and aria-label would silently outrank the text
+  // the reader can see.
+  const resolvedAriaLabel = $derived(caption ? undefined : (ariaLabel ?? undefined));
 </script>
 
-<div class="poodle-table-shell" data-size={resolvedSize} data-density={resolvedDensity} aria-label={ariaLabel ?? undefined}>
-  <table class="poodle-table">
+<div class="poodle-table-shell" data-size={resolvedSize} data-density={resolvedDensity}>
+  <table class="poodle-table" aria-label={resolvedAriaLabel}>
     {#if caption}
       <caption class="poodle-table__caption">{caption}</caption>
     {/if}

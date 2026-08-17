@@ -767,3 +767,31 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   disabled trigger reports focused on both GPUI and happy-dom; the observers
   treat disabled parts as unfocused on both runtimes (browser semantics),
   which is what keeps the cross-runtime comparison green.
+
+- 2026-08-17 — g15.005 (workstation & agent evidence) found that **no repo
+  selector typechecks React test files.** `effigy react:build` builds
+  `packages/react/preview` only, and there is no `check:react` counterpart to
+  `check:svelte`; `packages/react/components` has no `tsconfig.json`. The
+  ToolCallGroup fixtures in this card were missing the required
+  `TranscriptToolCall` discriminant on both sides — `check:svelte` caught the
+  Svelte copy and nothing caught the React copy. The React fixtures were fixed
+  by hand off the Svelte error. A React typecheck gate would have caught both,
+  and would also have caught the JSX-attribute `\n` fixture bug in the same
+  tranche (a string attribute keeps `\n` literal, so the whole markdown fixture
+  collapsed to one line and the assertion measured nothing). Recording the gap
+  rather than inventing a gate here: adding one is a board-health change, not
+  component evidence.
+
+- 2026-08-17 — g15.005 review found a second unguarded seam: **nothing checks
+  that a React component imports its shared stylesheet.** The React
+  `UiPresentationProvider` rendered the contract-required
+  `.poodle-ui-presentation-provider` wrapper without importing
+  `@inflatable-cookie/poodle-core/styles/ui-presentation-provider.css`, which
+  is the only definition of the `display: contents` that makes the wrapper
+  layout-neutral. Component tests cannot catch this: the vitest DOM loads no
+  stylesheets at all (`document.styleSheets.length === 0`, computed `display`
+  is `block` even for the Svelte reference, which does import it), so the
+  neutrality requirement is only assertable through the class hook and the
+  absence of ARIA. A per-component check that every `.poodle-<name>` root's
+  module imports the matching `styles/<name>.css` would close this; it is
+  board health, not component evidence, so it is recorded rather than built.

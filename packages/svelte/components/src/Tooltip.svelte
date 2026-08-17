@@ -54,14 +54,52 @@
   const isControlled = $derived(open !== null);
   const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
 
+  let anchorResolved = $state(false);
+
+  // The anchor is normally established by hover/focus. A tooltip shown through
+  // `open`/`defaultOpen` never ran ENTER, so the machine sits in "closed" and
+  // the first-child anchor stays unresolved — the bubble renders but nothing
+  // is announced and Escape is inert. Resolve the default anchor once so a
+  // forced-open surface behaves exactly like a hovered one.
+  $effect(() => {
+    if (!isOpen || anchorResolved) {
+      return;
+    }
+
+    const anchor = getDefaultAnchor();
+    if (anchor) {
+      triggerElement = anchor;
+      anchorResolved = true;
+    }
+  });
+
   $effect(() => {
     if (isOpen && triggerElement) {
       // Announced only while shown: a stale describedby outlives the bubble.
       triggerElement.setAttribute("aria-describedby", tooltipId);
+    } else if (triggerElement) {
+      triggerElement.removeAttribute("aria-describedby");
     }
   });
 
   let machineState: HoverState = "closed";
+  let syncedOpen = false;
+
+  // Keep the machine level with the surface. A tooltip shown or hidden through
+  // `open`/`defaultOpen` never ran ENTER or LEAVE, so without this sync the
+  // machine holds a stale state in both directions: DISMISS from "closed" is
+  // inert, so Escape leaves a forced-open tooltip stuck with no close reported;
+  // and after a controlled true -> false the machine stays "open", so the next
+  // ENTER takes the already-open branch and hover or focus can never reopen it.
+  // SET_OPEN emits no change of its own, so syncing never echoes back to a host.
+  $effect(() => {
+    if (isOpen === syncedOpen) {
+      return;
+    }
+
+    syncedOpen = isOpen;
+    send({ type: "SET_OPEN", open: isOpen });
+  });
 
   function send(event: HoverMachineEvent): void {
     const result = hoverTransition(machineState, { openDelayMs: delayMs, closeDelayMs: 0 }, event);

@@ -28,10 +28,14 @@ export function Table({
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
   const rowHeaderColumnId = columns.find((column) => column.isRowHeader)?.id ?? columns[0]?.id ?? null;
+  // `ariaLabel` is the fallback name, not an override: a visible <caption>
+  // already names the table, and aria-label would silently outrank the text
+  // the reader can see.
+  const resolvedAriaLabel = caption ? undefined : (ariaLabel ?? undefined);
 
   return (
-    <div className="poodle-table-shell" data-size={resolvedSize} data-density={resolvedDensity} aria-label={ariaLabel ?? undefined}>
-      <table className="poodle-table">
+    <div className="poodle-table-shell" data-size={resolvedSize} data-density={resolvedDensity}>
+      <table className="poodle-table" aria-label={resolvedAriaLabel}>
         {caption ? <caption className="poodle-table__caption">{caption}</caption> : null}
 
         <thead>

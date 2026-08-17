@@ -143,7 +143,7 @@ export function Select({
   const flatOptions = flattenSelectOptions(normalizedOptions as (SelectOption | SelectOptionGroup)[]) as SelectOption[];
   const hasPlaceholderOption = flatOptions.some((entry) => entry.value === placeholderValue);
   const hasCurrentOption = flatOptions.some((entry) => entry.value === currentValue);
-  const hasSelection = currentValue !== "" && currentValue !== clearValue;
+  const hasSelection = currentValue !== "" && currentValue !== placeholderValue;
   const showClear = clearable && hasSelection && !disabled;
   const isGrouped = normalizedOptions.length > 0 && "options" in normalizedOptions[0];
   const normalizedGroups = isGrouped ? (normalizedOptions as SelectOptionGroup[]) : [];

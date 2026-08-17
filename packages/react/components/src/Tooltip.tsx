@@ -52,6 +52,20 @@ export function Tooltip({
   const isControlled = open !== null;
   const isOpen = isControlled ? open === true : uncontrolledOpen;
 
+  // The anchor is normally established by hover/focus. A tooltip shown through
+  // `open`/`defaultOpen` never ran ENTER, so the machine stays "closed" and the
+  // first-child anchor stays unresolved — the portalled bubble would render
+  // nothing and Escape would be inert. Resolve the default anchor once so a
+  // forced-open surface behaves exactly like a hovered one.
+  useLayoutEffect(() => {
+    if (!isOpen || anchorElement) return;
+    const defaultAnchor = getDefaultAnchor();
+    if (defaultAnchor) {
+      triggerRef.current = defaultAnchor;
+      setAnchorElement(defaultAnchor);
+    }
+  }, [isOpen, anchorElement]);
+
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -113,10 +127,27 @@ export function Tooltip({
   }
 
   useLayoutEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      triggerRef.current?.removeAttribute("aria-describedby");
+      return;
+    }
     // Announced only while shown: a stale describedby outlives the bubble.
     triggerRef.current?.setAttribute("aria-describedby", tooltipId);
-  }, [isOpen, tooltipId]);
+  }, [isOpen, tooltipId, anchorElement]);
+
+  // Keep the machine level with the surface. A tooltip shown or hidden through
+  // `open`/`defaultOpen` never ran ENTER or LEAVE, so without this sync the
+  // machine holds a stale state in both directions: DISMISS from "closed" is
+  // inert, so Escape leaves a forced-open tooltip stuck with no close reported;
+  // and after a controlled true -> false the machine stays "open", so the next
+  // ENTER takes the already-open branch and hover or focus can never reopen it.
+  // SET_OPEN emits no change of its own, so syncing never echoes back to a host.
+  const syncedOpen = useRef(false);
+  useEffect(() => {
+    if (syncedOpen.current === isOpen) return;
+    syncedOpen.current = isOpen;
+    send({ type: "SET_OPEN", open: isOpen });
+  }, [isOpen, send]);
 
   useEffect(
     () => () => {
