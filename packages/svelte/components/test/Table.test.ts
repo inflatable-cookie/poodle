@@ -57,6 +57,15 @@ describe("Table (svelte)", () => {
     expect(container.querySelector(".poodle-table-shell")?.getAttribute("aria-label")).toBeNull();
   });
 
+  it("lets a visible caption outrank ariaLabel as the accessible name", () => {
+    const { container } = render(Table, {
+      props: { columns, rows, caption: "Q3 revenue", ariaLabel: "Team roster" },
+    });
+    const table = container.querySelector("table.poodle-table") as HTMLElement;
+    expect(container.querySelector(".poodle-table__caption")?.textContent).toBe("Q3 revenue");
+    expect(table.getAttribute("aria-label")).toBeNull();
+  });
+
   it("projects size and density data attributes on the shell", () => {
     const { container } = render(Table, {
       props: { columns, rows, size: "lg", density: "compact" },

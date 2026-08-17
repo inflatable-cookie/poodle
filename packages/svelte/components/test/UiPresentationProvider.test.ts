@@ -26,6 +26,19 @@ describe("UiPresentationProvider (svelte)", () => {
     expect(root.style.getPropertyValue("--poodle-space-control-x")).toBe("0.75rem");
   });
 
+  it("stays layout- and accessibility-neutral around its children", () => {
+    const { container } = render(UiPresentationHarness, { props: {} });
+    const root = container.querySelector(".poodle-ui-presentation-provider") as HTMLElement;
+    // `display: contents` lives in the shared stylesheet keyed on this class,
+    // so the class is the observable hook for the neutrality requirement; the
+    // test DOM does not apply the sheet.
+    expect(root.className).toBe("poodle-ui-presentation-provider");
+    expect(root.getAttribute("role")).toBeNull();
+    expect(Array.from(root.attributes).map((a) => a.name)).toEqual(["class", "style"]);
+    // The wrapper contributes no box of its own: the control is a direct child.
+    expect(root.firstElementChild?.classList.contains("poodle-button")).toBe(true);
+  });
+
   it("propagates semantic size resolution to descendant controls", () => {
     const { container } = render(UiPresentationHarness, {
       props: { density: "comfortable", sizeScale: "lg" },

@@ -164,6 +164,43 @@ completed the full validation round. This run rebased them onto current
   React covered focus-driven open, so neither trigger was paired. Both suites
   now cover both, which is what the card's pairing requirement asks for.
 
+## Review Repair (PR #29, changes requested)
+
+The orchestrator review confirmed the evidence tranche and the roster counts,
+and requested three bounded implementation repairs. All three were real.
+
+- **HIGH — React `UiPresentationProvider` was not layout-neutral in package
+  consumers.** The React module rendered `.poodle-ui-presentation-provider` but
+  never imported
+  `@inflatable-cookie/poodle-core/styles/ui-presentation-provider.css`, the only
+  definition of the `display: contents` the contract requires (§2, §6, §7). The
+  Svelte reference imports it. The React module now does too. Paired neutrality
+  evidence was added on both sides — class hook, no `role`, no ARIA attributes,
+  control as a direct child. It asserts what is observable: the vitest DOM loads
+  no stylesheets at all (measured: `document.styleSheets.length === 0`, computed
+  `display` is `block` even for the Svelte reference), so no component test in
+  this repo can assert `display: contents`. The unguarded seam is recorded in
+  `PAPERCUTS.md`.
+- **HIGH — controlled Tooltips could not reopen after the host closed them.**
+  The forced-open seed was one-directional: it moved the machine `closed` →
+  `open` when `isOpen` became true and never moved it back. After a controlled
+  true → false the surface closed but the machine stayed `open`, so the next
+  `ENTER` took the already-open branch and emitted nothing — hover and focus
+  could never reopen it. Both runtimes now synchronize through the contract's
+  `SET_OPEN` event in both directions; `SET_OPEN` emits no change of its own, so
+  the sync never echoes back to the host. Paired regressions cover controlled
+  true → false → hover (Svelte) and → focus (React) → `onOpenChange(true)`.
+- **MEDIUM — `ariaLabel` overrode a visible Table caption.** Both runtimes wrote
+  `aria-label` unconditionally, so with both props supplied the ARIA name
+  silently outranked the visible `<caption>`. The contract already scopes
+  `ariaLabel` to "accessible name when no caption" (§3, §6). Both runtimes now
+  project it only when there is no caption, and the contract note added earlier
+  in this card states the precedence as well as the placement. Paired evidence
+  added on both sides.
+
+All four new cases fail when their fix is reverted (verified), except the
+stylesheet import, which no test in this repo can observe — see above.
+
 ## Observations (no change made)
 
 - React synthesizes `pointerenter` from a bubbling `pointerover`, so the React
@@ -184,7 +221,7 @@ completed the full validation round. This run rebased them onto current
 
 | Command | Result |
 | --- | --- |
-| `effigy test:components` | pass (335 files, 2598 tests) |
+| `effigy test:components` | pass (335 files, 2604 tests) |
 | `effigy check:svelte` | pass (880 files, 0 errors, 4 baseline warnings) |
 | `effigy react:build` | pass (772 modules) |
 | `effigy docs:check` | pass |

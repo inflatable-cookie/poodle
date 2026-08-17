@@ -64,6 +64,25 @@ describe("Tooltip (svelte)", () => {
     expect(onOpenChange).toHaveBeenCalledWith(true);
   });
 
+  it("asks to reopen through hover after the host closed a controlled tooltip", async () => {
+    vi.useFakeTimers();
+    const onOpenChange = vi.fn();
+    const { container, rerender } = render(TooltipHarness, {
+      props: { open: true, onOpenChange },
+    });
+    const root = container.querySelector(".poodle-tooltip") as HTMLElement;
+
+    // The host closed it, so the machine never saw LEAVE; without a SET_OPEN
+    // sync it would still think it is open and swallow the next ENTER.
+    await rerender({ open: false, onOpenChange });
+    expect(bubbleOf()).toBeNull();
+    onOpenChange.mockClear();
+
+    await fireEvent.pointerEnter(root);
+    await vi.advanceTimersByTimeAsync(300);
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
   it("closes on Escape and reports the change", async () => {
     const onOpenChange = vi.fn();
     const { container } = render(TooltipHarness, { props: { open: true, onOpenChange } });

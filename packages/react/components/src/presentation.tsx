@@ -1,5 +1,10 @@
 import { createContext, useContext, type CSSProperties, type ReactNode } from "react";
 
+// The shared stylesheet is the only definition of the root's `display: contents`,
+// which is what keeps the wrapper layout- and accessibility-neutral. Without it
+// the provider is a plain block and every descendant layout shifts.
+import "@inflatable-cookie/poodle-core/styles/ui-presentation-provider.css";
+
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
 /**

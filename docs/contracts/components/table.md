@@ -110,7 +110,10 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 `aria-label` belongs on the `<table>` element, never on the `.poodle-table-shell`
 `<div>`: the shell is a scroll container with no table semantics, so a name
-parked there does not name the grid. Both web runtimes place it on `<table>`.
+parked there does not name the grid. It is also a fallback, not an override —
+when a `caption` is supplied it names the table and `aria-label` is not
+projected at all, so the ARIA name can never contradict the visible one. Both
+web runtimes follow this.
 
 ### Keyboard
 

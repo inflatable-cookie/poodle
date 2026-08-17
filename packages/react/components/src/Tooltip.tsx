@@ -135,14 +135,19 @@ export function Tooltip({
     triggerRef.current?.setAttribute("aria-describedby", tooltipId);
   }, [isOpen, tooltipId, anchorElement]);
 
-  // Seed the machine to "open" for a surface shown without hover: DISMISS from
-  // "closed" is inert, so Escape would otherwise leave a forced-open tooltip
-  // visibly stuck with no close reported.
+  // Keep the machine level with the surface. A tooltip shown or hidden through
+  // `open`/`defaultOpen` never ran ENTER or LEAVE, so without this sync the
+  // machine holds a stale state in both directions: DISMISS from "closed" is
+  // inert, so Escape leaves a forced-open tooltip stuck with no close reported;
+  // and after a controlled true -> false the machine stays "open", so the next
+  // ENTER takes the already-open branch and hover or focus can never reopen it.
+  // SET_OPEN emits no change of its own, so syncing never echoes back to a host.
+  const syncedOpen = useRef(false);
   useEffect(() => {
-    if (isOpen && machineState.current === "closed") {
-      machineState.current = "open";
-    }
-  }, [isOpen]);
+    if (syncedOpen.current === isOpen) return;
+    syncedOpen.current = isOpen;
+    send({ type: "SET_OPEN", open: isOpen });
+  }, [isOpen, send]);
 
   useEffect(
     () => () => {

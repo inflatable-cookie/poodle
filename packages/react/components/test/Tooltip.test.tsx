@@ -92,6 +92,33 @@ describe("Tooltip (react)", () => {
     expect(onOpenChange).toHaveBeenCalledWith(true);
   });
 
+  it("asks to reopen through focus after the host closed a controlled tooltip", () => {
+    vi.useFakeTimers();
+    const onOpenChange = vi.fn();
+    const { container, rerender } = render(
+      <Tooltip open content="Save" onOpenChange={onOpenChange}>
+        <button>Hover me</button>
+      </Tooltip>,
+    );
+
+    // The host closed it, so the machine never saw LEAVE; without a SET_OPEN
+    // sync it would still think it is open and swallow the next ENTER.
+    rerender(
+      <Tooltip open={false} content="Save" onOpenChange={onOpenChange}>
+        <button>Hover me</button>
+      </Tooltip>,
+    );
+    expect(bubbleOf()).toBeNull();
+    onOpenChange.mockClear();
+
+    const trigger = container.querySelector(".poodle-tooltip button") as HTMLElement;
+    fireEvent.focus(trigger);
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
   it("closes on Escape and reports the change", () => {
     const onOpenChange = vi.fn();
     const { container } = render(

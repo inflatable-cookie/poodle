@@ -781,3 +781,17 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   collapsed to one line and the assertion measured nothing). Recording the gap
   rather than inventing a gate here: adding one is a board-health change, not
   component evidence.
+
+- 2026-08-17 — g15.005 review found a second unguarded seam: **nothing checks
+  that a React component imports its shared stylesheet.** The React
+  `UiPresentationProvider` rendered the contract-required
+  `.poodle-ui-presentation-provider` wrapper without importing
+  `@inflatable-cookie/poodle-core/styles/ui-presentation-provider.css`, which
+  is the only definition of the `display: contents` that makes the wrapper
+  layout-neutral. Component tests cannot catch this: the vitest DOM loads no
+  stylesheets at all (`document.styleSheets.length === 0`, computed `display`
+  is `block` even for the Svelte reference, which does import it), so the
+  neutrality requirement is only assertable through the class hook and the
+  absence of ARIA. A per-component check that every `.poodle-<name>` root's
+  module imports the matching `styles/<name>.css` would close this; it is
+  board health, not component evidence, so it is recorded rather than built.
