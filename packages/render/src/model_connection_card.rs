@@ -49,6 +49,16 @@ pub struct ModelConnectionCardHandlers {
     pub on_enabled_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
     /// Closing asks the backend to restore focus to the disclosure control.
     pub on_focus_request: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Stable native instance scope. `id` already scopes one card within a
+    /// list; this scopes two surfaces that show the same connection, which
+    /// would otherwise share one backend focus handle.
+    pub instance_id: Option<String>,
+}
+
+/// The backend-state id of one card part: the instance scope when the host
+/// supplied one, else the spec's own instance-scoped semantic id.
+fn scoped(instance_id: Option<&str>, semantic: String) -> Option<String> {
+    instance_id.map(|scope| format!("model-connection-card:{scope}:{semantic}"))
 }
 
 /// Host-composed content, keyed by this card's opaque id at the call site.
@@ -275,6 +285,7 @@ pub fn model_connection_card_with_slots(
             s.min_width = Some(0.0);
         }
         details.id = Some(spec.details_id());
+        details.runtime_id = scoped(handlers.instance_id.as_deref(), spec.details_id());
         details.a11y.role = Some(NodeRole::Region);
         details.a11y.label = Some(spec.details_label());
         if let Some(content) = slots.details {
@@ -318,7 +329,10 @@ fn disclosure_button(
     let is_open = spec.is_open;
     let is_disabled = spec.is_disabled;
     let disclosure_id = spec.disclosure_id();
-    let focus_target = disclosure_id.clone();
+    // The focus destination is what the backend keys focus handles by: the
+    // scoped runtime id when the host supplied a scope, else the semantic id.
+    let focus_target = scoped(handlers.instance_id.as_deref(), disclosure_id.clone())
+        .unwrap_or_else(|| disclosure_id.clone());
 
     let activate: Option<Arc<dyn Fn() + Send + Sync>> = (!is_disabled).then(|| {
         Arc::new(move || {
@@ -359,6 +373,7 @@ fn disclosure_button(
         theme,
         activate,
     );
+    node.runtime_id = scoped(handlers.instance_id.as_deref(), disclosure_id.clone());
     node.id = Some(disclosure_id);
     // `icon_button` renders no focus patch, and the GPUI backend only creates
     // a focus handle for a focusable node that carries one — so without this
@@ -650,6 +665,59 @@ mod tests {
         assert!(node
             .find(&|n| n.id.as_deref() == Some(second.details_id().as_str()))
             .is_none());
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let scoped = |scope: &str| ModelConnectionCardHandlers {
+            instance_id: Some(scope.to_string()),
+            ..ModelConnectionCardHandlers::default()
+        };
+        let spec = spec().with_open(true);
+        let first = model_connection_card(&spec, &theme(), scoped("first"));
+        let second = model_connection_card(&spec, &theme(), scoped("second"));
+
+        for (node, scope) in [(&first, "first"), (&second, "second")] {
+            let expected = format!("model-connection-card:{scope}:{}", spec.disclosure_id());
+            assert!(node
+                .find(&|n| n.runtime_id.as_deref() == Some(expected.as_str()))
+                .is_some());
+        }
+        let other = format!("model-connection-card:second:{}", spec.disclosure_id());
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref() == Some(other.as_str()))
+            .is_none());
+        assert!(first
+            .find(&|n| n.id.as_deref() == Some(spec.disclosure_id().as_str()))
+            .is_some());
+    }
+
+    #[test]
+    fn a_scoped_card_restores_focus_to_its_own_disclosure() {
+        let focus = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&focus);
+        let spec = spec().with_open(true);
+        let node = model_connection_card(
+            &spec,
+            &theme(),
+            ModelConnectionCardHandlers {
+                on_open_change: Some(Arc::new(|_| {})),
+                on_focus_request: Some(Arc::new(move |id: &str| {
+                    sink.lock().unwrap().push(id.to_string())
+                })),
+                instance_id: Some("second".to_string()),
+                ..ModelConnectionCardHandlers::default()
+            },
+        );
+        (disclosure(&node, &spec)
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("activation"))();
+        assert_eq!(
+            focus.lock().unwrap().as_slice(),
+            [format!("model-connection-card:second:{}", spec.disclosure_id())]
+        );
     }
 
     #[test]

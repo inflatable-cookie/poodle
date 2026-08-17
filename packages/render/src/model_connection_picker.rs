@@ -48,6 +48,10 @@ pub struct ModelConnectionPickerHandlers {
     pub on_value_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// The search text changed.
     pub on_query_change: Option<TextChangeHandler>,
+    /// Stable native instance scope. Semantic ids stay readable, but two
+    /// pickers offering the same routes must never share backend focus
+    /// handles — GPUI keys them in one global map by element id.
+    pub instance_id: Option<String>,
 }
 
 /// Host-composed content. Provider marks are whatever the host supplies for an
@@ -60,9 +64,29 @@ pub struct ModelConnectionPickerSlots {
     pub footer: Option<Node>,
 }
 
-/// The element id of one option row, so roving focus can name its destination.
+/// The semantic element id of one option row. Readable and stable across
+/// instances; accessibility relationships use it.
 pub fn model_connection_option_id(option_id: &str) -> String {
     format!("model-connection-option:{option_id}")
+}
+
+/// The backend-state id of one option row: the instance scope when the host
+/// supplied one, else the semantic id. Roving focus and every focus request
+/// name this, because it is what the backend keys focus handles by.
+pub fn model_connection_option_focus_id(instance_id: Option<&str>, option_id: &str) -> String {
+    match instance_id {
+        Some(scope) => format!("model-connection-picker:{scope}:option:{option_id}"),
+        None => model_connection_option_id(option_id),
+    }
+}
+
+/// The backend-state id of the search field, scoped the same way: the field
+/// holds host-owned editing state the backend caches by element id.
+pub fn model_connection_picker_search_id(instance_id: Option<&str>) -> String {
+    match instance_id {
+        Some(scope) => format!("model-connection-picker:{scope}:search"),
+        None => "model-connection-picker:search".to_string(),
+    }
 }
 
 pub fn model_connection_picker(
@@ -122,7 +146,9 @@ pub fn model_connection_picker_with_slots(
         .with_disabled(spec.is_disabled)
         .with_size(effective_size)
         .with_density(spec.density);
-    search_spec.id = Some("model-connection-picker:search".to_string());
+    search_spec.id = Some(model_connection_picker_search_id(
+        handlers.instance_id.as_deref(),
+    ));
     let search = text_input_with_change(&search_spec, theme, handlers.on_query_change.clone());
 
     // ── Body: the grouped radio cards ──
@@ -393,6 +419,13 @@ fn option_node(
         }
     }
     node.id = Some(model_connection_option_id(&option.id));
+    // The instance scope lives on `runtime_id`, which is what the backend keys
+    // focus, editing and gesture state by; `id` stays the readable semantic
+    // one so accessibility relationships do not carry a scope.
+    node.runtime_id = handlers
+        .instance_id
+        .as_deref()
+        .map(|scope| model_connection_option_focus_id(Some(scope), &option.id));
     node.a11y.role = Some(NodeRole::RadioButton);
     node.a11y.label = Some(option_accessible_name(option));
     node.a11y.toggled = Some(if is_selected {
@@ -427,6 +460,7 @@ fn option_node(
         node.interaction.on_key = roving_key_handler(
             option,
             roving_ids,
+            handlers.instance_id.clone(),
             handlers.on_value_change.clone(),
         );
     }
@@ -462,6 +496,7 @@ fn tab_index_for(
 fn roving_key_handler(
     option: &ModelConnectionOption,
     roving_ids: &[String],
+    instance_id: Option<String>,
     on_value_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Option<Arc<dyn Fn(NodeKey, poodle_node::NodeModifiers) -> Option<String> + Send + Sync>> {
     let index = roving_ids.iter().position(|id| id == &option.id)?;
@@ -484,7 +519,10 @@ fn roving_key_handler(
         if let Some(handler) = &on_value_change {
             handler(&target);
         }
-        Some(model_connection_option_id(&target))
+        Some(model_connection_option_focus_id(
+            instance_id.as_deref(),
+            &target,
+        ))
     }))
 }
 
@@ -850,6 +888,64 @@ mod tests {
         let other = option_node(&node, "openai-responses");
         assert!(!other.texts().contains(&"OLLAMA MARK"));
         assert!(node.texts().contains(&"Host footer"));
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let scoped = |scope: &str| ModelConnectionPickerHandlers {
+            instance_id: Some(scope.to_string()),
+            ..ModelConnectionPickerHandlers::default()
+        };
+        let first = model_connection_picker(&spec(), &theme(), scoped("first"));
+        let second = model_connection_picker(&spec(), &theme(), scoped("second"));
+
+        for (node, scope) in [(&first, "first"), (&second, "second")] {
+            assert!(node
+                .find(&|n| n.runtime_id.as_deref()
+                    == Some(
+                        model_connection_option_focus_id(Some(scope), "openai-responses").as_str()
+                    ))
+                .is_some());
+            // `text_input` prefixes the spec id when it derives the field's
+            // own backend-state id, which is what keeps two search fields from
+            // sharing one caret.
+            let field = format!(
+                "poodle-input-{}",
+                model_connection_picker_search_id(Some(scope))
+            );
+            assert!(node.find(&|n| n.id.as_deref() == Some(field.as_str())).is_some());
+        }
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(
+                    model_connection_option_focus_id(Some("second"), "openai-responses").as_str()
+                ))
+            .is_none());
+        // The semantic id stays readable and unscoped in both.
+        assert!(first
+            .find(&|n| n.id.as_deref() == Some(model_connection_option_id("openai-responses").as_str()))
+            .is_some());
+    }
+
+    #[test]
+    fn a_scoped_picker_roves_to_scoped_destinations() {
+        let node = model_connection_picker(
+            &spec(),
+            &theme(),
+            ModelConnectionPickerHandlers {
+                instance_id: Some("second".to_string()),
+                ..ModelConnectionPickerHandlers::default()
+            },
+        );
+        let first = option_node(&node, "openai-responses");
+        let keys = first.interaction.on_key.as_ref().expect("roving handler");
+        assert_eq!(
+            keys(NodeKey::ArrowDown, poodle_node::NodeModifiers::default()),
+            Some(model_connection_option_focus_id(
+                Some("second"),
+                "openai-completions"
+            ))
+        );
     }
 
     #[test]

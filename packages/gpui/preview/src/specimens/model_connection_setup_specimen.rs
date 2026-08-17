@@ -186,7 +186,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     ModelConnectionEvent::FocusRequest(id.to_string()),
                 ));
         })
-    });
+    })
+    .with_instance_id("setup-live");
     if let Some(content) = configuration {
         interactive = interactive.with_configuration(content);
     }
@@ -194,6 +195,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     // and the configure stage's selected summary.
     interactive = interactive.with_leading("ollama-local", Node::icon("terminal", 16.0));
 
+    // Every group below renders the same routes, so each instance carries its
+    // own backend-state scope.
     let configure = |value: &str| {
         ModelConnectionSetupSpec::new()
             .with_options(options())
@@ -214,6 +217,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     configure("openai-responses").with_can_submit(true),
                     theme,
                 )
+                .with_instance_id("setup-api-key")
                 .with_configuration(api_key_field(theme, "mcs-api-key", "")),
             ),
         ))
@@ -222,20 +226,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Auto-detect: found",
-            panel(ModelConnectionSetup::from_spec(
-                configure("codex-app")
-                    .with_can_submit(true)
-                    .with_success("Local harness detected."),
-                theme,
-            )),
+            panel(
+                ModelConnectionSetup::from_spec(
+                    configure("codex-app")
+                        .with_can_submit(true)
+                        .with_success("Local harness detected."),
+                    theme,
+                )
+                .with_instance_id("setup-detect-found"),
+            ),
         ))
         .child(group(
             theme,
             "Auto-detect: missing",
-            panel(ModelConnectionSetup::from_spec(
-                configure("codex-app").with_error("Codex app not found on this machine."),
-                theme,
-            )),
+            panel(
+                ModelConnectionSetup::from_spec(
+                    configure("codex-app").with_error("Codex app not found on this machine."),
+                    theme,
+                )
+                .with_instance_id("setup-detect-missing"),
+            ),
         ))
         .child(group(
             theme,
@@ -247,6 +257,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_pending_label("Waiting for browser sign-in"),
                     theme,
                 )
+                .with_instance_id("setup-oauth-pending")
                 .with_configuration(browser_sign_in(theme)),
             ),
         ))
@@ -258,6 +269,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     configure("ollama-local").with_can_submit(true),
                     theme,
                 )
+                .with_instance_id("setup-local-endpoint")
                 .with_configuration(endpoint_field(theme, "mcs-endpoint"))
                 .with_configure_aside(Node::text(
                     "The host checks this endpoint; Poodle never contacts it.",
@@ -272,6 +284,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     configure("openai-responses").with_error("API key format is invalid."),
                     theme,
                 )
+                .with_instance_id("setup-invalid")
                 .with_configuration(api_key_field(theme, "mcs-invalid-key", "••••••••")),
             ),
         ))
@@ -285,6 +298,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_pending(true),
                     theme,
                 )
+                .with_instance_id("setup-pending")
                 .with_configuration(api_key_field(theme, "mcs-pending-key", "••••••••")),
             ),
         ))

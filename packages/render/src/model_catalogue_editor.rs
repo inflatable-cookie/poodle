@@ -71,6 +71,31 @@ pub struct ModelCatalogueEditorHandlers {
     pub on_announce: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Focus destination after a move or a hide. The backend performs the move.
     pub on_focus_request: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Stable native instance scope. Semantic ids stay readable, but two
+    /// editors over the same catalogue must never share backend focus handles.
+    pub instance_id: Option<String>,
+}
+
+/// The backend-state id of one row's reorder handle: the instance scope when
+/// the host supplied one, else the semantic id. Focus requests name this,
+/// because it is what the backend keys focus handles by.
+pub fn model_catalogue_handle_focus_id(instance_id: Option<&str>, item_id: &str) -> String {
+    match instance_id {
+        Some(scope) => format!("model-catalogue-editor:{scope}:{item_id}:handle"),
+        None => format!("model-catalogue-editor:{item_id}:handle"),
+    }
+}
+
+/// The backend-state id of the hidden-section disclosure, scoped the same way.
+pub fn model_catalogue_hidden_focus_id(instance_id: Option<&str>) -> String {
+    match instance_id {
+        Some(scope) => format!("model-catalogue-editor:{scope}:hidden"),
+        None => MODEL_CATALOGUE_HIDDEN_SECTION_ID.to_string(),
+    }
+}
+
+fn scoped_row_id(instance_id: Option<&str>, item_id: &str, part: &str) -> Option<String> {
+    instance_id.map(|scope| format!("model-catalogue-editor:{scope}:{item_id}:{part}"))
 }
 
 /// Host-composed content keyed by opaque model id. Poodle resolves no model
@@ -220,8 +245,15 @@ pub fn model_catalogue_editor_with_slots(
             Some(hidden_list),
             on_open,
         );
-        // The focus destination when the last shown model is hidden.
-        section.id = Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID.to_string());
+        // The focus destination when the last shown model is hidden. The
+        // outer region Collapsible returns is not focusable — its trigger is —
+        // so naming the outer node would hand the backend a destination it can
+        // never focus.
+        mark_hidden_disclosure(
+            &mut section,
+            handlers.instance_id.as_deref(),
+            theme,
+        );
         let mut wrapper = Node::container();
         {
             let s = &mut wrapper.style;
@@ -246,6 +278,30 @@ pub fn model_catalogue_editor_with_slots(
     }
 
     root
+}
+
+/// Stamp the hidden-section disclosure on `Collapsible`'s own focusable
+/// trigger. The trigger carries no focus patch of its own, and the GPUI
+/// backend creates a tracked focus handle only for a focusable node that draws
+/// differently when focused — so the id and the ring have to land together, on
+/// the node that can actually take focus.
+fn mark_hidden_disclosure(
+    node: &mut Node,
+    instance_id: Option<&str>,
+    theme: &dyn ThemeProvider,
+) -> bool {
+    if node.interaction.focusable {
+        node.id = Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID.to_string());
+        node.runtime_id = instance_id.map(|scope| model_catalogue_hidden_focus_id(Some(scope)));
+        node.style.focus = Some(StylePatch {
+            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            ..StylePatch::default()
+        });
+        return true;
+    }
+    node.children
+        .iter_mut()
+        .any(|child| mark_hidden_disclosure(child, instance_id, theme))
 }
 
 /// `icon_button` renders no focus patch, and the GPUI backend only creates a
@@ -414,6 +470,7 @@ fn shown_row(
     );
     let mut handle = focusable_chrome(handle, theme);
     handle.id = Some(spec.row_handle_id(&item.id));
+    handle.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "handle");
     handle.a11y.toggled = Some(if is_grabbed {
         poodle_node::NodeToggled::True
     } else {
@@ -548,6 +605,7 @@ fn shown_row(
         );
         let mut info = focusable_chrome(info, theme);
         info.id = Some(format!("model-catalogue-editor:{}:info", item.id));
+        info.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "info");
         utilities = utilities.child(info);
     }
     if spec.show_move_actions {
@@ -571,6 +629,7 @@ fn shown_row(
         );
         let mut up = focusable_chrome(up, theme);
         up.id = Some(format!("model-catalogue-editor:{}:up", item.id));
+        up.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "up");
 
         let down_disabled = row_locked || index + 1 == shown.len();
         let down = icon_button(
@@ -592,6 +651,7 @@ fn shown_row(
         );
         let mut down = focusable_chrome(down, theme);
         down.id = Some(format!("model-catalogue-editor:{}:down", item.id));
+        down.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "down");
         utilities = utilities.child(up).child(down);
     }
     let hide = icon_button(
@@ -608,7 +668,8 @@ fn shown_row(
             let handlers = Arc::clone(handlers);
             let shown_ids = shown_ids.to_vec();
             let item = item.clone();
-            let hidden_section = MODEL_CATALOGUE_HIDDEN_SECTION_ID.to_string();
+            let hidden_section = model_catalogue_hidden_focus_id(handlers.instance_id.as_deref());
+            let instance = handlers.instance_id.clone();
             Arc::new(move || {
                 let focus = model_catalogue_focus_after_hide(&shown_ids, &item.id);
                 if let Some(handler) = &handlers.on_visibility_change {
@@ -621,7 +682,7 @@ fn shown_row(
                 if let Some(handler) = &handlers.on_focus_request {
                     match &focus {
                         ModelCatalogueFocusAfterHide::Shown { id } => {
-                            handler(&format!("model-catalogue-editor:{id}:handle"))
+                            handler(&model_catalogue_handle_focus_id(instance.as_deref(), id))
                         }
                         ModelCatalogueFocusAfterHide::HiddenSection => {
                             // Hiding the last shown model discloses the hidden
@@ -639,6 +700,7 @@ fn shown_row(
     );
     let mut hide = focusable_chrome(hide, theme);
     hide.id = Some(format!("model-catalogue-editor:{}:hide", item.id));
+    hide.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "hide");
     let utilities = utilities.child(hide);
 
     // ── Row ──
@@ -755,6 +817,7 @@ fn hidden_row(
     );
     let mut restore = focusable_chrome(restore, theme);
     restore.id = Some(format!("model-catalogue-editor:{}:restore", item.id));
+    restore.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "restore");
 
     let mut row = Node::container();
     {
@@ -780,6 +843,7 @@ fn move_emitter(
     handlers: Arc<ModelCatalogueEditorHandlers>,
 ) -> Arc<dyn Fn(usize, usize) -> Option<String> + Send + Sync> {
     let locked = spec.is_locked();
+    let instance = handlers.instance_id.clone();
     Arc::new(move |from: usize, to: usize| {
         if locked {
             return None;
@@ -796,7 +860,9 @@ fn move_emitter(
             &handlers,
             &model_catalogue_reorder_announcement(&label, to + 1, next.len()),
         );
-        let focus = next.get(to).map(|id| format!("model-catalogue-editor:{id}:handle"));
+        let focus = next
+            .get(to)
+            .map(|id| model_catalogue_handle_focus_id(instance.as_deref(), id));
         if let (Some(handler), Some(target)) = (&handlers.on_focus_request, focus.as_deref()) {
             handler(target);
         }
@@ -887,6 +953,7 @@ mod tests {
                 on_focus_request: Some(Arc::new(move |id: &str| {
                     focus.lock().unwrap().push(id.to_string())
                 })),
+                instance_id: None,
             }
         }
     }
@@ -1289,6 +1356,104 @@ mod tests {
         assert!(node
             .find(&|n| n.id.as_deref() == Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID))
             .is_none());
+    }
+
+    #[test]
+    fn the_hidden_section_id_sits_on_a_focusable_disclosure() {
+        let recorder = Recorder::default();
+        let node = model_catalogue_editor(
+            &spec().with_hidden_open(true),
+            &theme(),
+            recorder.handlers(),
+        );
+        let disclosure = node
+            .find(&|n| n.id.as_deref() == Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID))
+            .expect("the hidden-section disclosure");
+        assert!(
+            disclosure.interaction.focusable,
+            "the focus destination must be the focusable trigger, not the outer region"
+        );
+        assert!(
+            disclosure.style.focus.is_some(),
+            "the GPUI backend only tracks a focusable node that draws differently when focused"
+        );
+        assert!(disclosure.interaction.on_activate.is_some());
+    }
+
+    #[test]
+    fn hiding_the_last_shown_model_names_a_destination_that_can_take_focus() {
+        let recorder = Recorder::default();
+        let only = ModelCatalogueEditorSpec::new().with_items(vec![
+            ModelCatalogueItem::new("model-solo", "Solo"),
+            ModelCatalogueItem::new("model-gone", "Gone").with_visible(false),
+        ]);
+        let node = model_catalogue_editor(&only, &theme(), recorder.handlers());
+        press(&node, "Hide Solo");
+
+        let requested = recorder.focus.lock().unwrap().last().cloned().expect("a request");
+        // The host discloses the section, so re-render and check the named id
+        // resolves to something the backend can focus.
+        let disclosed = model_catalogue_editor(
+            &only.clone().with_hidden_open(true),
+            &theme(),
+            recorder.handlers(),
+        );
+        let target = disclosed
+            .find(&|n| n.id.as_deref() == Some(requested.as_str()))
+            .expect("the requested id exists in the next render");
+        assert!(target.interaction.focusable && target.style.focus.is_some());
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let first = model_catalogue_editor(
+            &spec().with_hidden_open(true),
+            &theme(),
+            ModelCatalogueEditorHandlers {
+                instance_id: Some("first".to_string()),
+                ..ModelCatalogueEditorHandlers::default()
+            },
+        );
+        let second = model_catalogue_editor(
+            &spec().with_hidden_open(true),
+            &theme(),
+            ModelCatalogueEditorHandlers {
+                instance_id: Some("second".to_string()),
+                ..ModelCatalogueEditorHandlers::default()
+            },
+        );
+
+        for (node, scope) in [(&first, "first"), (&second, "second")] {
+            assert!(node
+                .find(&|n| n.runtime_id.as_deref()
+                    == Some(model_catalogue_handle_focus_id(Some(scope), "model-alpha").as_str()))
+                .is_some());
+            assert!(node
+                .find(&|n| n.runtime_id.as_deref()
+                    == Some(model_catalogue_hidden_focus_id(Some(scope)).as_str()))
+                .is_some());
+        }
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(model_catalogue_handle_focus_id(Some("second"), "model-alpha").as_str()))
+            .is_none());
+        // The semantic id stays readable and unscoped in both.
+        assert!(first
+            .find(&|n| n.id.as_deref() == Some("model-catalogue-editor:model-alpha:handle"))
+            .is_some());
+    }
+
+    #[test]
+    fn a_scoped_editor_requests_scoped_focus_destinations() {
+        let recorder = Recorder::default();
+        let mut handlers = recorder.handlers();
+        handlers.instance_id = Some("second".to_string());
+        let node = model_catalogue_editor(&spec(), &theme(), handlers);
+        press(&node, "Move Frontier Alpha down");
+        assert_eq!(
+            recorder.focus.lock().unwrap().as_slice(),
+            [model_catalogue_handle_focus_id(Some("second"), "model-alpha")]
+        );
     }
 
     #[test]

@@ -15,6 +15,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   lands inside the box. A driver option for a larger mount box (or one that
   sizes to its child) would remove the guessing. Found by g15.008 Batch C.
 
+- 2026-08-17 — `poodle_render::collapsible` marks its trigger `focusable` but
+  renders no focus patch, so the GPUI backend creates no focus handle for it
+  and a composed Collapsible's disclosure is unreachable by keyboard and
+  cannot receive a focus request. `model_catalogue_editor` stamps the ring on
+  the trigger itself to make the hidden-section focus destination real. Same
+  class as the `icon_button` entry below; fix both in the primitives and drop
+  the per-composition workarounds. Found by g15.008 review round 1.
+
 - 2026-08-17 — `IconButtonSpec::with_expanded` and `with_controls` never reach
   `Node.a11y`: `poodle_render::icon_button` ignores both, so a composed
   disclosure has no `expanded` and no `controls` relationship unless its caller

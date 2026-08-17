@@ -29,6 +29,17 @@ fn spec() -> ModelConnectionPickerSpec {
     ModelConnectionPickerSpec::new().with_options(ModelConnectionPreviewState::options())
 }
 
+/// Every group on this page renders the same routes, so each instance needs
+/// its own backend-state scope or they would share one focus handle per
+/// option id.
+fn scoped(
+    spec: ModelConnectionPickerSpec,
+    theme: &GpuiThemeProvider,
+    scope: &str,
+) -> ModelConnectionPicker {
+    ModelConnectionPicker::from_spec(spec, theme).with_instance_id(scope)
+}
+
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let queue = Arc::clone(&state.node_events);
@@ -48,6 +59,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_query(state.model_connection.picker_query.clone()),
         theme,
     )
+    .with_instance_id("picker-live")
     .on_value_change({
         let queue = Arc::clone(&queue);
         Arc::new(move |id: &str| {
@@ -85,51 +97,57 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Availability: available, checking, unavailable, unsupported",
-            panel(ModelConnectionPicker::from_spec(
+            panel(scoped(
                 spec().with_value(Some("openai-responses".to_string())),
                 theme,
+                "picker-availability",
             )),
         ))
         .child(group(
             theme,
             "Query with results",
-            panel(ModelConnectionPicker::from_spec(
+            panel(scoped(
                 spec()
                     .with_query("anthropic")
                     .with_value(Some("anthropic-messages".to_string())),
                 theme,
+                "picker-query-results",
             )),
         ))
         .child(group(
             theme,
             "Query with no results",
-            panel(ModelConnectionPicker::from_spec(
+            panel(scoped(
                 spec().with_query("zzzznothing"),
                 theme,
+                "picker-no-results",
             )),
         ))
         .child(group(
             theme,
             "Loading",
-            panel(ModelConnectionPicker::from_spec(
+            panel(scoped(
                 spec().with_state(ModelConnectionPickerState::Loading),
                 theme,
+                "picker-loading",
             )),
         ))
         .child(group(
             theme,
             "Error",
-            panel(ModelConnectionPicker::from_spec(
+            panel(scoped(
                 spec().with_state(ModelConnectionPickerState::Error),
                 theme,
+                "picker-error",
             )),
         ))
         .child(group(
             theme,
             "Empty catalogue",
-            panel(ModelConnectionPicker::from_spec(
+            panel(scoped(
                 ModelConnectionPickerSpec::new().with_state(ModelConnectionPickerState::Empty),
                 theme,
+                "picker-empty",
             )),
         ))
         // A host-supplied provider mark, keyed by option id, and a footer.
@@ -138,7 +156,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             theme,
             "Host provider marks and footer",
             panel(
-                ModelConnectionPicker::from_spec(spec(), theme)
+                scoped(spec(), theme, "picker-host-content")
                     .with_leading("ollama-local", poodle_node::Node::icon("terminal", 16.0))
                     .with_footer(poodle_node::Node::text(
                         "Connections are managed by the host application.",
@@ -148,19 +166,21 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Narrow layout",
-            div().max_w(px(320.0)).child(ModelConnectionPicker::from_spec(
+            div().max_w(px(320.0)).child(scoped(
                 spec().with_value(Some("ollama-local".to_string())),
                 theme,
+                "picker-narrow",
             )),
         ))
         .child(group(
             theme,
             "Disabled",
-            panel(ModelConnectionPicker::from_spec(
+            panel(scoped(
                 spec()
                     .with_value(Some("openai-responses".to_string()))
                     .with_disabled(true),
                 theme,
+                "picker-disabled",
             )),
         ))
 }

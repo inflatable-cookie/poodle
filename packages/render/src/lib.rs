@@ -283,20 +283,22 @@ pub use meta_item::meta_item;
 pub use meter::meter;
 pub use metric_tile::metric_tile;
 pub use model_connection_picker::{
-    model_connection_option_id, model_connection_picker, model_connection_picker_with_slots,
+    model_connection_option_focus_id, model_connection_option_id, model_connection_picker,
+    model_connection_picker_search_id, model_connection_picker_with_slots,
     ModelConnectionPickerHandlers, ModelConnectionPickerSlots,
 };
 pub use model_catalogue_editor::{
-    model_catalogue_editor, model_catalogue_editor_with_slots, ModelCatalogueEditorHandlers,
-    ModelCatalogueEditorSlots,
+    model_catalogue_editor, model_catalogue_editor_with_slots, model_catalogue_handle_focus_id,
+    model_catalogue_hidden_focus_id, ModelCatalogueEditorHandlers, ModelCatalogueEditorSlots,
 };
 pub use model_connection_card::{
     model_connection_card, model_connection_card_with_slots, ModelConnectionCardHandlers,
     ModelConnectionCardSlots,
 };
 pub use model_connection_setup::{
-    model_connection_setup, model_connection_setup_with_slots, ModelConnectionSetupHandlers,
-    ModelConnectionSetupSlots, MODEL_CONNECTION_SETUP_TITLE_ID,
+    model_connection_setup, model_connection_setup_action_id,
+    model_connection_setup_title_focus_id, model_connection_setup_with_slots,
+    ModelConnectionSetupHandlers, ModelConnectionSetupSlots, MODEL_CONNECTION_SETUP_TITLE_ID,
 };
 pub use model_picker::model_picker;
 pub use nav_card::{nav_card, nav_card_with_icon};

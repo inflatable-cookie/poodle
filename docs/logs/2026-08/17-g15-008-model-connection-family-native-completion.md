@@ -4,6 +4,7 @@ Date: 2026-08-17
 Card: `docs/roadmaps/g15/008-model-connection-family-native-completion.md`
 Worktree: `t3code/complete-model-connection` (worker lane, serial)
 Handoff: `docs/handoffs/20260817-122537-g15-008-model-connection-native-completion.md`
+PR: #33 (review round 1 addressed below)
 
 ## Summary
 
@@ -46,6 +47,46 @@ components repeat.
 - **Batch D — release evidence.** The four native roster rows, the gap
   register's model-connection row and native counts, and this log.
 
+## Review round (orchestrator verdict on PR #33)
+
+The four release blockers are addressed in the landed branch:
+
+1. **Two promised focus moves now reach real GPUI focus handles.** The
+   backend creates a tracked handle only for a node with `on_focus_change` or
+   `focusable` *plus* a focus patch. The setup's configure heading had neither
+   half, and the catalogue named the `Collapsible`'s outer region — which is
+   not focusable — instead of its trigger. The heading now carries the accent
+   focus patch, and `mark_hidden_disclosure` stamps the id, the scoped runtime
+   id, and the ring on the trigger itself. Two mounted regressions cover the
+   paths the old suite missed:
+   `model_connection_setup_stage_focus_lands_on_real_handles` (choose →
+   configure focuses the heading for real; Back's destination resolves to a
+   handle the backend created) and
+   `model_catalogue_editor_hiding_the_last_row_focuses_the_hidden_disclosure`.
+   Render-level counterparts assert both nodes are focusable *and* patched.
+2. **Native focus ids are instance-scoped.** Each handler struct gains
+   `instance_id`, following the `TabsHandlers` pattern: the semantic `id`
+   stays readable and unscoped, and the scope lives on `runtime_id`, which is
+   what `element_id_string` prefers and what GPUI keys focus handles by. Focus
+   destinations are named through `model_connection_option_focus_id`,
+   `model_connection_setup_title_focus_id`,
+   `model_catalogue_handle_focus_id`, and `model_catalogue_hidden_focus_id`.
+   Every specimen instance on the four preview pages now carries its own
+   scope — those pages render the same host data several times over, so they
+   were the first real collision. Proved by four render tests plus the mounted
+   `two_model_connection_pickers_do_not_share_backend_focus_handles`.
+3. **Canonical release records reconciled.** The roster headline now reports
+   `170 / 168 / 152` present and `4 / 6 / 22` missing, matching its own count
+   method. The gap register's carried-requirement rows for both the licence
+   family (`g15.007`) and the model-connection family (`g15.008`) are closed.
+4. **The four contracts no longer declare the native implementation missing.**
+   Each Known Deltas table records no open delta, and the adoption notes name
+   the landed native completion instead of a follow-up to compile it. The
+   setup contract's configuration wording is corrected: a host-composed node
+   is of course part of the rendered tree — the boundary is that Poodle never
+   inspects, retains, validates, or schemas its values, and no configuration
+   value reaches a spec field or a callback payload.
+
 ## Evidence per runtime
 
 One runtime does not borrow another's pass.
@@ -68,7 +109,12 @@ One runtime does not borrow another's pass.
   transitions including direct-add, shown/hidden partitions, complete
   shown-order payloads, visibility payloads, focus-after-hide, announcements,
   reorder key intents, and the tone/label mappings.
-- **Rust render** (`cargo test -p poodle-render`, 272 passed): 46 new cases —
+- **Rust render** (`cargo test -p poodle-render`, 283 passed): 57 new cases.
+  Eleven were added in review: the setup heading and the hidden-section
+  disclosure are focusable *and* carry a focus patch, hiding the last row
+  names a destination that can take focus, and each of the four components
+  isolates its backend-state ids and requests scoped focus destinations. The
+  original 46 —
   9 picker (filter order and group order, radio semantics with the supplied
   reason in the accessible name, one selected indicator replacing the mark,
   disabled/unavailable guards, roving keys with wrap and Home/End, query
@@ -94,8 +140,12 @@ One runtime does not borrow another's pass.
   duplicate labels staying distinct by id).
 - **Rust specs** (`cargo test -p poodle-specs`, 260 passed): unchanged suite
   re-run; the four new specs compile into it.
-- **GPUI mounted regressions** (`effigy regressions:native`, 22 passed): the
-  16 retained plus six new — the picker's roving focus moving real backend
+- **GPUI mounted regressions** (`effigy regressions:native`, 25 passed): the
+  16 retained plus nine new. Three came from review — setup stage focus
+  landing on real handles in both directions, hiding the last shown row
+  focusing the hidden disclosure, and two pickers over the same routes keeping
+  separate focus handles. The original six — the picker's roving focus moving
+  real backend
   focus past the disabled routes; a real pointer click on an unsupported route
   selecting nothing while the available one beside it selects; the setup's
   direct-add submitting from choose and emitting no stage; the card's
@@ -138,10 +188,18 @@ One runtime does not borrow another's pass.
   moves, and Escape rides `on_cancel`. Binding Space in both places would act
   twice.
 - **Composed chrome stamps its own focus ring.** `poodle_render::icon_button`
-  renders no focus patch and the GPUI backend creates a focus handle only for
-  a focusable node that carries one, so the card's disclosure and every
-  catalogue utility stamp one — the workaround `history_center` already
-  carries, recorded again in `PAPERCUTS.md`.
+  and `poodle_render::collapsible` render no focus patch, and the GPUI backend
+  creates a focus handle only for a focusable node that carries one — so the
+  card's disclosure, every catalogue utility, the hidden-section trigger, and
+  the setup's programmatically-focusable heading all stamp one. This is not
+  decoration: without it the focus destination cannot exist. The workaround
+  `history_center` already carries; recorded again in `PAPERCUTS.md`.
+- **Backend-state ids are instance-scoped, semantic ids are not.** Following
+  `TabsHandlers`, each handler struct takes an `instance_id`; the readable
+  semantic `id` stays unscoped for accessibility relationships and the scope
+  lives on `runtime_id`. The web has no equivalent because it queries within
+  its own root; GPUI keys focus handles in one global map, so the scope is how
+  two instances over the same host data stay apart.
 
 ## Papercuts recorded
 
@@ -160,12 +218,12 @@ One runtime does not borrow another's pass.
 - `effigy test:core` — 757 passed (48 files)
 - `cargo test -p poodle-headless` — 124 passed
 - `cargo test -p poodle-specs` — 260 passed
-- `cargo test -p poodle-render` — 272 passed
+- `cargo test -p poodle-render` — 283 passed
 - `effigy check:gpui` — clean
-- `effigy regressions:native` — 22 passed
+- `effigy regressions:native` — 25 passed
 - `cargo test --test catalogue` — 7 passed
 - `effigy docs:check` — clean
-- `effigy qa` — see the PR body for the run on the final rebased head
+- `effigy qa` — exit 0 on the final rebased head
 - `git diff --check origin/main...HEAD` — clean
 
 No `*-windowed` selector, `test:native-visual`, `qa:jetstream`, or Jetstream

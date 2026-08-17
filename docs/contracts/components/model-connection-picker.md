@@ -206,6 +206,10 @@ single-select transition, radio roving focus, and id wiring.
   composes the same content from descendant text plus a visually-hidden line.
 - Enter and Space select through the backend's own activation path; `on_key`
   carries only the arrow/Home/End roving moves, so Space is never bound twice.
+- `ModelConnectionPickerHandlers::instance_id` is the backend-state scope. The
+  semantic `id` stays readable and unscoped; the scope lives on `runtime_id`,
+  which is what GPUI keys focus handles and editing state by. Without it two
+  pickers offering the same routes would share one handle per option id.
 
 ## 11. Parity Checklist
 
@@ -227,11 +231,11 @@ single-select transition, radio roving focus, and id wiring.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Native implementation missing | rejected g14 pilot supplied no adoption path | open runtime gap; not parity-certified | g15 release-gap inventory |
+| — | — | no open deltas; native completion landed in `g15.008` | — |
 
 ## 13. Approval And Adoption Notes
 
 - contract status: `approved`
 - approver: operator, 2026-08-14
 - downstream adopter: Nucleus
-- future follow-up: compile native completion from the g15 release-gap inventory
+- native completion: landed in `g15.008` (Rust declaration, `poodle-headless` behaviour mirror, `poodle-render` composition, GPUI specimen and mounted evidence)

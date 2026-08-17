@@ -27,13 +27,18 @@ fn panel(child: impl IntoElement) -> Div {
     div().max_w(px(576.0)).child(child)
 }
 
-fn posture(theme: &GpuiThemeProvider, state: ModelCatalogueState) -> ModelCatalogueEditor {
+fn posture(
+    theme: &GpuiThemeProvider,
+    state: ModelCatalogueState,
+    scope: &str,
+) -> ModelCatalogueEditor {
     ModelCatalogueEditor::from_spec(ModelCatalogueEditorSpec::new().with_state(state), theme)
+        .with_instance_id(scope)
 }
 
 /// The live editor: order, visibility, grab, drop target, hidden disclosure,
 /// announcements and focus all round-trip through the preview's host loop.
-fn interactive(state: &AppState, with_custom_action: bool) -> ModelCatalogueEditor {
+fn interactive(state: &AppState, scope: &str, with_custom_action: bool) -> ModelCatalogueEditor {
     let theme = &state.theme;
     let queue = Arc::clone(&state.node_events);
     let host = &state.model_connection;
@@ -137,7 +142,10 @@ fn interactive(state: &AppState, with_custom_action: bool) -> ModelCatalogueEdit
                     ModelConnectionEvent::FocusRequest(id.to_string()),
                 ));
         })
-    });
+    })
+    // Four live editors share one host state; without a per-instance scope
+    // they would share one focus handle per item id too.
+    .with_instance_id(scope);
 
     if with_custom_action {
         editor = editor.with_custom_action(poodle_render::button(
@@ -163,7 +171,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Shown and hidden models",
-            panel(interactive(state, false)),
+            panel(interactive(state, "catalogue-main", false)),
         ))
         // Same live editor with the host's leading marks and row metadata
         // keyed by opaque id.
@@ -171,7 +179,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             theme,
             "Reorder-capable list with host content",
             panel(
-                interactive(state, false)
+                interactive(state, "catalogue-host-content", false)
                     .with_leading("model-gamma", Node::icon("star", 16.0))
                     .with_row_meta("model-gamma", Node::text("128k context")),
             ),
@@ -181,37 +189,45 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Duplicate display labels",
-            panel(interactive(state, false)),
+            panel(interactive(state, "catalogue-duplicates", false)),
         ))
         .child(group(
             theme,
             "Custom action",
-            panel(interactive(state, true)),
+            panel(interactive(state, "catalogue-custom-action", true)),
         ))
         .child(group(
             theme,
             "Loading",
-            panel(posture(theme, ModelCatalogueState::Loading)),
+            panel(posture(theme, ModelCatalogueState::Loading, "catalogue-loading")),
         ))
         .child(group(
             theme,
             "Unavailable",
-            panel(posture(theme, ModelCatalogueState::Unavailable)),
+            panel(posture(
+                theme,
+                ModelCatalogueState::Unavailable,
+                "catalogue-unavailable",
+            )),
         ))
         .child(group(
             theme,
             "Empty",
-            panel(posture(theme, ModelCatalogueState::Empty)),
+            panel(posture(theme, ModelCatalogueState::Empty, "catalogue-empty")),
         ))
         .child(group(
             theme,
             "Error",
-            panel(posture(theme, ModelCatalogueState::Error)),
+            panel(posture(theme, ModelCatalogueState::Error, "catalogue-error")),
         ))
         .child(group(
             theme,
             "Session negotiated",
-            panel(posture(theme, ModelCatalogueState::SessionNegotiated)),
+            panel(posture(
+                theme,
+                ModelCatalogueState::SessionNegotiated,
+                "catalogue-session",
+            )),
         ))
         .child(group(
             theme,
@@ -221,7 +237,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_items(state.model_connection.catalogue_items.clone())
                     .with_pending(true),
                 theme,
-            )),
+            )
+            .with_instance_id("catalogue-pending")),
         ))
         .child(group(
             theme,
@@ -231,6 +248,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_items(state.model_connection.catalogue_items.clone())
                     .with_drag_enabled(false),
                 theme,
-            )),
+            )
+            .with_instance_id("catalogue-no-drag")),
         ))
 }

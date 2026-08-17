@@ -3901,6 +3901,13 @@ impl ModelConnectionPicker {
         }
     }
 
+    /// Stable backend-state scope. Two pickers over the same routes would
+    /// otherwise share one focus handle per option id.
+    pub(crate) fn with_instance_id(mut self, instance_id: &str) -> Self {
+        self.handlers.instance_id = Some(instance_id.to_string());
+        self
+    }
+
     pub(crate) fn with_leading(mut self, option_id: &str, mark: poodle_node::Node) -> Self {
         self.slots.leading.insert(option_id.to_string(), mark);
         self
@@ -3953,6 +3960,12 @@ impl ModelConnectionSetup {
             slots: poodle_render::ModelConnectionSetupSlots::default(),
             handlers: poodle_render::ModelConnectionSetupHandlers::default(),
         }
+    }
+
+    /// Stable backend-state scope, forwarded to the composed picker.
+    pub(crate) fn with_instance_id(mut self, instance_id: &str) -> Self {
+        self.handlers.instance_id = Some(instance_id.to_string());
+        self
     }
 
     pub(crate) fn with_leading(mut self, option_id: &str, mark: poodle_node::Node) -> Self {
@@ -4043,6 +4056,12 @@ impl ModelConnectionCard {
         }
     }
 
+    /// Stable backend-state scope, for two surfaces showing one connection.
+    pub(crate) fn with_instance_id(mut self, instance_id: &str) -> Self {
+        self.handlers.instance_id = Some(instance_id.to_string());
+        self
+    }
+
     pub(crate) fn with_leading(mut self, mark: poodle_node::Node) -> Self {
         self.slots.leading = Some(mark);
         self
@@ -4115,6 +4134,13 @@ impl ModelCatalogueEditor {
             slots: poodle_render::ModelCatalogueEditorSlots::default(),
             handlers: poodle_render::ModelCatalogueEditorHandlers::default(),
         }
+    }
+
+    /// Stable backend-state scope. Two editors over the same catalogue would
+    /// otherwise share one focus handle per item id.
+    pub(crate) fn with_instance_id(mut self, instance_id: &str) -> Self {
+        self.handlers.instance_id = Some(instance_id.to_string());
+        self
     }
 
     pub(crate) fn with_leading(mut self, item_id: &str, mark: poodle_node::Node) -> Self {

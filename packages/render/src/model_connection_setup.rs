@@ -25,7 +25,7 @@ use poodle_headless::model_connection::{
 };
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
-    TextChangeHandler,
+    StylePatch, TextChangeHandler,
 };
 use poodle_specs::{
     ButtonSpec, ButtonVariant, CallOutSpec, CalloutAnnounceMode, ModelConnectionPickerSpec,
@@ -35,7 +35,7 @@ use poodle_specs::{
 use crate::button::button;
 use crate::callout::callout;
 use crate::model_connection_picker::{
-    model_connection_option_id, model_connection_picker_with_slots,
+    model_connection_option_focus_id, model_connection_picker_with_slots,
     ModelConnectionPickerHandlers, ModelConnectionPickerSlots,
 };
 use crate::presentation::{rem_to_px, resolve_semantic_size};
@@ -44,8 +44,28 @@ use crate::spinner::spinner;
 /// Contract §8: the label weight the workflow heading shares with the family.
 const LABEL_WEIGHT: u16 = 500;
 
-/// The heading a configured-flow stage change moves focus to.
+/// The semantic id of the heading a configured-flow stage change moves focus
+/// to. Readable and stable across instances.
 pub const MODEL_CONNECTION_SETUP_TITLE_ID: &str = "model-connection-setup:title";
+
+/// The backend-state id of that heading: the instance scope when the host
+/// supplied one, else the semantic id. Focus requests name this, because it is
+/// what the backend keys focus handles by.
+pub fn model_connection_setup_title_focus_id(instance_id: Option<&str>) -> String {
+    match instance_id {
+        Some(scope) => format!("model-connection-setup:{scope}:title"),
+        None => MODEL_CONNECTION_SETUP_TITLE_ID.to_string(),
+    }
+}
+
+/// The backend-state id of one workflow action, so a host or a mounted test
+/// can name it.
+pub fn model_connection_setup_action_id(instance_id: Option<&str>, action: &str) -> String {
+    match instance_id {
+        Some(scope) => format!("model-connection-setup:{scope}:{action}"),
+        None => format!("model-connection-setup:{action}"),
+    }
+}
 
 /// Host callbacks. Every one is a request; the host updates the spec.
 #[derive(Default)]
@@ -62,6 +82,9 @@ pub struct ModelConnectionSetupHandlers {
     /// A stage change wants focus moved to this element id. The backend owns
     /// the actual focus operation; the component names the destination.
     pub on_focus_request: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Stable native instance scope, forwarded to the composed picker. Two
+    /// setups over the same routes must never share backend focus handles.
+    pub instance_id: Option<String>,
 }
 
 /// Host-composed content. `configuration` is the only place provider fields,
@@ -107,9 +130,11 @@ pub fn model_connection_setup_with_slots(
     let can_add = model_connection_setup_can_submit(&context);
 
     let handlers = Arc::new(handlers);
+    let instance = handlers.instance_id.clone();
     let run = {
         let spec = spec.clone();
         let handlers = Arc::clone(&handlers);
+        let instance = instance.clone();
         move |event: ModelConnectionSetupEvent| {
             let result = model_connection_setup_transition(spec.behaviour_context(), event);
             for effect in result.effects {
@@ -124,12 +149,15 @@ pub fn model_connection_setup_with_slots(
                         // destination; the backend performs the move.
                         if let Some(handler) = &handlers.on_focus_request {
                             match stage {
-                                ModelConnectionSetupStage::Configure => {
-                                    handler(MODEL_CONNECTION_SETUP_TITLE_ID)
-                                }
+                                ModelConnectionSetupStage::Configure => handler(
+                                    &model_connection_setup_title_focus_id(instance.as_deref()),
+                                ),
                                 ModelConnectionSetupStage::Choose => {
                                     if let Some(value) = spec.value.as_deref() {
-                                        handler(&model_connection_option_id(value));
+                                        handler(&model_connection_option_focus_id(
+                                            instance.as_deref(),
+                                            value,
+                                        ));
                                     }
                                 }
                             }
@@ -172,13 +200,24 @@ pub fn model_connection_setup_with_slots(
     }
     let mut title = Node::text(&spec.title);
     title.id = Some(MODEL_CONNECTION_SETUP_TITLE_ID.to_string());
+    title.runtime_id = instance
+        .as_deref()
+        .map(|scope| model_connection_setup_title_focus_id(Some(scope)));
     title.style.text_size = Some(theme.resolve_space("typography.body.size"));
     title.style.text_weight = Some(LABEL_WEIGHT);
     title.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
     // Programmatically focusable, sequentially skipped — the web heading's
     // `tabindex="-1"`, which exists so a stage change has somewhere to land.
+    // The focus patch is not decoration: the GPUI backend creates a tracked
+    // focus handle only for a focusable node that draws differently when
+    // focused, so without it the stage's focus request would be dropped and
+    // the heading could never receive focus.
     title.interaction.focusable = true;
     title.a11y.tab_index = Some(-1);
+    title.style.focus = Some(StylePatch {
+        border_color: Some(theme.resolve_color("color.accent.focusRing")),
+        ..StylePatch::default()
+    });
     let mut header = header.child(title);
     if let Some(description) = spec.description.as_deref() {
         header = header.child(secondary_text(theme, description));
@@ -225,6 +264,7 @@ pub fn model_connection_setup_with_slots(
                         })
                     })
                 }),
+                instance_id: instance.clone(),
             },
         );
         body = body.child(picker);
@@ -333,6 +373,8 @@ pub fn model_connection_setup_with_slots(
     let cancel = action_button(
         theme,
         spec,
+        instance.as_deref(),
+        "cancel",
         effective_size,
         &spec.cancel_label,
         ButtonVariant::Ghost,
@@ -360,6 +402,8 @@ pub fn model_connection_setup_with_slots(
         let primary = action_button(
             theme,
             spec,
+            instance.as_deref(),
+            if requires_configuration { "continue" } else { "submit" },
             effective_size,
             label,
             ButtonVariant::Primary,
@@ -374,6 +418,8 @@ pub fn model_connection_setup_with_slots(
         let back = action_button(
             theme,
             spec,
+            instance.as_deref(),
+            "back",
             effective_size,
             &spec.back_label,
             ButtonVariant::Ghost,
@@ -386,6 +432,8 @@ pub fn model_connection_setup_with_slots(
         let submit = action_button(
             theme,
             spec,
+            instance.as_deref(),
+            "submit",
             effective_size,
             &spec.submit_label,
             ButtonVariant::Primary,
@@ -438,16 +486,19 @@ fn secondary_text(theme: &dyn ThemeProvider, content: &str) -> Node {
     node
 }
 
+#[allow(clippy::too_many_arguments)]
 fn action_button(
     theme: &dyn ThemeProvider,
     spec: &ModelConnectionSetupSpec,
+    instance_id: Option<&str>,
+    action: &str,
     effective_size: poodle_specs::ControlSize,
     label: &str,
     variant: ButtonVariant,
     disabled: bool,
     on_click: Arc<dyn Fn() + Send + Sync>,
 ) -> Node {
-    button(
+    let mut node = button(
         &ButtonSpec::new()
             .with_label(label)
             .with_variant(variant)
@@ -456,7 +507,10 @@ fn action_button(
             .with_density(spec.density),
         theme,
         (!disabled).then_some(on_click),
-    )
+    );
+    node.id = Some(model_connection_setup_action_id(None, action));
+    node.runtime_id = instance_id.map(|scope| model_connection_setup_action_id(Some(scope), action));
+    node
 }
 
 /// The configure stage's selected-route header: supplied labels, repeated.
@@ -515,6 +569,7 @@ fn selected_summary(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::model_connection_picker::model_connection_option_id;
     use poodle_headless::model_connection::{
         model_connection_picker_fixtures, ModelConnectionAvailability,
     };
@@ -591,6 +646,7 @@ mod tests {
                 on_focus_request: Some(Arc::new(move |id: &str| {
                     focus.lock().unwrap().push(id.to_string())
                 })),
+                instance_id: None,
             }
         }
     }
@@ -810,6 +866,84 @@ mod tests {
 
         assert_eq!(recorder.values.lock().unwrap().as_slice(), ["ollama-local"]);
         assert_eq!(recorder.queries.lock().unwrap().as_slice(), ["ollama"]);
+    }
+
+    #[test]
+    fn the_configure_heading_can_actually_take_focus() {
+        let node = model_connection_setup(&spec(), &theme(), ModelConnectionSetupHandlers::default());
+        let heading = node
+            .find(&|n| n.id.as_deref() == Some(MODEL_CONNECTION_SETUP_TITLE_ID))
+            .expect("the workflow heading");
+        assert!(heading.interaction.focusable);
+        assert_eq!(heading.a11y.tab_index, Some(-1));
+        assert!(
+            heading.style.focus.is_some(),
+            "the GPUI backend only tracks a focusable node that draws differently when focused"
+        );
+    }
+
+    #[test]
+    fn an_instance_scope_isolates_backend_state_ids() {
+        let scoped = |scope: &str| ModelConnectionSetupHandlers {
+            instance_id: Some(scope.to_string()),
+            ..ModelConnectionSetupHandlers::default()
+        };
+        let first = model_connection_setup(&spec(), &theme(), scoped("first"));
+        let second = model_connection_setup(&spec(), &theme(), scoped("second"));
+
+        for (node, scope) in [(&first, "first"), (&second, "second")] {
+            assert!(node
+                .find(&|n| n.runtime_id.as_deref()
+                    == Some(model_connection_setup_title_focus_id(Some(scope)).as_str()))
+                .is_some());
+            // The scope reaches the composed picker's options too.
+            assert!(node
+                .find(&|n| n.runtime_id.as_deref()
+                    == Some(
+                        model_connection_option_focus_id(Some(scope), "openai-responses").as_str()
+                    ))
+                .is_some());
+        }
+        assert!(first
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(model_connection_setup_title_focus_id(Some("second")).as_str()))
+            .is_none());
+        assert!(first
+            .find(&|n| n.id.as_deref() == Some(MODEL_CONNECTION_SETUP_TITLE_ID))
+            .is_some());
+    }
+
+    #[test]
+    fn a_scoped_setup_requests_scoped_focus_destinations() {
+        let recorder = Recorder::default();
+        let mut handlers = recorder.handlers();
+        handlers.instance_id = Some("second".to_string());
+        let node = model_connection_setup(
+            &spec().with_value(Some("openai-responses".to_string())),
+            &theme(),
+            handlers,
+        );
+        press(&node, "Continue");
+        assert_eq!(
+            recorder.focus.lock().unwrap().as_slice(),
+            [model_connection_setup_title_focus_id(Some("second"))]
+        );
+
+        let recorder = Recorder::default();
+        let mut handlers = recorder.handlers();
+        handlers.instance_id = Some("second".to_string());
+        let node = model_connection_setup(
+            &spec()
+                .with_stage(ModelConnectionSetupStage::Configure)
+                .with_value(Some("openai-responses".to_string())),
+            &theme(),
+            handlers,
+        );
+        press(&node, "Back");
+        assert_eq!(
+            recorder.focus.lock().unwrap().as_slice(),
+            [model_connection_option_focus_id(Some("second"), "openai-responses")]
+        );
     }
 
     #[test]

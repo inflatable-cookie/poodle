@@ -181,6 +181,9 @@ or derive one state from the other.
   mounted only while closed.
 - The provider label is stated on the identity group's accessible name rather
   than as a third visible line, matching the web's visually-hidden copy.
+- `ModelConnectionCardHandlers::instance_id` scopes the backend-state ids on
+  top of the card's own opaque `id`, so two surfaces showing one connection do
+  not share a disclosure focus handle.
 
 ## 11. Parity Checklist
 
@@ -201,11 +204,11 @@ or derive one state from the other.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Native implementation missing | rejected g14 pilot supplied no adoption path | open runtime gap; not parity-certified | g15 release-gap inventory |
+| — | — | no open deltas; native completion landed in `g15.008` | — |
 
 ## 13. Approval And Adoption Notes
 
 - contract status: `approved`
 - approver: operator, 2026-08-14
 - downstream adopter: Nucleus
-- future follow-up: compile native completion from the g15 release-gap inventory
+- native completion: landed in `g15.008` (Rust declaration, `poodle-headless` behaviour mirror, `poodle-render` composition, GPUI specimen and mounted evidence)

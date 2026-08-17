@@ -65,8 +65,15 @@ fn ollama() -> ModelConnectionCardSpec {
         .with_readiness(ModelConnectionReadiness::Unavailable, "Runtime not reachable")
 }
 
-fn plain(theme: &GpuiThemeProvider, spec: ModelConnectionCardSpec) -> ModelConnectionCard {
-    ModelConnectionCard::from_spec(spec, theme)
+/// Several groups show the same connection, so each instance carries its own
+/// backend-state scope: two cards for one connection id would otherwise share
+/// a disclosure focus handle.
+fn plain(
+    theme: &GpuiThemeProvider,
+    spec: ModelConnectionCardSpec,
+    scope: &str,
+) -> ModelConnectionCard {
+    ModelConnectionCard::from_spec(spec, theme).with_instance_id(scope)
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -81,10 +88,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_open(host.card_is_open("conn-openai-work"))
         .with_enabled(host.card_is_enabled("conn-openai-work", true));
     let live = ModelConnectionCard::from_spec(live_spec, theme)
+        .with_instance_id("card-live")
         .with_details(poodle_render::model_catalogue_editor(
             &ModelCatalogueEditorSpec::new().with_items(model_catalogue_fixtures()),
             theme,
-            poodle_render::ModelCatalogueEditorHandlers::default(),
+            poodle_render::ModelCatalogueEditorHandlers {
+                instance_id: Some("card-live-details".to_string()),
+                ..poodle_render::ModelCatalogueEditorHandlers::default()
+            },
         ))
         .on_open_change({
             let queue = Arc::clone(&queue);
@@ -130,11 +141,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex()
         .flex_col()
         .gap(px(32.0))
-        .child(group(theme, "Ready and enabled", plain(theme, work())))
-        .child(group(theme, "Ready and disabled", plain(theme, personal())))
-        .child(group(theme, "Checking", plain(theme, codex())))
-        .child(group(theme, "Needs attention", plain(theme, anthropic())))
-        .child(group(theme, "Unavailable", plain(theme, ollama())))
+        .child(group(
+            theme,
+            "Ready and enabled",
+            plain(theme, work(), "card-ready"),
+        ))
+        .child(group(
+            theme,
+            "Ready and disabled",
+            plain(theme, personal(), "card-off"),
+        ))
+        .child(group(theme, "Checking", plain(theme, codex(), "card-checking")))
+        .child(group(
+            theme,
+            "Needs attention",
+            plain(theme, anthropic(), "card-attention"),
+        ))
+        .child(group(
+            theme,
+            "Unavailable",
+            plain(theme, ollama(), "card-unavailable"),
+        ))
         // Two instances of one provider. They differ only by instance label
         // and by their opaque ids, which is the whole point.
         .child(group(
@@ -144,15 +171,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex()
                 .flex_col()
                 .gap(px(12.0))
-                .child(plain(theme, work()))
-                .child(plain(theme, personal())),
+                .child(plain(theme, work(), "card-pair-work"))
+                .child(plain(theme, personal(), "card-pair-personal")),
         ))
         // Host composition: the provider mark sits inline before the name,
         // badges follow it, and the actions menu is the host's own.
         .child(group(
             theme,
             "Host mark, badges, and actions",
-            plain(theme, work())
+            plain(theme, work(), "card-host-content")
                 .with_leading(Node::icon("star", 16.0))
                 .with_badges(poodle_render::pill(
                     &PillSpec::new()
@@ -174,7 +201,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Closed UpdateCenter accessory",
-            plain(theme, work()).with_closed_accessory(Node::text("Update 1.4.0 available")),
+            plain(theme, work(), "card-accessory")
+                .with_closed_accessory(Node::text("Update 1.4.0 available")),
         ))
         .child(group(
             theme,
@@ -186,16 +214,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "Narrow summary wrapping",
             div()
                 .max_w(px(288.0))
-                .child(plain(theme, anthropic())),
+                .child(plain(theme, anthropic(), "card-narrow")),
         ))
         .child(group(
             theme,
             "Disabled card",
-            plain(theme, work().with_disabled(true)),
+            plain(theme, work().with_disabled(true), "card-disabled"),
         ))
         .child(group(
             theme,
             "Enable switch disabled on its own",
-            plain(theme, codex().with_enable_disabled(true)),
+            plain(theme, codex().with_enable_disabled(true), "card-enable-locked"),
         ))
 }

@@ -1435,3 +1435,175 @@ fn model_catalogue_editor_hide_moves_real_focus_to_the_next_shown_model() {
         );
     });
 }
+
+/// The setup's configure heading is a real focus destination, not just a
+/// named one: entering configure moves the window's focus onto it, and the
+/// id Back names resolves to a node the backend created a handle for.
+#[test]
+fn model_connection_setup_stage_focus_lands_on_real_handles() {
+    use poodle_headless::model_connection::{
+        model_connection_picker_fixtures, ModelConnectionSetupStage,
+    };
+    use poodle_render::{
+        model_connection_setup_action_id, model_connection_setup_title_focus_id,
+    };
+    use poodle_specs::ModelConnectionSetupSpec;
+
+    run_headless(|cx| {
+        let requested = Arc::new(Mutex::new(Vec::new()));
+
+        let build = |stage: ModelConnectionSetupStage, requested: Arc<Mutex<Vec<String>>>| {
+            let mut node = poodle_render::model_connection_setup(
+                &ModelConnectionSetupSpec::new()
+                    .with_options(model_connection_picker_fixtures())
+                    .with_stage(stage)
+                    .with_value(Some("openai-responses".to_string())),
+                &theme(),
+                poodle_render::ModelConnectionSetupHandlers {
+                    on_stage_change: Some(Arc::new(|_| {})),
+                    on_focus_request: Some(Arc::new(move |id: &str| {
+                        requested.lock().unwrap().push(id.to_string());
+                        poodle_gpui_node_backend::request_focus(id);
+                    })),
+                    instance_id: Some("mounted".to_string()),
+                    ..poodle_render::ModelConnectionSetupHandlers::default()
+                },
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            Arc::new(Mutex::new(node))
+        };
+
+        let heading = model_connection_setup_title_focus_id(Some("mounted"));
+        let continue_id = model_connection_setup_action_id(Some("mounted"), "continue");
+        let back_id = model_connection_setup_action_id(Some("mounted"), "back");
+
+        // choose → configure: the heading is in both stages, so the request
+        // lands in the frame that follows the activation.
+        let choose = build(ModelConnectionSetupStage::Choose, Arc::clone(&requested));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&choose));
+        driver.wait_for_focus_handle(&continue_id);
+        driver.keyboard_activate(&continue_id);
+        driver.draw_frame();
+        assert_eq!(requested.lock().unwrap().as_slice(), [heading.clone()]);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&heading),
+            Some(true),
+            "the heading actually receives the focus it was sent"
+        );
+
+        // configure → choose: Back names the selected option, which only
+        // exists once the host applies the stage. Mount that stage and prove
+        // the named id is a handle the backend really created.
+        let configure = build(ModelConnectionSetupStage::Configure, Arc::clone(&requested));
+        driver.mount_node(Arc::clone(&configure));
+        driver.wait_for_focus_handle(&back_id);
+        driver.keyboard_activate(&back_id);
+        let back_target = requested
+            .lock()
+            .unwrap()
+            .last()
+            .cloned()
+            .expect("Back names a destination");
+
+        driver.mount_node(Arc::clone(&choose));
+        driver.wait_for_focus_handle(&back_target);
+        driver.focus_element(&back_target);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&back_target),
+            Some(true),
+            "Back's destination is a node the backend can focus"
+        );
+    });
+}
+
+/// Hiding the sole shown model moves real backend focus onto the
+/// hidden-section disclosure — the `Collapsible`'s own focusable trigger, not
+/// the outer region it returns.
+#[test]
+fn model_catalogue_editor_hiding_the_last_row_focuses_the_hidden_disclosure() {
+    use poodle_headless::model_connection::ModelCatalogueItem;
+    use poodle_render::model_catalogue_hidden_focus_id;
+    use poodle_specs::ModelCatalogueEditorSpec;
+
+    run_headless(|cx| {
+        let disclosed = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&disclosed);
+        let items = vec![
+            ModelCatalogueItem::new("model-solo", "Solo"),
+            ModelCatalogueItem::new("model-gone", "Gone").with_visible(false),
+        ];
+        let mut node = poodle_render::model_catalogue_editor(
+            &ModelCatalogueEditorSpec::new().with_items(items),
+            &theme(),
+            poodle_render::ModelCatalogueEditorHandlers {
+                on_visibility_change: Some(Arc::new(|_| {})),
+                on_hidden_open_change: Some(Arc::new(move |open| {
+                    sink.lock().unwrap().push(open)
+                })),
+                on_focus_request: Some(Arc::new(|id: &str| {
+                    poodle_gpui_node_backend::request_focus(id);
+                })),
+                instance_id: Some("mounted".to_string()),
+                ..poodle_render::ModelCatalogueEditorHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        let hide = "model-catalogue-editor:mounted:model-solo:hide";
+        let hidden = model_catalogue_hidden_focus_id(Some("mounted"));
+        driver.wait_for_focus_handle(hide);
+        driver.keyboard_activate(hide);
+        driver.draw_frame();
+
+        assert_eq!(disclosed.lock().unwrap().as_slice(), [true]);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&hidden),
+            Some(true),
+            "the hidden-section disclosure actually receives the focus it was sent"
+        );
+    });
+}
+
+/// Two mounted pickers over the same routes keep separate backend focus
+/// handles: focusing one instance's option leaves the other's alone.
+#[test]
+fn two_model_connection_pickers_do_not_share_backend_focus_handles() {
+    use poodle_headless::model_connection::model_connection_picker_fixtures;
+    use poodle_render::model_connection_option_focus_id;
+    use poodle_specs::ModelConnectionPickerSpec;
+
+    run_headless(|cx| {
+        let picker = |scope: &str| {
+            poodle_render::model_connection_picker(
+                &ModelConnectionPickerSpec::new()
+                    .with_options(model_connection_picker_fixtures()),
+                &theme(),
+                poodle_render::ModelConnectionPickerHandlers {
+                    instance_id: Some(scope.to_string()),
+                    ..poodle_render::ModelConnectionPickerHandlers::default()
+                },
+            )
+        };
+        let mut node = Node::container()
+            .child(picker("left"))
+            .child(picker("right"));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        let left = model_connection_option_focus_id(Some("left"), "openai-responses");
+        let right = model_connection_option_focus_id(Some("right"), "openai-responses");
+        driver.wait_for_focus_handle(&left);
+        driver.wait_for_focus_handle(&right);
+        driver.focus_element(&left);
+
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&left), Some(true));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right),
+            Some(false),
+            "the second picker's option keeps its own handle"
+        );
+    });
+}

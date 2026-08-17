@@ -21,9 +21,9 @@ Public types and helpers are recorded separately and are **not** part of the den
 | React implementation + export | 175 | 0 | 0 |
 | React gallery specimen | 175 | 0 | 0 |
 | Focused React test | 175 | 0 | 0 |
-| Rust declaration (`<Name>Spec`, including documented aliases) | 166 | 8 | 1 |
-| Rust render module (`poodle-render`) | 164 | 10 | 1 |
-| GPUI specimen | 148 | 26 | 1 |
+| Rust declaration (`<Name>Spec`, including documented aliases) | 170 | 4 | 1 |
+| Rust render module (`poodle-render`) | 168 | 6 | 1 |
+| GPUI specimen | 152 | 22 | 1 |
 | `test:web-pack-install` Svelte mounted proof | 9 | 166 (not exercised) | 0 |
 | Downstream consumer use (16 canonical consumers scanned) | 110 | 65 (no use found) | 0 |
 | Jetstream | 0 (program-deferred) | — | — |

@@ -197,7 +197,14 @@ and disclosure transition for the hidden section.
   places would toggle the grab twice.
 - Focus after a move or a hide is a request naming the destination element id;
   the backend performs the move. Hiding the last shown model also asks for the
-  hidden section to be disclosed, so the destination exists.
+  hidden section to be disclosed, so the destination exists. That destination
+  is `Collapsible`'s own focusable trigger — the outer region it returns is not
+  focusable — and the trigger is stamped with a focus patch so the backend
+  creates a handle for it.
+- `ModelCatalogueEditorHandlers::instance_id` is the backend-state scope.
+  Semantic row ids stay readable; the scope lives on `runtime_id`, and focus
+  destinations are named with `model_catalogue_handle_focus_id` /
+  `model_catalogue_hidden_focus_id`.
 - `leading` and `rowMeta` become host-composed nodes keyed by item id;
   `customAction` is a single header node.
 
@@ -221,11 +228,14 @@ and disclosure transition for the hidden section.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Native implementation missing | rejected g14 pilot supplied no adoption path | open runtime gap; not parity-certified | g15 release-gap inventory |
+| — | — | no open deltas; native completion landed in `g15.008` | — |
 
 ## 13. Approval And Adoption Notes
 
 - contract status: `approved`
 - approver: operator, 2026-08-14
 - downstream adopter: Nucleus
+- native completion: landed in `g15.008` (Rust declaration, `poodle-headless`
+  behaviour mirror, `poodle-render` composition, GPUI specimen and mounted
+  evidence)
 - future follow-up: large-catalogue virtualization only after a concrete case
