@@ -1,7 +1,7 @@
 # g15.009 — Update, Settings, Radio & Context-Provider Native Closure
 
-Status: **blocked** — release-first hold; `g15.013` is next
-Depends on: `g15.001` (measured gaps)
+Status: **blocked** — `g15.008` is next
+Depends on: `g15.001` (measured gaps), `g15.008` (preceding native tranche)
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
 

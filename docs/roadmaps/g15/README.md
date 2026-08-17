@@ -1,6 +1,6 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.001`–`g15.007` and `g15.014` complete; `g15.013`
+Status: active — `g15.001`–`g15.007` and `g15.014` complete; `g15.008`
 ready next
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
@@ -14,21 +14,22 @@ Ship Poodle v0.2.0 on an honest, complete Svelte roster. The release
 denominator is **every public Svelte component export** — frozen from
 `packages/svelte/components/src/index.ts` and the package `exports` map, not
 from a representative subset. React stays tightly paired through shared CSS
-and framework-free web behaviour; the certified GPUI subset is named honestly;
-Jetstream remains program-deferred.
+and framework-free web behaviour; the measured shared Rust and GPUI gaps close
+before certification; Jetstream remains program-deferred.
 
-This generation is release-first, not architecture-first. Two parity
+This generation is release-first, not architecture-first. Release-first means
+the runway closes the measured implementation, specimen, and evidence gaps
+before certification; it does not make certification an early exit. Two parity
 architectures were tried and rejected (g13's Rust IR, g14's executable
 conformance). g15 does not design a third one. It inventories, closes the
 honest gaps, and ships.
 
-## Release Support Versus Parity Completion
+## Release Denominator and Active-Cohort Closure
 
-The full Svelte roster is the v0.2.0 release denominator. Certifying that
-package does not certify active-cohort parity across Svelte, React, Rust, and
-GPUI. Missing mirrors and native implementations remain explicit gaps under
-the working rules; experimental packages keep experimental labels, and Poodle
-does not claim full cross-runtime completion while those gaps remain.
+The full Svelte roster is the v0.2.0 release denominator. The generation still
+completes its active-cohort implementation and evidence cards before release
+certification. Experimental package labels remain honest, Jetstream remains
+program-deferred, and no runtime borrows another runtime's pass.
 
 ## Why It Matters
 
@@ -42,7 +43,8 @@ unproved, and what each runtime's evidence is — then ship.
 `001` and `002` are executed; the inventory froze the denominator and the
 first evidence tranche closed 29 paired gaps. Later cards are listed in
 dependency order and are not dispatched until the orchestrator reviews and
-advances them.
+advances them. `g15.014` was an urgent prerequisite remediation executed out
+of numeric order; `g15.013` remains the final card.
 
 ## Runway
 
@@ -57,13 +59,13 @@ and status advance are the orchestrator's.
 5. [005 — Svelte focused evidence: workstation & agent](005-svelte-focused-evidence-workstation-agent.md) — complete; final 24 Svelte and 23 React evidence gaps closed
 6. [006 — React mirror implementation & gallery closure](006-react-mirror-closure.md) — complete; React implementation/gallery are 175/0 and focused evidence is 152/23
 7. [007 — Licence family native completion](007-licence-family-native-completion.md) — complete; PR #32 closed the Licence native family and prerequisites
-8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — carries `g14.020`
-9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md)
+8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — ready next; carries `g14.020`
+9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md) — follows `008`
 10. [010 — Display, workstation & agent GPUI specimens](010-display-workstation-agent-gpui-specimens.md) — GPUI closure after `007`–`009`
 11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — carries `g14.026`
 12. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — per the `g14.022` decision; headless capture required
 13. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
-14. [013 — v0.2.0 release certification](013-v020-release-certification.md) — ready next; all prerequisites and shared-row holds cleared
+14. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after `008`–`012`
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)
@@ -92,6 +94,6 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Dispatch `g15.013` for v0.2.0 release certification. Hold `g15.008`–`g15.012`
-as post-certification parity and catalogue lanes until the certification PR is
-reviewed; release mutation remains behind the explicit operator gate.
+Prepare and dispatch `g15.008`. `g15.009`–`g15.012` follow in runway order;
+`g15.013` stays blocked as the final certification gate until every earlier
+card is complete. Release mutation remains behind the explicit operator gate.

@@ -1,23 +1,21 @@
 # g15.013 — v0.2.0 Release Certification
 
-Status: **ready** — next; prerequisites and shared-row hold complete
-Depends on: `g15.002`–`g15.005` (Svelte focused evidence closure),
-`g15.006` (React mirror closure), `g15.007` (shared roster/register update),
-`g15.014` (release-gate remediation — security prerequisite)
+Status: **blocked** — final generation gate after `g15.008`–`g15.012`
+Depends on: `g15.002`–`g15.012` (release-baseline implementation, specimens,
+and evidence), `g15.014` (release-gate remediation — security prerequisite)
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
 
 ## Outcome
 
-Certify and package Poodle v0.2.0 once every Svelte-denominator blocker is
-closed **and every release gate is green**. The certification claim is the
-frozen Svelte roster (175 components with contract, implementation, export,
-specimen, and focused evidence). Missing React, Rust, and GPUI surfaces
-remain explicit parity gaps under the working rules; experimental package
-labels stay honest. This card does not claim active-cohort parity completion.
-Effigy's release contract does not allow a red gate to be waived: `effigy qa`
-must be fully green before certification, which requires the nanoid advisory
-remediation to have landed first.
+Certify and package Poodle v0.2.0 only after every earlier g15 implementation,
+specimen, audit, and conformance card is complete **and every release gate is
+green**. The frozen Svelte roster remains the release denominator: 175
+components with contract, implementation, export, specimen, and focused
+evidence. The completed active-cohort cards must also be reported honestly;
+experimental package labels stay explicit and Jetstream remains
+program-deferred. Effigy's release contract does not allow a red gate or an
+unfinished earlier card to be waived.
 
 ## Prerequisites
 
@@ -29,6 +27,10 @@ remediation to have landed first.
       cleared from `effigy qa`.
 - [x] `g15.007` landed: Licence native rows and the shared release roster and
       gap register are current before certification begins.
+- [ ] `g15.008`–`g15.010` landed: remaining native declarations, shared Rust
+      rendering, and GPUI specimen gaps are closed.
+- [ ] `g15.011` landed: the human-centred specimen catalogue audit is complete.
+- [ ] `g15.012` landed: the primitive-first visual conformance lane is complete.
 
 ## Execution Plan
 
@@ -48,9 +50,10 @@ remediation to have landed first.
       components.
 - [ ] `effigy qa` passes on every lane, including `bun audit`.
 - [ ] v0.2.0 package, changelog, and documentation reflect the honest state:
-      Svelte certified; React/Rust/GPUI parity gaps named; Jetstream deferred.
-- [ ] Register rows updated to closed where owned by earlier cards; remaining
-      rows renamed as post-release parity work, not v0.2.0 blockers.
+      the full Svelte denominator and completed active-cohort evidence are
+      named; experimental labels stay explicit; Jetstream is deferred.
+- [ ] Register rows owned by `g15.002`–`g15.012` are closed; any remaining rows
+      are explicitly outside the active cohort or release denominator.
 
 ## Operator Gate
 
@@ -61,18 +64,19 @@ remediation to have landed first.
 ## Acceptance
 
 - [ ] `effigy qa` passes fully green (every lane, including `bun audit`).
-- [ ] The release claim matches the roster: no cross-runtime pass borrowed,
-      no parity claim beyond the Svelte denominator.
+- [ ] The release claim matches the roster and completed active-cohort cards;
+      no runtime borrows another runtime's pass.
 - [ ] The experimental React/Rust/GPUI package labels remain honest.
 - [ ] The operator has approved the release mutation explicitly.
 
 ## Stop Conditions
 
-- The certification claims cross-runtime parity or active-cohort completion.
+- The certification claims Jetstream completion or visual parity beyond the
+  evidence landed by `g15.012`.
 - A release blocker is waived by a declared absence.
 - A red release gate is bypassed rather than remediated.
-- Packaging proceeds while a Svelte-denominator surface is still open, or
-  while the `bun audit` advisory is still open.
+- Packaging proceeds while any `g15.008`–`g15.012` card, Svelte-denominator
+  surface, or release gate remains open.
 
 ## Writable Scope
 

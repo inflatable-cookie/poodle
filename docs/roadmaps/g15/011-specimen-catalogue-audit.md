@@ -1,7 +1,8 @@
 # g15.011 — Human-Centred Specimen Catalogue Audit
 
-Status: **blocked** — release-first hold; `g15.013` is next
-Depends on: `g15.001` (measured roster); carries forward `g14.026` with its
+Status: **blocked** — `g15.010` must complete first
+Depends on: `g15.001` (measured roster), `g15.010` (final GPUI specimen set);
+carries forward `g14.026` with its
 rubric and bounded shared specimen-plan boundary intact
 Governing refs: `release-baseline-roster.md`,
 `../../roadmaps/g14/026-human-centred-specimen-catalogue-audit.md`,

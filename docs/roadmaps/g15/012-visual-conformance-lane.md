@@ -1,7 +1,8 @@
 # g15.012 — Primitive-First Visual Conformance Lane
 
-Status: **blocked** — release-first hold; `g15.013` is next
-Depends on: `g15.001` (measured roster)
+Status: **blocked** — `g15.011` must complete first
+Depends on: `g15.001` (measured roster), `g15.011` (human-centred catalogue
+audit)
 Governing refs: `release-baseline-roster.md`,
 `../../roadmaps/g14/022-generation-closeout.md` (operator ruling on future
 visual conformance), `../../roadmaps/g14/conformance-estate.md`,
@@ -18,7 +19,8 @@ primitives and reuses the retained headless/native capture foundation.
 What remains forbidden is making those fixtures a component API/behaviour
 authority or a universal runtime representation — the rejected g13/g14
 mechanisms do not return under new names. The lane is a diagnostic aid for
-human review, not a completion gate and not a release prerequisite.
+human review, not a component-completion gate. By operator ruling, the card
+still completes before the generation's final release-certification card.
 
 ## Scope
 
