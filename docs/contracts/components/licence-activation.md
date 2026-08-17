@@ -359,6 +359,16 @@ Status: **bound** — native implementation lands with `g15.007` (specs,
 - `machineLabel` is an opt-in seed on the web; on Rust targets the host seeds
   `spec.machine_label` and drives the draft. `None` hides the control; the
   committed label is trimmed and `null` for blank — `unnamed machine` copy is
-  never emitted.
+  never emitted. Editing is controlled: typing updates the draft
+  (`on_machine_label_change`), commit/cancel close it through distinct
+  channels, and **Escape restores the value snapped at edit start** (the
+  host/ specimen holds the snapshot) — the web EditableLabel's revert rule.
 - Data-state roles (`mode`, `route`, `busy`) mirror the web's `data-*`
   attributes; `pending` freezes the submit action (loading button).
+- The offline file read failure surfaces the approved
+  `LICENCE_FILE_UNREADABLE_MESSAGE` (`That file could not be read.`) rather
+  than a raw OS error; accept/size rejections keep their honest copy. Editing
+  the key clears the local validation copy (the web pair's `handleKeyChange`).
+- The composed EditableLabel input now accepts typed characters
+  (`on_edit_key`/`on_edit_insert` → the controlled draft) and carries a
+  focus ring — a bounded defect fix exposed by the machine-name evidence.

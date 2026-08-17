@@ -391,7 +391,7 @@ fn free_form_key_view(
     frozen: bool,
 ) -> Node {
     let invalid = spec.key_message.is_some();
-    let field_spec = FieldSpec::new("licence-key", "Licence key")
+    let mut field_spec = FieldSpec::new("licence-key", "Licence key")
         .with_validation_state(if invalid {
             ValidationState::Invalid
         } else {
@@ -399,6 +399,9 @@ fn free_form_key_view(
         })
         .with_size(spec.size)
         .with_density(spec.density);
+    if let Some(message) = &spec.key_message {
+        field_spec = field_spec.with_error(message.clone());
+    }
 
     let text_spec = TextInputSpec {
         value: Some(spec.key_draft.clone()),
@@ -662,7 +665,6 @@ mod tests {
     #[test]
     fn machine_label_change_commit_and_cancel_are_distinct() {
         let events = Arc::new(std::sync::Mutex::new(Vec::new()));
-        let sink = Arc::clone(&events);
         let spec = LicenceActivationSpec::new()
             .with_mode(LicenceActivationMode::Key)
             .with_machine_label(Some("rig".to_string()))

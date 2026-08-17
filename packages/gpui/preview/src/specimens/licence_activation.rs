@@ -76,6 +76,81 @@ fn group(theme: &GpuiThemeProvider, label: &str, specimen: impl IntoElement) -> 
         .child(specimen)
 }
 
+/// Build the four machine-name handlers shared by the key and embedded
+/// instances. Edit start snaps the committed value; typing updates the
+/// controlled draft; commit keeps the draft and clears the snapshot; Escape
+/// restores the snapshot (the web EditableLabel reverts the draft).
+fn label_handlers(
+    queue: &Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
+    committed: &str,
+) -> (
+    Arc<dyn Fn() + Send + Sync>,
+    Arc<dyn Fn(&str) + Send + Sync>,
+    Arc<dyn Fn(&str) + Send + Sync>,
+    Arc<dyn Fn() + Send + Sync>,
+) {
+    let committed = committed.to_string();
+
+    let edit = {
+        let queue = Arc::clone(queue);
+        let committed = committed.clone();
+        Arc::new(move || {
+            queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetOptionalText {
+                    key: "la-machine-label-original".to_string(),
+                    value: Some(committed.clone()),
+                });
+            queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetToggle {
+                    key: "la-machine-editing".to_string(),
+                    value: true,
+                });
+        })
+    };
+    let change = {
+        let queue = Arc::clone(queue);
+        Arc::new(move |value: &str| {
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                key: "la-machine-label".to_string(),
+                value: value.to_string(),
+            });
+        })
+    };
+    let commit = {
+        let queue = Arc::clone(queue);
+        Arc::new(move |_value: &str| {
+            queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetOptionalText {
+                    key: "la-machine-label-original".to_string(),
+                    value: None,
+                });
+            queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetToggle {
+                    key: "la-machine-editing".to_string(),
+                    value: false,
+                });
+        })
+    };
+    let cancel = {
+        let queue = Arc::clone(queue);
+        Arc::new(move || {
+            queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::MachineLabelCancel);
+        })
+    };
+    (edit, change, commit, cancel)
+}
+
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let queue = Arc::clone(&state.node_events);
@@ -175,6 +250,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 key: "la-key".to_string(),
                 value: value.to_string(),
             });
+            // Editing the key clears the local validation copy — the web pair
+            // clears keyMessage on every change, so a stale rejection must
+            // never survive against a new key.
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                key: "la-key-message".to_string(),
+                value: String::new(),
+            });
         })
     })
     .on_key_selection_change({
@@ -189,44 +271,21 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     })
     .on_key_check(Arc::new(|input: &str| SpecimenKeyFormat.parse(input)))
     .on_machine_label_edit({
-        let queue = Arc::clone(&queue);
-        Arc::new(move || {
-            queue
-                .lock()
-                .unwrap()
-                .push(NodeSpecimenEvent::SetToggle {
-                    key: "la-machine-editing".to_string(),
-                    value: true,
-                });
-        })
+        let (edit, _change, _commit, _cancel) =
+            label_handlers(&queue, machine_label.as_str());
+        edit
     })
     .on_machine_label_change({
-        let queue = Arc::clone(&queue);
-        Arc::new(move |value: &str| {
-            queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                key: "la-machine-label".to_string(),
-                value: value.to_string(),
-            });
-        })
+        let (_edit, change, _commit, _cancel) = label_handlers(&queue, machine_label.as_str());
+        change
     })
     .on_machine_label_commit({
-        let queue = Arc::clone(&queue);
-        Arc::new(move |_value: &str| {
-            // Commit closes the edit state (a keystroke never does).
-            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
-                key: "la-machine-editing".to_string(),
-                value: false,
-            });
-        })
+        let (_edit, _change, commit, _cancel) = label_handlers(&queue, machine_label.as_str());
+        commit
     })
     .on_machine_label_cancel({
-        let queue = Arc::clone(&queue);
-        Arc::new(move || {
-            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
-                key: "la-machine-editing".to_string(),
-                value: false,
-            });
-        })
+        let (_edit, _change, _commit, cancel) = label_handlers(&queue, machine_label.as_str());
+        cancel
     })
     .on_submit(key_submit);
 
@@ -378,43 +437,21 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         })
     })
     .on_machine_label_edit({
-        let queue = Arc::clone(&queue);
-        Arc::new(move || {
-            queue
-                .lock()
-                .unwrap()
-                .push(NodeSpecimenEvent::SetToggle {
-                    key: "la-machine-editing".to_string(),
-                    value: true,
-                });
-        })
+        let (edit, _change, _commit, _cancel) =
+            label_handlers(&queue, machine_label.as_str());
+        edit
     })
     .on_machine_label_change({
-        let queue = Arc::clone(&queue);
-        Arc::new(move |value: &str| {
-            queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                key: "la-machine-label".to_string(),
-                value: value.to_string(),
-            });
-        })
+        let (_edit, change, _commit, _cancel) = label_handlers(&queue, machine_label.as_str());
+        change
     })
     .on_machine_label_commit({
-        let queue = Arc::clone(&queue);
-        Arc::new(move |_value: &str| {
-            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
-                key: "la-machine-editing".to_string(),
-                value: false,
-            });
-        })
+        let (_edit, _change, commit, _cancel) = label_handlers(&queue, machine_label.as_str());
+        commit
     })
     .on_machine_label_cancel({
-        let queue = Arc::clone(&queue);
-        Arc::new(move || {
-            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
-                key: "la-machine-editing".to_string(),
-                value: false,
-            });
-        })
+        let (_edit, _change, _commit, cancel) = label_handlers(&queue, machine_label.as_str());
+        cancel
     })
     .on_submit(embedded_submit)
     .on_file_browse({
@@ -427,6 +464,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     accept: Some(".licence".to_string()),
                     max_size: None,
                 },
+                // A read failure is a local polite error on this component
+                // surface — the approved web copy, never the OS text.
+                failed_message: Some(
+                    poodle_headless::licence::LICENCE_FILE_UNREADABLE_MESSAGE.to_string()
+                ),
             });
         })
     })

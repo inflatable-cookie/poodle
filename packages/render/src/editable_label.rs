@@ -172,6 +172,37 @@ pub fn editable_label_with_handlers(
         if !spec.is_disabled {
             input.interaction.on_text_change = handlers.on_change.clone();
             input.interaction.on_cancel = handlers.on_cancel.clone();
+            // The editing input rings in the accent focus colour when
+            // focused — the same focus-visible signal a TextInput carries —
+            // which is also what lets the GPUI backend track its focus.
+            input.style.focus = Some(StylePatch {
+                background: None,
+                border_color: Some(theme.resolve_color("color.accent.focusRing")),
+                text_color: None,
+                opacity: None,
+            });
+            // Typing reaches the controlled draft: the platform IME and
+            // paste land through `on_edit_insert`, direct keys through
+            // `on_edit_key`. The host re-renders with the reported value, so
+            // the captured draft is current at each keystroke.
+            if let Some(change) = handlers.on_change.clone() {
+                let insert_change = change.clone();
+                input.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
+                    insert_change(text);
+                }));
+                let value = spec.value.clone();
+                input.interaction.on_edit_key = Some(Arc::new(move |key, _mods| {
+                    let mut next = value.clone();
+                    if key == "backspace" {
+                        next.pop();
+                    } else if key.chars().count() == 1 {
+                        next.push_str(key);
+                    } else {
+                        return;
+                    }
+                    change(&next);
+                }));
+            }
             if let Some(handler) = &handlers.on_commit {
                 let handler = Arc::clone(handler);
                 let value = spec.value.clone();

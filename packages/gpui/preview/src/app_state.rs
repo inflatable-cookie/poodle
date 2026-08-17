@@ -16,6 +16,7 @@ fn apply_file_pick_outcome(
     specimens: &mut SpecimenState,
     key: &str,
     outcome: &FilePickOutcome,
+    failed_message: Option<&str>,
 ) -> bool {
     let mut changed = false;
     match outcome {
@@ -33,11 +34,23 @@ fn apply_file_pick_outcome(
             changed |= specimens.text.remove(&error_key).is_some();
         }
         FilePickOutcome::Cancelled => {}
-        FilePickOutcome::Rejected(message) | FilePickOutcome::Failed(message) => {
+        FilePickOutcome::Rejected(message) => {
+            // Honest accept/size copy is preserved verbatim.
             let error_key = format!("{key}-error");
             let base64_key = format!("{key}-base64");
             changed |= specimens.text.get(&error_key) != Some(message);
             specimens.text.insert(error_key, message.clone());
+            changed |= specimens.text.remove(&base64_key).is_some();
+        }
+        FilePickOutcome::Failed(message) => {
+            // A read failure is a local polite error on the component surface
+            // (the raw OS text never reaches the operator); the capability
+            // outcome stays honest, the visible copy is the approved message.
+            let visible = failed_message.unwrap_or(message).to_string();
+            let error_key = format!("{key}-error");
+            let base64_key = format!("{key}-base64");
+            changed |= specimens.text.get(&error_key) != Some(&visible);
+            specimens.text.insert(error_key, visible);
             changed |= specimens.text.remove(&base64_key).is_some();
         }
     }
@@ -538,21 +551,32 @@ pub enum NodeSpecimenEvent {
     FileBrowse {
         key: String,
         spec: SingleFilePickSpec,
+        /// The polite message to surface for a read failure on this component
+        /// surface (e.g. LicenceActivation's "That file could not be read.").
+        /// The generic capability outcome stays honest; only the visible copy
+        /// is remapped.
+        failed_message: Option<String>,
     },
     /// A route/mode change invalidated a selected or pending file read: the
     /// completed bytes are cleared and in-flight/pending outcomes are made
     /// stale by generation so they can never land.
     FileInvalidate,
+    /// The machine-name edit was cancelled (Escape): the committed value
+    /// snapped at edit start is restored and editing closes.
+    MachineLabelCancel,
     /// A LicenceSeats interaction.
     LicenceSeats(LicenceSeatsEvent),
 }
 
 /// One requested single-file pick, waiting for the host to open its prompt.
+#[derive(Clone)]
 pub struct FilePickRequest {
     /// Specimen-state key prefix; the resolved outcome lands in
     /// `{key}-name`, `{key}-base64`, and `{key}-error`.
     pub key: String,
     pub spec: SingleFilePickSpec,
+    /// Polite copy for a read failure, surfaced instead of the raw OS text.
+    pub failed_message: Option<String>,
 }
 
 /// State changes the node-backed Tree specimen can request.
@@ -862,13 +886,37 @@ impl AppState {
                         self.tree.clear_drop();
                     }
                 },
-                NodeSpecimenEvent::FileBrowse { key, spec } => {
+                NodeSpecimenEvent::FileBrowse {
+                    key,
+                    spec,
+                    failed_message,
+                } => {
                     // The OS prompt opens on the next frame via
                     // `start_file_picks`, which owns the app context.
-                    self.pending_file_picks.push(FilePickRequest { key, spec });
+                    self.pending_file_picks.push(FilePickRequest {
+                        key,
+                        spec,
+                        failed_message,
+                    });
                 }
                 NodeSpecimenEvent::FileInvalidate => {
                     self.invalidate_file_picks();
+                }
+                NodeSpecimenEvent::MachineLabelCancel => {
+                    // Escape restores the value snapped when editing started
+                    // (the web EditableLabel reverts the draft) and closes
+                    // editing.
+                    let original = self
+                        .specimens
+                        .text
+                        .remove("la-machine-label-original")
+                        .unwrap_or_default();
+                    self.specimens
+                        .text
+                        .insert("la-machine-label".to_string(), original);
+                    self.specimens
+                        .toggles
+                        .insert("la-machine-editing".to_string(), false);
                 }
                 NodeSpecimenEvent::LicenceSeats(event) => match event {
                     LicenceSeatsEvent::Rename { machine_id, label } => {
@@ -968,28 +1016,19 @@ impl AppState {
             let generation = self.file_generation;
             let key = request.key.clone();
             let spec = request.spec.clone();
+            let failed_message = request.failed_message.clone();
             let root = root.clone();
             window.spawn(cx, async move |cx| {
-                // The platform delivers asynchronously; awaiting is what
-                // drives the completion (never a poll).
-                let selection = match receiver.await {
-                    Ok(selection) => selection,
-                    // The sender dropped without a selection: cancelled.
-                    Err(_) => Ok(None),
-                };
-                let outcome =
-                    poodle_gpui_node_backend::file_capability::resolve_os_selection(
-                        selection,
-                        &spec,
-                    );
-                cx.update(|_window, cx| {
-                    root.update(cx, |this, cx| {
-                        this.state.apply_pick_outcome(&key, generation, &outcome);
-                        cx.notify();
-                    })
-                    .ok();
-                })
-                .ok();
+                deliver_os_pick(
+                    &root,
+                    receiver,
+                    key,
+                    generation,
+                    spec,
+                    failed_message,
+                    cx,
+                )
+                .await;
             })
             .detach();
         }
@@ -997,12 +1036,19 @@ impl AppState {
 
     /// Apply a resolved pick outcome, but only while it belongs to the
     /// current route. A stale generation (the operator switched away after
-    /// the dialog opened) drops the outcome entirely.
-    pub fn apply_pick_outcome(&mut self, key: &str, generation: u64, outcome: &FilePickOutcome) {
+    /// the dialog opened) drops the outcome entirely. A read failure lands
+    /// the request's polite message rather than the raw OS text.
+    pub fn apply_pick_outcome(
+        &mut self,
+        key: &str,
+        generation: u64,
+        outcome: &FilePickOutcome,
+        failed_message: Option<&str>,
+    ) {
         if generation != self.file_generation {
             return;
         }
-        apply_file_pick_outcome(&mut self.specimens, key, outcome);
+        apply_file_pick_outcome(&mut self.specimens, key, outcome, failed_message);
     }
 
     /// Rebuild the theme provider from the current preset, density, and control size.
@@ -1018,6 +1064,40 @@ impl AppState {
     }
 }
 
+/// The completion-driven landing seam for one OS pick (g15.007).
+///
+/// Awaits the prompt's oneshot receiver — a dialog result *schedules* this
+/// task, never a poll — resolves it through the shared post-selection
+/// pipeline, and lands the outcome in the preview's specimen state through
+/// the root entity with an explicit notify. Guarded by the generation
+/// captured at spawn: a route change after the dialog opened drops the
+/// result entirely. This is the exact seam `start_file_picks` runs; tests
+/// drive it with an injected receiver completed after the first frame.
+pub async fn deliver_os_pick(
+    root: &gpui::WeakEntity<crate::PreviewRoot>,
+    receiver: futures::channel::oneshot::Receiver<anyhow::Result<Option<Vec<std::path::PathBuf>>>>,
+    key: String,
+    generation: u64,
+    spec: SingleFilePickSpec,
+    failed_message: Option<String>,
+    cx: &mut gpui::AsyncApp,
+) {
+    let selection = match receiver.await {
+        Ok(selection) => selection,
+        // The sender dropped without a selection: cancelled.
+        Err(_) => Ok(None),
+    };
+    let outcome = poodle_gpui_node_backend::file_capability::resolve_os_selection(selection, &spec);
+    let root = root.clone();
+    let _ = cx.update(|cx| {
+        root.update(cx, |this, cx| {
+            this.state
+                .apply_pick_outcome(&key, generation, &outcome, failed_message.as_deref());
+            cx.notify();
+        })
+    });
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1031,6 +1111,7 @@ mod tests {
                 accept: Some(".licence".to_string()),
                 max_size: None,
             },
+            failed_message: None,
         }
     }
 
@@ -1058,10 +1139,7 @@ mod tests {
             .insert("la-file-base64".to_string(), "c3R1ZmY=".to_string());
         state.active_file_keys.push("la-file".to_string());
         let generation = state.file_generation;
-        assert_eq!(
-            state.apply_pick_outcome("la-file", generation, &selected("machine.lic")),
-            (),
-        );
+        state.apply_pick_outcome("la-file", generation, &selected("machine.lic"), None);
 
         // Switching away from offline invalidates the read: completed bytes
         // are cleared and the generation bumps.
@@ -1078,7 +1156,7 @@ mod tests {
 
         // The in-flight dialog resolves later with the old generation: stale,
         // so it cannot land.
-        state.apply_pick_outcome("la-file", generation, &selected("machine.lic"));
+        state.apply_pick_outcome("la-file", generation, &selected("machine.lic"), None);
         assert!(
             state.specimens.text.get("la-file-base64").is_none(),
             "a late outcome after the route change must not land"
@@ -1089,6 +1167,7 @@ mod tests {
             "la-file",
             state.file_generation,
             &selected("machine.lic"),
+            None,
         );
         assert_eq!(
             state.specimens.text.get("la-file-name").map(String::as_str),
@@ -1111,6 +1190,101 @@ mod tests {
             state.pending_file_picks.is_empty(),
             "pending requests are dropped on route change"
         );
+    }
+
+    /// A read failure lands the request's polite message, never the raw OS
+    /// error; an accept/size rejection keeps its honest copy verbatim.
+    #[test]
+    fn a_read_failure_lands_the_polite_message_not_the_os_error() {
+        let mut state = AppState::new();
+        state.apply_pick_outcome(
+            "la-file",
+            state.file_generation,
+            &FilePickOutcome::Failed("No such file or directory (os error 2)".to_string()),
+            Some("That file could not be read."),
+        );
+        assert_eq!(
+            state
+                .specimens
+                .text
+                .get("la-file-error")
+                .map(String::as_str),
+            Some("That file could not be read."),
+            "the approved component message is pinned"
+        );
+        assert!(state.specimens.text.get("la-file-base64").is_none());
+
+        // Without a polite override the raw reason is retained (generic seam).
+        state.apply_pick_outcome(
+            "la-file",
+            state.file_generation,
+            &FilePickOutcome::Failed("raw os reason".to_string()),
+            None,
+        );
+        assert_eq!(
+            state
+                .specimens
+                .text
+                .get("la-file-error")
+                .map(String::as_str),
+            Some("raw os reason")
+        );
+
+        // An accept rejection keeps its honest copy.
+        state.apply_pick_outcome(
+            "la-file",
+            state.file_generation,
+            &FilePickOutcome::Rejected(
+                "File type not accepted. Accepted types: .licence".to_string(),
+            ),
+            Some("That file could not be read."),
+        );
+        assert_eq!(
+            state
+                .specimens
+                .text
+                .get("la-file-error")
+                .map(String::as_str),
+            Some("File type not accepted. Accepted types: .licence")
+        );
+    }
+
+    /// Escape restores the value snapped when editing started and closes the
+    /// edit; the draft typed in between is discarded.
+    #[test]
+    fn a_machine_label_cancel_restores_the_snapshot() {
+        let mut state = AppState::new();
+        state
+            .specimens
+            .text
+            .insert("la-machine-label".to_string(), "Studio Mac".to_string());
+        state
+            .specimens
+            .toggles
+            .insert("la-machine-editing".to_string(), true);
+        state
+            .specimens
+            .text
+            .insert("la-machine-label-original".to_string(), "Studio Mac".to_string());
+        // Typing edits the draft.
+        state
+            .specimens
+            .text
+            .insert("la-machine-label".to_string(), "Studio Mac 2".to_string());
+
+        let mut events = vec![NodeSpecimenEvent::MachineLabelCancel];
+        state.drain_node_events_into(&mut events);
+        assert_eq!(
+            state
+                .specimens
+                .text
+                .get("la-machine-label")
+                .map(String::as_str),
+            Some("Studio Mac"),
+            "the original label is restored, not the typed draft"
+        );
+        assert!(!state.specimens.is_on("la-machine-editing"));
+        assert!(state.specimens.text.get("la-machine-label-original").is_none());
     }
 
     impl AppState {

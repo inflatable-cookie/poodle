@@ -19,7 +19,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use poodle_adapter::ThemeProvider;
 use poodle_headless::licence::{
-    civil_from_days, format_time_date_parts, licence_status_view, LicenceStatusInput,
+    civil_from_days, format_time_date_locale, licence_status_view, LicenceStatusInput,
     LicenceStatusView,
 };
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole};
@@ -33,6 +33,15 @@ fn now_seconds() -> i64 {
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs() as i64)
         .unwrap_or(0)
+}
+
+/// The process locale, resolved the way the web's `toLocaleString` resolves
+/// its default: from the environment, most-specific first.
+fn runtime_locale() -> String {
+    std::env::var("LC_ALL")
+        .or_else(|_| std::env::var("LC_TIME"))
+        .or_else(|_| std::env::var("LANG"))
+        .unwrap_or_default()
 }
 
 /// Resolve an authority timestamp into **local** civil parts, matching the
@@ -66,10 +75,12 @@ fn local_time_parts(epoch_seconds: i64) -> (i64, i64, i64, i64, i64) {
     )
 }
 
-/// The absolute local time/date for the quiet `inGrace` line.
+/// The absolute local time/date for the quiet `inGrace` line, formatted in
+/// the runtime locale (en-US 12-hour/month-first; everything else
+/// 24-hour/day-first — matching the web's `formatDisplayTimeDate`).
 fn absolute_time_text(timestamp_ms: i64) -> String {
     let (year, month, day, hour, minute) = local_time_parts(timestamp_ms / 1_000);
-    format_time_date_parts(year, month, day, hour, minute)
+    format_time_date_locale(year, month, day, hour, minute, &runtime_locale())
 }
 
 /// Relative text for a timestamp row: `ends in 5m` / `ended 2d ago`, through

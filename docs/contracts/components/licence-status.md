@@ -178,9 +178,11 @@ Status: **bound** — native implementation lands with `g15.007` (specs,
   separate rows in every null/value combination.
 - Relative time renders through the shared `TimeAgoSpec::format_relative`
   thresholds (`ends in …` / `ended … ago`). The quiet `inGrace` line renders
-  the absolute time/date in the user's local time, matching the web: the
-  renderer resolves the authority instant through the platform's `localtime`
-  (Unix) and formats it with `poodle_headless::licence::format_time_date_parts`.
+  the absolute time/date in the user's local time **and locale**, matching the
+  web: the renderer resolves the authority instant through the platform's
+  `localtime` (Unix) and formats it with
+  `poodle_headless::licence::format_time_date_locale` using the runtime
+  locale (`en_US` → `12:45 PM 06/25/2026`; en-GB shape → `12:45 25/06/2026`).
 - `usable` and `attention` reach the tree as semantic token roles (the
   native `data-*` counterpart) and gate nothing: no row hides, no control
   disables, no licence read becomes a permission.

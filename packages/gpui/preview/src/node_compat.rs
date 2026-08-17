@@ -3650,6 +3650,7 @@ impl FileUpload {
             queue.lock().unwrap().push(NodeSpecimenEvent::FileBrowse {
                 key: key.clone(),
                 spec: spec.clone(),
+                failed_message: None,
             });
         }));
         self
