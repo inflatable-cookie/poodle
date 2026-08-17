@@ -1,6 +1,6 @@
 # g15.010 — Display, Workstation & Agent GPUI Specimen Closure
 
-Status: **blocked** — depends on `g15.008`–`g15.009`
+Status: **ready** — `g15.008`–`g15.009` accepted and merged
 Depends on: `g15.001` (measured gaps); GPUI-only closure after the native
 tranches `g15.007`–`g15.009` land their families
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
@@ -35,8 +35,14 @@ ToolCallGroup
 
 - [ ] One GPUI specimen per scoped component, composed from the existing
       `poodle-render` output through the node backend.
+- [ ] Each page is a concise teaching specimen shaped by the approved Svelte
+      page: representative examples, honest labels, and no exhaustive
+      size/density/state matrix in the primary view.
 - [ ] Focused headless cases where the specimen exercises interaction;
       infrastructure-only proofs do not count as component evidence.
+- [ ] Interactive specimens keep state in the preview host and feed the next
+      controlled spec. Calling a Node callback without the host update is not
+      live specimen evidence.
 - [ ] DockRegion specimen may reuse the retained headless driver; no new
       shared corpus or registry beyond the generated catalogue.
 
@@ -44,6 +50,9 @@ ToolCallGroup
 
 - [ ] Every scoped component has a named GPUI specimen file in the preview
       catalogue.
+- [ ] Each scoped route renders its real specimen rather than
+      `missing_specimen`, and representative interactive routes work through
+      mounted keyboard or pointer input.
 - [ ] `effigy check:gpui`, `effigy regressions:native` pass.
 - [ ] The roster's GPUI column flips to evidence-present for all 18.
 
@@ -56,7 +65,8 @@ ToolCallGroup
 
 ## Writable Scope
 
-- GPUI specimen files and focused headless tests
+- GPUI specimen files, catalogue dispatch, preview-local node bridges/host
+  state needed by those specimens, and focused headless tests
 - bounded contract-first fixes to scoped defects the new evidence exposes
 - `release-baseline-roster.md` and `release-gap-register.md` (GPUI rows only,
   no status lines)
