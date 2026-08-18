@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-17
+Updated: 2026-08-18
 
 Roadmaps record Poodle's executable milestone work. `g15` is the active
 v0.2.0 release-baseline generation.
@@ -18,7 +18,7 @@ v0.2.0 release-baseline generation.
   family tranches, and GPUI specimen closure are complete. `g15.011` has
   delivered its screening baseline and three approved pilots; its exact
   curation, native-probe, and screen-clear review children remain. `g15.015`
-  and `g15.016` are complete; `g15.017` is merged and awaiting live paired
+  through `g15.017` are complete. `g15.019` is next for dispatch-readiness
   review. Certification
   `g15.013` remains the final gate after the specimen program and `g15.012`.
   Jetstream remains deferred.
@@ -47,8 +47,8 @@ v0.2.0 release-baseline generation.
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010` and
-  `g15.014`–`g15.016` complete, `g15.011` partial with bounded continuation
-  cards, `g15.017` merged and awaiting operator review, `g15.013` final
+  `g15.014`–`g15.017` complete, `g15.011` partial with bounded continuation
+  cards, `g15.019` next for readiness review, `g15.013` final
 
 ## Rules
 

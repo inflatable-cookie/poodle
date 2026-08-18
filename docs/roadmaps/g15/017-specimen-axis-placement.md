@@ -1,7 +1,7 @@
 # g15.017 — Web Specimen Axis Placement and Evidence
 
-Status: **merged, awaiting operator review** — PR #39 merged at `c2f16961`;
-live paired review remains before completion
+Status: **complete** — PR #39 merged at `c2f16961`; operator accepted the
+paired web review; Dialog size-chrome follow-up landed at `f6b295dc`
 Consumes: `g15.011` partial screening baseline
 Depends on: `g15.016` (specimen idiom convergence)
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
@@ -79,7 +79,7 @@ The twelve audio pages corrected in PR #38 are validation-only:
       decisions, authored-scene tab projection, and paired tab parity.
 - [x] No public package API, component behaviour, contract semantics, example
       curation, or native specimen changes.
-- [ ] **Operator review of the 24 changed routes in the live Svelte and React
+- [x] **Operator review of the 24 changed routes in the live Svelte and React
       previews before this card is called complete.** Unreviewed pages remain
       an explicit PR item.
 
