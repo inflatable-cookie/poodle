@@ -28,7 +28,7 @@ use poodle_node::{
     MainAxisAlignment, Node, NodeKey, NodeRole, StylePatch,
 };
 use poodle_specs::{
-    ControlDensity, ControlSize, EmptyStateSpec, HistoryCenterSpec, HistoryCenterStatus,
+    ControlDensity, ControlSize, EmptyStateSize, EmptyStateSpec, HistoryCenterSpec, HistoryCenterStatus,
     IconButtonSpec, PopoverSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
 };
 
@@ -405,7 +405,7 @@ fn surface_content(
         let mut empty = empty_state(
             &EmptyStateSpec::new(&spec.title)
                 .with_message(&spec.empty_message)
-                .with_compact(true)
+                .with_size(EmptyStateSize::Compact)
                 .with_density(density),
             theme,
         );

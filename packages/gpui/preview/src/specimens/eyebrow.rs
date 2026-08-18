@@ -5,9 +5,10 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
 use crate::app_state::AppState;
+use crate::specimens::specimen_axes::EYEBROW_SIZES;
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
-use poodle_specs::{ControlSize, EyebrowSize, EyebrowSpec};
+use poodle_specs::{EyebrowSize, EyebrowSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -59,21 +60,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "eyebrow",
         examples,
         SpecimenAxes::examples_only()
-            // Eyebrow's own size enum stops at `md`; the larger control steps have
-            // no representative to show, exactly as in the Svelte specimen.
-            .with_sizes_where(|size, theme: &GpuiThemeProvider| {
-                let eyebrow_size = match size {
-                    ControlSize::Xs => EyebrowSize::Xs,
-                    ControlSize::Sm => EyebrowSize::Sm,
-                    ControlSize::Md => EyebrowSize::Md,
-                    ControlSize::Lg | ControlSize::Xl => return None,
+            .with_named_sizes(EYEBROW_SIZES, |value, theme: &GpuiThemeProvider| {
+                let eyebrow_size = match value {
+                    "xs" => EyebrowSize::Xs,
+                    "sm" => EyebrowSize::Sm,
+                    _ => EyebrowSize::Md,
                 };
-                Some(Eyebrow::from_spec(
+                Eyebrow::from_spec(
                     EyebrowSpec::new()
                         .with_content("Section label")
                         .with_size(eyebrow_size),
                     theme,
-                ))
+                )
+                .into_any_element()
             }),
     )
 }

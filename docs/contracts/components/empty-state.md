@@ -268,7 +268,7 @@ None.
 ## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::composites::empty_state`
-- spec struct: `EmptyStateSpec` with title, message, variant, size, density
+- spec struct: `EmptyStateSpec` with title, message, variant, `size` (`default` | `compact`), density
 - GPUI may use native layout and icon rendering, but the textual message and
   accessible action names remain the semantic core
 

@@ -7,20 +7,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
-use poodle_specs::{ControlSize, EyebrowSpec, IconSize, IconSpec};
-
-/// The control steps `IconSize` actually has. `xs` and `xl` have no icon
-/// variant, so the Sizes pane drops those rows rather than repeating `sm` and
-/// `lg` under a wider label — the pane must not advertise a scale the
-/// component does not own.
-fn control_to_icon_size(size: ControlSize) -> Option<IconSize> {
-    match size {
-        ControlSize::Sm => Some(IconSize::Sm),
-        ControlSize::Md => Some(IconSize::Md),
-        ControlSize::Lg => Some(IconSize::Lg),
-        ControlSize::Xs | ControlSize::Xl => None,
-    }
-}
+use poodle_specs::{EyebrowSpec, IconSize, IconSpec};
 
 /// A curated set of icon names to display in the gallery.
 const SPECIMEN_ICONS: &[&str] = &[
@@ -182,34 +169,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "icon",
         examples,
-        // No `Densities` pane. The web census admits one — `Icon.svelte` takes
-        // `density` and projects it as `data-density` — but the native
-        // renderer never reads `IconSpec::density`
-        // (`packages/render/src/icon.rs` resolves everything from
-        // `size_token()`). A pane here could only show one icon three times, or
-        // a disclaimer, which is what it did before. The gap is recorded in the
-        // g15.019 batch log; closing it means teaching the native renderer the
-        // density axis, which is outside this card.
-        SpecimenAxes::examples_only().with_sizes_where(
-            // `IconSize` covers sm / md / lg only, so `xs` and `xl` have no
-            // representative to show.
-            |size, theme: &GpuiThemeProvider| {
-                let icon_size = control_to_icon_size(size)?;
-                let text_primary = theme.resolve_color("color.text.primary");
-                Some(
-                    div()
-                        .flex()
-                        .items_center()
-                        .gap(px(8.0))
-                        .text_color(color_to_hsla(text_primary))
-                        .child(Icon::from_spec(
-                            IconSpec::new("star").with_size(icon_size),
-                            theme,
-                        ))
-                        .into_any_element(),
-                )
-            },
-        ),
+        SpecimenAxes::examples_only().with_sizes(|size, theme: &GpuiThemeProvider| {
+            let text_primary = theme.resolve_color("color.text.primary");
+            div()
+                .flex()
+                .items_center()
+                .gap(px(8.0))
+                .text_color(color_to_hsla(text_primary))
+                .child(Icon::from_spec(
+                    IconSpec::new("star").with_size(IconSize::from(size)),
+                    theme,
+                ))
+                .into_any_element()
+        }),
     )
 }
 
@@ -218,9 +190,11 @@ fn render_sizes_section(theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
 
     let sizes: &[(&str, IconSize)] = &[
+        ("xs", IconSize::Xs),
         ("sm", IconSize::Sm),
         ("md", IconSize::Md),
         ("lg", IconSize::Lg),
+        ("xl", IconSize::Xl),
     ];
 
     let mut container = div().flex().flex_col().gap(px(12.0));

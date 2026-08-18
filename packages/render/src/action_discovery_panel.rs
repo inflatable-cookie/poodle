@@ -16,7 +16,8 @@ use poodle_node::{
     ShadowLayer, StylePatch,
 };
 use poodle_specs::{
-    ActionDiscoveryPanelSpec, ControlDensity, ControlSize, DiscoveryState, EmptyStateSpec,
+    ActionDiscoveryPanelSpec, ControlDensity, ControlSize, DiscoveryState, EmptyStateSize,
+    EmptyStateSpec,
     EmptyStateVariant, EyebrowSpec, SkeletonSpec,
 };
 
@@ -200,7 +201,7 @@ pub fn action_discovery_panel(
             return panel.child(empty_state(
                 &EmptyStateSpec::new("Could not load actions")
                     .with_message("Actions could not be loaded. Try again.")
-                    .with_compact(true),
+                    .with_size(EmptyStateSize::Compact),
                 theme,
             ));
         }
@@ -212,7 +213,7 @@ pub fn action_discovery_panel(
             return panel.child(empty_state(
                 &EmptyStateSpec::new(title)
                     .with_message("No actions are available in this context.")
-                    .with_compact(true),
+                    .with_size(EmptyStateSize::Compact),
                 theme,
             ));
         }
@@ -221,7 +222,7 @@ pub fn action_discovery_panel(
                 &EmptyStateSpec::new("No matching actions")
                     .with_message("No actions match the current search.")
                     .with_variant(EmptyStateVariant::Search)
-                    .with_compact(true),
+                    .with_size(EmptyStateSize::Compact),
                 theme,
             ));
         }

@@ -4,7 +4,7 @@ use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{EmptyStateSpec, EmptyStateVariant, EyebrowSpec};
+use poodle_specs::{EmptyStateSpec, EmptyStateSize, EmptyStateVariant, EyebrowSpec};
 
 fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div {
     div()
@@ -60,7 +60,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             theme,
             EmptyState::from_spec(
                 EmptyStateSpec::new("No captured emails found")
-                    .with_compact(true)
+                    .with_size(EmptyStateSize::Compact)
                     .with_message("Emails will appear here when sent in development mode."),
                 theme,
             ),
@@ -72,19 +72,21 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "empty-state",
         examples,
-        // No `Sizes` pane. The web census admits one, but EmptyState's size is
-        // its own two-value domain (`EmptyStateSize::{Default, Compact}`), not
-        // the five control steps this pane walks — and the native renderer does
-        // not read `spec.size` at all: `packages/render/src/empty_state.rs`
-        // keys every visual decision off `spec.compact`. Mapping five generic
-        // steps onto two component values would advertise a scale the component
-        // does not have. The gap is recorded in the g15.019 batch log; closing
-        // it means changing the authored axis contract or the native renderer,
-        // which is outside this card.
-        //
-        // Density is honest: `EmptyStateSpec::density` drives the root gap and
-        // vertical padding in the same renderer.
         SpecimenAxes::examples_only()
+            .with_named_sizes(&["default", "compact"], |value, theme: &GpuiThemeProvider| {
+                let size = if value == "compact" {
+                    EmptyStateSize::Compact
+                } else {
+                    EmptyStateSize::Default
+                };
+                EmptyState::from_spec(
+                    EmptyStateSpec::new("No projects yet")
+                        .with_message("Create your first project to get started.")
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
             .with_densities(|density, theme: &GpuiThemeProvider| {
                 EmptyState::from_spec(
                     EmptyStateSpec::new("No projects yet")

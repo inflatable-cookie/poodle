@@ -687,7 +687,7 @@
           aria-expanded={isOpen}
           title={listLabel}
         >
-          <Icon name="chevron-down" size={resolvedSize} density={resolvedDensity} />
+          <Icon name="chevron-down" size={resolvedSize} />
         </button>
       {/snippet}
 

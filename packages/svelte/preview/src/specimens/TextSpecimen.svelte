@@ -4,11 +4,9 @@
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>
 
-<SpecimenLayout>
+<SpecimenLayout sizeValues={["xs", "sm", "md"]}>
   {#snippet sizes(size)}
-    {#if size === "xs" || size === "sm" || size === "md"}
-      <Text size={size}>Default body text for admin and product surfaces.</Text>
-    {/if}
+    <Text size={size as "xs" | "sm" | "md"}>Default body text for admin and product surfaces.</Text>
   {/snippet}
 
   <SpecimenGroup label="Tones">

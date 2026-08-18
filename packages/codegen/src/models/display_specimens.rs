@@ -293,6 +293,14 @@ fn size_axis() -> SceneAxis {
     }
 }
 
+fn empty_state_size_axis() -> SceneAxis {
+    SceneAxis {
+        kind: SceneAxisKind::Size,
+        values: AxisValues::Named(ids(["default", "compact"])),
+        description: "EmptyState size axis the Sizes matrix iterates.".to_owned(),
+    }
+}
+
 fn density_axis() -> SceneAxis {
     SceneAxis {
         kind: SceneAxisKind::Density,
@@ -622,33 +630,37 @@ pub fn display_specimens_scenes() -> Vec<Scene> {
             avatar_scene.tabs = Some(SpecimenTabs { tabs: ids(["examples", "sizes"]) });
             avatar_scene
         },
-        scene(
-            "empty-state-specimen",
-            "EmptyState",
-            "EmptyState specimen (contract §13): neutral, search, first-run, and compact \
-             postures.",
-            vec![
-                instance("empty-state", "Neutral", "No projects yet", vec![
-                    ("title", str_value("No projects yet")),
-                    ("message", str_value("Create your first project to get started.")),
-                ]),
-                instance("empty-state", "Search", "No results found", vec![
-                    ("variant", member_value("search")),
-                    ("title", str_value("No results found")),
-                    ("message", str_value("Try adjusting your search terms or clearing filters.")),
-                ]),
-                instance("empty-state", "First run", "Welcome", vec![
-                    ("variant", member_value("firstRun")),
-                    ("title", str_value("Welcome to your workspace")),
-                    ("message", str_value("This is where your team's components will appear once you start building.")),
-                ]),
-                instance("empty-state", "Compact custom visual", "No captured emails", vec![
-                    ("size", member_value("compact")),
-                    ("title", str_value("No captured emails found")),
-                    ("message", str_value("Emails will appear here when sent in development mode.")),
-                ]),
-            ],
-        ),
+        {
+            let mut empty_state_scene = scene(
+                "empty-state-specimen",
+                "EmptyState",
+                "EmptyState specimen (contract §13): neutral, search, first-run, and compact \
+                 postures.",
+                vec![
+                    instance("empty-state", "Neutral", "No projects yet", vec![
+                        ("title", str_value("No projects yet")),
+                        ("message", str_value("Create your first project to get started.")),
+                    ]),
+                    instance("empty-state", "Search", "No results found", vec![
+                        ("variant", member_value("search")),
+                        ("title", str_value("No results found")),
+                        ("message", str_value("Try adjusting your search terms or clearing filters.")),
+                    ]),
+                    instance("empty-state", "First run", "Welcome", vec![
+                        ("variant", member_value("firstRun")),
+                        ("title", str_value("Welcome to your workspace")),
+                        ("message", str_value("This is where your team's components will appear once you start building.")),
+                    ]),
+                    instance("empty-state", "Compact custom visual", "No captured emails", vec![
+                        ("size", member_value("compact")),
+                        ("title", str_value("No captured emails found")),
+                        ("message", str_value("Emails will appear here when sent in development mode.")),
+                    ]),
+                ],
+            );
+            empty_state_scene.axes = vec![empty_state_size_axis(), density_axis()];
+            empty_state_scene
+        },
     ];
 
     scenes

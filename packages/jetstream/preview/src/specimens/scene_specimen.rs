@@ -7,7 +7,7 @@
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     AvatarShape, AvatarSize, AvatarSpec, AvatarTone, CallOutSpec, ControlDensity, ControlSize,
-    EmptyStateSpec, EmptyStateVariant, InlineTypographyMode, PillAppearance,
+    EmptyStateSize, EmptyStateSpec, EmptyStateVariant, InlineTypographyMode, PillAppearance,
     PillFont, PillSize, PillSpec, PillTone, SemanticControlSizeRole, SpinnerSize, SpinnerSpec,
     SpinnerTone, SpinnerVariant, StatusTone,
 };
@@ -31,7 +31,7 @@ fn prop<'a>(instance: &'a SpecimenInstance, name: &str) -> Option<&'a str> {
     instance
         .props
         .iter()
-        .find(|p: &&SpecimenProp| p.prop == name)
+        .rfind(|p: &&SpecimenProp| p.prop == name)
         .map(|p| p.value)
 }
 
@@ -266,7 +266,7 @@ fn render_instance(instance: &SpecimenInstance, theme: &JetstreamThemeProvider) 
                 spec = spec.with_message(message);
             }
             if prop(instance, "size") == Some("compact") {
-                spec = spec.with_compact(true);
+                spec = spec.with_size(EmptyStateSize::Compact);
             }
             if let Some(density) = prop(instance, "density") {
                 spec = spec.with_density(control_density(density));
@@ -301,7 +301,12 @@ fn render_matrix(theme: &JetstreamThemeProvider, title: &str, axis: &[&str], ins
     let secondary = resolve_color(theme, "color.text.secondary");
     let mut content = div().flex_col().gap(12.0);
     for value in axis {
-        let mut props: Vec<SpecimenProp> = instance.props.to_vec();
+        let mut props: Vec<SpecimenProp> = instance
+            .props
+            .iter()
+            .filter(|p| p.prop != prop_name)
+            .cloned()
+            .collect();
         props.push(SpecimenProp {
             prop: prop_name,
             value,

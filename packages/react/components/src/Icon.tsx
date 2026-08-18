@@ -4,14 +4,13 @@ import "@inflatable-cookie/poodle-core/styles/icon.css";
 
 import { resolveIconNodes, useIconSet } from "./icon-registry";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
-import type { ControlDensity, ControlSize, IconNodes, SemanticControlSizeRole } from "./types";
+import type { ControlSize, IconNodes, SemanticControlSizeRole } from "./types";
 
 export interface IconProps {
   icon?: IconNodes | string | null;
   name?: string | null;
   size?: ControlSize | null;
   sizeRole?: SemanticControlSizeRole;
-  density?: ControlDensity | null;
   ariaLabel?: string | null;
 }
 
@@ -22,21 +21,18 @@ export function Icon({
   name = null,
   size = null,
   sizeRole = "chrome",
-  density = null,
   ariaLabel = null,
 }: IconProps) {
   const uiPresentation = useUiPresentation();
   const iconSet = useIconSet();
   const resolvedIcon = icon ?? name;
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
-  const resolvedDensity = density ?? uiPresentation.density;
   const nodes = resolveIconNodes(resolvedIcon, iconSet);
 
   return (
     <svg
       className="poodle-icon"
       data-size={resolvedSize}
-      data-density={resolvedDensity}
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"

@@ -8,10 +8,10 @@
   let compactOpen = $state(false);
   let query = $state("");
   let compactQuery = $state("");
-  let sizeOpenMap: Record<string, boolean> = {};
-  let densityOpenMap: Record<string, boolean> = {};
-  let sizeQueryMap: Record<string, string> = {};
-  let densityQueryMap: Record<string, string> = {};
+  let sizeOpenMap: Record<string, boolean> = $state({});
+  let densityOpenMap: Record<string, boolean> = $state({});
+  let sizeQueryMap: Record<string, string> = $state({});
+  let densityQueryMap: Record<string, string> = $state({});
 
   const items = [
     { id: "save", title: "Save", shortcut: "Ctrl+S", group: "File" },

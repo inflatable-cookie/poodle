@@ -54,7 +54,7 @@
   {#if matrixInstance}
     {@render renderInstance({
       component: matrixInstance.component,
-      props: { ...matrixInstance.props, size: size as "xs" | "sm" | "md" | "lg" | "xl" },
+      props: { ...matrixInstance.props, size },
     })}
   {/if}
 {/snippet}
@@ -63,17 +63,15 @@
   {#if matrixInstance}
     {@render renderInstance({
       component: matrixInstance.component,
-      props: { ...matrixInstance.props, density: density as "compact" | "default" | "comfortable" },
+      props: { ...matrixInstance.props, density },
     })}
   {/if}
 {/snippet}
 
 {#if scene}
-  <!-- Scene matrix snippets cast axis values inside the snippet body. The
-       scene's declared tabs decide which axis renderers exist; an axis the
-       scene does not declare never reaches SpecimenLayout, so its tab cannot
-       be advertised. -->
   <SpecimenLayout
+    sizeValues={scene.sizeAxis.length > 0 ? scene.sizeAxis : undefined}
+    densityValues={scene.densityAxis.length > 0 ? scene.densityAxis : undefined}
     sizes={(scene.tabs as readonly string[]).includes("sizes") ? (sizes as never) : undefined}
     densities={(scene.tabs as readonly string[]).includes("densities") ? (densities as never) : undefined}
   >

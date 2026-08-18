@@ -11,7 +11,8 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{
-    CallOutSpec, CalloutAnnounceMode, DialogSpec, DialogWidth, Direction, EmptyStateSpec,
+    CallOutSpec, CalloutAnnounceMode, DialogSpec, DialogWidth, Direction, EmptyStateSize,
+    EmptyStateSpec,
     EmptyStateVariant, PaddingScale, ScrollShellSpec, SettingsShellSpec, SidebarNavSpec,
     StatusTone, SurfaceBorder, SurfaceSpec, SurfaceTone, TextInputSpec,
 };
@@ -161,7 +162,7 @@ fn nav_rail(
             &EmptyStateSpec::new(title)
                 .with_message(message)
                 .with_variant(variant)
-                .with_compact(true),
+                .with_size(EmptyStateSize::Compact),
             theme,
         )
     } else {

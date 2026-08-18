@@ -243,11 +243,11 @@ mod tests {
 
     #[test]
     fn glyph_size_resolves_through_the_icon_token_ladder() {
-        // The old tier's IconSize::from(supporting size): xs/sm/md controls
-        // get the sm icon token, lg gets md, xl gets lg.
+        // Supporting visuals are one control stop smaller; IconSize maps 1:1
+        // from that stop through the five icon tokens (no endpoint collapse).
         let theme = theme();
         let cases = [
-            (ControlSize::Xs, "size.icon.sm"),
+            (ControlSize::Xs, "size.icon.xs"),
             (ControlSize::Sm, "size.icon.sm"),
             (ControlSize::Md, "size.icon.sm"),
             (ControlSize::Lg, "size.icon.md"),

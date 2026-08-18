@@ -36,7 +36,8 @@ mod specimen_axes;
 
 use headless_driver::HeadlessDriver;
 use specimen_axes::{
-    density_key, size_key, AxisAdmission, DENSITIES_TAB, EXAMPLES_TAB, SIZES_TAB,
+    density_key, size_key, AxisAdmission, DENSITIES_TAB, EXAMPLES_TAB, EYEBROW_SIZES, SIZES_TAB,
+    TEXT_SIZES,
 };
 
 /// The element id every single-node fixture mounts under.
@@ -2856,4 +2857,128 @@ fn axis_row_keys_are_distinct_per_step() {
     .map(density_key)
     .collect();
     assert_eq!(densities, vec!["compact", "default", "comfortable"]);
+}
+
+#[test]
+fn empty_state_scene_carries_the_two_value_size_domain() {
+    #[path = "../src/generated/specimens/specimens.rs"]
+    mod fixture;
+
+    let scene = fixture::SPECIMEN_SCENES
+        .iter()
+        .find(|scene| scene.id == "empty-state-specimen")
+        .expect("empty-state scene");
+    assert_eq!(scene.size_axis, &["default", "compact"]);
+}
+
+#[test]
+fn avatar_scene_matrix_uses_fixture_first_instance_with_xs_default() {
+    #[path = "../src/generated/specimens/specimens.rs"]
+    mod fixture;
+
+    let scene = fixture::SPECIMEN_SCENES
+        .iter()
+        .find(|scene| scene.id == "avatar-specimen")
+        .expect("avatar scene");
+    let first = scene
+        .groups
+        .first()
+        .and_then(|group| group.instances.first())
+        .expect("avatar first instance");
+    assert_eq!(first.props.iter().find(|p| p.prop == "size").map(|p| p.value), Some("xs"));
+    assert_eq!(scene.size_axis, &["xs", "sm", "md", "lg", "xl"]);
+}
+
+#[test]
+fn text_and_eyebrow_native_specimens_advertise_xs_sm_md_in_order() {
+    assert_eq!(TEXT_SIZES, &["xs", "sm", "md"]);
+    assert_eq!(EYEBROW_SIZES, &["xs", "sm", "md"]);
+}
+
+#[test]
+fn icon_size_domain_covers_all_five_control_steps_in_order() {
+    use poodle_specs::{ControlSize, IconSize};
+
+    let ordered: Vec<IconSize> = [
+        ControlSize::Xs,
+        ControlSize::Sm,
+        ControlSize::Md,
+        ControlSize::Lg,
+        ControlSize::Xl,
+    ]
+    .into_iter()
+    .map(IconSize::from)
+    .collect();
+    assert_eq!(
+        ordered,
+        [
+            IconSize::Xs,
+            IconSize::Sm,
+            IconSize::Md,
+            IconSize::Lg,
+            IconSize::Xl,
+        ]
+    );
+}
+
+#[test]
+fn empty_state_compact_and_default_render_distinct_geometry() {
+    use poodle_node::{LayoutSizing, Node, NodeKind};
+    use poodle_render::empty_state;
+    use poodle_specs::{EmptyStateSize, EmptyStateSpec};
+
+    fn walk<'a>(node: &'a Node, visit: &mut impl FnMut(&'a Node)) {
+        visit(node);
+        for child in &node.children {
+            walk(child, visit);
+        }
+    }
+
+    fn title_text_size(node: &Node) -> Option<f32> {
+        let mut found = None;
+        walk(node, &mut |candidate| {
+            if matches!(candidate.kind, NodeKind::Text { .. })
+                && candidate.style.text_size.is_some()
+                && candidate.style.text_weight == Some(600)
+            {
+                found = candidate.style.text_size;
+            }
+        });
+        found
+    }
+
+    fn icon_container_side(node: &Node) -> Option<f32> {
+        let mut found = None;
+        walk(node, &mut |candidate| {
+            if !matches!(candidate.kind, NodeKind::Container) {
+                return;
+            }
+            let LayoutSizing::Fixed(width) = candidate.style.descriptor.layout.width else {
+                return;
+            };
+            if candidate
+                .children
+                .iter()
+                .any(|child| matches!(child.kind, NodeKind::Icon { .. }))
+            {
+                found = Some(width);
+            }
+        });
+        found
+    }
+
+    let theme = theme();
+    let default = empty_state(&EmptyStateSpec::new("No projects yet"), &theme);
+    let compact = empty_state(
+        &EmptyStateSpec::new("No projects yet").with_size(EmptyStateSize::Compact),
+        &theme,
+    );
+
+    let default_title = title_text_size(&default).expect("default title");
+    let compact_title = title_text_size(&compact).expect("compact title");
+    assert!(compact_title < default_title);
+
+    let default_icon = icon_container_side(&default).expect("default icon box");
+    let compact_icon = icon_container_side(&compact).expect("compact icon box");
+    assert!(compact_icon < default_icon);
 }

@@ -7,7 +7,7 @@
 use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::{
-    ButtonSpec, ControlDensity, ControlSize, EmptyStateSpec, EmptyStateVariant,
+    ButtonSpec, ControlDensity, ControlSize, EmptyStateSize, EmptyStateSpec, EmptyStateVariant,
     SemanticControlSizeRole,
 };
 
@@ -20,17 +20,18 @@ pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
     let text_secondary = theme.resolve_color("color.text.secondary");
     let gap = theme.resolve_space(spec.layout_gap_token());
 
-    let effective_size = if spec.compact {
+    let compact = spec.size == EmptyStateSize::Compact;
+    let effective_size = if compact {
         ControlSize::Sm
     } else {
         ControlSize::Md
     };
-    let title_font = if spec.compact {
+    let title_font = if compact {
         rem_to_px(0.9375)
     } else {
         rem_to_px(1.125)
     };
-    let message_font = if spec.compact {
+    let message_font = if compact {
         rem_to_px(0.75)
     } else {
         rem_to_px(0.8125)
@@ -41,12 +42,12 @@ pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
         EmptyStateVariant::FirstRun => "plus",
         EmptyStateVariant::Neutral => "inbox",
     };
-    let icon_container = if spec.compact {
+    let icon_container = if compact {
         rem_to_px(1.75)
     } else {
         rem_to_px(2.25)
     };
-    let icon_font = if spec.compact {
+    let icon_font = if compact {
         rem_to_px(0.9375)
     } else {
         rem_to_px(1.125)
@@ -172,4 +173,83 @@ pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
         el.a11y.label = Some(label.to_string());
     }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_node::{LayoutSizing, NodeKind};
+
+    fn walk<'a>(node: &'a Node, visit: &mut impl FnMut(&'a Node)) {
+        visit(node);
+        for child in &node.children {
+            walk(child, visit);
+        }
+    }
+
+    fn icon_container_side(node: &Node) -> Option<f32> {
+        let mut found = None;
+        walk(node, &mut |candidate| {
+            if !matches!(candidate.kind, NodeKind::Container) {
+                return;
+            }
+            let LayoutSizing::Fixed(width) = candidate.style.descriptor.layout.width else {
+                return;
+            };
+            if candidate
+                .children
+                .iter()
+                .any(|child| matches!(child.kind, NodeKind::Icon { .. }))
+            {
+                found = Some(width);
+            }
+        });
+        found
+    }
+
+    fn title_text_size(node: &Node) -> Option<f32> {
+        let mut found = None;
+        walk(node, &mut |candidate| {
+            if matches!(candidate.kind, NodeKind::Text { .. })
+                && candidate.style.text_size.is_some()
+                && candidate.style.text_weight == Some(600)
+            {
+                found = candidate.style.text_size;
+            }
+        });
+        found
+    }
+
+    fn icon_glyph_size(node: &Node) -> Option<f32> {
+        let mut found = None;
+        walk(node, &mut |candidate| {
+            if let NodeKind::Icon { size, .. } = &candidate.kind {
+                found = Some(*size);
+            }
+        });
+        found
+    }
+
+    #[test]
+    fn compact_and_default_sizes_use_distinct_title_and_icon_geometry() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let default = empty_state(&EmptyStateSpec::new("No projects yet"), &theme);
+        let compact = empty_state(
+            &EmptyStateSpec::new("No projects yet").with_size(EmptyStateSize::Compact),
+            &theme,
+        );
+
+        let default_title = title_text_size(&default).expect("default title size");
+        let compact_title = title_text_size(&compact).expect("compact title size");
+        assert!(compact_title < default_title);
+
+        let default_icon_box = icon_container_side(&default).expect("default icon box");
+        let compact_icon_box = icon_container_side(&compact).expect("compact icon box");
+        assert!(compact_icon_box < default_icon_box);
+
+        let default_glyph = icon_glyph_size(&default).expect("default glyph");
+        let compact_glyph = icon_glyph_size(&compact).expect("compact glyph");
+        assert!(compact_glyph < default_glyph);
+    }
 }

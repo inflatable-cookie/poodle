@@ -11,7 +11,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     AvatarShape, AvatarSize, AvatarSpec, AvatarTone, CallOutSpec, ControlDensity, ControlSize,
-    EmptyStateSpec, EmptyStateVariant, EyebrowSpec, InlineTypographyMode, PillAppearance, PillFont,
+    EmptyStateSize, EmptyStateSpec, EmptyStateVariant, EyebrowSpec, InlineTypographyMode, PillAppearance, PillFont,
     PillSize, PillSpec, PillTone, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone,
     SpinnerVariant, StatusTone,
 };
@@ -32,7 +32,7 @@ fn prop<'a>(instance: &'a SpecimenInstance<'a>, name: &str) -> Option<&'a str> {
     instance
         .props
         .iter()
-        .find(|p: &&SpecimenProp| p.prop == name)
+        .rfind(|p: &&SpecimenProp| p.prop == name)
         .map(|p| p.value)
 }
 
@@ -266,7 +266,7 @@ fn render_instance(instance: &SpecimenInstance, theme: &GpuiThemeProvider) -> An
                 spec = spec.with_message(message);
             }
             if prop(instance, "size") == Some("compact") {
-                spec = spec.with_compact(true);
+                spec = spec.with_size(EmptyStateSize::Compact);
             }
             if let Some(density) = prop(instance, "density") {
                 spec = spec.with_density(control_density(density));
@@ -303,7 +303,12 @@ fn render_matrix_instance(
     prop_name: &str,
     value: &str,
 ) -> AnyElement {
-    let mut props: Vec<SpecimenProp> = instance.props.to_vec();
+    let mut props: Vec<SpecimenProp> = instance
+        .props
+        .iter()
+        .filter(|p| p.prop != prop_name)
+        .cloned()
+        .collect();
     props.push(SpecimenProp {
         prop: prop_name,
         value,
@@ -314,6 +319,67 @@ fn render_matrix_instance(
         props: &props,
     };
     render_instance(&adjusted, theme)
+}
+
+#[cfg(test)]
+mod matrix_override_tests {
+    use super::*;
+
+    #[test]
+    fn prop_last_binding_wins() {
+        let props = [
+            SpecimenProp {
+                prop: "size",
+                value: "xs",
+            },
+            SpecimenProp {
+                prop: "size",
+                value: "md",
+            },
+        ];
+        let instance = SpecimenInstance {
+            component: "avatar",
+            caption: Some("TA xs"),
+            props: &props,
+        };
+        assert_eq!(prop(&instance, "size"), Some("md"));
+    }
+
+    #[test]
+    fn matrix_size_overrides_fixture_binding() {
+        let base_props = [
+            SpecimenProp {
+                prop: "initials",
+                value: "TA",
+            },
+            SpecimenProp {
+                prop: "size",
+                value: "xs",
+            },
+        ];
+        let instance = SpecimenInstance {
+            component: "avatar",
+            caption: Some("TA xs"),
+            props: &base_props,
+        };
+        let mut props: Vec<SpecimenProp> = instance
+            .props
+            .iter()
+            .filter(|p| p.prop != "size")
+            .cloned()
+            .collect();
+        props.push(SpecimenProp {
+            prop: "size",
+            value: "md",
+        });
+        let adjusted = SpecimenInstance {
+            component: instance.component,
+            caption: instance.caption,
+            props: &props,
+        };
+        assert_eq!(prop(&instance, "size"), Some("xs"));
+        assert_eq!(prop(&adjusted, "size"), Some("md"));
+    }
 }
 
 /// Renders the scene for a slug, or `None` when the slug is not scene-driven.
@@ -339,40 +405,16 @@ pub(crate) fn render(slug: &str, state: &AppState, cx: &mut Context<PreviewRoot>
         Some(scene.density_axis)
     };
 
-    // The fixture's own axis lists are the admission decision: a scene that
-    // declares no size axis must not grow a Sizes tab, and a step outside the
-    // declared list is dropped instead of rendered blank.
-    let sizes_row = move |size: ControlSize, theme: &GpuiThemeProvider| {
-        let instance = first?;
-        let axis = size_axis?;
-        let value = match size {
-            ControlSize::Xs => "xs",
-            ControlSize::Sm => "sm",
-            ControlSize::Md => "md",
-            ControlSize::Lg => "lg",
-            ControlSize::Xl => "xl",
-        };
-        axis.contains(&value)
-            .then(|| render_matrix_instance(instance, theme, "size", value))
-    };
-    let densities_row = move |density: ControlDensity, theme: &GpuiThemeProvider| {
-        let instance = first?;
-        let axis = density_axis?;
-        let value = match density {
-            ControlDensity::Compact => "compact",
-            ControlDensity::Default => "default",
-            ControlDensity::Comfortable => "comfortable",
-        };
-        axis.contains(&value)
-            .then(|| render_matrix_instance(instance, theme, "density", value))
-    };
-
     let mut axes = SpecimenAxes::examples_only();
-    if first.is_some() && size_axis.is_some() {
-        axes = axes.with_sizes_where(sizes_row);
+    if let (Some(instance), Some(axis)) = (first, size_axis) {
+        axes = axes.with_named_sizes(axis, move |value, theme| {
+            render_matrix_instance(instance, theme, "size", value)
+        });
     }
-    if first.is_some() && density_axis.is_some() {
-        axes = axes.with_densities_where(densities_row);
+    if let (Some(instance), Some(axis)) = (first, density_axis) {
+        axes = axes.with_named_densities(axis, move |value, theme| {
+            render_matrix_instance(instance, theme, "density", value)
+        });
     }
 
     Some(super::specimen_layout::specimen_layout(

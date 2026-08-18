@@ -1,5 +1,6 @@
 use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, Text};
+use crate::specimens::specimen_axes::TEXT_SIZES;
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
@@ -7,7 +8,7 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
 use poodle_specs::{
-    ControlSize, EyebrowSpec, TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone,
+    EyebrowSpec, TextElement, TextLeading, TextSize, TextSpacing, TextSpec, TextTone,
     TextWeight,
 };
 
@@ -113,20 +114,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "text",
         examples,
         SpecimenAxes::examples_only()
-            // Text's own size enum stops at `md`; the larger control steps have
-            // no representative to show, exactly as in the Svelte specimen.
-            .with_sizes_where(|size, theme: &GpuiThemeProvider| {
-                let text_size = match size {
-                    ControlSize::Xs => TextSize::Xs,
-                    ControlSize::Sm => TextSize::Sm,
-                    ControlSize::Md => TextSize::Md,
-                    ControlSize::Lg | ControlSize::Xl => return None,
+            .with_named_sizes(TEXT_SIZES, |value, theme: &GpuiThemeProvider| {
+                let text_size = match value {
+                    "xs" => TextSize::Xs,
+                    "sm" => TextSize::Sm,
+                    _ => TextSize::Md,
                 };
-                Some(Text::from_spec(
+                Text::from_spec(
                     TextSpec::new("Default body text for admin and product surfaces.")
                         .with_size(text_size),
                     theme,
-                ))
+                )
+                .into_any_element()
             }),
     )
 }

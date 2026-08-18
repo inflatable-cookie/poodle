@@ -1,22 +1,26 @@
 use poodle_tokens::semantic;
 
-use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
+use crate::types::{ControlSize, SemanticControlSizeRole};
 
 /// Icon size variants matching the contract.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
 pub enum IconSize {
+    Xs,
     Sm,
     #[default]
     Md,
     Lg,
+    Xl,
 }
 
 impl IconSize {
     pub fn size_token(self) -> &'static str {
         match self {
+            Self::Xs => semantic::SIZE_ICON_XS,
             Self::Sm => semantic::SIZE_ICON_SM,
             Self::Md => semantic::SIZE_ICON_MD,
             Self::Lg => semantic::SIZE_ICON_LG,
+            Self::Xl => semantic::SIZE_ICON_XL,
         }
     }
 }
@@ -24,11 +28,11 @@ impl IconSize {
 impl From<ControlSize> for IconSize {
     fn from(size: ControlSize) -> Self {
         match size {
-            ControlSize::Xs => IconSize::Sm,
+            ControlSize::Xs => IconSize::Xs,
             ControlSize::Sm => IconSize::Sm,
             ControlSize::Md => IconSize::Md,
             ControlSize::Lg => IconSize::Lg,
-            ControlSize::Xl => IconSize::Lg,
+            ControlSize::Xl => IconSize::Xl,
         }
     }
 }
@@ -45,20 +49,14 @@ pub struct IconSpec {
     pub size: IconSize,
     /// Accessible name; absence triggers decorative mode.
     pub aria_label: Option<String>,
-    /// Presentation axes (contract §3): size is intrinsic, density is sibling
-    /// spacing, size_role resolves size from the inherited presentation.
+    /// Presentation axes (contract §3): size is intrinsic; size_role resolves
+    /// size from the inherited presentation.
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
 }
 
 impl IconSpec {
     pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
         self.size_role = size_role;
-        self
-    }
-
-    pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
         self
     }
 
@@ -68,7 +66,6 @@ impl IconSpec {
             size: IconSize::default(),
             aria_label: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
         }
     }
 
@@ -96,13 +93,17 @@ impl IconSpec {
         match (self.size, self.size_role) {
             (size, SemanticControlSizeRole::Control) => size,
 
-            (IconSize::Sm, SemanticControlSizeRole::Chrome) => IconSize::Sm,
+            (IconSize::Xs, SemanticControlSizeRole::Chrome) => IconSize::Xs,
+            (IconSize::Sm, SemanticControlSizeRole::Chrome) => IconSize::Xs,
             (IconSize::Md, SemanticControlSizeRole::Chrome) => IconSize::Sm,
             (IconSize::Lg, SemanticControlSizeRole::Chrome) => IconSize::Md,
+            (IconSize::Xl, SemanticControlSizeRole::Chrome) => IconSize::Lg,
 
+            (IconSize::Xs, SemanticControlSizeRole::Prominent) => IconSize::Sm,
             (IconSize::Sm, SemanticControlSizeRole::Prominent) => IconSize::Md,
             (IconSize::Md, SemanticControlSizeRole::Prominent) => IconSize::Lg,
-            (IconSize::Lg, SemanticControlSizeRole::Prominent) => IconSize::Lg,
+            (IconSize::Lg, SemanticControlSizeRole::Prominent) => IconSize::Xl,
+            (IconSize::Xl, SemanticControlSizeRole::Prominent) => IconSize::Xl,
         }
     }
 
@@ -116,11 +117,8 @@ impl IconSpec {
 mod size_role_tests {
     use super::*;
 
-    /// Icon has three stops rather than five, so the role clamps sooner — but
-    /// it still shifts, which is what keeps an icon in chrome from out-sizing
-    /// the control it sits in.
     #[test]
-    fn size_role_shifts_within_the_three_icon_stops() {
+    fn size_role_shifts_within_the_five_icon_stops() {
         let base = IconSpec::new("plus").with_size(IconSize::Md);
         assert_eq!(base.resolved_size(), IconSize::Md);
         assert_eq!(base.size_token(), semantic::SIZE_ICON_MD);
@@ -135,18 +133,27 @@ mod size_role_tests {
             .with_size(IconSize::Md)
             .with_size_role(SemanticControlSizeRole::Prominent);
         assert_eq!(prominent.resolved_size(), IconSize::Lg);
+        assert_eq!(prominent.size_token(), semantic::SIZE_ICON_LG);
     }
 
     #[test]
     fn roles_clamp_at_both_ends() {
         let smallest = IconSpec::new("plus")
-            .with_size(IconSize::Sm)
+            .with_size(IconSize::Xs)
             .with_size_role(SemanticControlSizeRole::Chrome);
-        assert_eq!(smallest.resolved_size(), IconSize::Sm);
+        assert_eq!(smallest.resolved_size(), IconSize::Xs);
+        assert_eq!(smallest.size_token(), semantic::SIZE_ICON_XS);
 
         let largest = IconSpec::new("plus")
-            .with_size(IconSize::Lg)
+            .with_size(IconSize::Xl)
             .with_size_role(SemanticControlSizeRole::Prominent);
-        assert_eq!(largest.resolved_size(), IconSize::Lg);
+        assert_eq!(largest.resolved_size(), IconSize::Xl);
+        assert_eq!(largest.size_token(), semantic::SIZE_ICON_XL);
+    }
+
+    #[test]
+    fn control_size_maps_one_to_one_without_endpoint_collapse() {
+        assert_eq!(IconSize::from(ControlSize::Xs), IconSize::Xs);
+        assert_eq!(IconSize::from(ControlSize::Xl), IconSize::Xl);
     }
 }

@@ -2,7 +2,7 @@
   import "@inflatable-cookie/poodle-core/styles/icon.css";
   import { fromStore } from "svelte/store";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, SemanticControlSizeRole } from "./types";
+  import type { SemanticControlSizeRole } from "./types";
   import type { ControlSize } from "./types";
   import type { IconNodes } from "./icon-registry";
 
@@ -19,14 +19,12 @@
     name = null,
     size = null,
     sizeRole = "chrome",
-    density = null,
     ariaLabel = null,
   }: {
     icon?: IconNodes | string | null;
     name?: string | null;
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
-    density?: ControlDensity | null;
     ariaLabel?: string | null;
   } = $props();
 
@@ -35,14 +33,12 @@
 
   const resolvedIcon = $derived(icon ?? name);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
-  const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const nodes = $derived(resolveIconNodes(resolvedIcon, iconSet.current));
 </script>
 
 <svg
   class="poodle-icon"
   data-size={resolvedSize}
-  data-density={resolvedDensity}
   xmlns="http://www.w3.org/2000/svg"
   width="24"
   height="24"

@@ -35,7 +35,6 @@ Updated: 2026-08-10
 | `name` | `string \| null` | `null` | no | **deprecated** — alias for `icon`; use `icon` instead |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit icon dimensions |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
-| `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name; absence triggers decorative mode |
 
 ### Controlled And Uncontrolled
@@ -167,7 +166,6 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Uses `getIconRegistry()` context to resolve icon name to SVG node data
 - SVG rendered with structured element rendering using `{#each nodes}` for path content from registry
 - `data-size` attribute for size variant
-- `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 
 ## 10. GPUI Notes
 
