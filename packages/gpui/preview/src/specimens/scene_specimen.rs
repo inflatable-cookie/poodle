@@ -11,7 +11,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     AvatarShape, AvatarSize, AvatarSpec, AvatarTone, CallOutSpec, ControlDensity, ControlSize,
-    EmptyStateSpec, EmptyStateVariant, EyebrowSpec, InlineTypographyMode, PillAppearance, PillFont,
+    EmptyStateSize, EmptyStateSpec, EmptyStateVariant, EyebrowSpec, InlineTypographyMode, PillAppearance, PillFont,
     PillSize, PillSpec, PillTone, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone,
     SpinnerVariant, StatusTone,
 };
@@ -266,7 +266,7 @@ fn render_instance(instance: &SpecimenInstance, theme: &GpuiThemeProvider) -> An
                 spec = spec.with_message(message);
             }
             if prop(instance, "size") == Some("compact") {
-                spec = spec.with_compact(true);
+                spec = spec.with_size(EmptyStateSize::Compact);
             }
             if let Some(density) = prop(instance, "density") {
                 spec = spec.with_density(control_density(density));
@@ -339,40 +339,16 @@ pub(crate) fn render(slug: &str, state: &AppState, cx: &mut Context<PreviewRoot>
         Some(scene.density_axis)
     };
 
-    // The fixture's own axis lists are the admission decision: a scene that
-    // declares no size axis must not grow a Sizes tab, and a step outside the
-    // declared list is dropped instead of rendered blank.
-    let sizes_row = move |size: ControlSize, theme: &GpuiThemeProvider| {
-        let instance = first?;
-        let axis = size_axis?;
-        let value = match size {
-            ControlSize::Xs => "xs",
-            ControlSize::Sm => "sm",
-            ControlSize::Md => "md",
-            ControlSize::Lg => "lg",
-            ControlSize::Xl => "xl",
-        };
-        axis.contains(&value)
-            .then(|| render_matrix_instance(instance, theme, "size", value))
-    };
-    let densities_row = move |density: ControlDensity, theme: &GpuiThemeProvider| {
-        let instance = first?;
-        let axis = density_axis?;
-        let value = match density {
-            ControlDensity::Compact => "compact",
-            ControlDensity::Default => "default",
-            ControlDensity::Comfortable => "comfortable",
-        };
-        axis.contains(&value)
-            .then(|| render_matrix_instance(instance, theme, "density", value))
-    };
-
     let mut axes = SpecimenAxes::examples_only();
-    if first.is_some() && size_axis.is_some() {
-        axes = axes.with_sizes_where(sizes_row);
+    if let (Some(instance), Some(axis)) = (first, size_axis) {
+        axes = axes.with_named_sizes(axis, move |value, theme| {
+            render_matrix_instance(instance, theme, "size", value)
+        });
     }
-    if first.is_some() && density_axis.is_some() {
-        axes = axes.with_densities_where(densities_row);
+    if let (Some(instance), Some(axis)) = (first, density_axis) {
+        axes = axes.with_named_densities(axis, move |value, theme| {
+            render_matrix_instance(instance, theme, "density", value)
+        });
     }
 
     Some(super::specimen_layout::specimen_layout(

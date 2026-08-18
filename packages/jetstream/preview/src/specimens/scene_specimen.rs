@@ -7,7 +7,7 @@
 use poodle_jetstream::JetstreamThemeProvider;
 use poodle_specs::{
     AvatarShape, AvatarSize, AvatarSpec, AvatarTone, CallOutSpec, ControlDensity, ControlSize,
-    EmptyStateSpec, EmptyStateVariant, InlineTypographyMode, PillAppearance,
+    EmptyStateSize, EmptyStateSpec, EmptyStateVariant, InlineTypographyMode, PillAppearance,
     PillFont, PillSize, PillSpec, PillTone, SemanticControlSizeRole, SpinnerSize, SpinnerSpec,
     SpinnerTone, SpinnerVariant, StatusTone,
 };
@@ -266,7 +266,7 @@ fn render_instance(instance: &SpecimenInstance, theme: &JetstreamThemeProvider) 
                 spec = spec.with_message(message);
             }
             if prop(instance, "size") == Some("compact") {
-                spec = spec.with_compact(true);
+                spec = spec.with_size(EmptyStateSize::Compact);
             }
             if let Some(density) = prop(instance, "density") {
                 spec = spec.with_density(control_density(density));

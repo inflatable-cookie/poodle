@@ -18,12 +18,8 @@ pub struct EmptyStateSpec {
     pub variant: EmptyStateVariant,
     pub aria_label: Option<String>,
     pub actions: Vec<RemediationAction>,
-    /// When true the empty state renders in a tighter form suitable
-    /// for embedding inside lists or small containers — reduced
-    /// vertical padding, smaller title, smaller icon.
-    pub compact: bool,
     /// Density override for root gap + vertical padding (contract §8 density
-    /// adjustments). Orthogonal to `compact` (which is the size axis).
+    /// adjustments). Orthogonal to `size` (which is the size axis).
     pub density: ControlDensity,
     /// Visual and copy sizing, orthogonal to `variant`'s semantic posture.
     pub size: EmptyStateSize,
@@ -37,15 +33,9 @@ impl EmptyStateSpec {
             variant: EmptyStateVariant::Neutral,
             aria_label: None,
             actions: Vec::new(),
-            compact: false,
             density: ControlDensity::Default,
             size: EmptyStateSize::Default,
         }
-    }
-
-    pub fn with_compact(mut self, compact: bool) -> Self {
-        self.compact = compact;
-        self
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
@@ -70,6 +60,11 @@ impl EmptyStateSpec {
 
     pub fn with_actions(mut self, actions: Vec<RemediationAction>) -> Self {
         self.actions = actions;
+        self
+    }
+
+    pub fn with_size(mut self, size: EmptyStateSize) -> Self {
+        self.size = size;
         self
     }
 

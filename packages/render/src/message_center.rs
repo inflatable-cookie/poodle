@@ -10,9 +10,9 @@ use poodle_node::{
     MainAxisAlignment, Node, NodePosition, NodeRole,
 };
 use poodle_specs::{
-    ButtonFit, ButtonSpec, ButtonTone, ButtonVariant, ControlSize, EmptyStateSpec, IconButtonSpec,
-    InlineTypographyMode, MessageCenterItem, MessageCenterSpec, PopoverSpec, ProgressSpec,
-    SemanticControlSizeRole, StatusIndicatorSpec, TimeAgoSpec,
+    ButtonFit, ButtonSpec, ButtonTone, ButtonVariant, ControlSize, EmptyStateSize, EmptyStateSpec,
+    IconButtonSpec, InlineTypographyMode, MessageCenterItem, MessageCenterSpec, PopoverSpec,
+    ProgressSpec, SemanticControlSizeRole, StatusIndicatorSpec, TimeAgoSpec,
 };
 
 use crate::button::button;
@@ -151,7 +151,7 @@ fn center_content(
     if spec.items.is_empty() {
         let empty_spec = EmptyStateSpec::new(&spec.empty_title)
             .with_message(&spec.empty_message)
-            .with_compact(true)
+            .with_size(EmptyStateSize::Compact)
             .with_density(spec.density);
         return root.child(empty_state(&empty_spec, theme));
     }

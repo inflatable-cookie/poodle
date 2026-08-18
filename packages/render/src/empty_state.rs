@@ -7,7 +7,7 @@
 use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::{
-    ButtonSpec, ControlDensity, ControlSize, EmptyStateSpec, EmptyStateVariant,
+    ButtonSpec, ControlDensity, ControlSize, EmptyStateSize, EmptyStateSpec, EmptyStateVariant,
     SemanticControlSizeRole,
 };
 
@@ -20,17 +20,18 @@ pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
     let text_secondary = theme.resolve_color("color.text.secondary");
     let gap = theme.resolve_space(spec.layout_gap_token());
 
-    let effective_size = if spec.compact {
+    let compact = spec.size == EmptyStateSize::Compact;
+    let effective_size = if compact {
         ControlSize::Sm
     } else {
         ControlSize::Md
     };
-    let title_font = if spec.compact {
+    let title_font = if compact {
         rem_to_px(0.9375)
     } else {
         rem_to_px(1.125)
     };
-    let message_font = if spec.compact {
+    let message_font = if compact {
         rem_to_px(0.75)
     } else {
         rem_to_px(0.8125)
@@ -41,12 +42,12 @@ pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
         EmptyStateVariant::FirstRun => "plus",
         EmptyStateVariant::Neutral => "inbox",
     };
-    let icon_container = if spec.compact {
+    let icon_container = if compact {
         rem_to_px(1.75)
     } else {
         rem_to_px(2.25)
     };
-    let icon_font = if spec.compact {
+    let icon_font = if compact {
         rem_to_px(0.9375)
     } else {
         rem_to_px(1.125)
