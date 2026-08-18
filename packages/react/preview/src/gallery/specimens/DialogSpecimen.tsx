@@ -1,5 +1,6 @@
+import { SpecimenGroup } from "../SpecimenGroup";
 import { useState, type CSSProperties } from "react";
-import { Button, Checkbox, Dialog, Eyebrow, Field, Pill, Popover, Select, Surface, TextInput } from "@inflatable-cookie/poodle-react";
+import { Button, Checkbox, Dialog, Field, Pill, Popover, Select, TextInput } from "@inflatable-cookie/poodle-react";
 
 const WIDTHS = ["sm", "md", "lg", "xl"] as const;
 type DialogWidth = (typeof WIDTHS)[number];
@@ -55,74 +56,61 @@ export function DialogSpecimen() {
 
   return (
     <>
-      <Surface tone="panel" border="subtle" padding="md">
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-            <Eyebrow>Popover inside a dialog</Eyebrow>
-            <Button variant="secondary" onClick={() => setOverlayInDialogOpen(true)}>
-              Open dialog
-            </Button>
-          </div>
+            <SpecimenGroup label="Popover inside a dialog">
+        <Button variant="secondary" onClick={() => setOverlayInDialogOpen(true)}>
+                      Open dialog
+                    </Button>
+      </SpecimenGroup>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-            <Eyebrow>Informational</Eyebrow>
-            <Button variant="secondary" onClick={() => setBasicOpen(true)}>
-              View details
-            </Button>
-          </div>
+                <SpecimenGroup label="Informational">
+        <Button variant="secondary" onClick={() => setBasicOpen(true)}>
+                      View details
+                    </Button>
+      </SpecimenGroup>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-            <Eyebrow>Form</Eyebrow>
-            <Button variant="secondary" onClick={() => setFormOpen(true)}>
-              Create project
-            </Button>
-          </div>
+                <SpecimenGroup label="Form">
+        <Button variant="secondary" onClick={() => setFormOpen(true)}>
+                      Create project
+                    </Button>
+      </SpecimenGroup>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-            <Eyebrow>Custom header</Eyebrow>
-            <Button variant="secondary" onClick={() => setContentOnlyOpen(true)}>
-              View changelog
-            </Button>
-          </div>
+                <SpecimenGroup label="Custom header">
+        <Button variant="secondary" onClick={() => setContentOnlyOpen(true)}>
+                      View changelog
+                    </Button>
+      </SpecimenGroup>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-            <Eyebrow>Custom footer</Eyebrow>
-            <Button variant="secondary" onClick={() => setCustomFooterOpen(true)}>
-              Terms &amp; conditions
-            </Button>
-          </div>
+                <SpecimenGroup label="Custom footer">
+        <Button variant="secondary" onClick={() => setCustomFooterOpen(true)}>
+                      Terms &amp; conditions
+                    </Button>
+      </SpecimenGroup>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-            <Eyebrow>Bare mode</Eyebrow>
-            <Button variant="secondary" onClick={() => setBareOpen(true)}>
-              Preview image
-            </Button>
-          </div>
+                <SpecimenGroup label="Bare mode">
+        <Button variant="secondary" onClick={() => setBareOpen(true)}>
+                      Preview image
+                    </Button>
+      </SpecimenGroup>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-            <Eyebrow>Scrollable</Eyebrow>
-            <Button variant="secondary" onClick={() => setScrollableOpen(true)}>
-              View log
-            </Button>
-          </div>
+                <SpecimenGroup label="Scrollable">
+        <Button variant="secondary" onClick={() => setScrollableOpen(true)}>
+                      View log
+                    </Button>
+      </SpecimenGroup>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-            <Eyebrow>Width presets</Eyebrow>
-            {WIDTHS.map((w) => (
-              <Button key={w} variant="secondary" onClick={() => setWidthOpen(w, true)}>
-                {w}
-              </Button>
-            ))}
-          </div>
+                <SpecimenGroup label="Width presets">
+        {WIDTHS.map((w) => (
+                      <Button key={w} variant="secondary" onClick={() => setWidthOpen(w, true)}>
+                        {w}
+                      </Button>
+                    ))}
+      </SpecimenGroup>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-            <Eyebrow>Non-dismissible</Eyebrow>
-            <Button variant="secondary" onClick={() => setWideOpen(true)}>
-              Open persistent
-            </Button>
-          </div>
-        </div>
-      </Surface>
+                <SpecimenGroup label="Non-dismissible">
+        <Button variant="secondary" onClick={() => setWideOpen(true)}>
+                      Open persistent
+                    </Button>
+      </SpecimenGroup>
 
       {/* Dialogs (rendered outside the Surface, portaled to [data-theme]) */}
 

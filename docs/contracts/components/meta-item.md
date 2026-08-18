@@ -125,3 +125,28 @@ When `typography="inherit"`:
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Jetstream label/value typography details | current Jetstream `JsEl` text surface does not yet expose font-family, letter-spacing, or line-height controls | allowed | add richer text styling support, then apply label and value typography literally |
+
+## 11. Specimen Definitions
+
+Dedicated paired specimens live at `#components/meta-item` in both web previews.
+
+### Labelled metadata
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Project metadata row | Three MetaItems with labels `ID`, `Owner`, `Updated`; ID value uses inline `Code` with copy | Inline ribbon with uppercase labels and compact values |
+
+### Unlabelled and rich value content
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Media facts row | Labelled `Type`, unlabelled `1920 × 1080`, plus a `Pill` between items | Mixed labelled and rich inline content without separator dots |
+
+### Interactive child content
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Docs link row | `TextLink` inside a labelled MetaItem; wired `onClick` updates the specimen readout | Interactive child remains the focus target; parent caption records the action |
+
+The **MetaBarSpecimen** still demonstrates MetaItem inside a fuller MetaBar
+context.

@@ -4,7 +4,8 @@ import {
   type AudioMeterMode, type MeterBus, type MeterBusChannel, type MeterFrameScheduler,
 } from "@inflatable-cookie/poodle-core";
 import { AudioMeter, MeterSurface } from "@inflatable-cookie/poodle-react";
-import { AudioSpecimenGroup as Group, AudioSpecimenPage as Page } from "./AudioSpecimen";
+import {AudioSpecimenPage as Page} from "./AudioSpecimen";
+import { SpecimenGroup } from "../SpecimenGroup";
 
 const MODES: AudioMeterMode[] = ["vu", "ppm", "sample-peak", "rms"];
 const DATA_INTERVAL_MS = 1000 / 15;
@@ -209,13 +210,13 @@ export function MeterSurfaceSpecimen() {
     setScene({ ...scene, meters: [...vertical, { id, right: null, style: "segments", orientation: "vertical", label: `Added ${index + 1}` } as SceneMeter, ...horizontal] });
   }
 
-  if (scene === null) return <Page><Group title="Batched meter surface">building scene…</Group></Page>;
+  if (scene === null) return <Page><SpecimenGroup label="Batched meter surface">building scene…</SpecimenGroup></Page>;
 
   const vertical = scene.meters.filter((meter) => meter.orientation === "vertical");
   const horizontal = scene.meters.filter((meter) => meter.orientation === "horizontal");
 
   return <Page>
-    <Group title="Batched meter surface">
+    <SpecimenGroup label="Batched meter surface">
       <p className="meter-surface-note">
         One <code>MeterBus</code>, one canvas, one frame loop. Standalone evidence stays on the{" "}
         <a href="#components/audio-meter">AudioMeter specimen</a>.
@@ -236,8 +237,8 @@ export function MeterSurfaceSpecimen() {
         <button type="button" data-part="theme-toggle" onClick={() => setThemed(!themed)}>{themed ? "Local theme off" : "Local theme on"}</button>
       </div>
       <pre className="meter-surface-readout" data-part="perf-readout">{readout}</pre>
-    </Group>
-    <Group title="Console strip">
+    </SpecimenGroup>
+    <SpecimenGroup label="Console strip">
       <div className="meter-surface-strip-wrap" data-theme={themed ? "midnight" : undefined}>
         {mounted ? <MeterSurface key={scene.version} bus={scene.bus}>
           <div className="meter-surface-strip" data-part="meter-strip">
@@ -261,6 +262,6 @@ export function MeterSurfaceSpecimen() {
         .meter-surface-strip { display: flex; align-items: flex-end; gap: 0.75rem; padding: 0.5rem; }
         .meter-surface-strip--horizontal { flex-direction: column; align-items: flex-start; }
       `}</style>
-    </Group>
+    </SpecimenGroup>
   </Page>;
 }

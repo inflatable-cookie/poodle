@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { TimeZoneSelect, Eyebrow, Surface } from "@inflatable-cookie/poodle-react";
+import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 const specimenStyle: CSSProperties = {
@@ -27,25 +28,18 @@ export function TimeZoneSelectSpecimen() {
       sizes={(size) => <TimeZoneSelect size={size} ariaLabel={size} />}
       densities={(density) => <TimeZoneSelect density={density} ariaLabel={density} />}
     >
-      <Surface tone="panel" border="subtle" padding="md">
-        <div style={specimenStyle}>
-          <div style={itemStyle}>
-            <Eyebrow>Default</Eyebrow>
-            <TimeZoneSelect ariaLabel="Time zone" onValueChange={(value) => setZone(value)} />
-            {zone && <span style={valueStyle}>{zone}</span>}
-          </div>
+            <SpecimenGroup label="Default">
+        <TimeZoneSelect ariaLabel="Time zone" onValueChange={(value) => setZone(value)} />
+                    {zone && <span style={valueStyle}>{zone}</span>}
+      </SpecimenGroup>
 
-          <div style={itemStyle}>
-            <Eyebrow>Pre-selected</Eyebrow>
-            <TimeZoneSelect defaultValue="America/New_York" ariaLabel="Pre-filled" />
-          </div>
+                <SpecimenGroup label="Pre-selected">
+        <TimeZoneSelect defaultValue="America/New_York" ariaLabel="Pre-filled" />
+      </SpecimenGroup>
 
-          <div style={itemStyle}>
-            <Eyebrow>Disabled</Eyebrow>
-            <TimeZoneSelect disabled ariaLabel="Disabled" />
-          </div>
-        </div>
-      </Surface>
+      <SpecimenGroup label="Disabled">
+        <TimeZoneSelect disabled ariaLabel="Disabled" />
+      </SpecimenGroup>
     </SpecimenLayout>
   );
 }

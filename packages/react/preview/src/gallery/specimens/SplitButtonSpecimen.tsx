@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { SplitButton, Eyebrow, Surface, type MenuItem } from "@inflatable-cookie/poodle-react";
+import { SplitButton, type MenuItem } from "@inflatable-cookie/poodle-react";
+import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 export function SplitButtonSpecimen() {
@@ -31,88 +32,77 @@ export function SplitButtonSpecimen() {
         </SplitButton>
       )}
     >
-      <Surface tone="panel" border="subtle" padding="md">
-        <div className="poodle-specimen">
-          <div className="poodle-specimen__row">
-            <Eyebrow>Primary</Eyebrow>
-            <SplitButton variant="primary" items={saveItems} onClick={() => setLastAction("Save")} onAction={(value) => setLastAction(value)}>
-              Save
-            </SplitButton>
-          </div>
+            <SpecimenGroup label="Primary">
+        <SplitButton variant="primary" items={saveItems} onClick={() => setLastAction("Save")} onAction={(value) => setLastAction(value)}>
+                      Save
+                    </SplitButton>
+      </SpecimenGroup>
 
-          <div className="poodle-specimen__row">
-            <Eyebrow>Secondary</Eyebrow>
-            <SplitButton variant="secondary" items={exportItems} onClick={() => setLastAction("Export")} onAction={(value) => setLastAction(value)}>
-              Export
-            </SplitButton>
-          </div>
+                <SpecimenGroup label="Secondary">
+        <SplitButton variant="secondary" items={exportItems} onClick={() => setLastAction("Export")} onAction={(value) => setLastAction(value)}>
+                      Export
+                    </SplitButton>
+      </SpecimenGroup>
 
-          <div className="poodle-specimen__row">
-            <Eyebrow>Danger</Eyebrow>
-            <SplitButton
-              tone="danger"
-              items={[
-                { value: "delete-selected", label: "Delete selected" },
-                { value: "delete-all", label: "Delete all" },
-              ]}
-              onClick={() => setLastAction("Delete")}
-              onAction={(value) => setLastAction(value)}
-            >
-              Delete
-            </SplitButton>
-          </div>
+                <SpecimenGroup label="Danger">
+        <SplitButton
+                      tone="danger"
+                      items={[
+                        { value: "delete-selected", label: "Delete selected" },
+                        { value: "delete-all", label: "Delete all" },
+                      ]}
+                      onClick={() => setLastAction("Delete")}
+                      onAction={(value) => setLastAction(value)}
+                    >
+                      Delete
+                    </SplitButton>
+      </SpecimenGroup>
 
-          <div className="poodle-specimen__row">
-            <Eyebrow>Success</Eyebrow>
-            <SplitButton
-              tone="success"
-              items={[
-                { value: "publish-now", label: "Publish now" },
-                { value: "schedule-publish", label: "Schedule" },
-              ]}
-              onClick={() => setLastAction("Publish")}
-              onAction={(value) => setLastAction(value)}
-            >
-              Publish
-            </SplitButton>
-          </div>
+                <SpecimenGroup label="Success">
+        <SplitButton
+                      tone="success"
+                      items={[
+                        { value: "publish-now", label: "Publish now" },
+                        { value: "schedule-publish", label: "Schedule" },
+                      ]}
+                      onClick={() => setLastAction("Publish")}
+                      onAction={(value) => setLastAction(value)}
+                    >
+                      Publish
+                    </SplitButton>
+      </SpecimenGroup>
 
-          <div className="poodle-specimen__row">
-            <Eyebrow>Warning</Eyebrow>
-            <SplitButton
-              tone="warning"
-              items={[
-                { value: "archive-selected", label: "Archive selected" },
-                { value: "archive-all", label: "Archive all" },
-              ]}
-              onClick={() => setLastAction("Archive")}
-              onAction={(value) => setLastAction(value)}
-            >
-              Archive
-            </SplitButton>
-          </div>
+                <SpecimenGroup label="Warning">
+        <SplitButton
+                      tone="warning"
+                      items={[
+                        { value: "archive-selected", label: "Archive selected" },
+                        { value: "archive-all", label: "Archive all" },
+                      ]}
+                      onClick={() => setLastAction("Archive")}
+                      onAction={(value) => setLastAction(value)}
+                    >
+                      Archive
+                    </SplitButton>
+      </SpecimenGroup>
 
-          <div className="poodle-specimen__row">
-            <Eyebrow>Loading</Eyebrow>
-            <SplitButton variant="primary" items={saveItems} loading>
-              Saving…
-            </SplitButton>
-          </div>
+                <SpecimenGroup label="Loading">
+        <SplitButton variant="primary" items={saveItems} loading>
+                      Saving…
+                    </SplitButton>
+      </SpecimenGroup>
 
-          <div className="poodle-specimen__row">
-            <Eyebrow>Disabled</Eyebrow>
-            <SplitButton variant="secondary" items={saveItems} disabled>
-              Save
-            </SplitButton>
-          </div>
+                <SpecimenGroup label="Disabled">
+        <SplitButton variant="secondary" items={saveItems} disabled>
+                      Save
+                    </SplitButton>
+      </SpecimenGroup>
 
           {lastAction ? (
             <p style={{ margin: 0, fontSize: "0.75rem", color: "var(--poodle-color-text-secondary)" }}>
               Last action: <strong>{lastAction}</strong>
             </p>
           ) : null}
-        </div>
-      </Surface>
     </SpecimenLayout>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Eyebrow, MarkdownEditor } from "@inflatable-cookie/poodle-react";
+import { MarkdownEditor } from "@inflatable-cookie/poodle-react";
+import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 const compactContent =
@@ -27,39 +28,32 @@ export function MarkdownEditorSpecimen() {
     <SpecimenLayout
       bareVariants
       sizes={(size) => (
-        <div className="poodle-specimen__stack">
-          <Eyebrow>{size}</Eyebrow>
+        <SpecimenGroup label={size}>
           <MarkdownEditor value={compactContent} mode="split" size={size} minHeight="10rem" />
-        </div>
+        </SpecimenGroup>
       )}
       densities={(density) => (
-        <div className="poodle-specimen__stack">
-          <Eyebrow>{density}</Eyebrow>
+        <SpecimenGroup label={density}>
           <MarkdownEditor value={compactContent} mode="split" density={density} minHeight="10rem" />
-        </div>
+        </SpecimenGroup>
       )}
     >
-      <div className="poodle-specimen">
-        <div className="poodle-specimen__stack">
-          <Eyebrow>Split view</Eyebrow>
-          <MarkdownEditor value={content} onValueChange={setContent} mode="split" />
-        </div>
+      <SpecimenGroup label="Split view">
+        <MarkdownEditor value={content} onValueChange={setContent} mode="split" />
+      </SpecimenGroup>
 
-        <div className="poodle-specimen__stack">
-          <Eyebrow>Edit mode</Eyebrow>
-          <MarkdownEditor
-            value={emptyContent}
-            onValueChange={setEmptyContent}
-            mode="edit"
-            placeholder="Start writing..."
-          />
-        </div>
+      <SpecimenGroup label="Edit mode">
+        <MarkdownEditor
+          value={emptyContent}
+          onValueChange={setEmptyContent}
+          mode="edit"
+          placeholder="Start writing..."
+        />
+      </SpecimenGroup>
 
-        <div className="poodle-specimen__stack">
-          <Eyebrow>Disabled</Eyebrow>
-          <MarkdownEditor value="Read-only content" disabled />
-        </div>
-      </div>
+      <SpecimenGroup label="Disabled">
+        <MarkdownEditor value="Read-only content" disabled />
+      </SpecimenGroup>
     </SpecimenLayout>
   );
 }

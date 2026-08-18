@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { TextInput, Field, Eyebrow, Surface } from "@inflatable-cookie/poodle-react";
 import type { InputValidationStatus, ValidationResult, ValidationState } from "@inflatable-cookie/poodle-react";
+import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 const specimenStyle: CSSProperties = {
@@ -46,113 +47,102 @@ export function TextInputSpecimen() {
         </div>
       )}
     >
-      <Surface tone="panel" border="subtle" padding="md">
-        <div style={specimenStyle}>
-          <div style={itemStyle}>
-            <Eyebrow>Default</Eyebrow>
-            <div style={controlStyle}>
-              <Field id="name-field" label="Name" description="Enter your full name.">
-                <TextInput id="name-field" placeholder="Jane Doe" onValueChange={(nextValue) => setName(nextValue)} />
-              </Field>
-            </div>
-          </div>
+            <SpecimenGroup label="Default">
+        <div style={controlStyle}>
+                      <Field id="name-field" label="Name" description="Enter your full name.">
+                        <TextInput id="name-field" placeholder="Jane Doe" onValueChange={(nextValue) => setName(nextValue)} />
+                      </Field>
+                    </div>
+      </SpecimenGroup>
 
-          <div style={itemStyle}>
-            <Eyebrow>With validation</Eyebrow>
-            <div style={controlStyle}>
-              <Field
-                id="email-field"
-                label="Email"
-                description="A valid email address is required."
-                validationState={validationState}
-                error={validationState === "invalid" ? "Please enter a valid email address." : null}
-              >
-                <TextInput
-                  id="email-field"
-                  value={email}
-                  validationState={validationState}
-                  onValueChange={(nextValue) => {
-                    setEmail(nextValue);
-                    setValidationState(nextValue.includes("@") ? "valid" : "invalid");
-                  }}
-                />
-              </Field>
-            </div>
-          </div>
+                <SpecimenGroup label="With validation">
+        <div style={controlStyle}>
+                      <Field
+                        id="email-field"
+                        label="Email"
+                        description="A valid email address is required."
+                        validationState={validationState}
+                        error={validationState === "invalid" ? "Please enter a valid email address." : null}
+                      >
+                        <TextInput
+                          id="email-field"
+                          value={email}
+                          validationState={validationState}
+                          onValueChange={(nextValue) => {
+                            setEmail(nextValue);
+                            setValidationState(nextValue.includes("@") ? "valid" : "invalid");
+                          }}
+                        />
+                      </Field>
+                    </div>
+      </SpecimenGroup>
 
-          <div style={itemStyle}>
-            <Eyebrow>Slug</Eyebrow>
-            <div style={controlStyle}>
-              <Field
-                id="slug-field"
-                label="Slug"
-                description="Generates from the title until the user edits it."
-                validationState={
-                  slugStatus === "validating"
-                    ? "pending"
-                    : slugStatus === "invalid"
-                      ? "invalid"
-                      : slugStatus === "valid"
-                        ? "valid"
-                        : "none"
-                }
-                error={slugStatus === "invalid" ? "That slug is not available." : null}
-              >
-                <TextInput
-                  id="slug-field"
-                  type="slug"
-                  value={slug}
-                  source="Northstar Launch Plan"
-                  prefix="/projects/"
-                  maxLength={64}
-                  validate={validateSlug}
-                  onValueChange={(nextValue) => setSlug(nextValue)}
-                  onValidationChange={(detail) => setSlugStatus(detail.status)}
-                />
-              </Field>
-            </div>
-          </div>
+                <SpecimenGroup label="Slug">
+        <div style={controlStyle}>
+                      <Field
+                        id="slug-field"
+                        label="Slug"
+                        description="Generates from the title until the user edits it."
+                        validationState={
+                          slugStatus === "validating"
+                            ? "pending"
+                            : slugStatus === "invalid"
+                              ? "invalid"
+                              : slugStatus === "valid"
+                                ? "valid"
+                                : "none"
+                        }
+                        error={slugStatus === "invalid" ? "That slug is not available." : null}
+                      >
+                        <TextInput
+                          id="slug-field"
+                          type="slug"
+                          value={slug}
+                          source="Northstar Launch Plan"
+                          prefix="/projects/"
+                          maxLength={64}
+                          validate={validateSlug}
+                          onValueChange={(nextValue) => setSlug(nextValue)}
+                          onValidationChange={(detail) => setSlugStatus(detail.status)}
+                        />
+                      </Field>
+                    </div>
+      </SpecimenGroup>
 
-          <div style={itemStyle}>
-            <Eyebrow>Search</Eyebrow>
-            <div style={controlStyle}>
-              <TextInput
-                id="search-field"
-                type="search"
-                placeholder="Search..."
-                value={searchQuery}
-                onValueChange={(nextValue) => setSearchQuery(nextValue)}
-                onClear={() => setSearchQuery("")}
-              />
-            </div>
-          </div>
+                <SpecimenGroup label="Search">
+        <div style={controlStyle}>
+                      <TextInput
+                        id="search-field"
+                        type="search"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onValueChange={(nextValue) => setSearchQuery(nextValue)}
+                        onClear={() => setSearchQuery("")}
+                      />
+                    </div>
+      </SpecimenGroup>
 
-          <div style={itemStyle}>
-            <Eyebrow>Prefix and suffix</Eyebrow>
-            <div style={controlStyle}>
-              <TextInput id="price-field" prefix="$" suffix="USD" placeholder="0.00" inputMode="decimal" />
-            </div>
-          </div>
+                <SpecimenGroup label="Prefix and suffix">
+        <div style={controlStyle}>
+                      <TextInput id="price-field" prefix="$" suffix="USD" placeholder="0.00" inputMode="decimal" />
+                    </div>
+      </SpecimenGroup>
 
-          <div style={itemStyle}>
-            <Eyebrow>Disabled</Eyebrow>
-            <div style={controlStyle}>
-              <Field id="disabled-field" label="API key">
-                <TextInput id="disabled-field" value="sk-xxxx-xxxx-xxxx" disabled />
-              </Field>
-            </div>
-          </div>
+                <SpecimenGroup label="Disabled">
+        <div style={controlStyle}>
+                      <Field id="disabled-field" label="API key">
+                        <TextInput id="disabled-field" value="sk-xxxx-xxxx-xxxx" disabled />
+                      </Field>
+                    </div>
+      </SpecimenGroup>
 
-          <div style={itemStyle}>
-            <Eyebrow>Multiline</Eyebrow>
-            <div style={controlStyle}>
-              <Field id="multiline-field" label="Description">
-                <TextInput id="multiline-field" type="multiline" rows={3} maxLength={280} showCharCount placeholder="Enter a description..." />
-              </Field>
-            </div>
-          </div>
+      <SpecimenGroup label="Multiline">
+        <div style={controlStyle}>
+          <Field id="multiline-field" label="Description">
+            <TextInput id="multiline-field" type="multiline" rows={3} maxLength={280} showCharCount placeholder="Enter a description..." />
+          </Field>
         </div>
-      </Surface>
+      </SpecimenGroup>
     </SpecimenLayout>
   );
 }

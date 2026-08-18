@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { SplitButton, Eyebrow, Surface } from "@inflatable-cookie/poodle-svelte";
+  import { SplitButton } from "@inflatable-cookie/poodle-svelte";
   import type { MenuItem } from "@inflatable-cookie/poodle-svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let lastAction = $state("");
@@ -20,48 +21,37 @@
 </script>
 
 <SpecimenLayout>
-  <Surface tone="panel" border="subtle" padding="md">
-    <div class="poodle-specimen">
-      <div class="poodle-specimen__row">
-        <Eyebrow>Primary</Eyebrow>
-        <SplitButton variant="primary" items={saveItems} onClick={() => (lastAction = "Save")} onAction={(value) => (lastAction = value)}>Save</SplitButton>
-      </div>
+    <SpecimenGroup label="Primary">
+    <SplitButton variant="primary" items={saveItems} onClick={() => (lastAction = "Save")} onAction={(value) => (lastAction = value)}>Save</SplitButton>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Secondary</Eyebrow>
-        <SplitButton variant="secondary" items={exportItems} onClick={() => (lastAction = "Export")} onAction={(value) => (lastAction = value)}>Export</SplitButton>
-      </div>
+        <SpecimenGroup label="Secondary">
+    <SplitButton variant="secondary" items={exportItems} onClick={() => (lastAction = "Export")} onAction={(value) => (lastAction = value)}>Export</SplitButton>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Danger</Eyebrow>
-        <SplitButton tone="danger" items={[{ value: "delete-selected", label: "Delete selected" }, { value: "delete-all", label: "Delete all" }]} onClick={() => (lastAction = "Delete")} onAction={(value) => (lastAction = value)}>Delete</SplitButton>
-      </div>
+        <SpecimenGroup label="Danger">
+    <SplitButton tone="danger" items={[{ value: "delete-selected", label: "Delete selected" }, { value: "delete-all", label: "Delete all" }]} onClick={() => (lastAction = "Delete")} onAction={(value) => (lastAction = value)}>Delete</SplitButton>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Success</Eyebrow>
-        <SplitButton tone="success" items={[{ value: "publish-now", label: "Publish now" }, { value: "schedule-publish", label: "Schedule" }]} onClick={() => (lastAction = "Publish")} onAction={(value) => (lastAction = value)}>Publish</SplitButton>
-      </div>
+        <SpecimenGroup label="Success">
+    <SplitButton tone="success" items={[{ value: "publish-now", label: "Publish now" }, { value: "schedule-publish", label: "Schedule" }]} onClick={() => (lastAction = "Publish")} onAction={(value) => (lastAction = value)}>Publish</SplitButton>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Warning</Eyebrow>
-        <SplitButton tone="warning" items={[{ value: "archive-selected", label: "Archive selected" }, { value: "archive-all", label: "Archive all" }]} onClick={() => (lastAction = "Archive")} onAction={(value) => (lastAction = value)}>Archive</SplitButton>
-      </div>
+        <SpecimenGroup label="Warning">
+    <SplitButton tone="warning" items={[{ value: "archive-selected", label: "Archive selected" }, { value: "archive-all", label: "Archive all" }]} onClick={() => (lastAction = "Archive")} onAction={(value) => (lastAction = value)}>Archive</SplitButton>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Loading</Eyebrow>
-        <SplitButton variant="primary" items={saveItems} loading>Saving…</SplitButton>
-      </div>
+        <SpecimenGroup label="Loading">
+    <SplitButton variant="primary" items={saveItems} loading>Saving…</SplitButton>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Disabled</Eyebrow>
-        <SplitButton variant="secondary" items={saveItems} disabled>Save</SplitButton>
-      </div>
+        <SpecimenGroup label="Disabled">
+    <SplitButton variant="secondary" items={saveItems} disabled>Save</SplitButton>
+  </SpecimenGroup>
 
       {#if lastAction}
         <p class="poodle-specimen__hint">Last action: <strong>{lastAction}</strong></p>
       {/if}
-    </div>
-  </Surface>
 
   {#snippet sizes(size)}
     <SplitButton variant="primary" items={saveItems} {size}>Save</SplitButton>
@@ -73,13 +63,7 @@
 </SpecimenLayout>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .poodle-specimen__row {
+    .poodle-specimen__row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;

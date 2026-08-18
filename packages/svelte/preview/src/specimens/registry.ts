@@ -63,6 +63,7 @@ import IconSpecimen from "./IconSpecimen.svelte";
 import IconButtonSpecimen from "./IconButtonSpecimen.svelte";
 import IconProviderSpecimen from "./IconProviderSpecimen.svelte";
 import ListCardSpecimen from "./ListCardSpecimen.svelte";
+import ListCardCounterSpecimen from "./ListCardCounterSpecimen.svelte";
 import ListContainerSpecimen from "./ListContainerSpecimen.svelte";
 import ListGridSpecimen from "./ListGridSpecimen.svelte";
 import LicenceActivationSpecimen from "./LicenceActivationSpecimen.svelte";
@@ -78,6 +79,7 @@ import MarkdownEditorSpecimen from "./MarkdownEditorSpecimen.svelte";
 import MediaBrowsePanelSpecimen from "./MediaBrowsePanelSpecimen.svelte";
 import MediaPickerSpecimen from "./MediaPickerSpecimen.svelte";
 import MetaBarSpecimen from "./MetaBarSpecimen.svelte";
+import MetaItemSpecimen from "./MetaItemSpecimen.svelte";
 import OrderBySpecimen from "./OrderBySpecimen.svelte";
 import MediaPreviewSpecimen from "./MediaPreviewSpecimen.svelte";
 import MediaThumbnailSpecimen from "./MediaThumbnailSpecimen.svelte";
@@ -247,7 +249,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "icon-button": IconButtonSpecimen,
   "icon-provider": IconProviderSpecimen,
   "list-card": ListCardSpecimen,
-  "list-card-counter": ListCardSpecimen,
+  "list-card-counter": ListCardCounterSpecimen,
   "list-container": ListContainerSpecimen,
   "list-grid": ListGridSpecimen,
   "licence-activation": LicenceActivationSpecimen,
@@ -265,7 +267,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "media-thumbnail": MediaThumbnailSpecimen,
   menu: MenuSpecimen,
   "meta-bar": MetaBarSpecimen,
-  "meta-item": MetaBarSpecimen,
+  "meta-item": MetaItemSpecimen,
   menubar: MenubarSpecimen,
   meter: MeterSpecimen,
   "model-picker": ModelPickerSpecimen,

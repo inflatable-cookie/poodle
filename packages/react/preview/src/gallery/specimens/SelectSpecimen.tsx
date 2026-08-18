@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { Select, Pill, Eyebrow, Surface, type SelectOption, type SelectOptionGroup } from "@inflatable-cookie/poodle-react";
+import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 const fruitOptions: SelectOption[] = [
@@ -120,121 +121,109 @@ export function SelectSpecimen() {
         <Select options={fruitOptions} placeholder="Select..." density={density} ariaLabel={`${density} select`} />
       )}
     >
-      <Surface tone="panel" border="subtle" padding="md">
-        <div style={specimenStyle}>
-          <div style={rowStyle}>
-            <Eyebrow>Native</Eyebrow>
-            <div style={fieldStyle}>
-              <Select
-                options={fruitOptions}
-                placeholder="Choose a fruit"
-                ariaLabel="Fruit selection"
-                onValueChange={(nextValue) => setSelectedFruit(nextValue)}
-              />
-              {selectedFruit ? <span style={valueStyle}>{selectedFruit}</span> : null}
-            </div>
-          </div>
+            <SpecimenGroup label="Native">
+        <div style={fieldStyle}>
+                      <Select
+                        options={fruitOptions}
+                        placeholder="Choose a fruit"
+                        ariaLabel="Fruit selection"
+                        onValueChange={(nextValue) => setSelectedFruit(nextValue)}
+                      />
+                      {selectedFruit ? <span style={valueStyle}>{selectedFruit}</span> : null}
+                    </div>
+      </SpecimenGroup>
 
-          <div style={rowStyle}>
-            <Eyebrow>Custom dropdown</Eyebrow>
-            <div style={fieldStyle}>
-              <Select
-                options={richOptions}
-                placeholder="Choose a country"
-                native={false}
-                ariaLabel="Country selection"
-                onValueChange={(nextValue) => setSelectedCountry(nextValue)}
-              />
-              {selectedCountry ? <span style={valueStyle}>{selectedCountry}</span> : null}
-            </div>
-          </div>
+                <SpecimenGroup label="Custom dropdown">
+        <div style={fieldStyle}>
+                      <Select
+                        options={richOptions}
+                        placeholder="Choose a country"
+                        native={false}
+                        ariaLabel="Country selection"
+                        onValueChange={(nextValue) => setSelectedCountry(nextValue)}
+                      />
+                      {selectedCountry ? <span style={valueStyle}>{selectedCountry}</span> : null}
+                    </div>
+      </SpecimenGroup>
 
-          <div style={rowStyle}>
-            <Eyebrow>Searchable</Eyebrow>
-            <div style={fieldStyle}>
-              <Select
-                options={frameworkOptions}
-                placeholder="Search frameworks..."
-                searchable
-                ariaLabel="Framework search"
-                onValueChange={(nextValue) => setSelectedFramework(nextValue)}
-              />
-              {selectedFramework ? <span style={valueStyle}>{selectedFramework}</span> : null}
-            </div>
-          </div>
+                <SpecimenGroup label="Searchable">
+        <div style={fieldStyle}>
+                      <Select
+                        options={frameworkOptions}
+                        placeholder="Search frameworks..."
+                        searchable
+                        ariaLabel="Framework search"
+                        onValueChange={(nextValue) => setSelectedFramework(nextValue)}
+                      />
+                      {selectedFramework ? <span style={valueStyle}>{selectedFramework}</span> : null}
+                    </div>
+      </SpecimenGroup>
 
-          <div style={rowStyle}>
-            <Eyebrow>Freeform</Eyebrow>
-            <div style={fieldStyle}>
-              <Select
-                options={frameworkOptions}
-                placeholder="Type or select..."
-                searchable
-                freeform
-                ariaLabel="Freeform"
-                onValueChange={(nextValue) => setFreeformValue(nextValue)}
-              />
-              {freeformValue ? <span style={valueStyle}>{freeformValue}</span> : null}
-            </div>
-          </div>
+                <SpecimenGroup label="Freeform">
+        <div style={fieldStyle}>
+                      <Select
+                        options={frameworkOptions}
+                        placeholder="Type or select..."
+                        searchable
+                        freeform
+                        ariaLabel="Freeform"
+                        onValueChange={(nextValue) => setFreeformValue(nextValue)}
+                      />
+                      {freeformValue ? <span style={valueStyle}>{freeformValue}</span> : null}
+                    </div>
+      </SpecimenGroup>
 
-          <div style={rowStyle}>
-            <Eyebrow>Snippet rendering</Eyebrow>
-            <div style={fieldStyle}>
-              <Select
-                options={richOptions}
-                placeholder="Custom country"
-                native={false}
-                ariaLabel="Custom country selection"
-                onValueChange={(nextValue) => setCustomCountry(nextValue)}
-                trigger={({ selectedOption, placeholder }) => (
-                  <span style={triggerStyle}>
-                    <span>{selectedOption?.label ?? placeholder ?? ""}</span>
-                    {selectedOption ? (
-                      <Pill size="sm" appearance="subtle" tone="info">picked</Pill>
-                    ) : null}
-                  </span>
-                )}
-                option={({ option }) => (
-                  <span style={optionStyle}>
-                    <span style={optionBodyStyle}>
-                      <span style={optionLabelStyle}>{option.label}</span>
-                      {option.description ? (
-                        <span style={secondaryTextStyle}>{option.description}</span>
-                      ) : null}
-                    </span>
-                  </span>
-                )}
-                empty={({ query }) => (
-                  <div style={secondaryTextStyle}>No match for "{query}"</div>
-                )}
-              />
-              {customCountry ? <span style={valueStyle}>{customCountry}</span> : null}
-            </div>
-          </div>
+                <SpecimenGroup label="Snippet rendering">
+        <div style={fieldStyle}>
+                      <Select
+                        options={richOptions}
+                        placeholder="Custom country"
+                        native={false}
+                        ariaLabel="Custom country selection"
+                        onValueChange={(nextValue) => setCustomCountry(nextValue)}
+                        trigger={({ selectedOption, placeholder }) => (
+                          <span style={triggerStyle}>
+                            <span>{selectedOption?.label ?? placeholder ?? ""}</span>
+                            {selectedOption ? (
+                              <Pill size="sm" appearance="subtle" tone="info">picked</Pill>
+                            ) : null}
+                          </span>
+                        )}
+                        option={({ option }) => (
+                          <span style={optionStyle}>
+                            <span style={optionBodyStyle}>
+                              <span style={optionLabelStyle}>{option.label}</span>
+                              {option.description ? (
+                                <span style={secondaryTextStyle}>{option.description}</span>
+                              ) : null}
+                            </span>
+                          </span>
+                        )}
+                        empty={({ query }) => (
+                          <div style={secondaryTextStyle}>No match for "{query}"</div>
+                        )}
+                      />
+                      {customCountry ? <span style={valueStyle}>{customCountry}</span> : null}
+                    </div>
+      </SpecimenGroup>
 
-          <div style={rowStyle}>
-            <Eyebrow>Grouped</Eyebrow>
-            <Select options={groupedOptions} placeholder="Choose a food" ariaLabel="Grouped food" />
-          </div>
+                <SpecimenGroup label="Grouped">
+        <Select options={groupedOptions} placeholder="Choose a food" ariaLabel="Grouped food" />
+      </SpecimenGroup>
 
-          <div style={rowStyle}>
-            <Eyebrow>Clearable</Eyebrow>
-            <Select
-              options={fruitOptions}
-              placeholder="All fruits"
-              native={false}
-              clearable
-              ariaLabel="Clearable"
-            />
-          </div>
+                <SpecimenGroup label="Clearable">
+        <Select
+                      options={fruitOptions}
+                      placeholder="All fruits"
+                      native={false}
+                      clearable
+                      ariaLabel="Clearable"
+                    />
+      </SpecimenGroup>
 
-          <div style={rowStyle}>
-            <Eyebrow>Disabled</Eyebrow>
-            <Select options={fruitOptions} value="banana" disabled ariaLabel="Disabled" />
-          </div>
-        </div>
-      </Surface>
+      <SpecimenGroup label="Disabled">
+        <Select options={fruitOptions} value="banana" disabled ariaLabel="Disabled" />
+      </SpecimenGroup>
     </SpecimenLayout>
   );
 }

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Dialog, Button, TextInput, Select, Field, Checkbox, Pill, Eyebrow, Surface, Popover } from "@inflatable-cookie/poodle-svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import { Dialog, Button, TextInput, Select, Field, Checkbox, Pill, Popover } from "@inflatable-cookie/poodle-svelte";
 
   // One $state rune puts the whole file in runes mode, where plain `let`
   // stops being reactive — every flag here must be $state or its dialog
@@ -15,60 +16,43 @@
   let overlayInDialogOpen = $state(false);
 </script>
 
-<Surface tone="panel" border="subtle" padding="md">
-  <div class="poodle-specimen">
-    <div class="poodle-specimen__row">
-      <!-- The combination nothing covered: an anchored surface opened from
-           inside a modal. The popover portals to the theme root, leaving the
-           dialog's stacking context, so it has to be lifted above it or it
-           renders behind the thing that opened it. -->
-      <Eyebrow>Popover inside a dialog</Eyebrow>
-      <Button variant="secondary" onClick={() => (overlayInDialogOpen = true)}>Open dialog</Button>
-    </div>
+  <SpecimenGroup label="Popover inside a dialog">
+    <Button variant="secondary" onClick={() => (overlayInDialogOpen = true)}>Open dialog</Button>
+  </SpecimenGroup>
 
-    <div class="poodle-specimen__row">
-      <Eyebrow>Informational</Eyebrow>
-      <Button variant="secondary" onClick={() => (basicOpen = true)}>View details</Button>
-    </div>
+      <SpecimenGroup label="Informational">
+    <Button variant="secondary" onClick={() => (basicOpen = true)}>View details</Button>
+  </SpecimenGroup>
 
-    <div class="poodle-specimen__row">
-      <Eyebrow>Form</Eyebrow>
-      <Button variant="secondary" onClick={() => (formOpen = true)}>Create project</Button>
-    </div>
+      <SpecimenGroup label="Form">
+    <Button variant="secondary" onClick={() => (formOpen = true)}>Create project</Button>
+  </SpecimenGroup>
 
-    <div class="poodle-specimen__row">
-      <Eyebrow>Custom header</Eyebrow>
-      <Button variant="secondary" onClick={() => (contentOnlyOpen = true)}>View changelog</Button>
-    </div>
+      <SpecimenGroup label="Custom header">
+    <Button variant="secondary" onClick={() => (contentOnlyOpen = true)}>View changelog</Button>
+  </SpecimenGroup>
 
-    <div class="poodle-specimen__row">
-      <Eyebrow>Custom footer</Eyebrow>
-      <Button variant="secondary" onClick={() => (customFooterOpen = true)}>Terms &amp; conditions</Button>
-    </div>
+      <SpecimenGroup label="Custom footer">
+    <Button variant="secondary" onClick={() => (customFooterOpen = true)}>Terms &amp; conditions</Button>
+  </SpecimenGroup>
 
-    <div class="poodle-specimen__row">
-      <Eyebrow>Bare mode</Eyebrow>
-      <Button variant="secondary" onClick={() => (bareOpen = true)}>Preview image</Button>
-    </div>
+      <SpecimenGroup label="Bare mode">
+    <Button variant="secondary" onClick={() => (bareOpen = true)}>Preview image</Button>
+  </SpecimenGroup>
 
-    <div class="poodle-specimen__row">
-      <Eyebrow>Scrollable</Eyebrow>
-      <Button variant="secondary" onClick={() => (scrollableOpen = true)}>View log</Button>
-    </div>
+      <SpecimenGroup label="Scrollable">
+    <Button variant="secondary" onClick={() => (scrollableOpen = true)}>View log</Button>
+  </SpecimenGroup>
 
-    <div class="poodle-specimen__row">
-      <Eyebrow>Width presets</Eyebrow>
-      {#each ["sm", "md", "lg", "xl"] as w}
+      <SpecimenGroup label="Width presets">
+    {#each ["sm", "md", "lg", "xl"] as w}
         <Button variant="secondary" onClick={() => (widthOpenMap[w] = true)}>{w}</Button>
       {/each}
-    </div>
+  </SpecimenGroup>
 
-    <div class="poodle-specimen__row">
-      <Eyebrow>Non-dismissible</Eyebrow>
-      <Button variant="secondary" onClick={() => (wideOpen = true)}>Open persistent</Button>
-    </div>
-  </div>
-</Surface>
+      <SpecimenGroup label="Non-dismissible">
+    <Button variant="secondary" onClick={() => (wideOpen = true)}>Open persistent</Button>
+  </SpecimenGroup>
 
 <!-- Dialogs (rendered outside the Surface, portaled to [data-theme]) -->
 
@@ -114,7 +98,6 @@
     <div class="poodle-form-full-width">
       <Checkbox id="dialog-private" label="Make this project private" />
     </div>
-  </div>
   {#snippet actions()}
     <Button variant="ghost" onClick={() => (formOpen = false)}>Cancel</Button>
     <Button onClick={() => (formOpen = false)}>Create project</Button>
@@ -240,13 +223,7 @@
 </Dialog>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .poodle-specimen__row {
+    .poodle-specimen__row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;

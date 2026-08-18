@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Select, Pill, Eyebrow, Surface, type SelectOption, type SelectOptionGroup } from "@inflatable-cookie/poodle-svelte";
+  import { Select, Pill, type SelectOption, type SelectOptionGroup } from "@inflatable-cookie/poodle-svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const fruitOptions: SelectOption[] = [
@@ -54,11 +55,8 @@
 </script>
 
 <SpecimenLayout>
-  <Surface tone="panel" border="subtle" padding="md">
-    <div class="poodle-specimen">
-      <div class="poodle-specimen__row">
-        <Eyebrow>Native</Eyebrow>
-        <div class="poodle-specimen__field">
+    <SpecimenGroup label="Native">
+    <div class="poodle-specimen__field">
           <Select
             options={fruitOptions}
             placeholder="Choose a fruit"
@@ -67,11 +65,10 @@
           />
           {#if selectedFruit}<span class="poodle-specimen__value">{selectedFruit}</span>{/if}
         </div>
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Custom dropdown</Eyebrow>
-        <div class="poodle-specimen__field">
+        <SpecimenGroup label="Custom dropdown">
+    <div class="poodle-specimen__field">
           <Select
             options={richOptions}
             placeholder="Choose a country"
@@ -81,11 +78,10 @@
           />
           {#if selectedCountry}<span class="poodle-specimen__value">{selectedCountry}</span>{/if}
         </div>
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Searchable</Eyebrow>
-        <div class="poodle-specimen__field">
+        <SpecimenGroup label="Searchable">
+    <div class="poodle-specimen__field">
           <Select
             options={frameworkOptions}
             placeholder="Search frameworks..."
@@ -95,11 +91,10 @@
           />
           {#if selectedFramework}<span class="poodle-specimen__value">{selectedFramework}</span>{/if}
         </div>
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Freeform</Eyebrow>
-        <div class="poodle-specimen__field">
+        <SpecimenGroup label="Freeform">
+    <div class="poodle-specimen__field">
           <Select
             options={frameworkOptions}
             placeholder="Type or select..."
@@ -110,11 +105,10 @@
           />
           {#if freeformValue}<span class="poodle-specimen__value">{freeformValue}</span>{/if}
         </div>
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Snippet rendering</Eyebrow>
-        <div class="poodle-specimen__field">
+        <SpecimenGroup label="Snippet rendering">
+    <div class="poodle-specimen__field">
           <Select
             options={richOptions}
             placeholder="Custom country"
@@ -148,39 +142,34 @@
           </Select>
           {#if customCountry}<span class="poodle-specimen__value">{customCountry}</span>{/if}
         </div>
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Grouped</Eyebrow>
-        <Select
+        <SpecimenGroup label="Grouped">
+    <Select
           options={groupedOptions}
           placeholder="Choose a food"
           ariaLabel="Grouped food"
         />
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Clearable</Eyebrow>
-        <Select
+        <SpecimenGroup label="Clearable">
+    <Select
           options={fruitOptions}
           placeholder="All fruits"
           native={false}
           clearable
           ariaLabel="Clearable"
         />
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Disabled</Eyebrow>
-        <Select
+        <SpecimenGroup label="Disabled">
+    <Select
           options={fruitOptions}
           value="banana"
           disabled
           ariaLabel="Disabled"
         />
-      </div>
-    </div>
-  </Surface>
+  </SpecimenGroup>
 
   {#snippet sizes(size)}
     <Select options={fruitOptions} placeholder="Select..." {size} ariaLabel="{size} select" />
@@ -192,13 +181,7 @@
 </SpecimenLayout>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .poodle-specimen__row {
+    .poodle-specimen__row {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;

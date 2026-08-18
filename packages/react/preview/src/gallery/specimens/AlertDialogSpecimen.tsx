@@ -1,5 +1,6 @@
+import { SpecimenGroup } from "../SpecimenGroup";
 import { useState, type CSSProperties } from "react";
-import { AlertDialog, Button, Eyebrow, Surface } from "@inflatable-cookie/poodle-react";
+import { AlertDialog, Button } from "@inflatable-cookie/poodle-react";
 
 const rowStyle: CSSProperties = { display: "flex", alignItems: "center", gap: "0.75rem" };
 const hintStyle: CSSProperties = { margin: 0, fontSize: "0.75rem", color: "var(--poodle-color-text-secondary)" };
@@ -25,80 +26,75 @@ export function AlertDialogSpecimen() {
   }
 
   return (
-    <Surface tone="panel" border="subtle" padding="md">
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-        <div style={rowStyle}>
-          <Eyebrow>Danger tone</Eyebrow>
-          <Button tone="danger" onClick={() => setDangerOpen(true)}>
-            Delete item
-          </Button>
-          <AlertDialog
-            open={dangerOpen}
-            title="Delete this item?"
-            description="This action cannot be undone. The item and all associated data will be permanently removed."
-            confirmLabel="Delete"
-            cancelLabel="Keep it"
-            onConfirm={() => {
-              setLastAction("Item deleted");
-              setDangerOpen(false);
-            }}
-            onCancel={() => setDangerOpen(false)}
-            onOpenChange={(open) => setDangerOpen(open)}
-          />
-        </div>
+    <>
+      <SpecimenGroup label="Danger tone">
+        <Button tone="danger" onClick={() => setDangerOpen(true)}>
+                    Delete item
+                  </Button>
+                  <AlertDialog
+                    open={dangerOpen}
+                    title="Delete this item?"
+                    description="This action cannot be undone. The item and all associated data will be permanently removed."
+                    confirmLabel="Delete"
+                    cancelLabel="Keep it"
+                    onConfirm={() => {
+                      setLastAction("Item deleted");
+                      setDangerOpen(false);
+                    }}
+                    onCancel={() => setDangerOpen(false)}
+                    onOpenChange={(open) => setDangerOpen(open)}
+                  />
+      </SpecimenGroup>
 
-        <div style={rowStyle}>
-          <Eyebrow>Warning tone</Eyebrow>
-          <Button variant="secondary" onClick={() => setWarningOpen(true)}>
-            Reset settings
-          </Button>
-          <AlertDialog
-            open={warningOpen}
-            title="Reset all settings?"
-            description="Your customized settings will be restored to their default values."
-            tone="warning"
-            confirmLabel="Reset"
-            cancelLabel="Cancel"
-            onConfirm={() => {
-              setLastAction("Settings reset");
-              setWarningOpen(false);
-            }}
-            onCancel={() => setWarningOpen(false)}
-            onOpenChange={(open) => setWarningOpen(open)}
-          />
-        </div>
+              <SpecimenGroup label="Warning tone">
+        <Button variant="secondary" onClick={() => setWarningOpen(true)}>
+                    Reset settings
+                  </Button>
+                  <AlertDialog
+                    open={warningOpen}
+                    title="Reset all settings?"
+                    description="Your customized settings will be restored to their default values."
+                    tone="warning"
+                    confirmLabel="Reset"
+                    cancelLabel="Cancel"
+                    onConfirm={() => {
+                      setLastAction("Settings reset");
+                      setWarningOpen(false);
+                    }}
+                    onCancel={() => setWarningOpen(false)}
+                    onOpenChange={(open) => setWarningOpen(open)}
+                  />
+      </SpecimenGroup>
 
-        <div style={rowStyle}>
-          <Eyebrow>Async confirm</Eyebrow>
-          <Button tone="danger" onClick={() => setAsyncOpen(true)}>
-            Archive project
-          </Button>
-          <AlertDialog
-            open={asyncOpen}
-            title="Archive this project?"
-            description="The project will be hidden from active lists but can still be restored later."
-            confirmLabel="Archive"
-            workingLabel="Archiving…"
-            onConfirm={async () => {
-              await simulateAsync();
-              setAsyncOpen(false);
-            }}
-            onCancel={() => setAsyncOpen(false)}
-            onOpenChange={(open) => setAsyncOpen(open)}
-          >
-            <div style={cardStyle}>
-              <strong>Roadmap Cleanup</strong>
-              <span style={cardSpanStyle}>14 linked tasks will move to the archived view.</span>
-            </div>
-          </AlertDialog>
-        </div>
+              <SpecimenGroup label="Async confirm">
+        <Button tone="danger" onClick={() => setAsyncOpen(true)}>
+                    Archive project
+                  </Button>
+                  <AlertDialog
+                    open={asyncOpen}
+                    title="Archive this project?"
+                    description="The project will be hidden from active lists but can still be restored later."
+                    confirmLabel="Archive"
+                    workingLabel="Archiving…"
+                    onConfirm={async () => {
+                      await simulateAsync();
+                      setAsyncOpen(false);
+                    }}
+                    onCancel={() => setAsyncOpen(false)}
+                    onOpenChange={(open) => setAsyncOpen(open)}
+                  >
+                    <div style={cardStyle}>
+                      <strong>Roadmap Cleanup</strong>
+                      <span style={cardSpanStyle}>14 linked tasks will move to the archived view.</span>
+                    </div>
+                  </AlertDialog>
+      </SpecimenGroup>
 
-        {lastAction ? (
-          <p style={hintStyle}>
-            Last action: <strong>{lastAction}</strong>
-          </p>
-        ) : null}
-      </div>
-    </Surface>
+      {lastAction ? (
+        <p style={hintStyle}>
+          Last action: <strong>{lastAction}</strong>
+        </p>
+      ) : null}
+    </>
   );
 }
