@@ -884,3 +884,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   `poodle-preview` unit-test target. Its bin-unit cases need a smaller test
   target or non-optimized test profile; adding more tests to the binary makes
   the compiler failure easier to hit.
+
+- 2026-08-18 — A fresh worker worktree has no `node_modules`, and nothing in
+  the task graph installs one. `effigy docs:check` runs most of the way on the
+  bun binaries alone, then fails at `bun run --cwd packages/react/preview
+  parity:report` with `Cannot find module
+  '@inflatable-cookie/poodle-core/tokens'`. The fix is one command —
+  `bun install --frozen-lockfile`, which leaves `bun.lock` untouched — but the
+  error names a missing module rather than a missing install, so it reads as a
+  code defect. A bootstrap step, or a docs:check preflight that checks for
+  `node_modules`, would remove the false lead.
