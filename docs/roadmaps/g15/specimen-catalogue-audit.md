@@ -1,6 +1,9 @@
 # g15 — Human-Centred Specimen Catalogue Audit
 
-Status: complete — measured by `g15.011`
+Status: **partial** — a mechanical screening baseline for the web catalogue.
+Not the completed human-centred audit: GPUI was not rendered (`g15.026`), and
+the rubric's teaching judgment was applied to the three pilots only, not to all
+175 pages.
 Date: 2026-08-18 (revision 2; first pass 2026-08-17)
 Card: `docs/roadmaps/g15/011-specimen-catalogue-audit.md`
 Handoff: `docs/handoffs/20260817-214451-g15-011-specimen-catalogue-audit.md`
@@ -29,7 +32,7 @@ carried rubric asks about:
 | --- | --- |
 | renders | page loads, is not the "specimen not yet available" placeholder, and its Examples pane has height, text, or controls |
 | captions | every caption idiom read from the DOM — `SpecimenGroup`, bare `<Eyebrow>`, `<section><h3>`, and React's `AudioSpecimenGroup` — counting named against blank |
-| interaction | up to five controls inside the specimen body clicked through the real event tree, comparing the whole document before and after; a page whose controls all leave the markup unchanged is inert |
+| interaction | up to five controls inside the specimen body clicked through the real event tree, comparing the whole document before and after. **This nominates, it does not grade** — every flagged page was then checked against its specimen source and classified (see finding 2) |
 | narrow layout | viewport reduced to 768px, recording how far the pane's content overflows its own width |
 | axis panes | the `Sizes` and `Densities` tabs opened and their content measured |
 
@@ -54,14 +57,20 @@ about render, interaction, or narrow behaviour. `g15.026` builds the seam and
 the probe that close this; until it lands, **no claim in this document about
 pages rendering, interaction being live, or narrow behaviour applies to GPUI.**
 
-Static signals that the live passes contradicted were discarded rather than
-reported. Four did: an apparent 47-page "empty Sizes tab" class was pages that
+Measurements that a later pass contradicted were discarded rather than
+reported. Seven did: an apparent 47-page "empty Sizes tab" class was pages that
 correctly omit `SpecimenLayout`; an apparent GPUI "no captions" class was
 captions threaded through local helpers; an apparent set of caption-less pages
-used a bare `<Eyebrow>` idiom the first probe did not read; and a first-pass
-`paneText === 0` rule read panes full of unlabelled form controls as empty.
+used a bare `<Eyebrow>` idiom the first probe did not read; a
+`paneText === 0` rule read panes full of unlabelled form controls as empty; a
+pane-level interaction check read every portalled overlay as inert; a
+focus-change signal would have cleared every page, since clicking a button
+moves focus to it; and the click probe's own "20 inert pages" became 14 once
+each page was checked against its source.
 
-## Grades
+## Grades, And What They Do Not Say
+
+The card's fixed vocabulary:
 
 - **A — ready:** concise teaching page, meaningful interaction, no named
   curation defect.
@@ -71,11 +80,26 @@ used a bare `<Eyebrow>` idiom the first probe did not read; and a first-pass
 - **D — missing/broken:** no real specimen, dead primary interaction, or the
   page cannot be used as documentation.
 
+**These are screening grades.** They are computed from measured signals —
+caption rendering, example count, axis eligibility, narrow overflow, and a
+source-checked interaction verdict. They are not the carried rubric's human
+judgment. In particular, no grade in this table asserts that a page's *first
+example teaches normal use* or that its *variants are meaningfully distinct*.
+Those two questions need a person, and a person answered them for three pages:
+Button, RangeSlider, and Tabs.
+
+So read an **A** as "no measured defect", not as "judged a good teaching page".
+A page can screen A and still open on a prop showcase. Each curation tranche
+applies the human judgment to its own family, which is why every tranche card
+carries a live operator-review checkpoint.
+
 Defects are weighted. A minor defect (one missing axis, a hand-rolled caption
 idiom, narrow overflow) scores 1; a major one (captions that do not render, an
-overloaded `Examples`, an advertised tab that renders nothing, controls that do
-nothing) scores 2. Score 0 is A, 1 is B, 2 or more is C. D is reserved for
-pages that fail as documentation outright.
+overloaded `Examples`, an advertised tab that renders nothing, controls
+confirmed unwired at source) scores 2. Score 0 is A, 1 is B, 2 or more is C. D
+is reserved for pages that fail as documentation outright. Observations that
+are not defects — a clipboard write, a hover surface — are recorded on the row
+as `note —` and score nothing.
 
 A cross-runtime caption-count difference is attributed to neither runtime when
 the Svelte page is itself hard-failed: the difference *is* that defect, already
@@ -92,16 +116,16 @@ pre-pilot baseline.
 
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Svelte (live) | 76 | 33 | 57 | 9 | — |
-| React (live) | 88 | 27 | 60 | 0 | — |
+| Svelte (live) | 81 | 33 | 52 | 9 | — |
+| React (live) | 94 | 26 | 55 | 0 | — |
 | GPUI (structural, provisional) | 100 | 68 | 6 | 0 | 1 |
-| **Worst of the three** | **54** | **48** | **64** | **9** | — |
+| **Worst of the three** | **58** | **48** | **60** | **9** | — |
 
 | Disposition | Count |
 | --- | ---: |
-| `keep` | 52 |
+| `keep` | 56 |
 | `pilot-fix` | 3 |
-| `curation-tranche` | 120 |
+| `curation-tranche` | 116 |
 | `contract/runtime-blocker` | 0 |
 
 175 of 175 pages were measured live in both web runtimes. No entry is a
@@ -135,28 +159,40 @@ The React versions of the same nine pages pass `label` correctly. This is
 Svelte-only, and it is the one class where the catalogue actively lies about
 being fine.
 
-### 2. Twenty pages whose sampled controls do nothing
+### 2. Fourteen pages whose controls are not wired at all
 
-Both web runtimes were probed by clicking up to five controls inside the
-specimen body and comparing the whole document before and after. Twenty pages
-came back unchanged in **both** runtimes:
+The click probe flagged 20 pages where up to five controls changed nothing in
+the document, in **both** web runtimes. That result is a review lead, not a
+grade: a clipboard write, a hover surface, and a wired control already in its
+terminal state all look identical to it, and cross-runtime agreement proves
+nothing when both previews share one specimen design.
 
-`IconButton`, `ListGrid`, `Code`, `MetaBar`, `MetaItem`, `TextLink`,
-`UiPresentationProvider`, `Callout`, `ErrorBoundary`, `RemediationBanner`,
-`ContextMenu`, `HoverCard`, `Tooltip`, `FormActions`, `FormLayout`,
-`InlineListSection`, `DetailShell`, `PageHeader`, `Toolbar`, `AgentMessage`.
+Every flagged page was therefore checked against its specimen source. The
+verdicts:
 
-Cross-runtime agreement is what makes this evidence rather than noise. A
-static scan supports it independently: 122 Button-family instances across 24
+| Verdict | Pages | What the source shows |
+| --- | ---: | --- |
+| **dead** — scored as a defect | 14 | the specimen renders the control and wires no handler to it |
+| outside the DOM | 1 | `Code` — the component owns the copy button and calls `navigator.clipboard.writeText` |
+| wrong modality | 3 | `Tooltip`, `HoverCard` open on hover; `ContextMenu` on right-click |
+| wired, terminal state | 1 | `ErrorBoundary` — "Throw again" sets `shouldThrow = true`, but the boundary was already showing its error |
+| navigation | 1 | `TextLink` — the anchors navigate; the control clicked is an explicit `onClick={() => undefined}` demo |
+
+The 14 with no handler at all:
+
+`IconButton`, `Toolbar`, `PageHeader`, `FormActions`, `FormLayout`,
+`DetailShell`, `RemediationBanner`, `UiPresentationProvider`, `ListGrid`,
+`MetaBar`, `MetaItem`, `InlineListSection`, `AgentMessage`, `Callout`.
+
+A static scan agrees independently: 122 Button-family instances across 24
 Svelte specimen files carry no handler, no `type="submit"`, no `href`, and no
 state prop — `AppHeader` 20 of 20, `Toolbar` 15 of 15, `PageHeader` 14 of 14.
+These are pages that look plausible and do nothing when a reader tries them,
+which is exactly the failure the handoff asked the audit to catch.
 
-**Read this measurement with its limits.** A control that acts outside the DOM
-— copy to clipboard, start a download — registers as unchanged. So does a
-surface whose real affordance is hover or right-click, which is why
-`Tooltip`, `HoverCard`, and `ContextMenu` appear here. The rows are recorded
-as measured; the curation tranche decides which are defects and which are
-modality.
+The six non-defects are recorded on their rows as `note —` and score nothing.
+They are kept in the table because the next probe will flag them again, and the
+next reader should not have to re-derive why they are fine.
 
 ### 3. Four caption idioms, one of which renders nothing
 
@@ -193,9 +229,10 @@ empty — the only genuinely empty tab in the catalogue.
 
 ### 6. Overloaded Examples
 
-Twenty pages show ten or more captioned examples in one view, and 38 more sit
-in the 7–9 band, many because a variant × tone cross-product was expanded
-rather than a set of distinct things worth seeing.
+Fifty-three pages carry an overloaded or long `Examples` view — ten or more
+captioned examples, or a 7–9 view whose length is a prop cross-product rather
+than a set of distinct things worth seeing. `g15.018` partitions exactly those
+53 across six family children.
 
 ### 7. Six pages that overflow a narrow viewport
 
@@ -231,30 +268,41 @@ source, not from a rendered page — see the measurement note above.
   `accessibility.ts` about assistive-technology claims, a demo activity string
   in `component-docs.ts`, and a comment in `headless_driver.rs` noting the
   retained headless infrastructure. `g14.021`'s removal holds.
-- **No dead pages in the web catalogue.** All 175 pages render in both
+- **No unrendered pages in the web catalogue.** All 175 pages render in both
   runtimes. None falls through to the "specimen not yet available" placeholder.
-  This claim does **not** extend to GPUI, which was not rendered.
+  This claim does **not** extend to GPUI, which was not rendered. Fourteen
+  pages do render controls that are not wired — see finding 2 — but the pages
+  themselves are alive.
 - **No contract or semantic defects.** Nothing here needs a component change.
 
-## Corrections From Revision 1
+## Corrections From Earlier Revisions
 
 Revision 1 was measured with a Svelte-only sweep and static React and GPUI
 inspection. Four results changed:
 
 - **React is now measured live**, not inferred from source. Its grades moved
-  from A 136 / B 21 / C 18 to A 88 / B 27 / C 60, almost entirely because the
+  from A 136 / B 21 / C 18 to A 94 / B 26 / C 55, almost entirely because the
   interaction and narrow-layout signals did not exist before.
 - **`ToolCall` React was wrongly marked down.** Its "(0 vs 4)" evidence was the
   Svelte-versus-React caption count — the detector read React's four groups
   correctly — but the difference was charged to React when its cause is
   Svelte's already-D-graded caption failure. Cross-runtime caption drift is now
-  attributed to neither runtime when the Svelte page is hard-failed. React
-  `ToolCall` is B on its own evidence: two controls clicked, nothing changed.
+  attributed to neither runtime when the Svelte page is hard-failed, and React
+  `ToolCall` grades A.
 - **Button and Tabs rows were stale.** The table is regenerated at the current
   head, so both describe the reworked pages. Both pilots now grade A, A, A and
   A, B, B respectively.
 - **GPUI grades are now labelled provisional** rather than presented alongside
-  live-measured ones without qualification.
+  live-measured ones without qualification, and `g15.026` is named as the
+  completion child rather than a follow-on.
+- **The interaction result is now source-checked, not heuristic.** Revision 2
+  scored "20 pages whose controls do nothing" as a defect while its own prose
+  admitted the probe cannot see clipboard writes, hover surfaces, or
+  navigation. Each flagged page was checked against its specimen source; 14 are
+  genuinely unwired and six are not defects at all.
+- **The grades are labelled as screening grades.** They do not assert the
+  rubric's teaching judgment, which a person applied to the three pilots and
+  which each curation tranche applies to its own family.
 
 ## Pilot Findings
 
@@ -329,16 +377,20 @@ that changes specimen presentation carries a live operator-review checkpoint.
 | [`g15.015`](015-specimen-caption-integrity.md) | Caption integrity + the type-check gate hole that hid it | 9 pages, 52 captions |
 | [`g15.016`](016-specimen-idiom-convergence.md) | One caption idiom; two borrowed pages get their own | ~35 pages |
 | [`g15.017`](017-specimen-axis-placement.md) | Axis matrices out of the main view; axis evidence where the prop exists | 12 audio + ~22 others |
-| [`g15.018`](018-overloaded-examples-curation.md) | Overloaded `Examples` — **parent, not dispatchable** | 58 pages |
-| ↳ [`g15.020`](020-curate-model-connection-licence.md)–[`g15.025`](025-curate-collections-navigation-tail.md) | six bounded family children | 4–12 each |
+| [`g15.018`](018-overloaded-examples-curation.md) | Overloaded `Examples` — **parent, not dispatchable** | 53 pages |
+| ↳ [`g15.020`](020-curate-model-connection-licence.md)–[`g15.025`](025-curate-collections-navigation-tail.md) | six bounded family children, one exact page list each | 6–11 each, 53 total |
 | [`g15.019`](019-gpui-specimen-structure.md) | Native axis panes and captions | 59 + 6 pages |
 | [`g15.026`](026-native-specimen-probe.md) | The headless native probe that un-provisions the GPUI column | 174 pages |
 
 Ordering matters: `g15.015` first, because it closes the gate that let the
 worst class ship. `g15.017` before `g15.019`, because the native axis work
-depends on `audio_specimens` separating its axis groups. `g15.026` before any
-claim that the native catalogue has been audited to the same standard as the
-web one.
+depends on `audio_specimens` separating its axis groups.
+
+**`g15.026` is `g15.011`'s completion child, not a follow-on.** `g15.011`
+scopes full Svelte, React, and GPUI pages and carries the all-runtime rubric.
+This document delivers the web two-thirds. The card is not complete until the
+native third is measured to the same standard, and this artifact should be read
+as the partial baseline it says it is at the top.
 
 The 20 inert-control pages are not their own card: each sits inside the family
 tranche that already owns its page, and the tranche decides per page whether a
@@ -360,7 +412,7 @@ names the defects that decided the grade; a row with no named defect is A.
 | `Checkbox` | A | A | A | keep | no named defect |
 | `CollapseToggle` | A | A | A | keep | no named defect |
 | `ConfirmAction` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `IconButton` | C | C | A | curation-tranche | **Sv:** 5 controls clicked, none changed the page in either runtime; takes `density`, but the page shows no Densities evidence · **Rc:** 5 controls clicked, none changed the page in either runtime; takes `density`, but the page shows no Densities evidence |
+| `IconButton` | C | C | A | curation-tranche | **Sv:** controls do nothing — specimen wires no handler on any IconButton; takes `density`, but the page shows no Densities evidence · **Rc:** controls do nothing — specimen wires no handler on any IconButton; takes `density`, but the page shows no Densities evidence |
 | `Radio` | A | A | A | keep | no named defect |
 | `RadioGroup` | A | A | A | keep | no named defect |
 | `SegmentedControl` | A | A | A | keep | no named defect |
@@ -410,7 +462,7 @@ names the defects that decided the grade; a row with no named defect is A.
 | --- | :-: | :-: | :-: | --- | --- |
 | `Box` | A | A | A | keep | no named defect |
 | `Grid` | A | A | A | keep | no named defect |
-| `ListGrid` | C | C | A | curation-tranche | **Sv:** 2 controls clicked, none changed the page in either runtime · **Rc:** 2 controls clicked, none changed the page in either runtime |
+| `ListGrid` | C | C | A | curation-tranche | **Sv:** controls do nothing — Export and the row action are unwired · **Rc:** controls do nothing — Export and the row action are unwired |
 | `Region` | A | A | A | keep | no named defect |
 | `ResizeHandle` | A | A | A | keep | no named defect |
 | `ScrollShell` | A | A | A | keep | no named defect |
@@ -426,31 +478,31 @@ names the defects that decided the grade; a row with no named defect is A.
 | --- | :-: | :-: | :-: | --- | --- |
 | `Avatar` | B | B | A | curation-tranche | **Sv:** Densities tab shown for a component with no `density` prop · **Rc:** Densities tab shown for a component with no `density` prop |
 | `Card` | B | B | B | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `Code` | C | C | A | curation-tranche | **Sv:** 4 controls clicked, none changed the page in either runtime · **Rc:** 4 controls clicked, none changed the page in either runtime |
+| `Code` | A | A | A | keep | **Sv:** note — 4 clicks changed nothing: Code owns the copy button and writes to the clipboard (navigator.clipboard.writeText); no markup change is expected · **Rc:** note — 4 clicks changed nothing: Code owns the copy button and writes to the clipboard (navigator.clipboard.writeText); no markup change is expected |
 | `DetailItem` | B | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `EmbedPreview` | A | A | A | keep | no named defect |
 | `Eyebrow` | C | C | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; takes `size`, but the page shows no Sizes evidence; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 8 captioned examples; takes `size`, but the page shows no Sizes evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `Icon` | C | C | A | curation-tranche | **Sv:** overflows its pane by 119px at a 768px viewport; takes `density`, but the page shows no Densities evidence · **Rc:** overflows its pane by 119px at a 768px viewport; takes `density`, but the page shows no Densities evidence |
 | `IconProvider` | A | A | A | keep | no named defect |
-| `MetaBar` | C | C | A | curation-tranche | **Sv:** 1 controls clicked, none changed the page in either runtime · **Rc:** 1 controls clicked, none changed the page in either runtime |
-| `MetaItem` | C | C | A | curation-tranche | **Sv:** 1 controls clicked, none changed the page in either runtime; page is `MetaBarSpecimen.svelte` — it teaches a different component · **Rc:** 1 controls clicked, none changed the page in either runtime; page is `MetaBarSpecimen.svelte` — it teaches a different component |
+| `MetaBar` | C | C | A | curation-tranche | **Sv:** controls do nothing — the specimen's only control is unwired · **Rc:** controls do nothing — the specimen's only control is unwired |
+| `MetaItem` | C | C | A | curation-tranche | **Sv:** controls do nothing — shares MetaBarSpecimen, whose control is unwired; page is `MetaBarSpecimen.svelte` — it teaches a different component · **Rc:** controls do nothing — shares MetaBarSpecimen, whose control is unwired; page is `MetaBarSpecimen.svelte` — it teaches a different component |
 | `Pill` | A | A | A | keep | no named defect |
 | `Text` | B | B | C | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence · **Rc:** takes `size`, but the page shows no Sizes evidence · **Gp:** examples carry no captions at all; no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `TextLink` | C | C | C | curation-tranche | **Sv:** 1 controls clicked, none changed the page in either runtime · **Rc:** 1 controls clicked, none changed the page in either runtime · **Gp:** examples carry no captions at all |
-| `UiPresentationProvider` | C | C | B | curation-tranche | **Sv:** 2 controls clicked, none changed the page in either runtime; takes `density`, but the page shows no Densities evidence · **Rc:** 2 controls clicked, none changed the page in either runtime; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `TextLink` | A | A | C | curation-tranche | **Sv:** note — 1 clicks changed nothing: the anchors navigate; the clicked control is an explicit `onClick={() => undefined}` demo · **Rc:** note — 1 clicks changed nothing: the anchors navigate; the clicked control is an explicit `onClick={() => undefined}` demo · **Gp:** examples carry no captions at all |
+| `UiPresentationProvider` | C | C | B | curation-tranche | **Sv:** controls do nothing — both Save buttons are unwired; takes `density`, but the page shows no Densities evidence · **Rc:** controls do nothing — both Save buttons are unwired; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 
 ### Status & progress — Foundations (14)
 
 | Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `Callout` | C | C | A | curation-tranche | **Sv:** 1 controls clicked, none changed the page in either runtime · **Rc:** 1 controls clicked, none changed the page in either runtime |
+| `Callout` | C | C | A | curation-tranche | **Sv:** controls do nothing — generated scene; the dismiss control has no handler · **Rc:** controls do nothing — generated scene; the dismiss control has no handler |
 | `EmptyState` | B | B | A | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples |
-| `ErrorBoundary` | C | C | A | curation-tranche | **Sv:** 2 controls clicked, none changed the page in either runtime · **Rc:** 2 controls clicked, none changed the page in either runtime |
+| `ErrorBoundary` | A | A | A | keep | **Sv:** note — 2 clicks changed nothing: Throw again is wired (`shouldThrow = true`); the boundary was already in its error state, so nothing changed · **Rc:** note — 2 clicks changed nothing: Throw again is wired (`shouldThrow = true`); the boundary was already in its error state, so nothing changed |
 | `Meter` | B | B | B | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `MetricTile` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `PageLoading` | A | A | A | keep | no named defect |
 | `Progress` | A | A | A | keep | no named defect |
-| `RemediationBanner` | C | C | A | curation-tranche | **Sv:** 3 controls clicked, none changed the page in either runtime · **Rc:** 3 controls clicked, none changed the page in either runtime |
+| `RemediationBanner` | C | C | A | curation-tranche | **Sv:** controls do nothing — Try again, View details and dismiss are unwired · **Rc:** controls do nothing — Try again, View details and dismiss are unwired |
 | `Skeleton` | B | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 captioned examples |
 | `Spinner` | A | A | A | keep | no named defect |
 | `StateTile` | A | A | A | keep | no named defect |
@@ -480,16 +532,16 @@ names the defects that decided the grade; a row with no named defect is A.
 | `AlertDialog` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence; hand-rolled captions instead of SpecimenGroup · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `Collapsible` | A | A | A | keep | no named defect |
 | `CommandPalette` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `ContextMenu` | C | C | A | curation-tranche | **Sv:** 1 controls clicked, none changed the page in either runtime · **Rc:** 1 controls clicked, none changed the page in either runtime |
+| `ContextMenu` | A | A | A | keep | **Sv:** note — 1 clicks changed nothing: a right-click surface; a left click is the wrong gesture · **Rc:** note — 1 clicks changed nothing: a right-click surface; a left click is the wrong gesture |
 | `DebugDialog` | A | A | A | keep | no named defect |
 | `Dialog` | C | C | B | curation-tranche | **Sv:** Examples long — 9 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 9 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `Drawer` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence; hand-rolled captions instead of SpecimenGroup · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `FormDialog` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `HoverCard` | C | C | A | curation-tranche | **Sv:** 2 controls clicked, none changed the page in either runtime · **Rc:** 2 controls clicked, none changed the page in either runtime |
+| `HoverCard` | A | A | A | keep | **Sv:** note — 2 clicks changed nothing: a hover surface; a click is the wrong gesture · **Rc:** note — 2 clicks changed nothing: a hover surface; a click is the wrong gesture |
 | `Menu` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |
 | `Menubar` | A | A | A | keep | no named defect |
 | `Popover` | A | A | A | keep | no named defect |
-| `Tooltip` | C | C | A | curation-tranche | **Sv:** 5 controls clicked, none changed the page in either runtime; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop · **Rc:** 5 controls clicked, none changed the page in either runtime; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop |
+| `Tooltip` | C | C | A | curation-tranche | **Sv:** note — 5 clicks changed nothing: a hover surface; a click is the wrong gesture; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop · **Rc:** note — 5 clicks changed nothing: a hover surface; a click is the wrong gesture; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop |
 
 ### Forms & validation — Composition (9)
 
@@ -498,9 +550,9 @@ names the defects that decided the grade; a row with no named defect is A.
 | `BlockEditor` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `Field` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `FieldSet` | A | A | A | keep | no named defect |
-| `FormActions` | C | C | B | curation-tranche | **Sv:** 5 controls clicked, none changed the page in either runtime · **Rc:** 5 controls clicked, none changed the page in either runtime · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `FormLayout` | C | C | A | curation-tranche | **Sv:** 5 controls clicked, none changed the page in either runtime · **Rc:** 5 controls clicked, none changed the page in either runtime |
-| `InlineListSection` | C | C | A | curation-tranche | **Sv:** 1 controls clicked, none changed the page in either runtime · **Rc:** 1 controls clicked, none changed the page in either runtime |
+| `FormActions` | C | C | B | curation-tranche | **Sv:** controls do nothing — Cancel, Save, Back, Continue and Delete are all unwired · **Rc:** controls do nothing — Cancel, Save, Back, Continue and Delete are all unwired · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `FormLayout` | C | C | A | curation-tranche | **Sv:** controls do nothing — every form action in the specimen is unwired · **Rc:** controls do nothing — every form action in the specimen is unwired |
+| `InlineListSection` | C | C | A | curation-tranche | **Sv:** controls do nothing — the section's add action is unwired · **Rc:** controls do nothing — the section's add action is unwired |
 | `MarkdownEditor` | B | A | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `PasswordRequirements` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `ValidationSummary` | A | A | A | keep | no named defect |
@@ -545,21 +597,21 @@ names the defects that decided the grade; a row with no named defect is A.
 | `AppHeader` | B | B | B | curation-tranche | **Sv:** overflows its pane by 31px at a 768px viewport · **Rc:** overflows its pane by 31px at a 768px viewport · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `DetailSection` | B | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `DetailSectionGroup` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 12 captioned examples · **Rc:** Examples overloaded — 12 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `DetailShell` | C | C | A | curation-tranche | **Sv:** Examples long — 8 captioned examples; 2 controls clicked, none changed the page in either runtime · **Rc:** Examples long — 8 captioned examples; 2 controls clicked, none changed the page in either runtime |
+| `DetailShell` | C | C | A | curation-tranche | **Sv:** Examples long — 8 captioned examples; controls do nothing — Edit and Reset are unwired · **Rc:** Examples long — 8 captioned examples; controls do nothing — Edit and Reset are unwired |
 | `DockRegion` | B | B | A | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 8 captioned examples |
 | `HistoryCenter` | B | B | C | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 captioned examples · **Gp:** examples carry no captions at all; no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `MessageCenter` | A | A | C | curation-tranche | **Gp:** examples carry no captions at all; no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `PageHeader` | C | C | B | curation-tranche | **Sv:** Examples long — 9 captioned examples; 5 controls clicked, none changed the page in either runtime · **Rc:** Examples long — 9 captioned examples; 5 controls clicked, none changed the page in either runtime · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `PageHeader` | C | C | B | curation-tranche | **Sv:** Examples long — 9 captioned examples; controls do nothing — specimen wires no handler on any header action · **Rc:** Examples long — 9 captioned examples; controls do nothing — specimen wires no handler on any header action · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `SettingsShell` | C | C | C | curation-tranche | **Sv:** examples carry no captions at all; hand-rolled captions instead of SpecimenGroup · **Rc:** examples carry no captions at all · **Gp:** examples carry no captions at all |
 | `StatusBar` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `Toolbar` | C | C | A | curation-tranche | **Sv:** 5 controls clicked, none changed the page in either runtime · **Rc:** 5 controls clicked, none changed the page in either runtime |
+| `Toolbar` | C | C | A | curation-tranche | **Sv:** controls do nothing — specimen wires no handler on any toolbar control · **Rc:** controls do nothing — specimen wires no handler on any toolbar control |
 
 ### Agent & tools — Systems (11)
 
 | Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
 | `AgentChatInput` | B | B | A | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 captioned examples |
-| `AgentMessage` | D | C | A | curation-tranche | **Sv:** all 8 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** Examples long — 9 captioned examples; 3 controls clicked, none changed the page in either runtime |
+| `AgentMessage` | D | C | A | curation-tranche | **Sv:** all 8 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** Examples long — 9 captioned examples; controls do nothing — the message actions are unwired |
 | `AgentPlan` | D | A | A | curation-tranche | **Sv:** all 4 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` |
 | `AgentPlanRecord` | D | A | A | curation-tranche | **Sv:** all 6 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` |
 | `AgentQuestion` | D | C | B | curation-tranche | **Sv:** all 6 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** Examples overloaded — 12 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
@@ -567,7 +619,7 @@ names the defects that decided the grade; a row with no named defect is A.
 | `AgentSubagent` | D | A | A | curation-tranche | **Sv:** all 6 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` |
 | `AgentTranscript` | B | A | B | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `ChangedFiles` | D | B | A | curation-tranche | **Sv:** all 7 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** Examples long — 7 captioned examples |
-| `ToolCall` | D | B | A | curation-tranche | **Sv:** all 4 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** 2 controls clicked, none changed the page |
+| `ToolCall` | D | A | A | curation-tranche | **Sv:** all 4 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` |
 | `ToolCallGroup` | D | A | A | curation-tranche | **Sv:** all 5 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` |
 
 ### Model connections — Systems (5)

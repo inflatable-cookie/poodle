@@ -1,6 +1,9 @@
 # g15.026 — Headless Native Specimen Probe
 
 Status: **planned** — orchestrator review required before dispatch
+Role: **completion child of `g15.011`.** That card scopes full Svelte, React,
+and GPUI pages; the audit delivered the web two-thirds and left the native
+third unmeasured. `g15.011` is not complete until this lands.
 Depends on: `g15.011` (audit)
 Governing refs: `specimen-catalogue-audit.md`,
 `../g14/026-human-centred-specimen-catalogue-audit.md` (audit rubric),

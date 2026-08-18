@@ -8,9 +8,18 @@ Branch: `t3code/specimen-catalogue-audit`
 
 ## Summary
 
-Audited all 175 frozen catalogue entries as documentation, proved the
-human-centred standard on Button, RangeSlider, and Tabs across Svelte, React,
-and GPUI, and split the remaining work into bounded curation cards.
+Screened all 175 frozen catalogue entries as documentation across the two web
+runtimes, proved the human-centred standard on Button, RangeSlider, and Tabs in
+Svelte, React, and GPUI, and split the remaining work into bounded curation
+cards.
+
+**This is a partial delivery of `g15.011`, not its completion.** The card scopes
+full Svelte, React, and GPUI pages; GPUI could not be rendered and its grades
+are structural and provisional. `g15.026` is the completion child. The audit's
+A–D grades are screening grades from measured signals; the rubric's teaching
+judgment — does the first example show normal use, are the variants meaningful
+— was applied to the three pilots, and each curation tranche applies it to its
+own family.
 
 Audit: `docs/roadmaps/g15/specimen-catalogue-audit.md`.
 Outline: `docs/roadmaps/g15/specimen-plan-outline.md`.
@@ -19,12 +28,12 @@ Outline: `docs/roadmaps/g15/specimen-plan-outline.md`.
 
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Svelte (live) | 76 | 33 | 57 | 9 | — |
-| React (live) | 88 | 27 | 60 | 0 | — |
+| Svelte (live) | 81 | 33 | 52 | 9 | — |
+| React (live) | 94 | 26 | 55 | 0 | — |
 | GPUI (structural, provisional) | 100 | 68 | 6 | 0 | 1 |
-| Worst of the three | 54 | 48 | 64 | 9 | — |
+| Worst of the three | 58 | 48 | 60 | 9 | — |
 
-Dispositions: `keep` 52, `pilot-fix` 3, `curation-tranche` 120,
+Dispositions: `keep` 56, `pilot-fix` 3, `curation-tranche` 116,
 `contract/runtime-blocker` 0. Every entry carries a grade; none was skipped.
 175 of 175 pages were measured live in both web runtimes.
 
@@ -47,15 +56,23 @@ and the probe that close this.
 Defects are weighted: minor 1, major 2. Score 0 is A, 1 is B, 2+ is C. D is
 reserved for pages that fail as documentation outright.
 
-Six measurements were discarded because a later pass contradicted them, rather
-than reported: an apparent 47-page "empty Sizes tab" class (pages that
+The click probe **nominates, it does not grade**. Each page it flagged was
+checked against its specimen source before any defect was recorded: 14 render
+controls with no handler at all, and six are not defects — a clipboard write
+(`Code`), three hover or right-click surfaces (`Tooltip`, `HoverCard`,
+`ContextMenu`), one wired control in a terminal state (`ErrorBoundary`), and
+one navigation case (`TextLink`).
+
+Seven measurements were discarded because a later pass contradicted them,
+rather than reported: an apparent 47-page "empty Sizes tab" class (pages that
 correctly omit `SpecimenLayout`); an apparent GPUI "no captions" class
 (captions threaded through local helpers); an apparent set of caption-less
 pages (a bare `<Eyebrow>` idiom the first probe did not read); a
 `paneText === 0` rule that read panes full of unlabelled form controls as
 empty; a pane-level interaction check that read every portalled overlay as
-inert; and a focus-change signal that would have cleared every page, since
-clicking a button moves focus to it.
+inert; a focus-change signal that would have cleared every page, since clicking
+a button moves focus to it; and the click probe's own "20 inert pages", which
+became 14 under source checking.
 
 ## Headline Finding
 
@@ -206,3 +223,31 @@ codegen, generated adapter, or runtime consumer.
 
 No `*-windowed` selector, no `test:native-visual`, no `qa:jetstream`, and no
 Jetstream selector was run. Jetstream remains program-deferred.
+
+## Review Response (revision 3)
+
+The orchestrator requested changes again. Three blockers, all addressed:
+
+1. **The interaction signal produced known false defects.** Revision 2 scored
+   "controls do nothing" as a major defect while its own prose admitted the
+   probe cannot see clipboard writes, hover surfaces, or navigation. The probe
+   is now a nomination only. Every one of the 20 flagged pages was checked
+   against its specimen source: 14 wire no handler at all and score; six are
+   recorded as `note —` and score nothing. Grades, totals, and dispositions
+   were regenerated — Svelte A 76→81, React A 88→94.
+
+   The rubric's teaching judgment — first example, variant meaning — is still
+   not measured for 172 of 175 pages, so the artifact is now labelled a
+   **mechanical screening baseline**, and an A is defined as "no measured
+   defect" rather than "judged a good teaching page".
+
+2. **`g15.011` was called complete while a required runtime was unaudited.**
+   The audit's status is now `partial`, this log says the same, and `g15.026`
+   is marked `g15.011`'s **completion child** rather than a follow-on. The card
+   is not complete until the native third is measured.
+
+3. **Tranche arithmetic did not reconcile and children had no lists.** The
+   audit said 58, the parent said 50, the children summed to 48. All three are
+   now 53, and each child carries an exact, exhaustive page list — one
+   partition of the same 53 pages, so two workers cannot choose different
+   subsets.

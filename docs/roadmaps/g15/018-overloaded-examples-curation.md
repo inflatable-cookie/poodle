@@ -14,8 +14,10 @@ catalogue, and `g14.026` requires bounded family cards with explicit
 operator-review checkpoints. The work is dispatched through the children.
 
 `g15.011` proved the shape on Button, RangeSlider, and Tabs. The audit graded
-50 remaining pages overloaded (10+ captioned examples) or long (7–9) where the
-length is a prop cross-product rather than distinct things worth seeing.
+**53 remaining pages** overloaded (10+ captioned examples) or long (7–9) where
+the length is a prop cross-product rather than distinct things worth seeing.
+The six children partition those 53 exactly: every page appears on one child
+and no page appears on two.
 
 ## Children
 
@@ -26,14 +28,17 @@ and is dispatched separately.
 | --- | --- | ---: | --- |
 | `g15.020` | Model connections + account lifecycle | 8 | none |
 | `g15.021` | Application shell | 7 | none |
-| `g15.022` | Audio & music | 7 | after `g15.017` splits `audio_specimens` |
-| `g15.023` | Foundations: entry, content, status | 12 | after `g15.016` |
-| `g15.024` | Agent & tools | 4 | after `g15.015` restores captions |
+| `g15.022` | Audio & music | 11 | after `g15.017` splits `audio_specimens` |
+| `g15.023` | Foundations: entry, content, status | 11 | after `g15.016` |
+| `g15.024` | Agent & tools | 6 | after `g15.015` restores captions |
 | `g15.025` | Collections, navigation, overlays, long tail | 10 | after `g15.016` |
+| **Total** | | **53** | |
 
-Counts are the audit's pre-`g15.015`/`016` measurement and are re-measured by
-each child before it starts. Per-page lists live in the audit table, not here,
-so the children cannot drift from the evidence.
+**Each child carries its own exact page list.** The counts above and the lists
+in the children are one partition of the same 53 pages, taken from the audit at
+this branch's head. A child re-measures its pages before starting — a
+prerequisite card can change a page's example count — and records any change
+rather than silently resizing its set.
 
 ## Method (every child follows this)
 

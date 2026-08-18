@@ -12,10 +12,24 @@ Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
 The remaining families, each with one to three affected pages.
 
 Catalogue families: `data-collections`, `navigation`, `overlays-disclosure`, `layout`, `media`, `date-time`.
-The audit measured 10 pages in this group as overloaded (10+ captioned
-examples) or long (7–9) from a prop cross-product. Take the current per-page
-list from the audit table rather than a copy here — `g15.015` and `g15.016`
-land first in some cases and change what remains.
+### Pages this card owns (10)
+
+- `Accordion`
+- `Dialog`
+- `FilterBuilder`
+- `ListCard`
+- `ListCardCounter`
+- `MediaPreview`
+- `SplitView`
+- `Stepper`
+- `TimeAgo`
+- `Tree`
+
+This list is exact and exhaustive: it is every page in these families whose
+`Examples` view the audit measured as overloaded (10+ captioned examples) or
+long (7–9). No other card owns these pages, and this card owns no others. If a
+prerequisite card changes a page's count before this one runs, re-measure and
+record the change — do not silently widen or narrow the set.
 
 No component, contract, or public API change.
 
