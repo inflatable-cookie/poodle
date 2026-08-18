@@ -8,8 +8,10 @@ Branch: `t3code/gpui-specimen-structure`
 
 ## Summary
 
-The GPUI catalogue now publishes the axis panes the merged web census admits,
-and only those. Three changes carry it:
+The 74 axis corrections named by this card now match the merged web census.
+Two pre-existing domain mismatches found outside that denominator are no longer
+disguised by fake panes and remain explicit follow-up gaps. Three changes carry
+the scoped repair:
 
 1. `specimen_layout` takes an explicit `SpecimenAxes` value. A page states the
    panes it supplies; a pane with no renderer produces no tab, and a retained
