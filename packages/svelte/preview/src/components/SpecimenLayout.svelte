@@ -22,10 +22,13 @@
     densities?: Snippet<[density: (typeof controlDensities)[number]]>;
   } = $props();
 
+  // An axis tab needs a renderer: without one the pane would be empty, which
+  // is exactly what the catalogue must never advertise. `show*` may hide a
+  // supplied renderer but cannot force a tabless pane.
   const tabs: TabItem[] = $derived([
     { value: "examples", label: "Examples" },
-    ...(showSizes ? [{ value: "sizes", label: "Sizes" }] : []),
-    ...(showDensities ? [{ value: "densities", label: "Densities" }] : []),
+    ...(showSizes && sizes ? [{ value: "sizes", label: "Sizes" }] : []),
+    ...(showDensities && densities ? [{ value: "densities", label: "Densities" }] : []),
   ]);
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;

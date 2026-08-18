@@ -45,7 +45,7 @@ pub static SPECIMEN_SCENES: &[SpecimenScene<'static>] = &[
         name: "Avatar",
         description: "Avatar specimen (contract §13): initials sizes, tone and shape, and an image avatar.",
         size_axis: &["xs", "sm", "md", "lg", "xl"],
-        density_axis: &["compact", "default", "comfortable"],
+        density_axis: &[],
         groups: &[
             SpecimenGroup { label: "Initials", instances: &[
                 SpecimenInstance {

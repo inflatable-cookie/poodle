@@ -285,19 +285,24 @@ fn display_components() -> Vec<ComponentDefinition> {
     ]
 }
 
+fn size_axis() -> SceneAxis {
+    SceneAxis {
+        kind: SceneAxisKind::Size,
+        values: AxisValues::Named(ids(["xs", "sm", "md", "lg", "xl"])),
+        description: "Control-size axis the Sizes matrix iterates (SHELL-02; CROSS-07).".to_owned(),
+    }
+}
+
+fn density_axis() -> SceneAxis {
+    SceneAxis {
+        kind: SceneAxisKind::Density,
+        values: AxisValues::Named(ids(["compact", "default", "comfortable"])),
+        description: "Density axis the Densities matrix iterates (SHELL-03; CROSS-08).".to_owned(),
+    }
+}
+
 fn size_density_axes() -> Vec<SceneAxis> {
-    vec![
-        SceneAxis {
-            kind: SceneAxisKind::Size,
-            values: AxisValues::Named(ids(["xs", "sm", "md", "lg", "xl"])),
-            description: "Control-size axis the Sizes matrix iterates (SHELL-02; CROSS-07).".to_owned(),
-        },
-        SceneAxis {
-            kind: SceneAxisKind::Density,
-            values: AxisValues::Named(ids(["compact", "default", "comfortable"])),
-            description: "Density axis the Densities matrix iterates (SHELL-03; CROSS-08).".to_owned(),
-        },
-    ]
+    vec![size_axis(), density_axis()]
 }
 
 fn specimen_tabs() -> SpecimenTabs {
@@ -325,7 +330,7 @@ fn scene(id: &str, name: &str, description: &str, instances: Vec<ComponentInstan
 /// Tranche-one scenes. Contract reference: each specimen's §13 specimen
 /// set (`B/R/T §13`), superseding the four hand-written copies.
 pub fn display_specimens_scenes() -> Vec<Scene> {
-    vec![
+    let scenes = vec![
         scene(
             "callout-specimen",
             "Callout",
@@ -563,52 +568,60 @@ pub fn display_specimens_scenes() -> Vec<Scene> {
                 ]),
             ],
         ),
-        scene(
-            "avatar-specimen",
-            "Avatar",
-            "Avatar specimen (contract §13): initials sizes, tone and shape, and an image \
-             avatar.",
-            vec![
-                instance("avatar", "Initials", "TA xs", vec![
-                    ("initials", str_value("TA")),
-                    ("size", member_value("xs")),
-                ]),
-                instance("avatar", "Initials", "TA sm", vec![
-                    ("initials", str_value("TA")),
-                    ("size", member_value("sm")),
-                ]),
-                instance("avatar", "Initials", "TA md", vec![
-                    ("initials", str_value("TA")),
-                    ("size", member_value("md")),
-                ]),
-                instance("avatar", "Initials", "TA lg", vec![
-                    ("initials", str_value("TA")),
-                    ("size", member_value("lg")),
-                ]),
-                instance("avatar", "Initials", "TA xl", vec![
-                    ("initials", str_value("TA")),
-                    ("size", member_value("xl")),
-                ]),
-                instance("avatar", "Tone and shape", "AC neutral", vec![
-                    ("initials", str_value("AC")),
-                    ("tone", member_value("neutral")),
-                ]),
-                instance("avatar", "Tone and shape", "AC accent", vec![
-                    ("initials", str_value("AC")),
-                    ("tone", member_value("accent")),
-                ]),
-                instance("avatar", "Tone and shape", "AC rounded", vec![
-                    ("initials", str_value("AC")),
-                    ("shape", member_value("rounded")),
-                    ("tone", member_value("accent")),
-                ]),
-                instance("avatar", "Image", "Example user", vec![
-                    ("src", str_value("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%232563eb'/%3E%3Ccircle cx='40' cy='30' r='16' fill='%23fff'/%3E%3Cpath d='M14 74c5-18 17-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E")),
-                    ("alt", str_value("Example user")),
-                    ("size", member_value("lg")),
-                ]),
-            ],
-        ),
+        {
+            // Avatar takes no `density` prop (contract §3): the scene must
+            // not declare the density axis or tab, or the Densities tab
+            // would be advertised for a prop the component does not take.
+            let mut avatar_scene = scene(
+                "avatar-specimen",
+                "Avatar",
+                "Avatar specimen (contract §13): initials sizes, tone and shape, and an image \
+                 avatar.",
+                vec![
+                    instance("avatar", "Initials", "TA xs", vec![
+                        ("initials", str_value("TA")),
+                        ("size", member_value("xs")),
+                    ]),
+                    instance("avatar", "Initials", "TA sm", vec![
+                        ("initials", str_value("TA")),
+                        ("size", member_value("sm")),
+                    ]),
+                    instance("avatar", "Initials", "TA md", vec![
+                        ("initials", str_value("TA")),
+                        ("size", member_value("md")),
+                    ]),
+                    instance("avatar", "Initials", "TA lg", vec![
+                        ("initials", str_value("TA")),
+                        ("size", member_value("lg")),
+                    ]),
+                    instance("avatar", "Initials", "TA xl", vec![
+                        ("initials", str_value("TA")),
+                        ("size", member_value("xl")),
+                    ]),
+                    instance("avatar", "Tone and shape", "AC neutral", vec![
+                        ("initials", str_value("AC")),
+                        ("tone", member_value("neutral")),
+                    ]),
+                    instance("avatar", "Tone and shape", "AC accent", vec![
+                        ("initials", str_value("AC")),
+                        ("tone", member_value("accent")),
+                    ]),
+                    instance("avatar", "Tone and shape", "AC rounded", vec![
+                        ("initials", str_value("AC")),
+                        ("shape", member_value("rounded")),
+                        ("tone", member_value("accent")),
+                    ]),
+                    instance("avatar", "Image", "Example user", vec![
+                        ("src", str_value("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%232563eb'/%3E%3Ccircle cx='40' cy='30' r='16' fill='%23fff'/%3E%3Cpath d='M14 74c5-18 17-28 26-28s21 10 26 28' fill='%23fff'/%3E%3C/svg%3E")),
+                        ("alt", str_value("Example user")),
+                        ("size", member_value("lg")),
+                    ]),
+                ],
+            );
+            avatar_scene.axes = vec![size_axis()];
+            avatar_scene.tabs = Some(SpecimenTabs { tabs: ids(["examples", "sizes"]) });
+            avatar_scene
+        },
         scene(
             "empty-state-specimen",
             "EmptyState",
@@ -636,7 +649,9 @@ pub fn display_specimens_scenes() -> Vec<Scene> {
                 ]),
             ],
         ),
-    ]
+    ];
+
+    scenes
 }
 
 /// The display-specimen model: shared types, fixture components, and the
