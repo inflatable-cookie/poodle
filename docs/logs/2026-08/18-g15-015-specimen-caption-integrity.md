@@ -19,7 +19,7 @@ Branch: `t3code/fix-specimen-caption-integrity`
 | React pairing | 9 pages | Copied authored Svelte descriptions into React counterparts |
 | Generated catalogue | 348 | `catalogue-ts` emits typed empty `collections` literals; `catalogue:build` |
 | Recipe inventory script | 13 | Unified entry type; `import-meta.d.ts` for `import.meta.dir` |
-| Contract drift scripts | 2 | `import-meta.d.ts` Bun surface for `spawnSync` / `Glob` |
+| Contract drift scripts | 5 | `contract-role-drift` 2, `contract-spec-drift` 2, `contract-value-domain-drift` 1 — three `import.meta.dir`, two Bun globals (`spawnSync`, `Glob`) via `import-meta.d.ts` |
 | `ListContainerSpecimen` | 5 | Renamed local `state` → `containerState` (Svelte 5 `$state` clash) |
 | `SceneSpecimen` | 2 | Axis casts inside snippets; `as never` boundary on layout snippets |
 | `DialogSpecimen` | 1 | Required `Field` `id` |
@@ -58,19 +58,19 @@ Branch: `t3code/fix-specimen-caption-integrity`
 
 **Open — operator checkpoint not run in this session.**
 
-Nine Svelte routes (hash catalogue):
+Nine Svelte routes (`#components/<slug>`):
 
-- `#/agent-message`
-- `#/agent-plan`
-- `#/agent-plan-record`
-- `#/agent-question`
-- `#/agent-question-record`
-- `#/agent-subagent`
-- `#/changed-files`
-- `#/tool-call`
-- `#/tool-call-group`
+- `#components/agent-message`
+- `#components/agent-plan`
+- `#components/agent-plan-record`
+- `#components/agent-question`
+- `#components/agent-question-record`
+- `#components/agent-subagent`
+- `#components/changed-files`
+- `#components/tool-call`
+- `#components/tool-call-group`
 
-React gallery mirrors the same slugs under the React preview dev server.
+React gallery mirrors the same paths under the React preview dev server.
 
 ## Deviations
 
