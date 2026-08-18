@@ -1,6 +1,6 @@
 # g15.015 — Specimen Caption Integrity
 
-Status: **planned** — orchestrator review required before dispatch
+Status: **ready** — exact page and type-gate scope approved for dispatch
 Consumes: `g15.011` partial screening baseline
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`,
 `../../contracts/001-working-rules.md`
@@ -17,14 +17,26 @@ copy, describing what each example teaches — never reaches the page.
 
 The cause is systemic, not local: `check:svelte` type-checks
 `packages/svelte/install-smoke` and `packages/svelte/components`, and never
-`packages/svelte/preview`. Running `svelte-check` there by hand reports the 52
-errors directly.
+`packages/svelte/preview`. The dispatch baseline is 428 errors in 25 files:
+348 generated-catalogue type errors, 52 caption-prop errors, and 28 residual
+preview-workspace errors. This card closes the complete measured gate deficit;
+it does not add a selector that is red on arrival.
 
 ## Scope
 
-- the nine pages listed under **D — captions do not render** in the audit
+- these nine Svelte pages, and no inferred page set:
+  - `AgentMessageSpecimen.svelte` — 8 captions
+  - `AgentPlanSpecimen.svelte` — 4 captions
+  - `AgentPlanRecordSpecimen.svelte` — 6 captions
+  - `AgentQuestionSpecimen.svelte` — 6 captions
+  - `AgentQuestionRecordSpecimen.svelte` — 6 captions
+  - `AgentSubagentSpecimen.svelte` — 6 captions
+  - `ChangedFilesSpecimen.svelte` — 7 captions
+  - `ToolCallSpecimen.svelte` — 4 captions
+  - `ToolCallGroupSpecimen.svelte` — 5 captions
 - `SpecimenGroup` in both web previews
-- the Svelte type-check gate's scope
+- the Svelte preview workspace's measured 28 residual diagnostics
+- the Svelte type-check gate's scope and task definition
 
 ## Goals
 
@@ -34,14 +46,22 @@ errors directly.
       deleted. React matches.
 - [ ] `packages/svelte/preview` is inside a type-check gate.
 - [ ] The 348 `readonly never[]` errors from the generated catalogue type are
-      resolved or explicitly suppressed with a reason — a gate nobody can pass
-      is not a gate.
+      fixed at their source or at one honest generated-data typing boundary.
+      Blanket suppression is not an accepted fix.
+- [ ] The remaining 28 diagnostics are fixed in their owning files without
+      broadening into component redesign. They currently comprise 13 recipe
+      inventory script errors, 6 contract-drift script errors, 5
+      `ListContainerSpecimen` errors, 2 `SceneSpecimen` errors, and one each in
+      `component-registry`, `DialogSpecimen`, and core licence narrowing.
 
 ## Acceptance
 
 - [ ] A live sweep of the nine pages reports zero blank captions.
-- [ ] `svelte-check` over `packages/svelte/preview` reports zero errors.
-- [ ] The gate runs in `ci:web`; a reintroduced `title=` prop fails it.
+- [ ] A named Effigy selector type-checks `packages/svelte/preview` with zero
+      errors, and `check:svelte`/`ci:web` inherit that selector.
+- [ ] Mutation proof: temporarily reintroducing `title=` on one scoped page
+      makes the selector fail; restoring `label=` makes it pass. The mutation
+      is not committed.
 - [ ] No component public API, contract, or semantic change.
 - [ ] **Operator review of the changed pages in the live Svelte and React
       previews before this card is called complete.** Unreviewed pages remain
@@ -51,16 +71,30 @@ errors directly.
 
 - The fix becomes a rewrite of the nine pages' examples. This card restores
   captions; content curation is `g15.018`.
-- Suppressing the type errors instead of fixing the scope hole.
+- Blanket suppressions, excluding preview source from the new gate, or making
+  the new selector advisory instead of required.
+- A residual diagnostic exposes a public component or contract question. Stop
+  and return that finding instead of changing the public surface inside this
+  card.
 
 ## Writable Scope
 
-- the nine specimen files, `SpecimenGroup` (Svelte + React)
-- the generated catalogue type or its suppression
-- `tasks/effigy.tasks.toml` gate scope — **operator approval required**
+- the nine named Svelte specimen files and their React counterparts only where
+  needed to keep caption structure and copy aligned
+- `SpecimenGroup` (Svelte + React)
+- the two generated catalogue artifacts and their generator/typing boundary
+- the 9 residual-diagnostic owners named in Goals, including
+  `packages/core/src/licence.ts`; fixes must remain type-only or preserve
+  existing behaviour
+- Svelte preview type configuration if needed for Bun-authored scripts
+- `tasks/effigy.tasks.toml` gate scope — **operator approved for this card**
 - one batch log
 
 ## Validation
 
-- focused preview tests, `effigy check:svelte`, `effigy react:build`,
-  `effigy docs:check`, `git diff --check`
+- focused `SpecimenGroup`/caption evidence
+- the new Svelte preview type-check selector, including fail/pass mutation proof
+- `effigy check:svelte`, `effigy react:build`, `effigy catalogue:check`,
+  `effigy ci:web`, `effigy docs:check`
+- live Svelte and React review of the nine changed pages
+- `git diff --check origin/main...HEAD`

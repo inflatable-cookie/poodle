@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Poodle orchestrator
-Updated: 2026-08-17
+Updated: 2026-08-18
 
 The orchestrator is the only writer. Workers write their scoped deliverables,
 batch log, and papercuts; they do not edit this ledger or roadmap/card status.
@@ -22,7 +22,8 @@ worktree. Paired Jetstream integration is explicit under `ci:jetstream` and
 
 | Batch | Card | Branch | Model | Status | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| `g15-r011-specimen-catalogue-audit` | `g15/011-specimen-catalogue-audit.md` | `t3code/g15-011-specimen-catalogue-audit` | capable coding model, medium reasoning | ready-to-launch | Planning base `10c53abc`; handoff `docs/handoffs/20260817-214451-g15-011-specimen-catalogue-audit.md`. One serial audit/pilot lane; operator live-review checkpoint required before the three pilots count as approved. |
+| `g15-r015-specimen-caption-integrity` | `g15/015-specimen-caption-integrity.md` | `t3code/g15-015-specimen-caption-integrity` | capable coding model, medium reasoning | ready-to-launch | Planning base `1719785c`; handoff `docs/handoffs/20260818-112051-g15-015-specimen-caption-integrity.md`. Exact nine-page/52-caption repair plus the complete measured 428-error Svelte-preview gate deficit. Serial lane; live Svelte and React review is a PR acceptance item. |
+| `g15-r011-specimen-catalogue-audit` | `g15/011-specimen-catalogue-audit.md` | `t3code/specimen-catalogue-audit` | capable coding model, medium reasoning | merged | PR #36 accepted at `f1033a0f`; merge `1719785c`. Audited all 175 pages, approved the Button/RangeSlider/Tabs pilots, recorded the renderer-neutral planning outline, and split the continuation into exact bounded cards. `g15.011` remains milestone-partial until its native probe and screen-clear review children land. |
 | `g15-r010-gpui-specimen-closure` | `g15/010-display-workstation-agent-gpui-specimens.md` | `t3code/gpui-specimen-closure` | t3code thread | merged | PR #35 accepted at `176f6f4f`; merge `a2bf1a99`. Closed all 18 measured GPUI specimen gaps with named teaching pages and 40 mounted headless regressions. Review repaired repeated-instance focus identity and completed the operator-approved pre-v0.2 `poodle-render` handler migration without a compatibility twin. Full headless `effigy qa` and GitHub `active-cohort` passed; no windowed selector ran. |
 | `g15-r009-update-settings-radio-native-closure` | `g15/009-update-settings-radio-native-closure.md` | `t3code/update-settings-radio-native-closure` | t3code thread | merged | PR #34 accepted at `ce28ecca`; merge `c5664ce8`. Closed UpdateStatus, UpdateCenter, SettingsShell, and standalone Radio with hand-written specs, shared render composition, GPUI specimens, and mounted keyboard evidence. IconProvider uses the allowed registry passthrough; UiPresentationProvider records an honest native cascade absence for follow-up before certification. `effigy check:gpui`, `effigy regressions:native`, `effigy docs:check`, and GitHub `active-cohort` passed; no windowed or Jetstream selector ran. |
 | `g15-r008-model-connection-native-completion` | `g15/008-model-connection-family-native-completion.md` | `t3code/complete-model-connection` | frontier coding model, high reasoning | merged | PR #33 accepted at `9dd051c3`; merge `6b36c7d3`. Closed the four-component model-connection native family with controlled specs, owner-local behaviour mirrors, shared render composition, GPUI specimens, and mounted focus evidence. Full headless `effigy qa` and GitHub `active-cohort` passed; no windowed selector ran. |
