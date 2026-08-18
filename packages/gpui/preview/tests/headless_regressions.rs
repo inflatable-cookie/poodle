@@ -36,7 +36,8 @@ mod specimen_axes;
 
 use headless_driver::HeadlessDriver;
 use specimen_axes::{
-    density_key, size_key, AxisAdmission, DENSITIES_TAB, EXAMPLES_TAB, SIZES_TAB,
+    density_key, size_key, AxisAdmission, DENSITIES_TAB, EXAMPLES_TAB, EYEBROW_SIZES, SIZES_TAB,
+    TEXT_SIZES,
 };
 
 /// The element id every single-node fixture mounts under.
@@ -2890,10 +2891,8 @@ fn avatar_scene_matrix_uses_fixture_first_instance_with_xs_default() {
 
 #[test]
 fn text_and_eyebrow_native_specimens_advertise_xs_sm_md_in_order() {
-    const TEXT_DOMAIN: &[&str] = &["xs", "sm", "md"];
-    const EYEBROW_DOMAIN: &[&str] = &["xs", "sm", "md"];
-    assert_eq!(TEXT_DOMAIN, &["xs", "sm", "md"]);
-    assert_eq!(EYEBROW_DOMAIN, &["xs", "sm", "md"]);
+    assert_eq!(TEXT_SIZES, &["xs", "sm", "md"]);
+    assert_eq!(EYEBROW_SIZES, &["xs", "sm", "md"]);
 }
 
 #[test]

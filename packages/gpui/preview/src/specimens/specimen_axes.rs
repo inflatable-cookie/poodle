@@ -37,6 +37,12 @@ pub const ALL_DENSITIES: &[(ControlDensity, &str)] = &[
     (ControlDensity::Comfortable, "comfortable"),
 ];
 
+/// Text's exact public size domain, in catalogue order.
+pub const TEXT_SIZES: &[&str] = &["xs", "sm", "md"];
+
+/// Eyebrow's exact public size domain, in catalogue order.
+pub const EYEBROW_SIZES: &[&str] = &["xs", "sm", "md"];
+
 /// Which axis panes a specimen page admits.
 ///
 /// There is no `Default`: a page states its axes or gets Examples only.

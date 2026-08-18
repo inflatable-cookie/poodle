@@ -39,9 +39,8 @@ use crate::specimens::specimen_axes::{
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 
-type SizeRenderer<'a> = Box<dyn Fn(ControlSize, &GpuiThemeProvider) -> Option<AnyElement> + 'a>;
-type DensityRenderer<'a> =
-    Box<dyn Fn(ControlDensity, &GpuiThemeProvider) -> Option<AnyElement> + 'a>;
+type SizeRenderer<'a> = Box<dyn Fn(ControlSize, &GpuiThemeProvider) -> AnyElement + 'a>;
+type DensityRenderer<'a> = Box<dyn Fn(ControlDensity, &GpuiThemeProvider) -> AnyElement + 'a>;
 type NamedSizeRenderer<'a> = Box<dyn Fn(&str, &GpuiThemeProvider) -> AnyElement + 'a>;
 type NamedDensityRenderer<'a> = Box<dyn Fn(&str, &GpuiThemeProvider) -> AnyElement + 'a>;
 
@@ -74,19 +73,8 @@ impl<'a> SpecimenAxes<'a> {
 
     /// Admit the `Sizes` pane, one representative per control step.
     pub fn with_sizes(
-        self,
-        row: impl Fn(ControlSize, &GpuiThemeProvider) -> AnyElement + 'a,
-    ) -> Self {
-        self.with_sizes_where(move |size, theme| Some(row(size, theme)))
-    }
-
-    /// Admit the `Sizes` pane for a component whose own size enum stops short
-    /// of the five control steps. The renderer returns `None` for a step the
-    /// component does not take and that row is dropped rather than faked —
-    /// matching what the Svelte specimen renders.
-    pub fn with_sizes_where(
         mut self,
-        row: impl Fn(ControlSize, &GpuiThemeProvider) -> Option<AnyElement> + 'a,
+        row: impl Fn(ControlSize, &GpuiThemeProvider) -> AnyElement + 'a,
     ) -> Self {
         self.sizes = Some(Box::new(row));
         self
@@ -105,17 +93,8 @@ impl<'a> SpecimenAxes<'a> {
 
     /// Admit the `Densities` pane, one representative per density step.
     pub fn with_densities(
-        self,
-        row: impl Fn(ControlDensity, &GpuiThemeProvider) -> AnyElement + 'a,
-    ) -> Self {
-        self.with_densities_where(move |density, theme| Some(row(density, theme)))
-    }
-
-    /// Admit the `Densities` pane for a component that does not take every
-    /// density step. See [`SpecimenAxes::with_sizes_where`].
-    pub fn with_densities_where(
         mut self,
-        row: impl Fn(ControlDensity, &GpuiThemeProvider) -> Option<AnyElement> + 'a,
+        row: impl Fn(ControlDensity, &GpuiThemeProvider) -> AnyElement + 'a,
     ) -> Self {
         self.densities = Some(Box::new(row));
         self
@@ -222,9 +201,7 @@ pub fn specimen_layout(
             } else {
                 let row = axes.sizes.as_ref().expect("sizes tab is admitted");
                 for (size, label) in ALL_SIZES {
-                    if let Some(body) = row(*size, theme) {
-                        col = col.child(variant_row(label, body, text_secondary));
-                    }
+                    col = col.child(variant_row(label, row(*size, theme), text_secondary));
                 }
             }
             col
@@ -238,9 +215,7 @@ pub fn specimen_layout(
             } else {
                 let row = axes.densities.as_ref().expect("densities tab is admitted");
                 for (density, label) in ALL_DENSITIES {
-                    if let Some(body) = row(*density, theme) {
-                        col = col.child(variant_row(label, body, text_secondary));
-                    }
+                    col = col.child(variant_row(label, row(*density, theme), text_secondary));
                 }
             }
             col

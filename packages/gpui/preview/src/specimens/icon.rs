@@ -7,7 +7,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
-use poodle_specs::{ControlSize, EyebrowSpec, IconSize, IconSpec};
+use poodle_specs::{EyebrowSpec, IconSize, IconSpec};
 
 /// A curated set of icon names to display in the gallery.
 const SPECIMEN_ICONS: &[&str] = &[

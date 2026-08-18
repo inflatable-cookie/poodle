@@ -7,10 +7,10 @@
 
   let open = $state(false);
   let selected = $state("");
-  let sizeOpenMap: Record<string, boolean> = {};
-  let densityOpenMap: Record<string, boolean> = {};
-  let sizeSelectedMap: Record<string, string> = {};
-  let densitySelectedMap: Record<string, string> = {};
+  let sizeOpenMap: Record<string, boolean> = $state({});
+  let densityOpenMap: Record<string, boolean> = $state({});
+  let sizeSelectedMap: Record<string, string> = $state({});
+  let densitySelectedMap: Record<string, string> = $state({});
 
   const sampleItems: MediaPickerItem[] = [
     { id: "1", label: "hero-banner.jpg", thumbnailUrl: undefined, kind: "image" },

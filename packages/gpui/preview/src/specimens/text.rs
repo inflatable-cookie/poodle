@@ -1,5 +1,6 @@
 use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, Text};
+use crate::specimens::specimen_axes::TEXT_SIZES;
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
@@ -113,7 +114,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "text",
         examples,
         SpecimenAxes::examples_only()
-            .with_named_sizes(&["xs", "sm", "md"], |value, theme: &GpuiThemeProvider| {
+            .with_named_sizes(TEXT_SIZES, |value, theme: &GpuiThemeProvider| {
                 let text_size = match value {
                     "xs" => TextSize::Xs,
                     "sm" => TextSize::Sm,

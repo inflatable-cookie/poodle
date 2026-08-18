@@ -188,6 +188,73 @@ function orderedComponentAxisValues(attr: "data-size" | "data-density"): string[
     .filter((value): value is string => Boolean(value));
 }
 
+const PORTALED_AXIS_SELECTORS: Partial<Record<string, string>> = {
+  "alert-dialog": ".poodle-dialog",
+  "command-palette": ".poodle-command-palette",
+  dialog: ".poodle-dialog",
+  drawer: ".poodle-drawer",
+  "form-dialog": ".poodle-dialog",
+  "media-picker": ".poodle-media-picker",
+};
+
+async function assertComponentAxisValues(
+  runtime: "Svelte" | "React",
+  slug: string,
+  attr: "data-size" | "data-density",
+  expected: readonly string[],
+  context = "",
+): Promise<void> {
+  const inlineValues = orderedComponentAxisValues(attr);
+  if (JSON.stringify(inlineValues) === JSON.stringify(expected)) return;
+
+  const selector = PORTALED_AXIS_SELECTORS[slug];
+  if (!selector) {
+    expect(inlineValues, `${context} rendered component axis values`).toEqual([...expected]);
+    return;
+  }
+
+  const axisAttr = attr === "data-size" ? "data-axis-size" : "data-axis-density";
+  const variants = document.querySelector(".poodle-specimen-layout__variants");
+  expect(variants, `${context} axis variants container missing`).toBeTruthy();
+  const rows = [
+    ...variants!.querySelectorAll<HTMLElement>(`.poodle-specimen-layout__variant[${axisAttr}]`),
+  ];
+  const waitFor = runtime === "Svelte" ? waitForSvelte : waitForReact;
+  const portaledValues: string[] = [];
+
+  for (const row of rows) {
+    const axisValue = row.getAttribute(axisAttr);
+    const trigger = row.querySelector<HTMLElement>("button");
+    expect(axisValue, `${context} axis row missing value`).toBeTruthy();
+    expect(trigger, `${context} ${axisValue} trigger missing`).toBeTruthy();
+
+    if (runtime === "React") {
+      await act(async () => fireEvent.click(trigger!));
+    } else {
+      fireEvent.click(trigger!);
+    }
+    await waitFor(() => {
+      const overlay = document.querySelector<HTMLElement>(selector);
+      expect(overlay, `${context} ${axisValue} overlay missing`).toBeTruthy();
+      expect(overlay!.getAttribute(attr), `${context} ${axisValue} overlay value`).toBe(axisValue);
+    });
+    portaledValues.push(axisValue!);
+
+    const dismiss = document.querySelector<HTMLElement>(
+      'button[aria-label^="Dismiss "], .poodle-command-palette__overlay, [aria-label="Close command palette"]',
+    );
+    expect(dismiss, `${context} ${axisValue} dismiss control missing`).toBeTruthy();
+    if (runtime === "React") {
+      await act(async () => fireEvent.click(dismiss!));
+    } else {
+      fireEvent.click(dismiss!);
+    }
+    await waitFor(() => expect(document.querySelectorAll(selector).length).toBe(0));
+  }
+
+  expect(portaledValues, `${context} rendered portaled component axis values`).toEqual([...expected]);
+}
+
 /** The exact 24 routes corrected by this card, for the explicit decision
  *  evidence the acceptance criteria name. */
 const CORRECTED_ROUTES = [
@@ -321,16 +388,10 @@ async function assertRoute(
     if (!clicked) return null;
     if (label === "Sizes" && sizeAxis) {
       assertOrderedAxisRows("data-axis-size", sizeAxis, `${slug} (${runtime})`);
-      const componentSizes = orderedComponentAxisValues("data-size");
-      if (componentSizes.length === sizeAxis.length) {
-        expect(componentSizes).toEqual([...sizeAxis]);
-      }
+      await assertComponentAxisValues(runtime, slug, "data-size", sizeAxis, `${slug} (${runtime})`);
     } else if (label === "Densities" && densityAxis) {
       assertOrderedAxisRows("data-axis-density", densityAxis, `${slug} (${runtime})`);
-      const componentDensities = orderedComponentAxisValues("data-density");
-      if (componentDensities.length === densityAxis.length) {
-        expect(componentDensities).toEqual([...densityAxis]);
-      }
+      await assertComponentAxisValues(runtime, slug, "data-density", densityAxis, `${slug} (${runtime})`);
     } else {
       await awaitPaneEvidence(runtime);
     }
@@ -422,6 +483,26 @@ describe("SpecimenLayout axis-tab hardening", () => {
     expect(rows.map((row) => row.getAttribute("data-axis-size"))).toEqual([...DEFAULT_CONTROL_SIZES]);
     expect(rows.some((row) => !variantRowHasEvidence(row))).toBe(true);
     cleanupSvelte();
+  });
+
+  it("rejects non-empty rows that collapse every component to one size", async () => {
+    renderReact(
+      <SpecimenLayout sizes={() => <p data-size="xs">collapsed size</p>}>
+        <p>examples content</p>
+      </SpecimenLayout>,
+    );
+    await clickTab(document, "Sizes", "React");
+    assertOrderedAxisRows("data-axis-size", [...DEFAULT_CONTROL_SIZES]);
+    await expect(
+      assertComponentAxisValues(
+        "React",
+        "collapsed-fixture",
+        "data-size",
+        [...DEFAULT_CONTROL_SIZES],
+        "collapsed fixture",
+      ),
+    ).rejects.toThrowError();
+    cleanupReact();
   });
 });
 
@@ -524,7 +605,7 @@ describe("authored-scene tab projection", () => {
     assertOrderedAxisRows("data-axis-size", [...DEFAULT_CONTROL_SIZES]);
     expect(orderedComponentAxisValues("data-size")).toEqual([...DEFAULT_CONTROL_SIZES]);
     cleanupReact();
-  });
+  }, 60_000);
 
   it("normalizes a retained tab when the next scene drops it (Callout Densities → Avatar)", async () => {
     // The preview reuses one SceneSpecimen instance across slugs; navigate it

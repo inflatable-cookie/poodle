@@ -5,9 +5,10 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
 use crate::app_state::AppState;
+use crate::specimens::specimen_axes::EYEBROW_SIZES;
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
-use poodle_specs::{ControlSize, EyebrowSize, EyebrowSpec};
+use poodle_specs::{EyebrowSize, EyebrowSpec};
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -59,7 +60,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "eyebrow",
         examples,
         SpecimenAxes::examples_only()
-            .with_named_sizes(&["xs", "sm", "md"], |value, theme: &GpuiThemeProvider| {
+            .with_named_sizes(EYEBROW_SIZES, |value, theme: &GpuiThemeProvider| {
                 let eyebrow_size = match value {
                     "xs" => EyebrowSize::Xs,
                     "sm" => EyebrowSize::Sm,

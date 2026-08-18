@@ -45,12 +45,12 @@ Result: no hits outside Poodle.
 | Command | Outcome |
 |---------|---------|
 | `effigy ir:check` | pass |
-| `effigy test:components` | 343 files, 2710 tests pass |
+| `effigy test:components` | 343 files, 2712 tests pass |
 | `effigy check:svelte` | 0 errors |
 | `effigy react:build` | pass |
-| `effigy test:parity` | 257 tests pass (incl. exact-domain assertions) |
+| `effigy test:parity` | 259 tests pass (incl. omission and collapse regressions) |
 | `effigy check:gpui` | pass |
-| `effigy regressions:native` | 46 tests pass |
+| `effigy regressions:native` | 49 tests pass |
 | `effigy test:web-pack-install` | pass |
 | `effigy docs:check` | pass |
 | `git diff --check origin/main...HEAD` | clean |
@@ -58,8 +58,12 @@ Result: no hits outside Poodle.
 ## Evidence added
 
 - Paired-web census: EmptyState `default|compact`, Text/Eyebrow `xs|sm|md`, Icon five sizes, no Icon Densities tab
-- GPUI: generated empty-state scene `size_axis`, `IconSize` endpoint mapping test
-- IR validation: scene size axes union component `size` permitted subsets with control sizes
+- Paired-web census opens every portaled axis row and verifies the component value;
+  CommandPalette and MediaPicker axis state is reactive in Svelte
+- GPUI: production-owned Text/Eyebrow domains, generated EmptyState axis,
+  non-filtering standard axes, Icon's five-step mapping, and distinct EmptyState geometry
+- IR validation: scene size axes select a component-specific permitted domain when present,
+  otherwise the standard control-size domain
 
 ## Operator preview routes (Svelte + React catalogue)
 
