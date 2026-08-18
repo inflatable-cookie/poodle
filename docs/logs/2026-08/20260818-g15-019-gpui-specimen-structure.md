@@ -21,9 +21,14 @@ and only those. Three changes carry it:
    out Examples, one representative at a requested size, and one at a requested
    density; GPUI composes them through its own axis-aware layout.
 
-Six named pages gained honest captions. Twelve pages that had been keeping an
-axis matrix inside `Examples` had it moved into the matching pane, not
+Six named pages gained honest captions. Twenty-one pages that had been keeping
+an axis matrix inside `Examples` had it moved into the matching pane, not
 duplicated.
+
+Two pages outside the card's 74 — `EmptyState` and `Icon` — were found
+advertising a pane their native renderer cannot fill. Both panes are unadmitted
+and the contract mismatch is returned rather than papered over; see **Stop
+Findings Returned**.
 
 **This is structural proof only.** No native page was rendered. `g15.026` owns
 the library seam and the 174-page live headless probe.
@@ -223,8 +228,10 @@ step in the matching pane: `Table`, `DataTable`, `Field`, `Tree`, `ToastStack`,
   returns a smaller tree than the Examples pane, so no step returns a page.
 - `the_requested_size_reaches_the_control` — the knob's own fixed box grows
   monotonically across `xs` → `xl`.
-- `the_requested_density_reaches_the_control` — every fader density step
-  renders.
+- `the_requested_density_reaches_the_control` — the fader's rail cross-axis is
+  4 / 6 / 8 px across compact / default / comfortable, read off the descriptor
+  the density decides. Mutation-checked: stubbing `at_density` to drop its
+  argument fails the test with `fader rail at Compact is 6px, not 4px`.
 
 `packages/gpui/preview/tests/headless_regressions.rs` (`effigy
 regressions:native`) — 4 tests, over a `#[path]`-included `specimen_axes`:
@@ -241,6 +248,15 @@ Caption evidence is not asserted in a test. `packages/gpui/preview` still cannot
 construct a specimen page outside `main.rs`, so there is no seam a headless test
 could read a caption through; `g15.026` owns that seam. The caption work is
 recorded in the table above and visible in the diff.
+
+## Release Note (spec 022)
+
+| Field | Entry |
+| --- | --- |
+| Packages changed | `poodle-render` (`public-intent = true`, `channel = preview`, `stability = pre-release`); `poodle-gpui-preview` and `poodle-jetstream-preview` (both `public-intent = false`, internal tooling) |
+| Public-intent entry points affected | Yes. `poodle_render::audio_specimens` is a public root module. Twelve public functions are removed: `knob`, `fader`, `audio_meter`, `value_readout`, `drag_number_field`, `envelope_editor`, `xy_pad`, `audio_switch`, `gain_reduction_meter`, `keyboard`, `waveform_display`, `mod_matrix_grid` |
+| Classification | **Breaking.** Each removed function returned a combined page (curated examples plus both axis sweeps). `AudioSpecimen::{examples, size, density}` replaces them; there is no compatibility twin and no deprecation shim, per the pre-1.0 working rule |
+| Downstream re-check | The two in-repo compile consumers are migrated in the same change: `packages/gpui/preview/src/specimens/audio_controls.rs` and `packages/jetstream/preview/src/specimens/audio_controls.rs`. An external consumer calling `audio_specimens::knob(theme)` must call `AudioSpecimen::Knob.examples(theme)` for the previous Examples content, and ask for `size` / `density` separately if it wants the sweeps. `poodle-render` version is unchanged; this rides the next release of the crate |
 
 ## Validation
 
@@ -266,6 +282,48 @@ and no release mutation.
 Recorded, not absorbed: the repository's existing generated-in-src, god-file,
 stale-suppression, stale-graph, and comment-ratio findings. `effigy doctor` was
 not run — selector routing was unambiguous throughout.
+
+## Stop Findings Returned
+
+Two pages hit the card's stop condition — the native spec cannot express the
+merged web axis contract. Neither was hidden by mapping generic control steps
+onto a narrower component domain. Both panes are unadmitted and the parity gap
+is recorded here for an orchestrator ruling; repairing either means changing an
+authored axis contract or a native renderer, which this card does not scope.
+
+### `EmptyState` — no `Sizes` pane
+
+- **Census:** `EmptyState.svelte` declares `size?: EmptyStateSize`, so the
+  census admits a `Sizes` pane.
+- **Native:** `EmptyStateSpec::size` is `EmptyStateSize::{Default, Compact}` —
+  a two-value component domain, not the five control steps a pane walks. It has
+  no builder, and `packages/render/src/empty_state.rs` never reads it: every
+  visual decision keys off `spec.compact`.
+- **Disposition:** the page publishes `Examples` and `Densities` only.
+  `EmptyStateSpec::density` is genuinely consumed (root gap and vertical
+  padding), so the `Densities` pane is honest.
+- **Before this card** the page advertised a `Sizes` pane whose renderer took
+  `_size` and rendered the same default spec five times. That is now gone. The
+  page is not one of the card's 74; this is a 75th correction found while
+  reading it.
+
+### `Icon` — no `Densities` pane, and three size rows
+
+- **Census:** `Icon.svelte` takes both `size: ControlSize` and `density`, and
+  projects `data-density`.
+- **Native:** `packages/render/src/icon.rs` resolves everything from
+  `size_token()` and never reads `IconSpec::density`. `IconSize` is
+  `Sm | Md | Lg`, so `xs` and `xl` have no icon variant.
+- **Disposition:** the `Densities` pane is unadmitted. The `Sizes` pane
+  publishes `sm`, `md`, and `lg` through `with_sizes_where` and drops `xs` and
+  `xl` rather than collapsing them onto `sm` and `lg`.
+- **Before this card** the page collapsed `xs` → `sm` and `xl` → `lg`, and its
+  `Densities` pane rendered one default icon beside a disclaimer. Both are now
+  gone. `Icon` is not one of the card's 74 either.
+
+A scan over every axis pane confirms no other page ignores its axis argument.
+The only two hits are the named `sizes_row` / `densities_row` bindings in the
+scene adapter, which do consume theirs.
 
 ## Deviations and Limitations
 
@@ -295,6 +353,7 @@ not run — selector routing was unambiguous throughout.
 3. **Text and Eyebrow publish three of five size rows.** Their own size enums
    stop at `md`. `with_sizes_where` drops the absent steps instead of
    substituting `md`, matching the Svelte specimens, which render nothing for
-   `lg` and `xl`.
+   `lg` and `xl`. `Icon` publishes three rows for the same reason — see the
+   stop finding above.
 
 4. **No live GPUI page review.** Not claimed anywhere in this log.
