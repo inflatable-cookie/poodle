@@ -7,6 +7,7 @@ export function ButtonSpecimen() {
   const [clickLog, setClickLog] = useState("No button clicked yet.");
   const [intent, setIntent] = useState("save");
   const [bookmarked, setBookmarked] = useState(false);
+  const [sectionsOpen, setSectionsOpen] = useState(false);
 
   const log = (label: string) => setClickLog(`Clicked: ${label}`);
 
@@ -55,6 +56,24 @@ export function ButtonSpecimen() {
           <Button trailingIcon="external-link" onClick={() => log("Trailing icon")}>Open</Button>
           <Button leadingIcon="filter" chevron onClick={() => log("Icon + chevron")}>Filter</Button>
           <Button leadingIcon="settings" ariaLabel="Settings" onClick={() => log("Icon only")} />
+        </div>
+        {/* `chevron` is only the indicator. `ariaExpanded` is the disclosure
+            state a screen reader hears, and the two are independent props. */}
+        <div className="poodle-specimen__row">
+          <Button
+            chevron
+            ariaExpanded={sectionsOpen}
+            onClick={() => {
+              const next = !sectionsOpen;
+              setSectionsOpen(next);
+              log(`Sections ${next ? "expanded" : "collapsed"}`);
+            }}
+          >
+            Sections
+          </Button>
+          <span style={{ fontSize: "0.8125rem", color: "var(--poodle-color-text-secondary)" }}>
+            aria-expanded="{String(sectionsOpen)}"
+          </span>
         </div>
       </SpecimenGroup>
 

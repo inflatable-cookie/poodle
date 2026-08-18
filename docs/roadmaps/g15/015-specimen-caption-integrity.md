@@ -43,6 +43,9 @@ errors directly.
 - [ ] `svelte-check` over `packages/svelte/preview` reports zero errors.
 - [ ] The gate runs in `ci:web`; a reintroduced `title=` prop fails it.
 - [ ] No component public API, contract, or semantic change.
+- [ ] **Operator review of the changed pages in the live Svelte and React
+      previews before this card is called complete.** Unreviewed pages remain
+      an explicit PR item.
 
 ## Stop Conditions
 

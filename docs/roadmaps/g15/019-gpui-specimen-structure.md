@@ -46,6 +46,9 @@ runtime-owned; the evidence is not.
 - [ ] No native page renders uncaptioned examples.
 - [ ] `effigy check:gpui` and the headless native regression board pass.
 - [ ] No Jetstream selector run; no `*-windowed` selector run.
+- [ ] **Operator review of the changed native pages before this card is
+      called complete**, through the headless evidence this card produces.
+      Unreviewed pages remain an explicit PR item.
 
 ## Stop Conditions
 

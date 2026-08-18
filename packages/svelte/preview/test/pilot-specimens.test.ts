@@ -70,6 +70,23 @@ describe("g15.011 pilot specimens", () => {
     ).not.toBeNull();
   });
 
+  it("Button teaches aria-expanded as disclosure state, not the chevron", () => {
+    render(PilotSpecimenHarness, { props: { specimen: ButtonSpecimen } });
+    // The contract separates the visual chevron from `ariaExpanded`, the
+    // state a screen reader hears. A chevron alone is not disclosure evidence.
+    const disclosure = document.querySelector(
+      ".poodle-button[aria-expanded]",
+    ) as HTMLElement | null;
+    expect(disclosure).not.toBeNull();
+    expect(disclosure?.getAttribute("aria-expanded")).toBe("false");
+
+    const chevronOnly = [...document.querySelectorAll(".poodle-button")].filter(
+      (b) =>
+        b.querySelector('[class*="chevron"]') && !b.hasAttribute("aria-expanded"),
+    );
+    expect(chevronOnly.length).toBeGreaterThan(0);
+  });
+
   it("Button shows every tone the contract defines", () => {
     render(PilotSpecimenHarness, { props: { specimen: ButtonSpecimen } });
     const labels = [...document.querySelectorAll(".poodle-button")].map(

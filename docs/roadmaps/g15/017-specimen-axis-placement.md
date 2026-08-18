@@ -48,6 +48,9 @@ component actually takes the prop, and is absent where it does not.
 - [ ] Every advertised axis tab renders content.
 - [ ] Axis-tab presence matches prop eligibility for all 175 entries.
 - [ ] Svelte, React, and GPUI agree on which axes each page teaches.
+- [ ] **Operator review of the changed pages in the live Svelte and React
+      previews before this card is called complete.** Unreviewed pages remain
+      an explicit PR item.
 
 ## Stop Conditions
 

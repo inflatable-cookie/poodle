@@ -41,6 +41,9 @@ names one component while the content teaches another.
       captions across the catalogue.
 - [ ] No page's caption count differs between Svelte and React.
 - [ ] `ListCardCounter` and `MetaItem` pages name and teach themselves.
+- [ ] **Operator review of the changed pages in the live Svelte and React
+      previews before this card is called complete.** Unreviewed pages remain
+      an explicit PR item.
 
 ## Stop Conditions
 

@@ -7,6 +7,7 @@
   let intent = $state("save");
 
   let bookmarked = $state(false);
+  let sectionsOpen = $state(false);
 
   function log(label: string): void {
     clickLog = `Clicked: ${label}`;
@@ -46,6 +47,19 @@
       <Button trailingIcon="external-link" onClick={() => log("Trailing icon")}>Open</Button>
       <Button leadingIcon="filter" chevron onClick={() => log("Icon + chevron")}>Filter</Button>
       <Button leadingIcon="settings" ariaLabel="Settings" onClick={() => log("Icon only")} />
+    </div>
+    <!-- `chevron` is only the indicator. `ariaExpanded` is the disclosure
+         state a screen reader hears, and the two are independent props. -->
+    <div class="poodle-specimen__row">
+      <Button
+        chevron
+        ariaExpanded={sectionsOpen}
+        onClick={() => {
+          sectionsOpen = !sectionsOpen;
+          log(`Sections ${sectionsOpen ? "expanded" : "collapsed"}`);
+        }}
+      >Sections</Button>
+      <span class="poodle-specimen__note">aria-expanded="{sectionsOpen}"</span>
     </div>
   </SpecimenGroup>
 
@@ -112,6 +126,11 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  .poodle-specimen__note {
+    font-size: 0.8125rem;
+    color: var(--poodle-color-text-secondary);
   }
 
   .poodle-specimen__log {
