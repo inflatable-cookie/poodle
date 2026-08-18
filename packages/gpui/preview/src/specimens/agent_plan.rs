@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{AgentChatInput, AgentPlan, Eyebrow};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -89,23 +89,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "agent-plan",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            AgentPlan::from_spec(
-                AgentPlanSpec::new(PLAN)
-                    .with_status(AgentPlanStatus::Accepted)
-                    .with_size(size),
-                theme,
-            )
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            AgentPlan::from_spec(
-                AgentPlanSpec::new(PLAN)
-                    .with_status(AgentPlanStatus::Accepted)
-                    .with_density(density),
-                theme,
-            )
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                AgentPlan::from_spec(
+                    AgentPlanSpec::new(PLAN)
+                        .with_status(AgentPlanStatus::Accepted)
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                AgentPlan::from_spec(
+                    AgentPlanSpec::new(PLAN)
+                        .with_status(AgentPlanStatus::Accepted)
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
     )
 }

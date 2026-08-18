@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, Pagination};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -279,27 +279,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "pagination",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            Pagination::from_spec(
-                PaginationSpec::new()
-                    .with_current_page(3)
-                    .with_total_pages(10)
-                    .with_aria_label("Pagination"),
-                theme,
-            )
-            .size(size)
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            Pagination::from_spec(
-                PaginationSpec::new()
-                    .with_current_page(3)
-                    .with_total_pages(10)
-                    .with_aria_label("Pagination"),
-                theme,
-            )
-            .with_density(density)
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                Pagination::from_spec(
+                    PaginationSpec::new()
+                        .with_current_page(3)
+                        .with_total_pages(10)
+                        .with_aria_label("Pagination"),
+                    theme,
+                )
+                .size(size)
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                Pagination::from_spec(
+                    PaginationSpec::new()
+                        .with_current_page(3)
+                        .with_total_pages(10)
+                        .with_aria_label("Pagination"),
+                    theme,
+                )
+                .with_density(density)
+                .into_any_element()
+            }),
     )
 }

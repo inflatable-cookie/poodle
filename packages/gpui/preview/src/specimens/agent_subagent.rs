@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{AgentSubagent, Eyebrow};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -158,33 +158,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "agent-subagent",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            AgentSubagent::from_spec(
-                AgentSubagentSpec::new(item(
-                    "scout-size",
-                    AgentSubagentStatus::Completed,
-                    None,
-                    Some("Found the drift: three vectors were stale"),
-                ))
-                .with_size(size),
-                theme,
-            )
-            .with_instance_id(format!("size-{size:?}"))
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            AgentSubagent::from_spec(
-                AgentSubagentSpec::new(item(
-                    "scout-density",
-                    AgentSubagentStatus::Running,
-                    Some("Searching the parser crate for the drift"),
-                    None,
-                ))
-                .with_density(density),
-                theme,
-            )
-            .with_instance_id(format!("density-{density:?}"))
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                AgentSubagent::from_spec(
+                    AgentSubagentSpec::new(item(
+                        "scout-size",
+                        AgentSubagentStatus::Completed,
+                        None,
+                        Some("Found the drift: three vectors were stale"),
+                    ))
+                    .with_size(size),
+                    theme,
+                )
+                .with_instance_id(format!("size-{size:?}"))
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                AgentSubagent::from_spec(
+                    AgentSubagentSpec::new(item(
+                        "scout-density",
+                        AgentSubagentStatus::Running,
+                        Some("Searching the parser crate for the drift"),
+                        None,
+                    ))
+                    .with_density(density),
+                    theme,
+                )
+                .with_instance_id(format!("density-{density:?}"))
+                .into_any_element()
+            }),
     )
 }

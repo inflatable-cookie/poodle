@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Button, Eyebrow, Menu};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
@@ -226,29 +226,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "menu",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            let items = vec![
-                MenuEntry::new("cut", "Cut"),
-                MenuEntry::new("copy", "Copy"),
-                MenuEntry::new("paste", "Paste"),
-            ];
-            let spec = MenuSpec::new(items).with_open(true).with_aria_label("Menu");
-            Menu::from_spec(spec, theme)
-                .with_id(format!("specimen-size-{:?}", size))
-                .size(size)
-                .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            let items = vec![
-                MenuEntry::new("cut", "Cut"),
-                MenuEntry::new("copy", "Copy"),
-                MenuEntry::new("paste", "Paste"),
-            ];
-            let spec = MenuSpec::new(items).with_open(true).with_aria_label("Menu");
-            Menu::from_spec(spec, theme)
-                .with_id(format!("specimen-density-{:?}", density))
-                .with_density(density)
-                .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                let items = vec![
+                    MenuEntry::new("cut", "Cut"),
+                    MenuEntry::new("copy", "Copy"),
+                    MenuEntry::new("paste", "Paste"),
+                ];
+                let spec = MenuSpec::new(items).with_open(true).with_aria_label("Menu");
+                Menu::from_spec(spec, theme)
+                    .with_id(format!("specimen-size-{:?}", size))
+                    .size(size)
+                    .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                let items = vec![
+                    MenuEntry::new("cut", "Cut"),
+                    MenuEntry::new("copy", "Copy"),
+                    MenuEntry::new("paste", "Paste"),
+                ];
+                let spec = MenuSpec::new(items).with_open(true).with_aria_label("Menu");
+                Menu::from_spec(spec, theme)
+                    .with_id(format!("specimen-density-{:?}", density))
+                    .with_density(density)
+                    .into_any_element()
+            }),
     )
 }

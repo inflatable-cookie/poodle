@@ -1,15 +1,17 @@
 use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, Field, TextInput};
+use crate::specimens::specimen_axes::{density_key, size_key};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     ControlDensity, ControlSize, EyebrowSpec, FieldSpec, TextInputSpec, ValidationState,
 };
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-
-    div().flex().flex_col().gap(px(24.0)).max_w(px(384.0)) // 24rem
+    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(384.0)) // 24rem
         // --- Label + control (plain) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -201,35 +203,27 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
-        // --- Sizes (xs → xl) ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Sizes"), theme))
-                .child(size_row(theme, ControlSize::Xs, "field-size-xs", "XS"))
-                .child(size_row(theme, ControlSize::Sm, "field-size-sm", "SM"))
-                .child(size_row(theme, ControlSize::Md, "field-size-md", "MD"))
-                .child(size_row(theme, ControlSize::Lg, "field-size-lg", "LG"))
-                .child(size_row(theme, ControlSize::Xl, "field-size-xl", "XL")),
-        )
-        // --- Densities (compact / default / comfortable) ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Densities"), theme))
-                .child(density_row(theme, ControlDensity::Compact, "field-density-compact", "COMPACT"))
-                .child(density_row(theme, ControlDensity::Default, "field-density-default", "DEFAULT"))
-                .child(density_row(theme, ControlDensity::Comfortable, "field-density-comfortable", "COMFORTABLE")),
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "field",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| size_row(theme, size).into_any_element())
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                density_row(theme, density).into_any_element()
+            }),
+    )
 }
 
-fn size_row(
-    theme: &poodle_gpui::GpuiThemeProvider,
-    size: ControlSize,
-    id: &'static str,
-    label: &'static str,
-) -> Div {
+fn size_row(theme: &poodle_gpui::GpuiThemeProvider, size: ControlSize) -> Div {
+    let id = format!("field-size-{}", size_key(size));
+    let label = size_key(size).to_uppercase();
     div().flex().flex_col().gap(px(4.0)).child(
         Field::from_spec(
-            FieldSpec::new(id, "Display name")
+            FieldSpec::new(id.clone(), "Display name")
                 .with_description("This is how your name appears to other users.")
                 .with_size(size),
             theme,
@@ -245,15 +239,12 @@ fn size_row(
     )
 }
 
-fn density_row(
-    theme: &poodle_gpui::GpuiThemeProvider,
-    density: ControlDensity,
-    id: &'static str,
-    label: &'static str,
-) -> Div {
+fn density_row(theme: &poodle_gpui::GpuiThemeProvider, density: ControlDensity) -> Div {
+    let id = format!("field-density-{}", density_key(density));
+    let label = density_key(density).to_uppercase();
     div().flex().flex_col().gap(px(4.0)).child(
         Field::from_spec(
-            FieldSpec::new(id, "Display name")
+            FieldSpec::new(id.clone(), "Display name")
                 .with_description("This is how your name appears to other users.")
                 .with_density(density),
             theme,

@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{DateTimePicker, Eyebrow};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -126,21 +126,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "date-time-picker",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            let mut spec = DateTimePickerSpec::new();
-            spec.aria_label = Some("Date time picker".to_string());
-            DateTimePicker::from_spec(spec, theme)
-                .with_id(format!("specimen-size-{:?}", size))
-                .size(size)
-                .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            let mut spec = DateTimePickerSpec::new();
-            spec.aria_label = Some("Date time picker".to_string());
-            DateTimePicker::from_spec(spec, theme)
-                .with_id(format!("specimen-density-{:?}", density))
-                .with_density(density)
-                .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                let mut spec = DateTimePickerSpec::new();
+                spec.aria_label = Some("Date time picker".to_string());
+                DateTimePicker::from_spec(spec, theme)
+                    .with_id(format!("specimen-size-{:?}", size))
+                    .size(size)
+                    .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                let mut spec = DateTimePickerSpec::new();
+                spec.aria_label = Some("Date time picker".to_string());
+                DateTimePicker::from_spec(spec, theme)
+                    .with_id(format!("specimen-density-{:?}", density))
+                    .with_density(density)
+                    .into_any_element()
+            }),
     )
 }

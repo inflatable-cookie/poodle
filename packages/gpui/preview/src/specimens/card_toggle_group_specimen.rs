@@ -13,6 +13,9 @@ use crate::node_compat::Eyebrow;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 
+use crate::app_state::AppState;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use poodle_specs::{
     CardToggleGroupSpec, CardToggleOption, ControlDensity, ControlSize, EyebrowSpec,
 };
@@ -45,8 +48,9 @@ fn section(theme: &GpuiThemeProvider, label: &str, content: impl IntoElement) ->
         .child(content)
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -137,4 +141,31 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 row
             },
         ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "card-toggle-group",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                node_card_toggle_group(
+                    CardToggleGroupSpec::new(view_options())
+                        .with_values(vec!["grid".into()])
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                node_card_toggle_group(
+                    CardToggleGroupSpec::new(view_options())
+                        .with_values(vec!["grid".into()])
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

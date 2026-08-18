@@ -15,7 +15,7 @@ use crate::node_compat::Eyebrow;
 use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -237,17 +237,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "toggle-group",
         examples,
-        move |size, theme: &GpuiThemeProvider| {
-            let spec = ToggleGroupSpec::new(make_opts())
-                .with_default_value(vec!["grid".to_string()])
-                .with_size(size);
-            poodle_gpui_node_backend::to_gpui(&toggle_group(&spec, theme, None))
-        },
-        move |density, theme: &GpuiThemeProvider| {
-            let spec = ToggleGroupSpec::new(make_opts())
-                .with_default_value(vec!["grid".to_string()])
-                .with_density(density);
-            poodle_gpui_node_backend::to_gpui(&toggle_group(&spec, theme, None))
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(move |size, theme: &GpuiThemeProvider| {
+                let spec = ToggleGroupSpec::new(make_opts())
+                    .with_default_value(vec!["grid".to_string()])
+                    .with_size(size);
+                poodle_gpui_node_backend::to_gpui(&toggle_group(&spec, theme, None))
+            })
+            .with_densities(move |density, theme: &GpuiThemeProvider| {
+                let spec = ToggleGroupSpec::new(make_opts())
+                    .with_default_value(vec!["grid".to_string()])
+                    .with_density(density);
+                poodle_gpui_node_backend::to_gpui(&toggle_group(&spec, theme, None))
+            }),
     )
 }

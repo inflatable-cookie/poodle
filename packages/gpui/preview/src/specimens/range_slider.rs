@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, RangeSlider};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -263,7 +263,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Vertical — the same control on the other axis"),
+                    EyebrowSpec::new()
+                        .with_content("Vertical — the same control on the other axis"),
                     theme,
                 ))
                 .child(
@@ -315,42 +316,45 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "range-slider",
         examples,
-        // Sizes pane: one control per step. Three per step was an exhaustive
-        // matrix inside the tab that exists to keep matrices out of Examples.
-        |size, theme: &GpuiThemeProvider| {
-            let key = format!("range-slider-size-{size:?}");
-            let lo = state
-                .specimens
-                .text
-                .get(&format!("{key}-lo"))
-                .and_then(|value| value.parse().ok())
-                .unwrap_or(0.2);
-            let hi = state
-                .specimens
-                .text
-                .get(&format!("{key}-hi"))
-                .and_then(|value| value.parse().ok())
-                .unwrap_or(0.75);
-            RangeSlider::from_spec(
-                RangeSliderSpec::new(lo, hi)
-                    .with_bounds(0.0, 1.0)
-                    .with_step(0.01)
-                    .with_aria_label("Range"),
-                theme,
+        SpecimenAxes::examples_only()
+            .with_sizes(
+                // Sizes pane: one control per step. Three per step was an exhaustive
+                // matrix inside the tab that exists to keep matrices out of Examples.
+                |size, theme: &GpuiThemeProvider| {
+                    let key = format!("range-slider-size-{size:?}");
+                    let lo = state
+                        .specimens
+                        .text
+                        .get(&format!("{key}-lo"))
+                        .and_then(|value| value.parse().ok())
+                        .unwrap_or(0.2);
+                    let hi = state
+                        .specimens
+                        .text
+                        .get(&format!("{key}-hi"))
+                        .and_then(|value| value.parse().ok())
+                        .unwrap_or(0.75);
+                    RangeSlider::from_spec(
+                        RangeSliderSpec::new(lo, hi)
+                            .with_bounds(0.0, 1.0)
+                            .with_step(0.01)
+                            .with_aria_label("Range"),
+                        theme,
+                    )
+                    .size(size)
+                    .on_change(key.clone(), range_fraction_change(state, key))
+                    .into_any_element()
+                },
             )
-            .size(size)
-            .on_change(key.clone(), range_fraction_change(state, key))
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            RangeSlider::from_spec(
-                RangeSliderSpec::new(20.0, 80.0)
-                    .with_bounds(0.0, 100.0)
-                    .with_aria_label("Range"),
-                theme,
-            )
-            .density(density)
-            .into_any_element()
-        },
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                RangeSlider::from_spec(
+                    RangeSliderSpec::new(20.0, 80.0)
+                        .with_bounds(0.0, 100.0)
+                        .with_aria_label("Range"),
+                    theme,
+                )
+                .density(density)
+                .into_any_element()
+            }),
     )
 }

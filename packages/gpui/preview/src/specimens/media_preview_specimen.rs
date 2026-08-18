@@ -1,4 +1,8 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, IntoCompatNode, MediaPreview, Surface};
+use crate::specimens::specimen_axes::{density_key, size_key};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
@@ -7,8 +11,9 @@ use poodle_specs::{
     MediaPreviewSpec, MediaState, SurfaceSpec, SurfaceTone,
 };
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -127,39 +132,25 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_media_content(media_slot(theme, "Image placeholder")),
                 ),
         ))
-        // ── Size axis (eyebrow/title/body/meta scale) ──
-        .child(group(
-            "Sizes",
-            theme,
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(12.0))
-                .child(size_preview(theme, ControlSize::Xs, "xs"))
-                .child(size_preview(theme, ControlSize::Sm, "sm"))
-                .child(size_preview(theme, ControlSize::Md, "md"))
-                .child(size_preview(theme, ControlSize::Lg, "lg"))
-                .child(size_preview(theme, ControlSize::Xl, "xl")),
-        ))
-        // ── Density axis (header/section gaps) ──
-        .child(group(
-            "Densities",
-            theme,
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(12.0))
-                .child(density_preview(theme, ControlDensity::Compact, "compact"))
-                .child(density_preview(theme, ControlDensity::Default, "default"))
-                .child(density_preview(
-                    theme,
-                    ControlDensity::Comfortable,
-                    "comfortable",
-                )),
-        ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "media-preview",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                size_preview(theme, size).into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                density_preview(theme, density).into_any_element()
+            }),
+    )
 }
 
-fn size_preview(theme: &GpuiThemeProvider, size: ControlSize, label: &str) -> MediaPreview {
+fn size_preview(theme: &GpuiThemeProvider, size: ControlSize) -> MediaPreview {
+    let label = size_key(size);
     MediaPreview::from_spec(
         MediaPreviewSpec::new(MediaKind::Image, format!("Hero banner ({label})"))
             .with_eyebrow("Image")
@@ -172,11 +163,8 @@ fn size_preview(theme: &GpuiThemeProvider, size: ControlSize, label: &str) -> Me
     .with_media_content(media_slot(theme, "Image placeholder"))
 }
 
-fn density_preview(
-    theme: &GpuiThemeProvider,
-    density: ControlDensity,
-    label: &str,
-) -> MediaPreview {
+fn density_preview(theme: &GpuiThemeProvider, density: ControlDensity) -> MediaPreview {
+    let label = density_key(density);
     MediaPreview::from_spec(
         MediaPreviewSpec::new(MediaKind::Image, format!("Hero banner ({label})"))
             .with_eyebrow("Image")

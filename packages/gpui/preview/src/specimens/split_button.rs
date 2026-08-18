@@ -17,7 +17,7 @@ use crate::node_compat::Eyebrow;
 use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -318,36 +318,37 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "split-button",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            let node = split_button(
-                &SplitButtonSpec::new()
-                    .with_variant(ButtonVariant::Secondary)
-                    .with_size(size)
-                    .with_label("Action")
-                    .with_items(vec![
-                        SplitMenuItem::action("a", "Action A"),
-                        SplitMenuItem::action("b", "Action B"),
-                    ]),
-                theme,
-                SplitButtonHandlers::default(),
-            );
-            poodle_gpui_node_backend::to_gpui(&node)
-        },
-        |density, theme: &GpuiThemeProvider| {
-            let node = split_button(
-                &SplitButtonSpec::new()
-                    .with_variant(ButtonVariant::Secondary)
-                    .with_label("Action")
-                    .with_items(vec![
-                        SplitMenuItem::action("a", "Action A"),
-                        SplitMenuItem::action("b", "Action B"),
-                    ])
-                    .with_density(density),
-                theme,
-                SplitButtonHandlers::default(),
-            );
-            poodle_gpui_node_backend::to_gpui(&node)
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                let node = split_button(
+                    &SplitButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_size(size)
+                        .with_label("Action")
+                        .with_items(vec![
+                            SplitMenuItem::action("a", "Action A"),
+                            SplitMenuItem::action("b", "Action B"),
+                        ]),
+                    theme,
+                    SplitButtonHandlers::default(),
+                );
+                poodle_gpui_node_backend::to_gpui(&node)
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                let node = split_button(
+                    &SplitButtonSpec::new()
+                        .with_variant(ButtonVariant::Secondary)
+                        .with_label("Action")
+                        .with_items(vec![
+                            SplitMenuItem::action("a", "Action A"),
+                            SplitMenuItem::action("b", "Action B"),
+                        ])
+                        .with_density(density),
+                    theme,
+                    SplitButtonHandlers::default(),
+                );
+                poodle_gpui_node_backend::to_gpui(&node)
+            }),
     )
 }
 

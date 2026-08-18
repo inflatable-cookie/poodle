@@ -1,4 +1,8 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Button, DetailItem, DetailSection, Eyebrow, IntoCompatNode};
+use crate::specimens::specimen_axes::density_key;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
@@ -15,8 +19,9 @@ fn node_column(children: Vec<Node>) -> Node {
     children.into_iter().fold(node, Node::child)
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -193,30 +198,17 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     ])),
                 ),
         )
-        // --- Density variants ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Density variants"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(16.0))
-                        .child(density_demo("Compact", ControlDensity::Compact, theme))
-                        .child(density_demo("Default", ControlDensity::Default, theme))
-                        .child(density_demo(
-                            "Comfortable",
-                            ControlDensity::Comfortable,
-                            theme,
-                        )),
-                ),
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "detail-section",
+        examples,
+        SpecimenAxes::examples_only().with_densities(|density, theme: &GpuiThemeProvider| {
+            density_demo(density, theme).into_any_element()
+        }),
+    )
 }
 
 /// A stacked detail row sized for a two-column wrapping body. The relative
@@ -238,7 +230,8 @@ fn col_item(label: &str, value: &str, theme: &GpuiThemeProvider) -> Node {
     )
 }
 
-fn density_demo(label: &str, density: ControlDensity, theme: &GpuiThemeProvider) -> Div {
+fn density_demo(density: ControlDensity, theme: &GpuiThemeProvider) -> Div {
+    let label = density_key(density);
     let muted = theme.resolve_color("color.text.muted");
     div()
         .flex()

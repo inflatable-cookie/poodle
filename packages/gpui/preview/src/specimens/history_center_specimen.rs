@@ -9,14 +9,19 @@
 use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::Eyebrow;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::history_center::{
     history_center_visible_rows, HistoryCenterOpenFork, HistoryContinuation, HistoryEntry,
     HistoryEntryPosition, HistoryPathPage,
 };
-use poodle_render::{history_center, HistoryCenterHandlers, HistoryCenterRename, HistoryCenterView};
-use poodle_specs::HistoryCenterSpec;
+use poodle_render::{
+    history_center, HistoryCenterHandlers, HistoryCenterRename, HistoryCenterView,
+};
+use poodle_specs::{EyebrowSpec, HistoryCenterSpec};
 
 const ANCHOR: &str = "e2";
 
@@ -31,13 +36,7 @@ fn pages() -> Vec<HistoryPathPage> {
     vec![HistoryPathPage::new(vec![
         entry("e3", "Raise gain", HistoryEntryPosition::Future, 0),
         entry("e2", "Trim tail", HistoryEntryPosition::Current, 3),
-        entry(
-            "e1",
-            "Import stems",
-            HistoryEntryPosition::Past,
-            1,
-        )
-        .with_checkpoint(true),
+        entry("e1", "Import stems", HistoryEntryPosition::Past, 1).with_checkpoint(true),
     ])]
 }
 
@@ -69,7 +68,7 @@ fn run_pages(fork: &str) -> Vec<HistoryPathPage> {
     }
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let is_open = state.specimens.is_on("history-center-open");
     let is_disclosed = state.specimens.is_on("history-center-disclosed");
     let is_select_open = state.specimens.is_on("history-center-select-open");
@@ -117,8 +116,10 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             .collect(),
         open_select_anchor: is_select_open.then(|| ANCHOR.to_owned()),
         open_actions_anchor: is_actions_open.then(|| ANCHOR.to_owned()),
-        rename: state.specimens.is_on("history-center-renaming").then(|| {
-            HistoryCenterRename {
+        rename: state
+            .specimens
+            .is_on("history-center-renaming")
+            .then(|| HistoryCenterRename {
                 anchor_entry_id: ANCHOR.to_owned(),
                 branch_id: "branch-wide".to_owned(),
                 value: state
@@ -127,8 +128,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .get("history-center-rename")
                     .cloned()
                     .unwrap_or_else(|| "Wide mix".into()),
-            }
-        }),
+            }),
         ..HistoryCenterView::default()
     };
 
@@ -195,7 +195,11 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             });
         })),
         on_actions_toggle: Some(Arc::new(move |_anchor| {
-            toggle(&actions_queue, "history-center-actions-open", !is_actions_open);
+            toggle(
+                &actions_queue,
+                "history-center-actions-open",
+                !is_actions_open,
+            );
         })),
         on_checkout: Some(Arc::new(move |_anchor| {
             let mut events = checkout_queue.lock().unwrap();
@@ -233,18 +237,55 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         ..HistoryCenterHandlers::default()
     };
 
-    let center = poodle_gpui_node_backend::to_gpui(&history_center(
-        &spec,
-        &state.theme,
-        &view,
-        &handlers,
-    ));
-
-    div()
+    let center =
+        poodle_gpui_node_backend::to_gpui(&history_center(&spec, &state.theme, &view, &handlers));
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(12.0))
         .min_h(px(560.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new()
+                .with_content("Undo path with a branch fork, rename, and continuation picker"),
+            &state.theme,
+        ))
         .child(center)
         .child(format!("Last command: {last_command}"))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "history-center",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                poodle_gpui_node_backend::to_gpui(&history_center(
+                    &HistoryCenterSpec::new()
+                        .with_can_undo(true)
+                        .with_can_redo(true)
+                        .with_size(size),
+                    theme,
+                    &HistoryCenterView {
+                        rows: history_center_visible_rows(Some(&pages()), &[]),
+                        ..HistoryCenterView::default()
+                    },
+                    &HistoryCenterHandlers::default(),
+                ))
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                poodle_gpui_node_backend::to_gpui(&history_center(
+                    &HistoryCenterSpec::new()
+                        .with_can_undo(true)
+                        .with_can_redo(true)
+                        .with_density(density),
+                    theme,
+                    &HistoryCenterView {
+                        rows: history_center_visible_rows(Some(&pages()), &[]),
+                        ..HistoryCenterView::default()
+                    },
+                    &HistoryCenterHandlers::default(),
+                ))
+            }),
+    )
 }

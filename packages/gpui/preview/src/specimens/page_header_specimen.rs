@@ -1,4 +1,7 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Breadcrumbs, Button, Eyebrow, IntoCompatNode, PageHeader, Pill};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
@@ -62,8 +65,9 @@ fn meta(theme: &GpuiThemeProvider) -> Node {
     row.child(last.child(last_label).child(last_value))
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -242,4 +246,33 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )),
                 ),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "page-header",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                PageHeader::from_spec(
+                    PageHeaderSpec::new("Media Library")
+                        .with_subtitle("Browse, review, and manage uploaded files.")
+                        .with_back("/dashboard", "Dashboard")
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                PageHeader::from_spec(
+                    PageHeaderSpec::new("Media Library")
+                        .with_subtitle("Browse, review, and manage uploaded files.")
+                        .with_back("/dashboard", "Dashboard")
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

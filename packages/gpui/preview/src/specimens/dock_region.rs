@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{DockRegion, Eyebrow};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
@@ -140,12 +140,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "Flexible dock — collapsed icon-strip (left edge)",
             theme,
-            div()
-                .h(px(100.0))
-                .flex()
-                .child(DockRegion::from_spec(collapsed, theme)
+            div().h(px(100.0)).flex().child(
+                DockRegion::from_spec(collapsed, theme)
                     .with_instance_id("collapsed")
-                    .with_content(Node::container())),
+                    .with_content(Node::container()),
+            ),
         ))
         .child(group(
             "Interactive collapse toggle",
@@ -196,33 +195,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "dock-region",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            let label = format!("{size:?}").to_lowercase();
-            DockRegion::from_spec(
-                DockRegionSpec::new(
-                    DockEdge::Left,
-                    vec![PanelTabItem::new(format!("files-{label}"), "Files").with_icon("folder")],
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                let label = format!("{size:?}").to_lowercase();
+                DockRegion::from_spec(
+                    DockRegionSpec::new(
+                        DockEdge::Left,
+                        vec![PanelTabItem::new(format!("files-{label}"), "Files")
+                            .with_icon("folder")],
+                    )
+                    .with_size(size)
+                    .with_value(format!("files-{label}")),
+                    theme,
                 )
-                .with_size(size)
-                .with_value(format!("files-{label}")),
-                theme,
-            )
-            .with_content(panel_body("Panel content.", text_secondary))
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            let label = format!("{density:?}").to_lowercase();
-            DockRegion::from_spec(
-                DockRegionSpec::new(
-                    DockEdge::Left,
-                    vec![PanelTabItem::new(format!("files-{label}"), "Files").with_icon("folder")],
+                .with_content(panel_body("Panel content.", text_secondary))
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                let label = format!("{density:?}").to_lowercase();
+                DockRegion::from_spec(
+                    DockRegionSpec::new(
+                        DockEdge::Left,
+                        vec![PanelTabItem::new(format!("files-{label}"), "Files")
+                            .with_icon("folder")],
+                    )
+                    .with_density(density)
+                    .with_value(format!("files-{label}")),
+                    theme,
                 )
-                .with_density(density)
-                .with_value(format!("files-{label}")),
-                theme,
-            )
-            .with_content(panel_body("Panel content.", text_secondary))
-            .into_any_element()
-        },
+                .with_content(panel_body("Panel content.", text_secondary))
+                .into_any_element()
+            }),
     )
 }

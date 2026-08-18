@@ -13,7 +13,7 @@
 
 use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, TokenInput};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -124,26 +124,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "token-input",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            TokenInput::from_spec(
-                TokenInputSpec::new()
-                    .with_values(vec!["alpha".into(), "beta".into()])
-                    .with_size(size)
-                    .with_placeholder(size_label(size)),
-                theme,
-            )
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            TokenInput::from_spec(
-                TokenInputSpec::new()
-                    .with_values(vec!["audit".into(), "reporting".into()])
-                    .with_density(density)
-                    .with_placeholder("Type a tag..."),
-                theme,
-            )
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                TokenInput::from_spec(
+                    TokenInputSpec::new()
+                        .with_values(vec!["alpha".into(), "beta".into()])
+                        .with_size(size)
+                        .with_placeholder(size_label(size)),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                TokenInput::from_spec(
+                    TokenInputSpec::new()
+                        .with_values(vec!["audit".into(), "reporting".into()])
+                        .with_density(density)
+                        .with_placeholder("Type a tag..."),
+                    theme,
+                )
+                .into_any_element()
+            }),
     )
 }
 

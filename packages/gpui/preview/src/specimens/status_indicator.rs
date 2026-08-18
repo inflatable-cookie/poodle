@@ -2,9 +2,13 @@ use crate::node_compat::{Eyebrow, StatusIndicator};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 
+use crate::app_state::AppState;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use poodle_specs::{EyebrowSpec, InlineTypographyMode, StatusIndicatorSpec, StatusTone};
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     // --- All statuses ---
     let mut neutral = StatusIndicatorSpec::new().with_status(StatusTone::Neutral);
     neutral.label = Some("Neutral".to_string());
@@ -40,8 +44,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     // --- Slot content ---
     let mut build = StatusIndicatorSpec::new().with_status(StatusTone::Success);
     build.label = Some("Build passing".to_string());
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -128,4 +131,33 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 ))
                 .child(StatusIndicator::from_spec(build, theme)),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "status-indicator",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                StatusIndicator::from_spec(
+                    StatusIndicatorSpec::new()
+                        .with_status(StatusTone::Success)
+                        .with_label("Success")
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                StatusIndicator::from_spec(
+                    StatusIndicatorSpec::new()
+                        .with_status(StatusTone::Success)
+                        .with_label("Success")
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

@@ -1,4 +1,7 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, LogList};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::EyebrowSpec;
@@ -6,7 +9,8 @@ use poodle_specs::{
     AuditLogEntry, LogActor, LogEntry, LogFilter, LogLevel, LogListSpec, StreamLogEntry,
 };
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     // The contract's level set is info | warn | error; the old GPUI tier's extra
     // `Debug` level had no contract or Svelte counterpart.
     let stream = |ts: &str, level: LogLevel, message: &str| {
@@ -69,8 +73,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             ),
         ]
     };
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -185,4 +188,33 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 )),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "log-list",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                LogList::from_spec(
+                    LogListSpec::new()
+                        .with_entries(sample_entries())
+                        .with_auto_scroll(true)
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                LogList::from_spec(
+                    LogListSpec::new()
+                        .with_entries(sample_entries())
+                        .with_auto_scroll(true)
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

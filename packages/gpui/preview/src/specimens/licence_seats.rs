@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::app_state::{AppState, LicenceSeatsEvent, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, LicenceSeats};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -13,7 +14,10 @@ fn group(theme: &GpuiThemeProvider, label: &str, specimen: impl IntoElement) -> 
         .flex()
         .flex_col()
         .gap(px(8.0))
-        .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(label), theme))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(label),
+            theme,
+        ))
         .child(specimen)
 }
 
@@ -42,11 +46,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     .on_rename_edit({
         let queue = Arc::clone(&queue);
         Arc::new(move |machine_id: &str| {
-            queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
-                LicenceSeatsEvent::Edit {
+            queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::LicenceSeats(LicenceSeatsEvent::Edit {
                     machine_id: machine_id.to_string(),
-                },
-            ));
+                }));
         })
     })
     .on_rename({
@@ -83,10 +88,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     .on_release_cancel({
         let queue = Arc::clone(&queue);
         Arc::new(move |_machine_id: &str| {
-            queue
-                .lock()
-                .unwrap()
-                .push(NodeSpecimenEvent::LicenceSeats(LicenceSeatsEvent::ReleaseCancel));
+            queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
+                LicenceSeatsEvent::ReleaseCancel,
+            ));
         })
     });
 
@@ -101,36 +105,25 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         seat("cmd-41ee80d2", Some("Tour laptop"), false),
         seat("cmd-77c1a5be", None, false),
     ];
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
         .max_w(px(420.0))
-        .child(group(
-            theme,
-            "Mixed labels",
-            mixed,
-        ))
+        .child(group(theme, "Mixed labels", mixed))
         // Two unnamed rows look alike, and stay that way. Inventing a
         // hostname to tell them apart would be claiming identity Poodle was
         // never given.
         .child(group(
             theme,
             "Unnamed machines",
-            LicenceSeats::from_spec(
-                LicenceSeatsSpec::new().with_seats(unnamed),
-                theme,
-            ),
+            LicenceSeats::from_spec(LicenceSeatsSpec::new().with_seats(unnamed), theme),
         ))
         // This machine only: a marker, and no release action anywhere.
         .child(group(
             theme,
             "This machine only",
-            LicenceSeats::from_spec(
-                LicenceSeatsSpec::new().with_seats(single),
-                theme,
-            ),
+            LicenceSeats::from_spec(LicenceSeatsSpec::new().with_seats(single), theme),
         ))
         .child(group(
             theme,
@@ -162,4 +155,37 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "Empty authority",
             LicenceSeats::from_spec(LicenceSeatsSpec::new(), theme),
         ))
-        }
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "licence-seats",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                LicenceSeats::from_spec(
+                    LicenceSeatsSpec::new()
+                        .with_seats(vec![
+                            seat("machine-a", Some("Studio desktop"), true),
+                            seat("machine-b", Some("Laptop"), false),
+                        ])
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                LicenceSeats::from_spec(
+                    LicenceSeatsSpec::new()
+                        .with_seats(vec![
+                            seat("machine-a", Some("Studio desktop"), true),
+                            seat("machine-b", Some("Laptop"), false),
+                        ])
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
+}

@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, Tabs};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
@@ -721,29 +721,31 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "tabs",
         examples,
-        move |size, theme: &GpuiThemeProvider| {
-            let spec = TabsSpec::new(axis_items())
-                .with_variant(TabVariant::Card)
-                .with_size(size)
-                .with_value("details")
-                .with_aria_label(format!("{size:?} tabs"));
-            div()
-                .max_w(px(360.0))
-                .child(Tabs::from_spec(spec, theme).with_id(format!("specimen-size-{size:?}")))
-                .into_any_element()
-        },
-        move |density, theme: &GpuiThemeProvider| {
-            let spec = TabsSpec::new(axis_items())
-                .with_variant(TabVariant::Card)
-                .with_density(density)
-                .with_value("details")
-                .with_aria_label(format!("{density:?} tabs"));
-            div()
-                .max_w(px(360.0))
-                .child(
-                    Tabs::from_spec(spec, theme).with_id(format!("specimen-density-{density:?}")),
-                )
-                .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(move |size, theme: &GpuiThemeProvider| {
+                let spec = TabsSpec::new(axis_items())
+                    .with_variant(TabVariant::Card)
+                    .with_size(size)
+                    .with_value("details")
+                    .with_aria_label(format!("{size:?} tabs"));
+                div()
+                    .max_w(px(360.0))
+                    .child(Tabs::from_spec(spec, theme).with_id(format!("specimen-size-{size:?}")))
+                    .into_any_element()
+            })
+            .with_densities(move |density, theme: &GpuiThemeProvider| {
+                let spec = TabsSpec::new(axis_items())
+                    .with_variant(TabVariant::Card)
+                    .with_density(density)
+                    .with_value("details")
+                    .with_aria_label(format!("{density:?} tabs"));
+                div()
+                    .max_w(px(360.0))
+                    .child(
+                        Tabs::from_spec(spec, theme)
+                            .with_id(format!("specimen-density-{density:?}")),
+                    )
+                    .into_any_element()
+            }),
     )
 }

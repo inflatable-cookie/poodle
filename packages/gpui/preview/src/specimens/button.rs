@@ -14,7 +14,7 @@ use crate::node_compat::Eyebrow;
 use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
@@ -96,7 +96,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let examples = div()
         .flex()
         .flex_col()
-        .gap(px(24.0))        // --- A normal action row ---
+        .gap(px(24.0)) // --- A normal action row ---
         .child(
             div()
                 .flex()
@@ -135,7 +135,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Variants — how much weight the action carries"),
+                    EyebrowSpec::new()
+                        .with_content("Variants — how much weight the action carries"),
                     theme,
                 ))
                 .child(
@@ -287,8 +288,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new()
-                        .with_content("States — unavailable, working, and held down"),
+                    EyebrowSpec::new().with_content("States — unavailable, working, and held down"),
                     theme,
                 ))
                 .child(
@@ -380,25 +380,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "button",
         examples,
-        // Sizes pane: one button per size.
-        |size, theme: &GpuiThemeProvider| {
-            node_button_static(
-                ButtonSpec::new()
-                    .with_variant(ButtonVariant::Primary)
-                    .with_size(size)
-                    .with_label("Enabled"),
-                theme,
+        SpecimenAxes::examples_only()
+            .with_sizes(
+                // Sizes pane: one button per size.
+                |size, theme: &GpuiThemeProvider| {
+                    node_button_static(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Primary)
+                            .with_size(size)
+                            .with_label("Enabled"),
+                        theme,
+                    )
+                },
             )
-        },
-        // Densities pane: one button per density.
-        |density, theme: &GpuiThemeProvider| {
-            node_button_static(
-                ButtonSpec::new()
-                    .with_variant(ButtonVariant::Primary)
-                    .with_label("Toggle")
-                    .with_density(density),
-                theme,
-            )
-        },
+            .with_densities(
+                // Densities pane: one button per density.
+                |density, theme: &GpuiThemeProvider| {
+                    node_button_static(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Primary)
+                            .with_label("Toggle")
+                            .with_density(density),
+                        theme,
+                    )
+                },
+            ),
     )
 }

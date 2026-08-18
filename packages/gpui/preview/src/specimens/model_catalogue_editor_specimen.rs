@@ -5,9 +5,7 @@ use crate::node_compat::{Eyebrow, ModelCatalogueEditor};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_headless::model_connection::{
-    ModelCatalogueState, ModelCatalogueVisibilityChange,
-};
+use poodle_headless::model_connection::{ModelCatalogueState, ModelCatalogueVisibilityChange};
 use poodle_node::Node;
 use poodle_specs::{ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec, ModelCatalogueEditorSpec};
 
@@ -199,7 +197,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Loading",
-            panel(posture(theme, ModelCatalogueState::Loading, "catalogue-loading")),
+            panel(posture(
+                theme,
+                ModelCatalogueState::Loading,
+                "catalogue-loading",
+            )),
         ))
         .child(group(
             theme,
@@ -213,12 +215,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Empty",
-            panel(posture(theme, ModelCatalogueState::Empty, "catalogue-empty")),
+            panel(posture(
+                theme,
+                ModelCatalogueState::Empty,
+                "catalogue-empty",
+            )),
         ))
         .child(group(
             theme,
             "Error",
-            panel(posture(theme, ModelCatalogueState::Error, "catalogue-error")),
+            panel(posture(
+                theme,
+                ModelCatalogueState::Error,
+                "catalogue-error",
+            )),
         ))
         .child(group(
             theme,
@@ -232,23 +242,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Pending mutation lock",
-            panel(ModelCatalogueEditor::from_spec(
-                ModelCatalogueEditorSpec::new()
-                    .with_items(state.model_connection.catalogue_items.clone())
-                    .with_pending(true),
-                theme,
-            )
-            .with_instance_id("catalogue-pending")),
+            panel(
+                ModelCatalogueEditor::from_spec(
+                    ModelCatalogueEditorSpec::new()
+                        .with_items(state.model_connection.catalogue_items.clone())
+                        .with_pending(true),
+                    theme,
+                )
+                .with_instance_id("catalogue-pending"),
+            ),
         ))
         .child(group(
             theme,
             "Drag disabled (keyboard and buttons remain)",
-            panel(ModelCatalogueEditor::from_spec(
-                ModelCatalogueEditorSpec::new()
-                    .with_items(state.model_connection.catalogue_items.clone())
-                    .with_drag_enabled(false),
-                theme,
-            )
-            .with_instance_id("catalogue-no-drag")),
+            panel(
+                ModelCatalogueEditor::from_spec(
+                    ModelCatalogueEditorSpec::new()
+                        .with_items(state.model_connection.catalogue_items.clone())
+                        .with_drag_enabled(false),
+                    theme,
+                )
+                .with_instance_id("catalogue-no-drag"),
+            ),
         ))
 }

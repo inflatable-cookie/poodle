@@ -1,5 +1,7 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Button, Dialog, Eyebrow, IntoCompatNode, Pill};
+use crate::specimens::specimen_axes::{density_key, size_key};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
@@ -13,23 +15,28 @@ use std::sync::Arc;
 
 fn set_toggle_click(
     state: &AppState,
-    key: &'static str,
+    key: impl Into<String>,
     value: bool,
 ) -> Arc<dyn Fn() + Send + Sync> {
     let events = state.node_events.clone();
+    let key = key.into();
     Arc::new(move || {
         events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
-            key: key.to_string(),
+            key: key.clone(),
             value,
         });
     })
 }
 
-fn set_toggle_open_change(state: &AppState, key: &'static str) -> Arc<dyn Fn(bool) + Send + Sync> {
+fn set_toggle_open_change(
+    state: &AppState,
+    key: impl Into<String>,
+) -> Arc<dyn Fn(bool) + Send + Sync> {
     let events = state.node_events.clone();
+    let key = key.into();
     Arc::new(move |value| {
         events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
-            key: key.to_string(),
+            key: key.clone(),
             value,
         });
     })
@@ -78,7 +85,7 @@ fn button(
         .into_compat_node()
 }
 
-fn close_button(theme: &GpuiThemeProvider, state: &AppState, key: &'static str) -> Node {
+fn close_button(theme: &GpuiThemeProvider, state: &AppState, key: &str) -> Node {
     button(
         theme,
         ButtonSpec::new()
@@ -89,7 +96,7 @@ fn close_button(theme: &GpuiThemeProvider, state: &AppState, key: &'static str) 
     )
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = "color.text.secondary";
     let accent = "color.accent.base";
@@ -563,6 +570,80 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             ])),
         );
     }
+    let examples = root.into_any_element();
 
-    root
+    specimen_layout(
+        state,
+        cx,
+        "dialog",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                let open_key = format!("dialog-axis-size-{}", size_key(size));
+                let mut row = div().flex().flex_col().gap(px(8.0)).child(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Secondary)
+                            .with_label(format!("Open {} dialog", size_key(size))),
+                        theme,
+                    )
+                    .with_id(format!("dialog-axis-size-{}-trigger", size_key(size)))
+                    .on_click(set_toggle_click(state, open_key.clone(), true)),
+                );
+                if state.specimens.is_on(&open_key) {
+                    row = row.child(
+                        Dialog::from_spec(
+                            DialogSpec::new()
+                                .with_title(format!("size: {}", size_key(size)))
+                                .with_show_close_button(true)
+                                .with_size(size),
+                            theme,
+                        )
+                        .on_open_change(set_toggle_open_change(state, open_key.clone()))
+                        .with_content(text(
+                            theme,
+                            "Command palette, save, and toggle comment live here.",
+                            13.0,
+                            "color.text.secondary",
+                        )),
+                    );
+                }
+                row.into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                let open_key = format!("dialog-axis-density-{}", density_key(density));
+                let mut row = div().flex().flex_col().gap(px(8.0)).child(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Secondary)
+                            .with_label(format!("Open {} dialog", density_key(density))),
+                        theme,
+                    )
+                    .with_id(format!(
+                        "dialog-axis-density-{}-trigger",
+                        density_key(density)
+                    ))
+                    .on_click(set_toggle_click(state, open_key.clone(), true)),
+                );
+                if state.specimens.is_on(&open_key) {
+                    row = row.child(
+                        Dialog::from_spec(
+                            DialogSpec::new()
+                                .with_title(format!("density: {}", density_key(density)))
+                                .with_show_close_button(true)
+                                .with_density(density),
+                            theme,
+                        )
+                        .on_open_change(set_toggle_open_change(state, open_key.clone()))
+                        .with_content(text(
+                            theme,
+                            "Command palette, save, and toggle comment live here.",
+                            13.0,
+                            "color.text.secondary",
+                        )),
+                    );
+                }
+                row.into_any_element()
+            }),
+    )
 }

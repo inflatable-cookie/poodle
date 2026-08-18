@@ -1,7 +1,10 @@
+use crate::app_state::AppState;
 use crate::node_compat::{EditableList, Eyebrow};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec};
+use poodle_specs::EyebrowSpec;
 
 fn group(title: &str, theme: &GpuiThemeProvider, body: EditableList) -> Div {
     div()
@@ -15,8 +18,9 @@ fn group(title: &str, theme: &GpuiThemeProvider, body: EditableList) -> Div {
         .child(body)
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -168,25 +172,22 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .editable(true)
                 .disabled(true),
         ))
-        // --- Sizes (xs → xl) ---
-        .child(sizes_section(theme))
-        // --- Densities (compact / default / comfortable) ---
-        .child(densities_section(theme))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "editable-list",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                sample_list(theme).with_size(size).into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                sample_list(theme).with_density(density).into_any_element()
+            }),
+    )
 }
-
-const SIZES: &[(ControlSize, &str)] = &[
-    (ControlSize::Xs, "xs"),
-    (ControlSize::Sm, "sm"),
-    (ControlSize::Md, "md"),
-    (ControlSize::Lg, "lg"),
-    (ControlSize::Xl, "xl"),
-];
-
-const DENSITIES: &[(ControlDensity, &str)] = &[
-    (ControlDensity::Compact, "compact"),
-    (ControlDensity::Default, "default"),
-    (ControlDensity::Comfortable, "comfortable"),
-];
 
 fn sample_list(theme: &GpuiThemeProvider) -> EditableList {
     EditableList::new(theme)
@@ -200,34 +201,4 @@ fn sample_list(theme: &GpuiThemeProvider) -> EditableList {
         ])
         .editable(true)
         .reorderable(true)
-}
-
-fn sizes_section(theme: &GpuiThemeProvider) -> Div {
-    let mut col = div()
-        .flex()
-        .flex_col()
-        .gap(px(12.0))
-        .child(Eyebrow::from_spec(
-            EyebrowSpec::new().with_content("Sizes"),
-            theme,
-        ));
-    for (size, _label) in SIZES {
-        col = col.child(sample_list(theme).with_size(*size));
-    }
-    col
-}
-
-fn densities_section(theme: &GpuiThemeProvider) -> Div {
-    let mut col = div()
-        .flex()
-        .flex_col()
-        .gap(px(12.0))
-        .child(Eyebrow::from_spec(
-            EyebrowSpec::new().with_content("Densities"),
-            theme,
-        ));
-    for (density, _label) in DENSITIES {
-        col = col.child(sample_list(theme).with_density(*density));
-    }
-    col
 }

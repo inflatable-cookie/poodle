@@ -4,10 +4,12 @@ use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{
     ContextMenu, Eyebrow, Icon, IntoCompatNode, ListCard, ListCardCounter, Pill, StatusIndicator,
 };
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
 use poodle_specs::{
     ContextMenuSpec, EyebrowSpec, IconSize, IconSpec, InlineTypographyMode, LeadingFill,
@@ -43,15 +45,14 @@ fn context_menu_select(state: &AppState) -> Arc<dyn Fn(&str) + Send + Sync> {
     })
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
     let text_muted = theme.resolve_color("color.text.muted");
     let footer_counter_gap = theme.resolve_space("space.inline.md");
 
     let last_clicked = state.specimens.text.get("list-card-clicked").cloned();
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -1214,4 +1215,43 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     ),
                 ),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "list-card",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                ListCard::from_spec(
+                    ListCardSpec::new()
+                        .with_title("Workspace settings")
+                        .with_subtitle("Shared defaults and access controls")
+                        .with_interactive(true)
+                        .with_size(size),
+                    theme,
+                )
+                .with_leading(Icon::from_spec(
+                    IconSpec::new("folder").with_size(IconSize::Sm),
+                    theme,
+                ))
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                ListCard::from_spec(
+                    ListCardSpec::new()
+                        .with_title("Workspace settings")
+                        .with_subtitle("Shared defaults and access controls")
+                        .with_interactive(true)
+                        .with_density(density),
+                    theme,
+                )
+                .with_leading(Icon::from_spec(
+                    IconSpec::new("folder").with_size(IconSize::Sm),
+                    theme,
+                ))
+                .into_any_element()
+            }),
+    )
 }

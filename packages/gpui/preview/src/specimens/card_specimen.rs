@@ -4,7 +4,11 @@
 //! GPUI node backend. The specimen keeps only its outer gallery layout in
 //! direct GPUI elements.
 
+use crate::app_state::AppState;
 use crate::node_compat::Eyebrow;
+use crate::specimens::specimen_axes::density_key;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
@@ -85,7 +89,8 @@ fn media_block(width: Option<f32>, height: f32, color: ColorValue) -> Node {
     node
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let primary = theme.resolve_color("color.text.primary");
     let secondary = theme.resolve_color("color.text.secondary");
     let accent = theme.resolve_color("color.accent.base");
@@ -93,8 +98,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let title = |content: &str| text(content, 16.0, primary, Some(600));
     let body = |content: &str| text(content, 14.0, secondary, None);
     let meta = |content: &str| text(content, 12.0, secondary, None);
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -230,38 +234,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         ))
         .child(group(
             theme,
-            "Density variants",
-            div()
-                .flex()
-                .gap(px(16.0))
-                .flex_wrap()
-                .child(density_card(
-                    theme,
-                    ControlDensity::Compact,
-                    "Compact",
-                    "card-compact",
-                    primary,
-                    secondary,
-                ))
-                .child(density_card(
-                    theme,
-                    ControlDensity::Default,
-                    "Default",
-                    "card-default-density",
-                    primary,
-                    secondary,
-                ))
-                .child(density_card(
-                    theme,
-                    ControlDensity::Comfortable,
-                    "Comfortable",
-                    "card-comfortable",
-                    primary,
-                    secondary,
-                )),
-        ))
-        .child(group(
-            theme,
             "Compact layout",
             div().w(px(280.0)).child(node_card(
                 "card-compact-layout",
@@ -275,18 +247,26 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 None,
             )),
         ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "card",
+        examples,
+        SpecimenAxes::examples_only().with_densities(|density, theme: &GpuiThemeProvider| {
+            density_card(theme, density).into_any_element()
+        }),
+    )
 }
 
-fn density_card(
-    theme: &GpuiThemeProvider,
-    density: ControlDensity,
-    label: &str,
-    id: &str,
-    primary: ColorValue,
-    secondary: ColorValue,
-) -> Div {
+fn density_card(theme: &GpuiThemeProvider, density: ControlDensity) -> Div {
+    let label = density_key(density);
+    let primary = theme.resolve_color("color.text.primary");
+    let secondary = theme.resolve_color("color.text.secondary");
+    let id = format!("card-density-{label}");
     div().w(px(240.0)).child(node_card(
-        id,
+        &id,
         CardSpec::new()
             .with_density(density)
             .with_aria_label(format!("{label} density card")),

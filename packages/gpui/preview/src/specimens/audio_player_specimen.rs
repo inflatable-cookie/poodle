@@ -1,13 +1,16 @@
+use crate::app_state::AppState;
 use crate::node_compat::{AudioPlayer, Eyebrow};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::AudioPlayerSpec;
-use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
+use poodle_specs::{EyebrowSpec, SemanticControlSizeRole};
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let src = "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3";
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -86,88 +89,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .with_rate(1.5),
                 )),
         ))
-        // Sizes — every size variant scales button/icon/time/volume.
-        .child(group(
-            theme,
-            "Sizes",
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(12.0))
-                .child(player(
-                    theme,
-                    AudioPlayerSpec::new(src)
-                        .with_duration(184.0)
-                        .with_current_time(60.0)
-                        .with_show_speed_control(true)
-                        .with_size(ControlSize::Xs),
-                ))
-                .child(player(
-                    theme,
-                    AudioPlayerSpec::new(src)
-                        .with_duration(184.0)
-                        .with_current_time(60.0)
-                        .with_show_speed_control(true)
-                        .with_size(ControlSize::Sm),
-                ))
-                .child(player(
-                    theme,
-                    AudioPlayerSpec::new(src)
-                        .with_duration(184.0)
-                        .with_current_time(60.0)
-                        .with_show_speed_control(true)
-                        .with_size(ControlSize::Md),
-                ))
-                .child(player(
-                    theme,
-                    AudioPlayerSpec::new(src)
-                        .with_duration(184.0)
-                        .with_current_time(60.0)
-                        .with_show_speed_control(true)
-                        .with_size(ControlSize::Lg),
-                ))
-                .child(player(
-                    theme,
-                    AudioPlayerSpec::new(src)
-                        .with_duration(184.0)
-                        .with_current_time(60.0)
-                        .with_show_speed_control(true)
-                        .with_size(ControlSize::Xl),
-                )),
-        ))
-        // Densities — spacing only; height stays constant.
-        .child(group(
-            theme,
-            "Densities",
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(12.0))
-                .child(player(
-                    theme,
-                    AudioPlayerSpec::new(src)
-                        .with_duration(184.0)
-                        .with_current_time(60.0)
-                        .with_show_speed_control(true)
-                        .with_density(ControlDensity::Compact),
-                ))
-                .child(player(
-                    theme,
-                    AudioPlayerSpec::new(src)
-                        .with_duration(184.0)
-                        .with_current_time(60.0)
-                        .with_show_speed_control(true)
-                        .with_density(ControlDensity::Default),
-                ))
-                .child(player(
-                    theme,
-                    AudioPlayerSpec::new(src)
-                        .with_duration(184.0)
-                        .with_current_time(60.0)
-                        .with_show_speed_control(true)
-                        .with_density(ControlDensity::Comfortable),
-                )),
-        ))
         // Semantic size role — inherited scale via role rather than explicit size.
         .child(group(
             theme,
@@ -182,6 +103,37 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_size_role(SemanticControlSizeRole::Prominent),
             ),
         ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "audio-player",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                player(
+                    theme,
+                    AudioPlayerSpec::new("/media/sample.mp3")
+                        .with_duration(184.0)
+                        .with_current_time(60.0)
+                        .with_show_speed_control(true)
+                        .with_size(size),
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                player(
+                    theme,
+                    AudioPlayerSpec::new("/media/sample.mp3")
+                        .with_duration(184.0)
+                        .with_current_time(60.0)
+                        .with_show_speed_control(true)
+                        .with_density(density),
+                )
+                .into_any_element()
+            }),
+    )
 }
 
 fn player(theme: &GpuiThemeProvider, spec: AudioPlayerSpec) -> Div {

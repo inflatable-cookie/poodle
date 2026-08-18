@@ -1,4 +1,7 @@
+use crate::app_state::AppState;
 use crate::node_compat::{DetailItem, DetailSection, DetailSectionGroup, Eyebrow, IntoCompatNode};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{LayoutDirection, Node};
@@ -33,8 +36,9 @@ fn section(title: &str, a: &str, b: &str, theme: &GpuiThemeProvider) -> DetailSe
     DetailSection::from_spec(DetailSectionSpec::new().with_title(title), theme).with_body(body)
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -78,22 +82,17 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .child(section("Four", "4", "—", theme)),
             theme,
         ))
-        // --- Density variants ---
-        .child(group_block(
-            "Density: compact",
-            density_group(ControlDensity::Compact, theme),
-            theme,
-        ))
-        .child(group_block(
-            "Density: default",
-            density_group(ControlDensity::Default, theme),
-            theme,
-        ))
-        .child(group_block(
-            "Density: comfortable",
-            density_group(ControlDensity::Comfortable, theme),
-            theme,
-        ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "detail-section-group",
+        examples,
+        SpecimenAxes::examples_only().with_densities(|density, theme: &GpuiThemeProvider| {
+            density_group(density, theme).into_any_element()
+        }),
+    )
 }
 
 fn density_group(density: ControlDensity, theme: &GpuiThemeProvider) -> DetailSectionGroup {

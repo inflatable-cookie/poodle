@@ -3,6 +3,7 @@ use std::sync::Arc;
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::AgentQuestion;
 use crate::node_compat::Eyebrow;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -79,7 +80,7 @@ fn multi_select_handler(state: &AppState) -> Arc<dyn Fn(&str) + Send + Sync> {
     })
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
     // Single-select stores the chosen value; multi-select stores a flag per
@@ -114,8 +115,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             ))
             .child(content)
     }
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -154,4 +154,27 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             )
             .into_any_element(),
         ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "agent-question",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                AgentQuestion::from_spec(
+                    AgentQuestionSpec::new(vec![placement()]).with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                AgentQuestion::from_spec(
+                    AgentQuestionSpec::new(vec![placement()]).with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

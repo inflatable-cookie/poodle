@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
 use crate::node_compat::{AgentChatInput, Eyebrow, IntoCompatNode, ModelPicker};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
@@ -219,17 +219,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "agent-chat-input",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            AgentChatInput::from_spec(demo_spec().with_context(40_000.0, 200_000.0), theme)
-                .size(size)
-                .toolbar_child(demo_picker(theme, size))
-                .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            AgentChatInput::from_spec(demo_spec().with_context(40_000.0, 200_000.0), theme)
-                .with_density(density)
-                .toolbar_child(demo_picker(theme, ControlSize::Md))
-                .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                AgentChatInput::from_spec(demo_spec().with_context(40_000.0, 200_000.0), theme)
+                    .size(size)
+                    .toolbar_child(demo_picker(theme, size))
+                    .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                AgentChatInput::from_spec(demo_spec().with_context(40_000.0, 200_000.0), theme)
+                    .with_density(density)
+                    .toolbar_child(demo_picker(theme, ControlSize::Md))
+                    .into_any_element()
+            }),
     )
 }

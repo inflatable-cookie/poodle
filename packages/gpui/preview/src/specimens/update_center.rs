@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::Eyebrow;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -40,7 +41,7 @@ fn center_element(
     poodle_gpui_node_backend::to_gpui(&update_center(&spec, theme, handlers))
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let open = state
         .specimens
@@ -59,8 +60,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         })),
         ..UpdateCenterHandlers::default()
     };
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -81,10 +81,11 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             theme,
             "Quiet — downloading",
             center_element(
-                UpdateCenterSpec::new(UpdatePresence::Quiet)
-                    .with_progress(UpdateProgressProjection::Downloading {
+                UpdateCenterSpec::new(UpdatePresence::Quiet).with_progress(
+                    UpdateProgressProjection::Downloading {
                         fraction: Some(0.42),
-                    }),
+                    },
+                ),
                 theme,
                 UpdateCenterHandlers::default(),
             ),
@@ -102,4 +103,33 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 UpdateCenterHandlers::default(),
             ),
         ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "update-center",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                center_element(
+                    UpdateCenterSpec::new(UpdatePresence::Attention)
+                        .with_status(UpdateControllerStatus::Ready)
+                        .with_availability(offer())
+                        .with_size(size),
+                    theme,
+                    UpdateCenterHandlers::default(),
+                )
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                center_element(
+                    UpdateCenterSpec::new(UpdatePresence::Attention)
+                        .with_status(UpdateControllerStatus::Ready)
+                        .with_availability(offer())
+                        .with_density(density),
+                    theme,
+                    UpdateCenterHandlers::default(),
+                )
+            }),
+    )
 }

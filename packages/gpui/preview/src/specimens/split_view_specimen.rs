@@ -1,9 +1,11 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, SplitView};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::{color_to_hsla, hsla_to_color_value};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{SplitOrientation, SplitToggleVisibility, SplitViewSpec};
@@ -91,8 +93,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         })
     });
     let _ = cx;
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -293,4 +294,37 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             let _ = panel_bg;
             div()
         })
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "split-view",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                SplitView::from_spec(
+                    SplitViewSpec::new(SplitOrientation::Horizontal)
+                        .with_ratio(0.4)
+                        .with_size(size),
+                    theme,
+                )
+                .with_primary(region("Sidebar", 220.0))
+                .with_secondary(region("Main content", 140.0))
+                .with_extent_px(FRAME_WIDTH_PX)
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                SplitView::from_spec(
+                    SplitViewSpec::new(SplitOrientation::Horizontal)
+                        .with_ratio(0.4)
+                        .with_density(density),
+                    theme,
+                )
+                .with_primary(region("Sidebar", 220.0))
+                .with_secondary(region("Main content", 140.0))
+                .with_extent_px(FRAME_WIDTH_PX)
+                .into_any_element()
+            }),
+    )
 }

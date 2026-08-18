@@ -16,7 +16,7 @@ use crate::node_compat::Eyebrow;
 use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -198,21 +198,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "segmented-control",
         examples,
-        move |size, theme: &GpuiThemeProvider| {
-            node_segmented_control_static(
-                SegmentedControlSpec::new(make_opts())
-                    .with_default_value("grid")
-                    .with_size(size),
-                theme,
-            )
-        },
-        move |density, theme: &GpuiThemeProvider| {
-            node_segmented_control_static(
-                SegmentedControlSpec::new(make_opts())
-                    .with_default_value("grid")
-                    .with_density(density),
-                theme,
-            )
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(move |size, theme: &GpuiThemeProvider| {
+                node_segmented_control_static(
+                    SegmentedControlSpec::new(make_opts())
+                        .with_default_value("grid")
+                        .with_size(size),
+                    theme,
+                )
+            })
+            .with_densities(move |density, theme: &GpuiThemeProvider| {
+                node_segmented_control_static(
+                    SegmentedControlSpec::new(make_opts())
+                        .with_default_value("grid")
+                        .with_density(density),
+                    theme,
+                )
+            }),
     )
 }

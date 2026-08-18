@@ -4,8 +4,9 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use poodle_specs::ShellStatusBarSpec;
-use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, StatusIndicatorSpec, StatusTone};
+use poodle_specs::{EyebrowSpec, StatusIndicatorSpec, StatusTone};
 
 /// A branch indicator (info tone dot) + diagnostics indicator (success tone dot),
 /// matching the contract §12 "Default" leading region.
@@ -45,23 +46,9 @@ fn group(theme: &GpuiThemeProvider, label: &str, content: impl IntoElement) -> D
         .child(content)
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-
-    let sizes: &[(&str, ControlSize)] = &[
-        ("xs", ControlSize::Xs),
-        ("sm", ControlSize::Sm),
-        ("md", ControlSize::Md),
-        ("lg", ControlSize::Lg),
-        ("xl", ControlSize::Xl),
-    ];
-    let densities: &[(&str, ControlDensity)] = &[
-        ("compact", ControlDensity::Compact),
-        ("default", ControlDensity::Default),
-        ("comfortable", ControlDensity::Comfortable),
-    ];
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -100,42 +87,37 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 theme,
             ),
         ))
-        // --- Sizes: font-size + padding-block scale ---
-        .child(group(theme, "Sizes", {
-            let mut col = div().flex().flex_col().gap(px(12.0));
-            for &(key, size) in sizes {
-                col = col.child(
-                    StatusBar::from_spec(
-                        ShellStatusBarSpec::new()
-                            .with_summary("Status bar")
-                            .with_chrome(true),
-                        theme,
-                    )
-                    .chrome(true)
-                    .with_size(size)
-                    .with_trailing_items(trailing_meta(&["UTF-8", "TypeScript"])),
-                );
-                let _ = key;
-            }
-            col
-        }))
-        // --- Densities: padding-inline + gap scale (height unchanged) ---
-        .child(group(theme, "Densities", {
-            let mut col = div().flex().flex_col().gap(px(12.0));
-            for &(key, density) in densities {
-                col = col.child(
-                    StatusBar::from_spec(
-                        ShellStatusBarSpec::new()
-                            .with_summary("Status bar")
-                            .with_chrome(true),
-                        theme,
-                    )
-                    .chrome(true)
-                    .with_density(density)
-                    .with_trailing_items(trailing_meta(&["UTF-8", "TypeScript"])),
-                );
-                let _ = key;
-            }
-            col
-        }))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "status-bar",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                StatusBar::from_spec(
+                    ShellStatusBarSpec::new()
+                        .with_summary("Status bar")
+                        .with_chrome(true),
+                    theme,
+                )
+                .chrome(true)
+                .with_size(size)
+                .with_trailing_items(trailing_meta(&["UTF-8", "TypeScript"]))
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                StatusBar::from_spec(
+                    ShellStatusBarSpec::new()
+                        .with_summary("Status bar")
+                        .with_chrome(true),
+                    theme,
+                )
+                .chrome(true)
+                .with_density(density)
+                .with_trailing_items(trailing_meta(&["UTF-8", "TypeScript"]))
+                .into_any_element()
+            }),
+    )
 }

@@ -1,4 +1,7 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, MediaPicker};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
@@ -17,8 +20,9 @@ fn sample_items() -> Vec<MediaPickerItem> {
     ]
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -111,4 +115,33 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         ),
                 ),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "media-picker",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                MediaPicker::from_spec(
+                    MediaPickerSpec::new("Select an asset")
+                        .with_open(true)
+                        .with_size(size),
+                    theme,
+                )
+                .with_items(sample_items())
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                MediaPicker::from_spec(
+                    MediaPickerSpec::new("Select an asset")
+                        .with_open(true)
+                        .with_density(density),
+                    theme,
+                )
+                .with_items(sample_items())
+                .into_any_element()
+            }),
+    )
 }

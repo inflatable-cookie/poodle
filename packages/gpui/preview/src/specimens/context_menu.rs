@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{ContextMenu, Eyebrow};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
@@ -103,49 +103,50 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "context-menu",
         examples,
-        move |size, theme: &GpuiThemeProvider| {
-            let trigger = div()
-                .h(px(64.0))
-                .w_full()
-                .border_2()
-                .border_color(color_to_hsla(border))
-                .rounded(px(4.0))
-                .flex()
-                .items_center()
-                .justify_center()
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(format!("{:?}", size).to_uppercase()),
-                );
-            ContextMenu::from_spec(ContextMenuSpec::new(make_menu_items()), theme)
-                .with_id(format!("specimen-size-{:?}", size))
-                .size(size)
-                .with_trigger(trigger)
-                .into_any_element()
-        },
-        move |density, theme: &GpuiThemeProvider| {
-            let trigger = div()
-                .h(px(64.0))
-                .w_full()
-                .border_2()
-                .border_color(color_to_hsla(border))
-                .rounded(px(4.0))
-                .flex()
-                .items_center()
-                .justify_center()
-                .child(
-                    div()
-                        .text_xs()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(format!("{:?}", density).to_lowercase()),
-                );
-            ContextMenu::from_spec(ContextMenuSpec::new(make_menu_items()), theme)
-                .with_id(format!("specimen-density-{:?}", density))
-                .with_density(density)
-                .with_trigger(trigger)
-                .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(move |size, theme: &GpuiThemeProvider| {
+                let trigger = div()
+                    .h(px(64.0))
+                    .w_full()
+                    .border_2()
+                    .border_color(color_to_hsla(border))
+                    .rounded(px(4.0))
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .child(
+                        div()
+                            .text_xs()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(format!("{:?}", size).to_uppercase()),
+                    );
+                ContextMenu::from_spec(ContextMenuSpec::new(make_menu_items()), theme)
+                    .with_id(format!("specimen-size-{:?}", size))
+                    .size(size)
+                    .with_trigger(trigger)
+                    .into_any_element()
+            })
+            .with_densities(move |density, theme: &GpuiThemeProvider| {
+                let trigger = div()
+                    .h(px(64.0))
+                    .w_full()
+                    .border_2()
+                    .border_color(color_to_hsla(border))
+                    .rounded(px(4.0))
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .child(
+                        div()
+                            .text_xs()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(format!("{:?}", density).to_lowercase()),
+                    );
+                ContextMenu::from_spec(ContextMenuSpec::new(make_menu_items()), theme)
+                    .with_id(format!("specimen-density-{:?}", density))
+                    .with_density(density)
+                    .with_trigger(trigger)
+                    .into_any_element()
+            }),
     )
 }

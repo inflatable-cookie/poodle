@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::Eyebrow;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -40,7 +41,7 @@ fn status_element(
     poodle_gpui_node_backend::to_gpui(&update_status(&spec, theme, handlers))
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let confirm_open = state
         .specimens
@@ -59,8 +60,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         })),
         ..UpdateStatusHandlers::default()
     };
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -160,4 +160,33 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 UpdateStatusHandlers::default(),
             ),
         ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "update-status",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                status_element(
+                    UpdateStatusSpec::new()
+                        .with_status(UpdateControllerStatus::Ready)
+                        .with_availability(offer())
+                        .with_size(size),
+                    theme,
+                    UpdateStatusHandlers::default(),
+                )
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                status_element(
+                    UpdateStatusSpec::new()
+                        .with_status(UpdateControllerStatus::Ready)
+                        .with_availability(offer())
+                        .with_density(density),
+                    theme,
+                    UpdateStatusHandlers::default(),
+                )
+            }),
+    )
 }

@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, NavigationMenu};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -151,9 +151,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content(
-                        "Navigation menu (solid fill — hover the open trigger)",
-                    ),
+                    EyebrowSpec::new()
+                        .with_content("Navigation menu (solid fill — hover the open trigger)"),
                     theme,
                 ))
                 .child(
@@ -205,27 +204,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "navigation-menu",
         examples,
-        move |size, theme: &GpuiThemeProvider| {
-            NavigationMenu::from_spec(
-                NavigationMenuSpec::new(make_items())
-                    .with_value("components")
-                    .with_aria_label("Navigation"),
-                theme,
-            )
-            .with_id(format!("specimen-size-{:?}", size))
-            .size(size)
-            .into_any_element()
-        },
-        move |density, theme: &GpuiThemeProvider| {
-            NavigationMenu::from_spec(
-                NavigationMenuSpec::new(make_items())
-                    .with_value("components")
-                    .with_aria_label("Navigation"),
-                theme,
-            )
-            .with_id(format!("specimen-density-{:?}", density))
-            .with_density(density)
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(move |size, theme: &GpuiThemeProvider| {
+                NavigationMenu::from_spec(
+                    NavigationMenuSpec::new(make_items())
+                        .with_value("components")
+                        .with_aria_label("Navigation"),
+                    theme,
+                )
+                .with_id(format!("specimen-size-{:?}", size))
+                .size(size)
+                .into_any_element()
+            })
+            .with_densities(move |density, theme: &GpuiThemeProvider| {
+                NavigationMenu::from_spec(
+                    NavigationMenuSpec::new(make_items())
+                        .with_value("components")
+                        .with_aria_label("Navigation"),
+                    theme,
+                )
+                .with_id(format!("specimen-density-{:?}", density))
+                .with_density(density)
+                .into_any_element()
+            }),
     )
 }

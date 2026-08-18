@@ -1,12 +1,17 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Button, Eyebrow, Field, FormActions, FormDialog, TextInput};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, FormActionsSpec, TextInputSpec,
+    ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, FormActionsSpec, FormDialogSpec,
+    TextInputSpec,
 };
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -194,4 +199,53 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         ),
                 ),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "form-dialog",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                FormDialog::from_spec(
+                    FormDialogSpec::new("Add new user")
+                        .with_description("Invite a user to this workspace.")
+                        .with_submit_label("Add user")
+                        .with_cancel_label("Cancel")
+                        .with_size(size),
+                    theme,
+                )
+                .with_child(
+                    Field::new("fd-axis-name", "Full name", theme).with_control(
+                        TextInput::from_spec(
+                            TextInputSpec::new().with_placeholder("Enter name"),
+                            theme,
+                        )
+                        .with_id("fd-axis-name"),
+                    ),
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                FormDialog::from_spec(
+                    FormDialogSpec::new("Add new user")
+                        .with_description("Invite a user to this workspace.")
+                        .with_submit_label("Add user")
+                        .with_cancel_label("Cancel")
+                        .with_density(density),
+                    theme,
+                )
+                .with_child(
+                    Field::new("fd-axis-name", "Full name", theme).with_control(
+                        TextInput::from_spec(
+                            TextInputSpec::new().with_placeholder("Enter name"),
+                            theme,
+                        )
+                        .with_id("fd-axis-name"),
+                    ),
+                )
+                .into_any_element()
+            }),
+    )
 }

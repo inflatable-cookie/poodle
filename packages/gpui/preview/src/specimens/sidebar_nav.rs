@@ -4,10 +4,15 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{EyebrowSpec, SidebarNavGroup, SidebarNavItem, SidebarNavSpec};
 
+use crate::app_state::AppState;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let catalogue_groups = vec![SidebarNavGroup::new(
+/// The single-group catalogue nav both the Examples pane and the axis
+/// representatives draw from.
+fn axis_groups() -> Vec<SidebarNavGroup> {
+    vec![SidebarNavGroup::new(
         "catalogue",
         vec![
             SidebarNavItem::new("button", "Button"),
@@ -15,7 +20,12 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             SidebarNavItem::new("split-view", "SplitView"),
             SidebarNavItem::new("tabs", "Tabs"),
         ],
-    )];
+    )]
+}
+
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let catalogue_groups = axis_groups();
 
     let harness_groups = vec![
         SidebarNavGroup::new(
@@ -38,8 +48,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         )
         .with_label("Shell"),
     ];
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -89,4 +98,33 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         )),
                 ),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "sidebar-nav",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                SidebarNav::from_spec(
+                    SidebarNavSpec::new(axis_groups())
+                        .with_aria_label("Catalogue navigation")
+                        .with_value("dock-region")
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                SidebarNav::from_spec(
+                    SidebarNavSpec::new(axis_groups())
+                        .with_aria_label("Catalogue navigation")
+                        .with_value("dock-region")
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

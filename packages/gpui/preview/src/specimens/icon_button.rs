@@ -15,7 +15,7 @@ use crate::node_compat::Eyebrow;
 use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
@@ -376,27 +376,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "icon-button",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            let node = icon_button(
-                &IconButtonSpec::new()
-                    .with_icon("star")
-                    .with_size(size)
-                    .with_aria_label("Star"),
-                theme,
-                None,
-            );
-            poodle_gpui_node_backend::to_gpui(&node)
-        },
-        |density, theme: &GpuiThemeProvider| {
-            let node = icon_button(
-                &IconButtonSpec::new()
-                    .with_icon("star")
-                    .with_density(density)
-                    .with_aria_label("Star"),
-                theme,
-                None,
-            );
-            poodle_gpui_node_backend::to_gpui(&node)
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                let node = icon_button(
+                    &IconButtonSpec::new()
+                        .with_icon("star")
+                        .with_size(size)
+                        .with_aria_label("Star"),
+                    theme,
+                    None,
+                );
+                poodle_gpui_node_backend::to_gpui(&node)
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                let node = icon_button(
+                    &IconButtonSpec::new()
+                        .with_icon("star")
+                        .with_density(density)
+                        .with_aria_label("Star"),
+                    theme,
+                    None,
+                );
+                poodle_gpui_node_backend::to_gpui(&node)
+            }),
     )
 }

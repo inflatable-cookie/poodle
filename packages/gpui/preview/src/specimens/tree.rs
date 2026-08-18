@@ -6,10 +6,11 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{DropEdge, NodeKey, NodeModifiers, NodePoint};
 use poodle_specs::{
-    compute_selection, ContextMenuSpec, ControlDensity, ControlSize, DropPosition, EyebrowSpec,
-    MenuEntry, TreeNode, TreeSelectionMode, TreeSpec,
+    compute_selection, ContextMenuSpec, DropPosition, EyebrowSpec, MenuEntry, TreeNode,
+    TreeSelectionMode, TreeSpec,
 };
 
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use std::sync::Arc;
 
@@ -263,42 +264,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 })
             });
     }
-
-    // Sizes row (static).
-    let mut sizes = div().flex().gap(px(16.0));
-    for size in [
-        ControlSize::Xs,
-        ControlSize::Sm,
-        ControlSize::Md,
-        ControlSize::Lg,
-        ControlSize::Xl,
-    ] {
-        sizes = sizes.child(Tree::from_spec(
-            TreeSpec::new(file_tree())
-                .with_expanded_values(expanded())
-                .with_selected_values(vec!["src/components/Tree.svelte".into()])
-                .with_size(size),
-            theme,
-        ));
-    }
-
-    // Densities row (static).
-    let mut densities = div().flex().gap(px(16.0));
-    for density in [
-        ControlDensity::Compact,
-        ControlDensity::Default,
-        ControlDensity::Comfortable,
-    ] {
-        densities = densities.child(Tree::from_spec(
-            TreeSpec::new(file_tree())
-                .with_expanded_values(expanded())
-                .with_selected_values(vec!["src/components/Tree.svelte".into()])
-                .with_density(density),
-            theme,
-        ));
-    }
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -467,10 +433,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ),
             ),
         ))
-        .child(labelled(theme, "Sizes (xs · sm · md · lg · xl)", sizes))
-        .child(labelled(
-            theme,
-            "Densities (compact · default · comfortable)",
-            densities,
-        ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "tree",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                Tree::from_spec(
+                    TreeSpec::new(file_tree())
+                        .with_expanded_values(expanded())
+                        .with_selected_values(vec!["src/components/Tree.svelte".into()])
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                Tree::from_spec(
+                    TreeSpec::new(file_tree())
+                        .with_expanded_values(expanded())
+                        .with_selected_values(vec!["src/components/Tree.svelte".into()])
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

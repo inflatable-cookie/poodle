@@ -1,11 +1,15 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, MetricTile};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::EyebrowSpec;
-use poodle_specs::{ControlDensity, MetricTileSpec, MetricTrend};
+use poodle_specs::{MetricTileSpec, MetricTrend};
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -122,37 +126,23 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         )),
                 ),
         )
-        // --- Density (contract §3/§8: compact / default / comfortable) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Density"),
-                    theme,
-                ))
-                .child(
-                    div().flex().gap(px(12.0)).flex_wrap().children(
-                        [
-                            ("Compact", ControlDensity::Compact),
-                            ("Default", ControlDensity::Default),
-                            ("Comfortable", ControlDensity::Comfortable),
-                        ]
-                        .into_iter()
-                        .map(|(_, density)| {
-                            MetricTile::from_spec(
-                                MetricTileSpec::new("Requests/min", "1,204")
-                                    .with_trend(MetricTrend::Up)
-                                    .with_trend_label("+5%")
-                                    .with_sparkline(vec![
-                                        800.0, 920.0, 850.0, 1100.0, 980.0, 1050.0, 1204.0,
-                                    ])
-                                    .with_density(density),
-                                theme,
-                            )
-                        }),
-                    ),
-                ),
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "metric-tile",
+        examples,
+        SpecimenAxes::examples_only().with_densities(|density, theme: &GpuiThemeProvider| {
+            MetricTile::from_spec(
+                MetricTileSpec::new("Requests/min", "1,204")
+                    .with_trend(MetricTrend::Up)
+                    .with_trend_label("+5%")
+                    .with_sparkline(vec![800.0, 920.0, 850.0, 1100.0, 980.0, 1050.0, 1204.0])
+                    .with_density(density),
+                theme,
+            )
+            .into_any_element()
+        }),
+    )
 }

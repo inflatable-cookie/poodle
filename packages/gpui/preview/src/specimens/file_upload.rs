@@ -1,10 +1,14 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, FileUpload};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{EyebrowSpec, FileUploadItem, FileUploadSpec, FileUploadStatus};
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -167,4 +171,33 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 )),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "file-upload",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                FileUpload::from_spec(
+                    FileUploadSpec::new()
+                        .with_accept("image/*")
+                        .with_max_size(5 * 1024 * 1024)
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                FileUpload::from_spec(
+                    FileUploadSpec::new()
+                        .with_accept("image/*")
+                        .with_max_size(5 * 1024 * 1024)
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

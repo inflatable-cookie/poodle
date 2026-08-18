@@ -1,7 +1,11 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Button, Eyebrow, ToastStack};
+use crate::specimens::specimen_axes::{density_key, size_key};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec};
+use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec};
 use poodle_specs::{Toast, ToastStackSpec, ToastTone};
 
 /// One labelled group: eyebrow heading + content stacked beneath it.
@@ -23,7 +27,8 @@ fn surface(stack: ToastStack, min_h: f32) -> Div {
     div().relative().min_h(px(min_h)).child(stack)
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     // ── Tones: one toast per tone (info / success / warning / danger) ──
     // Contract §4 visual states + §8 tone custom-property table.
     let tone_toasts = vec![
@@ -59,61 +64,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             .with_message("The file could not be uploaded.")
             .with_action_label("Retry"),
     ];
-
-    // ── Sizes: xs–xl, each an info toast + a success toast with an action,
-    // mirroring the Svelte sizes snippet so the size ladder is visible. ──
-    let control_sizes = [
-        (ControlSize::Xs, "xs"),
-        (ControlSize::Sm, "sm"),
-        (ControlSize::Md, "md"),
-        (ControlSize::Lg, "lg"),
-        (ControlSize::Xl, "xl"),
-    ];
-    let mut size_stack = div().flex().flex_col().gap(px(16.0));
-    for (size, size_label) in control_sizes {
-        let toasts = vec![
-            Toast::new(
-                format!("size-{size_label}-1"),
-                format!("Toast at {size_label}"),
-            )
-            .with_tone(ToastTone::Info)
-            .with_message("Chrome scales with size."),
-            Toast::new(format!("size-{size_label}-2"), "Action available")
-                .with_tone(ToastTone::Success)
-                .with_message("Dismiss and action controls follow the same ladder.")
-                .with_action_label("View"),
-        ];
-        size_stack = size_stack.child(surface(
-            ToastStack::from_spec(ToastStackSpec::new().with_toasts(toasts), theme).with_size(size),
-            120.0,
-        ));
-    }
-
-    // ── Densities: compact / default / comfortable spacing ladder. ──
-    let densities = [
-        (ControlDensity::Compact, "compact"),
-        (ControlDensity::Default, "default"),
-        (ControlDensity::Comfortable, "comfortable"),
-    ];
-    let mut density_stack = div().flex().flex_col().gap(px(16.0));
-    for (density, density_label) in densities {
-        let toasts = vec![
-            Toast::new(format!("density-{density_label}-1"), "Density example")
-                .with_tone(ToastTone::Warning)
-                .with_message("Spacing changes between compact, default, and comfortable."),
-            Toast::new(format!("density-{density_label}-2"), "Retry failed")
-                .with_tone(ToastTone::Danger)
-                .with_message("Action row and body spacing should ladder correctly.")
-                .with_action_label("Retry"),
-        ];
-        density_stack = density_stack.child(surface(
-            ToastStack::from_spec(ToastStackSpec::new().with_toasts(toasts), theme)
-                .with_density(density),
-            120.0,
-        ));
-    }
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -146,6 +97,59 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     260.0,
                 )),
         ))
-        .child(group(theme, "Sizes", size_stack))
-        .child(group(theme, "Densities", density_stack))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "toast-stack",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                surface(
+                    ToastStack::from_spec(
+                        ToastStackSpec::new().with_toasts(vec![
+                            Toast::new(format!("size-{}-1", size_key(size)), "Toast")
+                                .with_tone(ToastTone::Info)
+                                .with_message("Chrome scales with size."),
+                            Toast::new(format!("size-{}-2", size_key(size)), "Action available")
+                                .with_tone(ToastTone::Success)
+                                .with_message("Dismiss and action controls follow the same ladder.")
+                                .with_action_label("View"),
+                        ]),
+                        theme,
+                    )
+                    .with_size(size),
+                    120.0,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                surface(
+                    ToastStack::from_spec(
+                        ToastStackSpec::new().with_toasts(vec![
+                            Toast::new(
+                                format!("density-{}-1", density_key(density)),
+                                "Density example",
+                            )
+                            .with_tone(ToastTone::Warning)
+                            .with_message(
+                                "Spacing changes between compact, default, and comfortable.",
+                            ),
+                            Toast::new(
+                                format!("density-{}-2", density_key(density)),
+                                "Retry failed",
+                            )
+                            .with_tone(ToastTone::Danger)
+                            .with_message("Action row and body spacing follow the same ladder.")
+                            .with_action_label("Retry"),
+                        ]),
+                        theme,
+                    )
+                    .with_density(density),
+                    120.0,
+                )
+                .into_any_element()
+            }),
+    )
 }

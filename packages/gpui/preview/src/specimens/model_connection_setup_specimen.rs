@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
-use crate::app_state::{AppState, ModelConnectionEvent, ModelConnectionPreviewState,
-    NodeSpecimenEvent};
+use crate::app_state::{
+    AppState, ModelConnectionEvent, ModelConnectionPreviewState, NodeSpecimenEvent,
+};
 use crate::node_compat::{Eyebrow, ModelConnectionSetup};
 use crate::PreviewRoot;
 use gpui::*;
@@ -285,7 +286,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )
                 .with_instance_id("setup-invalid")
-                .with_configuration(api_key_field(theme, "mcs-invalid-key", "••••••••")),
+                .with_configuration(api_key_field(
+                    theme,
+                    "mcs-invalid-key",
+                    "••••••••",
+                )),
             ),
         ))
         .child(group(
@@ -299,7 +304,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )
                 .with_instance_id("setup-pending")
-                .with_configuration(api_key_field(theme, "mcs-pending-key", "••••••••")),
+                .with_configuration(api_key_field(
+                    theme,
+                    "mcs-pending-key",
+                    "••••••••",
+                )),
             ),
         ))
 }

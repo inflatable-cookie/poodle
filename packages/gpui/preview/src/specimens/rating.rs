@@ -1,7 +1,7 @@
 use crate::app_state::AppState;
 use crate::app_state::NodeSpecimenEvent;
 use crate::node_compat::{Eyebrow, Rating};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -145,16 +145,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "rating",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            Rating::from_spec(RatingSpec::new().with_value(3.0).with_size(size), theme)
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                Rating::from_spec(RatingSpec::new().with_value(3.0).with_size(size), theme)
+                    .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                Rating::from_spec(
+                    RatingSpec::new().with_value(3.0).with_density(density),
+                    theme,
+                )
                 .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            Rating::from_spec(
-                RatingSpec::new().with_value(3.0).with_density(density),
-                theme,
-            )
-            .into_any_element()
-        },
+            }),
     )
 }

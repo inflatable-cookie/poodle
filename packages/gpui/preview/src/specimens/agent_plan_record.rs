@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{AgentPlanRecord, Eyebrow};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -82,21 +82,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "agent-plan-record",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            AgentPlanRecord::from_spec(
-                AgentPlanRecordSpec::new(PLAN, AgentPlanStatus::Accepted).with_size(size),
-                theme,
-            )
-            .with_instance_id(format!("size-{size:?}"))
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            AgentPlanRecord::from_spec(
-                AgentPlanRecordSpec::new(PLAN, AgentPlanStatus::Accepted).with_density(density),
-                theme,
-            )
-            .with_instance_id(format!("density-{density:?}"))
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                AgentPlanRecord::from_spec(
+                    AgentPlanRecordSpec::new(PLAN, AgentPlanStatus::Accepted).with_size(size),
+                    theme,
+                )
+                .with_instance_id(format!("size-{size:?}"))
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                AgentPlanRecord::from_spec(
+                    AgentPlanRecordSpec::new(PLAN, AgentPlanStatus::Accepted).with_density(density),
+                    theme,
+                )
+                .with_instance_id(format!("density-{density:?}"))
+                .into_any_element()
+            }),
     )
 }

@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, Icon};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -180,48 +180,48 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "icon",
         examples,
-        // Sizes tab: map ControlSize → IconSize and render a standard
-        // star icon at each. Xs and Xl collapse to Sm and Lg because
-        // IconSize doesn't expose those extremes.
-        |size, theme: &GpuiThemeProvider| {
-            let text_primary = theme.resolve_color("color.text.primary");
-            div()
-                .flex()
-                .items_center()
-                .gap(px(8.0))
-                .text_color(color_to_hsla(text_primary))
-                .child(Icon::from_spec(
-                    IconSpec::new("star").with_size(control_to_icon_size(size)),
-                    theme,
-                ))
-                .into_any_element()
-        },
-        // Densities tab: icons are density-independent, so render a
-        // brief disclaimer next to the default icon rather than
-        // faking a sweep.
-        |_density: ControlDensity, theme: &GpuiThemeProvider| {
-            let text_primary = theme.resolve_color("color.text.primary");
-            let text_secondary = theme.resolve_color("color.text.secondary");
-            div()
-                .flex()
-                .items_center()
-                .gap(px(8.0))
-                .child(
+        SpecimenAxes::examples_only()
+            .with_sizes(
+                // Sizes tab: map ControlSize → IconSize and render a standard
+                // star icon at each. Xs and Xl collapse to Sm and Lg because
+                // IconSize doesn't expose those extremes.
+                |size, theme: &GpuiThemeProvider| {
+                    let text_primary = theme.resolve_color("color.text.primary");
                     div()
+                        .flex()
+                        .items_center()
+                        .gap(px(8.0))
                         .text_color(color_to_hsla(text_primary))
                         .child(Icon::from_spec(
-                            IconSpec::new("star").with_size(IconSize::Md),
+                            IconSpec::new("star").with_size(control_to_icon_size(size)),
                             theme,
-                        )),
-                )
-                .child(
+                        ))
+                        .into_any_element()
+                },
+            )
+            .with_densities(
+                // Densities tab: icons are density-independent, so render a
+                // brief disclaimer next to the default icon rather than
+                // faking a sweep.
+                |_density: ControlDensity, theme: &GpuiThemeProvider| {
+                    let text_primary = theme.resolve_color("color.text.primary");
+                    let text_secondary = theme.resolve_color("color.text.secondary");
                     div()
-                        .text_size(px(11.0))
-                        .text_color(color_to_hsla(text_secondary))
-                        .child("Icons are density-independent; size bridges to IconSize."),
-                )
-                .into_any_element()
-        },
+                        .flex()
+                        .items_center()
+                        .gap(px(8.0))
+                        .child(div().text_color(color_to_hsla(text_primary)).child(
+                            Icon::from_spec(IconSpec::new("star").with_size(IconSize::Md), theme),
+                        ))
+                        .child(
+                            div()
+                                .text_size(px(11.0))
+                                .text_color(color_to_hsla(text_secondary))
+                                .child("Icons are density-independent; size bridges to IconSize."),
+                        )
+                        .into_any_element()
+                },
+            ),
     )
 }
 

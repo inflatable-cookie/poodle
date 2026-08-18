@@ -1,9 +1,11 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, RelationPicker};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     BrowseState, DrillDownConfig, DrillDownItem, DrillDownLeafGroup, DrillDownLevel,
     PickerFilterConfig, PickerFilterOption, PickerItemSpec, RelationPickerSpec, SelectionMode,
@@ -11,7 +13,7 @@ use poodle_specs::{
 use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, SemanticControlSizeRole};
 use std::sync::Arc;
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
@@ -400,6 +402,35 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         );
     }
     root = root.child(densities_row);
+    let examples = root.into_any_element();
 
-    root
+    specimen_layout(
+        state,
+        cx,
+        "relation-picker",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                RelationPicker::from_spec(
+                    RelationPickerSpec::new(items())
+                        .with_selected_ids(vec!["btn".to_string()])
+                        .with_selection_mode(SelectionMode::Multiple)
+                        .with_state(BrowseState::Ready)
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                RelationPicker::from_spec(
+                    RelationPickerSpec::new(items())
+                        .with_selected_ids(vec!["btn".to_string()])
+                        .with_selection_mode(SelectionMode::Multiple)
+                        .with_state(BrowseState::Ready)
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

@@ -62,7 +62,10 @@ fn ollama() -> ModelConnectionCardSpec {
     ModelConnectionCardSpec::new("conn-ollama-unavailable", "Ollama", "Ollama")
         .with_route_label("Local runtime")
         .with_access_summary("No credentials required")
-        .with_readiness(ModelConnectionReadiness::Unavailable, "Runtime not reachable")
+        .with_readiness(
+            ModelConnectionReadiness::Unavailable,
+            "Runtime not reachable",
+        )
 }
 
 /// Several groups show the same connection, so each instance carries its own
@@ -151,7 +154,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "Ready and disabled",
             plain(theme, personal(), "card-off"),
         ))
-        .child(group(theme, "Checking", plain(theme, codex(), "card-checking")))
+        .child(group(
+            theme,
+            "Checking",
+            plain(theme, codex(), "card-checking"),
+        ))
         .child(group(
             theme,
             "Needs attention",
@@ -224,6 +231,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Enable switch disabled on its own",
-            plain(theme, codex().with_enable_disabled(true), "card-enable-locked"),
+            plain(
+                theme,
+                codex().with_enable_disabled(true),
+                "card-enable-locked",
+            ),
         ))
 }

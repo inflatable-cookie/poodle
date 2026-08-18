@@ -1,11 +1,12 @@
 use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::Eyebrow;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_node::Node;
 use poodle_render::{settings_shell, SettingsShellHandlers};
-use poodle_specs::{SettingsShellSpec, SidebarNavGroup, SidebarNavItem};
+use poodle_specs::{EyebrowSpec, SettingsShellSpec, SidebarNavGroup, SidebarNavItem};
 
 fn groups() -> Vec<SidebarNavGroup> {
     vec![
@@ -115,6 +116,12 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     div()
         .flex()
         .flex_col()
+        .gap(px(8.0))
         .min_h(px(520.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new()
+                .with_content("Settings dialog: grouped rail, search narrowing, and a page body"),
+            theme,
+        ))
         .child(poodle_gpui_node_backend::to_gpui(&node))
 }

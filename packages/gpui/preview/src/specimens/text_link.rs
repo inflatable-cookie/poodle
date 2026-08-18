@@ -1,20 +1,14 @@
-use crate::node_compat::TextLink;
+use crate::node_compat::{Eyebrow, TextLink};
 use crate::style_bridge::color_to_hsla;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{TextLinkSpec, TextLinkTone};
+use poodle_specs::{EyebrowSpec, TextLinkSpec, TextLinkTone};
 
 pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     let text_primary = color_to_hsla(theme.resolve_color("color.text.primary"));
-    let text_secondary = color_to_hsla(theme.resolve_color("color.text.secondary"));
 
-    let group = |title: &str| {
-        div()
-            .text_xs()
-            .text_color(text_secondary)
-            .child(title.to_string())
-    };
+    let group = |title: &str| Eyebrow::from_spec(EyebrowSpec::new().with_content(title), theme);
 
     div()
         .flex()
