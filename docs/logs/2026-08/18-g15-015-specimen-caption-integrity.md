@@ -56,7 +56,8 @@ Branch: `t3code/fix-specimen-caption-integrity`
 
 ## Live review
 
-**Open — operator checkpoint not run in this session.**
+**Accepted — operator reviewed the paired Svelte and React pages live before
+merge.**
 
 Nine Svelte routes (`#components/<slug>`):
 
@@ -75,3 +76,10 @@ React gallery mirrors the same paths under the React preview dev server.
 ## Deviations
 
 - None beyond the documented `SceneSpecimen` snippet typing boundary (`as never`).
+
+## Closeout
+
+- Review head: `b564c5cf`
+- PR: #37
+- Merge: `a80cbabd`
+- Operator live-review sign-off: accepted 2026-08-18

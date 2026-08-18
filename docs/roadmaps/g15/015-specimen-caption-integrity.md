@@ -1,6 +1,6 @@
 # g15.015 — Specimen Caption Integrity
 
-Status: **ready** — exact page and type-gate scope approved for dispatch
+Status: **complete** — PR #37 merged; operator live review accepted
 Consumes: `g15.011` partial screening baseline
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`,
 `../../contracts/001-working-rules.md`
@@ -40,15 +40,15 @@ it does not add a selector that is red on arrival.
 
 ## Goals
 
-- [ ] All 52 captions render, with the authored wording.
-- [ ] `SpecimenGroup` carries an optional `description`, so the explanatory
+- [x] All 52 captions render, with the authored wording.
+- [x] `SpecimenGroup` carries an optional `description`, so the explanatory
       sentences those pages already contain reach the reader instead of being
       deleted. React matches.
-- [ ] `packages/svelte/preview` is inside a type-check gate.
-- [ ] The 348 `readonly never[]` errors from the generated catalogue type are
+- [x] `packages/svelte/preview` is inside a type-check gate.
+- [x] The 348 `readonly never[]` errors from the generated catalogue type are
       fixed at their source or at one honest generated-data typing boundary.
       Blanket suppression is not an accepted fix.
-- [ ] The remaining 28 diagnostics are fixed in their owning files without
+- [x] The remaining 28 diagnostics are fixed in their owning files without
       broadening into component redesign. They currently comprise 13 recipe
       inventory script errors, 6 contract-drift script errors, 5
       `ListContainerSpecimen` errors, 2 `SceneSpecimen` errors, and one each in
@@ -56,14 +56,14 @@ it does not add a selector that is red on arrival.
 
 ## Acceptance
 
-- [ ] A live sweep of the nine pages reports zero blank captions.
-- [ ] A named Effigy selector type-checks `packages/svelte/preview` with zero
+- [x] A live sweep of the nine pages reports zero blank captions.
+- [x] A named Effigy selector type-checks `packages/svelte/preview` with zero
       errors, and `check:svelte`/`ci:web` inherit that selector.
-- [ ] Mutation proof: temporarily reintroducing `title=` on one scoped page
+- [x] Mutation proof: temporarily reintroducing `title=` on one scoped page
       makes the selector fail; restoring `label=` makes it pass. The mutation
       is not committed.
-- [ ] No component public API, contract, or semantic change.
-- [ ] **Operator review of the changed pages in the live Svelte and React
+- [x] No component public API, contract, or semantic change.
+- [x] **Operator review of the changed pages in the live Svelte and React
       previews before this card is called complete.** Unreviewed pages remain
       an explicit PR item.
 
