@@ -144,97 +144,78 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex()
         .flex_col()
         .gap(px(32.0))
+        // Two configured connections of one provider. They differ only by
+        // instance label and opaque id; the second is switched off by host
+        // preference, not by readiness.
         .child(group(
             theme,
             "Ready and enabled",
-            plain(theme, work(), "card-ready"),
-        ))
-        .child(group(
-            theme,
-            "Ready and disabled",
-            plain(theme, personal(), "card-off"),
-        ))
-        .child(group(
-            theme,
-            "Checking",
-            plain(theme, codex(), "card-checking"),
-        ))
-        .child(group(
-            theme,
-            "Needs attention",
-            plain(theme, anthropic(), "card-attention"),
-        ))
-        .child(group(
-            theme,
-            "Unavailable",
-            plain(theme, ollama(), "card-unavailable"),
-        ))
-        // Two instances of one provider. They differ only by instance label
-        // and by their opaque ids, which is the whole point.
-        .child(group(
-            theme,
-            "Two OpenAI instances",
             div()
                 .flex()
                 .flex_col()
                 .gap(px(12.0))
-                .child(plain(theme, work(), "card-pair-work"))
-                .child(plain(theme, personal(), "card-pair-personal")),
+                .child(plain(theme, work(), "card-ready"))
+                .child(plain(theme, personal(), "card-off")),
+        ))
+        .child(group(
+            theme,
+            "Readiness and preference states",
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(12.0))
+                .child(plain(theme, codex(), "card-checking"))
+                .child(plain(theme, anthropic(), "card-attention"))
+                .child(plain(theme, ollama(), "card-unavailable"))
+                // The whole card is inert; readiness copy stays readable.
+                .child(plain(theme, work().with_disabled(true), "card-disabled"))
+                // Only the enable Switch is locked; the card still opens.
+                .child(plain(
+                    theme,
+                    codex().with_enable_disabled(true),
+                    "card-enable-locked",
+                )),
         ))
         // Host composition: the provider mark sits inline before the name,
         // badges follow it, and the actions menu is the host's own.
         .child(group(
             theme,
-            "Host mark, badges, and actions",
-            plain(theme, work(), "card-host-content")
-                .with_leading(Node::icon("star", 16.0))
-                .with_badges(poodle_render::pill(
-                    &PillSpec::new()
-                        .with_label("Preview")
-                        .with_tone(PillTone::Info)
-                        .with_appearance(PillAppearance::Subtle),
-                    theme,
-                ))
-                .with_actions(poodle_render::icon_button(
-                    &IconButtonSpec::new()
-                        .with_icon("ellipsis")
-                        .with_variant(ButtonVariant::Ghost)
-                        .with_size_role(SemanticControlSizeRole::Chrome)
-                        .with_aria_label("More actions for OpenAI · Work"),
-                    theme,
-                    None,
-                )),
+            "Host mark, badges, actions, and closed accessory",
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(12.0))
+                .child(
+                    plain(theme, work(), "card-host-content")
+                        .with_leading(Node::icon("star", 16.0))
+                        .with_badges(poodle_render::pill(
+                            &PillSpec::new()
+                                .with_label("Preview")
+                                .with_tone(PillTone::Info)
+                                .with_appearance(PillAppearance::Subtle),
+                            theme,
+                        ))
+                        .with_actions(poodle_render::icon_button(
+                            &IconButtonSpec::new()
+                                .with_icon("ellipsis")
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_size_role(SemanticControlSizeRole::Chrome)
+                                .with_aria_label("More actions for OpenAI · Work"),
+                            theme,
+                            None,
+                        )),
+                )
+                .child(
+                    plain(theme, work(), "card-accessory")
+                        .with_closed_accessory(Node::text("Update 1.4.0 available")),
+                ),
         ))
-        .child(group(
-            theme,
-            "Closed UpdateCenter accessory",
-            plain(theme, work(), "card-accessory")
-                .with_closed_accessory(Node::text("Update 1.4.0 available")),
-        ))
-        .child(group(
-            theme,
-            "Open details with catalogue (interactive)",
-            live,
-        ))
+        .child(group(theme, "Open details with catalogue", live))
         .child(group(
             theme,
             "Narrow summary wrapping",
             div()
                 .max_w(px(288.0))
                 .child(plain(theme, anthropic(), "card-narrow")),
-        ))
-        .child(group(
-            theme,
-            "Disabled card",
-            plain(theme, work().with_disabled(true), "card-disabled"),
-        ))
-        .child(group(
-            theme,
-            "Enable switch disabled on its own",
-            plain(
-                theme,
-                codex().with_enable_disabled(true),
-                "card-enable-locked",
-            ),
         ))
 }

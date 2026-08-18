@@ -7,6 +7,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-19 — `effigy bootstrap:deps` fails in a second worktree of this repo:
+  `cargo fetch` for `packages/jetstream/preview` aborts with "package collision
+  in the lockfile: packages poodle-layout v0.1.0 (<other worktree>) and
+  poodle-layout v0.1.0 (<this worktree>) are different, but only one can be
+  written to lockfile unambiguously". The bun half of bootstrap has already run
+  by then, so the JS checks work and only the Rust fetch is lost; `cargo build`
+  in each crate still resolves. A per-worktree `CARGO_TARGET_DIR`/lockfile
+  scope, or fetching Rust crates per manifest directory, would remove the
+  collision. Found by g15.020.
+
 - 2026-08-17 — Sweeping the catalogue headlessly wedges the browser on
   `#components/file-upload`: the specimen opens a native file chooser and the
   page never settles, so a Playwright run with no `filechooser` handler and no
