@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
-import { Eyebrow } from "@inflatable-cookie/poodle-react";
+import { Eyebrow, type ControlSize } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 const example: CSSProperties = {
   display: "flex",
@@ -22,8 +23,12 @@ const paragraph: CSSProperties = {
 };
 
 export function EyebrowSpecimen() {
+  // Eyebrow's typographic scale stops at `md`; only its own steps render.
+  const sizes = (size: ControlSize) =>
+    size === "xs" || size === "sm" || size === "md" ? <Eyebrow size={size}>Section label</Eyebrow> : null;
+
   return (
-    <>
+    <SpecimenLayout sizes={sizes}>
       <SpecimenGroup label="Above a page title">
         <div style={example}>
           <Eyebrow>Section label</Eyebrow>
@@ -56,6 +61,6 @@ export function EyebrowSpecimen() {
           <p style={paragraph}>Eyebrow can render as a heading when it labels a real subsection.</p>
         </div>
       </SpecimenGroup>
-    </>
+    </SpecimenLayout>
   );
 }

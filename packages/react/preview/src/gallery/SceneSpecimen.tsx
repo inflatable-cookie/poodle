@@ -73,7 +73,13 @@ export function SceneSpecimen({ slug }: { slug?: string }) {
     matrixInstance ? renderInstance({ ...matrixInstance, props: { ...matrixInstance.props, density } }) : null;
 
   return (
-    <SpecimenLayout sizes={sizes} densities={densities}>
+    // The scene's declared tabs decide which axis renderers exist; an axis
+    // the scene does not declare never reaches SpecimenLayout, so its tab
+    // cannot be advertised.
+    <SpecimenLayout
+      sizes={scene.tabs.includes("sizes") ? sizes : undefined}
+      densities={scene.tabs.includes("densities") ? densities : undefined}
+    >
       {scene.groups.map((group) => (
         <SpecimenGroup key={group.label} label={group.label}>
           <div className="poodle-specimen__row">

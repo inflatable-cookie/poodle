@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Button, Select, Surface, TextInput, UiPresentationProvider } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const options = [
     { value: "alpha", label: "Alpha" },
@@ -8,7 +9,19 @@
   ];
 </script>
 
-<div class="poodle-specimen">
+<SpecimenLayout>
+  {#snippet densities(density)}
+    <UiPresentationProvider {density}>
+      <Surface border="subtle" padding="md">
+        <div class="poodle-specimen__controls">
+          <Button>Save</Button>
+          <TextInput id="provider-axis-name" value="Draft" />
+          <Select id="provider-axis-select" {options} value="alpha" />
+        </div>
+      </Surface>
+    </UiPresentationProvider>
+  {/snippet}
+
   <SpecimenGroup label="Compact small scope">
     <UiPresentationProvider density="compact" sizeScale="sm">
       <Surface border="subtle" padding="md">
@@ -32,15 +45,9 @@
       </Surface>
     </UiPresentationProvider>
   </SpecimenGroup>
-</div>
+</SpecimenLayout>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .poodle-specimen__controls {
     display: flex;
     flex-wrap: wrap;

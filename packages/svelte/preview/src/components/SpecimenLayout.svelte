@@ -22,11 +22,26 @@
     densities?: Snippet<[density: (typeof controlDensities)[number]]>;
   } = $props();
 
+  // An axis tab needs a renderer: without one the pane would be empty, which
+  // is exactly what the catalogue must never advertise. `show*` may hide a
+  // supplied renderer but cannot force a tabless pane.
   const tabs: TabItem[] = $derived([
     { value: "examples", label: "Examples" },
-    ...(showSizes ? [{ value: "sizes", label: "Sizes" }] : []),
-    ...(showDensities ? [{ value: "densities", label: "Densities" }] : []),
+    ...(showSizes && sizes ? [{ value: "sizes", label: "Sizes" }] : []),
+    ...(showDensities && densities ? [{ value: "densities", label: "Densities" }] : []),
   ]);
+
+  // The preview reuses one layout across scene slugs (SceneSpecimen). When the
+  // available tab set shrinks — e.g. Callout keeps Densities but Avatar does
+  // not — the retained active tab would point at a vanished pane and render a
+  // blank page. Normalize an invalid selection back to Examples whenever the
+  // tab set changes.
+  const tabValues = $derived(tabs.map((tab) => tab.value));
+  $effect(() => {
+    if (!tabValues.includes(activeTab)) {
+      activeTab = "examples";
+    }
+  });
 
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
   const controlDensities = ["compact", "default", "comfortable"] as const;

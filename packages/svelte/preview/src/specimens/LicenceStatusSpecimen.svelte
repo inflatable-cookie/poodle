@@ -13,7 +13,7 @@
   const remote = { kind: "remoteAssertion", checked } as const;
 </script>
 
-<SpecimenLayout showSizes={false} showDensities={false}>
+<SpecimenLayout>
   {#snippet children()}
     <div class="poodle-licence-status-specimen">
       <SpecimenGroup label="Active">
@@ -130,6 +130,30 @@
         />
       </SpecimenGroup>
     </div>
+  {/snippet}
+
+  {#snippet sizes(size)}
+    <LicenceStatus
+      usability={{ state: "active" }}
+      trustBasis={offline}
+      useUntil={later}
+      updateUntil={later}
+      usable={true}
+      attention="none"
+      {size}
+    />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <LicenceStatus
+      usability={{ state: "active" }}
+      trustBasis={offline}
+      useUntil={later}
+      updateUntil={later}
+      usable={true}
+      attention="none"
+      {density}
+    />
   {/snippet}
 </SpecimenLayout>
 

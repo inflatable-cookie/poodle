@@ -1,6 +1,7 @@
 import { SpecimenGroup } from "../SpecimenGroup";
 import { useState, type CSSProperties } from "react";
 import { AlertDialog, Button } from "@inflatable-cookie/poodle-react";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 const hintStyle: CSSProperties = { margin: 0, fontSize: "0.75rem", color: "var(--poodle-color-text-secondary)" };
 const cardStyle: CSSProperties = {
@@ -18,14 +19,50 @@ export function AlertDialogSpecimen() {
   const [warningOpen, setWarningOpen] = useState(false);
   const [asyncOpen, setAsyncOpen] = useState(false);
   const [lastAction, setLastAction] = useState("");
+  const [axisOpen, setAxisOpen] = useState<Record<string, boolean>>({});
 
   async function simulateAsync(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setLastAction("Async confirm completed");
   }
 
+  const setAxis = (key: string, open: boolean) => setAxisOpen((prev) => ({ ...prev, [key]: open }));
+
   return (
-    <>
+    <SpecimenLayout
+      sizes={(size) => (
+        <>
+          <Button variant="secondary" onClick={() => setAxis(`size-${size}`, true)}>
+            Open {size} dialog
+          </Button>
+          <AlertDialog
+            open={axisOpen[`size-${size}`] ?? false}
+            onOpenChange={(open) => setAxis(`size-${size}`, open)}
+            title="Delete this item?"
+            description="This action cannot be undone. The item and all associated data will be permanently removed."
+            confirmLabel="Delete"
+            cancelLabel="Keep it"
+            size={size}
+          />
+        </>
+      )}
+      densities={(density) => (
+        <>
+          <Button variant="secondary" onClick={() => setAxis(`density-${density}`, true)}>
+            Open {density} dialog
+          </Button>
+          <AlertDialog
+            open={axisOpen[`density-${density}`] ?? false}
+            onOpenChange={(open) => setAxis(`density-${density}`, open)}
+            title="Delete this item?"
+            description="This action cannot be undone. The item and all associated data will be permanently removed."
+            confirmLabel="Delete"
+            cancelLabel="Keep it"
+            density={density}
+          />
+        </>
+      )}
+    >
       <SpecimenGroup label="Danger tone">
         <Button tone="danger" onClick={() => setDangerOpen(true)}>
                     Delete item
@@ -94,6 +131,6 @@ export function AlertDialogSpecimen() {
           Last action: <strong>{lastAction}</strong>
         </p>
       ) : null}
-    </>
+    </SpecimenLayout>
   );
 }

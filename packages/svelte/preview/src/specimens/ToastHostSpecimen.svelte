@@ -4,6 +4,7 @@
   import { ToastHost, type ToastHostStoreItem } from "@inflatable-cookie/poodle-svelte";
   import { Button } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   type ToneSeed = "info" | "success" | "warning" | "error";
 
@@ -38,7 +39,7 @@
   }
 </script>
 
-<div class="poodle-specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Runtime host">
     <p class="poodle-specimen__copy">
       The host owns timer policy and fixed positioning while `ToastStack` stays presentational.
@@ -49,15 +50,21 @@
   <div class="poodle-specimen__surface">
     <ToastHost {store} />
   </div>
-</div>
+
+  {#snippet sizes(size)}
+    <div class="poodle-specimen__surface">
+      <ToastHost {store} {size} />
+    </div>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <div class="poodle-specimen__surface">
+      <ToastHost {store} {density} />
+    </div>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .poodle-specimen__copy {
     margin: 0;
     color: var(--poodle-color-text-secondary);

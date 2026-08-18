@@ -27,18 +27,6 @@
       </Tooltip>
     </div>
   </SpecimenGroup>
-
-  {#snippet sizes(size)}
-    <Tooltip content="Tooltip at {size}">
-      <Button variant="secondary" {size}>Hover ({size})</Button>
-    </Tooltip>
-  {/snippet}
-
-  {#snippet densities(density)}
-    <Tooltip content="Tooltip at {density}">
-      <Button variant="secondary" {density}>Hover ({density})</Button>
-    </Tooltip>
-  {/snippet}
 </SpecimenLayout>
 
 <style>

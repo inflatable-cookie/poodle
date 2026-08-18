@@ -43,7 +43,7 @@
   ];
 </script>
 
-<SpecimenLayout showDensities={false}>
+<SpecimenLayout>
   <SpecimenGroup label="Direct import — tree-shakeable">
     <p class="poodle-hint">
       Generate an application set with <code>bun x poodle-icons</code>. The generated
@@ -157,6 +157,14 @@
       <Icon icon={star} {size} />
       <Icon icon={heart} {size} />
       <Icon icon={settings} {size} />
+    </div>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <div class="poodle-size-demo">
+      <Icon icon={star} {density} />
+      <Icon icon={heart} {density} />
+      <Icon icon={settings} {density} />
     </div>
   {/snippet}
 

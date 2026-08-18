@@ -6,7 +6,7 @@
   const ready = { kind: "ready" } as const;
 </script>
 
-<SpecimenLayout showSizes={false} showDensities={false}>
+<SpecimenLayout>
   {#snippet children()}
     <div class="poodle-update-status-specimen">
       <SpecimenGroup label="Availability">
@@ -52,6 +52,26 @@
         <UpdateStatus status={ready} lastRejection="signatureRejected" />
       </SpecimenGroup>
     </div>
+  {/snippet}
+
+  {#snippet sizes(size)}
+    <UpdateStatus
+      status={ready}
+      availability={{ state: "upToDate" }}
+      installedVersion="1.3.0"
+      channel="production"
+      {size}
+    />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <UpdateStatus
+      status={ready}
+      availability={{ state: "upToDate" }}
+      installedVersion="1.3.0"
+      channel="production"
+      {density}
+    />
   {/snippet}
 </SpecimenLayout>
 

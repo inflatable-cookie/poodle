@@ -1,9 +1,16 @@
-import { Stack, Text } from "@inflatable-cookie/poodle-react";
+import { Stack, Text, type ControlSize } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 export function TextSpecimen() {
+  // Text's typographic scale stops at `md`; only its own steps render.
+  const sizes = (size: ControlSize) =>
+    size === "xs" || size === "sm" || size === "md" ? (
+      <Text size={size}>Default body text for admin and product surfaces.</Text>
+    ) : null;
+
   return (
-    <div className="poodle-specimen">
+    <SpecimenLayout sizes={sizes}>
       <SpecimenGroup label="Tones">
         <Stack gap="sm">
           <Text>Default body text for admin and product surfaces.</Text>
@@ -35,6 +42,6 @@ export function TextSpecimen() {
           This text is intentionally long enough to wrap across multiple lines in a narrow container, then clamp after two visible lines.
         </Text>
       </SpecimenGroup>
-    </div>
+    </SpecimenLayout>
   );
 }

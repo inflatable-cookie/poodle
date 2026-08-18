@@ -69,8 +69,14 @@
 {/snippet}
 
 {#if scene}
-  <!-- Scene matrix snippets cast axis values inside the snippet body. -->
-  <SpecimenLayout sizes={sizes as never} densities={densities as never}>
+  <!-- Scene matrix snippets cast axis values inside the snippet body. The
+       scene's declared tabs decide which axis renderers exist; an axis the
+       scene does not declare never reaches SpecimenLayout, so its tab cannot
+       be advertised. -->
+  <SpecimenLayout
+    sizes={(scene.tabs as readonly string[]).includes("sizes") ? (sizes as never) : undefined}
+    densities={(scene.tabs as readonly string[]).includes("densities") ? (densities as never) : undefined}
+  >
     {#each scene.groups as group}
       <SpecimenGroup label={group.label}>
         <div class="poodle-specimen__row">

@@ -2,6 +2,7 @@ import { useRef, useState, type CSSProperties } from "react";
 import { Button, LogList } from "@inflatable-cookie/poodle-react";
 import type { LogEntry, LogFilter } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 const now = Date.now();
 
@@ -72,6 +73,13 @@ const auditEntries: LogEntry[] = [
 
 const actionsStyle: CSSProperties = { display: "flex", gap: "0.5rem" };
 
+/** One stable, ordinary log for the axis panes. */
+const axisEntries: LogEntry[] = [
+  { id: "axis-1", timestamp: new Date(now - 60000), level: "info", message: "Application started" },
+  { id: "axis-2", timestamp: new Date(now - 45000), level: "warn", message: "Slow query detected: SELECT * FROM users (2.3s)" },
+  { id: "axis-3", timestamp: new Date(now - 20000), level: "error", message: "Failed to fetch /api/analytics: ECONNREFUSED" },
+];
+
 export function LogListSpecimen() {
   const [entries, setEntries] = useState<LogEntry[]>(initialEntries);
   const counter = useRef(10);
@@ -99,7 +107,10 @@ export function LogListSpecimen() {
   }
 
   return (
-    <div className="poodle-specimen">
+    <SpecimenLayout
+      sizes={(size) => <LogList entries={axisEntries} ariaLabel="Application logs" size={size} />}
+      densities={(density) => <LogList entries={axisEntries} ariaLabel="Application logs" density={density} />}
+    >
       <SpecimenGroup label="Log output with filtering" bare>
         <LogList entries={entries} ariaLabel="Application logs" />
         <div style={actionsStyle}>
@@ -123,6 +134,6 @@ export function LogListSpecimen() {
           }
         />
       </SpecimenGroup>
-    </div>
+    </SpecimenLayout>
   );
 }

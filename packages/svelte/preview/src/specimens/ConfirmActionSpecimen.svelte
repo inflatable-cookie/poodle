@@ -2,11 +2,12 @@
   import { ConfirmAction } from "@inflatable-cookie/poodle-svelte";
   import { Button, IconButton } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let lastAction = $state("");
 </script>
 
-<div class="poodle-specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Default trigger (danger)">
     <ConfirmAction
       title="Delete this record?"
@@ -68,15 +69,29 @@
       <p>{lastAction}</p>
     </SpecimenGroup>
   {/if}
-</div>
+
+  {#snippet sizes(size)}
+    <ConfirmAction
+      title="Delete this record?"
+      description="This record will be permanently removed."
+      triggerLabel="Delete record"
+      confirmLabel="Delete"
+      {size}
+    />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <ConfirmAction
+      title="Delete this record?"
+      description="This record will be permanently removed."
+      triggerLabel="Delete record"
+      confirmLabel="Delete"
+      {density}
+    />
+  {/snippet}
+</SpecimenLayout>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .poodle-key-display {
     padding: 0.5rem 0.75rem;
     border-radius: 0.375rem;

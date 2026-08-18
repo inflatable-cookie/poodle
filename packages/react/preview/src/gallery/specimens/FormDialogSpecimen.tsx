@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FormDialog, Button, TextInput, Field, Select, FormActions } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 const roleOptions = [
   { value: "admin", label: "Admin" },
@@ -18,6 +19,9 @@ export function FormDialogSpecimen() {
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
   const [lastAction, setLastAction] = useState("");
+  const [axisOpen, setAxisOpen] = useState<Record<string, boolean>>({});
+
+  const setAxis = (key: string, open: boolean) => setAxisOpen((prev) => ({ ...prev, [key]: open }));
 
   function handleBasicSubmit(): void {
     setSubmitting(true);
@@ -48,7 +52,48 @@ export function FormDialogSpecimen() {
   }
 
   return (
-    <div className="poodle-specimen">
+    <SpecimenLayout
+      sizes={(size) => (
+        <>
+          <Button variant="secondary" onClick={() => setAxis(`size-${size}`, true)}>
+            Open {size} dialog
+          </Button>
+          <FormDialog
+            open={axisOpen[`size-${size}`] ?? false}
+            onOpenChange={(open) => setAxis(`size-${size}`, open)}
+            title="Add new user"
+            description="Invite a user to this workspace."
+            submitLabel="Add user"
+            size={size}
+            onSubmit={() => {}}
+          >
+            <Field label="Full name" id={`form-dialog-axis-name-${size}`}>
+              <TextInput placeholder="Enter name" />
+            </Field>
+          </FormDialog>
+        </>
+      )}
+      densities={(density) => (
+        <>
+          <Button variant="secondary" onClick={() => setAxis(`density-${density}`, true)}>
+            Open {density} dialog
+          </Button>
+          <FormDialog
+            open={axisOpen[`density-${density}`] ?? false}
+            onOpenChange={(open) => setAxis(`density-${density}`, open)}
+            title="Add new user"
+            description="Invite a user to this workspace."
+            submitLabel="Add user"
+            density={density}
+            onSubmit={() => {}}
+          >
+            <Field label="Full name" id={`form-dialog-axis-name-${density}`}>
+              <TextInput placeholder="Enter name" />
+            </Field>
+          </FormDialog>
+        </>
+      )}
+    >
       <SpecimenGroup label="Basic form dialog">
         <Button variant="primary" onClick={() => setBasicOpen(true)}>
           Add user
@@ -164,6 +209,6 @@ export function FormDialogSpecimen() {
           <p style={{ margin: 0 }}>{lastAction}</p>
         </SpecimenGroup>
       ) : null}
-    </div>
+    </SpecimenLayout>
   );
 }

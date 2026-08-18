@@ -66,7 +66,24 @@ function EmbeddedAccountActivation() {
 
 export function LicenceActivationSpecimen() {
   return (
-    <SpecimenLayout showSizes={false} showDensities={false}>
+    <SpecimenLayout
+      sizes={(size) => (
+        <LicenceActivation
+          mode="account"
+          accountTokenProvider={accountTokenProvider}
+          fileAccept=".licence"
+          size={size}
+        />
+      )}
+      densities={(density) => (
+        <LicenceActivation
+          mode="account"
+          accountTokenProvider={accountTokenProvider}
+          fileAccept=".licence"
+          density={density}
+        />
+      )}
+    >
       <div style={stackStyle}>
         <SpecimenGroup label="Embedded account activation">
           <EmbeddedAccountActivation />

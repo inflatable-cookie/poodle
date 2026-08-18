@@ -6,9 +6,9 @@ export const avatarSpecimen = {
   id: "avatar-specimen",
   name: "Avatar",
   description: "Avatar specimen (contract §13): initials sizes, tone and shape, and an image avatar.",
-  tabs: ["examples", "sizes", "densities"],
+  tabs: ["examples", "sizes"],
   sizeAxis: ["xs", "sm", "md", "lg", "xl"],
-  densityAxis: ["compact", "default", "comfortable"],
+  densityAxis: [],
   groups: [
     { label: "Initials", instances: [
       {

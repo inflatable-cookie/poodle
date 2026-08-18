@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Surface, Tabs, type TabItem } from "@inflatable-cookie/poodle-react";
 import type { ControlDensity, ControlSize } from "@inflatable-cookie/poodle-react";
 
@@ -28,11 +28,25 @@ export function SpecimenLayout({
 }: SpecimenLayoutProps) {
   const [activeTab, setActiveTab] = useState<"examples" | "sizes" | "densities">(initialTab);
 
+  // An axis tab needs a renderer: without one the pane would be empty, which
+  // is exactly what the catalogue must never advertise. `show*` may hide a
+  // supplied renderer but cannot force a tabless pane.
   const tabs: TabItem[] = [
     { value: "examples", label: "Examples" },
-    ...(showSizes ? [{ value: "sizes", label: "Sizes" }] : []),
-    ...(showDensities ? [{ value: "densities", label: "Densities" }] : []),
+    ...(showSizes && sizes ? [{ value: "sizes", label: "Sizes" }] : []),
+    ...(showDensities && densities ? [{ value: "densities", label: "Densities" }] : []),
   ];
+
+  // The preview reuses one layout across scene slugs (SceneSpecimen). When the
+  // available tab set shrinks — e.g. Callout keeps Densities but Avatar does
+  // not — the retained active tab would point at a vanished pane and render a
+  // blank page. Normalize an invalid selection back to Examples whenever the
+  // tab set changes.
+  const tabKey = tabs.map((tab) => tab.value).join("|");
+  useEffect(() => {
+    const values = tabKey.split("|");
+    setActiveTab((current) => (values.includes(current) ? current : "examples"));
+  }, [tabKey]);
 
   const variants = (nodes: ReactNode) =>
     bareVariants ? (

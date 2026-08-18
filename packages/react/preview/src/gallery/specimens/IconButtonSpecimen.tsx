@@ -14,9 +14,11 @@ export function IconButtonSpecimen() {
 
   return (
     <SpecimenLayout
-      showDensities={false}
       sizes={(size) => (
         <IconButton icon="star" ariaLabel={`Favorite (${size})`} variant="secondary" size={size} />
+      )}
+      densities={(density) => (
+        <IconButton icon="star" ariaLabel={`Favorite (${density})`} variant="secondary" density={density} />
       )}
     >
       <SpecimenGroup label="Variants">

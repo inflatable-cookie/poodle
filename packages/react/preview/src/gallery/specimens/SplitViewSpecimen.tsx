@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { Region, SplitView } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 const frameStyle: CSSProperties = {
   height: "10rem",
@@ -13,9 +14,33 @@ const frameTallStyle: CSSProperties = { ...frameStyle, height: "16rem" };
 
 const fillStyle: CSSProperties = { width: "100%", height: "100%" };
 
+function axisSplit(sizeOrDensity: Record<string, unknown>) {
+  return (
+    <div style={frameStyle}>
+      <SplitView
+        orientation="horizontal"
+        {...sizeOrDensity}
+        primary={
+          <div className="poodle-specimen__fill" style={fillStyle}>
+            <Region label="Sidebar" color="blue" />
+          </div>
+        }
+        secondary={
+          <div className="poodle-specimen__fill" style={fillStyle}>
+            <Region label="Main content" color="green" />
+          </div>
+        }
+      />
+    </div>
+  );
+}
+
 export function SplitViewSpecimen() {
   return (
-    <div className="poodle-specimen">
+    <SpecimenLayout
+      sizes={(size) => axisSplit({ size })}
+      densities={(density) => axisSplit({ density })}
+    >
       {/* 1. Simple layout with Regions */}
       <SpecimenGroup label="Basic horizontal layout">
         <div style={frameStyle}>
@@ -173,6 +198,6 @@ export function SplitViewSpecimen() {
           />
         </div>
       </SpecimenGroup>
-    </div>
+    </SpecimenLayout>
   );
 }

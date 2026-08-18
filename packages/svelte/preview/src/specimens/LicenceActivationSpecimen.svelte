@@ -28,7 +28,7 @@
   let password = $state("");
 </script>
 
-<SpecimenLayout showSizes={false} showDensities={false}>
+<SpecimenLayout>
   {#snippet children()}
     <div class="poodle-licence-activation-specimen">
       <SpecimenGroup label="Embedded account activation">
@@ -95,6 +95,14 @@
         />
       </SpecimenGroup>
     </div>
+  {/snippet}
+
+  {#snippet sizes(size)}
+    <LicenceActivation mode="account" {accountTokenProvider} fileAccept=".licence" {size} />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <LicenceActivation mode="account" {accountTokenProvider} fileAccept=".licence" {density} />
   {/snippet}
 </SpecimenLayout>
 

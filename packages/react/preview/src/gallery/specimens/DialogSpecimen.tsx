@@ -1,6 +1,7 @@
 import { SpecimenGroup } from "../SpecimenGroup";
 import { useState, type CSSProperties } from "react";
 import { Button, Checkbox, Dialog, Field, Pill, Popover, Select, TextInput } from "@inflatable-cookie/poodle-react";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 const WIDTHS = ["sm", "md", "lg", "xl"] as const;
 type DialogWidth = (typeof WIDTHS)[number];
@@ -51,12 +52,47 @@ export function DialogSpecimen() {
   const [scrollableOpen, setScrollableOpen] = useState(false);
   const [widthOpenMap, setWidthOpenMap] = useState<Record<string, boolean>>({});
   const [overlayInDialogOpen, setOverlayInDialogOpen] = useState(false);
+  const [axisOpen, setAxisOpen] = useState<Record<string, boolean>>({});
 
   const setWidthOpen = (w: string, open: boolean) => setWidthOpenMap((prev) => ({ ...prev, [w]: open }));
+  const setAxis = (key: string, open: boolean) => setAxisOpen((prev) => ({ ...prev, [key]: open }));
 
   return (
-    <>
-            <SpecimenGroup label="Popover inside a dialog">
+    <SpecimenLayout
+      sizes={(size) => (
+        <>
+          <Button variant="secondary" onClick={() => setAxis(`size-${size}`, true)}>
+            Open {size} dialog
+          </Button>
+          <Dialog
+            open={axisOpen[`size-${size}`] ?? false}
+            onOpenChange={(open) => setAxis(`size-${size}`, open)}
+            title="Keyboard shortcuts"
+            showCloseButton
+            size={size}
+          >
+            <p>Command palette, save, and toggle comment live here.</p>
+          </Dialog>
+        </>
+      )}
+      densities={(density) => (
+        <>
+          <Button variant="secondary" onClick={() => setAxis(`density-${density}`, true)}>
+            Open {density} dialog
+          </Button>
+          <Dialog
+            open={axisOpen[`density-${density}`] ?? false}
+            onOpenChange={(open) => setAxis(`density-${density}`, open)}
+            title="Keyboard shortcuts"
+            showCloseButton
+            density={density}
+          >
+            <p>Command palette, save, and toggle comment live here.</p>
+          </Dialog>
+        </>
+      )}
+    >
+      <SpecimenGroup label="Popover inside a dialog">
         <Button variant="secondary" onClick={() => setOverlayInDialogOpen(true)}>
                       Open dialog
                     </Button>
@@ -359,6 +395,6 @@ export function DialogSpecimen() {
           </Popover>
         </Field>
       </Dialog>
-    </>
+    </SpecimenLayout>
   );
 }

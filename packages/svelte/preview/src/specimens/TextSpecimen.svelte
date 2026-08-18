@@ -1,9 +1,16 @@
 <script lang="ts">
   import { Stack, Text } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>
 
-<div class="poodle-specimen">
+<SpecimenLayout>
+  {#snippet sizes(size)}
+    {#if size === "xs" || size === "sm" || size === "md"}
+      <Text size={size}>Default body text for admin and product surfaces.</Text>
+    {/if}
+  {/snippet}
+
   <SpecimenGroup label="Tones">
     <Stack gap="sm">
       <Text>Default body text for admin and product surfaces.</Text>
@@ -35,12 +42,4 @@
       This text is intentionally long enough to wrap across multiple lines in a narrow container, then clamp after two visible lines.
     </Text>
   </SpecimenGroup>
-</div>
-
-<style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-</style>
+</SpecimenLayout>
