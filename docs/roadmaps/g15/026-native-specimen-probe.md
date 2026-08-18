@@ -1,10 +1,10 @@
 # g15.026 — Headless Native Specimen Probe
 
 Status: **planned** — orchestrator review required before dispatch
-Role: **completion child of `g15.011`.** That card scopes full Svelte, React,
-and GPUI pages; the audit delivered the web two-thirds and left the native
-third unmeasured. `g15.011` is not complete until this lands.
-Depends on: `g15.011` (audit)
+Role: **native completion lane for `g15.011`.** The audit left the GPUI third
+unmeasured. The separate `g15.027` lane closes human teaching judgment for the
+56 mechanically clear pages; `g15.011` requires both lanes.
+Consumes: `g15.011` partial screening baseline
 Governing refs: `specimen-catalogue-audit.md`,
 `../g14/026-human-centred-specimen-catalogue-audit.md` (audit rubric),
 `../../contracts/001-working-rules.md`

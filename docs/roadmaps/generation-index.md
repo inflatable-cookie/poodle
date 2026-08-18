@@ -1,25 +1,27 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-17
+Updated: 2026-08-18
 
 ## Active Track
 
 - `g15`
   - Status: active — `g15.001`–`g15.010` and `g15.014` complete;
-    `g15.011` ready next; `g15.013` final
+    `g15.011` partial with bounded continuation cards; `g15.015` next;
+    `g15.013` final
   - Posture: release-first v0.2.0 baseline
-  - Range: `001` to `014`
+  - Range: `001` to `033`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
     release baseline, not a parity architecture
   - Evidence: the v0.2.0 denominator is every public Svelte component
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: prepare and dispatch `g15.009`, then continue through `g15.012` in
-    runway order. The web release roster reads 175/175 focused evidence in
-    both Svelte and React, the independent `bun audit` advisory is closed, and
-    `g15.007` and `g15.008` have released their native roster/register rows.
-    `g15.013` remains the final certification gate.
+  - Next: review and dispatch `g15.015`, then execute the bounded specimen
+    continuation program. The web release roster reads 175/175 focused
+    evidence in both Svelte and React, the native implementation/specimen
+    closures are landed, and the independent `bun audit` advisory is closed.
+    `g15.012` follows the completed human-centred audit; `g15.013` remains the
+    final certification gate.
 
 ## Latest Completed Track
 

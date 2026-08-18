@@ -1,7 +1,7 @@
 # g15.015 — Specimen Caption Integrity
 
 Status: **planned** — orchestrator review required before dispatch
-Depends on: `g15.011` (audit)
+Consumes: `g15.011` partial screening baseline
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`,
 `../../contracts/001-working-rules.md`
 

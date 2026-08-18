@@ -1,7 +1,8 @@
 # g15.019 — GPUI Specimen Structure
 
 Status: **planned** — orchestrator review required before dispatch
-Depends on: `g15.011` (audit), `g15.017` (axis placement)
+Consumes: `g15.011` partial screening baseline
+Depends on: `g15.017` (axis placement)
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
 (Cross-Runtime Agreement), `../../contracts/001-working-rules.md`
 (Runtime Parity Authority)

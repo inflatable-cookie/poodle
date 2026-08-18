@@ -1,7 +1,7 @@
 # g15.017 — Specimen Axis Placement and Evidence
 
 Status: **planned** — orchestrator review required before dispatch
-Depends on: `g15.011` (audit)
+Consumes: `g15.011` partial screening baseline
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
 (Axis Eligibility), `../../contracts/001-working-rules.md`
 

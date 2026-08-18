@@ -4,7 +4,7 @@ Status: **partial** — a mechanical screening baseline for the web catalogue.
 Not the completed human-centred audit: GPUI was not rendered (`g15.026`), and
 the rubric's teaching judgment was applied to the three pilots only, not to all
 175 pages.
-Date: 2026-08-18 (revision 2; first pass 2026-08-17)
+Date: 2026-08-18 (revision 4; first pass 2026-08-17)
 Card: `docs/roadmaps/g15/011-specimen-catalogue-audit.md`
 Handoff: `docs/handoffs/20260817-214451-g15-011-specimen-catalogue-audit.md`
 Governing refs: `release-baseline-roster.md`, `specimen-plan-outline.md`,
@@ -89,9 +89,10 @@ Those two questions need a person, and a person answered them for three pages:
 Button, RangeSlider, and Tabs.
 
 So read an **A** as "no measured defect", not as "judged a good teaching page".
-A page can screen A and still open on a prop showcase. Each curation tranche
-applies the human judgment to its own family, which is why every tranche card
-carries a live operator-review checkpoint.
+A page can screen A and still open on a prop showcase. Each defect-led curation
+tranche applies the human judgment to its own family. The 56 pages that
+screened clear are covered separately by the exact `g15.028`–`g15.033` review
+partition. Every child carries a live operator-review checkpoint for changes.
 
 Defects are weighted. A minor defect (one missing axis, a hand-rolled caption
 idiom, narrow overflow) scores 1; a major one (captions that do not render, an
@@ -294,15 +295,16 @@ inspection. Four results changed:
   A, B, B respectively.
 - **GPUI grades are now labelled provisional** rather than presented alongside
   live-measured ones without qualification, and `g15.026` is named as the
-  completion child rather than a follow-on.
+  native completion lane rather than an optional follow-on.
 - **The interaction result is now source-checked, not heuristic.** Revision 2
   scored "20 pages whose controls do nothing" as a defect while its own prose
   admitted the probe cannot see clipboard writes, hover surfaces, or
   navigation. Each flagged page was checked against its specimen source; 14 are
   genuinely unwired and six are not defects at all.
 - **The grades are labelled as screening grades.** They do not assert the
-  rubric's teaching judgment, which a person applied to the three pilots and
-  which each curation tranche applies to its own family.
+  rubric's teaching judgment, which a person applied to the three pilots,
+  defect-led tranches apply to their families, and `g15.028`–`g15.033` apply
+  to the 56 pages that screened clear.
 
 ## Pilot Findings
 
@@ -366,9 +368,9 @@ taught it. Both web pages now carry a stateful `ariaExpanded` trigger with its
 readout, and a focused test asserts the distinction rather than accepting a
 chevron as evidence.
 
-## Proposed Curation Tranches
+## Continuation Runway
 
-The 120 `curation-tranche` entries group into bounded, reviewable families.
+The 116 `curation-tranche` entries group into bounded, reviewable families.
 Each is a planned card requiring orchestrator review before dispatch, and each
 that changes specimen presentation carries a live operator-review checkpoint.
 
@@ -381,20 +383,23 @@ that changes specimen presentation carries a live operator-review checkpoint.
 | ↳ [`g15.020`](020-curate-model-connection-licence.md)–[`g15.025`](025-curate-collections-navigation-tail.md) | six bounded family children, one exact page list each | 6–11 each, 53 total |
 | [`g15.019`](019-gpui-specimen-structure.md) | Native axis panes and captions | 59 + 6 pages |
 | [`g15.026`](026-native-specimen-probe.md) | The headless native probe that un-provisions the GPUI column | 174 pages |
+| [`g15.027`](027-screen-clear-human-review.md) | Human teaching review for mechanically clear pages — **parent, not dispatchable** | 56 pages |
+| ↳ [`g15.028`](028-review-foundation-controls-entry.md)–[`g15.033`](033-review-composition-forms-data-media.md) | six bounded family children, one exact page list each | 7–14 each, 56 total |
 
 Ordering matters: `g15.015` first, because it closes the gate that let the
 worst class ship. `g15.017` before `g15.019`, because the native axis work
 depends on `audio_specimens` separating its axis groups.
 
-**`g15.026` is `g15.011`'s completion child, not a follow-on.** `g15.011`
-scopes full Svelte, React, and GPUI pages and carries the all-runtime rubric.
-This document delivers the web two-thirds. The card is not complete until the
-native third is measured to the same standard, and this artifact should be read
-as the partial baseline it says it is at the top.
+**`g15.011` has two completion lanes, not one.** `g15.026` replaces the
+provisional GPUI column with live headless evidence. `g15.028`–`g15.033` apply
+the human teaching rubric to the 56 pages that screened clear and therefore do
+not belong to a defect-led tranche. The card is complete only when both lanes
+land; until then this artifact is the partial baseline named at the top.
 
-The 20 inert-control pages are not their own card: each sits inside the family
-tranche that already owns its page, and the tranche decides per page whether a
-control should be wired or removed.
+The interaction probe nominated 20 pages. Source review confirmed 14 as
+unwired; those pages sit inside the defect-led family tranche that already owns
+them. The other six are recorded as non-defect notes and stay in the
+screen-clear review partition where applicable.
 
 ## Per-Component Inventory
 

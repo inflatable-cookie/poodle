@@ -3,7 +3,7 @@
 Status: **planned** — orchestrator review required before dispatch
 Parent: `018-overloaded-examples-curation.md` (method, acceptance, stop
 conditions — this card does not restate them)
-Depends on: `g15.011`
+Consumes: `g15.011` partial screening baseline
 Sequenced after `g15.017`, which splits `poodle_render::audio_specimens`'s
 axis groups from its example groups — curating before that would re-count the
 matrices as examples.

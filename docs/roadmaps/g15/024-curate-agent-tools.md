@@ -3,7 +3,7 @@
 Status: **planned** — orchestrator review required before dispatch
 Parent: `018-overloaded-examples-curation.md` (method, acceptance, stop
 conditions — this card does not restate them)
-Depends on: `g15.011`
+Consumes: `g15.011` partial screening baseline
 Sequenced after `g15.015`, which restores the 52 blank captions. Curating
 before that would be cutting examples nobody can read.
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`

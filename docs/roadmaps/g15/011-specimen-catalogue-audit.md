@@ -1,6 +1,8 @@
 # g15.011 — Human-Centred Specimen Catalogue Audit
 
-Status: **ready** — `g15.010` accepted and merged
+Status: **partial** — screening baseline and three pilots delivered; completion
+requires the native probe (`g15.026`) and the screen-clear human review
+children (`g15.028`–`g15.033`)
 Depends on: `g15.001` (measured roster), `g15.010` (final GPUI specimen set);
 carries forward `g14.026` with its
 rubric and bounded shared specimen-plan boundary intact
@@ -66,10 +68,19 @@ codegen, generated adapter, or runtime consumer.
 - [ ] Page-by-page inventory with curation grades and named defects.
 - [ ] Operator-approved pilot pages for Button, RangeSlider, and Tabs.
 - [ ] Evidence that no `Conformance` projection tab exists.
-- [ ] Remaining work split into reviewable curation tranches (new bounded
-      cards), not one catalogue-wide rewrite.
+- [ ] Remaining work split into reviewable curation and screen-clear review
+      tranches (new bounded cards), not one catalogue-wide rewrite.
 - [ ] The operator reviews the three live pilot pages before the worker calls
       them approved. Unreviewed pages remain an explicit PR item.
+
+## Continuation
+
+The delivered A–D table is a mechanical screening baseline, not the completed
+human-centred verdict. `g15.026` replaces the provisional GPUI column with
+live headless evidence. `g15.027` is a non-dispatchable parent whose six exact
+children (`g15.028`–`g15.033`) apply the teaching rubric to the 56 pages that
+screened clear and therefore do not appear in a defect-led curation tranche.
+This card completes only after both lanes land.
 
 ## Stop Conditions
 

@@ -1,6 +1,6 @@
 # g15.011 — Human-Centred Specimen Catalogue Audit (August batch log)
 
-Date: 2026-08-17 (revision 2: 2026-08-18)
+Date: 2026-08-17 (revision 4: 2026-08-18)
 Card: `docs/roadmaps/g15/011-specimen-catalogue-audit.md`
 Handoff: `docs/handoffs/20260817-214451-g15-011-specimen-catalogue-audit.md`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-f6b446e9`
@@ -15,11 +15,11 @@ cards.
 
 **This is a partial delivery of `g15.011`, not its completion.** The card scopes
 full Svelte, React, and GPUI pages; GPUI could not be rendered and its grades
-are structural and provisional. `g15.026` is the completion child. The audit's
-A–D grades are screening grades from measured signals; the rubric's teaching
-judgment — does the first example show normal use, are the variants meaningful
-— was applied to the three pilots, and each curation tranche applies it to its
-own family.
+are structural and provisional. `g15.026` is the native completion lane. The
+audit's A–D grades are screening grades from measured signals; the rubric's
+teaching judgment — does the first example show normal use, are the variants
+meaningful — was applied to the three pilots. Defect-led tranches apply it to
+their families; `g15.028`–`g15.033` cover the 56 pages that screened clear.
 
 Audit: `docs/roadmaps/g15/specimen-catalogue-audit.md`.
 Outline: `docs/roadmaps/g15/specimen-plan-outline.md`.
@@ -185,7 +185,7 @@ including four flagged judgement calls: remaining tab-control density on the
 Tabs page, removal of its collapse-toggle demo, GPUI Tabs staying at eight
 sections, and sentence-style captions.
 
-## Proposed Curation Tranches
+## Proposed Continuation Cards
 
 Planned, orchestrator-review-required, not dispatched:
 
@@ -196,6 +196,8 @@ Planned, orchestrator-review-required, not dispatched:
   family children `g15.020`–`g15.025`
 - `g15.019` — GPUI specimen structure
 - `g15.026` — the headless native probe that un-provisions the GPUI column
+- `g15.027` — non-dispatchable screen-clear review parent, with six exact
+  family children `g15.028`–`g15.033`
 
 ## Rejected Machinery Stays Rejected
 
@@ -243,11 +245,25 @@ The orchestrator requested changes again. Three blockers, all addressed:
 
 2. **`g15.011` was called complete while a required runtime was unaudited.**
    The audit's status is now `partial`, this log says the same, and `g15.026`
-   is marked `g15.011`'s **completion child** rather than a follow-on. The card
-   is not complete until the native third is measured.
+   is marked `g15.011`'s native completion lane rather than an optional
+   follow-on. Revision 4 adds the separate human-review completion lane. The
+   card is not complete until both land.
 
 3. **Tranche arithmetic did not reconcile and children had no lists.** The
    audit said 58, the parent said 50, the children summed to 48. All three are
    now 53, and each child carries an exact, exhaustive page list — one
    partition of the same 53 pages, so two workers cannot choose different
    subsets.
+
+## Review Response (revision 4)
+
+The final orchestrator review found that the partial status was honest but its
+completion plan was not yet complete: 56 `keep` pages had no human teaching
+judgment, while `g15.026` only closed native measurement.
+
+- `g15.027` now owns that missing lane as a non-dispatchable parent.
+- `g15.028`–`g15.033` partition all 56 screen-clear pages exactly once in six
+  bounded family batches.
+- `g15.011` now completes only after the native probe and all six review
+  children land.
+- Stale revision, 120/116, 20/14, and circular dependency wording is corrected.

@@ -1,7 +1,7 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.010` and `g15.014` complete; `g15.011`
-ready next
+partial with bounded continuation cards; `g15.015` next
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -62,10 +62,19 @@ and status advance are the orchestrator's.
 8. [008 — Model-connection family native completion](008-model-connection-family-native-completion.md) — complete; PR #33 closed the model-connection native family
 9. [009 — Update, settings, Radio & context-provider native closure](009-update-settings-radio-native-closure.md) — complete; PR #34 closed the scoped native surfaces and declared UiPresentationProvider's remaining cascade gap
 10. [010 — Display, workstation & agent GPUI specimens](010-display-workstation-agent-gpui-specimens.md) — complete; PR #35 closed all 18 measured GPUI specimen gaps
-11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — ready next; carries `g14.026`
-12. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — per the `g14.022` decision; headless capture required
-13. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
-14. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after `008`–`012`
+11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — partial; screening baseline and three approved pilots delivered
+12. [015 — Specimen caption integrity](015-specimen-caption-integrity.md) — next; closes the gate hole that hid blank captions
+13. [016 — Specimen idiom convergence](016-specimen-idiom-convergence.md) — after `015`
+14. [017 — Specimen axis placement](017-specimen-axis-placement.md) — required before native structure work
+15. [018 — Overloaded Examples curation](018-overloaded-examples-curation.md) — non-dispatchable parent for exact children `020`–`025`
+16. [019 — GPUI specimen structure](019-gpui-specimen-structure.md) — after `017`
+17. [020–025 — Overloaded Examples family children](020-curate-model-connection-licence.md) — exact 53-page partition; follow each child's dependencies
+18. [026 — Headless native specimen probe](026-native-specimen-probe.md) — native completion lane for `011`
+19. [027 — Screen-clear human review](027-screen-clear-human-review.md) — non-dispatchable parent for exact children `028`–`033`
+20. [028–033 — Screen-clear family review children](028-review-foundation-controls-entry.md) — exact 56-page partition; after `026`
+21. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — after `011` completes; headless capture required
+22. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
+23. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after the full specimen program and `012`
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)
@@ -94,8 +103,8 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Launch `g15.011` from
-`docs/handoffs/20260817-214451-g15-011-specimen-catalogue-audit.md`.
-`g15.012` follows in runway order;
-`g15.013` stays blocked as the final certification gate until every earlier
-card is complete. Release mutation remains behind the explicit operator gate.
+Review `g15.015` for dispatch. `g15.011` remains partial until `g15.026` and
+all six screen-clear review children (`g15.028`–`g15.033`) land; defect-led
+curation proceeds through `g15.015`–`g15.025`. `g15.012` follows the completed
+audit. `g15.013` stays blocked as the final certification gate. Release
+mutation remains behind the explicit operator gate.

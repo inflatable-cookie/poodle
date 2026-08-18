@@ -27,7 +27,7 @@ unfinished earlier card to be waived.
       cleared from `effigy qa`.
 - [x] `g15.007` landed: Licence native rows and the shared release roster and
       gap register are current before certification begins.
-- [ ] `g15.008`–`g15.010` landed: remaining native declarations, shared Rust
+- [x] `g15.008`–`g15.010` landed: remaining native declarations, shared Rust
       rendering, and GPUI specimen gaps are closed.
 - [ ] `g15.011` landed: the human-centred specimen catalogue audit is complete.
 - [ ] `g15.012` landed: the primitive-first visual conformance lane is complete.

@@ -1,7 +1,7 @@
 # g15.018 — Overloaded Examples Curation (parent)
 
 Status: **planned parent — not dispatchable**
-Depends on: `g15.011` (audit and its three approved pilots)
+Consumes: `g15.011` partial screening baseline and its three approved pilots
 Children: `g15.020`–`g15.025`
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
 (Section order, Section budget)

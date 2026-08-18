@@ -1,7 +1,8 @@
 # g15.016 — Specimen Idiom Convergence
 
 Status: **planned** — orchestrator review required before dispatch
-Depends on: `g15.011` (audit), `g15.015` (caption integrity)
+Consumes: `g15.011` partial screening baseline
+Depends on: `g15.015` (caption integrity)
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
 
 ## Outcome
