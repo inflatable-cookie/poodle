@@ -6,6 +6,7 @@ import {
   canonicalComponents,
   findCanonicalComponent,
   type CanonicalComponent,
+  type CatalogueCollectionId,
 } from "./generated/catalogue/catalogue";
 
 export type ComponentEntry = CatalogueNavEntry & {
@@ -32,8 +33,8 @@ export const webOnlyComponents: CanonicalComponent[] = [
     section: "systems",
     family: "audio-music",
     kind: "display",
-    collections: [],
-  } as CanonicalComponent,
+    collections: [] as const satisfies readonly CatalogueCollectionId[],
+  },
 ];
 
 export const allComponents: ComponentEntry[] = [...canonicalComponents, ...webOnlyComponents].map((component) => ({

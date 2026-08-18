@@ -9,6 +9,7 @@
   "include": [
     "src/**/*.d.ts",
     "scripts/**/*.ts",
+    "scripts/**/*.d.ts",
     "src/**/*.ts",
     "src/**/*.svelte",
     "vite.config.ts"

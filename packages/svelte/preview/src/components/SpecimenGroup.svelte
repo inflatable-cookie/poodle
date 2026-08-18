@@ -1,15 +1,24 @@
 <script lang="ts">
-  import { Eyebrow, Surface } from "@inflatable-cookie/poodle-svelte";
+  import { Eyebrow, Surface, Text } from "@inflatable-cookie/poodle-svelte";
   let {
     label,
+    description,
     /** When true, renders without Surface wrapper — for components that are surfaces themselves. */
     bare = false,
     children,
-  }: { label: string; bare?: boolean; children?: import("svelte").Snippet } = $props();
+  }: {
+    label: string;
+    description?: string;
+    bare?: boolean;
+    children?: import("svelte").Snippet;
+  } = $props();
 </script>
 
 <div class="poodle-specimen-group">
   <Eyebrow>{label}</Eyebrow>
+  {#if description}
+    <Text tone="muted" size="sm" spacing="compact">{description}</Text>
+  {/if}
   {#if bare}
     <div class="poodle-specimen-group__content">
       {@render children?.()}

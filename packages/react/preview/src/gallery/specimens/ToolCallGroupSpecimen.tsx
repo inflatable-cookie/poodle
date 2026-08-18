@@ -23,23 +23,35 @@ export function ToolCallGroupSpecimen() {
       sizes={(size) => <ToolCallGroup id={`sz-${size}`} calls={three} size={size} />}
       densities={(density) => <ToolCallGroup id={`dn-${density}`} calls={three} density={density} />}
     >
-      <SpecimenGroup label="Single call">
+      <SpecimenGroup
+        label="Single call"
+        description="One call renders no toggle at all — not a disabled one, none, so there is no stray tab stop."
+      >
         <ToolCallGroup id="single" calls={[call("only", "bun test")]} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Collapsed and expanded">
+      <SpecimenGroup
+        label="Collapsed and expanded"
+        description="Collapsed shows the newest call. Expanded lists chronologically and ends on that same call, so the row you were reading does not move."
+      >
         <ToolCallGroup id="three" calls={three} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="A long run">
+      <SpecimenGroup label="A long run" description="Thirty calls behind one row.">
         <ToolCallGroup id="many" calls={many} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Buried failure">
+      <SpecimenGroup
+        label="Buried failure"
+        description="The failure is not the newest call. Without run status it would be invisible until someone expanded."
+      >
         <ToolCallGroup id="buried" calls={buriedFailure} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Running">
+      <SpecimenGroup
+        label="Running"
+        description="Running ranks below error: a run that already broke is not in progress."
+      >
         <ToolCallGroup id="running" calls={running} />
       </SpecimenGroup>
     </SpecimenLayout>

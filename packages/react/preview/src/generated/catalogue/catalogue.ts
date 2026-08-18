@@ -78,8 +78,7 @@ export const catalogueKinds = [
 	{ id: "composite", label: "Composite" },
 ] as const satisfies readonly CatalogueKind[];
 
-export const catalogueCollections = [
-] as const satisfies readonly CatalogueCollection[];
+export const catalogueCollections = [] as const satisfies readonly CatalogueCollection[];
 
 export const canonicalComponents: readonly CanonicalComponent[] = [
 	{
@@ -89,7 +88,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "actions-selection",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "checkbox",
@@ -98,7 +97,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "actions-selection",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "collapse-toggle",
@@ -107,7 +106,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "actions-selection",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "confirm-action",
@@ -116,7 +115,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "actions-selection",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "icon-button",
@@ -125,7 +124,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "actions-selection",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "radio",
@@ -134,7 +133,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "actions-selection",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "radio-group",
@@ -143,7 +142,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "actions-selection",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "segmented-control",
@@ -152,7 +151,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "actions-selection",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "split-button",
@@ -161,7 +160,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "actions-selection",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "switch",
@@ -170,7 +169,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "actions-selection",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "toggle-group",
@@ -179,7 +178,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "actions-selection",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "tri-state-switch",
@@ -188,7 +187,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "actions-selection",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "code-input",
@@ -197,7 +196,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "color-picker",
@@ -206,7 +205,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "drag-number-field",
@@ -215,7 +214,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "editable-label",
@@ -224,7 +223,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "embed-input",
@@ -233,7 +232,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "file-upload",
@@ -242,7 +241,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "number-input",
@@ -251,7 +250,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "range-slider",
@@ -260,7 +259,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "rating",
@@ -269,7 +268,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "ref-select",
@@ -278,7 +277,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "select",
@@ -287,7 +286,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "slider",
@@ -296,7 +295,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "text-input",
@@ -305,7 +304,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "theme-select",
@@ -314,7 +313,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "token-input",
@@ -323,7 +322,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "text-value-entry",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "calendar",
@@ -332,7 +331,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "date-time",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "date-picker",
@@ -341,7 +340,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "date-time",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "date-range-picker",
@@ -350,7 +349,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "date-time",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "date-time-picker",
@@ -359,7 +358,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "date-time",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "date-time-range-picker",
@@ -368,7 +367,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "date-time",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "date-time-zone-picker",
@@ -377,7 +376,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "date-time",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "duration-input",
@@ -386,7 +385,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "date-time",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "time-ago",
@@ -395,7 +394,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "date-time",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "time-input",
@@ -404,7 +403,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "date-time",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "time-zone-select",
@@ -413,7 +412,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "date-time",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "box",
@@ -422,7 +421,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "layout",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "grid",
@@ -431,7 +430,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "layout",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "list-grid",
@@ -440,7 +439,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "layout",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "region",
@@ -449,7 +448,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "layout",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "resize-handle",
@@ -458,7 +457,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "layout",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "scroll-shell",
@@ -467,7 +466,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "layout",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "separator",
@@ -476,7 +475,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "layout",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "spacer",
@@ -485,7 +484,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "layout",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "split-view",
@@ -494,7 +493,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "layout",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "stack",
@@ -503,7 +502,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "layout",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "surface",
@@ -512,7 +511,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "layout",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "avatar",
@@ -521,7 +520,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "card",
@@ -530,7 +529,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "code",
@@ -539,7 +538,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "detail-item",
@@ -548,7 +547,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "embed-preview",
@@ -557,7 +556,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "eyebrow",
@@ -566,7 +565,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "icon",
@@ -575,7 +574,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "icon-provider",
@@ -584,7 +583,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "meta-bar",
@@ -593,7 +592,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "meta-item",
@@ -602,7 +601,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "pill",
@@ -611,7 +610,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "text",
@@ -620,7 +619,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "text-link",
@@ -629,7 +628,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "ui-presentation-provider",
@@ -638,7 +637,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "content-identity",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "callout",
@@ -647,7 +646,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "empty-state",
@@ -656,7 +655,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "error-boundary",
@@ -665,7 +664,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "meter",
@@ -674,7 +673,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "metric-tile",
@@ -683,7 +682,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "page-loading",
@@ -692,7 +691,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "progress",
@@ -701,7 +700,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "remediation-banner",
@@ -710,7 +709,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "skeleton",
@@ -719,7 +718,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "spinner",
@@ -728,7 +727,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "state-tile",
@@ -737,7 +736,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "status-indicator",
@@ -746,7 +745,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "toast-host",
@@ -755,7 +754,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "toast-stack",
@@ -764,7 +763,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "foundations",
 		family: "status-progress",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "breadcrumbs",
@@ -773,7 +772,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "navigation",
 		kind: "navigation",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "nav-card",
@@ -782,7 +781,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "navigation",
 		kind: "navigation",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "navigation-menu",
@@ -791,7 +790,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "navigation",
 		kind: "navigation",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "pagination",
@@ -800,7 +799,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "navigation",
 		kind: "navigation",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "pagination-summary",
@@ -809,7 +808,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "navigation",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "sidebar-nav",
@@ -818,7 +817,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "navigation",
 		kind: "navigation",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "stepper",
@@ -827,7 +826,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "navigation",
 		kind: "navigation",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "tabs",
@@ -836,7 +835,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "navigation",
 		kind: "navigation",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "tree",
@@ -845,7 +844,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "navigation",
 		kind: "navigation",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "accordion",
@@ -854,7 +853,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "alert-dialog",
@@ -863,7 +862,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "collapsible",
@@ -872,7 +871,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "command-palette",
@@ -881,7 +880,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "context-menu",
@@ -890,7 +889,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "debug-dialog",
@@ -899,7 +898,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "dialog",
@@ -908,7 +907,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "drawer",
@@ -917,7 +916,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "form-dialog",
@@ -926,7 +925,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "hover-card",
@@ -935,7 +934,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "menu",
@@ -944,7 +943,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "menubar",
@@ -953,7 +952,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "popover",
@@ -962,7 +961,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "tooltip",
@@ -971,7 +970,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "overlays-disclosure",
 		kind: "overlay",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "block-editor",
@@ -980,7 +979,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "forms-validation",
 		kind: "form",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "field",
@@ -989,7 +988,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "forms-validation",
 		kind: "form",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "field-set",
@@ -998,7 +997,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "forms-validation",
 		kind: "form",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "form-actions",
@@ -1007,7 +1006,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "forms-validation",
 		kind: "form",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "form-layout",
@@ -1016,7 +1015,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "forms-validation",
 		kind: "form",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "inline-list-section",
@@ -1025,7 +1024,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "forms-validation",
 		kind: "form",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "markdown-editor",
@@ -1034,7 +1033,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "forms-validation",
 		kind: "form",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "password-requirements",
@@ -1043,7 +1042,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "forms-validation",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "validation-summary",
@@ -1052,7 +1051,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "forms-validation",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "bulk-action-bar",
@@ -1061,7 +1060,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "feedback",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "card-radio-group",
@@ -1070,7 +1069,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "card-toggle-group",
@@ -1079,7 +1078,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "data-table",
@@ -1088,7 +1087,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "editable-list",
@@ -1097,7 +1096,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "filter-builder",
@@ -1106,7 +1105,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "filter-toolbar",
@@ -1115,7 +1114,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "list-card",
@@ -1124,7 +1123,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "list-card-counter",
@@ -1133,7 +1132,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "list-container",
@@ -1142,7 +1141,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "log-list",
@@ -1151,7 +1150,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "order-by",
@@ -1160,7 +1159,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "picker-shell",
@@ -1169,7 +1168,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "relation-picker",
@@ -1178,7 +1177,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "selection-summary",
@@ -1187,7 +1186,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "table",
@@ -1196,7 +1195,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "data-collections",
 		kind: "data",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "audio-player",
@@ -1205,7 +1204,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "media",
 		kind: "media",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "media-browse-panel",
@@ -1214,7 +1213,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "media",
 		kind: "media",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "media-picker",
@@ -1223,7 +1222,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "media",
 		kind: "media",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "media-preview",
@@ -1232,7 +1231,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "media",
 		kind: "media",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "media-thumbnail",
@@ -1241,7 +1240,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "media",
 		kind: "media",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "video-player",
@@ -1250,7 +1249,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "composition",
 		family: "media",
 		kind: "media",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "action-discovery-panel",
@@ -1259,7 +1258,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "application-shell",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "app-header",
@@ -1268,7 +1267,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "application-shell",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "detail-section",
@@ -1277,7 +1276,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "application-shell",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "detail-section-group",
@@ -1286,7 +1285,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "application-shell",
 		kind: "layout",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "detail-shell",
@@ -1295,7 +1294,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "application-shell",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "dock-region",
@@ -1304,7 +1303,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "application-shell",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "history-center",
@@ -1313,7 +1312,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "application-shell",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "message-center",
@@ -1322,7 +1321,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "application-shell",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "page-header",
@@ -1331,7 +1330,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "application-shell",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "settings-shell",
@@ -1340,7 +1339,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "application-shell",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "status-bar",
@@ -1349,7 +1348,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "application-shell",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "toolbar",
@@ -1358,7 +1357,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "application-shell",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "agent-chat-input",
@@ -1367,7 +1366,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "agent-tools",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "agent-message",
@@ -1376,7 +1375,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "agent-tools",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "agent-plan",
@@ -1385,7 +1384,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "agent-tools",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "agent-plan-record",
@@ -1394,7 +1393,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "agent-tools",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "agent-question",
@@ -1403,7 +1402,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "agent-tools",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "agent-question-record",
@@ -1412,7 +1411,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "agent-tools",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "agent-subagent",
@@ -1421,7 +1420,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "agent-tools",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "agent-transcript",
@@ -1430,7 +1429,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "agent-tools",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "changed-files",
@@ -1439,7 +1438,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "agent-tools",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "tool-call",
@@ -1448,7 +1447,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "agent-tools",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "tool-call-group",
@@ -1457,7 +1456,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "agent-tools",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "model-catalogue-editor",
@@ -1466,7 +1465,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "model-connections",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "model-connection-card",
@@ -1475,7 +1474,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "model-connections",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "model-connection-picker",
@@ -1484,7 +1483,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "model-connections",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "model-connection-setup",
@@ -1493,7 +1492,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "model-connections",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "model-picker",
@@ -1502,7 +1501,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "model-connections",
 		kind: "input",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "audio-meter",
@@ -1511,7 +1510,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "audio-music",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "audio-switch",
@@ -1520,7 +1519,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "audio-music",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "envelope-editor",
@@ -1529,7 +1528,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "audio-music",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "fader",
@@ -1538,7 +1537,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "audio-music",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "gain-reduction-meter",
@@ -1547,7 +1546,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "audio-music",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "keyboard",
@@ -1556,7 +1555,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "audio-music",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "knob",
@@ -1565,7 +1564,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "audio-music",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "mod-matrix-grid",
@@ -1574,7 +1573,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "audio-music",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "value-readout",
@@ -1583,7 +1582,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "audio-music",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "waveform-display",
@@ -1592,7 +1591,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "audio-music",
 		kind: "display",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "xy-pad",
@@ -1601,7 +1600,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "audio-music",
 		kind: "control",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "licence-activation",
@@ -1610,7 +1609,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "account-lifecycle",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "licence-seats",
@@ -1619,7 +1618,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "account-lifecycle",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "licence-status",
@@ -1628,7 +1627,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "account-lifecycle",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "update-center",
@@ -1637,7 +1636,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "account-lifecycle",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 	{
 		slug: "update-status",
@@ -1646,7 +1645,7 @@ export const canonicalComponents: readonly CanonicalComponent[] = [
 		section: "systems",
 		family: "account-lifecycle",
 		kind: "composite",
-		collections: [],
+		collections: [] as const satisfies readonly CatalogueCollectionId[],
 	},
 ];
 

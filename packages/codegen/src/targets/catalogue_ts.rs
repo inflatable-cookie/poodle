@@ -106,20 +106,24 @@ fn render_module(document: &Document, source_path: &str) -> String {
     }
     out.push_str("] as const satisfies readonly CatalogueKind[];\n\n");
 
-    out.push_str("export const catalogueCollections = [\n");
-    for collection in &document.collections {
-        out.push_str(&format!(
-            "\t{{ id: {}, label: {} }},\n",
-            ts_string_literal(&collection.id),
-            ts_string_literal(&collection.label)
-        ));
+    if document.collections.is_empty() {
+        out.push_str("export const catalogueCollections = [] as const satisfies readonly CatalogueCollection[];\n\n");
+    } else {
+        out.push_str("export const catalogueCollections = [\n");
+        for collection in &document.collections {
+            out.push_str(&format!(
+                "\t{{ id: {}, label: {} }},\n",
+                ts_string_literal(&collection.id),
+                ts_string_literal(&collection.label)
+            ));
+        }
+        out.push_str("] as const satisfies readonly CatalogueCollection[];\n\n");
     }
-    out.push_str("] as const satisfies readonly CatalogueCollection[];\n\n");
 
     out.push_str("export const canonicalComponents: readonly CanonicalComponent[] = [\n");
     for component in components_in_order(document) {
         let collections = if component.collections.is_empty() {
-            "[]".to_owned()
+            "[] as const satisfies readonly CatalogueCollectionId[]".to_owned()
         } else {
             format!(
                 "[{}]",

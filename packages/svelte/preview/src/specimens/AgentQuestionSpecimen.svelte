@@ -45,7 +45,7 @@
 
 <SpecimenLayout>
   <SpecimenGroup
-    title="Hosted by the composer"
+    label="Hosted by the composer"
     description="The arrangement this component exists for: the question sits above the editor, and that editor is its free-text override. Type to see the selection clear."
   >
     <AgentChatInput
@@ -69,26 +69,26 @@
     </p>
   </SpecimenGroup>
 
-  <SpecimenGroup title="Single select" description="One click both selects and submits — the first click is also the last.">
+  <SpecimenGroup label="Single select" description="One click both selects and submits — the first click is also the last.">
     <AgentQuestion questions={[placement]} />
   </SpecimenGroup>
 
   <SpecimenGroup
-    title="Multi select"
+    label="Multi select"
     description="Checkboxes appear only here, so the mode is visible before the first click. Submit is always explicit."
   >
     <AgentQuestion questions={[targets]} bind:selections={multiSelections} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Batch" description="Progress reports position. It is not navigation — going back would change an answer the agent already has.">
+  <SpecimenGroup label="Batch" description="Progress reports position. It is not navigation — going back would change an answer the agent already has.">
     <AgentQuestion questions={batch} bind:activeIndex={batchIndex} bind:selections={batchSelections} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Dismissible" description="Dismissal resolves as declined and advances; it does not abandon the turn.">
+  <SpecimenGroup label="Dismissible" description="Dismissal resolves as declined and advances; it does not abandon the turn.">
     <AgentQuestion questions={[placement]} dismissible />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Without shortcuts">
+  <SpecimenGroup label="Without shortcuts">
     <AgentQuestion questions={[placement]} showShortcuts={false} />
   </SpecimenGroup>
 

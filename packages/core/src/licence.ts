@@ -440,7 +440,7 @@ export function resolveLicenceSubmit(
         throw new Error("A key-format adapter is required for key activation.");
       }
       const result = keyFormat.parse(draft.key);
-      if (!result.ok) {
+      if (result.ok === false) {
         return { outcome: "reject", message: licenceKeyProblemMessage(result.problem, keyFormat) };
       }
       return { outcome: "emit", credential: { kind: "key", key: draft.key }, label };

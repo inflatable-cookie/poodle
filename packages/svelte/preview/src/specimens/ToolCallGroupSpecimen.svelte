@@ -23,23 +23,23 @@
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup title="Single call" description="One call renders no toggle at all — not a disabled one, none, so there is no stray tab stop.">
+  <SpecimenGroup label="Single call" description="One call renders no toggle at all — not a disabled one, none, so there is no stray tab stop.">
     <ToolCallGroup id="single" calls={[call("only", "bun test")]} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Collapsed and expanded" description="Collapsed shows the newest call. Expanded lists chronologically and ends on that same call, so the row you were reading does not move.">
+  <SpecimenGroup label="Collapsed and expanded" description="Collapsed shows the newest call. Expanded lists chronologically and ends on that same call, so the row you were reading does not move.">
     <ToolCallGroup id="three" calls={three} bind:expanded={expandedThree} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="A long run" description="Thirty calls behind one row.">
+  <SpecimenGroup label="A long run" description="Thirty calls behind one row.">
     <ToolCallGroup id="many" calls={many} bind:expanded={expandedMany} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Buried failure" description="The failure is not the newest call. Without run status it would be invisible until someone expanded.">
+  <SpecimenGroup label="Buried failure" description="The failure is not the newest call. Without run status it would be invisible until someone expanded.">
     <ToolCallGroup id="buried" calls={buriedFailure} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Running" description="Running ranks below error: a run that already broke is not in progress.">
+  <SpecimenGroup label="Running" description="Running ranks below error: a run that already broke is not in progress.">
     <ToolCallGroup id="running" calls={running} />
   </SpecimenGroup>
 

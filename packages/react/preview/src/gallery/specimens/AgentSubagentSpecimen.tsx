@@ -30,10 +30,16 @@ export function AgentSubagentSpecimen() {
       )}
       densities={(density) => <AgentSubagent item={item()} density={density} />}
     >
-      <SpecimenGroup label="Running">
+      <SpecimenGroup
+        label="Running"
+        description="The child works alongside the turn: identity and status in the header, a dots spinner and a live one-line activity beneath."
+      >
         <AgentSubagent item={item()} detailLines={detailLines} />
       </SpecimenGroup>
-      <SpecimenGroup label="Waiting">
+      <SpecimenGroup
+        label="Waiting"
+        description="A paused child is not actively working, so there is no spinner — only the activity line."
+      >
         <AgentSubagent
           item={item({
             status: "waiting",
@@ -41,10 +47,16 @@ export function AgentSubagentSpecimen() {
           })}
         />
       </SpecimenGroup>
-      <SpecimenGroup label="Completed">
+      <SpecimenGroup
+        label="Completed"
+        description="A settled child shows what it accomplished — the summary replaces the activity line, and nothing spins."
+      >
         <AgentSubagent item={item({ status: "completed" })} />
       </SpecimenGroup>
-      <SpecimenGroup label="Failed">
+      <SpecimenGroup
+        label="Failed"
+        description="The failure carries its own colour, and the summary says what went wrong."
+      >
         <AgentSubagent
           item={item({
             status: "failed",
@@ -52,12 +64,18 @@ export function AgentSubagentSpecimen() {
           })}
         />
       </SpecimenGroup>
-      <SpecimenGroup label="Unknown">
+      <SpecimenGroup
+        label="Unknown"
+        description="The provider supplied no portable status, so the badge reads literally 'Unknown' — never prettified, and no spinner."
+      >
         <AgentSubagent
           item={item({ status: "unknown", activityLine: undefined })}
         />
       </SpecimenGroup>
-      <SpecimenGroup label="Expanded">
+      <SpecimenGroup
+        label="Expanded"
+        description="The disclosure reveals the child's recent activity lines — a simple block list for v1."
+      >
         <AgentSubagent item={item()} detailLines={detailLines} expanded />
       </SpecimenGroup>
     </SpecimenLayout>

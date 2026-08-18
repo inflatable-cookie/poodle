@@ -32,7 +32,7 @@
   ];
 
   let page = $state(2);
-  let state: "ready" | "loading" | "empty" | "error" = $state("ready");
+  let containerState: "ready" | "loading" | "empty" | "error" = $state("ready");
   let filtersCollapsed = $state(false);
 
   let visibleFrom = $derived(items.length === 0 ? 0 : ((page - 1) * 3) + 1);
@@ -118,16 +118,16 @@
 
   <SpecimenGroup label="State handling" bare>
       <div class="poodle-specimen__state-buttons">
-        <Button variant={state === "ready" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (state = "ready")}>Ready</Button>
-        <Button variant={state === "loading" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (state = "loading")}>Loading</Button>
-        <Button variant={state === "empty" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (state = "empty")}>Empty</Button>
-        <Button variant={state === "error" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (state = "error")}>Error</Button>
+        <Button variant={containerState === "ready" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (containerState = "ready")}>Ready</Button>
+        <Button variant={containerState === "loading" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (containerState = "loading")}>Loading</Button>
+        <Button variant={containerState === "empty" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (containerState = "empty")}>Empty</Button>
+        <Button variant={containerState === "error" ? "primary" : "ghost"} sizeRole="chrome" onClick={() => (containerState = "error")}>Error</Button>
       </div>
 
       <ListContainer
         title="Workflow incidents"
         subtitle="Review how the built-in state surfaces read inside the list shell."
-        {state}
+        state={containerState}
         loadingMessage="Loading workflow incidents..."
         errorMessage="The list failed to load after the latest refresh."
         emptyTitle="No incidents found"

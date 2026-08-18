@@ -61,7 +61,10 @@ export function AgentQuestionRecordSpecimen() {
         <AgentQuestionRecord question={placement} answer={selected} density={density} />
       )}
     >
-      <SpecimenGroup label="Selected">
+      <SpecimenGroup
+        label="Selected"
+        description="Every option stays. Why the agent did something is usually answered by what it did not do, and a record showing only the chosen option cannot tell you whether the choice was between three reasonable things or the only one on offer."
+      >
         <AgentQuestionRecord question={placement} answer={selected} />
       </SpecimenGroup>
 
@@ -69,7 +72,7 @@ export function AgentQuestionRecordSpecimen() {
         <AgentQuestionRecord question={targets} answer={several} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Override">
+      <SpecimenGroup label="Override" description="No option list — none was taken.">
         <AgentQuestionRecord question={placement} answer={override} />
       </SpecimenGroup>
 

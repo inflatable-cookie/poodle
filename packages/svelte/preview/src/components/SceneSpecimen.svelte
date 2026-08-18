@@ -50,20 +50,27 @@
   {/if}
 {/snippet}
 
-{#snippet sizes(size: string)}
+{#snippet sizes(size)}
   {#if matrixInstance}
-    {@render renderInstance({ component: matrixInstance.component, props: { ...matrixInstance.props, size } })}
+    {@render renderInstance({
+      component: matrixInstance.component,
+      props: { ...matrixInstance.props, size: size as "xs" | "sm" | "md" | "lg" | "xl" },
+    })}
   {/if}
 {/snippet}
 
-{#snippet densities(density: string)}
+{#snippet densities(density)}
   {#if matrixInstance}
-    {@render renderInstance({ component: matrixInstance.component, props: { ...matrixInstance.props, density } })}
+    {@render renderInstance({
+      component: matrixInstance.component,
+      props: { ...matrixInstance.props, density: density as "compact" | "default" | "comfortable" },
+    })}
   {/if}
 {/snippet}
 
 {#if scene}
-  <SpecimenLayout {sizes} {densities}>
+  <!-- Scene matrix snippets cast axis values inside the snippet body. -->
+  <SpecimenLayout sizes={sizes as never} densities={densities as never}>
     {#each scene.groups as group}
       <SpecimenGroup label={group.label}>
         <div class="poodle-specimen__row">
