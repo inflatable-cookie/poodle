@@ -1,9 +1,10 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, Table};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{
-    ColumnAlign, ControlDensity, ControlSize, EyebrowSpec, TableColumn, TableRow, TableSpec,
-};
+use poodle_specs::{ColumnAlign, EyebrowSpec, TableColumn, TableRow, TableSpec};
 
 fn team_columns() -> Vec<TableColumn> {
     vec![
@@ -100,8 +101,9 @@ fn group(title: &str, theme: &GpuiThemeProvider, content: AnyElement) -> Div {
         .child(content)
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -158,46 +160,35 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
             )
             .into_any_element(),
         ))
-        // --- Sizes ---
-        .child(group("Sizes", theme, {
-            let sizes: &[(&str, ControlSize)] = &[
-                ("xs", ControlSize::Xs),
-                ("sm", ControlSize::Sm),
-                ("md", ControlSize::Md),
-                ("lg", ControlSize::Lg),
-                ("xl", ControlSize::Xl),
-            ];
-            let mut col = div().flex().flex_col().gap(px(16.0));
-            for &(key, size) in sizes {
-                col = col.child(Table::from_spec(
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "table",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                Table::from_spec(
                     TableSpec::new()
                         .with_columns(minimal_columns())
                         .with_rows(minimal_rows())
-                        .with_aria_label(format!("Table at {}", key))
+                        .with_aria_label("Package info")
                         .with_size(size),
                     theme,
-                ));
-            }
-            col.into_any_element()
-        }))
-        // --- Densities ---
-        .child(group("Densities", theme, {
-            let densities: &[(&str, ControlDensity)] = &[
-                ("compact", ControlDensity::Compact),
-                ("default", ControlDensity::Default),
-                ("comfortable", ControlDensity::Comfortable),
-            ];
-            let mut col = div().flex().flex_col().gap(px(16.0));
-            for &(key, density) in densities {
-                col = col.child(Table::from_spec(
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                Table::from_spec(
                     TableSpec::new()
                         .with_columns(minimal_columns())
                         .with_rows(minimal_rows())
-                        .with_aria_label(format!("Table at {}", key))
+                        .with_aria_label("Package info")
                         .with_density(density),
                     theme,
-                ));
-            }
-            col.into_any_element()
-        }))
+                )
+                .into_any_element()
+            }),
+    )
 }

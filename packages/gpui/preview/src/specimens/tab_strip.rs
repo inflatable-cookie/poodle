@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, TabStrip};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
@@ -226,27 +226,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "tab-strip",
         examples,
-        move |size, theme: &GpuiThemeProvider| {
-            TabStrip::from_spec(
-                TabStripSpec::new(make_items())
-                    .with_value("overview")
-                    .with_aria_label("Tab strip"),
-                theme,
-            )
-            .with_id(format!("tab-strip-size-{size:?}"))
-            .size(size)
-            .into_any_element()
-        },
-        move |density, theme: &GpuiThemeProvider| {
-            TabStrip::from_spec(
-                TabStripSpec::new(make_items())
-                    .with_value("overview")
-                    .with_aria_label("Tab strip"),
-                theme,
-            )
-            .with_id(format!("tab-strip-density-{density:?}"))
-            .density(density)
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(move |size, theme: &GpuiThemeProvider| {
+                TabStrip::from_spec(
+                    TabStripSpec::new(make_items())
+                        .with_value("overview")
+                        .with_aria_label("Tab strip"),
+                    theme,
+                )
+                .with_id(format!("tab-strip-size-{size:?}"))
+                .size(size)
+                .into_any_element()
+            })
+            .with_densities(move |density, theme: &GpuiThemeProvider| {
+                TabStrip::from_spec(
+                    TabStripSpec::new(make_items())
+                        .with_value("overview")
+                        .with_aria_label("Tab strip"),
+                    theme,
+                )
+                .with_id(format!("tab-strip-density-{density:?}"))
+                .density(density)
+                .into_any_element()
+            }),
     )
 }

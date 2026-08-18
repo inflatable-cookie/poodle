@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{ActionDiscoveryPanel, Eyebrow};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -112,11 +112,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ActionDiscoveryPanel::from_spec(grouped, theme)
                     .with_instance_id("grouped")
                     .on_select(Arc::new(move |id| {
-                    events.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                        key: "action-discovery-active".to_string(),
-                        value: id.to_string(),
-                    });
-                })),
+                        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                            key: "action-discovery-active".to_string(),
+                            value: id.to_string(),
+                        });
+                    })),
             ),
         ))
         .child(group(
@@ -153,21 +153,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "action-discovery-panel",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            framed(
-                theme,
-                ActionDiscoveryPanel::from_spec(compact_panel().with_size(size), theme)
-                    .with_instance_id(format!("size-{size:?}")),
-            )
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            framed(
-                theme,
-                ActionDiscoveryPanel::from_spec(compact_panel().with_density(density), theme)
-                    .with_instance_id(format!("density-{density:?}")),
-            )
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                framed(
+                    theme,
+                    ActionDiscoveryPanel::from_spec(compact_panel().with_size(size), theme)
+                        .with_instance_id(format!("size-{size:?}")),
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                framed(
+                    theme,
+                    ActionDiscoveryPanel::from_spec(compact_panel().with_density(density), theme)
+                        .with_instance_id(format!("density-{density:?}")),
+                )
+                .into_any_element()
+            }),
     )
 }

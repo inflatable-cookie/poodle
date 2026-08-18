@@ -1,13 +1,17 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, Radio};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{EyebrowSpec, RadioSpec};
 use std::sync::Arc;
 
-fn radio_select(state: &AppState, group: &'static str, value: &'static str) -> Arc<dyn Fn(bool) + Send + Sync> {
+fn radio_select(
+    state: &AppState,
+    group: &'static str,
+    value: &'static str,
+) -> Arc<dyn Fn(bool) + Send + Sync> {
     let events = state.node_events.clone();
     Arc::new(move |checked| {
         if checked {
@@ -102,27 +106,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "radio",
         examples,
-        move |size, theme: &GpuiThemeProvider| {
-            Radio::from_spec(
-                RadioSpec::new()
-                    .with_label("Standard shipping")
-                    .with_checked(true)
-                    .with_size(size),
-                theme,
-            )
-            .with_id(format!("specimen-size-{:?}", size))
-            .into_any_element()
-        },
-        move |density, theme: &GpuiThemeProvider| {
-            Radio::from_spec(
-                RadioSpec::new()
-                    .with_label("Standard shipping")
-                    .with_checked(true)
-                    .with_density(density),
-                theme,
-            )
-            .with_id(format!("specimen-density-{:?}", density))
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(move |size, theme: &GpuiThemeProvider| {
+                Radio::from_spec(
+                    RadioSpec::new()
+                        .with_label("Standard shipping")
+                        .with_checked(true)
+                        .with_size(size),
+                    theme,
+                )
+                .with_id(format!("specimen-size-{:?}", size))
+                .into_any_element()
+            })
+            .with_densities(move |density, theme: &GpuiThemeProvider| {
+                Radio::from_spec(
+                    RadioSpec::new()
+                        .with_label("Standard shipping")
+                        .with_checked(true)
+                        .with_density(density),
+                    theme,
+                )
+                .with_id(format!("specimen-density-{:?}", density))
+                .into_any_element()
+            }),
     )
 }

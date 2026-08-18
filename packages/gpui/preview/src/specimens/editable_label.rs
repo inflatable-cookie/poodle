@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{EditableLabel, Eyebrow};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
@@ -317,17 +317,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "editable-label",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            EditableLabel::from_spec(EditableLabelSpec::new().with_value("Editable"), theme)
-                .with_id(format!("specimen-size-{:?}", size))
-                .size(size)
-                .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            EditableLabel::from_spec(EditableLabelSpec::new().with_value("Editable"), theme)
-                .with_id(format!("specimen-density-{:?}", density))
-                .density(density)
-                .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                EditableLabel::from_spec(EditableLabelSpec::new().with_value("Editable"), theme)
+                    .with_id(format!("specimen-size-{:?}", size))
+                    .size(size)
+                    .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                EditableLabel::from_spec(EditableLabelSpec::new().with_value("Editable"), theme)
+                    .with_id(format!("specimen-density-{:?}", density))
+                    .density(density)
+                    .into_any_element()
+            }),
     )
 }

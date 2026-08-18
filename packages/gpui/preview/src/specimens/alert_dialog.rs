@@ -1,26 +1,30 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{AlertDialog, Button, Eyebrow};
+use crate::specimens::specimen_axes::{density_key, size_key};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     AlertDialogSpec, AlertDialogTone, ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec,
 };
 use std::sync::Arc;
 
-fn open_click(state: &AppState, key: &'static str) -> Arc<dyn Fn() + Send + Sync> {
+fn open_click(state: &AppState, key: impl Into<String>) -> Arc<dyn Fn() + Send + Sync> {
     let events = state.node_events.clone();
+    let key = key.into();
     Arc::new(move || {
         events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
-            key: key.to_string(),
+            key: key.clone(),
             value: true,
         });
     })
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
@@ -32,8 +36,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .get("alert-last-action")
         .cloned()
         .unwrap_or_default();
-
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Danger tone (default) — interactive trigger ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -133,4 +136,71 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     )
             )
         })
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "alert-dialog",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                let open_key = format!("alert-axis-size-{}", size_key(size));
+                let mut row = div().flex().flex_col().gap(px(8.0)).child(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Secondary)
+                            .with_label(format!("Open {} alert", size_key(size))),
+                        theme,
+                    )
+                    .with_id(format!("alert-axis-size-{}-trigger", size_key(size)))
+                    .on_click(open_click(state, open_key.clone())),
+                );
+                if state.specimens.is_on(&open_key) {
+                    row = row.child(
+                        AlertDialog::from_spec(
+                            AlertDialogSpec::new("Delete this item?")
+                                .with_description(
+                                    "This action cannot be undone. The item and all associated data will be permanently removed.",
+                                )
+                                .with_confirm_label("Delete")
+                                .with_cancel_label("Keep it")
+                                .with_size(size),
+                            theme,
+                        )
+                        .open(true),
+                    );
+                }
+                row.into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                let open_key = format!("alert-axis-density-{}", density_key(density));
+                let mut row = div().flex().flex_col().gap(px(8.0)).child(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Secondary)
+                            .with_label(format!("Open {} alert", density_key(density))),
+                        theme,
+                    )
+                    .with_id(format!("alert-axis-density-{}-trigger", density_key(density)))
+                    .on_click(open_click(state, open_key.clone())),
+                );
+                if state.specimens.is_on(&open_key) {
+                    row = row.child(
+                        AlertDialog::from_spec(
+                            AlertDialogSpec::new("Delete this item?")
+                                .with_description(
+                                    "This action cannot be undone. The item and all associated data will be permanently removed.",
+                                )
+                                .with_confirm_label("Delete")
+                                .with_cancel_label("Keep it")
+                                .with_density(density),
+                            theme,
+                        )
+                        .open(true),
+                    );
+                }
+                row.into_any_element()
+            }),
+    )
 }

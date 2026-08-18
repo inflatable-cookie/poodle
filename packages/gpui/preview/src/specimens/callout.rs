@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Callout, Eyebrow};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -136,25 +136,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "callout",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            Callout::from_spec(
-                CallOutSpec::new()
-                    .with_title("Neutral callout")
-                    .with_content("A general informational message with no specific severity.")
-                    .with_size(size),
-                theme,
-            )
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            Callout::from_spec(
-                CallOutSpec::new()
-                    .with_title("Neutral callout")
-                    .with_content("A general informational message with no specific severity.")
-                    .with_density(density),
-                theme,
-            )
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                Callout::from_spec(
+                    CallOutSpec::new()
+                        .with_title("Neutral callout")
+                        .with_content("A general informational message with no specific severity.")
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                Callout::from_spec(
+                    CallOutSpec::new()
+                        .with_title("Neutral callout")
+                        .with_content("A general informational message with no specific severity.")
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
     )
 }

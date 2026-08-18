@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, SelectionSummary};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -153,15 +153,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "selection-summary",
         examples,
-        move |size, theme: &GpuiThemeProvider| {
-            SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme)
-                .with_size(size)
-                .into_any_element()
-        },
-        move |density, theme: &GpuiThemeProvider| {
-            SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme)
-                .with_density(density)
-                .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(move |size, theme: &GpuiThemeProvider| {
+                SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme)
+                    .with_size(size)
+                    .into_any_element()
+            })
+            .with_densities(move |density, theme: &GpuiThemeProvider| {
+                SelectionSummary::from_spec(SelectionSummarySpec::new(items()), theme)
+                    .with_density(density)
+                    .into_any_element()
+            }),
     )
 }

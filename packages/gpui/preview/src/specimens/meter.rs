@@ -1,14 +1,17 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, Meter};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{EyebrowSpec, MeterSpec};
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -110,4 +113,23 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .child("350 / 500 API calls used".to_string()),
                 ),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "meter",
+        examples,
+        SpecimenAxes::examples_only().with_sizes(|size, theme: &GpuiThemeProvider| {
+            Meter::from_spec(
+                MeterSpec::new()
+                    .with_value(50.0)
+                    .with_max(100.0)
+                    .with_aria_label("Storage usage")
+                    .with_size(size),
+                theme,
+            )
+            .into_any_element()
+        }),
+    )
 }

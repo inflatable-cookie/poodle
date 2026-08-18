@@ -1,8 +1,13 @@
-//! Deterministic native specimen pages for the audio family.
+//! Deterministic native specimen content for the audio family.
 //!
 //! GPUI and Jetstream both consume these exact node trees. Keeping the state
 //! matrix here prevents their coverage from drifting while their preview
 //! shells remain backend-owned.
+//!
+//! [`AudioSpecimen`] hands out the three parts a specimen page is made of —
+//! the curated Examples pane, one representative at a requested size, one at a
+//! requested density — and never a combined page. Whichever of those parts a
+//! preview shows, and in what layout, is the shell's decision.
 
 use poodle_adapter::ThemeProvider;
 use poodle_headless::audio::{
@@ -48,41 +53,208 @@ impl_audio_presentation_spec!(
     ModMatrixGridSpec,
 );
 
-fn axis_groups<S: AudioPresentationSpec>(
-    base: &S,
+/// The twelve audio controls with a shared native specimen page.
+///
+/// GPUI asks for the parts its axis-aware layout needs — the curated Examples
+/// pane, one representative at a requested size, one at a requested density —
+/// and composes them itself. Nothing here returns a combined page, so a
+/// consumer cannot show an axis matrix inside Examples by accident.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum AudioSpecimen {
+    AudioMeter,
+    AudioSwitch,
+    DragNumberField,
+    EnvelopeEditor,
+    Fader,
+    GainReductionMeter,
+    Keyboard,
+    Knob,
+    ModMatrixGrid,
+    ValueReadout,
+    WaveformDisplay,
+    XyPad,
+}
+
+impl AudioSpecimen {
+    /// The curated Examples pane: the states this control has to teach.
+    pub fn examples(self, theme: &dyn ThemeProvider) -> Node {
+        match self {
+            Self::AudioMeter => audio_meter_examples(theme),
+            Self::AudioSwitch => audio_switch_examples(theme),
+            Self::DragNumberField => drag_number_field_examples(theme),
+            Self::EnvelopeEditor => envelope_editor_examples(theme),
+            Self::Fader => fader_examples(theme),
+            Self::GainReductionMeter => gain_reduction_meter_examples(theme),
+            Self::Keyboard => keyboard_examples(theme),
+            Self::Knob => knob_examples(theme),
+            Self::ModMatrixGrid => mod_matrix_grid_examples(theme),
+            Self::ValueReadout => value_readout_examples(theme),
+            Self::WaveformDisplay => waveform_display_examples(theme),
+            Self::XyPad => xy_pad_examples(theme),
+        }
+    }
+
+    /// One ordinary representative at `size`. Nothing else varies.
+    pub fn size(self, size: ControlSize, theme: &dyn ThemeProvider) -> Node {
+        match self {
+            Self::AudioMeter => at_size(audio_meter_base(), size, super::audio_meter, theme),
+            Self::AudioSwitch => at_size(audio_switch_base(), size, super::audio_switch, theme),
+            Self::DragNumberField => at_size(
+                drag_number_field_base(),
+                size,
+                super::drag_number_field,
+                theme,
+            ),
+            Self::EnvelopeEditor => {
+                at_size(envelope_editor_base(), size, super::envelope_editor, theme)
+            }
+            Self::Fader => at_size(fader_base(), size, super::fader, theme),
+            Self::GainReductionMeter => at_size(
+                gain_reduction_meter_base(),
+                size,
+                super::gain_reduction_meter,
+                theme,
+            ),
+            Self::Keyboard => at_size(keyboard_base(), size, super::keyboard, theme),
+            Self::Knob => at_size(knob_base(), size, super::knob, theme),
+            Self::ModMatrixGrid => {
+                at_size(mod_matrix_grid_base(), size, super::mod_matrix_grid, theme)
+            }
+            Self::ValueReadout => at_size(value_readout_base(), size, super::value_readout, theme),
+            Self::WaveformDisplay => at_size(
+                waveform_display_base(),
+                size,
+                super::waveform_display,
+                theme,
+            ),
+            Self::XyPad => at_size(xy_pad_base(), size, super::xy_pad, theme),
+        }
+    }
+
+    /// One ordinary representative at `density`. Nothing else varies.
+    pub fn density(self, density: ControlDensity, theme: &dyn ThemeProvider) -> Node {
+        match self {
+            Self::AudioMeter => at_density(audio_meter_base(), density, super::audio_meter, theme),
+            Self::AudioSwitch => {
+                at_density(audio_switch_base(), density, super::audio_switch, theme)
+            }
+            Self::DragNumberField => at_density(
+                drag_number_field_base(),
+                density,
+                super::drag_number_field,
+                theme,
+            ),
+            Self::EnvelopeEditor => at_density(
+                envelope_editor_base(),
+                density,
+                super::envelope_editor,
+                theme,
+            ),
+            Self::Fader => at_density(fader_base(), density, super::fader, theme),
+            Self::GainReductionMeter => at_density(
+                gain_reduction_meter_base(),
+                density,
+                super::gain_reduction_meter,
+                theme,
+            ),
+            Self::Keyboard => at_density(keyboard_base(), density, super::keyboard, theme),
+            Self::Knob => at_density(knob_base(), density, super::knob, theme),
+            Self::ModMatrixGrid => at_density(
+                mod_matrix_grid_base(),
+                density,
+                super::mod_matrix_grid,
+                theme,
+            ),
+            Self::ValueReadout => {
+                at_density(value_readout_base(), density, super::value_readout, theme)
+            }
+            Self::WaveformDisplay => at_density(
+                waveform_display_base(),
+                density,
+                super::waveform_display,
+                theme,
+            ),
+            Self::XyPad => at_density(xy_pad_base(), density, super::xy_pad, theme),
+        }
+    }
+}
+
+// ── Axis bases ────────────────────────────────────────────────────────────
+//
+// One ordinary state per control. The axis panes vary a single presentation
+// prop against these; every other prop stays put.
+
+fn knob_base() -> KnobSpec {
+    KnobSpec::new(0.6, 0.0, 1.0, AudioValueLaw::Linear)
+}
+
+fn fader_base() -> FaderSpec {
+    FaderSpec::new(0.6, 0.0, 1.0, AudioValueLaw::Linear)
+}
+
+fn audio_meter_base() -> AudioMeterSpec {
+    AudioMeterSpec::new(meter_visual(0.65, Some(0.72), false, true))
+}
+
+fn value_readout_base() -> ValueReadoutSpec {
+    ValueReadoutSpec::new(
+        control(-12.4, -60.0, 6.0, AudioValueLaw::Linear),
+        "-12.4 dB",
+    )
+}
+
+fn drag_number_field_base() -> DragNumberFieldSpec {
+    DragNumberFieldSpec::new(-12.4, -60.0, 12.0, 0.1, "-12.4 dB")
+}
+
+fn envelope_editor_base() -> EnvelopeEditorSpec {
+    envelope_spec(&ADSR, true)
+}
+
+fn xy_pad_base() -> XYPadSpec {
+    xy_spec(0.4, 0.6, DragState::None, AutomationState::None, true)
+}
+
+fn audio_switch_base() -> AudioSwitchSpec {
+    switch_spec(1, 2, false, None, true, AudioSwitchMode::Latch)
+}
+
+fn gain_reduction_meter_base() -> GainReductionMeterSpec {
+    reduction_spec(12.0, true)
+}
+
+fn keyboard_base() -> KeyboardSpec {
+    keyboard_spec(KeyboardOrientation::Horizontal, true)
+}
+
+fn waveform_display_base() -> WaveformDisplaySpec {
+    waveform_spec(true)
+}
+
+fn mod_matrix_grid_base() -> ModMatrixGridSpec {
+    matrix_spec(true)
+}
+
+/// One ordinary representative of `base` at `size`. Only the size varies.
+fn at_size<S: AudioPresentationSpec>(
+    mut base: S,
+    size: ControlSize,
     render: fn(&S, &dyn ThemeProvider) -> Node,
     theme: &dyn ThemeProvider,
-) -> Vec<(&'static str, Vec<Node>)> {
-    let sizes = [
-        ControlSize::Xs,
-        ControlSize::Sm,
-        ControlSize::Md,
-        ControlSize::Lg,
-        ControlSize::Xl,
-    ]
-    .into_iter()
-    .map(|size| {
-        let mut spec = base.clone();
-        spec.set_size(size);
-        render(&spec, theme)
-    })
-    .collect();
-    let densities = [
-        ControlDensity::Compact,
-        ControlDensity::Default,
-        ControlDensity::Comfortable,
-    ]
-    .into_iter()
-    .map(|density| {
-        let mut spec = base.clone();
-        spec.set_density(density);
-        render(&spec, theme)
-    })
-    .collect();
-    vec![
-        ("Sizes — xs / sm / md / lg / xl", sizes),
-        ("Densities — compact / default / comfortable", densities),
-    ]
+) -> Node {
+    base.set_size(size);
+    render(&base, theme)
+}
+
+/// One ordinary representative of `base` at `density`. Only the density varies.
+fn at_density<S: AudioPresentationSpec>(
+    mut base: S,
+    density: ControlDensity,
+    render: fn(&S, &dyn ThemeProvider) -> Node,
+    theme: &dyn ThemeProvider,
+) -> Node {
+    base.set_density(density);
+    render(&base, theme)
 }
 
 fn page(groups: Vec<(&str, Vec<Node>)>, theme: &dyn ThemeProvider) -> Node {
@@ -124,7 +296,7 @@ fn knob_node(
     super::knob(&spec, theme)
 }
 
-pub fn knob(theme: &dyn ThemeProvider) -> Node {
+fn knob_examples(theme: &dyn ThemeProvider) -> Node {
     let bipolar = AudioValueLaw::BipolarCenter { center: 0.0 };
     let mut fine = KnobSpec::new(0.42, 0.0, 1.0, AudioValueLaw::Linear);
     fine.visual_state.drag = DragState::Fine;
@@ -132,11 +304,6 @@ pub fn knob(theme: &dyn ThemeProvider) -> Node {
     automated.visual_state.automation = AutomationState::Writing;
     let mut disabled = KnobSpec::new(0.5, 0.0, 1.0, AudioValueLaw::Linear);
     disabled.visual_state.enabled = false;
-    let axes = axis_groups(
-        &KnobSpec::new(0.6, 0.0, 1.0, AudioValueLaw::Linear),
-        super::knob,
-        theme,
-    );
     page(
         vec![
             (
@@ -211,10 +378,7 @@ pub fn knob(theme: &dyn ThemeProvider) -> Node {
                 ],
             ),
             ("Disabled", vec![super::knob(&disabled, theme)]),
-        ]
-        .into_iter()
-        .chain(axes)
-        .collect(),
+        ],
         theme,
     )
 }
@@ -238,7 +402,7 @@ fn fader_node(
     super::fader(&spec, theme)
 }
 
-pub fn fader(theme: &dyn ThemeProvider) -> Node {
+fn fader_examples(theme: &dyn ThemeProvider) -> Node {
     let mut detents = FaderSpec::new(0.5, 0.0, 1.0, AudioValueLaw::Linear);
     detents.detents = vec![0.25, 0.5, 0.75];
     let mut fine = FaderSpec::new(0.4, 0.0, 1.0, AudioValueLaw::Linear);
@@ -247,11 +411,6 @@ pub fn fader(theme: &dyn ThemeProvider) -> Node {
     automation.visual_state.automation = AutomationState::Touched;
     let mut disabled = FaderSpec::new(0.5, 0.0, 1.0, AudioValueLaw::Linear);
     disabled.visual_state.enabled = false;
-    let axes = axis_groups(
-        &FaderSpec::new(0.6, 0.0, 1.0, AudioValueLaw::Linear),
-        super::fader,
-        theme,
-    );
     page(
         vec![
             (
@@ -305,10 +464,7 @@ pub fn fader(theme: &dyn ThemeProvider) -> Node {
                 ],
             ),
             ("Disabled", vec![super::fader(&disabled, theme)]),
-        ]
-        .into_iter()
-        .chain(axes)
-        .collect(),
+        ],
         theme,
     )
 }
@@ -355,12 +511,7 @@ fn meter_node(
     super::audio_meter(&spec, theme)
 }
 
-pub fn audio_meter(theme: &dyn ThemeProvider) -> Node {
-    let axes = axis_groups(
-        &AudioMeterSpec::new(meter_visual(0.65, Some(0.72), false, true)),
-        super::audio_meter,
-        theme,
-    );
+fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
     page(
         vec![
             (
@@ -502,15 +653,12 @@ pub fn audio_meter(theme: &dyn ThemeProvider) -> Node {
                     ),
                 ],
             ),
-        ]
-        .into_iter()
-        .chain(axes)
-        .collect(),
+        ],
         theme,
     )
 }
 
-pub fn value_readout(theme: &dyn ThemeProvider) -> Node {
+fn value_readout_examples(theme: &dyn ThemeProvider) -> Node {
     let values = [
         ("Number", 12.345, AudioValueFormat::Number { decimals: 2 }),
         ("dB", -12.4, AudioValueFormat::Db { decimals: 1 }),
@@ -554,14 +702,6 @@ pub fn value_readout(theme: &dyn ThemeProvider) -> Node {
             super::value_readout(&disabled, theme),
         ],
     ));
-    groups.extend(axis_groups(
-        &ValueReadoutSpec::new(
-            control(-12.4, -60.0, 6.0, AudioValueLaw::Linear),
-            "-12.4 dB",
-        ),
-        super::value_readout,
-        theme,
-    ));
     page(groups, theme)
 }
 
@@ -579,18 +719,13 @@ fn drag_field(
     )
 }
 
-pub fn drag_number_field(theme: &dyn ThemeProvider) -> Node {
+fn drag_number_field_examples(theme: &dyn ThemeProvider) -> Node {
     let mut fine = DragNumberFieldSpec::new(0.4, 0.0, 1.0, 0.01, "0.4");
     fine.visual_state.drag = DragState::Fine;
     let mut direct = DragNumberFieldSpec::new(-12.0, -60.0, 12.0, 0.1, "-12 dB");
     direct.visual_state.focus = true;
     let mut disabled = DragNumberFieldSpec::new(0.5, 0.0, 1.0, 0.01, "0.5");
     disabled.visual_state.enabled = false;
-    let axes = axis_groups(
-        &DragNumberFieldSpec::new(-12.4, -60.0, 12.0, 0.1, "-12.4 dB"),
-        super::drag_number_field,
-        theme,
-    );
     page(
         vec![
             (
@@ -628,10 +763,7 @@ pub fn drag_number_field(theme: &dyn ThemeProvider) -> Node {
                 vec![drag_field(-7.0, -24.0, 24.0, 1.0, "-7", theme)],
             ),
             ("Disabled", vec![super::drag_number_field(&disabled, theme)]),
-        ]
-        .into_iter()
-        .chain(axes)
-        .collect(),
+        ],
         theme,
     )
 }
@@ -666,15 +798,18 @@ fn envelope_spec(points: &[(f64, f64, f64, bool, bool)], enabled: bool) -> Envel
     })
 }
 
-pub fn envelope_editor(theme: &dyn ThemeProvider) -> Node {
-    let adsr = [
-        (0.0, 0.0, 0.0, false, false),
-        (0.12, 1.0, -0.35, true, false),
-        (0.35, 0.62, 0.25, false, false),
-        (0.82, 0.62, 0.0, false, false),
-        (1.0, 0.0, 0.0, false, false),
-    ];
-    let axes = axis_groups(&envelope_spec(&adsr, true), super::envelope_editor, theme);
+/// The ADSR-like envelope both the Examples pane and the axis representatives
+/// draw from.
+const ADSR: [(f64, f64, f64, bool, bool); 5] = [
+    (0.0, 0.0, 0.0, false, false),
+    (0.12, 1.0, -0.35, true, false),
+    (0.35, 0.62, 0.25, false, false),
+    (0.82, 0.62, 0.0, false, false),
+    (1.0, 0.0, 0.0, false, false),
+];
+
+fn envelope_editor_examples(theme: &dyn ThemeProvider) -> Node {
+    let adsr = ADSR;
     page(
         vec![
             ("ADSR-like default", vec![envelope(&adsr, true, theme)]),
@@ -739,10 +874,7 @@ pub fn envelope_editor(theme: &dyn ThemeProvider) -> Node {
                 )],
             ),
             ("Disabled", vec![envelope(&adsr, false, theme)]),
-        ]
-        .into_iter()
-        .chain(axes)
-        .collect(),
+        ],
         theme,
     )
 }
@@ -778,12 +910,7 @@ fn xy_spec(
     })
 }
 
-pub fn xy_pad(theme: &dyn ThemeProvider) -> Node {
-    let axes = axis_groups(
-        &xy_spec(0.4, 0.6, DragState::None, AutomationState::None, true),
-        super::xy_pad,
-        theme,
-    );
+fn xy_pad_examples(theme: &dyn ThemeProvider) -> Node {
     page(
         vec![
             (
@@ -894,10 +1021,7 @@ pub fn xy_pad(theme: &dyn ThemeProvider) -> Node {
                     theme,
                 )],
             ),
-        ]
-        .into_iter()
-        .chain(axes)
-        .collect(),
+        ],
         theme,
     )
 }
@@ -931,12 +1055,7 @@ fn switch_spec(
     )
 }
 
-pub fn audio_switch(theme: &dyn ThemeProvider) -> Node {
-    let axes = axis_groups(
-        &switch_spec(1, 2, false, None, true, AudioSwitchMode::Latch),
-        super::audio_switch,
-        theme,
-    );
+fn audio_switch_examples(theme: &dyn ThemeProvider) -> Node {
     page(
         vec![
             (
@@ -1000,10 +1119,7 @@ pub fn audio_switch(theme: &dyn ThemeProvider) -> Node {
                     theme,
                 )],
             ),
-        ]
-        .into_iter()
-        .chain(axes)
-        .collect(),
+        ],
         theme,
     )
 }
@@ -1029,12 +1145,7 @@ fn reduction_spec(value: f64, enabled: bool) -> GainReductionMeterSpec {
     GainReductionMeterSpec::new(visual, 30.0)
 }
 
-pub fn gain_reduction_meter(theme: &dyn ThemeProvider) -> Node {
-    let axes = axis_groups(
-        &reduction_spec(12.0, true),
-        super::gain_reduction_meter,
-        theme,
-    );
+fn gain_reduction_meter_examples(theme: &dyn ThemeProvider) -> Node {
     page(
         vec![
             (
@@ -1145,10 +1256,7 @@ pub fn gain_reduction_meter(theme: &dyn ThemeProvider) -> Node {
                     theme,
                 )],
             ),
-        ]
-        .into_iter()
-        .chain(axes)
-        .collect(),
+        ],
         theme,
     )
 }
@@ -1167,9 +1275,8 @@ fn keyboard_spec(orientation: KeyboardOrientation, enabled: bool) -> KeyboardSpe
     KeyboardSpec::new(poodle_headless::audio::keyboard_visual_state(&context))
 }
 
-pub fn keyboard(theme: &dyn ThemeProvider) -> Node {
+fn keyboard_examples(theme: &dyn ThemeProvider) -> Node {
     let base = keyboard_spec(KeyboardOrientation::Horizontal, true);
-    let axes = axis_groups(&base, super::keyboard, theme);
     page(
         vec![
             (
@@ -1199,10 +1306,7 @@ pub fn keyboard(theme: &dyn ThemeProvider) -> Node {
                     theme,
                 )],
             ),
-        ]
-        .into_iter()
-        .chain(axes)
-        .collect(),
+        ],
         theme,
     )
 }
@@ -1252,9 +1356,8 @@ fn waveform_spec(enabled: bool) -> WaveformDisplaySpec {
     )
 }
 
-pub fn waveform_display(theme: &dyn ThemeProvider) -> Node {
+fn waveform_display_examples(theme: &dyn ThemeProvider) -> Node {
     let base = waveform_spec(true);
-    let axes = axis_groups(&base, super::waveform_display, theme);
     page(
         vec![
             (
@@ -1307,10 +1410,7 @@ pub fn waveform_display(theme: &dyn ThemeProvider) -> Node {
                 "Inspector ceiling",
                 vec![super::waveform_display(&base, theme)],
             ),
-        ]
-        .into_iter()
-        .chain(axes)
-        .collect(),
+        ],
         theme,
     )
 }
@@ -1382,9 +1482,8 @@ fn matrix_spec(enabled: bool) -> ModMatrixGridSpec {
     ModMatrixGridSpec::new(context.visual_state())
 }
 
-pub fn mod_matrix_grid(theme: &dyn ThemeProvider) -> Node {
+fn mod_matrix_grid_examples(theme: &dyn ThemeProvider) -> Node {
     let base = matrix_spec(true);
-    let axes = axis_groups(&base, super::mod_matrix_grid, theme);
     page(
         vec![
             (
@@ -1412,10 +1511,154 @@ pub fn mod_matrix_grid(theme: &dyn ThemeProvider) -> Node {
                 "Disabled",
                 vec![super::mod_matrix_grid(&matrix_spec(false), theme)],
             ),
-        ]
-        .into_iter()
-        .chain(axes)
-        .collect(),
+        ],
         theme,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_layout::LayoutSizing;
+
+    const ALL: &[AudioSpecimen] = &[
+        AudioSpecimen::AudioMeter,
+        AudioSpecimen::AudioSwitch,
+        AudioSpecimen::DragNumberField,
+        AudioSpecimen::EnvelopeEditor,
+        AudioSpecimen::Fader,
+        AudioSpecimen::GainReductionMeter,
+        AudioSpecimen::Keyboard,
+        AudioSpecimen::Knob,
+        AudioSpecimen::ModMatrixGrid,
+        AudioSpecimen::ValueReadout,
+        AudioSpecimen::WaveformDisplay,
+        AudioSpecimen::XyPad,
+    ];
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn text_of(node: &Node) -> Vec<String> {
+        let mut out = Vec::new();
+        if let poodle_node::NodeKind::Text { content } = &node.kind {
+            out.push(content.clone());
+        }
+        for child in &node.children {
+            out.extend(text_of(child));
+        }
+        out
+    }
+
+    fn node_count(node: &Node) -> usize {
+        1 + node.children.iter().map(node_count).sum::<usize>()
+    }
+
+    /// The split's whole point: the Examples pane stopped carrying the axis
+    /// sweeps, so a consumer cannot show a size matrix inside Examples.
+    #[test]
+    fn examples_pane_carries_no_axis_matrix() {
+        for specimen in ALL {
+            let captions = text_of(&specimen.examples(&theme()));
+            assert!(
+                !captions.iter().any(|line| line.starts_with("Sizes —")),
+                "{specimen:?} still lists a size sweep in Examples"
+            );
+            assert!(
+                !captions.iter().any(|line| line.starts_with("Densities —")),
+                "{specimen:?} still lists a density sweep in Examples"
+            );
+        }
+    }
+
+    /// One requested step, one representative — not a page, and not a matrix.
+    #[test]
+    fn each_axis_step_returns_one_representative() {
+        for specimen in ALL {
+            let examples = node_count(&specimen.examples(&theme()));
+            for size in [
+                ControlSize::Xs,
+                ControlSize::Sm,
+                ControlSize::Md,
+                ControlSize::Lg,
+                ControlSize::Xl,
+            ] {
+                assert!(
+                    node_count(&specimen.size(size, &theme())) < examples,
+                    "{specimen:?} at {size:?} returned more than one representative"
+                );
+            }
+            for density in [
+                ControlDensity::Compact,
+                ControlDensity::Default,
+                ControlDensity::Comfortable,
+            ] {
+                assert!(
+                    node_count(&specimen.density(density, &theme())) < examples,
+                    "{specimen:?} at {density:?} returned more than one representative"
+                );
+            }
+        }
+    }
+
+    /// The requested step actually reaches the control: the knob's own box
+    /// grows monotonically across the five control sizes.
+    #[test]
+    fn the_requested_size_reaches_the_control() {
+        let widths: Vec<f32> = [
+            ControlSize::Xs,
+            ControlSize::Sm,
+            ControlSize::Md,
+            ControlSize::Lg,
+            ControlSize::Xl,
+        ]
+        .into_iter()
+        .map(|size| {
+            match AudioSpecimen::Knob
+                .size(size, &theme())
+                .style
+                .descriptor
+                .layout
+                .width
+            {
+                LayoutSizing::Fixed(px) => px,
+                other => panic!("knob width is {other:?}, not a fixed box"),
+            }
+        })
+        .collect();
+
+        assert!(
+            widths.windows(2).all(|pair| pair[0] < pair[1]),
+            "knob sizes did not ladder: {widths:?}"
+        );
+    }
+
+    /// Density moves spacing, not the control box. The fader's rail cross-axis
+    /// resolves to 4 / 6 / 8 px across compact / default / comfortable, so this
+    /// reads the descriptor the requested density actually decides — a node
+    /// count would pass even if the density were dropped on the way through.
+    ///
+    /// The rail is the first child of `fader-root` (`crate::audio::fader`); if
+    /// that ordering changes this fails loudly rather than silently weakening.
+    #[test]
+    fn the_requested_density_reaches_the_control() {
+        for (density, expected) in [
+            (ControlDensity::Compact, 4.0_f32),
+            (ControlDensity::Default, 6.0),
+            (ControlDensity::Comfortable, 8.0),
+        ] {
+            let fader = AudioSpecimen::Fader.density(density, &theme());
+            assert_eq!(fader.id.as_deref(), Some("fader-root"));
+
+            let rail = fader.children.first().expect("fader rail");
+            match rail.style.descriptor.layout.width {
+                LayoutSizing::Fixed(px) => assert_eq!(
+                    px, expected,
+                    "fader rail at {density:?} is {px}px, not {expected}px"
+                ),
+                other => panic!("fader rail width is {other:?}, not a fixed box"),
+            }
+        }
+    }
 }

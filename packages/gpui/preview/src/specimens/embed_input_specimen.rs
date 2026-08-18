@@ -1,17 +1,20 @@
+use crate::app_state::AppState;
 use crate::node_compat::{EmbedInput, Eyebrow, Field};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{EmbedInputSpec, ParsedEmbed};
 use poodle_specs::{EyebrowSpec, FieldSpec};
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
     let border_subtle = theme.resolve_color("color.border.subtle");
     let panel_bg = theme.resolve_color("color.background.panel");
-
-    div().flex().flex_col().gap(px(24.0)).max_w(px(640.0))
+    let examples = div().flex().flex_col().gap(px(24.0)).max_w(px(640.0))
         // --- Supported providers (reference table) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -202,6 +205,35 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         )
                 )
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "embed-input",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                EmbedInput::from_spec(
+                    EmbedInputSpec::new()
+                        .with_value("https://youtu.be/dQw4w9WgXcQ")
+                        .with_detected_parse()
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                EmbedInput::from_spec(
+                    EmbedInputSpec::new()
+                        .with_value("https://youtu.be/dQw4w9WgXcQ")
+                        .with_detected_parse()
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }
 
 fn provider_header_row(

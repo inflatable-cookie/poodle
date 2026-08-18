@@ -1,8 +1,11 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Accordion, Eyebrow};
+use crate::specimens::specimen_axes::{density_key, size_key};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
 use poodle_specs::{
     AccordionItemSpec, AccordionSelectionValue, AccordionSpec, ControlDensity, ControlSize,
@@ -53,16 +56,21 @@ fn multi_toggle(state: &AppState, current: Vec<String>) -> Arc<dyn Fn(&str) + Se
     })
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+/// The item set both the Examples pane and the axis representatives use.
+fn axis_items() -> Vec<AccordionItemSpec> {
+    vec![
+        AccordionItemSpec::new("getting-started", "Getting started"),
+        AccordionItemSpec::new("api-reference", "API reference"),
+        AccordionItemSpec::new("accessibility", "Accessibility"),
+    ]
+}
+
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
     // --- Single selection items ---
-    let single_items = vec![
-        AccordionItemSpec::new("getting-started", "Getting started"),
-        AccordionItemSpec::new("api-reference", "API reference"),
-        AccordionItemSpec::new("accessibility", "Accessibility"),
-    ];
+    let single_items = axis_items();
 
     let single_content: Vec<(&str, &str)> = vec![
         ("getting-started", "Install the package with your preferred package manager, then import individual components as needed. Each component is tree-shakeable and ships with its own styles scoped via CSS custom properties."),
@@ -257,8 +265,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             ))
             .child(body)
     };
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -276,4 +283,51 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         ))
         .child(group("Sizes", sizes_row.into_any_element()))
         .child(group("Densities", densities_row.into_any_element()))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "accordion",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                Accordion::from_spec(
+                    AccordionSpec::new(axis_items())
+                        .with_allow_multiple(false)
+                        .with_collapsible(true)
+                        .with_value(AccordionSelectionValue::Single("getting-started".into()))
+                        .with_size(size),
+                    theme,
+                )
+                .with_id(format!("accordion-axis-{}", size_key(size)))
+                .with_content(
+                    "getting-started",
+                    content_node(
+                        "Install the package, then import components as needed.",
+                        theme.resolve_color("color.text.secondary"),
+                    ),
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                Accordion::from_spec(
+                    AccordionSpec::new(axis_items())
+                        .with_allow_multiple(false)
+                        .with_collapsible(true)
+                        .with_value(AccordionSelectionValue::Single("getting-started".into()))
+                        .with_density(density),
+                    theme,
+                )
+                .with_id(format!("accordion-axis-{}", density_key(density)))
+                .with_content(
+                    "getting-started",
+                    content_node(
+                        "Install the package, then import components as needed.",
+                        theme.resolve_color("color.text.secondary"),
+                    ),
+                )
+                .into_any_element()
+            }),
+    )
 }

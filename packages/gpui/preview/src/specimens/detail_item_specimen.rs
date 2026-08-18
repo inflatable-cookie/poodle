@@ -1,5 +1,9 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Button, DetailItem, Eyebrow};
+use crate::specimens::specimen_axes::density_key;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
@@ -9,7 +13,8 @@ use poodle_specs::{
     DetailItemPresentation, DetailItemSpec, EyebrowSpec,
 };
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let success = theme.resolve_color("color.status.success");
 
     let mut status_value = Node::container();
@@ -30,8 +35,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
     status_text.style.text_weight = Some(500);
     status_text.style.descriptor.text_color = Some(success);
     let status_value = status_value.child(status_text);
-
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Basic label-value pairs ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -169,20 +173,21 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                 )
         )
-        // --- Density variants ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Density variants"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(12.0))
-                        .child(density_demo("Compact", ControlDensity::Compact, theme))
-                        .child(density_demo("Default", ControlDensity::Default, theme))
-                        .child(density_demo("Comfortable", ControlDensity::Comfortable, theme))
-                )
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "detail-item",
+        examples,
+        SpecimenAxes::examples_only().with_densities(|density, theme: &GpuiThemeProvider| {
+            density_demo(density, theme).into_any_element()
+        }),
+    )
 }
 
-fn density_demo(label: &str, density: ControlDensity, theme: &GpuiThemeProvider) -> Div {
+fn density_demo(density: ControlDensity, theme: &GpuiThemeProvider) -> Div {
+    let label = density_key(density);
     let muted = theme.resolve_color("color.text.muted");
     div()
         .flex()

@@ -5,7 +5,10 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec};
 use poodle_specs::{Toast, ToastHostPlacement, ToastHostSpec, ToastTone};
 
+use crate::app_state::AppState;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 
 /// One labelled group: eyebrow heading + content stacked beneath it.
 fn group(theme: &GpuiThemeProvider, label: &str, content: impl IntoElement) -> Div {
@@ -35,7 +38,8 @@ fn surface(theme: &GpuiThemeProvider, host: ToastHost) -> Div {
         .child(host)
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     // Contract §12 "Default (Bottom-End)": success toast + error (danger)
     // toast; the danger toast is sticky (matches default `stickyTones`).
     let bottom_end_toasts = vec![
@@ -65,8 +69,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .with_tone(ToastTone::Danger)
         .with_message("We could not publish your changes.")
         .with_action_label("Retry")];
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -152,4 +155,35 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .toasts(action_toasts),
             ),
         ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "toast-host",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                surface(
+                    theme,
+                    ToastHost::from_spec(ToastHostSpec::new().with_size(size), theme).toasts(vec![
+                        Toast::new("axis-size", "Saved")
+                            .with_tone(ToastTone::Success)
+                            .with_message("Your changes were saved."),
+                    ]),
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                surface(
+                    theme,
+                    ToastHost::from_spec(ToastHostSpec::new().with_density(density), theme).toasts(
+                        vec![Toast::new("axis-density", "Saved")
+                            .with_tone(ToastTone::Success)
+                            .with_message("Your changes were saved.")],
+                    ),
+                )
+                .into_any_element()
+            }),
+    )
 }

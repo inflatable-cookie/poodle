@@ -1,9 +1,11 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, TriStateSwitch};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{CheckState, ControlSize, EyebrowSpec, TriStateSwitchSpec, TriStateValue};
 use std::sync::Arc;
 
@@ -33,13 +35,12 @@ fn filter_change(state: &AppState) -> Arc<dyn Fn(TriStateValue) + Send + Sync> {
     })
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
     let filter_state = state_from_key(state.specimens.selected("tri-state-filter"));
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -208,4 +209,31 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .on_change(filter_change(state)),
                 ),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "tri-state-switch",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                TriStateSwitch::from_spec(
+                    TriStateSwitchSpec::new()
+                        .with_state(CheckState::Mixed)
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                TriStateSwitch::from_spec(
+                    TriStateSwitchSpec::new()
+                        .with_state(CheckState::Mixed)
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

@@ -2,15 +2,17 @@ use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{DataTable, Eyebrow};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
-use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec, StatusTone};
+use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     DataTableSpec, TableColumnSpec, TableFilter, TablePagination, TableRowSpec, TableSortDirection,
 };
+use poodle_specs::{EyebrowSpec, StatusTone};
 
 fn make_columns() -> Vec<TableColumnSpec> {
     vec![
@@ -77,7 +79,7 @@ fn row_click_handler(state: &AppState) -> Arc<dyn Fn(&str) + Send + Sync> {
     })
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
@@ -176,8 +178,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         TableColumnSpec::new("role", "Role").with_sortable(true),
         TableColumnSpec::new("status", "Status"),
     ];
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -217,78 +218,6 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .text_sm()
                 .text_color(color_to_hsla(text_secondary))
                 .child(format!("{} of 5 selected", selected_count)),
-        )
-        // --- Sizes ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Sizes"),
-                    theme,
-                ))
-                .child({
-                    let sizes: &[(&str, ControlSize)] = &[
-                        ("xs", ControlSize::Xs),
-                        ("sm", ControlSize::Sm),
-                        ("md", ControlSize::Md),
-                        ("lg", ControlSize::Lg),
-                        ("xl", ControlSize::Xl),
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(16.0));
-                    for &(key, size) in sizes {
-                        col = col
-                            .child(
-                                div()
-                                    .text_size(px(11.0))
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(format!("size = {}", key)),
-                            )
-                            .child(DataTable::from_spec(
-                                DataTableSpec::new(make_columns(), make_rows())
-                                    .with_aria_label(format!("Data table at {}", key))
-                                    .with_size(size),
-                                theme,
-                            ));
-                    }
-                    col
-                }),
-        )
-        // --- Densities ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Densities"),
-                    theme,
-                ))
-                .child({
-                    let densities: &[(&str, ControlDensity)] = &[
-                        ("compact", ControlDensity::Compact),
-                        ("default", ControlDensity::Default),
-                        ("comfortable", ControlDensity::Comfortable),
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(16.0));
-                    for &(key, density) in densities {
-                        col = col
-                            .child(
-                                div()
-                                    .text_size(px(11.0))
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(format!("density = {}", key)),
-                            )
-                            .child(DataTable::from_spec(
-                                DataTableSpec::new(make_columns(), make_rows())
-                                    .with_aria_label(format!("Data table at {} density", key))
-                                    .with_density(density),
-                                theme,
-                            ));
-                    }
-                    col
-                }),
         )
         // --- With filters and pagination (compact + striped + sticky header) ---
         .child(
@@ -402,4 +331,31 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "data-table",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                DataTable::from_spec(
+                    DataTableSpec::new(make_columns(), make_rows())
+                        .with_aria_label("Data table")
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                DataTable::from_spec(
+                    DataTableSpec::new(make_columns(), make_rows())
+                        .with_aria_label("Data table")
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

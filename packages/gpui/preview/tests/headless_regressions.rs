@@ -28,7 +28,16 @@ use poodle_specs::{PopoverSpec, RangeSliderSpec};
 #[path = "../src/headless_driver.rs"]
 mod headless_driver;
 
+// The preview-local axis decision (g15.019). Pure data, no GPUI: which axis
+// tabs a specimen page publishes, and which tab a retained selection resolves
+// to once the available set shrinks.
+#[path = "../src/specimens/specimen_axes.rs"]
+mod specimen_axes;
+
 use headless_driver::HeadlessDriver;
+use specimen_axes::{
+    density_key, size_key, AxisAdmission, DENSITIES_TAB, EXAMPLES_TAB, SIZES_TAB,
+};
 
 /// The element id every single-node fixture mounts under.
 const FIXTURE_ID: &str = "headless-fixture";
@@ -2753,4 +2762,98 @@ fn tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input() {
             "run disclosure reached the host and painted the next spec"
         );
     });
+}
+
+// ── Specimen axis admission (g15.019) ──────────────────────────────────────
+//
+// The merged web census decides which axis panes a native page may show. These
+// claims are why a page cannot advertise a tab it has no renderer for, and why
+// a retained tab cannot strand a page on a pane that no longer exists.
+
+const BOTH: AxisAdmission = AxisAdmission {
+    sizes: true,
+    densities: true,
+};
+const SIZES_ONLY: AxisAdmission = AxisAdmission {
+    sizes: true,
+    densities: false,
+};
+const DENSITIES_ONLY: AxisAdmission = AxisAdmission {
+    sizes: false,
+    densities: true,
+};
+const EXAMPLES_ONLY: AxisAdmission = AxisAdmission {
+    sizes: false,
+    densities: false,
+};
+
+#[test]
+fn a_page_publishes_exactly_the_axis_tabs_it_admits() {
+    assert_eq!(
+        BOTH.tabs(),
+        vec![
+            (EXAMPLES_TAB, "Examples"),
+            (SIZES_TAB, "Sizes"),
+            (DENSITIES_TAB, "Densities"),
+        ]
+    );
+    assert_eq!(
+        SIZES_ONLY.tabs(),
+        vec![(EXAMPLES_TAB, "Examples"), (SIZES_TAB, "Sizes")]
+    );
+    assert_eq!(
+        DENSITIES_ONLY.tabs(),
+        vec![(EXAMPLES_TAB, "Examples"), (DENSITIES_TAB, "Densities")]
+    );
+    assert_eq!(EXAMPLES_ONLY.tabs(), vec![(EXAMPLES_TAB, "Examples")]);
+}
+
+#[test]
+fn an_admitted_tab_is_the_one_that_renders() {
+    assert_eq!(BOTH.resolve_tab(Some(SIZES_TAB)), SIZES_TAB);
+    assert_eq!(BOTH.resolve_tab(Some(DENSITIES_TAB)), DENSITIES_TAB);
+    assert_eq!(SIZES_ONLY.resolve_tab(Some(SIZES_TAB)), SIZES_TAB);
+    assert_eq!(
+        DENSITIES_ONLY.resolve_tab(Some(DENSITIES_TAB)),
+        DENSITIES_TAB
+    );
+}
+
+#[test]
+fn a_retained_tab_the_page_no_longer_admits_falls_back_to_examples() {
+    // Avatar and Progress lost Densities; Tooltip lost both. A page that kept
+    // the old selection must not render a blank pane.
+    assert_eq!(SIZES_ONLY.resolve_tab(Some(DENSITIES_TAB)), EXAMPLES_TAB);
+    assert_eq!(DENSITIES_ONLY.resolve_tab(Some(SIZES_TAB)), EXAMPLES_TAB);
+    assert_eq!(EXAMPLES_ONLY.resolve_tab(Some(SIZES_TAB)), EXAMPLES_TAB);
+    assert_eq!(EXAMPLES_ONLY.resolve_tab(Some(DENSITIES_TAB)), EXAMPLES_TAB);
+    assert_eq!(BOTH.resolve_tab(Some("nonsense")), EXAMPLES_TAB);
+    assert_eq!(BOTH.resolve_tab(None), EXAMPLES_TAB);
+}
+
+#[test]
+fn axis_row_keys_are_distinct_per_step() {
+    use poodle_specs::{ControlDensity, ControlSize};
+
+    let sizes: Vec<&str> = [
+        ControlSize::Xs,
+        ControlSize::Sm,
+        ControlSize::Md,
+        ControlSize::Lg,
+        ControlSize::Xl,
+    ]
+    .into_iter()
+    .map(size_key)
+    .collect();
+    assert_eq!(sizes, vec!["xs", "sm", "md", "lg", "xl"]);
+
+    let densities: Vec<&str> = [
+        ControlDensity::Compact,
+        ControlDensity::Default,
+        ControlDensity::Comfortable,
+    ]
+    .into_iter()
+    .map(density_key)
+    .collect();
+    assert_eq!(densities, vec!["compact", "default", "comfortable"]);
 }

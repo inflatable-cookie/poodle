@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, Pill};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -222,25 +222,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "pill",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            Pill::from_spec(
-                PillSpec::new()
-                    .with_label("Neutral")
-                    .with_size(pill_size(size))
-                    .with_size_role(SemanticControlSizeRole::Control),
-                theme,
-            )
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            Pill::from_spec(
-                PillSpec::new()
-                    .with_label("Neutral")
-                    .with_density(density)
-                    .with_size_role(SemanticControlSizeRole::Control),
-                theme,
-            )
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                Pill::from_spec(
+                    PillSpec::new()
+                        .with_label("Neutral")
+                        .with_size(pill_size(size))
+                        .with_size_role(SemanticControlSizeRole::Control),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                Pill::from_spec(
+                    PillSpec::new()
+                        .with_label("Neutral")
+                        .with_density(density)
+                        .with_size_role(SemanticControlSizeRole::Control),
+                    theme,
+                )
+                .into_any_element()
+            }),
     )
 }

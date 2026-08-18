@@ -4,13 +4,16 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
-use poodle_specs::EyebrowSpec;
+use crate::app_state::AppState;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
+use poodle_specs::{ControlSize, EyebrowSize, EyebrowSpec};
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
     let text_primary = theme.resolve_color("color.text.primary");
-
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Section label ---
         .child(
             div().flex().flex_col().gap(px(4.0))
@@ -48,4 +51,29 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .child("Feature-rich table with sorting, selection, and pagination.".to_string())
                 )
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "eyebrow",
+        examples,
+        SpecimenAxes::examples_only()
+            // Eyebrow's own size enum stops at `md`; the larger control steps have
+            // no representative to show, exactly as in the Svelte specimen.
+            .with_sizes_where(|size, theme: &GpuiThemeProvider| {
+                let eyebrow_size = match size {
+                    ControlSize::Xs => EyebrowSize::Xs,
+                    ControlSize::Sm => EyebrowSize::Sm,
+                    ControlSize::Md => EyebrowSize::Md,
+                    ControlSize::Lg | ControlSize::Xl => return None,
+                };
+                Some(Eyebrow::from_spec(
+                    EyebrowSpec::new()
+                        .with_content("Section label")
+                        .with_size(eyebrow_size),
+                    theme,
+                ))
+            }),
+    )
 }

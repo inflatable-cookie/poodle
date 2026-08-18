@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, Spinner};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -84,21 +84,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "spinner",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            Spinner::from_spec(
-                SpinnerSpec::new()
-                    .with_variant(SpinnerVariant::Ring)
-                    .with_size(spinner_size(size)),
-                theme,
-            )
-        },
-        |density, theme: &GpuiThemeProvider| {
-            Spinner::from_spec(
-                SpinnerSpec::new()
-                    .with_variant(SpinnerVariant::Ring)
-                    .with_density(density),
-                theme,
-            )
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                Spinner::from_spec(
+                    SpinnerSpec::new()
+                        .with_variant(SpinnerVariant::Ring)
+                        .with_size(spinner_size(size)),
+                    theme,
+                )
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                Spinner::from_spec(
+                    SpinnerSpec::new()
+                        .with_variant(SpinnerVariant::Ring)
+                        .with_density(density),
+                    theme,
+                )
+            }),
     )
 }

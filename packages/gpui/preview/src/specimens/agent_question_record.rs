@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
 use crate::node_compat::{AgentQuestionRecord, Eyebrow};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -162,37 +162,38 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "agent-question-record",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            AgentQuestionRecord::from_spec(
-                AgentQuestionRecordSpec::new(
-                    placement(),
-                    answer(
-                        "placement",
-                        AgentQuestionOutcome::Selected,
-                        &["composer"],
-                        "",
-                    ),
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                AgentQuestionRecord::from_spec(
+                    AgentQuestionRecordSpec::new(
+                        placement(),
+                        answer(
+                            "placement",
+                            AgentQuestionOutcome::Selected,
+                            &["composer"],
+                            "",
+                        ),
+                    )
+                    .with_size(size),
+                    theme,
                 )
-                .with_size(size),
-                theme,
-            )
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            AgentQuestionRecord::from_spec(
-                AgentQuestionRecordSpec::new(
-                    placement(),
-                    answer(
-                        "placement",
-                        AgentQuestionOutcome::Selected,
-                        &["composer"],
-                        "",
-                    ),
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                AgentQuestionRecord::from_spec(
+                    AgentQuestionRecordSpec::new(
+                        placement(),
+                        answer(
+                            "placement",
+                            AgentQuestionOutcome::Selected,
+                            &["composer"],
+                            "",
+                        ),
+                    )
+                    .with_density(density),
+                    theme,
                 )
-                .with_density(density),
-                theme,
-            )
-            .into_any_element()
-        },
+                .into_any_element()
+            }),
     )
 }

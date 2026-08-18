@@ -1,5 +1,7 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Button, Eyebrow, FormActions};
+use crate::specimens::specimen_axes::density_key;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
@@ -22,7 +24,7 @@ fn set_text_click(state: &AppState, value: &'static str) -> Arc<dyn Fn() + Send 
     })
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
     let last_action = state
@@ -31,8 +33,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .get("form-action-last")
         .cloned()
         .unwrap_or_default();
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -227,24 +228,6 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                         ),
                 ),
         )
-        // --- Density ladder (compact / default / comfortable) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Density ladder"),
-                    theme,
-                ))
-                .child(density_row(theme, "Compact", ControlDensity::Compact))
-                .child(density_row(theme, "Default", ControlDensity::Default))
-                .child(density_row(
-                    theme,
-                    "Comfortable",
-                    ControlDensity::Comfortable,
-                )),
-        )
         // --- Footer-embedded (showTopSeparation=false) ---
         .child(
             div()
@@ -321,12 +304,24 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .child(format!("Last action: {}", last_action)),
             )
         })
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "form-actions",
+        examples,
+        SpecimenAxes::examples_only().with_densities(|density, theme: &GpuiThemeProvider| {
+            density_row(theme, density).into_any_element()
+        }),
+    )
 }
 
 /// One labelled row of the density ladder: a secondary + primary pair laid out
 /// by a `FormActions` at the given density. Density changes the inline gap and
 /// top separation only — child button size stays constant (contract §8).
-fn density_row(theme: &GpuiThemeProvider, label: &str, density: ControlDensity) -> Div {
+fn density_row(theme: &GpuiThemeProvider, density: ControlDensity) -> Div {
+    let label = density_key(density);
     div()
         .flex()
         .flex_col()

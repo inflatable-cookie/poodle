@@ -1,5 +1,9 @@
+use crate::app_state::AppState;
 use crate::node_compat::{BulkActionBar, Eyebrow};
+use crate::specimens::specimen_axes::{density_key, size_key};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
@@ -22,8 +26,9 @@ fn default_actions() -> Vec<BulkAction> {
     ]
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -114,52 +119,21 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 )),
         )
-        // --- Size ladder ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Size ladder"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(16.0))
-                        .child(size_block(theme, "XS", ControlSize::Xs))
-                        .child(size_block(theme, "SM", ControlSize::Sm))
-                        .child(size_block(theme, "MD", ControlSize::Md))
-                        .child(size_block(theme, "LG", ControlSize::Lg))
-                        .child(size_block(theme, "XL", ControlSize::Xl)),
-                ),
-        )
-        // --- Density ladder ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Density ladder"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(16.0))
-                        .child(density_block(theme, "COMPACT", ControlDensity::Compact))
-                        .child(density_block(theme, "DEFAULT", ControlDensity::Default))
-                        .child(density_block(
-                            theme,
-                            "COMFORTABLE",
-                            ControlDensity::Comfortable,
-                        )),
-                ),
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "bulk-action-bar",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                size_block(theme, size).into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                density_block(theme, density).into_any_element()
+            }),
+    )
 }
 
 /// Label above a ladder entry (mirrors the Svelte specimen variant labels).
@@ -171,12 +145,13 @@ fn ladder_label(theme: &GpuiThemeProvider, label: &str) -> Div {
         .child(label.to_string())
 }
 
-fn size_block(theme: &GpuiThemeProvider, label: &str, size: ControlSize) -> Div {
+fn size_block(theme: &GpuiThemeProvider, size: ControlSize) -> Div {
+    let label = size_key(size).to_uppercase();
     div()
         .flex()
         .flex_col()
         .gap(px(8.0))
-        .child(ladder_label(theme, label))
+        .child(ladder_label(theme, &label))
         .child(BulkActionBar::from_spec(
             BulkActionBarSpec::new()
                 .with_selection_count(5)
@@ -186,12 +161,13 @@ fn size_block(theme: &GpuiThemeProvider, label: &str, size: ControlSize) -> Div 
         ))
 }
 
-fn density_block(theme: &GpuiThemeProvider, label: &str, density: ControlDensity) -> Div {
+fn density_block(theme: &GpuiThemeProvider, density: ControlDensity) -> Div {
+    let label = density_key(density).to_uppercase();
     div()
         .flex()
         .flex_col()
         .gap(px(8.0))
-        .child(ladder_label(theme, label))
+        .child(ladder_label(theme, &label))
         .child(BulkActionBar::from_spec(
             BulkActionBarSpec::new()
                 .with_selection_count(5)

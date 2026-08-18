@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
-use crate::app_state::{AppState, ModelConnectionEvent, ModelConnectionPreviewState,
-    NodeSpecimenEvent};
+use crate::app_state::{
+    AppState, ModelConnectionEvent, ModelConnectionPreviewState, NodeSpecimenEvent,
+};
 use crate::node_compat::{Eyebrow, ModelConnectionPicker};
 use crate::PreviewRoot;
 use gpui::*;

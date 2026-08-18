@@ -1,16 +1,17 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, VideoPlayer};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::EyebrowSpec;
-use poodle_specs::{
-    AspectRatio, ControlDensity, ControlSize, SemanticControlSizeRole, VideoPlayerSpec,
-};
+use poodle_specs::{AspectRatio, SemanticControlSizeRole, VideoPlayerSpec};
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let src = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
     let poster = "https://interactive-examples.mdn.mozilla.net/media/examples/friday.mp4";
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -127,78 +128,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .with_current_time(20.0),
                 )),
         ))
-        // Sizes — control button/icon/volume/time scale per size variant.
-        .child(group(
-            theme,
-            "Sizes",
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(12.0))
-                .child(player(
-                    theme,
-                    420.0,
-                    VideoPlayerSpec::new(src)
-                        .with_duration(64.0)
-                        .with_current_time(28.0)
-                        .with_playing(true)
-                        .with_size(ControlSize::Xs),
-                ))
-                .child(player(
-                    theme,
-                    420.0,
-                    VideoPlayerSpec::new(src)
-                        .with_duration(64.0)
-                        .with_current_time(28.0)
-                        .with_playing(true)
-                        .with_size(ControlSize::Sm),
-                ))
-                .child(player(
-                    theme,
-                    420.0,
-                    VideoPlayerSpec::new(src)
-                        .with_duration(64.0)
-                        .with_current_time(28.0)
-                        .with_playing(true)
-                        .with_size(ControlSize::Lg),
-                ))
-                .child(player(
-                    theme,
-                    420.0,
-                    VideoPlayerSpec::new(src)
-                        .with_duration(64.0)
-                        .with_current_time(28.0)
-                        .with_playing(true)
-                        .with_size(ControlSize::Xl),
-                )),
-        ))
-        // Densities — controls-bar spacing only; component height unchanged.
-        .child(group(
-            theme,
-            "Densities",
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(12.0))
-                .child(player(
-                    theme,
-                    420.0,
-                    VideoPlayerSpec::new(src)
-                        .with_duration(64.0)
-                        .with_current_time(28.0)
-                        .with_playing(true)
-                        .with_density(ControlDensity::Compact),
-                ))
-                .child(player(
-                    theme,
-                    420.0,
-                    VideoPlayerSpec::new(src)
-                        .with_duration(64.0)
-                        .with_current_time(28.0)
-                        .with_playing(true)
-                        .with_density(ControlDensity::Comfortable),
-                )),
-        ))
         // Semantic size role — inherited scale via role.
         .child(group(
             theme,
@@ -213,6 +142,39 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     .with_size_role(SemanticControlSizeRole::Prominent),
             ),
         ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "video-player",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                player(
+                    theme,
+                    420.0,
+                    VideoPlayerSpec::new("/media/sample.mp4")
+                        .with_duration(64.0)
+                        .with_current_time(28.0)
+                        .with_playing(true)
+                        .with_size(size),
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                player(
+                    theme,
+                    420.0,
+                    VideoPlayerSpec::new("/media/sample.mp4")
+                        .with_duration(64.0)
+                        .with_current_time(28.0)
+                        .with_playing(true)
+                        .with_density(density),
+                )
+                .into_any_element()
+            }),
+    )
 }
 
 fn player(theme: &GpuiThemeProvider, max_w: f32, spec: VideoPlayerSpec) -> Div {

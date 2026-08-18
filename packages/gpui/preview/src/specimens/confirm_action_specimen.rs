@@ -1,9 +1,12 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Button, ConfirmAction, Eyebrow};
+use crate::specimens::specimen_axes::{density_key, size_key};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{FontFamily, LayoutDirection, Node};
 use poodle_specs::ConfirmActionSpec;
 use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec, StatusTone};
@@ -40,7 +43,7 @@ fn finish_click(
     })
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let panel_bg = theme.resolve_color("color.background.panel");
 
@@ -56,8 +59,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or_default();
 
     let text_secondary = theme.resolve_color("color.text.secondary");
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -281,4 +283,62 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     )
             }
         })
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "confirm-action",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                ConfirmAction::from_spec(
+                    ConfirmActionSpec::new(
+                        "Delete this record?",
+                        "This record will be permanently removed.",
+                        "Delete",
+                        "Cancel",
+                    )
+                    .with_size(size),
+                    theme,
+                )
+                .with_trigger(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Primary)
+                            .with_tone(ButtonTone::Danger)
+                            .with_label("Delete record"),
+                        theme,
+                    )
+                    .with_id(format!("confirm-action-size-{}-trigger", size_key(size))),
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                ConfirmAction::from_spec(
+                    ConfirmActionSpec::new(
+                        "Delete this record?",
+                        "This record will be permanently removed.",
+                        "Delete",
+                        "Cancel",
+                    )
+                    .with_density(density),
+                    theme,
+                )
+                .with_trigger(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Primary)
+                            .with_tone(ButtonTone::Danger)
+                            .with_label("Delete record"),
+                        theme,
+                    )
+                    .with_id(format!(
+                        "confirm-action-density-{}-trigger",
+                        density_key(density)
+                    )),
+                )
+                .into_any_element()
+            }),
+    )
 }

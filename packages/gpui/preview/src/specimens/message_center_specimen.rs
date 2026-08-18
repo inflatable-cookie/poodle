@@ -1,16 +1,33 @@
 use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::Eyebrow;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_render::{message_center, MessageCenterHandlers};
 use poodle_specs::{
-    MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec, OverlayPlacement, StatusTone,
+    EyebrowSpec, MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec, OverlayPlacement,
+    StatusTone,
 };
 
 const IDS: &[&str] = &["render", "mention", "maintenance"];
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+/// Two ordinary rows the axis representatives read from. The Examples pane
+/// keeps the fuller, interactive set.
+fn axis_items() -> Vec<MessageCenterItem> {
+    vec![
+        MessageCenterItem::new("axis-render", "Render complete")
+            .with_message("Mix preview 42 is ready for review.")
+            .with_meta("Render queue"),
+        MessageCenterItem::new("axis-mention", "Maya mentioned you")
+            .with_message("Can you check the limiter settings before export?")
+            .with_meta("Studio chat"),
+    ]
+}
+
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let items = vec![
         MessageCenterItem::new("job-render", "Mix preview")
             .with_message("Rendering stems and automation…")
@@ -118,12 +135,43 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         .get("message-center-selected")
         .cloned()
         .unwrap_or_else(|| "none".into());
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(12.0))
         .min_h(px(520.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new()
+                .with_content("Live jobs, unread mentions, and a read maintenance notice"),
+            &state.theme,
+        ))
         .child(center)
         .child(format!("Selected message: {selected}"))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "message-center",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                poodle_gpui_node_backend::to_gpui(&message_center(
+                    &MessageCenterSpec::new(axis_items())
+                        .with_placement(OverlayPlacement::BottomStart)
+                        .with_size(size),
+                    theme,
+                    MessageCenterHandlers::default(),
+                ))
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                poodle_gpui_node_backend::to_gpui(&message_center(
+                    &MessageCenterSpec::new(axis_items())
+                        .with_placement(OverlayPlacement::BottomStart)
+                        .with_density(density),
+                    theme,
+                    MessageCenterHandlers::default(),
+                ))
+            }),
+    )
 }

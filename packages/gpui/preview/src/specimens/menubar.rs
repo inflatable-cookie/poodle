@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, Menubar};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
@@ -198,23 +198,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "menubar",
         examples,
-        move |size, theme: &GpuiThemeProvider| {
-            Menubar::from_spec(
-                MenubarSpec::new(make_items()).with_aria_label("Menubar"),
-                theme,
-            )
-            .with_id(format!("specimen-size-{:?}", size))
-            .size(size)
-            .into_any_element()
-        },
-        move |density, theme: &GpuiThemeProvider| {
-            Menubar::from_spec(
-                MenubarSpec::new(make_items()).with_aria_label("Menubar"),
-                theme,
-            )
-            .with_id(format!("specimen-density-{:?}", density))
-            .with_density(density)
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(move |size, theme: &GpuiThemeProvider| {
+                Menubar::from_spec(
+                    MenubarSpec::new(make_items()).with_aria_label("Menubar"),
+                    theme,
+                )
+                .with_id(format!("specimen-size-{:?}", size))
+                .size(size)
+                .into_any_element()
+            })
+            .with_densities(move |density, theme: &GpuiThemeProvider| {
+                Menubar::from_spec(
+                    MenubarSpec::new(make_items()).with_aria_label("Menubar"),
+                    theme,
+                )
+                .with_id(format!("specimen-density-{:?}", density))
+                .with_density(density)
+                .into_any_element()
+            }),
     )
 }

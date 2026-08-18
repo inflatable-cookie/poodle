@@ -1,48 +1,52 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Button, CommandPalette, Eyebrow};
+use crate::specimens::specimen_axes::{density_key, size_key};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ButtonSpec, CommandActionItem, CommandPaletteSpec, DiscoveryState};
 use poodle_specs::{ControlDensity, ControlSize, EyebrowSpec};
 use std::sync::Arc;
 
-fn open_click(state: &AppState, key: &'static str) -> Arc<dyn Fn() + Send + Sync> {
+fn open_click(state: &AppState, key: impl Into<String>) -> Arc<dyn Fn() + Send + Sync> {
     let events = state.node_events.clone();
+    let key = key.into();
     Arc::new(move || {
         events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
-            key: key.to_string(),
+            key: key.clone(),
             value: true,
         });
     })
 }
 
-fn set_text(state: &AppState, key: &'static str) -> Arc<dyn Fn(&str) + Send + Sync> {
+fn set_text(state: &AppState, key: impl Into<String>) -> Arc<dyn Fn(&str) + Send + Sync> {
     let events = state.node_events.clone();
+    let key = key.into();
     Arc::new(move |value| {
         events.lock().unwrap().push(NodeSpecimenEvent::SetText {
-            key: key.to_string(),
+            key: key.clone(),
             value: value.to_string(),
         });
     })
 }
 
-fn close_click(state: &AppState, key: &'static str) -> Arc<dyn Fn() + Send + Sync> {
+fn close_click(state: &AppState, key: impl Into<String>) -> Arc<dyn Fn() + Send + Sync> {
     let events = state.node_events.clone();
+    let key = key.into();
     Arc::new(move || {
         events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
-            key: key.to_string(),
+            key: key.clone(),
             value: false,
         });
     })
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
-    let theme = &state.theme;
-    let text_secondary = theme.resolve_color("color.text.secondary");
-
-    let actions = vec![
+/// The action set both the Examples pane and the axis representatives use.
+fn axis_actions() -> Vec<CommandActionItem> {
+    vec![
         CommandActionItem::new("save", "Save")
             .with_group("File")
             .with_shortcut("\u{2318}S"),
@@ -64,7 +68,14 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         CommandActionItem::new("toggle-sidebar", "Toggle Sidebar")
             .with_group("View")
             .with_shortcut("\u{2318}B"),
-    ];
+    ]
+}
+
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let text_secondary = theme.resolve_color("color.text.secondary");
+
+    let actions = axis_actions();
 
     let query = state
         .specimens
@@ -318,8 +329,71 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     if !is_open {
         root = root.child(densities_row);
     }
+    let examples = root.into_any_element();
 
-    root
+    specimen_layout(
+        state,
+        cx,
+        "command-palette",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                let open_key = format!("cmd-palette-axis-size-{}", size_key(size));
+                let mut row = div().relative().flex().flex_col().gap(px(8.0)).child(
+                    Button::from_spec(
+                        ButtonSpec::new().with_label(format!("Open {} palette", size_key(size))),
+                        theme,
+                    )
+                    .with_id(format!("cmd-palette-axis-size-{}-trigger", size_key(size)))
+                    .on_click(open_click(state, open_key.clone())),
+                );
+                if state.specimens.is_on(&open_key) {
+                    row = row.child(
+                        CommandPalette::from_spec(
+                            CommandPaletteSpec::new(axis_actions())
+                                .with_title("Command palette")
+                                .with_invocation_hint("\u{2318}K")
+                                .with_open(true)
+                                .with_size(size),
+                            theme,
+                        )
+                        .with_id(format!("cmd-palette-axis-size-{}", size_key(size)))
+                        .on_close(close_click(state, open_key.clone())),
+                    );
+                }
+                row.into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                let open_key = format!("cmd-palette-axis-density-{}", density_key(density));
+                let mut row = div().relative().flex().flex_col().gap(px(8.0)).child(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_label(format!("Open {} palette", density_key(density))),
+                        theme,
+                    )
+                    .with_id(format!(
+                        "cmd-palette-axis-density-{}-trigger",
+                        density_key(density)
+                    ))
+                    .on_click(open_click(state, open_key.clone())),
+                );
+                if state.specimens.is_on(&open_key) {
+                    row = row.child(
+                        CommandPalette::from_spec(
+                            CommandPaletteSpec::new(axis_actions())
+                                .with_title("Command palette")
+                                .with_invocation_hint("\u{2318}K")
+                                .with_open(true)
+                                .with_density(density),
+                            theme,
+                        )
+                        .with_id(format!("cmd-palette-axis-density-{}", density_key(density)))
+                        .on_close(close_click(state, open_key.clone())),
+                    );
+                }
+                row.into_any_element()
+            }),
+    )
 }
 
 /// Build one labeled group containing an always-open palette demonstrating a

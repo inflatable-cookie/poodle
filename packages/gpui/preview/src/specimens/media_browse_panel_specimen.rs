@@ -1,4 +1,7 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Eyebrow, MediaBrowsePanel};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::EyebrowSpec;
@@ -6,15 +9,20 @@ use poodle_specs::{
     ControlDensity, ControlSize, MediaBrowseItem, MediaBrowsePanelSpec, SemanticControlSizeRole,
 };
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    let items = vec![
+/// The browse rows both the Examples pane and the axis representatives use.
+fn sample_items() -> Vec<MediaBrowseItem> {
+    vec![
         MediaBrowseItem::new("1", "Hero banner", "image").with_meta("Image • 1920 x 1080"),
         MediaBrowseItem::new("2", "Launch trailer", "video").with_meta("Video • 3:42"),
         MediaBrowseItem::new("3", "Podcast intro", "audio").with_meta("Audio • 1:18"),
         MediaBrowseItem::new("4", "Quarterly report", "document").with_meta("Document • PDF"),
-    ];
+    ]
+}
 
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let items = sample_items();
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -112,4 +120,33 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         )),
                 ),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "media-browse-panel",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                MediaBrowsePanel::from_spec(
+                    MediaBrowsePanelSpec::new()
+                        .with_items(sample_items())
+                        .with_has_more(true)
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                MediaBrowsePanel::from_spec(
+                    MediaBrowsePanelSpec::new()
+                        .with_items(sample_items())
+                        .with_has_more(true)
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

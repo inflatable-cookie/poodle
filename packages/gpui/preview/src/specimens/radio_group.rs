@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, RadioGroup};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -186,27 +186,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "radio-group",
         examples,
-        move |size, theme: &GpuiThemeProvider| {
-            RadioGroup::from_spec(
-                RadioGroupSpec::new(make_options())
-                    .with_value("pro")
-                    .with_orientation(Orientation::Horizontal)
-                    .with_size(size),
-                theme,
-            )
-            .with_id(format!("specimen-size-{:?}", size))
-            .into_any_element()
-        },
-        move |density, theme: &GpuiThemeProvider| {
-            RadioGroup::from_spec(
-                RadioGroupSpec::new(make_options())
-                    .with_value("pro")
-                    .with_orientation(Orientation::Horizontal)
-                    .with_density(density),
-                theme,
-            )
-            .with_id(format!("specimen-density-{:?}", density))
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(move |size, theme: &GpuiThemeProvider| {
+                RadioGroup::from_spec(
+                    RadioGroupSpec::new(make_options())
+                        .with_value("pro")
+                        .with_orientation(Orientation::Horizontal)
+                        .with_size(size),
+                    theme,
+                )
+                .with_id(format!("specimen-size-{:?}", size))
+                .into_any_element()
+            })
+            .with_densities(move |density, theme: &GpuiThemeProvider| {
+                RadioGroup::from_spec(
+                    RadioGroupSpec::new(make_options())
+                        .with_value("pro")
+                        .with_orientation(Orientation::Horizontal)
+                        .with_density(density),
+                    theme,
+                )
+                .with_id(format!("specimen-density-{:?}", density))
+                .into_any_element()
+            }),
     )
 }

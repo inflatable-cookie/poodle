@@ -10,7 +10,7 @@
 //! so instead of `cx.listener` the handlers push `NodeSpecimenEvent`s onto a
 //! queue the next render drains into specimen state (see `app_state.rs`).
 
-use crate::node_compat::Eyebrow;
+use crate::node_compat::{Eyebrow, Select};
 use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
@@ -20,6 +20,9 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 
+use crate::specimens::specimen_axes::{density_key, size_key};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use poodle_gpui::GpuiThemeProvider;
 use poodle_render::{select, SelectHandlers};
 use poodle_specs::{
     ChoiceOption, ControlSize, EyebrowSpec, SelectMode, SelectSpec, ValidationState,
@@ -81,17 +84,22 @@ fn node_select_static(spec: SelectSpec, state: &AppState) -> AnyElement {
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
-    let theme = &state.theme;
-    let text_secondary = theme.resolve_color("color.text.secondary");
-
-    let fruit_options: Vec<ChoiceOption> = vec![
+/// The option set both the Examples pane and the axis representatives use.
+fn axis_options() -> Vec<ChoiceOption> {
+    vec![
         ChoiceOption::new("apple", "Apple"),
         ChoiceOption::new("banana", "Banana"),
         ChoiceOption::new("cherry", "Cherry"),
         ChoiceOption::new("dragonfruit", "Dragonfruit"),
         ChoiceOption::new("elderberry", "Elderberry"),
-    ];
+    ]
+}
+
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let text_secondary = theme.resolve_color("color.text.secondary");
+
+    let fruit_options: Vec<ChoiceOption> = axis_options();
 
     let rich_options: Vec<ChoiceOption> = vec![
         ChoiceOption::new("us", "United States").with_description("North America"),
@@ -127,8 +135,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     // Helper for reading toggle/value state
     let get_open = |key: &str| state.specimens.is_on(key);
     let get_value = |key: &str| state.specimens.text.get(key).cloned();
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -466,4 +473,33 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     col
                 }),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "select",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                Select::from_spec(
+                    SelectSpec::new(axis_options())
+                        .with_placeholder("Select...")
+                        .with_aria_label(format!("{} select", size_key(size)))
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                Select::from_spec(
+                    SelectSpec::new(axis_options())
+                        .with_placeholder("Select...")
+                        .with_aria_label(format!("{} select", density_key(density)))
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

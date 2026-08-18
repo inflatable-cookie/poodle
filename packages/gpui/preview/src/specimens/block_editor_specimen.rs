@@ -1,4 +1,7 @@
+use crate::app_state::AppState;
 use crate::node_compat::{BlockEditor, Eyebrow};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
@@ -18,12 +21,12 @@ fn text_block(text: &str, size: f32, color: ColorValue) -> Node {
     node
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let text_primary = theme.resolve_color("color.text.primary");
     let text_secondary = theme.resolve_color("color.text.secondary");
     let accent = theme.resolve_color("color.accent.base");
-
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Default blocks ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -182,4 +185,31 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )
                 )
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "block-editor",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                BlockEditor::from_spec(BlockEditorSpec::new().with_size(size), theme)
+                    .with_child(text_block(
+                        "A text block with regular content.",
+                        14.0,
+                        theme.resolve_color("color.text.primary"),
+                    ))
+                    .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                BlockEditor::from_spec(BlockEditorSpec::new().with_density(density), theme)
+                    .with_child(text_block(
+                        "A text block with regular content.",
+                        14.0,
+                        theme.resolve_color("color.text.primary"),
+                    ))
+                    .into_any_element()
+            }),
+    )
 }

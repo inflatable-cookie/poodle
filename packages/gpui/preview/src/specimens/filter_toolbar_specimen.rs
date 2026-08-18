@@ -1,10 +1,13 @@
+use crate::app_state::AppState;
 use crate::node_compat::{Button, Eyebrow, FilterToolbar, IconButton, Select, TextInput};
+use crate::specimens::specimen_axes::{density_key, size_key};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::FilterToolbarSpec;
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, ChoiceOption, ControlDensity, ControlSize, EyebrowSpec,
-    IconButtonSpec, SelectSpec, TextInputSpec,
+    ButtonSpec, ButtonVariant, ChoiceOption, EyebrowSpec, IconButtonSpec, SelectSpec, TextInputSpec,
 };
 
 /// Static filter option sets reused across specimen sections.
@@ -49,8 +52,9 @@ fn select_input(theme: &GpuiThemeProvider, id: &str, options: Vec<ChoiceOption>)
         .with_id(id.to_string())
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -81,89 +85,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         owner_options(),
                     )),
                 ),
-        )
-        // --- Sizes ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Sizes"),
-                    theme,
-                ))
-                .child({
-                    let sizes: &[(&str, ControlSize)] = &[
-                        ("xs", ControlSize::Xs),
-                        ("sm", ControlSize::Sm),
-                        ("md", ControlSize::Md),
-                        ("lg", ControlSize::Lg),
-                        ("xl", ControlSize::Xl),
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(12.0));
-                    for &(key, size) in sizes {
-                        col = col.child(
-                            FilterToolbar::from_spec(
-                                FilterToolbarSpec::new()
-                                    .with_summary_text(format!("Toolbar at {key}"))
-                                    .with_aria_label(format!("Filter toolbar at {key}"))
-                                    .with_collapsible(false)
-                                    .with_size(size),
-                                theme,
-                            )
-                            .with_child(search_input(theme, &format!("size-search-{key}")))
-                            .with_child(select_input(
-                                theme,
-                                &format!("size-status-{key}"),
-                                status_options(),
-                            )),
-                        );
-                    }
-                    col
-                }),
-        )
-        // --- Densities ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Densities"),
-                    theme,
-                ))
-                .child({
-                    let densities: &[(&str, ControlDensity)] = &[
-                        ("compact", ControlDensity::Compact),
-                        ("default", ControlDensity::Default),
-                        ("comfortable", ControlDensity::Comfortable),
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(12.0));
-                    for &(key, density) in densities {
-                        col = col.child(
-                            FilterToolbar::from_spec(
-                                FilterToolbarSpec::new()
-                                    .with_summary_text(format!("Toolbar at {key}"))
-                                    .with_aria_label(format!("Filter toolbar at {key}"))
-                                    .with_collapsible(false)
-                                    .with_density(density),
-                                theme,
-                            )
-                            .with_child(search_input(theme, &format!("density-search-{key}")))
-                            .with_child(select_input(
-                                theme,
-                                &format!("density-status-{key}"),
-                                status_options(),
-                            ))
-                            .with_child(select_input(
-                                theme,
-                                &format!("density-type-{key}"),
-                                type_options(),
-                            )),
-                        );
-                    }
-                    col
-                }),
         )
         // --- Collapsible with actions (expanded) ---
         .child(
@@ -270,4 +191,53 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     ),
                 ),
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "filter-toolbar",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                FilterToolbar::from_spec(
+                    FilterToolbarSpec::new()
+                        .with_summary_text("Filters")
+                        .with_aria_label("Filter toolbar")
+                        .with_collapsible(false)
+                        .with_size(size),
+                    theme,
+                )
+                .with_child(search_input(
+                    theme,
+                    &format!("size-search-{}", size_key(size)),
+                ))
+                .with_child(select_input(
+                    theme,
+                    &format!("size-status-{}", size_key(size)),
+                    status_options(),
+                ))
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                FilterToolbar::from_spec(
+                    FilterToolbarSpec::new()
+                        .with_summary_text("Filters")
+                        .with_aria_label("Filter toolbar")
+                        .with_collapsible(false)
+                        .with_density(density),
+                    theme,
+                )
+                .with_child(search_input(
+                    theme,
+                    &format!("density-search-{}", density_key(density)),
+                ))
+                .with_child(select_input(
+                    theme,
+                    &format!("density-status-{}", density_key(density)),
+                    status_options(),
+                ))
+                .into_any_element()
+            }),
+    )
 }

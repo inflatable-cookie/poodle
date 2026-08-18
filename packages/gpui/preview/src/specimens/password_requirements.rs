@@ -1,9 +1,12 @@
+use crate::app_state::AppState;
 use crate::node_compat::PasswordRequirements;
 use crate::node_compat::{Eyebrow, TextInput};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ControlSize, EyebrowSpec, PasswordRequirementsPolicy, PasswordRequirementsSpec, TextInputSpec,
+    EyebrowSpec, PasswordRequirementsPolicy, PasswordRequirementsSpec, TextInputSpec,
 };
 
 fn policy() -> PasswordRequirementsPolicy {
@@ -27,7 +30,8 @@ fn group(theme: &GpuiThemeProvider, label: &'static str, body: impl IntoElement)
         .child(body)
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let root = div().flex().flex_col().gap(px(24.0)).max_w(px(448.0));
 
     // Default — live field plus checklist, fully met.
@@ -112,37 +116,30 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         "Empty (no policy)",
         PasswordRequirements::from_spec(PasswordRequirementsSpec::new(), theme),
     );
-
-    // Size ladder — xs → xl, same partially-met password so tone + icons show.
-    let sizes: Vec<(ControlSize, &'static str)> = vec![
-        (ControlSize::Xs, "xs"),
-        (ControlSize::Sm, "sm"),
-        (ControlSize::Md, "md"),
-        (ControlSize::Lg, "lg"),
-        (ControlSize::Xl, "xl"),
-    ];
-    let mut size_row = div().flex().flex_col().gap(px(16.0));
-    for (size, label) in sizes {
-        size_row = size_row.child(group(
-            theme,
-            label,
-            PasswordRequirements::from_spec(
-                PasswordRequirementsSpec::new()
-                    .with_password("Example123!")
-                    .with_requirements(policy())
-                    .with_size(size),
-                theme,
-            ),
-        ));
-    }
-    let size_ladder = group(theme, "Sizes", size_row);
-
-    root.child(default_group)
+    let examples = root
+        .child(default_group)
         .child(all_met)
         .child(none_met)
         .child(mixed)
         .child(loading)
         .child(error)
         .child(empty)
-        .child(size_ladder)
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "password-requirements",
+        examples,
+        SpecimenAxes::examples_only().with_sizes(|size, theme: &GpuiThemeProvider| {
+            PasswordRequirements::from_spec(
+                PasswordRequirementsSpec::new()
+                    .with_password("Example123!")
+                    .with_requirements(policy())
+                    .with_size(size),
+                theme,
+            )
+            .into_any_element()
+        }),
+    )
 }

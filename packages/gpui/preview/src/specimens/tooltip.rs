@@ -1,14 +1,11 @@
 use crate::app_state::AppState;
 use crate::node_compat::{Button, Eyebrow, Tooltip};
 use crate::specimens::overlay_state;
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{
-    ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec, OverlayPlacement,
-    TooltipSpec,
-};
+use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec, OverlayPlacement, TooltipSpec};
 
 fn render_tooltip_case(
     state: &AppState,
@@ -190,55 +187,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "tooltip",
         examples,
-        |size: ControlSize, theme: &GpuiThemeProvider| {
-            let size_label = match size {
-                ControlSize::Xs => "xs",
-                ControlSize::Sm => "sm",
-                ControlSize::Md => "md",
-                ControlSize::Lg => "lg",
-                ControlSize::Xl => "xl",
-            };
-            render_tooltip_case(
-                state,
-                theme,
-                &root,
-                format!("tooltip-size-{size_label}-open"),
-                format!("tooltip-size-{size_label}-hovered"),
-                TooltipSpec::new().with_content(format!("Tooltip at {size_label}")),
-                Button::from_spec(
-                    ButtonSpec::new()
-                        .with_variant(ButtonVariant::Secondary)
-                        .with_size(size)
-                        .with_label(format!("Hover ({size_label})")),
-                    theme,
-                )
-                .with_id(format!("tooltip-size-{size_label}-trigger"))
-                .into_any_element(),
-            )
-        },
-        |density: ControlDensity, theme: &GpuiThemeProvider| {
-            let density_label = match density {
-                ControlDensity::Compact => "compact",
-                ControlDensity::Default => "default",
-                ControlDensity::Comfortable => "comfortable",
-            };
-            render_tooltip_case(
-                state,
-                theme,
-                &root,
-                format!("tooltip-density-{density_label}-open"),
-                format!("tooltip-density-{density_label}-hovered"),
-                TooltipSpec::new().with_content(format!("Tooltip at {density_label}")),
-                Button::from_spec(
-                    ButtonSpec::new()
-                        .with_variant(ButtonVariant::Secondary)
-                        .with_density(density)
-                        .with_label(format!("Hover ({density_label})")),
-                    theme,
-                )
-                .with_id(format!("tooltip-density-{density_label}-trigger"))
-                .into_any_element(),
-            )
-        },
+        SpecimenAxes::examples_only(),
     )
 }

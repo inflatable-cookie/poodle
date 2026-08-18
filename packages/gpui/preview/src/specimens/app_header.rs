@@ -1,5 +1,9 @@
+use crate::app_state::AppState;
 use crate::node_compat::{AppHeader, Button, Eyebrow, IconButton, IntoCompatNode};
+use crate::specimens::specimen_axes::{density_key, size_key};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
@@ -9,8 +13,9 @@ use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec, IconButtonSpec,
 };
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -142,9 +147,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content(
-                        "Centred header (destination tabs in the centre)",
-                    ),
+                    EyebrowSpec::new()
+                        .with_content("Centred header (destination tabs in the centre)"),
                     theme,
                 ))
                 .child(centered_header(theme, "c")),
@@ -156,9 +160,8 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content(
-                        "Centred header at narrow width (≤45rem viewport)",
-                    ),
+                    EyebrowSpec::new()
+                        .with_content("Centred header at narrow width (≤45rem viewport)"),
                     theme,
                 ))
                 // 40rem frame: the native renderer has no viewport breakpoint,
@@ -166,52 +169,21 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 // the CSS media query; see the contract §8).
                 .child(div().w(px(640.0)).child(centered_header(theme, "n"))),
         )
-        // --- Density ladder ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Density ladder"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(16.0))
-                        .child(density_block(theme, "COMPACT", ControlDensity::Compact))
-                        .child(density_block(theme, "DEFAULT", ControlDensity::Default))
-                        .child(density_block(
-                            theme,
-                            "COMFORTABLE",
-                            ControlDensity::Comfortable,
-                        )),
-                ),
-        )
-        // --- Size ladder ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Size ladder"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(16.0))
-                        .child(size_block(theme, "XS", ControlSize::Xs))
-                        .child(size_block(theme, "SM", ControlSize::Sm))
-                        .child(size_block(theme, "MD", ControlSize::Md))
-                        .child(size_block(theme, "LG", ControlSize::Lg))
-                        .child(size_block(theme, "XL", ControlSize::Xl)),
-                ),
-        )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "app-header",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                size_block(theme, size).into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                density_block(theme, density).into_any_element()
+            }),
+    )
 }
 
 fn action_row(
@@ -360,12 +332,13 @@ fn demo_header(spec: AppHeaderSpec, theme: &GpuiThemeProvider, id_suffix: &str) 
         ))
 }
 
-fn density_block(theme: &GpuiThemeProvider, label: &str, density: ControlDensity) -> Div {
+fn density_block(theme: &GpuiThemeProvider, density: ControlDensity) -> Div {
+    let label = density_key(density).to_uppercase();
     div()
         .flex()
         .flex_col()
         .gap(px(8.0))
-        .child(ladder_label(theme, label))
+        .child(ladder_label(theme, &label))
         .child(demo_header(
             AppHeaderSpec::new()
                 .with_title("My Application")
@@ -375,12 +348,13 @@ fn density_block(theme: &GpuiThemeProvider, label: &str, density: ControlDensity
         ))
 }
 
-fn size_block(theme: &GpuiThemeProvider, label: &str, size: ControlSize) -> Div {
+fn size_block(theme: &GpuiThemeProvider, size: ControlSize) -> Div {
+    let label = size_key(size).to_uppercase();
     div()
         .flex()
         .flex_col()
         .gap(px(8.0))
-        .child(ladder_label(theme, label))
+        .child(ladder_label(theme, &label))
         .child(demo_header(
             AppHeaderSpec::new()
                 .with_title("My Application")

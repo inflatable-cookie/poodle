@@ -2,17 +2,16 @@ use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, LicenceActivation};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_gpui_node_backend::file_capability::SingleFilePickSpec;
 use poodle_headless::licence::{
-    LicenceActivationMode, LicenceActivationRoute, LicenceKeyFormat, LicenceKeyProblem,
-    LicenceKeyResult, LicenceSubmitDraft, resolve_licence_submit,
+    resolve_licence_submit, LicenceActivationMode, LicenceActivationRoute, LicenceKeyFormat,
+    LicenceKeyProblem, LicenceKeyResult, LicenceSubmitDraft,
 };
-use poodle_specs::{
-    EyebrowSpec, FieldSpec, LicenceActivationSpec, TextInputSpec, ValidationState,
-};
+use poodle_specs::{EyebrowSpec, FieldSpec, LicenceActivationSpec, TextInputSpec, ValidationState};
 
 /// Stand-in for the host's key parser (the web specimen's, ported). The real
 /// parser belongs to the authority — the specimen shows Poodle works against
@@ -46,8 +45,7 @@ impl LicenceKeyFormat for SpecimenKeyFormat {
     fn is_probably_a_typo(&self, problem: &LicenceKeyProblem) -> bool {
         matches!(
             problem,
-            LicenceKeyProblem::CheckFailed
-                | LicenceKeyProblem::UnexpectedSymbol { .. }
+            LicenceKeyProblem::CheckFailed | LicenceKeyProblem::UnexpectedSymbol { .. }
         )
     }
 }
@@ -72,7 +70,10 @@ fn group(theme: &GpuiThemeProvider, label: &str, specimen: impl IntoElement) -> 
         .flex()
         .flex_col()
         .gap(px(8.0))
-        .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(label), theme))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(label),
+            theme,
+        ))
         .child(specimen)
 }
 
@@ -112,13 +113,10 @@ fn label_handlers(
                     key: "la-machine-label-original".to_string(),
                     value: Some(committed.clone()),
                 });
-            queue
-                .lock()
-                .unwrap()
-                .push(NodeSpecimenEvent::SetToggle {
-                    key: "la-machine-editing".to_string(),
-                    value: true,
-                });
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                key: "la-machine-editing".to_string(),
+                value: true,
+            });
         })
     };
     let change = {
@@ -140,13 +138,10 @@ fn label_handlers(
                     key: "la-machine-label-original".to_string(),
                     value: None,
                 });
-            queue
-                .lock()
-                .unwrap()
-                .push(NodeSpecimenEvent::SetToggle {
-                    key: "la-machine-editing".to_string(),
-                    value: false,
-                });
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                key: "la-machine-editing".to_string(),
+                value: false,
+            });
         })
     };
     let cancel = {
@@ -212,9 +207,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 label: machine_label.clone(),
             };
             match resolve_licence_submit(&draft, Some(&SpecimenKeyFormat)) {
-                poodle_headless::licence::LicenceSubmitResolution::Emit {
-                    credential, ..
-                } => {
+                poodle_headless::licence::LicenceSubmitResolution::Emit { credential, .. } => {
                     clear_key_message(&queue);
                     queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
                         key: "la-emitted".to_string(),
@@ -245,8 +238,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_machine_label(Some(machine_label.clone()))
             .with_machine_label_editing(machine_editing)
             .with_key_selection(
-                state.specimens.carets.get("la-key").map(|c| c.0).unwrap_or(0),
-                state.specimens.carets.get("la-key").map(|c| c.1).unwrap_or(0),
+                state
+                    .specimens
+                    .carets
+                    .get("la-key")
+                    .map(|c| c.0)
+                    .unwrap_or(0),
+                state
+                    .specimens
+                    .carets
+                    .get("la-key")
+                    .map(|c| c.1)
+                    .unwrap_or(0),
             ),
         theme,
     )
@@ -275,8 +278,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     })
     .on_key_check(Arc::new(|input: &str| SpecimenKeyFormat.parse(input)))
     .on_machine_label_edit({
-        let (edit, _change, _commit, _cancel) =
-            label_handlers(&queue, machine_label.as_str());
+        let (edit, _change, _commit, _cancel) = label_handlers(&queue, machine_label.as_str());
         edit
     })
     .on_machine_label_change({
@@ -295,8 +297,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     // Embedded account activation: host-owned account content beside the
     // spec, driven by Poodle's submit.
-    let email = state.specimens.text.get("la-email").cloned().unwrap_or_default();
-    let password = state.specimens.text.get("la-password").cloned().unwrap_or_default();
+    let email = state
+        .specimens
+        .text
+        .get("la-email")
+        .cloned()
+        .unwrap_or_default();
+    let password = state
+        .specimens
+        .text
+        .get("la-password")
+        .cloned()
+        .unwrap_or_default();
     let email_field = poodle_render::field(
         &FieldSpec::new("la-email", "Email address"),
         theme,
@@ -378,9 +390,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 label: machine_label.clone(),
             };
             match resolve_licence_submit(&draft, None) {
-                poodle_headless::licence::LicenceSubmitResolution::Emit {
-                    credential, ..
-                } => {
+                poodle_headless::licence::LicenceSubmitResolution::Emit { credential, .. } => {
                     queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
                         key: "la-emitted".to_string(),
                         value: emitted_caption(&credential),
@@ -441,8 +451,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         })
     })
     .on_machine_label_edit({
-        let (edit, _change, _commit, _cancel) =
-            label_handlers(&queue, machine_label.as_str());
+        let (edit, _change, _commit, _cancel) = label_handlers(&queue, machine_label.as_str());
         edit
     })
     .on_machine_label_change({
@@ -471,7 +480,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 // A read failure is a local polite error on this component
                 // surface — the approved web copy, never the OS text.
                 failed_message: Some(
-                    poodle_headless::licence::LICENCE_FILE_UNREADABLE_MESSAGE.to_string()
+                    poodle_headless::licence::LICENCE_FILE_UNREADABLE_MESSAGE.to_string(),
                 ),
             });
         })
@@ -479,18 +488,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     .on_file_remove({
         let queue = Arc::clone(&queue);
         Arc::new(move || {
-            queue.lock().unwrap().push(NodeSpecimenEvent::SetOptionalText {
-                key: "la-file-name".to_string(),
-                value: None,
-            });
-            queue.lock().unwrap().push(NodeSpecimenEvent::SetOptionalText {
-                key: "la-file-base64".to_string(),
-                value: None,
-            });
-            queue.lock().unwrap().push(NodeSpecimenEvent::SetOptionalText {
-                key: "la-file-error".to_string(),
-                value: None,
-            });
+            queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetOptionalText {
+                    key: "la-file-name".to_string(),
+                    value: None,
+                });
+            queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetOptionalText {
+                    key: "la-file-base64".to_string(),
+                    value: None,
+                });
+            queue
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetOptionalText {
+                    key: "la-file-error".to_string(),
+                    value: None,
+                });
         })
     });
 
@@ -513,22 +531,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .with_separator("-"),
         )
         .with_disabled(true);
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
         .max_w(px(420.0))
-        .child(group(
-            theme,
-            "Embedded account activation",
-            embedded,
-        ))
-        .child(group(
-            theme,
-            "External account activation",
-            external,
-        ))
+        .child(group(theme, "Embedded account activation", embedded))
+        .child(group(theme, "External account activation", external))
         .child(group(
             theme,
             "Key activation",
@@ -566,4 +575,31 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 theme,
             ),
         ))
-        }
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "licence-activation",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                LicenceActivation::from_spec(
+                    LicenceActivationSpec::new()
+                        .with_mode(LicenceActivationMode::Key)
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                LicenceActivation::from_spec(
+                    LicenceActivationSpec::new()
+                        .with_mode(LicenceActivationMode::Key)
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
+}

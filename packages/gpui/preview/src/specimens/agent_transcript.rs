@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{AgentTranscript, Eyebrow};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -29,7 +30,7 @@ fn message(id: &str, markdown: &str) -> TranscriptItem {
     })
 }
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
 
     fn group(theme: &GpuiThemeProvider, label: &str, content: AnyElement) -> Div {
@@ -157,8 +158,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
         })
     })
     .into_any_element();
-
-    div()
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -199,4 +199,35 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
             AgentTranscript::from_spec(AgentTranscriptSpec::new(Vec::new()), theme)
                 .into_any_element(),
         ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "agent-transcript",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                AgentTranscript::from_spec(
+                    AgentTranscriptSpec::new(vec![
+                        message("axis-m1", "A short worked turn."),
+                        call("axis-t1", "effigy check:gpui", ToolCallStatus::Success),
+                    ])
+                    .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                AgentTranscript::from_spec(
+                    AgentTranscriptSpec::new(vec![
+                        message("axis-m1", "A short worked turn."),
+                        call("axis-t1", "effigy check:gpui", ToolCallStatus::Success),
+                    ])
+                    .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

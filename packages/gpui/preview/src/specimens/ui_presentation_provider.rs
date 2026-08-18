@@ -7,8 +7,12 @@
 //! shows the explicit child-spec values a host must currently supply. It does
 //! not claim the passthrough wrapper caused a cascade.
 
+use crate::app_state::AppState;
 use crate::node_compat::{Button, Eyebrow, TextInput};
 use crate::providers::UiPresentationProvider;
+use crate::specimens::specimen_axes::density_key;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
@@ -61,8 +65,9 @@ fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div
         .child(child)
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
-    div()
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
+    let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
@@ -130,4 +135,16 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     )),
             ),
         ))
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "ui-presentation-provider",
+        examples,
+        SpecimenAxes::examples_only().with_densities(|density, theme: &GpuiThemeProvider| {
+            scoped_controls(density, ControlSize::Md, density_key(density), theme)
+                .into_any_element()
+        }),
+    )
 }

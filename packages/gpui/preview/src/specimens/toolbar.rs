@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Button, Eyebrow, Separator, Toolbar};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::prelude::FluentBuilder;
@@ -241,63 +241,64 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "toolbar",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            Toolbar::from_spec(
-                ToolbarSpec::new()
-                    .with_size(size)
-                    .with_aria_label("Toolbar"),
-                theme,
-            )
-            .child(
-                Button::from_spec(
-                    ButtonSpec::new()
-                        .with_variant(ButtonVariant::Ghost)
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                Toolbar::from_spec(
+                    ToolbarSpec::new()
                         .with_size(size)
-                        .with_label("B"),
+                        .with_aria_label("Toolbar"),
                     theme,
                 )
-                .with_id(format!("specimen-toolbar-size-{:?}-b", size)),
-            )
-            .child(
-                Button::from_spec(
-                    ButtonSpec::new()
-                        .with_variant(ButtonVariant::Ghost)
-                        .with_size(size)
-                        .with_label("I"),
+                .child(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Ghost)
+                            .with_size(size)
+                            .with_label("B"),
+                        theme,
+                    )
+                    .with_id(format!("specimen-toolbar-size-{:?}-b", size)),
+                )
+                .child(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Ghost)
+                            .with_size(size)
+                            .with_label("I"),
+                        theme,
+                    )
+                    .with_id(format!("specimen-toolbar-size-{:?}-i", size)),
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                Toolbar::from_spec(
+                    ToolbarSpec::new()
+                        .with_density(density)
+                        .with_aria_label("Toolbar"),
                     theme,
                 )
-                .with_id(format!("specimen-toolbar-size-{:?}-i", size)),
-            )
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            Toolbar::from_spec(
-                ToolbarSpec::new()
-                    .with_density(density)
-                    .with_aria_label("Toolbar"),
-                theme,
-            )
-            .child(
-                Button::from_spec(
-                    ButtonSpec::new()
-                        .with_variant(ButtonVariant::Ghost)
-                        .with_size(ControlSize::Sm)
-                        .with_label("B"),
-                    theme,
+                .child(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Ghost)
+                            .with_size(ControlSize::Sm)
+                            .with_label("B"),
+                        theme,
+                    )
+                    .with_id(format!("specimen-toolbar-density-{:?}-b", density)),
                 )
-                .with_id(format!("specimen-toolbar-density-{:?}-b", density)),
-            )
-            .child(
-                Button::from_spec(
-                    ButtonSpec::new()
-                        .with_variant(ButtonVariant::Ghost)
-                        .with_size(ControlSize::Sm)
-                        .with_label("I"),
-                    theme,
+                .child(
+                    Button::from_spec(
+                        ButtonSpec::new()
+                            .with_variant(ButtonVariant::Ghost)
+                            .with_size(ControlSize::Sm)
+                            .with_label("I"),
+                        theme,
+                    )
+                    .with_id(format!("specimen-toolbar-density-{:?}-i", density)),
                 )
-                .with_id(format!("specimen-toolbar-density-{:?}-i", density)),
-            )
-            .into_any_element()
-        },
+                .into_any_element()
+            }),
     )
 }

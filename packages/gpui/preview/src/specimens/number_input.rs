@@ -1,6 +1,6 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, NumberInput};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -240,15 +240,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "number-input",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            NumberInput::from_spec(NumberInputSpec::new(1.0), theme)
-                .size(size)
-                .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            NumberInput::from_spec(NumberInputSpec::new(1.0), theme)
-                .density(density)
-                .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                NumberInput::from_spec(NumberInputSpec::new(1.0), theme)
+                    .size(size)
+                    .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                NumberInput::from_spec(NumberInputSpec::new(1.0), theme)
+                    .density(density)
+                    .into_any_element()
+            }),
     )
 }

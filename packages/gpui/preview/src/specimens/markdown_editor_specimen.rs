@@ -1,14 +1,16 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, MarkdownEditor};
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
+use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::EyebrowSpec;
 use poodle_specs::MarkdownEditorSpec;
 use std::sync::Arc;
 
-pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
@@ -21,8 +23,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
     let md_value = state.specimens.text.get("editor-md-value")
         .cloned()
         .unwrap_or_else(|| "# Hello World\n\nThis is a **markdown** editor with _split_ view mode.\n\n- Item one\n- Item two\n- Item three".to_string());
-
-    div().flex().flex_col().gap(px(24.0))
+    let examples = div().flex().flex_col().gap(px(24.0))
         // --- Interactive ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -100,4 +101,35 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     )
                 )
         )
+        .into_any_element();
+
+    specimen_layout(
+        state,
+        cx,
+        "markdown-editor",
+        examples,
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                MarkdownEditor::from_spec(
+                    MarkdownEditorSpec::new()
+                        .with_value("## Release notes\n\nShip the axis panes.")
+                        .with_mode("split")
+                        .with_min_height("160px")
+                        .with_size(size),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                MarkdownEditor::from_spec(
+                    MarkdownEditorSpec::new()
+                        .with_value("## Release notes\n\nShip the axis panes.")
+                        .with_mode("split")
+                        .with_min_height("160px")
+                        .with_density(density),
+                    theme,
+                )
+                .into_any_element()
+            }),
+    )
 }

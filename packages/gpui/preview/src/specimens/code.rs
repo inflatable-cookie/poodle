@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
 use crate::node_compat::{Code, Eyebrow};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
@@ -166,25 +166,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "code",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            Code::from_spec(
-                CodeSpec::new()
-                    .with_content("const x: number = 42;")
-                    .with_language("ts"),
-                theme,
-            )
-            .size(size)
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            Code::from_spec(
-                CodeSpec::new()
-                    .with_content("const x: number = 42;")
-                    .with_language("ts"),
-                theme,
-            )
-            .with_density(density)
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                Code::from_spec(
+                    CodeSpec::new()
+                        .with_content("const x: number = 42;")
+                        .with_language("ts"),
+                    theme,
+                )
+                .size(size)
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                Code::from_spec(
+                    CodeSpec::new()
+                        .with_content("const x: number = 42;")
+                        .with_language("ts"),
+                    theme,
+                )
+                .with_density(density)
+                .into_any_element()
+            }),
     )
 }

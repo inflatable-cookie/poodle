@@ -1,6 +1,6 @@
 use crate::app_state::AppState;
 use crate::node_compat::{Breadcrumbs, Eyebrow};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -84,29 +84,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "breadcrumbs",
         examples,
-        |size, theme: &GpuiThemeProvider| {
-            Breadcrumbs::from_spec(
-                BreadcrumbsSpec::new(vec![
-                    BreadcrumbItem::new("home", "Home"),
-                    BreadcrumbItem::new("docs", "Docs"),
-                    BreadcrumbItem::new("page", "Page").with_is_current(true),
-                ]),
-                theme,
-            )
-            .size(size)
-            .into_any_element()
-        },
-        |density, theme: &GpuiThemeProvider| {
-            Breadcrumbs::from_spec(
-                BreadcrumbsSpec::new(vec![
-                    BreadcrumbItem::new("home", "Home"),
-                    BreadcrumbItem::new("docs", "Docs"),
-                    BreadcrumbItem::new("page", "Page").with_is_current(true),
-                ]),
-                theme,
-            )
-            .with_density(density)
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(|size, theme: &GpuiThemeProvider| {
+                Breadcrumbs::from_spec(
+                    BreadcrumbsSpec::new(vec![
+                        BreadcrumbItem::new("home", "Home"),
+                        BreadcrumbItem::new("docs", "Docs"),
+                        BreadcrumbItem::new("page", "Page").with_is_current(true),
+                    ]),
+                    theme,
+                )
+                .size(size)
+                .into_any_element()
+            })
+            .with_densities(|density, theme: &GpuiThemeProvider| {
+                Breadcrumbs::from_spec(
+                    BreadcrumbsSpec::new(vec![
+                        BreadcrumbItem::new("home", "Home"),
+                        BreadcrumbItem::new("docs", "Docs"),
+                        BreadcrumbItem::new("page", "Page").with_is_current(true),
+                    ]),
+                    theme,
+                )
+                .with_density(density)
+                .into_any_element()
+            }),
     )
 }

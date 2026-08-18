@@ -5,14 +5,15 @@
 
 use crate::app_state::AppState;
 use crate::node_compat::{Avatar, Callout, EmptyState, Eyebrow, Pill, Spinner};
+use crate::specimens::specimen_layout::SpecimenAxes;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     AvatarShape, AvatarSize, AvatarSpec, AvatarTone, CallOutSpec, ControlDensity, ControlSize,
-    EmptyStateSpec, EmptyStateVariant, EyebrowSpec, InlineTypographyMode, PillAppearance,
-    PillFont, PillSize, PillSpec, PillTone, SemanticControlSizeRole, SpinnerSize, SpinnerSpec,
-    SpinnerTone, SpinnerVariant, StatusTone,
+    EmptyStateSpec, EmptyStateVariant, EyebrowSpec, InlineTypographyMode, PillAppearance, PillFont,
+    PillSize, PillSpec, PillTone, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone,
+    SpinnerVariant, StatusTone,
 };
 
 #[path = "../generated/specimens/specimens.rs"]
@@ -173,10 +174,7 @@ fn empty_state_variant(value: &str) -> EmptyStateVariant {
 }
 
 /// Renders one fixture instance through the shared native renderer.
-fn render_instance(
-    instance: &SpecimenInstance,
-    theme: &GpuiThemeProvider,
-) -> AnyElement {
+fn render_instance(instance: &SpecimenInstance, theme: &GpuiThemeProvider) -> AnyElement {
     match instance.component {
         "callout" => {
             let mut spec = CallOutSpec::new()
@@ -202,7 +200,9 @@ fn render_instance(
             let mut spec = PillSpec::new()
                 .with_label(prop(instance, "content").unwrap_or(""))
                 .with_tone(pill_tone(prop(instance, "tone").unwrap_or("neutral")))
-                .with_appearance(pill_appearance(prop(instance, "appearance").unwrap_or("solid")));
+                .with_appearance(pill_appearance(
+                    prop(instance, "appearance").unwrap_or("solid"),
+                ));
             if let Some(role) = prop(instance, "sizeRole") {
                 spec = spec.with_size_role(size_role(role));
             }
@@ -259,8 +259,9 @@ fn render_instance(
             Avatar::from_spec(spec, theme)
         }
         "empty-state" => {
-            let mut spec = EmptyStateSpec::new(prop(instance, "title").unwrap_or(""))
-                .with_variant(empty_state_variant(prop(instance, "variant").unwrap_or("neutral")));
+            let mut spec = EmptyStateSpec::new(prop(instance, "title").unwrap_or("")).with_variant(
+                empty_state_variant(prop(instance, "variant").unwrap_or("neutral")),
+            );
             if let Some(message) = prop(instance, "message") {
                 spec = spec.with_message(message);
             }
@@ -287,7 +288,10 @@ fn render_group(group: &fixture::SpecimenGroup, theme: &GpuiThemeProvider) -> Di
         .flex()
         .flex_col()
         .gap(px(8.0))
-        .child(Eyebrow::from_spec(EyebrowSpec::new().with_content(group.label), theme))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(group.label),
+            theme,
+        ))
         .child(content)
 }
 
@@ -324,52 +328,54 @@ pub(crate) fn render(slug: &str, state: &AppState, cx: &mut Context<PreviewRoot>
     let examples = examples.into_any_element();
 
     let first = scene.groups.first().and_then(|g| g.instances.first());
-    let size_axis = if scene.size_axis.is_empty() { None } else { Some(scene.size_axis) };
-    let density_axis = if scene.density_axis.is_empty() { None } else { Some(scene.density_axis) };
+    let size_axis = if scene.size_axis.is_empty() {
+        None
+    } else {
+        Some(scene.size_axis)
+    };
+    let density_axis = if scene.density_axis.is_empty() {
+        None
+    } else {
+        Some(scene.density_axis)
+    };
 
-    let sizes_row = {
-        let first = first;
-        move |size: ControlSize, theme: &GpuiThemeProvider| match (first, size_axis) {
-            (Some(instance), Some(axis)) => {
-                let value = match size {
-                    ControlSize::Xs => "xs",
-                    ControlSize::Sm => "sm",
-                    ControlSize::Md => "md",
-                    ControlSize::Lg => "lg",
-                    ControlSize::Xl => "xl",
-                };
-                if !axis.contains(&value) {
-                    return div().into_any_element();
-                }
-                render_matrix_instance(instance, theme, "size", value)
-            }
-            _ => div().into_any_element(),
-        }
+    // The fixture's own axis lists are the admission decision: a scene that
+    // declares no size axis must not grow a Sizes tab, and a step outside the
+    // declared list is dropped instead of rendered blank.
+    let sizes_row = move |size: ControlSize, theme: &GpuiThemeProvider| {
+        let instance = first?;
+        let axis = size_axis?;
+        let value = match size {
+            ControlSize::Xs => "xs",
+            ControlSize::Sm => "sm",
+            ControlSize::Md => "md",
+            ControlSize::Lg => "lg",
+            ControlSize::Xl => "xl",
+        };
+        axis.contains(&value)
+            .then(|| render_matrix_instance(instance, theme, "size", value))
     };
-    let densities_row = {
-        let first = first;
-        move |density: ControlDensity, theme: &GpuiThemeProvider| match (first, density_axis) {
-            (Some(instance), Some(axis)) => {
-                let value = match density {
-                    ControlDensity::Compact => "compact",
-                    ControlDensity::Default => "default",
-                    ControlDensity::Comfortable => "comfortable",
-                };
-                if !axis.contains(&value) {
-                    return div().into_any_element();
-                }
-                render_matrix_instance(instance, theme, "density", value)
-            }
-            _ => div().into_any_element(),
-        }
+    let densities_row = move |density: ControlDensity, theme: &GpuiThemeProvider| {
+        let instance = first?;
+        let axis = density_axis?;
+        let value = match density {
+            ControlDensity::Compact => "compact",
+            ControlDensity::Default => "default",
+            ControlDensity::Comfortable => "comfortable",
+        };
+        axis.contains(&value)
+            .then(|| render_matrix_instance(instance, theme, "density", value))
     };
+
+    let mut axes = SpecimenAxes::examples_only();
+    if first.is_some() && size_axis.is_some() {
+        axes = axes.with_sizes_where(sizes_row);
+    }
+    if first.is_some() && density_axis.is_some() {
+        axes = axes.with_densities_where(densities_row);
+    }
 
     Some(super::specimen_layout::specimen_layout(
-        state,
-        cx,
-        slug,
-        examples,
-        sizes_row,
-        densities_row,
+        state, cx, slug, examples, axes,
     ))
 }

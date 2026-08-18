@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Eyebrow, Stepper};
-use crate::specimens::specimen_layout::specimen_layout;
+use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
@@ -198,25 +198,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         cx,
         "stepper",
         examples,
-        move |size, theme: &GpuiThemeProvider| {
-            Stepper::from_spec(
-                StepperSpec::new(wizard_steps())
-                    .with_value("categories")
-                    .with_size(size)
-                    .with_aria_label("Size ladder"),
-                theme,
-            )
-            .into_any_element()
-        },
-        move |density, theme: &GpuiThemeProvider| {
-            Stepper::from_spec(
-                StepperSpec::new(wizard_steps())
-                    .with_value("categories")
-                    .with_density(density)
-                    .with_aria_label("Density ladder"),
-                theme,
-            )
-            .into_any_element()
-        },
+        SpecimenAxes::examples_only()
+            .with_sizes(move |size, theme: &GpuiThemeProvider| {
+                Stepper::from_spec(
+                    StepperSpec::new(wizard_steps())
+                        .with_value("categories")
+                        .with_size(size)
+                        .with_aria_label("Size ladder"),
+                    theme,
+                )
+                .into_any_element()
+            })
+            .with_densities(move |density, theme: &GpuiThemeProvider| {
+                Stepper::from_spec(
+                    StepperSpec::new(wizard_steps())
+                        .with_value("categories")
+                        .with_density(density)
+                        .with_aria_label("Density ladder"),
+                    theme,
+                )
+                .into_any_element()
+            }),
     )
 }
