@@ -18,7 +18,9 @@ v0.2.0 release-baseline generation.
   family tranches, and GPUI specimen closure are complete. `g15.011` has
   delivered its screening baseline and three approved pilots; its exact
   curation, native-probe, and screen-clear review children remain. `g15.015`
-  through `g15.017` are complete. `g15.019` is ready for worker dispatch.
+  through `g15.017` and `g15.019` are complete. `g15.019` returned two
+  explicit axis-domain gaps for EmptyState and Icon; resolve their authority
+  before the next worker dispatch.
   Certification
   `g15.013` remains the final gate after the specimen program and `g15.012`.
   Jetstream remains deferred.
@@ -46,9 +48,9 @@ v0.2.0 release-baseline generation.
 - `g12` — React parity, verification depth, native hardening, audio family
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
-- `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010` and
-  `g15.014`–`g15.017` complete, `g15.011` partial with bounded continuation
-  cards, `g15.019` ready for dispatch, `g15.013` final
+- `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
+  `g15.014`–`g15.017`, and `g15.019` complete, `g15.011` partial with bounded
+  continuation cards, two returned axis-domain gaps pending, `g15.013` final
 
 ## Rules
 

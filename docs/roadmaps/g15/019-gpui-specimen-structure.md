@@ -1,6 +1,8 @@
 # g15.019 — GPUI Specimen Structure
 
-Status: **ready for dispatch** — exact native axis/caption scope reconciled
+Status: **complete** — PR #40 merged at `23150ead`; all 74 scoped axis
+corrections and six caption repairs landed, with EmptyState and Icon returned
+as explicit follow-up axis-domain gaps
 Consumes: `g15.011` partial screening baseline
 Depends on: `g15.017` (web axis target)
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
