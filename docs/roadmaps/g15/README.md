@@ -67,7 +67,7 @@ and status advance are the orchestrator's.
 13. [016 — Specimen idiom convergence](016-specimen-idiom-convergence.md) — complete; PR #38 converged all 29 paired routes
 14. [017 — Web specimen axis placement](017-specimen-axis-placement.md) — complete; PR #39 plus accepted Dialog follow-up
 15. [018 — Overloaded Examples curation](018-overloaded-examples-curation.md) — non-dispatchable parent for exact children `020`–`025`
-16. [019 — GPUI specimen structure](019-gpui-specimen-structure.md) — after `017`
+16. [019 — GPUI specimen structure](019-gpui-specimen-structure.md) — ready; exact 74-axis/6-caption scope
 17. [020–025 — Overloaded Examples family children](020-curate-model-connection-licence.md) — exact 53-page partition; follow each child's dependencies
 18. [026 — Headless native specimen probe](026-native-specimen-probe.md) — native completion lane for `011`
 19. [027 — Screen-clear human review](027-screen-clear-human-review.md) — non-dispatchable parent for exact children `028`–`033`
@@ -103,7 +103,7 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Review `g15.019` for dispatch readiness, then prepare its worker handoff.
+Dispatch `g15.019` from its committed worker handoff.
 `g15.011` remains
 partial until `g15.026` and all six screen-clear review children
 (`g15.028`–`g15.033`) land; defect-led curation proceeds through

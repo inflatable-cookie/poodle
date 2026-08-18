@@ -255,8 +255,11 @@ another.
 
 Every component in the active cohort has a native page — `g15.010` closed the
 last gap. What those pages *show* still differs: 59 native pages have no
-`Sizes`/`Densities` panes although their component takes that axis, and six
-render their examples with no captions at all.
+`Sizes`/`Densities` panes although their component takes that axis, 12 more
+keep their axis matrices inside `Examples`, and six render their examples with
+no captions at all. A post-`g15.017` readiness recheck also found three pages
+that advertise an unsupported axis through the native helper. `g15.019`
+therefore owns 74 axis corrections plus the six overlapping caption repairs.
 
 Native layout mechanics are runtime-owned and are not a defect. The absent
 evidence is, per the working rules' parity authority. These counts come from
@@ -383,7 +386,7 @@ that changes specimen presentation carries a live operator-review checkpoint.
 | [`g15.017`](017-specimen-axis-placement.md) | Axis matrices out of the main view; axis evidence where the prop exists | 12 audio + ~22 others |
 | [`g15.018`](018-overloaded-examples-curation.md) | Overloaded `Examples` — **parent, not dispatchable** | 53 pages |
 | ↳ [`g15.020`](020-curate-model-connection-licence.md)–[`g15.025`](025-curate-collections-navigation-tail.md) | six bounded family children, one exact page list each | 6–11 each, 53 total |
-| [`g15.019`](019-gpui-specimen-structure.md) | Native axis panes and captions | 59 + 6 pages |
+| [`g15.019`](019-gpui-specimen-structure.md) | Native axis panes and captions | 74 axis + 6 caption corrections |
 | [`g15.026`](026-native-specimen-probe.md) | The headless native probe that un-provisions the GPUI column | 174 pages |
 | [`g15.027`](027-screen-clear-human-review.md) | Human teaching review for mechanically clear pages — **parent, not dispatchable** | 56 pages |
 | ↳ [`g15.028`](028-review-foundation-controls-entry.md)–[`g15.033`](033-review-composition-forms-data-media.md) | six bounded family children, one exact page list each | 7–14 each, 56 total |

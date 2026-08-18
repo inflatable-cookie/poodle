@@ -18,8 +18,8 @@ v0.2.0 release-baseline generation.
   family tranches, and GPUI specimen closure are complete. `g15.011` has
   delivered its screening baseline and three approved pilots; its exact
   curation, native-probe, and screen-clear review children remain. `g15.015`
-  through `g15.017` are complete. `g15.019` is next for dispatch-readiness
-  review. Certification
+  through `g15.017` are complete. `g15.019` is ready for worker dispatch.
+  Certification
   `g15.013` remains the final gate after the specimen program and `g15.012`.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
@@ -48,7 +48,7 @@ v0.2.0 release-baseline generation.
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010` and
   `g15.014`–`g15.017` complete, `g15.011` partial with bounded continuation
-  cards, `g15.019` next for readiness review, `g15.013` final
+  cards, `g15.019` ready for dispatch, `g15.013` final
 
 ## Rules
 
