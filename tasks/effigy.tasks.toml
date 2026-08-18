@@ -241,7 +241,12 @@
   { run = "bun install --cwd packages/svelte/install-smoke" },
   { run = "bun run --cwd packages/svelte/install-smoke check --threshold error" },
   { task = "check:svelte-components" },
+  { task = "check:svelte-preview" },
 ]
+
+# Type-checks the Svelte preview workspace — specimens, scripts, and generated
+# catalogue artifacts that install-smoke and components never reach.
+"check:svelte-preview" = "bunx svelte-check --workspace packages/svelte/preview --tsconfig ./tsconfig.json --threshold error"
 
 # Type-checks the 165 shipped components. Until this existed, `check:svelte`
 # only covered `install-smoke` -- 4 files, reported as "COMPLETED 1 FILES" --

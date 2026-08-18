@@ -30,7 +30,18 @@ const SYSTEM_PREFIXES = [
 const APPEARANCE_PATTERN =
   /(fill|border|text|shadow|tone|ring|color|background|glow|tint|opacity|accent)(-(hover|active|focus|selected|disabled|checked|open|error|warning|success|danger))?$/;
 
-const perComponent = new Map<string, { recipe: Set<string>; candidates: Set<string>; metric: Set<string> }>();
+const perComponent = new Map<
+  string,
+  {
+    recipe: Set<string>;
+    candidates: Set<string>;
+    metric: Set<string>;
+    appearance: Set<string>;
+    hookedDefinitions: Set<string>;
+    bareDefinitions: Set<string>;
+    propChannel: Set<string>;
+  }
+>();
 
 function componentKey(variable: string): string | null {
   const body = variable.slice("--poodle-".length);

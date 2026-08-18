@@ -297,7 +297,7 @@
 </style>
 
 <Dialog bind:open={overlayInDialogOpen} title="Settings" showCloseButton>
-  <Field label="Model">
+  <Field id="overlay-model" label="Model">
     <Popover ariaLabel="Model settings">
       {#snippet trigger()}
         <Button variant="secondary">Opus 5 · Medium</Button>

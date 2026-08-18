@@ -26,7 +26,7 @@
 
 <SpecimenLayout>
   <SpecimenGroup
-    title="Hosted by the composer"
+    label="Hosted by the composer"
     description="A proposed plan is input, so it mounts in the composer region — not the transcript. The turn is already complete; sending a message is the revise channel."
   >
     <AgentChatInput
@@ -49,15 +49,15 @@
     </p>
   </SpecimenGroup>
 
-  <SpecimenGroup title="Pending" description="Controls render only while the plan waits on the operator.">
+  <SpecimenGroup label="Pending" description="Controls render only while the plan waits on the operator.">
     <AgentPlan plan={planMarkdown} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Settled" description="A settled status swaps the controls for the badge — the transitional render before the host swaps in the record.">
+  <SpecimenGroup label="Settled" description="A settled status swaps the controls for the badge — the transitional render before the host swaps in the record.">
     <AgentPlan plan={planMarkdown} status="accepted" />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Not dismissible" description="Dismiss is a first-class decision for a plan, so it renders by default; a host can still withhold it.">
+  <SpecimenGroup label="Not dismissible" description="Dismiss is a first-class decision for a plan, so it renders by default; a host can still withhold it.">
     <AgentPlan plan={planMarkdown} dismissible={false} />
   </SpecimenGroup>
 

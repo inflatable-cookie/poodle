@@ -67,7 +67,10 @@ export function AgentQuestionSpecimen() {
       sizes={(size) => <AgentQuestion questions={[placement]} size={size} />}
       densities={(density) => <AgentQuestion questions={[placement]} density={density} />}
     >
-      <SpecimenGroup label="Hosted by the composer">
+      <SpecimenGroup
+        label="Hosted by the composer"
+        description="The arrangement this component exists for: the question sits above the editor, and that editor is its free-text override. Type to see the selection clear."
+      >
         <AgentChatInput
           value={composerValue}
           status="questioning"
@@ -98,12 +101,18 @@ export function AgentQuestionSpecimen() {
         <p>{answerSummary(composerAnswer)}</p>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Single select">
+      <SpecimenGroup
+        label="Single select"
+        description="One click both selects and submits — the first click is also the last."
+      >
         <AgentQuestion questions={[placement]} onSubmit={setSingleAnswer} />
         <p>{answerSummary(singleAnswer)}</p>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Multi select">
+      <SpecimenGroup
+        label="Multi select"
+        description="Checkboxes appear only here, so the mode is visible before the first click. Submit is always explicit."
+      >
         <AgentQuestion
           questions={[targets]}
           selections={multiSelections}
@@ -112,7 +121,10 @@ export function AgentQuestionSpecimen() {
         <p>Selected: <strong>{multiSelections.join(", ") || "none"}</strong></p>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Batch">
+      <SpecimenGroup
+        label="Batch"
+        description="Progress reports position. It is not navigation — going back would change an answer the agent already has."
+      >
         <AgentQuestion
           questions={batch}
           activeIndex={1}
@@ -121,7 +133,10 @@ export function AgentQuestionSpecimen() {
         />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Dismissible">
+      <SpecimenGroup
+        label="Dismissible"
+        description="Dismissal resolves as declined and advances; it does not abandon the turn."
+      >
         <AgentQuestion questions={[placement]} dismissible onSubmit={setDismissedAnswer} />
         <p>{answerSummary(dismissedAnswer)}</p>
       </SpecimenGroup>

@@ -36,32 +36,32 @@
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup title="Collapsed and expanded" description="Collapsed gives scope counts and a few chips; expanded gives the tree with counts rolled up from descendants.">
+  <SpecimenGroup label="Collapsed and expanded" description="Collapsed gives scope counts and a few chips; expanded gives the tree with counts rolled up from descendants.">
     <ChangedFiles id="worked" files={worked} bind:expanded={workedExpanded} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Chain collapse" description="A path with no forks costs one row, not four.">
+  <SpecimenGroup label="Chain collapse" description="A path with no forks costs one row, not four.">
     <ChangedFiles id="deep" files={deep} expanded />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Single file">
+  <SpecimenGroup label="Single file">
     <ChangedFiles id="single" files={single} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="One-sided counts">
+  <SpecimenGroup label="One-sided counts">
     <ChangedFiles id="adds" files={additionsOnly} />
     <ChangedFiles id="dels" files={deletionsOnly} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Truncation and overflow" description="Long filenames ellipsise in their chip; files beyond the limit hide behind 'Show all'.">
+  <SpecimenGroup label="Truncation and overflow" description="Long filenames ellipsise in their chip; files beyond the limit hide behind 'Show all'.">
     <ChangedFiles id="long" files={longName} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Without the diff action">
+  <SpecimenGroup label="Without the diff action">
     <ChangedFiles id="nodiff" files={single} showOpenDiff={false} />
   </SpecimenGroup>
 
-  <SpecimenGroup title="Empty" description="No files renders nothing at all. A turn that changed nothing should not have a box saying so.">
+  <SpecimenGroup label="Empty" description="No files renders nothing at all. A turn that changed nothing should not have a box saying so.">
     <ChangedFiles id="empty" files={[]} />
   </SpecimenGroup>
 

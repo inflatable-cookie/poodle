@@ -30,20 +30,32 @@ export function AgentMessageSpecimen() {
         <AgentMessage markdown={`Density ${density}\n\n- one\n- two`} density={density} />
       )}
     >
-      <SpecimenGroup label="Inline markup">
+      <SpecimenGroup
+        label="Inline markup"
+        description="Structure, not text: code spans, emphasis, links and strikethrough all survive the block model."
+      >
         <AgentMessage markdown={inline} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Headings">
+      <SpecimenGroup
+        label="Headings"
+        description="Real heading elements, so the message is navigable by heading."
+      >
         <AgentMessage markdown={headings} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Code blocks">
+      <SpecimenGroup
+        label="Code blocks"
+        description="An unannotated fence reports no language rather than an empty one."
+      >
         <AgentMessage markdown={fenced} />
         <AgentMessage markdown={unfenced} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Lists">
+      <SpecimenGroup
+        label="Lists"
+        description="Tight and loose both normalise to paragraph-wrapped items — that is what removes tight-vs-loose as a source of native divergence."
+      >
         <AgentMessage markdown={tight} />
         <AgentMessage markdown={loose} />
         <AgentMessage markdown={ordered} />
@@ -56,15 +68,24 @@ export function AgentMessageSpecimen() {
         <AgentMessage markdown={rule} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Outside the subset">
+      <SpecimenGroup
+        label="Outside the subset"
+        description="Tables and raw HTML degrade to text. Silently losing content is the worst available failure for a transcript."
+      >
         <AgentMessage markdown={unsupported} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Streaming">
+      <SpecimenGroup
+        label="Streaming"
+        description="The caret is aria-hidden: it is a progress hint, not content."
+      >
         <AgentMessage markdown="Regenerating the corpus against the cached oracle" isStreaming />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Roles">
+      <SpecimenGroup
+        label="Roles"
+        description="A user turn sits on the subtle surface; an assistant turn has no container chrome."
+      >
         <AgentMessage markdown="Can you run the parity sweep again?" role="user" />
         <AgentMessage markdown={long} />
       </SpecimenGroup>

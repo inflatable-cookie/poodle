@@ -21,42 +21,42 @@
 
 <SpecimenLayout>
   <SpecimenGroup
-    title="Running"
+    label="Running"
     description="The child works alongside the turn: identity and status in the header, a dots spinner and a live one-line activity beneath."
   >
     <AgentSubagent item={item({})} {detailLines} />
   </SpecimenGroup>
 
   <SpecimenGroup
-    title="Waiting"
+    label="Waiting"
     description="A paused child is not actively working, so there is no spinner — only the activity line."
   >
     <AgentSubagent item={item({ status: "waiting", activityLine: "Waiting for the operator's decision" })} />
   </SpecimenGroup>
 
   <SpecimenGroup
-    title="Completed"
+    label="Completed"
     description="A settled child shows what it accomplished — the summary replaces the activity line, and nothing spins."
   >
     <AgentSubagent item={item({ status: "completed", summary: "Found the drift: three vectors were stale" })} />
   </SpecimenGroup>
 
   <SpecimenGroup
-    title="Failed"
+    label="Failed"
     description="The failure carries its own colour, and the summary says what went wrong."
   >
     <AgentSubagent item={item({ status: "failed", summary: "The parser crate failed to build: 3 errors in lexer.rs" })} />
   </SpecimenGroup>
 
   <SpecimenGroup
-    title="Unknown"
+    label="Unknown"
     description="The provider supplied no portable status, so the badge reads literally 'Unknown' — never prettified, and no spinner."
   >
     <AgentSubagent item={item({ status: "unknown", activityLine: undefined })} />
   </SpecimenGroup>
 
   <SpecimenGroup
-    title="Expanded"
+    label="Expanded"
     description="The disclosure reveals the child's recent activity lines — a simple block list for v1."
   >
     <AgentSubagent item={item({})} {detailLines} expanded />

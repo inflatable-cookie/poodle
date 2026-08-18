@@ -37,11 +37,14 @@ export function ChangedFilesSpecimen() {
       sizes={(size) => <ChangedFiles id={`sz-${size}`} files={worked} size={size} />}
       densities={(density) => <ChangedFiles id={`dn-${density}`} files={worked} density={density} />}
     >
-      <SpecimenGroup label="Collapsed and expanded">
+      <SpecimenGroup
+        label="Collapsed and expanded"
+        description="Collapsed gives scope counts and a few chips; expanded gives the tree with counts rolled up from descendants."
+      >
         <ChangedFiles id="worked" files={worked} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Chain collapse">
+      <SpecimenGroup label="Chain collapse" description="A path with no forks costs one row, not four.">
         <ChangedFiles id="deep" files={deep} expanded />
       </SpecimenGroup>
 
@@ -54,7 +57,10 @@ export function ChangedFilesSpecimen() {
         <ChangedFiles id="dels" files={deletionsOnly} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Truncation and overflow">
+      <SpecimenGroup
+        label="Truncation and overflow"
+        description="Long filenames ellipsise in their chip; files beyond the limit hide behind 'Show all'."
+      >
         <ChangedFiles id="long" files={longName} />
       </SpecimenGroup>
 
@@ -62,7 +68,10 @@ export function ChangedFilesSpecimen() {
         <ChangedFiles id="nodiff" files={single} showOpenDiff={false} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Empty">
+      <SpecimenGroup
+        label="Empty"
+        description="No files renders nothing at all. A turn that changed nothing should not have a box saying so."
+      >
         <ChangedFiles id="empty" files={[]} />
       </SpecimenGroup>
     </SpecimenLayout>
