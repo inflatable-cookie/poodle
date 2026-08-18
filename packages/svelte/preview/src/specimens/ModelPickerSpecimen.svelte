@@ -173,16 +173,6 @@
     },
   ];
 
-  // What each model exposes, for the caption beside the per-model pickers.
-  const exposes: Record<string, string> = {
-    "atlas-pro": "Effort · Fast mode · Context window",
-    atlas: "Effort · Fast mode",
-    "corvid-1": "Effort (own levels, list) · Verbosity",
-    "corvid-ultra": "Thinking budget (7 levels) · Extended thinking",
-    "corvid-mini": "— none —",
-  };
-  const perModel = models.filter((model) => !model.disabled);
-
   let value = $state<ModelSelection>({
     model: "atlas-pro",
     axes: { effort: "high", fast: false, context: "1m" },
@@ -194,55 +184,49 @@
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Cross-provider list (switch model — the axes rail follows)">
+  <SpecimenGroup label="Cross-provider default">
+    <p class="poodle-model-picker-specimen__note">
+      Two providers and an archive group in one list. Open it: the models carry
+      their own marks, badges and descriptions, and the axes rail follows
+      whichever model is selected. The serialized selection is below.
+    </p>
     <ModelPicker {models} {axes} bind:value />
     <pre>{JSON.stringify(value, null, 2)}</pre>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Different axes per model (one picker per model)">
-    <div class="poodle-model-picker-specimen__matrix">
-      {#each perModel as model (model.value)}
-        <div class="poodle-model-picker-specimen__row">
-          <ModelPicker {models} {axes} value={{ model: model.value, axes: {} }} />
-          <span class="poodle-model-picker-specimen__exposes">{exposes[model.value]}</span>
-        </div>
-      {/each}
-    </div>
-    <p>Each trigger summarises only its model's axes; open any of them to see that model's rail.</p>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Model marks: registry icon vs arbitrary image">
+  <SpecimenGroup label="Axis control forms">
+    <p class="poodle-model-picker-specimen__note">
+      An axis renders as a segmented control up to three options and as a list
+      beyond that; <code>control</code> forces either. A model may expose none.
+    </p>
     <div class="poodle-model-picker-specimen__matrix">
       <div class="poodle-model-picker-specimen__row">
-        <ModelPicker {models} {axes} value={{ model: "atlas", axes: {} }} />
+        <ModelPicker {models} {axes} value={{ model: "corvid-1", axes: { effort: "deep" } }} />
         <span class="poodle-model-picker-specimen__exposes">
-          icon: "sparkles" — a name from the icon registry
+          Rebound axis — same <code>effort</code> key, the provider's own levels, forced to a list
         </span>
       </div>
       <div class="poodle-model-picker-specimen__row">
-        <ModelPicker {models} {axes} value={{ model: "corvid-1", axes: {} }} />
+        <ModelPicker {models} {axes} value={{ model: "corvid-ultra", axes: { effort: "very-high" } }} />
         <span class="poodle-model-picker-specimen__exposes">
-          image: &lbrace; src, alt &rbrace; — any image URL (provider logo, data URI, asset path)
+          Seven levels → a list on its own, with the shared key relabelled
+        </span>
+      </div>
+      <div class="poodle-model-picker-specimen__row">
+        <ModelPicker {models} {axes} value={{ model: "corvid-mini", axes: {} }} />
+        <span class="poodle-model-picker-specimen__exposes">
+          No axes at all — no summary, and a single-column surface
         </span>
       </div>
     </div>
-    <p>An <code>image</code> wins over <code>icon</code> when a model sets both.</p>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Rebound axis (same key, provider's own levels, forced to a list)">
-    <ModelPicker {models} {axes} value={{ model: "corvid-1", axes: { effort: "deep" } }} />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Many-level axis (7 levels → list) with a relabelled key">
-    <ModelPicker {models} {axes} value={{ model: "corvid-ultra", axes: { effort: "very-high" } }} />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Model with no axes at all">
-    <ModelPicker {models} {axes} value={{ model: "corvid-mini", axes: {} }} />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Emphasis: default vs subdued">
+  <SpecimenGroup label="Variants and emphasis">
     <div class="poodle-model-picker-specimen__matrix">
+      <div class="poodle-model-picker-specimen__row">
+        <ModelPicker {models} {axes} variant="outlined" bind:value={outlinedValue} />
+        <span class="poodle-model-picker-specimen__exposes">outlined — a bordered trigger</span>
+      </div>
       <div class="poodle-model-picker-specimen__row">
         <ModelPicker {models} {axes} value={{ model: "atlas-pro", axes: {} }} />
         <span class="poodle-model-picker-specimen__exposes">default — full-strength trigger</span>
@@ -256,28 +240,30 @@
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Outlined trigger">
-    <ModelPicker {models} {axes} variant="outlined" bind:value={outlinedValue} />
+  <SpecimenGroup label="What the trigger shows">
+    <div class="poodle-model-picker-specimen__matrix">
+      <div class="poodle-model-picker-specimen__row">
+        <ModelPicker {models} {axes} showAxisSummary={false} value={{ model: "atlas", axes: {} }} />
+        <span class="poodle-model-picker-specimen__exposes">axis summary suppressed</span>
+      </div>
+      <div class="poodle-model-picker-specimen__row">
+        <ModelPicker {models} {axes} showModelDescriptions={false} value={{ model: "atlas", axes: {} }} />
+        <span class="poodle-model-picker-specimen__exposes">model descriptions hidden in the list</span>
+      </div>
+    </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Summary suppressed">
-    <ModelPicker {models} {axes} showAxisSummary={false} value={{ model: "atlas", axes: {} }} />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Descriptions hidden">
-    <ModelPicker {models} {axes} showModelDescriptions={false} value={{ model: "atlas", axes: {} }} />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="No model selected">
-    <ModelPicker {models} {axes} value={{ model: "", axes: {} }} />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Models only (no axes declared)">
-    <ModelPicker {models} value={{ model: "atlas", axes: {} }} />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Disabled">
-    <ModelPicker {models} {axes} disabled value={{ model: "atlas", axes: { effort: "low" } }} />
+  <SpecimenGroup label="Nothing selected, and disabled">
+    <div class="poodle-model-picker-specimen__matrix">
+      <div class="poodle-model-picker-specimen__row">
+        <ModelPicker {models} {axes} value={{ model: "", axes: {} }} />
+        <span class="poodle-model-picker-specimen__exposes">placeholder — no model chosen yet</span>
+      </div>
+      <div class="poodle-model-picker-specimen__row">
+        <ModelPicker {models} {axes} disabled value={{ model: "atlas", axes: { effort: "low" } }} />
+        <span class="poodle-model-picker-specimen__exposes">disabled — the trigger does not open</span>
+      </div>
+    </div>
   </SpecimenGroup>
 
   {#snippet sizes(size)}
@@ -313,5 +299,11 @@
   .poodle-model-picker-specimen__exposes {
     font-size: 0.75rem;
     opacity: 0.7;
+  }
+
+  .poodle-model-picker-specimen__note {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    opacity: 0.75;
   }
 </style>

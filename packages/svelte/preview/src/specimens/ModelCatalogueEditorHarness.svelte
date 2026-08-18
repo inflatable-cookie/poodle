@@ -4,11 +4,25 @@
   import type { ModelCatalogueItem } from "@inflatable-cookie/poodle-core";
   import { MODEL_CATALOGUE_FIXTURES } from "@inflatable-cookie/poodle-core";
 
-  interface Props {
-    customAction?: Snippet;
+  interface ItemProps {
+    item: ModelCatalogueItem;
   }
 
-  let { customAction }: Props = $props();
+  interface Props {
+    customAction?: Snippet;
+    leading?: Snippet<[ItemProps]>;
+    rowMeta?: Snippet<[ItemProps]>;
+    isDragEnabled?: boolean;
+    showMoveActions?: boolean;
+  }
+
+  let {
+    customAction,
+    leading,
+    rowMeta,
+    isDragEnabled = true,
+    showMoveActions = true,
+  }: Props = $props();
   let items = $state<ModelCatalogueItem[]>([...MODEL_CATALOGUE_FIXTURES]);
 
   function applyOrder(orderedIds: string[]): void {
@@ -28,6 +42,10 @@
 <ModelCatalogueEditor
   {items}
   {customAction}
+  {leading}
+  {rowMeta}
+  {isDragEnabled}
+  {showMoveActions}
   onOrderChange={applyOrder}
   onVisibilityChange={applyVisibility}
   onInfo={() => {}}

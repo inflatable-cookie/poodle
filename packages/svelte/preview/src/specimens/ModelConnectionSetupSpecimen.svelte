@@ -23,7 +23,7 @@
 <SpecimenLayout showSizes={false} showDensities={false}>
   {#snippet children()}
     <div class="poodle-model-connection-setup-specimen">
-      <SpecimenGroup label="Choose stage">
+      <SpecimenGroup label="Choose a connection">
         <div class="poodle-model-connection-setup-specimen__panel">
           <ModelConnectionSetup
             options={interactiveOptions}
@@ -81,30 +81,33 @@
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Auto-detect: found">
-        <div class="poodle-model-connection-setup-specimen__panel">
-          <ModelConnectionSetup
-            {options}
-            defaultStage="configure"
-            defaultValue="codex-app"
-            canSubmit={true}
-            success="Local harness detected."
-          />
+      <SpecimenGroup label="Auto-detected local route">
+        <p class="poodle-model-connection-setup-specimen__note">
+          This route needs no credentials, so the configuration step has no field
+          to fill: the setup reports what it found and moves on.
+        </p>
+        <div class="poodle-model-connection-setup-specimen__stack">
+          <div class="poodle-model-connection-setup-specimen__panel">
+            <ModelConnectionSetup
+              {options}
+              defaultStage="configure"
+              defaultValue="codex-app"
+              canSubmit={true}
+              success="Local harness detected."
+            />
+          </div>
+          <div class="poodle-model-connection-setup-specimen__panel">
+            <ModelConnectionSetup
+              {options}
+              defaultStage="configure"
+              defaultValue="codex-app"
+              error="Codex app not found on this machine."
+            />
+          </div>
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Auto-detect: missing">
-        <div class="poodle-model-connection-setup-specimen__panel">
-          <ModelConnectionSetup
-            {options}
-            defaultStage="configure"
-            defaultValue="codex-app"
-            error="Codex app not found on this machine."
-          />
-        </div>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="OAuth pending">
+      <SpecimenGroup label="OAuth in progress">
         <div class="poodle-model-connection-setup-specimen__panel">
           <ModelConnectionSetup
             {options}
@@ -142,52 +145,51 @@
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Validation failure">
-        <div class="poodle-model-connection-setup-specimen__panel">
-          <ModelConnectionSetup
-            {options}
-            defaultStage="configure"
-            defaultValue="openai-responses"
-            canSubmit={false}
-            error="API key format is invalid."
-          >
-            {#snippet configuration()}
-              <Field id="mcs-invalid-key" label="API key">
-                <TextInput
-                  id="mcs-invalid-key"
-                  type="password"
-                  value="••••••••"
-                  placeholder="sk-demo-placeholder"
-                  readOnly
-                />
-              </Field>
-            {/snippet}
-          </ModelConnectionSetup>
-        </div>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Pending submit">
-        <div class="poodle-model-connection-setup-specimen__panel">
-          <ModelConnectionSetup
-            {options}
-            defaultStage="configure"
-            defaultValue="openai-responses"
-            canSubmit={true}
-            isPending={true}
-            pendingLabel="Checking connection"
-          >
-            {#snippet configuration()}
-              <Field id="mcs-pending-key" label="API key">
-                <TextInput
-                  id="mcs-pending-key"
-                  type="password"
-                  value="••••••••"
-                  placeholder="sk-demo-placeholder"
-                  readOnly
-                />
-              </Field>
-            {/snippet}
-          </ModelConnectionSetup>
+      <SpecimenGroup label="Validation and pending">
+        <div class="poodle-model-connection-setup-specimen__stack">
+          <div class="poodle-model-connection-setup-specimen__panel">
+            <ModelConnectionSetup
+              {options}
+              defaultStage="configure"
+              defaultValue="openai-responses"
+              canSubmit={false}
+              error="API key format is invalid."
+            >
+              {#snippet configuration()}
+                <Field id="mcs-invalid-key" label="API key">
+                  <TextInput
+                    id="mcs-invalid-key"
+                    type="password"
+                    value="••••••••"
+                    placeholder="sk-demo-placeholder"
+                    readOnly
+                  />
+                </Field>
+              {/snippet}
+            </ModelConnectionSetup>
+          </div>
+          <div class="poodle-model-connection-setup-specimen__panel">
+            <ModelConnectionSetup
+              {options}
+              defaultStage="configure"
+              defaultValue="openai-responses"
+              canSubmit={true}
+              isPending={true}
+              pendingLabel="Checking connection"
+            >
+              {#snippet configuration()}
+                <Field id="mcs-pending-key" label="API key">
+                  <TextInput
+                    id="mcs-pending-key"
+                    type="password"
+                    value="••••••••"
+                    placeholder="sk-demo-placeholder"
+                    readOnly
+                  />
+                </Field>
+              {/snippet}
+            </ModelConnectionSetup>
+          </div>
         </div>
       </SpecimenGroup>
     </div>
@@ -203,5 +205,17 @@
 
   .poodle-model-connection-setup-specimen__panel {
     width: min(42rem, 100%);
+  }
+
+  .poodle-model-connection-setup-specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .poodle-model-connection-setup-specimen__note {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    opacity: 0.75;
   }
 </style>
