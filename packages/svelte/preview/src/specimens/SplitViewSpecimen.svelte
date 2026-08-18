@@ -2,9 +2,10 @@
   import { Region } from "@inflatable-cookie/poodle-svelte";
   import { SplitView } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>
 
-<div class="poodle-specimen">
+<SpecimenLayout>
   <!-- 1. Simple layout with Regions -->
   <SpecimenGroup label="Basic horizontal layout">
     <div class="poodle-specimen__frame">
@@ -166,15 +167,43 @@
       </SplitView>
     </div>
   </SpecimenGroup>
-</div>
+
+  {#snippet sizes(size)}
+    <div class="poodle-specimen__frame">
+      <SplitView orientation="horizontal" {size}>
+        {#snippet primary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Sidebar" color="blue" />
+          </div>
+        {/snippet}
+        {#snippet secondary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Main content" color="green" />
+          </div>
+        {/snippet}
+      </SplitView>
+    </div>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <div class="poodle-specimen__frame">
+      <SplitView orientation="horizontal" {density}>
+        {#snippet primary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Sidebar" color="blue" />
+          </div>
+        {/snippet}
+        {#snippet secondary()}
+          <div class="poodle-specimen__fill">
+            <Region label="Main content" color="green" />
+          </div>
+        {/snippet}
+      </SplitView>
+    </div>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .poodle-specimen__frame {
     height: 10rem;
     border: 0.0625rem solid var(--poodle-color-border-subtle);

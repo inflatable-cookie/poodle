@@ -1,5 +1,6 @@
 <script lang="ts">
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
   import { Dialog, Button, TextInput, Select, Field, Checkbox, Pill, Popover } from "@inflatable-cookie/poodle-svelte";
 
   // One $state rune puts the whole file in runes mode, where plain `let`
@@ -16,6 +17,7 @@
   let overlayInDialogOpen = $state(false);
 </script>
 
+<SpecimenLayout>
   <SpecimenGroup label="Popover inside a dialog">
     <Button variant="secondary" onClick={() => (overlayInDialogOpen = true)}>Open dialog</Button>
   </SpecimenGroup>
@@ -223,6 +225,33 @@
   {/snippet}
 </Dialog>
 
+<Dialog bind:open={overlayInDialogOpen} title="Settings" showCloseButton>
+  <Field id="overlay-model" label="Model">
+    <Popover ariaLabel="Model settings">
+      {#snippet trigger()}
+        <Button variant="secondary">Opus 5 · Medium</Button>
+      {/snippet}
+      <div style="display:flex;flex-direction:column;gap:0.25rem;min-width:14rem;">
+        <strong>Opus 5</strong>
+        <span>Reasoning depth. Higher costs more time and tokens.</span>
+      </div>
+    </Popover>
+  </Field>
+</Dialog>
+
+{#snippet sizes(size)}
+  <Dialog defaultOpen title="Keyboard shortcuts" showCloseButton {size}>
+    <p>Command palette, save, and toggle comment live here.</p>
+  </Dialog>
+{/snippet}
+
+{#snippet densities(density)}
+  <Dialog defaultOpen title="Keyboard shortcuts" showCloseButton {density}>
+    <p>Command palette, save, and toggle comment live here.</p>
+  </Dialog>
+{/snippet}
+</SpecimenLayout>
+
 <style>
   .poodle-shortcuts-list { display: flex; flex-direction: column; gap: 0.5rem; }
   .poodle-shortcut { display: flex; align-items: center; gap: 0.75rem; }
@@ -266,17 +295,3 @@
   .poodle-log-entry__time { color: var(--poodle-color-text-secondary); font-family: var(--poodle-typography-code-family); font-size: 0.75rem; min-width: 3rem; }
   .poodle-log-entry__message { font-size: 0.8125rem; }
 </style>
-
-<Dialog bind:open={overlayInDialogOpen} title="Settings" showCloseButton>
-  <Field id="overlay-model" label="Model">
-    <Popover ariaLabel="Model settings">
-      {#snippet trigger()}
-        <Button variant="secondary">Opus 5 · Medium</Button>
-      {/snippet}
-      <div style="display:flex;flex-direction:column;gap:0.25rem;min-width:14rem;">
-        <strong>Opus 5</strong>
-        <span>Reasoning depth. Higher costs more time and tokens.</span>
-      </div>
-    </Popover>
-  </Field>
-</Dialog>

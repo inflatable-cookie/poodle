@@ -113,12 +113,18 @@ export function IconSpecimen() {
 
   return (
     <SpecimenLayout
-      showDensities={false}
       sizes={(size) => (
         <div style={sizeDemo}>
           <Icon icon={star} size={size} />
           <Icon icon={heart} size={size} />
           <Icon icon={settings} size={size} />
+        </div>
+      )}
+      densities={(density) => (
+        <div style={sizeDemo}>
+          <Icon icon={star} density={density} />
+          <Icon icon={heart} density={density} />
+          <Icon icon={settings} density={density} />
         </div>
       )}
     >

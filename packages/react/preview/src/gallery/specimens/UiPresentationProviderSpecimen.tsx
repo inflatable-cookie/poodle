@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { Button, Select, Surface, TextInput, UiPresentationProvider } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 const controls: CSSProperties = {
   display: "flex",
@@ -16,7 +17,19 @@ const options = [
 
 export function UiPresentationProviderSpecimen() {
   return (
-    <div className="poodle-specimen">
+    <SpecimenLayout
+      densities={(density) => (
+        <UiPresentationProvider density={density}>
+          <Surface border="subtle" padding="md">
+            <div style={controls}>
+              <Button>Save</Button>
+              <TextInput id="provider-axis-name" value="Draft" />
+              <Select id="provider-axis-select" options={options} value="alpha" />
+            </div>
+          </Surface>
+        </UiPresentationProvider>
+      )}
+    >
       <SpecimenGroup label="Compact small scope">
         <UiPresentationProvider density="compact" sizeScale="sm">
           <Surface border="subtle" padding="md">
@@ -40,6 +53,6 @@ export function UiPresentationProviderSpecimen() {
           </Surface>
         </UiPresentationProvider>
       </SpecimenGroup>
-    </div>
+    </SpecimenLayout>
   );
 }

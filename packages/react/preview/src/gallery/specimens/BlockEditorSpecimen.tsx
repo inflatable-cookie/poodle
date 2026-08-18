@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type CSSProperties } from "react";
-import { BlockEditor, type BlockTypeDefinition, type BlockTypeGroup, type EditorBlock } from "@inflatable-cookie/poodle-react";
+import { BlockEditor, type BlockEditorBlockProps, type BlockTypeDefinition, type BlockTypeGroup, type EditorBlock } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 const blockTypes: BlockTypeDefinition[] = [
   { type: "paragraph", label: "Paragraph", icon: "file-text" },
@@ -71,6 +72,42 @@ function blockText(block: EditorBlock): string {
   return block.content ?? (block.data as { text?: string } | undefined)?.text ?? "";
 }
 
+/** One stable, ordinary editing state for the axis panes. */
+const axisBlocks: EditorBlock[] = [
+  { id: "axis-1", type: "heading", version: 3, hash: "a1", data: { text: "Release notes" }, content: "Release notes" },
+  { id: "axis-2", type: "paragraph", version: 3, hash: "a2", data: { text: "Draft your post here." }, content: "Draft your post here." },
+];
+
+function renderBlock({ block, disabled, update }: BlockEditorBlockProps) {
+  const value = blockText(block);
+  const onInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    update({
+      content: e.currentTarget.value,
+      data: { ...((block.data as Record<string, unknown>) ?? {}), text: e.currentTarget.value },
+    });
+  if (block.type === "divider") {
+    return <hr style={dividerStyle} />;
+  }
+  if (block.type === "heading") {
+    return (
+      <input type="text" style={headingStyle} placeholder="Heading..." disabled={disabled} value={value} onChange={onInput} />
+    );
+  }
+  if (block.type === "code") {
+    return (
+      <textarea style={codeStyle} placeholder="Code..." disabled={disabled} value={value} onChange={onInput} rows={3} />
+    );
+  }
+  if (block.type === "quote") {
+    return (
+      <textarea style={quoteStyle} placeholder="Quote..." disabled={disabled} value={value} onChange={onInput} rows={2} />
+    );
+  }
+  return (
+    <textarea style={textareaStyle} placeholder="Type something..." disabled={disabled} value={value} onChange={onInput} rows={2} />
+  );
+}
+
 export function BlockEditorSpecimen() {
   const [blocks, setBlocks] = useState<EditorBlock[]>([
     { id: "1", type: "heading", version: 3, hash: "a1", data: { text: "Block Editor Shell" }, content: "Block Editor Shell" },
@@ -124,41 +161,20 @@ export function BlockEditorSpecimen() {
   ]);
 
   return (
-    <div className="poodle-specimen">
+    <SpecimenLayout
+      sizes={(size) => (
+        <BlockEditor blocks={axisBlocks} blockTypes={blockTypes} size={size} block={renderBlock} />
+      )}
+      densities={(density) => (
+        <BlockEditor blocks={axisBlocks} blockTypes={blockTypes} density={density} block={renderBlock} />
+      )}
+    >
       <SpecimenGroup label="Consumer-driven block types">
         <BlockEditor
           blocks={blocks}
           blockTypes={blockTypes}
           onChange={setBlocks}
-          block={({ block, disabled, update }) => {
-            const value = blockText(block);
-            const onInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-              update({
-                content: e.currentTarget.value,
-                data: { ...((block.data as Record<string, unknown>) ?? {}), text: e.currentTarget.value },
-              });
-            if (block.type === "divider") {
-              return <hr style={dividerStyle} />;
-            }
-            if (block.type === "heading") {
-              return (
-                <input type="text" style={headingStyle} placeholder="Heading..." disabled={disabled} value={value} onChange={onInput} />
-              );
-            }
-            if (block.type === "code") {
-              return (
-                <textarea style={codeStyle} placeholder="Code..." disabled={disabled} value={value} onChange={onInput} rows={3} />
-              );
-            }
-            if (block.type === "quote") {
-              return (
-                <textarea style={quoteStyle} placeholder="Quote..." disabled={disabled} value={value} onChange={onInput} rows={2} />
-              );
-            }
-            return (
-              <textarea style={textareaStyle} placeholder="Type something..." disabled={disabled} value={value} onChange={onInput} rows={2} />
-            );
-          }}
+          block={renderBlock}
         />
         <p style={countStyle}>{blocks.length} blocks</p>
       </SpecimenGroup>
@@ -186,6 +202,6 @@ export function BlockEditorSpecimen() {
           Single posture hides reorder, add, and remove controls while the built-in picker accepts grouped Nightfire-style options.
         </p>
       </SpecimenGroup>
-    </div>
+    </SpecimenLayout>
   );
 }

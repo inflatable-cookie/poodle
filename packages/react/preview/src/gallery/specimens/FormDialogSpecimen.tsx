@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FormDialog, Button, TextInput, Field, Select, FormActions } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 const roleOptions = [
   { value: "admin", label: "Admin" },
@@ -48,7 +49,38 @@ export function FormDialogSpecimen() {
   }
 
   return (
-    <div className="poodle-specimen">
+    <SpecimenLayout
+      sizes={(size) => (
+        <FormDialog
+          open={true}
+          title="Add new user"
+          description="Invite a user to this workspace."
+          submitLabel="Add user"
+          size={size}
+          onSubmit={() => {}}
+          onOpenChange={() => {}}
+        >
+          <Field label="Full name" id="form-dialog-axis-name">
+            <TextInput placeholder="Enter name" />
+          </Field>
+        </FormDialog>
+      )}
+      densities={(density) => (
+        <FormDialog
+          open={true}
+          title="Add new user"
+          description="Invite a user to this workspace."
+          submitLabel="Add user"
+          density={density}
+          onSubmit={() => {}}
+          onOpenChange={() => {}}
+        >
+          <Field label="Full name" id="form-dialog-axis-name">
+            <TextInput placeholder="Enter name" />
+          </Field>
+        </FormDialog>
+      )}
+    >
       <SpecimenGroup label="Basic form dialog">
         <Button variant="primary" onClick={() => setBasicOpen(true)}>
           Add user
@@ -164,6 +196,6 @@ export function FormDialogSpecimen() {
           <p style={{ margin: 0 }}>{lastAction}</p>
         </SpecimenGroup>
       ) : null}
-    </div>
+    </SpecimenLayout>
   );
 }

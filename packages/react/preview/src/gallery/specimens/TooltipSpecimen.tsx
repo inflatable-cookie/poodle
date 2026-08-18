@@ -6,18 +6,7 @@ const rowStyle = { display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems
 
 export function TooltipSpecimen() {
   return (
-    <SpecimenLayout
-      sizes={(size) => (
-        <Tooltip content={`Tooltip at ${size}`}>
-          <Button variant="secondary" size={size}>Hover ({size})</Button>
-        </Tooltip>
-      )}
-      densities={(density) => (
-        <Tooltip content={`Tooltip at ${density}`}>
-          <Button variant="secondary" density={density}>Hover ({density})</Button>
-        </Tooltip>
-      )}
-    >
+    <SpecimenLayout>
       <SpecimenGroup label="Default">
         <Tooltip content="Save your changes">
           <Button variant="secondary">Hover me</Button>

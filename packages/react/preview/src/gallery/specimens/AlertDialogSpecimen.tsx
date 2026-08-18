@@ -1,6 +1,7 @@
 import { SpecimenGroup } from "../SpecimenGroup";
 import { useState, type CSSProperties } from "react";
 import { AlertDialog, Button } from "@inflatable-cookie/poodle-react";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 const hintStyle: CSSProperties = { margin: 0, fontSize: "0.75rem", color: "var(--poodle-color-text-secondary)" };
 const cardStyle: CSSProperties = {
@@ -25,7 +26,30 @@ export function AlertDialogSpecimen() {
   }
 
   return (
-    <>
+    <SpecimenLayout
+      sizes={(size) => (
+        <AlertDialog
+          open={true}
+          title="Delete this item?"
+          description="This action cannot be undone. The item and all associated data will be permanently removed."
+          confirmLabel="Delete"
+          cancelLabel="Keep it"
+          size={size}
+          onOpenChange={() => {}}
+        />
+      )}
+      densities={(density) => (
+        <AlertDialog
+          open={true}
+          title="Delete this item?"
+          description="This action cannot be undone. The item and all associated data will be permanently removed."
+          confirmLabel="Delete"
+          cancelLabel="Keep it"
+          density={density}
+          onOpenChange={() => {}}
+        />
+      )}
+    >
       <SpecimenGroup label="Danger tone">
         <Button tone="danger" onClick={() => setDangerOpen(true)}>
                     Delete item
@@ -94,6 +118,6 @@ export function AlertDialogSpecimen() {
           Last action: <strong>{lastAction}</strong>
         </p>
       ) : null}
-    </>
+    </SpecimenLayout>
   );
 }

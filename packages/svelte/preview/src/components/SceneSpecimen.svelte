@@ -74,8 +74,8 @@
        scene does not declare never reaches SpecimenLayout, so its tab cannot
        be advertised. -->
   <SpecimenLayout
-    sizes={scene.tabs.includes("sizes") ? (sizes as never) : undefined}
-    densities={scene.tabs.includes("densities") ? (densities as never) : undefined}
+    sizes={(scene.tabs as readonly string[]).includes("sizes") ? (sizes as never) : undefined}
+    densities={(scene.tabs as readonly string[]).includes("densities") ? (densities as never) : undefined}
   >
     {#each scene.groups as group}
       <SpecimenGroup label={group.label}>

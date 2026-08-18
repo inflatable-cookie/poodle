@@ -2,6 +2,7 @@
   import { BlockEditor } from "@inflatable-cookie/poodle-svelte";
   import type { BlockTypeDefinition, BlockTypeGroup, EditorBlock } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const blockTypes: BlockTypeDefinition[] = [
     { type: "paragraph", label: "Paragraph", icon: "file-text" },
@@ -56,52 +57,58 @@
   function handleSingleChange(nextBlocks: EditorBlock[]): void {
     singleBlocks = nextBlocks;
   }
+
+  /* One stable, ordinary editing state for the axis panes. */
+  const axisBlocks: EditorBlock[] = [
+    { id: "axis-1", type: "heading", version: 3, hash: "a1", data: { text: "Release notes" }, content: "Release notes" },
+    { id: "axis-2", type: "paragraph", version: 3, hash: "a2", data: { text: "Draft your post here." }, content: "Draft your post here." },
+  ];
 </script>
 
-<div class="poodle-specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Consumer-driven block types">
     <BlockEditor {blocks} {blockTypes} onChange={handleChange}>
       {#snippet block({ block, disabled, update })}
-        {#if block.type === "divider"}
-          <hr class="poodle-block-divider" />
-        {:else if block.type === "heading"}
-          <input
-            type="text"
-            class="poodle-block-input poodle-block-input--heading"
-            placeholder="Heading..."
-            disabled={disabled}
-            value={block.content ?? block.data?.text ?? ""}
-            oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
-          />
-        {:else if block.type === "code"}
-          <textarea
-            class="poodle-block-input poodle-block-input--code"
-            placeholder="Code..."
-            disabled={disabled}
-            value={block.content ?? block.data?.text ?? ""}
-            oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
-            rows="3"
-          ></textarea>
-        {:else if block.type === "quote"}
-          <textarea
-            class="poodle-block-input poodle-block-input--quote"
-            placeholder="Quote..."
-            disabled={disabled}
-            value={block.content ?? block.data?.text ?? ""}
-            oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
-            rows="2"
-          ></textarea>
-        {:else}
-          <textarea
-            class="poodle-block-input"
-            placeholder="Type something..."
-            disabled={disabled}
-            value={block.content ?? block.data?.text ?? ""}
-            oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
-            rows="2"
-          ></textarea>
-        {/if}
-      {/snippet}
+  {#if block.type === "divider"}
+    <hr class="poodle-block-divider" />
+  {:else if block.type === "heading"}
+    <input
+      type="text"
+      class="poodle-block-input poodle-block-input--heading"
+      placeholder="Heading..."
+      disabled={disabled}
+      value={block.content ?? block.data?.text ?? ""}
+      oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+    />
+  {:else if block.type === "code"}
+    <textarea
+      class="poodle-block-input poodle-block-input--code"
+      placeholder="Code..."
+      disabled={disabled}
+      value={block.content ?? block.data?.text ?? ""}
+      oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+      rows="3"
+    ></textarea>
+  {:else if block.type === "quote"}
+    <textarea
+      class="poodle-block-input poodle-block-input--quote"
+      placeholder="Quote..."
+      disabled={disabled}
+      value={block.content ?? block.data?.text ?? ""}
+      oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+      rows="2"
+    ></textarea>
+  {:else}
+    <textarea
+      class="poodle-block-input"
+      placeholder="Type something..."
+      disabled={disabled}
+      value={block.content ?? block.data?.text ?? ""}
+      oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+      rows="2"
+    ></textarea>
+  {/if}
+{/snippet}
     </BlockEditor>
     <p class="poodle-specimen__count">{blocks.length} blocks</p>
   </SpecimenGroup>
@@ -127,15 +134,61 @@
     </BlockEditor>
     <p class="poodle-specimen__count">Single posture hides reorder, add, and remove controls while the built-in picker accepts grouped Nightfire-style options.</p>
   </SpecimenGroup>
-</div>
+
+  {#snippet sizes(size)}
+    <BlockEditor blocks={axisBlocks} {blockTypes} {size}>
+      {#snippet block({ block, disabled, update })}
+        {#if block.type === "heading"}
+          <input
+            type="text"
+            class="poodle-block-input poodle-block-input--heading"
+            placeholder="Heading..."
+            disabled={disabled}
+            value={block.content ?? block.data?.text ?? ""}
+            oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+          />
+        {:else}
+          <textarea
+            class="poodle-block-input"
+            placeholder="Type something..."
+            disabled={disabled}
+            value={block.content ?? block.data?.text ?? ""}
+            oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+            rows="2"
+          ></textarea>
+        {/if}
+      {/snippet}
+    </BlockEditor>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <BlockEditor blocks={axisBlocks} {blockTypes} {density}>
+      {#snippet block({ block, disabled, update })}
+        {#if block.type === "heading"}
+          <input
+            type="text"
+            class="poodle-block-input poodle-block-input--heading"
+            placeholder="Heading..."
+            disabled={disabled}
+            value={block.content ?? block.data?.text ?? ""}
+            oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+          />
+        {:else}
+          <textarea
+            class="poodle-block-input"
+            placeholder="Type something..."
+            disabled={disabled}
+            value={block.content ?? block.data?.text ?? ""}
+            oninput={(e) => update({ content: (e.currentTarget).value, data: { ...(block.data ?? {}), text: (e.currentTarget).value } })}
+            rows="2"
+          ></textarea>
+        {/if}
+      {/snippet}
+    </BlockEditor>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .poodle-specimen__count {
     margin: 0;
     font-size: 0.75rem;

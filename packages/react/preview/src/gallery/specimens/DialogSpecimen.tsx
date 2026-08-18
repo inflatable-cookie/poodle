@@ -1,6 +1,7 @@
 import { SpecimenGroup } from "../SpecimenGroup";
 import { useState, type CSSProperties } from "react";
 import { Button, Checkbox, Dialog, Field, Pill, Popover, Select, TextInput } from "@inflatable-cookie/poodle-react";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 const WIDTHS = ["sm", "md", "lg", "xl"] as const;
 type DialogWidth = (typeof WIDTHS)[number];
@@ -55,8 +56,19 @@ export function DialogSpecimen() {
   const setWidthOpen = (w: string, open: boolean) => setWidthOpenMap((prev) => ({ ...prev, [w]: open }));
 
   return (
-    <>
-            <SpecimenGroup label="Popover inside a dialog">
+    <SpecimenLayout
+      sizes={(size) => (
+        <Dialog defaultOpen title="Keyboard shortcuts" showCloseButton size={size}>
+          <p>Command palette, save, and toggle comment live here.</p>
+        </Dialog>
+      )}
+      densities={(density) => (
+        <Dialog defaultOpen title="Keyboard shortcuts" showCloseButton density={density}>
+          <p>Command palette, save, and toggle comment live here.</p>
+        </Dialog>
+      )}
+    >
+      <SpecimenGroup label="Popover inside a dialog">
         <Button variant="secondary" onClick={() => setOverlayInDialogOpen(true)}>
                       Open dialog
                     </Button>
@@ -359,6 +371,6 @@ export function DialogSpecimen() {
           </Popover>
         </Field>
       </Dialog>
-    </>
+    </SpecimenLayout>
   );
 }

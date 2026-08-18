@@ -27,7 +27,18 @@ const anchorStyle: CSSProperties = {
 
 export function UpdateCenterSpecimen() {
   return (
-    <SpecimenLayout showSizes={false} showDensities={false}>
+    <SpecimenLayout
+      sizes={(size) => (
+        <div style={anchorStyle}>
+          <UpdateCenter presence="attention" {...offer} size={size} />
+        </div>
+      )}
+      densities={(density) => (
+        <div style={anchorStyle}>
+          <UpdateCenter presence="attention" {...offer} density={density} />
+        </div>
+      )}
+    >
       <div style={stackStyle}>
         <SpecimenGroup label="Attention">
           <div style={anchorStyle}>

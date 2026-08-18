@@ -1,12 +1,32 @@
 import { useState } from "react";
 import { Button, ConfirmAction } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 export function ConfirmActionSpecimen() {
   const [lastAction, setLastAction] = useState("");
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+    <SpecimenLayout
+      sizes={(size) => (
+        <ConfirmAction
+          title="Delete this record?"
+          description="This record will be permanently removed."
+          triggerLabel="Delete record"
+          confirmLabel="Delete"
+          size={size}
+        />
+      )}
+      densities={(density) => (
+        <ConfirmAction
+          title="Delete this record?"
+          description="This record will be permanently removed."
+          triggerLabel="Delete record"
+          confirmLabel="Delete"
+          density={density}
+        />
+      )}
+    >
       <SpecimenGroup label="Default trigger (danger)">
         <ConfirmAction
           title="Delete this record?"
@@ -65,6 +85,6 @@ export function ConfirmActionSpecimen() {
           <p style={{ margin: 0 }}>{lastAction}</p>
         </SpecimenGroup>
       ) : null}
-    </div>
+    </SpecimenLayout>
   );
 }

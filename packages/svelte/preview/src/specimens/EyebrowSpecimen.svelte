@@ -1,9 +1,17 @@
 <script lang="ts">
   import { Eyebrow } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>
 
-<SpecimenGroup label="Above a page title">
+<SpecimenLayout>
+  {#snippet sizes(size)}
+    {#if size === "xs" || size === "sm" || size === "md"}
+      <Eyebrow size={size}>Section label</Eyebrow>
+    {/if}
+  {/snippet}
+
+  <SpecimenGroup label="Above a page title">
   <div class="poodle-specimen__example">
     <Eyebrow>Section label</Eyebrow>
     <h3 class="poodle-demo-heading">Page Title</h3>
@@ -27,12 +35,13 @@
   </div>
 </SpecimenGroup>
 
-<SpecimenGroup label="Semantic heading">
-  <div class="poodle-specimen__example">
-    <Eyebrow as="h3" size="md" spacing="bottom">Semantic section heading</Eyebrow>
-    <p>Eyebrow can render as a heading when it labels a real subsection.</p>
-  </div>
-</SpecimenGroup>
+  <SpecimenGroup label="Semantic heading">
+    <div class="poodle-specimen__example">
+      <Eyebrow as="h3" size="md" spacing="bottom">Semantic section heading</Eyebrow>
+      <p>Eyebrow can render as a heading when it labels a real subsection.</p>
+    </div>
+  </SpecimenGroup>
+</SpecimenLayout>
 
 <style>
   .poodle-specimen__example {

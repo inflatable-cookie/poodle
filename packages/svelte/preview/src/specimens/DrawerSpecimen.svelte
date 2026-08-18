@@ -1,11 +1,13 @@
 <script lang="ts">
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
   import { Drawer, Button } from "@inflatable-cookie/poodle-svelte";
 
   let rightOpen = $state(false);
   let leftOpen = $state(false);
 </script>
 
+<SpecimenLayout>
   <SpecimenGroup label="Right edge (default)">
     <Button variant="secondary" onClick={() => (rightOpen = true)}>Open right drawer</Button>
   </SpecimenGroup>
@@ -35,6 +37,19 @@
 >
   <p>Side navigation or filters can live in a left-edge drawer.</p>
 </Drawer>
+
+{#snippet sizes(size)}
+  <Drawer defaultOpen title="Settings" description="Configure your preferences." {size}>
+    <p>Drawer content goes here. You can put forms, navigation, or any other content.</p>
+  </Drawer>
+{/snippet}
+
+{#snippet densities(density)}
+  <Drawer defaultOpen title="Settings" description="Configure your preferences." {density}>
+    <p>Drawer content goes here. You can put forms, navigation, or any other content.</p>
+  </Drawer>
+{/snippet}
+</SpecimenLayout>
 
 <style>
   p {

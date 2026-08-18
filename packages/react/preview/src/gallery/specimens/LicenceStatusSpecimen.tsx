@@ -16,7 +16,30 @@ const stackStyle: CSSProperties = { display: "flex", flexDirection: "column", ga
 
 export function LicenceStatusSpecimen() {
   return (
-    <SpecimenLayout showSizes={false} showDensities={false}>
+    <SpecimenLayout
+      sizes={(size) => (
+        <LicenceStatus
+          usability={{ state: "active" }}
+          trustBasis={offline}
+          useUntil={later}
+          updateUntil={later}
+          usable={true}
+          attention="none"
+          size={size}
+        />
+      )}
+      densities={(density) => (
+        <LicenceStatus
+          usability={{ state: "active" }}
+          trustBasis={offline}
+          useUntil={later}
+          updateUntil={later}
+          usable={true}
+          attention="none"
+          density={density}
+        />
+      )}
+    >
       <div style={stackStyle}>
         <SpecimenGroup label="Active">
           <LicenceStatus

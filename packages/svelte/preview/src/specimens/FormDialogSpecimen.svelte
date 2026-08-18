@@ -2,6 +2,7 @@
   import { FormDialog } from "@inflatable-cookie/poodle-svelte";
   import { Button, TextInput, Field, Select, FormActions } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let basicOpen: boolean | null = $state(null);
   let errorOpen: boolean | null = $state(null);
@@ -48,7 +49,7 @@
   }
 </script>
 
-<div class="poodle-specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Basic form dialog">
     <Button variant="primary" onClick={() => (basicOpen = true)}>Add user</Button>
     <FormDialog
@@ -125,15 +126,41 @@
       <p>{lastAction}</p>
     </SpecimenGroup>
   {/if}
-</div>
+
+  {#snippet sizes(size)}
+    <FormDialog
+      open={true}
+      title="Add new user"
+      description="Invite a user to this workspace."
+      submitLabel="Add user"
+      {size}
+      onSubmit={() => {}}
+      onOpenChange={() => {}}
+    >
+      <Field label="Full name" id="form-dialog-axis-name">
+        <TextInput placeholder="Enter name" />
+      </Field>
+    </FormDialog>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <FormDialog
+      open={true}
+      title="Add new user"
+      description="Invite a user to this workspace."
+      submitLabel="Add user"
+      {density}
+      onSubmit={() => {}}
+      onOpenChange={() => {}}
+    >
+      <Field label="Full name" id="form-dialog-axis-name">
+        <TextInput placeholder="Enter name" />
+      </Field>
+    </FormDialog>
+  {/snippet}
+</SpecimenLayout>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   p {
     margin: 0;
   }

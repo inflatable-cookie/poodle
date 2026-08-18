@@ -1,5 +1,6 @@
 <script lang="ts">
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
   import { AlertDialog, Button } from "@inflatable-cookie/poodle-svelte";
 
   let dangerOpen = $state(false);
@@ -13,6 +14,7 @@
   }
 </script>
 
+<SpecimenLayout>
   <SpecimenGroup label="Danger tone">
     <Button tone="danger" onClick={() => (dangerOpen = true)}>Delete item</Button>
       <AlertDialog
@@ -64,6 +66,31 @@
     {#if lastAction}
       <p class="poodle-specimen__hint">Last action: <strong>{lastAction}</strong></p>
     {/if}
+
+    {#snippet sizes(size)}
+      <AlertDialog
+        open={true}
+        title="Delete this item?"
+        description="This action cannot be undone. The item and all associated data will be permanently removed."
+        confirmLabel="Delete"
+        cancelLabel="Keep it"
+        {size}
+        onOpenChange={() => {}}
+      />
+    {/snippet}
+
+    {#snippet densities(density)}
+      <AlertDialog
+        open={true}
+        title="Delete this item?"
+        description="This action cannot be undone. The item and all associated data will be permanently removed."
+        confirmLabel="Delete"
+        cancelLabel="Keep it"
+        {density}
+        onOpenChange={() => {}}
+      />
+    {/snippet}
+</SpecimenLayout>
 
 <style>
   .poodle-specimen__hint {

@@ -54,7 +54,10 @@ function InteractiveSeats({
 
 export function LicenceSeatsSpecimen() {
   return (
-    <SpecimenLayout showSizes={false} showDensities={false}>
+    <SpecimenLayout
+      sizes={(size) => <LicenceSeats seats={mixed} onRename={() => {}} size={size} />}
+      densities={(density) => <LicenceSeats seats={mixed} onRename={() => {}} density={density} />}
+    >
       <div style={stackStyle}>
         <SpecimenGroup label="Mixed labels">
           <InteractiveSeats initialSeats={mixed} />

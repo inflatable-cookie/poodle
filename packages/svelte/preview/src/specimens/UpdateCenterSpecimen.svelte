@@ -19,7 +19,7 @@
     " changes to take effect.";
 </script>
 
-<SpecimenLayout showSizes={false} showDensities={false}>
+<SpecimenLayout>
   {#snippet children()}
     <div class="poodle-update-center-specimen">
       <SpecimenGroup label="Attention">
@@ -60,6 +60,18 @@
           <UpdateCenter presence="quiet" {...offer} progress={{ state: "downloading", fraction: null }} />
         </div>
       </SpecimenGroup>
+    </div>
+  {/snippet}
+
+  {#snippet sizes(size)}
+    <div class="poodle-update-center-specimen__anchor">
+      <UpdateCenter presence="attention" {...offer} {size} />
+    </div>
+  {/snippet}
+
+  {#snippet densities(density)}
+    <div class="poodle-update-center-specimen__anchor">
+      <UpdateCenter presence="attention" {...offer} {density} />
     </div>
   {/snippet}
 </SpecimenLayout>

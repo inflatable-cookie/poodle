@@ -13,7 +13,7 @@
   let starred = $state(false);
 </script>
 
-<SpecimenLayout showDensities={false}>
+<SpecimenLayout>
   <SpecimenGroup label="Variants">
     <div class="poodle-button-row">
       <IconButton icon={plus} ariaLabel="Add" variant="primary" />
@@ -62,6 +62,10 @@
 
   {#snippet sizes(size)}
     <IconButton icon={star} ariaLabel={`Favorite (${size})`} variant="secondary" {size} />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <IconButton icon={star} ariaLabel={`Favorite (${density})`} variant="secondary" {density} />
   {/snippet}
 
 </SpecimenLayout>

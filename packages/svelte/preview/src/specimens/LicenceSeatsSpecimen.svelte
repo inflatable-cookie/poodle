@@ -37,7 +37,7 @@
   }
 </script>
 
-<SpecimenLayout showSizes={false} showDensities={false}>
+<SpecimenLayout>
   {#snippet children()}
     <div class="poodle-licence-seats-specimen">
       <SpecimenGroup label="Mixed labels">
@@ -83,6 +83,14 @@
         <LicenceSeats seats={[]} />
       </SpecimenGroup>
     </div>
+  {/snippet}
+
+  {#snippet sizes(size)}
+    <LicenceSeats seats={mixed} onRename={() => {}} {size} />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <LicenceSeats seats={mixed} onRename={() => {}} {density} />
   {/snippet}
 </SpecimenLayout>
 

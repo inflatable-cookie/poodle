@@ -1,6 +1,7 @@
 import { SpecimenGroup } from "../SpecimenGroup";
 import { useState, type CSSProperties } from "react";
 import { Drawer, Button } from "@inflatable-cookie/poodle-react";
+import { SpecimenLayout } from "../SpecimenLayout";
 
 export function DrawerSpecimen() {
   const [rightOpen, setRightOpen] = useState(false);
@@ -13,7 +14,18 @@ export function DrawerSpecimen() {
   };
 
   return (
-    <>
+    <SpecimenLayout
+      sizes={(size) => (
+        <Drawer defaultOpen title="Settings" description="Configure your preferences." size={size}>
+          <p style={paragraph}>Drawer content goes here. You can put forms, navigation, or any other content.</p>
+        </Drawer>
+      )}
+      densities={(density) => (
+        <Drawer defaultOpen title="Settings" description="Configure your preferences." density={density}>
+          <p style={paragraph}>Drawer content goes here. You can put forms, navigation, or any other content.</p>
+        </Drawer>
+      )}
+    >
             <SpecimenGroup label="Right edge (default)">
         <Button variant="secondary" onClick={() => setRightOpen(true)}>Open right drawer</Button>
       </SpecimenGroup>
@@ -45,6 +57,6 @@ export function DrawerSpecimen() {
       >
         <p style={paragraph}>Side navigation or filters can live in a left-edge drawer.</p>
       </Drawer>
-    </>
+    </SpecimenLayout>
   );
 }

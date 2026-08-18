@@ -3,6 +3,7 @@
   import type { LogEntry, LogFilter } from "@inflatable-cookie/poodle-svelte";
   import { Button } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const now = Date.now();
 
@@ -95,9 +96,16 @@
   function clearAuditFilters() {
     auditFilterValues = {};
   }
+
+  /* One stable, ordinary log for the axis panes. */
+  const axisEntries: LogEntry[] = [
+    { id: "axis-1", timestamp: new Date(now - 60000), level: "info", message: "Application started" },
+    { id: "axis-2", timestamp: new Date(now - 45000), level: "warn", message: "Slow query detected: SELECT * FROM users (2.3s)" },
+    { id: "axis-3", timestamp: new Date(now - 20000), level: "error", message: "Failed to fetch /api/analytics: ECONNREFUSED" },
+  ];
 </script>
 
-<div class="poodle-specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Log output with filtering" bare>
     <LogList {entries} ariaLabel="Application logs" />
     <div class="poodle-specimen__actions">
@@ -119,15 +127,17 @@
       }
     />
   </SpecimenGroup>
-</div>
+
+  {#snippet sizes(size)}
+    <LogList entries={axisEntries} ariaLabel="Application logs" {size} />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <LogList entries={axisEntries} ariaLabel="Application logs" {density} />
+  {/snippet}
+</SpecimenLayout>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   .poodle-specimen__actions {
     display: flex;
     gap: 0.5rem;

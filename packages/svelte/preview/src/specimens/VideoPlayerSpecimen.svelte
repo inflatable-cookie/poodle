@@ -1,9 +1,10 @@
 <script lang="ts">
   import { VideoPlayer } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>
 
-<div class="poodle-specimen">
+<SpecimenLayout>
   <SpecimenGroup label="Video player">
     <VideoPlayer
       src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
@@ -18,12 +19,20 @@
       ariaLabel="4:3 aspect video"
     />
   </SpecimenGroup>
-</div>
 
-<style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-</style>
+  {#snippet sizes(size)}
+    <VideoPlayer
+      src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+      ariaLabel="Sample video"
+      {size}
+    />
+  {/snippet}
+
+  {#snippet densities(density)}
+    <VideoPlayer
+      src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+      ariaLabel="Sample video"
+      {density}
+    />
+  {/snippet}
+</SpecimenLayout>

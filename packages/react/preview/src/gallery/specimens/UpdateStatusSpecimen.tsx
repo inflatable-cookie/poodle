@@ -9,7 +9,26 @@ const stackStyle: CSSProperties = { display: "flex", flexDirection: "column", ga
 
 export function UpdateStatusSpecimen() {
   return (
-    <SpecimenLayout showSizes={false} showDensities={false}>
+    <SpecimenLayout
+      sizes={(size) => (
+        <UpdateStatus
+          status={ready}
+          availability={{ state: "upToDate" }}
+          installedVersion="1.3.0"
+          channel="production"
+          size={size}
+        />
+      )}
+      densities={(density) => (
+        <UpdateStatus
+          status={ready}
+          availability={{ state: "upToDate" }}
+          installedVersion="1.3.0"
+          channel="production"
+          density={density}
+        />
+      )}
+    >
       <div style={stackStyle}>
         <SpecimenGroup label="Availability">
           <UpdateStatus
