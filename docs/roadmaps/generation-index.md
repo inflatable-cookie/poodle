@@ -7,7 +7,7 @@ Updated: 2026-08-18
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`, and `g15.015`
     complete; `g15.011` partial with bounded continuation cards; `g15.016`
-    next for review;
+    ready to dispatch;
     `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `033`
@@ -17,7 +17,7 @@ Updated: 2026-08-18
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: review `g15.016` for readiness, then continue the bounded specimen
+  - Next: dispatch `g15.016`, then continue the bounded specimen
     program. `g15.015` restored all 52 scoped captions and added the missing
     Svelte-preview type gate. The web release roster reads 175/175 focused
     evidence in both Svelte and React, the native implementation/specimen

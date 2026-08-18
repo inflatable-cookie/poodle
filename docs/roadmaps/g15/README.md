@@ -1,7 +1,7 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.010`, `g15.014`, and `g15.015` complete;
-`g15.011` partial with bounded continuation cards; `g15.016` next for review
+`g15.011` partial with bounded continuation cards; `g15.016` ready to dispatch
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -64,7 +64,7 @@ and status advance are the orchestrator's.
 10. [010 — Display, workstation & agent GPUI specimens](010-display-workstation-agent-gpui-specimens.md) — complete; PR #35 closed all 18 measured GPUI specimen gaps
 11. [011 — Human-centred specimen catalogue audit](011-specimen-catalogue-audit.md) — partial; screening baseline and three approved pilots delivered
 12. [015 — Specimen caption integrity](015-specimen-caption-integrity.md) — complete; PR #37 restored 52 captions and closed the Svelte-preview gate hole
-13. [016 — Specimen idiom convergence](016-specimen-idiom-convergence.md) — next for orchestrator review
+13. [016 — Specimen idiom convergence](016-specimen-idiom-convergence.md) — ready; exact 29-page web scope
 14. [017 — Specimen axis placement](017-specimen-axis-placement.md) — required before native structure work
 15. [018 — Overloaded Examples curation](018-overloaded-examples-curation.md) — non-dispatchable parent for exact children `020`–`025`
 16. [019 — GPUI specimen structure](019-gpui-specimen-structure.md) — after `017`
@@ -103,8 +103,7 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Review `g15.016` for readiness; do not dispatch it until its exact page scope
-and acceptance evidence are confirmed. `g15.011` remains partial until `g15.026` and
+Dispatch `g15.016` from its committed worker handoff. `g15.011` remains partial until `g15.026` and
 all six screen-clear review children (`g15.028`–`g15.033`) land; defect-led
 curation proceeds through `g15.015`–`g15.025`. `g15.012` follows the completed
 audit. `g15.013` stays blocked as the final certification gate. Release

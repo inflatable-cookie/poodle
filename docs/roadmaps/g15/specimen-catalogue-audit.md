@@ -195,14 +195,16 @@ The six non-defects are recorded on their rows as `note —` and score nothing.
 They are kept in the table because the next probe will flag them again, and the
 next reader should not have to re-derive why they are fine.
 
-### 3. Four caption idioms, one of which renders nothing
+### 3. Four caption idioms, one of which rendered nothing
 
-The catalogue captions its examples four different ways: `SpecimenGroup label=`
-(140 pages), a bare `<Eyebrow>` inside a hand-rolled `Surface` (21 pages),
-`<section><h3>` in the audio family (14 pages), and React's separate
-`AudioSpecimenGroup title=`. They differ in spacing, weight, and surface
-treatment, so pages that should look like siblings do not. The divergence is
-what let the broken fifth idiom hide in plain sight.
+The dispatch baseline now has 27 paired routes with a divergent or missing
+caption shell: 13 Svelte pages use bare `<Eyebrow>` caption chrome, 13 audio
+pages use direct `<section><h3>` in Svelte and React's separate
+`AudioSpecimenGroup title=`, and `SettingsShell` has no example captions in
+either web runtime. The remaining pages use `SpecimenGroup label=`. These
+idioms differ in spacing, weight, and surface treatment, so pages that should
+look like siblings do not. The divergence is what let the now-fixed g15.015
+caption-prop failure hide in plain sight.
 
 ### 4. Size and density matrices in the main view
 
@@ -377,7 +379,7 @@ that changes specimen presentation carries a live operator-review checkpoint.
 | Card | Family | Scale |
 | --- | --- | ---: |
 | [`g15.015`](015-specimen-caption-integrity.md) | Caption integrity + the type-check gate hole that hid it | 9 pages, 52 captions |
-| [`g15.016`](016-specimen-idiom-convergence.md) | One caption idiom; two borrowed pages get their own | ~35 pages |
+| [`g15.016`](016-specimen-idiom-convergence.md) | One caption idiom; two borrowed pages get their own | 29 pages |
 | [`g15.017`](017-specimen-axis-placement.md) | Axis matrices out of the main view; axis evidence where the prop exists | 12 audio + ~22 others |
 | [`g15.018`](018-overloaded-examples-curation.md) | Overloaded `Examples` — **parent, not dispatchable** | 53 pages |
 | ↳ [`g15.020`](020-curate-model-connection-licence.md)–[`g15.025`](025-curate-collections-navigation-tail.md) | six bounded family children, one exact page list each | 6–11 each, 53 total |
