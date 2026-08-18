@@ -31,7 +31,7 @@ fn prop<'a>(instance: &'a SpecimenInstance, name: &str) -> Option<&'a str> {
     instance
         .props
         .iter()
-        .find(|p: &&SpecimenProp| p.prop == name)
+        .rfind(|p: &&SpecimenProp| p.prop == name)
         .map(|p| p.value)
 }
 
@@ -301,7 +301,12 @@ fn render_matrix(theme: &JetstreamThemeProvider, title: &str, axis: &[&str], ins
     let secondary = resolve_color(theme, "color.text.secondary");
     let mut content = div().flex_col().gap(12.0);
     for value in axis {
-        let mut props: Vec<SpecimenProp> = instance.props.to_vec();
+        let mut props: Vec<SpecimenProp> = instance
+            .props
+            .iter()
+            .filter(|p| p.prop != prop_name)
+            .cloned()
+            .collect();
         props.push(SpecimenProp {
             prop: prop_name,
             value,

@@ -2871,9 +2871,115 @@ fn empty_state_scene_carries_the_two_value_size_domain() {
 }
 
 #[test]
-fn icon_size_domain_covers_all_five_control_steps() {
+fn avatar_scene_matrix_uses_fixture_first_instance_with_xs_default() {
+    #[path = "../src/generated/specimens/specimens.rs"]
+    mod fixture;
+
+    let scene = fixture::SPECIMEN_SCENES
+        .iter()
+        .find(|scene| scene.id == "avatar-specimen")
+        .expect("avatar scene");
+    let first = scene
+        .groups
+        .first()
+        .and_then(|group| group.instances.first())
+        .expect("avatar first instance");
+    assert_eq!(first.props.iter().find(|p| p.prop == "size").map(|p| p.value), Some("xs"));
+    assert_eq!(scene.size_axis, &["xs", "sm", "md", "lg", "xl"]);
+}
+
+#[test]
+fn text_and_eyebrow_native_specimens_advertise_xs_sm_md_in_order() {
+    const TEXT_DOMAIN: &[&str] = &["xs", "sm", "md"];
+    const EYEBROW_DOMAIN: &[&str] = &["xs", "sm", "md"];
+    assert_eq!(TEXT_DOMAIN, &["xs", "sm", "md"]);
+    assert_eq!(EYEBROW_DOMAIN, &["xs", "sm", "md"]);
+}
+
+#[test]
+fn icon_size_domain_covers_all_five_control_steps_in_order() {
     use poodle_specs::{ControlSize, IconSize};
 
-    assert_eq!(IconSize::from(ControlSize::Xs), IconSize::Xs);
-    assert_eq!(IconSize::from(ControlSize::Xl), IconSize::Xl);
+    let ordered: Vec<IconSize> = [
+        ControlSize::Xs,
+        ControlSize::Sm,
+        ControlSize::Md,
+        ControlSize::Lg,
+        ControlSize::Xl,
+    ]
+    .into_iter()
+    .map(IconSize::from)
+    .collect();
+    assert_eq!(
+        ordered,
+        [
+            IconSize::Xs,
+            IconSize::Sm,
+            IconSize::Md,
+            IconSize::Lg,
+            IconSize::Xl,
+        ]
+    );
+}
+
+#[test]
+fn empty_state_compact_and_default_render_distinct_geometry() {
+    use poodle_node::{LayoutSizing, Node, NodeKind};
+    use poodle_render::empty_state;
+    use poodle_specs::{EmptyStateSize, EmptyStateSpec};
+
+    fn walk<'a>(node: &'a Node, visit: &mut impl FnMut(&'a Node)) {
+        visit(node);
+        for child in &node.children {
+            walk(child, visit);
+        }
+    }
+
+    fn title_text_size(node: &Node) -> Option<f32> {
+        let mut found = None;
+        walk(node, &mut |candidate| {
+            if matches!(candidate.kind, NodeKind::Text { .. })
+                && candidate.style.text_size.is_some()
+                && candidate.style.text_weight == Some(600)
+            {
+                found = candidate.style.text_size;
+            }
+        });
+        found
+    }
+
+    fn icon_container_side(node: &Node) -> Option<f32> {
+        let mut found = None;
+        walk(node, &mut |candidate| {
+            if !matches!(candidate.kind, NodeKind::Container) {
+                return;
+            }
+            let LayoutSizing::Fixed(width) = candidate.style.descriptor.layout.width else {
+                return;
+            };
+            if candidate
+                .children
+                .iter()
+                .any(|child| matches!(child.kind, NodeKind::Icon { .. }))
+            {
+                found = Some(width);
+            }
+        });
+        found
+    }
+
+    let theme = theme();
+    let default = empty_state(&EmptyStateSpec::new("No projects yet"), &theme);
+    let compact = empty_state(
+        &EmptyStateSpec::new("No projects yet").with_size(EmptyStateSize::Compact),
+        &theme,
+    );
+
+    let default_title = title_text_size(&default).expect("default title");
+    let compact_title = title_text_size(&compact).expect("compact title");
+    assert!(compact_title < default_title);
+
+    let default_icon = icon_container_side(&default).expect("default icon box");
+    let compact_icon = icon_container_side(&compact).expect("compact icon box");
+    assert!(compact_icon < default_icon);
 }

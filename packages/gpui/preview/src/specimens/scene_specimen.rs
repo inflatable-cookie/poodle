@@ -32,7 +32,7 @@ fn prop<'a>(instance: &'a SpecimenInstance<'a>, name: &str) -> Option<&'a str> {
     instance
         .props
         .iter()
-        .find(|p: &&SpecimenProp| p.prop == name)
+        .rfind(|p: &&SpecimenProp| p.prop == name)
         .map(|p| p.value)
 }
 
@@ -303,7 +303,12 @@ fn render_matrix_instance(
     prop_name: &str,
     value: &str,
 ) -> AnyElement {
-    let mut props: Vec<SpecimenProp> = instance.props.to_vec();
+    let mut props: Vec<SpecimenProp> = instance
+        .props
+        .iter()
+        .filter(|p| p.prop != prop_name)
+        .cloned()
+        .collect();
     props.push(SpecimenProp {
         prop: prop_name,
         value,
@@ -314,6 +319,67 @@ fn render_matrix_instance(
         props: &props,
     };
     render_instance(&adjusted, theme)
+}
+
+#[cfg(test)]
+mod matrix_override_tests {
+    use super::*;
+
+    #[test]
+    fn prop_last_binding_wins() {
+        let props = [
+            SpecimenProp {
+                prop: "size",
+                value: "xs",
+            },
+            SpecimenProp {
+                prop: "size",
+                value: "md",
+            },
+        ];
+        let instance = SpecimenInstance {
+            component: "avatar",
+            caption: Some("TA xs"),
+            props: &props,
+        };
+        assert_eq!(prop(&instance, "size"), Some("md"));
+    }
+
+    #[test]
+    fn matrix_size_overrides_fixture_binding() {
+        let base_props = [
+            SpecimenProp {
+                prop: "initials",
+                value: "TA",
+            },
+            SpecimenProp {
+                prop: "size",
+                value: "xs",
+            },
+        ];
+        let instance = SpecimenInstance {
+            component: "avatar",
+            caption: Some("TA xs"),
+            props: &base_props,
+        };
+        let mut props: Vec<SpecimenProp> = instance
+            .props
+            .iter()
+            .filter(|p| p.prop != "size")
+            .cloned()
+            .collect();
+        props.push(SpecimenProp {
+            prop: "size",
+            value: "md",
+        });
+        let adjusted = SpecimenInstance {
+            component: instance.component,
+            caption: instance.caption,
+            props: &props,
+        };
+        assert_eq!(prop(&instance, "size"), Some("xs"));
+        assert_eq!(prop(&adjusted, "size"), Some("md"));
+    }
 }
 
 /// Renders the scene for a slug, or `None` when the slug is not scene-driven.

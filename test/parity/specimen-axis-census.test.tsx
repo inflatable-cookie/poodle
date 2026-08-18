@@ -33,8 +33,10 @@ import AxisHelperNoRenderers from "../../packages/svelte/preview/test/AxisHelper
 import AxisHelperSizesOnly from "../../packages/svelte/preview/test/AxisHelperSizesOnly.svelte";
 import AxisHelperDensitiesOnly from "../../packages/svelte/preview/test/AxisHelperDensitiesOnly.svelte";
 import AxisHelperHiddenRenderers from "../../packages/svelte/preview/test/AxisHelperHiddenRenderers.svelte";
+import AxisHelperPartialSizes from "../../packages/svelte/preview/test/AxisHelperPartialSizes.svelte";
 import catalogue from "../../packages/codegen/fixtures/preview-catalogue.json";
 import { SpecimenLayout } from "../../packages/react/preview/src/gallery/SpecimenLayout";
+import { specimenScenes } from "../../packages/react/preview/src/generated/specimens/specimen-scenes";
 
 // Drawer slides/fades out through the Web Animations API (`element.animate`),
 // which happy-dom does not implement. Mirrors the polyfill in the Drawer
@@ -95,6 +97,96 @@ function axisEligibility(): Record<string, { size: boolean; density: boolean }> 
 }
 
 const ELIGIBILITY = axisEligibility();
+
+const DEFAULT_CONTROL_SIZES = ["xs", "sm", "md", "lg", "xl"] as const;
+const DEFAULT_CONTROL_DENSITIES = ["compact", "default", "comfortable"] as const;
+
+const SUBSET_SIZE_AXIS: Partial<Record<string, readonly string[]>> = {
+  text: ["xs", "sm", "md"],
+  eyebrow: ["xs", "sm", "md"],
+};
+
+function expectedSizeAxis(slug: string): readonly string[] | null {
+  const eligibility = ELIGIBILITY[slug.replace(/-/g, "")];
+  if (!eligibility?.size) return null;
+  if (slug in specimenScenes) {
+    const scene = specimenScenes[slug as keyof typeof specimenScenes];
+    if (scene.sizeAxis.length > 0) return scene.sizeAxis;
+  }
+  return SUBSET_SIZE_AXIS[slug] ?? DEFAULT_CONTROL_SIZES;
+}
+
+function expectedDensityAxis(slug: string): readonly string[] | null {
+  const eligibility = ELIGIBILITY[slug.replace(/-/g, "")];
+  if (!eligibility?.density) return null;
+  if (slug in specimenScenes) {
+    const scene = specimenScenes[slug as keyof typeof specimenScenes];
+    if (scene.densityAxis.length > 0) return scene.densityAxis;
+  }
+  return DEFAULT_CONTROL_DENSITIES;
+}
+
+function variantRowHasEvidence(row: HTMLElement): boolean {
+  if (
+    row.querySelector(
+      "input, button, select, textarea, svg, img, [data-size], [data-density], [class*='poodle-']",
+    )
+  ) {
+    return true;
+  }
+  if (row.childElementCount === 0) return false;
+  for (const child of row.children) {
+    if (
+      child.tagName === "SPAN" &&
+      child.childElementCount === 0 &&
+      (child.textContent ?? "").trim() === ""
+    ) {
+      continue;
+    }
+    if ((child.textContent ?? "").trim() !== "" || child.childElementCount > 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function assertOrderedAxisRows(
+  attr: "data-axis-size" | "data-axis-density",
+  expected: readonly string[],
+  context = "",
+): void {
+  const variants = document.querySelector(".poodle-specimen-layout__variants");
+  expect(variants, `${context} axis variants container missing`).toBeTruthy();
+  const rows = [
+    ...variants!.querySelectorAll<HTMLElement>(`.poodle-specimen-layout__variant[${attr}]`),
+  ];
+  expect(rows.map((row) => row.getAttribute(attr)), `${context} axis row order`).toEqual([
+    ...expected,
+  ]);
+  for (const row of rows) {
+    expect(
+      variantRowHasEvidence(row),
+      `${context} missing render evidence for ${row.getAttribute(attr)}`,
+    ).toBe(true);
+  }
+}
+
+function orderedComponentAxisValues(attr: "data-size" | "data-density"): string[] {
+  const axisAttr = attr === "data-size" ? "data-axis-size" : "data-axis-density";
+  const variants = document.querySelector(".poodle-specimen-layout__variants");
+  if (!variants) return [];
+  const rows = [
+    ...variants.querySelectorAll<HTMLElement>(`.poodle-specimen-layout__variant[${axisAttr}]`),
+  ];
+  return rows
+    .map((row) => {
+      const axisValue = row.getAttribute(axisAttr);
+      if (!axisValue) return null;
+      const sized = row.querySelector<HTMLElement>(`[${attr}="${axisValue}"]`);
+      return sized?.getAttribute(attr) ?? null;
+    })
+    .filter((value): value is string => Boolean(value));
+}
 
 /** The exact 24 routes corrected by this card, for the explicit decision
  *  evidence the acceptance criteria name. */
@@ -221,10 +313,27 @@ async function assertRoute(
   if (eligibility.size) expected.push("Sizes");
   if (eligibility.density) expected.push("Densities");
 
+  const sizeAxis = expectedSizeAxis(slug);
+  const densityAxis = expectedDensityAxis(slug);
+
   for (const label of expected.slice(1)) {
     const clicked = await clickTab(document, label, runtime);
     if (!clicked) return null;
-    await awaitPaneEvidence(runtime);
+    if (label === "Sizes" && sizeAxis) {
+      assertOrderedAxisRows("data-axis-size", sizeAxis, `${slug} (${runtime})`);
+      const componentSizes = orderedComponentAxisValues("data-size");
+      if (componentSizes.length === sizeAxis.length) {
+        expect(componentSizes).toEqual([...sizeAxis]);
+      }
+    } else if (label === "Densities" && densityAxis) {
+      assertOrderedAxisRows("data-axis-density", densityAxis, `${slug} (${runtime})`);
+      const componentDensities = orderedComponentAxisValues("data-density");
+      if (componentDensities.length === densityAxis.length) {
+        expect(componentDensities).toEqual([...densityAxis]);
+      }
+    } else {
+      await awaitPaneEvidence(runtime);
+    }
     await clickTab(document, "Examples", runtime);
   }
   return { tabs, hasLayout: true };
@@ -251,7 +360,7 @@ describe("SpecimenLayout axis-tab hardening", () => {
     renderSvelte(AxisHelperSizesOnly);
     expect(tabLabels(document)).toEqual(["Examples", "Sizes"]);
     await clickTab(document, "Sizes", "Svelte");
-    await awaitPaneEvidence("Svelte");
+    assertOrderedAxisRows("data-axis-size", [...DEFAULT_CONTROL_SIZES]);
     cleanupSvelte();
   });
 
@@ -263,7 +372,7 @@ describe("SpecimenLayout axis-tab hardening", () => {
     );
     expect(tabLabels(document)).toEqual(["Examples", "Sizes"]);
     await clickTab(document, "Sizes", "React");
-    await awaitPaneEvidence("React");
+    assertOrderedAxisRows("data-axis-size", [...DEFAULT_CONTROL_SIZES]);
     cleanupReact();
   });
 
@@ -271,7 +380,7 @@ describe("SpecimenLayout axis-tab hardening", () => {
     renderSvelte(AxisHelperDensitiesOnly);
     expect(tabLabels(document)).toEqual(["Examples", "Densities"]);
     await clickTab(document, "Densities", "Svelte");
-    await awaitPaneEvidence("Svelte");
+    assertOrderedAxisRows("data-axis-density", [...DEFAULT_CONTROL_DENSITIES]);
     cleanupSvelte();
   });
 
@@ -283,7 +392,7 @@ describe("SpecimenLayout axis-tab hardening", () => {
     );
     expect(tabLabels(document)).toEqual(["Examples", "Densities"]);
     await clickTab(document, "Densities", "React");
-    await awaitPaneEvidence("React");
+    assertOrderedAxisRows("data-axis-density", [...DEFAULT_CONTROL_DENSITIES]);
     cleanupReact();
   });
 
@@ -301,6 +410,18 @@ describe("SpecimenLayout axis-tab hardening", () => {
     );
     expect(tabLabels(document)).toEqual(["Examples"]);
     cleanupReact();
+  });
+
+  it("fails when a sizes snippet skips advertised axis steps", async () => {
+    renderSvelte(AxisHelperPartialSizes);
+    await clickTab(document, "Sizes", "Svelte");
+    const variants = document.querySelector(".poodle-specimen-layout__variants");
+    const rows = [
+      ...variants!.querySelectorAll<HTMLElement>(".poodle-specimen-layout__variant[data-axis-size]"),
+    ];
+    expect(rows.map((row) => row.getAttribute("data-axis-size"))).toEqual([...DEFAULT_CONTROL_SIZES]);
+    expect(rows.some((row) => !variantRowHasEvidence(row))).toBe(true);
+    cleanupSvelte();
   });
 });
 
@@ -341,75 +462,54 @@ describe("authored-scene tab projection", () => {
     document.body.innerHTML = "";
     renderSvelte(AxisSceneFixture, { props: { slug: "empty-state" } });
     await clickTab(document, "Sizes", "Svelte");
-    await awaitPaneEvidence("Svelte");
-    const svelteSizes = [...document.querySelectorAll<HTMLElement>(".poodle-empty-state[data-size]")]
-      .map((node) => node.getAttribute("data-size"))
-      .filter(Boolean);
-    expect(new Set(svelteSizes)).toEqual(new Set(["default", "compact"]));
+    assertOrderedAxisRows("data-axis-size", ["default", "compact"]);
+    expect(orderedComponentAxisValues("data-size")).toEqual(["default", "compact"]);
     cleanupSvelte();
 
     renderReact(createElement(ReactSceneSpecimen, { slug: "empty-state" }));
     await clickTab(document, "Sizes", "React");
-    await awaitPaneEvidence("React");
-    const reactSizes = [...document.querySelectorAll<HTMLElement>(".poodle-empty-state[data-size]")]
-      .map((node) => node.getAttribute("data-size"))
-      .filter(Boolean);
-    expect(new Set(reactSizes)).toEqual(new Set(["default", "compact"]));
+    assertOrderedAxisRows("data-axis-size", ["default", "compact"]);
+    expect(orderedComponentAxisValues("data-size")).toEqual(["default", "compact"]);
     cleanupReact();
   });
 
-  it("renders exactly xs, sm, and md for Text in both runtimes", async () => {
+  it("renders xs, sm, and md for Text in order in both runtimes", async () => {
     document.body.innerHTML = "";
     renderSvelte(PilotSpecimenHarness, { props: { specimen: svelteMap.text as never } });
     await clickTab(document, "Sizes", "Svelte");
-    await awaitPaneEvidence("Svelte");
-    const svelteSizes = [...document.querySelectorAll<HTMLElement>(".poodle-text[data-size]")]
-      .map((node) => node.getAttribute("data-size"))
-      .filter(Boolean);
-    expect(new Set(svelteSizes)).toEqual(new Set(["xs", "sm", "md"]));
+    assertOrderedAxisRows("data-axis-size", ["xs", "sm", "md"]);
+    expect(orderedComponentAxisValues("data-size")).toEqual(["xs", "sm", "md"]);
     cleanupSvelte();
 
     renderReact(createElement(reactMap.text! as ComponentType));
     await clickTab(document, "Sizes", "React");
-    await awaitPaneEvidence("React");
-    const reactSizes = [...document.querySelectorAll<HTMLElement>(".poodle-text[data-size]")]
-      .map((node) => node.getAttribute("data-size"))
-      .filter(Boolean);
-    expect(new Set(reactSizes)).toEqual(new Set(["xs", "sm", "md"]));
+    assertOrderedAxisRows("data-axis-size", ["xs", "sm", "md"]);
+    expect(orderedComponentAxisValues("data-size")).toEqual(["xs", "sm", "md"]);
     cleanupReact();
   });
 
-  it("renders exactly xs, sm, and md for Eyebrow in both runtimes", async () => {
+  it("renders xs, sm, and md for Eyebrow in order in both runtimes", async () => {
     document.body.innerHTML = "";
     renderSvelte(PilotSpecimenHarness, { props: { specimen: svelteMap.eyebrow as never } });
     await clickTab(document, "Sizes", "Svelte");
-    await awaitPaneEvidence("Svelte");
-    const svelteSizes = [...document.querySelectorAll<HTMLElement>(".poodle-eyebrow[data-size]")]
-      .map((node) => node.getAttribute("data-size"))
-      .filter(Boolean);
-    expect(new Set(svelteSizes)).toEqual(new Set(["xs", "sm", "md"]));
+    assertOrderedAxisRows("data-axis-size", ["xs", "sm", "md"]);
+    expect(orderedComponentAxisValues("data-size")).toEqual(["xs", "sm", "md"]);
     cleanupSvelte();
 
     renderReact(createElement(reactMap.eyebrow! as ComponentType));
     await clickTab(document, "Sizes", "React");
-    await awaitPaneEvidence("React");
-    const reactSizes = [...document.querySelectorAll<HTMLElement>(".poodle-eyebrow[data-size]")]
-      .map((node) => node.getAttribute("data-size"))
-      .filter(Boolean);
-    expect(new Set(reactSizes)).toEqual(new Set(["xs", "sm", "md"]));
+    assertOrderedAxisRows("data-axis-size", ["xs", "sm", "md"]);
+    expect(orderedComponentAxisValues("data-size")).toEqual(["xs", "sm", "md"]);
     cleanupReact();
   });
 
-  it("renders all five Icon sizes and no Densities tab", async () => {
+  it("renders all five Icon sizes in order and no Densities tab", async () => {
     document.body.innerHTML = "";
     renderSvelte(PilotSpecimenHarness, { props: { specimen: svelteMap.icon as never } });
     expect(tabLabels(document)).toEqual(["Examples", "Sizes"]);
     await clickTab(document, "Sizes", "Svelte");
-    await awaitPaneEvidence("Svelte");
-    const svelteSizes = [...document.querySelectorAll<HTMLElement>(".poodle-icon[data-size]")]
-      .map((node) => node.getAttribute("data-size"))
-      .filter(Boolean);
-    expect(new Set(svelteSizes)).toEqual(new Set(["xs", "sm", "md", "lg", "xl"]));
+    assertOrderedAxisRows("data-axis-size", [...DEFAULT_CONTROL_SIZES]);
+    expect(orderedComponentAxisValues("data-size")).toEqual([...DEFAULT_CONTROL_SIZES]);
     cleanupSvelte();
 
     renderReact(
@@ -421,11 +521,8 @@ describe("authored-scene tab projection", () => {
     );
     expect(tabLabels(document)).toEqual(["Examples", "Sizes"]);
     await clickTab(document, "Sizes", "React");
-    await awaitPaneEvidence("React");
-    const reactSizes = [...document.querySelectorAll<HTMLElement>(".poodle-icon[data-size]")]
-      .map((node) => node.getAttribute("data-size"))
-      .filter(Boolean);
-    expect(new Set(reactSizes)).toEqual(new Set(["xs", "sm", "md", "lg", "xl"]));
+    assertOrderedAxisRows("data-axis-size", [...DEFAULT_CONTROL_SIZES]);
+    expect(orderedComponentAxisValues("data-size")).toEqual([...DEFAULT_CONTROL_SIZES]);
     cleanupReact();
   });
 
@@ -481,6 +578,7 @@ async function assertOverlayAxisLifecycle(
   }
 
   await clickTab(document, "Sizes", runtime);
+  assertOrderedAxisRows("data-axis-size", [...DEFAULT_CONTROL_SIZES]);
 
   // The pane renders triggers, not stacked open modals.
   await waitFor(() => expect(document.querySelectorAll(selector).length).toBe(0));

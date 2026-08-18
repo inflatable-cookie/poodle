@@ -64,14 +64,18 @@
       {#if bareVariants}
         <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
           {#each resolvedSizeValues as size}
-            {@render sizes?.(size)}
+            <div class="poodle-specimen-layout__variant" data-axis-size={size}>
+              {@render sizes?.(size)}
+            </div>
           {/each}
         </div>
       {:else}
         <Surface tone="panel" border="subtle" padding="md">
           <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
             {#each resolvedSizeValues as size}
-              {@render sizes?.(size)}
+              <div class="poodle-specimen-layout__variant" data-axis-size={size}>
+                {@render sizes?.(size)}
+              </div>
             {/each}
           </div>
         </Surface>
@@ -80,14 +84,18 @@
       {#if bareVariants}
         <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
           {#each resolvedDensityValues as density}
-            {@render densities?.(density)}
+            <div class="poodle-specimen-layout__variant" data-axis-density={density}>
+              {@render densities?.(density)}
+            </div>
           {/each}
         </div>
       {:else}
         <Surface tone="panel" border="subtle" padding="md">
           <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
             {#each resolvedDensityValues as density}
-              {@render densities?.(density)}
+              <div class="poodle-specimen-layout__variant" data-axis-density={density}>
+                {@render densities?.(density)}
+              </div>
             {/each}
           </div>
         </Surface>

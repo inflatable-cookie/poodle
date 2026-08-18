@@ -174,3 +174,82 @@ pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
     }
     el
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_node::{LayoutSizing, NodeKind};
+
+    fn walk<'a>(node: &'a Node, visit: &mut impl FnMut(&'a Node)) {
+        visit(node);
+        for child in &node.children {
+            walk(child, visit);
+        }
+    }
+
+    fn icon_container_side(node: &Node) -> Option<f32> {
+        let mut found = None;
+        walk(node, &mut |candidate| {
+            if !matches!(candidate.kind, NodeKind::Container) {
+                return;
+            }
+            let LayoutSizing::Fixed(width) = candidate.style.descriptor.layout.width else {
+                return;
+            };
+            if candidate
+                .children
+                .iter()
+                .any(|child| matches!(child.kind, NodeKind::Icon { .. }))
+            {
+                found = Some(width);
+            }
+        });
+        found
+    }
+
+    fn title_text_size(node: &Node) -> Option<f32> {
+        let mut found = None;
+        walk(node, &mut |candidate| {
+            if matches!(candidate.kind, NodeKind::Text { .. })
+                && candidate.style.text_size.is_some()
+                && candidate.style.text_weight == Some(600)
+            {
+                found = candidate.style.text_size;
+            }
+        });
+        found
+    }
+
+    fn icon_glyph_size(node: &Node) -> Option<f32> {
+        let mut found = None;
+        walk(node, &mut |candidate| {
+            if let NodeKind::Icon { size, .. } = &candidate.kind {
+                found = Some(*size);
+            }
+        });
+        found
+    }
+
+    #[test]
+    fn compact_and_default_sizes_use_distinct_title_and_icon_geometry() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let default = empty_state(&EmptyStateSpec::new("No projects yet"), &theme);
+        let compact = empty_state(
+            &EmptyStateSpec::new("No projects yet").with_size(EmptyStateSize::Compact),
+            &theme,
+        );
+
+        let default_title = title_text_size(&default).expect("default title size");
+        let compact_title = title_text_size(&compact).expect("compact title size");
+        assert!(compact_title < default_title);
+
+        let default_icon_box = icon_container_side(&default).expect("default icon box");
+        let compact_icon_box = icon_container_side(&compact).expect("compact icon box");
+        assert!(compact_icon_box < default_icon_box);
+
+        let default_glyph = icon_glyph_size(&default).expect("default glyph");
+        let compact_glyph = icon_glyph_size(&compact).expect("compact glyph");
+        assert!(compact_glyph < default_glyph);
+    }
+}

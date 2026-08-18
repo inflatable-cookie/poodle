@@ -71,9 +71,25 @@ export function SpecimenLayout({
         {activeTab === "examples"
           ? children
           : activeTab === "sizes" && showSizes && sizes
-            ? variants(sizeValues.map((size) => <span key={size}>{sizes(size)}</span>))
+            ? variants(
+                sizeValues.map((size) => (
+                  <div key={size} className="poodle-specimen-layout__variant" data-axis-size={size}>
+                    {sizes(size)}
+                  </div>
+                )),
+              )
             : activeTab === "densities" && showDensities && densities
-              ? variants(densityValues.map((density) => <span key={density}>{densities(density)}</span>))
+              ? variants(
+                  densityValues.map((density) => (
+                    <div
+                      key={density}
+                      className="poodle-specimen-layout__variant"
+                      data-axis-density={density}
+                    >
+                      {densities(density)}
+                    </div>
+                  )),
+                )
               : null}
       </div>
     </div>

@@ -1201,10 +1201,16 @@ fn validate_instance_bindings(
 }
 
 fn scene_size_axis_values(model: &IrModel, scene: &crate::Scene) -> BTreeSet<String> {
-    let mut sizes: BTreeSet<String> = crate::tokens::control_size_names()
+    const CONTROL_SIZE_SHARED: &str = "control-size";
+
+    let control_sizes: BTreeSet<String> = crate::tokens::control_size_names()
         .into_iter()
         .map(String::from)
         .collect();
+
+    let mut component_specific = BTreeSet::new();
+    let mut uses_control_size = false;
+
     for instance in &scene.instances {
         let Some(component) = model.component(instance.component.as_str()) else {
             continue;
@@ -1213,12 +1219,25 @@ fn scene_size_axis_values(model: &IrModel, scene: &crate::Scene) -> BTreeSet<Str
             continue;
         };
         if let Some(subset) = &prop.permitted_subset {
-            for member in &subset.members {
-                sizes.insert(member.as_str().to_string());
+            if subset.shared_type.as_str() == CONTROL_SIZE_SHARED {
+                uses_control_size = true;
+            } else {
+                for member in &subset.members {
+                    component_specific.insert(member.as_str().to_string());
+                }
             }
         }
     }
-    sizes
+
+    if !component_specific.is_empty() {
+        return component_specific;
+    }
+
+    if uses_control_size {
+        return control_sizes;
+    }
+
+    control_sizes
 }
 
 fn validate_scene_axes(model: &IrModel, scene: &crate::Scene, findings: &mut Vec<Finding>) {
@@ -1423,5 +1442,145 @@ fn validate_registry(model: &IrModel, findings: &mut Vec<Finding>) {
                 ));
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod scene_size_axis_tests {
+    use super::*;
+    use crate::{
+        Accessibility, Axes, AxisValues, ComponentDefinition, ComponentInstance, ContractRef,
+        Identifier, Layer, PermittedSubset, Prop, PropBinding, PropType, Scene, SceneAxis,
+        SceneAxisKind, SharedType, Value, IR_SCHEMA_VERSION,
+    };
+
+    fn a11y() -> Accessibility {
+        Accessibility {
+            role: crate::A11yRole::Group,
+            name_rule: crate::NameRule::FromContent,
+            name_source: None,
+            aria: Vec::new(),
+            native: Vec::new(),
+            description: "fixture".to_owned(),
+        }
+    }
+
+    fn empty_state_model_with_size_axis(values: &[&str]) -> IrModel {
+        let empty_state_size = SharedType {
+            id: Identifier::new("empty-state-size"),
+            name: "EmptyStateSize".to_owned(),
+            description: "fixture".to_owned(),
+            canonical_ref: ContractRef {
+                path: "docs/contracts/components/empty-state.md".to_owned(),
+                section: None,
+            },
+            members: vec![
+                crate::SharedEnumMember {
+                    id: Identifier::new("default"),
+                    name: "Default".to_owned(),
+                    description: "fixture".to_owned(),
+                },
+                crate::SharedEnumMember {
+                    id: Identifier::new("compact"),
+                    name: "Compact".to_owned(),
+                    description: "fixture".to_owned(),
+                },
+            ],
+        };
+        let component = ComponentDefinition {
+            id: Identifier::new("empty-state"),
+            name: "EmptyState".to_owned(),
+            layer: Layer::Foundation,
+            contract: ContractRef {
+                path: "docs/contracts/components/empty-state.md".to_owned(),
+                section: None,
+            },
+            description: "fixture".to_owned(),
+            props: vec![Prop {
+                id: Identifier::new("size"),
+                name: "size".to_owned(),
+                prop_type: PropType::Shared(Identifier::new("empty-state-size")),
+                default: None,
+                required: false,
+                web_only: false,
+                description: "fixture".to_owned(),
+                permitted_subset: Some(
+                    PermittedSubset::new("empty-state-size", ["default", "compact"]),
+                ),
+            }],
+            controlled_state: Vec::new(),
+            events: Vec::new(),
+            parts: Vec::new(),
+            attributes: Vec::new(),
+            axes: Axes::default(),
+            tokens: Vec::new(),
+            recipe_hooks: Vec::new(),
+            accessibility: a11y(),
+            capabilities: Vec::new(),
+            keyboard: Vec::new(),
+            visual_state: Vec::new(),
+            conformance: Vec::new(),
+            extensions: Vec::new(),
+        };
+        let scene = Scene {
+            id: Identifier::new("empty-state-specimen"),
+            name: "EmptyState".to_owned(),
+            description: "fixture".to_owned(),
+            instances: vec![ComponentInstance {
+                component: Identifier::new("empty-state"),
+                bindings: vec![PropBinding {
+                    prop: Identifier::new("title"),
+                    value: Value::string("No projects yet"),
+                    description: None,
+                }],
+                caption: Some("fixture".to_owned()),
+                group: None,
+            }],
+            axes: vec![SceneAxis {
+                kind: SceneAxisKind::Size,
+                values: AxisValues::Named(
+                    values.iter().map(|v| Identifier::new(*v)).collect(),
+                ),
+                description: "fixture".to_owned(),
+            }],
+            layout: None,
+            tabs: None,
+            search: None,
+            preview_state: None,
+            parity: None,
+            captures: Vec::new(),
+        };
+        IrModel {
+            schema_version: IR_SCHEMA_VERSION,
+            shared_types: vec![empty_state_size],
+            components: vec![component],
+            conformance_vectors: Vec::new(),
+            scenes: vec![scene],
+            specimen_registry: None,
+        }
+    }
+
+    #[test]
+    fn empty_state_size_axis_accepts_default_and_compact() {
+        let model = empty_state_model_with_size_axis(&["default", "compact"]);
+        let findings = validate(&model);
+        assert!(
+            findings
+                .iter()
+                .all(|f| f.kind != FindingKind::InvalidReference),
+            "expected no invalid size axis refs: {findings:#?}"
+        );
+    }
+
+    #[test]
+    fn empty_state_size_axis_rejects_control_size_values() {
+        let model = empty_state_model_with_size_axis(&["xs", "default", "compact"]);
+        let findings = validate(&model);
+        assert!(
+            findings.iter().any(|f| {
+                f.kind == FindingKind::InvalidReference && f.identifier.contains("axis.size.xs")
+            }),
+            "control-size xs must be rejected on EmptyState scene axis: {findings:#?}"
+        );
     }
 }
