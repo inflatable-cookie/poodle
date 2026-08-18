@@ -49,6 +49,26 @@ function specimenSources(dir: string): string {
     .join("\n");
 }
 
+/** Visible example captions declared on SpecimenGroup, excluding loading branches. */
+function specimenGroupLabels(source: string): string[] {
+  const body = source
+    .split("\n")
+    .filter((line) => !line.includes("building scene"))
+    .join("\n");
+  const labels: string[] = [];
+
+  if (body.includes("examples as [label")) {
+    labels.push(...[...body.matchAll(/\["([^"]+)",/g)].map((match) => match[1]!));
+  }
+
+  for (const match of body.matchAll(/<SpecimenGroup[^>]*\slabel="([^"]+)"/g)) {
+    const label = match[1]!;
+    if (label !== "{label}") labels.push(label);
+  }
+
+  return labels;
+}
+
 describe("g15.016 specimen idiom convergence", () => {
   it("keeps dedicated registry mappings for borrowed pages", () => {
     expect(svelteRegistry["list-card-counter"]).toBe(ListCardCounterSpecimen);
@@ -88,6 +108,38 @@ describe("g15.016 specimen idiom convergence", () => {
       const reactSource = readFileSync(join(REACT_SPECIMENS, `${baseName}.tsx`), "utf8");
       expect(svelteSource).toContain("SpecimenGroup");
       expect(reactSource).toContain("SpecimenGroup");
+    }
+  });
+
+  it("keeps paired caption copy aligned on scoped routes", () => {
+    for (const [slug, baseName] of SCOPED_ROUTE_FILES) {
+      const svelteSource = readFileSync(join(SVELTE_SPECIMENS, `${baseName}.svelte`), "utf8");
+      const reactSource = readFileSync(join(REACT_SPECIMENS, `${baseName}.tsx`), "utf8");
+      expect(specimenGroupLabels(svelteSource), slug).toEqual(specimenGroupLabels(reactSource));
+    }
+  });
+
+  it("moves React audio axis evidence into SpecimenLayout tabs", () => {
+    const audioBases = [
+      "DragNumberFieldSpecimen",
+      "AudioMeterSpecimen",
+      "AudioSwitchSpecimen",
+      "EnvelopeEditorSpecimen",
+      "FaderSpecimen",
+      "GainReductionMeterSpecimen",
+      "KeyboardSpecimen",
+      "KnobSpecimen",
+      "ModMatrixGridSpecimen",
+      "ValueReadoutSpecimen",
+      "WaveformDisplaySpecimen",
+      "XYPadSpecimen",
+    ];
+    for (const baseName of audioBases) {
+      const reactSource = readFileSync(join(REACT_SPECIMENS, `${baseName}.tsx`), "utf8");
+      expect(reactSource).not.toContain("AudioAxes");
+      expect(reactSource).toContain("SpecimenLayout");
+      expect(reactSource).toContain("sizes={");
+      expect(reactSource).toContain("densities={");
     }
   });
 });

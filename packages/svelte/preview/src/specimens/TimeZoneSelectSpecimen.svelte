@@ -7,16 +7,18 @@
 </script>
 
 <SpecimenLayout>
-    <SpecimenGroup label="Default">
-    <TimeZoneSelect ariaLabel="Time zone" onValueChange={(value) => (zone = value)} />
-        {#if zone}<span class="poodle-specimen__value">{zone}</span>{/if}
+  <SpecimenGroup label="Default">
+    <div class="poodle-specimen__item">
+      <TimeZoneSelect ariaLabel="Time zone" onValueChange={(value) => (zone = value)} />
+      {#if zone}<span class="poodle-specimen__value">{zone}</span>{/if}
+    </div>
   </SpecimenGroup>
 
-        <SpecimenGroup label="Pre-selected">
+  <SpecimenGroup label="Pre-selected">
     <TimeZoneSelect defaultValue="America/New_York" ariaLabel="Pre-filled" />
   </SpecimenGroup>
 
-        <SpecimenGroup label="Disabled">
+  <SpecimenGroup label="Disabled">
     <TimeZoneSelect disabled ariaLabel="Disabled" />
   </SpecimenGroup>
 
@@ -30,6 +32,14 @@
 </SpecimenLayout>
 
 <style>
-    .poodle-specimen__item { display: flex; align-items: center; gap: 0.75rem; }
-  .poodle-specimen__value { font-size: 0.75rem; color: var(--poodle-color-text-secondary); }
+  .poodle-specimen__item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .poodle-specimen__value {
+    font-size: 0.75rem;
+    color: var(--poodle-color-text-secondary);
+  }
 </style>

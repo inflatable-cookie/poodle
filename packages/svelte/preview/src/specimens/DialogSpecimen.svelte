@@ -98,6 +98,7 @@
     <div class="poodle-form-full-width">
       <Checkbox id="dialog-private" label="Make this project private" />
     </div>
+  </div>
   {#snippet actions()}
     <Button variant="ghost" onClick={() => (formOpen = false)}>Cancel</Button>
     <Button onClick={() => (formOpen = false)}>Create project</Button>

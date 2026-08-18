@@ -7,20 +7,22 @@
 </script>
 
 <SpecimenLayout>
-    <SpecimenGroup label="Default">
-    <TriStateSwitch value={filter} ariaLabel="Filter mode" onValueChange={(value) => (filter = value)} />
-        <span class="poodle-specimen__value">{filter}</span>
+  <SpecimenGroup label="Default">
+    <div class="poodle-specimen__item">
+      <TriStateSwitch value={filter} ariaLabel="Filter mode" onValueChange={(value) => (filter = value)} />
+      <span class="poodle-specimen__value">{filter}</span>
+    </div>
   </SpecimenGroup>
 
-        <SpecimenGroup label="Custom labels">
+  <SpecimenGroup label="Custom labels">
     <TriStateSwitch options={{ excluded: "Hide", default: "All", included: "Show" }} ariaLabel="Visibility filter" />
   </SpecimenGroup>
 
-        <SpecimenGroup label="Custom colors">
+  <SpecimenGroup label="Custom colors">
     <TriStateSwitch value={filter} excludedColor="#ef4444" defaultColor="#64748b" includedColor="#22c55e" ariaLabel="Custom colors" onValueChange={(value) => (filter = value)} />
   </SpecimenGroup>
 
-        <SpecimenGroup label="Disabled">
+  <SpecimenGroup label="Disabled">
     <TriStateSwitch value="included" disabled ariaLabel="Disabled" />
   </SpecimenGroup>
 
@@ -34,6 +36,14 @@
 </SpecimenLayout>
 
 <style>
-    .poodle-specimen__item { display: flex; align-items: center; gap: 0.75rem; }
-  .poodle-specimen__value { font-size: 0.75rem; color: var(--poodle-color-text-secondary); }
+  .poodle-specimen__item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .poodle-specimen__value {
+    font-size: 0.75rem;
+    color: var(--poodle-color-text-secondary);
+  }
 </style>

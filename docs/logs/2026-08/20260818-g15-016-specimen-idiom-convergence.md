@@ -26,11 +26,26 @@ Twenty-nine paired web catalogue routes converged on preview-local `SpecimenGrou
 ## Files touched (high level)
 
 - Svelte/React specimens for all scoped routes
-- `packages/react/preview/src/gallery/specimens/AudioSpecimen.tsx` — removed forked caption helper; `AudioAxes` uses `SpecimenGroup`
+- `packages/react/preview/src/gallery/specimens/AudioSpecimen.tsx` — removed forked `AudioSpecimenGroup` and `AudioAxes`; kept page/row helpers
 - new: `ListCardCounterSpecimen`, `MetaItemSpecimen` (both runtimes)
 - registries: `registry.ts`, `specimen-map.ts`
 - contracts: `list-card-counter.md`, `meta-item.md` (specimen sections only)
 - evidence: `packages/svelte/preview/test/specimen-idiom-convergence.test.ts`
+- evidence: `test/parity/specimen-caption-parity.test.tsx`
+
+## Orchestrator review response (2026-08-18)
+
+### Blocker 1 — Svelte Dialog DOM regression
+- Fixed missing `</div>` for `.poodle-form-grid` in `DialogSpecimen.svelte`.
+
+### Blocker 2 — Inner example layout removed
+- Restored `poodle-specimen__item` flex rows in Svelte/React `TriStateSwitch`, `TimeInput`, and `TimeZoneSelect` specimens.
+
+### Blocker 3 — Paired caption acceptance not met
+- Removed React `AudioAxes` from Examples; all 12 audio React specimens now use `SpecimenLayout` `sizes`/`densities` tabs (matching Svelte).
+- Added missing React `AudioMeter` “Batched rendering” caption group.
+- Renamed React `MeterSurface` “Console strip” → “Live meter strip”; wrapped in `SpecimenLayout`.
+- Added source caption-copy parity + rendered Examples-tab parity tests for all 29 scoped routes.
 
 ## Validation
 
@@ -40,7 +55,8 @@ Twenty-nine paired web catalogue routes converged on preview-local `SpecimenGrou
 - `effigy ci:web` — pass
 - `effigy docs:check` — pass
 - `git diff --check origin/main...HEAD` — pass
-- focused: `vitest run test/specimen-idiom-convergence.test.ts` — pass
+- focused: `vitest run packages/svelte/preview/test/specimen-idiom-convergence.test.ts` — pass (5 tests)
+- focused: `vitest run test/parity/specimen-caption-parity.test.tsx` — pass (31 tests)
 
 ## Operator review (open)
 
