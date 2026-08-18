@@ -5,6 +5,7 @@
 
 // ── Structural ────────────────────────────────────────────
 pub(crate) mod scene_specimen;
+pub(crate) mod specimen_axes;
 pub(crate) mod specimen_layout;
 
 mod bx;
@@ -17,10 +18,10 @@ mod stack;
 mod surface;
 
 // ── Foundation ────────────────────────────────────────────
+mod avatar;
 mod icon;
 mod icon_provider;
 mod ui_presentation_provider;
-mod avatar;
 
 // ── Action ────────────────────────────────────────────────
 mod button;
@@ -68,8 +69,8 @@ mod code;
 mod color_picker;
 mod eyebrow;
 mod file_upload;
-mod meter;
 mod meta_item;
+mod meter;
 mod pill;
 mod progress;
 mod rating;
@@ -119,10 +120,10 @@ mod detail_section_group_specimen;
 mod detail_section_specimen;
 mod detail_shell;
 mod duration_input_specimen;
-mod empty_state;
 mod editable_list_specimen;
 mod embed_input_specimen;
 mod embed_preview_specimen;
+mod empty_state;
 mod error_boundary_specimen;
 mod field_set_specimen;
 mod filter_builder_specimen;
@@ -130,6 +131,7 @@ mod filter_toolbar_specimen;
 mod form_dialog_specimen;
 mod form_layout;
 mod form_shell;
+mod history_center_specimen;
 mod inline_list_section_specimen;
 mod inline_remediation_specimen;
 mod licence_activation;
@@ -145,11 +147,7 @@ mod media_browse_panel_specimen;
 mod media_picker_specimen;
 mod media_preview_specimen;
 mod media_thumbnail_specimen;
-mod history_center_specimen;
 mod message_center_specimen;
-mod settings_shell;
-mod update_center;
-mod update_status;
 mod meta_bar;
 mod metric_tile_specimen;
 mod model_catalogue_editor_specimen;
@@ -168,6 +166,7 @@ mod picker_shell_specimen;
 mod ref_select_specimen;
 mod relation_picker_specimen;
 mod selection_summary_specimen;
+mod settings_shell;
 mod sidebar_nav;
 mod split_view_specimen;
 mod table;
@@ -178,6 +177,8 @@ mod toast_stack_specimen;
 mod tool_call;
 mod tool_call_group;
 mod tree;
+mod update_center;
+mod update_status;
 mod validation_summary;
 mod video_player_specimen;
 
@@ -199,6 +200,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_render::audio_specimens::AudioSpecimen;
 
 /// Render a specimen card wrapper with title.
 pub fn specimen_card(title: &str, theme: &GpuiThemeProvider, content: impl IntoElement) -> Div {
@@ -303,14 +305,14 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "ui-presentation-provider" => specimen_card(
             "UiPresentationProvider",
             theme,
-            ui_presentation_provider::render(theme),
+            ui_presentation_provider::render(state, cx),
         ),
 
         // ── Action ──────────────────────────────────────────────
         "button" => specimen_card("Button", theme, button::render(state, cx)),
         "icon-button" => specimen_card("IconButton", theme, icon_button::render(state, cx)),
         "split-button" => specimen_card("SplitButton", theme, split_button::render(state, cx)),
-        "text" => specimen_card("Text", theme, text::render(theme)),
+        "text" => specimen_card("Text", theme, text::render(state, cx)),
         "text-input" => specimen_card("TextInput", theme, text_input::render(state, cx)),
         "text-link" => specimen_card("TextLink", theme, text_link::render(theme)),
         "token-input" => specimen_card("TokenInput", theme, token_input::render(state, cx)),
@@ -320,7 +322,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "password-requirements" => specimen_card(
             "PasswordRequirements",
             theme,
-            password_requirements::render(theme),
+            password_requirements::render(state, cx),
         ),
         "number-input" => specimen_card("NumberInput", theme, number_input::render(state, cx)),
         "code-input" => specimen_card("CodeInput", theme, code_input::render(state, cx)),
@@ -355,32 +357,81 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             agent_transcript::render(state, cx),
         ),
         "slider" => specimen_card("Slider", theme, slider::render(state, cx)),
-        "knob" => specimen_card("Knob", theme, audio_controls::knob(theme)),
-        "fader" => specimen_card("Fader", theme, audio_controls::fader(theme)),
-        "audio-meter" => specimen_card("AudioMeter", theme, audio_controls::audio_meter(theme)),
-        "value-readout" => {
-            specimen_card("ValueReadout", theme, audio_controls::value_readout(theme))
-        }
+        "knob" => specimen_card(
+            "Knob",
+            theme,
+            audio_controls::render(AudioSpecimen::Knob, "knob", state, cx),
+        ),
+        "fader" => specimen_card(
+            "Fader",
+            theme,
+            audio_controls::render(AudioSpecimen::Fader, "fader", state, cx),
+        ),
+        "audio-meter" => specimen_card(
+            "AudioMeter",
+            theme,
+            audio_controls::render(AudioSpecimen::AudioMeter, "audio-meter", state, cx),
+        ),
+        "value-readout" => specimen_card(
+            "ValueReadout",
+            theme,
+            audio_controls::render(AudioSpecimen::ValueReadout, "value-readout", state, cx),
+        ),
         "drag-number-field" => specimen_card(
             "DragNumberField",
             theme,
-            audio_controls::drag_number_field(theme),
+            audio_controls::render(
+                AudioSpecimen::DragNumberField,
+                "drag-number-field",
+                state,
+                cx,
+            ),
         ),
         "envelope-editor" => specimen_card(
             "EnvelopeEditor",
             theme,
-            audio_controls::envelope_editor(theme),
+            audio_controls::render(AudioSpecimen::EnvelopeEditor, "envelope-editor", state, cx),
         ),
-        "xy-pad" => specimen_card("XYPad", theme, audio_controls::xy_pad(theme)),
-        "audio-switch" => specimen_card("AudioSwitch", theme, audio_controls::audio_switch(theme)),
+        "xy-pad" => specimen_card(
+            "XYPad",
+            theme,
+            audio_controls::render(AudioSpecimen::XyPad, "xy-pad", state, cx),
+        ),
+        "audio-switch" => specimen_card(
+            "AudioSwitch",
+            theme,
+            audio_controls::render(AudioSpecimen::AudioSwitch, "audio-switch", state, cx),
+        ),
         "gain-reduction-meter" => specimen_card(
             "GainReductionMeter",
             theme,
-            audio_controls::gain_reduction_meter(theme),
+            audio_controls::render(
+                AudioSpecimen::GainReductionMeter,
+                "gain-reduction-meter",
+                state,
+                cx,
+            ),
         ),
-        "keyboard" => specimen_card("Keyboard", theme, audio_controls::keyboard(theme)),
-        "waveform-display" => specimen_card("WaveformDisplay", theme, audio_controls::waveform_display(theme)),
-        "mod-matrix-grid" => specimen_card("ModMatrixGrid", theme, audio_controls::mod_matrix_grid(theme)),
+        "keyboard" => specimen_card(
+            "Keyboard",
+            theme,
+            audio_controls::render(AudioSpecimen::Keyboard, "keyboard", state, cx),
+        ),
+        "waveform-display" => specimen_card(
+            "WaveformDisplay",
+            theme,
+            audio_controls::render(
+                AudioSpecimen::WaveformDisplay,
+                "waveform-display",
+                state,
+                cx,
+            ),
+        ),
+        "mod-matrix-grid" => specimen_card(
+            "ModMatrixGrid",
+            theme,
+            audio_controls::render(AudioSpecimen::ModMatrixGrid, "mod-matrix-grid", state, cx),
+        ),
         "range-slider" => specimen_card("RangeSlider", theme, range_slider::render(state, cx)),
 
         // ── Date/Time ───────────────────────────────────────────
@@ -411,10 +462,12 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         // ── Feedback ────────────────────────────────────────────
         "progress" => specimen_card("Progress", theme, progress::render(state, cx)),
         "pill" => specimen_card("Pill", theme, pill::render(state, cx)),
-        "status-indicator" => {
-            specimen_card("StatusIndicator", theme, status_indicator::render(theme))
-        }
-        "meter" => specimen_card("Meter", theme, meter::render(theme)),
+        "status-indicator" => specimen_card(
+            "StatusIndicator",
+            theme,
+            status_indicator::render(state, cx),
+        ),
+        "meter" => specimen_card("Meter", theme, meter::render(state, cx)),
         "meta-bar" => specimen_card("MetaBar", theme, meta_bar::render(theme)),
         "meta-item" => specimen_card("MetaItem", theme, meta_item::render(theme)),
         "rating" => specimen_card("Rating", theme, rating::render(state, cx)),
@@ -426,7 +479,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             remediation_banner::render(state, cx),
         ),
         "state-tile" => specimen_card("StateTile", theme, state_tile::render(theme)),
-        "eyebrow" => specimen_card("Eyebrow", theme, eyebrow::render(theme)),
+        "eyebrow" => specimen_card("Eyebrow", theme, eyebrow::render(state, cx)),
         "time-ago" => specimen_card("TimeAgo", theme, time_ago_specimen::render(theme)),
         "duration-input" => specimen_card(
             "DurationInput",
@@ -435,7 +488,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         ),
         "code" => specimen_card("Code", theme, code::render(state, cx)),
         "color-picker" => specimen_card("ColorPicker", theme, color_picker::render(state, cx)),
-        "file-upload" => specimen_card("FileUpload", theme, file_upload::render(theme)),
+        "file-upload" => specimen_card("FileUpload", theme, file_upload::render(state, cx)),
 
         // ── Overlay ─────────────────────────────────────────────
         "accordion" => specimen_card("Accordion", theme, accordion::render(state, cx)),
@@ -456,14 +509,14 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "menubar" => specimen_card("Menubar", theme, menubar::render(state, cx)),
 
         // ── Composites ──────────────────────────────────────────
-        "table" => specimen_card("Table", theme, table::render(theme)),
+        "table" => specimen_card("Table", theme, table::render(state, cx)),
         "data-table" => specimen_card("DataTable", theme, data_table::render(state, cx)),
         "list-card" => specimen_card("ListCard", theme, list_card::render(state, cx)),
         "list-card-counter" => {
             specimen_card("ListCardCounter", theme, list_card_counter::render(theme))
         }
         "list-grid" => specimen_card("ListGrid", theme, list_grid::render(state, cx)),
-        "nav-card" => specimen_card("NavCard", theme, nav_card::render(theme)),
+        "nav-card" => specimen_card("NavCard", theme, nav_card::render(state, cx)),
         "pagination" => specimen_card("Pagination", theme, pagination::render(state, cx)),
         "form-layout" => specimen_card("FormLayout", theme, form_layout::render(state, cx)),
         "form-shell" => specimen_card("FormShell", theme, form_shell::render(state, cx)),
@@ -473,18 +526,20 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             validation_summary::render(state, cx),
         ),
         "detail-shell" => specimen_card("DetailShell", theme, detail_shell::render(theme)),
-        "detail-item" => specimen_card("DetailItem", theme, detail_item_specimen::render(theme)),
+        "detail-item" => {
+            specimen_card("DetailItem", theme, detail_item_specimen::render(state, cx))
+        }
         "detail-section" => specimen_card(
             "DetailSection",
             theme,
-            detail_section_specimen::render(theme),
+            detail_section_specimen::render(state, cx),
         ),
         "detail-section-group" => specimen_card(
             "DetailSectionGroup",
             theme,
-            detail_section_group_specimen::render(theme),
+            detail_section_group_specimen::render(state, cx),
         ),
-        "card" => specimen_card("Card", theme, card_specimen::render(theme)),
+        "card" => specimen_card("Card", theme, card_specimen::render(state, cx)),
         "card-radio-group" => specimen_card(
             "CardRadioGroup",
             theme,
@@ -493,7 +548,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "card-toggle-group" => specimen_card(
             "CardToggleGroup",
             theme,
-            card_toggle_group_specimen::render(theme),
+            card_toggle_group_specimen::render(state, cx),
         ),
         "picker-shell" => specimen_card("PickerShell", theme, picker_shell_specimen::render(theme)),
         "relation-picker" => specimen_card(
@@ -506,7 +561,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             theme,
             selection_summary_specimen::render(state, cx),
         ),
-        "sidebar-nav" => specimen_card("SidebarNav", theme, sidebar_nav::render(theme)),
+        "sidebar-nav" => specimen_card("SidebarNav", theme, sidebar_nav::render(state, cx)),
         "tree" => specimen_card("Tree", theme, tree::render(state, cx)),
         "filter-builder" => specimen_card(
             "FilterBuilder",
@@ -558,19 +613,21 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         ),
         "agent-subagent" => {
             specimen_card("AgentSubagent", theme, agent_subagent::render(state, cx))
-        },
+        }
         "changed-files" => specimen_card("ChangedFiles", theme, changed_files::render(state, cx)),
         "tool-call" => specimen_card("ToolCall", theme, tool_call::render(state, cx)),
         "tool-call-group" => {
             specimen_card("ToolCallGroup", theme, tool_call_group::render(state, cx))
-        },
+        }
         "theme-select" => specimen_card(
             "ThemeSelect",
             theme,
             theme_select_specimen::render(state, cx),
         ),
         "order-by" => specimen_card("OrderBy", theme, order_by_specimen::render(state, cx)),
-        "page-header" => specimen_card("PageHeader", theme, page_header_specimen::render(theme)),
+        "page-header" => {
+            specimen_card("PageHeader", theme, page_header_specimen::render(state, cx))
+        }
         "breadcrumbs" => specimen_card(
             "Breadcrumbs",
             theme,
@@ -582,21 +639,27 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             theme,
             pagination_summary_specimen::render(theme),
         ),
-        "metric-tile" => specimen_card("MetricTile", theme, metric_tile_specimen::render(theme)),
+        "metric-tile" => {
+            specimen_card("MetricTile", theme, metric_tile_specimen::render(state, cx))
+        }
         "empty-state" => specimen_card("EmptyState", theme, empty_state::render(state, cx)),
         "error-boundary" => specimen_card(
             "ErrorBoundary",
             theme,
             error_boundary_specimen::render(theme),
         ),
-        "toast-stack" => specimen_card("ToastStack", theme, toast_stack_specimen::render(theme)),
-        "toast-host" => specimen_card("ToastHost", theme, toast_host::render(theme)),
+        "toast-stack" => {
+            specimen_card("ToastStack", theme, toast_stack_specimen::render(state, cx))
+        }
+        "toast-host" => specimen_card("ToastHost", theme, toast_host::render(state, cx)),
         "confirm-action" => specimen_card(
             "ConfirmAction",
             theme,
             confirm_action_specimen::render(state, cx),
         ),
-        "form-dialog" => specimen_card("FormDialog", theme, form_dialog_specimen::render(theme)),
+        "form-dialog" => {
+            specimen_card("FormDialog", theme, form_dialog_specimen::render(state, cx))
+        }
         "inline-list-section" => specimen_card(
             "InlineListSection",
             theme,
@@ -611,29 +674,47 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "filter-toolbar" => specimen_card(
             "FilterToolbar",
             theme,
-            filter_toolbar_specimen::render(theme),
+            filter_toolbar_specimen::render(state, cx),
         ),
         "bulk-action-bar" => specimen_card(
             "BulkActionBar",
             theme,
-            bulk_action_bar_specimen::render(theme),
+            bulk_action_bar_specimen::render(state, cx),
         ),
         // inline-editable-field was merged into EditableLabel
-        "log-list" => specimen_card("LogList", theme, log_list_specimen::render(theme)),
-        "editable-list" => {
-            specimen_card("EditableList", theme, editable_list_specimen::render(theme))
+        "log-list" => specimen_card("LogList", theme, log_list_specimen::render(state, cx)),
+        "editable-list" => specimen_card(
+            "EditableList",
+            theme,
+            editable_list_specimen::render(state, cx),
+        ),
+        "embed-input" => {
+            specimen_card("EmbedInput", theme, embed_input_specimen::render(state, cx))
         }
-        "embed-input" => specimen_card("EmbedInput", theme, embed_input_specimen::render(theme)),
         "embed-preview" => {
             specimen_card("EmbedPreview", theme, embed_preview_specimen::render(theme))
         }
         // autonomous-list was renamed to editable-list
-        "audio-player" => specimen_card("AudioPlayer", theme, audio_player_specimen::render(theme)),
-        "video-player" => specimen_card("VideoPlayer", theme, video_player_specimen::render(theme)),
-        "media-picker" => specimen_card("MediaPicker", theme, media_picker_specimen::render(theme)),
-        "media-preview" => {
-            specimen_card("MediaPreview", theme, media_preview_specimen::render(theme))
-        }
+        "audio-player" => specimen_card(
+            "AudioPlayer",
+            theme,
+            audio_player_specimen::render(state, cx),
+        ),
+        "video-player" => specimen_card(
+            "VideoPlayer",
+            theme,
+            video_player_specimen::render(state, cx),
+        ),
+        "media-picker" => specimen_card(
+            "MediaPicker",
+            theme,
+            media_picker_specimen::render(state, cx),
+        ),
+        "media-preview" => specimen_card(
+            "MediaPreview",
+            theme,
+            media_preview_specimen::render(state, cx),
+        ),
         "media-thumbnail" => specimen_card(
             "MediaThumbnail",
             theme,
@@ -642,23 +723,17 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "media-browse-panel" => specimen_card(
             "MediaBrowsePanel",
             theme,
-            media_browse_panel_specimen::render(theme),
+            media_browse_panel_specimen::render(state, cx),
         ),
         "licence-activation" => specimen_card(
             "LicenceActivation",
             theme,
             licence_activation::render(state, cx),
         ),
-        "licence-seats" => specimen_card(
-            "LicenceSeats",
-            theme,
-            licence_seats::render(state, cx),
-        ),
-        "licence-status" => specimen_card(
-            "LicenceStatus",
-            theme,
-            licence_status::render(theme),
-        ),
+        "licence-seats" => specimen_card("LicenceSeats", theme, licence_seats::render(state, cx)),
+        "licence-status" => {
+            specimen_card("LicenceStatus", theme, licence_status::render(state, cx))
+        }
         "list-container" => specimen_card(
             "ListContainer",
             theme,
@@ -669,7 +744,11 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             theme,
             markdown_editor_specimen::render(state, cx),
         ),
-        "block-editor" => specimen_card("BlockEditor", theme, block_editor_specimen::render(theme)),
+        "block-editor" => specimen_card(
+            "BlockEditor",
+            theme,
+            block_editor_specimen::render(state, cx),
+        ),
 
         // ── Layout Helpers ─────────────────────────────────────
         "collapse-toggle" => {
@@ -679,7 +758,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "resize-handle" => specimen_card("ResizeHandle", theme, resize_handle::render(theme)),
 
         // ── App Shell ───────────────────────────────────────────
-        "app-header" => specimen_card("AppHeader", theme, app_header::render(theme)),
+        "app-header" => specimen_card("AppHeader", theme, app_header::render(state, cx)),
         "command-palette" => {
             specimen_card("CommandPalette", theme, command_palette::render(state, cx))
         }
@@ -701,21 +780,11 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             theme,
             message_center_specimen::render(state, cx),
         ),
-        "update-status" => specimen_card(
-            "UpdateStatus",
-            theme,
-            update_status::render(state, cx),
-        ),
-        "update-center" => specimen_card(
-            "UpdateCenter",
-            theme,
-            update_center::render(state, cx),
-        ),
-        "settings-shell" => specimen_card(
-            "SettingsShell",
-            theme,
-            settings_shell::render(state, cx),
-        ),
+        "update-status" => specimen_card("UpdateStatus", theme, update_status::render(state, cx)),
+        "update-center" => specimen_card("UpdateCenter", theme, update_center::render(state, cx)),
+        "settings-shell" => {
+            specimen_card("SettingsShell", theme, settings_shell::render(state, cx))
+        }
 
         // Fallback
         _ => missing_specimen(slug, theme),
