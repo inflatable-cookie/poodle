@@ -20,7 +20,8 @@ v0.2.0 release-baseline generation.
   curation, native-probe, and screen-clear review children remain. `g15.015`
   through `g15.017`, `g15.019`, and `g15.034` are complete. PR #41 closed the
   two returned axis-domain gaps and hardened the specimen substrate that
-  admitted them.
+  admitted them. `g15.020` is ready as the first bounded overloaded-Examples
+  curation child.
   Certification
   `g15.013` remains the final gate after the specimen program and `g15.012`.
   Jetstream remains deferred.

@@ -70,7 +70,7 @@ and status advance are the orchestrator's.
 15. [018 — Overloaded Examples curation](018-overloaded-examples-curation.md) — non-dispatchable parent for exact children `020`–`025`
 16. [019 — GPUI specimen structure](019-gpui-specimen-structure.md) — complete; PR #40 landed the 74-axis/6-caption scope and returned two honest axis-domain gaps
 17. [034 — Component-specific specimen axis domains](034-component-specific-specimen-axis-domains.md) — complete; PR #41 closed EmptyState/Icon domains and hardened axis evidence
-18. [020–025 — Overloaded Examples family children](020-curate-model-connection-licence.md) — exact 53-page partition; follow each child's dependencies after `034`
+18. [020–025 — Overloaded Examples family children](020-curate-model-connection-licence.md) — `020` ready; exact 53-page partition continues through the remaining children
 19. [026 — Headless native specimen probe](026-native-specimen-probe.md) — native completion lane for `011`; after `034`
 20. [027 — Screen-clear human review](027-screen-clear-human-review.md) — non-dispatchable parent for exact children `028`–`033`
 21. [028–033 — Screen-clear family review children](028-review-foundation-controls-entry.md) — exact 56-page partition; after `026`
@@ -105,7 +105,7 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-Readiness-review `g15.020` for the next worker dispatch. `g15.011` remains
+Dispatch ready `g15.020` for the next worker. `g15.011` remains
 partial until `g15.026` and all six screen-clear review children
 (`g15.028`–`g15.033`) land; defect-led curation proceeds through
 `g15.015`–`g15.025`. `g15.012` follows the completed audit. `g15.013` stays

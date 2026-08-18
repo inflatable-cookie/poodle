@@ -16,9 +16,9 @@ Updated: 2026-08-19
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: readiness-review `g15.020` and continue the bounded specimen
-    program. PR #41 completed the operator-approved clean migration for
-    EmptyState, Icon, and explicit ordered specimen domains.
+  - Next: dispatch ready `g15.020`, then continue the bounded specimen program.
+    PR #41 completed the operator-approved clean migration for EmptyState,
+    Icon, and explicit ordered specimen domains.
     `g15.015` restored all 52 scoped captions and added the missing
     Svelte-preview type gate; `g15.016` converged 29 paired routes on one
     caption idiom and added two dedicated pages. The web release roster reads
