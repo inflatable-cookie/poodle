@@ -2,7 +2,7 @@
 
 Status: **planned** — orchestrator review required before dispatch
 Consumes: `g15.011` partial screening baseline
-Depends on: `g15.017` (axis placement)
+Depends on: `g15.017` (web axis target)
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
 (Cross-Runtime Agreement), `../../contracts/001-working-rules.md`
 (Runtime Parity Authority)
@@ -28,6 +28,9 @@ runtime-owned; the evidence is not.
 ## Scope
 
 - the GPUI specimen modules named in the audit's GPUI columns
+- `poodle_render::audio_specimens`: split examples, sizes, and densities in the
+  same migration that adopts those panes; update direct consumers without a
+  compatibility twin
 - `specimen_layout` adoption where the web page teaches an axis
 - Jetstream stays program-deferred and out of scope
 
@@ -60,8 +63,9 @@ runtime-owned; the evidence is not.
 ## Writable Scope
 
 - `packages/gpui/preview/src/specimens/*`
-- `packages/render/src/audio_specimens.rs`, if `g15.017` has not already split
-  its axis groups
+- `packages/render/src/audio_specimens.rs` and the direct GPUI/Jetstream
+  compile consumers required by its breaking internal shape migration;
+  Jetstream receives no new parity work
 - one batch log
 
 ## Validation

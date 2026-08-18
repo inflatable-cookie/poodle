@@ -1,70 +1,117 @@
-# g15.017 — Specimen Axis Placement and Evidence
+# g15.017 — Web Specimen Axis Placement and Evidence
 
-Status: **planned** — orchestrator review required before dispatch
+Status: **ready** — exact 24-route paired-web scope approved
 Consumes: `g15.011` partial screening baseline
+Depends on: `g15.016` (specimen idiom convergence)
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
 (Axis Eligibility), `../../contracts/001-working-rules.md`
 
 ## Outcome
 
-Size and density evidence lives in the tabs that own it, appears wherever the
-component actually takes the prop, and is absent where it does not.
+Every web catalogue page shows `Sizes` and `Densities` exactly when the
+component takes that public prop, and every visible axis tab contains one
+representative example per step.
 
-`g15.011` measured eligibility from the component props: 126 components take
-`size`, 128 take `density`. Three things disagree with that today.
+The audit found 17 missing size axes, 18 missing density axes, and five pages
+with spurious tabs. PR #38 then completed the twelve React audio layouts and
+gave `ListCardCounter` a dedicated page, removing one spurious case. This card
+starts from that merged state. It does not redo the reviewed audio pages.
 
-- The audio family's twelve components put their full size **and** density
-  matrices in the main view. React has no axis tabs at all for them, and the
-  native pages fold `axis_groups` into the page body. This is the specific
-  thing the operator asked not to happen.
-- A set of components take an axis but their page shows no evidence for it —
-  the overlay family, the licence and update family, and others named in the
-  audit.
-- A few pages advertise an axis tab for a component with no such prop.
+Native audio separation and GPUI pane adoption move together in `g15.019`.
+Splitting their shared return shape here would leave a compatibility bridge or
+a half-migrated consumer, both worse than one bounded native migration.
 
-## Scope
+## Exact Scope
 
-- the twelve audio components in React and `poodle-render`'s
-  `audio_specimens`
-- the components listed under **missing axis evidence** in the audit
-- the components listed under **spurious axis tab**
-- `MeterSurface`, the one page whose advertised axis tabs render empty
+Twenty paired pages are missing eligible evidence:
+
+- **Both size and density (15):** `ConfirmAction`, `SplitView`, `ToastHost`,
+  `AlertDialog`, `Dialog`, `Drawer`, `FormDialog`, `BlockEditor`, `LogList`,
+  `VideoPlayer`, `LicenceActivation`, `LicenceSeats`, `LicenceStatus`,
+  `UpdateCenter`, and `UpdateStatus`.
+- **Size only (2):** `Eyebrow` and `Text`.
+- **Density only (3):** `IconButton`, `Icon`, and
+  `UiPresentationProvider`. `IconButton` and `Icon` keep their existing size
+  evidence.
+
+Four paired pages advertise an ineligible axis:
+
+- `Avatar`: keep `Sizes`; remove `Densities` from the authored scene and make
+  both web scene renderers obey the scene's declared tab set.
+- `Tooltip`: remove both axis tabs. Its current matrices vary the child
+  `Button`, not `Tooltip`.
+- `PickerShell`: remove `Densities`; presentation-provider density is not a
+  `PickerShell` prop.
+- `MeterSurface`: remove both empty axis tabs.
+
+The twelve audio pages corrected in PR #38 are validation-only:
+`DragNumberField`, `AudioMeter`, `AudioSwitch`, `EnvelopeEditor`, `Fader`,
+`GainReductionMeter`, `Keyboard`, `Knob`, `ModMatrixGrid`, `ValueReadout`,
+`WaveformDisplay`, and `XYPad`.
 
 ## Goals
 
-- [ ] Axis matrices appear only in `Sizes` and `Densities`, never in
-      `Examples`.
-- [ ] React's audio pages use `SpecimenLayout` like every other page.
-- [ ] `poodle_render::audio_specimens` separates its axis groups from its
-      example groups so the native shells can place them in panes.
-- [ ] A page shows an axis tab exactly when its component takes that prop.
-- [ ] Axis panes show one representative example per step. The three-per-size
-      sweeps (`RangeSlider`, and others named in the audit) collapse to one.
+- [ ] Add one representative Svelte and React example for every missing axis
+      step without expanding the `Examples` pane.
+- [ ] Remove the four remaining spurious axis surfaces without deleting useful
+      example content.
+- [ ] Make preview-local `SpecimenLayout` incapable of advertising an empty
+      axis tab: a renderer must exist, and `showSizes` / `showDensities` may
+      narrow visibility but may not force an empty pane.
+- [ ] Make the retained authored-scene renderers respect each scene's declared
+      `tabs`; update the Avatar source model and regenerate, never hand-edit
+      generated artifacts.
+- [ ] Keep paired tab presence, ordering, representative state, and accessible
+      labels aligned between Svelte and React.
 
 ## Acceptance
 
-- [ ] A live sweep shows no `Examples` pane containing a full size or density
-      sweep.
-- [ ] Every advertised axis tab renders content.
-- [ ] Axis-tab presence matches prop eligibility for all 175 entries.
-- [ ] Svelte, React, and GPUI agree on which axes each page teaches.
-- [ ] **Operator review of the changed pages in the live Svelte and React
+- [ ] A complete 175-route web census reports `Sizes` iff the component takes
+      `size`, and `Densities` iff it takes `density`, in both runtimes.
+- [ ] Every advertised axis tab renders visible content; no callback-less
+      `SpecimenLayout` produces an empty tab.
+- [ ] Each axis pane contains exactly one representative per step: five sizes
+      and three densities. No prop cross-product enters an axis pane.
+- [ ] The twelve reviewed audio pages remain in `SpecimenLayout`, with their
+      matrices outside `Examples` and paired across Svelte and React.
+- [ ] Focused evidence locks helper behaviour, the 24 corrected route
+      decisions, authored-scene tab projection, and paired tab parity.
+- [ ] No public package API, component behaviour, contract semantics, example
+      curation, or native specimen changes.
+- [ ] **Operator review of the 24 changed routes in the live Svelte and React
       previews before this card is called complete.** Unreviewed pages remain
       an explicit PR item.
 
 ## Stop Conditions
 
-- Axis eligibility becomes a generated table any runtime imports. It is a
-  property of the component's props, read at authoring time.
-- The audio work turns into a rewrite of the audio examples themselves.
+- An axis example exposes a component API or contract mismatch. Return the
+  finding instead of changing the component inside this card.
+- The work turns into shortening or rewriting `Examples`; that belongs to
+  `g15.020`–`g15.025`.
+- The worker needs to change `poodle-render`, GPUI, or Jetstream. Native axis
+  separation and adoption belong together in `g15.019`.
+- Axis eligibility becomes data imported by a runtime. Test-time derivation or
+  census evidence is allowed; production authority is not.
 
 ## Writable Scope
 
-- audio specimens in the React gallery and `packages/render/src/audio_specimens.rs`
-- the specimen files named in the audit's axis sections
+- paired Svelte and React specimen files for the exact 24 changed routes
+- preview-local Svelte and React `SpecimenLayout` and `SceneSpecimen` helpers
+- the authored Avatar specimen model, its fixture, and generated specimen
+  outputs produced by the repository generator
+- focused preview/parity tests or a bounded source/live census
 - one batch log
 
 ## Validation
 
-- focused preview tests, `effigy check:svelte`, `effigy react:build`,
-  `effigy check:gpui`, `effigy docs:check`, `git diff --check`
+- focused helper, scene, and paired axis evidence; full 175-route web census
+- `effigy ir:build`, `effigy ir:check` when the authored scene changes
+- `effigy check:svelte`, `effigy react:build`, `effigy catalogue:check`,
+  `effigy ci:web`, `effigy docs:check`
+- live paired review of the 24 changed routes
+- `git diff --check origin/main...HEAD`
+
+## Continuation
+
+After merge, advance to `g15.019` for the native axis/caption structure lane.
+Do not absorb overloaded-Examples curation into this worker run.

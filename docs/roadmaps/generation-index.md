@@ -7,7 +7,7 @@ Updated: 2026-08-18
 - `g15`
   - Status: active — `g15.001`–`g15.010` and `g15.014`–`g15.016`
     complete; `g15.011` partial with bounded continuation cards; `g15.017`
-    next;
+    ready to dispatch;
     `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `033`
@@ -17,12 +17,13 @@ Updated: 2026-08-18
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: re-baseline and ready `g15.017`, then continue the bounded specimen
+  - Next: dispatch `g15.017`, then continue the bounded specimen
     program. `g15.015` restored all 52 scoped captions and added the missing
     Svelte-preview type gate; `g15.016` converged 29 paired routes on one
-    caption idiom and added two dedicated pages. The web release roster reads 175/175 focused
-    evidence in both Svelte and React, the native implementation/specimen
-    closures are landed, and the independent `bun audit` advisory is closed.
+    caption idiom and added two dedicated pages. The web release roster reads
+    175/175 focused evidence in both Svelte and React, the native
+    implementation/specimen closures are landed, and the independent
+    `bun audit` advisory is closed.
     `g15.012` follows the completed human-centred audit; `g15.013` remains the
     final certification gate.
 
