@@ -1634,22 +1634,31 @@ mod tests {
         );
     }
 
-    /// Density moves spacing, not the control box — so the density steps stay
-    /// distinguishable from each other without borrowing the size ladder.
+    /// Density moves spacing, not the control box. The fader's rail cross-axis
+    /// resolves to 4 / 6 / 8 px across compact / default / comfortable, so this
+    /// reads the descriptor the requested density actually decides — a node
+    /// count would pass even if the density were dropped on the way through.
+    ///
+    /// The rail is the first child of `fader-root` (`crate::audio::fader`); if
+    /// that ordering changes this fails loudly rather than silently weakening.
     #[test]
     fn the_requested_density_reaches_the_control() {
-        let counts: Vec<usize> = [
-            ControlDensity::Compact,
-            ControlDensity::Default,
-            ControlDensity::Comfortable,
-        ]
-        .into_iter()
-        .map(|density| node_count(&AudioSpecimen::Fader.density(density, &theme())))
-        .collect();
+        for (density, expected) in [
+            (ControlDensity::Compact, 4.0_f32),
+            (ControlDensity::Default, 6.0),
+            (ControlDensity::Comfortable, 8.0),
+        ] {
+            let fader = AudioSpecimen::Fader.density(density, &theme());
+            assert_eq!(fader.id.as_deref(), Some("fader-root"));
 
-        assert!(
-            counts.iter().all(|count| *count > 0),
-            "fader density steps rendered nothing: {counts:?}"
-        );
+            let rail = fader.children.first().expect("fader rail");
+            match rail.style.descriptor.layout.width {
+                LayoutSizing::Fixed(px) => assert_eq!(
+                    px, expected,
+                    "fader rail at {density:?} is {px}px, not {expected}px"
+                ),
+                other => panic!("fader rail width is {other:?}, not a fixed box"),
+            }
+        }
     }
 }
