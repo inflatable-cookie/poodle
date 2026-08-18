@@ -3,6 +3,7 @@
 Date: 2026-08-18
 Branch: `t3code/specimen-idiom-convergence`
 Card: `docs/roadmaps/g15/016-specimen-idiom-convergence.md`
+Status: complete — PR #38 merged as `f84b1c65`
 
 ## Scope delivered
 
@@ -63,9 +64,10 @@ Twenty-nine paired web catalogue routes converged on preview-local `SpecimenGrou
 - focused: `vitest run packages/svelte/preview/test/specimen-idiom-convergence.test.ts` — pass (5 tests)
 - focused: `vitest run test/parity/specimen-caption-parity.test.tsx` — pass (31 tests)
 
-## Operator review (open)
+## Operator review (complete)
 
-Live paired caption review requested for these 29 routes:
+The operator reviewed the paired Svelte and React previews for all 29 routes
+and accepted the result before merge:
 
 1. `#components/split-button`
 2. `#components/tri-state-switch`

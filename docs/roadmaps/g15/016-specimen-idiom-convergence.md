@@ -1,6 +1,6 @@
 # g15.016 — Specimen Idiom Convergence
 
-Status: **ready** — exact 29-page web scope and evidence approved
+Status: **complete** — PR #38 merged as `f84b1c65`; operator live review accepted
 Consumes: `g15.011` partial screening baseline
 Depends on: `g15.015` (caption integrity)
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
@@ -46,37 +46,37 @@ The React `AudioSpecimenPage`, row, and axis helpers may remain until
 
 ## Goals
 
-- [ ] Every web specimen page captions its examples through `SpecimenGroup`.
-- [ ] The 27 divergent or missing-caption pages converge on it. Dense
+- [x] Every web specimen page captions its examples through `SpecimenGroup`.
+- [x] The 27 divergent or missing-caption pages converge on it. Dense
       renderer-owned composition may stay; the caption mechanism does not
       fork.
-- [ ] `ListCardCounter` and `MetaItem` get their own pages that teach their own
+- [x] `ListCardCounter` and `MetaItem` get their own pages that teach their own
       component.
-- [ ] Svelte and React structure and copy agree page for page.
-- [ ] The `ListCardCounter` page teaches the component in its intended
+- [x] Svelte and React structure and copy agree page for page.
+- [x] The `ListCardCounter` page teaches the component in its intended
       `ListCard` footer context: static/tooltip counters and a wired linked
       counter. The `MetaItem` page teaches labelled, unlabelled/rich, and
       interactive child content with the interaction wired.
-- [ ] Reconcile the two component contracts' specimen sections with those
+- [x] Reconcile the two component contracts' specimen sections with those
       dedicated pages. This is documentation alignment, not a public component
       API or semantic change.
 
 ## Acceptance
 
-- [ ] A source census reports no remaining caption use of bare `Eyebrow`,
+- [x] A source census reports no remaining caption use of bare `Eyebrow`,
       direct `<section><h3>`, or `AudioSpecimenGroup` outside the ordinary
       `SpecimenGroup` helper. `Eyebrow` examples remain allowed as subject
       content.
-- [ ] A live sweep reports zero blank captions across all 175 web catalogue
+- [x] A live sweep reports zero blank captions across all 175 web catalogue
       routes and one visible caption shell on each of the 29 scoped routes.
-- [ ] None of the 29 scoped routes has a different caption count or different
+- [x] None of the 29 scoped routes has a different caption count or different
       caption copy between Svelte and React.
-- [ ] `ListCardCounter` and `MetaItem` pages name and teach themselves.
-- [ ] Focused regression evidence locks the idiom census and the two dedicated
+- [x] `ListCardCounter` and `MetaItem` pages name and teach themselves.
+- [x] Focused regression evidence locks the idiom census and the two dedicated
       registry mappings.
-- [ ] No package export, component API, component behaviour, or contract
+- [x] No package export, component API, component behaviour, or contract
       semantics change.
-- [ ] **Operator review of the changed pages in the live Svelte and React
+- [x] **Operator review of the changed pages in the live Svelte and React
       previews before this card is called complete.** Unreviewed pages remain
       an explicit PR item.
 
