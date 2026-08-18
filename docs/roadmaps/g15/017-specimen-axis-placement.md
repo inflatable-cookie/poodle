@@ -1,6 +1,7 @@
 # g15.017 — Web Specimen Axis Placement and Evidence
 
-Status: **ready** — exact 24-route paired-web scope approved
+Status: **merged, awaiting operator review** — PR #39 merged at `c2f16961`;
+live paired review remains before completion
 Consumes: `g15.011` partial screening baseline
 Depends on: `g15.016` (specimen idiom convergence)
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
@@ -51,32 +52,32 @@ The twelve audio pages corrected in PR #38 are validation-only:
 
 ## Goals
 
-- [ ] Add one representative Svelte and React example for every missing axis
+- [x] Add one representative Svelte and React example for every missing axis
       step without expanding the `Examples` pane.
-- [ ] Remove the four remaining spurious axis surfaces without deleting useful
+- [x] Remove the four remaining spurious axis surfaces without deleting useful
       example content.
-- [ ] Make preview-local `SpecimenLayout` incapable of advertising an empty
+- [x] Make preview-local `SpecimenLayout` incapable of advertising an empty
       axis tab: a renderer must exist, and `showSizes` / `showDensities` may
       narrow visibility but may not force an empty pane.
-- [ ] Make the retained authored-scene renderers respect each scene's declared
+- [x] Make the retained authored-scene renderers respect each scene's declared
       `tabs`; update the Avatar source model and regenerate, never hand-edit
       generated artifacts.
-- [ ] Keep paired tab presence, ordering, representative state, and accessible
+- [x] Keep paired tab presence, ordering, representative state, and accessible
       labels aligned between Svelte and React.
 
 ## Acceptance
 
-- [ ] A complete 175-route web census reports `Sizes` iff the component takes
+- [x] A complete 175-route web census reports `Sizes` iff the component takes
       `size`, and `Densities` iff it takes `density`, in both runtimes.
-- [ ] Every advertised axis tab renders visible content; no callback-less
+- [x] Every advertised axis tab renders visible content; no callback-less
       `SpecimenLayout` produces an empty tab.
-- [ ] Each axis pane contains exactly one representative per step: five sizes
+- [x] Each axis pane contains exactly one representative per step: five sizes
       and three densities. No prop cross-product enters an axis pane.
-- [ ] The twelve reviewed audio pages remain in `SpecimenLayout`, with their
+- [x] The twelve reviewed audio pages remain in `SpecimenLayout`, with their
       matrices outside `Examples` and paired across Svelte and React.
-- [ ] Focused evidence locks helper behaviour, the 24 corrected route
+- [x] Focused evidence locks helper behaviour, the 24 corrected route
       decisions, authored-scene tab projection, and paired tab parity.
-- [ ] No public package API, component behaviour, contract semantics, example
+- [x] No public package API, component behaviour, contract semantics, example
       curation, or native specimen changes.
 - [ ] **Operator review of the 24 changed routes in the live Svelte and React
       previews before this card is called complete.** Unreviewed pages remain
