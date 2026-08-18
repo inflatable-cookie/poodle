@@ -1,7 +1,7 @@
 # g15 — Human-Centred Specimen Catalogue Audit
 
 Status: complete — measured by `g15.011`
-Date: 2026-08-17
+Date: 2026-08-18 (revision 2; first pass 2026-08-17)
 Card: `docs/roadmaps/g15/011-specimen-catalogue-audit.md`
 Handoff: `docs/handoffs/20260817-214451-g15-011-specimen-catalogue-audit.md`
 Governing refs: `release-baseline-roster.md`, `specimen-plan-outline.md`,
@@ -19,31 +19,47 @@ entry is omitted for having a missing or unusable runtime page.
 The audit reads specimens as documentation. A green board does not make a page
 useful, and a page that looks plausible in source is not proof it renders.
 
-## How It Was Measured
+## What Was Measured, And How
 
-Four passes, each mechanical and reproducible:
+**Svelte and React are measured live.** Every one of the 175 pages was loaded
+in the running preview for that runtime and probed for the four things the
+carried rubric asks about:
 
-1. **Inventory.** The three runtime specimen maps resolved to files:
-   `packages/svelte/preview/src/specimens/registry.ts`,
-   `packages/react/preview/src/gallery/specimen-map.ts`, and the
-   `render_single_specimen` dispatch in
-   `packages/gpui/preview/src/specimens/mod.rs`.
-2. **Axis eligibility.** Whether each component's Svelte implementation
-   actually takes `size` and `density`, read from its `$props()` block, then
-   compared with what its pages advertise. 126 components take `size`; 128 take
-   `density`.
-3. **Live page sweep.** Every one of the 175 pages loaded in the running Svelte
-   preview, with the `Sizes` and `Densities` tabs opened, recording what
-   rendered.
-4. **Live caption sweep.** Every page's example captions read from the DOM
-   across all four caption idioms the catalogue uses, so a caption is counted
-   when a reader can see it and not when the source merely contains one.
+| Signal | Method |
+| --- | --- |
+| renders | page loads, is not the "specimen not yet available" placeholder, and its Examples pane has height, text, or controls |
+| captions | every caption idiom read from the DOM — `SpecimenGroup`, bare `<Eyebrow>`, `<section><h3>`, and React's `AudioSpecimenGroup` — counting named against blank |
+| interaction | up to five controls inside the specimen body clicked through the real event tree, comparing the whole document before and after; a page whose controls all leave the markup unchanged is inert |
+| narrow layout | viewport reduced to 768px, recording how far the pane's content overflows its own width |
+| axis panes | the `Sizes` and `Densities` tabs opened and their content measured |
+
+The interaction probe is scoped to the specimen body, not the page, so it
+cannot click the layout's own tab bar and measure the navigation it caused.
+
+Two supporting passes are static because they are questions about source, not
+about a rendered page: the specimen-map inventory, and axis eligibility read
+from each component's `$props()` block — 126 components take `size`, 128 take
+`density`.
+
+**GPUI is not measured live, and its grades are provisional.** No headless path
+renders a GPUI specimen page: `packages/gpui/preview` is a binary crate and
+`render_single_specimen` depends on `PreviewRoot`, `AppState`, and the
+catalogue sidebar, so nothing outside `main.rs` can construct one. The retained
+headless driver mounts a `poodle-node` tree, which is the component tier rather
+than the page tier.
+
+The GPUI column therefore grades what source can prove — dispatch reachability,
+caption presence, and whether the page uses `specimen_layout` — and nothing
+about render, interaction, or narrow behaviour. `g15.026` builds the seam and
+the probe that close this; until it lands, **no claim in this document about
+pages rendering, interaction being live, or narrow behaviour applies to GPUI.**
 
 Static signals that the live passes contradicted were discarded rather than
-reported. Three did: an apparent 47-page "empty Sizes tab" class was pages that
+reported. Four did: an apparent 47-page "empty Sizes tab" class was pages that
 correctly omit `SpecimenLayout`; an apparent GPUI "no captions" class was
-captions threaded through local helpers; and an apparent set of caption-less
-pages turned out to use a bare `<Eyebrow>` idiom the first probe did not read.
+captions threaded through local helpers; an apparent set of caption-less pages
+used a bare `<Eyebrow>` idiom the first probe did not read; and a first-pass
+`paneText === 0` rule read panes full of unlabelled form controls as empty.
 
 ## Grades
 
@@ -56,32 +72,41 @@ pages turned out to use a bare `<Eyebrow>` idiom the first probe did not read.
   page cannot be used as documentation.
 
 Defects are weighted. A minor defect (one missing axis, a hand-rolled caption
-idiom) scores 1; a major one (captions that do not render, an overloaded
-`Examples`, an advertised tab that renders nothing) scores 2. Score 0 is A, 1
-is B, 2 or more is C. D is reserved for pages that fail as documentation
-outright.
+idiom, narrow overflow) scores 1; a major one (captions that do not render, an
+overloaded `Examples`, an advertised tab that renders nothing, controls that do
+nothing) scores 2. Score 0 is A, 1 is B, 2 or more is C. D is reserved for
+pages that fail as documentation outright.
+
+A cross-runtime caption-count difference is attributed to neither runtime when
+the Svelte page is itself hard-failed: the difference *is* that defect, already
+graded, and charging React for it marked correct pages down.
 
 Dispositions: `keep`, `pilot-fix`, `curation-tranche`, or
 `contract/runtime-blocker`.
 
 ## Totals
 
+Measured against this branch's head — after the three approved pilot pages
+landed, so these grades describe the catalogue as it now stands, not a
+pre-pilot baseline.
+
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Svelte | 87 | 35 | 44 | 9 | — |
-| React | 136 | 21 | 18 | 0 | — |
-| GPUI | 116 | 52 | 6 | 0 | 1 |
-| **Worst of the three** | **61** | **54** | **51** | **9** | — |
+| Svelte (live) | 76 | 33 | 57 | 9 | — |
+| React (live) | 88 | 27 | 60 | 0 | — |
+| GPUI (structural, provisional) | 100 | 68 | 6 | 0 | 1 |
+| **Worst of the three** | **54** | **48** | **64** | **9** | — |
 
 | Disposition | Count |
 | --- | ---: |
-| `keep` | 60 |
+| `keep` | 52 |
 | `pilot-fix` | 3 |
-| `curation-tranche` | 112 |
+| `curation-tranche` | 120 |
 | `contract/runtime-blocker` | 0 |
 
-No entry is a contract or runtime blocker. Nothing found here needs a component
-semantic change; the defects are documentation defects.
+175 of 175 pages were measured live in both web runtimes. No entry is a
+contract or runtime blocker; nothing found here needs a component semantic
+change.
 
 `MeterSurface` is the single `n/a` on GPUI — web-only by fixed decision
 (spec 068), with no native counterpart. It is still graded on the two runtimes
@@ -106,21 +131,43 @@ covered `packages/svelte/preview`, where every specimen lives. Running
 `svelte-check` there reports 428 errors: 348 from one generated-catalogue type
 artifact, 52 from this defect, and 28 others.
 
-The React versions of the same nine pages pass `label` correctly and grade A or
-B. This is Svelte-only, and it is the one class where the catalogue actively
-lies about being fine.
+The React versions of the same nine pages pass `label` correctly. This is
+Svelte-only, and it is the one class where the catalogue actively lies about
+being fine.
 
-### 2. Four caption idioms, one of which renders nothing
+### 2. Twenty pages whose sampled controls do nothing
+
+Both web runtimes were probed by clicking up to five controls inside the
+specimen body and comparing the whole document before and after. Twenty pages
+came back unchanged in **both** runtimes:
+
+`IconButton`, `ListGrid`, `Code`, `MetaBar`, `MetaItem`, `TextLink`,
+`UiPresentationProvider`, `Callout`, `ErrorBoundary`, `RemediationBanner`,
+`ContextMenu`, `HoverCard`, `Tooltip`, `FormActions`, `FormLayout`,
+`InlineListSection`, `DetailShell`, `PageHeader`, `Toolbar`, `AgentMessage`.
+
+Cross-runtime agreement is what makes this evidence rather than noise. A
+static scan supports it independently: 122 Button-family instances across 24
+Svelte specimen files carry no handler, no `type="submit"`, no `href`, and no
+state prop — `AppHeader` 20 of 20, `Toolbar` 15 of 15, `PageHeader` 14 of 14.
+
+**Read this measurement with its limits.** A control that acts outside the DOM
+— copy to clipboard, start a download — registers as unchanged. So does a
+surface whose real affordance is hover or right-click, which is why
+`Tooltip`, `HoverCard`, and `ContextMenu` appear here. The rows are recorded
+as measured; the curation tranche decides which are defects and which are
+modality.
+
+### 3. Four caption idioms, one of which renders nothing
 
 The catalogue captions its examples four different ways: `SpecimenGroup label=`
 (140 pages), a bare `<Eyebrow>` inside a hand-rolled `Surface` (21 pages),
 `<section><h3>` in the audio family (14 pages), and React's separate
 `AudioSpecimenGroup title=`. They differ in spacing, weight, and surface
-treatment, so pages that should look like siblings do not.
+treatment, so pages that should look like siblings do not. The divergence is
+what let the broken fifth idiom hide in plain sight.
 
-The divergence is what let the broken fifth idiom hide in plain sight.
-
-### 3. Size and density matrices in the main view
+### 4. Size and density matrices in the main view
 
 The twelve audio components put their full size **and** density sweeps into the
 page body. React has no `Examples`/`Sizes`/`Densities` tabs for them at all —
@@ -132,56 +179,82 @@ tabs.
 This is the specific thing the operator asked not to happen, and it is
 currently the majority position for that family across runtimes.
 
-### 4. Missing axis evidence where the axis applies
+### 5. Missing axis evidence where the axis applies
 
 126 components take `size` and 128 take `density`. Seventeen pages show no
 `Sizes` evidence for a component that takes `size`, and eighteen show no
 `Densities` evidence for one that takes `density` — most of the overlay family,
 all five licence and update surfaces, and a handful of others.
 
-Four pages have the opposite problem and advertise an axis tab for a component
-with no such prop.
+Five pages have the opposite problem and advertise an axis tab for a component
+with no such prop: `Avatar`, `Tooltip`, `ListCardCounter`, `PickerShell`, and
+`MeterSurface`. `MeterSurface` also advertises both tabs and renders them
+empty — the only genuinely empty tab in the catalogue.
 
-One page, `MeterSurface`, advertises both tabs and renders them empty. It is
-the only genuinely empty tab in the catalogue.
+### 6. Overloaded Examples
 
-### 5. Overloaded Examples
+Twenty pages show ten or more captioned examples in one view, and 38 more sit
+in the 7–9 band, many because a variant × tone cross-product was expanded
+rather than a set of distinct things worth seeing.
 
-Fourteen pages show ten or more captioned examples in one view. `Tabs` shows
-18 groups and more than seventy tab controls on a single page. `ListCard` shows
-20. A further 41 pages sit in the 7–9 band, many of them because a variant ×
-tone cross-product was expanded rather than a set of distinct things worth
-seeing.
+### 7. Six pages that overflow a narrow viewport
 
-### 6. Two pages that teach a different component
+At a 768px window, six pages render content wider than their own pane:
+`EmbedInput` (582px), `LicenceActivation` (345px), `Icon` (119px),
+`EnvelopeEditor` (32px), `AppHeader` (31px), and — before the pilot fixed it —
+`Tabs` (81px, from a fixed `34rem` resize demo now clamped to
+`min(34rem, 100%)`).
+
+### 8. Two pages that teach a different component
 
 `ListCardCounter` renders `ListCardSpecimen` and `MetaItem` renders
 `MetaBarSpecimen`. The page title names one component; the content teaches
 another.
 
-### 7. GPUI structure
+### 9. GPUI structure (provisional)
 
 Every component in the active cohort has a native page — `g15.010` closed the
-last gap. What those pages *show* still differs: 43 native pages have no
-`Sizes`/`Densities` panes although their web counterpart teaches that axis, and
-six render their examples with no captions at all.
+last gap. What those pages *show* still differs: 59 native pages have no
+`Sizes`/`Densities` panes although their component takes that axis, and six
+render their examples with no captions at all.
 
 Native layout mechanics are runtime-owned and are not a defect. The absent
-evidence is, per the working rules' parity authority.
+evidence is, per the working rules' parity authority. These counts come from
+source, not from a rendered page — see the measurement note above.
 
 ## What The Audit Did Not Find
 
 - **No `Conformance` tab, anywhere.** The live tab set is exactly
-  `Examples · Sizes · Densities`. A repository-wide search for conformance or
-  corpus projection wiring in the three previews returns three incidental
-  matches: a sentence in `accessibility.ts` about assistive-technology claims,
-  a demo activity string in `component-docs.ts`, and a comment in
-  `headless_driver.rs` noting the retained headless infrastructure. `g14.021`'s
-  removal holds.
-- **No dead pages.** All 175 pages render. None falls through to
-  `missing_specimen` or the "specimen not yet available" placeholder, and no
-  page threw a runtime error during the sweep.
+  `Examples · Sizes · Densities` on all 175 pages in both web runtimes. A
+  repository-wide search for conformance or corpus projection wiring in the
+  three previews returns three incidental matches: a sentence in
+  `accessibility.ts` about assistive-technology claims, a demo activity string
+  in `component-docs.ts`, and a comment in `headless_driver.rs` noting the
+  retained headless infrastructure. `g14.021`'s removal holds.
+- **No dead pages in the web catalogue.** All 175 pages render in both
+  runtimes. None falls through to the "specimen not yet available" placeholder.
+  This claim does **not** extend to GPUI, which was not rendered.
 - **No contract or semantic defects.** Nothing here needs a component change.
+
+## Corrections From Revision 1
+
+Revision 1 was measured with a Svelte-only sweep and static React and GPUI
+inspection. Four results changed:
+
+- **React is now measured live**, not inferred from source. Its grades moved
+  from A 136 / B 21 / C 18 to A 88 / B 27 / C 60, almost entirely because the
+  interaction and narrow-layout signals did not exist before.
+- **`ToolCall` React was wrongly marked down.** Its "(0 vs 4)" evidence was the
+  Svelte-versus-React caption count — the detector read React's four groups
+  correctly — but the difference was charged to React when its cause is
+  Svelte's already-D-graded caption failure. Cross-runtime caption drift is now
+  attributed to neither runtime when the Svelte page is hard-failed. React
+  `ToolCall` is B on its own evidence: two controls clicked, nothing changed.
+- **Button and Tabs rows were stale.** The table is regenerated at the current
+  head, so both describe the reworked pages. Both pilots now grade A, A, A and
+  A, B, B respectively.
+- **GPUI grades are now labelled provisional** rather than presented alongside
+  live-measured ones without qualification.
 
 ## Pilot Findings
 
@@ -231,68 +304,94 @@ states, and the sentence-style captions.
 - Tabs is itself a documentation and navigation component. Restoring its
   pre-conformance page did not make it good.
 
+### What the pilots changed, and what the re-measurement shows
+
+All three pilot pages now grade A on both web runtimes except `Tabs`, which
+holds a B for the GPUI page's remaining structure. The pilot's own narrow-layout
+defect — an 81px overflow from a fixed `34rem` resize demo — was found by this
+audit's own probe and fixed.
+
+The Button pilot originally captioned a row "Icons, disclosure, and icon-only"
+while rendering only `chevron`. The contract separates the visual indicator
+from `ariaExpanded`, the disclosure state a screen reader hears, and only GPUI
+taught it. Both web pages now carry a stateful `ariaExpanded` trigger with its
+readout, and a focused test asserts the distinction rather than accepting a
+chevron as evidence.
+
 ## Proposed Curation Tranches
 
-The 112 `curation-tranche` entries group into five bounded, reviewable
-families. Each is a planned card requiring orchestrator review before dispatch.
+The 120 `curation-tranche` entries group into bounded, reviewable families.
+Each is a planned card requiring orchestrator review before dispatch, and each
+that changes specimen presentation carries a live operator-review checkpoint.
 
 | Card | Family | Scale |
 | --- | --- | ---: |
 | [`g15.015`](015-specimen-caption-integrity.md) | Caption integrity + the type-check gate hole that hid it | 9 pages, 52 captions |
 | [`g15.016`](016-specimen-idiom-convergence.md) | One caption idiom; two borrowed pages get their own | ~35 pages |
-| [`g15.017`](017-specimen-axis-placement.md) | Axis matrices out of the main view; axis evidence where the prop exists | 12 audio + ~21 others |
-| [`g15.018`](018-overloaded-examples-curation.md) | Overloaded and cross-product `Examples` | 14 + 41 pages |
-| [`g15.019`](019-gpui-specimen-structure.md) | Native axis panes and captions | 43 + 6 pages |
+| [`g15.017`](017-specimen-axis-placement.md) | Axis matrices out of the main view; axis evidence where the prop exists | 12 audio + ~22 others |
+| [`g15.018`](018-overloaded-examples-curation.md) | Overloaded `Examples` — **parent, not dispatchable** | 58 pages |
+| ↳ [`g15.020`](020-curate-model-connection-licence.md)–[`g15.025`](025-curate-collections-navigation-tail.md) | six bounded family children | 4–12 each |
+| [`g15.019`](019-gpui-specimen-structure.md) | Native axis panes and captions | 59 + 6 pages |
+| [`g15.026`](026-native-specimen-probe.md) | The headless native probe that un-provisions the GPUI column | 174 pages |
 
 Ordering matters: `g15.015` first, because it closes the gate that let the
 worst class ship. `g15.017` before `g15.019`, because the native axis work
-depends on `audio_specimens` separating its axis groups.
+depends on `audio_specimens` separating its axis groups. `g15.026` before any
+claim that the native catalogue has been audited to the same standard as the
+web one.
+
+The 20 inert-control pages are not their own card: each sits inside the family
+tranche that already owns its page, and the tranche decides per page whether a
+control should be wired or removed.
 
 ## Per-Component Inventory
 
-Grades are per runtime: **Sv** Svelte, **Rc** React, **Gp** GPUI. Evidence
+Grades are per runtime: **Sv** Svelte (live), **Rc** React (live),
+**Gp** GPUI (structural, provisional — see the measurement note). Evidence
 names the defects that decided the grade; a row with no named defect is A.
+
+† GPUI grades are not live-measured. `g15.026` closes that gap.
 
 ### Actions & selection — Foundations (12)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `Button` | B | B | A | pilot-fix | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 examples |
+| `Button` | A | A | A | pilot-fix | no named defect |
 | `Checkbox` | A | A | A | keep | no named defect |
 | `CollapseToggle` | A | A | A | keep | no named defect |
-| `ConfirmAction` | C | A | A | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence |
-| `IconButton` | B | A | A | curation-tranche | **Sv:** takes `density`, but the page shows no Densities evidence |
+| `ConfirmAction` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `IconButton` | C | C | A | curation-tranche | **Sv:** 5 controls clicked, none changed the page in either runtime; takes `density`, but the page shows no Densities evidence · **Rc:** 5 controls clicked, none changed the page in either runtime; takes `density`, but the page shows no Densities evidence |
 | `Radio` | A | A | A | keep | no named defect |
 | `RadioGroup` | A | A | A | keep | no named defect |
 | `SegmentedControl` | A | A | A | keep | no named defect |
-| `SplitButton` | C | A | A | curation-tranche | **Sv:** Examples long — 7 captioned examples; hand-rolled captions instead of SpecimenGroup |
+| `SplitButton` | C | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 7 captioned examples |
 | `Switch` | A | A | A | keep | no named defect |
 | `ToggleGroup` | A | A | A | keep | no named defect |
 | `TriStateSwitch` | B | A | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 
 ### Text & value entry — Foundations (15)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
 | `CodeInput` | A | A | A | keep | no named defect |
 | `ColorPicker` | A | A | A | keep | no named defect |
-| `DragNumberField` | C | C | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** size and density matrices render in the main view — the page has no Examples/Sizes/Densities tabs; Examples long — 8 examples · **Gp:** size and density matrices sit in the page body, not in panes |
-| `EditableLabel` | A | B | A | curation-tranche | **Rc:** Examples long — 7 examples |
-| `EmbedInput` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `DragNumberField` | C | C | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples overloaded — 10 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
+| `EditableLabel` | A | A | A | keep | no named defect |
+| `EmbedInput` | B | B | B | curation-tranche | **Sv:** overflows its pane by 582px at a 768px viewport · **Rc:** overflows its pane by 582px at a 768px viewport · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `FileUpload` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `NumberInput` | A | A | A | keep | no named defect |
 | `RangeSlider` | A | A | A | pilot-fix | no named defect |
 | `Rating` | A | A | A | keep | no named defect |
-| `RefSelect` | B | B | A | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 examples |
-| `Select` | C | A | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; hand-rolled captions instead of SpecimenGroup · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `RefSelect` | B | B | A | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 captioned examples |
+| `Select` | C | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `Slider` | A | A | A | keep | no named defect |
-| `TextInput` | C | A | A | curation-tranche | **Sv:** Examples long — 7 captioned examples; hand-rolled captions instead of SpecimenGroup |
+| `TextInput` | C | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 7 captioned examples |
 | `ThemeSelect` | A | A | A | keep | no named defect |
 | `TokenInput` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |
 
 ### Date & time — Foundations (10)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
 | `Calendar` | A | A | A | keep | no named defect |
 | `DatePicker` | A | A | A | keep | no named defect |
@@ -301,209 +400,209 @@ names the defects that decided the grade; a row with no named defect is A.
 | `DateTimeRangePicker` | A | A | A | keep | no named defect |
 | `DateTimeZonePicker` | A | A | A | keep | no named defect |
 | `DurationInput` | A | A | A | keep | no named defect |
-| `TimeAgo` | B | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 examples |
+| `TimeAgo` | B | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 captioned examples |
 | `TimeInput` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |
 | `TimeZoneSelect` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |
 
 ### Layout — Foundations (11)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
 | `Box` | A | A | A | keep | no named defect |
 | `Grid` | A | A | A | keep | no named defect |
-| `ListGrid` | A | A | A | keep | no named defect |
+| `ListGrid` | C | C | A | curation-tranche | **Sv:** 2 controls clicked, none changed the page in either runtime · **Rc:** 2 controls clicked, none changed the page in either runtime |
 | `Region` | A | A | A | keep | no named defect |
 | `ResizeHandle` | A | A | A | keep | no named defect |
 | `ScrollShell` | A | A | A | keep | no named defect |
 | `Separator` | A | A | A | keep | no named defect |
 | `Spacer` | A | A | A | keep | no named defect |
-| `SplitView` | C | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** Examples long — 7 examples |
+| `SplitView` | C | C | B | curation-tranche | **Sv:** Examples long — 7 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** Examples long — 7 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `Stack` | A | A | A | keep | no named defect |
 | `Surface` | A | A | A | keep | no named defect |
 
 ### Content & identity — Foundations (14)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `Avatar` | B | A | A | curation-tranche | **Sv:** Densities tab shown for a component with no `density` prop |
-| `Card` | B | A | B | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `Code` | A | A | A | keep | no named defect |
-| `DetailItem` | B | A | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `Avatar` | B | B | A | curation-tranche | **Sv:** Densities tab shown for a component with no `density` prop · **Rc:** Densities tab shown for a component with no `density` prop |
+| `Card` | B | B | B | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `Code` | C | C | A | curation-tranche | **Sv:** 4 controls clicked, none changed the page in either runtime · **Rc:** 4 controls clicked, none changed the page in either runtime |
+| `DetailItem` | B | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `EmbedPreview` | A | A | A | keep | no named defect |
-| `Eyebrow` | C | A | A | curation-tranche | **Sv:** Examples long — 8 captioned examples; takes `size`, but the page shows no Sizes evidence; hand-rolled captions instead of SpecimenGroup |
-| `Icon` | B | A | A | curation-tranche | **Sv:** takes `density`, but the page shows no Densities evidence |
+| `Eyebrow` | C | C | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; takes `size`, but the page shows no Sizes evidence; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 8 captioned examples; takes `size`, but the page shows no Sizes evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `Icon` | C | C | A | curation-tranche | **Sv:** overflows its pane by 119px at a 768px viewport; takes `density`, but the page shows no Densities evidence · **Rc:** overflows its pane by 119px at a 768px viewport; takes `density`, but the page shows no Densities evidence |
 | `IconProvider` | A | A | A | keep | no named defect |
-| `MetaBar` | A | A | A | keep | no named defect |
-| `MetaItem` | C | C | A | curation-tranche | **Sv:** page is `MetaBarSpecimen.svelte` — it teaches a different component · **Rc:** page is `MetaBarSpecimen.svelte` — it teaches a different component |
+| `MetaBar` | C | C | A | curation-tranche | **Sv:** 1 controls clicked, none changed the page in either runtime · **Rc:** 1 controls clicked, none changed the page in either runtime |
+| `MetaItem` | C | C | A | curation-tranche | **Sv:** 1 controls clicked, none changed the page in either runtime; page is `MetaBarSpecimen.svelte` — it teaches a different component · **Rc:** 1 controls clicked, none changed the page in either runtime; page is `MetaBarSpecimen.svelte` — it teaches a different component |
 | `Pill` | A | A | A | keep | no named defect |
-| `Text` | C | A | C | curation-tranche | **Sv:** a size/density matrix is repeated inside Examples; takes `size`, but the page shows no Sizes evidence · **Gp:** examples carry no captions at all |
-| `TextLink` | A | A | C | curation-tranche | **Gp:** examples carry no captions at all |
-| `UiPresentationProvider` | B | A | A | curation-tranche | **Sv:** takes `density`, but the page shows no Densities evidence |
+| `Text` | B | B | C | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence · **Rc:** takes `size`, but the page shows no Sizes evidence · **Gp:** examples carry no captions at all; no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `TextLink` | C | C | C | curation-tranche | **Sv:** 1 controls clicked, none changed the page in either runtime · **Rc:** 1 controls clicked, none changed the page in either runtime · **Gp:** examples carry no captions at all |
+| `UiPresentationProvider` | C | C | B | curation-tranche | **Sv:** 2 controls clicked, none changed the page in either runtime; takes `density`, but the page shows no Densities evidence · **Rc:** 2 controls clicked, none changed the page in either runtime; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 
 ### Status & progress — Foundations (14)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `Callout` | A | A | A | keep | no named defect |
-| `EmptyState` | B | A | A | curation-tranche | **Sv:** Examples long — 8 captioned examples |
-| `ErrorBoundary` | A | A | A | keep | no named defect |
-| `Meter` | C | B | B | curation-tranche | **Sv:** Examples long — 7 captioned examples; a size/density matrix is repeated inside Examples · **Rc:** Examples long — 7 examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `Callout` | C | C | A | curation-tranche | **Sv:** 1 controls clicked, none changed the page in either runtime · **Rc:** 1 controls clicked, none changed the page in either runtime |
+| `EmptyState` | B | B | A | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples |
+| `ErrorBoundary` | C | C | A | curation-tranche | **Sv:** 2 controls clicked, none changed the page in either runtime · **Rc:** 2 controls clicked, none changed the page in either runtime |
+| `Meter` | B | B | B | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `MetricTile` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `PageLoading` | A | A | A | keep | no named defect |
 | `Progress` | A | A | A | keep | no named defect |
-| `RemediationBanner` | A | A | A | keep | no named defect |
-| `Skeleton` | B | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 examples |
+| `RemediationBanner` | C | C | A | curation-tranche | **Sv:** 3 controls clicked, none changed the page in either runtime · **Rc:** 3 controls clicked, none changed the page in either runtime |
+| `Skeleton` | B | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 captioned examples |
 | `Spinner` | A | A | A | keep | no named defect |
 | `StateTile` | A | A | A | keep | no named defect |
 | `StatusIndicator` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `ToastHost` | C | A | A | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence |
+| `ToastHost` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `ToastStack` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 
 ### Navigation — Composition (9)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
 | `Breadcrumbs` | A | A | A | keep | no named defect |
 | `NavCard` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `NavigationMenu` | A | A | A | keep | no named defect |
-| `Pagination` | C | A | A | curation-tranche | **Sv:** a size/density matrix is repeated inside Examples |
+| `Pagination` | A | A | A | keep | no named defect |
 | `PaginationSummary` | A | A | A | keep | no named defect |
 | `SidebarNav` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `Stepper` | B | B | A | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 examples |
-| `Tabs` | C | C | B | pilot-fix | **Sv:** Examples overloaded — 18 captioned examples · **Rc:** Examples overloaded — 18 examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `Tree` | B | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 7 examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `Stepper` | B | B | A | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples |
+| `Tabs` | A | A | B | pilot-fix | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `Tree` | B | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 7 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 
 ### Overlays & disclosure — Composition (14)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `Accordion` | B | A | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `AlertDialog` | C | A | A | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence; hand-rolled captions instead of SpecimenGroup |
+| `Accordion` | B | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `AlertDialog` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence; hand-rolled captions instead of SpecimenGroup · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `Collapsible` | A | A | A | keep | no named defect |
 | `CommandPalette` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `ContextMenu` | A | A | A | keep | no named defect |
+| `ContextMenu` | C | C | A | curation-tranche | **Sv:** 1 controls clicked, none changed the page in either runtime · **Rc:** 1 controls clicked, none changed the page in either runtime |
 | `DebugDialog` | A | A | A | keep | no named defect |
-| `Dialog` | C | A | A | curation-tranche | **Sv:** Examples long — 9 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence; hand-rolled captions instead of SpecimenGroup |
-| `Drawer` | C | A | A | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence; hand-rolled captions instead of SpecimenGroup |
-| `FormDialog` | C | A | A | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence |
-| `HoverCard` | A | A | A | keep | no named defect |
+| `Dialog` | C | C | B | curation-tranche | **Sv:** Examples long — 9 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 9 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `Drawer` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence; hand-rolled captions instead of SpecimenGroup · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `FormDialog` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `HoverCard` | C | C | A | curation-tranche | **Sv:** 2 controls clicked, none changed the page in either runtime · **Rc:** 2 controls clicked, none changed the page in either runtime |
 | `Menu` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |
 | `Menubar` | A | A | A | keep | no named defect |
 | `Popover` | A | A | A | keep | no named defect |
-| `Tooltip` | C | A | A | curation-tranche | **Sv:** Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop |
+| `Tooltip` | C | C | A | curation-tranche | **Sv:** 5 controls clicked, none changed the page in either runtime; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop · **Rc:** 5 controls clicked, none changed the page in either runtime; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop |
 
 ### Forms & validation — Composition (9)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `BlockEditor` | C | A | A | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence |
+| `BlockEditor` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `Field` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `FieldSet` | A | A | A | keep | no named defect |
-| `FormActions` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `FormLayout` | A | A | A | keep | no named defect |
-| `InlineListSection` | A | A | A | keep | no named defect |
+| `FormActions` | C | C | B | curation-tranche | **Sv:** 5 controls clicked, none changed the page in either runtime · **Rc:** 5 controls clicked, none changed the page in either runtime · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `FormLayout` | C | C | A | curation-tranche | **Sv:** 5 controls clicked, none changed the page in either runtime · **Rc:** 5 controls clicked, none changed the page in either runtime |
+| `InlineListSection` | C | C | A | curation-tranche | **Sv:** 1 controls clicked, none changed the page in either runtime · **Rc:** 1 controls clicked, none changed the page in either runtime |
 | `MarkdownEditor` | B | A | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `PasswordRequirements` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `ValidationSummary` | A | A | A | keep | no named defect |
 
 ### Data & collections — Composition (16)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
 | `BulkActionBar` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `CardRadioGroup` | C | A | A | curation-tranche | **Sv:** a size/density matrix is repeated inside Examples |
+| `CardRadioGroup` | A | A | A | keep | no named defect |
 | `CardToggleGroup` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `DataTable` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `EditableList` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `FilterBuilder` | B | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 examples |
+| `FilterBuilder` | B | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 captioned examples |
 | `FilterToolbar` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `ListCard` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 19 captioned examples; a size/density matrix is repeated inside Examples · **Rc:** Examples overloaded — 20 examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `ListCardCounter` | C | C | C | curation-tranche | **Sv:** Examples overloaded — 19 captioned examples; page is `ListCardSpecimen.svelte` — it teaches a different component; a size/density matrix is repeated inside Examples; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop · **Rc:** Examples overloaded — 20 examples; page is `ListCardSpecimen.svelte` — it teaches a different component · **Gp:** examples carry no captions at all; no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `ListCard` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 19 captioned examples · **Rc:** Examples overloaded — 19 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `ListCardCounter` | C | C | C | curation-tranche | **Sv:** Examples overloaded — 19 captioned examples; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop; page is `ListCardSpecimen.svelte` — it teaches a different component · **Rc:** Examples overloaded — 19 captioned examples; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop; page is `ListCardSpecimen.svelte` — it teaches a different component · **Gp:** examples carry no captions at all |
 | `ListContainer` | A | A | A | keep | no named defect |
-| `LogList` | C | A | A | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence |
+| `LogList` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `OrderBy` | A | A | A | keep | no named defect |
-| `PickerShell` | B | A | B | curation-tranche | **Sv:** Densities tab shown for a component with no `density` prop · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `PickerShell` | B | B | A | curation-tranche | **Sv:** Densities tab shown for a component with no `density` prop · **Rc:** Densities tab shown for a component with no `density` prop |
 | `RelationPicker` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `SelectionSummary` | A | A | A | keep | no named defect |
 | `Table` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 
 ### Media — Composition (6)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
 | `AudioPlayer` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `MediaBrowsePanel` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `MediaPicker` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `MediaPreview` | B | A | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `MediaPreview` | B | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `MediaThumbnail` | A | A | A | keep | no named defect |
-| `VideoPlayer` | C | A | A | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence |
+| `VideoPlayer` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 
 ### Application shell — Systems (12)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `ActionDiscoveryPanel` | B | A | A | curation-tranche | **Sv:** Examples long — 9 captioned examples |
-| `AppHeader` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `DetailSection` | B | A | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `DetailSectionGroup` | C | A | B | curation-tranche | **Sv:** Examples overloaded — 12 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `DetailShell` | B | A | A | curation-tranche | **Sv:** Examples long — 8 captioned examples |
-| `DockRegion` | B | B | A | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 8 examples |
-| `HistoryCenter` | B | B | C | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 examples · **Gp:** examples carry no captions at all; no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `ActionDiscoveryPanel` | B | B | A | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 captioned examples |
+| `AppHeader` | B | B | B | curation-tranche | **Sv:** overflows its pane by 31px at a 768px viewport · **Rc:** overflows its pane by 31px at a 768px viewport · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `DetailSection` | B | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `DetailSectionGroup` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 12 captioned examples · **Rc:** Examples overloaded — 12 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `DetailShell` | C | C | A | curation-tranche | **Sv:** Examples long — 8 captioned examples; 2 controls clicked, none changed the page in either runtime · **Rc:** Examples long — 8 captioned examples; 2 controls clicked, none changed the page in either runtime |
+| `DockRegion` | B | B | A | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 8 captioned examples |
+| `HistoryCenter` | B | B | C | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 captioned examples · **Gp:** examples carry no captions at all; no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `MessageCenter` | A | A | C | curation-tranche | **Gp:** examples carry no captions at all; no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `PageHeader` | B | B | B | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 8 examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `SettingsShell` | C | A | C | curation-tranche | **Sv:** examples carry no captions at all; hand-rolled captions instead of SpecimenGroup · **Gp:** examples carry no captions at all |
+| `PageHeader` | C | C | B | curation-tranche | **Sv:** Examples long — 9 captioned examples; 5 controls clicked, none changed the page in either runtime · **Rc:** Examples long — 9 captioned examples; 5 controls clicked, none changed the page in either runtime · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `SettingsShell` | C | C | C | curation-tranche | **Sv:** examples carry no captions at all; hand-rolled captions instead of SpecimenGroup · **Rc:** examples carry no captions at all · **Gp:** examples carry no captions at all |
 | `StatusBar` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `Toolbar` | A | A | A | keep | no named defect |
+| `Toolbar` | C | C | A | curation-tranche | **Sv:** 5 controls clicked, none changed the page in either runtime · **Rc:** 5 controls clicked, none changed the page in either runtime |
 
 ### Agent & tools — Systems (11)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `AgentChatInput` | B | B | A | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 examples |
-| `AgentMessage` | D | B | A | curation-tranche | **Sv:** all 8 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** Examples long — 8 examples |
+| `AgentChatInput` | B | B | A | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 captioned examples |
+| `AgentMessage` | D | C | A | curation-tranche | **Sv:** all 8 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** Examples long — 9 captioned examples; 3 controls clicked, none changed the page in either runtime |
 | `AgentPlan` | D | A | A | curation-tranche | **Sv:** all 4 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` |
 | `AgentPlanRecord` | D | A | A | curation-tranche | **Sv:** all 6 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` |
-| `AgentQuestion` | D | A | B | curation-tranche | **Sv:** all 6 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `AgentQuestionRecord` | D | A | A | curation-tranche | **Sv:** all 6 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` |
+| `AgentQuestion` | D | C | B | curation-tranche | **Sv:** all 6 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** Examples overloaded — 12 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `AgentQuestionRecord` | D | C | A | curation-tranche | **Sv:** all 6 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** Examples overloaded — 10 captioned examples |
 | `AgentSubagent` | D | A | A | curation-tranche | **Sv:** all 6 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` |
 | `AgentTranscript` | B | A | B | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `ChangedFiles` | D | B | A | curation-tranche | **Sv:** all 7 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** Examples long — 7 examples |
-| `ToolCall` | D | B | A | curation-tranche | **Sv:** all 4 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** example count differs from Svelte (0 vs 4) |
+| `ChangedFiles` | D | B | A | curation-tranche | **Sv:** all 7 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** Examples long — 7 captioned examples |
+| `ToolCall` | D | B | A | curation-tranche | **Sv:** all 4 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` · **Rc:** 2 controls clicked, none changed the page |
 | `ToolCallGroup` | D | A | A | curation-tranche | **Sv:** all 5 example captions render blank — SpecimenGroup takes `label`, the page passes `title`/`description` |
 
 ### Model connections — Systems (5)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `ModelCatalogueEditor` | C | B | A | curation-tranche | **Sv:** Examples overloaded — 21 captioned examples · **Rc:** Examples long — 9 examples |
-| `ModelConnectionCard` | C | B | A | curation-tranche | **Sv:** Examples overloaded — 20 captioned examples · **Rc:** Examples long — 9 examples |
-| `ModelConnectionPicker` | C | B | A | curation-tranche | **Sv:** Examples overloaded — 22 captioned examples · **Rc:** Examples long — 8 examples |
-| `ModelConnectionSetup` | C | B | A | curation-tranche | **Sv:** Examples overloaded — 12 captioned examples · **Rc:** Examples long — 8 examples |
-| `ModelPicker` | C | C | A | curation-tranche | **Sv:** Examples overloaded — 13 captioned examples · **Rc:** Examples overloaded — 13 examples |
+| `ModelCatalogueEditor` | C | C | A | curation-tranche | **Sv:** Examples overloaded — 21 captioned examples · **Rc:** Examples overloaded — 21 captioned examples |
+| `ModelConnectionCard` | C | C | A | curation-tranche | **Sv:** Examples overloaded — 20 captioned examples · **Rc:** Examples overloaded — 20 captioned examples |
+| `ModelConnectionPicker` | C | C | A | curation-tranche | **Sv:** Examples overloaded — 22 captioned examples · **Rc:** Examples overloaded — 22 captioned examples |
+| `ModelConnectionSetup` | C | C | A | curation-tranche | **Sv:** Examples overloaded — 12 captioned examples · **Rc:** Examples overloaded — 12 captioned examples |
+| `ModelPicker` | C | C | A | curation-tranche | **Sv:** Examples overloaded — 13 captioned examples · **Rc:** Examples overloaded — 13 captioned examples |
 
 ### Audio & music — Systems (12)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `AudioMeter` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 10 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** size and density matrices render in the main view — the page has no Examples/Sizes/Densities tabs; Examples long — 9 examples · **Gp:** size and density matrices sit in the page body, not in panes |
-| `AudioSwitch` | B | C | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Rc:** size and density matrices render in the main view — the page has no Examples/Sizes/Densities tabs · **Gp:** size and density matrices sit in the page body, not in panes |
-| `EnvelopeEditor` | C | C | B | curation-tranche | **Sv:** Examples long — 7 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** size and density matrices render in the main view — the page has no Examples/Sizes/Densities tabs; Examples long — 7 examples · **Gp:** size and density matrices sit in the page body, not in panes |
-| `Fader` | C | C | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** size and density matrices render in the main view — the page has no Examples/Sizes/Densities tabs; Examples long — 8 examples · **Gp:** size and density matrices sit in the page body, not in panes |
-| `GainReductionMeter` | C | C | B | curation-tranche | **Sv:** Examples long — 9 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** size and density matrices render in the main view — the page has no Examples/Sizes/Densities tabs; Examples long — 9 examples · **Gp:** size and density matrices sit in the page body, not in panes |
-| `Keyboard` | B | C | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Rc:** size and density matrices render in the main view — the page has no Examples/Sizes/Densities tabs · **Gp:** size and density matrices sit in the page body, not in panes |
-| `Knob` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 10 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** size and density matrices render in the main view — the page has no Examples/Sizes/Densities tabs; Examples overloaded — 10 examples · **Gp:** size and density matrices sit in the page body, not in panes |
-| `ModMatrixGrid` | B | C | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Rc:** size and density matrices render in the main view — the page has no Examples/Sizes/Densities tabs · **Gp:** size and density matrices sit in the page body, not in panes |
-| `ValueReadout` | C | C | B | curation-tranche | **Sv:** Examples long — 9 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** size and density matrices render in the main view — the page has no Examples/Sizes/Densities tabs; Examples long — 9 examples · **Gp:** size and density matrices sit in the page body, not in panes |
-| `WaveformDisplay` | B | C | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Rc:** size and density matrices render in the main view — the page has no Examples/Sizes/Densities tabs · **Gp:** size and density matrices sit in the page body, not in panes |
-| `XYPad` | C | C | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** size and density matrices render in the main view — the page has no Examples/Sizes/Densities tabs; Examples long — 8 examples · **Gp:** size and density matrices sit in the page body, not in panes |
-| `MeterSurface` | C | A | n/a | curation-tranche | **Sv:** Sizes tab is advertised but renders nothing; Densities tab is advertised but renders nothing; hand-rolled captions instead of SpecimenGroup |
+| `AudioMeter` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 10 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples overloaded — 11 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
+| `AudioSwitch` | B | C | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 8 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
+| `EnvelopeEditor` | C | C | B | curation-tranche | **Sv:** Examples long — 7 captioned examples; overflows its pane by 32px at a 768px viewport; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 9 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
+| `Fader` | C | C | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples overloaded — 10 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
+| `GainReductionMeter` | C | C | B | curation-tranche | **Sv:** Examples long — 9 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples overloaded — 11 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
+| `Keyboard` | B | C | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 8 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
+| `Knob` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 10 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples overloaded — 12 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
+| `ModMatrixGrid` | B | C | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 7 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
+| `ValueReadout` | C | C | B | curation-tranche | **Sv:** Examples long — 9 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples overloaded — 11 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
+| `WaveformDisplay` | B | C | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 8 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
+| `XYPad` | C | C | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples overloaded — 10 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
+| `MeterSurface` | C | A | n/a | curation-tranche | **Sv:** Sizes tab is advertised but renders nothing; Densities tab is advertised but renders nothing; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop; hand-rolled captions instead of SpecimenGroup |
 
 ### Account & lifecycle — Systems (5)
 
-| Component | Sv | Rc | Gp | Disposition | Evidence |
+| Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `LicenceActivation` | C | A | A | curation-tranche | **Sv:** Examples overloaded — 11 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence |
-| `LicenceSeats` | C | A | A | curation-tranche | **Sv:** Examples overloaded — 11 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence |
-| `LicenceStatus` | C | C | A | curation-tranche | **Sv:** Examples overloaded — 20 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** Examples overloaded — 10 examples |
-| `UpdateCenter` | C | A | A | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence |
-| `UpdateStatus` | C | A | A | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence |
+| `LicenceActivation` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 11 captioned examples; overflows its pane by 345px at a 768px viewport; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** Examples overloaded — 11 captioned examples; overflows its pane by 345px at a 768px viewport; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `LicenceSeats` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 11 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** Examples overloaded — 11 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `LicenceStatus` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 20 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** Examples overloaded — 20 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `UpdateCenter` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `UpdateStatus` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |

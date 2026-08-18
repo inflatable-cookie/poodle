@@ -1,6 +1,6 @@
 # g15.011 — Human-Centred Specimen Catalogue Audit (August batch log)
 
-Date: 2026-08-17
+Date: 2026-08-17 (revision 2: 2026-08-18)
 Card: `docs/roadmaps/g15/011-specimen-catalogue-audit.md`
 Handoff: `docs/handoffs/20260817-214451-g15-011-specimen-catalogue-audit.md`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-f6b446e9`
@@ -10,7 +10,7 @@ Branch: `t3code/specimen-catalogue-audit`
 
 Audited all 175 frozen catalogue entries as documentation, proved the
 human-centred standard on Button, RangeSlider, and Tabs across Svelte, React,
-and GPUI, and split the remaining work into five bounded curation cards.
+and GPUI, and split the remaining work into bounded curation cards.
 
 Audit: `docs/roadmaps/g15/specimen-catalogue-audit.md`.
 Outline: `docs/roadmaps/g15/specimen-plan-outline.md`.
@@ -19,33 +19,43 @@ Outline: `docs/roadmaps/g15/specimen-plan-outline.md`.
 
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Svelte | 87 | 35 | 44 | 9 | — |
-| React | 136 | 21 | 18 | 0 | — |
-| GPUI | 116 | 52 | 6 | 0 | 1 |
-| Worst of the three | 61 | 54 | 51 | 9 | — |
+| Svelte (live) | 76 | 33 | 57 | 9 | — |
+| React (live) | 88 | 27 | 60 | 0 | — |
+| GPUI (structural, provisional) | 100 | 68 | 6 | 0 | 1 |
+| Worst of the three | 54 | 48 | 64 | 9 | — |
 
-Dispositions: `keep` 60, `pilot-fix` 3, `curation-tranche` 112,
+Dispositions: `keep` 52, `pilot-fix` 3, `curation-tranche` 120,
 `contract/runtime-blocker` 0. Every entry carries a grade; none was skipped.
+175 of 175 pages were measured live in both web runtimes.
 
 ## How Grades Were Measured
 
-Four passes, all reproducible:
+**Svelte and React are measured live**, page by page, for render, captions
+across all four idioms, interaction (up to five controls clicked through the
+real event tree, comparing the whole document), narrow layout at 768px, and
+axis-pane content. Two supporting passes are static because they are questions
+about source: the specimen-map inventory, and axis eligibility read from each
+component's `$props()` block — 126 take `size`, 128 take `density`.
 
-1. Inventory from the three runtime specimen maps.
-2. Axis eligibility read from each component's `$props()` block — 126 take
-   `size`, 128 take `density` — compared with what its pages advertise.
-3. A live sweep of all 175 pages in the running Svelte preview, with the
-   `Sizes` and `Densities` tabs opened.
-4. A live caption sweep across all four caption idioms in use.
+**GPUI is not measured live.** `packages/gpui/preview` is a binary crate and
+`render_single_specimen` depends on `PreviewRoot`, `AppState`, and the
+catalogue sidebar, so nothing outside `main.rs` can construct a specimen page.
+Its grades are labelled provisional and structural, and no render, interaction,
+or narrow-layout claim in the audit applies to it. `g15.026` builds the seam
+and the probe that close this.
 
 Defects are weighted: minor 1, major 2. Score 0 is A, 1 is B, 2+ is C. D is
 reserved for pages that fail as documentation outright.
 
-Three static signals were discarded because the live passes contradicted them,
-rather than reported: an apparent 47-page "empty Sizes tab" class (pages that
-correctly omit `SpecimenLayout`), an apparent GPUI "no captions" class
-(captions threaded through local helpers), and an apparent set of caption-less
-pages (a bare `<Eyebrow>` idiom the first probe did not read).
+Six measurements were discarded because a later pass contradicted them, rather
+than reported: an apparent 47-page "empty Sizes tab" class (pages that
+correctly omit `SpecimenLayout`); an apparent GPUI "no captions" class
+(captions threaded through local helpers); an apparent set of caption-less
+pages (a bare `<Eyebrow>` idiom the first probe did not read); a
+`paneText === 0` rule that read panes full of unlabelled form controls as
+empty; a pane-level interaction check that read every portalled overlay as
+inert; and a focus-change signal that would have cleared every page, since
+clicking a button moves focus to it.
 
 ## Headline Finding
 
@@ -118,11 +128,37 @@ collapse-toggle demo, which was not a contract behaviour.
 | `ButtonSpecimen.svelte` | 18 | 31 |
 | `ButtonSpecimen.tsx` | 18 | 31 |
 | New preview tests + harness | 97 | 0 |
-| Audit, outline, five cards | 1004 | 0 |
+| Audit, outline, cards | 1600+ | 0 |
 
 The nine pilot surfaces are 539 lines added against 1059 removed — a net
 reduction of 520 lines of specimen source while adding an orientation example
 and a tone the catalogue never showed.
+
+## Review Response (revision 2)
+
+The orchestrator requested changes on PR #36. All four items are addressed:
+
+1. **Coverage did not support three-runtime grades.** React is now swept live
+   with the same probe as Svelte — 175/175 pages, no timeouts. GPUI is labelled
+   provisional with the blocker named, and `g15.026` cards the fix.
+2. **A mechanically derived row was wrong.** `ToolCall`'s "(0 vs 4)" was the
+   Svelte-versus-React caption count, not React's count — the detector read
+   React's four groups correctly — but the difference was charged to React when
+   its cause is Svelte's already-D-graded caption failure. Cross-runtime drift
+   is now attributed to neither runtime when the Svelte page is hard-failed.
+   The whole table is regenerated at the current head, retiring the stale
+   pre-pilot Button and Tabs rows.
+3. **The Button pilot taught a chevron as disclosure.** Both web pages now
+   carry a stateful `ariaExpanded` trigger with its readout, matching GPUI, and
+   a focused test asserts the distinction.
+4. **The rollout was not dispatchable.** `g15.018` is a non-dispatchable parent
+   with six bounded family children (`g15.020`–`025`), each sequenced and each
+   carrying a live operator-review checkpoint. The same checkpoint is added to
+   `g15.015`–`017` and `019`.
+
+Two defects the re-measurement found in the pilot's own work: `Tabs` overflowed
+its pane by 81px at 768px from a fixed `34rem` resize demo, now clamped; and
+the Button disclosure gap above.
 
 ## Operator Review
 
@@ -139,8 +175,10 @@ Planned, orchestrator-review-required, not dispatched:
 - `g15.015` — specimen caption integrity and the type-check gate hole
 - `g15.016` — caption idiom convergence; two borrowed pages get their own
 - `g15.017` — axis placement and evidence
-- `g15.018` — overloaded Examples curation
+- `g15.018` — overloaded Examples (non-dispatchable parent), with six bounded
+  family children `g15.020`–`g15.025`
 - `g15.019` — GPUI specimen structure
+- `g15.026` — the headless native probe that un-provisions the GPUI column
 
 ## Rejected Machinery Stays Rejected
 

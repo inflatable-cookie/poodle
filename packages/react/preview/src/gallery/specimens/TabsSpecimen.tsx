@@ -67,7 +67,7 @@ const resizableStyle: CSSProperties = {
   overflow: "auto",
   minWidth: "12rem",
   maxWidth: "48rem",
-  width: "34rem",
+  width: "min(34rem, 100%)",
   border: "0.0625rem dashed var(--poodle-color-border-subtle)",
   padding: "0.5rem",
 };

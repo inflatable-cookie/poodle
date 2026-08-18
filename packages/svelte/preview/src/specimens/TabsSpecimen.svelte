@@ -184,7 +184,7 @@
     overflow: auto;
     min-width: 12rem;
     max-width: 48rem;
-    width: 34rem;
+    width: min(34rem, 100%);
     border: 0.0625rem dashed var(--poodle-color-border-subtle);
     padding: 0.5rem;
   }
