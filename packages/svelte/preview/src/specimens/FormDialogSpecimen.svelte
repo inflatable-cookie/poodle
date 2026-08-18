@@ -13,6 +13,7 @@
   let name = $state("");
   let role = $state("");
   let lastAction = $state("");
+  let axisOpen: Record<string, boolean> = $state({});
 
   const roleOptions = [
     { value: "admin", label: "Admin" },
@@ -127,37 +128,39 @@
     </SpecimenGroup>
   {/if}
 
-  {#snippet sizes(size)}
-    <FormDialog
-      open={true}
-      title="Add new user"
-      description="Invite a user to this workspace."
-      submitLabel="Add user"
-      {size}
-      onSubmit={() => {}}
-      onOpenChange={() => {}}
-    >
-      <Field label="Full name" id="form-dialog-axis-name">
-        <TextInput placeholder="Enter name" />
-      </Field>
-    </FormDialog>
-  {/snippet}
+{#snippet sizes(size)}
+  <Button variant="secondary" onClick={() => (axisOpen[`size-${size}`] = true)}>Open {size} dialog</Button>
+  <FormDialog
+    open={axisOpen[`size-${size}`] ?? false}
+    onOpenChange={(v) => (axisOpen[`size-${size}`] = v)}
+    title="Add new user"
+    description="Invite a user to this workspace."
+    submitLabel="Add user"
+    {size}
+    onSubmit={() => {}}
+  >
+    <Field label="Full name" id={`form-dialog-axis-name-${size}`}>
+      <TextInput placeholder="Enter name" />
+    </Field>
+  </FormDialog>
+{/snippet}
 
-  {#snippet densities(density)}
-    <FormDialog
-      open={true}
-      title="Add new user"
-      description="Invite a user to this workspace."
-      submitLabel="Add user"
-      {density}
-      onSubmit={() => {}}
-      onOpenChange={() => {}}
-    >
-      <Field label="Full name" id="form-dialog-axis-name">
-        <TextInput placeholder="Enter name" />
-      </Field>
-    </FormDialog>
-  {/snippet}
+{#snippet densities(density)}
+  <Button variant="secondary" onClick={() => (axisOpen[`density-${density}`] = true)}>Open {density} dialog</Button>
+  <FormDialog
+    open={axisOpen[`density-${density}`] ?? false}
+    onOpenChange={(v) => (axisOpen[`density-${density}`] = v)}
+    title="Add new user"
+    description="Invite a user to this workspace."
+    submitLabel="Add user"
+    {density}
+    onSubmit={() => {}}
+  >
+    <Field label="Full name" id={`form-dialog-axis-name-${density}`}>
+      <TextInput placeholder="Enter name" />
+    </Field>
+  </FormDialog>
+{/snippet}
 </SpecimenLayout>
 
 <style>

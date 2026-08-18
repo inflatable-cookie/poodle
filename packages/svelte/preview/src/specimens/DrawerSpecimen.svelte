@@ -5,6 +5,7 @@
 
   let rightOpen = $state(false);
   let leftOpen = $state(false);
+  let axisOpen: Record<string, boolean> = $state({});
 </script>
 
 <SpecimenLayout>
@@ -39,13 +40,27 @@
 </Drawer>
 
 {#snippet sizes(size)}
-  <Drawer defaultOpen title="Settings" description="Configure your preferences." {size}>
+  <Button variant="secondary" onClick={() => (axisOpen[`size-${size}`] = true)}>Open {size} drawer</Button>
+  <Drawer
+    open={axisOpen[`size-${size}`] ?? false}
+    onOpenChange={(v) => (axisOpen[`size-${size}`] = v)}
+    title="Settings"
+    description="Configure your preferences."
+    {size}
+  >
     <p>Drawer content goes here. You can put forms, navigation, or any other content.</p>
   </Drawer>
 {/snippet}
 
 {#snippet densities(density)}
-  <Drawer defaultOpen title="Settings" description="Configure your preferences." {density}>
+  <Button variant="secondary" onClick={() => (axisOpen[`density-${density}`] = true)}>Open {density} drawer</Button>
+  <Drawer
+    open={axisOpen[`density-${density}`] ?? false}
+    onOpenChange={(v) => (axisOpen[`density-${density}`] = v)}
+    title="Settings"
+    description="Configure your preferences."
+    {density}
+  >
     <p>Drawer content goes here. You can put forms, navigation, or any other content.</p>
   </Drawer>
 {/snippet}

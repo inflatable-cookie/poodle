@@ -31,6 +31,18 @@
     ...(showDensities && densities ? [{ value: "densities", label: "Densities" }] : []),
   ]);
 
+  // The preview reuses one layout across scene slugs (SceneSpecimen). When the
+  // available tab set shrinks — e.g. Callout keeps Densities but Avatar does
+  // not — the retained active tab would point at a vanished pane and render a
+  // blank page. Normalize an invalid selection back to Examples whenever the
+  // tab set changes.
+  const tabValues = $derived(tabs.map((tab) => tab.value));
+  $effect(() => {
+    if (!tabValues.includes(activeTab)) {
+      activeTab = "examples";
+    }
+  });
+
   const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
   const controlDensities = ["compact", "default", "comfortable"] as const;
 

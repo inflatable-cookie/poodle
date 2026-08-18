@@ -19,6 +19,9 @@ export function FormDialogSpecimen() {
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
   const [lastAction, setLastAction] = useState("");
+  const [axisOpen, setAxisOpen] = useState<Record<string, boolean>>({});
+
+  const setAxis = (key: string, open: boolean) => setAxisOpen((prev) => ({ ...prev, [key]: open }));
 
   function handleBasicSubmit(): void {
     setSubmitting(true);
@@ -51,34 +54,44 @@ export function FormDialogSpecimen() {
   return (
     <SpecimenLayout
       sizes={(size) => (
-        <FormDialog
-          open={true}
-          title="Add new user"
-          description="Invite a user to this workspace."
-          submitLabel="Add user"
-          size={size}
-          onSubmit={() => {}}
-          onOpenChange={() => {}}
-        >
-          <Field label="Full name" id="form-dialog-axis-name">
-            <TextInput placeholder="Enter name" />
-          </Field>
-        </FormDialog>
+        <>
+          <Button variant="secondary" onClick={() => setAxis(`size-${size}`, true)}>
+            Open {size} dialog
+          </Button>
+          <FormDialog
+            open={axisOpen[`size-${size}`] ?? false}
+            onOpenChange={(open) => setAxis(`size-${size}`, open)}
+            title="Add new user"
+            description="Invite a user to this workspace."
+            submitLabel="Add user"
+            size={size}
+            onSubmit={() => {}}
+          >
+            <Field label="Full name" id={`form-dialog-axis-name-${size}`}>
+              <TextInput placeholder="Enter name" />
+            </Field>
+          </FormDialog>
+        </>
       )}
       densities={(density) => (
-        <FormDialog
-          open={true}
-          title="Add new user"
-          description="Invite a user to this workspace."
-          submitLabel="Add user"
-          density={density}
-          onSubmit={() => {}}
-          onOpenChange={() => {}}
-        >
-          <Field label="Full name" id="form-dialog-axis-name">
-            <TextInput placeholder="Enter name" />
-          </Field>
-        </FormDialog>
+        <>
+          <Button variant="secondary" onClick={() => setAxis(`density-${density}`, true)}>
+            Open {density} dialog
+          </Button>
+          <FormDialog
+            open={axisOpen[`density-${density}`] ?? false}
+            onOpenChange={(open) => setAxis(`density-${density}`, open)}
+            title="Add new user"
+            description="Invite a user to this workspace."
+            submitLabel="Add user"
+            density={density}
+            onSubmit={() => {}}
+          >
+            <Field label="Full name" id={`form-dialog-axis-name-${density}`}>
+              <TextInput placeholder="Enter name" />
+            </Field>
+          </FormDialog>
+        </>
       )}
     >
       <SpecimenGroup label="Basic form dialog">

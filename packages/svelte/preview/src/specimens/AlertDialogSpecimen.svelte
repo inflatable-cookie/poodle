@@ -7,6 +7,7 @@
   let warningOpen = $state(false);
   let asyncOpen = $state(false);
   let lastAction = $state("");
+  let axisOpen: Record<string, boolean> = $state({});
 
   async function simulateAsync(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -67,29 +68,31 @@
       <p class="poodle-specimen__hint">Last action: <strong>{lastAction}</strong></p>
     {/if}
 
-    {#snippet sizes(size)}
-      <AlertDialog
-        open={true}
-        title="Delete this item?"
-        description="This action cannot be undone. The item and all associated data will be permanently removed."
-        confirmLabel="Delete"
-        cancelLabel="Keep it"
-        {size}
-        onOpenChange={() => {}}
-      />
-    {/snippet}
+{#snippet sizes(size)}
+  <Button variant="secondary" onClick={() => (axisOpen[`size-${size}`] = true)}>Open {size} dialog</Button>
+  <AlertDialog
+    open={axisOpen[`size-${size}`] ?? false}
+    onOpenChange={(v) => (axisOpen[`size-${size}`] = v)}
+    title="Delete this item?"
+    description="This action cannot be undone. The item and all associated data will be permanently removed."
+    confirmLabel="Delete"
+    cancelLabel="Keep it"
+    {size}
+  />
+{/snippet}
 
-    {#snippet densities(density)}
-      <AlertDialog
-        open={true}
-        title="Delete this item?"
-        description="This action cannot be undone. The item and all associated data will be permanently removed."
-        confirmLabel="Delete"
-        cancelLabel="Keep it"
-        {density}
-        onOpenChange={() => {}}
-      />
-    {/snippet}
+{#snippet densities(density)}
+  <Button variant="secondary" onClick={() => (axisOpen[`density-${density}`] = true)}>Open {density} dialog</Button>
+  <AlertDialog
+    open={axisOpen[`density-${density}`] ?? false}
+    onOpenChange={(v) => (axisOpen[`density-${density}`] = v)}
+    title="Delete this item?"
+    description="This action cannot be undone. The item and all associated data will be permanently removed."
+    confirmLabel="Delete"
+    cancelLabel="Keep it"
+    {density}
+  />
+{/snippet}
 </SpecimenLayout>
 
 <style>

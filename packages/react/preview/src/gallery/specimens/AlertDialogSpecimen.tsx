@@ -19,35 +19,48 @@ export function AlertDialogSpecimen() {
   const [warningOpen, setWarningOpen] = useState(false);
   const [asyncOpen, setAsyncOpen] = useState(false);
   const [lastAction, setLastAction] = useState("");
+  const [axisOpen, setAxisOpen] = useState<Record<string, boolean>>({});
 
   async function simulateAsync(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setLastAction("Async confirm completed");
   }
 
+  const setAxis = (key: string, open: boolean) => setAxisOpen((prev) => ({ ...prev, [key]: open }));
+
   return (
     <SpecimenLayout
       sizes={(size) => (
-        <AlertDialog
-          open={true}
-          title="Delete this item?"
-          description="This action cannot be undone. The item and all associated data will be permanently removed."
-          confirmLabel="Delete"
-          cancelLabel="Keep it"
-          size={size}
-          onOpenChange={() => {}}
-        />
+        <>
+          <Button variant="secondary" onClick={() => setAxis(`size-${size}`, true)}>
+            Open {size} dialog
+          </Button>
+          <AlertDialog
+            open={axisOpen[`size-${size}`] ?? false}
+            onOpenChange={(open) => setAxis(`size-${size}`, open)}
+            title="Delete this item?"
+            description="This action cannot be undone. The item and all associated data will be permanently removed."
+            confirmLabel="Delete"
+            cancelLabel="Keep it"
+            size={size}
+          />
+        </>
       )}
       densities={(density) => (
-        <AlertDialog
-          open={true}
-          title="Delete this item?"
-          description="This action cannot be undone. The item and all associated data will be permanently removed."
-          confirmLabel="Delete"
-          cancelLabel="Keep it"
-          density={density}
-          onOpenChange={() => {}}
-        />
+        <>
+          <Button variant="secondary" onClick={() => setAxis(`density-${density}`, true)}>
+            Open {density} dialog
+          </Button>
+          <AlertDialog
+            open={axisOpen[`density-${density}`] ?? false}
+            onOpenChange={(open) => setAxis(`density-${density}`, open)}
+            title="Delete this item?"
+            description="This action cannot be undone. The item and all associated data will be permanently removed."
+            confirmLabel="Delete"
+            cancelLabel="Keep it"
+            density={density}
+          />
+        </>
       )}
     >
       <SpecimenGroup label="Danger tone">

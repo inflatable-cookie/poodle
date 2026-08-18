@@ -68,3 +68,51 @@ Census covers the full 175-route denominator (174 catalogue entries +
 web-only `MeterSurface`). The 24 corrected routes are exercised individually;
 everything else is swept in the aggregate loop. All route changes from commits
 1–2 are untouched by this batch.
+
+## Review response (2026-08-18) — PR #39
+
+### Blocker 1 — overlay axes mounted every modal at once
+The Dialog/Drawer/AlertDialog/FormDialog axis renderers returned already-open
+overlays, stacking five/three modal portals and leaving body scroll-locked
+(each instance saved/restored the same `body.style.overflow`). Reworked all
+four routes in both runtimes to one-open-at-a-time triggers: each step renders
+a `Open {size} dialog` / `Open {size} drawer` button plus a controlled overlay
+(`axisOpen` state map), so the pane mounts triggers only and a step click opens
+exactly one overlay. FormDialog axis field ids are now per-step
+(`form-dialog-axis-name-{size|density}`), removing the duplicate-id mount.
+ConfirmAction already rendered a trigger and was left as-is.
+
+### Blocker 2 — SceneSpecimen retained a tab the next scene dropped
+`SpecimenLayout` kept `activeTab` when the tab set shrank (Callout → Densities
+→ Avatar left the pane blank). Both runtimes now normalize an invalid active
+tab back to `examples` when the available tab set changes (React `useEffect`
+keyed on the tab-value set; Svelte `$effect` over a `$derived` tab-value list).
+Verified with a paired regression that reuses one SceneSpecimen instance
+(`AxisSceneSwitch` fixture for Svelte, `rerender` for React).
+
+### Census hardening
+- Overlay lifecycle regressions: for dialog/alert-dialog/form-dialog/drawer in
+  both runtimes — pane mounts with zero open overlays, one step click opens
+  exactly one overlay with content, backdrop closes it, and body scroll is
+  restored on tab exit and on unmount.
+- The sweep now derives expectations from component props independently of page
+  shape: a layout-less page whose component takes `size`/`density` fails until
+  it exposes the axis. The nine layout-less demo pages (`time-ago`, `box`,
+  `grid`, `list-grid`, `region`, `resize-handle`, `scroll-shell`, `separator`,
+  `spacer`) take no axis props, so they still pass with no tabs.
+
+### Test-infrastructure notes
+- Svelte 5 runes components no longer expose `$set` (`component_api_changed`);
+  the scene-navigation regression uses a switch fixture that patches the same
+  SceneSpecimen instance via its own `$state`.
+- Svelte fixtures must use `onclick` (lowercase): camelCase `onClick` handlers
+  do not fire under `fireEvent.click` in this Svelte/happy-dom setup.
+- Drawer's Web Animations API usage (`element.animate`) is polyfilled in the
+  census file, mirroring the existing Drawer component test.
+
+### Validation after review response
+- `effigy test:parity` — 4 files, 252 passed (was 247; +5 new regressions).
+- `effigy ci:web` — 341 files, 2703 passed (+ 5 files, 11 passed).
+- `effigy check:svelte-preview` — 0 errors, 13 warnings (baseline).
+- `effigy react:build`, `effigy ir:check`, `effigy catalogue:check` — pass.
+- `git diff --check` — clean.

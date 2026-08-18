@@ -28,12 +28,32 @@ import { SceneSpecimen as ReactSceneSpecimen } from "../../packages/react/previe
 import { specimenMap as svelteMap } from "../../packages/svelte/preview/src/specimens/registry";
 import PilotSpecimenHarness from "../../packages/svelte/preview/test/PilotSpecimenHarness.svelte";
 import AxisSceneFixture from "../../packages/svelte/preview/test/AxisSceneFixture.svelte";
+import AxisSceneSwitch from "../../packages/svelte/preview/test/AxisSceneSwitch.svelte";
 import AxisHelperNoRenderers from "../../packages/svelte/preview/test/AxisHelperNoRenderers.svelte";
 import AxisHelperSizesOnly from "../../packages/svelte/preview/test/AxisHelperSizesOnly.svelte";
 import AxisHelperDensitiesOnly from "../../packages/svelte/preview/test/AxisHelperDensitiesOnly.svelte";
 import AxisHelperHiddenRenderers from "../../packages/svelte/preview/test/AxisHelperHiddenRenderers.svelte";
 import catalogue from "../../packages/codegen/fixtures/preview-catalogue.json";
 import { SpecimenLayout } from "../../packages/react/preview/src/gallery/SpecimenLayout";
+
+// Drawer slides/fades out through the Web Animations API (`element.animate`),
+// which happy-dom does not implement. Mirrors the polyfill in the Drawer
+// component tests: the fake fires `onfinish` on the next microtask, after
+// Svelte has attached it, so the outro completes without throwing.
+if (!("animate" in Element.prototype)) {
+  (Element.prototype as unknown as { animate: () => unknown }).animate = () => {
+    const animation = {
+      onfinish: null as (() => void) | null,
+      cancel: () => {},
+      playState: "finished",
+      currentTime: 0,
+      effect: null,
+      finished: Promise.resolve(),
+    };
+    queueMicrotask(() => animation.onfinish?.());
+    return animation;
+  };
+}
 
 const COMPONENT_SRC = join(import.meta.dirname, "../../packages/svelte/components/src");
 const { components: catalogueComponents } = catalogue as {
@@ -311,6 +331,117 @@ describe("authored-scene tab projection", () => {
     expect(tabLabels(document)).toEqual(["Examples", "Sizes", "Densities"]);
     cleanupReact();
   });
+
+  it("normalizes a retained tab when the next scene drops it (Callout Densities → Avatar)", async () => {
+    // The preview reuses one SceneSpecimen instance across slugs; navigate it
+    // while a tab the next scene no longer provides is active.
+    renderSvelte(AxisSceneSwitch);
+    await clickTab(document, "Densities", "Svelte");
+    await awaitPaneEvidence("Svelte");
+    const svelteSwitch = [...document.querySelectorAll<HTMLElement>("button")].find(
+      (button) => button.textContent?.trim() === "navigate to avatar",
+    );
+    expect(svelteSwitch).toBeTruthy();
+    fireEvent.click(svelteSwitch!);
+    await waitForSvelte(() => expect(tabLabels(document)).toEqual(["Examples", "Sizes"]));
+    const svelteExamples = [...document.querySelectorAll<HTMLElement>("button.poodle-tabs__tab")].find(
+      (button) => button.querySelector(".poodle-tabs__label")?.textContent?.trim() === "Examples",
+    );
+    expect(svelteExamples?.getAttribute("aria-selected")).toBe("true");
+    expect((document.querySelector(".poodle-specimen-layout__content")?.textContent ?? "").trim()).not.toBe("");
+    cleanupSvelte();
+
+    const reactView = renderReact(createElement(ReactSceneSpecimen, { slug: "callout" }));
+    await clickTab(document, "Densities", "React");
+    await awaitPaneEvidence("React");
+    reactView.rerender(createElement(ReactSceneSpecimen, { slug: "avatar" }));
+    expect(tabLabels(document)).toEqual(["Examples", "Sizes"]);
+    const reactExamples = [...document.querySelectorAll<HTMLElement>("button.poodle-tabs__tab")].find(
+      (button) => button.querySelector(".poodle-tabs__label")?.textContent?.trim() === "Examples",
+    );
+    expect(reactExamples?.getAttribute("aria-selected")).toBe("true");
+    expect((document.querySelector(".poodle-specimen-layout__content")?.textContent ?? "").trim()).not.toBe("");
+    cleanupReact();
+  });
+});
+
+/** The four overlay routes must present their axes through one-at-a-time
+ *  triggers: mounting the pane must not stack modals, opening a step must
+ *  leave exactly one overlay, and returning to Examples or unmounting must
+ *  restore body scroll. */
+async function assertOverlayAxisLifecycle(
+  runtime: "Svelte" | "React",
+  slug: string,
+  selector: string,
+  triggerLabel: string,
+  backdropLabel: string,
+): Promise<void> {
+  const waitFor = runtime === "Svelte" ? waitForSvelte : waitForReact;
+  if (runtime === "Svelte") {
+    renderSvelteSpecimen(slug);
+  } else {
+    renderReactSpecimen(slug);
+  }
+
+  await clickTab(document, "Sizes", runtime);
+
+  // The pane renders triggers, not stacked open modals.
+  await waitFor(() => expect(document.querySelectorAll(selector).length).toBe(0));
+
+  const trigger = [...document.querySelectorAll<HTMLElement>("button")].find(
+    (button) => (button.textContent ?? "").trim() === triggerLabel,
+  );
+  expect(trigger, `${slug} (${runtime}) axis trigger not found`).toBeTruthy();
+  if (runtime === "React") {
+    await act(async () => {
+      fireEvent.click(trigger!);
+    });
+  } else {
+    fireEvent.click(trigger!);
+  }
+  await waitFor(() => {
+    const overlays = [...document.querySelectorAll<HTMLElement>(selector)];
+    expect(overlays.length).toBe(1);
+    expect((overlays[0].textContent ?? "").trim()).not.toBe("");
+  });
+
+  const backdrop = document.querySelector<HTMLElement>(`button[aria-label="${backdropLabel}"]`);
+  expect(backdrop, `${slug} (${runtime}) backdrop not found`).toBeTruthy();
+  if (runtime === "React") {
+    await act(async () => {
+      fireEvent.click(backdrop!);
+    });
+  } else {
+    fireEvent.click(backdrop!);
+  }
+  await waitFor(() => expect(document.querySelectorAll(selector).length).toBe(0));
+
+  await clickTab(document, "Examples", runtime);
+  expect(document.body.style.overflow, `${slug} (${runtime}) scroll locked after tab exit`).not.toBe("hidden");
+
+  if (runtime === "Svelte") {
+    cleanupSvelte();
+  } else {
+    cleanupReact();
+  }
+  expect(document.body.style.overflow, `${slug} (${runtime}) scroll locked after unmount`).not.toBe("hidden");
+}
+
+describe("overlay axes open one at a time", () => {
+  const OVERLAY_ROUTES = [
+    ["dialog", ".poodle-dialog", "Open xs dialog", "Dismiss dialog backdrop"],
+    ["alert-dialog", ".poodle-dialog", "Open xs dialog", "Dismiss dialog backdrop"],
+    ["form-dialog", ".poodle-dialog", "Open xs dialog", "Dismiss dialog backdrop"],
+    ["drawer", ".poodle-drawer", "Open xs drawer", "Dismiss drawer backdrop"],
+  ] as const;
+
+  for (const [slug, selector, triggerLabel, backdropLabel] of OVERLAY_ROUTES) {
+    it(`${slug} mounts triggers only, opens one overlay, and restores scroll`, async () => {
+      document.body.innerHTML = "";
+      await assertOverlayAxisLifecycle("Svelte", slug, selector, triggerLabel, backdropLabel);
+      await assertOverlayAxisLifecycle("React", slug, selector, triggerLabel, backdropLabel);
+    });
+  }
 });
 
 describe("web axis census (175 routes)", () => {
@@ -387,11 +518,13 @@ describe("web axis census (175 routes)", () => {
         disagreements.push(`${slug} runtime drift: ${JSON.stringify(svelteTabs)} vs ${JSON.stringify(reactTabs)}`);
       }
 
-      const expected = svelteLayout ? ["Examples"] : [];
-      if (svelteLayout) {
-        if (eligibility.size) expected.push("Sizes");
-        if (eligibility.density) expected.push("Densities");
-      }
+      // Expectations are eligibility-derived independently of the current page
+      // shape: a page that takes a size/density prop must expose the axis even
+      // if it does not use SpecimenLayout, or the census fails until it does.
+      const expected: string[] = [];
+      if (svelteLayout) expected.push("Examples");
+      if (eligibility.size) expected.push("Sizes");
+      if (eligibility.density) expected.push("Densities");
       if (JSON.stringify(svelteTabs) !== JSON.stringify(expected)) {
         disagreements.push(`${slug} (Svelte): ${JSON.stringify(svelteTabs)} ≠ ${JSON.stringify(expected)}`);
       }

@@ -15,6 +15,7 @@
   let scrollableOpen = $state(false);
   let widthOpenMap: Record<string, boolean> = $state({});
   let overlayInDialogOpen = $state(false);
+  let axisOpen: Record<string, boolean> = $state({});
 </script>
 
 <SpecimenLayout>
@@ -240,13 +241,27 @@
 </Dialog>
 
 {#snippet sizes(size)}
-  <Dialog defaultOpen title="Keyboard shortcuts" showCloseButton {size}>
+  <Button variant="secondary" onClick={() => (axisOpen[`size-${size}`] = true)}>Open {size} dialog</Button>
+  <Dialog
+    open={axisOpen[`size-${size}`] ?? false}
+    onOpenChange={(v) => (axisOpen[`size-${size}`] = v)}
+    title="Keyboard shortcuts"
+    showCloseButton
+    {size}
+  >
     <p>Command palette, save, and toggle comment live here.</p>
   </Dialog>
 {/snippet}
 
 {#snippet densities(density)}
-  <Dialog defaultOpen title="Keyboard shortcuts" showCloseButton {density}>
+  <Button variant="secondary" onClick={() => (axisOpen[`density-${density}`] = true)}>Open {density} dialog</Button>
+  <Dialog
+    open={axisOpen[`density-${density}`] ?? false}
+    onOpenChange={(v) => (axisOpen[`density-${density}`] = v)}
+    title="Keyboard shortcuts"
+    showCloseButton
+    {density}
+  >
     <p>Command palette, save, and toggle comment live here.</p>
   </Dialog>
 {/snippet}
