@@ -40,6 +40,11 @@ prefer the narrower current authority and repair the stale document.
 - A renderer-neutral specimen plan may share ordered tabs, sections, captions,
   and fixture references across runtimes. Runtime adapters still render real
   components and may own bounded presentation needed by their renderer.
+- Axis tabs use the component's exact ordered public value domain. A prop named
+  `size` does not imply the five-step `ControlSize` domain, and a prop named
+  `density` does not justify a tab when its values have no observable effect.
+  Every advertised axis value must render real evidence in every active
+  runtime; an omitted, blank, collapsed, or fabricated row is a defect.
 - Review specimens as documentation. A green test board does not make a
   specimen page useful, and an attractive specimen does not prove parity.
 

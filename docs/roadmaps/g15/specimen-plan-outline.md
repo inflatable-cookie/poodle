@@ -105,9 +105,10 @@ which example changed. They are **not** test selectors and carry no assertions.
 
 ## Axis Eligibility
 
-A page shows the `Sizes` tab when the component takes `size`, and the
-`Densities` tab when it takes `density`. Both are decided from the component's
-public props, not from habit.
+A page shows the `Sizes` tab when the component takes a visually meaningful
+`size`, and the `Densities` tab when it takes a visually meaningful `density`.
+Both eligibility and the ordered values come from the component's public
+contract, not from habit or the prop name alone.
 
 | Condition | Result |
 | --- | --- |
@@ -120,6 +121,12 @@ Rules:
 
 - The axis tabs own the axis. Size and density matrices do not appear in
   `Examples`.
+- An axis uses its exact public value domain. The standard control-size domain
+  is `xs`, `sm`, `md`, `lg`, `xl`, but a component-specific domain such as
+  EmptyState's `default`, `compact` stays component-specific. Text and Eyebrow
+  stop at `md`. No shell may invent, collapse, or silently skip values.
+- A declared prop with no observable component effect is not an eligible axis;
+  remove the dead prop rather than documenting a blank pane.
 - One representative example per step. A tab that renders three variants per
   size is an exhaustive matrix wearing a tab.
 - `sizeRole` is not an axis. It is a semantic offset and belongs in `Examples`

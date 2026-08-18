@@ -270,6 +270,11 @@ mechanics are runtime-owned and are not a defect; absent or fabricated evidence
 is. These findings still come from source, not a rendered page — see the
 measurement note above.
 
+The operator resolved the authority on 2026-08-18: `g15.034` owns a clean
+pre-v1.0 migration. EmptyState keeps only its real `default | compact` size,
+Icon gains all five real sizes and loses dead density, and each specimen shell
+must consume the component's explicit ordered domain.
+
 ## What The Audit Did Not Find
 
 - **No `Conformance` tab, anywhere.** The live tab set is exactly
@@ -285,8 +290,8 @@ measurement note above.
   pages do render controls that are not wired — see finding 2 — but the pages
   themselves are alive.
 - **The live web sweep found no contract or semantic defects.** The later
-  `g15.019` native caller audit did expose the two axis-domain gaps above; they
-  require an authority decision before implementation.
+  `g15.019` native caller audit did expose the two axis-domain gaps above;
+  their clean breaking repair is ready as `g15.034`.
 
 ## Corrections From Earlier Revisions
 
@@ -394,6 +399,7 @@ that changes specimen presentation carries a live operator-review checkpoint.
 | [`g15.018`](018-overloaded-examples-curation.md) | Overloaded `Examples` — **parent, not dispatchable** | 53 pages |
 | ↳ [`g15.020`](020-curate-model-connection-licence.md)–[`g15.025`](025-curate-collections-navigation-tail.md) | six bounded family children, one exact page list each | 6–11 each, 53 total |
 | [`g15.019`](019-gpui-specimen-structure.md) | Native axis panes and captions | complete — 74 axis + 6 caption corrections; two axis-domain gaps returned |
+| [`g15.034`](034-component-specific-specimen-axis-domains.md) | Exact component domains and truthful specimen-axis evidence | ready — approved clean break |
 | [`g15.026`](026-native-specimen-probe.md) | The headless native probe that un-provisions the GPUI column | 174 pages |
 | [`g15.027`](027-screen-clear-human-review.md) | Human teaching review for mechanically clear pages — **parent, not dispatchable** | 56 pages |
 | ↳ [`g15.028`](028-review-foundation-controls-entry.md)–[`g15.033`](033-review-composition-forms-data-media.md) | six bounded family children, one exact page list each | 7–14 each, 56 total |
