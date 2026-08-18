@@ -101,7 +101,7 @@ export function Dialog({
   const titleId = useId();
   const labelledBy = !header && title ? titleId : undefined;
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
-  const resolvedCloseButtonSize = closeButtonSize ?? resolveSemanticControlSize(uiPresentation.sizeScale, "chrome");
+  const resolvedCloseButtonSize = closeButtonSize ?? resolvedSize;
   const resolvedDensity = density ?? uiPresentation.density;
   const isControlled = open !== undefined;
   const isOpen = isControlled ? open === true : uncontrolledOpen;

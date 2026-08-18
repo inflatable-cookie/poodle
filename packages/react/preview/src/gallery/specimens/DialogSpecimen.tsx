@@ -67,7 +67,8 @@ export function DialogSpecimen() {
           <Dialog
             open={axisOpen[`size-${size}`] ?? false}
             onOpenChange={(open) => setAxis(`size-${size}`, open)}
-            title="Keyboard shortcuts"
+            title={`Control scale: ${size}`}
+            description="Size scales the dialog header and close control; width is configured separately."
             showCloseButton
             size={size}
           >
@@ -83,7 +84,8 @@ export function DialogSpecimen() {
           <Dialog
             open={axisOpen[`density-${density}`] ?? false}
             onOpenChange={(open) => setAxis(`density-${density}`, open)}
-            title="Keyboard shortcuts"
+            title={`Density: ${density}`}
+            description="Density changes surface spacing; width is configured separately."
             showCloseButton
             density={density}
           >

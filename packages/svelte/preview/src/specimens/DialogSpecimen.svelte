@@ -245,7 +245,8 @@
   <Dialog
     open={axisOpen[`size-${size}`] ?? false}
     onOpenChange={(v) => (axisOpen[`size-${size}`] = v)}
-    title="Keyboard shortcuts"
+    title="Control scale: {size}"
+    description="Size scales the dialog header and close control; width is configured separately."
     showCloseButton
     {size}
   >
@@ -258,7 +259,8 @@
   <Dialog
     open={axisOpen[`density-${density}`] ?? false}
     onOpenChange={(v) => (axisOpen[`density-${density}`] = v)}
-    title="Keyboard shortcuts"
+    title="Density: {density}"
+    description="Density changes surface spacing; width is configured separately."
     showCloseButton
     {density}
   >

@@ -115,7 +115,7 @@
   const titleId = `poodle-dialog-title-${nextDialogId++}`;
   const labelledBy = $derived(!header && title ? titleId : undefined);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
-  const resolvedCloseButtonSize = $derived(closeButtonSize ?? resolveSemanticControlSize($uiPresentation.sizeScale, "chrome"));
+  const resolvedCloseButtonSize = $derived(closeButtonSize ?? resolvedSize);
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const isControlled = $derived(open !== undefined);
   const isOpen = $derived(isControlled ? open === true : uncontrolledOpen);
@@ -361,4 +361,3 @@
     </div>
   </div>
 {/if}
-
