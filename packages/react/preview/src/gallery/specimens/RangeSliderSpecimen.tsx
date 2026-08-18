@@ -8,30 +8,28 @@ export function RangeSliderSpecimen() {
   const [ageRange, setAgeRange] = useState<[number, number]>([23, 43]);
   const [embeddedUnipolarRange, setEmbeddedUnipolarRange] = useState<[number, number]>([0.2, 0.75]);
   const [embeddedBipolarRange, setEmbeddedBipolarRange] = useState<[number, number]>([-0.6, 0.35]);
-  const [sizeUnipolarRanges, setSizeUnipolarRanges] = useState<Record<string, [number, number]>>({ xs: [0.2, 0.75], sm: [0.2, 0.75], md: [0.2, 0.75], lg: [0.2, 0.75], xl: [0.2, 0.75] });
-  const [sizeBipolarRanges, setSizeBipolarRanges] = useState<Record<string, [number, number]>>({ xs: [-0.5, 0.5], sm: [-0.5, 0.5], md: [-0.5, 0.5], lg: [-0.5, 0.5], xl: [-0.5, 0.5] });
+  const [verticalRange, setVerticalRange] = useState<[number, number]>([30, 70]);
+  const [sizeRanges, setSizeRanges] = useState<Record<string, [number, number]>>({ xs: [0.2, 0.75], sm: [0.2, 0.75], md: [0.2, 0.75], lg: [0.2, 0.75], xl: [0.2, 0.75] });
 
-  const variantStyle = { display: "flex", width: "100%", flexDirection: "column" as const, gap: "0.375rem" };
-  const labelStyle = { color: "var(--poodle-color-text-secondary)", fontSize: "var(--poodle-typography-label-size)" };
+  const axisStyle = { width: "min(100%, 20rem)" };
 
   return (
-    <div style={{ maxWidth: "20rem" }}>
-      <SpecimenLayout
-        sizes={(size) => (
-          <span style={variantStyle}>
-            <span style={labelStyle}>{size.toUpperCase()} · standard</span>
-            <RangeSlider value={sizeUnipolarRanges[size]} min={0} max={1} step={0.01} size={size} ariaLabel={`Standard range at ${size}`} onValueChange={(value) => setSizeUnipolarRanges((current) => ({ ...current, [size]: value }))} />
-            <span style={labelStyle}>{size.toUpperCase()} · embedded unipolar</span>
-            <RangeSlider variant="embedded" polarity="unipolar" value={sizeUnipolarRanges[size]} min={0} max={1} step={0.01} size={size} ariaLabel={`Embedded unipolar range at ${size}`} onValueChange={(value) => setSizeUnipolarRanges((current) => ({ ...current, [size]: value }))} />
-            <span style={labelStyle}>{size.toUpperCase()} · embedded bipolar</span>
-            <RangeSlider variant="embedded" polarity="bipolar" value={sizeBipolarRanges[size]} min={-1} max={1} step={0.01} size={size} ariaLabel={`Embedded bipolar range at ${size}`} onValueChange={(value) => setSizeBipolarRanges((current) => ({ ...current, [size]: value }))} />
-          </span>
-        )}
-        densities={(density) => (
-          <RangeSlider variant="embedded" polarity="bipolar" value={[-0.5, 0.5]} min={-1} max={1} density={density} ariaLabel={`Embedded range at ${density} density`} />
-        )}
-      >
-        <SpecimenGroup label="Default">
+    <SpecimenLayout
+      /* One control per step. The axis tabs exist so Examples does not have to
+         carry a matrix; filling them with a matrix defeats the point. */
+      sizes={(size) => (
+        <div style={axisStyle}>
+          <RangeSlider value={sizeRanges[size]} min={0} max={1} step={0.01} size={size} ariaLabel={`Range at ${size}`} onValueChange={(value) => setSizeRanges((current) => ({ ...current, [size]: value }))} />
+        </div>
+      )}
+      densities={(density) => (
+        <div style={axisStyle}>
+          <RangeSlider value={[20, 80]} min={0} max={100} density={density} ariaLabel={`Range at ${density} density`} />
+        </div>
+      )}
+    >
+      <div style={{ maxWidth: "20rem" }}>
+        <SpecimenGroup label="A lower and upper bound the reader drags">
           <RangeSlider
             value={priceRange}
             min={0}
@@ -44,7 +42,7 @@ export function RangeSliderSpecimen() {
           </p>
         </SpecimenGroup>
 
-        <SpecimenGroup label="With step">
+        <SpecimenGroup label="Stepped — the thumbs land on whole increments">
           <RangeSlider
             value={ageRange}
             min={18}
@@ -58,18 +56,40 @@ export function RangeSliderSpecimen() {
           </p>
         </SpecimenGroup>
 
+        {/* The embedded variant is the dense control used inside audio and
+            modulation panels; unipolar fills from the floor, bipolar from centre. */}
+        <SpecimenGroup label="Embedded variant — unipolar fills from the floor, bipolar from centre">
+          <RangeSlider variant="embedded" polarity="unipolar" value={embeddedUnipolarRange} min={0} max={1} step={0.01} ariaLabel="Unipolar modulation range" onValueChange={setEmbeddedUnipolarRange} />
+          <RangeSlider variant="embedded" polarity="bipolar" value={embeddedBipolarRange} min={-1} max={1} step={0.01} ariaLabel="Bipolar modulation range" onValueChange={setEmbeddedBipolarRange} />
+        </SpecimenGroup>
+
         <SpecimenGroup label="Disabled">
           <RangeSlider value={[30, 70]} min={0} max={100} disabled ariaLabel="Disabled range" />
         </SpecimenGroup>
+      </div>
 
-        <SpecimenGroup label="Embedded unipolar control">
-          <RangeSlider variant="embedded" polarity="unipolar" value={embeddedUnipolarRange} min={0} max={1} step={0.01} ariaLabel="Unipolar modulation range" onValueChange={setEmbeddedUnipolarRange} />
-        </SpecimenGroup>
-
-        <SpecimenGroup label="Embedded bipolar control">
-          <RangeSlider variant="embedded" polarity="bipolar" value={embeddedBipolarRange} min={-1} max={1} step={0.01} ariaLabel="Bipolar modulation range" onValueChange={setEmbeddedBipolarRange} />
-        </SpecimenGroup>
-      </SpecimenLayout>
-    </div>
+      <SpecimenGroup label="Vertical — the same control on the other axis">
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "2rem", height: "12rem" }}>
+          <RangeSlider
+            orientation="vertical"
+            value={verticalRange}
+            min={0}
+            max={100}
+            ariaLabel="Vertical range"
+            onValueChange={setVerticalRange}
+          />
+          <RangeSlider
+            orientation="vertical"
+            variant="embedded"
+            polarity="bipolar"
+            value={[-0.4, 0.6]}
+            min={-1}
+            max={1}
+            step={0.01}
+            ariaLabel="Vertical embedded range"
+          />
+        </div>
+      </SpecimenGroup>
+    </SpecimenLayout>
   );
 }

@@ -7,6 +7,7 @@ export function ButtonSpecimen() {
   const [clickLog, setClickLog] = useState("No button clicked yet.");
   const [intent, setIntent] = useState("save");
   const [bookmarked, setBookmarked] = useState(false);
+  const [sectionsOpen, setSectionsOpen] = useState(false);
 
   const log = (label: string) => setClickLog(`Clicked: ${label}`);
 
@@ -23,7 +24,14 @@ export function ButtonSpecimen() {
         </Button>
       )}
     >
-      <SpecimenGroup label="Variants">
+      <SpecimenGroup label="A normal action row — the primary action, then the way out">
+        <div className="poodle-specimen__row">
+          <Button variant="primary" onClick={() => log("Save changes")}>Save changes</Button>
+          <Button variant="ghost" onClick={() => log("Cancel")}>Cancel</Button>
+        </div>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Variants — how much weight the action carries">
         <div className="poodle-specimen__row">
           <Button variant="primary" onClick={() => log("Primary")}>Primary</Button>
           <Button variant="secondary" onClick={() => log("Secondary")}>Secondary</Button>
@@ -31,57 +39,55 @@ export function ButtonSpecimen() {
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Danger tone">
+      {/* One variant, every tone. Tone and variant compose freely, so showing
+          the grid teaches nothing the two rows above and below do not. */}
+      <SpecimenGroup label="Tones — what kind of action it is">
         <div className="poodle-specimen__row">
-          <Button variant="primary" tone="danger" onClick={() => log("Danger primary")}>Danger primary</Button>
-          <Button variant="secondary" tone="danger" onClick={() => log("Danger secondary")}>Danger secondary</Button>
-          <Button variant="ghost" tone="danger" onClick={() => log("Danger ghost")}>Danger ghost</Button>
+          <Button variant="secondary" onClick={() => log("Default tone")}>Default</Button>
+          <Button variant="secondary" tone="danger" onClick={() => log("Danger tone")}>Delete</Button>
+          <Button variant="secondary" tone="success" onClick={() => log("Success tone")}>Approve</Button>
+          <Button variant="secondary" tone="warning" onClick={() => log("Warning tone")}>Override</Button>
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Success tone">
-        <div className="poodle-specimen__row">
-          <Button variant="primary" tone="success" onClick={() => log("Success primary")}>Success primary</Button>
-          <Button variant="secondary" tone="success" onClick={() => log("Success secondary")}>Success secondary</Button>
-          <Button variant="ghost" tone="success" onClick={() => log("Success ghost")}>Success ghost</Button>
-        </div>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="With icons">
+      <SpecimenGroup label="Icons, disclosure, and icon-only">
         <div className="poodle-specimen__row">
           <Button leadingIcon="plus" onClick={() => log("Leading icon")}>Create</Button>
           <Button trailingIcon="external-link" onClick={() => log("Trailing icon")}>Open</Button>
-          <Button leadingIcon="save" trailingIcon="check" onClick={() => log("Both icons")}>Save</Button>
-        </div>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="With chevron">
-        <div className="poodle-specimen__row">
-          <Button chevron onClick={() => log("Chevron")}>Options</Button>
-          <Button variant="primary" chevron onClick={() => log("Primary chevron")}>Actions</Button>
           <Button leadingIcon="filter" chevron onClick={() => log("Icon + chevron")}>Filter</Button>
+          <Button leadingIcon="settings" ariaLabel="Settings" onClick={() => log("Icon only")} />
+        </div>
+        {/* `chevron` is only the indicator. `ariaExpanded` is the disclosure
+            state a screen reader hears, and the two are independent props. */}
+        <div className="poodle-specimen__row">
+          <Button
+            chevron
+            ariaExpanded={sectionsOpen}
+            onClick={() => {
+              const next = !sectionsOpen;
+              setSectionsOpen(next);
+              log(`Sections ${next ? "expanded" : "collapsed"}`);
+            }}
+          >
+            Sections
+          </Button>
+          <span style={{ fontSize: "0.8125rem", color: "var(--poodle-color-text-secondary)" }}>
+            aria-expanded="{String(sectionsOpen)}"
+          </span>
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="States">
+      <SpecimenGroup label="States — unavailable, working, and held down">
         <div className="poodle-specimen__row">
           <Button variant="primary" disabled>Disabled</Button>
           <Button variant="primary" loading>Loading</Button>
-          <Button variant="secondary" disabled>Disabled secondary</Button>
-        </div>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Toggle (pressed state)">
-        <div className="poodle-specimen__row">
           <Button variant="secondary" leadingIcon="star" pressed={bookmarked} onPressedChange={setBookmarked}>
             {bookmarked ? "Bookmarked" : "Bookmark"}
           </Button>
-          <Button variant="secondary" leadingIcon="heart" defaultPressed={false}>Like</Button>
-          <Button variant="ghost" leadingIcon="lock-open" defaultPressed>Locked</Button>
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Form overrides">
+      <SpecimenGroup label="Inside a form — each button can submit somewhere else">
         <form
           className="poodle-specimen__form"
           onSubmit={(event) => {

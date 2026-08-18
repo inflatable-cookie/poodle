@@ -96,7 +96,38 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let examples = div()
         .flex()
         .flex_col()
-        .gap(px(24.0))
+        .gap(px(24.0))        // --- A normal action row ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new()
+                        .with_content("A normal action row — the primary action, then the way out"),
+                    theme,
+                ))
+                .child(
+                    div()
+                        .flex()
+                        .gap(px(8.0))
+                        .flex_wrap()
+                        .child(node_button(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Primary)
+                                .with_label("Save changes"),
+                            state,
+                            Some(variant_click(state, "Save changes")),
+                        ))
+                        .child(node_button(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Ghost)
+                                .with_label("Cancel"),
+                            state,
+                            Some(variant_click(state, "Cancel")),
+                        )),
+                ),
+        )
         // --- Variants ---
         .child(
             div()
@@ -104,7 +135,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Variants"),
+                    EyebrowSpec::new().with_content("Variants — how much weight the action carries"),
                     theme,
                 ))
                 .child(
@@ -135,14 +166,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )),
                 ),
         )
-        // --- Danger tone ---
+        // --- Tones ---
+        // One variant, every tone. Tone and variant compose freely, so the
+        // 3x4 grid this replaced taught nothing the variants row does not.
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Danger tone"),
+                    EyebrowSpec::new().with_content("Tones — what kind of action it is"),
                     theme,
                 ))
                 .child(
@@ -152,111 +185,44 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex_wrap()
                         .child(node_button_static(
                             ButtonSpec::new()
-                                .with_variant(ButtonVariant::Primary)
-                                .with_tone(ButtonTone::Danger)
-                                .with_label("Danger primary"),
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_label("Default"),
                             theme,
                         ))
                         .child(node_button_static(
                             ButtonSpec::new()
                                 .with_variant(ButtonVariant::Secondary)
                                 .with_tone(ButtonTone::Danger)
-                                .with_label("Danger secondary"),
-                            theme,
-                        ))
-                        .child(node_button_static(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Ghost)
-                                .with_tone(ButtonTone::Danger)
-                                .with_label("Danger ghost"),
-                            theme,
-                        )),
-                ),
-        )
-        // --- Success tone ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Success tone"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .gap(px(8.0))
-                        .flex_wrap()
-                        .child(node_button_static(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Primary)
-                                .with_tone(ButtonTone::Success)
-                                .with_label("Success primary"),
+                                .with_label("Delete"),
                             theme,
                         ))
                         .child(node_button_static(
                             ButtonSpec::new()
                                 .with_variant(ButtonVariant::Secondary)
                                 .with_tone(ButtonTone::Success)
-                                .with_label("Success secondary"),
-                            theme,
-                        ))
-                        .child(node_button_static(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Ghost)
-                                .with_tone(ButtonTone::Success)
-                                .with_label("Success ghost"),
-                            theme,
-                        )),
-                ),
-        )
-        // --- Warning tone ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Warning tone"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .gap(px(8.0))
-                        .flex_wrap()
-                        .child(node_button_static(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Primary)
-                                .with_tone(ButtonTone::Warning)
-                                .with_label("Warning primary"),
+                                .with_label("Approve"),
                             theme,
                         ))
                         .child(node_button_static(
                             ButtonSpec::new()
                                 .with_variant(ButtonVariant::Secondary)
                                 .with_tone(ButtonTone::Warning)
-                                .with_label("Warning secondary"),
-                            theme,
-                        ))
-                        .child(node_button_static(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Ghost)
-                                .with_tone(ButtonTone::Warning)
-                                .with_label("Warning ghost"),
+                                .with_label("Override"),
                             theme,
                         )),
                 ),
         )
-        // --- With icons ---
+        // --- Icons, disclosure, and icon-only ---
+        // The disclosure trigger below is the native evidence for
+        // `ButtonSpec.aria_expanded`; the web pages carry the same idea as the
+        // chevron button, so it lives in the same section rather than its own.
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With icons"),
+                    EyebrowSpec::new().with_content("Icons, disclosure, and icon-only"),
                     theme,
                 ))
                 .child(
@@ -281,61 +247,48 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(node_button_static(
                             ButtonSpec::new()
                                 .with_variant(ButtonVariant::Secondary)
-                                .with_leading_icon("save")
-                                .with_trailing_icon("check")
-                                .with_label("Save"),
-                            theme,
-                        )),
-                ),
-        )
-        // --- With chevron ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With chevron"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .gap(px(8.0))
-                        .flex_wrap()
-                        .child(node_button_static(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Secondary)
-                                .with_chevron(true)
-                                .with_label("Options"),
-                            theme,
-                        ))
-                        .child(node_button_static(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Primary)
-                                .with_chevron(true)
-                                .with_label("Actions"),
-                            theme,
-                        ))
-                        .child(node_button_static(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Secondary)
                                 .with_leading_icon("filter")
                                 .with_chevron(true)
                                 .with_label("Filter"),
                             theme,
+                        ))
+                        .child(node_button_static(
+                            ButtonSpec::new()
+                                .with_variant(ButtonVariant::Secondary)
+                                .with_leading_icon("settings")
+                                .with_aria_label("Settings"),
+                            theme,
+                        )),
+                )
+                .child(node_button(
+                    ButtonSpec::new()
+                        .with_label("Sections")
+                        .with_chevron(true)
+                        .with_aria_expanded(disclosure_open),
+                    state,
+                    Some(toggle_click(state, "btn-disclosure-open")),
+                ))
+                .child(
+                    div()
+                        .text_sm()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(format!(
+                            "ButtonSpec.aria_expanded = {:?}",
+                            Some(disclosure_open)
                         )),
                 ),
         )
         // (Sizes and Densities moved into the SpecimenLayout tabs below.)
         // --- States ---
-        .child(
+        .child({
+            let bookmarked = state.specimens.is_on("btn-bookmarked");
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("States"),
+                    EyebrowSpec::new()
+                        .with_content("States — unavailable, working, and held down"),
                     theme,
                 ))
                 .child(
@@ -357,89 +310,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_label("Loading"),
                             theme,
                         ))
-                        .child(node_button_static(
+                        .child(node_button(
                             ButtonSpec::new()
                                 .with_variant(ButtonVariant::Secondary)
-                                .with_disabled(true)
-                                .with_label("Disabled secondary"),
-                            theme,
-                        )),
-                ),
-        )
-        // --- Toggle (pressed state) ---
-        .child({
-            let bold = state.specimens.is_on("btn-bold");
-            let italic = state.specimens.is_on("btn-italic");
-            let underline = !state.specimens.is_on("btn-underline-off");
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Toggle (pressed state)"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .gap(px(8.0))
-                        .child(node_button(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Ghost)
-                                .with_leading_icon("bold")
-                                .with_pressed(bold)
-                                .with_label("B"),
+                                .with_leading_icon("star")
+                                .with_pressed(bookmarked)
+                                .with_label(if bookmarked { "Bookmarked" } else { "Bookmark" }),
                             state,
-                            Some(toggle_click(state, "btn-bold")),
-                        ))
-                        .child(node_button(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Ghost)
-                                .with_leading_icon("italic")
-                                .with_pressed(italic)
-                                .with_label("I"),
-                            state,
-                            Some(toggle_click(state, "btn-italic")),
-                        ))
-                        .child(node_button(
-                            ButtonSpec::new()
-                                .with_variant(ButtonVariant::Ghost)
-                                .with_leading_icon("underline")
-                                .with_pressed(underline)
-                                .with_label("U"),
-                            state,
-                            Some(toggle_click(state, "btn-underline-off")),
+                            Some(toggle_click(state, "btn-bookmarked")),
                         )),
                 )
         })
-        // --- Disclosure: aria_expanded on ButtonSpec (native ARIA pending D-002) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Disclosure trigger (aria_expanded on spec)"),
-                    theme,
-                ))
-                .child(node_button(
-                    ButtonSpec::new()
-                        .with_label("Sections")
-                        .with_chevron(true)
-                        .with_aria_expanded(disclosure_open),
-                    state,
-                    Some(toggle_click(state, "btn-disclosure-open")),
-                ))
-                .child(
-                    div()
-                        .text_sm()
-                        .text_color(color_to_hsla(text_secondary))
-                        .child(format!(
-                            "ButtonSpec.aria_expanded = {:?}",
-                            Some(disclosure_open)
-                        )),
-                ),
-        )
         // --- Form overrides ---
         .child(
             div()
@@ -447,7 +328,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Form overrides"),
+                    EyebrowSpec::new()
+                        .with_content("Inside a form — each button can submit somewhere else"),
                     theme,
                 ))
                 .child(

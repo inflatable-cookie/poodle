@@ -7,6 +7,22 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-17 — Sweeping the catalogue headlessly wedges the browser on
+  `#components/file-upload`: the specimen opens a native file chooser and the
+  page never settles, so a Playwright run with no `filechooser` handler and no
+  per-page deadline hangs there forever and silently loses everything after it.
+  A driver needs `page.on("filechooser", …)`, `page.on("dialog", …)`, and a
+  hard per-page deadline that relaunches rather than awaits a poisoned browser.
+  Worth a shared preview-probe helper before `g15.012` builds its capture lane
+  on the same path. Found by g15.011.
+
+- 2026-08-17 — `bun run --cwd packages/svelte/preview dev` takes whatever port
+  is free, so parallel worktrees silently land on each other's neighbours. Worse,
+  a stale server bound to `127.0.0.1:<port>` shadows a new one bound to
+  `*:<port>`, and the new server reports "ready" on a URL that answers 404. Pass
+  `--port <n> --strictPort` when driving a preview from an agent, and check
+  `lsof -nP -iTCP -sTCP:LISTEN` before trusting the banner. Found by g15.011.
+
 - 2026-08-17 — `effigy docs:check` dies at `report:parity`'s React preview
   step in a worktree with no `node_modules`:
   `bun run --cwd packages/react/preview parity:report` cannot resolve
