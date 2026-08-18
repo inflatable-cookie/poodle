@@ -1,6 +1,6 @@
 # g15.034 — Component-Specific Specimen Axis Domains
 
-Status: **ready** — clean pre-v1.0 break approved by the operator on 2026-08-18
+Status: **complete** — PR #41 merged as `0bc8aa85` on 2026-08-19
 Depends on: `g15.019`
 Blocks: `g15.020`, `g15.026`, `g15.012`, `g15.013`
 Governing refs: `../../contracts/001-working-rules.md` (Catalogue Specimens,
@@ -137,24 +137,24 @@ clean pre-v1.0 break under the repository hard rule.
 
 ## Acceptance
 
-- [ ] EmptyState has exactly one two-value size source in each active runtime;
+- [x] EmptyState has exactly one two-value size source in each active runtime;
       changing it produces the contracted geometry.
-- [ ] Icon exposes and renders five distinct token-backed sizes in each active
+- [x] Icon exposes and renders five distinct token-backed sizes in each active
       runtime; neither endpoint collapses.
-- [ ] Icon has no density public input, stored field, emitted attribute,
+- [x] Icon has no density public input, stored field, emitted attribute,
       specimen pane, or direct caller forwarding it.
-- [ ] EmptyState panes contain exactly `default`, `compact`; Text and Eyebrow
+- [x] EmptyState panes contain exactly `default`, `compact`; Text and Eyebrow
       exactly `xs`, `sm`, `md`; Icon exactly `xs`, `sm`, `md`, `lg`, `xl`.
-- [ ] Generated scene adapters consume authored ordered domains; ordinary
+- [x] Generated scene adapters consume authored ordered domains; ordinary
       standard-axis specimens remain unchanged.
-- [ ] Evidence fails if one declared axis value is omitted, blank, collapsed
+- [x] Evidence fails if one declared axis value is omitted, blank, collapsed
       into another value, or silently filtered.
-- [ ] The operator reviews the EmptyState, Icon, Text, and Eyebrow routes in
+- [x] The operator reviews the EmptyState, Icon, Text, and Eyebrow routes in
       the paired Svelte/React previews before merge and accepts their exact
       axis rows.
-- [ ] No compatibility twin, no new shared render tree, no new conformance
+- [x] No compatibility twin, no new shared render tree, no new conformance
       architecture, and no Jetstream parity claim.
-- [ ] One batch log records exact commands, counts, package change class,
+- [x] One batch log records exact commands, counts, package change class,
       migration notes, downstream search, and unresolved findings.
 
 ## Writable Scope

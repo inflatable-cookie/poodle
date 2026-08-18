@@ -1,12 +1,12 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-18
+Updated: 2026-08-19
 
 ## Active Track
 
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`, and
-    `g15.019` complete; `g15.034` ready; `g15.011` partial with bounded
+    `g15.019` and `g15.034` complete; `g15.011` partial with bounded
     continuation cards; `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `034`
@@ -16,9 +16,9 @@ Updated: 2026-08-18
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch ready `g15.034`, the operator-approved clean migration for
-    EmptyState, Icon, and explicit ordered specimen domains. Then
-    readiness-review `g15.020` and continue the bounded specimen program.
+  - Next: readiness-review `g15.020` and continue the bounded specimen
+    program. PR #41 completed the operator-approved clean migration for
+    EmptyState, Icon, and explicit ordered specimen domains.
     `g15.015` restored all 52 scoped captions and added the missing
     Svelte-preview type gate; `g15.016` converged 29 paired routes on one
     caption idiom and added two dedicated pages. The web release roster reads

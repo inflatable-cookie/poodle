@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Poodle orchestrator
-Updated: 2026-08-18
+Updated: 2026-08-19
 
 The orchestrator is the only writer. Workers write their scoped deliverables,
 batch log, and papercuts; they do not edit this ledger or roadmap/card status.
@@ -22,6 +22,7 @@ worktree. Paired Jetstream integration is explicit under `ci:jetstream` and
 
 | Batch | Card | Branch | Model | Status | Evidence |
 | --- | --- | --- | --- | --- | --- |
+| `g15-r034-component-axis-domains` | `g15/034-component-specific-specimen-axis-domains.md` | `t3code/component-axis-domains` | frontier coding model, high reasoning | merged | PR #41 accepted at `2409ccda`; merge `0bc8aa85`. Made EmptyState and Icon public domains truthful, carried authored specimen axes through all active previews, removed GPUI's silent standard-row filter, and strengthened the paired-web census to reject collapsed inline or portaled values. Review repaired reactive Svelte axis state in CommandPalette and MediaPicker. All focused/broad headless gates and GitHub `active-cohort` passed; no windowed, native-visual, conformance, or Jetstream selector ran. |
 | `g15-r019-gpui-specimen-structure` | `g15/019-gpui-specimen-structure.md` | `t3code/gpui-specimen-structure` | frontier coding model, high reasoning | merged | PR #40 accepted at `d5d71b92`; merge `23150ead`. Added explicit native axis admission, landed all 74 scoped axis corrections and six caption repairs, and split the public-intent `poodle-render::audio_specimens` API without a compatibility twin. Review removed fake EmptyState and Icon panes and returned those two axis-domain gaps for planning. Independent `check:gpui`, `docs:check`, diff checks, and GitHub `active-cohort` passed; no windowed, native-visual, conformance, or Jetstream selector ran. |
 | `g15-r017-web-specimen-axis-placement` | `g15/017-specimen-axis-placement.md` | `t3code/g15-017-specimen-axis-placement` | capable coding model, medium reasoning | merged | PR #39 accepted at `d7ed5b02`; merge `c2f16961`. Corrected all 24 paired-web routes, hardened axis-tab admission and scene navigation, and added the 175-route census plus overlay lifecycle regressions. Focused review and GitHub `active-cohort` passed. Operator accepted the paired preview review; its Dialog finding restored contracted size scaling for built-in chrome in both web runtimes at `f6b295dc` with 2,707 component tests green. |
 | `g15-r016-specimen-idiom-convergence` | `g15/016-specimen-idiom-convergence.md` | `t3code/g15-016-specimen-idiom-convergence` | capable coding model, medium reasoning | merged | PR #38 accepted at `0ef91a12`; merge `f84b1c65`. Converged 27 divergent or missing caption routes on `SpecimenGroup`, added dedicated ListCardCounter and MetaItem pages, and locked paired caption parity. Operator accepted all 29 paired routes in the live previews before merge. |
