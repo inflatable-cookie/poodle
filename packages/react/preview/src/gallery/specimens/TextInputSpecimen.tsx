@@ -1,20 +1,8 @@
 import { useState, type CSSProperties } from "react";
-import { TextInput, Field, Eyebrow, Surface } from "@inflatable-cookie/poodle-react";
+import { TextInput, Field } from "@inflatable-cookie/poodle-react";
 import type { InputValidationStatus, ValidationResult, ValidationState } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
-
-const specimenStyle: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "1.25rem",
-};
-
-const itemStyle: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "0.375rem",
-};
 
 const controlStyle: CSSProperties = {
   maxWidth: "20rem",

@@ -63,13 +63,6 @@
 </SpecimenLayout>
 
 <style>
-    .poodle-specimen__row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-  }
-
   .poodle-specimen__hint {
     margin: 0;
     font-size: 0.75rem;

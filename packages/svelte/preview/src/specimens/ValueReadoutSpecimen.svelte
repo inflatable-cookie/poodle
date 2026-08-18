@@ -15,7 +15,7 @@
 </script>
 <SpecimenLayout variantDirection="row"><div class="page">
   {#each examples as [label, value, format]}
-    <SpecimenGroup label="{label}"><ValueReadout {value} min={-20_000} max={20_000} {format} ariaLabel={label} /></SpecimenGroup>
+    <SpecimenGroup label={label}><ValueReadout {value} min={-20_000} max={20_000} {format} ariaLabel={label} /></SpecimenGroup>
   {/each}
   <SpecimenGroup label="Negative / boundary / disabled"><div class="row"><ValueReadout value={-1} min={-1} max={1} /><ValueReadout value={1} min={-1} max={1} /><ValueReadout value={0} disabled ariaLabel="Disabled readout" /></div></SpecimenGroup>
 </div>

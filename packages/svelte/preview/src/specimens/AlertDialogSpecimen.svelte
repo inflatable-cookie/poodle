@@ -66,12 +66,6 @@
     {/if}
 
 <style>
-    .poodle-specimen__row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
   .poodle-specimen__hint {
     margin: 0;
     font-size: 0.75rem;

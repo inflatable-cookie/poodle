@@ -181,13 +181,6 @@
 </SpecimenLayout>
 
 <style>
-    .poodle-specimen__row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-  }
-
   .poodle-specimen__field {
     display: flex;
     align-items: center;

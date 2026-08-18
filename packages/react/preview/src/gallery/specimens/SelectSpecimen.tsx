@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { Select, Pill, Eyebrow, Surface, type SelectOption, type SelectOptionGroup } from "@inflatable-cookie/poodle-react";
+import { Select, Pill, type SelectOption, type SelectOptionGroup } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
@@ -46,19 +46,6 @@ const frameworkOptions: SelectOption[] = [
   { value: "solid", label: "SolidJS" },
   { value: "astro", label: "Astro" },
 ];
-
-const specimenStyle: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "0.75rem",
-};
-
-const rowStyle: CSSProperties = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "0.75rem",
-  alignItems: "center",
-};
 
 const fieldStyle: CSSProperties = {
   display: "flex",

@@ -47,6 +47,11 @@ Twenty-nine paired web catalogue routes converged on preview-local `SpecimenGrou
 - Renamed React `MeterSurface` “Console strip” → “Live meter strip”; wrapped in `SpecimenLayout`.
 - Added source caption-copy parity + rendered Examples-tab parity tests for all 29 scoped routes.
 
+### Re-review cleanup (2026-08-18)
+- Removed dead conversion-era CSS selectors from 12 Svelte specimens.
+- Fixed `ValueReadoutSpecimen.svelte` dynamic `label={label}` binding.
+- Removed unused React style constants/imports from AlertDialog, Select, TextInput, and TokenInput specimens.
+
 ## Validation
 
 - `effigy check:svelte` — pass

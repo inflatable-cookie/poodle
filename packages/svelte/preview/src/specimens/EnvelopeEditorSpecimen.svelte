@@ -22,5 +22,4 @@
   {#snippet densities(density)}<EnvelopeEditor points={adsr} {density} ariaLabel={`Envelope ${density} density`} />{/snippet}
 </SpecimenLayout>
 <style>.page { display: grid; gap: 1.5rem; }
-h3, p { margin: 0; }
-p { color: var(--poodle-color-text-secondary); font-size: .75rem; }</style>
+p { margin: 0; color: var(--poodle-color-text-secondary); font-size: .75rem; }</style>

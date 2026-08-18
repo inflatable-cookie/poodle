@@ -224,13 +224,6 @@
 </Dialog>
 
 <style>
-    .poodle-specimen__row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-  }
-
   .poodle-shortcuts-list { display: flex; flex-direction: column; gap: 0.5rem; }
   .poodle-shortcut { display: flex; align-items: center; gap: 0.75rem; }
   .poodle-shortcut kbd {

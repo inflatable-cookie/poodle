@@ -17,4 +17,4 @@
   {#snippet sizes(size)}<ModMatrixGrid sources={sources.slice(0,2)} destinations={destinations.slice(0,2)} {cells} {size} ariaLabel={`Mod matrix ${size} size`} />{/snippet}
   {#snippet densities(density)}<ModMatrixGrid sources={sources.slice(0,2)} destinations={destinations.slice(0,2)} {cells} {density} ariaLabel={`Mod matrix ${density} density`} />{/snippet}
 </SpecimenLayout>
-<style>.page{display:grid;gap:1.5rem}section{display:grid;gap:.75rem}h3{margin:0;color:var(--poodle-color-text-secondary);font-size:.75rem}</style>
+<style>.page { display: grid; gap: 1.5rem; }</style>

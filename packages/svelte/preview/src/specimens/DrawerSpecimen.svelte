@@ -37,13 +37,6 @@
 </Drawer>
 
 <style>
-    .poodle-specimen__row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-  }
-
   p {
     margin: 0;
     font-size: 0.875rem;

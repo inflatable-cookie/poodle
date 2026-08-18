@@ -75,13 +75,6 @@
 </SpecimenLayout>
 
 <style>
-    .poodle-specimen__row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-  }
-
   .poodle-specimen__hint {
     font-size: 0.75rem;
     color: var(--poodle-color-text-secondary);

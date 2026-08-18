@@ -15,4 +15,4 @@
   {#snippet sizes(size)}<Keyboard firstNote={60} lastNote={72} externalHeldNotes={[60, 64]} {size} ariaLabel={`Keyboard ${size} size`} />{/snippet}
   {#snippet densities(density)}<Keyboard firstNote={60} lastNote={72} externalHeldNotes={[60, 64]} {density} ariaLabel={`Keyboard ${density} density`} />{/snippet}
 </SpecimenLayout>
-<style>.page{display:grid;gap:1.5rem}section{display:grid;gap:.75rem}h3{margin:0;color:var(--poodle-color-text-secondary);font-size:.75rem}</style>
+<style>.page { display: grid; gap: 1.5rem; }</style>

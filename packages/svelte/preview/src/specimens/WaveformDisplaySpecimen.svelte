@@ -17,4 +17,4 @@
   {#snippet sizes(size)}<WaveformDisplay {pyramid} cursorSample={24} {size} ariaLabel={`Waveform ${size} size`} />{/snippet}
   {#snippet densities(density)}<WaveformDisplay {pyramid} cursorSample={24} {density} ariaLabel={`Waveform ${density} density`} />{/snippet}
 </SpecimenLayout>
-<style>.page{display:grid;gap:1.5rem}section{display:grid;gap:.75rem}h3{margin:0;color:var(--poodle-color-text-secondary);font-size:.75rem}</style>
+<style>.page { display: grid; gap: 1.5rem; }</style>

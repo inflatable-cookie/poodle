@@ -111,12 +111,6 @@
 </SpecimenLayout>
 
 <style>
-    .poodle-specimen__item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.375rem;
-  }
-
   .poodle-specimen__control {
     width: 100%;
     max-width: 40rem;
