@@ -332,6 +332,103 @@ describe("authored-scene tab projection", () => {
     cleanupReact();
   });
 
+  it("declares EmptyState's two-value size domain in the generated scene", async () => {
+    const { specimenScenes } = await import("../../packages/react/preview/src/generated/specimens/specimen-scenes");
+    expect(specimenScenes["empty-state"].sizeAxis).toEqual(["default", "compact"]);
+  });
+
+  it("renders every declared EmptyState size value in both runtimes", async () => {
+    document.body.innerHTML = "";
+    renderSvelte(AxisSceneFixture, { props: { slug: "empty-state" } });
+    await clickTab(document, "Sizes", "Svelte");
+    await awaitPaneEvidence("Svelte");
+    const svelteSizes = [...document.querySelectorAll<HTMLElement>(".poodle-empty-state[data-size]")]
+      .map((node) => node.getAttribute("data-size"))
+      .filter(Boolean);
+    expect(new Set(svelteSizes)).toEqual(new Set(["default", "compact"]));
+    cleanupSvelte();
+
+    renderReact(createElement(ReactSceneSpecimen, { slug: "empty-state" }));
+    await clickTab(document, "Sizes", "React");
+    await awaitPaneEvidence("React");
+    const reactSizes = [...document.querySelectorAll<HTMLElement>(".poodle-empty-state[data-size]")]
+      .map((node) => node.getAttribute("data-size"))
+      .filter(Boolean);
+    expect(new Set(reactSizes)).toEqual(new Set(["default", "compact"]));
+    cleanupReact();
+  });
+
+  it("renders exactly xs, sm, and md for Text in both runtimes", async () => {
+    document.body.innerHTML = "";
+    renderSvelte(PilotSpecimenHarness, { props: { specimen: svelteMap.text as never } });
+    await clickTab(document, "Sizes", "Svelte");
+    await awaitPaneEvidence("Svelte");
+    const svelteSizes = [...document.querySelectorAll<HTMLElement>(".poodle-text[data-size]")]
+      .map((node) => node.getAttribute("data-size"))
+      .filter(Boolean);
+    expect(new Set(svelteSizes)).toEqual(new Set(["xs", "sm", "md"]));
+    cleanupSvelte();
+
+    renderReact(createElement(reactMap.text! as ComponentType));
+    await clickTab(document, "Sizes", "React");
+    await awaitPaneEvidence("React");
+    const reactSizes = [...document.querySelectorAll<HTMLElement>(".poodle-text[data-size]")]
+      .map((node) => node.getAttribute("data-size"))
+      .filter(Boolean);
+    expect(new Set(reactSizes)).toEqual(new Set(["xs", "sm", "md"]));
+    cleanupReact();
+  });
+
+  it("renders exactly xs, sm, and md for Eyebrow in both runtimes", async () => {
+    document.body.innerHTML = "";
+    renderSvelte(PilotSpecimenHarness, { props: { specimen: svelteMap.eyebrow as never } });
+    await clickTab(document, "Sizes", "Svelte");
+    await awaitPaneEvidence("Svelte");
+    const svelteSizes = [...document.querySelectorAll<HTMLElement>(".poodle-eyebrow[data-size]")]
+      .map((node) => node.getAttribute("data-size"))
+      .filter(Boolean);
+    expect(new Set(svelteSizes)).toEqual(new Set(["xs", "sm", "md"]));
+    cleanupSvelte();
+
+    renderReact(createElement(reactMap.eyebrow! as ComponentType));
+    await clickTab(document, "Sizes", "React");
+    await awaitPaneEvidence("React");
+    const reactSizes = [...document.querySelectorAll<HTMLElement>(".poodle-eyebrow[data-size]")]
+      .map((node) => node.getAttribute("data-size"))
+      .filter(Boolean);
+    expect(new Set(reactSizes)).toEqual(new Set(["xs", "sm", "md"]));
+    cleanupReact();
+  });
+
+  it("renders all five Icon sizes and no Densities tab", async () => {
+    document.body.innerHTML = "";
+    renderSvelte(PilotSpecimenHarness, { props: { specimen: svelteMap.icon as never } });
+    expect(tabLabels(document)).toEqual(["Examples", "Sizes"]);
+    await clickTab(document, "Sizes", "Svelte");
+    await awaitPaneEvidence("Svelte");
+    const svelteSizes = [...document.querySelectorAll<HTMLElement>(".poodle-icon[data-size]")]
+      .map((node) => node.getAttribute("data-size"))
+      .filter(Boolean);
+    expect(new Set(svelteSizes)).toEqual(new Set(["xs", "sm", "md", "lg", "xl"]));
+    cleanupSvelte();
+
+    renderReact(
+      createElement(
+        IconProvider,
+        { icons: iconNodes as unknown as IconSet },
+        createElement(reactMap.icon! as ComponentType),
+      ),
+    );
+    expect(tabLabels(document)).toEqual(["Examples", "Sizes"]);
+    await clickTab(document, "Sizes", "React");
+    await awaitPaneEvidence("React");
+    const reactSizes = [...document.querySelectorAll<HTMLElement>(".poodle-icon[data-size]")]
+      .map((node) => node.getAttribute("data-size"))
+      .filter(Boolean);
+    expect(new Set(reactSizes)).toEqual(new Set(["xs", "sm", "md", "lg", "xl"]));
+    cleanupReact();
+  });
+
   it("normalizes a retained tab when the next scene drops it (Callout Densities → Avatar)", async () => {
     // The preview reuses one SceneSpecimen instance across slugs; navigate it
     // while a tab the next scene no longer provides is active.

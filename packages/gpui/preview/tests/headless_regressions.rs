@@ -2857,3 +2857,23 @@ fn axis_row_keys_are_distinct_per_step() {
     .collect();
     assert_eq!(densities, vec!["compact", "default", "comfortable"]);
 }
+
+#[test]
+fn empty_state_scene_carries_the_two_value_size_domain() {
+    #[path = "../src/generated/specimens/specimens.rs"]
+    mod fixture;
+
+    let scene = fixture::SPECIMEN_SCENES
+        .iter()
+        .find(|scene| scene.id == "empty-state-specimen")
+        .expect("empty-state scene");
+    assert_eq!(scene.size_axis, &["default", "compact"]);
+}
+
+#[test]
+fn icon_size_domain_covers_all_five_control_steps() {
+    use poodle_specs::{ControlSize, IconSize};
+
+    assert_eq!(IconSize::from(ControlSize::Xs), IconSize::Xs);
+    assert_eq!(IconSize::from(ControlSize::Xl), IconSize::Xl);
+}

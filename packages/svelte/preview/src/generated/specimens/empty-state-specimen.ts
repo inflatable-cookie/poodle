@@ -7,7 +7,7 @@ export const emptyStateSpecimen = {
   name: "EmptyState",
   description: "EmptyState specimen (contract §13): neutral, search, first-run, and compact postures.",
   tabs: ["examples", "sizes", "densities"],
-  sizeAxis: ["xs", "sm", "md", "lg", "xl"],
+  sizeAxis: ["default", "compact"],
   densityAxis: ["compact", "default", "comfortable"],
   groups: [
     { label: "Neutral", instances: [

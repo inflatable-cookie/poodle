@@ -1089,7 +1089,7 @@ fn validate_scenes(model: &IrModel, findings: &mut Vec<Finding>) {
                 }
             }
         }
-        validate_scene_axes(scene, findings);
+        validate_scene_axes(model, scene, findings);
         validate_scene_layout(model, scene, findings);
         if let Some(preview) = &scene.preview_state {
             validate_preview_state(scene, preview, findings);
@@ -1200,7 +1200,28 @@ fn validate_instance_bindings(
     }
 }
 
-fn validate_scene_axes(scene: &crate::Scene, findings: &mut Vec<Finding>) {
+fn scene_size_axis_values(model: &IrModel, scene: &crate::Scene) -> BTreeSet<String> {
+    let mut sizes: BTreeSet<String> = crate::tokens::control_size_names()
+        .into_iter()
+        .map(String::from)
+        .collect();
+    for instance in &scene.instances {
+        let Some(component) = model.component(instance.component.as_str()) else {
+            continue;
+        };
+        let Some(prop) = component.props.iter().find(|prop| prop.id.as_str() == "size") else {
+            continue;
+        };
+        if let Some(subset) = &prop.permitted_subset {
+            for member in &subset.members {
+                sizes.insert(member.as_str().to_string());
+            }
+        }
+    }
+    sizes
+}
+
+fn validate_scene_axes(model: &IrModel, scene: &crate::Scene, findings: &mut Vec<Finding>) {
     let mut seen = BTreeSet::new();
     for axis in &scene.axes {
         if !seen.insert(axis.kind) {
@@ -1263,18 +1284,17 @@ fn validate_scene_axes(scene: &crate::Scene, findings: &mut Vec<Finding>) {
                 }
             }
             (SceneAxisKind::Size, crate::AxisValues::Named(values)) => {
-                let sizes: BTreeSet<&str> =
-                    crate::tokens::control_size_names().into_iter().collect();
+                let sizes = scene_size_axis_values(model, scene);
                 for value in values {
                     if !sizes.contains(value.as_str()) {
                         findings.push(Finding::new(
                             FindingKind::InvalidReference,
                             format!("{}.axis.size.{}", scene.id, value),
                             format!(
-                                "control size '{}' is not a poodle-tokens control size; \
-                                 available sizes are [{}] (SHELL-02, CROSS-07)",
+                                "size axis value '{}' is not in the scene's allowed size domain \
+                                 [{}] (SHELL-02, CROSS-07)",
                                 value,
-                                sizes.iter().copied().collect::<Vec<_>>().join(", ")
+                                sizes.iter().map(String::as_str).collect::<Vec<_>>().join(", ")
                             ),
                         ));
                     }

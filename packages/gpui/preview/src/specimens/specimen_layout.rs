@@ -42,6 +42,8 @@ use crate::PreviewRoot;
 type SizeRenderer<'a> = Box<dyn Fn(ControlSize, &GpuiThemeProvider) -> Option<AnyElement> + 'a>;
 type DensityRenderer<'a> =
     Box<dyn Fn(ControlDensity, &GpuiThemeProvider) -> Option<AnyElement> + 'a>;
+type NamedSizeRenderer<'a> = Box<dyn Fn(&str, &GpuiThemeProvider) -> AnyElement + 'a>;
+type NamedDensityRenderer<'a> = Box<dyn Fn(&str, &GpuiThemeProvider) -> AnyElement + 'a>;
 
 /// The axis panes a specimen page admits, together with their renderers.
 ///
@@ -50,7 +52,9 @@ type DensityRenderer<'a> =
 /// cannot fill.
 pub struct SpecimenAxes<'a> {
     sizes: Option<SizeRenderer<'a>>,
+    named_sizes: Option<(Vec<&'static str>, NamedSizeRenderer<'a>)>,
     densities: Option<DensityRenderer<'a>>,
+    named_densities: Option<(Vec<&'static str>, NamedDensityRenderer<'a>)>,
 }
 
 impl<'a> SpecimenAxes<'a> {
@@ -62,7 +66,9 @@ impl<'a> SpecimenAxes<'a> {
     pub fn examples_only() -> Self {
         Self {
             sizes: None,
+            named_sizes: None,
             densities: None,
+            named_densities: None,
         }
     }
 
@@ -86,6 +92,17 @@ impl<'a> SpecimenAxes<'a> {
         self
     }
 
+    /// Admit the `Sizes` pane for a component whose public size domain is not
+    /// the five control steps. The provided labels are rendered in order.
+    pub fn with_named_sizes(
+        mut self,
+        values: &'static [&'static str],
+        row: impl Fn(&str, &GpuiThemeProvider) -> AnyElement + 'a,
+    ) -> Self {
+        self.named_sizes = Some((values.to_vec(), Box::new(row)));
+        self
+    }
+
     /// Admit the `Densities` pane, one representative per density step.
     pub fn with_densities(
         self,
@@ -104,11 +121,21 @@ impl<'a> SpecimenAxes<'a> {
         self
     }
 
+    /// Admit the `Densities` pane for an explicit ordered density domain.
+    pub fn with_named_densities(
+        mut self,
+        values: &'static [&'static str],
+        row: impl Fn(&str, &GpuiThemeProvider) -> AnyElement + 'a,
+    ) -> Self {
+        self.named_densities = Some((values.to_vec(), Box::new(row)));
+        self
+    }
+
     /// Which tabs this page publishes.
     pub fn admission(&self) -> AxisAdmission {
         AxisAdmission {
-            sizes: self.sizes.is_some(),
-            densities: self.densities.is_some(),
+            sizes: self.sizes.is_some() || self.named_sizes.is_some(),
+            densities: self.densities.is_some() || self.named_densities.is_some(),
         }
     }
 }
@@ -187,21 +214,33 @@ pub fn specimen_layout(
     // ── Pane body ──
     let body: Div = match active_tab {
         SIZES_TAB => {
-            let row = axes.sizes.as_ref().expect("sizes tab is admitted");
             let mut col = variant_pane(border_subtle, panel_bg);
-            for (size, label) in ALL_SIZES {
-                if let Some(body) = row(*size, theme) {
-                    col = col.child(variant_row(label, body, text_secondary));
+            if let Some((values, row)) = axes.named_sizes.as_ref() {
+                for value in values {
+                    col = col.child(variant_row(value, row(value, theme), text_secondary));
+                }
+            } else {
+                let row = axes.sizes.as_ref().expect("sizes tab is admitted");
+                for (size, label) in ALL_SIZES {
+                    if let Some(body) = row(*size, theme) {
+                        col = col.child(variant_row(label, body, text_secondary));
+                    }
                 }
             }
             col
         }
         DENSITIES_TAB => {
-            let row = axes.densities.as_ref().expect("densities tab is admitted");
             let mut col = variant_pane(border_subtle, panel_bg);
-            for (density, label) in ALL_DENSITIES {
-                if let Some(body) = row(*density, theme) {
-                    col = col.child(variant_row(label, body, text_secondary));
+            if let Some((values, row)) = axes.named_densities.as_ref() {
+                for value in values {
+                    col = col.child(variant_row(value, row(value, theme), text_secondary));
+                }
+            } else {
+                let row = axes.densities.as_ref().expect("densities tab is admitted");
+                for (density, label) in ALL_DENSITIES {
+                    if let Some(body) = row(*density, theme) {
+                        col = col.child(variant_row(label, body, text_secondary));
+                    }
                 }
             }
             col

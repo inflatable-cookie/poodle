@@ -2745,14 +2745,11 @@
           "kind": "size",
           "values": {
             "named": [
-              "xs",
-              "sm",
-              "md",
-              "lg",
-              "xl"
+              "default",
+              "compact"
             ]
           },
-          "description": "Control-size axis the Sizes matrix iterates (SHELL-02; CROSS-07)."
+          "description": "EmptyState size axis the Sizes matrix iterates."
         },
         {
           "kind": "density",

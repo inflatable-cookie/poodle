@@ -154,17 +154,9 @@
 
   {#snippet sizes(size)}
     <div class="poodle-size-demo">
-      <Icon icon={star} {size} />
-      <Icon icon={heart} {size} />
-      <Icon icon={settings} {size} />
-    </div>
-  {/snippet}
-
-  {#snippet densities(density)}
-    <div class="poodle-size-demo">
-      <Icon icon={star} {density} />
-      <Icon icon={heart} {density} />
-      <Icon icon={settings} {density} />
+      <Icon icon={star} size={size as typeof iconSizes[number]} />
+      <Icon icon={heart} size={size as typeof iconSizes[number]} />
+      <Icon icon={settings} size={size as typeof iconSizes[number]} />
     </div>
   {/snippet}
 

@@ -2,8 +2,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Surface, Tabs, type TabItem } from "@inflatable-cookie/poodle-react";
 import type { ControlDensity, ControlSize } from "@inflatable-cookie/poodle-react";
 
-const CONTROL_SIZES: ControlSize[] = ["xs", "sm", "md", "lg", "xl"];
-const CONTROL_DENSITIES: ControlDensity[] = ["compact", "default", "comfortable"];
+const DEFAULT_CONTROL_SIZES: ControlSize[] = ["xs", "sm", "md", "lg", "xl"];
+const DEFAULT_CONTROL_DENSITIES: ControlDensity[] = ["compact", "default", "comfortable"];
 
 export interface SpecimenLayoutProps {
   activeTab?: "examples" | "sizes" | "densities";
@@ -12,8 +12,10 @@ export interface SpecimenLayoutProps {
   showSizes?: boolean;
   showDensities?: boolean;
   children?: ReactNode;
-  sizes?: (size: ControlSize) => ReactNode;
-  densities?: (density: ControlDensity) => ReactNode;
+  sizes?: (size: string) => ReactNode;
+  densities?: (density: string) => ReactNode;
+  sizeValues?: readonly string[];
+  densityValues?: readonly string[];
 }
 
 export function SpecimenLayout({
@@ -25,23 +27,17 @@ export function SpecimenLayout({
   children,
   sizes,
   densities,
+  sizeValues = DEFAULT_CONTROL_SIZES,
+  densityValues = DEFAULT_CONTROL_DENSITIES,
 }: SpecimenLayoutProps) {
   const [activeTab, setActiveTab] = useState<"examples" | "sizes" | "densities">(initialTab);
 
-  // An axis tab needs a renderer: without one the pane would be empty, which
-  // is exactly what the catalogue must never advertise. `show*` may hide a
-  // supplied renderer but cannot force a tabless pane.
   const tabs: TabItem[] = [
     { value: "examples", label: "Examples" },
     ...(showSizes && sizes ? [{ value: "sizes", label: "Sizes" }] : []),
     ...(showDensities && densities ? [{ value: "densities", label: "Densities" }] : []),
   ];
 
-  // The preview reuses one layout across scene slugs (SceneSpecimen). When the
-  // available tab set shrinks — e.g. Callout keeps Densities but Avatar does
-  // not — the retained active tab would point at a vanished pane and render a
-  // blank page. Normalize an invalid selection back to Examples whenever the
-  // tab set changes.
   const tabKey = tabs.map((tab) => tab.value).join("|");
   useEffect(() => {
     const values = tabKey.split("|");
@@ -75,9 +71,9 @@ export function SpecimenLayout({
         {activeTab === "examples"
           ? children
           : activeTab === "sizes" && showSizes && sizes
-            ? variants(CONTROL_SIZES.map((size) => <span key={size}>{sizes(size)}</span>))
+            ? variants(sizeValues.map((size) => <span key={size}>{sizes(size)}</span>))
             : activeTab === "densities" && showDensities && densities
-              ? variants(CONTROL_DENSITIES.map((density) => <span key={density}>{densities(density)}</span>))
+              ? variants(densityValues.map((density) => <span key={density}>{densities(density)}</span>))
               : null}
       </div>
     </div>

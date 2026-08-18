@@ -4,11 +4,9 @@
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 </script>
 
-<SpecimenLayout>
+<SpecimenLayout sizeValues={["xs", "sm", "md"]}>
   {#snippet sizes(size)}
-    {#if size === "xs" || size === "sm" || size === "md"}
-      <Eyebrow size={size}>Section label</Eyebrow>
-    {/if}
+    <Eyebrow size={size as "xs" | "sm" | "md"}>Section label</Eyebrow>
   {/snippet}
 
   <SpecimenGroup label="Above a page title">

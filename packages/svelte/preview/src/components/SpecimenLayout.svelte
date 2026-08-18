@@ -2,6 +2,9 @@
   import { Surface, Tabs, getUiPresentation, type TabItem } from "@inflatable-cookie/poodle-svelte";
   import type { Snippet } from "svelte";
 
+  const DEFAULT_CONTROL_SIZES = ["xs", "sm", "md", "lg", "xl"] as const;
+  const DEFAULT_CONTROL_DENSITIES = ["compact", "default", "comfortable"] as const;
+
   let {
     activeTab = "examples",
     bareVariants = false,
@@ -11,6 +14,8 @@
     children,
     sizes,
     densities,
+    sizeValues,
+    densityValues,
   }: {
     activeTab?: "examples" | "sizes" | "densities";
     bareVariants?: boolean;
@@ -18,24 +23,18 @@
     showSizes?: boolean;
     showDensities?: boolean;
     children?: Snippet;
-    sizes?: Snippet<[size: (typeof controlSizes)[number]]>;
-    densities?: Snippet<[density: (typeof controlDensities)[number]]>;
+    sizes?: Snippet<[size: string]>;
+    densities?: Snippet<[density: string]>;
+    sizeValues?: readonly string[];
+    densityValues?: readonly string[];
   } = $props();
 
-  // An axis tab needs a renderer: without one the pane would be empty, which
-  // is exactly what the catalogue must never advertise. `show*` may hide a
-  // supplied renderer but cannot force a tabless pane.
   const tabs: TabItem[] = $derived([
     { value: "examples", label: "Examples" },
     ...(showSizes && sizes ? [{ value: "sizes", label: "Sizes" }] : []),
     ...(showDensities && densities ? [{ value: "densities", label: "Densities" }] : []),
   ]);
 
-  // The preview reuses one layout across scene slugs (SceneSpecimen). When the
-  // available tab set shrinks — e.g. Callout keeps Densities but Avatar does
-  // not — the retained active tab would point at a vanished pane and render a
-  // blank page. Normalize an invalid selection back to Examples whenever the
-  // tab set changes.
   const tabValues = $derived(tabs.map((tab) => tab.value));
   $effect(() => {
     if (!tabValues.includes(activeTab)) {
@@ -43,8 +42,8 @@
     }
   });
 
-  const controlSizes = ["xs", "sm", "md", "lg", "xl"] as const;
-  const controlDensities = ["compact", "default", "comfortable"] as const;
+  const resolvedSizeValues = $derived(sizeValues ?? DEFAULT_CONTROL_SIZES);
+  const resolvedDensityValues = $derived(densityValues ?? DEFAULT_CONTROL_DENSITIES);
 
   const uiPresentation = getUiPresentation();
 </script>
@@ -64,14 +63,14 @@
     {:else if activeTab === "sizes" && showSizes}
       {#if bareVariants}
         <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
-          {#each controlSizes as size}
+          {#each resolvedSizeValues as size}
             {@render sizes?.(size)}
           {/each}
         </div>
       {:else}
         <Surface tone="panel" border="subtle" padding="md">
           <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
-            {#each controlSizes as size}
+            {#each resolvedSizeValues as size}
               {@render sizes?.(size)}
             {/each}
           </div>
@@ -80,14 +79,14 @@
     {:else if activeTab === "densities" && showDensities}
       {#if bareVariants}
         <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
-          {#each controlDensities as density}
+          {#each resolvedDensityValues as density}
             {@render densities?.(density)}
           {/each}
         </div>
       {:else}
         <Surface tone="panel" border="subtle" padding="md">
           <div class="poodle-specimen-layout__variants" data-direction={variantDirection}>
-            {#each controlDensities as density}
+            {#each resolvedDensityValues as density}
               {@render densities?.(density)}
             {/each}
           </div>

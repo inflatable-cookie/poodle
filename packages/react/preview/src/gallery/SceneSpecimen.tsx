@@ -5,8 +5,6 @@ import {
   EmptyState,
   Pill,
   Spinner,
-  type ControlDensity,
-  type ControlSize,
 } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "./SpecimenGroup";
 import { SpecimenLayout } from "./SpecimenLayout";
@@ -66,17 +64,16 @@ export function SceneSpecimen({ slug }: { slug?: string }) {
 
   if (!scene) return null;
 
-  const sizes = (size: ControlSize): ReactNode =>
+  const sizes = (size: string): ReactNode =>
     matrixInstance ? renderInstance({ ...matrixInstance, props: { ...matrixInstance.props, size } }) : null;
 
-  const densities = (density: ControlDensity): ReactNode =>
+  const densities = (density: string): ReactNode =>
     matrixInstance ? renderInstance({ ...matrixInstance, props: { ...matrixInstance.props, density } }) : null;
 
   return (
-    // The scene's declared tabs decide which axis renderers exist; an axis
-    // the scene does not declare never reaches SpecimenLayout, so its tab
-    // cannot be advertised.
     <SpecimenLayout
+      sizeValues={scene.sizeAxis.length > 0 ? scene.sizeAxis : undefined}
+      densityValues={scene.densityAxis.length > 0 ? scene.densityAxis : undefined}
       sizes={scene.tabs.includes("sizes") ? sizes : undefined}
       densities={scene.tabs.includes("densities") ? densities : undefined}
     >

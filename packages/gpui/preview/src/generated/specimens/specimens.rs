@@ -238,7 +238,7 @@ pub static SPECIMEN_SCENES: &[SpecimenScene<'static>] = &[
         id: "empty-state-specimen",
         name: "EmptyState",
         description: "EmptyState specimen (contract §13): neutral, search, first-run, and compact postures.",
-        size_axis: &["xs", "sm", "md", "lg", "xl"],
+        size_axis: &["default", "compact"],
         density_axis: &["compact", "default", "comfortable"],
         groups: &[
             SpecimenGroup { label: "Neutral", instances: &[
