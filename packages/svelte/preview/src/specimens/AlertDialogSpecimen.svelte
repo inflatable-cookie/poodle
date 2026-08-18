@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { AlertDialog, Button, Eyebrow, Surface } from "@inflatable-cookie/poodle-svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import { AlertDialog, Button } from "@inflatable-cookie/poodle-svelte";
 
   let dangerOpen = $state(false);
   let warningOpen = $state(false);
@@ -12,11 +13,8 @@
   }
 </script>
 
-<Surface tone="panel" border="subtle" padding="md">
-  <div class="poodle-specimen">
-    <div class="poodle-specimen__row">
-      <Eyebrow>Danger tone</Eyebrow>
-      <Button tone="danger" onClick={() => (dangerOpen = true)}>Delete item</Button>
+  <SpecimenGroup label="Danger tone">
+    <Button tone="danger" onClick={() => (dangerOpen = true)}>Delete item</Button>
       <AlertDialog
         open={dangerOpen}
         title="Delete this item?"
@@ -27,11 +25,10 @@
         onCancel={() => (dangerOpen = false)}
         onOpenChange={(open) => (dangerOpen = open)}
       />
-    </div>
+  </SpecimenGroup>
 
-    <div class="poodle-specimen__row">
-      <Eyebrow>Warning tone</Eyebrow>
-      <Button variant="secondary" onClick={() => (warningOpen = true)}>Reset settings</Button>
+      <SpecimenGroup label="Warning tone">
+    <Button variant="secondary" onClick={() => (warningOpen = true)}>Reset settings</Button>
       <AlertDialog
         open={warningOpen}
         title="Reset all settings?"
@@ -43,11 +40,10 @@
         onCancel={() => (warningOpen = false)}
         onOpenChange={(open) => (warningOpen = open)}
       />
-    </div>
+  </SpecimenGroup>
 
-    <div class="poodle-specimen__row">
-      <Eyebrow>Async confirm</Eyebrow>
-      <Button tone="danger" onClick={() => (asyncOpen = true)}>Archive project</Button>
+      <SpecimenGroup label="Async confirm">
+    <Button tone="danger" onClick={() => (asyncOpen = true)}>Archive project</Button>
       <AlertDialog
         open={asyncOpen}
         title="Archive this project?"
@@ -63,27 +59,13 @@
           <span>14 linked tasks will move to the archived view.</span>
         </div>
       </AlertDialog>
-    </div>
+  </SpecimenGroup>
 
     {#if lastAction}
       <p class="poodle-specimen__hint">Last action: <strong>{lastAction}</strong></p>
     {/if}
-  </div>
-</Surface>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .poodle-specimen__row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
   .poodle-specimen__hint {
     margin: 0;
     font-size: 0.75rem;

@@ -1,23 +1,18 @@
 <script lang="ts">
-  import { Drawer, Button, Eyebrow, Surface } from "@inflatable-cookie/poodle-svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import { Drawer, Button } from "@inflatable-cookie/poodle-svelte";
 
   let rightOpen = $state(false);
   let leftOpen = $state(false);
 </script>
 
-<Surface tone="panel" border="subtle" padding="md">
-  <div class="poodle-specimen">
-    <div class="poodle-specimen__row">
-      <Eyebrow>Right edge (default)</Eyebrow>
-      <Button variant="secondary" onClick={() => (rightOpen = true)}>Open right drawer</Button>
-    </div>
+  <SpecimenGroup label="Right edge (default)">
+    <Button variant="secondary" onClick={() => (rightOpen = true)}>Open right drawer</Button>
+  </SpecimenGroup>
 
-    <div class="poodle-specimen__row">
-      <Eyebrow>Left edge</Eyebrow>
-      <Button variant="secondary" onClick={() => (leftOpen = true)}>Open left drawer</Button>
-    </div>
-  </div>
-</Surface>
+      <SpecimenGroup label="Left edge">
+    <Button variant="secondary" onClick={() => (leftOpen = true)}>Open left drawer</Button>
+  </SpecimenGroup>
 
 <Drawer
   open={rightOpen}
@@ -42,19 +37,6 @@
 </Drawer>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .poodle-specimen__row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-  }
-
   p {
     margin: 0;
     font-size: 0.875rem;

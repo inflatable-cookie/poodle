@@ -184,12 +184,20 @@ None.
 
 ## 13. Specimen Definitions
 
-ListCardCounter does not have a standalone specimen. It is demonstrated within
-the **ListCardSpecimen** in the "With footer counters" group.
+Dedicated paired specimens live at `#components/list-card-counter` in both web
+previews.
 
-### With Footer Counters (in ListCardSpecimen)
+### Static footer counters
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Design system card | Three ListCardCounters: `icon="file-text" count=24 tooltip="24 documents"`, `icon="image" count=8 tooltip="8 images"`, `icon="layers" count=3 tooltip="3 sub-folders" href="#sub-folders"` | Footer row showing three icon+count pairs; last one is a link |
-| Brand guidelines card | Two ListCardCounters: `icon="file-text" count=6 tooltip="6 documents"`, `icon="image" count=42 tooltip="42 images"` | Footer row with two icon+count pairs |
+| Design system card | Two ListCardCounters: `icon="file-text" count=24 tooltip="24 documents"`, `icon="image" count=8 tooltip="8 images"` | Footer row inside a ListCard showing two icon+count pairs |
+
+### Linked footer counter
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Brand guidelines card | `icon="layers" count=3 tooltip="3 sub-folders" href="#sub-folders"` with wired `onClick` | Footer row with one linked counter; click updates the specimen readout |
+
+The **ListCardSpecimen** still demonstrates counters in a fuller list-card
+context under "With footer counters".

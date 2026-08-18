@@ -1,11 +1,6 @@
 import type { CSSProperties } from "react";
-import { Eyebrow, Surface } from "@inflatable-cookie/poodle-react";
-
-const container: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "1.5rem",
-};
+import { Eyebrow } from "@inflatable-cookie/poodle-react";
+import { SpecimenGroup } from "../SpecimenGroup";
 
 const example: CSSProperties = {
   display: "flex",
@@ -28,31 +23,39 @@ const paragraph: CSSProperties = {
 
 export function EyebrowSpecimen() {
   return (
-    <Surface tone="panel" border="subtle" padding="md">
-      <div style={container}>
+    <>
+      <SpecimenGroup label="Above a page title">
         <div style={example}>
           <Eyebrow>Section label</Eyebrow>
           <h3 style={heading}>Page Title</h3>
           <p style={paragraph}>Eyebrow renders small uppercase text used for categorizing content above headings.</p>
         </div>
+      </SpecimenGroup>
 
+      <SpecimenGroup label="Primitive category">
         <div style={example}>
           <Eyebrow>Primitive</Eyebrow>
           <h3 style={heading}>Button</h3>
           <p style={paragraph}>Primary interactive control for triggering actions.</p>
         </div>
+      </SpecimenGroup>
 
+      <SpecimenGroup label="Status ribbon">
         <div style={example}>
           <Eyebrow>Status</Eyebrow>
           <h3 style={heading}>Active deployment</h3>
           <p style={paragraph}>Last deployed 3 minutes ago.</p>
         </div>
+      </SpecimenGroup>
 
+      <SpecimenGroup label="Semantic heading">
         <div style={example}>
-          <Eyebrow as="h3" size="md" spacing="bottom">Semantic section heading</Eyebrow>
+          <Eyebrow as="h3" size="md" spacing="bottom">
+            Semantic section heading
+          </Eyebrow>
           <p style={paragraph}>Eyebrow can render as a heading when it labels a real subsection.</p>
         </div>
-      </div>
-    </Surface>
+      </SpecimenGroup>
+    </>
   );
 }

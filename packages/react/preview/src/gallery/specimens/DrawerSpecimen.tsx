@@ -1,5 +1,6 @@
+import { SpecimenGroup } from "../SpecimenGroup";
 import { useState, type CSSProperties } from "react";
-import { Drawer, Button, Eyebrow, Surface } from "@inflatable-cookie/poodle-react";
+import { Drawer, Button } from "@inflatable-cookie/poodle-react";
 
 export function DrawerSpecimen() {
   const [rightOpen, setRightOpen] = useState(false);
@@ -13,19 +14,13 @@ export function DrawerSpecimen() {
 
   return (
     <>
-      <Surface tone="panel" border="subtle" padding="md">
-        <div className="poodle-specimen">
-          <div className="poodle-specimen__row">
-            <Eyebrow>Right edge (default)</Eyebrow>
-            <Button variant="secondary" onClick={() => setRightOpen(true)}>Open right drawer</Button>
-          </div>
+            <SpecimenGroup label="Right edge (default)">
+        <Button variant="secondary" onClick={() => setRightOpen(true)}>Open right drawer</Button>
+      </SpecimenGroup>
 
-          <div className="poodle-specimen__row">
-            <Eyebrow>Left edge</Eyebrow>
-            <Button variant="secondary" onClick={() => setLeftOpen(true)}>Open left drawer</Button>
-          </div>
-        </div>
-      </Surface>
+                <SpecimenGroup label="Left edge">
+        <Button variant="secondary" onClick={() => setLeftOpen(true)}>Open left drawer</Button>
+      </SpecimenGroup>
 
       <Drawer
         open={rightOpen}

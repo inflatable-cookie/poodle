@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Code, Eyebrow, Field, Surface, TokenInput } from "@inflatable-cookie/poodle-svelte";
+  import { Code, Field, TokenInput } from "@inflatable-cookie/poodle-svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let tags = $state(["ifrs", "tax", "audit"]);
@@ -11,11 +12,8 @@
 </script>
 
 <SpecimenLayout>
-  <Surface tone="panel" border="subtle" padding="md">
-    <div class="poodle-specimen">
-      <div class="poodle-specimen__item">
-        <Eyebrow>Default</Eyebrow>
-        <div class="poodle-specimen__control">
+    <SpecimenGroup label="Default">
+    <div class="poodle-specimen__control">
           <Field
             id="blog-tags"
             label="Tags"
@@ -30,11 +28,10 @@
           </Field>
         </div>
         <Code source={JSON.stringify(tags)} inline={false} inlineVariant="plain" />
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__item">
-        <Eyebrow>Multiple separators</Eyebrow>
-        <div class="poodle-specimen__control">
+        <SpecimenGroup label="Multiple separators">
+    <div class="poodle-specimen__control">
           <Field
             id="workflow-tags"
             label="Workflow tags"
@@ -48,11 +45,10 @@
             />
           </Field>
         </div>
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__item">
-        <Eyebrow>Narrow and long values</Eyebrow>
-        <div class="poodle-specimen__control poodle-specimen__control--narrow">
+        <SpecimenGroup label="Narrow and long values">
+    <div class="poodle-specimen__control poodle-specimen__control--narrow">
           <Field
             id="long-tags"
             label="Migration labels"
@@ -65,11 +61,10 @@
             />
           </Field>
         </div>
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__item">
-        <Eyebrow>Read only</Eyebrow>
-        <div class="poodle-specimen__control">
+        <SpecimenGroup label="Read only">
+    <div class="poodle-specimen__control">
           <Field id="readonly-tags" label="Locked tags">
             <TokenInput
               id="readonly-tags"
@@ -78,11 +73,10 @@
             />
           </Field>
         </div>
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__item">
-        <Eyebrow>Disabled</Eyebrow>
-        <div class="poodle-specimen__control">
+        <SpecimenGroup label="Disabled">
+    <div class="poodle-specimen__control">
           <Field id="disabled-tags" label="Disabled tags">
             <TokenInput
               id="disabled-tags"
@@ -91,9 +85,7 @@
             />
           </Field>
         </div>
-      </div>
-    </div>
-  </Surface>
+  </SpecimenGroup>
 
   {#snippet sizes(size)}
     <div class="poodle-specimen__control">
@@ -119,18 +111,6 @@
 </SpecimenLayout>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-  }
-
-  .poodle-specimen__item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.375rem;
-  }
-
   .poodle-specimen__control {
     width: 100%;
     max-width: 40rem;

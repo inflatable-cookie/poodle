@@ -1,35 +1,30 @@
 <script lang="ts">
-  import { TriStateSwitch, Eyebrow, Surface, type TriStateValue } from "@inflatable-cookie/poodle-svelte";
+  import { TriStateSwitch, type TriStateValue } from "@inflatable-cookie/poodle-svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let filter: TriStateValue = $state("default");
 </script>
 
 <SpecimenLayout>
-  <Surface tone="panel" border="subtle" padding="md">
-    <div class="poodle-specimen">
-      <div class="poodle-specimen__item">
-        <Eyebrow>Default</Eyebrow>
-        <TriStateSwitch value={filter} ariaLabel="Filter mode" onValueChange={(value) => (filter = value)} />
-        <span class="poodle-specimen__value">{filter}</span>
-      </div>
-
-      <div class="poodle-specimen__item">
-        <Eyebrow>Custom labels</Eyebrow>
-        <TriStateSwitch options={{ excluded: "Hide", default: "All", included: "Show" }} ariaLabel="Visibility filter" />
-      </div>
-
-      <div class="poodle-specimen__item">
-        <Eyebrow>Custom colors</Eyebrow>
-        <TriStateSwitch value={filter} excludedColor="#ef4444" defaultColor="#64748b" includedColor="#22c55e" ariaLabel="Custom colors" onValueChange={(value) => (filter = value)} />
-      </div>
-
-      <div class="poodle-specimen__item">
-        <Eyebrow>Disabled</Eyebrow>
-        <TriStateSwitch value="included" disabled ariaLabel="Disabled" />
-      </div>
+  <SpecimenGroup label="Default">
+    <div class="poodle-specimen__item">
+      <TriStateSwitch value={filter} ariaLabel="Filter mode" onValueChange={(value) => (filter = value)} />
+      <span class="poodle-specimen__value">{filter}</span>
     </div>
-  </Surface>
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Custom labels">
+    <TriStateSwitch options={{ excluded: "Hide", default: "All", included: "Show" }} ariaLabel="Visibility filter" />
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Custom colors">
+    <TriStateSwitch value={filter} excludedColor="#ef4444" defaultColor="#64748b" includedColor="#22c55e" ariaLabel="Custom colors" onValueChange={(value) => (filter = value)} />
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Disabled">
+    <TriStateSwitch value="included" disabled ariaLabel="Disabled" />
+  </SpecimenGroup>
 
   {#snippet sizes(size)}
     <TriStateSwitch value="default" {size} ariaLabel={"Switch at " + size} />
@@ -41,7 +36,14 @@
 </SpecimenLayout>
 
 <style>
-  .poodle-specimen { display: flex; flex-direction: column; gap: 0.75rem; }
-  .poodle-specimen__item { display: flex; align-items: center; gap: 0.75rem; }
-  .poodle-specimen__value { font-size: 0.75rem; color: var(--poodle-color-text-secondary); }
+  .poodle-specimen__item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .poodle-specimen__value {
+    font-size: 0.75rem;
+    color: var(--poodle-color-text-secondary);
+  }
 </style>

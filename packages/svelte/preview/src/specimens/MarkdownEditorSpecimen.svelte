@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { MarkdownEditor, Eyebrow } from "@inflatable-cookie/poodle-svelte";
+  import { MarkdownEditor } from "@inflatable-cookie/poodle-svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   let content = $state(`# Hello World
@@ -22,60 +23,28 @@ Check out [Poodle](https://example.com) for more.`);
 
 <SpecimenLayout bareVariants>
   {#snippet children()}
-    <div class="poodle-specimen">
-      <div class="poodle-specimen__item">
-        <Eyebrow>Split view</Eyebrow>
-        <MarkdownEditor bind:value={content} mode="split" />
-      </div>
+    <SpecimenGroup label="Split view">
+      <MarkdownEditor bind:value={content} mode="split" />
+    </SpecimenGroup>
 
-      <div class="poodle-specimen__item">
-        <Eyebrow>Edit mode</Eyebrow>
-        <MarkdownEditor bind:value={emptyContent} mode="edit" placeholder="Start writing..." />
-      </div>
+    <SpecimenGroup label="Edit mode">
+      <MarkdownEditor bind:value={emptyContent} mode="edit" placeholder="Start writing..." />
+    </SpecimenGroup>
 
-      <div class="poodle-specimen__item">
-        <Eyebrow>Disabled</Eyebrow>
-        <MarkdownEditor value="Read-only content" disabled />
-      </div>
-    </div>
+    <SpecimenGroup label="Disabled">
+      <MarkdownEditor value="Read-only content" disabled />
+    </SpecimenGroup>
   {/snippet}
 
   {#snippet sizes(size)}
-    <div class="poodle-md-editor-specimen__variant-block">
-      <Eyebrow>{size}</Eyebrow>
-      <MarkdownEditor
-        value={compactContent}
-        mode="split"
-        size={size}
-        minHeight="10rem"
-      />
-    </div>
+    <SpecimenGroup label={size}>
+      <MarkdownEditor value={compactContent} mode="split" {size} minHeight="10rem" />
+    </SpecimenGroup>
   {/snippet}
 
   {#snippet densities(density)}
-    <div class="poodle-md-editor-specimen__variant-block">
-      <Eyebrow>{density}</Eyebrow>
-      <MarkdownEditor
-        value={compactContent}
-        mode="split"
-        density={density}
-        minHeight="10rem"
-      />
-    </div>
+    <SpecimenGroup label={density}>
+      <MarkdownEditor value={compactContent} mode="split" {density} minHeight="10rem" />
+    </SpecimenGroup>
   {/snippet}
 </SpecimenLayout>
-
-<style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .poodle-specimen__item,
-  .poodle-md-editor-specimen__variant-block {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-</style>

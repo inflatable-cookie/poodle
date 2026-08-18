@@ -83,6 +83,7 @@ import { IconSpecimen } from "./specimens/IconSpecimen";
 import { InlineListSectionSpecimen } from "./specimens/InlineListSectionSpecimen";
 import { KnobSpecimen } from "./specimens/KnobSpecimen";
 import { ListCardSpecimen } from "./specimens/ListCardSpecimen";
+import { ListCardCounterSpecimen } from "./specimens/ListCardCounterSpecimen";
 import { ListContainerSpecimen } from "./specimens/ListContainerSpecimen";
 import { ListGridSpecimen } from "./specimens/ListGridSpecimen";
 import { LicenceActivationSpecimen } from "./specimens/LicenceActivationSpecimen";
@@ -101,6 +102,7 @@ import { MediaThumbnailSpecimen } from "./specimens/MediaThumbnailSpecimen";
 import { MenubarSpecimen } from "./specimens/MenubarSpecimen";
 import { MenuSpecimen } from "./specimens/MenuSpecimen";
 import { MetaBarSpecimen } from "./specimens/MetaBarSpecimen";
+import { MetaItemSpecimen } from "./specimens/MetaItemSpecimen";
 import { MeterSpecimen } from "./specimens/MeterSpecimen";
 import { ModelPickerSpecimen } from "./specimens/ModelPickerSpecimen";
 import { RefSelectSpecimen } from "./specimens/RefSelectSpecimen";
@@ -265,7 +267,7 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "knob": KnobSpecimen,
   "mod-matrix-grid": ModMatrixGridSpecimen,
   "list-card": ListCardSpecimen,
-  "list-card-counter": ListCardSpecimen,
+  "list-card-counter": ListCardCounterSpecimen,
   "list-container": ListContainerSpecimen,
   "list-grid": ListGridSpecimen,
   "licence-activation": LicenceActivationSpecimen,
@@ -284,7 +286,7 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "menu": MenuSpecimen,
   "menubar": MenubarSpecimen,
   "meta-bar": MetaBarSpecimen,
-  "meta-item": MetaBarSpecimen,
+  "meta-item": MetaItemSpecimen,
   "meter": MeterSpecimen,
   "model-picker": ModelPickerSpecimen,
   "ref-select": RefSelectSpecimen,

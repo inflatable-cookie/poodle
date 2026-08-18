@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Menu, Button, Eyebrow, Surface, type MenuItem } from "@inflatable-cookie/poodle-react";
+import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
 const fileItems: MenuItem[] = [
@@ -55,42 +56,35 @@ export function MenuSpecimen() {
         />
       )}
     >
-      <Surface tone="panel" border="subtle" padding="md">
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-            <Eyebrow>With shortcuts</Eyebrow>
-            <Menu
-              items={fileItems}
-              ariaLabel="File menu"
-              onAction={(value) => setLastAction(value)}
-              trigger={<Button variant="secondary">File</Button>}
-            />
-            {lastAction ? (
-              <span style={{ fontSize: "0.75rem", color: "var(--poodle-color-text-secondary)" }}>
-                Last: {lastAction}
-              </span>
-            ) : null}
-          </div>
+            <SpecimenGroup label="With shortcuts">
+        <Menu
+                      items={fileItems}
+                      ariaLabel="File menu"
+                      onAction={(value) => setLastAction(value)}
+                      trigger={<Button variant="secondary">File</Button>}
+                    />
+                    {lastAction ? (
+                      <span style={{ fontSize: "0.75rem", color: "var(--poodle-color-text-secondary)" }}>
+                        Last: {lastAction}
+                      </span>
+                    ) : null}
+      </SpecimenGroup>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-            <Eyebrow>With checkboxes</Eyebrow>
-            <Menu
-              items={settingsItems}
-              ariaLabel="Settings menu"
-              trigger={<Button variant="secondary">Settings</Button>}
-            />
-          </div>
+                <SpecimenGroup label="With checkboxes">
+        <Menu
+                      items={settingsItems}
+                      ariaLabel="Settings menu"
+                      trigger={<Button variant="secondary">Settings</Button>}
+                    />
+      </SpecimenGroup>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
-            <Eyebrow>Destructive action</Eyebrow>
-            <Menu
-              items={destructiveItems}
-              ariaLabel="Item actions"
-              trigger={<Button variant="secondary">Actions</Button>}
-            />
-          </div>
-        </div>
-      </Surface>
+      <SpecimenGroup label="Destructive action">
+        <Menu
+          items={destructiveItems}
+          ariaLabel="Item actions"
+          trigger={<Button variant="secondary">Actions</Button>}
+        />
+      </SpecimenGroup>
     </SpecimenLayout>
   );
 }

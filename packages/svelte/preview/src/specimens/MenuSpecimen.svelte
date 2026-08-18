@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Menu, Button, Eyebrow, Surface, type MenuItem } from "@inflatable-cookie/poodle-svelte";
+  import { Menu, Button, type MenuItem } from "@inflatable-cookie/poodle-svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const fileItems: MenuItem[] = [
@@ -29,11 +30,8 @@
 </script>
 
 <SpecimenLayout>
-  <Surface tone="panel" border="subtle" padding="md">
-    <div class="poodle-specimen">
-      <div class="poodle-specimen__row">
-        <Eyebrow>With shortcuts</Eyebrow>
-        <Menu items={fileItems} ariaLabel="File menu" onAction={(value) => (lastAction = value)}>
+    <SpecimenGroup label="With shortcuts">
+    <Menu items={fileItems} ariaLabel="File menu" onAction={(value) => (lastAction = value)}>
           {#snippet trigger()}
             <Button variant="secondary">File</Button>
           {/snippet}
@@ -41,27 +39,23 @@
         {#if lastAction}
           <span class="poodle-specimen__hint">Last: {lastAction}</span>
         {/if}
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>With checkboxes</Eyebrow>
-        <Menu items={settingsItems} ariaLabel="Settings menu">
+        <SpecimenGroup label="With checkboxes">
+    <Menu items={settingsItems} ariaLabel="Settings menu">
           {#snippet trigger()}
             <Button variant="secondary">Settings</Button>
           {/snippet}
         </Menu>
-      </div>
+  </SpecimenGroup>
 
-      <div class="poodle-specimen__row">
-        <Eyebrow>Destructive action</Eyebrow>
-        <Menu items={destructiveItems} ariaLabel="Item actions">
+        <SpecimenGroup label="Destructive action">
+    <Menu items={destructiveItems} ariaLabel="Item actions">
           {#snippet trigger()}
             <Button variant="secondary">Actions</Button>
           {/snippet}
         </Menu>
-      </div>
-    </div>
-  </Surface>
+  </SpecimenGroup>
 
   {#snippet sizes(size)}
     <Menu items={fileItems} {size} ariaLabel={size + " menu"}>
@@ -81,19 +75,6 @@
 </SpecimenLayout>
 
 <style>
-  .poodle-specimen {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .poodle-specimen__row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-  }
-
   .poodle-specimen__hint {
     font-size: 0.75rem;
     color: var(--poodle-color-text-secondary);

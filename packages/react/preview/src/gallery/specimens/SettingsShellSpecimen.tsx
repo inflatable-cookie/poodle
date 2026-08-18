@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Button, DetailItem, DetailSection, SettingsShell, Surface } from "@inflatable-cookie/poodle-react";
+import { Button, DetailItem, DetailSection, SettingsShell } from "@inflatable-cookie/poodle-react";
+import { SpecimenGroup } from "../SpecimenGroup";
 
 export function SettingsShellSpecimen() {
   const [normalOpen, setNormalOpen] = useState(false);
@@ -10,8 +11,6 @@ export function SettingsShellSpecimen() {
 
   const [searchingQuery, setSearchingQuery] = useState("storage");
 
-  // Long labels on purpose: the rail renders group titles on one line,
-  // truncated with a native title tooltip (R1.2) — never wrapped.
   const groups = [
     { id: "general", label: "General", items: [{ value: "general", label: "General" }] },
     {
@@ -33,8 +32,6 @@ export function SettingsShellSpecimen() {
     },
   ];
 
-  // The host filters. Only it knows a query can match an anchor inside a page,
-  // so the shell never derives this — it just renders the groups it is given.
   const narrowedGroups = [
     {
       id: "storage",
@@ -48,7 +45,7 @@ export function SettingsShellSpecimen() {
 
   return (
     <>
-      <Surface tone="panel" border="subtle" padding="md">
+      <SpecimenGroup label="Open each scenario">
         <div className="poodle-settings-shell-specimen__triggers" style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
           <Button onClick={() => setNormalOpen(true)}>Settings</Button>
           <Button variant="secondary" onClick={() => setSearchingOpen(true)}>
@@ -74,95 +71,105 @@ export function SettingsShellSpecimen() {
           supplies the filtered groups. A refused close is a warning callout, not an
           error.
         </p>
-      </Surface>
+      </SpecimenGroup>
 
-      <SettingsShell
-        open={normalOpen}
-        onOpenChange={setNormalOpen}
-        groups={groups}
-        activePageId="general"
-        pageTitle="General"
-        page={
-          <>
-            <DetailSection title="Appearance">
+      <SpecimenGroup label="Default settings dialog">
+        <SettingsShell
+          open={normalOpen}
+          onOpenChange={setNormalOpen}
+          groups={groups}
+          activePageId="general"
+          pageTitle="General"
+          page={
+            <>
+              <DetailSection title="Appearance">
+                <DetailItem label="Theme" value="Dark" />
+                <DetailItem label="Density" value="Compact" />
+                <DetailItem label="Default size" value="Medium" />
+              </DetailSection>
+              <DetailSection title="Editor">
+                <DetailItem label="Tab size" value="2" />
+                <DetailItem label="Word wrap" value="On" />
+                <DetailItem label="Minimap" value="Off" />
+                <DetailItem label="Format on save" value="On" />
+              </DetailSection>
+              <DetailSection title="Search">
+                <DetailItem label="Search in files" value="On" />
+                <DetailItem label="Follow symlinks" value="Off" />
+              </DetailSection>
+              <DetailSection title="Privacy">
+                <DetailItem label="Telemetry" value="Disabled" />
+                <DetailItem label="Crash reports" value="Disabled" />
+              </DetailSection>
+            </>
+          }
+        />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Search-narrowed rail">
+        <SettingsShell
+          open={searchingOpen}
+          onOpenChange={setSearchingOpen}
+          groups={narrowedGroups}
+          activePageId="storage"
+          pageTitle="Storage"
+          ariaLabel="Soundcheck settings"
+          searchQuery={searchingQuery}
+          onSearchQueryChange={setSearchingQuery}
+          page={
+            <DetailSection title="Storage">
+              <DetailItem label="Location" value="~/Library/Application Support" />
+            </DetailSection>
+          }
+        />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="No groups in the rail">
+        <SettingsShell
+          open={noGroupsOpen}
+          onOpenChange={setNoGroupsOpen}
+          groups={[]}
+          pageTitle="General"
+          page={
+            <DetailSection title="General">
               <DetailItem label="Theme" value="Dark" />
-              <DetailItem label="Density" value="Compact" />
-              <DetailItem label="Default size" value="Medium" />
             </DetailSection>
-            <DetailSection title="Editor">
-              <DetailItem label="Tab size" value="2" />
-              <DetailItem label="Word wrap" value="On" />
-              <DetailItem label="Minimap" value="Off" />
-              <DetailItem label="Format on save" value="On" />
+          }
+        />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="No search matches">
+        <SettingsShell
+          open={noResultsOpen}
+          onOpenChange={setNoResultsOpen}
+          groups={[]}
+          activePageId="general"
+          pageTitle="General"
+          searchQuery="xyzzy"
+          page={
+            <DetailSection title="General">
+              <DetailItem label="Theme" value="Dark" />
             </DetailSection>
-            <DetailSection title="Search">
-              <DetailItem label="Search in files" value="On" />
-              <DetailItem label="Follow symlinks" value="Off" />
+          }
+        />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Refused close">
+        <SettingsShell
+          open={refusedOpen}
+          onOpenChange={setRefusedOpen}
+          groups={groups}
+          activePageId="keymap"
+          pageTitle="Keymap"
+          closeRefusedReason="Apply or discard this page before leaving."
+          page={
+            <DetailSection title="Keymap">
+              <DetailItem label="Save" value="Cmd+S" />
+              <DetailItem label="Search" value="Cmd+Shift+F" />
             </DetailSection>
-            <DetailSection title="Privacy">
-              <DetailItem label="Telemetry" value="Disabled" />
-              <DetailItem label="Crash reports" value="Disabled" />
-            </DetailSection>
-          </>
-        }
-      />
-
-      <SettingsShell
-        open={searchingOpen}
-        onOpenChange={setSearchingOpen}
-        groups={narrowedGroups}
-        activePageId="storage"
-        pageTitle="Storage"
-        ariaLabel="Soundcheck settings"
-        searchQuery={searchingQuery}
-        onSearchQueryChange={setSearchingQuery}
-        page={
-          <DetailSection title="Storage">
-            <DetailItem label="Location" value="~/Library/Application Support" />
-          </DetailSection>
-        }
-      />
-
-      <SettingsShell
-        open={noGroupsOpen}
-        onOpenChange={setNoGroupsOpen}
-        groups={[]}
-        pageTitle="General"
-        page={
-          <DetailSection title="General">
-            <DetailItem label="Theme" value="Dark" />
-          </DetailSection>
-        }
-      />
-
-      <SettingsShell
-        open={noResultsOpen}
-        onOpenChange={setNoResultsOpen}
-        groups={[]}
-        activePageId="general"
-        pageTitle="General"
-        searchQuery="xyzzy"
-        page={
-          <DetailSection title="General">
-            <DetailItem label="Theme" value="Dark" />
-          </DetailSection>
-        }
-      />
-
-      <SettingsShell
-        open={refusedOpen}
-        onOpenChange={setRefusedOpen}
-        groups={groups}
-        activePageId="keymap"
-        pageTitle="Keymap"
-        closeRefusedReason="Apply or discard this page before leaving."
-        page={
-          <DetailSection title="Keymap">
-            <DetailItem label="Save" value="Cmd+S" />
-            <DetailItem label="Search" value="Cmd+Shift+F" />
-          </DetailSection>
-        }
-      />
+          }
+        />
+      </SpecimenGroup>
     </>
   );
 }

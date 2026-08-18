@@ -5,6 +5,7 @@
     type AudioMeterMode, type MeterBus, type MeterBusChannel, type MeterFrameScheduler,
   } from "@inflatable-cookie/poodle-core";
   import { AudioMeter, MeterSurface } from "@inflatable-cookie/poodle-svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const MODES: AudioMeterMode[] = ["vu", "ppm", "sample-peak", "rms"];
@@ -223,8 +224,7 @@
 
 <SpecimenLayout variantDirection="row">
   <div class="page">
-    <section>
-      <h3>Batched meter surface</h3>
+    <SpecimenGroup label="Batched meter surface">
       <p class="note">
         One <code>MeterBus</code>, one canvas, one frame loop. Standalone evidence stays on the
         <a href="#components/audio-meter">AudioMeter specimen</a>.
@@ -245,8 +245,9 @@
         <button type="button" data-part="theme-toggle" onclick={() => (themed = !themed)}>{themed ? "Local theme off" : "Local theme on"}</button>
       </div>
       <pre class="readout" data-part="perf-readout">{readout}</pre>
-    </section>
-    <section>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Live meter strip">
       <div class="strip-wrap" data-theme={themed ? "midnight" : undefined}>
         {#if mounted}
           {#key sceneVersion}
@@ -267,15 +268,13 @@
           <p class="note">Surface destroyed — bus channels stay registered.</p>
         {/if}
       </div>
-    </section>
+    </SpecimenGroup>
   </div>
 </SpecimenLayout>
 
 <style>
   .page { display: grid; gap: 1.5rem; }
-  section { display: grid; gap: 0.75rem; }
-  h3 { margin: 0; color: var(--poodle-color-text-secondary); font-size: 0.75rem; }
-  .note { margin: 0; color: var(--poodle-color-text-secondary); font-size: 0.8125rem; }
+.note { margin: 0; color: var(--poodle-color-text-secondary); font-size: 0.8125rem; }
   .controls { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .readout { margin: 0; padding: 0.5rem; border-radius: 0.25rem; background: var(--poodle-color-background-surface); font-size: 0.6875rem; white-space: pre-wrap; }
   .strip-wrap { max-width: 40rem; }

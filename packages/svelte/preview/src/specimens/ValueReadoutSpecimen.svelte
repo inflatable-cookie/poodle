@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ValueReadout } from "@inflatable-cookie/poodle-svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
   const examples = [
     ["Number", 12.345, { type: "number", decimals: 2 }],
@@ -14,11 +15,12 @@
 </script>
 <SpecimenLayout variantDirection="row"><div class="page">
   {#each examples as [label, value, format]}
-    <section><h3>{label}</h3><ValueReadout {value} min={-20_000} max={20_000} {format} ariaLabel={label} /></section>
+    <SpecimenGroup label={label}><ValueReadout {value} min={-20_000} max={20_000} {format} ariaLabel={label} /></SpecimenGroup>
   {/each}
-  <section><h3>Negative / boundary / disabled</h3><div class="row"><ValueReadout value={-1} min={-1} max={1} /><ValueReadout value={1} min={-1} max={1} /><ValueReadout value={0} disabled ariaLabel="Disabled readout" /></div></section>
+  <SpecimenGroup label="Negative / boundary / disabled"><div class="row"><ValueReadout value={-1} min={-1} max={1} /><ValueReadout value={1} min={-1} max={1} /><ValueReadout value={0} disabled ariaLabel="Disabled readout" /></div></SpecimenGroup>
 </div>
   {#snippet sizes(size)}<ValueReadout value={-12.4} format={{ type: "db" }} {size} ariaLabel={`Readout ${size} size`} />{/snippet}
   {#snippet densities(density)}<ValueReadout value={-12.4} format={{ type: "db" }} {density} ariaLabel={`Readout ${density} density`} />{/snippet}
 </SpecimenLayout>
-<style>.page { display: grid; gap: 1rem; } section { display: grid; gap: .5rem; } h3 { margin: 0; color: var(--poodle-color-text-secondary); font-size: .75rem; } .row { display: flex; gap: .75rem; flex-wrap: wrap; }</style>
+<style>.page { display: grid; gap: 1rem; }
+.row { display: flex; gap: .75rem; flex-wrap: wrap; }</style>

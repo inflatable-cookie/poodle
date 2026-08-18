@@ -4,8 +4,8 @@
     DetailItem,
     DetailSection,
     SettingsShell,
-    Surface,
   } from "@inflatable-cookie/poodle-svelte";
+  import SpecimenGroup from "../components/SpecimenGroup.svelte";
 
   // One $state rune puts the whole file in runes mode, where plain `let`
   // stops being reactive — every flag here must be $state or its shell
@@ -55,7 +55,7 @@
   ];
 </script>
 
-<Surface tone="panel" border="subtle" padding="md">
+<SpecimenGroup label="Open each scenario">
   <div class="poodle-settings-shell-specimen__triggers">
     <Button onClick={() => (normalOpen = true)}>Settings</Button>
     <Button variant="secondary" onClick={() => (searchingOpen = true)}>Narrowed by search</Button>
@@ -70,8 +70,9 @@
     supplies the filtered groups. A refused close is a warning callout, not an
     error.
   </p>
-</Surface>
+</SpecimenGroup>
 
+<SpecimenGroup label="Default settings dialog">
 <SettingsShell
   bind:open={normalOpen}
   {groups}
@@ -100,7 +101,9 @@
     </DetailSection>
   {/snippet}
 </SettingsShell>
+</SpecimenGroup>
 
+<SpecimenGroup label="Search-narrowed rail">
 <SettingsShell
   bind:open={searchingOpen}
   groups={narrowedGroups}
@@ -115,7 +118,9 @@
     </DetailSection>
   {/snippet}
 </SettingsShell>
+</SpecimenGroup>
 
+<SpecimenGroup label="No groups in the rail">
 <SettingsShell
   bind:open={noGroupsOpen}
   groups={[]}
@@ -127,7 +132,9 @@
     </DetailSection>
   {/snippet}
 </SettingsShell>
+</SpecimenGroup>
 
+<SpecimenGroup label="No search matches">
 <SettingsShell
   bind:open={noResultsOpen}
   groups={[]}
@@ -141,7 +148,9 @@
     </DetailSection>
   {/snippet}
 </SettingsShell>
+</SpecimenGroup>
 
+<SpecimenGroup label="Refused close">
 <SettingsShell
   bind:open={refusedOpen}
   {groups}
@@ -159,6 +168,7 @@
     </DetailSection>
   {/snippet}
 </SettingsShell>
+</SpecimenGroup>
 
 <style>
   .poodle-settings-shell-specimen__triggers {
