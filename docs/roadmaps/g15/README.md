@@ -109,7 +109,8 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 ## Current Task
 
 `g15.024` and its review prerequisite `g15.037` are complete through PR #48.
-The next defect-led curation child is `g15.025`. `g15.011` remains
+`g15.025` is reviewed and ready as the final defect-led curation child.
+`g15.011` remains
 partial until `g15.026` and all six screen-clear review children
 (`g15.028`–`g15.033`) land; defect-led curation proceeds through
 `g15.015`–`g15.025`. `g15.012` follows the completed audit. `g15.013` stays
