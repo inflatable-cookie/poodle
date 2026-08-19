@@ -1,7 +1,7 @@
 # g15.023 — Overloaded Examples: foundation entry, content and status
 
-Status: **changes requested** — PR #47 reviewed at `e87e6773`; bounded
-TextInput specimen/evidence corrections required before live review
+Status: **awaiting operator live review** — PR #47 code gate accepted at
+`dda190ed`; paired Svelte/React preview checkpoint remains
 Parent: `018-overloaded-examples-curation.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Consumes: `g15.011` partial screening baseline
