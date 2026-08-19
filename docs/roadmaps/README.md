@@ -31,7 +31,9 @@ v0.2.0 release-baseline generation.
   appearance recipes before visual conformance. PR #46 completed `g15.022`,
   curating the audio/music family with paired-web and shared-native coverage.
   PR #47 completed `g15.023`, curating the foundation entry, content, and
-  status family. `g15.024` is remeasured and ready for dispatch.
+  status family. PR #48's `g15.024` review exposed a real GPUI
+  AgentTranscript detached-scroll/jump gap; `g15.024` is paused on planned,
+  non-dispatchable prerequisite `g15.037`.
   `g15.013` remains the final gate after the
   specimen program and `g15.012`.
   Jetstream remains deferred.
@@ -60,8 +62,9 @@ v0.2.0 release-baseline generation.
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
-  `g15.014`–`g15.017`, `g15.019`–`g15.022`, and `g15.034`–`g15.036` complete,
-  `g15.011` partial with bounded continuation cards, `g15.013` final
+  `g15.014`–`g15.017`, `g15.019`–`g15.023`, and `g15.034`–`g15.036` complete,
+  `g15.011` partial with bounded continuation cards, `g15.024` paused on
+  planned `g15.037`, `g15.013` final
 
 ## Rules
 

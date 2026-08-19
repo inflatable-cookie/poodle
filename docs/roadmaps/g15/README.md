@@ -1,8 +1,8 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.010` and `g15.014`–`g15.017` complete;
-`g15.019`–`g15.022` and `g15.034`–`g15.036` complete; `g15.011` partial with
-bounded continuation cards
+`g15.019`–`g15.023` and `g15.034`–`g15.036` complete; `g15.011` partial with
+bounded continuation cards; `g15.024` paused on planned prerequisite `g15.037`
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -79,6 +79,7 @@ and status advance are the orchestrator's.
 24. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after the full specimen program and `012`
 25. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
 26. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
+27. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — planned, not dispatchable; ownership seam must be settled before it can unblock `024`
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)
@@ -107,8 +108,9 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-`g15.023` is complete through PR #47. `g15.024` has been remeasured and is the
-next ready specimen-curation card.
+`g15.023` is complete through PR #47. PR #48's `g15.024` review exposed a real
+GPUI AgentTranscript detached-scroll/jump gap. `g15.024` is paused until
+planned prerequisite `g15.037` has an approved ownership seam and lands.
 `g15.011` remains
 partial until `g15.026` and all six screen-clear review children
 (`g15.028`–`g15.033`) land; defect-led curation proceeds through
