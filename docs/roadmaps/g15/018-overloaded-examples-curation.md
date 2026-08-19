@@ -27,7 +27,7 @@ and is dispatched separately.
 | Card | Family group | Pages | Sequencing |
 | --- | --- | ---: | --- |
 | `g15.020` | Model connections + account lifecycle | 8 | complete — PR #42 |
-| `g15.021` | Application shell | 7 | none |
+| `g15.021` | Application shell | 7 | ready |
 | `g15.022` | Audio & music | 11 | after `g15.017` splits `audio_specimens` |
 | `g15.023` | Foundations: entry, content, status | 11 | after `g15.016` |
 | `g15.024` | Agent & tools | 6 | after `g15.015` restores captions |

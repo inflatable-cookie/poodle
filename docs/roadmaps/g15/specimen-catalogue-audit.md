@@ -397,7 +397,7 @@ that changes specimen presentation carries a live operator-review checkpoint.
 | [`g15.016`](016-specimen-idiom-convergence.md) | One caption idiom; two borrowed pages get their own | 29 pages |
 | [`g15.017`](017-specimen-axis-placement.md) | Axis matrices out of the main view; axis evidence where the prop exists | 12 audio + ~22 others |
 | [`g15.018`](018-overloaded-examples-curation.md) | Overloaded `Examples` — **parent, not dispatchable** | 53 pages |
-| ↳ [`g15.020`](020-curate-model-connection-licence.md)–[`g15.025`](025-curate-collections-navigation-tail.md) | six bounded family children, one exact page list each; `020` complete | 6–11 each, 53 total |
+| ↳ [`g15.020`](020-curate-model-connection-licence.md)–[`g15.025`](025-curate-collections-navigation-tail.md) | six bounded family children, one exact page list each; `020` complete, `021` ready | 6–11 each, 53 total |
 | [`g15.019`](019-gpui-specimen-structure.md) | Native axis panes and captions | complete — 74 axis + 6 caption corrections; two axis-domain gaps returned |
 | [`g15.034`](034-component-specific-specimen-axis-domains.md) | Exact component domains and truthful specimen-axis evidence | complete — PR #41 |
 | [`g15.026`](026-native-specimen-probe.md) | The headless native probe that un-provisions the GPUI column | 174 pages |

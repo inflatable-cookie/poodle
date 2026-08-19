@@ -16,8 +16,8 @@ Updated: 2026-08-19
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: compile and readiness-review `g15.021`, then continue the bounded
-    specimen program. PR #42 completed `g15.020` after two review repair rounds;
+  - Next: dispatch ready `g15.021`, then continue the bounded specimen program.
+    PR #42 completed `g15.020` after two review repair rounds;
     the operator explicitly waived its live visual checkpoint when directing
     merge.
     PR #41 completed the operator-approved clean migration for EmptyState,

@@ -23,8 +23,8 @@ v0.2.0 release-baseline generation.
   repair rounds; the operator explicitly waived that child's live visual
   checkpoint when directing merge. PR #41 closed the
   two returned axis-domain gaps and hardened the specimen substrate that
-  admitted them. `g15.021` is the next bounded overloaded-Examples child and
-  requires compilation before dispatch.
+  admitted them. `g15.021` is ready as the next bounded overloaded-Examples
+  child.
   Certification
   `g15.013` remains the final gate after the specimen program and `g15.012`.
   Jetstream remains deferred.
