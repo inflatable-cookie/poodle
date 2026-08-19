@@ -6,6 +6,8 @@ Parent: `docs/roadmaps/g15/018-overloaded-examples-curation.md`
 Handoff: `docs/handoffs/20260819-090350-g15-021-application-shell-curation.md`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-e18e170e`
 Branch: `t3code/curate-application-shell`
+Accepted head: `da17637c941fa2def6d55d86a1eade694864b4fb`
+Merge: `c991b0daf793c1df19fa0951670c7fdf24a535a4`
 Worker base: `ecbaa9f539015532ee488c7411291aa01e09aadd` (`origin/main` at dispatch;
 handoff planning base `055641feebceeef91db0fc4678a01c8f498b04f9` is an ancestor)
 

@@ -18,12 +18,14 @@ v0.2.0 release-baseline generation.
   family tranches, and GPUI specimen closure are complete. `g15.011` has
   delivered its screening baseline and three approved pilots; its exact
   curation, native-probe, and screen-clear review children remain. `g15.015`
-  through `g15.017`, `g15.019`, `g15.020`, and `g15.034` are complete. PR #42
+  through `g15.017`, `g15.019` through `g15.021`, and `g15.034` are complete. PR #42
   curated the model-connection and account-lifecycle family after two review
   repair rounds; the operator explicitly waived that child's live visual
   checkpoint when directing merge. PR #41 closed the
   two returned axis-domain gaps and hardened the specimen substrate that
-  admitted them. `g15.021` is in its review loop as the next bounded
+  admitted them. PR #43 completed `g15.021`, including the review-time native
+  HistoryCenter delete-parity repair; its final live visual checkpoint was
+  explicitly waived by the operator. `g15.022` is the next bounded
   overloaded-Examples child. `g15.035` is ready as a parallel additive API
   lane for solid Callout and RemediationBanner surfaces; it must land before
   visual conformance and certification.
@@ -55,7 +57,7 @@ v0.2.0 release-baseline generation.
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
-  `g15.014`–`g15.017`, `g15.019`, and `g15.034` complete, `g15.011` partial
+  `g15.014`–`g15.017`, `g15.019`–`g15.021`, and `g15.034` complete, `g15.011` partial
   with bounded continuation cards, `g15.035` ready, `g15.013` final
 
 ## Rules

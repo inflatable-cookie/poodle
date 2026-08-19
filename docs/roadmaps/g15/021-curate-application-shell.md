@@ -1,7 +1,7 @@
 # g15.021 — Overloaded Examples: application shell
 
-Status: **ready to merge** — remediation complete; operator waived the final
-live paired-preview checkpoint on 2026-08-19
+Status: **complete** — PR #43 accepted at `da17637c`; merge `c991b0da`.
+The operator waived the final live paired-preview checkpoint on 2026-08-19.
 Parent: `018-overloaded-examples-curation.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Consumes: `g15.011` partial screening baseline

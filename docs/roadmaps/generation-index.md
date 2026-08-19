@@ -6,7 +6,7 @@ Updated: 2026-08-19
 
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`, and
-    `g15.019`, `g15.020`, and `g15.034` complete; `g15.011` partial with bounded
+    `g15.019`–`g15.021` and `g15.034` complete; `g15.011` partial with bounded
     continuation cards; `g15.035` ready; `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `035`
@@ -16,9 +16,11 @@ Updated: 2026-08-19
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: complete the `g15.021` review loop. `g15.035` is ready as a
-    parallel-safe additive API lane and must land before `g15.012`/`g15.013`.
-    Then continue the bounded specimen program.
+  - Next: review and dispatch `g15.022`. `g15.035` is ready as a parallel-safe
+    additive API lane and must land before `g15.012`/`g15.013`. Then continue
+    the bounded specimen program.
+    PR #43 completed `g15.021`, including native HistoryCenter delete parity;
+    the operator explicitly waived its final live visual checkpoint.
     PR #42 completed `g15.020` after two review repair rounds;
     the operator explicitly waived its live visual checkpoint when directing
     merge.
