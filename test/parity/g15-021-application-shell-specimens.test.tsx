@@ -280,6 +280,9 @@ describe("g15.021 application-shell specimens", () => {
       "Failure and incomplete metadata",
     ]);
     expect(document.querySelectorAll("[data-part='trigger']").length).toBeGreaterThanOrEqual(9);
+    const gpui = readFileSync(join(GPUI_SPECIMENS, "history_center_specimen.rs"), "utf8");
+    expect(gpui).toContain("with_delete_handlers");
+    expect(gpui).toContain('value: format!("delete {entry_id}")');
     cleanupSvelte();
   });
 

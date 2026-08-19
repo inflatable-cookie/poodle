@@ -14,16 +14,24 @@ handoff planning base `055641feebceeef91db0fc4678a01c8f498b04f9` is an ancestor)
 Application-shell catalogue pages curated to the outline's 3–6 section
 budget across Svelte, React, and GPUI. DetailSectionGroup verified no-op.
 Dead Edit/Reset and PageHeader actions now update visible specimen feedback.
-HistoryCenter fixture IDs become six plain-language questions. No component,
-contract, or public API changed.
+HistoryCenter fixture IDs become six plain-language questions. Review then
+closed the pre-existing Rust/GPUI delete-parity gap named by the contract.
 
 ## Change class
 
-- **Change class:** none (documentation surfaces only)
+- **Change class:** specimen curation plus behavioral parity correction. The
+  Rust HistoryCenter surface is additive in capability but source-breaking for
+  exhaustive enum matches and struct literals without `..Default`; this is the
+  operator-approved pre-v1 migration, with no compatibility shim.
 - **Packages touched:** `poodle-svelte` preview, `poodle-react` preview,
-  `poodle-gpui-preview` — specimen files only; `mod.rs` for DetailShell
-  `render(state, cx)` signature
-- **Public entry points:** unchanged
+  `poodle-gpui-preview`, `poodle-headless`, and `poodle-render`
+- **Public entry points:** `poodle-render` adds `HistoryCenterDelete` and delete
+  request/confirm/cancel handler fields; `poodle-headless` adds the documented
+  delete event/effect variants
+- **Downstream re-check:** direct Rust consumers must recompile exhaustive
+  `HistoryCenterEvent` / `HistoryCenterEffect` matches and any literal
+  `HistoryCenterView` / `HistoryCenterHandlers` construction. GPUI consumers
+  should confirm request → dialog → confirm/cancel timing and anchor reload.
 - **app_state.rs:** unused — specimen-local keys go through existing
   `specimens.text` / `node_events`
 
@@ -147,18 +155,17 @@ dock-region contract §12).
 | fork-off-fork | Nested continuation runs |
 | single-continuation | Single continuation and run boundaries |
 | run-tail | Single continuation and run boundaries |
-| single-fork-open | Rename and manage a continuation (disclose + delete on web; rename sibling) |
+| single-fork-open | Rename and manage a continuation (disclose + delete; rename sibling) |
 | rename | Rename and manage a continuation |
 | rejection | Failure and incomplete metadata |
 | no-timestamp | Failure and incomplete metadata |
 
 Mount-time auto-open of single-fork-open removed; examples stay interactable.
 Host feeds remain live. Undo and navigate write a page-level Last host
-command readout. Rename and web delete write a section Last command readout.
-GPUI teaches disclose + rename only: `HistoryCenterHandlers` still has no
-delete command surface. Restoring web delete without a GPUI delete handler is
-an intentional three-runtime gap that needs a planning amendment / focused
-parity slice — not a catalogue reduction on Svelte/React.
+command readout. Rename and delete write a section Last command readout. The
+orchestrator remediation ports the existing delete transition into the Rust
+machine and adds the opt-in shared confirmation surface, so GPUI now teaches
+the same disclose/delete story without reducing the web catalogue.
 
 ### PageHeader
 
@@ -203,6 +210,8 @@ links and breadcrumbs stay real `href` navigation.
 - `effigy react:build`: pass
 - `effigy check:gpui`: pass
 - `effigy docs:check`: pass
+- focused Rust HistoryCenter machine tests: pass (20)
+- focused shared-renderer HistoryCenter tests: pass (15)
 - `git diff --check origin/main...HEAD`: pass
 
 Headless only. No windowed, native-visual, conformance, Jetstream, or release
@@ -220,10 +229,6 @@ passed.
   structural / affordance-only until native gesture vocabulary expands; expanded
   dock copy no longer claims closable/reorderable (web wires those handlers)
 - `g15.026` still owns the native page probe
-- **GPUI HistoryCenter delete** — web manage story restores `onDeleteContinuation`;
-  GPUI has no matching handler field. Needs orchestrator planning amendment /
-  focused prerequisite parity slice before three-runtime delete parity. Do
-  not hide this by removing the web delete story.
 - Size/density axes for HistoryCenter and DockRegion are presentation-only (no
   enabled undo/redo/close/reorder without local handlers)
 - Live paired-preview operator review remains open
@@ -243,7 +248,26 @@ Second pass:
 3. MEDIUM — transfer docks and size/density axes no longer mark closable without
    handlers; focused tests assert collapse `data-collapsed`, reorder tab order,
    transfer panel counts, and delete confirmation
-4. LOW — batch log recount + honest unresolved GPUI delete gap
+4. LOW — batch log recount + explicit GPUI delete prerequisite, resolved by
+   the orchestrator remediation below
+
+## Orchestrator remediation
+
+The operator authorised the remaining native parity fix on the PR. The
+g15.021 roadmap now carries the narrow scope amendment.
+
+- `poodle-headless::history_center` now handles `DeleteContinuation`: it
+  accepts only a fork offered by an open picker, emits delete + anchor reload,
+  and invalidates the cached level so deleted entries cannot keep rendering
+- `poodle-render::history_center` now exposes an opt-in danger Delete item,
+  host-owned `HistoryCenterDelete` target state, and one shared AlertDialog;
+  request/cancel emit no destructive command and confirm names the selected
+  entry exactly once
+- the GPUI manage specimen wires request, confirm, cancel, and visible
+  `delete <entry>` feedback; other GPUI HistoryCenter stories do not grow a
+  delete item
+- direct Rust tests cover opt-in rendering, confirmation timing, exact payload,
+  level invalidation/reload, and closed/unknown inertness
 
 ## Changed files
 
@@ -251,5 +275,9 @@ Second pass:
 - `packages/react/preview/src/gallery/specimens/{ActionDiscoveryPanel,DetailSection,DetailShell,DockRegion,HistoryCenter,PageHeader}Specimen.tsx`
 - `packages/gpui/preview/src/specimens/{action_discovery_panel,detail_section_specimen,detail_section_group_specimen,detail_shell,dock_region,history_center_specimen,page_header_specimen}.rs`
 - `packages/gpui/preview/src/specimens/mod.rs`
+- `packages/contracts/headless/src/history_center.rs`
+- `packages/render/src/{history_center,lib}.rs`
+- `docs/contracts/components/history-center.md`
+- `docs/roadmaps/g15/021-curate-application-shell.md`
 - `test/parity/g15-021-application-shell-specimens.test.tsx`
 - `docs/logs/2026-08/20260819-g15-021-application-shell-curation.md`

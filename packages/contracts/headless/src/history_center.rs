@@ -635,6 +635,7 @@ pub enum HistoryCenterEvent {
     },
     PickContinuation { entry_id: String },
     Confirm,
+    DeleteContinuation { entry_id: String },
     RunLoaded {
         from_entry_id: String,
         pages: Vec<HistoryPathPage>,
@@ -667,6 +668,9 @@ pub enum HistoryCenterEffect {
     /// build the new root — it emits the command and renders whatever root
     /// pages the host supplies afterwards.
     CheckoutContinuation { entry_id: String },
+    /// The host deletes the selected continuation. The machine invalidates
+    /// the affected level and re-requests its continuations separately.
+    DeleteContinuation { entry_id: String },
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -1078,6 +1082,48 @@ fn confirm(context: HistoryCenterContext) -> HistoryCenterResult {
     }
 }
 
+fn delete_continuation(context: HistoryCenterContext, entry_id: &str) -> HistoryCenterResult {
+    for level in walk_levels(&context.open) {
+        let Some(continuations) = level.continuations.as_ref() else {
+            continue;
+        };
+        let Some((entries, index)) = anchor_run_context(&context, &level.anchor_entry_id) else {
+            continue;
+        };
+        let forks = history_center_forks_at(Some(continuations), &entries, index);
+        if !forks.iter().any(|fork| fork.entry_id == entry_id) {
+            continue;
+        }
+
+        // A deleted fork never becomes part of the root spine, so the normal
+        // stale-level reconciliation cannot invalidate its cached run. Keep
+        // the disclosure open, clear every cached claim below it, and ask the
+        // host for the authority's new continuation list.
+        let invalidated = HistoryCenterOpenFork {
+            anchor_entry_id: level.anchor_entry_id.clone(),
+            continuations: None,
+            pick: None,
+            chosen: None,
+            run_pages: Vec::new(),
+            inner: Vec::new(),
+        };
+        let open = replace_level(&context.open, &invalidated);
+        return HistoryCenterResult {
+            state: HistoryCenterState::Open,
+            context: HistoryCenterContext { open, ..context },
+            effects: vec![
+                HistoryCenterEffect::DeleteContinuation {
+                    entry_id: entry_id.to_owned(),
+                },
+                HistoryCenterEffect::LoadContinuations {
+                    entry_id: level.anchor_entry_id,
+                },
+            ],
+        };
+    }
+    stay(HistoryCenterState::Open, context)
+}
+
 fn run_loaded(
     context: HistoryCenterContext,
     from_entry_id: &str,
@@ -1261,6 +1307,13 @@ fn dispatch(
         HistoryCenterEvent::Confirm => {
             if is_open {
                 confirm(context)
+            } else {
+                stay(state, context)
+            }
+        }
+        HistoryCenterEvent::DeleteContinuation { entry_id } => {
+            if is_open {
+                delete_continuation(context, &entry_id)
             } else {
                 stay(state, context)
             }
@@ -1737,6 +1790,82 @@ mod tests {
             }],
         );
         assert!(result.context.open.is_empty());
+    }
+
+    #[test]
+    fn delete_invalidates_the_offered_fork_and_reloads_its_anchor() {
+        let context = HistoryCenterContext {
+            pages: Some(vec![page(vec![entry("e2", 3), entry("e1", 1)], 0)]),
+            open: vec![HistoryCenterOpenFork {
+                anchor_entry_id: "e2".to_owned(),
+                continuations: Some(vec![fork("f1", "wide"), fork("f2", "duck")]),
+                pick: Some(fork("f2", "duck")),
+                chosen: None,
+                run_pages: vec![page(vec![entry("f2", 1)], 0)],
+                inner: vec![HistoryCenterOpenFork::opening("f2")],
+            }],
+            ..HistoryCenterContext::default()
+        };
+        let result = history_center_transition(
+            HistoryCenterState::Open,
+            context,
+            HistoryCenterEvent::DeleteContinuation {
+                entry_id: "f2".to_owned(),
+            },
+        );
+
+        assert_eq!(
+            result.effects,
+            [
+                HistoryCenterEffect::DeleteContinuation {
+                    entry_id: "f2".to_owned(),
+                },
+                HistoryCenterEffect::LoadContinuations {
+                    entry_id: "e2".to_owned(),
+                },
+            ],
+        );
+        let level = &result.context.open[0];
+        assert_eq!(level.anchor_entry_id, "e2");
+        assert!(level.continuations.is_none());
+        assert!(level.pick.is_none());
+        assert!(level.chosen.is_none());
+        assert!(level.run_pages.is_empty());
+        assert!(level.inner.is_empty());
+    }
+
+    #[test]
+    fn delete_is_inert_for_an_unoffered_fork_and_while_closed() {
+        let context = HistoryCenterContext {
+            pages: Some(vec![page(vec![entry("e2", 2), entry("e1", 1)], 0)]),
+            open: vec![HistoryCenterOpenFork {
+                anchor_entry_id: "e2".to_owned(),
+                continuations: Some(vec![fork("f1", "wide")]),
+                chosen: Some(fork("f1", "wide")),
+                ..HistoryCenterOpenFork::default()
+            }],
+            ..HistoryCenterContext::default()
+        };
+
+        let unknown = history_center_transition(
+            HistoryCenterState::Open,
+            context.clone(),
+            HistoryCenterEvent::DeleteContinuation {
+                entry_id: "ghost".to_owned(),
+            },
+        );
+        assert!(unknown.effects.is_empty());
+        assert_eq!(unknown.context, context);
+
+        let closed = history_center_transition(
+            HistoryCenterState::Closed,
+            context.clone(),
+            HistoryCenterEvent::DeleteContinuation {
+                entry_id: "f1".to_owned(),
+            },
+        );
+        assert!(closed.effects.is_empty());
+        assert_eq!(closed.context, context);
     }
 
     /// Focus is the row, not an index, so it survives a shape change under it.

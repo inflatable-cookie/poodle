@@ -269,7 +269,8 @@ pub use form_layout::form_layout;
 pub use form_shell::form_shell;
 pub use grid::grid;
 pub use history_center::{
-    history_center, HistoryCenterHandlers, HistoryCenterRename, HistoryCenterView,
+    history_center, HistoryCenterDelete, HistoryCenterHandlers, HistoryCenterRename,
+    HistoryCenterView,
 };
 pub use hover_card::hover_card;
 pub use icon::icon;

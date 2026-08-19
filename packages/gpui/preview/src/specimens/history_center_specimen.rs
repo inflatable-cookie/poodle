@@ -17,7 +17,8 @@ use poodle_headless::history_center::{
     HistoryEntryPosition, HistoryPathPage,
 };
 use poodle_render::{
-    history_center, HistoryCenterHandlers, HistoryCenterRename, HistoryCenterView,
+    history_center, HistoryCenterDelete, HistoryCenterHandlers, HistoryCenterRename,
+    HistoryCenterView,
 };
 use poodle_specs::{
     EyebrowSpec, HistoryCenterRejection, HistoryCenterSpec,
@@ -379,6 +380,10 @@ impl<'a> SectionState<'a> {
                 branch_id: "feature/lead".to_string(),
                 value: self.text("rename", "Wide mix"),
             }),
+            delete_target: self.is_on("deleting").then(|| HistoryCenterDelete {
+                entry_id: self.text("delete-entry", "l1"),
+                label: self.text("delete-label", "Lead intro"),
+            }),
             rejection,
             ..HistoryCenterView::default()
         }
@@ -519,6 +524,62 @@ impl<'a> SectionState<'a> {
             }),
             ..HistoryCenterHandlers::default()
         }
+    }
+
+    fn with_delete_handlers(
+        &self,
+        mut handlers: HistoryCenterHandlers,
+        queue: Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
+    ) -> HistoryCenterHandlers {
+        let prefix = self.prefix.to_string();
+        handlers.on_delete_request = Some({
+            let queue = queue.clone();
+            let prefix = prefix.clone();
+            Arc::new(move |target: &HistoryContinuation| {
+                let mut events = queue.lock().unwrap();
+                events.push(NodeSpecimenEvent::SetText {
+                    key: format!("{prefix}-delete-entry"),
+                    value: target.entry_id.clone(),
+                });
+                events.push(NodeSpecimenEvent::SetText {
+                    key: format!("{prefix}-delete-label"),
+                    value: target.label.clone(),
+                });
+                events.push(NodeSpecimenEvent::SetToggle {
+                    key: format!("{prefix}-deleting"),
+                    value: true,
+                });
+                events.push(NodeSpecimenEvent::SetToggle {
+                    key: format!("{prefix}-actions-open"),
+                    value: false,
+                });
+            })
+        });
+        handlers.on_delete_confirm = Some({
+            let queue = queue.clone();
+            let prefix = prefix.clone();
+            Arc::new(move |entry_id| {
+                let mut events = queue.lock().unwrap();
+                events.push(NodeSpecimenEvent::SetText {
+                    key: format!("{prefix}-command"),
+                    value: format!("delete {entry_id}"),
+                });
+                events.push(NodeSpecimenEvent::SetToggle {
+                    key: format!("{prefix}-deleting"),
+                    value: false,
+                });
+            })
+        });
+        handlers.on_delete_cancel = Some({
+            let prefix = prefix.clone();
+            Arc::new(move || {
+                queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                    key: format!("{prefix}-deleting"),
+                    value: false,
+                });
+            })
+        });
+        handlers
     }
 }
 
@@ -715,7 +776,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                                 &HistoryCenterSpec::new().with_can_undo(true),
                                 &manage.view(&run_tail_pages(), &manage_levels, None),
-                                manage.handlers(queue.clone(), "c2", None),
+                                manage.with_delete_handlers(
+                                    manage.handlers(queue.clone(), "c2", None),
+                                    queue.clone(),
+                                ),
                                 "hc-manage",
                             )),
                     )
