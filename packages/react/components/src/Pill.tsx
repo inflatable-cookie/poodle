@@ -12,10 +12,12 @@ import type {
   PillTone,
   PillTypography,
   SemanticControlSizeRole,
+  ToneFill,
 } from "./types";
 
 export interface PillProps {
   tone?: PillTone;
+  fill?: ToneFill;
   appearance?: PillAppearance;
   size?: PillSize | null;
   sizeRole?: SemanticControlSizeRole;
@@ -26,12 +28,14 @@ export interface PillProps {
   muted?: boolean;
   adaptiveWidth?: boolean;
   dot?: boolean;
+  title?: string | null;
   ariaLabel?: string | null;
   children?: ReactNode;
 }
 
 export function Pill({
   tone = "neutral",
+  fill = "tint",
   appearance = "solid",
   size = null,
   sizeRole = "chrome",
@@ -42,6 +46,7 @@ export function Pill({
   muted = false,
   adaptiveWidth = false,
   dot = false,
+  title = null,
   ariaLabel = null,
   children,
 }: PillProps) {
@@ -62,6 +67,7 @@ export function Pill({
     <span
       className="poodle-pill"
       data-tone={tone}
+      data-fill={fill}
       data-appearance={appearance}
       data-size={resolvedSize}
       data-density={resolvedDensity}
@@ -70,6 +76,7 @@ export function Pill({
       data-muted={muted}
       data-adaptive-width={adaptiveWidth || undefined}
       data-accent={accent ? "custom" : undefined}
+      title={title ?? undefined}
       aria-label={ariaLabel ?? undefined}
       style={style}
     >

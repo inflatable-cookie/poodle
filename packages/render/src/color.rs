@@ -7,7 +7,42 @@
 //! same recipe is a plain componentwise lerp — bit-equivalent, asserted by
 //! the Jetstream adapter's draw-command parity suite.
 
+use poodle_adapter::ThemeProvider;
 use poodle_node::ColorValue;
+
+/// Resolved colors for the shared solid tone surface recipe.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SolidToneSurface {
+    pub background: ColorValue,
+    pub border: ColorValue,
+    pub foreground: ColorValue,
+}
+
+/// Resolve the shared solid treatment: 45% tone base + 55% primary text,
+/// with neutral surfaces using primary text directly.
+pub fn solid_tone_surface(
+    theme: &dyn ThemeProvider,
+    tone_base: ColorValue,
+    is_neutral: bool,
+) -> SolidToneSurface {
+    let text_primary = theme.resolve_color("color.text.primary");
+    let background = if is_neutral {
+        with_alpha(text_primary, 1.0)
+    } else {
+        with_alpha(mix_srgb(tone_base, text_primary, 0.45), 1.0)
+    };
+    let border = if is_neutral {
+        theme.resolve_color("color.border.strong")
+    } else {
+        with_alpha(tone_base, 1.0)
+    };
+
+    SolidToneSurface {
+        background,
+        border,
+        foreground: with_alpha(theme.resolve_color("color.text.inverse"), 1.0),
+    }
+}
 
 /// sRGB-space mix: `fraction` weights `a`. Alpha lerps the same way.
 pub fn mix_srgb(a: ColorValue, b: ColorValue, fraction: f32) -> ColorValue {
@@ -71,6 +106,95 @@ pub const BLACK: ColorValue = ColorValue(0.0, 0.0, 0.0, 1.0);
 
 /// Pure white, for the contract's lightening mixes.
 pub const WHITE: ColorValue = ColorValue(1.0, 1.0, 1.0, 1.0);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_adapter::ThemeProvider;
+    use poodle_jetstream::JetstreamThemeProvider;
+    use poodle_tokens::themes;
+
+    fn relative_luminance(color: ColorValue) -> f32 {
+        fn linear(channel: f32) -> f32 {
+            if channel <= 0.04045 {
+                channel / 12.92
+            } else {
+                ((channel + 0.055) / 1.055).powf(2.4)
+            }
+        }
+
+        0.2126 * linear(color.0) + 0.7152 * linear(color.1) + 0.0722 * linear(color.2)
+    }
+
+    fn contrast_ratio(a: ColorValue, b: ColorValue) -> f32 {
+        let lighter = relative_luminance(a).max(relative_luminance(b));
+        let darker = relative_luminance(a).min(relative_luminance(b));
+        (lighter + 0.05) / (darker + 0.05)
+    }
+
+    #[test]
+    fn solid_tone_surface_keeps_inverse_foreground_readable_across_themes() {
+        let themes = [
+            &themes::CLAY,
+            &themes::COBALT,
+            &themes::ECLIPSE,
+            &themes::FOREST,
+            &themes::GRAPHITE,
+            &themes::HORNET,
+            &themes::ICEBERG,
+            &themes::MEADOW,
+            &themes::MIDNIGHT,
+            &themes::NORD,
+            &themes::ROSE,
+            &themes::SOLARIZED,
+        ];
+        let tone_tokens = [
+            "color.status.info",
+            "color.status.success",
+            "color.status.warning",
+            "color.status.danger",
+            "color.accent.base",
+        ];
+        let mut floor = f32::INFINITY;
+        let mut floor_name = "";
+
+        for definition in themes {
+            let provider = JetstreamThemeProvider::from_theme(definition);
+            let neutral = solid_tone_surface(
+                &provider,
+                provider.resolve_color("color.text.secondary"),
+                true,
+            );
+            let neutral_ratio = contrast_ratio(neutral.foreground, neutral.background);
+            if neutral_ratio < floor {
+                floor = neutral_ratio;
+                floor_name = definition.name;
+            }
+            assert!(
+                neutral_ratio >= 4.5,
+                "neutral solid contrast below 4.5:1 in {} ({neutral_ratio:.3})",
+                definition.name
+            );
+
+            for token in tone_tokens {
+                let surface = solid_tone_surface(&provider, provider.resolve_color(token), false);
+                let ratio = contrast_ratio(surface.foreground, surface.background);
+                if ratio < floor {
+                    floor = ratio;
+                    floor_name = definition.name;
+                }
+                assert!(
+                    ratio >= 4.5,
+                    "solid contrast below 4.5:1 for {token} in {} ({ratio:.3})",
+                    definition.name
+                );
+            }
+        }
+
+        println!("solid tone foreground contrast floor: {floor:.3}:1 ({floor_name})");
+        assert!(floor > 5.0, "expected the shared solid recipe to clear 5:1");
+    }
+}
 
 fn to_linear(c: f32) -> f32 {
     if c <= 0.04045 {

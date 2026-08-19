@@ -5,10 +5,11 @@ import type { ReactNode } from "react";
 import { Icon } from "./Icon";
 import { Spinner } from "./Spinner";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
-import type { CalloutAnnounceMode, ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone } from "./types";
+import type { CalloutAnnounceMode, ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone, ToneFill } from "./types";
 
 export interface CalloutProps {
-  tone?: StatusTone | "neutral";
+  tone?: StatusTone;
+  fill?: ToneFill;
   title?: string | null;
   message?: string | null;
   ariaLabel?: string | null;
@@ -34,6 +35,7 @@ const toneIcon: Record<string, string> = {
 
 export function Callout({
   tone = "neutral",
+  fill = "tint",
   title = null,
   message = null,
   ariaLabel = null,
@@ -59,6 +61,7 @@ export function Callout({
     <section
       className="poodle-callout"
       data-tone={tone}
+      data-fill={fill}
       data-size={resolvedSize}
       data-density={resolvedDensity}
       aria-label={ariaLabel ?? undefined}
@@ -69,7 +72,7 @@ export function Callout({
         <span className="poodle-callout__icon" aria-hidden="true">
           {icon ??
             (tone === "pending" ? (
-              <Spinner variant="ring" size={resolvedSize} sizeRole="chrome" tone="accent" />
+              <Spinner variant="ring" size={resolvedSize} sizeRole="chrome" tone={fill === "solid" ? "current" : "accent"} />
             ) : (
               <Icon name={toneIcon[tone] ?? "info"} size={resolvedSize} />
             ))}

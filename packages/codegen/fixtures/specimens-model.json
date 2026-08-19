@@ -43,6 +43,27 @@
       ]
     },
     {
+      "id": "tone-fill",
+      "name": "ToneFill",
+      "description": "ToneFill — the union the contract fragment defines; specimen fixtures bind its members.",
+      "canonical_ref": {
+        "path": "docs/contracts/004-shared-control-types.md",
+        "section": null
+      },
+      "members": [
+        {
+          "id": "tint",
+          "name": "Tint",
+          "description": "Tint member."
+        },
+        {
+          "id": "solid",
+          "name": "Solid",
+          "description": "Solid member."
+        }
+      ]
+    },
+    {
       "id": "pill-tone",
       "name": "PillTone",
       "description": "PillTone — the union the contract fragment defines; specimen fixtures bind its members.",
@@ -410,6 +431,24 @@
           }
         },
         {
+          "id": "fill",
+          "name": "fill",
+          "prop_type": {
+            "Shared": "tone-fill"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "tone surface treatment",
+          "permitted_subset": {
+            "shared_type": "tone-fill",
+            "members": [
+              "solid",
+              "tint"
+            ]
+          }
+        },
+        {
           "id": "title",
           "name": "title",
           "prop_type": "String",
@@ -543,6 +582,24 @@
               "neutral",
               "success",
               "warning"
+            ]
+          }
+        },
+        {
+          "id": "fill",
+          "name": "fill",
+          "prop_type": {
+            "Shared": "tone-fill"
+          },
+          "default": null,
+          "required": false,
+          "web_only": false,
+          "description": "tone surface treatment",
+          "permitted_subset": {
+            "shared_type": "tone-fill",
+            "members": [
+              "solid",
+              "tint"
             ]
           }
         },
@@ -1324,6 +1381,111 @@
           ],
           "caption": "Dismissible",
           "group": "Dismissible"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "neutral"
+              },
+              "description": null
+            },
+            {
+              "prop": "fill",
+              "value": {
+                "Member": "solid"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Solid neutral"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Neutral solid surfaces use primary text as the background."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Solid neutral",
+          "group": "Solid fills"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "warning"
+              },
+              "description": null
+            },
+            {
+              "prop": "fill",
+              "value": {
+                "Member": "solid"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Solid warning"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Tone base and inverse foreground stay readable across themes."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Solid warning",
+          "group": "Solid fills"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "pending"
+              },
+              "description": null
+            },
+            {
+              "prop": "fill",
+              "value": {
+                "Member": "solid"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Solid pending"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "The pending spinner inherits the solid inverse foreground."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Solid pending",
+          "group": "Solid fills"
         }
       ],
       "axes": [
@@ -1999,6 +2161,104 @@
           ],
           "caption": "Danger-ish",
           "group": "Custom accent"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "neutral"
+              },
+              "description": null
+            },
+            {
+              "prop": "fill",
+              "value": {
+                "Member": "solid"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Solid neutral"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Solid neutral",
+          "group": "Solid fills"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "success"
+              },
+              "description": null
+            },
+            {
+              "prop": "fill",
+              "value": {
+                "Member": "solid"
+              },
+              "description": null
+            },
+            {
+              "prop": "appearance",
+              "value": {
+                "Member": "subtle"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Solid success"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Solid success subtle",
+          "group": "Solid fills"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "fill",
+              "value": {
+                "Member": "solid"
+              },
+              "description": null
+            },
+            {
+              "prop": "appearance",
+              "value": {
+                "Member": "badge"
+              },
+              "description": null
+            },
+            {
+              "prop": "accent",
+              "value": {
+                "String": "#3b82f6"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Solid custom"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Solid custom badge",
+          "group": "Solid fills"
         }
       ],
       "axes": [

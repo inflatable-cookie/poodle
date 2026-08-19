@@ -7,12 +7,12 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, MainAxisAlignment,
-    Node, NodeRole,
+    ColorValue, CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutSizing,
+    MainAxisAlignment, Node, NodeRole,
 };
 use poodle_specs::{InlineTypographyMode, PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 
-use crate::color::{hex_color, mix_srgb, with_alpha, WHITE};
+use crate::color::{hex_color, mix_srgb, solid_tone_surface, with_alpha, WHITE};
 use crate::presentation::rem_to_px;
 
 /// Per-size metrics in rem: `(min_w, min_h, pad_x, pad_y, font)`.
@@ -42,6 +42,14 @@ fn pill_colors(spec: &PillSpec, theme: &dyn ThemeProvider) -> (ColorValue, Color
     let border_subtle = theme.resolve_color("color.border.subtle");
     let accent_base = theme.resolve_color("color.accent.base");
     let tone_color = theme.resolve_color(spec.tone_color_token());
+    let custom_accent = spec.accent_color.as_deref().and_then(hex_color);
+
+    if spec.is_solid_fill() {
+        let tone_base = custom_accent.unwrap_or(tone_color);
+        let is_neutral = spec.tone == PillTone::Neutral && custom_accent.is_none();
+        let surface = solid_tone_surface(theme, tone_base, is_neutral);
+        return (surface.background, surface.border, surface.foreground);
+    }
 
     let fill = match spec.appearance {
         PillAppearance::Badge => match spec.tone {
@@ -86,7 +94,7 @@ fn pill_colors(spec: &PillSpec, theme: &dyn ThemeProvider) -> (ColorValue, Color
     // The slate base is a Svelte literal with no semantic token. Colour-space
     // note as with checkbox hex: the custom colour lands in sRGB and converts
     // at the backend edge — the old tier mixed raw values; pinned divergence.
-    if let Some(accent) = spec.accent_color.as_deref().and_then(hex_color) {
+    if let Some(accent) = custom_accent {
         let slate_08 = ColorValue(148.0 / 255.0, 163.0 / 255.0, 184.0 / 255.0, 0.08);
         let slate_12 = ColorValue(148.0 / 255.0, 163.0 / 255.0, 184.0 / 255.0, 0.12);
         return (
@@ -166,6 +174,28 @@ pub fn pill_with_remove(
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
         s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
     }
+    if spec.has_dot {
+        let dot_color = if spec.is_solid_fill() {
+            text_color
+        } else {
+            spec.accent_color
+                .as_deref()
+                .and_then(hex_color)
+                .unwrap_or_else(|| theme.resolve_color(spec.tone_color_token()))
+        };
+        let dot_size = rem_to_px(font_size * 0.5);
+        let mut dot = Node::container();
+        dot.style.descriptor.layout.width = LayoutSizing::Fixed(dot_size);
+        dot.style.descriptor.layout.height = LayoutSizing::Fixed(dot_size);
+        dot.style.descriptor.corner_radii.top_left = 999.0;
+        dot.style.descriptor.corner_radii.top_right = 999.0;
+        dot.style.descriptor.corner_radii.bottom_right = 999.0;
+        dot.style.descriptor.corner_radii.bottom_left = 999.0;
+        dot.style.descriptor.background = Some(dot_color);
+        dot.style.flex_shrink_zero = true;
+        el = el.child(dot);
+    }
+
     if spec.is_removable {
         let mut remove = Node::container();
         remove.id = Some("poodle-pill-remove".to_string());
@@ -176,7 +206,11 @@ pub fn pill_with_remove(
         remove.style.descriptor.cursor = CursorHint::Pointer;
 
         let mut icon = Node::icon("x", theme.resolve_space("size.icon.sm"));
-        icon.style.descriptor.text_color = Some(theme.resolve_color("color.icon.muted"));
+        icon.style.descriptor.text_color = Some(if spec.is_solid_fill() {
+            text_color
+        } else {
+            theme.resolve_color("color.icon.muted")
+        });
         let mut remove = remove.child(icon);
         if let Some(handler) = on_remove {
             remove.interaction.on_activate = Some(handler);
@@ -195,6 +229,8 @@ mod tests {
     use std::sync::Mutex;
 
     use super::*;
+    use poodle_node::NodeKind;
+    use poodle_specs::ToneFill;
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -223,5 +259,78 @@ mod tests {
             .as_ref()
             .expect("activatable"))();
         assert_eq!(*removes.lock().unwrap(), 1);
+    }
+
+    #[test]
+    fn solid_fill_precedes_appearance_and_uses_custom_accent_as_tone_base() {
+        let theme = theme();
+        let success = PillSpec::new()
+            .with_tone(PillTone::Success)
+            .with_fill(ToneFill::Solid)
+            .with_appearance(PillAppearance::Subtle);
+        let expected = solid_tone_surface(
+            &theme,
+            theme.resolve_color(success.tone_color_token()),
+            false,
+        );
+        assert_eq!(
+            pill_colors(&success, &theme),
+            (expected.background, expected.border, expected.foreground)
+        );
+
+        let custom = PillSpec::new()
+            .with_fill(ToneFill::Solid)
+            .with_appearance(PillAppearance::Badge)
+            .with_accent_color("#ff9900");
+        let custom_base = hex_color("#ff9900").expect("custom accent");
+        let custom_expected = solid_tone_surface(&theme, custom_base, false);
+        assert_eq!(
+            pill_colors(&custom, &theme),
+            (
+                custom_expected.background,
+                custom_expected.border,
+                custom_expected.foreground
+            )
+        );
+
+        let neutral = PillSpec::new()
+            .with_fill(ToneFill::Solid)
+            .with_appearance(PillAppearance::Badge);
+        let neutral_expected = solid_tone_surface(
+            &theme,
+            theme.resolve_color(neutral.tone_color_token()),
+            true,
+        );
+        assert_eq!(
+            pill_colors(&neutral, &theme),
+            (
+                neutral_expected.background,
+                neutral_expected.border,
+                neutral_expected.foreground
+            )
+        );
+    }
+
+    #[test]
+    fn solid_dot_and_remove_affordance_use_inverse_foreground() {
+        let theme = theme();
+        let mut spec = PillSpec::new()
+            .with_label("Filter")
+            .with_fill(ToneFill::Solid)
+            .with_removable(true);
+        spec.has_dot = true;
+        let expected =
+            solid_tone_surface(&theme, theme.resolve_color(spec.tone_color_token()), true);
+        let node = pill_with_remove(&spec, &theme, None);
+
+        let dot = node.children.first().expect("solid dot");
+        assert_eq!(dot.style.descriptor.background, Some(expected.foreground));
+        let remove = node
+            .find(&|n| n.id.as_deref() == Some("poodle-pill-remove"))
+            .expect("remove affordance");
+        let icon = remove
+            .find(&|n| matches!(&n.kind, NodeKind::Icon { name, .. } if name == "x"))
+            .expect("remove icon");
+        assert_eq!(icon.style.descriptor.text_color, Some(expected.foreground));
     }
 }

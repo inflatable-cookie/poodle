@@ -1612,9 +1612,15 @@
     "props": [
       {
         "name": "tone",
-        "type": "StatusTone | \"neutral\"",
+        "type": "StatusTone",
         "default": "\"neutral\"",
         "description": "Semantic tone and color treatment."
+      },
+      {
+        "name": "fill",
+        "type": "ToneFill",
+        "default": "\"tint\"",
+        "description": "Tint or solid tone surface treatment."
       },
       {
         "name": "title",
@@ -1701,6 +1707,12 @@
         "type": "StatusTone",
         "default": "\"warning\"",
         "description": "Semantic tone for the surface and leading indicator."
+      },
+      {
+        "name": "fill",
+        "type": "ToneFill",
+        "default": "\"tint\"",
+        "description": "Tint or solid tone surface treatment."
       },
       {
         "name": "title",
@@ -8304,6 +8316,12 @@
         "type": "PillTone",
         "default": "\"neutral\"",
         "description": "Color tone of the pill."
+      },
+      {
+        "name": "fill",
+        "type": "ToneFill",
+        "default": "\"tint\"",
+        "description": "Tint or solid tone surface treatment."
       },
       {
         "name": "appearance",

@@ -6,7 +6,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     ControlSize, EyebrowSpec, InlineTypographyMode, PillAppearance, PillFont, PillSize, PillSpec,
-    PillTone, SemanticControlSizeRole,
+    PillTone, SemanticControlSizeRole, ToneFill,
 };
 
 fn pill_size(size: ControlSize) -> PillSize {
@@ -213,6 +213,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     PillSpec::new()
                         .with_label("Danger-ish")
                         .with_accent_color("#ef4444"),
+                )),
+        ))
+        .child(group(
+            "Solid fills",
+            theme,
+            div()
+                .flex()
+                .gap(px(8.0))
+                .flex_wrap()
+                .child(pill(
+                    theme,
+                    PillSpec::new()
+                        .with_label("Solid neutral")
+                        .with_fill(ToneFill::Solid),
+                ))
+                .child(pill(
+                    theme,
+                    PillSpec::new()
+                        .with_label("Solid success")
+                        .with_tone(PillTone::Success)
+                        .with_fill(ToneFill::Solid)
+                        .with_appearance(PillAppearance::Subtle),
+                ))
+                .child(pill(
+                    theme,
+                    PillSpec::new()
+                        .with_label("Solid custom")
+                        .with_fill(ToneFill::Solid)
+                        .with_appearance(PillAppearance::Badge)
+                        .with_accent_color("#3b82f6"),
                 )),
         ))
         .into_any_element();

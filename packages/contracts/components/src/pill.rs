@@ -1,4 +1,4 @@
-use crate::types::{ControlSize, SemanticControlSizeRole};
+use crate::types::{ControlSize, SemanticControlSizeRole, ToneFill};
 use poodle_tokens::semantic;
 
 use crate::InlineTypographyMode;
@@ -46,6 +46,7 @@ pub enum PillFont {
 pub struct PillSpec {
     pub label: String,
     pub tone: PillTone,
+    pub fill: ToneFill,
     pub appearance: PillAppearance,
     pub size: PillSize,
     pub font: PillFont,
@@ -75,6 +76,7 @@ impl Default for PillSpec {
         Self {
             label: String::new(),
             tone: PillTone::default(),
+            fill: ToneFill::Tint,
             appearance: PillAppearance::default(),
             size: PillSize::default(),
             font: PillFont::default(),
@@ -138,6 +140,11 @@ impl PillSpec {
         self
     }
 
+    pub fn with_fill(mut self, fill: ToneFill) -> Self {
+        self.fill = fill;
+        self
+    }
+
     pub fn with_appearance(mut self, appearance: PillAppearance) -> Self {
         self.appearance = appearance;
         self
@@ -186,6 +193,10 @@ impl PillSpec {
     pub fn with_accent_color(mut self, color: impl Into<String>) -> Self {
         self.accent_color = Some(color.into());
         self
+    }
+
+    pub fn is_solid_fill(&self) -> bool {
+        matches!(self.fill, ToneFill::Solid)
     }
 
     /// Background fill token based on tone + appearance.

@@ -1,4 +1,4 @@
-use crate::StatusTone;
+use crate::{StatusTone, ToneFill};
 use poodle_tokens::semantic;
 
 use crate::composite_types::{AnnouncementMode, RemediationAction};
@@ -6,6 +6,7 @@ use crate::composite_types::{AnnouncementMode, RemediationAction};
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RemediationBannerSpec {
     pub tone: StatusTone,
+    pub fill: ToneFill,
     pub title: String,
     pub message: String,
     pub announce_mode: AnnouncementMode,
@@ -19,6 +20,7 @@ impl RemediationBannerSpec {
     pub fn new(title: impl Into<String>, message: impl Into<String>) -> Self {
         Self {
             tone: StatusTone::Warning,
+            fill: ToneFill::Tint,
             title: title.into(),
             message: message.into(),
             announce_mode: AnnouncementMode::Polite,
@@ -32,6 +34,19 @@ impl RemediationBannerSpec {
     pub fn with_tone(mut self, tone: StatusTone) -> Self {
         self.tone = tone;
         self
+    }
+
+    pub fn with_fill(mut self, fill: ToneFill) -> Self {
+        self.fill = fill;
+        self
+    }
+
+    pub fn is_neutral_tone(&self) -> bool {
+        matches!(self.tone, StatusTone::Neutral)
+    }
+
+    pub fn is_solid_fill(&self) -> bool {
+        matches!(self.fill, ToneFill::Solid)
     }
 
     pub fn with_announce_mode(mut self, announce_mode: AnnouncementMode) -> Self {

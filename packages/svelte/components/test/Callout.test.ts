@@ -14,6 +14,28 @@ describe("Callout (svelte)", () => {
     expect(container.querySelector(".poodle-callout__content p")?.textContent).toBe("Try again");
   });
 
+  it("defaults to tint and projects every tone/fill combination", () => {
+    const tones = ["neutral", "info", "success", "warning", "danger", "pending"] as const;
+    for (const tone of tones) {
+      for (const fill of ["tint", "solid"] as const) {
+        const { container } = render(Callout, { props: { tone, fill, message: "m" } });
+        const root = container.querySelector(".poodle-callout") as HTMLElement;
+        expect(root.dataset.tone).toBe(tone);
+        expect(root.dataset.fill).toBe(fill);
+        if (tone === "pending") {
+          expect(container.querySelector(".poodle-spinner")?.getAttribute("data-tone")).toBe(
+            fill === "solid" ? "current" : "accent",
+          );
+        }
+      }
+    }
+
+    const defaultRoot = render(Callout, { props: { message: "m" } }).container.querySelector(
+      ".poodle-callout",
+    ) as HTMLElement;
+    expect(defaultRoot.dataset.fill).toBe("tint");
+  });
+
   it("projects an alert or status live region from announceMode", () => {
     const assertive = render(Callout, { props: { announceMode: "assertive", message: "m" } });
     const assertiveRoot = assertive.container.querySelector(".poodle-callout") as HTMLElement;

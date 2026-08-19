@@ -206,6 +206,7 @@ impl GpuiThemeProvider {
             "color.status.success" => typed::semantic::COLOR_STATUS_SUCCESS,
             "color.status.warning" => typed::semantic::COLOR_STATUS_WARNING,
             "color.status.danger" => typed::semantic::COLOR_STATUS_DANGER,
+            "color.status.info" => typed::semantic::COLOR_STATUS_INFO,
             "color.icon.primary" => typed::semantic::COLOR_ICON_PRIMARY,
             "color.icon.muted" => typed::semantic::COLOR_ICON_MUTED,
             // 3. Direct hex/rgba parsing (for inline color values)

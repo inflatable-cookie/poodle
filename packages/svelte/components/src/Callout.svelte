@@ -4,12 +4,13 @@
   import { default as Icon } from "./Icon.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import { default as Spinner } from "./Spinner.svelte";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, SpinnerTone, StatusTone, ToneFill } from "./types";
 
   type CalloutAnnounceMode = "none" | "polite" | "assertive";
 
   interface Props {
-    tone?: StatusTone | "neutral";
+    tone?: StatusTone;
+    fill?: ToneFill;
     title?: string | null;
     message?: string | null;
     ariaLabel?: string | null;
@@ -37,6 +38,7 @@
 
   let {
     tone = "neutral",
+    fill = "tint",
     title = null,
     message = null,
     ariaLabel = null,
@@ -68,11 +70,13 @@
         ? "polite" as const
         : undefined,
   );
+  let spinnerTone: SpinnerTone = $derived(fill === "solid" ? "current" : "accent");
 </script>
 
 <section
   class="poodle-callout"
   data-tone={tone}
+  data-fill={fill}
   data-size={resolvedSize}
   data-density={resolvedDensity}
   aria-label={ariaLabel ?? undefined}
@@ -84,7 +88,7 @@
       {#if icon}
         {@render icon()}
       {:else if tone === "pending"}
-        <Spinner variant="ring" size={resolvedSize} sizeRole="chrome" tone="accent" />
+        <Spinner variant="ring" size={resolvedSize} sizeRole="chrome" tone={spinnerTone} />
       {:else}
         <Icon name={toneIcon[tone] ?? "info"} size={resolvedSize} />
       {/if}
@@ -118,4 +122,3 @@
     </button>
   {/if}
 </section>
-

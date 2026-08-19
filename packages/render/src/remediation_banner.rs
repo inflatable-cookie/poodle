@@ -9,13 +9,18 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole, StylePatch,
+    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole,
+    StylePatch,
 };
-use poodle_specs::{ButtonSpec, RemediationAction, RemediationBannerSpec};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, RemediationAction, RemediationBannerSpec, SpinnerSize, SpinnerSpec,
+    SpinnerTone, SpinnerVariant, StatusTone,
+};
 
 use crate::button::button;
-use crate::color::mix_srgb;
+use crate::color::{mix_srgb, solid_tone_surface, with_alpha};
 use crate::presentation::rem_to_px;
+use crate::spinner::spinner;
 
 const DISMISS_ID: &str = "remediation-banner-dismiss";
 
@@ -60,10 +65,21 @@ pub fn remediation_banner(
     let icon_color = theme.resolve_color(spec.icon_color_token());
     let text_primary = theme.resolve_color(spec.title_color_token());
     let text_secondary = theme.resolve_color(spec.message_color_token());
+    let solid = spec.is_solid_fill();
+    let solid_surface =
+        solid.then(|| solid_tone_surface(theme, tone_color, spec.is_neutral_tone()));
 
     // Surface fill = color-mix(tone, panel) at the spec's tone ratio; border = tone.
-    let fill = mix_srgb(tone_color, panel, spec.fill_tone_ratio());
-    let border = theme.resolve_color(spec.border_token());
+    let fill = solid_surface
+        .map(|surface| surface.background)
+        .unwrap_or_else(|| mix_srgb(tone_color, panel, spec.fill_tone_ratio()));
+    let border = solid_surface
+        .map(|surface| surface.border)
+        .unwrap_or_else(|| theme.resolve_color(spec.border_token()));
+    let foreground = solid_surface
+        .map(|surface| surface.foreground)
+        .unwrap_or(text_primary);
+    let icon_color = if solid { foreground } else { icon_color };
 
     // ── Dimensions ──
     // Radius / border-width resolve from tokens; the rest are contract-exact
@@ -85,6 +101,7 @@ pub fn remediation_banner(
     {
         let s = &mut el.style;
         s.descriptor.background = Some(fill);
+        s.descriptor.text_color = Some(foreground);
         s.descriptor.border.width = border_width;
         s.descriptor.border.color = border;
         let c = &mut s.descriptor.corner_radii;
@@ -104,8 +121,27 @@ pub fn remediation_banner(
     el.a11y.role = Some(NodeRole::Alert);
 
     // ── Icon (contract §2: tone-based leading indicator) ──
-    let mut glyph = Node::icon(spec.tone_icon_name(), icon_size);
-    glyph.style.descriptor.text_color = Some(icon_color);
+    let glyph = if spec.tone == StatusTone::Pending {
+        let mut pending_spinner = spinner(
+            &SpinnerSpec::new()
+                .with_variant(SpinnerVariant::Ring)
+                .with_size(SpinnerSize::Sm)
+                .with_tone(if solid {
+                    SpinnerTone::Current
+                } else {
+                    SpinnerTone::Accent
+                }),
+            theme,
+        );
+        if let Some(surface) = solid_surface {
+            pending_spinner.style.descriptor.text_color = Some(surface.foreground);
+        }
+        pending_spinner
+    } else {
+        let mut glyph = Node::icon(spec.tone_icon_name(), icon_size);
+        glyph.style.descriptor.text_color = Some(icon_color);
+        glyph
+    };
     let mut el = el.child(glyph);
 
     // ── Content column: Title + Message + Actions ──
@@ -119,13 +155,13 @@ pub fn remediation_banner(
     }
 
     let mut title = Node::text(&spec.title);
-    title.style.descriptor.text_color = Some(text_primary);
+    title.style.descriptor.text_color = Some(foreground);
     title.style.text_size = Some(title_size);
     title.style.text_weight = Some(600);
     let mut content = content.child(title);
 
     let mut message = Node::text(&spec.message);
-    message.style.descriptor.text_color = Some(text_secondary);
+    message.style.descriptor.text_color = Some(if solid { foreground } else { text_secondary });
     message.style.text_size = Some(message_size);
     content = content.child(message);
 
@@ -146,6 +182,8 @@ pub fn remediation_banner(
                 theme,
                 handlers.on_action.as_ref(),
                 instance_id.as_deref(),
+                solid,
+                foreground,
             ));
         }
         if let Some(ref secondary) = spec.secondary_action {
@@ -154,6 +192,8 @@ pub fn remediation_banner(
                 theme,
                 handlers.on_action.as_ref(),
                 handlers.instance_id.as_deref(),
+                solid,
+                foreground,
             ));
         }
 
@@ -167,7 +207,7 @@ pub fn remediation_banner(
         let mut dismiss = Node::icon("x", dismiss_size);
         dismiss.id = Some(DISMISS_ID.to_string());
         dismiss.runtime_id = scoped(instance_id.as_deref(), DISMISS_ID);
-        dismiss.style.descriptor.text_color = Some(text_secondary);
+        dismiss.style.descriptor.text_color = Some(if solid { foreground } else { text_secondary });
         dismiss.a11y.role = Some(NodeRole::Button);
         dismiss.a11y.label = Some(spec.dismiss_label.clone());
         dismiss.interaction.focusable = true;
@@ -195,6 +235,8 @@ fn action_button(
     theme: &dyn ThemeProvider,
     on_action: Option<&Arc<dyn Fn(&str) + Send + Sync>>,
     instance_id: Option<&str>,
+    solid: bool,
+    foreground: ColorValue,
 ) -> Node {
     let on_click = on_action.map(|handler| {
         let handler = Arc::clone(handler);
@@ -211,13 +253,33 @@ fn action_button(
     );
     b.id = Some(format!("remediation-action-{}", action.id));
     b.runtime_id = scoped(instance_id, &format!("action:{}", action.id));
+    if solid && action.variant != ButtonVariant::Primary {
+        b.style.descriptor.background = Some(with_alpha(foreground, 0.16));
+        b.style.descriptor.border.color = with_alpha(foreground, 0.56);
+        b.style.descriptor.text_color = Some(foreground);
+        b.style.descriptor.shadow = None;
+        b.style.hover = Some(StylePatch {
+            background: Some(with_alpha(foreground, 0.24)),
+            border_color: Some(foreground),
+            text_color: Some(foreground),
+            opacity: None,
+        });
+        b.style.active = Some(StylePatch {
+            background: Some(with_alpha(foreground, 0.30)),
+            border_color: Some(foreground),
+            text_color: Some(foreground),
+            opacity: None,
+        });
+    }
     b
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_node::NodeKind;
     use poodle_specs::ButtonVariant;
+    use poodle_specs::ToneFill;
     use std::sync::Mutex;
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
@@ -295,5 +357,44 @@ mod tests {
             .find(&|n| n.runtime_id.as_deref()
                 == Some(remediation_banner_dismiss_focus_id(Some("second")).as_str()))
             .is_some());
+    }
+
+    #[test]
+    fn solid_pending_banner_uses_inverse_spinner_and_local_secondary_recipe() {
+        let theme = theme();
+        let spec = RemediationBannerSpec::new("Reconnecting", "Please wait.")
+            .with_tone(StatusTone::Pending)
+            .with_fill(ToneFill::Solid)
+            .with_secondary_action(RemediationAction::new("details", "View details"));
+        let expected = solid_tone_surface(&theme, theme.resolve_color(spec.border_token()), false);
+        let node = remediation_banner(&spec, &theme, RemediationBannerHandlers::default());
+
+        assert_eq!(node.style.descriptor.background, Some(expected.background));
+        assert_eq!(node.style.descriptor.border.color, expected.border);
+        assert_eq!(node.style.descriptor.text_color, Some(expected.foreground));
+        let spinner = node
+            .find(&|n| matches!(&n.kind, NodeKind::Icon { name, .. } if name == "spinner"))
+            .expect("pending spinner");
+        assert_eq!(
+            spinner.style.descriptor.text_color,
+            Some(expected.foreground)
+        );
+
+        let action = node
+            .find(&|n| n.id.as_deref() == Some("remediation-action-details"))
+            .expect("secondary action");
+        assert_eq!(
+            action.style.descriptor.background,
+            Some(with_alpha(expected.foreground, 0.16))
+        );
+        assert_eq!(
+            action.style.descriptor.border.color,
+            with_alpha(expected.foreground, 0.56)
+        );
+        assert_eq!(
+            action.style.descriptor.text_color,
+            Some(expected.foreground)
+        );
+        assert!(action.style.hover.is_some());
     }
 }

@@ -80,6 +80,7 @@ export type StatusTone =
   | "warning"
   | "danger"
   | "pending";
+export type ToneFill = "tint" | "solid";
 export type PillTone = "neutral" | "info" | "success" | "warning" | "danger";
 export type PillAppearance = "solid" | "subtle" | "badge";
 export type PillSize = "xs" | "sm" | "md" | "lg" | "xl";

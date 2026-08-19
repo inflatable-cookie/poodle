@@ -295,6 +295,7 @@ fn match_semantic_color(token: &str) -> Option<ColorValue> {
         t if t.contains("status.success") => Some(typed::semantic::COLOR_STATUS_SUCCESS),
         t if t.contains("status.warning") => Some(typed::semantic::COLOR_STATUS_WARNING),
         t if t.contains("status.danger") => Some(typed::semantic::COLOR_STATUS_DANGER),
+        t if t.contains("status.info") => Some(typed::semantic::COLOR_STATUS_INFO),
         t if t.contains("icon.primary") => Some(typed::semantic::COLOR_ICON_PRIMARY),
         t if t.contains("icon.muted") => Some(typed::semantic::COLOR_ICON_MUTED),
         _ => None,

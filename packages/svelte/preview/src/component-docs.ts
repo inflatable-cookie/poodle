@@ -612,7 +612,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 
   callout: {
     props: [
-      { name: "tone", type: 'StatusTone | "neutral"', default: '"neutral"', description: "Semantic tone and color treatment." },
+      { name: "tone", type: "StatusTone", default: '"neutral"', description: "Semantic tone and color treatment." },
+      { name: "fill", type: "ToneFill", default: '"tint"', description: "Tint or solid tone surface treatment." },
       { name: "title", type: "string | null", default: "null", description: "Bold heading text." },
       { name: "message", type: "string | null", default: "null", description: "Body text rendered in a paragraph." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the callout region." },
@@ -647,6 +648,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   "remediation-banner": {
     props: [
       { name: "tone", type: "StatusTone", default: '"warning"', description: "Semantic tone for the surface and leading indicator." },
+      { name: "fill", type: "ToneFill", default: '"tint"', description: "Tint or solid tone surface treatment." },
       { name: "title", type: "string", required: true, description: "Banner heading." },
       { name: "message", type: "string", required: true, description: "Recovery guidance." },
       { name: "announceMode", type: "AnnouncementMode", default: '"polite"', description: "Live-region urgency: none, polite, or assertive." },
@@ -3362,6 +3364,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   pill: {
     props: [
       { name: "tone", type: "PillTone", default: '"neutral"', description: "Color tone of the pill." },
+      { name: "fill", type: "ToneFill", default: '"tint"', description: "Tint or solid tone surface treatment." },
       { name: "appearance", type: "PillAppearance", default: '"solid"', description: "Visual appearance variant." },
       { name: "size", type: "PillSize", default: '"md"', description: "Size of the pill." },
       { name: "font", type: "PillFont", default: '"normal"', description: "Font style of the pill label." },

@@ -103,5 +103,38 @@ export const calloutSpecimen = {
       },
     ],
     },
+    { label: "Solid fills", instances: [
+      {
+        component: "callout",
+        caption: "Solid neutral",
+        props: {
+          tone: "neutral",
+          fill: "solid",
+          title: "Solid neutral",
+          content: "Neutral solid surfaces use primary text as the background.",
+        },
+      },
+      {
+        component: "callout",
+        caption: "Solid warning",
+        props: {
+          tone: "warning",
+          fill: "solid",
+          title: "Solid warning",
+          content: "Tone base and inverse foreground stay readable across themes.",
+        },
+      },
+      {
+        component: "callout",
+        caption: "Solid pending",
+        props: {
+          tone: "pending",
+          fill: "solid",
+          title: "Solid pending",
+          content: "The pending spinner inherits the solid inverse foreground.",
+        },
+      },
+    ],
+    },
   ],
 } as const;

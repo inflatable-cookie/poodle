@@ -4,6 +4,7 @@
   .poodle-callout {
     --poodle-callout-fill: var(--poodle-recipe-callout-fill, color-mix(in srgb, var(--poodle-color-background-panel) 94%, transparent));
     --poodle-callout-border: var(--poodle-recipe-callout-border, color-mix(in srgb, var(--poodle-color-border-subtle) 88%, transparent));
+    --poodle-callout-tone-base: var(--poodle-color-text-primary);
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
@@ -17,26 +18,31 @@
   }
 
   .poodle-callout[data-tone="info"] {
+    --poodle-callout-tone-base: var(--poodle-color-status-info, #3b82f6);
     --poodle-callout-fill: var(--poodle-recipe-callout-info-fill, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 10%, var(--poodle-color-background-panel)));
     --poodle-callout-border: var(--poodle-recipe-callout-info-border, color-mix(in srgb, var(--poodle-color-status-info, #3b82f6) 34%, var(--poodle-color-border-default)));
   }
 
   .poodle-callout[data-tone="success"] {
+    --poodle-callout-tone-base: var(--poodle-color-status-success);
     --poodle-callout-fill: var(--poodle-recipe-callout-success-fill, color-mix(in srgb, var(--poodle-color-status-success) 10%, var(--poodle-color-background-panel)));
     --poodle-callout-border: var(--poodle-recipe-callout-success-border, color-mix(in srgb, var(--poodle-color-status-success) 34%, var(--poodle-color-border-default)));
   }
 
   .poodle-callout[data-tone="warning"] {
+    --poodle-callout-tone-base: var(--poodle-color-status-warning);
     --poodle-callout-fill: var(--poodle-recipe-callout-warning-fill, color-mix(in srgb, var(--poodle-color-status-warning) 10%, var(--poodle-color-background-panel)));
     --poodle-callout-border: var(--poodle-recipe-callout-warning-border, color-mix(in srgb, var(--poodle-color-status-warning) 34%, var(--poodle-color-border-default)));
   }
 
   .poodle-callout[data-tone="danger"] {
+    --poodle-callout-tone-base: var(--poodle-color-status-danger);
     --poodle-callout-fill: var(--poodle-recipe-callout-danger-fill, color-mix(in srgb, var(--poodle-color-status-danger) 10%, var(--poodle-color-background-panel)));
     --poodle-callout-border: var(--poodle-recipe-callout-danger-border, color-mix(in srgb, var(--poodle-color-status-danger) 34%, var(--poodle-color-border-default)));
   }
 
   .poodle-callout[data-tone="pending"] {
+    --poodle-callout-tone-base: var(--poodle-color-accent-base);
     --poodle-callout-fill: var(--poodle-recipe-callout-pending-fill, color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-panel)));
     --poodle-callout-border: var(--poodle-recipe-callout-pending-border, color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default)));
   }
@@ -164,3 +170,41 @@
   .poodle-callout[data-size="xl"] .poodle-callout__content { font-size: 1.0625rem; }
   .poodle-callout[data-size="xl"] .poodle-callout__content strong { font-size: 1.125rem; }
   .poodle-callout[data-size="xl"] .poodle-callout__dismiss { width: 2.25rem; height: 2.25rem; }
+
+  /* Solid fill is a component-local treatment; it does not alter Button's
+     public API. Primary actions keep their existing recipe, while secondary
+     and ghost actions borrow the inverse foreground for readability. */
+  .poodle-callout[data-fill="solid"] {
+    --poodle-callout-fill: var(--poodle-recipe-callout-solid-fill, color-mix(in srgb, var(--poodle-callout-tone-base) 45%, var(--poodle-color-text-primary) 55%));
+    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-callout-tone-base));
+    background: var(--poodle-callout-fill);
+    color: var(--poodle-recipe-callout-solid-foreground, var(--poodle-color-text-inverse));
+  }
+
+  .poodle-callout[data-fill="solid"][data-tone="neutral"] {
+    --poodle-callout-fill: var(--poodle-recipe-callout-solid-fill, var(--poodle-color-text-primary));
+    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-color-border-strong));
+  }
+
+  .poodle-callout[data-fill="solid"] .poodle-callout__icon {
+    background: color-mix(in srgb, var(--poodle-color-text-inverse) 18%, transparent);
+    color: var(--poodle-color-text-inverse);
+  }
+
+  .poodle-callout[data-fill="solid"] .poodle-callout__content,
+  .poodle-callout[data-fill="solid"] .poodle-callout__content strong,
+  .poodle-callout[data-fill="solid"] .poodle-callout__content p,
+  .poodle-callout[data-fill="solid"] .poodle-callout__dismiss {
+    color: var(--poodle-color-text-inverse);
+  }
+
+  .poodle-callout[data-fill="solid"] .poodle-button[data-variant="secondary"],
+  .poodle-callout[data-fill="solid"] .poodle-button[data-variant="ghost"] {
+    --poodle-button-fill: color-mix(in srgb, var(--poodle-color-text-inverse) 16%, transparent);
+    --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-text-inverse) 24%, transparent);
+    --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-text-inverse) 30%, transparent);
+    --poodle-button-border: color-mix(in srgb, var(--poodle-color-text-inverse) 56%, transparent);
+    --poodle-button-border-hover: var(--poodle-color-text-inverse);
+    --poodle-button-text: var(--poodle-color-text-inverse);
+    --poodle-button-shadow: none;
+  }

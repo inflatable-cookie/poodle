@@ -223,5 +223,37 @@ export const pillSpecimen = {
       },
     ],
     },
+    { label: "Solid fills", instances: [
+      {
+        component: "pill",
+        caption: "Solid neutral",
+        props: {
+          tone: "neutral",
+          fill: "solid",
+          content: "Solid neutral",
+        },
+      },
+      {
+        component: "pill",
+        caption: "Solid success subtle",
+        props: {
+          tone: "success",
+          fill: "solid",
+          appearance: "subtle",
+          content: "Solid success",
+        },
+      },
+      {
+        component: "pill",
+        caption: "Solid custom badge",
+        props: {
+          fill: "solid",
+          appearance: "badge",
+          accent: "#3b82f6",
+          content: "Solid custom",
+        },
+      },
+    ],
+    },
   ],
 } as const;

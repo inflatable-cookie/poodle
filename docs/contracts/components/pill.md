@@ -8,7 +8,8 @@ Updated: 2026-07-10
 - Component name: `Pill`
 - Layer: `foundation`
 - Summary: a rounded inline label for compact categorization or metadata
-- In scope: tone, appearance, semantic sizing, optional monospace styling
+- In scope: tone, shared tint/solid fill treatment, appearance, semantic
+  sizing, optional monospace styling
 - Out of scope: removable chips, multi-select tag inputs
 
 ## 2. Anatomy
@@ -34,6 +35,7 @@ Updated: 2026-07-10
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `tone` | `"neutral" \| "info" \| "success" \| "warning" \| "danger"` | `"neutral"` | no | semantic tone controlling fill/border/text color |
+| `fill` | `ToneFill` | `"tint"` | no | shared tone surface treatment; solid overrides appearance color recipes |
 | `appearance` | `"solid" \| "subtle" \| "badge"` | `"solid"` | no | fill opacity variant |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit pill size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
@@ -51,6 +53,8 @@ Updated: 2026-07-10
 
 - Display primitive only; no internal state.
 
+`ToneFill` is defined in [004 Shared Control Types](../004-shared-control-types.md).
+
 ## 4. States
 
 ### Visual States
@@ -63,6 +67,7 @@ Updated: 2026-07-10
 | warning | `tone="warning"` | amber-tinted fill and border, primary text |
 | danger | `tone="danger"` | red-tinted fill and border, primary text |
 | custom accent | `accent` provided | accent-tinted fill, border, and text using the provided color |
+| solid | `fill="solid"` | opaque tone fill with inverse foreground; composes with every appearance, preserves badge typography, and uses a custom accent as the tone base |
 | subtle | `appearance="subtle"` | 50% transparent fill overlay |
 | muted | `muted=true` | reduced opacity (0.72) |
 | xs | `size="xs"` | smallest metadata chip sizing |
@@ -203,6 +208,17 @@ When `typography="inherit"`:
 | Custom Property | Value |
 |-----------------|-------|
 | `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-pill-fill) 50%, transparent)` |
+
+### Fill: solid `.pill[data-fill="solid"]`
+
+Tint recipes remain unchanged. Solid resolves the background as an opaque
+sRGB mix of the tone base at 45% and `color.text.primary` at 55%, uses the raw
+tone base as the border, and uses `color.text.inverse` as the text color. The
+neutral solid background is `color.text.primary` and its border is
+`color.border.strong`. A custom `accent` replaces the semantic tone as the mix
+base. `appearance="subtle"` does not reduce opacity in solid mode, while
+`appearance="badge"` keeps its uppercase typography and weight. The optional
+dot uses the inverse foreground in solid mode.
 
 ### Appearance: badge `.pill[data-appearance="badge"]`
 
@@ -417,12 +433,14 @@ comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
 
 - [ ] non-interactive metadata semantics match
 - [ ] tone custom property overrides produce equivalent colors
+- [ ] `fill="solid"` uses the shared surface recipe for every tone and custom accent
 
 ### Tier 2: Visual Parity
 
 - [ ] `xs | sm | md | lg | xl` sizes produce correct min-height, padding, and font-size
 - [ ] mono font variant uses code family with correct letter-spacing
 - [ ] subtle appearance halves fill opacity
+- [ ] solid fill overrides subtle/badge color recipes while preserving badge typography
 - [ ] muted state applies 0.72 opacity
 
 ### Tier 3: Implementation Freedom
@@ -450,6 +468,14 @@ Five pills in a horizontal row with 8px gap:
 | Neutral | neutral |
 | Success | success |
 | Danger | danger |
+
+### Solid fills
+
+Preview apps include one compact representative group using
+`fill="solid"`: neutral, one status tone, and one custom-accent pill. The
+group includes `appearance="subtle"` and `appearance="badge"` examples so
+solid precedence and badge typography stay visible without requiring an
+exhaustive matrix.
 
 ### Sizes
 

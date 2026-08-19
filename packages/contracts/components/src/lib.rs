@@ -333,6 +333,7 @@ pub use types::{
     PopoverSurfaceWidth, RuleTone, SemanticControlSizeRole, SeparatorOrientation, StatusTone,
     SurfaceBorder, SurfaceRole, SurfaceTone, TabActivationMode, TabDefinition, TabStripItem,
     TabVariant, TimeZoneOption, TriStateValue, ValidationState, ZonedDateTimeValue,
+    ToneFill,
 };
 
 // Composite exports

@@ -15,7 +15,7 @@ use poodle_specs::{
     CallOutSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, StatusTone,
 };
 
-use crate::color::{mix_srgb, with_alpha};
+use crate::color::{mix_srgb, solid_tone_surface, with_alpha};
 use crate::presentation::{
     panel_space_x_rem, rem_to_px, resolve_semantic_size, resolve_supporting_visual_size,
     size_font_rem,
@@ -58,11 +58,7 @@ fn tone_icon(tone: StatusTone) -> &'static str {
     }
 }
 
-pub fn callout(
-    spec: &CallOutSpec,
-    theme: &dyn ThemeProvider,
-    handlers: CalloutHandlers,
-) -> Node {
+pub fn callout(spec: &CallOutSpec, theme: &dyn ThemeProvider, handlers: CalloutHandlers) -> Node {
     let on_dismiss = handlers.on_dismiss;
     let instance_id = handlers.instance_id;
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -89,14 +85,20 @@ pub fn callout(
     // Per-tone fill/border (contract §8).
     let is_neutral = spec.is_neutral_tone();
     let is_pending = spec.is_pending_tone();
-    let fill = if is_neutral {
+    let solid = spec.is_solid_fill();
+    let solid_surface = solid.then(|| solid_tone_surface(theme, tone_color, is_neutral));
+    let fill = if let Some(surface) = solid_surface {
+        surface.background
+    } else if is_neutral {
         with_alpha(panel, panel.3 * 0.94)
     } else if is_pending {
         mix_srgb(tone_color, panel, 0.08)
     } else {
         mix_srgb(tone_color, panel, 0.10)
     };
-    let border = if is_neutral {
+    let border = if let Some(surface) = solid_surface {
+        surface.border
+    } else if is_neutral {
         with_alpha(border_subtle, border_subtle.3 * 0.88)
     } else if is_pending {
         mix_srgb(tone_color, border_default, 0.26)
@@ -108,6 +110,11 @@ pub fn callout(
     {
         let s = &mut el.style;
         s.descriptor.background = Some(fill);
+        s.descriptor.text_color = Some(
+            solid_surface
+                .map(|surface| surface.foreground)
+                .unwrap_or(text_primary),
+        );
         s.descriptor.border.width = border_width;
         s.descriptor.border.color = border;
         s.descriptor.corner_radii.top_left = radius;
@@ -145,23 +152,39 @@ pub fn callout(
         s.descriptor.corner_radii.top_right = 999.0;
         s.descriptor.corner_radii.bottom_right = 999.0;
         s.descriptor.corner_radii.bottom_left = 999.0;
-        s.descriptor.background = Some(with_alpha(surface, surface.3 * 0.78));
+        s.descriptor.background = Some(if let Some(surface) = solid_surface {
+            with_alpha(surface.foreground, 0.18)
+        } else {
+            with_alpha(surface, surface.3 * 0.78)
+        });
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
         s.flex_shrink_zero = true;
     }
     if is_pending {
-        badge = badge.child(spinner(
+        let mut pending_spinner = spinner(
             &SpinnerSpec::new()
                 .with_variant(SpinnerVariant::Ring)
                 .with_size(SpinnerSize::Sm)
-                .with_tone(SpinnerTone::Accent),
+                .with_tone(if solid {
+                    SpinnerTone::Current
+                } else {
+                    SpinnerTone::Accent
+                }),
             theme,
-        ));
+        );
+        if let Some(surface) = solid_surface {
+            pending_spinner.style.descriptor.text_color = Some(surface.foreground);
+        }
+        badge = badge.child(pending_spinner);
     } else {
         let mut icon = Node::icon(tone_icon(spec.tone), icon_glyph);
-        icon.style.descriptor.text_color = Some(tone_color);
+        icon.style.descriptor.text_color = Some(
+            solid_surface
+                .map(|surface| surface.foreground)
+                .unwrap_or(tone_color),
+        );
         badge = badge.child(icon);
     }
     body = body.child(badge);
@@ -177,14 +200,22 @@ pub fn callout(
     }
     if let Some(ref title) = spec.title {
         let mut t = Node::text(title);
-        t.style.descriptor.text_color = Some(text_primary);
+        t.style.descriptor.text_color = Some(
+            solid_surface
+                .map(|surface| surface.foreground)
+                .unwrap_or(text_primary),
+        );
         t.style.text_size = Some(font_size);
         t.style.text_weight = Some(600);
         content = content.child(t);
     }
     if let Some(ref message) = spec.content {
         let mut m = Node::text(message);
-        m.style.descriptor.text_color = Some(text_secondary);
+        m.style.descriptor.text_color = Some(
+            solid_surface
+                .map(|surface| surface.foreground)
+                .unwrap_or(text_secondary),
+        );
         m.style.text_size = Some(font_size);
         content = content.child(m);
     }
@@ -222,7 +253,11 @@ pub fn callout(
             s.descriptor.cursor = CursorHint::Pointer;
         }
         let mut x = Node::icon("x", icon_glyph);
-        x.style.descriptor.text_color = Some(text_secondary);
+        x.style.descriptor.text_color = Some(
+            solid_surface
+                .map(|surface| surface.foreground)
+                .unwrap_or(text_secondary),
+        );
         dismiss = dismiss.child(x);
 
         if let Some(handler) = &on_dismiss {
@@ -242,6 +277,8 @@ pub fn callout(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_node::NodeKind;
+    use poodle_specs::ToneFill;
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -306,5 +343,46 @@ mod tests {
         assert!(first
             .find(&|n| n.id.as_deref() == Some(CALLOUT_DISMISS_ID))
             .is_some());
+    }
+
+    #[test]
+    fn solid_surface_stamps_inverse_foreground_on_content_and_pending_spinner() {
+        let theme = theme();
+        let warning = CallOutSpec::new()
+            .with_tone(StatusTone::Warning)
+            .with_fill(ToneFill::Solid)
+            .with_title("Warning")
+            .with_content("Read this");
+        let expected = solid_tone_surface(
+            &theme,
+            theme.resolve_color(warning.tone_color_token()),
+            false,
+        );
+        let node = callout(&warning, &theme, CalloutHandlers::default());
+
+        assert_eq!(node.style.descriptor.background, Some(expected.background));
+        assert_eq!(node.style.descriptor.border.color, expected.border);
+        assert_eq!(node.style.descriptor.text_color, Some(expected.foreground));
+        let icon = node
+            .find(&|n| matches!(&n.kind, NodeKind::Icon { name, .. } if name == "triangle-alert"))
+            .expect("warning icon");
+        assert_eq!(icon.style.descriptor.text_color, Some(expected.foreground));
+
+        let pending = CallOutSpec::new()
+            .with_tone(StatusTone::Pending)
+            .with_fill(ToneFill::Solid);
+        let pending_expected = solid_tone_surface(
+            &theme,
+            theme.resolve_color(pending.tone_color_token()),
+            false,
+        );
+        let pending_node = callout(&pending, &theme, CalloutHandlers::default());
+        let spinner = pending_node
+            .find(&|n| matches!(&n.kind, NodeKind::Icon { name, .. } if name == "spinner"))
+            .expect("pending spinner");
+        assert_eq!(
+            spinner.style.descriptor.text_color,
+            Some(pending_expected.foreground)
+        );
     }
 }

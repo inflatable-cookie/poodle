@@ -39,6 +39,7 @@ export type StatusTone =
   | "warning"
   | "danger"
   | "pending";
+export type ToneFill = "tint" | "solid";
 export type SeparatorTone = "subtle" | "default";
 export type SkeletonShape = "line" | "block" | "circle";
 
