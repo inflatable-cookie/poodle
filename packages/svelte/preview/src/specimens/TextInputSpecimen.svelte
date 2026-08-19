@@ -36,7 +36,7 @@
         </div>
       <div class="poodle-specimen__control">
           <Field id="slug-field" label="Slug" description="Generates from the title until the user edits it." validationState={slugStatus === "validating" ? "pending" : slugStatus === "invalid" ? "invalid" : slugStatus === "valid" ? "valid" : "none"} error={slugStatus === "invalid" ? "That slug is not available." : null}>
-            <TextInput id="slug-field" type="slug" value={slug} source="Northstar Launch Plan" prefix="/projects/" maxLength={64} validate={validateSlug} onValueChange={(nextValue) => (slug = nextValue)} onValidationChange={(detail) => { slugStatus = detail.status; }} />
+            <TextInput id="slug-field" type="slug" value={slug} source="Northstar Launch Plan" maxLength={64} validate={validateSlug} onValueChange={(nextValue) => (slug = nextValue)} onValidationChange={(detail) => { slugStatus = detail.status; }} />
           </Field>
         </div>
     </div>

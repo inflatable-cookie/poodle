@@ -91,7 +91,6 @@ export function TextInputSpecimen() {
                           type="slug"
                           value={slug}
                           source="Northstar Launch Plan"
-                          prefix="/projects/"
                           maxLength={64}
                           validate={validateSlug}
                           onValueChange={(nextValue) => setSlug(nextValue)}

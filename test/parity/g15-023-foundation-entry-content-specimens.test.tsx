@@ -4,17 +4,20 @@ import {
   cleanup as cleanupReact,
   fireEvent as fireEventReact,
   render as renderReact,
+  waitFor as waitForReact,
 } from "@testing-library/react";
 import {
   cleanup as cleanupSvelte,
   fireEvent as fireEventSvelte,
   render as renderSvelte,
+  waitFor as waitForSvelte,
 } from "@testing-library/svelte";
 import iconNodes from "lucide-static/icon-nodes.json";
 import { createElement, type ComponentType } from "react";
 import { describe, expect, it } from "vitest";
 
-import { IconProvider, type IconSet } from "../../packages/react/components/src";
+import { IconProvider, type IconSet, TextInput as ReactTextInput } from "../../packages/react/components/src";
+import SvelteTextInput from "../../packages/svelte/components/src/TextInput.svelte";
 import { SceneSpecimen as ReactSceneSpecimen } from "../../packages/react/preview/src/gallery/SceneSpecimen";
 import { specimenMap as reactMap } from "../../packages/react/preview/src/gallery/specimen-map";
 import { specimenMap as svelteMap } from "../../packages/svelte/preview/src/specimens/registry";
@@ -420,25 +423,43 @@ describe("g15.023 foundation entry, content, and status specimens", () => {
     cleanupReact();
   });
 
+  async function assertSlugAvailability(runtime: "svelte" | "react"): Promise<void> {
+    const validation = groupByCaption("Validation and async availability");
+    expect(validation.textContent).toContain("Please enter a valid email address.");
+    const email = validation.querySelector("#email-field") as HTMLInputElement;
+    expect(email, `${runtime} email field`).toBeTruthy();
+    if (runtime === "svelte") {
+      await fireEventSvelte.input(email, { target: { value: "you@example.com" } });
+    } else {
+      await fireEventReact.change(email, { target: { value: "you@example.com" } });
+    }
+    expect(validation.textContent).not.toContain("Please enter a valid email address.");
+
+    const slug = validation.querySelector("#slug-field") as HTMLInputElement;
+    expect(slug, `${runtime} async slug field`).toBeTruthy();
+    const slugRoot = slug.closest(".poodle-text-input") as HTMLElement;
+    expect(slugRoot, `${runtime} slug root`).toBeTruthy();
+    expect(slugRoot.querySelector(".poodle-text-input__affix--prefix")).toBeNull();
+
+    if (runtime === "svelte") {
+      await fireEventSvelte.input(slug, { target: { value: "northstar" } });
+    } else {
+      await fireEventReact.change(slug, { target: { value: "northstar" } });
+    }
+    expect(slugRoot.getAttribute("data-validation-state")).toBe("pending");
+
+    const waitFor = runtime === "svelte" ? waitForSvelte : waitForReact;
+    await waitFor(() => {
+      expect(slugRoot.getAttribute("data-validation-state")).toBe("invalid");
+    });
+    expect(validation.textContent).toMatch(/already in use|not available/i);
+  }
+
   it("keeps TextInput invalid, valid, pending, search, affix, multiline, and disabled evidence", async () => {
     renderSvelte(PilotSpecimenHarness, {
       props: { specimen: svelteMap["text-input"] as never },
     });
-    const validation = groupByCaption("Validation and async availability");
-    expect(validation.textContent).toContain("Please enter a valid email address.");
-    const email = validation.querySelector("#email-field") as HTMLInputElement;
-    expect(email, "email field").toBeTruthy();
-    await fireEventSvelte.input(email, { target: { value: "you@example.com" } });
-    expect(validation.textContent).not.toContain("Please enter a valid email address.");
-
-    const slug = validation.querySelector("#slug-field") as HTMLInputElement;
-    expect(slug, "async slug field").toBeTruthy();
-    await fireEventSvelte.input(slug, { target: { value: "northstar" } });
-    expect(
-      validation.querySelector('[data-validation="pending"], [data-state="pending"]') ||
-        validation.textContent?.toLowerCase().includes("slug"),
-    ).toBeTruthy();
-
+    await assertSlugAvailability("svelte");
     expect(groupByCaption("Search input").querySelector('input[type="search"]')).toBeTruthy();
     const affix = groupByCaption("Prefix and suffix");
     expect(affix.textContent).toMatch(/\$/);
@@ -448,5 +469,77 @@ describe("g15.023 foundation entry, content, and status specimens", () => {
       groupByCaption("Disabled").querySelector("input[disabled], textarea[disabled]"),
     ).toBeTruthy();
     cleanupSvelte();
+
+    renderReactSpecimen(reactMap["text-input"] as ComponentType);
+    await assertSlugAvailability("react");
+    cleanupReact();
+  });
+
+  it("keeps focused evidence for removed TextInput icon and read-only stories", () => {
+    renderSvelte(SvelteTextInput, {
+      props: {
+        id: "leading-field",
+        leadingIcon: "search",
+        placeholder: "Search components…",
+      },
+    });
+    const svelteLeading = document.querySelector(".poodle-text-input") as HTMLElement;
+    expect(svelteLeading.getAttribute("data-has-leading")).toBe("true");
+    expect(
+      svelteLeading.querySelector(".poodle-text-input__affordance--leading")?.getAttribute("data-icon"),
+    ).toBe("search");
+    cleanupSvelte();
+
+    renderSvelte(SvelteTextInput, {
+      props: {
+        id: "trailing-field",
+        trailingIcon: "x-circle",
+        value: "Some text",
+      },
+    });
+    const svelteTrailing = document.querySelector(".poodle-text-input") as HTMLElement;
+    expect(svelteTrailing.getAttribute("data-has-trailing")).toBe("true");
+    expect(
+      svelteTrailing.querySelector(".poodle-text-input__affordance--trailing")?.getAttribute("data-icon"),
+    ).toBe("x-circle");
+    cleanupSvelte();
+
+    renderSvelte(SvelteTextInput, {
+      props: { id: "readonly-field", value: "read-only value", readOnly: true },
+    });
+    expect(document.querySelector("#readonly-field")?.hasAttribute("readonly")).toBe(true);
+    cleanupSvelte();
+
+    renderReactSpecimen(ReactTextInput, {
+      id: "leading-field",
+      leadingIcon: "search",
+      placeholder: "Search components…",
+    });
+    const reactLeading = document.querySelector(".poodle-text-input") as HTMLElement;
+    expect(reactLeading.getAttribute("data-has-leading")).toBe("true");
+    expect(
+      reactLeading.querySelector(".poodle-text-input__affordance--leading")?.getAttribute("data-icon"),
+    ).toBe("search");
+    cleanupReact();
+
+    renderReactSpecimen(ReactTextInput, {
+      id: "trailing-field",
+      trailingIcon: "x-circle",
+      value: "Some text",
+    });
+    const reactTrailing = document.querySelector(".poodle-text-input") as HTMLElement;
+    expect(reactTrailing.getAttribute("data-has-trailing")).toBe("true");
+    expect(
+      reactTrailing.querySelector(".poodle-text-input__affordance--trailing")?.getAttribute("data-icon"),
+    ).toBe("x-circle");
+    cleanupReact();
+
+    renderReactSpecimen(ReactTextInput, {
+      id: "readonly-field",
+      value: "read-only value",
+      readOnly: true,
+    });
+    expect(document.querySelector("#readonly-field")?.hasAttribute("readonly")).toBe(true);
+    cleanupReact();
   });
 });

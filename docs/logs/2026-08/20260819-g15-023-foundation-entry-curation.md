@@ -6,7 +6,8 @@ Parent: `docs/roadmaps/g15/018-overloaded-examples-curation.md`
 Handoff: `docs/handoffs/20260819-201239-g15-023-foundation-entry-curation.md`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-eea8d8fa`
 Branch: `t3code/curate-foundation-entry-pages`
-Accepted head: `87ee87da2ef6e1525e1b941de94ee3a83ccd6037`
+Accepted head: pending orchestrator closeout
+PR head: review-round 1 on this branch; first review saw `e87e6773`
 Worker base: `87ee87da2ef6e1525e1b941de94ee3a83ccd6037` (`origin/main` at
 dispatch; handoff planning base `aa451297961be3fd98e3c038774af7f5151d9eed`
 confirmed as an ancestor)
@@ -144,10 +145,19 @@ input; Prefix and suffix; Multiline; Disabled
   group. Last-action feedback stays visible as uncaptioned host copy.
   Dropdown/outside-dismiss remains in `SplitButton.test.ts`.
 - **TextInput — "With validation" + "Slug" → "Validation and async
-  availability".** Invalid/valid email and async slug stay live. GPUI dropped
-  icon, character-count, read-only, suffix-only, and repeated multiline
-  groups. Character count remains on the retained multiline example. Icon and
-  read-only stay on the component/public props, not as catalogue-only claims.
+  availability".** Invalid/valid email and async slug stay live. The slug
+  example no longer carries `prefix="/projects/"` — that prefix made
+  `prefix + value` fail built-in slug-format validation before the custom
+  async check ran. Prefix/suffix teaching stays in its own section. Review
+  round 1 pins the pending → unavailable path on
+  `.poodle-text-input[data-validation-state]` in both web runtimes.
+  GPUI dropped icon, character-count, read-only, suffix-only, and repeated
+  multiline groups. Character count remains on the retained multiline
+  example. Leading icon, trailing icon, and read-only leave the catalogue
+  because `g15-023-foundation-entry-content-specimens.test.tsx` now asserts
+  them in both web runtimes: `data-has-leading` / `data-icon="search"`,
+  `data-has-trailing` / `data-icon="x-circle"`, and the `readonly`
+  attribute.
 
 ## Contract coverage
 
@@ -179,8 +189,10 @@ a named disposition above.
 
 ## Validation
 
-- focused `g15-023` parity regression: 74 passed
-- `effigy test:parity`: 7 files, 439 passed
+- focused `g15-023` parity regression: 75 passed after review-round 1
+  (74 at first push)
+- `effigy test:parity`: 7 files, 439 passed at first push; focused
+  regression re-run for this round
 - `effigy catalogue:check`: passed
 - `effigy check:svelte`: 0 errors
 - `effigy react:build`: passed
