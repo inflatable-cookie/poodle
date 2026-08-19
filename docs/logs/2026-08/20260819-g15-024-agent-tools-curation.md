@@ -6,7 +6,8 @@ Parent: `docs/roadmaps/g15/018-overloaded-examples-curation.md`
 Handoff: `docs/handoffs/20260819-221731-g15-024-agent-tools-curation.md`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-826e3c4f`
 Branch: `t3code/curate-agent-tool-specimens`
-Accepted head: worker implementation commit on this branch
+Accepted head: pending orchestrator closeout
+First review head: `6d8e0b24`
 Worker base: `a94e95431295df2b1aabf34084c799531dbca9f5` (`origin/main` at
 dispatch; handoff planning base `11e49d89df12e90500ebf3c9318bdc493b45cc1c`
 confirmed as an ancestor)
@@ -101,7 +102,8 @@ Overflow and actions
   shortcuts** gained a twelve-option first-nine-only instance as **Shortcut
   limits**. Hosted override remains live on web; GPUI teaches the typed
   override as a render-only result because native editors do not take
-  keystrokes.
+  keystrokes. Review round 1 pairs the hosted single-select reset: Svelte now
+  clears both the editor and the bound selection after submit, matching React.
 - **AgentQuestionRecord — Selected + Several chosen → Selected answers.**
   **Override** renamed **Free-text override**. **Without options** +
   with-header + no-header share **Presentation options**. GPUI gained the
@@ -112,8 +114,9 @@ Overflow and actions
   message-and-run and a thirty-call run collapsed/expanded as **Tool run
   states**. React gained the missing worked turn and streaming. GPUI dropped
   the extra Interactive and Markdown subset groups; live disclosure stays on
-  the worked turn. Native still has no jump button (`onScrollStateChange` is
-  web-only).
+  the worked turn. Native scroll is host-owned, so GPUI teaches jump-to-latest
+  as host chrome: a height-clipped `ScrollShell` plus a live button using
+  `AgentTranscriptSpec.jump_label`. `onScrollStateChange` remains web-only.
 - **ChangedFiles — Empty** left Examples. The component correctly renders
   nothing; focused `ChangedFiles.test.ts` / `ChangedFiles.test.tsx` still
   assert the no-output contract. **Single file** + **One-sided counts** →
@@ -139,14 +142,15 @@ implementation, public prop, or token changed.
 
 ## Validation
 
-- focused `g15-024` parity regression: 43 passed
-- `effigy test:parity`: 8 files, 483 passed
+- focused `g15-024` parity regression: 43 passed at `6d8e0b24` and after
+  review-round 1
+- `effigy test:parity`: 8 files, 483 passed at `6d8e0b24`
 - `effigy catalogue:check`: passed
 - `effigy check:svelte`: 0 errors
 - `effigy react:build`: passed
 - `effigy check:gpui`: passed (`poodle-gpui-preview` compiled)
 - `effigy docs:check`: passed
-- `git diff --check origin/main...HEAD`: passed
+- `git diff --check origin/main...HEAD`: passed at `6d8e0b24`
 
 Headless only. No windowed, native-visual, conformance, Jetstream, or
 release selectors.

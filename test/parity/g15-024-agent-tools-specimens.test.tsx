@@ -245,8 +245,11 @@ describe("g15.024 agent and tools specimens", () => {
     ) as HTMLButtonElement;
     expect(hostedOption, "hosted option").toBeTruthy();
     fireEventSvelte.click(hostedOption);
+    expect(hosted.textContent).toMatch(/answered: selected/);
+    expect(hosted.querySelector('.poodle-agent-question__option[data-selected="true"]')).toBeNull();
     const hostedEditor = hosted.querySelector("textarea, input") as HTMLTextAreaElement;
     expect(hostedEditor, "hosted composer editor").toBeTruthy();
+    expect(hostedEditor.value).toBe("");
     fireEventSvelte.input(hostedEditor, { target: { value: "Neither — put it in the sidebar." } });
     expect(hosted.querySelector('.poodle-agent-question__option[data-selected="true"]')).toBeNull();
 
@@ -272,6 +275,18 @@ describe("g15.024 agent and tools specimens", () => {
     expect(questions[0]!.querySelectorAll(".poodle-agent-question__option").length).toBe(12);
     expect(questions[1]!.querySelectorAll(".poodle-agent-question__option-shortcut").length).toBe(0);
     cleanupSvelte();
+
+    renderReactSpecimen(reactMap["agent-question"] as ComponentType);
+    const reactHosted = groupByCaption("Hosted by the composer");
+    const reactOption = reactHosted.querySelector(
+      ".poodle-agent-question__option",
+    ) as HTMLButtonElement;
+    fireEventReact.click(reactOption);
+    expect(reactHosted.textContent).toMatch(/answered: selected/);
+    expect(reactHosted.querySelector('.poodle-agent-question__option[data-selected="true"]')).toBeNull();
+    const reactEditor = reactHosted.querySelector("textarea, input") as HTMLTextAreaElement;
+    expect(reactEditor.value).toBe("");
+    cleanupReact();
   });
 
   it("keeps AgentQuestionRecord selected, override, declined, and presentation variants", () => {
@@ -362,6 +377,22 @@ describe("g15.024 agent and tools specimens", () => {
     const caret = streaming.querySelector(".poodle-agent-message__caret");
     expect(caret, "transcript streaming caret").toBeTruthy();
     expect(caret!.getAttribute("aria-hidden")).toBe("true");
+    const streamingTranscripts = streaming.querySelectorAll(".poodle-agent-transcript");
+    expect(streamingTranscripts.length).toBe(2);
+    const detachedViewport = streamingTranscripts[1]!.querySelector(
+      ".poodle-agent-transcript__viewport",
+    ) as HTMLElement;
+    Object.defineProperty(detachedViewport, "scrollHeight", { configurable: true, value: 2000 });
+    Object.defineProperty(detachedViewport, "clientHeight", { configurable: true, value: 200 });
+    detachedViewport.scrollTop = 0;
+    fireEventSvelte.scroll(detachedViewport);
+    expect(streamingTranscripts[1]!.querySelector(".poodle-agent-transcript__jump")).toBeTruthy();
+
+    const gpuiTranscript = readFileSync(join(GPUI_SPECIMENS, "agent_transcript.rs"), "utf8");
+    expect(gpuiTranscript).toMatch(/is_streaming:\s*true/);
+    expect(gpuiTranscript).toMatch(/\.jump_label/);
+    expect(gpuiTranscript).toMatch(/ScrollShell/);
+    expect(gpuiTranscript).toMatch(/with_label\(jump_label/);
 
     const long = groupByCaption("Long transcript rendering");
     const transcripts = long.querySelectorAll(".poodle-agent-transcript");

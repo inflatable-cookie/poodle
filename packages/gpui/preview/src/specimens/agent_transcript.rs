@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
-use crate::node_compat::{AgentTranscript, Eyebrow};
+use crate::node_compat::{AgentTranscript, Button, Eyebrow, ScrollShell};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
@@ -10,7 +10,7 @@ use poodle_headless::agent_transcript::{
     ChangedFile, ToolCallStatus, TranscriptActivity, TranscriptChangedFiles, TranscriptItem,
     TranscriptMessage, TranscriptToolCall,
 };
-use poodle_specs::{AgentTranscriptSpec, EyebrowSpec};
+use poodle_specs::{AgentTranscriptSpec, ButtonSpec, Direction, EyebrowSpec, ScrollShellSpec};
 
 fn call(id: &str, detail: &str, status: ToolCallStatus) -> TranscriptItem {
     TranscriptItem::ToolCall(TranscriptToolCall {
@@ -169,6 +169,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         })
     };
 
+    let jump_clicks = state.specimens.count("transcript.jump");
+    let jump_events = state.node_events.clone();
+    let jump_label = AgentTranscriptSpec::new(Vec::new()).jump_label;
+
     let worked = AgentTranscript::from_spec(
         AgentTranscriptSpec::new(turn)
             .with_expanded_tool_runs(expanded_for("run", &["t1", "t6"]))
@@ -208,8 +212,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Streaming and detached scroll",
-            AgentTranscript::from_spec(AgentTranscriptSpec::new(streaming), theme)
-                .into_any_element(),
+            stack([
+                AgentTranscript::from_spec(AgentTranscriptSpec::new(streaming), theme)
+                    .into_any_element(),
+                // Native scroll is host-owned; the jump affordance is host
+                // chrome on the same spec label the web button uses.
+                div()
+                    .h(px(256.0))
+                    .child(
+                        ScrollShell::from_spec(
+                            ScrollShellSpec::new()
+                                .with_direction(Direction::Vertical)
+                                .with_label("Detached transcript"),
+                            theme,
+                        )
+                        .with_child(poodle_render::agent_transcript(
+                            &AgentTranscriptSpec::new(long.clone()),
+                            theme,
+                            poodle_render::AgentTranscriptHandlers::default(),
+                        )),
+                    )
+                    .into_any_element(),
+                Button::from_spec(ButtonSpec::new().with_label(jump_label.clone()), theme)
+                    .on_click(Arc::new(move || {
+                        jump_events
+                            .lock()
+                            .unwrap()
+                            .push(NodeSpecimenEvent::Increment("transcript.jump".to_string()));
+                    }))
+                    .into_any_element(),
+                div()
+                    .child(format!("{jump_label} ({jump_clicks})"))
+                    .into_any_element(),
+            ])
+            .into_any_element(),
         ))
         .child(group(
             theme,

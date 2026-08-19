@@ -179,7 +179,7 @@
           questions={[placement]}
           bind:selections={questionSelections}
           override={questionValue}
-          onSubmit={(answer) => { questionAnswer = answer; questionValue = ""; }}
+          onSubmit={(answer) => { questionAnswer = answer; questionValue = ""; questionSelections = []; }}
         />
       {/snippet}
     </AgentChatInput>

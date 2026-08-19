@@ -76,7 +76,7 @@
           questions={[placement]}
           bind:selections={composerSelections}
           override={composerValue}
-          onSubmit={(answer) => { lastAnswer = answer; composerValue = ""; }}
+          onSubmit={(answer) => { lastAnswer = answer; composerValue = ""; composerSelections = []; }}
         />
       {/snippet}
     </AgentChatInput>
