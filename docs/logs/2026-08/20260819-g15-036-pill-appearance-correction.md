@@ -7,6 +7,10 @@ Worktree: `/Users/tom/.t3/worktrees/poodle/g15-036-pill-appearance-semantics`
 Branch: `t3code/g15-036-pill-appearance-semantics`
 PR: #45 — merged 2026-08-19 at `7f16ec5b`
 
+> Post-merge visual review superseded the 45/55 text-mix recipe recorded in
+> this historical log. The current recipe and evidence are in
+> `20260819-solid-tone-visual-tuning.md`.
+
 ## Summary
 
 Pill's temporary `fill` axis from PR #44 (`g15.035`) is fully removed. Pill

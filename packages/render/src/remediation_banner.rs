@@ -360,7 +360,7 @@ mod tests {
     }
 
     #[test]
-    fn solid_pending_banner_uses_inverse_spinner_and_local_secondary_recipe() {
+    fn solid_pending_banner_uses_primary_spinner_and_local_secondary_recipe() {
         let theme = theme();
         let spec = RemediationBannerSpec::new("Reconnecting", "Please wait.")
             .with_tone(StatusTone::Pending)

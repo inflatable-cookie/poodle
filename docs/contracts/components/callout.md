@@ -46,7 +46,7 @@ Updated: 2026-07-10
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `tone` | `StatusTone` | `"neutral"` | no | semantic tone and coloring |
-| `fill` | `ToneFill` | `"tint"` | no | tone surface treatment; solid uses the shared inverse-foreground recipe |
+| `fill` | `ToneFill` | `"tint"` | no | tone surface treatment; solid mixes tone into the theme surface with primary foreground |
 | `title` | `string \| null` | `null` | no | bold heading text rendered as `<strong>` |
 | `message` | `string \| null` | `null` | no | body text rendered as `<p>` |
 | `ariaLabel` | `string \| null` | `null` | no | optional accessible label for the callout region |
@@ -99,7 +99,7 @@ Defined in [004 Shared Control Types](../004-shared-control-types.md).
 | warning | `tone="warning"` | warning-tinted fill and border |
 | danger | `tone="danger"` | danger-tinted fill and border |
 | pending | `tone="pending"` | lighter accent-tinted fill and border |
-| solid | `fill="solid"` | opaque tone surface with inverse foreground; composes with every tone and preserves the existing icon, action, and typography structure |
+| solid | `fill="solid"` | opaque tone-and-theme surface with primary foreground; composes with every tone and preserves the existing icon, action, and typography structure |
 
 ### Component States
 
@@ -233,14 +233,15 @@ Tint recipes remain unchanged. For every non-neutral tone, solid resolves:
 
 | Property | Value |
 |----------|-------|
-| `--poodle-callout-fill` | opaque sRGB mix of `var(--poodle-callout-tone-base)` at 45% and `var(--poodle-color-text-primary)` at 55% |
+| `--poodle-callout-fill` | opaque sRGB mix of `var(--poodle-callout-tone-base)` at 40% and `var(--poodle-color-background-surface)` at 60% |
 | `--poodle-callout-border` | raw `var(--poodle-callout-tone-base)` |
-| foreground | `var(--poodle-color-text-inverse)` |
+| foreground | `var(--poodle-color-text-primary)` |
 
-For `tone="neutral"`, solid uses `color.text.primary` as the opaque background
-and `color.border.strong` as the border. The icon badge, title, message,
-dismiss control, and pending spinner use the inverse foreground. Secondary and
-ghost action buttons use local inverse-derived fill, border, text, and hover
+For `tone="neutral"`, solid mixes `color.text.secondary` and
+`color.background.surface` equally and uses `color.border.strong` as the
+border. The icon badge, title, message, dismiss control, and pending spinner
+use the primary foreground. Secondary and ghost action buttons use local
+primary-derived fill, border, text, and hover
 recipes; primary action Button semantics are unchanged. Existing typography,
 layout, and focus-ring behavior remain unchanged.
 
@@ -278,7 +279,7 @@ Pending tone uses the shared [`Spinner`](./spinner.md) primitive with
 no icon slot override is provided.
 
 With `fill="solid"`, the spinner uses `tone="current"` so it inherits the
-inverse foreground of the solid surface.
+primary foreground of the solid surface.
 
 ### Content `.callout__content`
 
@@ -407,7 +408,7 @@ font-size is the `.callout__content` size.
 - [ ] neutral tone uses custom property defaults (94% panel, 88% border)
 - [ ] info/success/warning/danger tones use 10%/34% color-mix pattern
 - [ ] pending tone uses 8%/26% color-mix pattern (distinct from others)
-- [ ] `fill="solid"` uses the shared 45% tone-base / 55% text-primary recipe with inverse foreground
+- [ ] `fill="solid"` uses the shared 40% tone-base / 60% surface recipe with primary foreground
 - [ ] icon badge size (1.375rem), circular radius (999px), and background match
 - [ ] icon typography matches (code-family, 0.75rem, weight 700)
 - [ ] content gap (space-inline-sm) matches

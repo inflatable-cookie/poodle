@@ -11,7 +11,7 @@ export function RemediationBannerSpecimen() {
     </SpecimenGroup>
     <SpecimenGroup label="Recovery in progress"><RemediationBanner title="Reconnecting" message="This should only take a moment." tone="pending" /></SpecimenGroup>
     <SpecimenGroup label="Solid fills">
-      <RemediationBanner title="Solid neutral recovery" message="Neutral solid surfaces use the inverse foreground." tone="neutral" fill="solid" />
+      <RemediationBanner title="Solid neutral recovery" message="Neutral solid surfaces keep the theme's primary foreground." tone="neutral" fill="solid" />
       <RemediationBanner title="Solid danger recovery" message="Secondary actions stay readable on the solid surface." tone="danger" fill="solid" secondaryAction={details} />
     </SpecimenGroup>
   </div>;

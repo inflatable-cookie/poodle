@@ -6,6 +6,10 @@ Handoff: `docs/handoffs/20260819-143940-g15-035-solid-tone-surfaces.md`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-5f45fbf7`
 Branch: `t3code/solid-tone-surfaces`
 
+> Post-merge visual review superseded the 45/55 text-mix recipe recorded in
+> this historical log. The current recipe and evidence are in
+> `20260819-solid-tone-visual-tuning.md`.
+
 ## Summary
 
 `Callout`, `Pill`, and `RemediationBanner` now share one opt-in `ToneFill` axis

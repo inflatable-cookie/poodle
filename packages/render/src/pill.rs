@@ -273,15 +273,9 @@ mod tests {
             pill_colors(&explicit_tint, &theme)
         );
 
-        // The tint shell keeps the ordinary tone-tinted recipe: a translucent
-        // surface fill, not the opaque solid surface.
-        let (fill, _, text) = pill_colors(&default_spec, &theme);
-        let solid = PillSpec::new()
-            .with_label("Neutral")
-            .with_appearance(PillAppearance::Solid);
-        let (solid_fill, _, solid_text) = pill_colors(&solid, &theme);
-        assert_ne!(fill, solid_fill);
-        assert_ne!(text, solid_text);
+        // Solid has its own exact recipe coverage below. Do not require every
+        // resolved channel to differ: a theme may legitimately make one tint
+        // channel meet the solid midpoint.
     }
 
     #[test]
@@ -351,7 +345,7 @@ mod tests {
     }
 
     #[test]
-    fn solid_dot_and_remove_affordance_use_inverse_foreground() {
+    fn solid_dot_and_remove_affordance_use_primary_foreground() {
         let theme = theme();
         let mut spec = PillSpec::new()
             .with_label("Filter")

@@ -96,7 +96,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 .child(RemediationBanner::from_spec(
                     RemediationBannerSpec::new(
                         "Solid neutral recovery",
-                        "Neutral solid surfaces use the inverse foreground.",
+                        "Neutral solid surfaces keep the theme's primary foreground.",
                     )
                     .with_tone(StatusTone::Neutral)
                     .with_fill(ToneFill::Solid),

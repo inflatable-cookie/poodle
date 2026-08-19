@@ -36,12 +36,13 @@ fallback.
 - The implicit appearance changes from `solid` to `tint`; default rendered
   output remains observably unchanged.
 - `appearance="solid"` owns the `g15.035` opaque recipe:
-  - non-neutral background: 45% tone base plus 55% `color.text.primary` in
-    sRGB;
-  - neutral background: `color.text.primary`;
+  - non-neutral background: 40% tone base plus 60%
+    `color.background.surface` in sRGB;
+  - neutral background: equal parts `color.text.secondary` and
+    `color.background.surface`;
   - non-neutral border: raw tone base;
   - neutral border: `color.border.strong`;
-  - foreground and dot/remove affordance: `color.text.inverse`;
+  - foreground and dot/remove affordance: `color.text.primary`;
   - a custom `accent` replaces the semantic tone base.
 - `appearance="subtle"` and `appearance="badge"` keep their current visual and
   typography behavior. They do not combine with solid because appearance is
@@ -58,7 +59,7 @@ fallback.
   specimens, GPUI examples, and focused tests.
 - Before PR #44, `appearance="solid"` was the default but selected no dedicated
   CSS or Rust color recipe. The name described the ordinary tinted shell.
-- The opaque 45/55 recipe is already implemented and contrast-tested across
+- The opaque shared recipe is implemented and contrast-tested across
   all twelve themes in `poodle-render`; this card reassigns it to Pill's
   existing appearance axis rather than inventing new color math.
 - Callout and RemediationBanner genuinely need a second fill axis because
@@ -109,7 +110,7 @@ fallback.
   - omitting the prop emits `data-appearance="tint"`, emits no `data-fill`, and
     preserves the previous default recipe;
   - explicit tint matches the default;
-  - solid uses inverse foreground for every tone and custom accent;
+  - solid uses primary foreground for every tone and custom accent;
   - subtle and badge remain distinct and unchanged;
   - no Pill public type or DOM output contains `fill`.
 - Rust spec/render tests prove the same default, four-member enum, solid color
@@ -189,7 +190,7 @@ Jetstream, or release selector.
 - Preserving current default visuals requires a compatibility alias or silent
   fallback instead of a direct `appearance="tint"` default.
 - The four appearances cannot remain mutually exclusive across web and Rust.
-- The existing 45/55 solid recipe fails a current theme's 4.5:1 text contrast
+- The existing shared solid recipe fails a current theme's 4.5:1 text contrast
   evidence.
 - The generated presentation model would need component behavior or runtime
   callbacks.

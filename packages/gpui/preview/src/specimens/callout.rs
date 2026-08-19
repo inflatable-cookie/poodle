@@ -152,7 +152,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_tone(StatusTone::Warning)
                             .with_fill(ToneFill::Solid)
                             .with_title("Solid warning")
-                            .with_content("Tone base border with inverse foreground."),
+                            .with_content("Tone base border with primary foreground."),
                         theme,
                     ),
                 )

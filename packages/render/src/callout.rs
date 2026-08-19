@@ -346,7 +346,7 @@ mod tests {
     }
 
     #[test]
-    fn solid_surface_stamps_inverse_foreground_on_content_and_pending_spinner() {
+    fn solid_surface_stamps_primary_foreground_on_content_and_pending_spinner() {
         let theme = theme();
         let warning = CallOutSpec::new()
             .with_tone(StatusTone::Warning)

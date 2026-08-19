@@ -24,28 +24,28 @@
 .poodle-remediation-banner__dismiss:focus-visible { outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing); outline-offset: 0.125rem; }
 
 .poodle-remediation-banner[data-fill="solid"] {
-  background: color-mix(in srgb, var(--poodle-remediation-banner-tone) 45%, var(--poodle-color-text-primary) 55%);
+  background: color-mix(in srgb, var(--poodle-remediation-banner-tone) 40%, var(--poodle-color-background-surface));
   border-color: var(--poodle-remediation-banner-tone);
-  color: var(--poodle-color-text-inverse);
+  color: var(--poodle-color-text-primary);
 }
 .poodle-remediation-banner[data-fill="solid"][data-tone="neutral"] {
-  background: var(--poodle-color-text-primary);
+  background: color-mix(in srgb, var(--poodle-color-text-secondary) 50%, var(--poodle-color-background-surface));
   border-color: var(--poodle-color-border-strong);
 }
 .poodle-remediation-banner[data-fill="solid"] .poodle-remediation-banner__icon,
 .poodle-remediation-banner[data-fill="solid"] .poodle-remediation-banner__content,
 .poodle-remediation-banner[data-fill="solid"] .poodle-remediation-banner__content p,
 .poodle-remediation-banner[data-fill="solid"] .poodle-remediation-banner__dismiss {
-  color: var(--poodle-color-text-inverse);
+  color: var(--poodle-color-text-primary);
 }
 .poodle-remediation-banner[data-fill="solid"] .poodle-button[data-variant="secondary"],
 .poodle-remediation-banner[data-fill="solid"] .poodle-button[data-variant="ghost"] {
-  --poodle-button-fill: color-mix(in srgb, var(--poodle-color-text-inverse) 16%, transparent);
-  --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-text-inverse) 24%, transparent);
-  --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-text-inverse) 30%, transparent);
-  --poodle-button-border: color-mix(in srgb, var(--poodle-color-text-inverse) 56%, transparent);
-  --poodle-button-border-hover: var(--poodle-color-text-inverse);
-  --poodle-button-text: var(--poodle-color-text-inverse);
+  --poodle-button-fill: color-mix(in srgb, var(--poodle-color-text-primary) 16%, transparent);
+  --poodle-button-fill-hover: color-mix(in srgb, var(--poodle-color-text-primary) 24%, transparent);
+  --poodle-button-fill-active: color-mix(in srgb, var(--poodle-color-text-primary) 30%, transparent);
+  --poodle-button-border: color-mix(in srgb, var(--poodle-color-text-primary) 56%, transparent);
+  --poodle-button-border-hover: var(--poodle-color-text-primary);
+  --poodle-button-text: var(--poodle-color-text-primary);
   --poodle-button-shadow: none;
 }
 @media (max-width: 45rem) {

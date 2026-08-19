@@ -9,7 +9,7 @@ import { describe, expect, test } from "bun:test";
  * compute to a fully transparent background. This suite models the pill.css
  * cascade for the root element (and the optional dot), resolves the `var()`
  * chain with cycle detection, and pins the contract recipes for tint
- * preservation, solid inverse foreground (tones + custom accent), and
+ * preservation, theme-surface solid recipes (tones + custom accent), and
  * distinct subtle/badge treatments.
  */
 
@@ -206,7 +206,7 @@ describe("pill.css appearance recipes", () => {
       .not.toBe(resolved("root", { "data-tone": "success", "data-appearance": "tint" }, "--poodle-pill-fill"));
   });
 
-  test("solid uses the opaque 45/55 recipe with inverse foreground for every tone", () => {
+  test("solid mixes every tone into the theme surface with primary foreground", () => {
     const toneBases: Record<string, string> = {
       info: "var(--poodle-color-status-info, #3b82f6)",
       success: "var(--poodle-color-status-success, #22c55e)",
@@ -216,29 +216,31 @@ describe("pill.css appearance recipes", () => {
     for (const [tone, base] of Object.entries(toneBases)) {
       const attrs = { "data-tone": tone, "data-appearance": "solid" };
       expect(resolved("root", attrs, "--poodle-pill-fill"))
-        .toBe(`color-mix(in srgb, ${base} 45%, var(--poodle-color-text-primary) 55%)`);
+        .toBe(`color-mix(in srgb, ${base} 40%, var(--poodle-color-background-surface))`);
       expect(resolved("root", attrs, "--poodle-pill-border")).toBe(base);
-      expect(resolved("root", attrs, "--poodle-pill-text")).toBe("var(--poodle-color-text-inverse)");
+      expect(resolved("root", attrs, "--poodle-pill-text")).toBe("var(--poodle-color-text-primary)");
     }
 
     const neutral = { "data-tone": "neutral", "data-appearance": "solid" };
-    expect(resolved("root", neutral, "--poodle-pill-fill")).toBe("var(--poodle-color-text-primary)");
+    expect(resolved("root", neutral, "--poodle-pill-fill")).toBe(
+      "color-mix(in srgb, var(--poodle-color-text-secondary) 50%, var(--poodle-color-background-surface))",
+    );
     expect(resolved("root", neutral, "--poodle-pill-border")).toBe("var(--poodle-color-border-strong)");
-    expect(resolved("root", neutral, "--poodle-pill-text")).toBe("var(--poodle-color-text-inverse)");
+    expect(resolved("root", neutral, "--poodle-pill-text")).toBe("var(--poodle-color-text-primary)");
   });
 
   test("solid with a custom accent uses the accent as the tone base", () => {
     const attrs = { "data-tone": "neutral", "data-appearance": "solid", "data-accent": "custom" };
     expect(resolved("root", attrs, "--poodle-pill-fill")).toBe(
-      "color-mix(in srgb, var(--poodle-pill-accent) 45%, var(--poodle-color-text-primary) 55%)",
+      "color-mix(in srgb, var(--poodle-pill-accent) 40%, var(--poodle-color-background-surface))",
     );
     expect(resolved("root", attrs, "--poodle-pill-border")).toBe("var(--poodle-pill-accent)");
-    expect(resolved("root", attrs, "--poodle-pill-text")).toBe("var(--poodle-color-text-inverse)");
+    expect(resolved("root", attrs, "--poodle-pill-text")).toBe("var(--poodle-color-text-primary)");
   });
 
-  test("solid paints the dot with the inverse foreground; tint keeps tone dots", () => {
+  test("solid paints the dot with the primary foreground; tint keeps tone dots", () => {
     expect(resolved("dot", { "data-tone": "neutral", "data-appearance": "solid" }, "--poodle-pill-dot-fill"))
-      .toBe("var(--poodle-color-text-inverse)");
+      .toBe("var(--poodle-color-text-primary)");
     expect(resolved("dot", { "data-tone": "info", "data-appearance": "tint" }, "--poodle-pill-dot-fill"))
       .toBe("var(--poodle-color-status-info, #3b82f6)");
   });

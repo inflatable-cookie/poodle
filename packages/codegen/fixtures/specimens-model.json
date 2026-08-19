@@ -1432,7 +1432,7 @@
             {
               "prop": "content",
               "value": {
-                "String": "Tone base and inverse foreground stay readable across themes."
+                "String": "Tone and theme surface stay readable without inverting the palette."
               },
               "description": null
             }
@@ -1467,7 +1467,7 @@
             {
               "prop": "content",
               "value": {
-                "String": "The pending spinner inherits the solid inverse foreground."
+                "String": "The pending spinner inherits the solid primary foreground."
               },
               "description": null
             }

@@ -65,7 +65,7 @@ Updated: 2026-07-10
 | danger | `tone="danger"` | red-tinted fill and border, primary text |
 | custom accent | `accent` provided | accent-tinted fill, border, and text using the provided color |
 | tint | default (`appearance="tint"`) | ordinary tone-tinted shell; the base recipes below apply with no appearance override |
-| solid | `appearance="solid"` | opaque tone fill with inverse foreground; uses a custom accent as the tone base |
+| solid | `appearance="solid"` | opaque tone-and-theme fill with primary foreground; uses a custom accent as the tone base |
 | subtle | `appearance="subtle"` | 50% transparent fill overlay |
 | muted | `muted=true` | reduced opacity (0.72) |
 | xs | `size="xs"` | smallest metadata chip sizing |
@@ -215,14 +215,14 @@ cycle. `solid` and `badge` assign `--poodle-pill-fill` directly.
 
 ### Appearance: solid `.pill[data-appearance="solid"]`
 
-Solid resolves the background as an opaque sRGB mix of the tone base at 45%
-and `color.text.primary` at 55%, uses the raw tone base as the border, and
-uses `color.text.inverse` as the text color. The neutral solid background is
-`color.text.primary` and its border is `color.border.strong`. A custom
-`accent` replaces the semantic tone as the mix base. Appearance is a single
-mutually exclusive axis: solid never combines with subtle's opacity reduction
-or badge's uppercase typography. The optional dot uses the inverse foreground
-in the solid appearance.
+Solid resolves the background as an opaque sRGB mix of the tone base at 40%
+and `color.background.surface` at 60%, uses the raw tone base as the border,
+and uses `color.text.primary` as the text color. The neutral solid background
+mixes `color.text.secondary` and `color.background.surface` equally and its
+border is `color.border.strong`. A custom `accent` replaces the semantic tone
+as the mix base. Appearance is a single mutually exclusive axis: solid never
+combines with subtle's opacity reduction or badge's uppercase typography. The
+optional dot uses the primary foreground in the solid appearance.
 
 ### Appearance: badge `.pill[data-appearance="badge"]`
 
@@ -479,7 +479,7 @@ Five pills in a horizontal row with 8px gap:
 
 Preview apps include one compact appearances group showing the four mutually
 exclusive treatments: `tint` (the default ordinary shell), `solid` (opaque
-tone fill with inverse foreground), `subtle`, and `badge`. Tests own the
+tone-and-theme fill with primary foreground), `subtle`, and `badge`. Tests own the
 tone-by-appearance matrix; the specimen stays representative.
 
 ### Sizes

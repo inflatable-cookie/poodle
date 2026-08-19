@@ -23,7 +23,7 @@ fill?: ToneFill; // default: "tint"
 ```
 
 `tint` preserves today's treatment. `solid` produces an opaque, high-contrast
-tone surface with inverse foregrounds. Neutral is a real solid variant, not an
+tone-and-theme surface with primary foregrounds. Neutral is a real solid variant, not an
 alias for info. The API, defaults, semantic output, and representative
 specimens match in Svelte, React, renderer-neutral Rust, and GPUI.
 
@@ -49,19 +49,19 @@ records the supersession without rewriting the execution history below.
 - `tint` retains the current fill, border, foreground, icon, spinner, action,
   and focus treatment. Do not use this card to restyle the existing variant.
 - `solid` uses one shared tone-resolution rule:
-  - neutral base: `color.text.primary`;
+  - neutral base: equal parts `color.text.secondary` and
+    `color.background.surface`;
   - info/success/warning/danger base: the matching `color.status.*` token;
   - pending base: `color.accent.base`;
-  - non-neutral solid background: an opaque sRGB mix of **45% tone base and
-    55% `color.text.primary`**;
-  - neutral solid background: `color.text.primary` directly;
-  - foreground: `color.text.inverse` for title, message, icon, dismiss control,
+  - non-neutral solid background: an opaque sRGB mix of **40% tone base and
+    60% `color.background.surface`**;
+  - foreground: `color.text.primary` for title, message, icon, dismiss control,
     and pending spinner;
   - border: raw tone base for non-neutral; `color.border.strong` for neutral;
-  - icon badge, where the component has one: a subtle inverse overlay that
+  - icon badge, where the component has one: a subtle primary-text overlay that
     keeps the existing badge geometry.
 - Pill custom accents use the same formula with the custom accent as the tone
-  base. Its dot and optional native remove affordance use inverse foreground
+  base. Its dot and optional native remove affordance use primary foreground
   treatment in solid mode.
 - Pill's existing `appearance="solid" | "subtle" | "badge"` axis is not
   renamed. It predates this fill axis: `appearance="solid"` remains the
@@ -69,11 +69,10 @@ records the supersession without rewriting the execution history below.
   `fill="solid"` takes precedence over appearance-specific tint/opacity color
   recipes; badge typography remains, while subtle adds no opacity reduction in
   solid mode. This is an explicit precedence rule, not a silent fallback.
-- The 45/55 rule is deliberate. A read-only check over all twelve current
-  themes found its worst normal-text contrast against `color.text.inverse`
-  above 5:1; a tone-heavier 50/50 mix fell just below 4.5:1 in Clay. Preserve
-  the cross-runtime sRGB formula and add durable contrast evidence rather than
-  replacing it with an unproved raw status fill.
+- Post-merge visual review replaced the original inverted 45/55 recipe. It
+  washed dark themes toward white and light themes toward black. The 40/60
+  tone/surface recipe keeps each theme on its own side of the contrast axis;
+  current-theme evidence retains at least 4.7:1 normal-text contrast.
 - Poodle `Button` compositions in either action area remain legible on the
   solid surface while honoring the action's supplied variant and disabled
   state. Use a local surface/foreground treatment; do not rewrite host action
@@ -132,7 +131,7 @@ records the supersession without rewriting the execution history below.
   shared substrate. Do not duplicate framework-specific styles.
 - Add recipe hooks only for real theme override seams. Hooks stay
   component-specific and use the established recipe-to-token fallback shape.
-- Pending uses the shared Spinner with current/inverse foreground in solid
+- Pending uses the shared Spinner with current/primary foreground in solid
   mode; tint mode remains accent.
 - Prove all `6 tones × 2 fills`, defaults, attributes, semantics, actions,
   dismissal, disabled actions, and focus-visible behavior in focused paired
@@ -148,7 +147,7 @@ records the supersession without rewriting the execution history below.
   to `CallOutSpec`, `RemediationBannerSpec`, and `PillSpec`.
 - Default all three specs to `Tint`; also correct Callout's tone default to
   `Neutral`.
-- Resolve the same 45/55 sRGB solid fill, border, inverse text/icon/spinner,
+- Resolve the same 40/60 tone/surface sRGB solid fill, border, primary text/icon/spinner,
   action readability, and focus treatment in `poodle-render`.
 - Add spec and render tests for the full matrices, default parity, token
   selection, contrast rule, callbacks, Pill appearance precedence, and
@@ -267,7 +266,7 @@ Jetstream, or release selector.
 - Pill needs a breaking `appearance` rename, an invalid-combination fallback,
   or a second component-specific fill type. Preserve the recorded precedence
   and report contrary evidence instead of widening the migration.
-- The 45/55 rule fails the contrast threshold in a current theme or cannot be
+- The 40/60 tone/surface rule fails the contrast threshold in a current theme or cannot be
   reproduced by both shared CSS and `poodle-render`.
 - Solid action readability requires changing Button's public API or global
   behavior rather than a local composition treatment.

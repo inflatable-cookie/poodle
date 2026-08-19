@@ -250,7 +250,7 @@ pub static SPECIMEN_SCENES: &[SpecimenScene<'static>] = &[
                         SpecimenProp { prop: "tone", value: "warning" },
                         SpecimenProp { prop: "fill", value: "solid" },
                         SpecimenProp { prop: "title", value: "Solid warning" },
-                        SpecimenProp { prop: "content", value: "Tone base and inverse foreground stay readable across themes." },
+                        SpecimenProp { prop: "content", value: "Tone and theme surface stay readable without inverting the palette." },
                     ],
                 },
                 SpecimenInstance {
@@ -260,7 +260,7 @@ pub static SPECIMEN_SCENES: &[SpecimenScene<'static>] = &[
                         SpecimenProp { prop: "tone", value: "pending" },
                         SpecimenProp { prop: "fill", value: "solid" },
                         SpecimenProp { prop: "title", value: "Solid pending" },
-                        SpecimenProp { prop: "content", value: "The pending spinner inherits the solid inverse foreground." },
+                        SpecimenProp { prop: "content", value: "The pending spinner inherits the solid primary foreground." },
                     ],
                 },
         ],

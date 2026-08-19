@@ -172,7 +172,8 @@ TypeScript: `ToneFill` in `packages/svelte/components/src/types.ts` and
 
 `tint` preserves each component's existing tone recipe. `solid` is a shared
 foreground/background treatment: non-neutral backgrounds are an opaque sRGB
-mix of 45% tone base and 55% `color.text.primary`, with the raw tone base as
-the border and `color.text.inverse` as the foreground. Neutral solid surfaces
-use `color.text.primary` as the background and `color.border.strong` as the
-border. Components keep their existing typography and focus-ring behavior.
+mix of 40% tone base and 60% `color.background.surface`, with the raw tone base
+as the border and `color.text.primary` as the foreground. Neutral solid
+surfaces mix `color.text.secondary` and `color.background.surface` equally and
+use `color.border.strong` as the border. Components keep their existing
+typography and focus-ring behavior.

@@ -121,7 +121,7 @@ export const calloutSpecimen = {
           tone: "warning",
           fill: "solid",
           title: "Solid warning",
-          content: "Tone base and inverse foreground stay readable across themes.",
+          content: "Tone and theme surface stay readable without inverting the palette.",
         },
       },
       {
@@ -131,7 +131,7 @@ export const calloutSpecimen = {
           tone: "pending",
           fill: "solid",
           title: "Solid pending",
-          content: "The pending spinner inherits the solid inverse foreground.",
+          content: "The pending spinner inherits the solid primary foreground.",
         },
       },
     ],

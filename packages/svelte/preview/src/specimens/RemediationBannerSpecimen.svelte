@@ -23,7 +23,7 @@
   <SpecimenGroup label="Solid fills">
     <RemediationBanner
       title="Solid neutral recovery"
-      message="Neutral solid surfaces use the inverse foreground."
+      message="Neutral solid surfaces keep the theme's primary foreground."
       tone="neutral"
       fill="solid"
     />
