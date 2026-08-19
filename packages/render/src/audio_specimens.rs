@@ -360,19 +360,16 @@ fn knob_examples(theme: &dyn ThemeProvider) -> Node {
             ),
             ("Automation state", vec![super::knob(&automated, theme)]),
             (
-                "Type-in",
-                vec![knob_node(
-                    0.25,
-                    0.0,
-                    1.0,
-                    AudioValueLaw::Linear,
-                    "Type-in value",
-                    theme,
-                )],
-            ),
-            (
-                "Keyboard bounds",
+                "Type-in and keyboard bounds",
                 vec![
+                    knob_node(
+                        0.25,
+                        0.0,
+                        1.0,
+                        AudioValueLaw::Linear,
+                        "Type-in value",
+                        theme,
+                    ),
                     knob_node(0.0, 0.0, 1.0, AudioValueLaw::Linear, "Minimum", theme),
                     knob_node(1.0, 0.0, 1.0, AudioValueLaw::Linear, "Maximum", theme),
                 ],

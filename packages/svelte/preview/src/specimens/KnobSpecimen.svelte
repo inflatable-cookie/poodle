@@ -15,8 +15,7 @@
   <SpecimenGroup label="Fine drag (Shift)"><Knob value={0.42} ariaLabel="Fine drag" /></SpecimenGroup>
   <SpecimenGroup label="Circular mode"><Knob value={0.8} dragMode="circular" ariaLabel="Circular drag" /></SpecimenGroup>
   <SpecimenGroup label="Automation state"><Knob value={0.7} automation="writing" ariaLabel="Automated value" /></SpecimenGroup>
-  <SpecimenGroup label="Type-in (Enter)"><Knob value={0.25} ariaLabel="Type-in value" /></SpecimenGroup>
-  <SpecimenGroup label="Keyboard bounds (Home / End)"><div class="row"><Knob value={0} ariaLabel="Minimum" /><Knob value={1} ariaLabel="Maximum" /></div></SpecimenGroup>
+  <SpecimenGroup label="Type-in and keyboard bounds"><div class="row"><Knob value={0.25} ariaLabel="Type-in value" /><Knob value={0} ariaLabel="Minimum" /><Knob value={1} ariaLabel="Maximum" /></div></SpecimenGroup>
   <SpecimenGroup label="Disabled"><Knob value={0.5} disabled ariaLabel="Disabled knob" /></SpecimenGroup>
 </div>
   {#snippet sizes(size)}<Knob value={0.6} {size} ariaLabel={`Knob ${size} size`} />{/snippet}
