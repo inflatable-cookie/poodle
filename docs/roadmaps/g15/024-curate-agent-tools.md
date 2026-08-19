@@ -1,11 +1,12 @@
 # g15.024 — Overloaded Examples: agent and tools
 
-Status: **ready** — current captions remeasured after `g15.015`; exact teaching
-outline and evidence boundary approved for dispatch
+Status: **paused in PR #48 review** — paired-web corrections are sound, but the
+GPUI AgentTranscript page exposed a real detached-scroll/jump capability gap;
+resume only after `g15.037`
 Parent: `018-overloaded-examples-curation.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Consumes: `g15.011` partial screening baseline
-Depends on: `g15.015` and `g15.023` (complete)
+Depends on: `g15.015` and `g15.023` (complete), `g15.037` (planned prerequisite)
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`, and
 the six component contracts named below
 
@@ -180,3 +181,17 @@ release selectors.
 - Curation becomes an exhaustive reference view or grows outside these six
   pages.
 - Another active lane touches a writable specimen file.
+
+## Review Pause — 2026-08-19
+
+PR #48 correctly curated the six pages and repaired paired-web hosted-question
+reset drift. Review found that GPUI cannot honestly render the target
+`Streaming and detached scroll` story: the shared native renderer emits no
+tracked viewport or jump control. A follow-up attempt added a ScrollShell and a
+button that only incremented a counter; it did not change scroll state and was
+rejected as fabricated evidence.
+
+`g15.037` now owns the missing native capability. PR #48 must remove the
+counter-button workaround, pause, then rebase after that prerequisite lands and
+bind the specimen to the real behavior. No roadmap wording change turns the
+absence into parity.
