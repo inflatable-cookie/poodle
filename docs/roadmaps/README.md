@@ -30,8 +30,8 @@ v0.2.0 release-baseline generation.
   removed Pill's temporary duplicate `fill` axis, and corrected its four
   appearance recipes before visual conformance. PR #46 completed `g15.022`,
   curating the audio/music family with paired-web and shared-native coverage.
-  `g15.023` is the next
-  overloaded-Examples child. `g15.013` remains the final gate after the
+  `g15.023` is the next overloaded-Examples child and is ready for dispatch.
+  `g15.013` remains the final gate after the
   specimen program and `g15.012`.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,

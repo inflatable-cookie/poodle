@@ -107,8 +107,7 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-`g15.023` is the next bounded specimen child and requires orchestrator review
-before dispatch.
+`g15.023` is the next bounded specimen child and is ready for dispatch.
 `g15.011` remains
 partial until `g15.026` and all six screen-clear review children
 (`g15.028`–`g15.033`) land; defect-led curation proceeds through
