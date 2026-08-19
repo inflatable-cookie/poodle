@@ -82,7 +82,7 @@ export type StatusTone =
   | "pending";
 export type ToneFill = "tint" | "solid";
 export type PillTone = "neutral" | "info" | "success" | "warning" | "danger";
-export type PillAppearance = "solid" | "subtle" | "badge";
+export type PillAppearance = "tint" | "solid" | "subtle" | "badge";
 export type PillSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type PillFont = "normal" | "mono";
 export type Orientation = "vertical" | "horizontal";

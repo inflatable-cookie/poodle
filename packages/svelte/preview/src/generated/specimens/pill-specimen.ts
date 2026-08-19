@@ -5,7 +5,7 @@
 export const pillSpecimen = {
   id: "pill-specimen",
   name: "Pill",
-  description: "Pill specimen (contract §13): tones, code font, muted, badge, inherited typography, and custom accents.",
+  description: "Pill specimen (contract §13): tones, appearances, code font, muted, badge, inherited typography, and custom accents.",
   tabs: ["examples", "sizes", "densities"],
   sizeAxis: ["xs", "sm", "md", "lg", "xl"],
   densityAxis: ["compact", "default", "comfortable"],
@@ -223,34 +223,45 @@ export const pillSpecimen = {
       },
     ],
     },
-    { label: "Solid fills", instances: [
+    { label: "Appearances", instances: [
       {
         component: "pill",
-        caption: "Solid neutral",
-        props: {
-          tone: "neutral",
-          fill: "solid",
-          content: "Solid neutral",
-        },
-      },
-      {
-        component: "pill",
-        caption: "Solid success subtle",
+        caption: "Tint",
         props: {
           tone: "success",
-          fill: "solid",
-          appearance: "subtle",
-          content: "Solid success",
+          appearance: "tint",
+          sizeRole: "control",
+          content: "Tint",
         },
       },
       {
         component: "pill",
-        caption: "Solid custom badge",
+        caption: "Solid",
         props: {
-          fill: "solid",
+          tone: "success",
+          appearance: "solid",
+          sizeRole: "control",
+          content: "Solid",
+        },
+      },
+      {
+        component: "pill",
+        caption: "Subtle",
+        props: {
+          tone: "success",
+          appearance: "subtle",
+          sizeRole: "control",
+          content: "Subtle",
+        },
+      },
+      {
+        component: "pill",
+        caption: "Badge",
+        props: {
+          tone: "success",
           appearance: "badge",
-          accent: "#3b82f6",
-          content: "Solid custom",
+          sizeRole: "control",
+          content: "Badge",
         },
       },
     ],

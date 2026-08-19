@@ -8,7 +8,7 @@ Updated: 2026-07-10
 - Component name: `Pill`
 - Layer: `foundation`
 - Summary: a rounded inline label for compact categorization or metadata
-- In scope: tone, shared tint/solid fill treatment, appearance, semantic
+- In scope: tone, appearance (tint/solid/subtle/badge), semantic
   sizing, optional monospace styling
 - Out of scope: removable chips, multi-select tag inputs
 
@@ -35,8 +35,7 @@ Updated: 2026-07-10
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `tone` | `"neutral" \| "info" \| "success" \| "warning" \| "danger"` | `"neutral"` | no | semantic tone controlling fill/border/text color |
-| `fill` | `ToneFill` | `"tint"` | no | shared tone surface treatment; solid overrides appearance color recipes |
-| `appearance` | `"solid" \| "subtle" \| "badge"` | `"solid"` | no | fill opacity variant |
+| `appearance` | `"tint" \| "solid" \| "subtle" \| "badge"` | `"tint"` | no | visual treatment variant; mutually exclusive |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit pill size override |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
@@ -53,8 +52,6 @@ Updated: 2026-07-10
 
 - Display primitive only; no internal state.
 
-`ToneFill` is defined in [004 Shared Control Types](../004-shared-control-types.md).
-
 ## 4. States
 
 ### Visual States
@@ -67,7 +64,8 @@ Updated: 2026-07-10
 | warning | `tone="warning"` | amber-tinted fill and border, primary text |
 | danger | `tone="danger"` | red-tinted fill and border, primary text |
 | custom accent | `accent` provided | accent-tinted fill, border, and text using the provided color |
-| solid | `fill="solid"` | opaque tone fill with inverse foreground; composes with every appearance, preserves badge typography, and uses a custom accent as the tone base |
+| tint | default (`appearance="tint"`) | ordinary tone-tinted shell; the base recipes below apply with no appearance override |
+| solid | `appearance="solid"` | opaque tone fill with inverse foreground; uses a custom accent as the tone base |
 | subtle | `appearance="subtle"` | 50% transparent fill overlay |
 | muted | `muted=true` | reduced opacity (0.72) |
 | xs | `size="xs"` | smallest metadata chip sizing |
@@ -209,16 +207,16 @@ When `typography="inherit"`:
 |-----------------|-------|
 | `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-pill-fill) 50%, transparent)` |
 
-### Fill: solid `.pill[data-fill="solid"]`
+### Appearance: solid `.pill[data-appearance="solid"]`
 
-Tint recipes remain unchanged. Solid resolves the background as an opaque
-sRGB mix of the tone base at 45% and `color.text.primary` at 55%, uses the raw
-tone base as the border, and uses `color.text.inverse` as the text color. The
-neutral solid background is `color.text.primary` and its border is
-`color.border.strong`. A custom `accent` replaces the semantic tone as the mix
-base. `appearance="subtle"` does not reduce opacity in solid mode, while
-`appearance="badge"` keeps its uppercase typography and weight. The optional
-dot uses the inverse foreground in solid mode.
+Solid resolves the background as an opaque sRGB mix of the tone base at 45%
+and `color.text.primary` at 55%, uses the raw tone base as the border, and
+uses `color.text.inverse` as the text color. The neutral solid background is
+`color.text.primary` and its border is `color.border.strong`. A custom
+`accent` replaces the semantic tone as the mix base. Appearance is a single
+mutually exclusive axis: solid never combines with subtle's opacity reduction
+or badge's uppercase typography. The optional dot uses the inverse foreground
+in the solid appearance.
 
 ### Appearance: badge `.pill[data-appearance="badge"]`
 
@@ -433,14 +431,15 @@ comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
 
 - [ ] non-interactive metadata semantics match
 - [ ] tone custom property overrides produce equivalent colors
-- [ ] `fill="solid"` uses the shared surface recipe for every tone and custom accent
+- [ ] `appearance="solid"` uses the shared opaque surface recipe for every tone and custom accent
 
 ### Tier 2: Visual Parity
 
 - [ ] `xs | sm | md | lg | xl` sizes produce correct min-height, padding, and font-size
 - [ ] mono font variant uses code family with correct letter-spacing
+- [ ] tint appearance preserves the ordinary tone-tinted shell
 - [ ] subtle appearance halves fill opacity
-- [ ] solid fill overrides subtle/badge color recipes while preserving badge typography
+- [ ] badge appearance keeps its uppercase typography and weight
 - [ ] muted state applies 0.72 opacity
 
 ### Tier 3: Implementation Freedom
@@ -469,13 +468,12 @@ Five pills in a horizontal row with 8px gap:
 | Success | success |
 | Danger | danger |
 
-### Solid fills
+### Appearances
 
-Preview apps include one compact representative group using
-`fill="solid"`: neutral, one status tone, and one custom-accent pill. The
-group includes `appearance="subtle"` and `appearance="badge"` examples so
-solid precedence and badge typography stay visible without requiring an
-exhaustive matrix.
+Preview apps include one compact appearances group showing the four mutually
+exclusive treatments: `tint` (the default ordinary shell), `solid` (opaque
+tone fill with inverse foreground), `subtle`, and `badge`. Tests own the
+tone-by-appearance matrix; the specimen stays representative.
 
 ### Sizes
 

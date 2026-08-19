@@ -158,7 +158,7 @@ type ToneFill = "tint" | "solid"
 
 Default: `"tint"`.
 
-Consumers: `components/callout.md`, `components/pill.md`,
+Consumers: `components/callout.md`,
 `components/remediation-banner.md`.
 
 Rust: `ToneFill` in `packages/contracts/components/src/types.rs`, re-exported

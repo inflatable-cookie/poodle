@@ -326,7 +326,7 @@ pub static SPECIMEN_SCENES: &[SpecimenScene<'static>] = &[
     SpecimenScene {
         id: "pill-specimen",
         name: "Pill",
-        description: "Pill specimen (contract §13): tones, code font, muted, badge, inherited typography, and custom accents.",
+        description: "Pill specimen (contract §13): tones, appearances, code font, muted, badge, inherited typography, and custom accents.",
         size_axis: &["xs", "sm", "md", "lg", "xl"],
         density_axis: &["compact", "default", "comfortable"],
         groups: &[
@@ -543,34 +543,45 @@ pub static SPECIMEN_SCENES: &[SpecimenScene<'static>] = &[
                 },
         ],
             },
-            SpecimenGroup { label: "Solid fills", instances: &[
+            SpecimenGroup { label: "Appearances", instances: &[
                 SpecimenInstance {
                     component: "pill",
-                    caption: Some("Solid neutral"),
-                    props: &[
-                        SpecimenProp { prop: "tone", value: "neutral" },
-                        SpecimenProp { prop: "fill", value: "solid" },
-                        SpecimenProp { prop: "content", value: "Solid neutral" },
-                    ],
-                },
-                SpecimenInstance {
-                    component: "pill",
-                    caption: Some("Solid success subtle"),
+                    caption: Some("Tint"),
                     props: &[
                         SpecimenProp { prop: "tone", value: "success" },
-                        SpecimenProp { prop: "fill", value: "solid" },
-                        SpecimenProp { prop: "appearance", value: "subtle" },
-                        SpecimenProp { prop: "content", value: "Solid success" },
+                        SpecimenProp { prop: "appearance", value: "tint" },
+                        SpecimenProp { prop: "sizeRole", value: "control" },
+                        SpecimenProp { prop: "content", value: "Tint" },
                     ],
                 },
                 SpecimenInstance {
                     component: "pill",
-                    caption: Some("Solid custom badge"),
+                    caption: Some("Solid"),
                     props: &[
-                        SpecimenProp { prop: "fill", value: "solid" },
+                        SpecimenProp { prop: "tone", value: "success" },
+                        SpecimenProp { prop: "appearance", value: "solid" },
+                        SpecimenProp { prop: "sizeRole", value: "control" },
+                        SpecimenProp { prop: "content", value: "Solid" },
+                    ],
+                },
+                SpecimenInstance {
+                    component: "pill",
+                    caption: Some("Subtle"),
+                    props: &[
+                        SpecimenProp { prop: "tone", value: "success" },
+                        SpecimenProp { prop: "appearance", value: "subtle" },
+                        SpecimenProp { prop: "sizeRole", value: "control" },
+                        SpecimenProp { prop: "content", value: "Subtle" },
+                    ],
+                },
+                SpecimenInstance {
+                    component: "pill",
+                    caption: Some("Badge"),
+                    props: &[
+                        SpecimenProp { prop: "tone", value: "success" },
                         SpecimenProp { prop: "appearance", value: "badge" },
-                        SpecimenProp { prop: "accent", value: "#3b82f6" },
-                        SpecimenProp { prop: "content", value: "Solid custom" },
+                        SpecimenProp { prop: "sizeRole", value: "control" },
+                        SpecimenProp { prop: "content", value: "Badge" },
                     ],
                 },
         ],

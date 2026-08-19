@@ -12,12 +12,10 @@ import type {
   PillTone,
   PillTypography,
   SemanticControlSizeRole,
-  ToneFill,
 } from "./types";
 
 export interface PillProps {
   tone?: PillTone;
-  fill?: ToneFill;
   appearance?: PillAppearance;
   size?: PillSize | null;
   sizeRole?: SemanticControlSizeRole;
@@ -35,8 +33,7 @@ export interface PillProps {
 
 export function Pill({
   tone = "neutral",
-  fill = "tint",
-  appearance = "solid",
+  appearance = "tint",
   size = null,
   sizeRole = "chrome",
   density = null,
@@ -67,7 +64,6 @@ export function Pill({
     <span
       className="poodle-pill"
       data-tone={tone}
-      data-fill={fill}
       data-appearance={appearance}
       data-size={resolvedSize}
       data-density={resolvedDensity}

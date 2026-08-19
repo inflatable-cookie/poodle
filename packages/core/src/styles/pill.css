@@ -250,19 +250,20 @@
   .poodle-pill[data-tone="danger"] { --poodle-pill-dot-fill: var(--poodle-color-status-danger, #ef4444); }
   .poodle-pill[data-accent="custom"] { --poodle-pill-dot-fill: var(--poodle-pill-accent); }
 
-  /* Solid overrides appearance color recipes while preserving badge
-     typography and the custom accent as the tone base. */
-  .poodle-pill[data-fill="solid"] {
+  /* Solid appearance: opaque tone surface with inverse foreground. The
+     ordinary tone-tinted shell is the `tint` base recipe above; appearances
+     are mutually exclusive, so solid never composes with subtle or badge. */
+  .poodle-pill[data-appearance="solid"] {
     --poodle-pill-fill: var(--poodle-recipe-pill-solid-fill, color-mix(in srgb, var(--poodle-pill-tone-base) 45%, var(--poodle-color-text-primary) 55%));
     --poodle-pill-border: var(--poodle-recipe-pill-solid-border, var(--poodle-pill-tone-base));
     --poodle-pill-text: var(--poodle-recipe-pill-solid-text, var(--poodle-color-text-inverse));
   }
 
-  .poodle-pill[data-fill="solid"][data-tone="neutral"] {
+  .poodle-pill[data-appearance="solid"][data-tone="neutral"] {
     --poodle-pill-fill: var(--poodle-recipe-pill-solid-fill, var(--poodle-color-text-primary));
     --poodle-pill-border: var(--poodle-recipe-pill-solid-border, var(--poodle-color-border-strong));
   }
 
-  .poodle-pill[data-fill="solid"] .poodle-pill__dot {
+  .poodle-pill[data-appearance="solid"] .poodle-pill__dot {
     --poodle-pill-dot-fill: var(--poodle-color-text-inverse);
   }

@@ -66,9 +66,10 @@ fn pill_tone(value: &str) -> PillTone {
 
 fn pill_appearance(value: &str) -> PillAppearance {
     match value {
+        "solid" => PillAppearance::Solid,
         "subtle" => PillAppearance::Subtle,
         "badge" => PillAppearance::Badge,
-        _ => PillAppearance::Solid,
+        _ => PillAppearance::Tint,
     }
 }
 
@@ -208,9 +209,8 @@ fn render_instance(instance: &SpecimenInstance, theme: &GpuiThemeProvider) -> An
             let mut spec = PillSpec::new()
                 .with_label(prop(instance, "content").unwrap_or(""))
                 .with_tone(pill_tone(prop(instance, "tone").unwrap_or("neutral")))
-                .with_fill(tone_fill(prop(instance, "fill").unwrap_or("tint")))
                 .with_appearance(pill_appearance(
-                    prop(instance, "appearance").unwrap_or("solid"),
+                    prop(instance, "appearance").unwrap_or("tint"),
                 ));
             if let Some(role) = prop(instance, "sizeRole") {
                 spec = spec.with_size_role(size_role(role));

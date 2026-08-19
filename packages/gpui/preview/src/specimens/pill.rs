@@ -6,7 +6,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     ControlSize, EyebrowSpec, InlineTypographyMode, PillAppearance, PillFont, PillSize, PillSpec,
-    PillTone, SemanticControlSizeRole, ToneFill,
+    PillTone, SemanticControlSizeRole,
 };
 
 fn pill_size(size: ControlSize) -> PillSize {
@@ -216,7 +216,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 )),
         ))
         .child(group(
-            "Solid fills",
+            "Appearances",
             theme,
             div()
                 .flex()
@@ -225,24 +225,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(pill(
                     theme,
                     PillSpec::new()
-                        .with_label("Solid neutral")
-                        .with_fill(ToneFill::Solid),
+                        .with_label("Tint")
+                        .with_tone(PillTone::Success)
+                        .with_appearance(PillAppearance::Tint),
                 ))
                 .child(pill(
                     theme,
                     PillSpec::new()
-                        .with_label("Solid success")
+                        .with_label("Solid")
                         .with_tone(PillTone::Success)
-                        .with_fill(ToneFill::Solid)
+                        .with_appearance(PillAppearance::Solid),
+                ))
+                .child(pill(
+                    theme,
+                    PillSpec::new()
+                        .with_label("Subtle")
+                        .with_tone(PillTone::Success)
                         .with_appearance(PillAppearance::Subtle),
                 ))
                 .child(pill(
                     theme,
                     PillSpec::new()
-                        .with_label("Solid custom")
-                        .with_fill(ToneFill::Solid)
-                        .with_appearance(PillAppearance::Badge)
-                        .with_accent_color("#3b82f6"),
+                        .with_label("Badge")
+                        .with_tone(PillTone::Success)
+                        .with_appearance(PillAppearance::Badge),
                 )),
         ))
         .into_any_element();
