@@ -163,9 +163,15 @@ When `typography="inherit"`:
 
 ### Component custom properties (neutral default)
 
+The ordinary tone-tinted recipes assign `--poodle-pill-tint-fill`;
+`--poodle-pill-fill` defaults to `var(--poodle-pill-tint-fill)` so the
+`subtle` appearance can derive from the tint base without a custom-property
+cycle. `solid` and `badge` assign `--poodle-pill-fill` directly.
+
 | Custom Property | Value |
 |-----------------|-------|
-| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent)` |
+| `--poodle-pill-tint-fill` | `color-mix(in srgb, var(--poodle-color-background-surface) 90%, transparent)` |
+| `--poodle-pill-fill` | `var(--poodle-pill-tint-fill)` |
 | `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-border-subtle) 82%, transparent)` |
 | `--poodle-pill-text` | `var(--poodle-color-text-secondary)` |
 
@@ -173,7 +179,7 @@ When `typography="inherit"`:
 
 | Custom Property | Value |
 |-----------------|-------|
-| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-color-status-info) 14%, var(--poodle-color-background-surface))` |
+| `--poodle-pill-tint-fill` | `color-mix(in srgb, var(--poodle-color-status-info) 14%, var(--poodle-color-background-surface))` |
 | `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-status-info) 38%, var(--poodle-color-border-subtle))` |
 | `--poodle-pill-text` | `var(--poodle-color-text-primary)` |
 
@@ -181,7 +187,7 @@ When `typography="inherit"`:
 
 | Custom Property | Value |
 |-----------------|-------|
-| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-color-status-success) 14%, var(--poodle-color-background-surface))` |
+| `--poodle-pill-tint-fill` | `color-mix(in srgb, var(--poodle-color-status-success) 14%, var(--poodle-color-background-surface))` |
 | `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-status-success) 38%, var(--poodle-color-border-subtle))` |
 | `--poodle-pill-text` | `var(--poodle-color-text-primary)` |
 
@@ -189,7 +195,7 @@ When `typography="inherit"`:
 
 | Custom Property | Value |
 |-----------------|-------|
-| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-color-status-danger) 14%, var(--poodle-color-background-surface))` |
+| `--poodle-pill-tint-fill` | `color-mix(in srgb, var(--poodle-color-status-danger) 14%, var(--poodle-color-background-surface))` |
 | `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-status-danger) 38%, var(--poodle-color-border-subtle))` |
 | `--poodle-pill-text` | `var(--poodle-color-text-primary)` |
 
@@ -197,7 +203,7 @@ When `typography="inherit"`:
 
 | Custom Property | Value |
 |-----------------|-------|
-| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-pill-accent) 18%, rgba(148, 163, 184, 0.08))` |
+| `--poodle-pill-tint-fill` | `color-mix(in srgb, var(--poodle-pill-accent) 18%, rgba(148, 163, 184, 0.08))` |
 | `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-pill-accent) 30%, rgba(148, 163, 184, 0.12))` |
 | `--poodle-pill-text` | `color-mix(in srgb, var(--poodle-pill-accent) 88%, white)` |
 
@@ -205,7 +211,7 @@ When `typography="inherit"`:
 
 | Custom Property | Value |
 |-----------------|-------|
-| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-pill-fill) 50%, transparent)` |
+| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-pill-tint-fill) 50%, transparent)` |
 
 ### Appearance: solid `.pill[data-appearance="solid"]`
 
@@ -403,9 +409,10 @@ comfortable `min-width 0.2727em` / `padding-y 0.0909em` / `padding-x 0.1818em`.)
 - `typography="inherit"` uses the proportional-inherit rule from
   `docs/contracts/001-working-rules.md`: the selected size preset is converted
   from token `rem` values into equivalent `em` values
-- Component custom properties (`--poodle-pill-fill`, `--poodle-pill-border`,
-  `--poodle-pill-text`) are set on the root element and consumed by the same
-  element's CSS, enabling tone overrides without class proliferation
+- Component custom properties (`--poodle-pill-tint-fill`,
+  `--poodle-pill-fill`, `--poodle-pill-border`, `--poodle-pill-text`) are set
+  on the root element and consumed by the same element's CSS, enabling tone
+  overrides without class proliferation
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
 - **Pill context composition surface** (`pill-context.ts`): a parent may call
   `setPillContext({ size?, typography? })` to force the `size` and `typography`
@@ -526,6 +533,6 @@ removed in a future cleanup pass.
 
 | Custom Property | Value |
 |-----------------|-------|
-| `--poodle-pill-fill` | `color-mix(in srgb, var(--poodle-color-status-warning) 14%, var(--poodle-color-background-surface))` |
+| `--poodle-pill-tint-fill` | `color-mix(in srgb, var(--poodle-color-status-warning) 14%, var(--poodle-color-background-surface))` |
 | `--poodle-pill-border` | `color-mix(in srgb, var(--poodle-color-status-warning) 38%, var(--poodle-color-border-subtle))` |
 | `--poodle-pill-text` | `var(--poodle-color-text-primary)` |

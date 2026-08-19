@@ -95,15 +95,47 @@ current. No generated file was edited by hand.
 | `cargo check --manifest-path packages/contracts/components/Cargo.toml` | pass |
 | `cargo check --manifest-path packages/gpui/preview/Cargo.toml` | pass |
 | `effigy ir:build` / `effigy ir:check` | pass; generated artifacts current |
+| `effigy test:core` | 765 tests pass (includes the Pill style evidence) |
 | `effigy test:components` | 347 files, 2828 tests pass |
 | `effigy check:svelte` | 0 errors; 8 baseline warnings in 5 files |
 | `effigy react:build` | pass |
 | `effigy test:parity` | 6 files, 365 tests pass |
 | `effigy check:gpui` | pass; render 335 and node backend 19 tests pass |
 | `effigy regressions:native` | 49 tests pass |
-| `effigy test:web-pack-install` | 5 files, 11 tests pass |
+| `effigy test:web-pack-install` | 7 files, 15 tests pass (includes packed Pill consumers) |
 | `effigy docs:check` | pass |
 | `git diff --check origin/main...HEAD` | clean (post-commit) |
+
+## Orchestrator review round 1 (changes requested, resolved)
+
+1. **Web `subtle` computed fully transparent.** The pre-existing subtle rule
+   defined `--poodle-pill-fill` in terms of itself — a custom-property cycle
+   that invalidates the declaration. Fixed by introducing the non-recursive
+   `--poodle-pill-tint-fill` base: tone and custom-accent recipes assign it,
+   `--poodle-pill-fill` defaults to it, and subtle derives
+   `color-mix(in srgb, var(--poodle-pill-tint-fill) 50%, transparent)` from
+   it. The contract's token tables now document the derivation.
+2. **Solid + neutral tone + custom accent web recipe.** While pinning the
+   style evidence, the new tests surfaced that
+   `[data-appearance="solid"][data-tone="neutral"]` outranked
+   `[data-accent="custom"]`, so a custom-accent solid pill with the default
+   neutral tone got the neutral `text.primary` background instead of the
+   contract's accent-base 45/55 mix (which the Rust renderer already
+   produced). Added an explicit
+   `.poodle-pill[data-appearance="solid"][data-accent="custom"]` rule so the
+   accent replaces the tone base as the contract states.
+3. **Durable style evidence.** `packages/core/test/pill-appearance-styles.test.ts`
+   models the pill.css cascade, resolves the `var()` chain with cycle
+   detection, and pins tint preservation, subtle derivation, the solid 45/55
+   recipe with inverse foreground for every tone and custom accent, dot
+   treatment, and badge typography/recipes. Reintroducing the self-reference
+   fails three of its tests; the paired data-attribute tests passed
+   throughout.
+4. **Packed-root Pill evidence.** New package-install fixtures mount the
+   packed Svelte (`PillHarness.svelte` + `PillPackage.test.ts`) and React
+   (`PillPackageReact.test.tsx`) Pill from both packed roots across all four
+   appearances, asserting `data-appearance` and the absence of `data-fill`,
+   with `PillAppearance` imported from each packed root.
 
 ## Unresolved / out of scope
 
