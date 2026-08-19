@@ -161,7 +161,7 @@ directly.
 
 | Removed caption | Disposition |
 | --- | --- |
-| Auto-detect: found / Auto-detect: missing | two instances inside **Auto-detected local route**. The card's contract-critical story — a route needing no credentials skips the configuration step — is stated in the section's explanatory sentence and shown by the `codex-app` fixture rendering the configure stage with no field |
+| Auto-detect: found / Auto-detect: missing | two instances inside **Auto-detected local route**, both on the `choose` stage over the interactive option set where `codex-app` is available. Because that option sets `requiresConfiguration: false`, the action row reads Add rather than Continue and carries no Back: the credential step is genuinely skipped, not merely described. Corrected after PR review — the first draft forced both instances onto `configure`, which showed the opposite of the claim |
 | Validation failure / Pending submit | two instances inside **Validation and pending** |
 
 ### ModelPicker (13 → 5, GPUI 9 → 5)
@@ -186,15 +186,19 @@ model-scoped axis, a disabled option and the live serialized selection.
 - **LicenceStatus** keeps one surface per usability state; both trust bases and
   all four coverage-window pairings survive across the five fixtures.
 - **ModelConnectionSetup** visibly proves that a route with no required
-  configuration skips the credential step (`codex-app`, configure stage, no
-  field), and says so beside the caption.
+  configuration skips the credential step: both instances sit on `choose` with
+  the available `codex-app` option, whose `requiresConfiguration: false` makes
+  the action Add instead of Continue and emits no configure stage at all. The
+  regression asserts the stage, the action labels, the enabled/disabled Add,
+  and the absence of any configuration surface, in both web runtimes and in the
+  GPUI source.
 - **ModelPicker** consolidates rather than deletes: contract §14's required
   specimen coverage is either on the curated page or in a named focused test,
   itemised above.
 
 ## New evidence
 
-`test/parity/g15-020-model-account-specimens.test.tsx` (51 assertions, runs
+`test/parity/g15-020-model-account-specimens.test.tsx` (54 assertions, runs
 under `effigy test:parity`). For this exact eight-page set it pins:
 
 - the final ordered caption list per page, per runtime
@@ -205,6 +209,15 @@ under `effigy test:parity`). For this exact eight-page set it pins:
 - GPUI's ordered captions, read from each specimen's `group`/`section` helper
 - LicenceStatus's retained contract stories: five surfaces, six instances, both
   trust bases, and exactly one both-windows-unbounded fixture
+- ModelConnectionSetup's direct-add story: `data-stage="choose"`, action labels
+  `["Cancel", "Add connection"]`, Add enabled when detected and disabled when
+  not, and no `__configuration` surface — asserted in Svelte and React
+- GPUI's matching seeds: the detected pair built from `interactive_options()`
+  on `Choose`, and the open-details card seeded through
+  `card_is_open(CARD_LIVE_ID, true)`
+
+Each of the three assertions above was verified to fail against the pre-review
+source before being accepted as green.
 
 The GPUI assertion is source-structural. `g15.026` owns the headless page probe
 and was not built here; until it lands, the declared caption order is the
@@ -216,8 +229,8 @@ narrowest deterministic native evidence available.
 | --- | --- |
 | `effigy tasks` | selector inventory read |
 | `effigy doctor` | 3 errors, 1 warning — recorded baseline, unchanged |
-| `bunx vitest run --project parity test/parity/g15-020-model-account-specimens.test.tsx` | 51 passed |
-| `effigy test:parity` | 5 files, 310 passed |
+| `bunx vitest run --project parity test/parity/g15-020-model-account-specimens.test.tsx` | 54 passed |
+| `effigy test:parity` | 5 files, 313 passed |
 | `effigy check:svelte` | 0 errors (install-smoke, components, preview) |
 | `effigy react:build` | built |
 | `effigy check:gpui` | 326 + 19 passed, 0 failed |
@@ -233,6 +246,16 @@ run, per the card.
 `scan.stale-suppressions` (17), `scan.comment-ratio` (2). Present at the worker
 base and unchanged by this card.
 
+## One step outside the specimen files
+
+`packages/gpui/preview/src/app_state.rs` — `card_is_open(&self, id)` gained a
+`default` parameter, mirroring the `card_is_enabled(&self, id, default)` that
+already sat beside it. Seeding the open-details example from the specimen alone
+left `card_is_open` dead, and suppressing that would have traded a real warning
+for a stale suppression. One call site, one signature, no behaviour change for
+any other page. Flagged here because it is preview infrastructure rather than a
+specimen file.
+
 ## Unresolved findings
 
 - **ModelConnectionCard readiness domain is incomplete on the catalogue.** The
@@ -245,6 +268,21 @@ base and unchanged by this card.
 - **`effigy bootstrap:deps` fails in a second worktree** on a Cargo lockfile
   collision. Recorded in `PAPERCUTS.md`; it cost nothing here because the bun
   half completes first and per-crate `cargo build` still resolves.
+
+## Review rounds
+
+Round 1 (PR #42) requested two blocking changes, both accepted as correct:
+
+1. The `Auto-detected local route` section forced the no-configuration route
+   onto `configure`, so the page taught the opposite of the contract story it
+   claimed. Fixed in all three runtimes and pinned by new assertions.
+2. GPUI's `Open details with catalogue` example seeded from an empty host map
+   and therefore started closed, while Svelte and React seeded it open — the
+   caption-only regression could not see the difference. Fixed and pinned.
+
+Both were invisible to the first regression because it asserted caption text
+only. The lesson is recorded in the evidence list above: a section that claims
+a behaviour needs an assertion on that behaviour, not on its heading.
 
 ## Live operator review
 

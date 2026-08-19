@@ -198,6 +198,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     // Every group below renders the same routes, so each instance carries its
     // own backend-state scope.
+    let detected = |value: &str| {
+        ModelConnectionSetupSpec::new()
+            .with_options(interactive_options())
+            .with_stage(ModelConnectionSetupStage::Choose)
+            .with_value(Some(value.to_string()))
+    };
+
     let configure = |value: &str| {
         ModelConnectionSetupSpec::new()
             .with_options(options())
@@ -222,9 +229,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .with_configuration(api_key_field(theme, "mcs-api-key", "")),
             ),
         ))
-        // Detection is the host's. Poodle renders the outcome it was given
-        // and never probes for an install. This route needs no credentials,
-        // so the configuration step has no field to fill.
+        // Detection is the host's. Poodle renders the outcome it was given and
+        // never probes for an install. This route needs no credentials, so no
+        // configure stage is emitted: both examples stay on `choose`, where the
+        // action reads Add rather than Continue and there is no Back.
         .child(group(
             theme,
             "Auto-detected local route",
@@ -234,16 +242,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .gap(px(16.0))
                 .child(panel(
                     ModelConnectionSetup::from_spec(
-                        configure("codex-app")
+                        detected("codex-app")
                             .with_can_submit(true)
                             .with_success("Local harness detected."),
                         theme,
                     )
                     .with_instance_id("setup-detect-found"),
                 ))
+                // Nothing was found, so Add stays disabled and no step is skipped.
                 .child(panel(
                     ModelConnectionSetup::from_spec(
-                        configure("codex-app").with_error("Codex app not found on this machine."),
+                        detected("codex-app").with_error("Codex app not found on this machine."),
                         theme,
                     )
                     .with_instance_id("setup-detect-missing"),

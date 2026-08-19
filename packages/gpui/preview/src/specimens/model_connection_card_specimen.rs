@@ -68,6 +68,9 @@ fn ollama() -> ModelConnectionCardSpec {
         )
 }
 
+/// The connection behind the one live card on this page.
+const CARD_LIVE_ID: &str = "conn-openai-work";
+
 /// Several groups show the same connection, so each instance carries its own
 /// backend-state scope: two cards for one connection id would otherwise share
 /// a disclosure focus handle.
@@ -87,9 +90,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     // One live card: disclosure and the enable preference are host state, and
     // each callback moves only its own dimension.
+    // The details example seeds open, so the section shows the evidence it
+    // exists for rather than a closed summary. The disclosure stays live.
     let live_spec = work()
-        .with_open(host.card_is_open("conn-openai-work"))
-        .with_enabled(host.card_is_enabled("conn-openai-work", true));
+        .with_open(host.card_is_open(CARD_LIVE_ID, true))
+        .with_enabled(host.card_is_enabled(CARD_LIVE_ID, true));
     let live = ModelConnectionCard::from_spec(live_spec, theme)
         .with_instance_id("card-live")
         .with_details(poodle_render::model_catalogue_editor(
@@ -108,7 +113,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .unwrap()
                     .push(NodeSpecimenEvent::ModelConnection(
                         ModelConnectionEvent::CardOpen {
-                            id: "conn-openai-work".to_string(),
+                            id: CARD_LIVE_ID.to_string(),
                             open,
                         },
                     ));
@@ -122,7 +127,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .unwrap()
                     .push(NodeSpecimenEvent::ModelConnection(
                         ModelConnectionEvent::CardEnabled {
-                            id: "conn-openai-work".to_string(),
+                            id: CARD_LIVE_ID.to_string(),
                             enabled,
                         },
                     ));

@@ -83,23 +83,24 @@
 
       <SpecimenGroup label="Auto-detected local route">
         <p class="poodle-model-connection-setup-specimen__note">
-          This route needs no credentials, so the configuration step has no field
-          to fill: the setup reports what it found and moves on.
+          This route needs no credentials, so there is no configuration step to
+          emit. Both examples stay on <em>choose</em>: the action reads Add, not
+          Continue, and there is no Back. Detection is the host's — Poodle only
+          renders the outcome it was handed.
         </p>
         <div class="poodle-model-connection-setup-specimen__stack">
           <div class="poodle-model-connection-setup-specimen__panel">
             <ModelConnectionSetup
-              {options}
-              defaultStage="configure"
+              options={interactiveOptions}
               defaultValue="codex-app"
               canSubmit={true}
               success="Local harness detected."
             />
           </div>
+          <!-- Nothing was found, so Add stays disabled and no step is skipped. -->
           <div class="poodle-model-connection-setup-specimen__panel">
             <ModelConnectionSetup
-              {options}
-              defaultStage="configure"
+              options={interactiveOptions}
               defaultValue="codex-app"
               error="Codex app not found on this machine."
             />

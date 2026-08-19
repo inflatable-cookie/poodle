@@ -648,8 +648,11 @@ impl ModelConnectionPreviewState {
         model_connection_picker_fixtures()
     }
 
-    pub fn card_is_open(&self, id: &str) -> bool {
-        self.card_open.get(id).copied().unwrap_or(false)
+    /// A specimen that seeds its disclosure open passes `default: true`. The
+    /// host map still owns the value once the reader toggles it, so the live
+    /// control keeps working in both directions.
+    pub fn card_is_open(&self, id: &str, default: bool) -> bool {
+        self.card_open.get(id).copied().unwrap_or(default)
     }
 
     pub fn card_is_enabled(&self, id: &str, default: bool) -> bool {

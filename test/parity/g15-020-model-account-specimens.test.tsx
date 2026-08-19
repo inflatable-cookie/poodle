@@ -173,16 +173,20 @@ function svelteCaptions(slug: string): string[] {
   return rendered;
 }
 
-function reactCaptions(slug: string): string[] {
-  const Specimen = reactMap[slug] as ComponentType | undefined;
-  expect(Specimen, `${slug} missing from the React registry`).toBeTruthy();
-  renderReact(
+function renderReactSpecimen(Specimen: ComponentType) {
+  return renderReact(
     createElement(
       IconProvider,
       { icons: iconNodes as unknown as IconSet },
-      createElement(Specimen!),
+      createElement(Specimen),
     ),
   );
+}
+
+function reactCaptions(slug: string): string[] {
+  const Specimen = reactMap[slug] as ComponentType | undefined;
+  expect(Specimen, `${slug} missing from the React registry`).toBeTruthy();
+  renderReactSpecimen(Specimen!);
   const rendered = captions();
   cleanupReact();
   return rendered;
@@ -242,6 +246,93 @@ describe("g15.020 model-connection and account-lifecycle specimens", () => {
       ["licence-activation", 5],
       ["licence-seats", 6],
     ]);
+  });
+
+  /** The `.poodle-specimen-group` whose visible caption is `caption`. */
+  function groupByCaption(caption: string): HTMLElement {
+    const group = [...document.querySelectorAll(".poodle-specimen-group")].find(
+      (candidate) =>
+        (candidate.querySelector("[class*=eyebrow]")?.textContent ?? "").trim() === caption,
+    );
+    expect(group, `no specimen group captioned "${caption}"`).toBeTruthy();
+    return group as HTMLElement;
+  }
+
+  /**
+   * The card's contract-critical story for ModelConnectionSetup: a route whose
+   * option sets `requiresConfiguration: false` is added straight from `choose`.
+   * Asserting the caption alone let an earlier draft render this section on
+   * `configure`, which teaches the opposite of what it claims.
+   */
+  function assertDirectAddStory(runtime: string): void {
+    const group = groupByCaption("Auto-detected local route");
+    const setups = [...group.querySelectorAll(".poodle-model-connection-setup")];
+    expect(setups, runtime).toHaveLength(2);
+
+    for (const setup of setups) {
+      expect(setup.getAttribute("data-stage"), `${runtime}: no configure stage is emitted`).toBe(
+        "choose",
+      );
+      expect(
+        setup.querySelector(".poodle-model-connection-setup__configuration"),
+        `${runtime}: a skipped credential step must render no configuration surface`,
+      ).toBeNull();
+
+      const actions = [
+        ...setup.querySelectorAll(".poodle-model-connection-setup__actions .poodle-button"),
+      ].map((button) => (button.textContent ?? "").trim());
+      // Add, not Continue; and no Back, because there is nowhere to go back to.
+      expect(actions, runtime).toEqual(["Cancel", "Add connection"]);
+    }
+
+    // Detected: the host approved the add, so Add is live from `choose`.
+    const detected = setups[0]!.querySelector(
+      ".poodle-model-connection-setup__actions .poodle-button:last-of-type",
+    ) as HTMLButtonElement;
+    expect(detected.disabled, `${runtime}: detected route submits from choose`).toBe(false);
+
+    // Missing: nothing was found, so Add stays disabled - still without a
+    // configure stage, which is the point of the pairing.
+    const missing = setups[1]!.querySelector(
+      ".poodle-model-connection-setup__actions .poodle-button:last-of-type",
+    ) as HTMLButtonElement;
+    expect(missing.disabled, `${runtime}: undetected route cannot be added`).toBe(true);
+  }
+
+  it("proves ModelConnectionSetup skips the credential step in both web runtimes", () => {
+    renderSvelte(PilotSpecimenHarness, {
+      props: { specimen: svelteMap["model-connection-setup"] as never },
+    });
+    assertDirectAddStory("svelte");
+    cleanupSvelte();
+
+    renderReactSpecimen(reactMap["model-connection-setup"] as ComponentType);
+    assertDirectAddStory("react");
+    cleanupReact();
+  });
+
+  it("keeps GPUI's auto-detected route on the choose stage too", () => {
+    const source = readFileSync(
+      join(GPUI_SPECIMENS, "model_connection_setup_specimen.rs"),
+      "utf8",
+    );
+    // The detected pair must build from the interactive option set, where
+    // `codex-app` is available, and stay on Choose.
+    expect(source).toMatch(
+      /let detected = \|value: &str\| \{\s*ModelConnectionSetupSpec::new\(\)\s*\.with_options\(interactive_options\(\)\)\s*\.with_stage\(ModelConnectionSetupStage::Choose\)/,
+    );
+    expect(source).not.toMatch(/configure\("codex-app"\)/);
+  });
+
+  it("seeds GPUI's open-details example open, as both web runtimes do", () => {
+    const source = readFileSync(
+      join(GPUI_SPECIMENS, "model_connection_card_specimen.rs"),
+      "utf8",
+    );
+    expect(source).toMatch(/const CARD_LIVE_ID: &str = "conn-openai-work";/);
+    // `card_is_open(id, default)` mirrors `card_is_enabled`: seeded open, and
+    // still yielding to the host map once the reader toggles the disclosure.
+    expect(source).toMatch(/\.with_open\(host\.card_is_open\(CARD_LIVE_ID, true\)\)/);
   });
 
   it("proves the contract-critical stories the curation had to keep", () => {
