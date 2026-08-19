@@ -23,6 +23,17 @@
     { id: "save", title: "Save", shortcut: "Ctrl+S", group: "File" },
     { id: "deploy", title: "Deploy", badge: "Dangerous", group: "Release" },
   ];
+
+  let activeId = $state<string | null>(null);
+  let selectedAction = $state("");
+
+  function selectAction(id: string): void {
+    activeId = id;
+    selectedAction =
+      groupedItems.find((item) => item.id === id)?.title ??
+      descriptiveItems.find((item) => item.id === id)?.title ??
+      id;
+  }
 </script>
 
 <SpecimenLayout bareVariants>
@@ -30,19 +41,34 @@
     <div class="poodle-specimen">
       <SpecimenGroup label="Grouped actions">
         <div class="poodle-specimen__frame poodle-specimen__frame--bare">
-          <ActionDiscoveryPanel items={groupedItems} ariaLabel="Demo actions" />
+          <ActionDiscoveryPanel
+            items={groupedItems}
+            ariaLabel="Demo actions"
+            activeId={activeId}
+            onItemSelect={selectAction}
+          />
         </div>
+        {#if selectedAction}
+          <p class="poodle-specimen__hint">
+            Selected action: <strong>{selectedAction}</strong>
+          </p>
+        {/if}
       </SpecimenGroup>
 
-      <SpecimenGroup label="With descriptions and badges">
+      <SpecimenGroup label="Descriptions, badges, and shortcuts">
         <div class="poodle-specimen__frame poodle-specimen__frame--bare">
           <ActionDiscoveryPanel items={descriptiveItems} ariaLabel="CI actions" />
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Empty state">
-        <div class="poodle-specimen__frame poodle-specimen__frame--bare">
-          <ActionDiscoveryPanel items={[]} state="empty" ariaLabel="Empty actions" />
+      <SpecimenGroup label="Loading and empty states">
+        <div class="poodle-adp-specimen__state-pair">
+          <div class="poodle-specimen__frame poodle-specimen__frame--bare">
+            <ActionDiscoveryPanel items={[]} state="empty" ariaLabel="Empty actions" />
+          </div>
+          <div class="poodle-specimen__frame poodle-specimen__frame--bare">
+            <ActionDiscoveryPanel items={[]} state="loading" ariaLabel="Loading actions" />
+          </div>
         </div>
       </SpecimenGroup>
     </div>
@@ -100,4 +126,15 @@
     width: min(32rem, 100%);
   }
 
+  .poodle-adp-specimen__state-pair {
+    display: grid;
+    gap: 1rem;
+    width: min(32rem, 100%);
+  }
+
+  .poodle-specimen__hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--poodle-color-text-secondary);
+  }
 </style>

@@ -525,7 +525,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             theme,
             validation_summary::render(state, cx),
         ),
-        "detail-shell" => specimen_card("DetailShell", theme, detail_shell::render(theme)),
+        "detail-shell" => specimen_card("DetailShell", theme, detail_shell::render(state, cx)),
         "detail-item" => {
             specimen_card("DetailItem", theme, detail_item_specimen::render(state, cx))
         }

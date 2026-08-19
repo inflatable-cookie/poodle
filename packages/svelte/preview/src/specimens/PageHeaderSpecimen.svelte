@@ -3,16 +3,22 @@
   import { IconButton, MetaBar, Pill, TimeAgo } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
+
+  let navAction = $state("");
+  let hierarchyAction = $state("");
+  let statusAction = $state("");
+  let metaAction = $state("");
 </script>
 
 <SpecimenLayout>
   {#snippet children()}
     <div class="poodle-specimen">
-      <SpecimenGroup label="Basic">
+      <SpecimenGroup label="Page title and summary">
         <PageHeader title="Components" subtitle="Browse and manage your component library." />
+        <PageHeader title="Settings" />
       </SpecimenGroup>
 
-      <SpecimenGroup label="With back link and actions">
+      <SpecimenGroup label="Navigation and actions">
         <PageHeader
           title="Media Library"
           subtitle="Browse, review, and manage uploaded files."
@@ -20,43 +26,20 @@
           backLabel="Dashboard"
         >
           {#snippet actions()}
-            <IconButton icon="upload" ariaLabel="Upload" variant="secondary" />
-            <IconButton icon="settings" ariaLabel="Settings" variant="secondary" />
+            <IconButton
+              icon="upload"
+              ariaLabel="Upload"
+              variant="secondary"
+              onClick={() => (navAction = "Upload")}
+            />
+            <IconButton
+              icon="settings"
+              ariaLabel="Settings"
+              variant="secondary"
+              onClick={() => (navAction = "Settings")}
+            />
           {/snippet}
         </PageHeader>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="With eyebrow and actions">
-        <PageHeader title="Button" eyebrow="Primitive" subtitle="Primary interactive control for triggering actions.">
-          {#snippet actions()}
-            <IconButton icon="code" ariaLabel="View source" variant="secondary" />
-            <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" />
-          {/snippet}
-        </PageHeader>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="With count">
-        <PageHeader title="Users" count={128} backHref="/dashboard" backLabel="Dashboard" />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Section and banner">
-        <PageHeader
-          section="Scheduled Task"
-          title="Nightly Sync"
-          backHref="/system/tasks"
-          backLabel="Tasks"
-          backIsContextual={true}
-          bannerMessage="This task is currently paused."
-          bannerTone="warning"
-        >
-          {#snippet actions()}
-            <IconButton icon="play" ariaLabel="Run now" variant="secondary" />
-            <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" />
-          {/snippet}
-        </PageHeader>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="With breadcrumbs">
         <PageHeader
           title="Cash flow forecasts"
           section="Module"
@@ -74,13 +57,85 @@
             </nav>
           {/snippet}
           {#snippet actions()}
-            <IconButton icon="upload" ariaLabel="Upload" variant="secondary" />
-            <IconButton icon="settings" ariaLabel="Settings" variant="secondary" />
+            <IconButton
+              icon="upload"
+              ariaLabel="Upload"
+              variant="secondary"
+              onClick={() => (navAction = "Upload module")}
+            />
+            <IconButton
+              icon="settings"
+              ariaLabel="Settings"
+              variant="secondary"
+              onClick={() => (navAction = "Settings module")}
+            />
           {/snippet}
         </PageHeader>
+        {#if navAction}
+          <p class="poodle-specimen__hint">
+            Last action: <strong>{navAction}</strong>
+          </p>
+        {/if}
       </SpecimenGroup>
 
-      <SpecimenGroup label="With MetaBar">
+      <SpecimenGroup label="Hierarchy and count">
+        <PageHeader title="Button" eyebrow="Primitive" subtitle="Primary interactive control for triggering actions.">
+          {#snippet actions()}
+            <IconButton
+              icon="code"
+              ariaLabel="View source"
+              variant="secondary"
+              onClick={() => (hierarchyAction = "View source")}
+            />
+            <IconButton
+              icon="pencil"
+              ariaLabel="Edit"
+              variant="secondary"
+              onClick={() => (hierarchyAction = "Edit")}
+            />
+          {/snippet}
+        </PageHeader>
+        <PageHeader title="Users" count={128} backHref="/dashboard" backLabel="Dashboard" />
+        {#if hierarchyAction}
+          <p class="poodle-specimen__hint">
+            Last action: <strong>{hierarchyAction}</strong>
+          </p>
+        {/if}
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Contextual status">
+        <PageHeader
+          section="Scheduled Task"
+          title="Nightly Sync"
+          backHref="/system/tasks"
+          backLabel="Tasks"
+          backIsContextual={true}
+          bannerMessage="This task is currently paused."
+          bannerTone="warning"
+        >
+          {#snippet actions()}
+            <IconButton
+              icon="play"
+              ariaLabel="Run now"
+              variant="secondary"
+              onClick={() => (statusAction = "Run now")}
+            />
+            <IconButton
+              icon="pencil"
+              ariaLabel="Edit"
+              variant="secondary"
+              onClick={() => (statusAction = "Edit task")}
+            />
+          {/snippet}
+        </PageHeader>
+        {#if statusAction}
+          <p class="poodle-specimen__hint">
+            Last action: <strong>{statusAction}</strong>
+          </p>
+        {/if}
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Operational metadata">
         <PageHeader title="Nightly Sync" section="Scheduled Task" backHref="/system/tasks" backLabel="Tasks">
           {#snippet meta()}
             <MetaBar>
@@ -90,14 +145,25 @@
             </MetaBar>
           {/snippet}
           {#snippet actions()}
-            <IconButton icon="play" ariaLabel="Run now" variant="secondary" />
-            <IconButton icon="calendar" ariaLabel="Edit schedule" variant="secondary" />
+            <IconButton
+              icon="play"
+              ariaLabel="Run now"
+              variant="secondary"
+              onClick={() => (metaAction = "Run now")}
+            />
+            <IconButton
+              icon="calendar"
+              ariaLabel="Edit schedule"
+              variant="secondary"
+              onClick={() => (metaAction = "Edit schedule")}
+            />
           {/snippet}
         </PageHeader>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Title only">
-        <PageHeader title="Settings" />
+        {#if metaAction}
+          <p class="poodle-specimen__hint">
+            Last action: <strong>{metaAction}</strong>
+          </p>
+        {/if}
       </SpecimenGroup>
     </div>
   {/snippet}
@@ -169,5 +235,11 @@
 
   .poodle-breadcrumbs__chevron {
     opacity: 0.7;
+  }
+
+  .poodle-specimen__hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--poodle-color-text-secondary);
   }
 </style>

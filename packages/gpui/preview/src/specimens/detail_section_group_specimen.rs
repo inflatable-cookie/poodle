@@ -69,7 +69,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ))
         // --- Column cap (maxColumns = 2) ---
         .child(group_block(
-            "Column cap (maxColumns = 2)",
+            "Column cap",
             DetailSectionGroup::from_spec(
                 DetailSectionGroupSpec::new()
                     .with_min_column_width("10rem")

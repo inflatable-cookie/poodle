@@ -1,8 +1,10 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Button, DetailItem, DetailSection, Eyebrow, IntoCompatNode};
 use crate::specimens::specimen_axes::density_key;
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
@@ -12,6 +14,19 @@ use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, DetailItemLayout, DetailItemSpec,
     EyebrowSpec,
 };
+use std::sync::Arc;
+
+fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div {
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(8.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(label),
+            theme,
+        ))
+        .child(child)
+}
 
 fn node_column(children: Vec<Node>) -> Node {
     let mut node = Node::container();
@@ -21,63 +36,64 @@ fn node_column(children: Vec<Node>) -> Node {
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let section_action = state
+        .specimens
+        .text
+        .get("detail-section-action")
+        .cloned()
+        .unwrap_or_default();
+    let events = state.node_events.clone();
+
     let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
-        // --- With title and rows ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With title and rows"),
+        .child(group(
+            "Project details",
+            theme,
+            DetailSection::from_spec(
+                DetailSectionSpec::new()
+                    .with_title("Project details")
+                    .with_description("Core metadata for this project."),
+                theme,
+            )
+            .with_body(node_column(vec![
+                DetailItem::from_spec(
+                    DetailItemSpec::new("Name").with_value("Poodle Design System"),
                     theme,
-                ))
-                .child(
-                    DetailSection::from_spec(
-                        DetailSectionSpec::new()
-                            .with_title("Project details")
-                            .with_description("Core metadata for this project."),
-                        theme,
-                    )
-                    .with_body(node_column(vec![
-                        DetailItem::from_spec(
-                            DetailItemSpec::new("Name").with_value("Poodle Design System"),
-                            theme,
-                        )
-                        .into_compat_node(),
-                        DetailItem::from_spec(
-                            DetailItemSpec::new("Owner").with_value("Clay + Aura"),
-                            theme,
-                        )
-                        .into_compat_node(),
-                        DetailItem::from_spec(
-                            DetailItemSpec::new("Created").with_value("March 2025"),
-                            theme,
-                        )
-                        .into_compat_node(),
-                        DetailItem::from_spec(
-                            DetailItemSpec::new("Status").with_value("Active"),
-                            theme,
-                        )
-                        .into_compat_node(),
-                    ])),
-                ),
-        )
-        // --- With actions ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With actions"),
+                )
+                .into_compat_node(),
+                DetailItem::from_spec(
+                    DetailItemSpec::new("Owner").with_value("Clay + Aura"),
                     theme,
-                ))
-                .child(
-                    DetailSection::from_spec(DetailSectionSpec::new().with_title("Billing"), theme)
+                )
+                .into_compat_node(),
+                DetailItem::from_spec(
+                    DetailItemSpec::new("Created").with_value("March 2025"),
+                    theme,
+                )
+                .into_compat_node(),
+                DetailItem::from_spec(
+                    DetailItemSpec::new("Status").with_value("Active"),
+                    theme,
+                )
+                .into_compat_node(),
+            ])),
+        ))
+        .child(
+            group(
+                "Section actions",
+                theme,
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(8.0))
+                    .child(
+                        DetailSection::from_spec(
+                            DetailSectionSpec::new().with_title("Billing"),
+                            theme,
+                        )
                         .with_actions(
                             Button::from_spec(
                                 ButtonSpec::new()
@@ -86,7 +102,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_label("Edit"),
                                 theme,
                             )
-                            .with_id("ds-edit"),
+                            .with_id("ds-edit")
+                            .on_click(Arc::new(move || {
+                                events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                                    key: "detail-section-action".to_string(),
+                                    value: "Edit billing".to_string(),
+                                });
+                            })),
                         )
                         .with_body(node_column(vec![
                             DetailItem::from_spec(
@@ -105,99 +127,59 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             )
                             .into_compat_node(),
                         ])),
-                ),
-        )
-        // --- DetailItem with description ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("DetailItem with description"),
-                    theme,
-                ))
-                .child(
-                    DetailSection::from_spec(
-                        DetailSectionSpec::new().with_title("Configuration"),
-                        theme,
                     )
-                    .with_body(node_column(vec![
-                        DetailItem::from_spec(
-                            DetailItemSpec::new("API endpoint")
-                                .with_value("https://api.example.com/v2")
-                                .with_description("The base URL for all API requests.")
-                                .with_truncate_value(true),
-                            theme,
+                    .when(!section_action.is_empty(), |d| {
+                        d.child(
+                            div()
+                                .text_sm()
+                                .text_color(color_to_hsla(text_secondary))
+                                .child(format!("Last action: {section_action}")),
                         )
-                        .into_compat_node(),
-                        DetailItem::from_spec(
-                            DetailItemSpec::new("Rate limit")
-                                .with_value("1,000 req/min")
-                                .with_description("Maximum requests per minute."),
-                            theme,
-                        )
-                        .into_compat_node(),
-                    ])),
-                ),
+                    }),
+            ),
         )
-        // --- Two-column details ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Two-column details"),
+        .child(group(
+            "Described detail rows",
+            theme,
+            DetailSection::from_spec(
+                DetailSectionSpec::new().with_title("Configuration"),
+                theme,
+            )
+            .with_body(node_column(vec![
+                DetailItem::from_spec(
+                    DetailItemSpec::new("API endpoint")
+                        .with_value("https://api.example.com/v2")
+                        .with_description("The base URL for all API requests.")
+                        .with_truncate_value(true),
                     theme,
-                ))
-                .child(
-                    DetailSection::from_spec(
-                        DetailSectionSpec::new()
-                            .with_title("Runtime summary")
-                            .with_description("Compact layout for denser metadata surfaces.")
-                            .with_columns(2),
-                        theme,
-                    )
-                    .with_body(node_column(vec![
-                        col_item("Route", "local-brokered", theme),
-                        col_item("Posture", "aura-local-brokered", theme),
-                        col_item("Authority", "local", theme),
-                        col_item("Displays", "2", theme),
-                    ])),
-                ),
-        )
-        // --- Description only (no title) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Description only (no title)"),
+                )
+                .into_compat_node(),
+                DetailItem::from_spec(
+                    DetailItemSpec::new("Rate limit")
+                        .with_value("1,000 req/min")
+                        .with_description("Maximum requests per minute."),
                     theme,
-                ))
-                .child(
-                    DetailSection::from_spec(
-                        DetailSectionSpec::new().with_description(
-                            "A section header carried by description text alone.",
-                        ),
-                        theme,
-                    )
-                    .with_body(node_column(vec![
-                        DetailItem::from_spec(
-                            DetailItemSpec::new("Region").with_value("eu-west-1"),
-                            theme,
-                        )
-                        .into_compat_node(),
-                        DetailItem::from_spec(
-                            DetailItemSpec::new("Zone").with_value("eu-west-1a"),
-                            theme,
-                        )
-                        .into_compat_node(),
-                    ])),
-                ),
-        )
+                )
+                .into_compat_node(),
+            ])),
+        ))
+        .child(group(
+            "Two-column details",
+            theme,
+            DetailSection::from_spec(
+                DetailSectionSpec::new()
+                    .with_title("Runtime summary")
+                    .with_description("Compact layout for denser metadata surfaces.")
+                    .with_columns(2),
+                theme,
+            )
+            .with_body(node_column(vec![
+                col_item("Route", "local-brokered", theme),
+                col_item("Posture", "aura-local-brokered", theme),
+                col_item("Authority", "local", theme),
+                col_item("Displays", "2", theme),
+            ])),
+        ))
         .into_any_element();
 
     specimen_layout(
@@ -240,7 +222,7 @@ fn density_demo(density: ControlDensity, theme: &GpuiThemeProvider) -> Div {
         .child(
             div()
                 .text_xs()
-                .text_color(crate::style_bridge::color_to_hsla(muted))
+                .text_color(color_to_hsla(muted))
                 .child(label.to_string()),
         )
         .child(

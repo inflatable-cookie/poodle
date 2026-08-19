@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import type {
     HistoryCenterRejectionCode,
     HistoryContinuation,
@@ -163,76 +162,50 @@
 
   // Host simulation: each group's two result feeds resolve synchronously from
   // the fixtures above, exactly as a real host resolves the three operations.
-  let twoForks = $state<{ continuations: { entryId: string; continuations: HistoryContinuation[] } | null; run: { fromEntryId: string; pages: HistoryPathPage[] } | null }>({
-    continuations: null,
-    run: null,
-  });
-  let nested = $state({ ...twoForks });
-  let runTail = $state({ ...twoForks });
-  let noTimestamp = $state({ ...twoForks });
-  let renameHost = $state({ ...twoForks });
-  let singleForkOpen = $state({ ...twoForks });
+  type HostFeed = {
+    continuations: { entryId: string; continuations: HistoryContinuation[] } | null;
+    run: { fromEntryId: string; pages: HistoryPathPage[] } | null;
+  };
+  const emptyFeed = (): HostFeed => ({ continuations: null, run: null });
+  let twoForks = $state<HostFeed>(emptyFeed());
+  let nested = $state(emptyFeed());
+  let runTail = $state(emptyFeed());
+  let noTimestamp = $state(emptyFeed());
+  let renameHost = $state(emptyFeed());
+  let manageHost = $state(emptyFeed());
+
+  let failureCommand = $state("");
+  let manageCommand = $state("");
 
   function loadContinuations(
-    state: typeof twoForks,
-    set: (next: typeof twoForks) => void,
+    state: HostFeed,
+    set: (next: HostFeed) => void,
     continuations: Record<string, HistoryContinuation[]>,
   ): (entryId: string) => void {
     return (entryId) => set({ ...state, continuations: { entryId, continuations: continuations[entryId] ?? [] } });
   }
 
   function loadRun(
-    state: typeof twoForks,
-    set: (next: typeof twoForks) => void,
+    state: HostFeed,
+    set: (next: HostFeed) => void,
     runs: Record<string, HistoryPathPage[]>,
   ): (fromEntryId: string) => void {
     return (fromEntryId) => set({ ...state, run: { fromEntryId, pages: runs[fromEntryId] ?? [] } });
   }
 
-  // The capture never clicks, so the single-fork-open group drives its own
-  // single interaction on mount: disclose the fork. The capture then shows
-  // the unified picker row for one fork — the disabled Select with the fork
-  // icon, name, branch, entry count and relative time, the rename pencil,
-  // the opt-in delete button (the host supplies the callback here) and the
-  // disabled checkout. The popover portals to the theme root, so only one
-  // group opens at once.
-  onMount(() => {
-    const run = (): boolean => {
-      const disclosure = document.querySelector<HTMLButtonElement>('[data-part="fork-disclosure"]');
-      if (disclosure === null) {
-        return false;
-      }
-      disclosure.click();
-      return true;
-    };
-
-    if (!run()) {
-      const timer = setTimeout(() => run(), 60);
-      return () => clearTimeout(timer);
-    }
-  });
 </script>
+
 
 <SpecimenLayout bareVariants>
   {#snippet children()}
     <div class="poodle-history-center-specimen">
-      <!-- The single-fork-open group opens by default so the capture shows
-           the unified picker row for one fork — the disabled Select with the
-           fork icon, name, branch, entry count and relative time, the rename
-           pencil, the opt-in delete and the disabled checkout (the mount-time
-           driver discloses the fork); the popover portals to the theme root,
-           so only one group opens at once. -->
-      <SpecimenGroup label="linear">
+      <SpecimenGroup label="Linear history">
         <div class="poodle-history-center-specimen__anchor">
-          <HistoryCenter
-            pages={linearPages}
-            canUndo
-            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
-          />
+          <HistoryCenter pages={linearPages} canUndo onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)} />
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="two-forks">
+      <SpecimenGroup label="Choosing between continuations">
         <div class="poodle-history-center-specimen__anchor">
           <HistoryCenter
             pages={twoForkPages}
@@ -246,7 +219,7 @@
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="fork-off-fork">
+      <SpecimenGroup label="Nested continuation runs">
         <div class="poodle-history-center-specimen__anchor">
           <HistoryCenter
             pages={nestedPages}
@@ -260,92 +233,86 @@
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="single-continuation">
-        <div class="poodle-history-center-specimen__anchor">
-          <HistoryCenter
-            pages={singleContinuationPages}
-            canUndo
-            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
-          />
+      <SpecimenGroup label="Single continuation and run boundaries">
+        <div class="poodle-history-center-specimen__stack">
+          <div class="poodle-history-center-specimen__anchor">
+            <HistoryCenter pages={singleContinuationPages} canUndo onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)} />
+          </div>
+          <div class="poodle-history-center-specimen__anchor">
+            <HistoryCenter
+              pages={runTailPages}
+              canUndo
+              continuationsResult={runTail.continuations}
+              runResult={runTail.run}
+              onLoadContinuations={loadContinuations(runTail, (next) => (runTail = next), runTailContinuations)}
+              onLoadContinuationRun={loadRun(runTail, (next) => (runTail = next), runTailRuns)}
+              onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+            />
+          </div>
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="run-tail">
-        <div class="poodle-history-center-specimen__anchor">
-          <HistoryCenter
-            pages={runTailPages}
-            canUndo
-            continuationsResult={runTail.continuations}
-            runResult={runTail.run}
-            onLoadContinuations={loadContinuations(runTail, (next) => (runTail = next), runTailContinuations)}
-            onLoadContinuationRun={loadRun(runTail, (next) => (runTail = next), runTailRuns)}
-            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
-          />
+      <SpecimenGroup label="Rename and manage a continuation">
+        <div class="poodle-history-center-specimen__stack">
+          <div class="poodle-history-center-specimen__anchor">
+            <HistoryCenter
+              pages={runTailPages}
+              canUndo
+              continuationsResult={manageHost.continuations}
+              runResult={manageHost.run}
+              onLoadContinuations={loadContinuations(manageHost, (next) => (manageHost = next), runTailContinuations)}
+              onLoadContinuationRun={loadRun(manageHost, (next) => (manageHost = next), runTailRuns)}
+              onDeleteContinuation={(entryId) => (manageCommand = `Delete ${entryId}`)}
+              onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+            />
+          </div>
+          <div class="poodle-history-center-specimen__anchor">
+            <HistoryCenter
+              pages={nestedPages}
+              canUndo
+              continuationsResult={renameHost.continuations}
+              runResult={renameHost.run}
+              onLoadContinuations={loadContinuations(renameHost, (next) => (renameHost = next), nestedContinuations)}
+              onLoadContinuationRun={loadRun(renameHost, (next) => (renameHost = next), nestedRuns)}
+              onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+              onRenameBranch={(branchId, name) => (manageCommand = `Rename ${branchId} to ${name}`)}
+            />
+          </div>
         </div>
+        {#if manageCommand}
+          <p class="poodle-history-center-specimen__hint">Last command: <strong>{manageCommand}</strong></p>
+        {/if}
       </SpecimenGroup>
 
-      <SpecimenGroup label="single-fork-open">
-        <div class="poodle-history-center-specimen__anchor">
-          <HistoryCenter
-            pages={runTailPages}
-            defaultOpen
-            canUndo
-            continuationsResult={singleForkOpen.continuations}
-            runResult={singleForkOpen.run}
-            onLoadContinuations={loadContinuations(singleForkOpen, (next) => (singleForkOpen = next), runTailContinuations)}
-            onLoadContinuationRun={loadRun(singleForkOpen, (next) => (singleForkOpen = next), runTailRuns)}
-            onDeleteContinuation={(entryId) => console.log("delete", entryId)}
-            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
-          />
+      <SpecimenGroup label="Failure and incomplete metadata">
+        <div class="poodle-history-center-specimen__stack">
+          <div class="poodle-history-center-specimen__anchor">
+            <HistoryCenter
+              pages={rejectionPages}
+              rejection={"AlreadyAtTarget" satisfies HistoryCenterRejectionCode}
+              canUndo
+              onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+            />
+          </div>
+          <div class="poodle-history-center-specimen__anchor">
+            <HistoryCenter
+              pages={noTimestampPages}
+              canUndo
+              continuationsResult={noTimestamp.continuations}
+              runResult={noTimestamp.run}
+              onLoadContinuations={loadContinuations(noTimestamp, (next) => (noTimestamp = next), noTimestampContinuations)}
+              onLoadContinuationRun={loadRun(noTimestamp, (next) => (noTimestamp = next), noTimestampRuns)}
+              onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+            />
+          </div>
         </div>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="rejection">
-        <div class="poodle-history-center-specimen__anchor">
-          <HistoryCenter
-            pages={rejectionPages}
-            rejection={"AlreadyAtTarget" satisfies HistoryCenterRejectionCode}
-            canUndo
-            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
-          />
-        </div>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="no-timestamp">
-        <div class="poodle-history-center-specimen__anchor">
-          <HistoryCenter
-            pages={noTimestampPages}
-            canUndo
-            continuationsResult={noTimestamp.continuations}
-            runResult={noTimestamp.run}
-            onLoadContinuations={loadContinuations(noTimestamp, (next) => (noTimestamp = next), noTimestampContinuations)}
-            onLoadContinuationRun={loadRun(noTimestamp, (next) => (noTimestamp = next), noTimestampRuns)}
-            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
-          />
-        </div>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="rename">
-        <div class="poodle-history-center-specimen__anchor">
-          <HistoryCenter
-            pages={nestedPages}
-            canUndo
-            continuationsResult={renameHost.continuations}
-            runResult={renameHost.run}
-            onLoadContinuations={loadContinuations(renameHost, (next) => (renameHost = next), nestedContinuations)}
-            onLoadContinuationRun={loadRun(renameHost, (next) => (renameHost = next), nestedRuns)}
-            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
-            onRenameBranch={(branchId, name) => console.log("rename", branchId, name)}
-          />
-        </div>
+        {#if failureCommand}
+          <p class="poodle-history-center-specimen__hint">Last command: <strong>{failureCommand}</strong></p>
+        {/if}
       </SpecimenGroup>
     </div>
   {/snippet}
 
-  <!-- Axis tabs are advertised by SpecimenLayout whether or not a specimen
-       fills them (showSizes/showDensities default true), so a specimen that
-       omits these renders empty Sizes and Densities tabs. Triggers stay closed
-       here: several open popovers would stack in one place. -->
   {#snippet sizes(size)}
     <HistoryCenter pages={linearPages} {size} canUndo canRedo />
   {/snippet}
@@ -358,4 +325,6 @@
 <style>
   .poodle-history-center-specimen { display: grid; gap: 2rem; min-height: 40rem; }
   .poodle-history-center-specimen__anchor { display: flex; justify-content: flex-end; width: min(42rem, 100%); }
+  .poodle-history-center-specimen__stack { display: grid; gap: 1.5rem; }
+  .poodle-history-center-specimen__hint { margin: 0.5rem 0 0; font-size: 0.8125rem; color: var(--poodle-color-text-secondary); }
 </style>

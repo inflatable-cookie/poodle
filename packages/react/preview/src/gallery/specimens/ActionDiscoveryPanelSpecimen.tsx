@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { ActionDiscoveryPanel } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
@@ -12,6 +12,12 @@ const bareFrame: CSSProperties = {
   padding: 0,
 };
 const variantBlock: CSSProperties = { width: "min(32rem, 100%)" };
+const statePair: CSSProperties = { display: "grid", gap: "1rem", width: "min(32rem, 100%)" };
+const hintStyle: CSSProperties = {
+  margin: "0.5rem 0 0",
+  fontSize: "0.8125rem",
+  color: "var(--poodle-color-text-secondary)",
+};
 
 const groupedItems = [
   { id: "save", title: "Save", shortcut: "Ctrl+S", group: "File" },
@@ -47,6 +53,18 @@ const variantItems = [
 ];
 
 export function ActionDiscoveryPanelSpecimen() {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [selectedAction, setSelectedAction] = useState("");
+
+  function selectAction(id: string): void {
+    setActiveId(id);
+    setSelectedAction(
+      groupedItems.find((item) => item.id === id)?.title ??
+        descriptiveItems.find((item) => item.id === id)?.title ??
+        id,
+    );
+  }
+
   return (
     <SpecimenLayout
       bareVariants
@@ -72,19 +90,34 @@ export function ActionDiscoveryPanelSpecimen() {
       <div className="poodle-specimen">
         <SpecimenGroup label="Grouped actions">
           <div style={bareFrame}>
-            <ActionDiscoveryPanel items={groupedItems} ariaLabel="Demo actions" />
+            <ActionDiscoveryPanel
+              items={groupedItems}
+              ariaLabel="Demo actions"
+              activeId={activeId}
+              onItemSelect={selectAction}
+            />
           </div>
+          {selectedAction ? (
+            <p style={hintStyle}>
+              Selected action: <strong>{selectedAction}</strong>
+            </p>
+          ) : null}
         </SpecimenGroup>
 
-        <SpecimenGroup label="With descriptions and badges">
+        <SpecimenGroup label="Descriptions, badges, and shortcuts">
           <div style={bareFrame}>
             <ActionDiscoveryPanel items={descriptiveItems} ariaLabel="CI actions" />
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Empty state">
-          <div style={bareFrame}>
-            <ActionDiscoveryPanel items={[]} state="empty" ariaLabel="Empty actions" />
+        <SpecimenGroup label="Loading and empty states">
+          <div style={statePair}>
+            <div style={bareFrame}>
+              <ActionDiscoveryPanel items={[]} state="empty" ariaLabel="Empty actions" />
+            </div>
+            <div style={bareFrame}>
+              <ActionDiscoveryPanel items={[]} state="loading" ariaLabel="Loading actions" />
+            </div>
           </div>
         </SpecimenGroup>
       </div>

@@ -41,6 +41,10 @@ const panelStrong: CSSProperties = {
 };
 
 const dndLayout: CSSProperties = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" };
+const pairStyle: CSSProperties = { display: "flex", flexDirection: "column", gap: "1rem" };
+const stackStyle: CSSProperties = { display: "flex", flexDirection: "column", gap: "1rem" };
+const narrowFrame: CSSProperties = { maxWidth: "14rem" };
+
 const variantBlock: CSSProperties = {
   display: "flex",
   flexDirection: "column",
@@ -78,6 +82,12 @@ export function DockRegionSpecimen() {
 
   // ── Flexible dock state ────────────────────────────────────────────
   const [flexActivePanel, setFlexActivePanel] = useState("explorer");
+
+  const iconlessItems: PanelTabItem[] = [
+    { value: "inspector", label: "Inspector", closable: false },
+    { value: "browser", label: "Media Browser", closable: false },
+    { value: "clips", label: "Clip Editor", closable: false },
+  ];
 
   const flexItems: PanelTabItem[] = [
     { value: "explorer", label: "Explorer", icon: "folder", closable: true },
@@ -196,32 +206,124 @@ export function DockRegionSpecimen() {
       )}
     >
       <div className="poodle-specimen">
-        {/* 1. Flexible dock (expanded) */}
-        <SpecimenGroup label="Flexible dock — expanded (left edge)" bare>
-          <div style={frameFlex}>
-            <div style={{ flex: "0 0 16rem", minWidth: 0, minHeight: 0 }}>
-              <DockRegion
-                edge="left"
-                sizing="flexible"
-                items={flexItems}
-                value={flexActivePanel}
-                collapsed={false}
-                onValueChange={(value) => setFlexActivePanel(value)}
-              >
-                {() => (
-                  <div style={panelContent}>
-                    <strong style={panelStrong}>{flexActivePanel}</strong>
-                    <p style={{ margin: 0 }}>Panel content for the active tab. Tabs are closable and reorderable.</p>
-                  </div>
-                )}
-              </DockRegion>
+        <SpecimenGroup label="Expanded side dock" bare>
+          <div style={pairStyle}>
+            <div style={frameFlex}>
+              <div style={{ flex: "0 0 16rem", minWidth: 0, minHeight: 0 }}>
+                <DockRegion
+                  edge="left"
+                  sizing="flexible"
+                  items={flexItems}
+                  value={flexActivePanel}
+                  collapsed={false}
+                  onValueChange={(value) => setFlexActivePanel(value)}
+                >
+                  {() => (
+                    <div style={panelContent}>
+                      <strong style={panelStrong}>{flexActivePanel}</strong>
+                      <p style={{ margin: 0 }}>
+                        Panel content for the active tab. Tabs are closable and reorderable.
+                      </p>
+                    </div>
+                  )}
+                </DockRegion>
+              </div>
+              <div style={flexMain}>Main content area</div>
             </div>
-            <div style={flexMain}>Main content area</div>
+            <div style={{ ...frameFlex, ...narrowFrame }}>
+              <div style={{ flex: "0 0 16rem", minWidth: 0, minHeight: 0 }}>
+                <DockRegion edge="left" sizing="flexible" items={iconlessItems} value="inspector">
+                  {() => (
+                    <div style={panelContent}>
+                      <strong style={panelStrong}>Inspector</strong>
+                      <p style={{ margin: 0 }}>
+                        Panels without icons keep their labels when the strip is squeezed.
+                      </p>
+                    </div>
+                  )}
+                </DockRegion>
+              </div>
+              <div style={flexMain}>Main content area</div>
+            </div>
           </div>
         </SpecimenGroup>
 
-        {/* 1c. Tab pass-throughs (g13-040) */}
-        <SpecimenGroup label="Tab pass-throughs — no underline, no reorder, solid fill (g13-040)" bare>
+        <SpecimenGroup label="Collapse and edge placement" bare>
+          <div style={stackStyle}>
+            <div style={frameFlex}>
+              <div style={{ flex: "0 0 auto", minWidth: 0, minHeight: 0 }}>
+                <DockRegion
+                  edge="left"
+                  sizing="flexible"
+                  items={flexItems}
+                  value={flexActivePanel}
+                  collapsed={true}
+                  collapsedPosture="icon-strip"
+                  onValueChange={(value) => setFlexActivePanel(value)}
+                />
+              </div>
+              <div style={flexMain}>Main content area</div>
+            </div>
+            <div style={frameFlex}>
+              <div
+                style={{
+                  flex: interactiveCollapsed ? "0 0 auto" : "0 0 16rem",
+                  minWidth: 0,
+                  minHeight: 0,
+                }}
+              >
+                <DockRegion
+                  edge="left"
+                  sizing="flexible"
+                  collapsible
+                  items={interactiveItems}
+                  value={interactiveActive}
+                  collapsed={interactiveCollapsed}
+                  collapsedPosture="icon-strip"
+                  onValueChange={(value) => setInteractiveActive(value)}
+                  onCollapsedChange={(isCollapsed) => setInteractiveCollapsed(isCollapsed)}
+                >
+                  {() => (
+                    <div style={panelContent}>
+                      <strong style={panelStrong}>{interactiveActive}</strong>
+                      <p style={{ margin: 0 }}>
+                        Click the collapse toggle to switch between expanded and icon-strip modes.
+                      </p>
+                    </div>
+                  )}
+                </DockRegion>
+              </div>
+              <div style={flexMain}>Main content area</div>
+            </div>
+            <div style={frameBottom}>
+              <div style={flexMainBottom}>Editor area</div>
+              <div style={{ flex: "0 0 auto", maxHeight: "10rem", minHeight: 0 }}>
+                <DockRegion
+                  edge="bottom"
+                  sizing="flexible"
+                  collapsible
+                  items={bottomItems}
+                  value={bottomActive}
+                  collapsed={bottomCollapsed}
+                  collapsedPosture="icon-strip"
+                  onValueChange={(value) => setBottomActive(value)}
+                  onCollapsedChange={(isCollapsed) => setBottomCollapsed(isCollapsed)}
+                >
+                  {() => (
+                    <div style={panelContent}>
+                      <strong style={panelStrong}>{bottomActive}</strong>
+                      <p style={{ margin: 0 }}>
+                        Bottom panel content. Collapses downward, keeping horizontal tabs.
+                      </p>
+                    </div>
+                  )}
+                </DockRegion>
+              </div>
+            </div>
+          </div>
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Tab strip presentation" bare>
           <div style={dndLayout}>
             <div style={frameDnd}>
               <DockRegion
@@ -283,84 +385,7 @@ export function DockRegionSpecimen() {
           </div>
         </SpecimenGroup>
 
-        {/* 2. Flexible dock (collapsed icon-strip) */}
-        <SpecimenGroup label="Flexible dock — collapsed icon-strip (left edge)" bare>
-          <div style={frameFlex}>
-            <div style={{ flex: "0 0 auto", minWidth: 0, minHeight: 0 }}>
-              <DockRegion
-                edge="left"
-                sizing="flexible"
-                items={flexItems}
-                value={flexActivePanel}
-                collapsed={true}
-                collapsedPosture="icon-strip"
-                onValueChange={(value) => setFlexActivePanel(value)}
-              />
-            </div>
-            <div style={flexMain}>Main content area</div>
-          </div>
-        </SpecimenGroup>
-
-        {/* 3. Interactive collapse toggle */}
-        <SpecimenGroup label="Interactive collapse toggle (click to toggle)" bare>
-          <div style={frameFlex}>
-            <div
-              style={{ flex: interactiveCollapsed ? "0 0 auto" : "0 0 16rem", minWidth: 0, minHeight: 0 }}
-            >
-              <DockRegion
-                edge="left"
-                sizing="flexible"
-                collapsible
-                items={interactiveItems}
-                value={interactiveActive}
-                collapsed={interactiveCollapsed}
-                collapsedPosture="icon-strip"
-                onValueChange={(value) => setInteractiveActive(value)}
-                onCollapsedChange={(isCollapsed) => setInteractiveCollapsed(isCollapsed)}
-              >
-                {() => (
-                  <div style={panelContent}>
-                    <strong style={panelStrong}>{interactiveActive}</strong>
-                    <p style={{ margin: 0 }}>
-                      Click the collapse toggle to switch between expanded and icon-strip modes.
-                    </p>
-                  </div>
-                )}
-              </DockRegion>
-            </div>
-            <div style={flexMain}>Main content area</div>
-          </div>
-        </SpecimenGroup>
-
-        {/* 4. Bottom edge collapsible dock */}
-        <SpecimenGroup label="Bottom edge dock (click to toggle)" bare>
-          <div style={frameBottom}>
-            <div style={flexMainBottom}>Editor area</div>
-            <div style={{ flex: "0 0 auto", maxHeight: "10rem", minHeight: 0 }}>
-              <DockRegion
-                edge="bottom"
-                sizing="flexible"
-                collapsible
-                items={bottomItems}
-                value={bottomActive}
-                collapsed={bottomCollapsed}
-                collapsedPosture="icon-strip"
-                onValueChange={(value) => setBottomActive(value)}
-                onCollapsedChange={(isCollapsed) => setBottomCollapsed(isCollapsed)}
-              >
-                {() => (
-                  <div style={panelContent}>
-                    <strong style={panelStrong}>{bottomActive}</strong>
-                    <p style={{ margin: 0 }}>Bottom panel content. Collapses downward, keeping horizontal tabs.</p>
-                  </div>
-                )}
-              </DockRegion>
-            </div>
-          </div>
-        </SpecimenGroup>
-
-        {/* 5. Cross-region drag-and-drop */}
-        <SpecimenGroup label="Cross-region drag-and-drop (drag tabs between docks)" bare>
+        <SpecimenGroup label="Move panels between docks" bare>
           <div style={dndLayout}>
             <div style={frameDnd}>
               <DockRegion
@@ -405,25 +430,26 @@ export function DockRegionSpecimen() {
           </div>
         </SpecimenGroup>
 
-        {/* 6a. Static dock — horizontal (top edge, panels stack vertically) */}
-        <SpecimenGroup label="Static dock — horizontal (top edge)" bare>
-          <div style={frameShort}>
-            <DockRegion edge="top" sizing="static" items={staticItems} onReorder={handleStaticReorder}
-              panel={(item) => <div className="poodle-specimen__static-panel">{item.label}</div>}
-            />
-          </div>
-        </SpecimenGroup>
-
-        {/* 6b. Static dock — vertical (left edge, panels stack horizontally) */}
-        <SpecimenGroup label="Static dock — vertical (left edge)" bare>
-          <div style={frameBase}>
-            <DockRegion
-              edge="left"
-              sizing="static"
-              items={staticVerticalItems}
-              onReorder={handleStaticVerticalReorder}
-              panel={(item) => <div className="poodle-specimen__static-panel">{item.label}</div>}
-            />
+        <SpecimenGroup label="Static panel stacks" bare>
+          <div style={stackStyle}>
+            <div style={frameShort}>
+              <DockRegion
+                edge="top"
+                sizing="static"
+                items={staticItems}
+                onReorder={handleStaticReorder}
+                panel={(item) => <div className="poodle-specimen__static-panel">{item.label}</div>}
+              />
+            </div>
+            <div style={frameBase}>
+              <DockRegion
+                edge="left"
+                sizing="static"
+                items={staticVerticalItems}
+                onReorder={handleStaticVerticalReorder}
+                panel={(item) => <div className="poodle-specimen__static-panel">{item.label}</div>}
+              />
+            </div>
           </div>
         </SpecimenGroup>
       </div>
