@@ -25,11 +25,11 @@
   </div>
 </SpecimenGroup>
 
-<SpecimenGroup label="Status ribbon">
+<SpecimenGroup label="Composite category">
   <div class="poodle-specimen__example">
-    <Eyebrow>Status</Eyebrow>
-    <h3 class="poodle-demo-heading">Active deployment</h3>
-    <p>Last deployed 3 minutes ago.</p>
+    <Eyebrow>Composite</Eyebrow>
+    <h3 class="poodle-demo-heading">DataTable</h3>
+    <p>Feature-rich table with sorting, selection, and pagination.</p>
   </div>
 </SpecimenGroup>
 

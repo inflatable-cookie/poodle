@@ -3,6 +3,13 @@ import { SplitButton, type MenuItem } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
+const rowStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "0.75rem",
+  alignItems: "center",
+} as const;
+
 export function SplitButtonSpecimen() {
   const [lastAction, setLastAction] = useState("");
 
@@ -32,20 +39,21 @@ export function SplitButtonSpecimen() {
         </SplitButton>
       )}
     >
-            <SpecimenGroup label="Primary">
+            <SpecimenGroup label="Save split action">
         <SplitButton variant="primary" items={saveItems} onClick={() => setLastAction("Save")} onAction={(value) => setLastAction(value)}>
                       Save
                     </SplitButton>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Secondary">
+                <SpecimenGroup label="Secondary export">
         <SplitButton variant="secondary" items={exportItems} onClick={() => setLastAction("Export")} onAction={(value) => setLastAction(value)}>
                       Export
                     </SplitButton>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Danger">
-        <SplitButton
+                <SpecimenGroup label="Intent tones">
+        <div style={rowStyle}>
+          <SplitButton
                       tone="danger"
                       items={[
                         { value: "delete-selected", label: "Delete selected" },
@@ -56,10 +64,7 @@ export function SplitButtonSpecimen() {
                     >
                       Delete
                     </SplitButton>
-      </SpecimenGroup>
-
-                <SpecimenGroup label="Success">
-        <SplitButton
+          <SplitButton
                       tone="success"
                       items={[
                         { value: "publish-now", label: "Publish now" },
@@ -70,10 +75,7 @@ export function SplitButtonSpecimen() {
                     >
                       Publish
                     </SplitButton>
-      </SpecimenGroup>
-
-                <SpecimenGroup label="Warning">
-        <SplitButton
+          <SplitButton
                       tone="warning"
                       items={[
                         { value: "archive-selected", label: "Archive selected" },
@@ -84,18 +86,18 @@ export function SplitButtonSpecimen() {
                     >
                       Archive
                     </SplitButton>
+        </div>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Loading">
-        <SplitButton variant="primary" items={saveItems} loading>
+                <SpecimenGroup label="Loading and disabled states">
+        <div style={rowStyle}>
+          <SplitButton variant="primary" items={saveItems} loading>
                       Saving…
                     </SplitButton>
-      </SpecimenGroup>
-
-                <SpecimenGroup label="Disabled">
-        <SplitButton variant="secondary" items={saveItems} disabled>
+          <SplitButton variant="secondary" items={saveItems} disabled>
                       Save
                     </SplitButton>
+        </div>
       </SpecimenGroup>
 
           {lastAction ? (

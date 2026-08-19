@@ -43,11 +43,11 @@ export function EyebrowSpecimen() {
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Status ribbon">
+      <SpecimenGroup label="Composite category">
         <div style={example}>
-          <Eyebrow>Status</Eyebrow>
-          <h3 style={heading}>Active deployment</h3>
-          <p style={paragraph}>Last deployed 3 minutes ago.</p>
+          <Eyebrow>Composite</Eyebrow>
+          <h3 style={heading}>DataTable</h3>
+          <p style={paragraph}>Feature-rich table with sorting, selection, and pagination.</p>
         </div>
       </SpecimenGroup>
 

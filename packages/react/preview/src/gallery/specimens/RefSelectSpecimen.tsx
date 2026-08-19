@@ -32,6 +32,7 @@ const refs: RefOption[] = [
 ];
 
 const code = { fontFamily: "var(--poodle-typography-code-family)", fontSize: "0.75rem" } as const;
+const stack = { display: "flex", flexDirection: "column", gap: "0.75rem" } as const;
 
 export function RefSelectSpecimen() {
   const [value, setValue] = useState("tree-component");
@@ -65,7 +66,7 @@ export function RefSelectSpecimen() {
         />
       )}
     >
-      <SpecimenGroup label="Refs with the checked-out branch marked (live value)">
+      <SpecimenGroup label="Branch and tag selection">
         <RefSelect refs={refs} value={value} onChange={setValue} currentRef="main" />
         <p>
           Selected: <code style={code}>{value}</code> — the marker stays on{" "}
@@ -73,45 +74,42 @@ export function RefSelectSpecimen() {
         </p>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Host-driven search (searchValue supplied, host filters)">
-        <RefSelect
-          refs={hostFiltered}
-          value="tree-component"
-          currentRef="main"
-          searchValue={hostQuery}
-          onSearchChange={setHostQuery}
-        />
-        <p>
-          Query: <code style={code}>{hostQuery}</code> → {hostFiltered.length} ref(s) passed in
-        </p>
+      <SpecimenGroup label="Search and no matches">
+        <div style={stack}>
+          <RefSelect
+            refs={hostFiltered}
+            value="tree-component"
+            currentRef="main"
+            searchValue={hostQuery}
+            onSearchChange={setHostQuery}
+          />
+          <p>
+            Query: <code style={code}>{hostQuery}</code> → {hostFiltered.length} ref(s) passed in
+          </p>
+          <RefSelect refs={[]} searchValue="nothing-matches" currentRef="main" />
+          <p>Host search with an empty list shows no matches.</p>
+        </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Loading more refs">
-        <RefSelect refs={refs} value="main" currentRef="main" loading />
+      <SpecimenGroup label="Loading and short-list search">
+        <div style={stack}>
+          <RefSelect refs={refs} value="main" currentRef="main" loading />
+          <RefSelect refs={refs.slice(0, 3)} value="main" currentRef="main" searchable={false} />
+        </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="No matches (host-driven, empty list)">
-        <RefSelect refs={[]} searchValue="nothing-matches" currentRef="main" />
+      <SpecimenGroup label="Trigger presentation">
+        <div style={stack}>
+          <RefSelect refs={refs} value="main" currentRef="main" variant="outlined" />
+          <RefSelect refs={refs} value="main" currentRef="main" emphasis="subdued" />
+        </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Search hidden (short lists don't need it)">
-        <RefSelect refs={refs.slice(0, 3)} value="main" currentRef="main" searchable={false} />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Outlined trigger">
-        <RefSelect refs={refs} value="main" currentRef="main" variant="outlined" />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Subdued (as embedded in the AgentChatInput footer)">
-        <RefSelect refs={refs} value="main" currentRef="main" emphasis="subdued" />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="No selection">
-        <RefSelect refs={refs} value="" currentRef="main" />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Disabled">
-        <RefSelect refs={refs} value="main" currentRef="main" disabled />
+      <SpecimenGroup label="Selection states">
+        <div style={stack}>
+          <RefSelect refs={refs} value="" currentRef="main" />
+          <RefSelect refs={refs} value="main" currentRef="main" disabled />
+        </div>
       </SpecimenGroup>
     </SpecimenLayout>
   );
