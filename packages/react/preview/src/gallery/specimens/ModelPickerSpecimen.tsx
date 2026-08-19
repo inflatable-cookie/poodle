@@ -173,19 +173,10 @@ const models: ModelOption[] = [
   },
 ];
 
-// What each model exposes, for the caption beside the per-model pickers.
-const exposes: Record<string, string> = {
-  "atlas-pro": "Effort · Fast mode · Context window",
-  atlas: "Effort · Fast mode",
-  "corvid-1": "Effort (own levels, list) · Verbosity",
-  "corvid-ultra": "Thinking budget (7 levels) · Extended thinking",
-  "corvid-mini": "— none —",
-};
-const perModel = models.filter((model) => !model.disabled);
-
 const matrix = { display: "flex", flexDirection: "column", gap: "0.25rem" } as const;
 const row = { display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" } as const;
 const caption = { fontSize: "0.75rem", opacity: 0.7 } as const;
+const note = { margin: "0 0 0.75rem", fontSize: "0.875rem", opacity: 0.75 } as const;
 
 export function ModelPickerSpecimen() {
   const [value, setValue] = useState<ModelSelection>({
@@ -226,67 +217,64 @@ export function ModelPickerSpecimen() {
         />
       )}
     >
-      <SpecimenGroup label="Cross-provider list (switch model — the axes rail follows)">
+      <SpecimenGroup label="Cross-provider default">
+        <p style={note}>
+          Two providers and an archive group in one list. Open it: the models carry
+          their own marks, badges and descriptions, and the axes rail follows
+          whichever model is selected. The serialized selection is below.
+        </p>
         <ModelPicker models={models} axes={axes} value={value} onChange={setValue} />
         <pre style={{ margin: 0, fontSize: "0.75rem", maxHeight: "10rem", overflow: "auto" }}>
           {JSON.stringify(value, null, 2)}
         </pre>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Different axes per model (one picker per model)">
-        <div style={matrix}>
-          {perModel.map((model) => (
-            <div key={model.value} style={row}>
-              <ModelPicker models={models} axes={axes} value={{ model: model.value, axes: {} }} />
-              <span style={caption}>{exposes[model.value]}</span>
-            </div>
-          ))}
-        </div>
-        <p>
-          Each trigger summarises only its model's axes; open any of them to see that model's rail.
+      <SpecimenGroup label="Axis control forms">
+        <p style={note}>
+          An axis renders as a segmented control up to three options and as a list
+          beyond that; <code>control</code> forces either. A model may expose none.
         </p>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Model marks: registry icon vs arbitrary image">
         <div style={matrix}>
           <div style={row}>
-            <ModelPicker models={models} axes={axes} value={{ model: "atlas", axes: {} }} />
-            <span style={caption}>icon: "sparkles" — a name from the icon registry</span>
-          </div>
-          <div style={row}>
-            <ModelPicker models={models} axes={axes} value={{ model: "corvid-1", axes: {} }} />
+            <ModelPicker
+              models={models}
+              axes={axes}
+              value={{ model: "corvid-1", axes: { effort: "deep" } }}
+            />
             <span style={caption}>
-              image: {"{ src, alt }"} — any image URL (provider logo, data URI, asset path)
+              Rebound axis — same <code>effort</code> key, the provider&apos;s own levels, forced
+              to a list
             </span>
           </div>
+          <div style={row}>
+            <ModelPicker
+              models={models}
+              axes={axes}
+              value={{ model: "corvid-ultra", axes: { effort: "very-high" } }}
+            />
+            <span style={caption}>
+              Seven levels → a list on its own, with the shared key relabelled
+            </span>
+          </div>
+          <div style={row}>
+            <ModelPicker models={models} axes={axes} value={{ model: "corvid-mini", axes: {} }} />
+            <span style={caption}>No axes at all — no summary, and a single-column surface</span>
+          </div>
         </div>
-        <p>
-          An <code>image</code> wins over <code>icon</code> when a model sets both.
-        </p>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Rebound axis (same key, provider's own levels, forced to a list)">
-        <ModelPicker
-          models={models}
-          axes={axes}
-          value={{ model: "corvid-1", axes: { effort: "deep" } }}
-        />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Many-level axis (7 levels → list) with a relabelled key">
-        <ModelPicker
-          models={models}
-          axes={axes}
-          value={{ model: "corvid-ultra", axes: { effort: "very-high" } }}
-        />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Model with no axes at all">
-        <ModelPicker models={models} axes={axes} value={{ model: "corvid-mini", axes: {} }} />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Emphasis: default vs subdued">
+      <SpecimenGroup label="Variants and emphasis">
         <div style={matrix}>
+          <div style={row}>
+            <ModelPicker
+              models={models}
+              axes={axes}
+              variant="outlined"
+              value={outlinedValue}
+              onChange={setOutlinedValue}
+            />
+            <span style={caption}>outlined — a bordered trigger</span>
+          </div>
           <div style={row}>
             <ModelPicker models={models} axes={axes} value={{ model: "atlas-pro", axes: {} }} />
             <span style={caption}>default — full-strength trigger</span>
@@ -295,8 +283,8 @@ export function ModelPickerSpecimen() {
             <ModelPicker
               models={models}
               axes={axes}
-              value={{ model: "atlas-pro", axes: {} }}
               emphasis="subdued"
+              value={{ model: "atlas-pro", axes: {} }}
             />
             <span style={caption}>
               subdued — recedes beside a more important control; hover or focus restores it
@@ -305,49 +293,45 @@ export function ModelPickerSpecimen() {
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Outlined trigger">
-        <ModelPicker
-          models={models}
-          axes={axes}
-          variant="outlined"
-          value={outlinedValue}
-          onChange={setOutlinedValue}
-        />
+      <SpecimenGroup label="What the trigger shows">
+        <div style={matrix}>
+          <div style={row}>
+            <ModelPicker
+              models={models}
+              axes={axes}
+              showAxisSummary={false}
+              value={{ model: "atlas", axes: {} }}
+            />
+            <span style={caption}>axis summary suppressed</span>
+          </div>
+          <div style={row}>
+            <ModelPicker
+              models={models}
+              axes={axes}
+              showModelDescriptions={false}
+              value={{ model: "atlas", axes: {} }}
+            />
+            <span style={caption}>model descriptions hidden in the list</span>
+          </div>
+        </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Summary suppressed">
-        <ModelPicker
-          models={models}
-          axes={axes}
-          showAxisSummary={false}
-          value={{ model: "atlas", axes: {} }}
-        />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Descriptions hidden">
-        <ModelPicker
-          models={models}
-          axes={axes}
-          showModelDescriptions={false}
-          value={{ model: "atlas", axes: {} }}
-        />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="No model selected">
-        <ModelPicker models={models} axes={axes} value={{ model: "", axes: {} }} />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Models only (no axes declared)">
-        <ModelPicker models={models} value={{ model: "atlas", axes: {} }} />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Disabled">
-        <ModelPicker
-          models={models}
-          axes={axes}
-          disabled
-          value={{ model: "atlas", axes: { effort: "low" } }}
-        />
+      <SpecimenGroup label="Nothing selected, and disabled">
+        <div style={matrix}>
+          <div style={row}>
+            <ModelPicker models={models} axes={axes} value={{ model: "", axes: {} }} />
+            <span style={caption}>placeholder — no model chosen yet</span>
+          </div>
+          <div style={row}>
+            <ModelPicker
+              models={models}
+              axes={axes}
+              disabled
+              value={{ model: "atlas", axes: { effort: "low" } }}
+            />
+            <span style={caption}>disabled — the trigger does not open</span>
+          </div>
+        </div>
       </SpecimenGroup>
     </SpecimenLayout>
   );

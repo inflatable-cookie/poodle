@@ -13,6 +13,7 @@ const offline = { kind: "offlineSignature" } as const;
 const remote = { kind: "remoteAssertion", checked } as const;
 
 const stackStyle: CSSProperties = { display: "flex", flexDirection: "column", gap: "2rem" };
+const pairStyle: CSSProperties = { display: "flex", flexDirection: "column", gap: "1rem" };
 
 export function LicenceStatusSpecimen() {
   return (
@@ -42,14 +43,27 @@ export function LicenceStatusSpecimen() {
     >
       <div style={stackStyle}>
         <SpecimenGroup label="Active">
-          <LicenceStatus
-            usability={{ state: "active" }}
-            trustBasis={offline}
-            useUntil={later}
-            updateUntil={later}
-            usable={true}
-            attention="none"
-          />
+          <div style={pairStyle}>
+            {/* Covered use and updates, verified on this machine. */}
+            <LicenceStatus
+              usability={{ state: "active" }}
+              trustBasis={offline}
+              useUntil={later}
+              updateUntil={later}
+              usable={true}
+              attention="none"
+            />
+            {/* Perpetual use, lapsed updates. Two windows, two rows: collapsing
+                them is how an owner is told they have lost what they bought. */}
+            <LicenceStatus
+              usability={{ state: "active" }}
+              trustBasis={offline}
+              useUntil={null}
+              updateUntil={past}
+              usable={true}
+              attention="informational"
+            />
+          </div>
         </SpecimenGroup>
 
         <SpecimenGroup label="In grace">
@@ -76,11 +90,12 @@ export function LicenceStatusSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Lease lapsed">
+          {/* Lifetime updates, lapsed lease: the licence is not expired. */}
           <LicenceStatus
             usability={{ state: "leaseLapsed", at: past }}
             trustBasis={remote}
             useUntil={later}
-            updateUntil={later}
+            updateUntil={null}
             usable={false}
             attention="actionable"
           />
@@ -91,67 +106,10 @@ export function LicenceStatusSpecimen() {
           <LicenceStatus
             usability={{ state: "clockRefused" }}
             trustBasis={remote}
-            useUntil={later}
-            updateUntil={later}
+            useUntil={null}
+            updateUntil={null}
             usable={false}
             attention="actionable"
-          />
-        </SpecimenGroup>
-
-        <SpecimenGroup label="No coverage expiry">
-          <LicenceStatus
-            usability={{ state: "active" }}
-            trustBasis={offline}
-            useUntil={null}
-            updateUntil={null}
-            usable={true}
-            attention="none"
-          />
-        </SpecimenGroup>
-
-        <SpecimenGroup label="Updates expired">
-          {/* Perpetual use, lapsed updates. Two windows, two rows: collapsing
-              them is how an owner is told they have lost what they bought. */}
-          <LicenceStatus
-            usability={{ state: "active" }}
-            trustBasis={offline}
-            useUntil={null}
-            updateUntil={past}
-            usable={true}
-            attention="informational"
-          />
-        </SpecimenGroup>
-
-        <SpecimenGroup label="Use window only">
-          <LicenceStatus
-            usability={{ state: "active" }}
-            trustBasis={offline}
-            useUntil={later}
-            updateUntil={null}
-            usable={true}
-            attention="none"
-          />
-        </SpecimenGroup>
-
-        <SpecimenGroup label="Offline verification">
-          <LicenceStatus
-            usability={{ state: "active" }}
-            trustBasis={offline}
-            useUntil={later}
-            updateUntil={later}
-            usable={true}
-            attention="none"
-          />
-        </SpecimenGroup>
-
-        <SpecimenGroup label="Remote verification">
-          <LicenceStatus
-            usability={{ state: "active" }}
-            trustBasis={remote}
-            useUntil={later}
-            updateUntil={later}
-            usable={true}
-            attention="none"
           />
         </SpecimenGroup>
       </div>

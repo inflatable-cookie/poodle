@@ -1,7 +1,10 @@
 <script lang="ts">
   import {
+    IconButton,
+    Icon,
     ModelCatalogueEditor,
     ModelConnectionCard,
+    Pill,
     UpdateCenter,
   } from "@inflatable-cookie/poodle-svelte";
   import {
@@ -22,139 +25,76 @@
       notes: "Faster renders, a rebuilt automation pass, and two crash fixes.",
     } as const,
   };
+
+  function cardProps(fixture: (typeof MODEL_CONNECTION_CARD_FIXTURES)[number]) {
+    return {
+      id: fixture.id,
+      title: fixture.title,
+      providerLabel: fixture.providerLabel,
+      routeLabel: fixture.routeLabel,
+      version: fixture.version,
+      accessSummary: fixture.accessSummary,
+      readiness: fixture.readiness,
+      readinessLabel: fixture.readinessLabel,
+      isEnabled: fixture.enabled,
+    };
+  }
 </script>
 
 <SpecimenLayout showSizes={false} showDensities={false}>
   {#snippet children()}
     <div class="poodle-model-connection-card-specimen">
       <SpecimenGroup label="Ready and enabled">
-        <ModelConnectionCard
-          id={work.id}
-          title={work.title}
-          providerLabel={work.providerLabel}
-          routeLabel={work.routeLabel}
-          version={work.version}
-          accessSummary={work.accessSummary}
-          readiness={work.readiness}
-          readinessLabel={work.readinessLabel}
-          isEnabled={work.enabled}
-        />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Ready and disabled">
-        <ModelConnectionCard
-          id={personal.id}
-          title={personal.title}
-          providerLabel={personal.providerLabel}
-          routeLabel={personal.routeLabel}
-          version={personal.version}
-          accessSummary={personal.accessSummary}
-          readiness={personal.readiness}
-          readinessLabel={personal.readinessLabel}
-          isEnabled={personal.enabled}
-        />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Checking">
-        <ModelConnectionCard
-          id={codex.id}
-          title={codex.title}
-          providerLabel={codex.providerLabel}
-          routeLabel={codex.routeLabel}
-          version={codex.version}
-          accessSummary={codex.accessSummary}
-          readiness={codex.readiness}
-          readinessLabel={codex.readinessLabel}
-          isEnabled={codex.enabled}
-        />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Needs attention">
-        <ModelConnectionCard
-          id={anthropic.id}
-          title={anthropic.title}
-          providerLabel={anthropic.providerLabel}
-          routeLabel={anthropic.routeLabel}
-          version={anthropic.version}
-          accessSummary={anthropic.accessSummary}
-          readiness={anthropic.readiness}
-          readinessLabel={anthropic.readinessLabel}
-          isEnabled={anthropic.enabled}
-        />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Unavailable">
-        <ModelConnectionCard
-          id={ollama.id}
-          title={ollama.title}
-          providerLabel={ollama.providerLabel}
-          routeLabel={ollama.routeLabel}
-          version={ollama.version}
-          accessSummary={ollama.accessSummary}
-          readiness={ollama.readiness}
-          readinessLabel={ollama.readinessLabel}
-          isEnabled={ollama.enabled}
-        />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Two OpenAI instances">
+        <p class="poodle-model-connection-card-specimen__note">
+          Two configured connections of one provider. They differ only by instance
+          label and opaque id; the second is switched off by host preference, not
+          by readiness.
+        </p>
         <div class="poodle-model-connection-card-specimen__stack">
-          <ModelConnectionCard
-            id={work.id}
-            title={work.title}
-            providerLabel={work.providerLabel}
-            routeLabel={work.routeLabel}
-            version={work.version}
-            accessSummary={work.accessSummary}
-            readiness={work.readiness}
-            readinessLabel={work.readinessLabel}
-            isEnabled={work.enabled}
-          />
-          <ModelConnectionCard
-            id={personal.id}
-            title={personal.title}
-            providerLabel={personal.providerLabel}
-            routeLabel={personal.routeLabel}
-            version={personal.version}
-            accessSummary={personal.accessSummary}
-            readiness={personal.readiness}
-            readinessLabel={personal.readinessLabel}
-            isEnabled={personal.enabled}
-          />
+          <ModelConnectionCard {...cardProps(work)} />
+          <ModelConnectionCard {...cardProps(personal)} />
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Closed UpdateCenter accessory">
-        <ModelConnectionCard
-          id={work.id}
-          title={work.title}
-          providerLabel={work.providerLabel}
-          routeLabel={work.routeLabel}
-          version={work.version}
-          accessSummary={work.accessSummary}
-          readiness={work.readiness}
-          readinessLabel={work.readinessLabel}
-          isEnabled={work.enabled}
-        >
-          {#snippet closedAccessory()}
-            <UpdateCenter presence="attention" {...updateOffer} />
-          {/snippet}
-        </ModelConnectionCard>
+      <SpecimenGroup label="Readiness and preference states">
+        <div class="poodle-model-connection-card-specimen__stack">
+          <ModelConnectionCard {...cardProps(codex)} />
+          <ModelConnectionCard {...cardProps(anthropic)} />
+          <ModelConnectionCard {...cardProps(ollama)} />
+          <!-- The whole card is inert; readiness copy stays readable. -->
+          <ModelConnectionCard {...cardProps(work)} isDisabled />
+          <!-- Only the enable Switch is locked; the card still opens. -->
+          <ModelConnectionCard {...cardProps(codex)} isEnableDisabled />
+        </div>
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Host mark, badges, actions, and closed accessory">
+        <div class="poodle-model-connection-card-specimen__stack">
+          <ModelConnectionCard {...cardProps(work)}>
+            {#snippet leading()}
+              <Icon name="star" />
+            {/snippet}
+            {#snippet badges()}
+              <Pill tone="info" appearance="subtle">Preview</Pill>
+            {/snippet}
+            {#snippet actions()}
+              <IconButton
+                icon="ellipsis"
+                variant="ghost"
+                ariaLabel="More actions for OpenAI · Work"
+              />
+            {/snippet}
+          </ModelConnectionCard>
+          <ModelConnectionCard {...cardProps(work)}>
+            {#snippet closedAccessory()}
+              <UpdateCenter presence="attention" {...updateOffer} />
+            {/snippet}
+          </ModelConnectionCard>
+        </div>
       </SpecimenGroup>
 
       <SpecimenGroup label="Open details with catalogue">
-        <ModelConnectionCard
-          id={work.id}
-          title={work.title}
-          providerLabel={work.providerLabel}
-          routeLabel={work.routeLabel}
-          version={work.version}
-          accessSummary={work.accessSummary}
-          readiness={work.readiness}
-          readinessLabel={work.readinessLabel}
-          isEnabled={work.enabled}
-          defaultOpen
-        >
+        <ModelConnectionCard {...cardProps(work)} defaultOpen>
           {#snippet details()}
             <ModelCatalogueEditor items={MODEL_CATALOGUE_FIXTURES} />
           {/snippet}
@@ -163,17 +103,7 @@
 
       <SpecimenGroup label="Narrow summary wrapping">
         <div class="poodle-model-connection-card-specimen__narrow">
-          <ModelConnectionCard
-            id={anthropic.id}
-            title={anthropic.title}
-            providerLabel={anthropic.providerLabel}
-            routeLabel={anthropic.routeLabel}
-            version={anthropic.version}
-            accessSummary={anthropic.accessSummary}
-            readiness={anthropic.readiness}
-            readinessLabel={anthropic.readinessLabel}
-            isEnabled={anthropic.enabled}
-          />
+          <ModelConnectionCard {...cardProps(anthropic)} />
         </div>
       </SpecimenGroup>
     </div>
@@ -195,5 +125,11 @@
 
   .poodle-model-connection-card-specimen__narrow {
     width: min(18rem, 100%);
+  }
+
+  .poodle-model-connection-card-specimen__note {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    opacity: 0.75;
   }
 </style>

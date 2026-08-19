@@ -14,7 +14,7 @@ fn now_seconds() -> i64 {
         .unwrap_or(0)
 }
 
-fn group(theme: &GpuiThemeProvider, label: &str, specimen: LicenceStatus) -> Div {
+fn group(theme: &GpuiThemeProvider, label: &str, specimen: impl IntoElement) -> Div {
     div()
         .flex()
         .flex_col()
@@ -44,15 +44,31 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             theme,
             "Active",
-            LicenceStatus::from_spec(
-                LicenceStatusSpec::new()
-                    .with_usability(LicenceUsability::Active)
-                    .with_trust_basis(offline.clone())
-                    .with_use_until(Some(later))
-                    .with_update_until(Some(later))
-                    .with_usable(true),
-                theme,
-            ),
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                // Covered use and updates, verified on this machine.
+                .child(LicenceStatus::from_spec(
+                    LicenceStatusSpec::new()
+                        .with_usability(LicenceUsability::Active)
+                        .with_trust_basis(offline.clone())
+                        .with_use_until(Some(later))
+                        .with_update_until(Some(later))
+                        .with_usable(true),
+                    theme,
+                ))
+                // Perpetual use, lapsed updates. Two windows, two rows.
+                .child(LicenceStatus::from_spec(
+                    LicenceStatusSpec::new()
+                        .with_usability(LicenceUsability::Active)
+                        .with_trust_basis(offline.clone())
+                        .with_use_until(None)
+                        .with_update_until(Some(past))
+                        .with_usable(true)
+                        .with_attention(LicenceAttention::Informational),
+                    theme,
+                )),
         ))
         // A pending renewal is the seller's outstanding work. It stays calm.
         .child(group(
@@ -82,6 +98,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 theme,
             ),
         ))
+        // Lifetime updates, lapsed lease: the licence is not expired.
         .child(group(
             theme,
             "Lease lapsed",
@@ -90,7 +107,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_usability(LicenceUsability::LeaseLapsed { at: past })
                     .with_trust_basis(remote.clone())
                     .with_use_until(Some(later))
-                    .with_update_until(Some(later))
+                    .with_update_until(None)
                     .with_usable(false)
                     .with_attention(LicenceAttention::Actionable),
                 theme,
@@ -104,77 +121,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 LicenceStatusSpec::new()
                     .with_usability(LicenceUsability::ClockRefused)
                     .with_trust_basis(remote.clone())
-                    .with_use_until(Some(later))
-                    .with_update_until(Some(later))
+                    .with_use_until(None)
+                    .with_update_until(None)
                     .with_usable(false)
                     .with_attention(LicenceAttention::Actionable),
-                theme,
-            ),
-        ))
-        .child(group(
-            theme,
-            "No coverage expiry",
-            LicenceStatus::from_spec(
-                LicenceStatusSpec::new()
-                    .with_usability(LicenceUsability::Active)
-                    .with_trust_basis(offline.clone())
-                    .with_use_until(None)
-                    .with_update_until(None)
-                    .with_usable(true),
-                theme,
-            ),
-        ))
-        // Perpetual use, lapsed updates. Two windows, two rows.
-        .child(group(
-            theme,
-            "Updates expired",
-            LicenceStatus::from_spec(
-                LicenceStatusSpec::new()
-                    .with_usability(LicenceUsability::Active)
-                    .with_trust_basis(offline.clone())
-                    .with_use_until(None)
-                    .with_update_until(Some(past))
-                    .with_usable(true)
-                    .with_attention(LicenceAttention::Informational),
-                theme,
-            ),
-        ))
-        .child(group(
-            theme,
-            "Use window only",
-            LicenceStatus::from_spec(
-                LicenceStatusSpec::new()
-                    .with_usability(LicenceUsability::Active)
-                    .with_trust_basis(offline.clone())
-                    .with_use_until(Some(later))
-                    .with_update_until(None)
-                    .with_usable(true),
-                theme,
-            ),
-        ))
-        .child(group(
-            theme,
-            "Offline verification",
-            LicenceStatus::from_spec(
-                LicenceStatusSpec::new()
-                    .with_usability(LicenceUsability::Active)
-                    .with_trust_basis(offline.clone())
-                    .with_use_until(Some(later))
-                    .with_update_until(Some(later))
-                    .with_usable(true),
-                theme,
-            ),
-        ))
-        .child(group(
-            theme,
-            "Remote verification",
-            LicenceStatus::from_spec(
-                LicenceStatusSpec::new()
-                    .with_usability(LicenceUsability::Active)
-                    .with_trust_basis(remote.clone())
-                    .with_use_until(Some(later))
-                    .with_update_until(Some(later))
-                    .with_usable(true),
                 theme,
             ),
         ))

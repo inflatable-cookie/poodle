@@ -36,18 +36,24 @@ fn posture(
 
 /// The live editor: order, visibility, grab, drop target, hidden disclosure,
 /// announcements and focus all round-trip through the preview's host loop.
-fn interactive(state: &AppState, scope: &str, with_custom_action: bool) -> ModelCatalogueEditor {
+fn interactive(
+    state: &AppState,
+    scope: &str,
+    tweak: impl FnOnce(ModelCatalogueEditorSpec) -> ModelCatalogueEditorSpec,
+) -> ModelCatalogueEditor {
     let theme = &state.theme;
     let queue = Arc::clone(&state.node_events);
     let host = &state.model_connection;
 
-    let mut editor = ModelCatalogueEditor::from_spec(
-        ModelCatalogueEditorSpec::new()
-            .with_items(host.catalogue_items.clone())
-            .with_grabbed(host.grabbed_id.clone())
-            .with_drop_target(host.drop_target_id.clone())
-            .with_hidden_open(host.hidden_open)
-            .with_live_message(host.live_message.clone()),
+    let editor = ModelCatalogueEditor::from_spec(
+        tweak(
+            ModelCatalogueEditorSpec::new()
+                .with_items(host.catalogue_items.clone())
+                .with_grabbed(host.grabbed_id.clone())
+                .with_drop_target(host.drop_target_id.clone())
+                .with_hidden_open(host.hidden_open)
+                .with_live_message(host.live_message.clone()),
+        ),
         theme,
     )
     .on_order_change({
@@ -145,16 +151,6 @@ fn interactive(state: &AppState, scope: &str, with_custom_action: bool) -> Model
     // they would share one focus handle per item id too.
     .with_instance_id(scope);
 
-    if with_custom_action {
-        editor = editor.with_custom_action(poodle_render::button(
-            &ButtonSpec::new()
-                .with_label("Add custom model")
-                .with_variant(ButtonVariant::Secondary)
-                .with_size(ControlSize::Sm),
-            theme,
-            None,
-        ));
-    }
     editor
 }
 
@@ -166,55 +162,74 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex()
         .flex_col()
         .gap(px(32.0))
-        .child(group(
-            theme,
-            "Shown and hidden models",
-            panel(interactive(state, "catalogue-main", false)),
-        ))
-        // Same live editor with the host's leading marks and row metadata
-        // keyed by opaque id.
-        .child(group(
-            theme,
-            "Reorder-capable list with host content",
-            panel(
-                interactive(state, "catalogue-host-content", false)
-                    .with_leading("model-gamma", Node::icon("star", 16.0))
-                    .with_row_meta("model-gamma", Node::text("128k context")),
-            ),
-        ))
         // Two rows share the label "Shared Label" and stay distinct: identity
         // is the opaque id, and a display label was never identity.
         .child(group(
             theme,
-            "Duplicate display labels",
-            panel(interactive(state, "catalogue-duplicates", false)),
+            "Shown and hidden models",
+            panel(interactive(state, "catalogue-main", |spec| spec)),
+        ))
+        // Pointer drag, keyboard grab and explicit move buttons are three
+        // routes to the same reorder; a host may switch either off.
+        .child(group(
+            theme,
+            "Reorder and visibility controls",
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(panel(interactive(state, "catalogue-no-drag", |spec| {
+                    spec.with_drag_enabled(false)
+                })))
+                .child(panel(interactive(state, "catalogue-no-buttons", |spec| {
+                    spec.with_move_actions(false)
+                }))),
+        ))
+        // Host composition: the leading mark and row metadata are keyed by
+        // opaque id, and the custom action is the host's own.
+        .child(group(
+            theme,
+            "Host mark, actions, and row metadata",
+            panel(
+                interactive(state, "catalogue-host-content", |spec| spec)
+                    .with_leading("model-gamma", Node::icon("star", 16.0))
+                    .with_row_meta("model-gamma", Node::text("128k context"))
+                    .with_custom_action(poodle_render::button(
+                        &ButtonSpec::new()
+                            .with_label("Add custom model")
+                            .with_variant(ButtonVariant::Secondary)
+                            .with_size(ControlSize::Sm),
+                        theme,
+                        None,
+                    )),
+            ),
         ))
         .child(group(
             theme,
-            "Custom action",
-            panel(interactive(state, "catalogue-custom-action", true)),
+            "Loading and pending",
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(panel(posture(
+                    theme,
+                    ModelCatalogueState::Loading,
+                    "catalogue-loading",
+                )))
+                // A mutation lock leaves the list readable and every control inert.
+                .child(panel(
+                    ModelCatalogueEditor::from_spec(
+                        ModelCatalogueEditorSpec::new()
+                            .with_items(state.model_connection.catalogue_items.clone())
+                            .with_pending(true),
+                        theme,
+                    )
+                    .with_instance_id("catalogue-pending"),
+                )),
         ))
         .child(group(
             theme,
-            "Loading",
-            panel(posture(
-                theme,
-                ModelCatalogueState::Loading,
-                "catalogue-loading",
-            )),
-        ))
-        .child(group(
-            theme,
-            "Unavailable",
-            panel(posture(
-                theme,
-                ModelCatalogueState::Unavailable,
-                "catalogue-unavailable",
-            )),
-        ))
-        .child(group(
-            theme,
-            "Empty",
+            "Empty catalogue",
             panel(posture(
                 theme,
                 ModelCatalogueState::Empty,
@@ -223,46 +238,25 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ))
         .child(group(
             theme,
-            "Error",
-            panel(posture(
-                theme,
-                ModelCatalogueState::Error,
-                "catalogue-error",
-            )),
-        ))
-        .child(group(
-            theme,
-            "Session negotiated",
-            panel(posture(
-                theme,
-                ModelCatalogueState::SessionNegotiated,
-                "catalogue-session",
-            )),
-        ))
-        .child(group(
-            theme,
-            "Pending mutation lock",
-            panel(
-                ModelCatalogueEditor::from_spec(
-                    ModelCatalogueEditorSpec::new()
-                        .with_items(state.model_connection.catalogue_items.clone())
-                        .with_pending(true),
+            "Unavailable, error, and session-negotiated",
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(panel(posture(
                     theme,
-                )
-                .with_instance_id("catalogue-pending"),
-            ),
-        ))
-        .child(group(
-            theme,
-            "Drag disabled (keyboard and buttons remain)",
-            panel(
-                ModelCatalogueEditor::from_spec(
-                    ModelCatalogueEditorSpec::new()
-                        .with_items(state.model_connection.catalogue_items.clone())
-                        .with_drag_enabled(false),
+                    ModelCatalogueState::Unavailable,
+                    "catalogue-unavailable",
+                )))
+                .child(panel(posture(
                     theme,
-                )
-                .with_instance_id("catalogue-no-drag"),
-            ),
+                    ModelCatalogueState::Error,
+                    "catalogue-error",
+                )))
+                .child(panel(posture(
+                    theme,
+                    ModelCatalogueState::SessionNegotiated,
+                    "catalogue-session",
+                ))),
         ))
 }

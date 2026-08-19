@@ -88,68 +88,61 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex()
         .flex_col()
         .gap(px(32.0))
+        // Many providers, one of them with several routes. Availability is the
+        // host's classification: all four postures sit on their matching
+        // options here, and nothing on this page probes for them.
+        .child(group(theme, "Grouped catalogue", panel(interactive)))
         .child(group(
             theme,
-            "Grouped catalogue (many providers, one provider with several routes)",
-            panel(interactive),
-        ))
-        // Availability is the host's classification. All four postures are on
-        // their matching options above; nothing here probes for them.
-        .child(group(
-            theme,
-            "Availability: available, checking, unavailable, unsupported",
-            panel(scoped(
-                spec().with_value(Some("openai-responses".to_string())),
-                theme,
-                "picker-availability",
-            )),
-        ))
-        .child(group(
-            theme,
-            "Query with results",
-            panel(scoped(
-                spec()
-                    .with_query("anthropic")
-                    .with_value(Some("anthropic-messages".to_string())),
-                theme,
-                "picker-query-results",
-            )),
+            "Search results",
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(panel(scoped(
+                    spec()
+                        .with_query("anthropic")
+                        .with_value(Some("anthropic-messages".to_string())),
+                    theme,
+                    "picker-query-results",
+                )))
+                .child(panel(scoped(
+                    spec().with_query("zzzznothing"),
+                    theme,
+                    "picker-no-results",
+                ))),
         ))
         .child(group(
             theme,
-            "Query with no results",
-            panel(scoped(
-                spec().with_query("zzzznothing"),
-                theme,
-                "picker-no-results",
-            )),
-        ))
-        .child(group(
-            theme,
-            "Loading",
-            panel(scoped(
-                spec().with_state(ModelConnectionPickerState::Loading),
-                theme,
-                "picker-loading",
-            )),
-        ))
-        .child(group(
-            theme,
-            "Error",
-            panel(scoped(
-                spec().with_state(ModelConnectionPickerState::Error),
-                theme,
-                "picker-error",
-            )),
-        ))
-        .child(group(
-            theme,
-            "Empty catalogue",
-            panel(scoped(
-                ModelConnectionPickerSpec::new().with_state(ModelConnectionPickerState::Empty),
-                theme,
-                "picker-empty",
-            )),
+            "Catalogue states and host lock",
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(panel(scoped(
+                    spec().with_state(ModelConnectionPickerState::Loading),
+                    theme,
+                    "picker-loading",
+                )))
+                .child(panel(scoped(
+                    spec().with_state(ModelConnectionPickerState::Error),
+                    theme,
+                    "picker-error",
+                )))
+                .child(panel(scoped(
+                    ModelConnectionPickerSpec::new()
+                        .with_state(ModelConnectionPickerState::Empty),
+                    theme,
+                    "picker-empty",
+                )))
+                // The catalogue is fine; the host has locked search and options.
+                .child(panel(scoped(
+                    spec()
+                        .with_value(Some("openai-responses".to_string()))
+                        .with_disabled(true),
+                    theme,
+                    "picker-disabled",
+                ))),
         ))
         // A host-supplied provider mark, keyed by option id, and a footer.
         // The generic mark stays on every option the host did not name.
@@ -157,11 +150,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             theme,
             "Host provider marks and footer",
             panel(
-                scoped(spec(), theme, "picker-host-content")
-                    .with_leading("ollama-local", poodle_node::Node::icon("terminal", 16.0))
-                    .with_footer(poodle_node::Node::text(
-                        "Connections are managed by the host application.",
-                    )),
+                scoped(
+                    spec().with_value(Some("ollama-local".to_string())),
+                    theme,
+                    "picker-host-content",
+                )
+                .with_leading("ollama-local", poodle_node::Node::icon("terminal", 16.0))
+                .with_footer(poodle_node::Node::text(
+                    "Connections are managed by the host application.",
+                )),
             ),
         ))
         .child(group(
@@ -171,17 +168,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 spec().with_value(Some("ollama-local".to_string())),
                 theme,
                 "picker-narrow",
-            )),
-        ))
-        .child(group(
-            theme,
-            "Disabled",
-            panel(scoped(
-                spec()
-                    .with_value(Some("openai-responses".to_string()))
-                    .with_disabled(true),
-                theme,
-                "picker-disabled",
             )),
         ))
 }

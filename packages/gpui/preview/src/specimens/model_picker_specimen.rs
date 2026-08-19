@@ -149,77 +149,91 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex()
         .flex_col()
         .gap(px(24.0))
+        // Two providers and an archive group in one list. Open, the models
+        // carry their own marks, badges and descriptions, and the axes rail
+        // follows whichever model is selected.
         .child(section(
-            "Model + axes (open)",
+            "Cross-provider default",
             theme,
             ModelPicker::from_spec(demo_spec().with_open(true), theme).into_any_element(),
         ))
+        // An axis is a segmented control up to three options and a list beyond
+        // that; `control` forces either. A model may expose none.
         .child(section(
-            "Rebound axis (Corvid 1: own levels, forced to a list)",
+            "Axis control forms",
             theme,
-            ModelPicker::from_spec(
-                demo_spec()
-                    .with_value(ModelSelection::new("corvid-1"))
-                    .with_open(true),
-                theme,
-            )
-            .into_any_element(),
-        ))
-        .child(section(
-            "Many-level axis (Corvid Ultra: 7 levels, relabelled key)",
-            theme,
-            ModelPicker::from_spec(
-                demo_spec()
-                    .with_value(ModelSelection::new("corvid-ultra"))
-                    .with_open(true),
-                theme,
-            )
-            .into_any_element(),
-        ))
-        .child(section(
-            "Model with no axes at all (Corvid Mini)",
-            theme,
-            ModelPicker::from_spec(
-                demo_spec()
-                    .with_value(ModelSelection::new("corvid-mini"))
-                    .with_open(true),
-                theme,
-            )
-            .into_any_element(),
-        ))
-        .child(section(
-            "Trigger only (collapsed)",
-            theme,
-            ModelPicker::from_spec(demo_spec(), theme).into_any_element(),
-        ))
-        .child(section(
-            "Emphasis: subdued (recedes beside a louder control)",
-            theme,
-            ModelPicker::from_spec(
-                demo_spec().with_emphasis(ModelPickerEmphasis::Subdued),
-                theme,
-            )
-            .into_any_element(),
-        ))
-        .child(section(
-            "Outlined trigger",
-            theme,
-            ModelPicker::from_spec(
-                demo_spec().with_variant(ModelPickerVariant::Outlined),
-                theme,
-            )
-            .into_any_element(),
-        ))
-        .child(section(
-            "No model selected",
-            theme,
-            ModelPicker::from_spec(demo_spec().with_value(ModelSelection::default()), theme)
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(ModelPicker::from_spec(
+                    demo_spec()
+                        .with_value(ModelSelection::new("corvid-1"))
+                        .with_open(true),
+                    theme,
+                ))
+                .child(ModelPicker::from_spec(
+                    demo_spec()
+                        .with_value(ModelSelection::new("corvid-ultra"))
+                        .with_open(true),
+                    theme,
+                ))
+                .child(ModelPicker::from_spec(
+                    demo_spec()
+                        .with_value(ModelSelection::new("corvid-mini"))
+                        .with_open(true),
+                    theme,
+                ))
                 .into_any_element(),
         ))
         .child(section(
-            "Disabled",
+            "Variants and emphasis",
             theme,
-            ModelPicker::from_spec(demo_spec().with_disabled(true), theme).into_any_element(),
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(ModelPicker::from_spec(
+                    demo_spec().with_variant(ModelPickerVariant::Outlined),
+                    theme,
+                ))
+                .child(ModelPicker::from_spec(demo_spec(), theme))
+                .child(ModelPicker::from_spec(
+                    demo_spec().with_emphasis(ModelPickerEmphasis::Subdued),
+                    theme,
+                ))
+                .into_any_element(),
+        ))
+        .child(section(
+            "What the trigger shows",
+            theme,
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(ModelPicker::from_spec(
+                    demo_spec().with_show_axis_summary(false),
+                    theme,
+                ))
+                .child(ModelPicker::from_spec(
+                    demo_spec().with_show_model_descriptions(false).with_open(true),
+                    theme,
+                ))
+                .into_any_element(),
+        ))
+        .child(section(
+            "Nothing selected, and disabled",
+            theme,
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(ModelPicker::from_spec(
+                    demo_spec().with_value(ModelSelection::default()),
+                    theme,
+                ))
+                .child(ModelPicker::from_spec(demo_spec().with_disabled(true), theme))
+                .into_any_element(),
         ))
         .into_any_element();
 

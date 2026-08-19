@@ -52,6 +52,26 @@ fn interactive_options() -> Vec<ModelConnectionOption> {
         .collect()
 }
 
+/// The same direct-add route after host detection failed. It still needs no
+/// configuration, but its honest availability state keeps Add disabled.
+fn missing_options() -> Vec<ModelConnectionOption> {
+    options()
+        .into_iter()
+        .map(|option| {
+            if option.id == "codex-app" {
+                option
+                    .with_availability(
+                        ModelConnectionAvailability::Unavailable,
+                        "Not detected",
+                    )
+                    .with_disabled(true)
+            } else {
+                option
+            }
+        })
+        .collect()
+}
+
 /// Host configuration content. Poodle never sees these values: the field and
 /// its input are nodes the host built and handed over.
 fn api_key_field(theme: &GpuiThemeProvider, id: &str, value: &str) -> Node {
@@ -198,6 +218,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     // Every group below renders the same routes, so each instance carries its
     // own backend-state scope.
+    let direct_add = |options: Vec<ModelConnectionOption>, value: &str| {
+        ModelConnectionSetupSpec::new()
+            .with_options(options)
+            .with_stage(ModelConnectionSetupStage::Choose)
+            .with_value(Some(value.to_string()))
+    };
+
     let configure = |value: &str| {
         ModelConnectionSetupSpec::new()
             .with_options(options())
@@ -209,7 +236,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex()
         .flex_col()
         .gap(px(32.0))
-        .child(group(theme, "Choose stage", panel(interactive)))
+        .child(group(theme, "Choose a connection", panel(interactive)))
         .child(group(
             theme,
             "Configure: API key",
@@ -222,35 +249,37 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .with_configuration(api_key_field(theme, "mcs-api-key", "")),
             ),
         ))
-        // Detection is the host's. Poodle renders the outcome it was given
-        // and never probes for an install.
+        // Detection is the host's. Poodle renders the outcome it was given and
+        // never probes for an install. This route needs no credentials, so no
+        // configure stage is emitted: both examples stay on `choose`, where the
+        // action reads Add rather than Continue and there is no Back.
         .child(group(
             theme,
-            "Auto-detect: found",
-            panel(
-                ModelConnectionSetup::from_spec(
-                    configure("codex-app")
-                        .with_can_submit(true)
-                        .with_success("Local harness detected."),
-                    theme,
-                )
-                .with_instance_id("setup-detect-found"),
-            ),
+            "Auto-detected local route",
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(panel(
+                    ModelConnectionSetup::from_spec(
+                        direct_add(interactive_options(), "codex-app")
+                            .with_can_submit(true),
+                        theme,
+                    )
+                    .with_instance_id("setup-detect-found"),
+                ))
+                // Nothing was found, so the option says so and Add stays disabled.
+                .child(panel(
+                    ModelConnectionSetup::from_spec(
+                        direct_add(missing_options(), "codex-app"),
+                        theme,
+                    )
+                    .with_instance_id("setup-detect-missing"),
+                )),
         ))
         .child(group(
             theme,
-            "Auto-detect: missing",
-            panel(
-                ModelConnectionSetup::from_spec(
-                    configure("codex-app").with_error("Codex app not found on this machine."),
-                    theme,
-                )
-                .with_instance_id("setup-detect-missing"),
-            ),
-        ))
-        .child(group(
-            theme,
-            "OAuth pending",
+            "OAuth in progress",
             panel(
                 ModelConnectionSetup::from_spec(
                     configure("anthropic-messages")
@@ -279,36 +308,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ))
         .child(group(
             theme,
-            "Validation failure",
-            panel(
-                ModelConnectionSetup::from_spec(
-                    configure("openai-responses").with_error("API key format is invalid."),
-                    theme,
-                )
-                .with_instance_id("setup-invalid")
-                .with_configuration(api_key_field(
-                    theme,
-                    "mcs-invalid-key",
-                    "••••••••",
+            "Validation and pending",
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(panel(
+                    ModelConnectionSetup::from_spec(
+                        configure("openai-responses").with_error("API key format is invalid."),
+                        theme,
+                    )
+                    .with_instance_id("setup-invalid")
+                    .with_configuration(api_key_field(theme, "mcs-invalid-key", "••••••••")),
+                ))
+                .child(panel(
+                    ModelConnectionSetup::from_spec(
+                        configure("openai-responses")
+                            .with_can_submit(true)
+                            .with_pending(true),
+                        theme,
+                    )
+                    .with_instance_id("setup-pending")
+                    .with_configuration(api_key_field(theme, "mcs-pending-key", "••••••••")),
                 )),
-            ),
-        ))
-        .child(group(
-            theme,
-            "Pending submit",
-            panel(
-                ModelConnectionSetup::from_spec(
-                    configure("openai-responses")
-                        .with_can_submit(true)
-                        .with_pending(true),
-                    theme,
-                )
-                .with_instance_id("setup-pending")
-                .with_configuration(api_key_field(
-                    theme,
-                    "mcs-pending-key",
-                    "••••••••",
-                )),
-            ),
         ))
 }
