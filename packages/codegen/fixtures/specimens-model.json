@@ -1397,12 +1397,82 @@
             {
               "prop": "content",
               "value": {
-                "String": "Neutral solid surfaces use primary text as the background."
+                "String": "Neutral uses one continuous solid surface."
               },
               "description": null
             }
           ],
           "caption": "Solid neutral",
+          "group": "Solid fills"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "info"
+              },
+              "description": null
+            },
+            {
+              "prop": "fill",
+              "value": {
+                "Member": "solid"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Solid info"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Information uses the original tint-border colour as its fill."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Solid info",
+          "group": "Solid fills"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "success"
+              },
+              "description": null
+            },
+            {
+              "prop": "fill",
+              "value": {
+                "Member": "solid"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Solid success"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Success uses one continuous solid colour."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Solid success",
           "group": "Solid fills"
         },
         {
@@ -1432,12 +1502,47 @@
             {
               "prop": "content",
               "value": {
-                "String": "Tone and theme surface stay readable without inverting the palette."
+                "String": "Warning promotes the tint-border colour into a solid surface."
               },
               "description": null
             }
           ],
           "caption": "Solid warning",
+          "group": "Solid fills"
+        },
+        {
+          "component": "callout",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "danger"
+              },
+              "description": null
+            },
+            {
+              "prop": "fill",
+              "value": {
+                "Member": "solid"
+              },
+              "description": null
+            },
+            {
+              "prop": "title",
+              "value": {
+                "String": "Solid danger"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Danger uses one continuous solid colour."
+              },
+              "description": null
+            }
+          ],
+          "caption": "Solid danger",
           "group": "Solid fills"
         },
         {

@@ -59,8 +59,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.375rem;
-    height: 1.375rem;
+    width: 1.5rem;
+    height: 1.5rem;
     border-radius: 999px;
     background: color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent);
     font-family: var(--poodle-typography-code-family);
@@ -133,8 +133,8 @@
   }
 
   .poodle-callout[data-size="xs"] .poodle-callout__icon {
-    width: 0.875rem;
-    height: 0.875rem;
+    width: 1rem;
+    height: 1rem;
     font-size: 0.5rem;
   }
   .poodle-callout[data-size="xs"] .poodle-callout__content { font-size: 0.625rem; }
@@ -143,8 +143,8 @@
   .poodle-callout[data-size="xs"] { gap: 0.375rem; }
 
   .poodle-callout[data-size="sm"] .poodle-callout__icon {
-    width: 1.125rem;
-    height: 1.125rem;
+    width: 1.25rem;
+    height: 1.25rem;
     font-size: 0.5625rem;
   }
   .poodle-callout[data-size="sm"] .poodle-callout__content { font-size: 0.6875rem; }
@@ -153,8 +153,8 @@
   .poodle-callout[data-size="sm"] { gap: 0.5rem; }
 
   .poodle-callout[data-size="lg"] .poodle-callout__icon {
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 1.875rem;
+    height: 1.875rem;
     font-size: 0.9375rem;
   }
   .poodle-callout[data-size="lg"] .poodle-callout__content { font-size: 0.9375rem; }
@@ -163,27 +163,30 @@
   .poodle-callout[data-size="lg"] { gap: 0.875rem; }
 
   .poodle-callout[data-size="xl"] .poodle-callout__icon {
-    width: 2rem;
-    height: 2rem;
+    width: 2.125rem;
+    height: 2.125rem;
     font-size: 1.0625rem;
   }
   .poodle-callout[data-size="xl"] .poodle-callout__content { font-size: 1.0625rem; }
   .poodle-callout[data-size="xl"] .poodle-callout__content strong { font-size: 1.125rem; }
   .poodle-callout[data-size="xl"] .poodle-callout__dismiss { width: 2.25rem; height: 2.25rem; }
 
-  /* Solid fill is a component-local treatment; it does not alter Button's
-     public API. Tone mixes into the theme surface so dark themes stay
-     dark-rich and light themes stay light-rich. */
+  /* Solid fill promotes the tint-border colour into one continuous surface. */
   .poodle-callout[data-fill="solid"] {
-    --poodle-callout-fill: var(--poodle-recipe-callout-solid-fill, color-mix(in srgb, var(--poodle-callout-tone-base) 40%, var(--poodle-color-background-surface)));
-    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-callout-tone-base));
+    --poodle-callout-fill: var(--poodle-recipe-callout-solid-fill, color-mix(in srgb, var(--poodle-callout-tone-base) 34%, var(--poodle-color-border-default)));
+    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-callout-fill));
     background: var(--poodle-callout-fill);
+    background-clip: padding-box;
     color: var(--poodle-recipe-callout-solid-foreground, var(--poodle-color-text-primary));
   }
 
   .poodle-callout[data-fill="solid"][data-tone="neutral"] {
     --poodle-callout-fill: var(--poodle-recipe-callout-solid-fill, color-mix(in srgb, var(--poodle-color-text-secondary) 50%, var(--poodle-color-background-surface)));
-    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-color-border-strong));
+    --poodle-callout-border: var(--poodle-recipe-callout-solid-border, var(--poodle-callout-fill));
+  }
+
+  .poodle-callout[data-fill="solid"][data-tone="pending"] {
+    --poodle-callout-fill: var(--poodle-recipe-callout-solid-fill, color-mix(in srgb, var(--poodle-callout-tone-base) 24%, var(--poodle-color-border-default)));
   }
 
   .poodle-callout[data-fill="solid"] .poodle-callout__icon {

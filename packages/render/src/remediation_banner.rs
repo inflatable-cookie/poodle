@@ -66,8 +66,13 @@ pub fn remediation_banner(
     let text_primary = theme.resolve_color(spec.title_color_token());
     let text_secondary = theme.resolve_color(spec.message_color_token());
     let solid = spec.is_solid_fill();
-    let solid_surface =
-        solid.then(|| solid_tone_surface(theme, tone_color, spec.is_neutral_tone()));
+    let tint_border_mix = if spec.tone == StatusTone::Pending {
+        0.24
+    } else {
+        0.34
+    };
+    let solid_surface = solid
+        .then(|| solid_tone_surface(theme, tone_color, spec.is_neutral_tone(), tint_border_mix));
 
     // Surface fill = color-mix(tone, panel) at the spec's tone ratio; border = tone.
     let fill = solid_surface
@@ -366,7 +371,12 @@ mod tests {
             .with_tone(StatusTone::Pending)
             .with_fill(ToneFill::Solid)
             .with_secondary_action(RemediationAction::new("details", "View details"));
-        let expected = solid_tone_surface(&theme, theme.resolve_color(spec.border_token()), false);
+        let expected = solid_tone_surface(
+            &theme,
+            theme.resolve_color(spec.border_token()),
+            false,
+            0.24,
+        );
         let node = remediation_banner(&spec, &theme, RemediationBannerHandlers::default());
 
         assert_eq!(node.style.descriptor.background, Some(expected.background));

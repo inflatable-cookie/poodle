@@ -111,7 +111,27 @@ export const calloutSpecimen = {
           tone: "neutral",
           fill: "solid",
           title: "Solid neutral",
-          content: "Neutral solid surfaces use primary text as the background.",
+          content: "Neutral uses one continuous solid surface.",
+        },
+      },
+      {
+        component: "callout",
+        caption: "Solid info",
+        props: {
+          tone: "info",
+          fill: "solid",
+          title: "Solid info",
+          content: "Information uses the original tint-border colour as its fill.",
+        },
+      },
+      {
+        component: "callout",
+        caption: "Solid success",
+        props: {
+          tone: "success",
+          fill: "solid",
+          title: "Solid success",
+          content: "Success uses one continuous solid colour.",
         },
       },
       {
@@ -121,7 +141,17 @@ export const calloutSpecimen = {
           tone: "warning",
           fill: "solid",
           title: "Solid warning",
-          content: "Tone and theme surface stay readable without inverting the palette.",
+          content: "Warning promotes the tint-border colour into a solid surface.",
+        },
+      },
+      {
+        component: "callout",
+        caption: "Solid danger",
+        props: {
+          tone: "danger",
+          fill: "solid",
+          title: "Solid danger",
+          content: "Danger uses one continuous solid colour.",
         },
       },
       {

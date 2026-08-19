@@ -254,25 +254,26 @@
   .poodle-pill[data-tone="danger"] { --poodle-pill-dot-fill: var(--poodle-color-status-danger, #ef4444); }
   .poodle-pill[data-accent="custom"] { --poodle-pill-dot-fill: var(--poodle-pill-accent); }
 
-  /* Solid appearance: opaque tone mixed into the theme surface. The
+  /* Solid appearance: tint-border colour promoted into one surface. The
      ordinary tone-tinted shell is the `tint` base recipe above; appearances
      are mutually exclusive, so solid never composes with subtle or badge. */
   .poodle-pill[data-appearance="solid"] {
-    --poodle-pill-fill: var(--poodle-recipe-pill-solid-fill, color-mix(in srgb, var(--poodle-pill-tone-base) 40%, var(--poodle-color-background-surface)));
-    --poodle-pill-border: var(--poodle-recipe-pill-solid-border, var(--poodle-pill-tone-base));
+    --poodle-pill-fill: var(--poodle-recipe-pill-solid-fill, color-mix(in srgb, var(--poodle-pill-tone-base) 34%, var(--poodle-color-border-default)));
+    --poodle-pill-border: var(--poodle-recipe-pill-solid-border, var(--poodle-pill-fill));
     --poodle-pill-text: var(--poodle-recipe-pill-solid-text, var(--poodle-color-text-primary));
+    background-clip: padding-box;
   }
 
   .poodle-pill[data-appearance="solid"][data-tone="neutral"] {
     --poodle-pill-fill: var(--poodle-recipe-pill-solid-fill, color-mix(in srgb, var(--poodle-color-text-secondary) 50%, var(--poodle-color-background-surface)));
-    --poodle-pill-border: var(--poodle-recipe-pill-solid-border, var(--poodle-color-border-strong));
+    --poodle-pill-border: var(--poodle-recipe-pill-solid-border, var(--poodle-pill-fill));
   }
 
   /* A custom accent replaces the semantic tone as the solid mix base, so the
      neutral special case above must not win when an accent is present. */
   .poodle-pill[data-appearance="solid"][data-accent="custom"] {
-    --poodle-pill-fill: var(--poodle-recipe-pill-solid-fill, color-mix(in srgb, var(--poodle-pill-tone-base) 40%, var(--poodle-color-background-surface)));
-    --poodle-pill-border: var(--poodle-recipe-pill-solid-border, var(--poodle-pill-tone-base));
+    --poodle-pill-fill: var(--poodle-recipe-pill-solid-fill, color-mix(in srgb, var(--poodle-pill-tone-base) 24%, var(--poodle-color-border-default)));
+    --poodle-pill-border: var(--poodle-recipe-pill-solid-border, var(--poodle-pill-fill));
   }
 
   .poodle-pill[data-appearance="solid"] .poodle-pill__dot {

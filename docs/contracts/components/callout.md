@@ -46,7 +46,7 @@ Updated: 2026-07-10
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `tone` | `StatusTone` | `"neutral"` | no | semantic tone and coloring |
-| `fill` | `ToneFill` | `"tint"` | no | tone surface treatment; solid mixes tone into the theme surface with primary foreground |
+| `fill` | `ToneFill` | `"tint"` | no | tone surface treatment; solid promotes the tint-border colour into the fill |
 | `title` | `string \| null` | `null` | no | bold heading text rendered as `<strong>` |
 | `message` | `string \| null` | `null` | no | body text rendered as `<p>` |
 | `ariaLabel` | `string \| null` | `null` | no | optional accessible label for the callout region |
@@ -99,7 +99,7 @@ Defined in [004 Shared Control Types](../004-shared-control-types.md).
 | warning | `tone="warning"` | warning-tinted fill and border |
 | danger | `tone="danger"` | danger-tinted fill and border |
 | pending | `tone="pending"` | lighter accent-tinted fill and border |
-| solid | `fill="solid"` | opaque tone-and-theme surface with primary foreground; composes with every tone and preserves the existing icon, action, and typography structure |
+| solid | `fill="solid"` | tint-border colour used for both fill and border as one continuous surface; composes with every tone and preserves the existing icon, action, and typography structure |
 
 ### Component States
 
@@ -233,12 +233,12 @@ Tint recipes remain unchanged. For every non-neutral tone, solid resolves:
 
 | Property | Value |
 |----------|-------|
-| `--poodle-callout-fill` | opaque sRGB mix of `var(--poodle-callout-tone-base)` at 40% and `var(--poodle-color-background-surface)` at 60% |
-| `--poodle-callout-border` | raw `var(--poodle-callout-tone-base)` |
+| `--poodle-callout-fill` | the tint-border recipe: 34% tone base with `color.border.default`; pending uses 24% |
+| `--poodle-callout-border` | the same resolved colour as `--poodle-callout-fill` |
 | foreground | `var(--poodle-color-text-primary)` |
 
 For `tone="neutral"`, solid mixes `color.text.secondary` and
-`color.background.surface` equally and uses `color.border.strong` as the
+`color.background.surface` equally and uses that colour for both fill and
 border. The icon badge, title, message, dismiss control, and pending spinner
 use the primary foreground. Secondary and ghost action buttons use local
 primary-derived fill, border, text, and hover
@@ -265,8 +265,8 @@ layout, and focus-ring behavior remain unchanged.
 | `display` | `inline-flex` |
 | `align-items` | `center` |
 | `justify-content` | `center` |
-| `width` | `1.375rem` |
-| `height` | `1.375rem` |
+| `width` | `1.5rem` |
+| `height` | `1.5rem` |
 | `border-radius` | `999px` |
 | `background` | `color-mix(in srgb, var(--poodle-color-background-surface) 78%, transparent)` |
 | `font-family` | `var(--poodle-typography-code-family)` |
@@ -348,11 +348,11 @@ font-size is the `.callout__content` size.
 
 | Size | icon badge size | icon font-size | title font-size | message font-size | dismiss button size |
 |------|----------------|----------------|-----------------|-------------------|---------------------|
-| `xs` | `0.875rem` | `0.5rem` | `0.6875rem` | `0.625rem` | `1.25rem` |
-| `sm` | `1.125rem` | `0.5625rem` | `0.75rem` | `0.6875rem` | `1.5rem` |
-| `md` | `1.375rem` | `0.75rem` | `typography-label-size` | `0.8125rem` | `1.75rem` |
-| `lg` | `1.75rem` | `0.9375rem` | `1rem` | `0.9375rem` | `2rem` |
-| `xl` | `2rem` | `1.0625rem` | `1.125rem` | `1.0625rem` | `2.25rem` |
+| `xs` | `1rem` | `0.5rem` | `0.6875rem` | `0.625rem` | `1.25rem` |
+| `sm` | `1.25rem` | `0.5625rem` | `0.75rem` | `0.6875rem` | `1.5rem` |
+| `md` | `1.5rem` | `0.75rem` | `typography-label-size` | `0.8125rem` | `1.75rem` |
+| `lg` | `1.875rem` | `0.9375rem` | `1rem` | `0.9375rem` | `2rem` |
+| `xl` | `2.125rem` | `1.0625rem` | `1.125rem` | `1.0625rem` | `2.25rem` |
 
 ## 9. Svelte Notes
 
@@ -408,8 +408,8 @@ font-size is the `.callout__content` size.
 - [ ] neutral tone uses custom property defaults (94% panel, 88% border)
 - [ ] info/success/warning/danger tones use 10%/34% color-mix pattern
 - [ ] pending tone uses 8%/26% color-mix pattern (distinct from others)
-- [ ] `fill="solid"` uses the shared 40% tone-base / 60% surface recipe with primary foreground
-- [ ] icon badge size (1.375rem), circular radius (999px), and background match
+- [ ] `fill="solid"` promotes the tint-border colour into one continuous fill-and-border surface with primary foreground
+- [ ] icon badge size (1.5rem), circular radius (999px), and background match
 - [ ] icon typography matches (code-family, 0.75rem, weight 700)
 - [ ] content gap (space-inline-sm) matches
 - [ ] title typography uses label token family/size/lineHeight

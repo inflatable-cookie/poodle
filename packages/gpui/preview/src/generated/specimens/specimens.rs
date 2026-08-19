@@ -240,7 +240,27 @@ pub static SPECIMEN_SCENES: &[SpecimenScene<'static>] = &[
                         SpecimenProp { prop: "tone", value: "neutral" },
                         SpecimenProp { prop: "fill", value: "solid" },
                         SpecimenProp { prop: "title", value: "Solid neutral" },
-                        SpecimenProp { prop: "content", value: "Neutral solid surfaces use primary text as the background." },
+                        SpecimenProp { prop: "content", value: "Neutral uses one continuous solid surface." },
+                    ],
+                },
+                SpecimenInstance {
+                    component: "callout",
+                    caption: Some("Solid info"),
+                    props: &[
+                        SpecimenProp { prop: "tone", value: "info" },
+                        SpecimenProp { prop: "fill", value: "solid" },
+                        SpecimenProp { prop: "title", value: "Solid info" },
+                        SpecimenProp { prop: "content", value: "Information uses the original tint-border colour as its fill." },
+                    ],
+                },
+                SpecimenInstance {
+                    component: "callout",
+                    caption: Some("Solid success"),
+                    props: &[
+                        SpecimenProp { prop: "tone", value: "success" },
+                        SpecimenProp { prop: "fill", value: "solid" },
+                        SpecimenProp { prop: "title", value: "Solid success" },
+                        SpecimenProp { prop: "content", value: "Success uses one continuous solid colour." },
                     ],
                 },
                 SpecimenInstance {
@@ -250,7 +270,17 @@ pub static SPECIMEN_SCENES: &[SpecimenScene<'static>] = &[
                         SpecimenProp { prop: "tone", value: "warning" },
                         SpecimenProp { prop: "fill", value: "solid" },
                         SpecimenProp { prop: "title", value: "Solid warning" },
-                        SpecimenProp { prop: "content", value: "Tone and theme surface stay readable without inverting the palette." },
+                        SpecimenProp { prop: "content", value: "Warning promotes the tint-border colour into a solid surface." },
+                    ],
+                },
+                SpecimenInstance {
+                    component: "callout",
+                    caption: Some("Solid danger"),
+                    props: &[
+                        SpecimenProp { prop: "tone", value: "danger" },
+                        SpecimenProp { prop: "fill", value: "solid" },
+                        SpecimenProp { prop: "title", value: "Solid danger" },
+                        SpecimenProp { prop: "content", value: "Danger uses one continuous solid colour." },
                     ],
                 },
                 SpecimenInstance {

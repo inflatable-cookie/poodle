@@ -50,7 +50,7 @@ Updated: 2026-08-10
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `tone` | `StatusTone` | `"warning"` | no | banner fill, border, and icon color |
-| `fill` | `ToneFill` | `"tint"` | no | shared tone surface treatment; solid mixes tone into the theme surface with primary foreground |
+| `fill` | `ToneFill` | `"tint"` | no | shared tone surface treatment; solid promotes the tint-border colour into the fill |
 | `title` | `string` | — | yes | bold heading text |
 | `message` | `string` | — | yes | body message |
 | `announceMode` | `AnnouncementMode` | `"polite"` | no | `"polite"`, `"assertive"`, or `"none"` — derives role/aria-live |
@@ -106,7 +106,7 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 | polite | `announceMode="polite"` | `role="status"`, `aria-live="polite"` |
 | assertive | `announceMode="assertive"` | `role="alert"`, `aria-live="assertive"` |
 | silent | `announceMode="none"` | no live-region semantics |
-| solid | `fill="solid"` | opaque tone-and-theme surface with primary foreground; tint behavior is unchanged |
+| solid | `fill="solid"` | tint-border colour used for both fill and border as one continuous surface; tint behavior is unchanged |
 
 ## 5. Accessibility
 
@@ -129,11 +129,12 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 
 ### Solid fill
 
-With `fill="solid"`, non-neutral banners use an opaque sRGB mix of 40% tone
-base and 60% `color.background.surface`, with the raw tone base as the border
-and `color.text.primary` for the title, message, icon, dismiss control, and
+With `fill="solid"`, non-neutral banners promote the tint-border colour into
+the fill: standard status tones mix 34% tone base with `color.border.default`,
+while pending uses 24%. The promoted colour paints both fill and border, and
+`color.text.primary` colors the title, message, icon, dismiss control, and
 spinner. Neutral solid banners mix `color.text.secondary` and
-`color.background.surface` equally and use `color.border.strong` as the
+`color.background.surface` equally and use that colour for both fill and
 border. Secondary and ghost actions use local primary-derived button recipes
 for readability; primary Button behavior is
 unchanged. Layout, typography, announcement semantics, and focus rings stay

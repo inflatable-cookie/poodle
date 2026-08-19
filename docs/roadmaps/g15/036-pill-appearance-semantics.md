@@ -35,13 +35,12 @@ fallback.
 - `appearance="tint"` owns today's default tone-tinted shell.
 - The implicit appearance changes from `solid` to `tint`; default rendered
   output remains observably unchanged.
-- `appearance="solid"` owns the `g15.035` opaque recipe:
-  - non-neutral background: 40% tone base plus 60%
-    `color.background.surface` in sRGB;
+- `appearance="solid"` owns the `g15.035` solid recipe:
+  - non-neutral background: tint-border colour promoted into the fill — 34%
+    tone base with `color.border.default`, or 24% for a custom accent;
   - neutral background: equal parts `color.text.secondary` and
     `color.background.surface`;
-  - non-neutral border: raw tone base;
-  - neutral border: `color.border.strong`;
+  - border: the same resolved colour as the fill;
   - foreground and dot/remove affordance: `color.text.primary`;
   - a custom `accent` replaces the semantic tone base.
 - `appearance="subtle"` and `appearance="badge"` keep their current visual and

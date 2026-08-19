@@ -27,6 +27,9 @@
       tone="neutral"
       fill="solid"
     />
+    <RemediationBanner title="Solid information" message="Tint-border colour promoted into the fill." tone="info" fill="solid" />
+    <RemediationBanner title="Solid success" message="The operation completed successfully." tone="success" fill="solid" />
+    <RemediationBanner title="Solid warning" message="Review this condition before continuing." tone="warning" fill="solid" />
     <RemediationBanner
       title="Solid danger recovery"
       message="Secondary actions stay readable on the solid surface."
@@ -34,5 +37,6 @@
       fill="solid"
       secondaryAction={details}
     />
+    <RemediationBanner title="Solid pending" message="Recovery is still in progress." tone="pending" fill="solid" />
   </SpecimenGroup>
 </div>

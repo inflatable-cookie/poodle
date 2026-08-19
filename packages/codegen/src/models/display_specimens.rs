@@ -395,13 +395,31 @@ pub fn display_specimens_scenes() -> Vec<Scene> {
                     ("tone", member_value("neutral")),
                     ("fill", member_value("solid")),
                     ("title", str_value("Solid neutral")),
-                    ("content", str_value("Neutral solid surfaces use primary text as the background.")),
+                    ("content", str_value("Neutral uses one continuous solid surface.")),
+                ]),
+                instance("callout", "Solid fills", "Solid info", vec![
+                    ("tone", member_value("info")),
+                    ("fill", member_value("solid")),
+                    ("title", str_value("Solid info")),
+                    ("content", str_value("Information uses the original tint-border colour as its fill.")),
+                ]),
+                instance("callout", "Solid fills", "Solid success", vec![
+                    ("tone", member_value("success")),
+                    ("fill", member_value("solid")),
+                    ("title", str_value("Solid success")),
+                    ("content", str_value("Success uses one continuous solid colour.")),
                 ]),
                 instance("callout", "Solid fills", "Solid warning", vec![
                     ("tone", member_value("warning")),
                     ("fill", member_value("solid")),
                     ("title", str_value("Solid warning")),
-                    ("content", str_value("Tone and theme surface stay readable without inverting the palette.")),
+                    ("content", str_value("Warning promotes the tint-border colour into a solid surface.")),
+                ]),
+                instance("callout", "Solid fills", "Solid danger", vec![
+                    ("tone", member_value("danger")),
+                    ("fill", member_value("solid")),
+                    ("title", str_value("Solid danger")),
+                    ("content", str_value("Danger uses one continuous solid colour.")),
                 ]),
                 instance("callout", "Solid fills", "Solid pending", vec![
                     ("tone", member_value("pending")),

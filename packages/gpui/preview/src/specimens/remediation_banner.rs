@@ -104,12 +104,45 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(RemediationBanner::from_spec(
                     RemediationBannerSpec::new(
+                        "Solid information",
+                        "Tint-border colour promoted into the fill.",
+                    )
+                    .with_tone(StatusTone::Info)
+                    .with_fill(ToneFill::Solid),
+                    theme,
+                ))
+                .child(RemediationBanner::from_spec(
+                    RemediationBannerSpec::new(
+                        "Solid success",
+                        "The operation completed successfully.",
+                    )
+                    .with_tone(StatusTone::Success)
+                    .with_fill(ToneFill::Solid),
+                    theme,
+                ))
+                .child(RemediationBanner::from_spec(
+                    RemediationBannerSpec::new(
+                        "Solid warning",
+                        "Review this condition before continuing.",
+                    )
+                    .with_tone(StatusTone::Warning)
+                    .with_fill(ToneFill::Solid),
+                    theme,
+                ))
+                .child(RemediationBanner::from_spec(
+                    RemediationBannerSpec::new(
                         "Solid danger recovery",
                         "Secondary and ghost actions stay readable on the solid surface.",
                     )
                     .with_tone(StatusTone::Danger)
                     .with_fill(ToneFill::Solid)
                     .with_secondary_action(RemediationAction::new("details", "View details")),
+                    theme,
+                ))
+                .child(RemediationBanner::from_spec(
+                    RemediationBannerSpec::new("Solid pending", "Recovery is still in progress.")
+                        .with_tone(StatusTone::Pending)
+                        .with_fill(ToneFill::Solid),
                     theme,
                 )),
         ))

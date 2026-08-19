@@ -12,26 +12,25 @@ not make that visual direction sound.
 
 ## Correction
 
-- Non-neutral backgrounds now mix 40% tone with 60%
-  `color.background.surface` in sRGB.
+- Non-neutral backgrounds now promote the tint-border colour into the fill:
+  34% tone with `color.border.default`, or 24% for pending/custom accent.
 - Neutral backgrounds mix `color.text.secondary` and
   `color.background.surface` equally.
 - Content, icons, pending spinners, and Pill remove affordances use
   `color.text.primary`.
-- Tone and neutral border rules stay unchanged.
+- Fill and border use the same resolved colour as one continuous surface.
 - Callout, RemediationBanner, and Pill use the same recipe in shared CSS and
   renderer-neutral Rust.
 
-The recipe follows the theme instead of inverting it: dark themes keep
-moderately dark, saturated surfaces; light themes keep moderately light,
-muted surfaces.
+Dark themes keep moderately dark coloured surfaces; light themes keep
+moderately light ones. No stronger outline separates border from fill.
 
 ## Evidence
 
 The renderer test covers all twelve themes plus neutral, info, success,
-warning, danger, and accent bases. The lowest measured normal-text contrast is
-4.783:1 for a toned surface and 4.860:1 for a neutral surface, both above the
-4.5:1 floor.
+warning, danger, and accent bases. It evaluates translucent tint-border fills
+over the panel token. The lowest measured normal-text contrast is 4.528:1,
+above the 4.5:1 floor.
 
 React preview inspection covered Callout, RemediationBanner, and Pill in
 Eclipse and Iceberg. Eclipse retained white primary text on darkened tone
@@ -50,4 +49,3 @@ switching resolved the recipe without component-local theme branches.
 | `effigy react:build` | pass |
 | `effigy check:gpui` | render 335 and node backend 19 tests pass |
 | `effigy docs:check` | pass |
-

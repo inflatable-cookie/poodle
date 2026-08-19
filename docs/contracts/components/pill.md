@@ -65,7 +65,7 @@ Updated: 2026-07-10
 | danger | `tone="danger"` | red-tinted fill and border, primary text |
 | custom accent | `accent` provided | accent-tinted fill, border, and text using the provided color |
 | tint | default (`appearance="tint"`) | ordinary tone-tinted shell; the base recipes below apply with no appearance override |
-| solid | `appearance="solid"` | opaque tone-and-theme fill with primary foreground; uses a custom accent as the tone base |
+| solid | `appearance="solid"` | tint-border colour used for both fill and border with primary foreground |
 | subtle | `appearance="subtle"` | 50% transparent fill overlay |
 | muted | `muted=true` | reduced opacity (0.72) |
 | xs | `size="xs"` | smallest metadata chip sizing |
@@ -215,14 +215,14 @@ cycle. `solid` and `badge` assign `--poodle-pill-fill` directly.
 
 ### Appearance: solid `.pill[data-appearance="solid"]`
 
-Solid resolves the background as an opaque sRGB mix of the tone base at 40%
-and `color.background.surface` at 60%, uses the raw tone base as the border,
-and uses `color.text.primary` as the text color. The neutral solid background
+Solid promotes the tint-border colour into the background: semantic tones mix
+34% tone base with `color.border.default`, while a custom accent uses 24% to
+retain normal-text contrast. The promoted colour paints both fill and border,
+and `color.text.primary` remains the text color. The neutral solid background
 mixes `color.text.secondary` and `color.background.surface` equally and its
-border is `color.border.strong`. A custom `accent` replaces the semantic tone
-as the mix base. Appearance is a single mutually exclusive axis: solid never
-combines with subtle's opacity reduction or badge's uppercase typography. The
-optional dot uses the primary foreground in the solid appearance.
+colour also paints its border. Appearance is a single mutually exclusive
+axis: solid never combines with subtle's opacity reduction or badge's
+uppercase typography. The optional dot uses the primary foreground.
 
 ### Appearance: badge `.pill[data-appearance="badge"]`
 

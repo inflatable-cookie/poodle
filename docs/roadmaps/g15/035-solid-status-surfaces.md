@@ -53,11 +53,13 @@ records the supersession without rewriting the execution history below.
     `color.background.surface`;
   - info/success/warning/danger base: the matching `color.status.*` token;
   - pending base: `color.accent.base`;
-  - non-neutral solid background: an opaque sRGB mix of **40% tone base and
-    60% `color.background.surface`**;
+  - non-neutral solid background: promote the tint-border colour into the
+    fill — 34% tone base with `color.border.default`, or 24% for pending and
+    custom accent surfaces;
   - foreground: `color.text.primary` for title, message, icon, dismiss control,
     and pending spinner;
-  - border: raw tone base for non-neutral; `color.border.strong` for neutral;
+  - border: the same resolved colour as the fill, producing one continuous
+    solid surface;
   - icon badge, where the component has one: a subtle primary-text overlay that
     keeps the existing badge geometry.
 - Pill custom accents use the same formula with the custom accent as the tone
@@ -69,10 +71,10 @@ records the supersession without rewriting the execution history below.
   `fill="solid"` takes precedence over appearance-specific tint/opacity color
   recipes; badge typography remains, while subtle adds no opacity reduction in
   solid mode. This is an explicit precedence rule, not a silent fallback.
-- Post-merge visual review replaced the original inverted 45/55 recipe. It
-  washed dark themes toward white and light themes toward black. The 40/60
-  tone/surface recipe keeps each theme on its own side of the contrast axis;
-  current-theme evidence retains at least 4.7:1 normal-text contrast.
+- Post-merge visual review first removed the inverted 45/55 recipe, then
+  replaced the intermediate tone/surface mix with the tint-border promotion
+  requested in live review. Current-theme evidence retains at least 4.5:1
+  normal-text contrast.
 - Poodle `Button` compositions in either action area remain legible on the
   solid surface while honoring the action's supplied variant and disabled
   state. Use a local surface/foreground treatment; do not rewrite host action
@@ -147,8 +149,9 @@ records the supersession without rewriting the execution history below.
   to `CallOutSpec`, `RemediationBannerSpec`, and `PillSpec`.
 - Default all three specs to `Tint`; also correct Callout's tone default to
   `Neutral`.
-- Resolve the same 40/60 tone/surface sRGB solid fill, border, primary text/icon/spinner,
-  action readability, and focus treatment in `poodle-render`.
+- Resolve the same continuous promoted tint-border surface, primary
+  text/icon/spinner, action readability, and focus treatment in
+  `poodle-render`.
 - Add spec and render tests for the full matrices, default parity, token
   selection, contrast rule, callbacks, Pill appearance precedence, and
   unchanged accessibility output.
@@ -266,8 +269,8 @@ Jetstream, or release selector.
 - Pill needs a breaking `appearance` rename, an invalid-combination fallback,
   or a second component-specific fill type. Preserve the recorded precedence
   and report contrary evidence instead of widening the migration.
-- The 40/60 tone/surface rule fails the contrast threshold in a current theme or cannot be
-  reproduced by both shared CSS and `poodle-render`.
+- The promoted tint-border rule fails the contrast threshold in a current
+  theme or cannot be reproduced by both shared CSS and `poodle-render`.
 - Solid action readability requires changing Button's public API or global
   behavior rather than a local composition treatment.
 - The change requires a new token family or changes global status-tone

@@ -142,7 +142,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_tone(StatusTone::Neutral)
                             .with_fill(ToneFill::Solid)
                             .with_title("Solid neutral")
-                            .with_content("Primary text background with strong neutral border."),
+                            .with_content("One continuous neutral surface."),
+                        theme,
+                    ),
+                )
+                .child(
+                    Callout::from_spec(
+                        CallOutSpec::new()
+                            .with_tone(StatusTone::Info)
+                            .with_fill(ToneFill::Solid)
+                            .with_title("Solid info")
+                            .with_content("Tint-border colour promoted into the fill."),
+                        theme,
+                    ),
+                )
+                .child(
+                    Callout::from_spec(
+                        CallOutSpec::new()
+                            .with_tone(StatusTone::Success)
+                            .with_fill(ToneFill::Solid)
+                            .with_title("Solid success")
+                            .with_content("One continuous solid colour."),
                         theme,
                     ),
                 )
@@ -152,7 +172,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_tone(StatusTone::Warning)
                             .with_fill(ToneFill::Solid)
                             .with_title("Solid warning")
-                            .with_content("Tone base border with primary foreground."),
+                            .with_content("Tint-border colour promoted into the fill."),
+                        theme,
+                    ),
+                )
+                .child(
+                    Callout::from_spec(
+                        CallOutSpec::new()
+                            .with_tone(StatusTone::Danger)
+                            .with_fill(ToneFill::Solid)
+                            .with_title("Solid danger")
+                            .with_content("One continuous solid colour."),
                         theme,
                     ),
                 )

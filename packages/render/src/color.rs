@@ -18,40 +18,34 @@ pub struct SolidToneSurface {
     pub foreground: ColorValue,
 }
 
-/// Resolve the shared solid treatment against the theme surface.
-///
-/// Non-neutral fills mix 40% tone into the surface. Neutral fills mix
-/// secondary text and surface equally. Both keep primary text as the
-/// foreground, so dark themes stay dark-rich and light themes stay light-rich
-/// instead of inverting toward washed-out or near-black surfaces.
+/// Resolve the shared solid treatment by promoting the tint border colour to
+/// one continuous fill-and-border surface.
 pub fn solid_tone_surface(
     theme: &dyn ThemeProvider,
     tone_base: ColorValue,
     is_neutral: bool,
+    tint_border_mix: f32,
 ) -> SolidToneSurface {
     let text_primary = theme.resolve_color("color.text.primary");
-    let background_surface = theme.resolve_color("color.background.surface");
     let background = if is_neutral {
         with_alpha(
             mix_srgb(
                 theme.resolve_color("color.text.secondary"),
-                background_surface,
+                theme.resolve_color("color.background.surface"),
                 0.50,
             ),
             1.0,
         )
     } else {
-        with_alpha(mix_srgb(tone_base, background_surface, 0.40), 1.0)
+        mix_srgb(
+            tone_base,
+            theme.resolve_color("color.border.default"),
+            tint_border_mix,
+        )
     };
-    let border = if is_neutral {
-        theme.resolve_color("color.border.strong")
-    } else {
-        with_alpha(tone_base, 1.0)
-    };
-
     SolidToneSurface {
         background,
-        border,
+        border: background,
         foreground: with_alpha(text_primary, 1.0),
     }
 }
@@ -144,8 +138,24 @@ mod tests {
         (lighter + 0.05) / (darker + 0.05)
     }
 
+    fn composite_over(foreground: ColorValue, background: ColorValue) -> ColorValue {
+        let alpha = foreground.3 + background.3 * (1.0 - foreground.3);
+        if alpha == 0.0 {
+            return ColorValue(0.0, 0.0, 0.0, 0.0);
+        }
+        ColorValue(
+            (foreground.0 * foreground.3 + background.0 * background.3 * (1.0 - foreground.3))
+                / alpha,
+            (foreground.1 * foreground.3 + background.1 * background.3 * (1.0 - foreground.3))
+                / alpha,
+            (foreground.2 * foreground.3 + background.2 * background.3 * (1.0 - foreground.3))
+                / alpha,
+            alpha,
+        )
+    }
+
     #[test]
-    fn solid_tone_surface_keeps_primary_foreground_readable_across_themes() {
+    fn solid_tone_surface_promotes_tint_borders_with_readable_primary_foreground() {
         let themes = [
             &themes::CLAY,
             &themes::COBALT,
@@ -165,7 +175,6 @@ mod tests {
             "color.status.success",
             "color.status.warning",
             "color.status.danger",
-            "color.accent.base",
         ];
         let mut floor = f32::INFINITY;
         let mut floor_name = "";
@@ -176,8 +185,10 @@ mod tests {
                 &provider,
                 provider.resolve_color("color.text.secondary"),
                 true,
+                0.34,
             );
             let neutral_ratio = contrast_ratio(neutral.foreground, neutral.background);
+            assert_eq!(neutral.border, neutral.background);
             if neutral_ratio < floor {
                 floor = neutral_ratio;
                 floor_name = definition.name;
@@ -189,8 +200,14 @@ mod tests {
             );
 
             for token in tone_tokens {
-                let surface = solid_tone_surface(&provider, provider.resolve_color(token), false);
-                let ratio = contrast_ratio(surface.foreground, surface.background);
+                let surface =
+                    solid_tone_surface(&provider, provider.resolve_color(token), false, 0.34);
+                assert_eq!(surface.border, surface.background);
+                let effective_background = composite_over(
+                    surface.background,
+                    provider.resolve_color("color.background.panel"),
+                );
+                let ratio = contrast_ratio(surface.foreground, effective_background);
                 if ratio < floor {
                     floor = ratio;
                     floor_name = definition.name;
@@ -201,12 +218,34 @@ mod tests {
                     definition.name
                 );
             }
+
+            let accent = solid_tone_surface(
+                &provider,
+                provider.resolve_color("color.accent.base"),
+                false,
+                0.24,
+            );
+            assert_eq!(accent.border, accent.background);
+            let accent_background = composite_over(
+                accent.background,
+                provider.resolve_color("color.background.panel"),
+            );
+            let accent_ratio = contrast_ratio(accent.foreground, accent_background);
+            if accent_ratio < floor {
+                floor = accent_ratio;
+                floor_name = definition.name;
+            }
+            assert!(
+                accent_ratio >= 4.5,
+                "solid accent contrast below 4.5:1 in {} ({accent_ratio:.3})",
+                definition.name
+            );
         }
 
         println!("solid tone foreground contrast floor: {floor:.3}:1 ({floor_name})");
         assert!(
-            floor > 4.7,
-            "expected the shared solid recipe to retain margin above 4.5:1"
+            floor >= 4.5,
+            "expected the shared solid recipe to clear 4.5:1"
         );
     }
 }

@@ -24,13 +24,17 @@
 .poodle-remediation-banner__dismiss:focus-visible { outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing); outline-offset: 0.125rem; }
 
 .poodle-remediation-banner[data-fill="solid"] {
-  background: color-mix(in srgb, var(--poodle-remediation-banner-tone) 40%, var(--poodle-color-background-surface));
-  border-color: var(--poodle-remediation-banner-tone);
+  --poodle-remediation-banner-solid-color: color-mix(in srgb, var(--poodle-remediation-banner-tone) 34%, var(--poodle-color-border-default));
+  background: var(--poodle-remediation-banner-solid-color);
+  border-color: var(--poodle-remediation-banner-solid-color);
+  background-clip: padding-box;
   color: var(--poodle-color-text-primary);
 }
 .poodle-remediation-banner[data-fill="solid"][data-tone="neutral"] {
-  background: color-mix(in srgb, var(--poodle-color-text-secondary) 50%, var(--poodle-color-background-surface));
-  border-color: var(--poodle-color-border-strong);
+  --poodle-remediation-banner-solid-color: color-mix(in srgb, var(--poodle-color-text-secondary) 50%, var(--poodle-color-background-surface));
+}
+.poodle-remediation-banner[data-fill="solid"][data-tone="pending"] {
+  --poodle-remediation-banner-solid-color: color-mix(in srgb, var(--poodle-remediation-banner-tone) 24%, var(--poodle-color-border-default));
 }
 .poodle-remediation-banner[data-fill="solid"] .poodle-remediation-banner__icon,
 .poodle-remediation-banner[data-fill="solid"] .poodle-remediation-banner__content,

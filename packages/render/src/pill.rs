@@ -47,7 +47,8 @@ fn pill_colors(spec: &PillSpec, theme: &dyn ThemeProvider) -> (ColorValue, Color
     if spec.is_solid_appearance() {
         let tone_base = custom_accent.unwrap_or(tone_color);
         let is_neutral = spec.tone == PillTone::Neutral && custom_accent.is_none();
-        let surface = solid_tone_surface(theme, tone_base, is_neutral);
+        let tint_border_mix = if custom_accent.is_some() { 0.24 } else { 0.34 };
+        let surface = solid_tone_surface(theme, tone_base, is_neutral, tint_border_mix);
         return (surface.background, surface.border, surface.foreground);
     }
 
@@ -308,6 +309,7 @@ mod tests {
             &theme,
             theme.resolve_color(success.tone_color_token()),
             false,
+            0.34,
         );
         assert_eq!(
             pill_colors(&success, &theme),
@@ -318,7 +320,7 @@ mod tests {
             .with_appearance(PillAppearance::Solid)
             .with_accent_color("#ff9900");
         let custom_base = hex_color("#ff9900").expect("custom accent");
-        let custom_expected = solid_tone_surface(&theme, custom_base, false);
+        let custom_expected = solid_tone_surface(&theme, custom_base, false, 0.24);
         assert_eq!(
             pill_colors(&custom, &theme),
             (
@@ -333,6 +335,7 @@ mod tests {
             &theme,
             theme.resolve_color(neutral.tone_color_token()),
             true,
+            0.34,
         );
         assert_eq!(
             pill_colors(&neutral, &theme),
@@ -352,8 +355,12 @@ mod tests {
             .with_appearance(PillAppearance::Solid)
             .with_removable(true);
         spec.has_dot = true;
-        let expected =
-            solid_tone_surface(&theme, theme.resolve_color(spec.tone_color_token()), true);
+        let expected = solid_tone_surface(
+            &theme,
+            theme.resolve_color(spec.tone_color_token()),
+            true,
+            0.34,
+        );
         let node = pill_with_remove(&spec, &theme, None);
 
         let dot = node.children.first().expect("solid dot");

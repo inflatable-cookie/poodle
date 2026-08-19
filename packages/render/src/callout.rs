@@ -12,7 +12,7 @@ use poodle_node::{
     NodeRole, StylePatch,
 };
 use poodle_specs::{
-    CallOutSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, StatusTone,
+    CallOutSpec, ControlSize, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant, StatusTone,
 };
 
 use crate::color::{mix_srgb, solid_tone_surface, with_alpha};
@@ -86,7 +86,9 @@ pub fn callout(spec: &CallOutSpec, theme: &dyn ThemeProvider, handlers: CalloutH
     let is_neutral = spec.is_neutral_tone();
     let is_pending = spec.is_pending_tone();
     let solid = spec.is_solid_fill();
-    let solid_surface = solid.then(|| solid_tone_surface(theme, tone_color, is_neutral));
+    let tint_border_mix = if is_pending { 0.24 } else { 0.34 };
+    let solid_surface =
+        solid.then(|| solid_tone_surface(theme, tone_color, is_neutral, tint_border_mix));
     let fill = if let Some(surface) = solid_surface {
         surface.background
     } else if is_neutral {
@@ -141,8 +143,14 @@ pub fn callout(spec: &CallOutSpec, theme: &dyn ThemeProvider, handlers: CalloutH
         s.descriptor.layout.width = LayoutSizing::Grow;
     }
 
-    // Circular icon badge — 1.375rem, surface at 78%.
-    let badge_size = rem_to_px(1.375);
+    // Circular icon badge follows the web size ladder, with the glyph unchanged.
+    let badge_size = rem_to_px(match effective_size {
+        ControlSize::Xs => 1.0,
+        ControlSize::Sm => 1.25,
+        ControlSize::Md => 1.5,
+        ControlSize::Lg => 1.875,
+        ControlSize::Xl => 2.125,
+    });
     let mut badge = Node::container();
     {
         let s = &mut badge.style;
@@ -357,6 +365,7 @@ mod tests {
             &theme,
             theme.resolve_color(warning.tone_color_token()),
             false,
+            0.34,
         );
         let node = callout(&warning, &theme, CalloutHandlers::default());
 
@@ -375,6 +384,7 @@ mod tests {
             &theme,
             theme.resolve_color(pending.tone_color_token()),
             false,
+            0.24,
         );
         let pending_node = callout(&pending, &theme, CalloutHandlers::default());
         let spinner = pending_node
