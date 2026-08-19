@@ -31,7 +31,7 @@ v0.2.0 release-baseline generation.
   appearance recipes before visual conformance. PR #46 completed `g15.022`,
   curating the audio/music family with paired-web and shared-native coverage.
   PR #47 completed `g15.023`, curating the foundation entry, content, and
-  status family. `g15.024` is next for readiness review.
+  status family. `g15.024` is remeasured and ready for dispatch.
   `g15.013` remains the final gate after the
   specimen program and `g15.012`.
   Jetstream remains deferred.
