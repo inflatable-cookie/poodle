@@ -6,7 +6,7 @@ Parent: `docs/roadmaps/g15/018-overloaded-examples-curation.md`
 Handoff: `docs/handoffs/20260819-221731-g15-024-agent-tools-curation.md`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-826e3c4f`
 Branch: `t3code/curate-agent-tool-specimens`
-Accepted implementation head: pending final commit
+Accepted implementation head: `99b85ff5`
 First review head: `6d8e0b24`
 Worker base: `a94e95431295df2b1aabf34084c799531dbca9f5` (`origin/main` at
 dispatch; handoff planning base `11e49d89df12e90500ebf3c9318bdc493b45cc1c`

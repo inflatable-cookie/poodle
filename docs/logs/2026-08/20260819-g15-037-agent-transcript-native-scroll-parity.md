@@ -3,6 +3,7 @@
 Date: 2026-08-19
 Card: `docs/roadmaps/g15/037-agent-transcript-native-scroll-parity.md`
 PR: #48, absorbed review prerequisite for `g15.024`
+Accepted implementation head: `99b85ff5`
 
 ## Outcome
 
