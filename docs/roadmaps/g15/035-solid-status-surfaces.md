@@ -1,7 +1,7 @@
 # g15.035 — Solid Tone Surfaces
 
-Status: **ready** — API and visual rules, including Pill, approved by the
-operator on 2026-08-19
+Status: **complete** — PR #44 merged at `c24b19f4`; Pill's duplicate `fill`
+axis is superseded by `g15.036`
 Depends on: `g15.010` (complete active-cohort component closure)
 Blocks: `g15.012`, `g15.013`
 Parallel with: `g15.022` — no shared mutable implementation or specimen files
@@ -30,6 +30,16 @@ specimens match in Svelte, React, renderer-neutral Rust, and GPUI.
 This is additive public API on the pre-1.0 preview channel. It is not a new
 component variant system and does not change announcement, dismissal, action,
 layout, size, density, or Pill appearance behavior.
+
+## Post-Merge Correction
+
+PR #44 delivered this card as written. During closeout, the operator identified
+that Pill already had a mutually exclusive appearance axis, making its new
+`fill` prop duplicate public vocabulary. `g15.036` removes Pill `fill`, adds
+`appearance="tint"` as the visual-preserving default, and assigns the opaque
+treatment to the existing `appearance="solid"`. Callout and
+RemediationBanner retain the `ToneFill` API delivered here. This section
+records the supersession without rewriting the execution history below.
 
 ## Approved API And Visual Rule
 

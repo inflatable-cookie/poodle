@@ -1,8 +1,8 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.010` and `g15.014`–`g15.017` complete;
-`g15.019`–`g15.021` and `g15.034` complete; `g15.011` partial with bounded
-continuation cards; `g15.035` ready as an independent additive API lane
+`g15.019`–`g15.021`, `g15.034`, and `g15.035` complete; `g15.011` partial with
+bounded continuation cards; `g15.036` ready as the Pill API correction
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -77,7 +77,8 @@ and status advance are the orchestrator's.
 22. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — after `011` completes; headless capture required
 23. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
 24. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after the full specimen program and `012`
-25. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — ready; additive shared `fill` axis for Callout, Pill, and RemediationBanner, parallel-safe with `022`, before `012`/`013`
+25. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
+26. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — ready; remove Pill's temporary `fill`, add tint appearance, and make existing solid appearance truthful before `012`/`013`
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)
@@ -107,7 +108,8 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 ## Current Task
 
 `g15.022` is the next bounded specimen child and requires orchestrator review
-before dispatch. `g15.035` is ready as an independent parallel feature lane.
+before dispatch. `g15.036` is ready as an independent, parallel-safe Pill API
+correction after PR #44.
 `g15.011` remains
 partial until `g15.026` and all six screen-clear review children
 (`g15.028`–`g15.033`) land; defect-led curation proceeds through
