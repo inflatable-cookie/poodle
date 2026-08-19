@@ -47,6 +47,14 @@ const frameworkOptions: SelectOption[] = [
   { value: "astro", label: "Astro" },
 ];
 
+const stackStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "0.75rem",
+  flex: 1,
+  minWidth: "12rem",
+};
+
 const fieldStyle: CSSProperties = {
   display: "flex",
   alignItems: "center",
@@ -108,7 +116,7 @@ export function SelectSpecimen() {
         <Select options={fruitOptions} placeholder="Select..." density={density} ariaLabel={`${density} select`} />
       )}
     >
-            <SpecimenGroup label="Native">
+            <SpecimenGroup label="Native select">
         <div style={fieldStyle}>
                       <Select
                         options={fruitOptions}
@@ -133,8 +141,9 @@ export function SelectSpecimen() {
                     </div>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Searchable">
-        <div style={fieldStyle}>
+                <SpecimenGroup label="Search and freeform entry">
+        <div style={stackStyle}>
+          <div style={fieldStyle}>
                       <Select
                         options={frameworkOptions}
                         placeholder="Search frameworks..."
@@ -144,10 +153,7 @@ export function SelectSpecimen() {
                       />
                       {selectedFramework ? <span style={valueStyle}>{selectedFramework}</span> : null}
                     </div>
-      </SpecimenGroup>
-
-                <SpecimenGroup label="Freeform">
-        <div style={fieldStyle}>
+          <div style={fieldStyle}>
                       <Select
                         options={frameworkOptions}
                         placeholder="Type or select..."
@@ -158,10 +164,12 @@ export function SelectSpecimen() {
                       />
                       {freeformValue ? <span style={valueStyle}>{freeformValue}</span> : null}
                     </div>
+        </div>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Snippet rendering">
-        <div style={fieldStyle}>
+                <SpecimenGroup label="Rich and grouped options">
+        <div style={stackStyle}>
+          <div style={fieldStyle}>
                       <Select
                         options={richOptions}
                         placeholder="Custom country"
@@ -192,13 +200,11 @@ export function SelectSpecimen() {
                       />
                       {customCountry ? <span style={valueStyle}>{customCountry}</span> : null}
                     </div>
+          <Select options={groupedOptions} placeholder="Choose a food" ariaLabel="Grouped food" />
+        </div>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Grouped">
-        <Select options={groupedOptions} placeholder="Choose a food" ariaLabel="Grouped food" />
-      </SpecimenGroup>
-
-                <SpecimenGroup label="Clearable">
+                <SpecimenGroup label="Clearable selection">
         <Select
                       options={fruitOptions}
                       placeholder="All fruits"

@@ -21,32 +21,27 @@
 </script>
 
 <SpecimenLayout>
-    <SpecimenGroup label="Primary">
+    <SpecimenGroup label="Save split action">
     <SplitButton variant="primary" items={saveItems} onClick={() => (lastAction = "Save")} onAction={(value) => (lastAction = value)}>Save</SplitButton>
   </SpecimenGroup>
 
-        <SpecimenGroup label="Secondary">
+        <SpecimenGroup label="Secondary export">
     <SplitButton variant="secondary" items={exportItems} onClick={() => (lastAction = "Export")} onAction={(value) => (lastAction = value)}>Export</SplitButton>
   </SpecimenGroup>
 
-        <SpecimenGroup label="Danger">
-    <SplitButton tone="danger" items={[{ value: "delete-selected", label: "Delete selected" }, { value: "delete-all", label: "Delete all" }]} onClick={() => (lastAction = "Delete")} onAction={(value) => (lastAction = value)}>Delete</SplitButton>
+        <SpecimenGroup label="Intent tones">
+    <div class="poodle-specimen__row">
+      <SplitButton tone="danger" items={[{ value: "delete-selected", label: "Delete selected" }, { value: "delete-all", label: "Delete all" }]} onClick={() => (lastAction = "Delete")} onAction={(value) => (lastAction = value)}>Delete</SplitButton>
+      <SplitButton tone="success" items={[{ value: "publish-now", label: "Publish now" }, { value: "schedule-publish", label: "Schedule" }]} onClick={() => (lastAction = "Publish")} onAction={(value) => (lastAction = value)}>Publish</SplitButton>
+      <SplitButton tone="warning" items={[{ value: "archive-selected", label: "Archive selected" }, { value: "archive-all", label: "Archive all" }]} onClick={() => (lastAction = "Archive")} onAction={(value) => (lastAction = value)}>Archive</SplitButton>
+    </div>
   </SpecimenGroup>
 
-        <SpecimenGroup label="Success">
-    <SplitButton tone="success" items={[{ value: "publish-now", label: "Publish now" }, { value: "schedule-publish", label: "Schedule" }]} onClick={() => (lastAction = "Publish")} onAction={(value) => (lastAction = value)}>Publish</SplitButton>
-  </SpecimenGroup>
-
-        <SpecimenGroup label="Warning">
-    <SplitButton tone="warning" items={[{ value: "archive-selected", label: "Archive selected" }, { value: "archive-all", label: "Archive all" }]} onClick={() => (lastAction = "Archive")} onAction={(value) => (lastAction = value)}>Archive</SplitButton>
-  </SpecimenGroup>
-
-        <SpecimenGroup label="Loading">
-    <SplitButton variant="primary" items={saveItems} loading>Saving…</SplitButton>
-  </SpecimenGroup>
-
-        <SpecimenGroup label="Disabled">
-    <SplitButton variant="secondary" items={saveItems} disabled>Save</SplitButton>
+        <SpecimenGroup label="Loading and disabled states">
+    <div class="poodle-specimen__row">
+      <SplitButton variant="primary" items={saveItems} loading>Saving…</SplitButton>
+      <SplitButton variant="secondary" items={saveItems} disabled>Save</SplitButton>
+    </div>
   </SpecimenGroup>
 
       {#if lastAction}
@@ -63,6 +58,13 @@
 </SpecimenLayout>
 
 <style>
+  .poodle-specimen__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
   .poodle-specimen__hint {
     margin: 0;
     font-size: 0.75rem;

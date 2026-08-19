@@ -11,31 +11,28 @@ export function MeterSpecimen() {
       showDensities={false}
       sizes={(size) => (
         <div style={{ width: "min(100%, 20rem)" }}>
-          <Meter value={50} ariaLabel={`Storage usage at ${size}`} size={size} />
+          <Meter shape="ring" value={60} ariaLabel={`Context used at ${size}`} size={size} />
         </div>
       )}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem", maxWidth: "20rem" }}>
-        <SpecimenGroup label="Default (50%)">
+        <SpecimenGroup label="Default usage">
           <Meter value={50} ariaLabel="Storage usage" />
         </SpecimenGroup>
 
-        <SpecimenGroup label="With thresholds">
+        <SpecimenGroup label="Threshold states">
           <Meter value={82} low={25} high={75} optimum={50} ariaLabel="CPU usage" />
           <p>82% — above high threshold</p>
-        </SpecimenGroup>
-
-        <SpecimenGroup label="Low value (optimal range)">
           <Meter value={30} low={25} high={75} optimum={50} ariaLabel="Memory usage" />
           <p>30% — within normal range</p>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Custom range (0–500)">
+        <SpecimenGroup label="Custom range">
           <Meter value={350} min={0} max={500} ariaLabel="API calls" />
           <p>350 / 500 API calls used</p>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Ring">
+        <SpecimenGroup label="Ring shape and readout">
           <div style={row}>
             <Meter shape="ring" value={38} ariaLabel="Context used" />
             <Meter
@@ -47,14 +44,6 @@ export function MeterSpecimen() {
             <Meter shape="ring" value={64} showValue size="xl" ariaLabel="Context used" />
           </div>
           <p>38% · 86% (above high) · 64% with readout</p>
-        </SpecimenGroup>
-
-        <SpecimenGroup label="Ring sizes">
-          <div style={row}>
-            {(["xs", "sm", "md", "lg", "xl"] as const).map((size) => (
-              <Meter key={size} shape="ring" value={60} size={size} ariaLabel={`Ring ${size}`} />
-            ))}
-          </div>
         </SpecimenGroup>
 
         <SpecimenGroup label="Ring tones">

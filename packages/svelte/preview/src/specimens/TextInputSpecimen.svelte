@@ -7,9 +7,6 @@
   let name = $state("");
   let email = $state("invalid-email");
   let validationState: ValidationState = $state("invalid");
-  let workspace = "acme-admin";
-  let workspaceStatus: InputValidationStatus = "idle";
-  let workspaceError: string | null = null;
   let slug = $state("");
   let slugStatus: InputValidationStatus = $state("idle");
   let searchQuery = $state("");
@@ -19,18 +16,10 @@
     if (value === "northstar") return { valid: false, message: "That slug is already in use." };
     return { valid: true };
   }
-
-  async function validateWorkspace(value: string) {
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    if (["admin", "settings", "support"].includes(value.trim().toLowerCase())) {
-      return { valid: false, message: "That workspace handle is reserved." };
-    }
-    return { valid: true };
-  }
 </script>
 
 <SpecimenLayout>
-    <SpecimenGroup label="Default">
+    <SpecimenGroup label="Default field">
     <div class="poodle-specimen__control">
           <Field id="name-field" label="Name" description="Enter your full name.">
             <TextInput id="name-field" placeholder="Jane Doe" onValueChange={(nextValue) => (name = nextValue)} />
@@ -38,23 +27,22 @@
         </div>
   </SpecimenGroup>
 
-        <SpecimenGroup label="With validation">
-    <div class="poodle-specimen__control">
+        <SpecimenGroup label="Validation and async availability">
+    <div class="poodle-specimen__stack">
+      <div class="poodle-specimen__control">
           <Field id="email-field" label="Email" description="A valid email address is required." validationState={validationState} error={validationState === "invalid" ? "Please enter a valid email address." : null}>
             <TextInput id="email-field" value={email} {validationState} onValueChange={(nextValue) => { email = nextValue; validationState = nextValue.includes("@") ? "valid" : "invalid"; }} />
           </Field>
         </div>
-  </SpecimenGroup>
-
-        <SpecimenGroup label="Slug">
-    <div class="poodle-specimen__control">
+      <div class="poodle-specimen__control">
           <Field id="slug-field" label="Slug" description="Generates from the title until the user edits it." validationState={slugStatus === "validating" ? "pending" : slugStatus === "invalid" ? "invalid" : slugStatus === "valid" ? "valid" : "none"} error={slugStatus === "invalid" ? "That slug is not available." : null}>
             <TextInput id="slug-field" type="slug" value={slug} source="Northstar Launch Plan" prefix="/projects/" maxLength={64} validate={validateSlug} onValueChange={(nextValue) => (slug = nextValue)} onValidationChange={(detail) => { slugStatus = detail.status; }} />
           </Field>
         </div>
+    </div>
   </SpecimenGroup>
 
-        <SpecimenGroup label="Search">
+        <SpecimenGroup label="Search input">
     <div class="poodle-specimen__control">
           <TextInput id="search-field" type="search" placeholder="Search..." value={searchQuery} onValueChange={(nextValue) => (searchQuery = nextValue)} onClear={() => (searchQuery = "")} />
         </div>
@@ -66,18 +54,18 @@
         </div>
   </SpecimenGroup>
 
-        <SpecimenGroup label="Disabled">
-    <div class="poodle-specimen__control">
-          <Field id="disabled-field" label="API key">
-            <TextInput id="disabled-field" value="sk-xxxx-xxxx-xxxx" disabled />
-          </Field>
-        </div>
-  </SpecimenGroup>
-
         <SpecimenGroup label="Multiline">
     <div class="poodle-specimen__control">
           <Field id="multiline-field" label="Description">
             <TextInput id="multiline-field" type="multiline" rows={3} maxLength={280} showCharCount placeholder="Enter a description..." />
+          </Field>
+        </div>
+  </SpecimenGroup>
+
+        <SpecimenGroup label="Disabled">
+    <div class="poodle-specimen__control">
+          <Field id="disabled-field" label="API key">
+            <TextInput id="disabled-field" value="sk-xxxx-xxxx-xxxx" disabled />
           </Field>
         </div>
   </SpecimenGroup>
@@ -96,6 +84,12 @@
 </SpecimenLayout>
 
 <style>
+  .poodle-specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
   .poodle-specimen__control {
     max-width: 20rem;
   }

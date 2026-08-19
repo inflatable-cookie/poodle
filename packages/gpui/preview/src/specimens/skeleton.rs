@@ -43,28 +43,6 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                     theme,
                 )),
         ))
-        // --- Partial-width lines (rem, since % is not parsed in single-shape) ---
-        .child(group(
-            theme,
-            "Partial-width lines",
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(6.0))
-                .w(px(rem_px(18.0)))
-                .child(Skeleton::from_spec(
-                    SkeletonSpec::new().with_shape("line").with_width("18rem"),
-                    theme,
-                ))
-                .child(Skeleton::from_spec(
-                    SkeletonSpec::new().with_shape("line").with_width("13.5rem"),
-                    theme,
-                ))
-                .child(Skeleton::from_spec(
-                    SkeletonSpec::new().with_shape("line").with_width("9rem"),
-                    theme,
-                )),
-        ))
         // --- Preset: avatar-line ---
         .child(group(
             theme,
@@ -77,7 +55,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Preset: list-item (x3) ---
         .child(group(
             theme,
-            "Preset: list-item (\u{00d7}3)",
+            "Preset: list-item (×3)",
             div()
                 .flex()
                 .flex_col()
@@ -98,7 +76,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         // --- Preset: table-row (x3) ---
         .child(group(
             theme,
-            "Preset: table-row (\u{00d7}3)",
+            "Preset: table-row (×3)",
             div()
                 .flex()
                 .flex_col()

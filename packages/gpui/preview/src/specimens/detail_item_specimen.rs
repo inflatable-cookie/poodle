@@ -36,10 +36,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     status_text.style.descriptor.text_color = Some(success);
     let status_value = status_value.child(status_text);
     let examples = div().flex().flex_col().gap(px(24.0))
-        // --- Basic label-value pairs ---
+        // --- Inline layout (default) ---
         .child(
             div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Basic label-value pairs"), theme))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Inline layout (default)"), theme))
                 .child(
                     div().flex().flex_col()
                         .child(DetailItem::from_spec(DetailItemSpec::new("Name").with_value("Poodle Design System"), theme))
@@ -93,6 +93,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_value_content(status_value)
                 )
         )
+        // --- Stacked layout ---
+        .child(
+            div().flex().flex_col().gap(px(8.0))
+                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Stacked layout"), theme))
+                .child(
+                    DetailItem::from_spec(
+                        DetailItemSpec::new("Arrangement")
+                            .with_value("2CF8B3D0-F592-4D87-8F9F-74D6B42E0E7D:main:external:0:0:3440:1440:1000|37D8832A...")
+                            .with_truncate_value(true)
+                            .with_layout(DetailItemLayout::Stacked),
+                        theme,
+                    )
+                )
+        )
         // --- Surface presentation ---
         .child(
             div().flex().flex_col().gap(px(8.0))
@@ -126,51 +140,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                             ).with_id("dr-surface-edit")
                         ))
-                )
-        )
-        // --- Stacked layout ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Stacked layout"), theme))
-                .child(
-                    DetailItem::from_spec(
-                        DetailItemSpec::new("Arrangement")
-                            .with_value("2CF8B3D0-F592-4D87-8F9F-74D6B42E0E7D:main:external:0:0:3440:1440:1000|37D8832A...")
-                            .with_truncate_value(true)
-                            .with_layout(DetailItemLayout::Stacked),
-                        theme,
-                    )
-                )
-        )
-        // --- Simple vs surface presentation ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Simple vs surface presentation"), theme))
-                .child(
-                    div().flex().flex_col().gap(px(8.0))
-                        .child(DetailItem::from_spec(
-                            DetailItemSpec::new("Simple")
-                                .with_value("Plain row, no chrome")
-                                .with_presentation(DetailItemPresentation::Simple),
-                            theme,
-                        ))
-                        .child(DetailItem::from_spec(
-                            DetailItemSpec::new("Surface")
-                                .with_value("Elevated card row")
-                                .with_presentation(DetailItemPresentation::Surface),
-                            theme,
-                        ))
-                )
-        )
-        // --- Empty value (em-dash placeholder) ---
-        .child(
-            div().flex().flex_col().gap(px(8.0))
-                .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Empty value (em-dash)"), theme))
-                .child(
-                    DetailItem::from_spec(
-                        DetailItemSpec::new("Owner"),
-                        theme,
-                    )
                 )
         )
         .into_any_element();

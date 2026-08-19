@@ -4,6 +4,12 @@ import type { InputValidationStatus, ValidationResult, ValidationState } from "@
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
+const stackStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "0.75rem",
+};
+
 const controlStyle: CSSProperties = {
   maxWidth: "20rem",
 };
@@ -35,7 +41,7 @@ export function TextInputSpecimen() {
         </div>
       )}
     >
-            <SpecimenGroup label="Default">
+            <SpecimenGroup label="Default field">
         <div style={controlStyle}>
                       <Field id="name-field" label="Name" description="Enter your full name.">
                         <TextInput id="name-field" placeholder="Jane Doe" onValueChange={(nextValue) => setName(nextValue)} />
@@ -43,8 +49,9 @@ export function TextInputSpecimen() {
                     </div>
       </SpecimenGroup>
 
-                <SpecimenGroup label="With validation">
-        <div style={controlStyle}>
+                <SpecimenGroup label="Validation and async availability">
+        <div style={stackStyle}>
+          <div style={controlStyle}>
                       <Field
                         id="email-field"
                         label="Email"
@@ -63,10 +70,7 @@ export function TextInputSpecimen() {
                         />
                       </Field>
                     </div>
-      </SpecimenGroup>
-
-                <SpecimenGroup label="Slug">
-        <div style={controlStyle}>
+          <div style={controlStyle}>
                       <Field
                         id="slug-field"
                         label="Slug"
@@ -95,9 +99,10 @@ export function TextInputSpecimen() {
                         />
                       </Field>
                     </div>
+        </div>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Search">
+                <SpecimenGroup label="Search input">
         <div style={controlStyle}>
                       <TextInput
                         id="search-field"
@@ -116,20 +121,20 @@ export function TextInputSpecimen() {
                     </div>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Disabled">
-        <div style={controlStyle}>
-                      <Field id="disabled-field" label="API key">
-                        <TextInput id="disabled-field" value="sk-xxxx-xxxx-xxxx" disabled />
-                      </Field>
-                    </div>
-      </SpecimenGroup>
-
       <SpecimenGroup label="Multiline">
         <div style={controlStyle}>
           <Field id="multiline-field" label="Description">
             <TextInput id="multiline-field" type="multiline" rows={3} maxLength={280} showCharCount placeholder="Enter a description..." />
           </Field>
         </div>
+      </SpecimenGroup>
+
+                <SpecimenGroup label="Disabled">
+        <div style={controlStyle}>
+                      <Field id="disabled-field" label="API key">
+                        <TextInput id="disabled-field" value="sk-xxxx-xxxx-xxxx" disabled />
+                      </Field>
+                    </div>
       </SpecimenGroup>
     </SpecimenLayout>
   );

@@ -43,48 +43,45 @@
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Refs with the checked-out branch marked (live value)">
+  <SpecimenGroup label="Branch and tag selection">
     <RefSelect {refs} bind:value currentRef="main" />
     <p>Selected: <code>{value}</code> — the marker stays on <code>main</code></p>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Host-driven search (searchValue supplied, host filters)">
-    <RefSelect
-      refs={hostFiltered}
-      value="tree-component"
-      currentRef="main"
-      searchValue={hostQuery}
-      onSearchChange={(next) => (hostQuery = next)}
-    />
-    <p>Query: <code>{hostQuery}</code> → {hostFiltered.length} ref(s) passed in</p>
+  <SpecimenGroup label="Search and no matches">
+    <div class="poodle-specimen__stack">
+      <RefSelect
+        refs={hostFiltered}
+        value="tree-component"
+        currentRef="main"
+        searchValue={hostQuery}
+        onSearchChange={(next) => (hostQuery = next)}
+      />
+      <p>Query: <code>{hostQuery}</code> → {hostFiltered.length} ref(s) passed in</p>
+      <RefSelect refs={[]} searchValue="nothing-matches" currentRef="main" />
+      <p>Host search with an empty list shows no matches.</p>
+    </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Loading more refs">
-    <RefSelect {refs} value="main" currentRef="main" loading />
+  <SpecimenGroup label="Loading and short-list search">
+    <div class="poodle-specimen__stack">
+      <RefSelect {refs} value="main" currentRef="main" loading />
+      <RefSelect refs={refs.slice(0, 3)} value="main" currentRef="main" searchable={false} />
+    </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="No matches (host-driven, empty list)">
-    <RefSelect refs={[]} searchValue="nothing-matches" currentRef="main" />
+  <SpecimenGroup label="Trigger presentation">
+    <div class="poodle-specimen__stack">
+      <RefSelect {refs} value="main" currentRef="main" variant="outlined" />
+      <RefSelect {refs} value="main" currentRef="main" emphasis="subdued" />
+    </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Search hidden (short lists don't need it)">
-    <RefSelect refs={refs.slice(0, 3)} value="main" currentRef="main" searchable={false} />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Outlined trigger">
-    <RefSelect {refs} value="main" currentRef="main" variant="outlined" />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Subdued (as embedded in the AgentChatInput footer)">
-    <RefSelect {refs} value="main" currentRef="main" emphasis="subdued" />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="No selection">
-    <RefSelect {refs} value="" currentRef="main" />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Disabled">
-    <RefSelect {refs} value="main" currentRef="main" disabled />
+  <SpecimenGroup label="Selection states">
+    <div class="poodle-specimen__stack">
+      <RefSelect {refs} value="" currentRef="main" />
+      <RefSelect {refs} value="main" currentRef="main" disabled />
+    </div>
   </SpecimenGroup>
 
   {#snippet sizes(size)}
@@ -97,6 +94,12 @@
 </SpecimenLayout>
 
 <style>
+  .poodle-specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
   code {
     font-family: var(--poodle-typography-code-family);
     font-size: 0.75rem;

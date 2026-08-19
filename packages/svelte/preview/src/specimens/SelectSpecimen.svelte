@@ -55,7 +55,7 @@
 </script>
 
 <SpecimenLayout>
-    <SpecimenGroup label="Native">
+    <SpecimenGroup label="Native select">
     <div class="poodle-specimen__field">
           <Select
             options={fruitOptions}
@@ -80,8 +80,9 @@
         </div>
   </SpecimenGroup>
 
-        <SpecimenGroup label="Searchable">
-    <div class="poodle-specimen__field">
+        <SpecimenGroup label="Search and freeform entry">
+    <div class="poodle-specimen__stack">
+      <div class="poodle-specimen__field">
           <Select
             options={frameworkOptions}
             placeholder="Search frameworks..."
@@ -91,10 +92,7 @@
           />
           {#if selectedFramework}<span class="poodle-specimen__value">{selectedFramework}</span>{/if}
         </div>
-  </SpecimenGroup>
-
-        <SpecimenGroup label="Freeform">
-    <div class="poodle-specimen__field">
+      <div class="poodle-specimen__field">
           <Select
             options={frameworkOptions}
             placeholder="Type or select..."
@@ -105,10 +103,12 @@
           />
           {#if freeformValue}<span class="poodle-specimen__value">{freeformValue}</span>{/if}
         </div>
+    </div>
   </SpecimenGroup>
 
-        <SpecimenGroup label="Snippet rendering">
-    <div class="poodle-specimen__field">
+        <SpecimenGroup label="Rich and grouped options">
+    <div class="poodle-specimen__stack">
+      <div class="poodle-specimen__field">
           <Select
             options={richOptions}
             placeholder="Custom country"
@@ -142,17 +142,15 @@
           </Select>
           {#if customCountry}<span class="poodle-specimen__value">{customCountry}</span>{/if}
         </div>
-  </SpecimenGroup>
-
-        <SpecimenGroup label="Grouped">
-    <Select
+      <Select
           options={groupedOptions}
           placeholder="Choose a food"
           ariaLabel="Grouped food"
         />
+    </div>
   </SpecimenGroup>
 
-        <SpecimenGroup label="Clearable">
+        <SpecimenGroup label="Clearable selection">
     <Select
           options={fruitOptions}
           placeholder="All fruits"
@@ -181,6 +179,14 @@
 </SpecimenLayout>
 
 <style>
+  .poodle-specimen__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 12rem;
+  }
+
   .poodle-specimen__field {
     display: flex;
     align-items: center;

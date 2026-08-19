@@ -304,40 +304,43 @@ All preview apps must render the following specimens identically.
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Sizes | `value=50`, `size=xs..xl` | Track thickness steps from thin to thick across the full size ladder |
+| Sizes | `shape="ring"`, `value=60`, `size=xs..xl` | One ring representative per size; diameter and ring thickness step across the full size ladder |
 
-### Default (50%)
-
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
-| Default (50%) | `value=50`, `ariaLabel="Storage usage"` | Track with fill at 50% width; pill-shaped track and fill with success-gradient coloring |
-
-### With thresholds
+### Default usage
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| With thresholds | `value=82`, `low=25`, `high=75`, `optimum=50`, `ariaLabel="CPU usage"` | Track with fill at 82% width; value is above the high threshold; annotated "82% -- above high threshold" |
+| Default usage | `value=50`, `ariaLabel="Storage usage"` | Track with fill at 50% width; pill-shaped track and fill with success-gradient coloring |
 
-### Low value (optimal range)
-
-| Label | Props/Config | Expected Visual |
-|-------|-------------|-----------------|
-| Low value (optimal range) | `value=30`, `low=25`, `high=75`, `optimum=50`, `ariaLabel="Memory usage"` | Track with fill at 30% width; value is within the normal range; annotated "30% -- within normal range" |
-
-### Custom range (0-500)
+### Threshold states
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
-| Custom range (0-500) | `value=350`, `min=0`, `max=500`, `ariaLabel="API calls"` | Track with fill at 70% width (350/500); annotated "350 / 500 API calls used" |
+| Above high | `value=82`, `low=25`, `high=75`, `optimum=50`, `ariaLabel="CPU usage"` | Track with fill at 82% width; value is above the high threshold; annotated "82% -- above high threshold" |
+| Within range | `value=30`, `low=25`, `high=75`, `optimum=50`, `ariaLabel="Memory usage"` | Track with fill at 30% width; value is within the normal range; annotated "30% -- within normal range" |
 
-### Ring
+High and low threshold states share one Examples section.
+
+### Custom range
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
+| Custom range | `value=350`, `min=0`, `max=500`, `ariaLabel="API calls"` | Track with fill at 70% width (350/500); annotated "350 / 500 API calls used" |
+
+### Ring shape and readout
 
 | Label | Props/Config | Expected Visual |
 |-------|-------------|-----------------|
 | Ring (38%) | `shape="ring"`, `value=38`, `ariaLabel="Context used"` | Circular track with a success arc covering 38% of the turn from 12 o'clock |
 | Ring above high | `shape="ring"`, `value=86`, `high=80`, `ariaLabel="Context used"` | Warning-toned arc at 86%; `data-level="high"` |
 | Ring with readout | `shape="ring"`, `value=64`, `showValue`, `size="xl"` | Arc at 64% with "64%" centred inside the ring |
-| Ring sizes | `shape="ring"`, `value=60`, `size=xs..xl` | Diameter and ring thickness step across the full ladder |
+
+Ring scaling is taught once in the Sizes pane, not as a second Examples matrix.
+
+### Ring tones
+
+| Label | Props/Config | Expected Visual |
+|-------|-------------|-----------------|
 | Ring tones | `shape="ring"`, `value=60`, `tone=success/accent/warning/danger/neutral` | Arc colour steps through the tone set |
 
 ## 14. Approval And Adoption Notes

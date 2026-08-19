@@ -56,62 +56,88 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex_col()
         .gap(px(24.0))
         .child(section(
-            "Refs with the checked-out branch marked (open)",
+            "Branch and tag selection",
             theme,
             RefSelect::from_spec(demo_spec().with_open(true), theme).into_any_element(),
         ))
         .child(section(
-            "Trigger only (collapsed)",
+            "Search and no matches",
             theme,
-            RefSelect::from_spec(demo_spec(), theme).into_any_element(),
-        ))
-        .child(section(
-            "Host-driven search (searchValue supplied)",
-            theme,
-            RefSelect::from_spec(
-                RefSelectSpec::new()
-                    .with_refs(vec![demo_refs()[1].clone(), demo_refs()[2].clone()])
-                    .with_value("tree-component")
-                    .with_current_ref("main")
-                    .with_search_value("comp")
-                    .with_open(true),
-                theme,
-            )
-            .into_any_element(),
-        ))
-        .child(section(
-            "Loading more refs",
-            theme,
-            RefSelect::from_spec(demo_spec().with_loading(true).with_open(true), theme)
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(12.0))
+                .child(RefSelect::from_spec(
+                    RefSelectSpec::new()
+                        .with_refs(vec![demo_refs()[1].clone(), demo_refs()[2].clone()])
+                        .with_value("tree-component")
+                        .with_current_ref("main")
+                        .with_search_value("comp")
+                        .with_open(true),
+                    theme,
+                ))
+                .child(RefSelect::from_spec(
+                    RefSelectSpec::new()
+                        .with_search_value("nothing-matches")
+                        .with_open(true),
+                    theme,
+                ))
                 .into_any_element(),
         ))
         .child(section(
-            "No matches",
+            "Loading and short-list search",
             theme,
-            RefSelect::from_spec(
-                RefSelectSpec::new()
-                    .with_search_value("nothing-matches")
-                    .with_open(true),
-                theme,
-            )
-            .into_any_element(),
-        ))
-        .child(section(
-            "Outlined trigger",
-            theme,
-            RefSelect::from_spec(demo_spec().with_variant(RefSelectVariant::Outlined), theme)
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(12.0))
+                .child(RefSelect::from_spec(
+                    demo_spec().with_loading(true).with_open(true),
+                    theme,
+                ))
+                .child(RefSelect::from_spec(
+                    RefSelectSpec::new()
+                        .with_refs(demo_refs().into_iter().take(3).collect())
+                        .with_value("main")
+                        .with_current_ref("main")
+                        .with_searchable(false),
+                    theme,
+                ))
                 .into_any_element(),
         ))
         .child(section(
-            "Subdued (as embedded in the composer footer)",
+            "Trigger presentation",
             theme,
-            RefSelect::from_spec(demo_spec().with_emphasis(RefSelectEmphasis::Subdued), theme)
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(12.0))
+                .child(RefSelect::from_spec(
+                    demo_spec().with_variant(RefSelectVariant::Outlined),
+                    theme,
+                ))
+                .child(RefSelect::from_spec(
+                    demo_spec().with_emphasis(RefSelectEmphasis::Subdued),
+                    theme,
+                ))
                 .into_any_element(),
         ))
         .child(section(
-            "Disabled",
+            "Selection states",
             theme,
-            RefSelect::from_spec(demo_spec().with_disabled(true), theme).into_any_element(),
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(12.0))
+                .child(RefSelect::from_spec(
+                    demo_spec().with_value(""),
+                    theme,
+                ))
+                .child(RefSelect::from_spec(
+                    demo_spec().with_disabled(true),
+                    theme,
+                ))
+                .into_any_element(),
         ))
         .into_any_element();
 

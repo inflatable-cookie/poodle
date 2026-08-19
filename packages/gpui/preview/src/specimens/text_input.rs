@@ -40,14 +40,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex_col()
         .gap(px(24.0))
         .max_w(px(384.0)) // 24rem = Svelte specimen max-width
-        // --- Default ---
         .child(
             div()
                 .flex()
                 .flex_col()
-                .gap(px(8.0)) // 0.5rem
+                .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Default"),
+                    EyebrowSpec::new().with_content("Default field"),
                     theme,
                 ))
                 .child(
@@ -67,207 +66,83 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )),
                 ),
         )
-        // --- With validation ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("With validation"),
+                    EyebrowSpec::new().with_content("Validation and async availability"),
                     theme,
                 ))
                 .child(
-                    Field::from_spec(
-                        {
-                            let mut field = FieldSpec::new("email-field", "Email")
-                                .with_description("A valid email address is required.")
-                                .with_validation_state(validation_state);
-                            if !email_is_valid {
-                                field = field.with_error("Please enter a valid email address.");
-                            }
-                            field
-                        },
-                        theme,
-                    )
-                    .with_control(live_text_input(
-                        TextInputSpec::new()
-                            .with_id("email-field")
-                            .with_placeholder("you@example.com")
-                            .with_value(&email_value)
-                            .with_validation_state(validation_state),
-                        theme,
-                        state,
-                        "text-input-email",
-                    )),
+                    div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(12.0))
+                        .child(
+                            Field::from_spec(
+                                {
+                                    let mut field = FieldSpec::new("email-field", "Email")
+                                        .with_description("A valid email address is required.")
+                                        .with_validation_state(validation_state);
+                                    if !email_is_valid {
+                                        field = field.with_error("Please enter a valid email address.");
+                                    }
+                                    field
+                                },
+                                theme,
+                            )
+                            .with_control(live_text_input(
+                                TextInputSpec::new()
+                                    .with_id("email-field")
+                                    .with_placeholder("you@example.com")
+                                    .with_value(&email_value)
+                                    .with_validation_state(validation_state),
+                                theme,
+                                state,
+                                "text-input-email",
+                            )),
+                        )
+                        .child(
+                            Field::from_spec(
+                                FieldSpec::new("workspace-field", "Workspace")
+                                    .with_description(
+                                        "Check whether the workspace handle is available.",
+                                    )
+                                    .with_validation_state(ValidationState::Pending)
+                                    .with_pending_message("Checking availability..."),
+                                theme,
+                            )
+                            .with_control(live_text_input(
+                                TextInputSpec::new()
+                                    .with_id("workspace-field")
+                                    .with_value(&workspace_value)
+                                    .with_validation_state(ValidationState::Pending),
+                                theme,
+                                state,
+                                "text-input-workspace",
+                            )),
+                        ),
                 ),
         )
-        // --- Async validation ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Async validation"),
-                    theme,
-                ))
-                .child(
-                    Field::from_spec(
-                        FieldSpec::new("workspace-field", "Workspace")
-                            .with_description("Check whether the workspace handle is available.")
-                            .with_validation_state(ValidationState::Pending)
-                            .with_pending_message("Checking availability..."),
-                        theme,
-                    )
-                    .with_control(live_text_input(
-                        TextInputSpec::new()
-                            .with_id("workspace-field")
-                            .with_value(&workspace_value)
-                            .with_validation_state(ValidationState::Pending),
-                        theme,
-                        state,
-                        "text-input-workspace",
-                    )),
-                ),
-        )
-        // --- Slug ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Slug"),
-                    theme,
-                ))
-                .child(
-                    Field::from_spec(
-                        FieldSpec::new("slug-field", "URL slug")
-                            .with_description("Lowercase letters, numbers, and hyphens."),
-                        theme,
-                    )
-                    .with_control(TextInput::from_spec(
-                        TextInputSpec::new()
-                            .with_id("slug-field")
-                            .with_prefix("poodle.dev/")
-                            .with_value("team-alpha")
-                            .with_placeholder("your-workspace"),
-                        theme,
-                    )),
-                ),
-        )
-        // --- Search ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Search"),
+                    EyebrowSpec::new().with_content("Search input"),
                     theme,
                 ))
                 .child(TextInput::from_spec(
                     TextInputSpec::new()
                         .with_id("search-field")
                         .with_input_type("search")
-                        .with_placeholder("Search components…"),
+                        .with_placeholder("Search..."),
                     theme,
                 )),
         )
-        // --- Valid ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Valid"),
-                    theme,
-                ))
-                .child(TextInput::from_spec(
-                    TextInputSpec::new()
-                        .with_id("valid-field")
-                        .with_value("you@example.com")
-                        .with_validation_state(ValidationState::Valid),
-                    theme,
-                )),
-        )
-        // --- Leading icon ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Leading icon"),
-                    theme,
-                ))
-                .child(TextInput::from_spec(
-                    TextInputSpec::new()
-                        .with_id("leading-field")
-                        .with_leading_icon("search")
-                        .with_placeholder("Search components…"),
-                    theme,
-                )),
-        )
-        // --- Trailing icon ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Trailing icon"),
-                    theme,
-                ))
-                .child(TextInput::from_spec(
-                    TextInputSpec::new()
-                        .with_id("trailing-field")
-                        .with_trailing_icon("x-circle")
-                        .with_value("Some text"),
-                    theme,
-                )),
-        )
-        // --- Character count ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Character count"),
-                    theme,
-                ))
-                .child(TextInput::from_spec(
-                    TextInputSpec::new()
-                        .with_id("charcount-field")
-                        .with_value("Hello")
-                        .with_max_length(40)
-                        .with_show_char_count(true)
-                        .with_placeholder("Up to 40 characters…"),
-                    theme,
-                )),
-        )
-        // --- Read-only ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Read-only"),
-                    theme,
-                ))
-                .child(TextInput::from_spec(
-                    TextInputSpec::new()
-                        .with_id("readonly-field")
-                        .with_value("read-only value")
-                        .with_read_only(true),
-                    theme,
-                )),
-        )
-        // --- Prefix and suffix ---
         .child(
             div()
                 .flex()
@@ -277,114 +152,39 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Prefix and suffix"),
                     theme,
                 ))
+                .child(TextInput::from_spec(
+                    TextInputSpec::new()
+                        .with_id("price-field")
+                        .with_prefix("$")
+                        .with_suffix("USD")
+                        .with_placeholder("0.00")
+                        .with_input_type("number"),
+                    theme,
+                )),
+        )
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Multiline"),
+                    theme,
+                ))
                 .child(
-                    Field::from_spec(FieldSpec::new("price-field", "Monthly cost"), theme)
+                    Field::from_spec(FieldSpec::new("multiline-field", "Description"), theme)
                         .with_control(TextInput::from_spec(
                             TextInputSpec::new()
-                                .with_id("price-field")
-                                .with_prefix("$")
-                                .with_suffix("/mo")
-                                .with_value("29")
-                                .with_input_type("number"),
-                            theme,
-                        )),
-                ),
-        )
-        // --- Suffix only ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Suffix only"),
-                    theme,
-                ))
-                .child(
-                    Field::from_spec(FieldSpec::new("weight-field", "Weight"), theme).with_control(
-                        TextInput::from_spec(
-                            TextInputSpec::new()
-                                .with_id("weight-field")
-                                .with_suffix("kg")
-                                .with_value("72")
-                                .with_input_type("number"),
-                            theme,
-                        ),
-                    ),
-                ),
-        )
-        // --- Multiline (explicit type) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Multiline (explicit type)"),
-                    theme,
-                ))
-                .child(
-                    Field::from_spec(
-                        FieldSpec::new("bio-field", "Bio")
-                            .with_description("Tell us a bit about yourself."),
-                        theme,
-                    )
-                    .with_control(TextInput::from_spec(
-                        TextInputSpec::new()
-                            .with_id("bio-field")
-                            .with_input_type("multiline")
-                            .with_placeholder("A few sentences…")
-                            .with_rows(4),
-                        theme,
-                    )),
-                ),
-        )
-        // --- Multiline (auto-detected from rows) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Multiline (auto-detected from rows)"),
-                    theme,
-                ))
-                .child(
-                    Field::from_spec(FieldSpec::new("notes-field", "Notes"), theme).with_control(
-                        TextInput::from_spec(
-                            TextInputSpec::new()
-                                .with_id("notes-field")
-                                .with_placeholder("Scratch space…")
-                                .with_rows(3),
-                            theme,
-                        ),
-                    ),
-                ),
-        )
-        // --- Multiline with character count ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Multiline with character count"),
-                    theme,
-                ))
-                .child(
-                    Field::from_spec(FieldSpec::new("summary-field", "Summary"), theme)
-                        .with_control(TextInput::from_spec(
-                            TextInputSpec::new()
-                                .with_id("summary-field")
+                                .with_id("multiline-field")
                                 .with_input_type("multiline")
                                 .with_rows(3)
-                                .with_max_length(140)
-                                .with_placeholder("Up to 140 characters…"),
+                                .with_max_length(280)
+                                .with_show_char_count(true)
+                                .with_placeholder("Enter a description..."),
                             theme,
                         )),
                 ),
         )
-        // --- Disabled ---
         .child(
             div()
                 .flex()

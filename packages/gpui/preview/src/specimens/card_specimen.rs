@@ -12,9 +12,9 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_node::{ColorValue, LayoutDirection, LayoutSizing, Node};
+use poodle_node::{ColorValue, LayoutDirection, Node};
 use poodle_render::presentation::rem_to_px;
-use poodle_specs::{CardLayout, CardSpec, CardVariant, ControlDensity, EyebrowSpec};
+use poodle_specs::{CardSpec, CardVariant, ControlDensity, EyebrowSpec};
 
 fn text(content: &str, size: f32, color: ColorValue, weight: Option<u16>) -> Node {
     let mut node = Node::text(content);
@@ -76,24 +76,10 @@ fn node_card(
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
-fn media_block(width: Option<f32>, height: f32, color: ColorValue) -> Node {
-    let mut node = Node::container();
-    node.style.descriptor.layout.direction = LayoutDirection::Row;
-    if let Some(width) = width {
-        node.style.descriptor.layout.width = LayoutSizing::Fixed(width);
-    } else {
-        node.style.fill_width = true;
-    }
-    node.style.descriptor.layout.height = LayoutSizing::Fixed(height);
-    node.style.descriptor.background = Some(color);
-    node
-}
-
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let primary = theme.resolve_color("color.text.primary");
     let secondary = theme.resolve_color("color.text.secondary");
-    let accent = theme.resolve_color("color.accent.base");
 
     let title = |content: &str| text(content, 16.0, primary, Some(600));
     let body = |content: &str| text(content, 14.0, secondary, None);
@@ -162,21 +148,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ))
         .child(group(
             theme,
-            "Selected",
-            div().w(px(280.0)).child(node_card(
-                "card-selected",
-                CardSpec::new().selected().with_aria_label("Selected card"),
-                theme,
-                None,
-                Some(title("Selected card")),
-                Some(body(
-                    "Selected cards carry an accent border and accent ring.",
-                )),
-                None,
-            )),
-        ))
-        .child(group(
-            theme,
             "Interactive",
             div().w(px(280.0)).child(node_card(
                 "card-interactive",
@@ -189,61 +160,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 Some(body(
                     "Hover to see the interactive state. Cursor changes to pointer.",
                 )),
-                None,
-            )),
-        ))
-        .child(group(
-            theme,
-            "Media slot",
-            div().w(px(280.0)).child(node_card(
-                "card-media",
-                CardSpec::new()
-                    .with_media(true)
-                    .with_aria_label("Media card"),
-                theme,
-                Some(media_block(None, 120.0, accent)),
-                Some(title("Media card")),
-                Some(body(
-                    "The media region is overflow-clipped with an inset radius.",
-                )),
-                None,
-            )),
-        ))
-        .child(group(
-            theme,
-            "Horizontal layout",
-            div().w(px(400.0)).child(node_card(
-                "card-horizontal",
-                CardSpec::new()
-                    .with_layout(CardLayout::Horizontal)
-                    .with_media(true)
-                    .with_aria_label("Horizontal card"),
-                theme,
-                Some(media_block(Some(96.0), 96.0, accent)),
-                None,
-                Some({
-                    let mut content = Node::container();
-                    content.style.descriptor.layout.direction = LayoutDirection::Column;
-                    content.style.descriptor.layout.spacing.gap = 4.0;
-                    content.child(title("Horizontal card")).child(body(
-                        "Media occupies the leading column; content fills the rest.",
-                    ))
-                }),
-                None,
-            )),
-        ))
-        .child(group(
-            theme,
-            "Compact layout",
-            div().w(px(280.0)).child(node_card(
-                "card-compact-layout",
-                CardSpec::new()
-                    .with_layout(CardLayout::Compact)
-                    .with_aria_label("Compact card"),
-                theme,
-                None,
-                Some(title("Compact layout")),
-                Some(body("Reduced padding and gap via the compact layout.")),
                 None,
             )),
         ))

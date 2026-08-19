@@ -24,9 +24,7 @@ use crate::specimens::specimen_axes::{density_key, size_key};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use poodle_gpui::GpuiThemeProvider;
 use poodle_render::{select, SelectHandlers};
-use poodle_specs::{
-    ChoiceOption, ControlSize, EyebrowSpec, SelectMode, SelectSpec, ValidationState,
-};
+use poodle_specs::{ChoiceOption, EyebrowSpec, SelectMode, SelectSpec};
 
 /// Build a node-tier Select with the specimen's toggle/change/clear wiring.
 /// Mirrors the old specimen's behavior: toggle flips `{id}-open`, change
@@ -139,14 +137,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex()
         .flex_col()
         .gap(px(24.0))
-        // --- Native (default) ---
+        // --- Native select ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Native (default)"),
+                    EyebrowSpec::new().with_content("Native select"),
                     theme,
                 ))
                 .child({
@@ -180,7 +178,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Custom dropdown (non-searchable)"),
+                    EyebrowSpec::new().with_content("Custom dropdown"),
                     theme,
                 ))
                 .child({
@@ -208,143 +206,118 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         })
                 }),
         )
-        // --- Searchable ---
+        // --- Search and freeform entry ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Searchable"),
+                    EyebrowSpec::new().with_content("Search and freeform entry"),
                     theme,
                 ))
                 .child({
-                    let value = get_value("select-searchable-value");
-                    let mut spec = SelectSpec::new(framework_options.clone())
+                    let search_value = get_value("select-searchable-value");
+                    let mut search = SelectSpec::new(framework_options.clone())
                         .with_placeholder("Search frameworks...")
                         .with_open(get_open("select-searchable-open"));
-                    spec.searchable = true;
-                    if let Some(ref v) = value {
-                        spec = spec.with_value(v.as_str());
+                    search.searchable = true;
+                    if let Some(ref v) = search_value {
+                        search = search.with_value(v.as_str());
                     }
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(6.0))
-                        .max_w(px(320.0))
-                        .child(node_select("select-searchable", spec, state))
-                        .when(value.is_some(), |d| {
-                            d.child(
-                                div()
-                                    .text_sm()
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(format!("Selected: {}", value.as_deref().unwrap_or(""))),
-                            )
-                        })
-                }),
-        )
-        // --- Searchable with groups ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Searchable with groups"),
-                    theme,
-                ))
-                .child({
-                    let value = get_value("select-searchable-grouped-value");
-                    let mut spec = SelectSpec::new(grouped_options.clone())
-                        .with_placeholder("Search food...")
-                        .with_open(get_open("select-searchable-grouped-open"));
-                    spec.searchable = true;
-                    if let Some(ref v) = value {
-                        spec = spec.with_value(v.as_str());
-                    }
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(6.0))
-                        .max_w(px(320.0))
-                        .child(node_select("select-searchable-grouped", spec, state))
-                        .when(value.is_some(), |d| {
-                            d.child(
-                                div()
-                                    .text_sm()
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(format!("Selected: {}", value.as_deref().unwrap_or(""))),
-                            )
-                        })
-                }),
-        )
-        // --- Freeform (autocomplete) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Freeform (autocomplete)"),
-                    theme,
-                ))
-                .child({
-                    let value = get_value("select-freeform-value");
-                    let mut spec = SelectSpec::new(framework_options.clone())
+                    let freeform_value = get_value("select-freeform-value");
+                    let mut freeform = SelectSpec::new(framework_options.clone())
                         .with_placeholder("Type or select...")
                         .with_open(get_open("select-freeform-open"));
-                    spec.searchable = true;
-                    spec.freeform = true;
-                    if let Some(ref v) = value {
-                        spec = spec.with_value(v.as_str());
+                    freeform.searchable = true;
+                    freeform.freeform = true;
+                    if let Some(ref v) = freeform_value {
+                        freeform = freeform.with_value(v.as_str());
                     }
                     div()
                         .flex()
                         .flex_col()
-                        .gap(px(6.0))
+                        .gap(px(12.0))
                         .max_w(px(320.0))
-                        .child(node_select("select-freeform", spec, state))
-                        .when(value.is_some(), |d| {
-                            d.child(
-                                div()
-                                    .text_sm()
-                                    .text_color(color_to_hsla(text_secondary))
-                                    .child(format!("Value: {}", value.as_deref().unwrap_or(""))),
-                            )
-                        })
+                        .child(
+                            div()
+                                .flex()
+                                .flex_col()
+                                .gap(px(6.0))
+                                .child(node_select("select-searchable", search, state))
+                                .when(search_value.is_some(), |d| {
+                                    d.child(
+                                        div()
+                                            .text_sm()
+                                            .text_color(color_to_hsla(text_secondary))
+                                            .child(format!(
+                                                "Selected: {}",
+                                                search_value.as_deref().unwrap_or("")
+                                            )),
+                                    )
+                                }),
+                        )
+                        .child(
+                            div()
+                                .flex()
+                                .flex_col()
+                                .gap(px(6.0))
+                                .child(node_select("select-freeform", freeform, state))
+                                .when(freeform_value.is_some(), |d| {
+                                    d.child(
+                                        div()
+                                            .text_sm()
+                                            .text_color(color_to_hsla(text_secondary))
+                                            .child(format!(
+                                                "Value: {}",
+                                                freeform_value.as_deref().unwrap_or("")
+                                            )),
+                                    )
+                                }),
+                        )
                 }),
         )
-        // --- Rich option rendering (custom slot) ---
+        // --- Rich and grouped options ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Rich option rendering (custom slot)"),
+                    EyebrowSpec::new().with_content("Rich and grouped options"),
                     theme,
                 ))
                 .child({
-                    let mut spec = SelectSpec::new(rich_options.clone())
+                    let mut rich = SelectSpec::new(rich_options.clone())
                         .with_placeholder("Choose a country")
                         .with_open(get_open("select-rich-open"));
-                    spec.mode = SelectMode::Custom;
+                    rich.mode = SelectMode::Custom;
                     if let Some(ref v) = get_value("select-rich-value") {
-                        spec = spec.with_value(v.as_str());
+                        rich = rich.with_value(v.as_str());
+                    }
+                    let mut grouped = SelectSpec::new(grouped_options.clone())
+                        .with_placeholder("Choose a food")
+                        .with_open(get_open("select-native-grouped-open"));
+                    if let Some(ref v) = get_value("select-native-grouped-value") {
+                        grouped = grouped.with_value(v.as_str());
                     }
                     div()
+                        .flex()
+                        .flex_col()
+                        .gap(px(12.0))
                         .max_w(px(320.0))
-                        .child(node_select("select-rich", spec, state))
+                        .child(node_select("select-rich", rich, state))
+                        .child(node_select("select-native-grouped", grouped, state))
                 }),
         )
-        // --- Clearable (custom) ---
+        // --- Clearable selection ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Clearable (custom)"),
+                    EyebrowSpec::new().with_content("Clearable selection"),
                     theme,
                 ))
                 .child({
@@ -359,28 +332,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div()
                         .max_w(px(320.0))
                         .child(node_select("select-clearable", spec, state))
-                }),
-        )
-        // --- Native grouped ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Native grouped"),
-                    theme,
-                ))
-                .child({
-                    let mut spec = SelectSpec::new(grouped_options.clone())
-                        .with_placeholder("Choose a food")
-                        .with_open(get_open("select-native-grouped-open"));
-                    if let Some(ref v) = get_value("select-native-grouped-value") {
-                        spec = spec.with_value(v.as_str());
-                    }
-                    div()
-                        .max_w(px(320.0))
-                        .child(node_select("select-native-grouped", spec, state))
                 }),
         )
         // --- Disabled ---
@@ -402,75 +353,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div()
                         .max_w(px(320.0))
                         .child(node_select_static(spec, state))
-                }),
-        )
-        // --- Validation states ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Validation states"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(12.0))
-                        .max_w(px(320.0))
-                        .child(node_select_static(
-                            SelectSpec::new(fruit_options.clone())
-                                .with_placeholder("Pick one")
-                                .with_value("apple")
-                                .with_validation_state(ValidationState::Invalid),
-                            state,
-                        ))
-                        .child(node_select_static(
-                            SelectSpec::new(fruit_options.clone())
-                                .with_placeholder("Pick one")
-                                .with_value("banana")
-                                .with_validation_state(ValidationState::Valid),
-                            state,
-                        ))
-                        .child(node_select_static(
-                            SelectSpec::new(fruit_options.clone())
-                                .with_placeholder("Pick one")
-                                .with_value("cherry")
-                                .with_validation_state(ValidationState::Pending),
-                            state,
-                        )),
-                ),
-        )
-        // --- Sizes (xs → xl) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Sizes (xs → xl)"),
-                    theme,
-                ))
-                .child({
-                    let sizes = [
-                        ("xs", ControlSize::Xs),
-                        ("sm", ControlSize::Sm),
-                        ("md", ControlSize::Md),
-                        ("lg", ControlSize::Lg),
-                        ("xl", ControlSize::Xl),
-                    ];
-                    let mut col = div().flex().flex_col().gap(px(12.0)).max_w(px(320.0));
-                    for (_label, size) in sizes {
-                        col = col.child(node_select_static(
-                            SelectSpec::new(fruit_options.clone())
-                                .with_placeholder("Select...")
-                                .with_size(size),
-                            state,
-                        ));
-                    }
-                    col
                 }),
         )
         .into_any_element();
