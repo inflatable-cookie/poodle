@@ -21,7 +21,9 @@ component, contract, prop, or token changes.
 
 ## Change class
 
-- **Change class:** specimen curation only
+- **Change class:** specimen curation, plus one orchestrator-authorized,
+  docs-only contract wording correction (`knob.md` § 13, requested in PR
+  review)
 - **Packages touched:** `poodle-svelte` preview, `poodle-react` preview,
   `poodle-render` (shared native specimen definitions)
 - **Public entry points:** none
@@ -110,14 +112,21 @@ rejection; Disabled.
 - **Knob — "Type-in (Enter)" and "Keyboard bounds (Home / End)" groups.**
   Merged into "Type-in and keyboard bounds": one row of three knobs
   (type-in, minimum, maximum). Both contract-named behaviours remain
-  visible; the page was one caption over the ceiling.
+  visible; the page was one caption over the ceiling. Contract § 13
+  previously required *standalone* groups for the two behaviours; PR review
+  authorized a docs-only wording correction so § 13 now describes the
+  required evidence set and explicitly allows type-in and keyboard bounds
+  to share one group.
 
 ## Contract coverage
 
-Unchanged. Every item each contract's § 13 enumerates remains visible on
-its page; three captions now name two behaviours each. No component
-implementation, public prop, token, or contract text changed. No behaviour
-lost its only visible evidence.
+Preserved. Every behaviour each contract's § 13 names remains visible on
+its page; three captions now name two behaviours each. One contract text
+changed: `knob.md` § 13, an orchestrator-authorized docs-only wording
+correction requested in PR review — it now describes the required evidence
+set and explicitly permits type-in and keyboard bounds to share a group,
+matching what the page teaches. No component implementation, public prop,
+or token changed. No behaviour lost its only visible evidence.
 
 ## Pages intentionally left unchanged
 

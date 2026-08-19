@@ -24,5 +24,5 @@
 
 <style>
   .page { display: grid; gap: 1.5rem; }
-.row { display: flex; gap: 1rem; }
+.row { display: flex; gap: 1rem; flex-wrap: wrap; }
 </style>
