@@ -107,8 +107,8 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-`g15.023` passed code re-review on PR #47 at `dda190ed`; the paired
-Svelte/React live-preview checkpoint is next.
+`g15.023` is complete through PR #47. `g15.024` is next for remeasurement and
+readiness review before dispatch.
 `g15.011` remains
 partial until `g15.026` and all six screen-clear review children
 (`g15.028`–`g15.033`) land; defect-led curation proceeds through

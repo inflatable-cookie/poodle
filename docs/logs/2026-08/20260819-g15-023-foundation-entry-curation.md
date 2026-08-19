@@ -6,8 +6,9 @@ Parent: `docs/roadmaps/g15/018-overloaded-examples-curation.md`
 Handoff: `docs/handoffs/20260819-201239-g15-023-foundation-entry-curation.md`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-eea8d8fa`
 Branch: `t3code/curate-foundation-entry-pages`
-Accepted head: pending orchestrator closeout
-PR head: review-round 1 on this branch; first review saw `e87e6773`
+Accepted head: `dda190edf95e3d60c9f78bc0c9593556e96b1737`
+Merge: `82e943d0bef53a50af63724afff37ae067008244`
+First review head: `e87e677340e1999046e68d1c4e329540b91a5eef`
 Worker base: `87ee87da2ef6e1525e1b941de94ee3a83ccd6037` (`origin/main` at
 dispatch; handoff planning base `aa451297961be3fd98e3c038774af7f5151d9eed`
 confirmed as an ancestor)
@@ -191,8 +192,7 @@ a named disposition above.
 
 - focused `g15-023` parity regression: 75 passed after review-round 1
   (74 at first push)
-- `effigy test:parity`: 7 files, 439 passed at first push; focused
-  regression re-run for this round
+- `effigy test:parity`: 7 files, 440 passed at accepted head
 - `effigy catalogue:check`: passed
 - `effigy check:svelte`: 0 errors
 - `effigy react:build`: passed
@@ -205,7 +205,7 @@ release selectors.
 
 ## Operator review
 
-Pending. The six changed web pages need live Svelte and React preview review
-before the card can close: Eyebrow, Meter, RefSelect, Select, SplitButton,
-and TextInput. Card, DetailItem, DragNumberField, EmptyState, and Skeleton
-need verification only.
+Signed off by the operator in paired Svelte and React previews on 2026-08-19.
+The six changed pages were Eyebrow, Meter, RefSelect, Select, SplitButton, and
+TextInput. Card, DetailItem, DragNumberField, EmptyState, and Skeleton needed
+verification only.

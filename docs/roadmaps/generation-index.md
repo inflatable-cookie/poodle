@@ -16,8 +16,8 @@ Updated: 2026-08-19
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: run PR #47's paired g15.023 live-preview checkpoint, then continue
-    the bounded specimen program.
+  - Next: remeasure and ready `g15.024`, then continue the bounded specimen
+    program. PR #47 completed `g15.023` with paired live review signed off.
     PR #46 completed `g15.022`, curating the audio/music family across
     paired web and shared native specimens. PR #45 completed `g15.036`, removed Pill's temporary duplicate
     `fill` API, and moved solid treatment onto the existing appearance axis.

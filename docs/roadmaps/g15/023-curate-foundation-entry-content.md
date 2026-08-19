@@ -1,7 +1,7 @@
 # g15.023 — Overloaded Examples: foundation entry, content and status
 
-Status: **awaiting operator live review** — PR #47 code gate accepted at
-`dda190ed`; paired Svelte/React preview checkpoint remains
+Status: **complete** — PR #47 accepted at `dda190ed`, live review signed off,
+merge `82e943d0`
 Parent: `018-overloaded-examples-curation.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Consumes: `g15.011` partial screening baseline

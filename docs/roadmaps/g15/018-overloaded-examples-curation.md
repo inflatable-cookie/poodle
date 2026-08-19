@@ -1,7 +1,7 @@
 # g15.018 — Overloaded Examples Curation (parent)
 
-Status: **active parent — not dispatchable**; `g15.020`–`g15.022` complete;
-`g15.023` awaits paired live review on PR #47
+Status: **active parent — not dispatchable**; `g15.020`–`g15.023` complete;
+`g15.024` is next for readiness review
 Consumes: `g15.011` partial screening baseline and its three approved pilots
 Children: `g15.020`–`g15.025`
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
@@ -30,7 +30,7 @@ and is dispatched separately.
 | `g15.020` | Model connections + account lifecycle | 8 | complete — PR #42 |
 | `g15.021` | Application shell | 7 | complete — PR #43 |
 | `g15.022` | Audio & music | 11 | complete — PR #46 |
-| `g15.023` | Foundations: entry, content, status | 11 | PR #47 code gate accepted; live review pending |
+| `g15.023` | Foundations: entry, content, status | 11 | complete — PR #47 |
 | `g15.024` | Agent & tools | 6 | after `g15.015` restores captions |
 | `g15.025` | Collections, navigation, overlays, long tail | 10 | after `g15.016` |
 | **Total** | | **53** | |

@@ -30,8 +30,8 @@ v0.2.0 release-baseline generation.
   removed Pill's temporary duplicate `fill` axis, and corrected its four
   appearance recipes before visual conformance. PR #46 completed `g15.022`,
   curating the audio/music family with paired-web and shared-native coverage.
-  `g15.023` is the next overloaded-Examples child; PR #47 passed its code
-  gate at `dda190ed` and awaits paired live review.
+  PR #47 completed `g15.023`, curating the foundation entry, content, and
+  status family. `g15.024` is next for readiness review.
   `g15.013` remains the final gate after the
   specimen program and `g15.012`.
   Jetstream remains deferred.
