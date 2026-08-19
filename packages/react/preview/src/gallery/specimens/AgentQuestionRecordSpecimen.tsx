@@ -62,17 +62,14 @@ export function AgentQuestionRecordSpecimen() {
       )}
     >
       <SpecimenGroup
-        label="Selected"
+        label="Selected answers"
         description="Every option stays. Why the agent did something is usually answered by what it did not do, and a record showing only the chosen option cannot tell you whether the choice was between three reasonable things or the only one on offer."
       >
         <AgentQuestionRecord question={placement} answer={selected} />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Several chosen">
         <AgentQuestionRecord question={targets} answer={several} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Override" description="No option list — none was taken.">
+      <SpecimenGroup label="Free-text override" description="No option list — none was taken.">
         <AgentQuestionRecord question={placement} answer={override} />
       </SpecimenGroup>
 
@@ -80,11 +77,12 @@ export function AgentQuestionRecordSpecimen() {
         <AgentQuestionRecord question={placement} answer={declined} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Without options">
+      <SpecimenGroup
+        label="Presentation options"
+        description="A host can hide the option list, keep the question header, or drop the header when the prompt is enough."
+      >
         <AgentQuestionRecord question={placement} answer={selected} showOptions={false} />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Without a header">
+        <AgentQuestionRecord question={placement} answer={selected} />
         <AgentQuestionRecord question={targets} answer={several} />
       </SpecimenGroup>
     </SpecimenLayout>

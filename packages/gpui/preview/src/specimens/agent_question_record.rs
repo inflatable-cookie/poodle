@@ -21,6 +21,14 @@ fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div
         .child(child)
 }
 
+fn stack(children: impl IntoIterator<Item = AnyElement>) -> Div {
+    let mut col = div().flex().flex_col().gap(px(12.0));
+    for child in children {
+        col = col.child(child);
+    }
+    col
+}
+
 fn option(value: &str, label: &str) -> AgentQuestionOption {
     AgentQuestionOption {
         value: value.to_string(),
@@ -73,6 +81,24 @@ fn answer(
     }
 }
 
+fn selected() -> AgentQuestionAnswer {
+    answer(
+        "placement",
+        AgentQuestionOutcome::Selected,
+        &["composer"],
+        "",
+    )
+}
+
+fn several() -> AgentQuestionAnswer {
+    answer(
+        "targets",
+        AgentQuestionOutcome::Selected,
+        &["svelte", "gpui"],
+        "",
+    )
+}
+
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let examples = div()
@@ -80,39 +106,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex_col()
         .gap(px(24.0))
         .child(group(
-            "Selected",
+            "Selected answers",
             theme,
-            AgentQuestionRecord::from_spec(
-                AgentQuestionRecordSpec::new(
-                    placement(),
-                    answer(
-                        "placement",
-                        AgentQuestionOutcome::Selected,
-                        &["composer"],
-                        "",
-                    ),
-                ),
-                theme,
-            ),
+            stack([
+                AgentQuestionRecord::from_spec(
+                    AgentQuestionRecordSpec::new(placement(), selected()),
+                    theme,
+                )
+                .into_any_element(),
+                AgentQuestionRecord::from_spec(
+                    AgentQuestionRecordSpec::new(targets(), several()),
+                    theme,
+                )
+                .into_any_element(),
+            ])
+            .into_any_element(),
         ))
         .child(group(
-            "Several chosen",
-            theme,
-            AgentQuestionRecord::from_spec(
-                AgentQuestionRecordSpec::new(
-                    targets(),
-                    answer(
-                        "targets",
-                        AgentQuestionOutcome::Selected,
-                        &["svelte", "gpui"],
-                        "",
-                    ),
-                ),
-                theme,
-            ),
-        ))
-        .child(group(
-            "Override",
+            "Free-text override",
             theme,
             AgentQuestionRecord::from_spec(
                 AgentQuestionRecordSpec::new(
@@ -139,21 +150,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             ),
         ))
         .child(group(
-            "Without options",
+            "Presentation options",
             theme,
-            AgentQuestionRecord::from_spec(
-                AgentQuestionRecordSpec::new(
-                    placement(),
-                    answer(
-                        "placement",
-                        AgentQuestionOutcome::Selected,
-                        &["composer"],
-                        "",
-                    ),
+            stack([
+                AgentQuestionRecord::from_spec(
+                    AgentQuestionRecordSpec::new(placement(), selected()).with_show_options(false),
+                    theme,
                 )
-                .with_show_options(false),
-                theme,
-            ),
+                .into_any_element(),
+                AgentQuestionRecord::from_spec(
+                    AgentQuestionRecordSpec::new(placement(), selected()),
+                    theme,
+                )
+                .into_any_element(),
+                AgentQuestionRecord::from_spec(
+                    AgentQuestionRecordSpec::new(targets(), several()),
+                    theme,
+                )
+                .into_any_element(),
+            ])
+            .into_any_element(),
         ))
         .into_any_element();
 
@@ -165,32 +181,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         SpecimenAxes::examples_only()
             .with_sizes(|size, theme: &GpuiThemeProvider| {
                 AgentQuestionRecord::from_spec(
-                    AgentQuestionRecordSpec::new(
-                        placement(),
-                        answer(
-                            "placement",
-                            AgentQuestionOutcome::Selected,
-                            &["composer"],
-                            "",
-                        ),
-                    )
-                    .with_size(size),
+                    AgentQuestionRecordSpec::new(placement(), selected()).with_size(size),
                     theme,
                 )
                 .into_any_element()
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
                 AgentQuestionRecord::from_spec(
-                    AgentQuestionRecordSpec::new(
-                        placement(),
-                        answer(
-                            "placement",
-                            AgentQuestionOutcome::Selected,
-                            &["composer"],
-                            "",
-                        ),
-                    )
-                    .with_density(density),
+                    AgentQuestionRecordSpec::new(placement(), selected()).with_density(density),
                     theme,
                 )
                 .into_any_element()

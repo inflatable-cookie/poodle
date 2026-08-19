@@ -1,15 +1,20 @@
 <script lang="ts">
   import {
     AgentChatInput,
+    AgentPlan,
+    AgentQuestion,
     Button,
     ModelPicker,
     RefSelect,
     Icon,
-    type RefOption,
     type AgentChatAttachment,
+    type AgentPlanStatus,
+    type AgentQuestionAnswer,
+    type AgentQuestionItem,
     type ModelCapabilityAxis,
     type ModelOption,
     type ModelSelection,
+    type RefOption,
   } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
@@ -84,17 +89,39 @@
     },
   ];
 
+  const placement: AgentQuestionItem = {
+    id: "placement",
+    header: "Placement",
+    prompt: "When the agent needs an answer mid-turn, where should the question surface appear?",
+    options: [
+      { value: "inline", label: "Inline in the transcript", description: "A block in the conversation." },
+      { value: "composer", label: "Anchored above the composer", description: "Pinned over the input." },
+      { value: "modal", label: "Modal dialog", description: "Blocks the app until answered." },
+    ],
+  };
+
+  // Named `planMarkdown`, not `plan`: inside `{#snippet plan()}` the identifier
+  // `plan` is the snippet itself.
+  const planMarkdown = "1. Inspect the contract.\n2. Apply the bounded change.";
+
   let selection = $state<ModelSelection>({
     model: "atlas-pro",
     axes: { effort: "high", fast: false, context: "1m" },
   });
 
-  let message = $state("");
+  let message = $state("Summarise the release notes and open a PR");
   let busyMessage = $state("Summarise the release notes and open a PR");
   let sizeMessage = $state("");
   let densityMessage = $state("");
   let lastSubmitted = $state<string | null>(null);
   let stopCount = $state(0);
+
+  let questionValue = $state("");
+  let questionSelections = $state<string[]>([]);
+  let questionAnswer = $state<AgentQuestionAnswer | null>(null);
+  let questionRef = $state<{ submit: () => void } | null>(null);
+  let planValue = $state("");
+  let planDecision = $state<AgentPlanStatus>("pending");
 
   // The footer's ref switcher — the "main" in the reference is a control, not
   // a label.
@@ -116,7 +143,10 @@
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Composer with model picker + context ring">
+  <SpecimenGroup
+    label="Default composer"
+    description="Composing with a model picker, submit feedback, and context below the warning threshold."
+  >
     <AgentChatInput
       bind:value={message}
       placeholder="Ask for follow-up changes or attach images"
@@ -133,7 +163,45 @@
     <p>Last submitted: {lastSubmitted ?? "—"}</p>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Busy (stop state) — Escape also stops">
+  <SpecimenGroup
+    label="Questions and plans"
+    description="The composer hosts a live question or a pending plan. The editor is the override or revise channel."
+  >
+    <AgentChatInput
+      bind:value={questionValue}
+      status="questioning"
+      questionCanSubmit={questionSelections.length > 0}
+      onSubmit={() => questionRef?.submit()}
+    >
+      {#snippet question()}
+        <AgentQuestion
+          bind:this={questionRef}
+          questions={[placement]}
+          bind:selections={questionSelections}
+          override={questionValue}
+          onSubmit={(answer) => { questionAnswer = answer; questionValue = ""; }}
+        />
+      {/snippet}
+    </AgentChatInput>
+    <p>{questionAnswer ? `answered: ${questionAnswer.outcome}` : "no answer yet"}</p>
+    <AgentChatInput bind:value={planValue} status="reviewing-plan">
+      {#snippet plan()}
+        <AgentPlan
+          plan={planMarkdown}
+          status={planDecision}
+          onAccept={() => (planDecision = "accepted")}
+          onRevise={() => (planDecision = "revised")}
+          onDismiss={() => (planDecision = "dismissed")}
+        />
+      {/snippet}
+    </AgentChatInput>
+    <p>{planDecision !== "pending" ? `decided: ${planDecision}` : "no decision yet"}</p>
+  </SpecimenGroup>
+
+  <SpecimenGroup
+    label="Busy and unavailable"
+    description="Busy shows stop and a high-context ring. Read-only blocks editing; disabled blocks everything."
+  >
     <AgentChatInput
       bind:value={busyMessage}
       status="busy"
@@ -146,9 +214,14 @@
       {/snippet}
     </AgentChatInput>
     <p>Stop pressed {stopCount} time(s) — context ring is above the warn threshold</p>
+    <AgentChatInput value="This transcript entry cannot be edited" readOnly />
+    <AgentChatInput value="Composer unavailable" disabled contextUsed={10_000} contextLimit={200_000} />
   </SpecimenGroup>
 
-  <SpecimenGroup label="Attachments (image tile + file chip) + footer bar">
+  <SpecimenGroup
+    label="Attachments and footer"
+    description="Images render as tiles, files as chips. Removal is live; the footer holds checkout context."
+  >
     <AgentChatInput
       value="Fix the failing parity gate"
       {attachments}
@@ -175,15 +248,12 @@
     </AgentChatInput>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Empty (submit disabled)">
+  <SpecimenGroup
+    label="Submission rules"
+    description="Empty submit stays disabled unless allowEmptySubmit. Enter can insert a newline instead of sending."
+  >
     <AgentChatInput value="" />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="allowEmptySubmit">
     <AgentChatInput value="" allowEmptySubmit />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="No context ring, no dividers, Cmd/Ctrl+Enter only">
     <AgentChatInput value="Enter inserts a newline here" submitOnEnter={false} toolbarDividers={false}>
       {#snippet toolbar()}
         <ModelPicker {models} value={{ model: "atlas", axes: {} }} emphasis="subdued" />
@@ -191,19 +261,11 @@
     </AgentChatInput>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Grown editor (at the maxRows ceiling)">
+  <SpecimenGroup label="Editor growth" description="The editor stops growing at the maxRows ceiling.">
     <AgentChatInput
       value={"Line one\nLine two\nLine three\nLine four\nLine five\nLine six"}
       maxRows={4}
     />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Read-only">
-    <AgentChatInput value="This transcript entry cannot be edited" readOnly />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Disabled">
-    <AgentChatInput value="Composer unavailable" disabled contextUsed={10_000} contextLimit={200_000} />
   </SpecimenGroup>
 
   {#snippet sizes(size)}

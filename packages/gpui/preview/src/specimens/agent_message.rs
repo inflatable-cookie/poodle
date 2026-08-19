@@ -19,6 +19,18 @@ fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div
         .child(child)
 }
 
+fn stack(children: impl IntoIterator<Item = AnyElement>) -> Div {
+    let mut col = div().flex().flex_col().gap(px(12.0));
+    for child in children {
+        col = col.child(child);
+    }
+    col
+}
+
+fn message(markdown: &str, theme: &GpuiThemeProvider) -> AnyElement {
+    AgentMessage::from_spec(AgentMessageSpec::new(markdown), theme).into_any_element()
+}
+
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let examples = div()
@@ -26,58 +38,71 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex_col()
         .gap(px(24.0))
         .child(group(
-            "Inline markup",
+            "Assistant and user messages",
             theme,
-            AgentMessage::from_spec(
-                AgentMessageSpec::new(
-                    "The `lexer` is **strict** but *forgiving*, see [the docs](https://example.com/md). Also ~~gone~~ kept.",
+            stack([
+                message("The latest parser fixes hold.", theme),
+                AgentMessage::from_spec(
+                    AgentMessageSpec::new("Can you run the parity sweep again?")
+                        .with_role(TranscriptRole::User),
+                    theme,
+                )
+                .into_any_element(),
+                message(
+                    "The latest fixes hold: 41 parser tests pass. Remaining deltas are narrow compatibility rules, not parsing failures.",
+                    theme,
                 ),
-                theme,
-            ),
+            ])
+            .into_any_element(),
         ))
         .child(group(
-            "Headings",
+            "Inline formatting and headings",
             theme,
-            AgentMessage::from_spec(AgentMessageSpec::new("# One\n\n### Three\n\n###### Six"), theme),
+            stack([
+                message(
+                    "The `lexer` is **strict** but *forgiving*, see [the docs](https://example.com/md). Also ~~gone~~ kept.",
+                    theme,
+                ),
+                message(
+                    "# One\n\n## Two\n\n### Three\n\n#### Four\n\n##### Five\n\n###### Six",
+                    theme,
+                ),
+            ])
+            .into_any_element(),
         ))
         .child(group(
             "Code blocks",
             theme,
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(12.0))
-                .child(AgentMessage::from_spec(
-                    AgentMessageSpec::new("```rust\nfn main() {\n    println!(\"hi\");\n}\n```"),
-                    theme,
-                ))
-                .child(AgentMessage::from_spec(
-                    AgentMessageSpec::new("```\nno language given\n```"),
-                    theme,
-                )),
+            stack([
+                message("```rust\nfn main() {\n    println!(\"hi\");\n}\n```", theme),
+                message("```\nno language given\n```", theme),
+            ])
+            .into_any_element(),
         ))
         .child(group(
-            "Lists",
+            "List structures",
             theme,
-            AgentMessage::from_spec(AgentMessageSpec::new("- alpha\n- beta\n- gamma"), theme),
+            stack([
+                message("- alpha\n- beta\n- gamma", theme),
+                message("- alpha\n\n- beta", theme),
+                message("3. three\n4. four", theme),
+                message("- outer\n  - inner one\n  - inner two\n- second", theme),
+                message("1. run this:\n\n   ```sh\n   bun test\n   ```", theme),
+            ])
+            .into_any_element(),
         ))
         .child(group(
-            "Quotes and rules",
+            "Quotes, rules and fallback",
             theme,
-            AgentMessage::from_spec(
-                AgentMessageSpec::new("> quoted **line**\n> continued\n\nbefore\n\n---\n\nafter"),
-                theme,
-            ),
-        ))
-        .child(group(
-            "Outside the subset",
-            theme,
-            AgentMessage::from_spec(
-                AgentMessageSpec::new(
+            stack([
+                message("> quoted **line**\n> continued", theme),
+                message("before\n\n---\n\nafter", theme),
+                message(
                     "A table:\n\n| a | b |\n| - | - |\n| 1 | 2 |\n\nAnd raw <div>markup</div>.",
+                    theme,
                 ),
-                theme,
-            ),
+            ])
+            .into_any_element(),
         ))
         .child(group(
             "Streaming",
@@ -87,25 +112,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_streaming(true),
                 theme,
             ),
-        ))
-        .child(group(
-            "Roles",
-            theme,
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(12.0))
-                .child(AgentMessage::from_spec(
-                    AgentMessageSpec::new("Can you run the parity sweep again?")
-                        .with_role(TranscriptRole::User),
-                    theme,
-                ))
-                .child(AgentMessage::from_spec(
-                    AgentMessageSpec::new(
-                        "The latest fixes hold: 41 parser tests pass. Remaining deltas are narrow compatibility rules, not parsing failures.",
-                    ),
-                    theme,
-                )),
         ))
         .into_any_element();
 
