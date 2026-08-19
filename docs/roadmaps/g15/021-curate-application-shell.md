@@ -1,6 +1,7 @@
 # g15.021 — Overloaded Examples: application shell
 
-Status: **ready** — remeasured and bounded by the orchestrator on 2026-08-19
+Status: **ready to merge** — remediation complete; operator waived the final
+live paired-preview checkpoint on 2026-08-19
 Parent: `018-overloaded-examples-curation.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Consumes: `g15.011` partial screening baseline
@@ -30,7 +31,10 @@ partition even where intervening caption and axis work has already brought a
 page inside budget. No other card owns these pages, and this card owns no
 others.
 
-No component, component contract, shared specimen shell, or public API change.
+The worker scope changes no component, component contract, shared specimen
+shell, or public API. The dated orchestrator amendment below narrowly extends
+that boundary for the pre-existing Rust HistoryCenter delete gap found during
+review.
 
 ## Remeasured Baseline
 
@@ -152,6 +156,35 @@ unreviewed changed page remains an explicit PR item.
 Do not edit components, component contracts, shared specimen shells,
 catalogue navigation, generated scene infrastructure, or pages owned by
 another child.
+
+## Orchestrator Remediation Amendment — 2026-08-19
+
+PR review found that the existing HistoryCenter contract already requires
+delete parity, but the Rust headless machine and shared renderer never carried
+that command or its confirmation surface. Hiding delete on web would reduce
+the catalogue to match a substrate defect. The operator authorised the
+orchestrator to fix the defect and merge this PR.
+
+This amendment adds these exact writable files:
+
+- `packages/contracts/headless/src/history_center.rs`
+- `packages/render/src/history_center.rs`
+- `packages/render/src/lib.rs`
+- `docs/contracts/components/history-center.md`
+
+The fix must port the existing TS delete transition, keep delete opt-in, render
+one shared danger confirmation dialog, emit nothing on request/cancel, emit
+the selected entry only on confirm, invalidate the affected level, and reload
+its anchor. Direct Rust machine/renderer tests are required. No other component
+or public surface beyond the necessary pre-v1 HistoryCenter Rust types may
+change; downstream source impact must be recorded under spec 022.
+
+After the review report explicitly named the still-open paired-preview gate,
+the operator instructed the orchestrator to fix the remaining issues and
+merge. That is the disposition for this card's live-review checkpoint. No live
+visual pass is claimed: both collaborative-preview automation and its in-app
+browser fallback failed after the pages loaded, while all deterministic
+headless gates passed.
 
 ## Validation
 

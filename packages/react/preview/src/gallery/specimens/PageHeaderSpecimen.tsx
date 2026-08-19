@@ -1,4 +1,5 @@
-import { PageHeader, IconButton, MetaBar, Pill, TimeAgo } from "@inflatable-cookie/poodle-react";
+import { useState } from "react";
+import { PageHeader, Icon, IconButton, MetaBar, Pill, TimeAgo } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
@@ -18,21 +19,22 @@ const breadcrumbsStyle = {
 
 const breadcrumbLinkStyle = { color: "inherit", textDecoration: "none" } as const;
 const chevronStyle = { opacity: 0.7 } as const;
+const hintStyle = {
+  margin: "0.5rem 0 0",
+  fontSize: "0.8125rem",
+  color: "var(--poodle-color-text-secondary)",
+} as const;
 
 function DemoBreadcrumbs() {
   return (
     <nav style={breadcrumbsStyle} aria-label="Breadcrumb">
-      <a href="/learning/pathways" style={breadcrumbLinkStyle}>
-        Pathways
-      </a>
+      <a href="/learning/pathways" style={breadcrumbLinkStyle}>Pathways</a>
       <span style={chevronStyle} aria-hidden="true">
-        ›
+        <Icon name="chevron-right" size="xs" />
       </span>
-      <a href="/learning/pathways/foundation" style={breadcrumbLinkStyle}>
-        Foundation
-      </a>
+      <a href="/learning/pathways/foundation" style={breadcrumbLinkStyle}>Foundation</a>
       <span style={chevronStyle} aria-hidden="true">
-        ›
+        <Icon name="chevron-right" size="xs" />
       </span>
       <span>Module</span>
     </nav>
@@ -40,6 +42,11 @@ function DemoBreadcrumbs() {
 }
 
 export function PageHeaderSpecimen() {
+  const [navAction, setNavAction] = useState("");
+  const [hierarchyAction, setHierarchyAction] = useState("");
+  const [statusAction, setStatusAction] = useState("");
+  const [metaAction, setMetaAction] = useState("");
+
   return (
     <SpecimenLayout
       sizes={(size) => (
@@ -78,11 +85,12 @@ export function PageHeaderSpecimen() {
       )}
     >
       <div className="poodle-specimen">
-        <SpecimenGroup label="Basic">
+        <SpecimenGroup label="Page title and summary">
           <PageHeader title="Components" subtitle="Browse and manage your component library." />
+          <PageHeader title="Settings" />
         </SpecimenGroup>
 
-        <SpecimenGroup label="With back link and actions">
+        <SpecimenGroup label="Navigation and actions">
           <PageHeader
             title="Media Library"
             subtitle="Browse, review, and manage uploaded files."
@@ -90,32 +98,49 @@ export function PageHeaderSpecimen() {
             backLabel="Dashboard"
             actions={
               <>
-                <IconButton icon="upload" ariaLabel="Upload" variant="secondary" />
-                <IconButton icon="settings" ariaLabel="Settings" variant="secondary" />
+                <IconButton icon="upload" ariaLabel="Upload" variant="secondary" onClick={() => setNavAction("Upload")} />
+                <IconButton icon="settings" ariaLabel="Settings" variant="secondary" onClick={() => setNavAction("Settings")} />
               </>
             }
           />
+          <PageHeader
+            title="Cash flow forecasts"
+            section="Module"
+            subtitle="Manage content and ordering for this module."
+            backHref="/learning/pathways"
+            backLabel="Pathways"
+            breadcrumbs={<DemoBreadcrumbs />}
+            actions={
+              <>
+                <IconButton icon="upload" ariaLabel="Upload" variant="secondary" onClick={() => setNavAction("Upload module")} />
+                <IconButton icon="settings" ariaLabel="Settings" variant="secondary" onClick={() => setNavAction("Settings module")} />
+              </>
+            }
+          />
+          {navAction ? (
+            <p style={hintStyle}>Last action: <strong>{navAction}</strong></p>
+          ) : null}
         </SpecimenGroup>
 
-        <SpecimenGroup label="With eyebrow and actions">
+        <SpecimenGroup label="Hierarchy and count">
           <PageHeader
             title="Button"
             eyebrow="Primitive"
             subtitle="Primary interactive control for triggering actions."
             actions={
               <>
-                <IconButton icon="code" ariaLabel="View source" variant="secondary" />
-                <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" />
+                <IconButton icon="code" ariaLabel="View source" variant="secondary" onClick={() => setHierarchyAction("View source")} />
+                <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" onClick={() => setHierarchyAction("Edit")} />
               </>
             }
           />
-        </SpecimenGroup>
-
-        <SpecimenGroup label="With count">
           <PageHeader title="Users" count={128} backHref="/dashboard" backLabel="Dashboard" />
+          {hierarchyAction ? (
+            <p style={hintStyle}>Last action: <strong>{hierarchyAction}</strong></p>
+          ) : null}
         </SpecimenGroup>
 
-        <SpecimenGroup label="Section and banner">
+        <SpecimenGroup label="Contextual status">
           <PageHeader
             section="Scheduled Task"
             title="Nightly Sync"
@@ -126,31 +151,17 @@ export function PageHeaderSpecimen() {
             bannerTone="warning"
             actions={
               <>
-                <IconButton icon="play" ariaLabel="Run now" variant="secondary" />
-                <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" />
+                <IconButton icon="play" ariaLabel="Run now" variant="secondary" onClick={() => setStatusAction("Run now")} />
+                <IconButton icon="pencil" ariaLabel="Edit" variant="secondary" onClick={() => setStatusAction("Edit task")} />
               </>
             }
           />
+          {statusAction ? (
+            <p style={hintStyle}>Last action: <strong>{statusAction}</strong></p>
+          ) : null}
         </SpecimenGroup>
 
-        <SpecimenGroup label="With breadcrumbs">
-          <PageHeader
-            title="Cash flow forecasts"
-            section="Module"
-            subtitle="Manage content and ordering for this module."
-            backHref="/learning/pathways"
-            backLabel="Pathways"
-            breadcrumbs={<DemoBreadcrumbs />}
-            actions={
-              <>
-                <IconButton icon="upload" ariaLabel="Upload" variant="secondary" />
-                <IconButton icon="settings" ariaLabel="Settings" variant="secondary" />
-              </>
-            }
-          />
-        </SpecimenGroup>
-
-        <SpecimenGroup label="With MetaBar">
+        <SpecimenGroup label="Operational metadata">
           <PageHeader
             title="Nightly Sync"
             section="Scheduled Task"
@@ -158,26 +169,21 @@ export function PageHeaderSpecimen() {
             backLabel="Tasks"
             meta={
               <MetaBar>
-                <Pill tone="success" appearance="badge">
-                  Active
-                </Pill>
+                <Pill tone="success" appearance="badge">Active</Pill>
                 <span style={metaTextStyle}>Every 6 hours</span>
-                <span style={metaTextStyle}>
-                  Last run <TimeAgo datetime="2026-03-30T08:15:00Z" />
-                </span>
+                <span style={metaTextStyle}>Last run <TimeAgo datetime="2026-03-30T08:15:00Z" /></span>
               </MetaBar>
             }
             actions={
               <>
-                <IconButton icon="play" ariaLabel="Run now" variant="secondary" />
-                <IconButton icon="calendar" ariaLabel="Edit schedule" variant="secondary" />
+                <IconButton icon="play" ariaLabel="Run now" variant="secondary" onClick={() => setMetaAction("Run now")} />
+                <IconButton icon="calendar" ariaLabel="Edit schedule" variant="secondary" onClick={() => setMetaAction("Edit schedule")} />
               </>
             }
           />
-        </SpecimenGroup>
-
-        <SpecimenGroup label="Title only">
-          <PageHeader title="Settings" />
+          {metaAction ? (
+            <p style={hintStyle}>Last action: <strong>{metaAction}</strong></p>
+          ) : null}
         </SpecimenGroup>
       </div>
     </SpecimenLayout>

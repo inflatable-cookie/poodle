@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type {
   HistoryCenterRejectionCode,
   HistoryContinuation,
@@ -171,7 +171,10 @@ export function HistoryCenterSpecimen() {
   const [runTail, setRunTail] = useState<HostFeed>({ continuations: null, run: null });
   const [noTimestamp, setNoTimestamp] = useState<HostFeed>({ continuations: null, run: null });
   const [renameHost, setRenameHost] = useState<HostFeed>({ continuations: null, run: null });
-  const [singleForkOpen, setSingleForkOpen] = useState<HostFeed>({ continuations: null, run: null });
+  const [manageHost, setManageHost] = useState<HostFeed>({ continuations: null, run: null });
+  const [manageCommand, setManageCommand] = useState("");
+  const [failureCommand, setFailureCommand] = useState("");
+  const [hostCommand, setHostCommand] = useState("");
 
   function loadContinuations(
     set: (updater: (current: HostFeed) => HostFeed) => void,
@@ -187,57 +190,44 @@ export function HistoryCenterSpecimen() {
     return (fromEntryId) => set((current) => ({ ...current, run: { fromEntryId, pages: runs[fromEntryId] ?? [] } }));
   }
 
-  // The capture never clicks, so the single-fork-open group drives its own
-  // single interaction on mount: disclose the fork. The capture then shows
-  // the unified picker row for one fork — the disabled Select with the fork
-  // icon, name, branch, entry count and relative time, the rename pencil,
-  // the opt-in delete button (the host supplies the callback here) and the
-  // disabled checkout. The popover portals to the theme root, so only one
-  // group opens at once.
-  useEffect(() => {
-    const run = () => {
-      const disclosure = document.querySelector<HTMLButtonElement>('[data-part="fork-disclosure"]');
-      if (!disclosure) return false;
-      disclosure.click();
-      return true;
-    };
+  const navigate = (_branchId: string | null, entryId: string) => {
+    setHostCommand(`Navigate ${entryId}`);
+  };
+  const undoHistory = () => setHostCommand("Undo");
 
-    if (!run()) {
-      const timer = setTimeout(run, 60);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  const navigate = (branchId: string | null, entryId: string) => console.log("navigate", branchId, entryId);
+  const anchorStyle = { display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" } as const;
+  const stackStyle = { display: "grid", gap: "1.5rem" } as const;
+  const hintStyle = {
+    margin: "0.5rem 0 0",
+    fontSize: "0.8125rem",
+    color: "var(--poodle-color-text-secondary)",
+  } as const;
 
   return (
-    // Axis tabs are advertised by SpecimenLayout whether or not a specimen
-    // fills them (showSizes/showDensities default true), so omitting these
-    // renders empty Sizes and Densities tabs. Triggers stay closed here:
-    // several open popovers would stack in one place.
     <SpecimenLayout
       bareVariants
-      sizes={(size) => <HistoryCenter pages={linearPages} size={size} canUndo canRedo />}
-      densities={(density) => <HistoryCenter pages={linearPages} density={density} canUndo canRedo />}
+      sizes={(size) => <HistoryCenter pages={linearPages} size={size} />}
+      densities={(density) => <HistoryCenter pages={linearPages} density={density} />}
     >
-      {/* The single-fork-open group opens by default so the capture shows
-          the unified picker row for one fork — the disabled Select with the
-          fork icon, name, branch, entry count and relative time, the rename
-          pencil, the opt-in delete and the disabled checkout (the mount-time
-          driver discloses the fork); the popover portals to the theme root,
-          so only one group opens at once. */}
       <div style={{ display: "grid", gap: "2rem", minHeight: "40rem" }}>
-        <SpecimenGroup label="linear">
-          <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
-            <HistoryCenter pages={linearPages} canUndo onNavigateEntry={navigate} />
+        {hostCommand ? (
+          <p style={hintStyle}>
+            Last host command: <strong>{hostCommand}</strong>
+          </p>
+        ) : null}
+        <SpecimenGroup label="Linear history">
+          <div style={anchorStyle}>
+            <HistoryCenter pages={linearPages} canUndo onUndo={undoHistory} onNavigateEntry={navigate} />
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="two-forks">
-          <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
+        <SpecimenGroup label="Choosing between continuations">
+          <div style={anchorStyle}>
             <HistoryCenter
               pages={twoForkPages}
               canUndo
+
+              onUndo={undoHistory}
               continuationsResult={twoForks.continuations}
               runResult={twoForks.run}
               onLoadContinuations={loadContinuations(setTwoForks, twoForkContinuations)}
@@ -247,11 +237,13 @@ export function HistoryCenterSpecimen() {
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="fork-off-fork">
-          <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
+        <SpecimenGroup label="Nested continuation runs">
+          <div style={anchorStyle}>
             <HistoryCenter
               pages={nestedPages}
               canUndo
+
+              onUndo={undoHistory}
               continuationsResult={nested.continuations}
               runResult={nested.run}
               onLoadContinuations={loadContinuations(setNested, nestedContinuations)}
@@ -261,80 +253,97 @@ export function HistoryCenterSpecimen() {
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="single-continuation">
-          <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
-            <HistoryCenter pages={singleContinuationPages} canUndo onNavigateEntry={navigate} />
+        <SpecimenGroup label="Single continuation and run boundaries">
+          <div style={stackStyle}>
+            <div style={anchorStyle}>
+              <HistoryCenter pages={singleContinuationPages} canUndo onUndo={undoHistory} onNavigateEntry={navigate} />
+            </div>
+            <div style={anchorStyle}>
+              <HistoryCenter
+                pages={runTailPages}
+                canUndo
+
+                onUndo={undoHistory}
+                continuationsResult={runTail.continuations}
+                runResult={runTail.run}
+                onLoadContinuations={loadContinuations(setRunTail, runTailContinuations)}
+                onLoadContinuationRun={loadRun(setRunTail, runTailRuns)}
+                onNavigateEntry={navigate}
+              />
+            </div>
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="run-tail">
-          <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
-            <HistoryCenter
-              pages={runTailPages}
-              canUndo
-              continuationsResult={runTail.continuations}
-              runResult={runTail.run}
-              onLoadContinuations={loadContinuations(setRunTail, runTailContinuations)}
-              onLoadContinuationRun={loadRun(setRunTail, runTailRuns)}
-              onNavigateEntry={navigate}
-            />
+        <SpecimenGroup label="Rename and manage a continuation">
+          <div style={stackStyle}>
+            <div style={anchorStyle}>
+              <HistoryCenter
+                pages={runTailPages}
+                canUndo
+
+                onUndo={undoHistory}
+                continuationsResult={manageHost.continuations}
+                runResult={manageHost.run}
+                onLoadContinuations={loadContinuations(setManageHost, runTailContinuations)}
+                onLoadContinuationRun={loadRun(setManageHost, runTailRuns)}
+                onDeleteContinuation={(entryId) => setManageCommand(`Delete ${entryId}`)}
+                onRenameBranch={(branchId, name) => setManageCommand(`Rename ${branchId} to ${name}`)}
+                onNavigateEntry={navigate}
+              />
+            </div>
+            <div style={anchorStyle}>
+              <HistoryCenter
+                pages={nestedPages}
+                canUndo
+
+                onUndo={undoHistory}
+                continuationsResult={renameHost.continuations}
+                runResult={renameHost.run}
+                onLoadContinuations={loadContinuations(setRenameHost, nestedContinuations)}
+                onLoadContinuationRun={loadRun(setRenameHost, nestedRuns)}
+                onNavigateEntry={navigate}
+                onRenameBranch={(branchId, name) => setManageCommand(`Rename ${branchId} to ${name}`)}
+              />
+            </div>
           </div>
+          {manageCommand ? (
+            <p style={hintStyle}>
+              Last command: <strong>{manageCommand}</strong>
+            </p>
+          ) : null}
         </SpecimenGroup>
 
-        <SpecimenGroup label="single-fork-open">
-          <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
-            <HistoryCenter
-              pages={runTailPages}
-              defaultOpen
-              canUndo
-              continuationsResult={singleForkOpen.continuations}
-              runResult={singleForkOpen.run}
-              onLoadContinuations={loadContinuations(setSingleForkOpen, runTailContinuations)}
-              onLoadContinuationRun={loadRun(setSingleForkOpen, runTailRuns)}
-              onDeleteContinuation={(entryId) => console.log("delete", entryId)}
-              onNavigateEntry={navigate}
-            />
-          </div>
-        </SpecimenGroup>
+        <SpecimenGroup label="Failure and incomplete metadata">
+          <div style={stackStyle}>
+            <div style={anchorStyle}>
+              <HistoryCenter
+                pages={rejectionPages}
+                rejection={"AlreadyAtTarget" satisfies HistoryCenterRejectionCode}
+                canUndo
 
-        <SpecimenGroup label="rejection">
-          <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
-            <HistoryCenter
-              pages={rejectionPages}
-              rejection={"AlreadyAtTarget" satisfies HistoryCenterRejectionCode}
-              canUndo
-              onNavigateEntry={navigate}
-            />
-          </div>
-        </SpecimenGroup>
+                onUndo={undoHistory}
+                onNavigateEntry={navigate}
+              />
+            </div>
+            <div style={anchorStyle}>
+              <HistoryCenter
+                pages={noTimestampPages}
+                canUndo
 
-        <SpecimenGroup label="no-timestamp">
-          <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
-            <HistoryCenter
-              pages={noTimestampPages}
-              canUndo
-              continuationsResult={noTimestamp.continuations}
-              runResult={noTimestamp.run}
-              onLoadContinuations={loadContinuations(setNoTimestamp, noTimestampContinuations)}
-              onLoadContinuationRun={loadRun(setNoTimestamp, noTimestampRuns)}
-              onNavigateEntry={navigate}
-            />
+                onUndo={undoHistory}
+                continuationsResult={noTimestamp.continuations}
+                runResult={noTimestamp.run}
+                onLoadContinuations={loadContinuations(setNoTimestamp, noTimestampContinuations)}
+                onLoadContinuationRun={loadRun(setNoTimestamp, noTimestampRuns)}
+                onNavigateEntry={navigate}
+              />
+            </div>
           </div>
-        </SpecimenGroup>
-
-        <SpecimenGroup label="rename">
-          <div style={{ display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" }}>
-            <HistoryCenter
-              pages={nestedPages}
-              canUndo
-              continuationsResult={renameHost.continuations}
-              runResult={renameHost.run}
-              onLoadContinuations={loadContinuations(setRenameHost, nestedContinuations)}
-              onLoadContinuationRun={loadRun(setRenameHost, nestedRuns)}
-              onNavigateEntry={navigate}
-              onRenameBranch={(branchId, name) => console.log("rename", branchId, name)}
-            />
-          </div>
+          {failureCommand ? (
+            <p style={hintStyle}>
+              Last command: <strong>{failureCommand}</strong>
+            </p>
+          ) : null}
         </SpecimenGroup>
       </div>
     </SpecimenLayout>

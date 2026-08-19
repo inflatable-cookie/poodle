@@ -1,8 +1,17 @@
+import { useState } from "react";
 import { Button, DetailItem, DetailSection } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
+const hintStyle = {
+  margin: "0.5rem 0 0",
+  fontSize: "0.8125rem",
+  color: "var(--poodle-color-text-secondary)",
+} as const;
+
 export function DetailSectionSpecimen() {
+  const [sectionAction, setSectionAction] = useState("");
+
   return (
     <SpecimenLayout
       showSizes={false}
@@ -36,7 +45,7 @@ export function DetailSectionSpecimen() {
       )}
     >
       <div className="poodle-specimen">
-        <SpecimenGroup label="With title and rows">
+        <SpecimenGroup label="Project details">
           <DetailSection title="Project details" description="Core metadata for this project.">
             <DetailItem label="Name" value="Poodle Design System" />
             <DetailItem label="Owner" value="Clay + Aura" />
@@ -45,11 +54,11 @@ export function DetailSectionSpecimen() {
           </DetailSection>
         </SpecimenGroup>
 
-        <SpecimenGroup label="With actions">
+        <SpecimenGroup label="Section actions">
           <DetailSection
             title="Billing"
             actions={
-              <Button variant="secondary" size="sm">
+              <Button variant="secondary" size="sm" onClick={() => setSectionAction("Edit billing")}>
                 Edit
               </Button>
             }
@@ -58,9 +67,14 @@ export function DetailSectionSpecimen() {
             <DetailItem label="Billing cycle" value="Monthly" />
             <DetailItem label="Next invoice" value="April 1, 2026" />
           </DetailSection>
+          {sectionAction ? (
+            <p style={hintStyle}>
+              Last action: <strong>{sectionAction}</strong>
+            </p>
+          ) : null}
         </SpecimenGroup>
 
-        <SpecimenGroup label="DetailItem with description">
+        <SpecimenGroup label="Described detail rows">
           <DetailSection title="Configuration">
             <DetailItem
               label="API endpoint"

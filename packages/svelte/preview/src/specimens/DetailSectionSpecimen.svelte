@@ -3,11 +3,13 @@
   import { Button, DetailItem } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
+
+  let sectionAction = $state("");
 </script>
 
 <SpecimenLayout showSizes={false}>
   <div class="poodle-specimen">
-    <SpecimenGroup label="With title and rows">
+    <SpecimenGroup label="Project details">
       <DetailSection title="Project details" description="Core metadata for this project.">
         <DetailItem label="Name" value="Poodle Design System" />
         <DetailItem label="Owner" value="Clay + Aura" />
@@ -16,18 +18,25 @@
       </DetailSection>
     </SpecimenGroup>
 
-    <SpecimenGroup label="With actions">
+    <SpecimenGroup label="Section actions">
       <DetailSection title="Billing">
         {#snippet actions()}
-          <Button variant="secondary" size="sm">Edit</Button>
+          <Button variant="secondary" size="sm" onClick={() => (sectionAction = "Edit billing")}>
+            Edit
+          </Button>
         {/snippet}
         <DetailItem label="Plan" value="Pro" />
         <DetailItem label="Billing cycle" value="Monthly" />
         <DetailItem label="Next invoice" value="April 1, 2026" />
       </DetailSection>
+      {#if sectionAction}
+        <p class="poodle-specimen__hint">
+          Last action: <strong>{sectionAction}</strong>
+        </p>
+      {/if}
     </SpecimenGroup>
 
-    <SpecimenGroup label="DetailItem with description">
+    <SpecimenGroup label="Described detail rows">
       <DetailSection title="Configuration">
         <DetailItem label="API endpoint" value="https://api.example.com/v2" description="The base URL for all API requests." truncateValue />
         <DetailItem label="Rate limit" value="1,000 req/min" description="Maximum requests per minute." />
@@ -93,4 +102,9 @@
     text-transform: uppercase;
   }
 
+  .poodle-specimen__hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--poodle-color-text-secondary);
+  }
 </style>

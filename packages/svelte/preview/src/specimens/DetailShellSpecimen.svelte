@@ -2,6 +2,25 @@
   import { DetailShell, DetailSection, PageHeader } from "@inflatable-cookie/poodle-svelte";
   import { Button, Pill, DetailItem, Region, Separator } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+
+  const defaultConfig = {
+    theme: "Dark",
+    density: "Compact",
+    defaultSize: "Medium",
+  };
+
+  let config = $state({ ...defaultConfig });
+  let shellAction = $state("");
+
+  function resetConfiguration(): void {
+    config = { ...defaultConfig };
+    shellAction = "Reset configuration";
+  }
+
+  function editProject(): void {
+    config.theme = config.theme === "Dark" ? "Light" : "Dark";
+    shellAction = "Edit project";
+  }
 </script>
 
 <div class="poodle-specimen">
@@ -25,7 +44,7 @@
           <PageHeader title="Poodle Design System" eyebrow="Project" subtitle="A comprehensive component library.">
             {#snippet actions()}
               <Pill appearance="badge" tone="success">Active</Pill>
-              <Button variant="secondary">Edit</Button>
+              <Button variant="secondary" onClick={() => editProject()}>Edit</Button>
             {/snippet}
           </PageHeader>
         {/snippet}
@@ -37,11 +56,11 @@
         <Separator />
         <DetailSection title="Configuration">
           {#snippet actions()}
-            <Button variant="ghost">Reset</Button>
+            <Button variant="ghost" onClick={() => resetConfiguration()}>Reset</Button>
           {/snippet}
-          <DetailItem label="Theme" value="Dark" />
-          <DetailItem label="Density" value="Compact" />
-          <DetailItem label="Default size" value="Medium" />
+          <DetailItem label="Theme" value={config.theme} />
+          <DetailItem label="Density" value={config.density} />
+          <DetailItem label="Default size" value={config.defaultSize} />
         </DetailSection>
         <Separator />
         <DetailSection title="Integrations">
@@ -49,6 +68,11 @@
           <DetailItem label="Storybook" value="Not configured" />
         </DetailSection>
       </DetailShell>
+      {#if shellAction}
+        <p class="poodle-specimen__hint">
+          Last action: <strong>{shellAction}</strong>
+        </p>
+      {/if}
     </div>
   </SpecimenGroup>
 
@@ -80,5 +104,11 @@
 
   .poodle-specimen__demo {
     margin-top: 0.75rem;
+  }
+
+  .poodle-specimen__hint {
+    margin: 0.75rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--poodle-color-text-secondary);
   }
 </style>

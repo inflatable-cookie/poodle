@@ -1,10 +1,21 @@
-use crate::node_compat::{Button, DetailItem, DetailSection, DetailShell, Eyebrow, IntoCompatNode};
+use crate::app_state::{AppState, NodeSpecimenEvent};
+use crate::node_compat::{
+    Button, DetailItem, DetailSection, DetailShell, Eyebrow, IntoCompatNode, PageHeader, Pill,
+    Separator,
+};
+use crate::style_bridge::color_to_hsla;
+use crate::PreviewRoot;
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
-use poodle_specs::{ButtonSpec, ButtonVariant, ControlSize, DetailItemSpec, EyebrowSpec};
-use poodle_specs::{DetailSectionSpec, DetailShellSpec, DetailState};
+use poodle_specs::{
+    ButtonSpec, ButtonVariant, ControlSize, DetailItemSpec, DetailSectionSpec, DetailShellSpec,
+    DetailState, EyebrowSpec, PageHeaderSpec, PillAppearance, PillSpec, PillTone,
+    SeparatorSpec,
+};
+use std::sync::Arc;
 
 fn node_column(gap: f32, children: Vec<Node>) -> Node {
     let mut node = Node::container();
@@ -13,182 +24,288 @@ fn node_column(gap: f32, children: Vec<Node>) -> Node {
     children.into_iter().fold(node, Node::child)
 }
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div {
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(8.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(label),
+            theme,
+        ))
+        .child(child)
+}
+
+fn config_text(state: &AppState, key: &str, default: &str) -> String {
+    state
+        .specimens
+        .text
+        .get(key)
+        .cloned()
+        .unwrap_or_else(|| default.to_string())
+}
+
+pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
+    let theme = &state.theme;
     let accent = theme.resolve_color("color.accent.base");
     let border = theme.resolve_color("color.border.subtle");
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let events = state.node_events.clone();
+
+    let config_theme = config_text(state, "detail-shell-theme", "Dark");
+    let config_density = config_text(state, "detail-shell-density", "Compact");
+    let config_size = config_text(state, "detail-shell-default-size", "Medium");
+    let shell_action = state
+        .specimens
+        .text
+        .get("detail-shell-action")
+        .cloned()
+        .unwrap_or_default();
+
+    let edit_events = events.clone();
+    let edit_theme = config_theme.clone();
+    let reset_events = events.clone();
 
     div()
         .flex()
         .flex_col()
         .gap(px(24.0))
+        .child(group(
+            "Layout structure",
+            theme,
+            div().h(px(180.0)).child(
+                DetailShell::from_spec(DetailShellSpec::new(), theme)
+                    .with_header(region_block("Header", accent, border))
+                    .with_content(node_column(
+                        6.0,
+                        vec![
+                            region_block("Section 1", accent, border),
+                            region_block("Section 2", accent, border),
+                            region_block("Section 3", accent, border),
+                        ],
+                    )),
+            ),
+        ))
         .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Layout structure"),
-                    theme,
-                ))
-                .child(
-                    div().h(px(180.0)).child(
-                        DetailShell::from_spec(DetailShellSpec::new(), theme)
-                            .with_header(region_block("Header", accent, border))
-                            .with_content(node_column(
-                                6.0,
-                                vec![
-                                    region_block("Section 1", accent, border),
-                                    region_block("Section 2", accent, border),
-                                    region_block("Section 3", accent, border),
-                                ],
-                            )),
-                    ),
-                ),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Multi-section layout with header"),
-                    theme,
-                ))
-                .child(
-                    div().h(px(240.0)).child(
-                        DetailShell::from_spec(
-                            DetailShellSpec::new().with_title("Poodle Design System"),
-                            theme,
-                        )
-                        .with_content(node_column(
-                            8.0,
-                            vec![
-                                DetailSection::from_spec(
-                                    DetailSectionSpec::new().with_title("General"),
-                                    theme,
-                                )
-                                .with_body(node_column(
-                                    0.0,
-                                    vec![
-                                        DetailItem::from_spec(
-                                            DetailItemSpec::new("Owner").with_value("Clay"),
-                                            theme,
-                                        )
-                                        .into_compat_node(),
-                                        DetailItem::from_spec(
-                                            DetailItemSpec::new("Created").with_value("March 2025"),
-                                            theme,
-                                        )
-                                        .into_compat_node(),
-                                        DetailItem::from_spec(
-                                            DetailItemSpec::new("Repository")
-                                                .with_value("github.com/poodle-ui/poodle"),
-                                            theme,
-                                        )
-                                        .into_compat_node(),
-                                    ],
-                                ))
-                                .into_compat_node(),
-                                DetailSection::from_spec(
-                                    DetailSectionSpec::new().with_title("Configuration"),
-                                    theme,
-                                )
-                                .with_actions(
-                                    Button::from_spec(
-                                        ButtonSpec::new()
-                                            .with_variant(ButtonVariant::Ghost)
-                                            .with_size(ControlSize::Sm)
-                                            .with_label("Reset"),
+            group(
+                "Multi-section layout with header",
+                theme,
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap(px(8.0))
+                    .child(
+                        div().h(px(280.0)).child(
+                            DetailShell::from_spec(DetailShellSpec::new(), theme)
+                                .with_header(
+                                    PageHeader::from_spec(
+                                        PageHeaderSpec::new("Poodle Design System")
+                                            .with_eyebrow("Project")
+                                            .with_subtitle(
+                                                "A comprehensive component library.",
+                                            ),
                                         theme,
                                     )
-                                    .with_id("ds-reset"),
+                                    .with_actions({
+                                        let mut row = Node::container();
+                                        row.style.descriptor.layout.direction =
+                                            LayoutDirection::Row;
+                                        row.style.descriptor.layout.spacing.gap = 6.0;
+                                        row = row.child(
+                                            Pill::from_spec(
+                                                PillSpec::new()
+                                                    .with_label("Active")
+                                                    .with_tone(PillTone::Success)
+                                                    .with_appearance(PillAppearance::Badge),
+                                                theme,
+                                            )
+                                            .into_compat_node(),
+                                        );
+                                        row.child(
+                                            Button::from_spec(
+                                                ButtonSpec::new()
+                                                    .with_variant(ButtonVariant::Secondary)
+                                                    .with_label("Edit"),
+                                                theme,
+                                            )
+                                            .with_id("detail-shell-edit")
+                                            .on_click(Arc::new(move || {
+                                                let next = if edit_theme == "Light" {
+                                                    "Dark"
+                                                } else {
+                                                    "Light"
+                                                };
+                                                let mut queue = edit_events.lock().unwrap();
+                                                queue.push(NodeSpecimenEvent::SetText {
+                                                    key: "detail-shell-theme".to_string(),
+                                                    value: next.to_string(),
+                                                });
+                                                queue.push(NodeSpecimenEvent::SetText {
+                                                    key: "detail-shell-action".to_string(),
+                                                    value: "Edit project".to_string(),
+                                                });
+                                            }))
+                                            .into_compat_node(),
+                                        )
+                                    })
+                                    .into_compat_node(),
                                 )
-                                .with_body(node_column(
-                                    0.0,
+                                .with_content(node_column(
+                                    8.0,
                                     vec![
-                                        DetailItem::from_spec(
-                                            DetailItemSpec::new("Theme").with_value("Dark"),
+                                        DetailSection::from_spec(
+                                            DetailSectionSpec::new().with_title("General"),
                                             theme,
                                         )
+                                        .with_body(node_column(
+                                            0.0,
+                                            vec![
+                                                DetailItem::from_spec(
+                                                    DetailItemSpec::new("Owner")
+                                                        .with_value("Clay"),
+                                                    theme,
+                                                )
+                                                .into_compat_node(),
+                                                DetailItem::from_spec(
+                                                    DetailItemSpec::new("Created")
+                                                        .with_value("March 2025"),
+                                                    theme,
+                                                )
+                                                .into_compat_node(),
+                                                DetailItem::from_spec(
+                                                    DetailItemSpec::new("Repository")
+                                                        .with_value(
+                                                            "github.com/poodle-ui/poodle",
+                                                        ),
+                                                    theme,
+                                                )
+                                                .into_compat_node(),
+                                            ],
+                                        ))
                                         .into_compat_node(),
-                                        DetailItem::from_spec(
-                                            DetailItemSpec::new("Density").with_value("Compact"),
+                                        Separator::from_spec(SeparatorSpec::new(), theme)
+                                            .into_compat_node(),
+                                        DetailSection::from_spec(
+                                            DetailSectionSpec::new()
+                                                .with_title("Configuration"),
                                             theme,
                                         )
+                                        .with_actions(
+                                            Button::from_spec(
+                                                ButtonSpec::new()
+                                                    .with_variant(ButtonVariant::Ghost)
+                                                    .with_size(ControlSize::Sm)
+                                                    .with_label("Reset"),
+                                                theme,
+                                            )
+                                            .with_id("detail-shell-reset")
+                                            .on_click(Arc::new(move || {
+                                                let mut queue =
+                                                    reset_events.lock().unwrap();
+                                                queue.push(NodeSpecimenEvent::SetText {
+                                                    key: "detail-shell-theme".to_string(),
+                                                    value: "Dark".to_string(),
+                                                });
+                                                queue.push(NodeSpecimenEvent::SetText {
+                                                    key: "detail-shell-density".to_string(),
+                                                    value: "Compact".to_string(),
+                                                });
+                                                queue.push(NodeSpecimenEvent::SetText {
+                                                    key: "detail-shell-default-size"
+                                                        .to_string(),
+                                                    value: "Medium".to_string(),
+                                                });
+                                                queue.push(NodeSpecimenEvent::SetText {
+                                                    key: "detail-shell-action".to_string(),
+                                                    value: "Reset configuration".to_string(),
+                                                });
+                                            })),
+                                        )
+                                        .with_body(node_column(
+                                            0.0,
+                                            vec![
+                                                DetailItem::from_spec(
+                                                    DetailItemSpec::new("Theme")
+                                                        .with_value(&config_theme),
+                                                    theme,
+                                                )
+                                                .into_compat_node(),
+                                                DetailItem::from_spec(
+                                                    DetailItemSpec::new("Density")
+                                                        .with_value(&config_density),
+                                                    theme,
+                                                )
+                                                .into_compat_node(),
+                                                DetailItem::from_spec(
+                                                    DetailItemSpec::new("Default size")
+                                                        .with_value(&config_size),
+                                                    theme,
+                                                )
+                                                .into_compat_node(),
+                                            ],
+                                        ))
                                         .into_compat_node(),
-                                        DetailItem::from_spec(
-                                            DetailItemSpec::new("Default size")
-                                                .with_value("Medium"),
+                                        Separator::from_spec(SeparatorSpec::new(), theme)
+                                            .into_compat_node(),
+                                        DetailSection::from_spec(
+                                            DetailSectionSpec::new()
+                                                .with_title("Integrations"),
                                             theme,
                                         )
+                                        .with_body(node_column(
+                                            0.0,
+                                            vec![
+                                                DetailItem::from_spec(
+                                                    DetailItemSpec::new("Figma")
+                                                        .with_value("Connected"),
+                                                    theme,
+                                                )
+                                                .into_compat_node(),
+                                                DetailItem::from_spec(
+                                                    DetailItemSpec::new("Storybook")
+                                                        .with_value("Not configured"),
+                                                    theme,
+                                                )
+                                                .into_compat_node(),
+                                            ],
+                                        ))
                                         .into_compat_node(),
                                     ],
-                                ))
-                                .into_compat_node(),
-                                DetailSection::from_spec(
-                                    DetailSectionSpec::new().with_title("Integrations"),
-                                    theme,
-                                )
-                                .with_body(node_column(
-                                    0.0,
-                                    vec![
-                                        DetailItem::from_spec(
-                                            DetailItemSpec::new("Figma").with_value("Connected"),
-                                            theme,
-                                        )
-                                        .into_compat_node(),
-                                        DetailItem::from_spec(
-                                            DetailItemSpec::new("Storybook")
-                                                .with_value("Not configured"),
-                                            theme,
-                                        )
-                                        .into_compat_node(),
-                                    ],
-                                ))
-                                .into_compat_node(),
-                            ],
-                        )),
-                    ),
-                ),
+                                )),
+                        ),
+                    )
+                    .when(!shell_action.is_empty(), |d| {
+                        d.child(
+                            div()
+                                .text_sm()
+                                .text_color(color_to_hsla(text_secondary))
+                                .child(format!("Last action: {shell_action}")),
+                        )
+                    }),
+            ),
         )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Loading state"),
-                    theme,
-                ))
-                .child(
-                    div().h(px(100.0)).child(DetailShell::from_spec(
-                        DetailShellSpec::new()
-                            .with_title("Loading")
-                            .with_state(DetailState::Loading),
-                        theme,
-                    )),
-                ),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Error state"),
-                    theme,
-                ))
-                .child(
-                    div().h(px(120.0)).child(DetailShell::from_spec(
-                        DetailShellSpec::new()
-                            .with_title("Error")
-                            .with_state(DetailState::Error)
-                            .with_state_title("Failed to load")
-                            .with_state_message("Something went wrong. Please try again."),
-                        theme,
-                    )),
-                ),
-        )
+        .child(group(
+            "Loading state",
+            theme,
+            div().h(px(100.0)).child(DetailShell::from_spec(
+                DetailShellSpec::new()
+                    .with_title("Loading")
+                    .with_state(DetailState::Loading),
+                theme,
+            )),
+        ))
+        .child(group(
+            "Error state",
+            theme,
+            div().h(px(120.0)).child(DetailShell::from_spec(
+                DetailShellSpec::new()
+                    .with_title("Error")
+                    .with_state(DetailState::Error)
+                    .with_state_title("Failed to load")
+                    .with_state_message("Something went wrong. Please try again."),
+                theme,
+            )),
+        ))
 }
 
 fn region_block(

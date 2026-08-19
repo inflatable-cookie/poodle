@@ -28,15 +28,18 @@ use poodle_node::{
     MainAxisAlignment, Node, NodeKey, NodeRole, StylePatch,
 };
 use poodle_specs::{
-    ControlDensity, ControlSize, EmptyStateSize, EmptyStateSpec, HistoryCenterSpec, HistoryCenterStatus,
-    IconButtonSpec, PopoverSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
+    AlertDialogSpec, AlertDialogTone, ControlDensity, ControlSize, EmptyStateSize,
+    EmptyStateSpec, HistoryCenterSpec, HistoryCenterStatus, IconButtonSpec, PopoverSpec,
+    SeparatorSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
 };
 
+use crate::alert_dialog::{alert_dialog, AlertDialogHandlers, DEFAULT_WORKING_LABEL};
 use crate::empty_state::empty_state;
 use crate::floating_overlay::floating_overlay;
 use crate::icon_button::icon_button;
 use crate::popover::popover_surface;
 use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
+use crate::separator::separator;
 use crate::spinner::spinner;
 
 /// Stable semantic part ids. Backends key per-instance state on `runtime_id`;
@@ -95,6 +98,7 @@ pub fn history_center_picker_actions_id(anchor_entry_id: &str) -> String {
 /// One actions menu is open at a time, so its items are singletons.
 pub const HISTORY_CENTER_ACTION_RENAME_ID: &str = "history-center:action-rename";
 pub const HISTORY_CENTER_ACTION_CHECKOUT_ID: &str = "history-center:action-checkout";
+pub const HISTORY_CENTER_ACTION_DELETE_ID: &str = "history-center:action-delete";
 
 pub fn history_center_rename_input_id(anchor_entry_id: &str) -> String {
     format!("history-center:rename-input:{anchor_entry_id}")
@@ -121,6 +125,15 @@ pub struct HistoryCenterRename {
     pub value: String,
 }
 
+/// The continuation awaiting destructive confirmation. The host owns this
+/// transient state so every backend renders the same dialog without the
+/// shared composition inventing local authority.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct HistoryCenterDelete {
+    pub entry_id: String,
+    pub label: String,
+}
+
 /// Everything the host resolved before this frame: the derived rows plus the
 /// UI state the machine and the shells own. The composition reads it and
 /// decides nothing.
@@ -144,6 +157,8 @@ pub struct HistoryCenterView {
     pub open_actions_anchor: Option<String>,
     /// The open inline rename, if any.
     pub rename: Option<HistoryCenterRename>,
+    /// The continuation whose delete confirmation is open, if any.
+    pub delete_target: Option<HistoryCenterDelete>,
 }
 
 impl HistoryCenterView {
@@ -164,6 +179,7 @@ impl HistoryCenterView {
 
 type Command = Arc<dyn Fn() + Send + Sync>;
 type EntryCommand = Arc<dyn Fn(&str) + Send + Sync>;
+type ContinuationCommand = Arc<dyn Fn(&HistoryContinuation) + Send + Sync>;
 
 /// Host-owned interaction intent. The backend turns these into real listeners;
 /// none is ever invoked speculatively.
@@ -186,6 +202,11 @@ pub struct HistoryCenterHandlers {
     pub on_checkout: Option<EntryCommand>,
     /// The actions menu's rename item was chosen for an anchor.
     pub on_rename_open: Option<EntryCommand>,
+    /// Request the component-owned delete confirmation. No delete command
+    /// leaves until the operator confirms it.
+    pub on_delete_request: Option<ContinuationCommand>,
+    pub on_delete_confirm: Option<EntryCommand>,
+    pub on_delete_cancel: Option<Command>,
     /// A keystroke reached the open rename input. The host owns the buffer;
     /// the component enforces no protocol rule on the name.
     pub on_rename_key: Option<Arc<dyn Fn(&str) + Send + Sync>>,
@@ -257,6 +278,33 @@ pub fn history_center(
     wrapper
         .roles
         .insert("density".to_owned(), kebab_case_debug(density));
+
+    if let Some(target) = view.delete_target.as_ref() {
+        let confirm = handlers.on_delete_confirm.clone().map(|handler| {
+            let entry_id = target.entry_id.clone();
+            Arc::new(move || handler(&entry_id)) as Command
+        });
+        let dialog = alert_dialog(
+            &AlertDialogSpec::new("Delete this fork?")
+                .with_description("The fork and its entries go for good. This cannot be undone.")
+                .with_item_detail("Fork", target.label.clone())
+                .with_tone(AlertDialogTone::Danger)
+                .with_confirm_label("Delete")
+                .with_cancel_label("Cancel")
+                .with_open(true)
+                .with_size(size)
+                .with_density(density),
+            theme,
+            false,
+            DEFAULT_WORKING_LABEL,
+            AlertDialogHandlers {
+                confirm,
+                cancel: handlers.on_delete_cancel.clone(),
+            },
+        );
+        wrapper = wrapper.child(dialog);
+    }
+
     wrapper
 }
 
@@ -815,6 +863,7 @@ fn picker(
 
     controls.child(picker_actions(
         anchor_entry_id,
+        continuations,
         picked_entry_id,
         theme,
         view,
@@ -949,6 +998,7 @@ fn picker_option(
 #[allow(clippy::too_many_arguments)]
 fn picker_actions(
     anchor_entry_id: &str,
+    continuations: &[HistoryContinuation],
     picked_entry_id: Option<&str>,
     theme: &dyn ThemeProvider,
     view: &HistoryCenterView,
@@ -960,6 +1010,8 @@ fn picker_actions(
     let semantic = history_center_picker_actions_id(anchor_entry_id);
     let is_open = view.open_actions_anchor.as_deref() == Some(anchor_entry_id);
     let is_renaming = view.renaming_at(anchor_entry_id).is_some();
+    let picked = picked_entry_id
+        .and_then(|id| continuations.iter().find(|fork| fork.entry_id == id));
 
     let mut trigger = icon_button(
         &IconButtonSpec::new()
@@ -1002,6 +1054,7 @@ fn picker_actions(
             let anchor = anchor_entry_id.to_owned();
             Arc::new(move || handler(&anchor)) as Command
         }),
+        false,
         theme,
         instance,
     ));
@@ -1014,9 +1067,34 @@ fn picker_actions(
             let anchor = anchor_entry_id.to_owned();
             Arc::new(move || handler(&anchor)) as Command
         }),
+        false,
         theme,
         instance,
     ));
+
+    let delete_is_supported = handlers.on_delete_request.is_some()
+        && handlers.on_delete_confirm.is_some()
+        && handlers.on_delete_cancel.is_some();
+    if delete_is_supported {
+        menu = menu.child(separator(
+            &SeparatorSpec::new().with_decorative(false),
+            theme,
+        ));
+        menu = menu.child(menu_item(
+            HISTORY_CENTER_ACTION_DELETE_ID,
+            "Delete",
+            picked.is_none() || is_renaming,
+            picked.and_then(|fork| {
+                handlers.on_delete_request.clone().map(|handler| {
+                    let fork = fork.clone();
+                    Arc::new(move || handler(&fork)) as Command
+                })
+            }),
+            true,
+            theme,
+            instance,
+        ));
+    }
 
     let mut wrapper = Node::container();
     wrapper.style.descriptor.layout.direction = LayoutDirection::Column;
@@ -1028,6 +1106,7 @@ fn menu_item(
     label: &str,
     is_disabled: bool,
     on_activate: Option<Command>,
+    is_danger: bool,
     theme: &dyn ThemeProvider,
     instance: Option<&str>,
 ) -> Node {
@@ -1049,7 +1128,11 @@ fn menu_item(
         s.descriptor.layout.spacing.padding.left = rem_to_px(0.5);
         s.descriptor.layout.spacing.padding.right = rem_to_px(0.5);
         s.descriptor.opacity = if is_disabled { 0.5 } else { 1.0 };
-        s.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
+        s.descriptor.text_color = Some(theme.resolve_color(if is_danger {
+            "color.status.danger"
+        } else {
+            "color.text.primary"
+        }));
         s.focus = Some(focus_ring(theme));
         s.fill_width = true;
     }
@@ -1565,6 +1648,112 @@ mod tests {
         assert_eq!(
             typed.lock().expect("typed").as_slice(),
             [" ".to_owned(), "M".to_owned(), "i".to_owned()],
+        );
+    }
+
+    #[test]
+    fn delete_is_opt_in_and_the_menu_item_only_requests_confirmation() {
+        use std::sync::Mutex;
+
+        let pages = spine();
+        let fork = HistoryContinuation::new("f1", "Widen", "wide");
+        let level = HistoryCenterOpenFork {
+            anchor_entry_id: "e2".to_owned(),
+            continuations: Some(vec![fork.clone()]),
+            pick: Some(fork),
+            ..HistoryCenterOpenFork::default()
+        };
+        let mut view = view_for(&pages, &[level]);
+        view.open_actions_anchor = Some("e2".to_owned());
+
+        let unsupported = history_center(
+            &open_spec(),
+            &theme(),
+            &view,
+            &HistoryCenterHandlers::default(),
+        );
+        assert!(find(&unsupported, HISTORY_CENTER_ACTION_DELETE_ID).is_none());
+
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let requested = Arc::clone(&seen);
+        let handlers = HistoryCenterHandlers {
+            on_delete_request: Some(Arc::new(move |target| {
+                requested
+                    .lock()
+                    .expect("request")
+                    .push(format!("request:{}", target.entry_id));
+            })),
+            on_delete_confirm: Some(Arc::new(|_| {})),
+            on_delete_cancel: Some(Arc::new(|| {})),
+            ..HistoryCenterHandlers::default()
+        };
+        let supported = history_center(&open_spec(), &theme(), &view, &handlers);
+        let delete = find(&supported, HISTORY_CENTER_ACTION_DELETE_ID)
+            .expect("supported delete item renders");
+        assert_eq!(delete.a11y.role, Some(NodeRole::MenuItem));
+        assert!(!delete.interaction.disabled);
+        (delete
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("delete request is wired"))();
+        assert_eq!(seen.lock().expect("seen").as_slice(), ["request:f1"]);
+        assert!(supported
+            .find(&|node| node.a11y.role == Some(NodeRole::AlertDialog))
+            .is_none());
+    }
+
+    #[test]
+    fn delete_confirmation_emits_only_confirm_and_cancel_intents() {
+        use std::sync::Mutex;
+
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let confirmed = Arc::clone(&seen);
+        let cancelled = Arc::clone(&seen);
+        let mut view = open_view();
+        view.delete_target = Some(HistoryCenterDelete {
+            entry_id: "f1".to_owned(),
+            label: "Widen".to_owned(),
+        });
+        let node = history_center(
+            &open_spec(),
+            &theme(),
+            &view,
+            &HistoryCenterHandlers {
+                on_delete_confirm: Some(Arc::new(move |entry_id| {
+                    confirmed
+                        .lock()
+                        .expect("confirm")
+                        .push(format!("confirm:{entry_id}"));
+                })),
+                on_delete_cancel: Some(Arc::new(move || {
+                    cancelled.lock().expect("cancel").push("cancel".to_owned());
+                })),
+                ..HistoryCenterHandlers::default()
+            },
+        );
+
+        let dialog = node
+            .find(&|candidate| candidate.a11y.role == Some(NodeRole::AlertDialog))
+            .expect("delete confirmation renders");
+        assert!(dialog.has_text("Fork:"));
+        assert!(dialog.has_text("Widen"));
+        let confirm = dialog
+            .find(&|candidate| {
+                matches!(&candidate.kind, poodle_node::NodeKind::Button { label } if label == "Delete")
+            })
+            .expect("confirm button");
+        let cancel = dialog
+            .find(&|candidate| {
+                matches!(&candidate.kind, poodle_node::NodeKind::Button { label } if label == "Cancel")
+            })
+            .expect("cancel button");
+
+        (confirm.interaction.on_activate.as_ref().expect("confirm wired"))();
+        (cancel.interaction.on_activate.as_ref().expect("cancel wired"))();
+        assert_eq!(
+            seen.lock().expect("seen").as_slice(),
+            ["confirm:f1", "cancel"],
         );
     }
 }

@@ -693,6 +693,12 @@ inset step, font sizes) are internal and not part of the recipe contract.
 - `HistoryCenterSpec` carries portable inputs. Open, expansion, rename,
   rejection, and host-result state remain host-owned per the `MessageCenter`
   precedent.
+- Delete follows the same contract as web: the Rust machine validates the
+  offered fork, invalidates the anchor cache, emits delete + reload effects,
+  and the shared renderer exposes an opt-in danger menu item plus one
+  confirmation dialog. `HistoryCenterDelete` is transient host-owned view
+  state; request, confirm, and cancel are distinct handler intents, so the
+  destructive command cannot leave on the initial menu activation.
 - theme access strategy: recipe hooks map to spec fields / token overrides.
 - Jetstream execution remains program-deferred under the active-cohort rule;
   it must consume the same shared Rust composition when that lane resumes.

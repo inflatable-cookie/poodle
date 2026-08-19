@@ -120,31 +120,31 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             ),
         ))
         .child(group(
-            "With descriptions and badges",
+            "Descriptions, badges, and shortcuts",
             theme,
             framed(theme, ActionDiscoveryPanel::from_spec(described, theme)),
         ))
         .child(group(
-            "Empty state",
+            "Loading and empty states",
             theme,
-            framed(
-                theme,
-                ActionDiscoveryPanel::from_spec(
-                    ActionDiscoveryPanelSpec::new(vec![]).with_state(DiscoveryState::Empty),
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(framed(
                     theme,
-                ),
-            ),
-        ))
-        .child(group(
-            "Loading",
-            theme,
-            framed(
-                theme,
-                ActionDiscoveryPanel::from_spec(
-                    ActionDiscoveryPanelSpec::new(vec![]).with_state(DiscoveryState::Loading),
+                    ActionDiscoveryPanel::from_spec(
+                        ActionDiscoveryPanelSpec::new(vec![]).with_state(DiscoveryState::Empty),
+                        theme,
+                    ),
+                ))
+                .child(framed(
                     theme,
-                ),
-            ),
+                    ActionDiscoveryPanel::from_spec(
+                        ActionDiscoveryPanelSpec::new(vec![]).with_state(DiscoveryState::Loading),
+                        theme,
+                    ),
+                )),
         ))
         .into_any_element();
 
