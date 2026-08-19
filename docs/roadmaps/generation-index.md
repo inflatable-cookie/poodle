@@ -6,7 +6,7 @@ Updated: 2026-08-19
 
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.021`, and `g15.034`–`g15.036` complete; `g15.011` partial
+    `g15.019`–`g15.022`, and `g15.034`–`g15.036` complete; `g15.011` partial
     with bounded continuation cards; `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `036`
@@ -16,8 +16,9 @@ Updated: 2026-08-19
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch `g15.022`, then continue the bounded specimen
-    program. PR #45 completed `g15.036`, removed Pill's temporary duplicate
+  - Next: review `g15.023` for dispatch, then continue the bounded specimen
+    program. PR #46 completed `g15.022`, curating the audio/music family across
+    paired web and shared native specimens. PR #45 completed `g15.036`, removed Pill's temporary duplicate
     `fill` API, and moved solid treatment onto the existing appearance axis.
     PR #44's Callout and RemediationBanner solid fills remain unchanged.
     PR #43 completed `g15.021`, including native HistoryCenter delete parity;

@@ -6,6 +6,8 @@ Parent: `docs/roadmaps/g15/018-overloaded-examples-curation.md`
 Handoff: `docs/handoffs/20260819-183903-g15-022-audio-music-curation.md`
 Worktree: `/Users/tom/.t3/worktrees/poodle/g15-022-audio-music-curation`
 Branch: `t3code/g15-022-audio-music-curation`
+Accepted head: `eddc233e10ec9e0fb2713990f0f92109d9181204`
+Merge: `4d7364699587294c37e1cf1f144bb078f4d1595b`
 Worker base: `6ba53a7b872a69f280ae09cf4378cefda841345c` (`origin/main` at
 dispatch; handoff planning base `15069e7e579a2af67e987cb5a4dd16ba2e866cd0`
 confirmed as an ancestor)

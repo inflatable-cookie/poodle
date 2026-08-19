@@ -18,7 +18,7 @@ v0.2.0 release-baseline generation.
   family tranches, and GPUI specimen closure are complete. `g15.011` has
   delivered its screening baseline and three approved pilots; its exact
   curation, native-probe, and screen-clear review children remain. `g15.015`
-  through `g15.017`, `g15.019` through `g15.021`, and `g15.034` are complete. PR #42
+  through `g15.017`, `g15.019` through `g15.022`, and `g15.034` are complete. PR #42
   curated the model-connection and account-lifecycle family after two review
   repair rounds; the operator explicitly waived that child's live visual
   checkpoint when directing merge. PR #41 closed the
@@ -28,7 +28,9 @@ v0.2.0 release-baseline generation.
   explicitly waived by the operator. PR #44 completed `g15.035` and landed
   solid Callout and RemediationBanner surfaces. PR #45 completed `g15.036`,
   removed Pill's temporary duplicate `fill` axis, and corrected its four
-  appearance recipes before visual conformance. `g15.022` is the next
+  appearance recipes before visual conformance. PR #46 completed `g15.022`,
+  curating the audio/music family with paired-web and shared-native coverage.
+  `g15.023` is the next
   overloaded-Examples child. `g15.013` remains the final gate after the
   specimen program and `g15.012`.
   Jetstream remains deferred.
@@ -57,7 +59,7 @@ v0.2.0 release-baseline generation.
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
-  `g15.014`–`g15.017`, `g15.019`–`g15.021`, and `g15.034`–`g15.036` complete,
+  `g15.014`–`g15.017`, `g15.019`–`g15.022`, and `g15.034`–`g15.036` complete,
   `g15.011` partial with bounded continuation cards, `g15.013` final
 
 ## Rules

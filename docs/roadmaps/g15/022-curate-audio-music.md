@@ -1,6 +1,6 @@
 # g15.022 — Overloaded Examples: audio and music
 
-Status: **ready** — orchestrator reviewed; dispatch as one bounded worker lane
+Status: **complete** — PR #46 accepted at `eddc233e`; merge `4d736469`.
 Parent: `018-overloaded-examples-curation.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Consumes: `g15.011` partial screening baseline
