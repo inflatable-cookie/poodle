@@ -126,10 +126,12 @@ interaction, and accessibility semantics remain strict.
 
 ## 13. Specimen Definitions
 
-All four previews provide standalone groups for linear/default reset,
-logarithmic frequency, bipolar center, stepped values, fine drag, circular
-mode, disabled state, automation state, type-in, and the keyboard bounds.
-Each page also includes the full five-size and three-density matrices.
+All four previews provide groups for linear/default reset, logarithmic
+frequency, bipolar center, stepped values, fine drag, circular mode,
+automation state, and disabled state, plus type-in and keyboard-bounds
+evidence. Type-in and keyboard bounds may share one group; every named
+behaviour must remain visible. Each page also includes the full five-size
+and three-density matrices.
 
 ## 14. Approval And Adoption Notes
 

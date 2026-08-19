@@ -12,7 +12,7 @@ export function AudioMeterSpecimen() { return (
       densities={(density) => <AudioMeter context={ppm} density={density} ariaLabel={`Meter ${density} density`} />}
     >
       <div style={{ display: "grid", gap: "1.5rem" }}>
-        <SpecimenGroup label="Batched rendering"><p style={{ margin: 0, color: "var(--poodle-color-text-secondary)", fontSize: "0.8125rem" }}>High-count consoles opt into the <a href="#components/meter-surface">MeterSurface specimen</a>; this page stays the standalone evidence.</p></SpecimenGroup>
+        <p style={{ margin: 0, color: "var(--poodle-color-text-secondary)", fontSize: "0.8125rem" }}>High-count consoles opt into the <a href="#components/meter-surface">MeterSurface specimen</a>; this page stays the standalone evidence.</p>
       <SpecimenGroup label="VU — 300 ms integration"><AudioMeter context={vu} ariaLabel="VU meter" /></SpecimenGroup>
   <SpecimenGroup label="PPM"><AudioMeter context={ppm} ariaLabel="PPM meter" /></SpecimenGroup>
   <SpecimenGroup label="Sample peak"><AudioMeter context={samplePeak} ariaLabel="Sample peak meter" /></SpecimenGroup>

@@ -9,14 +9,13 @@
   const invalid = gainReductionMeterTransition(context(12), { type: "PUSH_FRAME", frame: { atMs: Number.NaN, reductionDb: -1, durationMs: 0 } }).context;
 </script>
 <SpecimenLayout variantDirection="row"><div class="page">
-  <SpecimenGroup label="No reduction"><GainReductionMeter context={context(0)} ariaLabel="No gain reduction" /></SpecimenGroup>
+  <SpecimenGroup label="No reduction / reset"><GainReductionMeter context={context(0)} ariaLabel="No gain reduction" /></SpecimenGroup>
   <SpecimenGroup label="Attack"><GainReductionMeter context={attacked} ariaLabel="Attack response" /></SpecimenGroup>
   <SpecimenGroup label="Release"><GainReductionMeter context={released} ariaLabel="Release response" /></SpecimenGroup>
   <SpecimenGroup label="Maximum reduction"><GainReductionMeter context={context(30)} ariaLabel="Maximum reduction" /></SpecimenGroup>
   <SpecimenGroup label="Bar and segment styles"><div class="row"><GainReductionMeter context={context(12)} style="bar" orientation="horizontal" ariaLabel="Bar reduction" /><GainReductionMeter context={context(12)} style="segments" orientation="horizontal" ariaLabel="Segment reduction" /></div></SpecimenGroup>
   <SpecimenGroup label="Vertical and horizontal"><div class="row"><GainReductionMeter context={context(12)} ariaLabel="Vertical reduction" /><GainReductionMeter context={context(12)} orientation="horizontal" ariaLabel="Horizontal reduction" /></div></SpecimenGroup>
   <SpecimenGroup label="Invalid-frame rejection"><GainReductionMeter context={invalid} ariaLabel="Invalid frame rejected" /></SpecimenGroup>
-  <SpecimenGroup label="Reset"><GainReductionMeter context={context(0)} ariaLabel="Reset reduction" /></SpecimenGroup>
   <SpecimenGroup label="Disabled"><GainReductionMeter context={context(12, false)} ariaLabel="Disabled reduction" /></SpecimenGroup>
 </div>
   {#snippet sizes(size)}<GainReductionMeter context={context(12)} {size} ariaLabel={`Gain reduction ${size} size`} />{/snippet}
