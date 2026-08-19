@@ -1,6 +1,7 @@
 # g15.021 — Overloaded Examples: application shell
 
-Status: **active** — PR review remediation in progress on 2026-08-19
+Status: **ready to merge** — remediation complete; operator waived the final
+live paired-preview checkpoint on 2026-08-19
 Parent: `018-overloaded-examples-curation.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Consumes: `g15.011` partial screening baseline
@@ -177,6 +178,13 @@ the selected entry only on confirm, invalidate the affected level, and reload
 its anchor. Direct Rust machine/renderer tests are required. No other component
 or public surface beyond the necessary pre-v1 HistoryCenter Rust types may
 change; downstream source impact must be recorded under spec 022.
+
+After the review report explicitly named the still-open paired-preview gate,
+the operator instructed the orchestrator to fix the remaining issues and
+merge. That is the disposition for this card's live-review checkpoint. No live
+visual pass is claimed: both collaborative-preview automation and its in-app
+browser fallback failed after the pages loaded, while all deterministic
+headless gates passed.
 
 ## Validation
 

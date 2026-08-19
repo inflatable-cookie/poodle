@@ -217,11 +217,14 @@ links and breadcrumbs stay real `href` navigation.
 Headless only. No windowed, native-visual, conformance, Jetstream, or release
 selectors.
 
-## Open PR checkpoint
+## Operator checkpoint disposition
 
-**Live paired-preview operator review** of every changed web page in Svelte and
-React previews is required before merge. This worker does not claim that review
-passed.
+The review report explicitly told the operator that live paired Svelte/React
+review remained before merge. The operator then instructed the orchestrator to
+fix the remaining issues and merge. That is an informed waiver of this card's
+live-review checkpoint; no visual pass is claimed. Both preview apps loaded,
+but collaborative-preview automation and the in-app browser fallback failed.
+The deterministic headless gate below remained green.
 
 ## Unresolved / known gaps
 
@@ -231,7 +234,6 @@ passed.
 - `g15.026` still owns the native page probe
 - Size/density axes for HistoryCenter and DockRegion are presentation-only (no
   enabled undo/redo/close/reorder without local handlers)
-- Live paired-preview operator review remains open
 
 ## Review remediation (2026-08-19)
 
