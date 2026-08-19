@@ -147,13 +147,16 @@ dock-region contract §12).
 | fork-off-fork | Nested continuation runs |
 | single-continuation | Single continuation and run boundaries |
 | run-tail | Single continuation and run boundaries |
-| single-fork-open | Rename and manage a continuation (manage/delete) |
+| single-fork-open | Rename and manage a continuation (disclose + rename; delete affordance removed — no GPUI `HistoryCenterHandlers` delete surface without component work) |
 | rename | Rename and manage a continuation |
 | rejection | Failure and incomplete metadata |
 | no-timestamp | Failure and incomplete metadata |
 
 Mount-time auto-open of single-fork-open removed; examples stay interactable.
-Host feeds remain live. Rename/delete write a visible Last command readout.
+Host feeds remain live. Undo and navigate write a page-level Last host
+command readout. Rename writes a section Last command readout. Delete is not
+taught in any runtime (orchestrator review: same meaning without a component
+change).
 
 ### PageHeader
 
@@ -210,14 +213,22 @@ passed.
 
 ## Unresolved / known gaps
 
-- GPUI DockRegion tab pass-throughs and live cross-region transfer are
-  structural / affordance-only until native gesture vocabulary expands
-- GPUI HistoryCenter delete continuation has no handler surface (web-only)
-- GPUI PageHeader MetaBar uses static "4mo ago" (TimeAgo not in meta slot)
+- GPUI DockRegion tab pass-throughs and live cross-region panel transfer remain
+  structural / affordance-only until native gesture vocabulary expands; expanded
+  dock copy no longer claims closable/reorderable (web wires those handlers)
 - `g15.026` still owns the native page probe
-- Svelte DetailShell/PageHeader IconButton/Button click feedback was asserted
-  via React in the focused test where happy-dom + nested snippets did not
-  flush Svelte host state; catalogue wiring is present in both web runtimes
+- Delete continuation is not taught: GPUI `HistoryCenterHandlers` has no delete
+  command; web remove delete rather than widen the component in this card
+- Live paired-preview operator review remains open
+
+## Review remediation (2026-08-19)
+
+Addressed orchestrator review on PR #43:
+
+1. HIGH — drop catalogue delete claim; teach rename/disclose as shared manage
+2. MEDIUM — wire `onUndo` / navigate to visible Last host command (all three)
+3. MEDIUM — wire DockRegion `onClose`/`onReorder` on web closable docks; GPUI copy
+4. LOW — PageHeader breadcrumbs use `Icon name="chevron-right"`
 
 ## Changed files
 

@@ -283,20 +283,74 @@ describe("g15.021 application-shell specimens", () => {
     cleanupSvelte();
   });
 
+  it("wires HistoryCenter undo and navigate to visible host feedback", () => {
+    renderSvelte(PilotSpecimenHarness, {
+      props: { specimen: svelteMap["history-center"] as never },
+    });
+    const linear = groupByCaption("Linear history");
+    const undo = linear.querySelector(
+      '[data-part="undo"], button[aria-label*="Undo" i], button[aria-label*="undo" i]',
+    ) as HTMLButtonElement | null;
+    expect(undo, "linear undo control").toBeTruthy();
+    fireEventSvelte.click(undo!);
+    expect(document.body.textContent).toContain("Last host command: Undo");
+
+    const entry = linear.querySelector(
+      '[data-part="entry"], .poodle-history-center__row, button[data-part="row"]',
+    ) as HTMLElement | null;
+    if (entry) {
+      fireEventSvelte.click(entry);
+      expect(document.body.textContent).toMatch(/Last host command: Navigate /);
+    }
+    cleanupSvelte();
+  });
+
   it("keeps DockRegion's iconless, pass-through, collapse, transfer, and static groups", () => {
     renderSvelte(PilotSpecimenHarness, {
       props: { specimen: svelteMap["dock-region"] as never },
     });
     const expanded = groupByCaption("Expanded side dock");
     expect(expanded.textContent).toMatch(/icon-less|Inspector/i);
+    expect(expanded.textContent).toMatch(/closable and reorderable/i);
     const tabs = groupByCaption("Tab strip presentation");
     expect(tabs.textContent).toMatch(/tabActiveEdge|tabReorderable|tabVariant/i);
     const collapse = groupByCaption("Collapse and edge placement");
     expect(collapse.querySelectorAll(".poodle-dock-region").length).toBeGreaterThanOrEqual(3);
+    const toggle = collapse.querySelector(
+      'button[aria-label*="collapse" i], button[aria-label*="Collapse" i], [data-part="collapse"]',
+    ) as HTMLButtonElement | null;
+    expect(toggle, "interactive collapse control").toBeTruthy();
+    fireEventSvelte.click(toggle!);
     const transfer = groupByCaption("Move panels between docks");
     expect(transfer.querySelectorAll(".poodle-dock-region").length).toBe(2);
     const staticStacks = groupByCaption("Static panel stacks");
     expect(staticStacks.textContent).toMatch(/Meter Strip|Toolbar/i);
+    cleanupSvelte();
+  });
+
+  it("wires DockRegion close on the expanded side dock", () => {
+    renderSvelte(PilotSpecimenHarness, {
+      props: { specimen: svelteMap["dock-region"] as never },
+    });
+    const expanded = groupByCaption("Expanded side dock");
+    const before = expanded.querySelectorAll('[role="tab"], [data-part="tab"]').length;
+    const close = expanded.querySelector(
+      'button[aria-label*="Close" i], button[aria-label*="close" i], [data-part="close"]',
+    ) as HTMLButtonElement | null;
+    expect(close, "closable tab close control").toBeTruthy();
+    fireEventSvelte.click(close!);
+    const after = expanded.querySelectorAll('[role="tab"], [data-part="tab"]').length;
+    expect(after).toBeLessThan(before);
+    cleanupSvelte();
+  });
+
+  it("uses Icon chevrons between PageHeader breadcrumb segments", () => {
+    renderSvelte(PilotSpecimenHarness, {
+      props: { specimen: svelteMap["page-header"] as never },
+    });
+    const nav = groupByCaption("Navigation and actions");
+    expect(nav.textContent).not.toContain("›");
+    expect(nav.querySelectorAll('.poodle-breadcrumbs [class*="icon"], .poodle-icon, svg').length).toBeGreaterThanOrEqual(2);
     cleanupSvelte();
   });
 });

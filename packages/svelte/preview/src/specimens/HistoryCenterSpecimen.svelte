@@ -176,6 +176,15 @@
 
   let failureCommand = $state("");
   let manageCommand = $state("");
+  let hostCommand = $state("");
+
+  function undoHistory(): void {
+    hostCommand = "Undo";
+  }
+
+  function navigateEntry(_branchId: string | null, entryId: string): void {
+    hostCommand = `Navigate ${entryId}`;
+  }
 
   function loadContinuations(
     state: HostFeed,
@@ -199,9 +208,12 @@
 <SpecimenLayout bareVariants>
   {#snippet children()}
     <div class="poodle-history-center-specimen">
+      {#if hostCommand}
+        <p class="poodle-history-center-specimen__hint">Last host command: <strong>{hostCommand}</strong></p>
+      {/if}
       <SpecimenGroup label="Linear history">
         <div class="poodle-history-center-specimen__anchor">
-          <HistoryCenter pages={linearPages} canUndo onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)} />
+          <HistoryCenter pages={linearPages} canUndo onUndo={undoHistory} onNavigateEntry={navigateEntry} />
         </div>
       </SpecimenGroup>
 
@@ -214,7 +226,8 @@
             runResult={twoForks.run}
             onLoadContinuations={loadContinuations(twoForks, (next) => (twoForks = next), twoForkContinuations)}
             onLoadContinuationRun={loadRun(twoForks, (next) => (twoForks = next), twoForkRuns)}
-            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+            onNavigateEntry={navigateEntry}
+            onUndo={undoHistory}
           />
         </div>
       </SpecimenGroup>
@@ -228,7 +241,8 @@
             runResult={nested.run}
             onLoadContinuations={loadContinuations(nested, (next) => (nested = next), nestedContinuations)}
             onLoadContinuationRun={loadRun(nested, (next) => (nested = next), nestedRuns)}
-            onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+            onNavigateEntry={navigateEntry}
+            onUndo={undoHistory}
           />
         </div>
       </SpecimenGroup>
@@ -236,7 +250,7 @@
       <SpecimenGroup label="Single continuation and run boundaries">
         <div class="poodle-history-center-specimen__stack">
           <div class="poodle-history-center-specimen__anchor">
-            <HistoryCenter pages={singleContinuationPages} canUndo onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)} />
+            <HistoryCenter pages={singleContinuationPages} canUndo onUndo={undoHistory} onNavigateEntry={navigateEntry} />
           </div>
           <div class="poodle-history-center-specimen__anchor">
             <HistoryCenter
@@ -246,7 +260,8 @@
               runResult={runTail.run}
               onLoadContinuations={loadContinuations(runTail, (next) => (runTail = next), runTailContinuations)}
               onLoadContinuationRun={loadRun(runTail, (next) => (runTail = next), runTailRuns)}
-              onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+              onNavigateEntry={navigateEntry}
+            onUndo={undoHistory}
             />
           </div>
         </div>
@@ -262,8 +277,9 @@
               runResult={manageHost.run}
               onLoadContinuations={loadContinuations(manageHost, (next) => (manageHost = next), runTailContinuations)}
               onLoadContinuationRun={loadRun(manageHost, (next) => (manageHost = next), runTailRuns)}
-              onDeleteContinuation={(entryId) => (manageCommand = `Delete ${entryId}`)}
-              onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+              onRenameBranch={(branchId, name) => (manageCommand = `Rename ${branchId} to ${name}`)}
+              onNavigateEntry={navigateEntry}
+              onUndo={undoHistory}
             />
           </div>
           <div class="poodle-history-center-specimen__anchor">
@@ -274,7 +290,8 @@
               runResult={renameHost.run}
               onLoadContinuations={loadContinuations(renameHost, (next) => (renameHost = next), nestedContinuations)}
               onLoadContinuationRun={loadRun(renameHost, (next) => (renameHost = next), nestedRuns)}
-              onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+              onNavigateEntry={navigateEntry}
+            onUndo={undoHistory}
               onRenameBranch={(branchId, name) => (manageCommand = `Rename ${branchId} to ${name}`)}
             />
           </div>
@@ -291,7 +308,8 @@
               pages={rejectionPages}
               rejection={"AlreadyAtTarget" satisfies HistoryCenterRejectionCode}
               canUndo
-              onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+              onNavigateEntry={navigateEntry}
+            onUndo={undoHistory}
             />
           </div>
           <div class="poodle-history-center-specimen__anchor">
@@ -302,7 +320,8 @@
               runResult={noTimestamp.run}
               onLoadContinuations={loadContinuations(noTimestamp, (next) => (noTimestamp = next), noTimestampContinuations)}
               onLoadContinuationRun={loadRun(noTimestamp, (next) => (noTimestamp = next), noTimestampRuns)}
-              onNavigateEntry={(branchId, entryId) => console.log("navigate", branchId, entryId)}
+              onNavigateEntry={navigateEntry}
+            onUndo={undoHistory}
             />
           </div>
         </div>
@@ -314,11 +333,11 @@
   {/snippet}
 
   {#snippet sizes(size)}
-    <HistoryCenter pages={linearPages} {size} canUndo canRedo />
+    <HistoryCenter pages={linearPages} {size} canUndo onUndo={undoHistory} canRedo />
   {/snippet}
 
   {#snippet densities(density)}
-    <HistoryCenter pages={linearPages} {density} canUndo canRedo />
+    <HistoryCenter pages={linearPages} {density} canUndo onUndo={undoHistory} canRedo />
   {/snippet}
 </SpecimenLayout>
 

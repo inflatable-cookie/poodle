@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PageHeader, IconButton, MetaBar, Pill, TimeAgo } from "@inflatable-cookie/poodle-react";
+import { PageHeader, Icon, IconButton, MetaBar, Pill, TimeAgo } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 
@@ -29,9 +29,13 @@ function DemoBreadcrumbs() {
   return (
     <nav style={breadcrumbsStyle} aria-label="Breadcrumb">
       <a href="/learning/pathways" style={breadcrumbLinkStyle}>Pathways</a>
-      <span style={chevronStyle} aria-hidden="true">›</span>
+      <span style={chevronStyle} aria-hidden="true">
+        <Icon name="chevron-right" size="xs" />
+      </span>
       <a href="/learning/pathways/foundation" style={breadcrumbLinkStyle}>Foundation</a>
-      <span style={chevronStyle} aria-hidden="true">›</span>
+      <span style={chevronStyle} aria-hidden="true">
+        <Icon name="chevron-right" size="xs" />
+      </span>
       <span>Module</span>
     </nav>
   );

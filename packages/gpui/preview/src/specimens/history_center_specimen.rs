@@ -395,6 +395,16 @@ impl<'a> SectionState<'a> {
         let select_open = self.is_on("select-open");
         let actions_open = self.is_on("actions-open");
         HistoryCenterHandlers {
+            on_undo: Some({
+                let queue = queue.clone();
+                let prefix = prefix.clone();
+                Arc::new(move || {
+                    queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                        key: format!("{prefix}-command"),
+                        value: "undo".to_string(),
+                    });
+                })
+            }),
             on_open_change: Some({
                 let queue = queue.clone();
                 let prefix = prefix.clone();
@@ -597,15 +607,26 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             theme,
             div()
                 .flex()
-                .justify_end()
-                .w_full()
-                .max_w(px(672.0))
-                .child(render_instance(
+                .flex_col()
+                .gap(px(8.0))
+                .child(
+                    div()
+                        .flex()
+                        .justify_end()
+                        .w_full()
+                        .max_w(px(672.0))
+                        .child(render_instance(
+                            theme,
+                            &HistoryCenterSpec::new().with_can_undo(true),
+                            &linear.view(&linear_pages(), &[], None),
+                            linear.handlers(queue.clone(), "c2", None),
+                            "hc-linear",
+                        )),
+                )
+                .child(hint(
                     theme,
-                    &HistoryCenterSpec::new().with_can_undo(true),
-                    &linear.view(&linear_pages(), &[], None),
-                    linear.handlers(queue.clone(), "c2", None),
-                    "hc-linear",
+                    "Last host command",
+                    &linear.text("command", ""),
                 )),
         ))
         .child(group(
@@ -715,7 +736,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .child(hint(
                         theme,
                         "Last command",
-                        &manage.text("command", ""),
+                        &{
+                            let rename_command = rename.text("command", "");
+                            if rename_command.is_empty() {
+                                manage.text("command", "")
+                            } else {
+                                rename_command
+                            }
+                        },
                     )),
             ),
         )

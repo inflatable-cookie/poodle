@@ -1,6 +1,6 @@
 <script lang="ts">
   import { PageHeader } from "@inflatable-cookie/poodle-svelte";
-  import { IconButton, MetaBar, Pill, TimeAgo } from "@inflatable-cookie/poodle-svelte";
+  import { Icon, IconButton, MetaBar, Pill, TimeAgo } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
@@ -50,9 +50,13 @@
           {#snippet breadcrumbs()}
             <nav class="poodle-breadcrumbs" aria-label="Breadcrumb">
               <a href="/learning/pathways">Pathways</a>
-              <span class="poodle-breadcrumbs__chevron" aria-hidden="true">›</span>
+              <span class="poodle-breadcrumbs__chevron" aria-hidden="true">
+                <Icon name="chevron-right" size="xs" />
+              </span>
               <a href="/learning/pathways/foundation">Foundation</a>
-              <span class="poodle-breadcrumbs__chevron" aria-hidden="true">›</span>
+              <span class="poodle-breadcrumbs__chevron" aria-hidden="true">
+                <Icon name="chevron-right" size="xs" />
+              </span>
               <span>Module</span>
             </nav>
           {/snippet}

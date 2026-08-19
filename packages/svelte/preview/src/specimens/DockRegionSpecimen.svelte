@@ -39,33 +39,69 @@
     { value: "clips", label: "Clip Editor", closable: false },
   ];
 
-  const flexItems: PanelTabItem[] = [
+  let flexItems: PanelTabItem[] = $state([
     { value: "explorer", label: "Explorer", icon: folder, closable: true },
     { value: "search", label: "Search", icon: "search", closable: true },
     { value: "git", label: "Source Control", icon: code, closable: false },
-  ];
+  ]);
+
+  function handleFlexReorder(order: string[]): void {
+    flexItems = order.map((id) => flexItems.find((i) => i.value === id)!);
+  }
+
+  function handleFlexClose(value: string): void {
+    const next = flexItems.filter((i) => i.value !== value);
+    flexItems = next;
+    if (flexActivePanel === value) {
+      flexActivePanel = next[0]?.value ?? "";
+    }
+  }
 
   // ── Interactive collapse state ─────────────────────────────────────
 
   let interactiveCollapsed = $state(false);
   let interactiveActive = $state("files");
 
-  const interactiveItems: PanelTabItem[] = [
+  let interactiveItems: PanelTabItem[] = $state([
     { value: "files", label: "Files", icon: folder, closable: true },
     { value: "outline", label: "Outline", icon: listIcon, closable: true },
     { value: "debug", label: "Debug", icon: terminal, closable: false },
-  ];
+  ]);
+
+  function handleInteractiveReorder(order: string[]): void {
+    interactiveItems = order.map((id) => interactiveItems.find((i) => i.value === id)!);
+  }
+
+  function handleInteractiveClose(value: string): void {
+    const next = interactiveItems.filter((i) => i.value !== value);
+    interactiveItems = next;
+    if (interactiveActive === value) {
+      interactiveActive = next[0]?.value ?? "";
+    }
+  }
 
   // ── Bottom dock state ───────────────────────────────────────────────
 
   let bottomCollapsed = $state(false);
   let bottomActive = $state("terminal");
 
-  const bottomItems: PanelTabItem[] = [
+  let bottomItems: PanelTabItem[] = $state([
     { value: "terminal", label: "Terminal", icon: terminal, closable: true },
     { value: "output", label: "Output", icon: "file-text", closable: true },
     { value: "problems", label: "Problems", icon: "alert-circle", closable: false },
-  ];
+  ]);
+
+  function handleBottomReorder(order: string[]): void {
+    bottomItems = order.map((id) => bottomItems.find((i) => i.value === id)!);
+  }
+
+  function handleBottomClose(value: string): void {
+    const next = bottomItems.filter((i) => i.value !== value);
+    bottomItems = next;
+    if (bottomActive === value) {
+      bottomActive = next[0]?.value ?? "";
+    }
+  }
 
   // ── Cross-region drag-and-drop state ───────────────────────────────
 
@@ -132,6 +168,8 @@
               value={flexActivePanel}
               collapsed={false}
               onValueChange={(value) => (flexActivePanel = value)}
+              onReorder={handleFlexReorder}
+              onClose={handleFlexClose}
             >
               {#snippet children()}
                 <div class="poodle-specimen__panel-content">
@@ -167,6 +205,8 @@
               collapsed={true}
               collapsedPosture="icon-strip"
               onValueChange={(value) => (flexActivePanel = value)}
+              onReorder={handleFlexReorder}
+              onClose={handleFlexClose}
             />
             <div class="poodle-specimen__flex-main">Main content area</div>
           </div>
@@ -181,6 +221,8 @@
               collapsedPosture="icon-strip"
               onValueChange={(value) => (interactiveActive = value)}
               onCollapsedChange={(isCollapsed) => (interactiveCollapsed = isCollapsed)}
+              onReorder={handleInteractiveReorder}
+              onClose={handleInteractiveClose}
             >
               {#snippet children()}
                 <div class="poodle-specimen__panel-content">
@@ -203,6 +245,8 @@
               collapsedPosture="icon-strip"
               onValueChange={(value) => (bottomActive = value)}
               onCollapsedChange={(isCollapsed) => (bottomCollapsed = isCollapsed)}
+              onReorder={handleBottomReorder}
+              onClose={handleBottomClose}
             >
               {#snippet children()}
                 <div class="poodle-specimen__panel-content">
@@ -225,6 +269,8 @@
               value={flexActivePanel}
               tabActiveEdge="none"
               onValueChange={(value) => (flexActivePanel = value)}
+              onReorder={handleFlexReorder}
+              onClose={handleFlexClose}
             >
               {#snippet children()}
                 <div class="poodle-specimen__panel-content">
@@ -242,6 +288,8 @@
               value={flexActivePanel}
               tabReorderable={false}
               onValueChange={(value) => (flexActivePanel = value)}
+              onReorder={handleFlexReorder}
+              onClose={handleFlexClose}
             >
               {#snippet children()}
                 <div class="poodle-specimen__panel-content">
@@ -260,6 +308,8 @@
               tabVariant="pill"
               tabActiveFill="solid"
               onValueChange={(value) => (flexActivePanel = value)}
+              onReorder={handleFlexReorder}
+              onClose={handleFlexClose}
             >
               {#snippet children()}
                 <div class="poodle-specimen__panel-content">

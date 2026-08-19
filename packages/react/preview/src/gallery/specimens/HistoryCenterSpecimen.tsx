@@ -174,6 +174,7 @@ export function HistoryCenterSpecimen() {
   const [manageHost, setManageHost] = useState<HostFeed>({ continuations: null, run: null });
   const [manageCommand, setManageCommand] = useState("");
   const [failureCommand, setFailureCommand] = useState("");
+  const [hostCommand, setHostCommand] = useState("");
 
   function loadContinuations(
     set: (updater: (current: HostFeed) => HostFeed) => void,
@@ -189,7 +190,10 @@ export function HistoryCenterSpecimen() {
     return (fromEntryId) => set((current) => ({ ...current, run: { fromEntryId, pages: runs[fromEntryId] ?? [] } }));
   }
 
-  const navigate = (branchId: string | null, entryId: string) => console.log("navigate", branchId, entryId);
+  const navigate = (_branchId: string | null, entryId: string) => {
+    setHostCommand(`Navigate ${entryId}`);
+  };
+  const undoHistory = () => setHostCommand("Undo");
 
   const anchorStyle = { display: "flex", justifyContent: "flex-end", width: "min(42rem, 100%)" } as const;
   const stackStyle = { display: "grid", gap: "1.5rem" } as const;
@@ -202,13 +206,18 @@ export function HistoryCenterSpecimen() {
   return (
     <SpecimenLayout
       bareVariants
-      sizes={(size) => <HistoryCenter pages={linearPages} size={size} canUndo canRedo />}
-      densities={(density) => <HistoryCenter pages={linearPages} density={density} canUndo canRedo />}
+      sizes={(size) => <HistoryCenter pages={linearPages} size={size} canUndo onUndo={undoHistory} canRedo />}
+      densities={(density) => <HistoryCenter pages={linearPages} density={density} canUndo onUndo={undoHistory} canRedo />}
     >
       <div style={{ display: "grid", gap: "2rem", minHeight: "40rem" }}>
+        {hostCommand ? (
+          <p style={hintStyle}>
+            Last host command: <strong>{hostCommand}</strong>
+          </p>
+        ) : null}
         <SpecimenGroup label="Linear history">
           <div style={anchorStyle}>
-            <HistoryCenter pages={linearPages} canUndo onNavigateEntry={navigate} />
+            <HistoryCenter pages={linearPages} canUndo onUndo={undoHistory} onNavigateEntry={navigate} />
           </div>
         </SpecimenGroup>
 
@@ -217,6 +226,8 @@ export function HistoryCenterSpecimen() {
             <HistoryCenter
               pages={twoForkPages}
               canUndo
+
+              onUndo={undoHistory}
               continuationsResult={twoForks.continuations}
               runResult={twoForks.run}
               onLoadContinuations={loadContinuations(setTwoForks, twoForkContinuations)}
@@ -231,6 +242,8 @@ export function HistoryCenterSpecimen() {
             <HistoryCenter
               pages={nestedPages}
               canUndo
+
+              onUndo={undoHistory}
               continuationsResult={nested.continuations}
               runResult={nested.run}
               onLoadContinuations={loadContinuations(setNested, nestedContinuations)}
@@ -243,12 +256,14 @@ export function HistoryCenterSpecimen() {
         <SpecimenGroup label="Single continuation and run boundaries">
           <div style={stackStyle}>
             <div style={anchorStyle}>
-              <HistoryCenter pages={singleContinuationPages} canUndo onNavigateEntry={navigate} />
+              <HistoryCenter pages={singleContinuationPages} canUndo onUndo={undoHistory} onNavigateEntry={navigate} />
             </div>
             <div style={anchorStyle}>
               <HistoryCenter
                 pages={runTailPages}
                 canUndo
+
+                onUndo={undoHistory}
                 continuationsResult={runTail.continuations}
                 runResult={runTail.run}
                 onLoadContinuations={loadContinuations(setRunTail, runTailContinuations)}
@@ -265,11 +280,13 @@ export function HistoryCenterSpecimen() {
               <HistoryCenter
                 pages={runTailPages}
                 canUndo
+
+                onUndo={undoHistory}
                 continuationsResult={manageHost.continuations}
                 runResult={manageHost.run}
                 onLoadContinuations={loadContinuations(setManageHost, runTailContinuations)}
                 onLoadContinuationRun={loadRun(setManageHost, runTailRuns)}
-                onDeleteContinuation={(entryId) => setManageCommand(`Delete ${entryId}`)}
+                onRenameBranch={(branchId, name) => setManageCommand(`Rename ${branchId} to ${name}`)}
                 onNavigateEntry={navigate}
               />
             </div>
@@ -277,6 +294,8 @@ export function HistoryCenterSpecimen() {
               <HistoryCenter
                 pages={nestedPages}
                 canUndo
+
+                onUndo={undoHistory}
                 continuationsResult={renameHost.continuations}
                 runResult={renameHost.run}
                 onLoadContinuations={loadContinuations(setRenameHost, nestedContinuations)}
@@ -300,6 +319,8 @@ export function HistoryCenterSpecimen() {
                 pages={rejectionPages}
                 rejection={"AlreadyAtTarget" satisfies HistoryCenterRejectionCode}
                 canUndo
+
+                onUndo={undoHistory}
                 onNavigateEntry={navigate}
               />
             </div>
@@ -307,6 +328,8 @@ export function HistoryCenterSpecimen() {
               <HistoryCenter
                 pages={noTimestampPages}
                 canUndo
+
+                onUndo={undoHistory}
                 continuationsResult={noTimestamp.continuations}
                 runResult={noTimestamp.run}
                 onLoadContinuations={loadContinuations(setNoTimestamp, noTimestampContinuations)}

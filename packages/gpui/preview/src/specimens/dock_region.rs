@@ -256,7 +256,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .on_tab_change(set_text(&state.node_events, "dock-flex-active"))
                                 .with_content(panel_body(
                                     format!(
-                                        "Panel content for {flex_active}. Tabs are closable and reorderable."
+                                        "Panel content for {flex_active}. Tabs are selectable."
                                     ),
                                     text_secondary,
                                 )),
