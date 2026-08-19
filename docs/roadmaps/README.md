@@ -26,10 +26,10 @@ v0.2.0 release-baseline generation.
   admitted them. PR #43 completed `g15.021`, including the review-time native
   HistoryCenter delete-parity repair; its final live visual checkpoint was
   explicitly waived by the operator. PR #44 completed `g15.035` and landed
-  solid Callout and RemediationBanner surfaces; its temporary duplicate Pill
-  `fill` axis is now bounded by ready correction `g15.036`. `g15.022` is the
-  next overloaded-Examples child. `g15.036` must land before visual
-  conformance and certification. `g15.013` remains the final gate after the
+  solid Callout and RemediationBanner surfaces. PR #45 completed `g15.036`,
+  removed Pill's temporary duplicate `fill` axis, and corrected its four
+  appearance recipes before visual conformance. `g15.022` is the next
+  overloaded-Examples child. `g15.013` remains the final gate after the
   specimen program and `g15.012`.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
@@ -57,9 +57,8 @@ v0.2.0 release-baseline generation.
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
-  `g15.014`–`g15.017`, `g15.019`–`g15.021`, `g15.034`, and `g15.035` complete,
-  `g15.011` partial with bounded continuation cards, `g15.036` ready,
-  `g15.013` final
+  `g15.014`–`g15.017`, `g15.019`–`g15.021`, and `g15.034`–`g15.036` complete,
+  `g15.011` partial with bounded continuation cards, `g15.013` final
 
 ## Rules
 

@@ -5,9 +5,9 @@ Updated: 2026-08-19
 ## Active Track
 
 - `g15`
-  - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`, and
-    `g15.019`–`g15.021`, `g15.034`, and `g15.035` complete; `g15.011` partial
-    with bounded continuation cards; `g15.036` ready; `g15.013` final
+  - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
+    `g15.019`–`g15.021`, and `g15.034`–`g15.036` complete; `g15.011` partial
+    with bounded continuation cards; `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `036`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
@@ -16,11 +16,10 @@ Updated: 2026-08-19
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: review and dispatch `g15.022`. `g15.036` is ready as a parallel-safe
-    correction of Pill's duplicate API and must land before
-    `g15.012`/`g15.013`. Then continue the bounded specimen program.
-    PR #44 completed `g15.035`; Callout and RemediationBanner's solid fills
-    stand, while Pill moves to the existing appearance axis in `g15.036`.
+  - Next: review and dispatch `g15.022`, then continue the bounded specimen
+    program. PR #45 completed `g15.036`, removed Pill's temporary duplicate
+    `fill` API, and moved solid treatment onto the existing appearance axis.
+    PR #44's Callout and RemediationBanner solid fills remain unchanged.
     PR #43 completed `g15.021`, including native HistoryCenter delete parity;
     the operator explicitly waived its final live visual checkpoint.
     PR #42 completed `g15.020` after two review repair rounds;

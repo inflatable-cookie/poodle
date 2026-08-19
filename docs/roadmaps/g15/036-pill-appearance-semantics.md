@@ -1,7 +1,7 @@
 # g15.036 — Pill Appearance Semantics
 
-Status: **ready** — operator rejected Pill's duplicate `fill` axis after
-`g15.035`; clean pre-v0.2 correction approved on 2026-08-19
+Status: **complete** — PR #45 merged 2026-08-19; Pill's duplicate `fill` axis
+was removed before v0.2.0
 Depends on: `g15.035` (complete; PR #44)
 Blocks: `g15.012`, `g15.013`
 Parallel with: `g15.022` — no shared mutable component or specimen files
@@ -121,23 +121,23 @@ fallback.
 
 ## Acceptance
 
-- [ ] Pill exposes only `appearance` for tint/solid/subtle/badge treatment in
+- [x] Pill exposes only `appearance` for tint/solid/subtle/badge treatment in
       Svelte, React, Rust, contracts, generated artifacts, and specimens.
-- [ ] Default appearance is tint and its rendered output matches the pre-PR
+- [x] Default appearance is tint and its rendered output matches the pre-PR
       #44 default treatment.
-- [ ] Explicit solid uses the shared contrast-safe opaque recipe in both web
+- [x] Explicit solid uses the shared contrast-safe opaque recipe in both web
       runtimes and renderer-neutral Rust.
-- [ ] Subtle and badge remain observably unchanged and do not participate in a
+- [x] Subtle and badge remain observably unchanged and do not participate in a
       two-axis precedence rule.
-- [ ] Pill has no public `fill`, `ToneFill`, `with_fill`, `data-fill`, or
+- [x] Pill has no public `fill`, `ToneFill`, `with_fill`, `data-fill`, or
       compatibility path after the correction.
-- [ ] Callout and RemediationBanner retain their landed `ToneFill` APIs and
+- [x] Callout and RemediationBanner retain their landed `ToneFill` APIs and
       behavior unchanged.
-- [ ] Generated artifacts are rebuilt from the authored display model and
+- [x] Generated artifacts are rebuilt from the authored display model and
       `effigy ir:check` is clean.
-- [ ] The Pill specimen teaches the four appearances compactly in Svelte,
+- [x] The Pill specimen teaches the four appearances compactly in Svelte,
       React, and GPUI.
-- [ ] Focused component, Rust, parity, package, docs, and diff gates pass.
+- [x] Focused component, Rust, parity, package, docs, and diff gates pass.
 
 ## Writable Scope
 

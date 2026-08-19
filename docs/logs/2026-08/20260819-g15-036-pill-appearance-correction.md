@@ -5,6 +5,7 @@ Card: `docs/roadmaps/g15/036-pill-appearance-semantics.md`
 Handoff: `docs/handoffs/20260819-154051-g15-036-pill-appearance-semantics.md`
 Worktree: `/Users/tom/.t3/worktrees/poodle/g15-036-pill-appearance-semantics`
 Branch: `t3code/g15-036-pill-appearance-semantics`
+PR: #45 — merged 2026-08-19 at `7f16ec5b`
 
 ## Summary
 
@@ -154,4 +155,10 @@ current. No generated file was edited by hand.
   into this PR.
 - Windowed, native-visual, conformance, Jetstream, and release selectors were
   not run by scope.
-- PR review and merge remain with the orchestrator.
+
+## Closeout
+
+The orchestrator approved the corrected head `6f600d78` after live React
+computed-style verification and the focused core/package evidence rerun. PR
+#45 was squash-merged to `main` as `7f16ec5b`. `g15.036` is complete;
+`g15.022` remains the next bounded specimen child.
