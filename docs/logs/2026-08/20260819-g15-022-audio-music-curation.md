@@ -17,7 +17,8 @@ idiom convergence and `g15.017` axis placement had already removed the
 in-body axis matrices and hand-rolled captions the audit graded, so eight of
 eleven pages were already inside the section budget. Three pages changed:
 AudioMeter 10 → 9 captions, Knob 10 → 9, GainReductionMeter 9 → 8. No
-component, contract, prop, or token changes.
+component, prop, token, or public API changes; the docs-only Knob contract
+wording correction is recorded below.
 
 ## Change class
 
@@ -172,5 +173,5 @@ touched.
 ## Operator review checkpoint
 
 The changed pages (AudioMeter, Knob, GainReductionMeter in the Svelte and
-React previews) require the operator's live review before this card can
-close. Status: **pending**.
+React previews) were opened for live review. On 2026-08-19 the operator
+authorized the final corrections and merge. Status: **accepted**.
