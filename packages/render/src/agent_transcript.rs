@@ -12,9 +12,9 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_transcript::TranscriptBlock;
-use poodle_node::{LayoutDirection, Node, NodeRole};
+use poodle_node::{LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{
-    AgentMessageSpec, AgentQuestionRecordSpec, AgentTranscriptSpec, ChangedFilesSpec,
+    AgentMessageSpec, AgentQuestionRecordSpec, AgentTranscriptSpec, ButtonSpec, ChangedFilesSpec,
     ToolCallGroupSpec,
 };
 
@@ -23,6 +23,52 @@ use crate::agent_question_record::agent_question_record;
 use crate::changed_files::{changed_files, ChangedFilesHandlers};
 use crate::presentation::rem_to_px;
 use crate::tool_call_group::{tool_call_group, ToolCallGroupHandlers};
+
+/// Build the renderer-owned jump-to-latest control.
+///
+/// Runtime adapters decide when to mount it and what "latest" means. The
+/// component recipe stays shared so native runtimes do not invent host chrome.
+pub fn agent_transcript_jump(
+    spec: &AgentTranscriptSpec,
+    theme: &dyn ThemeProvider,
+    on_activate: Option<Arc<dyn Fn() + Send + Sync>>,
+) -> Node {
+    let button_spec = ButtonSpec::new()
+        .with_label(spec.jump_label.clone())
+        .with_leading_icon("arrow-down")
+        .with_size(spec.size)
+        .with_density(spec.density);
+    let mut jump = crate::button::button(&button_spec, theme, on_activate);
+    let fill = theme.resolve_color(spec.jump_fill_token());
+    let border = theme.resolve_color(spec.jump_border_token());
+    let text = theme.resolve_color(spec.jump_text_token());
+    let radius = theme.resolve_radius(spec.jump_radius_token());
+    {
+        let style = &mut jump.style;
+        style.descriptor.layout.height = LayoutSizing::Fit;
+        style.min_width = None;
+        style.descriptor.layout.spacing.padding.top = rem_to_px(0.3125);
+        style.descriptor.layout.spacing.padding.bottom = rem_to_px(0.3125);
+        style.descriptor.layout.spacing.padding.left = rem_to_px(0.75);
+        style.descriptor.layout.spacing.padding.right = rem_to_px(0.75);
+        style.descriptor.layout.spacing.gap = rem_to_px(0.375);
+        style.descriptor.background = Some(fill);
+        style.descriptor.border.width = 1.0;
+        style.descriptor.border.color = border;
+        style.descriptor.text_color = Some(text);
+        style.text_size = Some(rem_to_px(spec.font_size_rem()));
+        style.descriptor.corner_radii.top_left = radius;
+        style.descriptor.corner_radii.top_right = radius;
+        style.descriptor.corner_radii.bottom_right = radius;
+        style.descriptor.corner_radii.bottom_left = radius;
+        style.hover = None;
+        style.active = None;
+    }
+    for child in &mut jump.children {
+        child.style.descriptor.text_color = Some(text);
+    }
+    jump
+}
 
 /// The transcript owns the events its blocks raise, because the host holds the
 /// expansion state and the transcript is the only place that knows which block
@@ -173,4 +219,48 @@ pub fn agent_transcript(
     }
 
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    use super::*;
+
+    #[test]
+    fn jump_control_uses_the_transcript_recipe_and_real_activation() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let spec = AgentTranscriptSpec::default();
+        let activations = Arc::new(AtomicUsize::new(0));
+        let sink = Arc::clone(&activations);
+        let jump = agent_transcript_jump(
+            &spec,
+            &theme,
+            Some(Arc::new(move || {
+                sink.fetch_add(1, Ordering::Relaxed);
+            })),
+        );
+
+        assert_eq!(jump.a11y.role, Some(NodeRole::Button));
+        match &jump.children[0].kind {
+            poodle_node::NodeKind::Icon { name, .. } => assert_eq!(name, "arrow-down"),
+            _ => panic!("jump leading child must be an icon"),
+        }
+        assert_eq!(
+            jump.style.descriptor.background,
+            Some(theme.resolve_color(spec.jump_fill_token())),
+        );
+        assert_eq!(
+            jump.style.descriptor.border.color,
+            theme.resolve_color(spec.jump_border_token()),
+        );
+        assert_eq!(
+            jump.style.descriptor.corner_radii.top_left,
+            theme.resolve_radius(spec.jump_radius_token()),
+        );
+
+        jump.interaction.on_activate.as_ref().unwrap()();
+        assert_eq!(activations.load(Ordering::Relaxed), 1);
+    }
 }

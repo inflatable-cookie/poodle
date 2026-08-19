@@ -43,8 +43,13 @@ use poodle_node::{
 mod interaction;
 mod layers;
 mod style;
+mod tracked_scroll;
 
 pub mod file_capability;
+
+pub use tracked_scroll::{
+    tracked_vertical_scroll, TrackedScrollOptions, TrackedScrollState,
+};
 
 use interaction::apply_listeners;
 pub use layers::{

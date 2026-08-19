@@ -842,6 +842,9 @@ pub struct AppState {
     pub licence_seats: LicencePreviewState,
     /// Model-connection family specimen host state.
     pub model_connection: ModelConnectionPreviewState,
+    /// GPUI-owned offset and pin posture for the AgentTranscript specimen's
+    /// real bounded viewport.
+    pub agent_transcript_scroll: poodle_gpui_node_backend::TrackedScrollState,
     /// Single-file picks requested through the generic browse seam whose OS
     /// prompt has not been opened yet.
     pub pending_file_picks: Vec<FilePickRequest>,
@@ -887,6 +890,7 @@ impl AppState {
             tree: TreePreviewState::new(),
             licence_seats: LicencePreviewState::mixed(),
             model_connection: ModelConnectionPreviewState::new(),
+            agent_transcript_scroll: poodle_gpui_node_backend::TrackedScrollState::new(),
             pending_file_picks: Vec::new(),
             active_file_keys: Vec::new(),
             file_generation: 0,

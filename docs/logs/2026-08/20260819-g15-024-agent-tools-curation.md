@@ -6,7 +6,7 @@ Parent: `docs/roadmaps/g15/018-overloaded-examples-curation.md`
 Handoff: `docs/handoffs/20260819-221731-g15-024-agent-tools-curation.md`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-826e3c4f`
 Branch: `t3code/curate-agent-tool-specimens`
-Accepted head: pending orchestrator closeout
+Accepted implementation head: pending final commit
 First review head: `6d8e0b24`
 Worker base: `a94e95431295df2b1aabf34084c799531dbca9f5` (`origin/main` at
 dispatch; handoff planning base `11e49d89df12e90500ebf3c9318bdc493b45cc1c`
@@ -23,12 +23,16 @@ work. The blank ChangedFiles example left the catalogue.
 
 ## Change class
 
-- **Change class:** specimen curation
+- **Change class:** specimen curation plus bounded native capability repair
 - **Packages touched:** `poodle-svelte` preview, `poodle-react` preview,
-  `poodle-gpui-preview`
-- **Public entry points:** none
-- **Downstream re-check:** none — no public surface changed
-- **app_state.rs:** unused
+  `poodle-gpui-preview`, `poodle-render`, `poodle-gpui-node-backend`
+- **Public entry points:** additive shared jump recipe and GPUI tracked-scroll
+  helper/state; no component prop changed
+- **Downstream re-check:** GPUI transcript hosts should retain one
+  `TrackedScrollState` per instance and use the shared jump handler/viewport
+  path; paired-web consumers are unchanged
+- **app_state.rs:** retains one `TrackedScrollState` for the GPUI teaching
+  instance
 
 ## Baseline recount at the worker base
 
@@ -114,9 +118,11 @@ Overflow and actions
   message-and-run and a thirty-call run collapsed/expanded as **Tool run
   states**. React gained the missing worked turn and streaming. GPUI dropped
   the extra Interactive and Markdown subset groups; live disclosure stays on
-  the worked turn. Native scroll is host-owned, so GPUI teaches jump-to-latest
-  as host chrome: a height-clipped `ScrollShell` plus a live button using
-  `AgentTranscriptSpec.jump_label`. `onScrollStateChange` remains web-only.
+  the worked turn. Review rejected the first host-chrome counter workaround.
+  `g15.037` replaced it with a real GPUI-owned tracked viewport and the shared
+  renderer-owned jump control. Mounted evidence proves detach, offset hold,
+  jump-to-bottom, and resumed following. `onScrollStateChange` remains
+  web-only.
 - **ChangedFiles — Empty** left Examples. The component correctly renders
   nothing; focused `ChangedFiles.test.ts` / `ChangedFiles.test.tsx` still
   assert the no-output contract. **Single file** + **One-sided counts** →
@@ -129,14 +135,20 @@ Overflow and actions
 
 Preserved. Every contract specimen-definition case remains inside a target
 section or, for empty ChangedFiles, in the existing focused component tests.
-Size and density ladders stay in the dedicated panes. No component
-implementation, public prop, or token changed.
+Size and density ladders stay in the dedicated panes. No public component
+prop or token changed. The bounded native repair adds the shared jump recipe
+and GPUI tracked-scroll substrate documented above.
 
 ## Changed files
 
 - `packages/svelte/preview/src/specimens/{AgentChatInput,AgentMessage,AgentQuestion,AgentQuestionRecord,AgentTranscript,ChangedFiles}Specimen.svelte`
 - `packages/react/preview/src/gallery/specimens/{AgentChatInput,AgentMessage,AgentQuestion,AgentQuestionRecord,AgentTranscript,ChangedFiles}Specimen.tsx`
 - `packages/gpui/preview/src/specimens/{agent_chat_input_specimen,agent_message,agent_question,agent_question_record,agent_transcript,changed_files}.rs`
+- `packages/gpui/preview/{src/app_state.rs,src/headless_driver.rs,tests/headless_regressions.rs}`
+- `packages/render/src/agent_transcript.rs`
+- `packages/gpui/node-backend/{README.md,src/lib.rs,src/tracked_scroll.rs}`
+- `packages/svelte/preview/test/{agent-caption-integrity,specimen-idiom-convergence}.test.ts`
+- `docs/contracts/components/agent-transcript.md`
 - `test/parity/g15-024-agent-tools-specimens.test.tsx`
 - this log
 
@@ -149,7 +161,10 @@ implementation, public prop, or token changed.
 - `effigy check:svelte`: 0 errors
 - `effigy react:build`: passed
 - `effigy check:gpui`: passed (`poodle-gpui-preview` compiled)
+- `effigy regressions:native`: 50 passed after the `g15.037` repair
 - `effigy docs:check`: passed
+- full headless `effigy qa`: passed after repairing two stale preview-test
+  assertions exposed by the curated captions and retained Eyebrow example
 - `git diff --check origin/main...HEAD`: passed at `6d8e0b24`
 
 Headless only. No windowed, native-visual, conformance, Jetstream, or
@@ -157,5 +172,6 @@ release selectors.
 
 ## Operator review
 
-Pending. The operator must inspect all six changed Svelte and React pages
-live before the card can close.
+The operator explicitly instructed the orchestrator to resolve the final
+native blocker and merge PR #48. A separate six-page live sweep was not run
+and is not claimed.

@@ -95,6 +95,7 @@ describe("g15.016 specimen idiom convergence", () => {
     const allowedEyebrowDemos = [
       "<Eyebrow>Section label</Eyebrow>",
       "<Eyebrow>Primitive</Eyebrow>",
+      "<Eyebrow>Composite</Eyebrow>",
       "<Eyebrow>Status</Eyebrow>",
     ];
     for (const match of eyebrowCaptionUses) {

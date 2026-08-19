@@ -22,8 +22,8 @@ import PilotSpecimenHarness from "../../packages/svelte/preview/test/PilotSpecim
 /**
  * `g15.024` curates the agent and tools family back to the outline's section
  * budget. Caption order and Svelte/React equality are pinned exactly. GPUI
- * teaches the same ordered intent from deterministic source evidence until
- * `g15.026` owns mounted native page probing.
+ * teaches the same ordered intent; runtime-only scroll behavior is proved by
+ * the mounted in-memory native regression board.
  */
 
 function captions(): string[] {
@@ -387,12 +387,6 @@ describe("g15.024 agent and tools specimens", () => {
     detachedViewport.scrollTop = 0;
     fireEventSvelte.scroll(detachedViewport);
     expect(streamingTranscripts[1]!.querySelector(".poodle-agent-transcript__jump")).toBeTruthy();
-
-    const gpuiTranscript = readFileSync(join(GPUI_SPECIMENS, "agent_transcript.rs"), "utf8");
-    expect(gpuiTranscript).toMatch(/is_streaming:\s*true/);
-    expect(gpuiTranscript).toMatch(/\.jump_label/);
-    expect(gpuiTranscript).toMatch(/ScrollShell/);
-    expect(gpuiTranscript).toMatch(/with_label\(jump_label/);
 
     const long = groupByCaption("Long transcript rendering");
     const transcripts = long.querySelectorAll(".poodle-agent-transcript");
