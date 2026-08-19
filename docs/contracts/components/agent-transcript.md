@@ -1,7 +1,7 @@
 # AgentTranscript
 
 Status: detailed contract
-Updated: 2026-07-29
+Updated: 2026-08-19
 
 ## 1. Purpose
 
@@ -379,9 +379,19 @@ block's own height.
 
 ## 10. GPUI Notes
 
-- Windowing uses GPUI's own variable-height list rather than the shared
-  `transcriptWindow`, which assumes a scroll container the component owns. The
-  grouping and status logic are shared unchanged.
+- GPUI renders every block inside a real bounded viewport. The host retains one
+  `TrackedScrollState` per transcript instance; `tracked_vertical_scroll`
+  owns GPUI's `ScrollHandle`, observes the pin threshold after wheel dispatch,
+  and executes jump-to-bottom on the runtime thread.
+- `poodle-render::agent_transcript` remains the source of transcript content.
+  `poodle-render::agent_transcript_jump` owns the jump button's icon, label,
+  semantics, and token recipe. The GPUI backend decides only when to mount the
+  control and what imperative scroll action it performs.
+- The send-safe `TrackedScrollState::jump_handler()` records intent without
+  moving GPUI state off-thread. The next render consumes that intent, moves the
+  real viewport, hides the control, and re-arms following.
+- GPUI remains unwindowed for now. That affects materialization cost, not the
+  detached-scroll state machine or the rendered order.
 - Markdown renders from `poodle-markdown` blocks, not from HTML.
 - `AgentTranscript::from_spec(spec, theme)` forwards the same four events as
   Jetstream — `.on_tool_run_toggle(...)`, `.on_tool_call_toggle(...)`,
@@ -436,7 +446,7 @@ block's own height.
 |-------|-------------|-----------------|-----------|
 | Windowed blocks are absent from the accessibility tree | inherent to virtualization on every platform; `virtualized={false}` is the documented escape | accepted | revisit if a platform gains a virtualized-a11y API |
 | Jetstream renders unwindowed | `jetstream-ui` materializes every child of a scroll container; windowing needs engine support | accepted, tracked | engine work scoped separately |
-| GPUI uses its own list rather than `transcriptWindow` | GPUI owns its scroll container and already has variable-height list machinery | accepted (by design) | none |
+| GPUI renders unwindowed | the current node backend materializes every child; the tracked viewport still owns real scrolling and anchoring | accepted, tracked | add native windowing only when measured transcript cost requires it |
 | Natives do not stream | neither native re-renders per token during spec resolution; unrelated to interaction, which GPUI does support | accepted | host drives re-render |
 
 ## 13. Approval And Adoption Notes

@@ -43,9 +43,19 @@
     { kind: "activity", id: "act", label: "Working for 1h 1m" },
   ];
 
+  const simple: TranscriptItem[] = [
+    message("s0", "Running the gate."),
+    call("s1", "effigy check:gpui"),
+  ];
+
+  const thirty: TranscriptItem[] = [
+    message("t30m", "Running the remaining checks."),
+    ...Array.from({ length: 30 }, (_, index) => call(`t30-${index + 1}`, `check ${index + 1}`)),
+  ];
+
   const streaming: TranscriptItem[] = [
-    message("s1", "Reading the parser now"),
-    { kind: "message", id: "s2", role: "assistant", markdown: "The corpus-wide patterns were genuine legacy", isStreaming: true },
+    message("st1", "Reading the parser now"),
+    { kind: "message", id: "st2", role: "assistant", markdown: "The corpus-wide patterns were genuine legacy", isStreaming: true },
   ];
 
   const withFailure: TranscriptItem[] = [
@@ -62,24 +72,65 @@
       ? message(`lm${i}`, `Block ${i}. ${"A sentence that makes this block taller than a tool row. ".repeat((i % 4) + 1)}`)
       : call(`lc${i}`, `step ${i} of a long session`),
   );
+
+  let turnRuns = $state<string[]>([]);
+  let turnCalls = $state<string[]>([]);
+  let turnFiles = $state<string[]>([]);
+  let thirtyExpanded = $state<string[]>(["t30-1"]);
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="A worked turn">
+  <SpecimenGroup label="A worked turn" description="A realistic turn: messages, tool runs, changed files, and the activity footer.">
     <div style="height: 30rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
-      <AgentTranscript items={turn} virtualized={false} />
+      <AgentTranscript
+        items={turn}
+        virtualized={false}
+        bind:expandedToolRuns={turnRuns}
+        bind:expandedToolCalls={turnCalls}
+        bind:expandedChangedFiles={turnFiles}
+      />
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Streaming">
+  <SpecimenGroup
+    label="Tool run states"
+    description="Contiguous calls collapse into one run. Expand a thirty-call run to read every row; a failure anywhere marks the whole run."
+  >
+    <div style="height: 10rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
+      <AgentTranscript items={simple} virtualized={false} />
+    </div>
+    <div style="height: 14rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
+      <AgentTranscript items={thirty} virtualized={false} />
+    </div>
+    <div style="height: 22rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
+      <AgentTranscript items={thirty} virtualized={false} bind:expandedToolRuns={thirtyExpanded} />
+    </div>
+    <div style="height: 14rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
+      <AgentTranscript items={withFailure} virtualized={false} />
+    </div>
+  </SpecimenGroup>
+
+  <SpecimenGroup
+    label="Streaming and detached scroll"
+    description="The caret marks a message still arriving. Scroll away from the bottom to reveal jump-to-latest."
+  >
     <div style="height: 12rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
       <AgentTranscript items={streaming} virtualized={false} />
     </div>
+    <div style="height: 16rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
+      <AgentTranscript items={long} virtualized={false} />
+    </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="A run containing a failure">
-    <div style="height: 14rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
-      <AgentTranscript items={withFailure} virtualized={false} />
+  <SpecimenGroup
+    label="Long transcript rendering"
+    description="The same mixed-height content, windowed and unwindowed."
+  >
+    <div style="height: 26rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
+      <AgentTranscript items={long} />
+    </div>
+    <div style="height: 26rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
+      <AgentTranscript items={long} virtualized={false} />
     </div>
   </SpecimenGroup>
 
@@ -88,20 +139,6 @@
       <AgentTranscript items={[]} />
     </div>
   </SpecimenGroup>
-
-  <SpecimenGroup label="Windowed">
-    <div style="height: 26rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
-      <AgentTranscript items={long} />
-    </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Unwindowed">
-    <div style="height: 26rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">
-      <AgentTranscript items={long} virtualized={false} />
-    </div>
-  </SpecimenGroup>
-
-
 
   {#snippet sizes(size)}
     <div style="height: 12rem; border: 1px solid var(--poodle-color-border-subtle); border-radius: var(--poodle-radius-surface);">

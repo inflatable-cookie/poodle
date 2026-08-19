@@ -1,11 +1,17 @@
 import { useState } from "react";
+import { resolveQuestionAnswer } from "@inflatable-cookie/poodle-core";
 import {
   AgentChatInput,
+  AgentPlan,
+  AgentQuestion,
   Button,
   Icon,
   ModelPicker,
   RefSelect,
   type AgentChatAttachment,
+  type AgentPlanStatus,
+  type AgentQuestionAnswer,
+  type AgentQuestionItem,
   type ModelCapabilityAxis,
   type ModelOption,
   type ModelSelection,
@@ -72,6 +78,19 @@ const axes: ModelCapabilityAxis[] = [
   },
 ];
 
+const placement: AgentQuestionItem = {
+  id: "placement",
+  header: "Placement",
+  prompt: "When the agent needs an answer mid-turn, where should the question surface appear?",
+  options: [
+    { value: "inline", label: "Inline in the transcript", description: "A block in the conversation." },
+    { value: "composer", label: "Anchored above the composer", description: "Pinned over the input." },
+    { value: "modal", label: "Modal dialog", description: "Blocks the app until answered." },
+  ],
+};
+
+const planMarkdown = "1. Inspect the contract.\n2. Apply the bounded change.";
+
 // The footer's ref switcher — the "main" in the reference is a control, not a
 // label.
 const refs: RefOption[] = [
@@ -87,7 +106,7 @@ export function AgentChatInputSpecimen() {
     model: "atlas-pro",
     axes: { effort: "high", fast: false, context: "1m" },
   });
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState("Summarise the release notes and open a PR");
   const [busyMessage, setBusyMessage] = useState("Summarise the release notes and open a PR");
   const [sizeMessage, setSizeMessage] = useState("");
   const [densityMessage, setDensityMessage] = useState("");
@@ -98,6 +117,11 @@ export function AgentChatInputSpecimen() {
     { id: "a1", label: "architecture.png", kind: "image", thumbnailUrl: diagramThumb },
     { id: "a2", label: "release-notes.md", kind: "document", icon: "file-text" },
   ]);
+  const [questionValue, setQuestionValue] = useState("");
+  const [questionSelections, setQuestionSelections] = useState<string[]>([]);
+  const [questionAnswer, setQuestionAnswer] = useState<AgentQuestionAnswer | null>(null);
+  const [planValue, setPlanValue] = useState("");
+  const [planDecision, setPlanDecision] = useState<AgentPlanStatus>("pending");
 
   return (
     <SpecimenLayout
@@ -122,7 +146,10 @@ export function AgentChatInputSpecimen() {
         />
       )}
     >
-      <SpecimenGroup label="Composer with model picker + context ring">
+      <SpecimenGroup
+        label="Default composer"
+        description="Composing with a model picker, submit feedback, and context below the warning threshold."
+      >
         <AgentChatInput
           value={message}
           onValueChange={setMessage}
@@ -151,7 +178,59 @@ export function AgentChatInputSpecimen() {
         <p>Last submitted: {lastSubmitted ?? "—"}</p>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Busy (stop state) — Escape also stops">
+      <SpecimenGroup
+        label="Questions and plans"
+        description="The composer hosts a live question or a pending plan. The editor is the override or revise channel."
+      >
+        <AgentChatInput
+          value={questionValue}
+          status="questioning"
+          questionCanSubmit={questionSelections.length > 0}
+          question={
+            <AgentQuestion
+              questions={[placement]}
+              selections={questionSelections}
+              override={questionValue}
+              onSelectionChange={setQuestionSelections}
+              onSubmit={(answer) => {
+                setQuestionAnswer(answer);
+                setQuestionValue("");
+                setQuestionSelections([]);
+              }}
+            />
+          }
+          onValueChange={setQuestionValue}
+          onSubmit={() => {
+            const answer = resolveQuestionAnswer(placement, questionSelections, questionValue);
+            if (answer) {
+              setQuestionAnswer(answer);
+              setQuestionValue("");
+              setQuestionSelections([]);
+            }
+          }}
+        />
+        <p>{questionAnswer ? `answered: ${questionAnswer.outcome}` : "no answer yet"}</p>
+        <AgentChatInput
+          value={planValue}
+          onValueChange={setPlanValue}
+          status="reviewing-plan"
+          plan={
+            <AgentPlan
+              plan={planMarkdown}
+              status={planDecision}
+              onAccept={() => setPlanDecision("accepted")}
+              onRevise={() => setPlanDecision("revised")}
+              onDismiss={() => setPlanDecision("dismissed")}
+            />
+          }
+        />
+        <p>{planDecision !== "pending" ? `decided: ${planDecision}` : "no decision yet"}</p>
+      </SpecimenGroup>
+
+      <SpecimenGroup
+        label="Busy and unavailable"
+        description="Busy shows stop and a high-context ring. Read-only blocks editing; disabled blocks everything."
+      >
         <AgentChatInput
           value={busyMessage}
           onValueChange={setBusyMessage}
@@ -162,9 +241,19 @@ export function AgentChatInputSpecimen() {
           toolbar={<ModelPicker models={models} axes={axes} value={selection} emphasis="subdued" />}
         />
         <p>Stop pressed {stopCount} time(s) — context ring is above the warn threshold</p>
+        <AgentChatInput value="This transcript entry cannot be edited" readOnly />
+        <AgentChatInput
+          value="Composer unavailable"
+          disabled
+          contextUsed={10_000}
+          contextLimit={200_000}
+        />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Attachments (image tile + file chip) + footer bar">
+      <SpecimenGroup
+        label="Attachments and footer"
+        description="Images render as tiles, files as chips. Removal is live; the footer holds checkout context."
+      >
         <AgentChatInput
           value="Fix the failing parity gate"
           attachments={attachments}
@@ -193,15 +282,12 @@ export function AgentChatInputSpecimen() {
         />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Empty (submit disabled)">
+      <SpecimenGroup
+        label="Submission rules"
+        description="Empty submit stays disabled unless allowEmptySubmit. Enter can insert a newline instead of sending."
+      >
         <AgentChatInput value="" />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="allowEmptySubmit">
         <AgentChatInput value="" allowEmptySubmit />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="No context ring, no dividers, Cmd/Ctrl+Enter only">
         <AgentChatInput
           value="Enter inserts a newline here"
           submitOnEnter={false}
@@ -210,23 +296,10 @@ export function AgentChatInputSpecimen() {
         />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Grown editor (at the maxRows ceiling)">
+      <SpecimenGroup label="Editor growth" description="The editor stops growing at the maxRows ceiling.">
         <AgentChatInput
           value={"Line one\nLine two\nLine three\nLine four\nLine five\nLine six"}
           maxRows={4}
-        />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Read-only">
-        <AgentChatInput value="This transcript entry cannot be edited" readOnly />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Disabled">
-        <AgentChatInput
-          value="Composer unavailable"
-          disabled
-          contextUsed={10_000}
-          contextLimit={200_000}
         />
       </SpecimenGroup>
     </SpecimenLayout>

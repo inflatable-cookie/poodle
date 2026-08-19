@@ -14,6 +14,7 @@
 //! `g14.008` ruled worth keeping. It is not a parity architecture: it mounts a
 //! `poodle-node` tree and drives real input at it.
 
+use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
 use gpui::*;
@@ -35,8 +36,13 @@ pub fn mount_box_center() -> Point<Pixels> {
 /// The root view: a fixed-size, center-aligned box containing the current
 /// node. The root carries its own focus handle so tests can blur whatever the
 /// backend holds.
+enum HeadlessContent {
+    Node(Arc<Mutex<Node>>),
+    Element(Rc<dyn Fn() -> AnyElement>),
+}
+
 pub struct HeadlessRoot {
-    pub node: Arc<Mutex<Node>>,
+    content: HeadlessContent,
     pub focus: FocusHandle,
 }
 
@@ -48,7 +54,13 @@ impl Focusable for HeadlessRoot {
 
 impl Render for HeadlessRoot {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-        let node = self.node.lock().expect("node lock").clone();
+        let content = match &self.content {
+            HeadlessContent::Node(node) => {
+                let node = node.lock().expect("node lock").clone();
+                poodle_gpui_node_backend::to_gpui(&node)
+            }
+            HeadlessContent::Element(build) => build(),
+        };
         // The window-level overlay host: every pointer press and Escape is
         // routed through the node backend's layer registry (generic — no
         // component identifier here), so overlay dismissal executes through
@@ -67,7 +79,7 @@ impl Render for HeadlessRoot {
                         .flex()
                         .items_center()
                         .justify_center()
-                        .child(poodle_gpui_node_backend::to_gpui(&node)),
+                        .child(content),
                 ),
         )
     }
@@ -92,7 +104,31 @@ impl<'a> HeadlessDriver<'a> {
     pub fn new(cx: &'a mut TestAppContext, node: Arc<Mutex<Node>>) -> Self {
         let (root, cx) = cx.add_window_view(|window, cx| {
             let root = HeadlessRoot {
-                node: Arc::clone(&node),
+                content: HeadlessContent::Node(Arc::clone(&node)),
+                focus: cx.focus_handle(),
+            };
+            window.refresh();
+            root
+        });
+        let root_focus = cx.update(|_window, cx| root.read(cx).focus.clone());
+        let mut driver = Self {
+            cx,
+            root,
+            root_focus,
+        };
+        driver.draw_frame();
+        driver
+    }
+
+    /// Mount an element factory when a regression owns runtime state outside
+    /// the renderer-neutral node tree (scroll handles, for example).
+    pub fn new_element(
+        cx: &'a mut TestAppContext,
+        build: Rc<dyn Fn() -> AnyElement>,
+    ) -> Self {
+        let (root, cx) = cx.add_window_view(|window, cx| {
+            let root = HeadlessRoot {
+                content: HeadlessContent::Element(build),
                 focus: cx.focus_handle(),
             };
             window.refresh();
@@ -111,7 +147,7 @@ impl<'a> HeadlessDriver<'a> {
     /// Swap in a new node and repaint.
     pub fn mount_node(&mut self, node: Arc<Mutex<Node>>) {
         self.root.update(self.cx, |root, cx| {
-            root.node = Arc::clone(&node);
+            root.content = HeadlessContent::Node(Arc::clone(&node));
             cx.notify();
         });
         self.draw_frame();
@@ -251,6 +287,17 @@ impl<'a> HeadlessDriver<'a> {
             }
             None => self.pointer_activate_at(0.92),
         }
+    }
+
+    /// Scroll the mounted box through GPUI's real wheel dispatch.
+    pub fn scroll_vertical(&mut self, delta_y: f32) {
+        self.cx.simulate_event(ScrollWheelEvent {
+            position: mount_box_center(),
+            delta: ScrollDelta::Pixels(point(px(0.0), px(delta_y))),
+            ..Default::default()
+        });
+        self.cx.run_until_parked();
+        self.draw_frame();
     }
 
     /// Pointer scrub at a fraction along the mount box (0 = left, 1 = right).

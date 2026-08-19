@@ -15,6 +15,8 @@
 
 #![recursion_limit = "512"]
 
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
 // Explicit import only: `use gpui::*` would glob in gpui's `test` proc macro
@@ -23,7 +25,7 @@ use std::sync::{Arc, Mutex};
 use gpui::TestAppContext;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
-use poodle_specs::{PopoverSpec, RangeSliderSpec};
+use poodle_specs::{AgentTranscriptSpec, PopoverSpec, RangeSliderSpec};
 
 #[path = "../src/headless_driver.rs"]
 mod headless_driver;
@@ -252,6 +254,97 @@ fn overlay_layers_survive_independent_conversions_within_one_frame() {
             "both independently converted overlays must register in the same frame",
         );
         poodle_gpui_node_backend::overlay_frame_end();
+    });
+}
+
+/// g15.037: AgentTranscript's native viewport uses GPUI's real scroll handle.
+/// The reader can detach, append without being pulled away, jump to the real
+/// bottom, and resume following. This runs entirely on GPUI's in-memory test
+/// platform; a source token or specimen counter cannot satisfy it.
+#[test]
+fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
+    use poodle_headless::agent_transcript::{TranscriptItem, TranscriptMessage};
+
+    fn message(index: usize) -> TranscriptItem {
+        TranscriptItem::Message(TranscriptMessage {
+            id: format!("message-{index}"),
+            markdown: format!(
+                "Transcript block {index} has enough mixed-height copy to overflow the viewport."
+            ),
+            ..Default::default()
+        })
+    }
+
+    run_headless(|cx| {
+        let items = Rc::new(RefCell::new((0..24).map(message).collect::<Vec<_>>()));
+        let scroll = poodle_gpui_node_backend::TrackedScrollState::new();
+        let build_items = Rc::clone(&items);
+        let build_scroll = scroll.clone();
+        let build_theme = theme();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
+            let spec = AgentTranscriptSpec::new(build_items.borrow().clone());
+            let content = poodle_render::agent_transcript(
+                &spec,
+                &build_theme,
+                poodle_render::AgentTranscriptHandlers::default(),
+            );
+            let mut jump = poodle_render::agent_transcript::agent_transcript_jump(
+                &spec,
+                &build_theme,
+                Some(build_scroll.jump_handler()),
+            );
+            jump.id = Some("transcript-headless-jump-control".to_owned());
+            poodle_gpui_node_backend::tracked_vertical_scroll(
+                &content,
+                &jump,
+                &build_scroll,
+                poodle_gpui_node_backend::TrackedScrollOptions {
+                    viewport_id: "transcript-headless-viewport",
+                    jump_id: "transcript-headless-jump",
+                    pin_threshold: spec.pin_threshold,
+                    auto_follow: spec.is_auto_scroll,
+                    is_empty: spec.is_empty(),
+                },
+            )
+        });
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+        assert!(scroll.max_offset_y() > 0.0, "fixture must overflow");
+        assert!(scroll.is_pinned(), "initial render follows the latest block");
+        assert!(scroll.remaining_to_bottom() <= 0.5);
+
+        driver.scroll_vertical(240.0);
+        assert!(!scroll.is_pinned(), "scrolling up detaches the reader");
+        let detached_offset = scroll.offset_y();
+        assert!(scroll.remaining_to_bottom() > 32.0);
+
+        items.borrow_mut().push(message(24));
+        driver.draw_frame();
+        assert_eq!(
+            scroll.offset_y(),
+            detached_offset,
+            "an append must not move a detached reader",
+        );
+        assert!(
+            poodle_gpui_node_backend::bounds_for("transcript-headless-jump-control").is_some(),
+            "detached state mounts the real jump control",
+        );
+
+        driver.pointer_activate_id("transcript-headless-jump-control");
+        driver.draw_frame();
+        assert!(scroll.is_pinned(), "jump re-arms following");
+        assert!(scroll.remaining_to_bottom() <= 0.5, "jump reaches the bottom");
+        assert!(
+            poodle_gpui_node_backend::bounds_for("transcript-headless-jump-control").is_none(),
+            "the jump control leaves the mounted tree once pinned",
+        );
+
+        let followed_offset = scroll.offset_y();
+        items.borrow_mut().push(message(25));
+        driver.draw_frame();
+        assert!(scroll.offset_y() < followed_offset, "a pinned append follows");
+        assert!(scroll.remaining_to_bottom() <= 0.5);
     });
 }
 

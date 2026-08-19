@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ChangedFiles, type ChangedFile } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
@@ -21,6 +22,14 @@ const deep: ChangedFile[] = [
   { path: "app/src/lib/features/editor/state/machine.ts", additions: 12, deletions: 3 },
 ];
 
+const scopes: ChangedFile[] = [
+  { path: "cp-api/src/main.rs", additions: 4, deletions: 1 },
+  { path: "cp-docs/book.md", additions: 2, deletions: 0 },
+  { path: "packages/core/index.ts", additions: 8, deletions: 3 },
+  { path: "apps/preview/App.svelte", additions: 5, deletions: 1 },
+  { path: "tools/export.ts", additions: 1, deletions: 0 },
+];
+
 const single: ChangedFile[] = [{ path: "README.md", additions: 4, deletions: 1 }];
 const additionsOnly: ChangedFile[] = [{ path: "src/new.ts", additions: 88, deletions: 0 }];
 const deletionsOnly: ChangedFile[] = [{ path: "src/old.ts", additions: 0, deletions: 45 }];
@@ -32,47 +41,46 @@ const longName: ChangedFile[] = [
 ];
 
 export function ChangedFilesSpecimen() {
+  const [workedExpanded, setWorkedExpanded] = useState(false);
+
   return (
     <SpecimenLayout
       sizes={(size) => <ChangedFiles id={`sz-${size}`} files={worked} size={size} />}
       densities={(density) => <ChangedFiles id={`dn-${density}`} files={worked} density={density} />}
     >
       <SpecimenGroup
-        label="Collapsed and expanded"
+        label="Worked change set"
         description="Collapsed gives scope counts and a few chips; expanded gives the tree with counts rolled up from descendants."
       >
-        <ChangedFiles id="worked" files={worked} />
+        <ChangedFiles
+          id="worked"
+          files={worked}
+          expanded={workedExpanded}
+          onToggle={() => setWorkedExpanded((current) => !current)}
+        />
+        <ChangedFiles id="worked-open" files={worked} expanded />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Chain collapse" description="A path with no forks costs one row, not four.">
+      <SpecimenGroup
+        label="Paths and scopes"
+        description="A path with no forks costs one row, not four. Files across several scopes keep their scope chips."
+      >
         <ChangedFiles id="deep" files={deep} expanded />
+        <ChangedFiles id="scopes" files={scopes} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Single file">
+      <SpecimenGroup label="Count variations" description="A single file, additions only, and deletions only.">
         <ChangedFiles id="single" files={single} />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="One-sided counts">
         <ChangedFiles id="adds" files={additionsOnly} />
         <ChangedFiles id="dels" files={deletionsOnly} />
       </SpecimenGroup>
 
       <SpecimenGroup
-        label="Truncation and overflow"
-        description="Long filenames ellipsise in their chip; files beyond the limit hide behind 'Show all'."
+        label="Overflow and actions"
+        description="Long filenames ellipsise in their chip; files beyond the limit hide behind 'Show all'. The diff action can be withheld."
       >
-        <ChangedFiles id="long" files={longName} />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Without the diff action">
+        <ChangedFiles id="long" files={longName} chipLimit={2} />
         <ChangedFiles id="nodiff" files={single} showOpenDiff={false} />
-      </SpecimenGroup>
-
-      <SpecimenGroup
-        label="Empty"
-        description="No files renders nothing at all. A turn that changed nothing should not have a box saying so."
-      >
-        <ChangedFiles id="empty" files={[]} />
       </SpecimenGroup>
     </SpecimenLayout>
   );

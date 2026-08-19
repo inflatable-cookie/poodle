@@ -30,20 +30,37 @@ fn message(id: &str, markdown: &str) -> TranscriptItem {
     })
 }
 
+fn streaming_message(id: &str, markdown: &str) -> TranscriptItem {
+    TranscriptItem::Message(TranscriptMessage {
+        id: id.to_string(),
+        markdown: markdown.to_string(),
+        is_streaming: true,
+        ..Default::default()
+    })
+}
+
+fn group(theme: &GpuiThemeProvider, label: &str, content: AnyElement) -> Div {
+    div()
+        .flex()
+        .flex_col()
+        .gap(px(8.0))
+        .child(Eyebrow::from_spec(
+            EyebrowSpec::new().with_content(label),
+            theme,
+        ))
+        .child(content)
+}
+
+fn stack(children: impl IntoIterator<Item = AnyElement>) -> Div {
+    let mut col = div().flex().flex_col().gap(px(12.0));
+    for child in children {
+        col = col.child(child);
+    }
+    col
+}
+
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-
-    fn group(theme: &GpuiThemeProvider, label: &str, content: AnyElement) -> Div {
-        div()
-            .flex()
-            .flex_col()
-            .gap(px(8.0))
-            .child(Eyebrow::from_spec(
-                EyebrowSpec::new().with_content(label),
-                theme,
-            ))
-            .child(content)
-    }
 
     // The worked turn: the changed-files card splits the commands either side
     // of it into two runs rather than being absorbed into one.
@@ -91,8 +108,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         }),
     ];
 
-    // A failure that is not the newest call: collapsed, the run must still
-    // advertise it.
+    let simple = vec![
+        message("s0", "Running the gate."),
+        call("s1", "effigy check:gpui", ToolCallStatus::Success),
+    ];
+
+    let mut thirty = vec![message("t30m", "Running the remaining checks.")];
+    thirty.extend((1..=30).map(|index| {
+        call(
+            &format!("t30-{index}"),
+            &format!("check {index}"),
+            ToolCallStatus::Success,
+        )
+    }));
+
     let failing = vec![
         message("f0", "Running the gate."),
         call("f1", "cargo check", ToolCallStatus::Success),
@@ -100,13 +129,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         call("f3", "bun test", ToolCallStatus::Success),
     ];
 
-    let markdown = vec![message(
-        "md",
-        "Supported subset:\n\n- `inline code` and **strong**\n- nested\n  - items\n\n```rust\nfn main() {}\n```\n\n> a quoted line",
-    )];
+    let streaming = vec![
+        message("st1", "Reading the parser now"),
+        streaming_message("st2", "The corpus-wide patterns were genuine legacy"),
+    ];
 
-    // Every block in the worked turn expands and collapses through the
-    // transcript-level handlers; the specimen holds the state the host would.
+    let long: Vec<TranscriptItem> = (0..40)
+        .map(|index| {
+            if index % 3 == 0 {
+                message(
+                    &format!("lm{index}"),
+                    &format!("Block {index}. Mixed-height content for windowing."),
+                )
+            } else {
+                call(
+                    &format!("lc{index}"),
+                    &format!("step {index} of a long session"),
+                    ToolCallStatus::Success,
+                )
+            }
+        })
+        .collect();
+
     let expanded_for = |prefix: &str, ids: &[&str]| -> Vec<String> {
         ids.iter()
             .filter(|id| state.specimens.is_on(&format!("transcript.{prefix}.{id}")))
@@ -124,22 +168,22 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 )));
         })
     };
-    let file_clicks = state.specimens.count("transcript.files");
-    // The first call gets an output: a call row without one renders inert by
-    // design, and the interactive group exists to prove every forwarded event.
-    let interactive_items: Vec<TranscriptItem> = turn
-        .iter()
-        .cloned()
-        .map(|item| match item {
-            TranscriptItem::ToolCall(mut call) if call.id == "t3" => {
-                call.output = Some("41 parser tests passed".to_string());
-                TranscriptItem::ToolCall(call)
-            }
-            other => other,
-        })
-        .collect();
-    let interactive = AgentTranscript::from_spec(
-        AgentTranscriptSpec::new(interactive_items)
+
+    let detached_spec = AgentTranscriptSpec::new(long.clone());
+    let detached_content = poodle_render::agent_transcript(
+        &detached_spec,
+        theme,
+        poodle_render::AgentTranscriptHandlers::default(),
+    );
+    let mut jump_control = poodle_render::agent_transcript::agent_transcript_jump(
+        &detached_spec,
+        theme,
+        Some(state.agent_transcript_scroll.jump_handler()),
+    );
+    jump_control.id = Some("agent-transcript-jump-control".to_string());
+
+    let worked = AgentTranscript::from_spec(
+        AgentTranscriptSpec::new(turn)
             .with_expanded_tool_runs(expanded_for("run", &["t1", "t6"]))
             .with_expanded_tool_calls(expanded_for("call", &["t1", "t2", "t3", "t6"]))
             .with_expanded_changed_files(expanded_for("diff", &["diff"])),
@@ -148,50 +192,72 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     .on_tool_run_toggle(toggle("run"))
     .on_tool_call_toggle(toggle("call"))
     .on_changed_files_toggle(toggle("diff"))
-    .on_file_select({
-        let events = state.node_events.clone();
-        Arc::new(move |_id| {
-            events
-                .lock()
-                .unwrap()
-                .push(NodeSpecimenEvent::Increment("transcript.files".to_string()));
-        })
-    })
     .into_any_element();
+
     let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
+        .child(group(theme, "A worked turn", worked))
         .child(group(
             theme,
-            &format!("Interactive (files clicked: {file_clicks})"),
-            interactive,
-        ))
-        .child(group(
-            theme,
-            "A worked turn",
-            AgentTranscript::from_spec(AgentTranscriptSpec::new(turn), theme).into_any_element(),
-        ))
-        .child(group(
-            theme,
-            "A run containing a failure",
-            AgentTranscript::from_spec(AgentTranscriptSpec::new(failing.clone()), theme)
+            "Tool run states",
+            stack([
+                AgentTranscript::from_spec(AgentTranscriptSpec::new(simple), theme)
+                    .into_any_element(),
+                AgentTranscript::from_spec(AgentTranscriptSpec::new(thirty.clone()), theme)
+                    .into_any_element(),
+                AgentTranscript::from_spec(
+                    AgentTranscriptSpec::new(thirty)
+                        .with_expanded_tool_runs(vec!["t30-1".to_string()]),
+                    theme,
+                )
                 .into_any_element(),
-        ))
-        .child(group(
-            theme,
-            "Expanded run",
-            AgentTranscript::from_spec(
-                AgentTranscriptSpec::new(failing).with_expanded_tool_runs(vec!["f1".to_string()]),
-                theme,
-            )
+                AgentTranscript::from_spec(AgentTranscriptSpec::new(failing), theme)
+                    .into_any_element(),
+            ])
             .into_any_element(),
         ))
         .child(group(
             theme,
-            "Markdown subset",
-            AgentTranscript::from_spec(AgentTranscriptSpec::new(markdown), theme)
+            "Streaming and detached scroll",
+            stack([
+                AgentTranscript::from_spec(AgentTranscriptSpec::new(streaming), theme)
+                    .into_any_element(),
+                div()
+                    .h(px(256.0))
+                    .child(poodle_gpui_node_backend::tracked_vertical_scroll(
+                        &detached_content,
+                        &jump_control,
+                        &state.agent_transcript_scroll,
+                        poodle_gpui_node_backend::TrackedScrollOptions {
+                            viewport_id: "agent-transcript-detached-viewport",
+                            jump_id: "agent-transcript-jump",
+                            pin_threshold: detached_spec.pin_threshold,
+                            auto_follow: detached_spec.is_auto_scroll,
+                            is_empty: detached_spec.is_empty(),
+                        },
+                    ))
+                    .into_any_element(),
+            ])
+            .into_any_element(),
+        ))
+        .child(group(
+            theme,
+            "Long transcript rendering",
+            stack([
+                AgentTranscript::from_spec(
+                    AgentTranscriptSpec::new(long.clone()).with_virtualized(true),
+                    theme,
+                )
                 .into_any_element(),
+                AgentTranscript::from_spec(
+                    AgentTranscriptSpec::new(long).with_virtualized(false),
+                    theme,
+                )
+                .into_any_element(),
+            ])
+            .into_any_element(),
         ))
         .child(group(
             theme,

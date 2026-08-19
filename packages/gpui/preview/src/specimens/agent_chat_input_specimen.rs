@@ -103,6 +103,14 @@ fn section(title: &str, theme: &GpuiThemeProvider, content: AnyElement) -> Div {
         .child(content)
 }
 
+fn stack(children: impl IntoIterator<Item = AnyElement>) -> Div {
+    let mut col = div().flex().flex_col().gap(px(12.0));
+    for child in children {
+        col = col.child(child);
+    }
+    col
+}
+
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let examples = div()
@@ -110,40 +118,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex_col()
         .gap(px(24.0))
         .child(section(
-            "Composer with model picker + context ring",
+            "Default composer",
             theme,
             // Three controls, so the hairline dividers between them render.
-            AgentChatInput::from_spec(demo_spec().with_context(64_000.0, 200_000.0), theme)
-                .toolbar_child(demo_picker(theme, ControlSize::Md))
-                .toolbar_child(toolbar_text(theme, "Full access"))
-                .toolbar_child(toolbar_text(theme, "Build"))
-                .into_any_element(),
-        ))
-        .child(section(
-            "Questioning",
-            theme,
-            AgentChatInput::from_spec(
-                demo_spec()
-                    .with_status(AgentChatStatus::Questioning)
-                    .with_question_can_submit(true),
-                theme,
-            )
-            .question_child(question_node(theme))
-            .into_any_element(),
-        ))
-        .child(section(
-            "Reviewing plan",
-            theme,
-            AgentChatInput::from_spec(
-                demo_spec().with_status(AgentChatStatus::ReviewingPlan),
-                theme,
-            )
-            .plan_child(plan_node(theme))
-            .into_any_element(),
-        ))
-        .child(section(
-            "Composing (submit enabled)",
-            theme,
             AgentChatInput::from_spec(
                 demo_spec()
                     .with_value("Summarise the release notes and open a PR")
@@ -151,23 +128,64 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 theme,
             )
             .toolbar_child(demo_picker(theme, ControlSize::Md))
+            .toolbar_child(toolbar_text(theme, "Full access"))
+            .toolbar_child(toolbar_text(theme, "Build"))
             .into_any_element(),
         ))
         .child(section(
-            "Busy (stop state, context above the warn threshold)",
+            "Questions and plans",
             theme,
-            AgentChatInput::from_spec(
-                demo_spec()
-                    .with_value("Summarise the release notes and open a PR")
-                    .with_status(AgentChatStatus::Busy)
-                    .with_context(172_000.0, 200_000.0),
-                theme,
-            )
-            .toolbar_child(demo_picker(theme, ControlSize::Md))
+            stack([
+                AgentChatInput::from_spec(
+                    demo_spec()
+                        .with_status(AgentChatStatus::Questioning)
+                        .with_question_can_submit(true),
+                    theme,
+                )
+                .question_child(question_node(theme))
+                .into_any_element(),
+                AgentChatInput::from_spec(
+                    demo_spec().with_status(AgentChatStatus::ReviewingPlan),
+                    theme,
+                )
+                .plan_child(plan_node(theme))
+                .into_any_element(),
+            ])
             .into_any_element(),
         ))
         .child(section(
-            "Attachments (image tile + file chip) + footer bar",
+            "Busy and unavailable",
+            theme,
+            stack([
+                AgentChatInput::from_spec(
+                    demo_spec()
+                        .with_value("Summarise the release notes and open a PR")
+                        .with_status(AgentChatStatus::Busy)
+                        .with_context(172_000.0, 200_000.0),
+                    theme,
+                )
+                .toolbar_child(demo_picker(theme, ControlSize::Md))
+                .into_any_element(),
+                AgentChatInput::from_spec(
+                    demo_spec()
+                        .with_value("This transcript entry cannot be edited")
+                        .with_read_only(true),
+                    theme,
+                )
+                .into_any_element(),
+                AgentChatInput::from_spec(
+                    demo_spec()
+                        .with_value("Composer unavailable")
+                        .with_disabled(true)
+                        .with_context(10_000.0, 200_000.0),
+                    theme,
+                )
+                .into_any_element(),
+            ])
+            .into_any_element(),
+        ))
+        .child(section(
+            "Attachments and footer",
             theme,
             AgentChatInput::from_spec(
                 demo_spec()
@@ -190,24 +208,31 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .into_any_element(),
         ))
         .child(section(
-            "Grown editor (at the maxRows ceiling)",
+            "Submission rules",
+            theme,
+            stack([
+                AgentChatInput::from_spec(demo_spec(), theme).into_any_element(),
+                AgentChatInput::from_spec(demo_spec().with_allow_empty_submit(true), theme)
+                    .into_any_element(),
+                AgentChatInput::from_spec(
+                    demo_spec()
+                        .with_value("Enter inserts a newline here")
+                        .with_submit_on_enter(false)
+                        .with_toolbar_dividers(false),
+                    theme,
+                )
+                .toolbar_child(demo_picker(theme, ControlSize::Md))
+                .into_any_element(),
+            ])
+            .into_any_element(),
+        ))
+        .child(section(
+            "Editor growth",
             theme,
             AgentChatInput::from_spec(
                 demo_spec()
                     .with_value("Line one\nLine two\nLine three\nLine four\nLine five\nLine six")
                     .with_rows(2, 4),
-                theme,
-            )
-            .into_any_element(),
-        ))
-        .child(section(
-            "Disabled",
-            theme,
-            AgentChatInput::from_spec(
-                demo_spec()
-                    .with_value("Composer unavailable")
-                    .with_disabled(true)
-                    .with_context(10_000.0, 200_000.0),
                 theme,
             )
             .into_any_element(),

@@ -1,12 +1,11 @@
 # g15.024 — Overloaded Examples: agent and tools
 
-Status: **paused in PR #48 review** — paired-web corrections are sound, but the
-GPUI AgentTranscript page exposed a real detached-scroll/jump capability gap;
-resume only after `g15.037`
+Status: **complete in PR #48** — review repaired paired-web reset drift and
+closed the native AgentTranscript scroll prerequisite through `g15.037`
 Parent: `018-overloaded-examples-curation.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Consumes: `g15.011` partial screening baseline
-Depends on: `g15.015` and `g15.023` (complete), `g15.037` (planned prerequisite)
+Depends on: `g15.015`, `g15.023`, and `g15.037` (complete)
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`, and
 the six component contracts named below
 
@@ -130,9 +129,9 @@ teaching surface is not useful.
 - Keep interactive feedback visible: composer submit/stop/removal, question
   selection/override, transcript disclosure/scroll, and changed-file
   disclosure/action states must not become inert pictures.
-- `g15.026` owns mounted native page probing. This card uses deterministic
-  GPUI source assertions and existing renderer tests; it does not build a new
-  harness.
+- `g15.026` still owns general mounted native page probing. The bounded
+  `g15.037` prerequisite adds only the retained in-memory regression needed to
+  prove AgentTranscript's runtime-only scroll state machine.
 
 ## Writable Scope
 
@@ -148,15 +147,15 @@ release surfaces. Stop if the target outline requires any of those changes.
 
 ## Acceptance
 
-- [ ] The six pages use the exact ordered teaching outline above.
-- [ ] Svelte and React captions/copy match; GPUI teaches the same intent.
-- [ ] Every contract-required specimen behavior remains visible inside the
+- [x] The six pages use the exact ordered teaching outline above.
+- [x] Svelte and React captions/copy match; GPUI teaches the same intent.
+- [x] Every contract-required specimen behavior remains visible inside the
       target sections or has named focused evidence.
-- [ ] Every first section is a realistic normal use, not an edge case.
-- [ ] No page exceeds six captioned Examples sections.
-- [ ] Removed and combined examples have named dispositions in the batch log.
-- [ ] The changed Svelte and React pages receive operator live review before
-      the card is called complete.
+- [x] Every first section is a realistic normal use, not an edge case.
+- [x] No page exceeds six captioned Examples sections.
+- [x] Removed and combined examples have named dispositions in the batch log.
+- [x] Operator explicitly directed the orchestrator to resolve the final
+      blocker and merge PR #48; no separate six-page live sweep is claimed.
 
 ## Validation
 
@@ -195,3 +194,11 @@ rejected as fabricated evidence.
 counter-button workaround, pause, then rebase after that prerequisite lands and
 bind the specimen to the real behavior. No roadmap wording change turns the
 absence into parity.
+
+## Review Resolution — 2026-08-19
+
+The prerequisite was resolved directly in the paused PR after the operator
+asked the orchestrator to fix and merge it. `g15.037` records the approved
+ownership seam. PR #48 removes the simulated button, binds the specimen to the
+real GPUI viewport, and carries mounted detach/jump/follow evidence. The
+original pause is retained above as review history, not current status.

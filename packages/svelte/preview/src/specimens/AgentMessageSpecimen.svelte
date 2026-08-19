@@ -4,7 +4,7 @@
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
   const inline = "The `lexer` is **strict** but *forgiving*, see [the docs](https://example.com/md). Also ~~gone~~ kept.";
-  const headings = "# One\n\n### Three\n\n###### Six";
+  const headings = "# One\n\n## Two\n\n### Three\n\n#### Four\n\n##### Five\n\n###### Six";
   const fenced = "```rust\nfn main() {\n    println!(\"hi\");\n}\n```";
   const unfenced = "```\nno language given\n```";
   const tight = "- alpha\n- beta\n- gamma";
@@ -22,11 +22,20 @@
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Inline markup" description="Structure, not text: code spans, emphasis, links and strikethrough all survive the block model.">
-    <AgentMessage markdown={inline} />
+  <SpecimenGroup
+    label="Assistant and user messages"
+    description="A user turn sits on the subtle surface; an assistant turn has no container chrome. Long answers stay at the prose measure."
+  >
+    <AgentMessage markdown="The latest parser fixes hold." />
+    <AgentMessage markdown="Can you run the parity sweep again?" role="user" />
+    <AgentMessage markdown={long} />
   </SpecimenGroup>
 
-  <SpecimenGroup label="Headings" description="Real heading elements, so the message is navigable by heading.">
+  <SpecimenGroup
+    label="Inline formatting and headings"
+    description="Structure, not text: code spans, emphasis, links and strikethrough all survive the block model. Headings are real heading elements, so the message is navigable by heading."
+  >
+    <AgentMessage markdown={inline} />
     <AgentMessage markdown={headings} />
   </SpecimenGroup>
 
@@ -35,7 +44,10 @@
     <AgentMessage markdown={unfenced} />
   </SpecimenGroup>
 
-  <SpecimenGroup label="Lists" description="Tight and loose both normalise to paragraph-wrapped items — that is what removes tight-vs-loose as a source of native divergence.">
+  <SpecimenGroup
+    label="List structures"
+    description="Tight and loose both normalise to paragraph-wrapped items — that is what removes tight-vs-loose as a source of native divergence."
+  >
     <AgentMessage markdown={tight} />
     <AgentMessage markdown={loose} />
     <AgentMessage markdown={ordered} />
@@ -43,25 +55,18 @@
     <AgentMessage markdown={itemWithFence} />
   </SpecimenGroup>
 
-  <SpecimenGroup label="Quotes and rules">
+  <SpecimenGroup
+    label="Quotes, rules and fallback"
+    description="Tables and raw HTML degrade to text. Silently losing content is the worst available failure for a transcript."
+  >
     <AgentMessage markdown={quote} />
     <AgentMessage markdown={rule} />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Outside the subset" description="Tables and raw HTML degrade to text. Silently losing content is the worst available failure for a transcript.">
     <AgentMessage markdown={unsupported} />
   </SpecimenGroup>
 
   <SpecimenGroup label="Streaming" description="The caret is aria-hidden: it is a progress hint, not content.">
     <AgentMessage markdown="Regenerating the corpus against the cached oracle" isStreaming />
   </SpecimenGroup>
-
-  <SpecimenGroup label="Roles" description="A user turn sits on the subtle surface; an assistant turn has no container chrome.">
-    <AgentMessage markdown="Can you run the parity sweep again?" role="user" />
-    <AgentMessage markdown={long} />
-  </SpecimenGroup>
-
-
 
   {#snippet sizes(size)}
     <AgentMessage markdown={`Size ${size}: prose measure and type scale move together.`} {size} />

@@ -41,6 +41,16 @@ const targets: AgentQuestionItem = {
   ],
 };
 
+const many: AgentQuestionItem = {
+  id: "many",
+  header: "Priority",
+  prompt: "Which remaining check should run first?",
+  options: Array.from({ length: 12 }, (_, index) => ({
+    value: `step-${index + 1}`,
+    label: `Step ${index + 1}`,
+  })),
+};
+
 const batch: AgentQuestionItem[] = [
   placement,
   targets,
@@ -59,7 +69,7 @@ export function AgentQuestionSpecimen() {
   const [composerAnswer, setComposerAnswer] = useState<AgentQuestionAnswer | null>(null);
   const [singleAnswer, setSingleAnswer] = useState<AgentQuestionAnswer | null>(null);
   const [multiSelections, setMultiSelections] = useState<string[]>([]);
-  const [batchSelections, setBatchSelections] = useState<string[]>([]);
+  const [madeSelections, setMadeSelections] = useState<string[]>(["composer"]);
   const [dismissedAnswer, setDismissedAnswer] = useState<AgentQuestionAnswer | null>(null);
 
   return (
@@ -102,46 +112,48 @@ export function AgentQuestionSpecimen() {
       </SpecimenGroup>
 
       <SpecimenGroup
-        label="Single select"
-        description="One click both selects and submits — the first click is also the last."
+        label="Choice modes"
+        description="One click both selects and submits. Checkboxes appear only for multiple selection, so the mode is visible before the first click. Descriptions sit under the option label."
       >
         <AgentQuestion questions={[placement]} onSubmit={setSingleAnswer} />
         <p>{answerSummary(singleAnswer)}</p>
-      </SpecimenGroup>
-
-      <SpecimenGroup
-        label="Multi select"
-        description="Checkboxes appear only here, so the mode is visible before the first click. Submit is always explicit."
-      >
         <AgentQuestion
           questions={[targets]}
           selections={multiSelections}
           onSelectionChange={setMultiSelections}
         />
-        <p>Selected: <strong>{multiSelections.join(", ") || "none"}</strong></p>
-      </SpecimenGroup>
-
-      <SpecimenGroup
-        label="Batch"
-        description="Progress reports position. It is not navigation — going back would change an answer the agent already has."
-      >
+        <p>
+          Selected: <strong>{multiSelections.join(", ") || "none"}</strong>
+        </p>
         <AgentQuestion
-          questions={batch}
-          activeIndex={1}
-          selections={batchSelections}
-          onSelectionChange={setBatchSelections}
+          questions={[placement]}
+          selections={madeSelections}
+          onSelectionChange={setMadeSelections}
         />
       </SpecimenGroup>
 
       <SpecimenGroup
-        label="Dismissible"
-        description="Dismissal resolves as declined and advances; it does not abandon the turn."
+        label="Batch progress"
+        description="Progress reports position. It is not navigation — going back would change an answer the agent already has."
+      >
+        <AgentQuestion questions={batch} activeIndex={1} />
+        <AgentQuestion questions={batch} activeIndex={3} />
+      </SpecimenGroup>
+
+      <SpecimenGroup
+        label="Dismissal"
+        description="Dismissal resolves as declined and advances; it does not abandon the turn. A question is not dismissible unless the host says so."
       >
         <AgentQuestion questions={[placement]} dismissible onSubmit={setDismissedAnswer} />
         <p>{answerSummary(dismissedAnswer)}</p>
+        <AgentQuestion questions={[placement]} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Without shortcuts">
+      <SpecimenGroup
+        label="Shortcut limits"
+        description="Digit hints cover the first nine options only. The host can withhold them entirely."
+      >
+        <AgentQuestion questions={[many]} />
         <AgentQuestion questions={[placement]} showShortcuts={false} />
       </SpecimenGroup>
     </SpecimenLayout>

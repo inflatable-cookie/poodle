@@ -27,7 +27,22 @@
     ],
   };
 
+  const many: AgentQuestionItem = {
+    id: "many",
+    header: "Priority",
+    prompt: "Which remaining check should run first?",
+    options: Array.from({ length: 12 }, (_, index) => ({
+      value: `step-${index + 1}`,
+      label: `Step ${index + 1}`,
+    })),
+  };
+
   const batch: AgentQuestionItem[] = [placement, targets, { ...placement, id: "third", header: "Scale" }, { ...targets, id: "fourth", header: "Rollout" }];
+
+  function answerSummary(answer: AgentQuestionAnswer | null): string {
+    if (!answer) return "no answer yet";
+    return `answered: ${answer.outcome} ${JSON.stringify(answer.values)}${answer.text}`;
+  }
 
   // The arrangement that matters: the question inside the composer, with the
   // editor as its override.
@@ -38,9 +53,10 @@
   // answer. The host joins them, which is why `submit()` is exported.
   let questionRef = $state<{ submit: () => void } | null>(null);
 
+  let singleAnswer = $state<AgentQuestionAnswer | null>(null);
   let multiSelections = $state<string[]>([]);
-  let batchIndex = $state(1);
-  let batchSelections = $state<string[]>([]);
+  let madeSelections = $state<string[]>(["composer"]);
+  let dismissedAnswer = $state<AgentQuestionAnswer | null>(null);
 </script>
 
 <SpecimenLayout>
@@ -60,35 +76,46 @@
           questions={[placement]}
           bind:selections={composerSelections}
           override={composerValue}
-          onSubmit={(answer) => { lastAnswer = answer; composerValue = ""; }}
+          onSubmit={(answer) => { lastAnswer = answer; composerValue = ""; composerSelections = []; }}
         />
       {/snippet}
     </AgentChatInput>
-    <p style="color: var(--poodle-color-text-secondary); font-size: 0.8125rem;">
-      {lastAnswer ? `answered: ${lastAnswer.outcome} ${JSON.stringify(lastAnswer.values)}${lastAnswer.text}` : "no answer yet"}
-    </p>
+    <p>{answerSummary(lastAnswer)}</p>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Single select" description="One click both selects and submits — the first click is also the last.">
+  <SpecimenGroup
+    label="Choice modes"
+    description="One click both selects and submits. Checkboxes appear only for multiple selection, so the mode is visible before the first click. Descriptions sit under the option label."
+  >
+    <AgentQuestion questions={[placement]} onSubmit={(answer) => (singleAnswer = answer)} />
+    <p>{answerSummary(singleAnswer)}</p>
+    <AgentQuestion questions={[targets]} bind:selections={multiSelections} />
+    <p>Selected: <strong>{multiSelections.join(", ") || "none"}</strong></p>
+    <AgentQuestion questions={[placement]} bind:selections={madeSelections} />
+  </SpecimenGroup>
+
+  <SpecimenGroup
+    label="Batch progress"
+    description="Progress reports position. It is not navigation — going back would change an answer the agent already has."
+  >
+    <AgentQuestion questions={batch} activeIndex={1} />
+    <AgentQuestion questions={batch} activeIndex={3} />
+  </SpecimenGroup>
+
+  <SpecimenGroup
+    label="Dismissal"
+    description="Dismissal resolves as declined and advances; it does not abandon the turn. A question is not dismissible unless the host says so."
+  >
+    <AgentQuestion questions={[placement]} dismissible onSubmit={(answer) => (dismissedAnswer = answer)} />
+    <p>{answerSummary(dismissedAnswer)}</p>
     <AgentQuestion questions={[placement]} />
   </SpecimenGroup>
 
   <SpecimenGroup
-    label="Multi select"
-    description="Checkboxes appear only here, so the mode is visible before the first click. Submit is always explicit."
+    label="Shortcut limits"
+    description="Digit hints cover the first nine options only. The host can withhold them entirely."
   >
-    <AgentQuestion questions={[targets]} bind:selections={multiSelections} />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Batch" description="Progress reports position. It is not navigation — going back would change an answer the agent already has.">
-    <AgentQuestion questions={batch} bind:activeIndex={batchIndex} bind:selections={batchSelections} />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Dismissible" description="Dismissal resolves as declined and advances; it does not abandon the turn.">
-    <AgentQuestion questions={[placement]} dismissible />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Without shortcuts">
+    <AgentQuestion questions={[many]} />
     <AgentQuestion questions={[placement]} showShortcuts={false} />
   </SpecimenGroup>
 

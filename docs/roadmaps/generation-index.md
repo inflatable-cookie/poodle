@@ -6,8 +6,8 @@ Updated: 2026-08-19
 
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.023`, and `g15.034`–`g15.036` complete; `g15.011` partial
-    with bounded continuation cards; `g15.024` paused on planned `g15.037`;
+    `g15.019`–`g15.024`, and `g15.034`–`g15.037` complete; `g15.011` partial
+    with bounded continuation cards;
     `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `037`
@@ -17,11 +17,11 @@ Updated: 2026-08-19
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: settle the bounded ownership seam in planned `g15.037`; it must land
-    before PR #48 can complete `g15.024`. Review found that the current GPUI
-    AgentTranscript has no real detached-scroll/jump behavior, and rejected a
-    specimen counter-button simulation. PR #47 completed `g15.023` with paired
-    live review signed off.
+  - Next: dispatch `g15.025`, the final overloaded-Examples family child.
+    PR #48 completes `g15.024` and its `g15.037` review prerequisite with a
+    real GPUI tracked viewport and mounted detach/jump/follow proof; the
+    rejected specimen counter simulation is gone. PR #47 completed `g15.023`
+    with paired live review signed off.
     PR #46 completed `g15.022`, curating the audio/music family across
     paired web and shared native specimens. PR #45 completed `g15.036`, removed Pill's temporary duplicate
     `fill` API, and moved solid treatment onto the existing appearance axis.

@@ -1,7 +1,7 @@
 # g15.037 — AgentTranscript native scroll and jump parity
 
-Status: **planned — not dispatchable**; one adapter-ownership decision and a
-bounded headless proof are required before implementation
+Status: **complete in PR #48** — the review prerequisite was resolved inside
+the paused branch after explicit operator direction to fix and merge
 Discovered by: PR #48 review of `g15.024`
 Blocks: `g15.024`, `g15.026`, `g15.013`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -33,33 +33,31 @@ The component contract already classifies following and the jump affordance as
 strict parity. Working rule 001 says an active-runtime absence is a gap to port,
 not an accepted delta.
 
-## Decision Required Before Dispatch
+## Ownership Decision
 
-Choose the smallest ownership seam that keeps shared component composition in
-`poodle-render` and scroll physics in GPUI:
+Use a reusable GPUI node-backend viewport helper without adding a scroll
+channel to `poodle-node`:
 
-1. **Preferred candidate: reusable node scroll intent.** Add a small
-   renderer-neutral scroll channel keyed by stable runtime identity. The node
-   declares a tracked viewport, receives pinned/detached state through an
-   interaction callback, and can request scroll-to-bottom. The GPUI backend
-   owns `ScrollHandle` and executes the request.
-2. **Fallback candidate: GPUI AgentTranscript adapter state.** Use a
-   component-specific GPUI wrapper only if a generic node channel would expose
-   GPUI mechanics or grow beyond the one reusable scroll capability. The
-   wrapper may own `ScrollHandle`, but shared content and jump-control recipes
-   still come from `poodle-render`.
+- `TrackedScrollState` lives in `poodle-gpui-node-backend`; the GPUI host
+  retains one value per transcript instance. Its clones share the same
+  non-Send `ScrollHandle` and pinned latch.
+- `tracked_vertical_scroll` wraps renderer-owned content in the real viewport,
+  observes the handle after GPUI wheel dispatch, and rebuilds only when the
+  pinned posture changes.
+- `poodle-render::agent_transcript_jump` owns the control's content, semantics,
+  and token recipe. `TrackedScrollState::jump_handler()` is a send-safe atomic
+  intent bridge; the next runtime-thread build consumes it and calls the real
+  `scroll_to_bottom()`.
+- While pinned, builds request bottom anchoring after layout. While detached,
+  builds do not touch the offset, so appends stay put. Jump sets the latch and
+  re-arms following.
+- The in-memory GPUI regression reads the real handle through the state and
+  drives wheel and pointer input through GPUI's dispatch tree.
 
-The decision must name:
-
-- where the persistent `ScrollHandle` lives;
-- how pinned/detached state reaches component composition;
-- how jump activation requests a real scroll-to-bottom;
-- how appending while pinned follows without moving a detached reader;
-- how the in-memory GPUI test platform observes all four transitions.
-
-Do not dispatch an implementation worker until that decision is written into
-this card or a promoted architecture/contract update. Do not add a public prop
-merely to expose GPUI bookkeeping.
+This is smaller than the proposed renderer-neutral node channel: no GPUI type,
+offset, callback, or transient state enters the node vocabulary or component
+spec. It is more reusable than a preview-only AgentTranscript wrapper and keeps
+runtime mechanics at the runtime boundary.
 
 ## Required Behaviour
 
@@ -114,17 +112,26 @@ remains program-deferred and is not a validation dependency.
 
 ## Acceptance
 
-- [ ] The approved ownership seam is recorded before implementation begins.
-- [ ] GPUI demonstrates the full detached-scroll state machine on a real
+- [x] The approved ownership seam is recorded before implementation begins.
+- [x] GPUI demonstrates the full detached-scroll state machine on a real
       viewport.
-- [ ] Jump activation changes actual scroll state; a counter, label swap, or
+- [x] Jump activation changes actual scroll state; a counter, label swap, or
       pre-rendered posture is not evidence.
-- [ ] Shared Rust composition remains the source of component structure and
+- [x] Shared Rust composition remains the source of component structure and
       recipes; GPUI owns only runtime scroll mechanics.
-- [ ] Headless mounted evidence covers detach, append-while-detached, jump, and
+- [x] Headless mounted evidence covers detach, append-while-detached, jump, and
       resumed following.
-- [ ] `g15.024` can remove its workaround and complete the exact teaching
+- [x] `g15.024` removes its workaround and completes the exact teaching
       outline without a runtime-specific lie.
+
+## Outcome
+
+The fake ScrollShell/counter row is gone. The native specimen uses the real
+tracked viewport. Owner-local pin-predicate evidence and the mounted 50-test
+native board cover initial following, detach, offset preservation across an
+append, real jump activation, hidden control after jump, and resumed following.
+No OS window, node-vocabulary change, public component prop, or Jetstream work
+was introduced.
 
 ## Stop Conditions
 
