@@ -1,4 +1,4 @@
-use crate::types::{ControlSize, SemanticControlSizeRole, ToneFill};
+use crate::types::{ControlSize, SemanticControlSizeRole};
 use poodle_tokens::semantic;
 
 use crate::InlineTypographyMode;
@@ -14,10 +14,12 @@ pub enum PillTone {
     Danger,
 }
 
-/// Visual appearance / style of a pill.
+/// Visual appearance / style of a pill. Mutually exclusive: `Tint` is the
+/// ordinary tone-tinted shell, `Solid` the opaque high-contrast treatment.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum PillAppearance {
     #[default]
+    Tint,
     Solid,
     Subtle,
     Badge,
@@ -46,7 +48,6 @@ pub enum PillFont {
 pub struct PillSpec {
     pub label: String,
     pub tone: PillTone,
-    pub fill: ToneFill,
     pub appearance: PillAppearance,
     pub size: PillSize,
     pub font: PillFont,
@@ -76,7 +77,6 @@ impl Default for PillSpec {
         Self {
             label: String::new(),
             tone: PillTone::default(),
-            fill: ToneFill::Tint,
             appearance: PillAppearance::default(),
             size: PillSize::default(),
             font: PillFont::default(),
@@ -140,11 +140,6 @@ impl PillSpec {
         self
     }
 
-    pub fn with_fill(mut self, fill: ToneFill) -> Self {
-        self.fill = fill;
-        self
-    }
-
     pub fn with_appearance(mut self, appearance: PillAppearance) -> Self {
         self.appearance = appearance;
         self
@@ -195,8 +190,8 @@ impl PillSpec {
         self
     }
 
-    pub fn is_solid_fill(&self) -> bool {
-        matches!(self.fill, ToneFill::Solid)
+    pub fn is_solid_appearance(&self) -> bool {
+        matches!(self.appearance, PillAppearance::Solid)
     }
 
     /// Background fill token based on tone + appearance.

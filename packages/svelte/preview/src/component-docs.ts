@@ -3364,8 +3364,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   pill: {
     props: [
       { name: "tone", type: "PillTone", default: '"neutral"', description: "Color tone of the pill." },
-      { name: "fill", type: "ToneFill", default: '"tint"', description: "Tint or solid tone surface treatment." },
-      { name: "appearance", type: "PillAppearance", default: '"solid"', description: "Visual appearance variant." },
+      { name: "appearance", type: "PillAppearance", default: '"tint"', description: "Visual treatment variant: tint, solid, subtle, or badge." },
       { name: "size", type: "PillSize", default: '"md"', description: "Size of the pill." },
       { name: "font", type: "PillFont", default: '"normal"', description: "Font style of the pill label." },
       { name: "muted", type: "boolean", default: "false", description: "Whether the pill uses muted styling." },
@@ -3382,7 +3381,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
   import { Pill } from "@inflatable-cookie/poodle-svelte";
 </script>
 
-<Pill tone="success" appearance="solid">Active</Pill>
+<Pill tone="success">Active</Pill>
 <Pill tone="warning" appearance="solid" muted>Pending</Pill>`,
   },
 

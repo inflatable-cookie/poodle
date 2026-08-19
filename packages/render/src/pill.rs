@@ -44,7 +44,7 @@ fn pill_colors(spec: &PillSpec, theme: &dyn ThemeProvider) -> (ColorValue, Color
     let tone_color = theme.resolve_color(spec.tone_color_token());
     let custom_accent = spec.accent_color.as_deref().and_then(hex_color);
 
-    if spec.is_solid_fill() {
+    if spec.is_solid_appearance() {
         let tone_base = custom_accent.unwrap_or(tone_color);
         let is_neutral = spec.tone == PillTone::Neutral && custom_accent.is_none();
         let surface = solid_tone_surface(theme, tone_base, is_neutral);
@@ -175,7 +175,7 @@ pub fn pill_with_remove(
         s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
     }
     if spec.has_dot {
-        let dot_color = if spec.is_solid_fill() {
+        let dot_color = if spec.is_solid_appearance() {
             text_color
         } else {
             spec.accent_color
@@ -206,7 +206,7 @@ pub fn pill_with_remove(
         remove.style.descriptor.cursor = CursorHint::Pointer;
 
         let mut icon = Node::icon("x", theme.resolve_space("size.icon.sm"));
-        icon.style.descriptor.text_color = Some(if spec.is_solid_fill() {
+        icon.style.descriptor.text_color = Some(if spec.is_solid_appearance() {
             text_color
         } else {
             theme.resolve_color("color.icon.muted")
@@ -230,7 +230,6 @@ mod tests {
 
     use super::*;
     use poodle_node::NodeKind;
-    use poodle_specs::ToneFill;
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -262,12 +261,55 @@ mod tests {
     }
 
     #[test]
-    fn solid_fill_precedes_appearance_and_uses_custom_accent_as_tone_base() {
+    fn default_appearance_is_tint_and_matches_explicit_tint() {
+        let theme = theme();
+        let default_spec = PillSpec::new().with_label("Neutral");
+        assert_eq!(default_spec.appearance, PillAppearance::Tint);
+        let explicit_tint = PillSpec::new()
+            .with_label("Neutral")
+            .with_appearance(PillAppearance::Tint);
+        assert_eq!(
+            pill_colors(&default_spec, &theme),
+            pill_colors(&explicit_tint, &theme)
+        );
+
+        // The tint shell keeps the ordinary tone-tinted recipe: a translucent
+        // surface fill, not the opaque solid surface.
+        let (fill, _, text) = pill_colors(&default_spec, &theme);
+        let solid = PillSpec::new()
+            .with_label("Neutral")
+            .with_appearance(PillAppearance::Solid);
+        let (solid_fill, _, solid_text) = pill_colors(&solid, &theme);
+        assert_ne!(fill, solid_fill);
+        assert_ne!(text, solid_text);
+    }
+
+    #[test]
+    fn subtle_appearance_halves_the_tint_fill_opacity() {
+        let theme = theme();
+        let tint = PillSpec::new()
+            .with_tone(PillTone::Success)
+            .with_appearance(PillAppearance::Tint);
+        let subtle = PillSpec::new()
+            .with_tone(PillTone::Success)
+            .with_appearance(PillAppearance::Subtle);
+        let (tint_fill, tint_border, tint_text) = pill_colors(&tint, &theme);
+        let (subtle_fill, subtle_border, subtle_text) = pill_colors(&subtle, &theme);
+        assert_eq!(
+            subtle_fill,
+            with_alpha(tint_fill, tint_fill.3 * 0.5),
+            "subtle halves the tint fill alpha"
+        );
+        assert_eq!(subtle_border, tint_border);
+        assert_eq!(subtle_text, tint_text);
+    }
+
+    #[test]
+    fn solid_appearance_uses_shared_opaque_recipe_and_custom_accent_base() {
         let theme = theme();
         let success = PillSpec::new()
             .with_tone(PillTone::Success)
-            .with_fill(ToneFill::Solid)
-            .with_appearance(PillAppearance::Subtle);
+            .with_appearance(PillAppearance::Solid);
         let expected = solid_tone_surface(
             &theme,
             theme.resolve_color(success.tone_color_token()),
@@ -279,8 +321,7 @@ mod tests {
         );
 
         let custom = PillSpec::new()
-            .with_fill(ToneFill::Solid)
-            .with_appearance(PillAppearance::Badge)
+            .with_appearance(PillAppearance::Solid)
             .with_accent_color("#ff9900");
         let custom_base = hex_color("#ff9900").expect("custom accent");
         let custom_expected = solid_tone_surface(&theme, custom_base, false);
@@ -293,9 +334,7 @@ mod tests {
             )
         );
 
-        let neutral = PillSpec::new()
-            .with_fill(ToneFill::Solid)
-            .with_appearance(PillAppearance::Badge);
+        let neutral = PillSpec::new().with_appearance(PillAppearance::Solid);
         let neutral_expected = solid_tone_surface(
             &theme,
             theme.resolve_color(neutral.tone_color_token()),
@@ -316,7 +355,7 @@ mod tests {
         let theme = theme();
         let mut spec = PillSpec::new()
             .with_label("Filter")
-            .with_fill(ToneFill::Solid)
+            .with_appearance(PillAppearance::Solid)
             .with_removable(true);
         spec.has_dot = true;
         let expected =

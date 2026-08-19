@@ -178,8 +178,7 @@ fn display_components() -> Vec<ComponentDefinition> {
             description: "Status pill; fixture definition for the pill specimen scene.".to_owned(),
             props: vec![
                 shared_prop("tone", "pill-tone", &["neutral", "info", "success", "warning", "danger"], "semantic tone controlling fill/border/text color"),
-                shared_prop("fill", "tone-fill", &["tint", "solid"], "tone surface treatment"),
-                shared_prop("appearance", "pill-appearance", &["solid", "subtle", "badge"], "fill opacity variant"),
+                shared_prop("appearance", "pill-appearance", &["tint", "solid", "subtle", "badge"], "visual treatment variant"),
                 shared_prop("sizeRole", "semantic-size-role", &["chrome", "control", "prominent"], "semantic size offset"),
                 shared_prop("font", "pill-font", &["normal", "mono"], "content font variant"),
                 shared_prop("typography", "pill-typography", &["label", "inherit"], "label typography or inherited"),
@@ -415,7 +414,7 @@ pub fn display_specimens_scenes() -> Vec<Scene> {
         scene(
             "pill-specimen",
             "Pill",
-            "Pill specimen (contract §13): tones, code font, muted, badge, inherited typography, \
+            "Pill specimen (contract §13): tones, appearances, code font, muted, badge, inherited typography, \
              and custom accents.",
             vec![
                 instance("pill", "Tones", "Neutral", vec![
@@ -529,22 +528,29 @@ pub fn display_specimens_scenes() -> Vec<Scene> {
                     ("sizeRole", member_value("control")),
                     ("content", str_value("Danger-ish")),
                 ]),
-                instance("pill", "Solid fills", "Solid neutral", vec![
-                    ("tone", member_value("neutral")),
-                    ("fill", member_value("solid")),
-                    ("content", str_value("Solid neutral")),
-                ]),
-                instance("pill", "Solid fills", "Solid success subtle", vec![
+                instance("pill", "Appearances", "Tint", vec![
                     ("tone", member_value("success")),
-                    ("fill", member_value("solid")),
-                    ("appearance", member_value("subtle")),
-                    ("content", str_value("Solid success")),
+                    ("appearance", member_value("tint")),
+                    ("sizeRole", member_value("control")),
+                    ("content", str_value("Tint")),
                 ]),
-                instance("pill", "Solid fills", "Solid custom badge", vec![
-                    ("fill", member_value("solid")),
+                instance("pill", "Appearances", "Solid", vec![
+                    ("tone", member_value("success")),
+                    ("appearance", member_value("solid")),
+                    ("sizeRole", member_value("control")),
+                    ("content", str_value("Solid")),
+                ]),
+                instance("pill", "Appearances", "Subtle", vec![
+                    ("tone", member_value("success")),
+                    ("appearance", member_value("subtle")),
+                    ("sizeRole", member_value("control")),
+                    ("content", str_value("Subtle")),
+                ]),
+                instance("pill", "Appearances", "Badge", vec![
+                    ("tone", member_value("success")),
                     ("appearance", member_value("badge")),
-                    ("accent", str_value("#3b82f6")),
-                    ("content", str_value("Solid custom")),
+                    ("sizeRole", member_value("control")),
+                    ("content", str_value("Badge")),
                 ]),
             ],
         ),
@@ -731,7 +737,7 @@ pub fn display_specimens_model() -> IrModel {
                 ("chrome", "Chrome"), ("control", "Control"), ("prominent", "Prominent"),
             ]),
             shared_type("pill-appearance", "PillAppearance", "docs/contracts/components/pill.md", &[
-                ("solid", "Solid"), ("subtle", "Subtle"), ("badge", "Badge"),
+                ("tint", "Tint"), ("solid", "Solid"), ("subtle", "Subtle"), ("badge", "Badge"),
             ]),
             shared_type("pill-font", "PillFont", "docs/contracts/components/pill.md", &[
                 ("normal", "Normal"), ("mono", "Mono"),

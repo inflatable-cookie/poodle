@@ -197,6 +197,11 @@
       },
       "members": [
         {
+          "id": "tint",
+          "name": "Tint",
+          "description": "Tint member."
+        },
+        {
           "id": "solid",
           "name": "Solid",
           "description": "Solid member."
@@ -586,24 +591,6 @@
           }
         },
         {
-          "id": "fill",
-          "name": "fill",
-          "prop_type": {
-            "Shared": "tone-fill"
-          },
-          "default": null,
-          "required": false,
-          "web_only": false,
-          "description": "tone surface treatment",
-          "permitted_subset": {
-            "shared_type": "tone-fill",
-            "members": [
-              "solid",
-              "tint"
-            ]
-          }
-        },
-        {
           "id": "appearance",
           "name": "appearance",
           "prop_type": {
@@ -612,13 +599,14 @@
           "default": null,
           "required": false,
           "web_only": false,
-          "description": "fill opacity variant",
+          "description": "visual treatment variant",
           "permitted_subset": {
             "shared_type": "pill-appearance",
             "members": [
               "badge",
               "solid",
-              "subtle"
+              "subtle",
+              "tint"
             ]
           }
         },
@@ -1530,7 +1518,7 @@
     {
       "id": "pill-specimen",
       "name": "Pill",
-      "description": "Pill specimen (contract §13): tones, code font, muted, badge, inherited typography, and custom accents.",
+      "description": "Pill specimen (contract §13): tones, appearances, code font, muted, badge, inherited typography, and custom accents.",
       "instances": [
         {
           "component": "pill",
@@ -2168,27 +2156,34 @@
             {
               "prop": "tone",
               "value": {
-                "Member": "neutral"
+                "Member": "success"
               },
               "description": null
             },
             {
-              "prop": "fill",
+              "prop": "appearance",
               "value": {
-                "Member": "solid"
+                "Member": "tint"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
               },
               "description": null
             },
             {
               "prop": "content",
               "value": {
-                "String": "Solid neutral"
+                "String": "Tint"
               },
               "description": null
             }
           ],
-          "caption": "Solid neutral",
-          "group": "Solid fills"
+          "caption": "Tint",
+          "group": "Appearances"
         },
         {
           "component": "pill",
@@ -2201,9 +2196,37 @@
               "description": null
             },
             {
-              "prop": "fill",
+              "prop": "appearance",
               "value": {
                 "Member": "solid"
+              },
+              "description": null
+            },
+            {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
+              "prop": "content",
+              "value": {
+                "String": "Solid"
+              },
+              "description": null
+            }
+          ],
+          "caption": "Solid",
+          "group": "Appearances"
+        },
+        {
+          "component": "pill",
+          "bindings": [
+            {
+              "prop": "tone",
+              "value": {
+                "Member": "success"
               },
               "description": null
             },
@@ -2215,23 +2238,30 @@
               "description": null
             },
             {
+              "prop": "sizeRole",
+              "value": {
+                "Member": "control"
+              },
+              "description": null
+            },
+            {
               "prop": "content",
               "value": {
-                "String": "Solid success"
+                "String": "Subtle"
               },
               "description": null
             }
           ],
-          "caption": "Solid success subtle",
-          "group": "Solid fills"
+          "caption": "Subtle",
+          "group": "Appearances"
         },
         {
           "component": "pill",
           "bindings": [
             {
-              "prop": "fill",
+              "prop": "tone",
               "value": {
-                "Member": "solid"
+                "Member": "success"
               },
               "description": null
             },
@@ -2243,22 +2273,22 @@
               "description": null
             },
             {
-              "prop": "accent",
+              "prop": "sizeRole",
               "value": {
-                "String": "#3b82f6"
+                "Member": "control"
               },
               "description": null
             },
             {
               "prop": "content",
               "value": {
-                "String": "Solid custom"
+                "String": "Badge"
               },
               "description": null
             }
           ],
-          "caption": "Solid custom badge",
-          "group": "Solid fills"
+          "caption": "Badge",
+          "group": "Appearances"
         }
       ],
       "axes": [

@@ -1612,9 +1612,15 @@
     "props": [
       {
         "name": "tone",
-        "type": "StatusTone | \"neutral\"",
+        "type": "StatusTone",
         "default": "\"neutral\"",
         "description": "Semantic tone and color treatment."
+      },
+      {
+        "name": "fill",
+        "type": "ToneFill",
+        "default": "\"tint\"",
+        "description": "Tint or solid tone surface treatment."
       },
       {
         "name": "title",
@@ -1701,6 +1707,12 @@
         "type": "StatusTone",
         "default": "\"warning\"",
         "description": "Semantic tone for the surface and leading indicator."
+      },
+      {
+        "name": "fill",
+        "type": "ToneFill",
+        "default": "\"tint\"",
+        "description": "Tint or solid tone surface treatment."
       },
       {
         "name": "title",
@@ -8308,8 +8320,8 @@
       {
         "name": "appearance",
         "type": "PillAppearance",
-        "default": "\"solid\"",
-        "description": "Visual appearance variant."
+        "default": "\"tint\"",
+        "description": "Visual treatment variant: tint, solid, subtle, or badge."
       },
       {
         "name": "size",
@@ -8361,7 +8373,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Pill } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Pill tone=\"success\" appearance=\"solid\">Active</Pill>\n<Pill tone=\"warning\" appearance=\"solid\" muted>Pending</Pill>"
+    "usage": "<script lang=\"ts\">\n  import { Pill } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Pill tone=\"success\">Active</Pill>\n<Pill tone=\"warning\" appearance=\"solid\" muted>Pending</Pill>"
   },
   "code-input": {
     "props": [

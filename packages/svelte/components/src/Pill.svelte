@@ -4,13 +4,12 @@
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import { getPillContext, type PillTypography } from "./pill-context";
-  import type { ControlDensity, SemanticControlSizeRole, ToneFill } from "./types";
+  import type { ControlDensity, SemanticControlSizeRole } from "./types";
   import type { PillAppearance, PillFont, PillSize, PillTone } from "./types";
 
   let {
     tone = "neutral",
-    fill = "tint",
-    appearance = "solid",
+    appearance = "tint",
     size = null,
     sizeRole = "chrome",
     density = null,
@@ -25,7 +24,6 @@
     children = undefined,
   }: {
     tone?: PillTone;
-    fill?: ToneFill;
     appearance?: PillAppearance;
     size?: PillSize | null;
     sizeRole?: SemanticControlSizeRole;
@@ -54,7 +52,6 @@
 <span
   class="poodle-pill"
   data-tone={tone}
-  data-fill={fill}
   data-appearance={appearance}
   data-size={resolvedSize}
   data-density={resolvedDensity}

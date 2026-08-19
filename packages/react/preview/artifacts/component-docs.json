@@ -8318,16 +8318,10 @@
         "description": "Color tone of the pill."
       },
       {
-        "name": "fill",
-        "type": "ToneFill",
-        "default": "\"tint\"",
-        "description": "Tint or solid tone surface treatment."
-      },
-      {
         "name": "appearance",
         "type": "PillAppearance",
-        "default": "\"solid\"",
-        "description": "Visual appearance variant."
+        "default": "\"tint\"",
+        "description": "Visual treatment variant: tint, solid, subtle, or badge."
       },
       {
         "name": "size",
@@ -8379,7 +8373,7 @@
       }
     ],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { Pill } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Pill tone=\"success\" appearance=\"solid\">Active</Pill>\n<Pill tone=\"warning\" appearance=\"solid\" muted>Pending</Pill>"
+    "usage": "<script lang=\"ts\">\n  import { Pill } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Pill tone=\"success\">Active</Pill>\n<Pill tone=\"warning\" appearance=\"solid\" muted>Pending</Pill>"
   },
   "code-input": {
     "props": [

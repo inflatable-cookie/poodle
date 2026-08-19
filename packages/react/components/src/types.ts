@@ -47,7 +47,7 @@ export type { IconNodeElement, IconNodes, IconSet } from "@inflatable-cookie/poo
 export type IconProp = IconNodes | string;
 
 export type PillTone = "neutral" | "info" | "success" | "warning" | "danger";
-export type PillAppearance = "solid" | "subtle" | "badge";
+export type PillAppearance = "tint" | "solid" | "subtle" | "badge";
 export type PillSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type PillFont = "normal" | "mono";
 export type PillTypography = "label" | "inherit";

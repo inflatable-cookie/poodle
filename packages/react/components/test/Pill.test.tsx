@@ -12,22 +12,32 @@ describe("Pill (react)", () => {
     expect(root.dataset.size).toBe("lg");
   });
 
-  it("defaults to tint and keeps solid fill independent from appearance", () => {
-    const { container } = render(
-      <Pill tone="warning" fill="solid" appearance="badge" dot title="Warning">
-        Warning
-      </Pill>,
-    );
+  it("defaults to the tint appearance and emits no fill axis", () => {
+    const { container } = render(<Pill>Neutral</Pill>);
     const root = container.querySelector(".poodle-pill") as HTMLElement;
-    expect(root.dataset.fill).toBe("solid");
-    expect(root.dataset.appearance).toBe("badge");
-    expect(root.title).toBe("Warning");
-    expect(container.querySelector(".poodle-pill__dot")).not.toBeNull();
+    expect(root.dataset.appearance).toBe("tint");
+    expect(root.hasAttribute("data-fill")).toBe(false);
 
-    const defaultRoot = render(<Pill>Neutral</Pill>).container.querySelector(
+    const explicitTint = render(<Pill appearance="tint">Neutral</Pill>).container.querySelector(
       ".poodle-pill",
     ) as HTMLElement;
-    expect(defaultRoot.dataset.fill).toBe("tint");
+    expect(explicitTint.dataset.appearance).toBe(root.dataset.appearance);
+    expect(explicitTint.outerHTML).toBe(root.outerHTML);
+  });
+
+  it("projects all four appearances as one mutually exclusive axis", () => {
+    for (const appearance of ["tint", "solid", "subtle", "badge"] as const) {
+      const { container } = render(
+        <Pill tone="warning" appearance={appearance} dot title="Warning">
+          Warning
+        </Pill>,
+      );
+      const root = container.querySelector(".poodle-pill") as HTMLElement;
+      expect(root.dataset.appearance).toBe(appearance);
+      expect(root.hasAttribute("data-fill")).toBe(false);
+      expect(root.title).toBe("Warning");
+      expect(container.querySelector(".poodle-pill__dot")).not.toBeNull();
+    }
   });
 
   it("carries the accent token and marks it custom", () => {
