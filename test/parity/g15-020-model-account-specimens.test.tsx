@@ -285,6 +285,35 @@ describe("g15.020 model-connection and account-lifecycle specimens", () => {
       expect(actions, runtime).toEqual(["Cancel", "Add connection"]);
     }
 
+    const codexOptions = setups.map(
+      (setup) =>
+        setup.querySelector('[data-model-connection-option="codex-app"]') as HTMLButtonElement,
+    );
+    expect(
+      codexOptions.map((option) => option.getAttribute("data-availability")),
+      `${runtime}: detection outcome is visible on the option`,
+    ).toEqual(["available", "unavailable"]);
+    expect(
+      codexOptions.map((option) => option.textContent?.replace(/\s+/g, " ").trim()),
+      `${runtime}: visible availability copy stays honest`,
+    ).toEqual([
+      expect.stringContaining("Available"),
+      expect.stringContaining("Unavailable"),
+    ]);
+    expect(
+      codexOptions.map((option) =>
+        option.querySelector(".poodle-status-indicator")?.getAttribute("aria-label"),
+      ),
+      `${runtime}: host detail remains available to assistive technology`,
+    ).toEqual([
+      "Available",
+      "Not detected",
+    ]);
+    expect(
+      codexOptions.map((option) => option.disabled),
+      `${runtime}: the missing route is not selectable`,
+    ).toEqual([false, true]);
+
     // Detected: the host approved the add, so Add is live from `choose`.
     const detected = setups[0]!.querySelector(
       ".poodle-model-connection-setup__actions .poodle-button:last-of-type",
@@ -316,11 +345,16 @@ describe("g15.020 model-connection and account-lifecycle specimens", () => {
       join(GPUI_SPECIMENS, "model_connection_setup_specimen.rs"),
       "utf8",
     );
-    // The detected pair must build from the interactive option set, where
-    // `codex-app` is available, and stay on Choose.
+    // Both outcomes stay on Choose. Their option sets carry the actual host
+    // detection result, rather than invisible configure-stage feedback.
     expect(source).toMatch(
-      /let detected = \|value: &str\| \{\s*ModelConnectionSetupSpec::new\(\)\s*\.with_options\(interactive_options\(\)\)\s*\.with_stage\(ModelConnectionSetupStage::Choose\)/,
+      /let direct_add = \|options: Vec<ModelConnectionOption>, value: &str\| \{\s*ModelConnectionSetupSpec::new\(\)\s*\.with_options\(options\)\s*\.with_stage\(ModelConnectionSetupStage::Choose\)/,
     );
+    expect(source).toMatch(
+      /fn missing_options\(\)[\s\S]*ModelConnectionAvailability::Unavailable,\s*"Not detected"/,
+    );
+    expect(source).toMatch(/direct_add\(interactive_options\(\), "codex-app"\)/);
+    expect(source).toMatch(/direct_add\(missing_options\(\), "codex-app"\)/);
     expect(source).not.toMatch(/configure\("codex-app"\)/);
   });
 

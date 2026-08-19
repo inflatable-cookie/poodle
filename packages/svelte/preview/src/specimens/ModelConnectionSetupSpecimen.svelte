@@ -15,6 +15,16 @@
       ? { ...option, availability: "available" as const, availabilityLabel: "Available", isDisabled: false }
       : option,
   );
+  const missingOptions = options.map((option) =>
+    option.id === "codex-app"
+      ? {
+          ...option,
+          availability: "unavailable" as const,
+          availabilityLabel: "Not detected",
+          isDisabled: true,
+        }
+      : option,
+  );
 
   let apiKey = $state("");
   let endpoint = $state("http://127.0.0.1:11434");
@@ -94,15 +104,13 @@
               options={interactiveOptions}
               defaultValue="codex-app"
               canSubmit={true}
-              success="Local harness detected."
             />
           </div>
-          <!-- Nothing was found, so Add stays disabled and no step is skipped. -->
+          <!-- Nothing was found, so the option says so and Add stays disabled. -->
           <div class="poodle-model-connection-setup-specimen__panel">
             <ModelConnectionSetup
-              options={interactiveOptions}
+              options={missingOptions}
               defaultValue="codex-app"
-              error="Codex app not found on this machine."
             />
           </div>
         </div>

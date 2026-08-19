@@ -10,6 +10,16 @@ const interactiveOptions = options.map((option) =>
     ? { ...option, availability: "available" as const, availabilityLabel: "Available", isDisabled: false }
     : option,
 );
+const missingOptions = options.map((option) =>
+  option.id === "codex-app"
+    ? {
+        ...option,
+        availability: "unavailable" as const,
+        availabilityLabel: "Not detected",
+        isDisabled: true,
+      }
+    : option,
+);
 
 const stackStyle: CSSProperties = { display: "flex", flexDirection: "column", gap: "2rem" };
 const panelStyle: CSSProperties = { width: "min(42rem, 100%)" };
@@ -94,15 +104,13 @@ export function ModelConnectionSetupSpecimen() {
                 options={interactiveOptions}
                 defaultValue="codex-app"
                 canSubmit={true}
-                success="Local harness detected."
               />
             </div>
-            {/* Nothing was found, so Add stays disabled and no step is skipped. */}
+            {/* Nothing was found, so the option says so and Add stays disabled. */}
             <div style={panelStyle}>
               <ModelConnectionSetup
-                options={interactiveOptions}
+                options={missingOptions}
                 defaultValue="codex-app"
-                error="Codex app not found on this machine."
               />
             </div>
           </div>

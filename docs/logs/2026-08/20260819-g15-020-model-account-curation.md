@@ -161,7 +161,7 @@ directly.
 
 | Removed caption | Disposition |
 | --- | --- |
-| Auto-detect: found / Auto-detect: missing | two instances inside **Auto-detected local route**, both on the `choose` stage over the interactive option set where `codex-app` is available. Because that option sets `requiresConfiguration: false`, the action row reads Add rather than Continue and carries no Back: the credential step is genuinely skipped, not merely described. Corrected after PR review — the first draft forced both instances onto `configure`, which showed the opposite of the claim |
+| Auto-detect: found / Auto-detect: missing | two instances inside **Auto-detected local route**, both on the `choose` stage. The found option is available and directly addable; the missing option is visibly Unavailable, carries `Not detected` as its detailed accessibility label, and keeps Add disabled. Both retain `requiresConfiguration: false`, so neither emits a credential step. Corrected after PR review — the first draft forced both instances onto `configure`, then the first correction gave both contradictory `Available` copy |
 | Validation failure / Pending submit | two instances inside **Validation and pending** |
 
 ### ModelPicker (13 → 5, GPUI 9 → 5)
@@ -186,12 +186,14 @@ model-scoped axis, a disabled option and the live serialized selection.
 - **LicenceStatus** keeps one surface per usability state; both trust bases and
   all four coverage-window pairings survive across the five fixtures.
 - **ModelConnectionSetup** visibly proves that a route with no required
-  configuration skips the credential step: both instances sit on `choose` with
-  the available `codex-app` option, whose `requiresConfiguration: false` makes
-  the action Add instead of Continue and emits no configure stage at all. The
-  regression asserts the stage, the action labels, the enabled/disabled Add,
-  and the absence of any configuration surface, in both web runtimes and in the
-  GPUI source.
+  configuration skips the credential step: both instances sit on `choose` and
+  retain `requiresConfiguration: false`, which makes the action Add instead of
+  Continue and emits no configure stage. The detected option is available and
+  addable; the missing option is visibly Unavailable, exposes `Not detected` as
+  its detailed accessibility label, and is disabled. The regression asserts the
+  stage, action labels, option state and copy, enabled/disabled Add, and absence
+  of any configuration surface in both web runtimes and the matching GPUI
+  source fixtures.
 - **ModelPicker** consolidates rather than deletes: contract §14's required
   specimen coverage is either on the curated page or in a named focused test,
   itemised above.
@@ -210,10 +212,11 @@ under `effigy test:parity`). For this exact eight-page set it pins:
 - LicenceStatus's retained contract stories: five surfaces, six instances, both
   trust bases, and exactly one both-windows-unbounded fixture
 - ModelConnectionSetup's direct-add story: `data-stage="choose"`, action labels
-  `["Cancel", "Add connection"]`, Add enabled when detected and disabled when
-  not, and no `__configuration` surface — asserted in Svelte and React
-- GPUI's matching seeds: the detected pair built from `interactive_options()`
-  on `Choose`, and the open-details card seeded through
+  `["Cancel", "Add connection"]`, honest Available/Unavailable visible copy and
+  `Not detected` accessibility detail, Add enabled when detected and disabled
+  when not, and no `__configuration` surface — asserted in Svelte and React
+- GPUI's matching seeds: distinct available and unavailable direct-add option
+  sets on `Choose`, and the open-details card seeded through
   `card_is_open(CARD_LIVE_ID, true)`
 
 Each of the three assertions above was verified to fail against the pre-review
@@ -283,6 +286,13 @@ Round 1 (PR #42) requested two blocking changes, both accepted as correct:
 Both were invisible to the first regression because it asserted caption text
 only. The lesson is recorded in the evidence list above: a section that claims
 a behaviour needs an assertion on that behaviour, not on its heading.
+
+Round 2 found that the first direct-add correction gave both outcomes the same
+available option set while its choose-stage `success`/`error` props were not
+visible. The missing fixture now carries an honest unavailable option in all
+three runtimes, with `Not detected` retained as the detailed accessibility
+label; the dead feedback props are gone, and the focused regression pins the
+visible and accessible option state and copy.
 
 ## Live operator review
 
