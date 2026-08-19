@@ -16,7 +16,7 @@ Updated: 2026-08-19
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: review and dispatch `g15.022`, then continue the bounded specimen
+  - Next: dispatch `g15.022`, then continue the bounded specimen
     program. PR #45 completed `g15.036`, removed Pill's temporary duplicate
     `fill` API, and moved solid treatment onto the existing appearance axis.
     PR #44's Callout and RemediationBanner solid fills remain unchanged.
