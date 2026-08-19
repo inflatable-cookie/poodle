@@ -1149,7 +1149,7 @@ fn gain_reduction_meter_examples(theme: &dyn ThemeProvider) -> Node {
     page(
         vec![
             (
-                "No reduction",
+                "No reduction / reset",
                 vec![reduction(
                     0.0,
                     AudioMeterStyle::Segments,
@@ -1230,16 +1230,6 @@ fn gain_reduction_meter_examples(theme: &dyn ThemeProvider) -> Node {
                 "Invalid-frame rejection",
                 vec![reduction(
                     12.0,
-                    AudioMeterStyle::Segments,
-                    Orientation::Vertical,
-                    true,
-                    theme,
-                )],
-            ),
-            (
-                "Reset",
-                vec![reduction(
-                    0.0,
                     AudioMeterStyle::Segments,
                     Orientation::Vertical,
                     true,
