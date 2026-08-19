@@ -1,6 +1,7 @@
 # g15.020 — Overloaded Examples: model connections and account lifecycle
 
-Status: **ready** — remeasured and bounded by the orchestrator on 2026-08-19
+Status: **complete** — PR #42 merged as `315ce2b9` on 2026-08-19;
+operator explicitly waived the live visual checkpoint when directing merge
 Parent: `018-overloaded-examples-curation.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Consumes: `g15.011` partial screening baseline
@@ -87,9 +88,9 @@ Preserve these contract-critical stories while consolidating:
 
 ## Goals
 
-- [ ] Every page in the group meets the parent's method.
-- [ ] Svelte and React stay identical; GPUI teaches the same set.
-- [ ] Removals are named, with contract coverage checked first.
+- [x] Every page in the group meets the parent's method.
+- [x] Svelte and React stay identical; GPUI teaches the same set.
+- [x] Removals are named, with contract coverage checked first.
 
 ## Evidence
 
@@ -107,6 +108,11 @@ Preserve these contract-critical stories while consolidating:
 Per the parent, including its operator-review checkpoint: **the changed pages
 are reviewed live in the Svelte and React previews before this card is called
 complete.** Unreviewed pages remain an explicit PR item.
+
+Closeout exception: after the two review repair rounds passed the full card
+gate, the operator explicitly directed the orchestrator to fix the remaining
+issues and merge. That instruction waived this child's live visual checkpoint;
+no live visual inspection is claimed.
 
 ## Writable Scope
 
@@ -144,6 +150,5 @@ In addition to the parent stop conditions, stop if:
 
 ## Continuation
 
-Push one PR and stop for orchestrator review. The changed six pages require
-live Svelte/React operator review before merge. `g15.021` is the next curation
-child; do not absorb it into this run.
+PR #42 merged after two orchestrator review rounds. `g15.021` is the next
+curation child; it was not absorbed into this run.

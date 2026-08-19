@@ -296,7 +296,12 @@ visible and accessible option state and copy.
 
 ## Live operator review
 
-Open until the orchestrator records it. The six changed routes are
-`licence-status`, `model-catalogue-editor`, `model-connection-card`,
-`model-connection-picker`, `model-connection-setup` and `model-picker`. The two
-no-op licence routes need no review.
+Waived by the operator's explicit direction to fix the remaining issues and
+merge on 2026-08-19. No live visual inspection is claimed.
+
+## Merge closeout
+
+PR #42 was accepted at `0921613d` and merged as `315ce2b9`. GitHub
+`active-cohort` passed. The optional local `cargo fmt --check` probe was broadly
+red on pre-existing repository formatting outside this card and made no
+mutation; it was not a card gate.

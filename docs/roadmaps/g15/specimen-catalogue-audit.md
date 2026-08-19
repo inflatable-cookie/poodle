@@ -397,9 +397,9 @@ that changes specimen presentation carries a live operator-review checkpoint.
 | [`g15.016`](016-specimen-idiom-convergence.md) | One caption idiom; two borrowed pages get their own | 29 pages |
 | [`g15.017`](017-specimen-axis-placement.md) | Axis matrices out of the main view; axis evidence where the prop exists | 12 audio + ~22 others |
 | [`g15.018`](018-overloaded-examples-curation.md) | Overloaded `Examples` — **parent, not dispatchable** | 53 pages |
-| ↳ [`g15.020`](020-curate-model-connection-licence.md)–[`g15.025`](025-curate-collections-navigation-tail.md) | six bounded family children, one exact page list each | 6–11 each, 53 total |
+| ↳ [`g15.020`](020-curate-model-connection-licence.md)–[`g15.025`](025-curate-collections-navigation-tail.md) | six bounded family children, one exact page list each; `020` complete | 6–11 each, 53 total |
 | [`g15.019`](019-gpui-specimen-structure.md) | Native axis panes and captions | complete — 74 axis + 6 caption corrections; two axis-domain gaps returned |
-| [`g15.034`](034-component-specific-specimen-axis-domains.md) | Exact component domains and truthful specimen-axis evidence | ready — approved clean break |
+| [`g15.034`](034-component-specific-specimen-axis-domains.md) | Exact component domains and truthful specimen-axis evidence | complete — PR #41 |
 | [`g15.026`](026-native-specimen-probe.md) | The headless native probe that un-provisions the GPUI column | 174 pages |
 | [`g15.027`](027-screen-clear-human-review.md) | Human teaching review for mechanically clear pages — **parent, not dispatchable** | 56 pages |
 | ↳ [`g15.028`](028-review-foundation-controls-entry.md)–[`g15.033`](033-review-composition-forms-data-media.md) | six bounded family children, one exact page list each | 7–14 each, 56 total |
@@ -649,11 +649,11 @@ names the defects that decided the grade; a row with no named defect is A.
 
 | Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `ModelCatalogueEditor` | C | C | A | curation-tranche | **Sv:** Examples overloaded — 21 captioned examples · **Rc:** Examples overloaded — 21 captioned examples |
-| `ModelConnectionCard` | C | C | A | curation-tranche | **Sv:** Examples overloaded — 20 captioned examples · **Rc:** Examples overloaded — 20 captioned examples |
-| `ModelConnectionPicker` | C | C | A | curation-tranche | **Sv:** Examples overloaded — 22 captioned examples · **Rc:** Examples overloaded — 22 captioned examples |
-| `ModelConnectionSetup` | C | C | A | curation-tranche | **Sv:** Examples overloaded — 12 captioned examples · **Rc:** Examples overloaded — 12 captioned examples |
-| `ModelPicker` | C | C | A | curation-tranche | **Sv:** Examples overloaded — 13 captioned examples · **Rc:** Examples overloaded — 13 captioned examples |
+| `ModelCatalogueEditor` | A | A | A | curation-complete (`g15.020`) | no named defect |
+| `ModelConnectionCard` | A | A | A | curation-complete (`g15.020`) | `unknown` and `error` readiness stories remain a recorded catalogue coverage note, not a curation defect |
+| `ModelConnectionPicker` | A | A | A | curation-complete (`g15.020`) | no named defect |
+| `ModelConnectionSetup` | A | A | A | curation-complete (`g15.020`) | no-credential direct add and detected/missing outcomes pinned beyond captions |
+| `ModelPicker` | A | A | A | curation-complete (`g15.020`) | no named defect |
 
 ### Audio & music — Systems (12)
 
@@ -676,8 +676,8 @@ names the defects that decided the grade; a row with no named defect is A.
 
 | Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `LicenceActivation` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 11 captioned examples; overflows its pane by 345px at a 768px viewport; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** Examples overloaded — 11 captioned examples; overflows its pane by 345px at a 768px viewport; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `LicenceSeats` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 11 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** Examples overloaded — 11 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `LicenceStatus` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 20 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** Examples overloaded — 20 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
+| `LicenceActivation` | A | A | A | verified no-op (`g15.020`) | no named defect |
+| `LicenceSeats` | A | A | A | verified no-op (`g15.020`) | no named defect |
+| `LicenceStatus` | A | A | A | curation-complete (`g15.020`) | no named defect |
 | `UpdateCenter` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `UpdateStatus` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |

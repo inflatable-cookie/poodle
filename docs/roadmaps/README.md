@@ -18,10 +18,13 @@ v0.2.0 release-baseline generation.
   family tranches, and GPUI specimen closure are complete. `g15.011` has
   delivered its screening baseline and three approved pilots; its exact
   curation, native-probe, and screen-clear review children remain. `g15.015`
-  through `g15.017`, `g15.019`, and `g15.034` are complete. PR #41 closed the
+  through `g15.017`, `g15.019`, `g15.020`, and `g15.034` are complete. PR #42
+  curated the model-connection and account-lifecycle family after two review
+  repair rounds; the operator explicitly waived that child's live visual
+  checkpoint when directing merge. PR #41 closed the
   two returned axis-domain gaps and hardened the specimen substrate that
-  admitted them. `g15.020` is ready as the first bounded overloaded-Examples
-  curation child.
+  admitted them. `g15.021` is the next bounded overloaded-Examples child and
+  requires compilation before dispatch.
   Certification
   `g15.013` remains the final gate after the specimen program and `g15.012`.
   Jetstream remains deferred.

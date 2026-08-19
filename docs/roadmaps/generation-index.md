@@ -6,7 +6,7 @@ Updated: 2026-08-19
 
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`, and
-    `g15.019` and `g15.034` complete; `g15.011` partial with bounded
+    `g15.019`, `g15.020`, and `g15.034` complete; `g15.011` partial with bounded
     continuation cards; `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `034`
@@ -16,7 +16,10 @@ Updated: 2026-08-19
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch ready `g15.020`, then continue the bounded specimen program.
+  - Next: compile and readiness-review `g15.021`, then continue the bounded
+    specimen program. PR #42 completed `g15.020` after two review repair rounds;
+    the operator explicitly waived its live visual checkpoint when directing
+    merge.
     PR #41 completed the operator-approved clean migration for EmptyState,
     Icon, and explicit ordered specimen domains.
     `g15.015` restored all 52 scoped captions and added the missing

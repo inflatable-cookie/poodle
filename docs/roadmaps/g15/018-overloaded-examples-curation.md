@@ -1,6 +1,6 @@
 # g15.018 — Overloaded Examples Curation (parent)
 
-Status: **planned parent — not dispatchable**
+Status: **active parent — not dispatchable**; `g15.020` complete
 Consumes: `g15.011` partial screening baseline and its three approved pilots
 Children: `g15.020`–`g15.025`
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
@@ -26,7 +26,7 @@ and is dispatched separately.
 
 | Card | Family group | Pages | Sequencing |
 | --- | --- | ---: | --- |
-| `g15.020` | Model connections + account lifecycle | 8 | none |
+| `g15.020` | Model connections + account lifecycle | 8 | complete — PR #42 |
 | `g15.021` | Application shell | 7 | none |
 | `g15.022` | Audio & music | 11 | after `g15.017` splits `audio_specimens` |
 | `g15.023` | Foundations: entry, content, status | 11 | after `g15.016` |
