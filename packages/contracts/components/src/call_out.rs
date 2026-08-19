@@ -5,7 +5,7 @@
 
 use poodle_tokens::semantic;
 
-use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone};
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, StatusTone, ToneFill};
 
 /// ARIA live-region behavior for the callout (contract §3 `CalloutAnnounceMode`).
 ///
@@ -43,6 +43,7 @@ impl CalloutAnnounceMode {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CallOutSpec {
     pub tone: StatusTone,
+    pub fill: ToneFill,
     pub title: Option<String>,
     pub content: Option<String>,
     pub size: ControlSize,
@@ -61,7 +62,8 @@ pub struct CallOutSpec {
 impl Default for CallOutSpec {
     fn default() -> Self {
         Self {
-            tone: StatusTone::Info,
+            tone: StatusTone::Neutral,
+            fill: ToneFill::Tint,
             title: None,
             content: None,
             size: ControlSize::Md,
@@ -82,6 +84,11 @@ impl CallOutSpec {
 
     pub fn with_tone(mut self, tone: StatusTone) -> Self {
         self.tone = tone;
+        self
+    }
+
+    pub fn with_fill(mut self, fill: ToneFill) -> Self {
+        self.fill = fill;
         self
     }
 
@@ -136,6 +143,10 @@ impl CallOutSpec {
     /// `8%` / `26%` mix and the icon badge hosts a ring spinner (contract §6/§8).
     pub fn is_pending_tone(&self) -> bool {
         matches!(self.tone, StatusTone::Pending)
+    }
+
+    pub fn is_solid_fill(&self) -> bool {
+        matches!(self.fill, ToneFill::Solid)
     }
 
     /// Token for the neutral-tone fill source (panel) before the 94% mix.

@@ -307,6 +307,14 @@ pub enum StatusTone {
     Pending,
 }
 
+/// Surface fill treatment shared by tone-bearing components.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum ToneFill {
+    #[default]
+    Tint,
+    Solid,
+}
+
 impl StatusTone {
     pub fn color_token(self) -> &'static str {
         match self {

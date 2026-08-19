@@ -149,3 +149,30 @@ value is a contract violation (T2), not an extension.
 
 `activeEdge` (the border axis) and `activeFill` (the fill axis) are orthogonal
 and compose freely: any edge value combines with any fill value.
+
+## ToneFill
+
+```
+type ToneFill = "tint" | "solid"
+```
+
+Default: `"tint"`.
+
+Consumers: `components/callout.md`, `components/pill.md`,
+`components/remediation-banner.md`.
+
+Rust: `ToneFill` in `packages/contracts/components/src/types.rs`, re-exported
+from `packages/contracts/components/src/lib.rs`; each shared renderer resolves
+the same solid surface recipe.
+
+TypeScript: `ToneFill` in `packages/svelte/components/src/types.ts` and
+`packages/react/components/src/types.ts`.
+
+### Semantics
+
+`tint` preserves each component's existing tone recipe. `solid` is a shared
+foreground/background treatment: non-neutral backgrounds are an opaque sRGB
+mix of 45% tone base and 55% `color.text.primary`, with the raw tone base as
+the border and `color.text.inverse` as the foreground. Neutral solid surfaces
+use `color.text.primary` as the background and `color.border.strong` as the
+border. Components keep their existing typography and focus-ring behavior.

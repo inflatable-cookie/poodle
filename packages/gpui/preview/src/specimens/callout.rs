@@ -4,7 +4,7 @@ use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CallOutSpec, EyebrowSpec, StatusTone};
+use poodle_specs::{CallOutSpec, EyebrowSpec, StatusTone, ToneFill};
 use std::sync::Arc;
 
 fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div {
@@ -129,6 +129,44 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             ),
         ))
         .child(group("Dismissible", theme, dismissible))
+        .child(group(
+            "Solid fills",
+            theme,
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(12.0))
+                .child(
+                    Callout::from_spec(
+                        CallOutSpec::new()
+                            .with_tone(StatusTone::Neutral)
+                            .with_fill(ToneFill::Solid)
+                            .with_title("Solid neutral")
+                            .with_content("Primary text background with strong neutral border."),
+                        theme,
+                    ),
+                )
+                .child(
+                    Callout::from_spec(
+                        CallOutSpec::new()
+                            .with_tone(StatusTone::Warning)
+                            .with_fill(ToneFill::Solid)
+                            .with_title("Solid warning")
+                            .with_content("Tone base border with inverse foreground."),
+                        theme,
+                    ),
+                )
+                .child(
+                    Callout::from_spec(
+                        CallOutSpec::new()
+                            .with_tone(StatusTone::Pending)
+                            .with_fill(ToneFill::Solid)
+                            .with_title("Solid pending")
+                            .with_content("Pending spinner inherits the solid foreground."),
+                        theme,
+                    ),
+                ),
+        ))
         .into_any_element();
 
     specimen_layout(

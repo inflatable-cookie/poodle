@@ -148,6 +148,7 @@ fn display_components() -> Vec<ComponentDefinition> {
             description: "Semantic status callout; fixture definition for the callout specimen scene.".to_owned(),
             props: vec![
                 shared_prop("tone", "status-tone", &["neutral", "info", "success", "warning", "danger", "pending"], "semantic tone and coloring"),
+                shared_prop("fill", "tone-fill", &["tint", "solid"], "tone surface treatment"),
                 prop("title", PropType::String, None, "bold heading text"),
                 prop("message", PropType::String, None, "body text rendered as a paragraph"),
                 prop("content", PropType::String, None, "fixture content prop (g14-b005): projected to children on web, the native spec content field on GPUI/Jetstream"),
@@ -177,6 +178,7 @@ fn display_components() -> Vec<ComponentDefinition> {
             description: "Status pill; fixture definition for the pill specimen scene.".to_owned(),
             props: vec![
                 shared_prop("tone", "pill-tone", &["neutral", "info", "success", "warning", "danger"], "semantic tone controlling fill/border/text color"),
+                shared_prop("fill", "tone-fill", &["tint", "solid"], "tone surface treatment"),
                 shared_prop("appearance", "pill-appearance", &["solid", "subtle", "badge"], "fill opacity variant"),
                 shared_prop("sizeRole", "semantic-size-role", &["chrome", "control", "prominent"], "semantic size offset"),
                 shared_prop("font", "pill-font", &["normal", "mono"], "content font variant"),
@@ -390,6 +392,24 @@ pub fn display_specimens_scenes() -> Vec<Scene> {
                     ("content", str_value("This callout can be dismissed by the user.")),
                     ("dismissible", Value::boolean(true)),
                 ]),
+                instance("callout", "Solid fills", "Solid neutral", vec![
+                    ("tone", member_value("neutral")),
+                    ("fill", member_value("solid")),
+                    ("title", str_value("Solid neutral")),
+                    ("content", str_value("Neutral solid surfaces use primary text as the background.")),
+                ]),
+                instance("callout", "Solid fills", "Solid warning", vec![
+                    ("tone", member_value("warning")),
+                    ("fill", member_value("solid")),
+                    ("title", str_value("Solid warning")),
+                    ("content", str_value("Tone base and inverse foreground stay readable across themes.")),
+                ]),
+                instance("callout", "Solid fills", "Solid pending", vec![
+                    ("tone", member_value("pending")),
+                    ("fill", member_value("solid")),
+                    ("title", str_value("Solid pending")),
+                    ("content", str_value("The pending spinner inherits the solid inverse foreground.")),
+                ]),
             ],
         ),
         scene(
@@ -508,6 +528,23 @@ pub fn display_specimens_scenes() -> Vec<Scene> {
                     ("accent", str_value("#ef4444")),
                     ("sizeRole", member_value("control")),
                     ("content", str_value("Danger-ish")),
+                ]),
+                instance("pill", "Solid fills", "Solid neutral", vec![
+                    ("tone", member_value("neutral")),
+                    ("fill", member_value("solid")),
+                    ("content", str_value("Solid neutral")),
+                ]),
+                instance("pill", "Solid fills", "Solid success subtle", vec![
+                    ("tone", member_value("success")),
+                    ("fill", member_value("solid")),
+                    ("appearance", member_value("subtle")),
+                    ("content", str_value("Solid success")),
+                ]),
+                instance("pill", "Solid fills", "Solid custom badge", vec![
+                    ("fill", member_value("solid")),
+                    ("appearance", member_value("badge")),
+                    ("accent", str_value("#3b82f6")),
+                    ("content", str_value("Solid custom")),
                 ]),
             ],
         ),
@@ -676,6 +713,9 @@ pub fn display_specimens_model() -> IrModel {
             shared_type("status-tone", "StatusTone", "docs/contracts/components/callout.md", &[
                 ("neutral", "Neutral"), ("info", "Info"), ("success", "Success"),
                 ("warning", "Warning"), ("danger", "Danger"), ("pending", "Pending"),
+            ]),
+            shared_type("tone-fill", "ToneFill", "docs/contracts/004-shared-control-types.md", &[
+                ("tint", "Tint"), ("solid", "Solid"),
             ]),
             shared_type("pill-tone", "PillTone", "docs/contracts/components/pill.md", &[
                 ("neutral", "Neutral"), ("info", "Info"), ("success", "Success"),

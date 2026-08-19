@@ -11,9 +11,9 @@ Updated: 2026-07-10
   dismissal, action snippets, and ARIA announcement support. Consolidates the
   former Banner and Callout components into a single primitive.
 - In scope: neutral, info, success, warning, danger, and pending tones;
-  inline contextual content; dismissible messaging; action snippets; optional
-  icon override; ARIA live-region announcements; title, message prop, and
-  body snippet
+  tint and solid fills; inline contextual content; dismissible messaging;
+  action snippets; optional icon override; ARIA live-region announcements;
+  title, message prop, and body snippet
 - Out of scope: toast notifications, alert dialogs, full-width page banners
 
 ## 2. Anatomy
@@ -45,7 +45,8 @@ Updated: 2026-07-10
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `tone` | `StatusTone \| "neutral"` | `"neutral"` | no | semantic tone and coloring |
+| `tone` | `StatusTone` | `"neutral"` | no | semantic tone and coloring |
+| `fill` | `ToneFill` | `"tint"` | no | tone surface treatment; solid uses the shared inverse-foreground recipe |
 | `title` | `string \| null` | `null` | no | bold heading text rendered as `<strong>` |
 | `message` | `string \| null` | `null` | no | body text rendered as `<p>` |
 | `ariaLabel` | `string \| null` | `null` | no | optional accessible label for the callout region |
@@ -62,11 +63,17 @@ Updated: 2026-07-10
 type CalloutAnnounceMode = "none" | "polite" | "assertive"
 ```
 
-### StatusTone (with neutral extension)
+### StatusTone
 
 ```
-type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pending"
+type StatusTone = "neutral" | "info" | "success" | "warning" | "danger" | "pending"
 ```
+
+Defined in [004 Shared Control Types](../004-shared-control-types.md).
+
+### ToneFill
+
+Defined in [004 Shared Control Types](../004-shared-control-types.md).
 
 ### Snippets
 
@@ -92,6 +99,7 @@ type CalloutTone = "neutral" | "info" | "success" | "warning" | "danger" | "pend
 | warning | `tone="warning"` | warning-tinted fill and border |
 | danger | `tone="danger"` | danger-tinted fill and border |
 | pending | `tone="pending"` | lighter accent-tinted fill and border |
+| solid | `fill="solid"` | opaque tone surface with inverse foreground; composes with every tone and preserves the existing icon, action, and typography structure |
 
 ### Component States
 
@@ -131,7 +139,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `success` | `check` icon |
 | `warning` | `triangle-alert` icon |
 | `danger` | `circle-x` icon |
-| `pending` | shared `Spinner` primitive in `ring` + `sm` + `accent` configuration |
+| `pending` | shared `Spinner` primitive in `ring` + `sm`; `accent` for tint and `current` for solid |
 
 ### Keyboard
 
@@ -219,6 +227,23 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `--poodle-callout-fill` | `color-mix(in srgb, var(--poodle-color-accent-base) 8%, var(--poodle-color-background-panel))` |
 | `--poodle-callout-border` | `color-mix(in srgb, var(--poodle-color-accent-base) 26%, var(--poodle-color-border-default))` |
 
+### Root — `fill="solid"`
+
+Tint recipes remain unchanged. For every non-neutral tone, solid resolves:
+
+| Property | Value |
+|----------|-------|
+| `--poodle-callout-fill` | opaque sRGB mix of `var(--poodle-callout-tone-base)` at 45% and `var(--poodle-color-text-primary)` at 55% |
+| `--poodle-callout-border` | raw `var(--poodle-callout-tone-base)` |
+| foreground | `var(--poodle-color-text-inverse)` |
+
+For `tone="neutral"`, solid uses `color.text.primary` as the opaque background
+and `color.border.strong` as the border. The icon badge, title, message,
+dismiss control, and pending spinner use the inverse foreground. Secondary and
+ghost action buttons use local inverse-derived fill, border, text, and hover
+recipes; primary action Button semantics are unchanged. Existing typography,
+layout, and focus-ring behavior remain unchanged.
+
 ### Body `.callout__body`
 
 | Property | Value |
@@ -251,6 +276,9 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 Pending tone uses the shared [`Spinner`](./spinner.md) primitive with
 `variant="ring"`, `size="sm"`, and `tone="accent"` inside the icon badge when
 no icon slot override is provided.
+
+With `fill="solid"`, the spinner uses `tone="current"` so it inherits the
+inverse foreground of the solid surface.
 
 ### Content `.callout__content`
 
@@ -379,6 +407,7 @@ font-size is the `.callout__content` size.
 - [ ] neutral tone uses custom property defaults (94% panel, 88% border)
 - [ ] info/success/warning/danger tones use 10%/34% color-mix pattern
 - [ ] pending tone uses 8%/26% color-mix pattern (distinct from others)
+- [ ] `fill="solid"` uses the shared 45% tone-base / 55% text-primary recipe with inverse foreground
 - [ ] icon badge size (1.375rem), circular radius (999px), and background match
 - [ ] icon typography matches (code-family, 0.75rem, weight 700)
 - [ ] content gap (space-inline-sm) matches

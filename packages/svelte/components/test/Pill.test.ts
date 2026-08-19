@@ -15,6 +15,26 @@ describe("Pill (svelte)", () => {
     expect(root.dataset.size).toBe("lg");
   });
 
+  it("defaults to tint and keeps solid fill independent from appearance", () => {
+    const { container } = render(Pill, {
+      props: {
+        tone: "warning",
+        fill: "solid",
+        appearance: "badge",
+        dot: true,
+        children: asSnippet(() => "Warning"),
+      },
+    });
+    const root = container.querySelector(".poodle-pill") as HTMLElement;
+    expect(root.dataset.fill).toBe("solid");
+    expect(root.dataset.appearance).toBe("badge");
+    expect(container.querySelector(".poodle-pill__dot")).not.toBeNull();
+
+    const defaultRoot = render(Pill, { props: { children: asSnippet(() => "Neutral") } }).container
+      .querySelector(".poodle-pill") as HTMLElement;
+    expect(defaultRoot.dataset.fill).toBe("tint");
+  });
+
   it("carries the accent token and marks it custom", () => {
     const { container } = render(Pill, {
       props: { accent: "#ff9900", children: asSnippet(() => "Beta") },

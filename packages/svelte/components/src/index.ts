@@ -301,6 +301,7 @@ export type {
   SpinnerVariant,
   SpaceScale,
   StatusTone,
+  ToneFill,
   ValidationState,
   ValidationSummaryEntry,
   SurfaceBorder,

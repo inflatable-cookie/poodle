@@ -13,9 +13,10 @@ Updated: 2026-08-10
   error states that require one or two recovery actions. Distinct from
   `InlineRemediation` (field-adjacent) and `Callout` (passive messaging) by
   being announce-capable, action-primary, and dismissible.
-- In scope: tone-styled background and border, required title and message,
-  announcement mode (polite / assertive / none), up to two remediation actions,
-  optional dismiss affordance, role derivation from announce mode
+- In scope: tone-styled tint or solid background and border, required title and
+  message, announcement mode (polite / assertive / none), up to two
+  remediation actions, optional dismiss affordance, role derivation from
+  announce mode
 - Out of scope: field-scoped messaging (use `InlineRemediation`), toast
   notifications (use `ToastHost`), form-level status summary (use
   `FormShell.status_summary`)
@@ -49,6 +50,7 @@ Updated: 2026-08-10
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `tone` | `StatusTone` | `"warning"` | no | banner fill, border, and icon color |
+| `fill` | `ToneFill` | `"tint"` | no | shared tone surface treatment; solid uses inverse foreground |
 | `title` | `string` | — | yes | bold heading text |
 | `message` | `string` | — | yes | body message |
 | `announceMode` | `AnnouncementMode` | `"polite"` | no | `"polite"`, `"assertive"`, or `"none"` — derives role/aria-live |
@@ -82,6 +84,8 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 - The parent owns visibility and handles `onDismiss`; the banner does not hide itself
 - Actions are command-only; the component does not track which was clicked
 
+`ToneFill` is defined in [004 Shared Control Types](../004-shared-control-types.md).
+
 ### Callbacks
 
 | Callback | When It Fires | Payload | Notes |
@@ -94,6 +98,7 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
 | warning | `tone="warning"` (default) | warning-tinted background and border |
+| neutral | `tone="neutral"` | neutral tone with the shared neutral background/border treatment |
 | danger | `tone="danger"` | danger-tinted background and border |
 | success | `tone="success"` | success-tinted treatment (recovery confirmation) |
 | info | `tone="info"` | info-tinted treatment |
@@ -101,6 +106,7 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 | polite | `announceMode="polite"` | `role="status"`, `aria-live="polite"` |
 | assertive | `announceMode="assertive"` | `role="alert"`, `aria-live="assertive"` |
 | silent | `announceMode="none"` | no live-region semantics |
+| solid | `fill="solid"` | opaque tone surface with inverse foreground; tint behavior is unchanged |
 
 ## 5. Accessibility
 
@@ -120,6 +126,17 @@ type AnnouncementMode = "none" | "polite" | "assertive";
 | Padding | `space.panel.x`, `space.panel.y` | internal spacing |
 | Title | `typography.label` | recovery heading |
 | Message | `typography.body`, `color.text.secondary` | recovery guidance |
+
+### Solid fill
+
+With `fill="solid"`, non-neutral banners use an opaque sRGB mix of 45% tone
+base and 55% `color.text.primary`, with the raw tone base as the border and
+`color.text.inverse` for the title, message, icon, dismiss control, and spinner.
+Neutral solid banners use `color.text.primary` as the background and
+`color.border.strong` as the border. Secondary and ghost actions use local
+inverse-derived button recipes for readability; primary Button behavior is
+unchanged. Layout, typography, announcement semantics, and focus rings stay
+unchanged.
 
 ## 7. Rust Spec
 

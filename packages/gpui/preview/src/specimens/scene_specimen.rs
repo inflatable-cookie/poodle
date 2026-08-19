@@ -11,9 +11,9 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
     AvatarShape, AvatarSize, AvatarSpec, AvatarTone, CallOutSpec, ControlDensity, ControlSize,
-    EmptyStateSize, EmptyStateSpec, EmptyStateVariant, EyebrowSpec, InlineTypographyMode, PillAppearance, PillFont,
-    PillSize, PillSpec, PillTone, SemanticControlSizeRole, SpinnerSize, SpinnerSpec, SpinnerTone,
-    SpinnerVariant, StatusTone,
+    EmptyStateSize, EmptyStateSpec, EmptyStateVariant, EyebrowSpec, InlineTypographyMode,
+    PillAppearance, PillFont, PillSize, PillSpec, PillTone, SemanticControlSizeRole, SpinnerSize,
+    SpinnerSpec, SpinnerTone, SpinnerVariant, StatusTone, ToneFill,
 };
 
 #[path = "../generated/specimens/specimens.rs"]
@@ -44,6 +44,13 @@ fn status_tone(value: &str) -> StatusTone {
         "danger" => StatusTone::Danger,
         "pending" => StatusTone::Pending,
         _ => StatusTone::Neutral,
+    }
+}
+
+fn tone_fill(value: &str) -> ToneFill {
+    match value {
+        "solid" => ToneFill::Solid,
+        _ => ToneFill::Tint,
     }
 }
 
@@ -179,6 +186,7 @@ fn render_instance(instance: &SpecimenInstance, theme: &GpuiThemeProvider) -> An
         "callout" => {
             let mut spec = CallOutSpec::new()
                 .with_tone(status_tone(prop(instance, "tone").unwrap_or("neutral")))
+                .with_fill(tone_fill(prop(instance, "fill").unwrap_or("tint")))
                 .dismissible(prop(instance, "dismissible") == Some("true"));
             if let Some(title) = prop(instance, "title") {
                 spec = spec.with_title(title);
@@ -200,6 +208,7 @@ fn render_instance(instance: &SpecimenInstance, theme: &GpuiThemeProvider) -> An
             let mut spec = PillSpec::new()
                 .with_label(prop(instance, "content").unwrap_or(""))
                 .with_tone(pill_tone(prop(instance, "tone").unwrap_or("neutral")))
+                .with_fill(tone_fill(prop(instance, "fill").unwrap_or("tint")))
                 .with_appearance(pill_appearance(
                     prop(instance, "appearance").unwrap_or("solid"),
                 ));

@@ -232,6 +232,39 @@ pub static SPECIMEN_SCENES: &[SpecimenScene<'static>] = &[
                 },
         ],
             },
+            SpecimenGroup { label: "Solid fills", instances: &[
+                SpecimenInstance {
+                    component: "callout",
+                    caption: Some("Solid neutral"),
+                    props: &[
+                        SpecimenProp { prop: "tone", value: "neutral" },
+                        SpecimenProp { prop: "fill", value: "solid" },
+                        SpecimenProp { prop: "title", value: "Solid neutral" },
+                        SpecimenProp { prop: "content", value: "Neutral solid surfaces use primary text as the background." },
+                    ],
+                },
+                SpecimenInstance {
+                    component: "callout",
+                    caption: Some("Solid warning"),
+                    props: &[
+                        SpecimenProp { prop: "tone", value: "warning" },
+                        SpecimenProp { prop: "fill", value: "solid" },
+                        SpecimenProp { prop: "title", value: "Solid warning" },
+                        SpecimenProp { prop: "content", value: "Tone base and inverse foreground stay readable across themes." },
+                    ],
+                },
+                SpecimenInstance {
+                    component: "callout",
+                    caption: Some("Solid pending"),
+                    props: &[
+                        SpecimenProp { prop: "tone", value: "pending" },
+                        SpecimenProp { prop: "fill", value: "solid" },
+                        SpecimenProp { prop: "title", value: "Solid pending" },
+                        SpecimenProp { prop: "content", value: "The pending spinner inherits the solid inverse foreground." },
+                    ],
+                },
+        ],
+            },
         ],
     },
     SpecimenScene {
@@ -506,6 +539,38 @@ pub static SPECIMEN_SCENES: &[SpecimenScene<'static>] = &[
                         SpecimenProp { prop: "accent", value: "#ef4444" },
                         SpecimenProp { prop: "sizeRole", value: "control" },
                         SpecimenProp { prop: "content", value: "Danger-ish" },
+                    ],
+                },
+        ],
+            },
+            SpecimenGroup { label: "Solid fills", instances: &[
+                SpecimenInstance {
+                    component: "pill",
+                    caption: Some("Solid neutral"),
+                    props: &[
+                        SpecimenProp { prop: "tone", value: "neutral" },
+                        SpecimenProp { prop: "fill", value: "solid" },
+                        SpecimenProp { prop: "content", value: "Solid neutral" },
+                    ],
+                },
+                SpecimenInstance {
+                    component: "pill",
+                    caption: Some("Solid success subtle"),
+                    props: &[
+                        SpecimenProp { prop: "tone", value: "success" },
+                        SpecimenProp { prop: "fill", value: "solid" },
+                        SpecimenProp { prop: "appearance", value: "subtle" },
+                        SpecimenProp { prop: "content", value: "Solid success" },
+                    ],
+                },
+                SpecimenInstance {
+                    component: "pill",
+                    caption: Some("Solid custom badge"),
+                    props: &[
+                        SpecimenProp { prop: "fill", value: "solid" },
+                        SpecimenProp { prop: "appearance", value: "badge" },
+                        SpecimenProp { prop: "accent", value: "#3b82f6" },
+                        SpecimenProp { prop: "content", value: "Solid custom" },
                     ],
                 },
         ],

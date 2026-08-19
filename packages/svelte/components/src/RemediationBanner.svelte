@@ -7,14 +7,15 @@
   import Button from "./Button.svelte";
   import Icon from "./Icon.svelte";
   import Spinner from "./Spinner.svelte";
-  import type { AnnouncementMode, RemediationAction, StatusTone } from "./types";
+  import type { AnnouncementMode, RemediationAction, SpinnerTone, StatusTone, ToneFill } from "./types";
 
   let {
-    tone = "warning", title, message, announceMode = "polite", primaryAction = null,
+    tone = "warning", fill = "tint", title, message, announceMode = "polite", primaryAction = null,
     secondaryAction = null, isDismissible = false, dismissLabel = "Dismiss",
     onAction = undefined, onDismiss = undefined,
   }: {
     tone?: StatusTone;
+    fill?: ToneFill;
     title: string;
     message: string;
     announceMode?: AnnouncementMode;
@@ -33,11 +34,12 @@
   };
   const role = $derived(announceMode === "assertive" ? "alert" : announceMode === "polite" ? "status" : undefined);
   const ariaLive = $derived(announceMode === "none" ? undefined : announceMode);
+  const spinnerTone: SpinnerTone = $derived(fill === "solid" ? "current" : "accent");
 </script>
 
-<section class="poodle-remediation-banner" data-tone={tone} aria-labelledby={titleId} {role} aria-live={ariaLive}>
+<section class="poodle-remediation-banner" data-tone={tone} data-fill={fill} aria-labelledby={titleId} {role} aria-live={ariaLive}>
   <span class="poodle-remediation-banner__icon" aria-hidden="true">
-    {#if tone === "pending"}<Spinner variant="ring" tone="accent" />{:else}<Icon name={toneIcon[tone]} />{/if}
+    {#if tone === "pending"}<Spinner variant="ring" tone={spinnerTone} />{:else}<Icon name={toneIcon[tone]} />{/if}
   </span>
   <div class="poodle-remediation-banner__content">
     <strong id={titleId}>{title}</strong>

@@ -4,7 +4,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    ButtonVariant, EyebrowSpec, RemediationAction, RemediationBannerSpec, StatusTone,
+    ButtonVariant, EyebrowSpec, RemediationAction, RemediationBannerSpec, StatusTone, ToneFill,
 };
 use std::sync::Arc;
 
@@ -85,5 +85,32 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                     .with_tone(StatusTone::Pending),
                 theme,
             ),
+        ))
+        .child(group(
+            "Solid fills",
+            theme,
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(RemediationBanner::from_spec(
+                    RemediationBannerSpec::new(
+                        "Solid neutral recovery",
+                        "Neutral solid surfaces use the inverse foreground.",
+                    )
+                    .with_tone(StatusTone::Neutral)
+                    .with_fill(ToneFill::Solid),
+                    theme,
+                ))
+                .child(RemediationBanner::from_spec(
+                    RemediationBannerSpec::new(
+                        "Solid danger recovery",
+                        "Secondary and ghost actions stay readable on the solid surface.",
+                    )
+                    .with_tone(StatusTone::Danger)
+                    .with_fill(ToneFill::Solid)
+                    .with_secondary_action(RemediationAction::new("details", "View details")),
+                    theme,
+                )),
         ))
 }
