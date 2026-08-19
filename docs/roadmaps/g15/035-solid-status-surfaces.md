@@ -1,23 +1,25 @@
-# g15.035 — Solid Status Surfaces
+# g15.035 — Solid Tone Surfaces
 
-Status: **ready** — API and visual rules approved by the operator on 2026-08-19
+Status: **ready** — API and visual rules, including Pill, approved by the
+operator on 2026-08-19
 Depends on: `g15.010` (complete active-cohort component closure)
 Blocks: `g15.012`, `g15.013`
-Parallel with: `g15.021` — no shared mutable implementation or specimen files
+Parallel with: `g15.022` — no shared mutable implementation or specimen files
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/004-shared-control-types.md`,
 `../../contracts/components/callout.md`,
+`../../contracts/components/pill.md`,
 `../../contracts/components/remediation-banner.md`,
 `../../specs/022-packaging-versioning-and-release-channel-rules.md`
 
 ## Outcome
 
-`Callout` and `RemediationBanner` gain the same opt-in fill axis:
+`Callout`, `RemediationBanner`, and `Pill` gain the same opt-in fill axis:
 
 ```ts
-type StatusSurfaceFill = "tint" | "solid";
+type ToneFill = "tint" | "solid";
 
-fill?: StatusSurfaceFill; // default: "tint"
+fill?: ToneFill; // default: "tint"
 ```
 
 `tint` preserves today's treatment. `solid` produces an opaque, high-contrast
@@ -27,13 +29,13 @@ specimens match in Svelte, React, renderer-neutral Rust, and GPUI.
 
 This is additive public API on the pre-1.0 preview channel. It is not a new
 component variant system and does not change announcement, dismissal, action,
-layout, size, or density behavior.
+layout, size, density, or Pill appearance behavior.
 
 ## Approved API And Visual Rule
 
-- Add shared `StatusSurfaceFill = "tint" | "solid"`; default `"tint"`.
-- Add `fill` to both components. Emit `data-fill` on web roots and carry the
-  equivalent enum in both Rust specs.
+- Add shared `ToneFill = "tint" | "solid"`; default `"tint"`.
+- Add `fill` to all three components. Emit `data-fill` on web roots and carry
+  the equivalent enum in all three Rust specs.
 - `tint` retains the current fill, border, foreground, icon, spinner, action,
   and focus treatment. Do not use this card to restyle the existing variant.
 - `solid` uses one shared tone-resolution rule:
@@ -48,6 +50,15 @@ layout, size, or density behavior.
   - border: raw tone base for non-neutral; `color.border.strong` for neutral;
   - icon badge, where the component has one: a subtle inverse overlay that
     keeps the existing badge geometry.
+- Pill custom accents use the same formula with the custom accent as the tone
+  base. Its dot and optional native remove affordance use inverse foreground
+  treatment in solid mode.
+- Pill's existing `appearance="solid" | "subtle" | "badge"` axis is not
+  renamed. It predates this fill axis: `appearance="solid"` remains the
+  standard shell style, while `fill="solid"` requests an opaque tone fill.
+  `fill="solid"` takes precedence over appearance-specific tint/opacity color
+  recipes; badge typography remains, while subtle adds no opacity reduction in
+  solid mode. This is an explicit precedence rule, not a silent fallback.
 - The 45/55 rule is deliberate. A read-only check over all twelve current
   themes found its worst normal-text contrast against `color.text.inverse`
   above 5:1; a tone-heavier 50/50 mix fell just below 4.5:1 in Clay. Preserve
@@ -64,15 +75,20 @@ layout, size, or density behavior.
 
 ## Measured Starting Point
 
-- Both web components already share framework-neutral CSS with their paired
-  runtime and expose the same six `StatusTone` values.
+- All three web components already share framework-neutral CSS with their
+  paired runtime. Callout and RemediationBanner expose the same six
+  `StatusTone` values; Pill exposes five `PillTone` values plus custom accent.
 - `Callout` is generated-specimen-backed. Its authored display model and
   regenerated Svelte/React/Rust artifacts must carry `fill`; generated files
   are not edited by hand.
 - `RemediationBanner` uses hand-written specimens and currently relies on the
   broad `WebParityCloseout` tests. This card gives it dedicated focused web
   evidence.
-- Shared Rust composition already resolves both surfaces in `poodle-render`;
+- `Pill` is generated-specimen-backed and already has focused paired web tests,
+  a `PillSpec`, shared `poodle-render` composition, and a GPUI specimen. Its
+  existing `appearance="solid"` name describes the standard shell, not the
+  requested opaque color treatment; no breaking rename is authorised here.
+- Shared Rust composition already resolves all three surfaces in `poodle-render`;
   GPUI consumes those nodes. No backend-only paint path is required.
 - `CallOutSpec::default()` currently uses `StatusTone::Info`, while the
   contract and both web runtimes default to neutral. Correct it to neutral as
@@ -84,17 +100,19 @@ layout, size, or density behavior.
 
 ### 1. Contract the shared axis first
 
-- Define `StatusSurfaceFill` once in
-  `docs/contracts/004-shared-control-types.md`; name both consumers and the TS
-  and Rust authorities.
-- Update both component contracts before implementation. Record `fill`, its
+- Define `ToneFill` once in `docs/contracts/004-shared-control-types.md`; name
+  all three consumers and the TS and Rust authorities.
+- Update all three component contracts before implementation. Record `fill`, its
   default, exact tint/solid token rules, neutral and pending behavior,
   foregrounds, composed actions, focus, runtime notes, and parity checklists.
 - Remove Callout's redundant `StatusTone | "neutral"` wording: `StatusTone`
   already includes neutral. This is a documentation correction, not an API
   removal.
 - Keep the component distinction intact: Callout remains contextual/passive;
-  RemediationBanner remains action-primary and announcing by default.
+  RemediationBanner remains action-primary and announcing by default; Pill
+  remains non-interactive compact metadata.
+- In Pill's contract, distinguish the legacy `appearance="solid"` label from
+  the new fill axis and record the solid-over-appearance precedence exactly.
 
 ### 2. Deliver the web pair from shared CSS
 
@@ -110,18 +128,22 @@ layout, size, or density behavior.
   dismissal, disabled actions, and focus-visible behavior in focused paired
   tests. Add dedicated RemediationBanner test files instead of growing the
   unrelated closeout suite.
+- Prove Pill's `5 tones × 2 fills`, custom accent, default, `data-fill`, dot,
+  muted state, and `solid × appearance` precedence in its paired tests. Tint
+  assertions must pin the existing CSS unchanged.
 
 ### 3. Deliver renderer-neutral Rust and GPUI
 
-- Add `StatusSurfaceFill` to the shared Rust type surface and add `fill` plus a
-  builder to `CallOutSpec` and `RemediationBannerSpec`.
-- Default both specs to `Tint`; also correct Callout's tone default to
+- Add `ToneFill` to the shared Rust type surface and add `fill` plus a builder
+  to `CallOutSpec`, `RemediationBannerSpec`, and `PillSpec`.
+- Default all three specs to `Tint`; also correct Callout's tone default to
   `Neutral`.
 - Resolve the same 45/55 sRGB solid fill, border, inverse text/icon/spinner,
   action readability, and focus treatment in `poodle-render`.
-- Add spec and render tests for the full matrix, default parity, token
-  selection, contrast rule, callbacks, and unchanged accessibility output.
-- Add representative solid examples to both GPUI pages. Do not add a
+- Add spec and render tests for the full matrices, default parity, token
+  selection, contrast rule, callbacks, Pill appearance precedence, and
+  unchanged accessibility output.
+- Add representative solid examples to all three GPUI pages. Do not add a
   GPUI-only visual option or touch Jetstream preview integration.
 
 ### 4. Teach the option without rebuilding the catalogue
@@ -133,9 +155,13 @@ layout, size, or density behavior.
 - RemediationBanner: add a matching compact solid group to the hand-written
   Svelte, React, and GPUI specimens. Keep the existing realistic recovery
   examples and live action/dismiss behavior.
+- Pill: extend the surviving display-specimen model with `fill`, regenerate
+  its artifacts, and add one compact `Solid fills` group with representative
+  neutral, success, warning, and custom-accent examples. Do not repeat its
+  existing tones, sizes, or appearances as a matrix.
 - Keep `Examples` human-centred. Do not add a fill matrix, repeat size/density
   rows, revive a Conformance tab, or extend the specimen model into behavior.
-- The operator reviews both changed pages live in Svelte and React before
+- The operator reviews all three changed pages live in Svelte and React before
   merge. Record the checkpoint honestly; the worker cannot self-approve it.
 
 ### 5. Record the release surface
@@ -145,7 +171,7 @@ The August batch log names:
 - packages changed: `@inflatable-cookie/poodle-core`,
   `@inflatable-cookie/poodle-svelte`, `@inflatable-cookie/poodle-react`,
   `poodle-specs`, `poodle-render`, and preview-only consumers;
-- public-entry-point impact: additive `StatusSurfaceFill` plus `fill` on two
+- public-entry-point impact: additive `ToneFill` plus `fill` on three
   components/specs; Callout's corrected Rust default;
 - change class: additive public API plus a behavioral parity correction on the
   pre-1.0 preview channel;
@@ -156,42 +182,46 @@ The August batch log names:
 ## Acceptance
 
 - [ ] One shared two-member type exists in both TS runtimes, Rust, and contract
-      authority; both components consume it without local restatement.
-- [ ] Tint is the unchanged default in both components and all active
+      authority; all three components consume it without local restatement.
+- [ ] Tint is the unchanged default in all three components and all active
       runtimes.
 - [ ] Every solid tone uses the approved opaque fill/border/foreground rule;
       neutral and pending remain semantically distinct.
-- [ ] Normal title/message text has at least 4.5:1 contrast for all twelve
+- [ ] Normal title/message/Pill text has at least 4.5:1 contrast for all twelve
       current themes; UI/icon boundaries meet the relevant 3:1 threshold.
 - [ ] Solid action buttons, dismiss controls, spinners, disabled states, and
       focus rings remain readable and functional.
 - [ ] Svelte and React behavior/API tests cover the full matrix and
-      RemediationBanner has dedicated focused evidence.
+      RemediationBanner has dedicated focused evidence; Pill covers custom
+      accent and every appearance combination.
 - [ ] Rust spec/render tests cover the same matrix and Callout defaults to
       neutral/tint.
+- [ ] Pill tint behavior is unchanged; solid overrides appearance color
+      recipes deterministically, badge typography survives, and custom accent
+      stays contrast-safe.
 - [ ] Svelte, React, and GPUI specimens teach representative solid usage
       without an exhaustive matrix.
 - [ ] Generated specimen artifacts are regenerated from their authored model
       and `ir:check` is clean.
-- [ ] The operator accepts both changed web pages in the live paired previews.
+- [ ] The operator accepts all three changed web pages in the live paired previews.
 - [ ] One batch log records change class, exact commands, contrast evidence,
       generated artifacts, and unresolved findings.
 
 ## Writable Scope
 
 - `docs/contracts/004-shared-control-types.md`
-- `docs/contracts/components/{callout,remediation-banner}.md`
-- Callout/RemediationBanner component shells, focused tests, and shared CSS in
-  `packages/{svelte,react,core}`
+- `docs/contracts/components/{callout,pill,remediation-banner}.md`
+- Callout/Pill/RemediationBanner component shells, focused tests, and shared
+  CSS in `packages/{svelte,react,core}`
 - shared TS type surfaces and package-facing documentation generated from the
   component contracts where required by drift checks
-- `packages/contracts/components/src/{types,call_out,remediation_banner}.rs`
+- `packages/contracts/components/src/{types,call_out,pill,remediation_banner}.rs`
   and their exports/tests
-- `packages/render/src/{callout,remediation_banner}.rs` and focused tests
-- the two named specimen pages across Svelte, React, and GPUI
-- Callout's authored display-specimen model, fixture, generated artifacts, and
-  focused generator tests
-- focused parity/contrast evidence for this exact two-component scope
+- `packages/render/src/{callout,pill,remediation_banner}.rs` and focused tests
+- the three named specimen pages across Svelte, React, and GPUI
+- Callout and Pill authored display-specimen model entries, fixture, generated
+  artifacts, and focused generator tests
+- focused parity/contrast evidence for this exact three-component scope
 - one August batch log
 - append-only `PAPERCUTS.md` for new execution friction only
 
@@ -203,7 +233,7 @@ Jetstream parity surfaces, release automation, or `.github/workflows/`.
 
 Run one coherent headless round after implementation:
 
-- focused Svelte/React component tests for Callout and RemediationBanner
+- focused Svelte/React component tests for Callout, Pill, and RemediationBanner
 - focused Rust spec/render and contrast tests
 - focused paired specimen/parity evidence
 - `effigy ir:check`
@@ -224,20 +254,23 @@ Jetstream, or release selector.
 
 - The approved shared axis cannot be expressed without a third value, a
   component-specific semantic fork, or a compatibility alias.
+- Pill needs a breaking `appearance` rename, an invalid-combination fallback,
+  or a second component-specific fill type. Preserve the recorded precedence
+  and report contrary evidence instead of widening the migration.
 - The 45/55 rule fails the contrast threshold in a current theme or cannot be
   reproduced by both shared CSS and `poodle-render`.
 - Solid action readability requires changing Button's public API or global
   behavior rather than a local composition treatment.
 - The change requires a new token family or changes global status-tone
   meaning; return the evidence to the orchestrator instead of widening scope.
-- The generated Callout specimen path needs callbacks, conditions, or other
-  behavior. Keep the scene presentation-only and report the boundary.
+- The generated Callout/Pill specimen path needs callbacks, conditions, or
+  other behavior. Keep the scene presentation-only and report the boundary.
 - A validation failure changes the API/visual plan rather than exposing an
   implementation defect inside this card.
 
 ## Continuation
 
 Push one PR and stop for orchestrator review. Leave the paired live-preview
-checkpoint open for the operator. This card may run beside `g15.021`; it must
+checkpoint open for the operator. This card may run beside `g15.022`; it must
 land before `g15.012` and final certification. Do not absorb another specimen
 family or advance the main runway from the worker.

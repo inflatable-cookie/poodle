@@ -77,7 +77,7 @@ and status advance are the orchestrator's.
 22. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — after `011` completes; headless capture required
 23. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
 24. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after the full specimen program and `012`
-25. [035 — Solid status surfaces](035-solid-status-surfaces.md) — ready; additive `fill` axis for Callout and RemediationBanner, parallel-safe with `021`, before `012`/`013`
+25. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — ready; additive shared `fill` axis for Callout, Pill, and RemediationBanner, parallel-safe with `022`, before `012`/`013`
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)

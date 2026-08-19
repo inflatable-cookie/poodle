@@ -5,7 +5,7 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: ready-to-launch
+status: superseded
 owner: Poodle orchestrator
 created: 2026-08-19
 updated: 2026-08-19
@@ -13,6 +13,10 @@ handoff_path: /Users/tom/Dev/projects/poodle/docs/handoffs/20260819-140017-g15-0
 base_required: pushed-main
 tags: [coordination, handoff, worker, pr, g15, status-surfaces]
 ---
+
+Superseded on 2026-08-19 before dispatch. Do not launch this handoff. Use
+`docs/handoffs/20260819-143940-g15-035-solid-tone-surfaces.md`, which adds Pill
+to the same shared fill lane and replaces the stale two-component scope.
 
 ## What This Thread Was Doing
 

@@ -27,7 +27,7 @@ v0.2.0 release-baseline generation.
   HistoryCenter delete-parity repair; its final live visual checkpoint was
   explicitly waived by the operator. `g15.022` is the next bounded
   overloaded-Examples child. `g15.035` is ready as a parallel additive API
-  lane for solid Callout and RemediationBanner surfaces; it must land before
+  lane for solid Callout, Pill, and RemediationBanner tone surfaces; it must land before
   visual conformance and certification.
   Certification
   `g15.013` remains the final gate after the specimen program and `g15.012`.
