@@ -106,15 +106,22 @@
   // ── Cross-region drag-and-drop state ───────────────────────────────
 
   let leftItems: PanelTabItem[] = $state([
-    { value: "explorer", label: "Explorer", icon: folder, closable: true },
-    { value: "search", label: "Search", icon: "search", closable: true },
-    { value: "git", label: "Source Control", icon: code, closable: true },
+    { value: "explorer", label: "Explorer", icon: folder, closable: false },
+    { value: "search", label: "Search", icon: "search", closable: false },
+    { value: "git", label: "Source Control", icon: code, closable: false },
   ]);
   let rightItems: PanelTabItem[] = $state([
-    { value: "outline", label: "Outline", icon: listIcon, closable: true },
+    { value: "outline", label: "Outline", icon: listIcon, closable: false },
   ]);
   let leftActive = $state("explorer");
   let rightActive = $state("outline");
+
+  // Size/density axes teach control scale only — no enabled close/reorder.
+  const axisItems: PanelTabItem[] = [
+    { value: "explorer", label: "Explorer", icon: folder, closable: false },
+    { value: "search", label: "Search", icon: "search", closable: false },
+    { value: "git", label: "Source Control", icon: code, closable: false },
+  ];
 
   function canAcceptPanel(panelId: string, _sourceEdge: DockEdge): boolean {
     return true;
@@ -395,14 +402,14 @@
         <DockRegion
           edge="left"
           sizing="flexible"
-          items={flexItems}
+          items={axisItems}
           value="git"
           {size}
         >
           {#snippet children()}
             <div class="poodle-specimen__panel-content">
               <strong>git</strong>
-              <p>Panel content for the active tab. Tabs are closable and reorderable.</p>
+              <p>Size axis — presentation only; close and reorder live in the Examples tab.</p>
             </div>
           {/snippet}
         </DockRegion>
@@ -420,14 +427,14 @@
         <DockRegion
           edge="left"
           sizing="flexible"
-          items={flexItems}
+          items={axisItems}
           value="git"
           {density}
         >
           {#snippet children()}
             <div class="poodle-specimen__panel-content">
               <strong>git</strong>
-              <p>Panel content for the active tab. Tabs are closable and reorderable.</p>
+              <p>Density axis — presentation only; close and reorder live in the Examples tab.</p>
             </div>
           {/snippet}
         </DockRegion>

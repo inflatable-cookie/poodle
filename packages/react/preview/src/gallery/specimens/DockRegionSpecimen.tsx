@@ -155,15 +155,21 @@ export function DockRegionSpecimen() {
   }
   // ── Cross-region drag-and-drop state ───────────────────────────────
   const [leftItems, setLeftItems] = useState<PanelTabItem[]>([
-    { value: "explorer", label: "Explorer", icon: "folder", closable: true },
-    { value: "search", label: "Search", icon: "search", closable: true },
-    { value: "git", label: "Source Control", icon: "code", closable: true },
+    { value: "explorer", label: "Explorer", icon: "folder", closable: false },
+    { value: "search", label: "Search", icon: "search", closable: false },
+    { value: "git", label: "Source Control", icon: "code", closable: false },
   ]);
   const [rightItems, setRightItems] = useState<PanelTabItem[]>([
-    { value: "outline", label: "Outline", icon: "list", closable: true },
+    { value: "outline", label: "Outline", icon: "list", closable: false },
   ]);
   const [leftActive, setLeftActive] = useState("explorer");
   const [rightActive, setRightActive] = useState("outline");
+
+  const axisItems: PanelTabItem[] = [
+    { value: "explorer", label: "Explorer", icon: "folder", closable: false },
+    { value: "search", label: "Search", icon: "search", closable: false },
+    { value: "git", label: "Source Control", icon: "code", closable: false },
+  ];
 
   function canAcceptPanel(_panelId: string, _sourceEdge: DockEdge): boolean {
     return true;
@@ -211,11 +217,13 @@ export function DockRegionSpecimen() {
           <div style={variantLabel}>{size.toUpperCase()}</div>
           <div style={frameVariant}>
             <div style={{ flex: "0 0 16rem", minWidth: 0, minHeight: 0 }}>
-              <DockRegion edge="left" sizing="flexible" items={flexItems} value="git" size={size}>
+              <DockRegion edge="left" sizing="flexible" items={axisItems} value="git" size={size}>
                 {() => (
                   <div style={panelContent}>
                     <strong style={panelStrong}>git</strong>
-                    <p style={{ margin: 0 }}>Panel content for the active tab. Tabs are closable and reorderable.</p>
+                    <p style={{ margin: 0 }}>
+                      Size axis — presentation only; close and reorder live in the Examples tab.
+                    </p>
                   </div>
                 )}
               </DockRegion>
@@ -229,11 +237,13 @@ export function DockRegionSpecimen() {
           <div style={variantLabel}>{density.toUpperCase()}</div>
           <div style={frameVariant}>
             <div style={{ flex: "0 0 16rem", minWidth: 0, minHeight: 0 }}>
-              <DockRegion edge="left" sizing="flexible" items={flexItems} value="git" density={density}>
+              <DockRegion edge="left" sizing="flexible" items={axisItems} value="git" density={density}>
                 {() => (
                   <div style={panelContent}>
                     <strong style={panelStrong}>git</strong>
-                    <p style={{ margin: 0 }}>Panel content for the active tab. Tabs are closable and reorderable.</p>
+                    <p style={{ margin: 0 }}>
+                      Density axis — presentation only; close and reorder live in the Examples tab.
+                    </p>
                   </div>
                 )}
               </DockRegion>

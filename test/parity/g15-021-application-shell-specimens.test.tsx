@@ -283,29 +283,71 @@ describe("g15.021 application-shell specimens", () => {
     cleanupSvelte();
   });
 
-  it("wires HistoryCenter undo and navigate to visible host feedback", () => {
+  it("wires HistoryCenter undo and navigate to visible host feedback", async () => {
     renderSvelte(PilotSpecimenHarness, {
       props: { specimen: svelteMap["history-center"] as never },
     });
     const linear = groupByCaption("Linear history");
     const undo = linear.querySelector(
-      '[data-part="undo"], button[aria-label*="Undo" i], button[aria-label*="undo" i]',
+      'button[aria-label="Undo"], button[name="Undo"]',
     ) as HTMLButtonElement | null;
     expect(undo, "linear undo control").toBeTruthy();
-    fireEventSvelte.click(undo!);
+    await fireEventSvelte.click(undo!);
     expect(document.body.textContent).toContain("Last host command: Undo");
 
-    const entry = linear.querySelector(
-      '[data-part="entry"], .poodle-history-center__row, button[data-part="row"]',
-    ) as HTMLElement | null;
-    if (entry) {
-      fireEventSvelte.click(entry);
-      expect(document.body.textContent).toMatch(/Last host command: Navigate /);
-    }
+    const history = [...linear.querySelectorAll("button")].find(
+      (button) => button.textContent?.trim() === "History" || button.getAttribute("aria-label") === "History",
+    ) as HTMLButtonElement | undefined;
+    expect(history, "linear History trigger").toBeTruthy();
+    await fireEventSvelte.click(history!);
+    const entry = [...document.querySelectorAll("button")].find(
+      (button) => button.textContent?.trim() === "Committed mix 1",
+    ) as HTMLButtonElement | undefined;
+    expect(entry, "linear spine entry").toBeTruthy();
+    await fireEventSvelte.click(entry!);
+    expect(document.body.textContent).toMatch(/Last host command: Navigate e1/);
     cleanupSvelte();
   });
 
-  it("keeps DockRegion's iconless, pass-through, collapse, transfer, and static groups", () => {
+  it("wires HistoryCenter delete on the manage story", async () => {
+    renderSvelte(PilotSpecimenHarness, {
+      props: { specimen: svelteMap["history-center"] as never },
+    });
+    const manage = groupByCaption("Rename and manage a continuation");
+    const history = [...manage.querySelectorAll("button")].find(
+      (button) => button.textContent?.trim() === "History" || button.getAttribute("aria-label") === "History",
+    ) as HTMLButtonElement | undefined;
+    expect(history, "manage History trigger").toBeTruthy();
+    await fireEventSvelte.click(history!);
+
+    const disclose = document.querySelector(
+      '[data-part="fork-disclosure"]',
+    ) as HTMLButtonElement | null;
+    expect(disclose, "manage fork disclosure").toBeTruthy();
+    await fireEventSvelte.click(disclose!);
+
+    const actions = [...document.querySelectorAll("button")].find((button) =>
+      /^(Fork actions|Actions for )/.test(button.getAttribute("aria-label") ?? ""),
+    ) as HTMLButtonElement | undefined;
+    expect(actions, "fork actions menu").toBeTruthy();
+    await fireEventSvelte.click(actions!);
+    const deleteItem = [...document.querySelectorAll('[role="menuitem"]')].find(
+      (item) => item.textContent?.trim() === "Delete",
+    ) as HTMLElement | undefined;
+    expect(deleteItem, "Delete menu item").toBeTruthy();
+    await fireEventSvelte.click(deleteItem!);
+    const dialog = document.querySelector('[role="alertdialog"]') as HTMLElement | null;
+    expect(dialog, "delete confirmation dialog").toBeTruthy();
+    const confirm = [...dialog!.querySelectorAll("button")].find(
+      (button) => button.textContent?.trim() === "Delete",
+    ) as HTMLButtonElement | undefined;
+    expect(confirm, "Delete confirmation").toBeTruthy();
+    await fireEventSvelte.click(confirm!);
+    expect(document.body.textContent).toMatch(/Last command: Delete /);
+    cleanupSvelte();
+  });
+
+  it("keeps DockRegion's iconless, pass-through, collapse, transfer, and static groups", async () => {
     renderSvelte(PilotSpecimenHarness, {
       props: { specimen: svelteMap["dock-region"] as never },
     });
@@ -316,31 +358,70 @@ describe("g15.021 application-shell specimens", () => {
     expect(tabs.textContent).toMatch(/tabActiveEdge|tabReorderable|tabVariant/i);
     const collapse = groupByCaption("Collapse and edge placement");
     expect(collapse.querySelectorAll(".poodle-dock-region").length).toBeGreaterThanOrEqual(3);
-    const toggle = collapse.querySelector(
-      'button[aria-label*="collapse" i], button[aria-label*="Collapse" i], [data-part="collapse"]',
-    ) as HTMLButtonElement | null;
+    const interactive = [...collapse.querySelectorAll(".poodle-dock-region")].find((region) =>
+      region.querySelector('button[aria-label*="Collapse"]'),
+    ) as HTMLElement | undefined;
+    expect(interactive, "interactive collapsible dock").toBeTruthy();
+    expect(interactive!.hasAttribute("data-collapsed")).toBe(false);
+    const toggle = interactive!.querySelector(
+      'button[aria-label*="Collapse"]',
+    ) as HTMLButtonElement;
     expect(toggle, "interactive collapse control").toBeTruthy();
-    fireEventSvelte.click(toggle!);
+    await fireEventSvelte.click(toggle);
+    expect(interactive!.hasAttribute("data-collapsed")).toBe(true);
+
     const transfer = groupByCaption("Move panels between docks");
     expect(transfer.querySelectorAll(".poodle-dock-region").length).toBe(2);
+    expect(
+      transfer.querySelectorAll(
+        'button[aria-label*="Close" i], button[aria-label*="close" i], [data-part="close"]',
+      ).length,
+    ).toBe(0);
+    expect(transfer.textContent).toMatch(/Left dock — 3 panels/);
+    expect(transfer.textContent).toMatch(/Right dock — 1 panels/);
+
+    const left = transfer.querySelector('[aria-label="Left dock"]') as HTMLElement;
+    const right = transfer.querySelector('[aria-label="Right dock"]') as HTMLElement;
+    const tab = left.querySelector("[draggable='true']") as HTMLElement;
+    expect(tab, "transfer source tab").toBeTruthy();
+    const dataTransfer = new DataTransfer();
+    await fireEventSvelte.dragStart(tab, { dataTransfer });
+    await fireEventSvelte.drop(right, { dataTransfer });
+    expect(transfer.textContent).toMatch(/Left dock — 2 panels/);
+    expect(transfer.textContent).toMatch(/Right dock — 2 panels/);
+
     const staticStacks = groupByCaption("Static panel stacks");
     expect(staticStacks.textContent).toMatch(/Meter Strip|Toolbar/i);
     cleanupSvelte();
   });
 
-  it("wires DockRegion close on the expanded side dock", () => {
+  it("wires DockRegion close and reorder on the expanded side dock", async () => {
     renderSvelte(PilotSpecimenHarness, {
       props: { specimen: svelteMap["dock-region"] as never },
     });
     const expanded = groupByCaption("Expanded side dock");
-    const before = expanded.querySelectorAll('[role="tab"], [data-part="tab"]').length;
+    const dock = expanded.querySelector(".poodle-dock-region") as HTMLElement;
+    const tabLabels = () =>
+      [...dock.querySelectorAll('[role="tab"]')].map((tab) => tab.textContent?.trim() ?? "");
+    const before = tabLabels();
+    expect(before.length).toBeGreaterThanOrEqual(2);
+
+    const [firstTab, secondTab] = [...dock.querySelectorAll('[role="tab"]')] as HTMLElement[];
+    const secondItem = secondTab.parentElement!;
+    const dataTransfer = new DataTransfer();
+    await fireEventSvelte.pointerDown(firstTab, { button: 0 });
+    await fireEventSvelte.dragStart(firstTab, { dataTransfer });
+    await fireEventSvelte.dragOver(secondItem, { dataTransfer });
+    await fireEventSvelte.drop(secondItem, { dataTransfer });
+    expect(tabLabels()).not.toEqual(before);
+
     const close = expanded.querySelector(
       'button[aria-label*="Close" i], button[aria-label*="close" i], [data-part="close"]',
     ) as HTMLButtonElement | null;
     expect(close, "closable tab close control").toBeTruthy();
-    fireEventSvelte.click(close!);
-    const after = expanded.querySelectorAll('[role="tab"], [data-part="tab"]').length;
-    expect(after).toBeLessThan(before);
+    const countBeforeClose = tabLabels().length;
+    await fireEventSvelte.click(close!);
+    expect(tabLabels().length).toBeLessThan(countBeforeClose);
     cleanupSvelte();
   });
 

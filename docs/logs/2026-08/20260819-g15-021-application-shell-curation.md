@@ -147,16 +147,18 @@ dock-region contract §12).
 | fork-off-fork | Nested continuation runs |
 | single-continuation | Single continuation and run boundaries |
 | run-tail | Single continuation and run boundaries |
-| single-fork-open | Rename and manage a continuation (disclose + rename; delete affordance removed — no GPUI `HistoryCenterHandlers` delete surface without component work) |
+| single-fork-open | Rename and manage a continuation (disclose + delete on web; rename sibling) |
 | rename | Rename and manage a continuation |
 | rejection | Failure and incomplete metadata |
 | no-timestamp | Failure and incomplete metadata |
 
 Mount-time auto-open of single-fork-open removed; examples stay interactable.
 Host feeds remain live. Undo and navigate write a page-level Last host
-command readout. Rename writes a section Last command readout. Delete is not
-taught in any runtime (orchestrator review: same meaning without a component
-change).
+command readout. Rename and web delete write a section Last command readout.
+GPUI teaches disclose + rename only: `HistoryCenterHandlers` still has no
+delete command surface. Restoring web delete without a GPUI delete handler is
+an intentional three-runtime gap that needs a planning amendment / focused
+parity slice — not a catalogue reduction on Svelte/React.
 
 ### PageHeader
 
@@ -189,13 +191,14 @@ links and breadcrumbs stay real `href` navigation.
 - `test/parity/g15-021-application-shell-specimens.test.tsx` — ordered captions,
   Svelte/React equality, 3–6 budget, GPUI structural captions, DetailSectionGroup
   no-op, ActionDiscoveryPanel selection feedback, DetailSection/DetailShell/
-  PageHeader action feedback, HistoryCenter nine-to-six mapping, DockRegion
-  retained story groups
+  PageHeader action feedback, HistoryCenter nine-to-six mapping, HistoryCenter
+  undo/navigate/delete host feedback, DockRegion collapse state change, close,
+  reorder, and cross-dock transfer, PageHeader Icon chevrons (no text `›`)
 
 ## Validation
 
-- focused `g15.021` parity: pass (48/48)
-- `effigy test:parity -- g15-021`: pass (361 tests in run)
+- focused `g15.021` parity file: pass (52/52)
+- `effigy test:parity -- g15-021`: pass (365)
 - `effigy check:svelte`: 0 errors (existing warnings only)
 - `effigy react:build`: pass
 - `effigy check:gpui`: pass
@@ -217,18 +220,30 @@ passed.
   structural / affordance-only until native gesture vocabulary expands; expanded
   dock copy no longer claims closable/reorderable (web wires those handlers)
 - `g15.026` still owns the native page probe
-- Delete continuation is not taught: GPUI `HistoryCenterHandlers` has no delete
-  command; web remove delete rather than widen the component in this card
+- **GPUI HistoryCenter delete** — web manage story restores `onDeleteContinuation`;
+  GPUI has no matching handler field. Needs orchestrator planning amendment /
+  focused prerequisite parity slice before three-runtime delete parity. Do
+  not hide this by removing the web delete story.
+- Size/density axes for HistoryCenter and DockRegion are presentation-only (no
+  enabled undo/redo/close/reorder without local handlers)
 - Live paired-preview operator review remains open
 
 ## Review remediation (2026-08-19)
 
-Addressed orchestrator review on PR #43:
+First pass (a114a978): breadcrumbs, Examples undo/navigate, main DockRegion
+close/reorder. Re-review still requested delete restoration and remaining
+inert affordances.
 
-1. HIGH — drop catalogue delete claim; teach rename/disclose as shared manage
-2. MEDIUM — wire `onUndo` / navigate to visible Last host command (all three)
-3. MEDIUM — wire DockRegion `onClose`/`onReorder` on web closable docks; GPUI copy
-4. LOW — PageHeader breadcrumbs use `Icon name="chevron-right"`
+Second pass:
+
+1. HIGH — restore web `onDeleteContinuation` + Last command feedback; record
+   GPUI delete as planning-blocked (not catalogue normalization)
+2. MEDIUM — strip enabled undo/redo from HistoryCenter size/density axes
+   (Svelte/React/GPUI)
+3. MEDIUM — transfer docks and size/density axes no longer mark closable without
+   handlers; focused tests assert collapse `data-collapsed`, reorder tab order,
+   transfer panel counts, and delete confirmation
+4. LOW — batch log recount + honest unresolved GPUI delete gap
 
 ## Changed files
 

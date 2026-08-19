@@ -801,10 +801,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_sizes(|size, theme: &GpuiThemeProvider| {
                 render_instance(
                     theme,
-                    &HistoryCenterSpec::new()
-                        .with_can_undo(true)
-                        .with_can_redo(true)
-                        .with_size(size),
+                    &HistoryCenterSpec::new().with_size(size),
                     &HistoryCenterView {
                         rows: history_center_visible_rows(Some(&linear_pages()), &[]),
                         ..HistoryCenterView::default()
@@ -816,10 +813,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_densities(|density, theme: &GpuiThemeProvider| {
                 render_instance(
                     theme,
-                    &HistoryCenterSpec::new()
-                        .with_can_undo(true)
-                        .with_can_redo(true)
-                        .with_density(density),
+                    &HistoryCenterSpec::new().with_density(density),
                     &HistoryCenterView {
                         rows: history_center_visible_rows(Some(&linear_pages()), &[]),
                         ..HistoryCenterView::default()

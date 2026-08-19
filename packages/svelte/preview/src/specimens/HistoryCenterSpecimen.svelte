@@ -277,6 +277,7 @@
               runResult={manageHost.run}
               onLoadContinuations={loadContinuations(manageHost, (next) => (manageHost = next), runTailContinuations)}
               onLoadContinuationRun={loadRun(manageHost, (next) => (manageHost = next), runTailRuns)}
+              onDeleteContinuation={(entryId) => (manageCommand = `Delete ${entryId}`)}
               onRenameBranch={(branchId, name) => (manageCommand = `Rename ${branchId} to ${name}`)}
               onNavigateEntry={navigateEntry}
               onUndo={undoHistory}
@@ -291,7 +292,7 @@
               onLoadContinuations={loadContinuations(renameHost, (next) => (renameHost = next), nestedContinuations)}
               onLoadContinuationRun={loadRun(renameHost, (next) => (renameHost = next), nestedRuns)}
               onNavigateEntry={navigateEntry}
-            onUndo={undoHistory}
+              onUndo={undoHistory}
               onRenameBranch={(branchId, name) => (manageCommand = `Rename ${branchId} to ${name}`)}
             />
           </div>
@@ -333,11 +334,11 @@
   {/snippet}
 
   {#snippet sizes(size)}
-    <HistoryCenter pages={linearPages} {size} canUndo onUndo={undoHistory} canRedo />
+    <HistoryCenter pages={linearPages} {size} />
   {/snippet}
 
   {#snippet densities(density)}
-    <HistoryCenter pages={linearPages} {density} canUndo onUndo={undoHistory} canRedo />
+    <HistoryCenter pages={linearPages} {density} />
   {/snippet}
 </SpecimenLayout>
 

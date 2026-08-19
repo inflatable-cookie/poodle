@@ -206,8 +206,8 @@ export function HistoryCenterSpecimen() {
   return (
     <SpecimenLayout
       bareVariants
-      sizes={(size) => <HistoryCenter pages={linearPages} size={size} canUndo onUndo={undoHistory} canRedo />}
-      densities={(density) => <HistoryCenter pages={linearPages} density={density} canUndo onUndo={undoHistory} canRedo />}
+      sizes={(size) => <HistoryCenter pages={linearPages} size={size} />}
+      densities={(density) => <HistoryCenter pages={linearPages} density={density} />}
     >
       <div style={{ display: "grid", gap: "2rem", minHeight: "40rem" }}>
         {hostCommand ? (
@@ -286,6 +286,7 @@ export function HistoryCenterSpecimen() {
                 runResult={manageHost.run}
                 onLoadContinuations={loadContinuations(setManageHost, runTailContinuations)}
                 onLoadContinuationRun={loadRun(setManageHost, runTailRuns)}
+                onDeleteContinuation={(entryId) => setManageCommand(`Delete ${entryId}`)}
                 onRenameBranch={(branchId, name) => setManageCommand(`Rename ${branchId} to ${name}`)}
                 onNavigateEntry={navigate}
               />
