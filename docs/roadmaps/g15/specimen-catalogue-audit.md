@@ -3,9 +3,10 @@
 Status: **partial** — a mechanical screening baseline plus live measurement on
 all three runtimes. Not the completed human-centred audit: the rubric's
 teaching judgment was applied to the three pilots only, not to all 175 pages.
-Date: 2026-08-20 (revision 6 — SegmentedControl native option parity closed
-by `g15.038`; revision 5 measured the GPUI column live via the `g15.026`
-probe; first pass 2026-08-17)
+Date: 2026-08-20 (revision 7 — `g15.029` human review of the foundation date
+and time family; revision 6 closed SegmentedControl native option parity via
+`g15.038`; revision 5 measured the GPUI column live via the `g15.026` probe;
+first pass 2026-08-17)
 Card: `docs/roadmaps/g15/011-specimen-catalogue-audit.md`
 Handoff: `docs/handoffs/20260817-214451-g15-011-specimen-catalogue-audit.md`
 Governing refs: `release-baseline-roster.md`, `specimen-plan-outline.md`,
@@ -123,24 +124,25 @@ pre-pilot baseline.
 
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Svelte (live) | 81 | 33 | 52 | 9 | — |
-| React (live) | 94 | 26 | 55 | 0 | — |
+| Svelte (live) | 80 | 34 | 52 | 9 | — |
+| React (live) | 93 | 27 | 55 | 0 | — |
 | GPUI (headless render + structural) | 100 | 68 | 6 | 0 | 1 |
-| **Worst of the three** | **58** | **48** | **60** | **9** | — |
+| **Worst of the three** | **57** | **49** | **60** | **9** | — |
 
 | Disposition | Count |
 | --- | ---: |
-| `keep` | 56 |
+| `keep` | 55 |
 | `pilot-fix` | 3 |
 | `curation-tranche` | 116 |
-| `contract/runtime-blocker` | 0 |
+| `contract/runtime-blocker` | 1 |
 
 175 of 175 pages were measured live in both web runtimes. The `g15.028`
-contract/runtime blocker on GPUI `SegmentedControl` is closed by `g15.038`:
-Rust now has a dedicated `SegmentedControlOption`, shared rendering emits
-labelled-icon and icon-only segments, and the GPUI specimen teaches the
-contract's Effects/Instruments example. Nothing else found here needs a
-component semantic change.
+contract/runtime blocker on GPUI `SegmentedControl` is closed by `g15.038`.
+`g15.029` records a new blocker on web `DateTimeZonePicker`: pointer
+selection of the nested `TimeZoneSelect` is dismissed as an outside click
+because the Select popover is portalled outside the picker's
+`layerContains(root, surface)` check. Keyboard Enter commits. That is a
+component defect, not specimen work.
 
 `MeterSurface` is the single `n/a` on GPUI — web-only by fixed decision
 (spec 068), with no native counterpart. It is still graded on the two runtimes
@@ -493,13 +495,13 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 
 | Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `Calendar` | A | A | A | keep | no named defect |
-| `DatePicker` | A | A | A | keep | no named defect |
-| `DateRangePicker` | A | A | A | keep | no named defect |
-| `DateTimePicker` | A | A | A | keep | no named defect |
-| `DateTimeRangePicker` | A | A | A | keep | no named defect |
-| `DateTimeZonePicker` | A | A | A | keep | no named defect |
-| `DurationInput` | A | A | A | keep | no named defect |
+| `Calendar` | A | A | A | keep | human verdict (`g15.029`): keep after Gp specimen repair — section order now matches web (Disabled before Range); live range no longer seeds a filled range that duplicated "Range with pre-selected range"; readouts appear only after a pick. Sv/Rc unchanged |
+| `DatePicker` | A | A | A | keep | human verdict (`g15.029`): keep — live default with Selected readout, pre-filled Mar 14, disabled; Sv/Rc paired; Gp mirrors all three with live open/select |
+| `DateRangePicker` | A | A | A | keep | human verdict (`g15.029`): keep — live default range gesture with readout, pre-filled Mar 1–14, disabled; Gp adds a static Open (range calendar) so the composed surface is visible without interaction |
+| `DateTimePicker` | A | A | A | keep | human verdict (`g15.029`): keep — default, pre-filled Mar 14 2:30 PM, disabled; trigger shows the committed date/time; Gp adds Open (calendar + time) |
+| `DateTimeRangePicker` | A | A | A | keep | human verdict (`g15.029`): keep — default, pre-filled Mar 10 9:00–Mar 14 5:00, disabled; start/end time fields visible when open; Gp adds Open (range calendar + start/end time) |
+| `DateTimeZonePicker` | B | B | A | contract/runtime-blocker | human verdict (`g15.029`): **Sv/Rc:** nested `TimeZoneSelect` popover sits outside the picker's `layerContains(root, surface)` outside-click check (`DateTimeZonePicker.svelte` / React equivalent), so a pointer choice dismisses the picker without committing; keyboard Enter works. Not repaired here. **Gp:** empty default now matches web; Open section still shows calendar + time + zone. Follow-up owns the dismiss-layer fix |
+| `DurationInput` | A | A | A | keep | human verdict (`g15.029`): keep after specimen repair — removed the interaction-only "Last change" group (Total already teaches live binding); Gp dropped Empty/zero and Invalid extras, aligned captions/fixtures to the web three-section set, and made the Total readout follow stored state instead of a hardcoded 01:30:00 |
 | `TimeAgo` | B | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 captioned examples |
 | `TimeInput` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |
 | `TimeZoneSelect` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |

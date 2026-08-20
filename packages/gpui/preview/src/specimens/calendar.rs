@@ -53,8 +53,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex_col()
         .gap(px(24.0))
         // --- Default ---
-        .child(
-            div()
+        .child({
+            let mut section = div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
@@ -75,17 +75,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_id("interactive")
                         .on_select(text_handler(&state.node_events, "calendar-selected"))
                         .on_navigate(text_handler(&state.node_events, "calendar-nav-month"))
-                })
-                .child(
+                });
+            if let Some(ref date) = selected_date {
+                section = section.child(
                     div()
                         .text_size(px(12.0))
                         .text_color(color_to_hsla(text_primary))
-                        .child(format!(
-                            "Selected: {}",
-                            selected_date.as_deref().unwrap_or("(none)")
-                        )),
-                ),
-        )
+                        .child(format!("Selected: {date}")),
+                );
+            }
+            section
+        })
         // --- With pre-selected date ---
         .child(
             div()
@@ -103,9 +103,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     Calendar::from_spec(spec, theme).with_id("preselected")
                 }),
         )
-        // --- Range selection ---
+        // --- Disabled ---
         .child(
             div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Disabled"),
+                    theme,
+                ))
+                .child({
+                    let mut spec = CalendarSpec::new().with_today("2026-03-12");
+                    spec.default_value = Some("2026-03-01".to_string());
+                    spec.is_disabled = true;
+                    spec.aria_label = Some("Disabled calendar".to_string());
+                    Calendar::from_spec(spec, theme).with_id("disabled")
+                }),
+        )
+        // --- Range selection ---
+        .child({
+            let mut section = div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
@@ -114,40 +132,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child({
-                    // Seed a default range when nothing is picked yet so
-                    // the specimen shows range styling immediately.
-                    let (eff_start, eff_end) = match (&range_start, &range_end) {
-                        (Some(s), Some(e)) => (Some(s.clone()), Some(e.clone())),
-                        (Some(s), None) => (Some(s.clone()), None),
-                        _ => (
-                            Some("2026-03-10".to_string()),
-                            Some("2026-03-20".to_string()),
-                        ),
-                    };
-
                     let mut spec = CalendarSpec::new()
                         .with_today("2026-03-12")
                         .with_mode(CalendarMode::Range);
-                    spec.range_value =
-                        Some(DateRangeValue::new(eff_start.clone(), eff_end.clone()));
+                    if range_start.is_some() || range_end.is_some() {
+                        spec.range_value =
+                            Some(DateRangeValue::new(range_start.clone(), range_end.clone()));
+                    }
                     spec.visible_month = Some("2026-03".to_string());
-                    spec.aria_label = Some("Pick a date range".to_string());
+                    spec.aria_label = Some("Select a date range".to_string());
 
                     Calendar::from_spec(spec, theme)
                         .with_id("range")
                         .on_range_select(range_handler(&state.node_events))
-                })
-                .child(
+                });
+            if let Some(ref start) = range_start {
+                section = section.child(
                     div()
                         .text_size(px(12.0))
                         .text_color(color_to_hsla(text_primary))
                         .child(format!(
-                            "Start: {} · End: {}",
-                            range_start.as_deref().unwrap_or("(none)"),
-                            range_end.as_deref().unwrap_or("(none)"),
+                            "{start} → {}",
+                            range_end.as_deref().unwrap_or("...")
                         )),
-                ),
-        )
+                );
+            }
+            section
+        })
         // --- Range with pre-selected range ---
         .child(
             div()
@@ -169,24 +180,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     spec.visible_month = Some("2026-03".to_string());
                     spec.aria_label = Some("Pre-selected range".to_string());
                     Calendar::from_spec(spec, theme).with_id("range-preselected")
-                }),
-        )
-        // --- Disabled ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Disabled"),
-                    theme,
-                ))
-                .child({
-                    let mut spec = CalendarSpec::new().with_today("2026-03-12");
-                    spec.default_value = Some("2026-03-01".to_string());
-                    spec.is_disabled = true;
-                    spec.aria_label = Some("Disabled calendar".to_string());
-                    Calendar::from_spec(spec, theme).with_id("disabled")
                 }),
         )
         // --- Range disabled ---

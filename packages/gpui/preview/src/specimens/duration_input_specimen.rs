@@ -6,7 +6,19 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{DurationInputSpec, EyebrowSpec, ValidationState};
+use poodle_specs::{DurationInputSpec, EyebrowSpec};
+
+fn duration_total_label(value: &str) -> String {
+    let parts: Vec<u32> = value
+        .split(':')
+        .filter_map(|part| part.parse().ok())
+        .collect();
+    match parts.as_slice() {
+        [hours, minutes, seconds] => format!("Total: {hours}h {minutes}m {seconds}s"),
+        [hours, minutes] => format!("Total: {hours}h {minutes}m"),
+        _ => format!("Total: {value}"),
+    }
+}
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
@@ -43,19 +55,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         }};
     }
 
+    let full_value = stored("duration-full", "01:30:00");
     let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
         .max_w(px(384.0))
-        // --- Full (H:M:S) ---
+        // --- Hours, minutes, seconds ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Full (H:M:S)"),
+                    EyebrowSpec::new().with_content("Hours, minutes, seconds"),
                     theme,
                 ))
                 .child(
@@ -66,7 +79,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(live_duration!(
                             DurationInput::from_spec(
                                 DurationInputSpec::new()
-                                    .with_value(stored("duration-full", "01:30:00"))
+                                    .with_value(full_value.clone())
                                     .with_show_seconds(true),
                                 theme,
                             )
@@ -78,7 +91,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             div()
                                 .text_xs()
                                 .text_color(color_to_hsla(text_secondary))
-                                .child("Value: 01:30:00 (5400 seconds)"),
+                                .child(duration_total_label(&full_value)),
                         ),
                 ),
         )
@@ -95,7 +108,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(live_duration!(
                     DurationInput::from_spec(
                         DurationInputSpec::new()
-                            .with_value(stored("duration-hm", "02:45"))
+                            .with_value(stored("duration-hm", "00:45"))
                             .with_show_seconds(false),
                         theme,
                     )
@@ -103,24 +116,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     "duration-hm",
                     false
                 )),
-        )
-        // --- Empty / zero (default zero display) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Empty / zero"),
-                    theme,
-                ))
-                .child(
-                    DurationInput::from_spec(
-                        DurationInputSpec::new().with_show_seconds(true),
-                        theme,
-                    )
-                    .with_id("duration-empty"),
-                ),
         )
         // --- Disabled ---
         .child(
@@ -135,33 +130,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     DurationInput::from_spec(
                         DurationInputSpec::new()
-                            .with_value("00:30:00")
+                            .with_value("02:15:30")
                             .with_disabled(true),
                         theme,
                     )
                     .with_id("duration-disabled"),
-                ),
-        )
-        // --- Invalid (out-of-bounds danger border) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Invalid (out of bounds)"),
-                    theme,
-                ))
-                .child(
-                    DurationInput::from_spec(
-                        DurationInputSpec::new()
-                            .with_value("00:00:05")
-                            .with_show_seconds(true)
-                            .with_min_total_seconds(60)
-                            .with_validation_state(ValidationState::Invalid),
-                        theme,
-                    )
-                    .with_id("duration-invalid"),
                 ),
         )
         .into_any_element();

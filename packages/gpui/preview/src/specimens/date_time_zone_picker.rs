@@ -42,13 +42,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     DateTimeZonePicker::from_spec(
-                        DateTimeZonePickerSpec::new()
-                            .with_value(ZonedDateTimeValue::new(
-                                Some("2026-03-23".into()),
-                                Some("14:30".into()),
-                                Some("America/New_York".into()),
-                            ))
-                            .with_open(is_open),
+                        DateTimeZonePickerSpec::new().with_open(is_open),
                         theme,
                     )
                     .on_toggle(toggle_handler(&state.node_events, "dtz-picker-open")),
