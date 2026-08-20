@@ -4,7 +4,7 @@ Date: 2026-08-20
 Card: `docs/roadmaps/g15/029-review-foundation-date-time.md`
 Handoff: `docs/handoffs/20260820-193238-g15-029-review-foundation-date-time.md`
 Parent: `docs/roadmaps/g15/027-screen-clear-human-review.md`
-PR: pending
+PR: #53
 
 ## Outcome
 
@@ -82,4 +82,4 @@ not implemented here; the orchestrator routes the follow-up.
 - `effigy probe:gpui-specimens` — 7/7 (174/174 routes construct, advertised axis panes open)
 - `effigy catalogue:check` — pass (TS and Rust catalogue targets verified)
 - `effigy docs:check` — pass
-- `git diff --check origin/main...HEAD` — run at closeout after commit
+- `git diff --check origin/main...HEAD` — clean
