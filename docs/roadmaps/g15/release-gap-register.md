@@ -69,7 +69,7 @@ Rust render 1 missing (+ 1 not-applicable), GPUI specimen 0 missing
 | Context providers | — | IconProvider closed by `g15.009` (`packages/render/src/icon_provider.rs`); UiPresentationProvider remains a declared capability absence because ambient presentation cannot cross an already-built Node tree | — | follow-up required before `g15.013` |
 | AgentTranscript scroll/follow | — | closed by `g15.037`: shared render owns content and the jump-control recipe | closed by `g15.037`: retained GPUI state owns a real tracked viewport, detach latch, and jump-to-bottom | `g15.037` complete in PR #48; no remaining release blocker |
 | Stepper selection and re-run | — | handlers exist in shared composition | `node_compat.rs` wires collapse only; selection and re-run controls shown by the specimen are inert | follow-up card required before `g15.013`; found and accepted out of scope in PR #49 |
-| Specimen axis domains | EmptyState declares a two-value native size domain that its renderer does not consume; Icon declares a three-value native size domain and an unused density field | EmptyState and Icon renderers cannot yet supply the full web-admitted axis evidence | fake panes removed by `g15.019`; clean breaking migration approved | `g15.034` ready; required before `g15.026` / `g15.013` |
+| Specimen axis domains | — closed by `g15.034` | — closed by `g15.034` | fake panes removed by `g15.019`; exact domains closed by `g15.034` | complete in PR #41 |
 | Display, workstation & agent specimens | — | — | — closed by `g15.010` (18 named GPUI specimen files under `packages/gpui/preview/src/specimens/`) | `g15.010` |
 | MeterSurface | not-applicable — web-only by fixed decision (spec 068) | not-applicable | not-applicable | none |
 
@@ -106,7 +106,7 @@ the roster is folded into the release-certification card.
 | --- | --- | --- |
 | Licence native completion (`g14.017`) | closed by `g15.007` — declarations, render, and GPUI specimens landed | `g15.007` |
 | Model-connection native completion (`g14.020`) | closed by `g15.008` — declarations, headless mirror, render, and GPUI specimens landed | `g15.008` |
-| Human-centred specimen catalogue audit (`g14.026`) | rubric and boundary intact; unexecuted | `g15.011` |
+| Human-centred specimen catalogue audit (`g14.026`) | screening, pilots, and defect-led curation complete; native probe and six screen-clear review children remain | `g15.011`, `g15.026`, `g15.028`–`g15.033` |
 | Primitive-first visual conformance lane | seam recorded in `conformance-estate.md`; harness not designed | `g15.012` |
 | Release-gate remediation | closed by PR #31 — `nanoid@3.3.18`; `bun audit` clean | `g15.014` |
 | v0.2.0 release certification | after all Svelte-denominator blockers close | `g15.013` |

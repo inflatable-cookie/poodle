@@ -17,7 +17,8 @@ Updated: 2026-08-20
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: review and ready `g15.026`, the headless native specimen probe.
+  - Next: dispatch ready `g15.026`, the bounded in-binary headless native
+    specimen probe.
     PR #49 completes `g15.025` and the six-child overloaded-Examples parent;
     operator sign-off and GitHub `active-cohort` are recorded. PR #48 completes
     `g15.024` and its `g15.037` review prerequisite with a

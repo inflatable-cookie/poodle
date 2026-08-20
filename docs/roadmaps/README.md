@@ -34,7 +34,7 @@ v0.2.0 release-baseline generation.
   status family. PR #48 completes `g15.024` and its review prerequisite
   `g15.037`: GPUI now has real detached-scroll/jump/follow behavior. PR #49
   completes `g15.025` and the six-child overloaded-Examples parent. The next
-  planning task is `g15.026`, the headless native specimen probe.
+  worker task is ready `g15.026`, the headless native specimen probe.
   `g15.013` remains the final gate after the
   specimen program and `g15.012`.
   Jetstream remains deferred.

@@ -44,12 +44,13 @@ about a rendered page: the specimen-map inventory, and axis eligibility read
 from each component's `$props()` block — 126 components take `size`, 128 take
 `density`.
 
-**GPUI is not measured live, and its grades are provisional.** No headless path
-renders a GPUI specimen page: `packages/gpui/preview` is a binary crate and
-`render_single_specimen` depends on `PreviewRoot`, `AppState`, and the
-catalogue sidebar, so nothing outside `main.rs` can construct one. The retained
-headless driver mounts a `poodle-node` tree, which is the component tier rather
-than the page tier.
+**GPUI is not measured live, and its grades are provisional.** The audit did
+not have a headless page probe. `render_single_specimen` depends on
+`PreviewRoot`, `AppState`, and the catalogue shell; the retained headless
+driver mounts a `poodle-node` tree, which is the component tier rather than the
+page tier. Readiness review later found that the existing in-binary
+`TestAppContext` seam can mount `PreviewRoot` without adding the `lib.rs` the
+first `g15.026` draft proposed.
 
 The GPUI column therefore grades what source can prove — dispatch reachability,
 caption presence, and whether the page uses `specimen_layout` — and nothing
