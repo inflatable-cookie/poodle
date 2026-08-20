@@ -99,13 +99,13 @@ meaningfully distinct. A later human review may change a grade or disposition
 in the existing row; it does not add a second table.
 
 A person has now answered those questions for the three pilots (Button,
-RangeSlider, Tabs) and for the 21 screen-clear pages owned by `g15.028` and
-`g15.029`. The remaining 35 screen-clear pages still sit in `g15.030`–
+RangeSlider, Tabs) and for the 30 screen-clear pages owned by `g15.028`–
+`g15.030`. The remaining 26 screen-clear pages still sit in `g15.031`–
 `g15.033`. Every child carries a live operator-review checkpoint for changes.
 
 So read an **A** that has no human verdict as "no measured defect", not as
 "judged a good teaching page". A page can screen A and still open on a prop
-showcase. Read an **A** that names a `g15.028`/`g15.029` human verdict as the
+showcase. Read an **A** that names a `g15.028`–`g15.030` human verdict as the
 reviewer's keep. **D** remains the dead-primary-interaction or unusable-as-
 documentation grade even when the defect is a component blocker rather than a
 caption hole.
@@ -138,7 +138,7 @@ not a pre-pilot or pre-curation baseline.
 | Svelte (live) | 89 | 33 | 44 | 9 | — |
 | React (live) | 102 | 26 | 47 | 0 | — |
 | GPUI (headless render + structural) | 102 | 66 | 6 | 0 | 1 |
-| **Worst of the three** | **66** | **48** | **52** | **9** | — |
+| **Worst of the three** | **65** | **49** | **52** | **9** | — |
 
 | Disposition | Count |
 | --- | ---: |
