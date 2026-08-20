@@ -42,4 +42,29 @@ mod tests {
             Some(theme.resolve_color("color.icon.primary"))
         );
     }
+
+    fn paint_asset_exists(name: &str) -> bool {
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("assets/icons")
+            .join(format!("{name}.svg"))
+            .is_file()
+    }
+
+    #[test]
+    fn default_specimen_icons_have_paint_assets() {
+        for name in ["audio-waveform", "piano"] {
+            assert!(paint_asset_exists(name), "{name} must have an SVG asset");
+        }
+    }
+
+    #[test]
+    fn custom_icon_names_pass_through() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let node = icon(&IconSpec::new("company-logo"), &theme);
+        assert!(matches!(
+            &node.kind,
+            poodle_node::NodeKind::Icon { name, .. } if name == "company-logo"
+        ));
+    }
 }

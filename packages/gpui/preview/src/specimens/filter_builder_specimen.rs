@@ -150,6 +150,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_show_combinator(true)
                         .with_open(true),
                     theme,
+                    "building",
                 ))
                 .child(
                     div()
@@ -173,6 +174,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_open(true)
                         .with_draft(FilterDraft::editing(&demo_value().clauses[0])),
                     theme,
+                    "match-all",
                 ))
                 .child(FilterBuilder::from_spec(
                     FilterBuilderSpec::new()
@@ -184,6 +186,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_show_combinator(true)
                         .with_open(true),
                     theme,
+                    "match-any",
                 ))
                 .into_any_element(),
         ))
@@ -202,6 +205,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         })
                         .with_open(true),
                     theme,
+                    "empty",
                 ))
                 .child(FilterBuilder::from_spec(
                     FilterBuilderSpec::new()
@@ -226,6 +230,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_max_clauses(2)
                         .with_open(true),
                     theme,
+                    "limited",
                 ))
                 .into_any_element(),
         ))
@@ -237,6 +242,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_value(overflow_value())
                     .with_open(true),
                 theme,
+                "overflow",
             )
             .into_any_element(),
         ))
@@ -257,6 +263,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_disabled(true)
                     .with_open(true),
                 theme,
+                "disabled",
             )
             .into_any_element(),
         ))
@@ -275,6 +282,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_value(demo_value())
                         .with_open(true),
                     theme,
+                    format!("size-{size:?}"),
                 )
                 .size(size)
                 .into_any_element()
@@ -286,6 +294,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_value(demo_value())
                         .with_open(true),
                     theme,
+                    format!("density-{density:?}"),
                 )
                 .with_density(density)
                 .into_any_element()

@@ -288,8 +288,12 @@ mod tests {
     #[test]
     fn segmented_control() {
         assert_eq!(
-            a().render(&SegmentedControlSpec::new(vec![]), &s(), &t())
-                .spec_type,
+            a().render(
+                &SegmentedControlSpec::new("selection-test", vec![]),
+                &s(),
+                &t()
+            )
+            .spec_type,
             "SegmentedControlSpec"
         );
     }

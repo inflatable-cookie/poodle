@@ -284,7 +284,7 @@ pub use scroll_shell::ScrollShellSpec;
 pub type SearchInputSpec = TextInputSpec;
 /// Deprecated: use `TextInputSpec` with `input_type("search")` instead.
 pub type SearchFieldSpec = TextInputSpec;
-pub use segmented_control::SegmentedControlSpec;
+pub use segmented_control::{SegmentedControlOption, SegmentedControlSpec};
 pub use select::{SelectMode, SelectSpec, SelectVariant};
 pub use separator::SeparatorSpec;
 pub use skeleton::{SkeletonPreset, SkeletonSpec};
@@ -495,8 +495,9 @@ mod tests {
         FormActionsSpec, GridSpec, IconButtonSpec, MenuEntry, MenuItemKind, MenuSpec, MenubarEntry,
         MenubarSpec, NavigationMenuEntry, NavigationMenuSpec, Orientation, OverlayPlacement,
         PaddingScale, PopoverInitialFocus, PopoverSpec, ProgressSpec, RadioGroupSpec,
-        ScrollShellSpec, SegmentedControlSpec, SelectSpec, SeparatorSpec, SliderSpec, StackSpec,
-        StatusIndicatorSpec, StatusTone, SurfaceSpec, SurfaceTone, SwitchSpec, TabActivationMode,
+        ScrollShellSpec, SegmentedControlOption, SegmentedControlSpec, SelectSpec, SeparatorSpec,
+        SliderSpec, StackSpec, StatusIndicatorSpec, StatusTone, SurfaceSpec, SurfaceTone,
+        SwitchSpec, TabActivationMode,
         TabDefinition, TabStripItem, TabStripSpec, TabsSpec, TextInputSpec, TimeFieldSpec,
         TooltipSpec, ValidationState,
     };
@@ -776,14 +777,44 @@ mod tests {
 
     #[test]
     fn segmented_control_uses_selected_fill() {
-        let spec = SegmentedControlSpec::new(vec![
-            ChoiceOption::new("grid", "Grid"),
-            ChoiceOption::new("list", "List"),
+        let spec = SegmentedControlSpec::new("contract-test", vec![
+            SegmentedControlOption::new("grid", "Grid"),
+            SegmentedControlOption::new("list", "List"),
         ])
         .with_default_value("grid");
 
         assert_eq!(spec.current_value(), Some("grid"));
         assert_eq!(spec.selected_fill_token(), semantic::COLOR_ACCENT_BASE);
+    }
+
+    #[test]
+    fn segmented_control_option_carries_the_contract_icon_surface() {
+        // Contract §3: value, label, optional icon, icon-only, disabled,
+        // optional accessible label, optional title — every portable field.
+        let option = SegmentedControlOption::new("effects", "Effects")
+            .with_icon("audio-waveform")
+            .with_icon_only(true)
+            .with_disabled(true)
+            .with_aria_label("Audio effects")
+            .with_title("Effects plugins");
+
+        assert_eq!(option.value, "effects");
+        assert_eq!(option.label, "Effects");
+        assert_eq!(option.icon.as_deref(), Some("audio-waveform"));
+        assert!(option.icon_only);
+        assert!(option.is_disabled);
+        assert_eq!(option.aria_label.as_deref(), Some("Audio effects"));
+        assert_eq!(option.title.as_deref(), Some("Effects plugins"));
+        assert!(option.is_icon_only());
+        assert_eq!(option.accessible_name_override(), Some("Audio effects"));
+        assert_eq!(option.tooltip_text(), Some("Effects plugins"));
+
+        // Icon-only requested without an icon is NOT icon-only: the visible
+        // label and its fallbacks stay engaged.
+        let label_only = SegmentedControlOption::new("grid", "Grid").with_icon_only(true);
+        assert!(!label_only.is_icon_only());
+        assert!(label_only.accessible_name_override().is_none());
+        assert!(label_only.tooltip_text().is_none());
     }
 
     #[test]

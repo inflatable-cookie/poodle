@@ -28,7 +28,7 @@ use std::time::Duration;
 
 use gpui::{
     canvas, deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, svg,
-    AnyElement, App, AppContext, ClickEvent, CursorStyle, Div, ElementId, Hsla,
+    AnyElement, AnyView, App, AppContext, ClickEvent, CursorStyle, Div, ElementId, Hsla,
     InteractiveElement, IntoElement, KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent,
     MouseUpEvent, ParentElement, PathBuilder, SharedString, Stateful,
     StatefulInteractiveElement, StyleRefinement, Styled, StyledImage, Window,
@@ -526,6 +526,8 @@ fn needs_state(node: &Node) -> bool {
         || node.style.active.is_some()
         || node.style.descriptor.layout.overflow_x == LayoutOverflow::Scroll
         || node.style.descriptor.layout.overflow_y == LayoutOverflow::Scroll
+        // GPUI `.tooltip()` lives on StatefulInteractiveElement.
+        || node.tooltip.as_deref().is_some_and(|text| !text.is_empty())
 }
 
 /// The channels every box gets, in the Jetstream walk's order: layout,

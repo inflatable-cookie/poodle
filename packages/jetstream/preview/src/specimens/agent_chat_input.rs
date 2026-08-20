@@ -41,7 +41,7 @@ fn picker(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
         .with_size(size)
         // Subdued inside the composer: the editor should hold the eye.
         .with_emphasis(ModelPickerEmphasis::Subdued);
-    js_model_picker(&spec, theme)
+    js_model_picker(&spec, theme, "agent-chat-input")
 }
 
 fn base() -> AgentChatInputSpec {

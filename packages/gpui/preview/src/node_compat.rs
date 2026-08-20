@@ -15,39 +15,35 @@ use gpui::{
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{
-    AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentMessageSpec, AgentPlanRecordSpec,
-    AgentPlanSpec, AgentQuestionRecordSpec, AgentQuestionSpec, AgentSubagentSpec,
-    AgentTranscriptSpec, AlertDialogSpec, AppHeaderSpec, AudioPlayerSpec, AvatarSpec,
-    BlockEditorSpec, BoxSpec, BreadcrumbsSpec,
-    BulkActionBarSpec, ButtonSpec, CalendarSpec, CallOutSpec, CardRadioGroupSpec, ChangedFilesSpec,
-    CheckboxSpec,
-    CodeInputSpec, CodeSpec, CollapseToggleSpec, CollapsibleSpec, ColorPickerSpec,
-    CommandPaletteSpec, ConfirmActionSpec, ContextMenuSpec, ControlDensity, ControlSize,
-    DataTableSpec, DatePickerSpec, DateRangePickerSpec, DateRangeValue, DockRegionSpec,
-    DateTimePickerSpec,
-    DateTimeRangePickerSpec, DateTimeZonePickerSpec, DebugDialogSpec, DetailItemSpec,
-    DetailSectionGroupSpec, DetailSectionSpec, DetailShellSpec, DialogSpec, DrawerSpec,
-    DurationInputSpec, EditableLabelSpec, EditableListSpec, EmbedInputSpec, EmbedPreviewSpec,
-    EmptyStateSpec, ErrorBoundarySpec, EyebrowSpec, FieldSetSpec, FieldSpec, FileUploadSpec,
-    FilterBuilderSpec, FilterToolbarSpec, FormActionsSpec, FormDialogSpec, FormLayoutSpec,
-    FormShellSpec, GridSpec, HoverCardSpec, IconButtonSpec, IconSpec, InlineListSectionSpec,
-    ListCardCounterSpec, ListCardSpec, ListContainerSpec, ListGridSpec, LicenceActivationSpec,
-    LicenceSeatsSpec, LicenceStatusSpec, LogListSpec, MarkdownEditorSpec,
-    MediaBrowsePanelSpec, MediaPickerSpec, MediaPreviewSpec, MediaThumbnailSpec, MenuSpec,
-    MenubarSpec, MetaBarSpec, MetaItemSpec, MeterSpec, MetricTileSpec, ModelPickerSpec,
-    NavCardSpec, NavigationMenuSpec, NumberInputSpec, OrderBySpec, OverlayPlacement,
-    PageHeaderSpec, PageLoadingSpec, PaginationSpec, PaginationSummarySpec,
-    PasswordRequirementsSpec, PickerShellSpec, PillSpec, PopoverSpec, ProgressSpec, RadioGroupSpec,
-    RadioSpec, RangeSliderSpec, RatingSpec, RefSelectSpec, RegionSpec, RelationPickerSpec,
-    RemediationBannerSpec, ResizeHandleSpec,
-    ScrollShellSpec, SelectSpec, SelectionSummarySpec, SeparatorSpec,
-    ShellStatusBarSpec, SidebarNavSpec, SkeletonSpec, SliderSpec, SpacerSpec, SpinnerSpec,
-    StackSpec, StateTileSpec, StatusIndicatorSpec, StepperSpec, SurfaceSpec, SwitchSpec,
-    TabStripSpec, TableSpec, ToolCallGroupSpec, ToolCallSpec,
-    SplitOrientation, SplitViewSpec, TabsSpec, TextInputSpec, TextLinkSpec, TextSpec,
-    ThemeSelectSpec, TimeAgoSpec, TimeFieldSpec, TreeSpec,
-    TimeZoneSelectSpec, ToastHostSpec, ToastStackSpec, TokenInputSpec, ToolbarSpec, TooltipSpec,
-    TriStateSwitchSpec, TriStateValue, ValidationSummarySpec, VideoPlayerSpec,
+    AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentMessageSpec,
+    AgentPlanRecordSpec, AgentPlanSpec, AgentQuestionRecordSpec, AgentQuestionSpec,
+    AgentSubagentSpec, AgentTranscriptSpec, AlertDialogSpec, AppHeaderSpec, AudioPlayerSpec,
+    AvatarSpec, BlockEditorSpec, BoxSpec, BreadcrumbsSpec, BulkActionBarSpec, ButtonSpec,
+    CalendarSpec, CallOutSpec, CardRadioGroupSpec, ChangedFilesSpec, CheckboxSpec, CodeInputSpec,
+    CodeSpec, CollapseToggleSpec, CollapsibleSpec, ColorPickerSpec, CommandPaletteSpec,
+    ConfirmActionSpec, ContextMenuSpec, ControlDensity, ControlSize, DataTableSpec, DatePickerSpec,
+    DateRangePickerSpec, DateRangeValue, DateTimePickerSpec, DateTimeRangePickerSpec,
+    DateTimeZonePickerSpec, DebugDialogSpec, DetailItemSpec, DetailSectionGroupSpec,
+    DetailSectionSpec, DetailShellSpec, DialogSpec, DockRegionSpec, DrawerSpec, DurationInputSpec,
+    EditableLabelSpec, EditableListSpec, EmbedInputSpec, EmbedPreviewSpec, EmptyStateSpec,
+    ErrorBoundarySpec, EyebrowSpec, FieldSetSpec, FieldSpec, FileUploadSpec, FilterBuilderSpec,
+    FilterToolbarSpec, FormActionsSpec, FormDialogSpec, FormLayoutSpec, FormShellSpec, GridSpec,
+    HoverCardSpec, IconButtonSpec, IconSpec, InlineListSectionSpec, LicenceActivationSpec,
+    LicenceSeatsSpec, LicenceStatusSpec, ListCardCounterSpec, ListCardSpec, ListContainerSpec,
+    ListGridSpec, LogListSpec, MarkdownEditorSpec, MediaBrowsePanelSpec, MediaPickerSpec,
+    MediaPreviewSpec, MediaThumbnailSpec, MenuSpec, MenubarSpec, MetaBarSpec, MetaItemSpec,
+    MeterSpec, MetricTileSpec, ModelPickerSpec, NavCardSpec, NavigationMenuSpec, NumberInputSpec,
+    OrderBySpec, OverlayPlacement, PageHeaderSpec, PageLoadingSpec, PaginationSpec,
+    PaginationSummarySpec, PasswordRequirementsSpec, PickerShellSpec, PillSpec, PopoverSpec,
+    ProgressSpec, RadioGroupSpec, RadioSpec, RangeSliderSpec, RatingSpec, RefSelectSpec,
+    RegionSpec, RelationPickerSpec, RemediationBannerSpec, ResizeHandleSpec, ScrollShellSpec,
+    SelectSpec, SelectionSummarySpec, SeparatorSpec, ShellStatusBarSpec, SidebarNavSpec,
+    SkeletonSpec, SliderSpec, SpacerSpec, SpinnerSpec, SplitOrientation, SplitViewSpec, StackSpec,
+    StateTileSpec, StatusIndicatorSpec, StepperSpec, SurfaceSpec, SwitchSpec, TabStripSpec,
+    TableSpec, TabsSpec, TextInputSpec, TextLinkSpec, TextSpec, ThemeSelectSpec, TimeAgoSpec,
+    TimeFieldSpec, TimeZoneSelectSpec, ToastHostSpec, ToastStackSpec, TokenInputSpec,
+    ToolCallGroupSpec, ToolCallSpec, ToolbarSpec, TooltipSpec, TreeSpec, TriStateSwitchSpec,
+    TriStateValue, ValidationSummarySpec, VideoPlayerSpec,
 };
 use poodle_tokens::typed::ColorValue;
 
@@ -587,6 +583,7 @@ pub(crate) struct ThemeSelect {
 pub(crate) struct ModelPicker {
     spec: ModelPickerSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
 }
 
 pub(crate) struct PickerShell {
@@ -786,6 +783,7 @@ pub(crate) struct AgentChatInput {
 pub(crate) struct FilterBuilder {
     spec: FilterBuilderSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     handlers: poodle_render::FilterBuilderHandlers,
 }
 
@@ -998,7 +996,6 @@ impl DataTable {
         self.handlers.on_row_click = Some(handler);
         self
     }
-
 }
 
 impl AgentQuestion {
@@ -1014,7 +1011,6 @@ impl AgentQuestion {
         self.handlers.on_select = Some(handler);
         self
     }
-
 }
 
 impl IntoElement for AgentQuestion {
@@ -1342,7 +1338,6 @@ impl MediaBrowsePanel {
             on_select: None,
         }
     }
-
 }
 
 impl IntoElement for MediaBrowsePanel {
@@ -1430,7 +1425,6 @@ impl ToastHost {
         self.stack_spec.toasts = toasts;
         self
     }
-
 }
 
 impl IntoElement for ToastHost {
@@ -1503,7 +1497,6 @@ impl BulkActionBar {
             handlers: poodle_render::BulkActionBarHandlers::default(),
         }
     }
-
 }
 
 impl IntoElement for BulkActionBar {
@@ -1579,10 +1572,15 @@ impl IntoElement for AgentChatInput {
 }
 
 impl FilterBuilder {
-    pub(crate) fn from_spec(spec: FilterBuilderSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: FilterBuilderSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: instance_id.into(),
             handlers: poodle_render::FilterBuilderHandlers::default(),
         }
     }
@@ -1596,7 +1594,6 @@ impl FilterBuilder {
         self.spec.density = density;
         self
     }
-
 }
 
 impl IntoElement for FilterBuilder {
@@ -1606,6 +1603,7 @@ impl IntoElement for FilterBuilder {
         poodle_gpui_node_backend::to_gpui(&poodle_render::filter_builder(
             &self.spec,
             &self.theme,
+            &self.instance_id,
             &self.handlers,
         ))
     }
@@ -1629,7 +1627,6 @@ impl MarkdownEditor {
         self.handlers.on_mode_change = Some(handler);
         self
     }
-
 }
 
 impl IntoElement for MarkdownEditor {
@@ -1770,7 +1767,6 @@ impl RelationPicker {
         self.handlers.on_breadcrumb_click = Some(handler);
         self
     }
-
 }
 
 impl IntoElement for RelationPicker {
@@ -2185,10 +2181,15 @@ impl IntoElement for PickerShell {
 }
 
 impl ModelPicker {
-    pub(crate) fn from_spec(spec: ModelPickerSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: ModelPickerSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: instance_id.into(),
         }
     }
 
@@ -2203,7 +2204,7 @@ impl ModelPicker {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::model_picker(&self.spec, &self.theme, None)
+        poodle_render::model_picker(&self.spec, &self.theme, &self.instance_id, None)
     }
 }
 
@@ -3816,16 +3817,22 @@ impl IntoElement for Select {
 pub(crate) struct ColorPicker {
     spec: ColorPickerSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     id_suffix: Option<String>,
     on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 }
 
 impl ColorPicker {
-    pub(crate) fn from_spec(spec: ColorPickerSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: ColorPickerSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: instance_id.into(),
             id_suffix: None,
             on_toggle: None,
             on_change: None,
@@ -3861,6 +3868,7 @@ impl ColorPicker {
         let mut node = poodle_render::color_picker(
             &self.spec,
             &self.theme,
+            &self.instance_id,
             poodle_render::ColorPickerHandlers {
                 on_toggle: self.on_toggle,
                 on_change: self.on_change,
@@ -4112,7 +4120,10 @@ impl LicenceSeats {
         }
     }
 
-    pub(crate) fn on_rename(mut self, handler: Arc<dyn Fn(&str, Option<&str>) + Send + Sync>) -> Self {
+    pub(crate) fn on_rename(
+        mut self,
+        handler: Arc<dyn Fn(&str, Option<&str>) + Send + Sync>,
+    ) -> Self {
         self.handlers.on_rename = Some(handler);
         self
     }
@@ -4637,7 +4648,6 @@ impl Breadcrumbs {
         self.spec.density = density;
         self
     }
-
 }
 
 impl IntoElement for Breadcrumbs {
@@ -4672,7 +4682,6 @@ impl TextLink {
             on_click: None,
         }
     }
-
 }
 
 pub(crate) struct SelectionSummary {
@@ -6371,10 +6380,7 @@ impl Popover {
         self
     }
 
-    pub(crate) fn on_open_change(
-        mut self,
-        handler: Arc<dyn Fn(bool) + Send + Sync>,
-    ) -> Self {
+    pub(crate) fn on_open_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
         self.on_open_change = Some(handler);
         self
     }
@@ -6420,9 +6426,7 @@ impl IntoElement for Popover {
             },
         };
         let run_machine = {
-            use poodle_headless::popover::{
-                popover_transition, PopoverEffect, PopoverState,
-            };
+            use poodle_headless::popover::{popover_transition, PopoverEffect, PopoverState};
             let context = context;
             let handler = on_open_change.clone();
             let content = content.clone();
@@ -6453,9 +6457,7 @@ impl IntoElement for Popover {
                             poodle_headless::popover::PopoverInitialFocus::FirstFocusable => {
                                 let target = content
                                     .as_ref()
-                                    .and_then(|content| {
-                                        content.find(&|n| n.interaction.focusable)
-                                    });
+                                    .and_then(|content| content.find(&|n| n.interaction.focusable));
                                 if let Some(target) = target {
                                     let id = target
                                         .runtime_id
@@ -6487,21 +6489,19 @@ impl IntoElement for Popover {
             Arc::new(move || run(poodle_headless::popover::PopoverEvent::Toggle))
                 as Arc<dyn Fn() + Send + Sync>
         });
-        let on_dismiss = on_open_change
-            .as_ref()
-            .map(|_| {
-                let run = run_machine.clone();
-                Arc::new(move |reason| {
-                    run(match reason {
-                        poodle_node::DismissReason::Escape => {
-                            poodle_headless::popover::PopoverEvent::Escape
-                        }
-                        poodle_node::DismissReason::Outside => {
-                            poodle_headless::popover::PopoverEvent::OutsideInteract
-                        }
-                    })
-                }) as poodle_node::DismissHandler
-            });
+        let on_dismiss = on_open_change.as_ref().map(|_| {
+            let run = run_machine.clone();
+            Arc::new(move |reason| {
+                run(match reason {
+                    poodle_node::DismissReason::Escape => {
+                        poodle_headless::popover::PopoverEvent::Escape
+                    }
+                    poodle_node::DismissReason::Outside => {
+                        poodle_headless::popover::PopoverEvent::OutsideInteract
+                    }
+                })
+            }) as poodle_node::DismissHandler
+        });
         let node = poodle_render::popover(
             &spec,
             &theme,
@@ -6754,7 +6754,10 @@ impl DetailShell {
         self
     }
 
-    #[expect(dead_code, reason = "retained for parity with the state-content compatibility contract")]
+    #[expect(
+        dead_code,
+        reason = "retained for parity with the state-content compatibility contract"
+    )]
     pub(crate) fn with_state_content(mut self, content: impl IntoCompatNode) -> Self {
         self.state_content = Some(content.into_compat_node());
         self
@@ -7196,10 +7199,7 @@ impl Stepper {
         }
     }
 
-    pub(crate) fn on_collapsed_change(
-        mut self,
-        handler: Arc<dyn Fn(bool) + Send + Sync>,
-    ) -> Self {
+    pub(crate) fn on_collapsed_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
         self.handlers.on_collapsed_change = Some(handler);
         self
     }
@@ -7533,7 +7533,10 @@ impl LogList {
         }
     }
 
-    #[expect(dead_code, reason = "retained for hosts that wire the optional clear-filters event")]
+    #[expect(
+        dead_code,
+        reason = "retained for hosts that wire the optional clear-filters event"
+    )]
     pub(crate) fn on_clear_filters(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
         self.on_clear_filters = Some(handler);
         self

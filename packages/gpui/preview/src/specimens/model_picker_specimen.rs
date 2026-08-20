@@ -155,7 +155,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(section(
             "Cross-provider default",
             theme,
-            ModelPicker::from_spec(demo_spec().with_open(true), theme).into_any_element(),
+            ModelPicker::from_spec(demo_spec().with_open(true), theme, "default")
+                .into_any_element(),
         ))
         // An axis is a segmented control up to three options and a list beyond
         // that; `control` forces either. A model may expose none.
@@ -171,18 +172,21 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_value(ModelSelection::new("corvid-1"))
                         .with_open(true),
                     theme,
+                    "axis-segmented",
                 ))
                 .child(ModelPicker::from_spec(
                     demo_spec()
                         .with_value(ModelSelection::new("corvid-ultra"))
                         .with_open(true),
                     theme,
+                    "axis-list",
                 ))
                 .child(ModelPicker::from_spec(
                     demo_spec()
                         .with_value(ModelSelection::new("corvid-mini"))
                         .with_open(true),
                     theme,
+                    "axis-none",
                 ))
                 .into_any_element(),
         ))
@@ -196,11 +200,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(ModelPicker::from_spec(
                     demo_spec().with_variant(ModelPickerVariant::Outlined),
                     theme,
+                    "outlined",
                 ))
-                .child(ModelPicker::from_spec(demo_spec(), theme))
+                .child(ModelPicker::from_spec(demo_spec(), theme, "standard"))
                 .child(ModelPicker::from_spec(
                     demo_spec().with_emphasis(ModelPickerEmphasis::Subdued),
                     theme,
+                    "subdued",
                 ))
                 .into_any_element(),
         ))
@@ -214,10 +220,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(ModelPicker::from_spec(
                     demo_spec().with_show_axis_summary(false),
                     theme,
+                    "no-axis-summary",
                 ))
                 .child(ModelPicker::from_spec(
-                    demo_spec().with_show_model_descriptions(false).with_open(true),
+                    demo_spec()
+                        .with_show_model_descriptions(false)
+                        .with_open(true),
                     theme,
+                    "no-descriptions",
                 ))
                 .into_any_element(),
         ))
@@ -231,8 +241,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(ModelPicker::from_spec(
                     demo_spec().with_value(ModelSelection::default()),
                     theme,
+                    "empty",
                 ))
-                .child(ModelPicker::from_spec(demo_spec().with_disabled(true), theme))
+                .child(ModelPicker::from_spec(
+                    demo_spec().with_disabled(true),
+                    theme,
+                    "disabled",
+                ))
                 .into_any_element(),
         ))
         .into_any_element();
@@ -244,12 +259,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         examples,
         SpecimenAxes::examples_only()
             .with_sizes(|size, theme: &GpuiThemeProvider| {
-                ModelPicker::from_spec(demo_spec(), theme)
+                ModelPicker::from_spec(demo_spec(), theme, format!("size-{size:?}"))
                     .size(size)
                     .into_any_element()
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
-                ModelPicker::from_spec(demo_spec(), theme)
+                ModelPicker::from_spec(demo_spec(), theme, format!("density-{density:?}"))
                     .with_density(density)
                     .into_any_element()
             }),

@@ -3,7 +3,8 @@
 Status: **partial** — a mechanical screening baseline plus live measurement on
 all three runtimes. Not the completed human-centred audit: the rubric's
 teaching judgment was applied to the three pilots only, not to all 175 pages.
-Date: 2026-08-20 (revision 5 — GPUI column live-measured by the `g15.026`
+Date: 2026-08-20 (revision 6 — SegmentedControl native option parity closed
+by `g15.038`; revision 5 measured the GPUI column live via the `g15.026`
 probe; first pass 2026-08-17)
 Card: `docs/roadmaps/g15/011-specimen-catalogue-audit.md`
 Handoff: `docs/handoffs/20260817-214451-g15-011-specimen-catalogue-audit.md`
@@ -124,21 +125,21 @@ pre-pilot baseline.
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Svelte (live) | 81 | 33 | 52 | 9 | — |
 | React (live) | 94 | 26 | 55 | 0 | — |
-| GPUI (headless render + structural) | 99 | 69 | 6 | 0 | 1 |
-| **Worst of the three** | **57** | **49** | **60** | **9** | — |
+| GPUI (headless render + structural) | 100 | 68 | 6 | 0 | 1 |
+| **Worst of the three** | **58** | **48** | **60** | **9** | — |
 
 | Disposition | Count |
 | --- | ---: |
-| `keep` | 55 |
+| `keep` | 56 |
 | `pilot-fix` | 3 |
 | `curation-tranche` | 116 |
-| `contract/runtime-blocker` | 1 |
+| `contract/runtime-blocker` | 0 |
 
-175 of 175 pages were measured live in both web runtimes. One entry is a
-contract/runtime blocker, named by the `g15.028` human review: GPUI
-`SegmentedControl` cannot teach icon-only options because the Rust
-`ChoiceOption`/`SegmentedControlSpec` carries no `icon`/`iconOnly`
-counterpart to the contract's option fields. Nothing else found here needs a
+175 of 175 pages were measured live in both web runtimes. The `g15.028`
+contract/runtime blocker on GPUI `SegmentedControl` is closed by `g15.038`:
+Rust now has a dedicated `SegmentedControlOption`, shared rendering emits
+labelled-icon and icon-only segments, and the GPUI specimen teaches the
+contract's Effects/Instruments example. Nothing else found here needs a
 component semantic change.
 
 `MeterSurface` is the single `n/a` on GPUI — web-only by fixed decision
@@ -462,7 +463,7 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | `IconButton` | C | C | A | curation-tranche | **Sv:** controls do nothing — specimen wires no handler on any IconButton; takes `density`, but the page shows no Densities evidence · **Rc:** controls do nothing — specimen wires no handler on any IconButton; takes `density`, but the page shows no Densities evidence |
 | `Radio` | A | A | A | keep | human verdict (`g15.028`): keep — live three-option group plus States; Gp matches (custom-color hex is fixture data, not copy) |
 | `RadioGroup` | A | A | A | keep | human verdict (`g15.028`): keep — vertical/horizontal/disabled/custom color all live; Gp adds a bounded disabled-option visual |
-| `SegmentedControl` | A | A | B | contract/runtime-blocker | human verdict (`g15.028`): **Gp:** cannot teach the icon-only section — the contract's `SegmentedControlOption.icon`/`iconOnly` have no counterpart in Rust `ChoiceOption`/`SegmentedControlSpec`, a gap to port under the active-cohort rule (named at PR #51 review; orchestrator routes the follow-up) · **Sv/Rc:** keep — live default, disabled option, content fit, icon-only, fully disabled |
+| `SegmentedControl` | A | A | A | keep | human verdict (`g15.028`) plus `g15.038` closeout: **Gp:** icon-only options now use a dedicated `SegmentedControlOption` (icon, icon-only, title, accessible-name fallback) through shared render and a live Effects/Instruments specimen section · **Sv/Rc:** keep — live default, disabled option, content fit, icon-only, fully disabled |
 | `SplitButton` | C | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 7 captioned examples |
 | `Switch` | A | A | A | keep | human verdict (`g15.028`): keep — live trio, States, custom colors, dual labels/tones; Gp mirrors all four sections |
 | `ToggleGroup` | A | A | A | keep | human verdict (`g15.028`): keep after Gp specimen repair — "Multiple selection" was inert (node tier wires `on_activate` only when a handler exists) with a hardcoded readout; wired live with a real readout, and the inert static "Allow deactivation" section removed. Sv/Rc unchanged |

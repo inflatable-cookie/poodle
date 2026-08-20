@@ -12,24 +12,24 @@ use crate::compat::js_segmented_control;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{ChoiceOption, ControlDensity, ControlSize, SegmentedControlSpec};
+use poodle_specs::{ControlDensity, ControlSize, SegmentedControlOption, SegmentedControlSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // Contract default set: Grid / List / Table (Svelte authority).
     let view_options = vec![
-        ChoiceOption::new("grid", "Grid"),
-        ChoiceOption::new("list", "List"),
-        ChoiceOption::new("table", "Table"),
+        SegmentedControlOption::new("grid", "Grid"),
+        SegmentedControlOption::new("list", "List"),
+        SegmentedControlOption::new("table", "Table"),
     ];
 
     // Contract "With disabled option" set: All / Active / Archived / Draft(disabled).
     let status_options = vec![
-        ChoiceOption::new("all", "All"),
-        ChoiceOption::new("active", "Active"),
-        ChoiceOption::new("archived", "Archived"),
-        ChoiceOption::new("draft", "Draft").with_disabled(true),
+        SegmentedControlOption::new("all", "All"),
+        SegmentedControlOption::new("active", "Active"),
+        SegmentedControlOption::new("archived", "Archived"),
+        SegmentedControlOption::new("draft", "Draft").with_disabled(true),
     ];
 
     div()
@@ -40,7 +40,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Default (Grid selected)",
             secondary,
             div().w(300.0).child(js_segmented_control(
-                &SegmentedControlSpec::new(view_options.clone()).with_default_value("grid"),
+                &SegmentedControlSpec::new("default", view_options.clone())
+                    .with_default_value("grid"),
                 theme,
             )),
         ))
@@ -49,7 +50,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "With disabled option (Draft)",
             secondary,
             div().w(340.0).child(js_segmented_control(
-                &SegmentedControlSpec::new(status_options).with_default_value("all"),
+                &SegmentedControlSpec::new("disabled-option", status_options)
+                    .with_default_value("all"),
                 theme,
             )),
         ))
@@ -59,8 +61,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             div().w(300.0).child(js_segmented_control(
                 &{
-                    let mut s =
-                        SegmentedControlSpec::new(view_options.clone()).with_default_value("list");
+                    let mut s = SegmentedControlSpec::new("fully-disabled", view_options.clone())
+                        .with_default_value("list");
                     s.is_disabled = true;
                     s
                 },
@@ -72,12 +74,15 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Equal width (default)",
             secondary,
             div().w(360.0).child(js_segmented_control(
-                &SegmentedControlSpec::new(vec![
-                    ChoiceOption::new("day", "Day"),
-                    ChoiceOption::new("week", "Week"),
-                    ChoiceOption::new("month", "Month"),
-                    ChoiceOption::new("year", "Year"),
-                ])
+                &SegmentedControlSpec::new(
+                    "equal-width",
+                    vec![
+                        SegmentedControlOption::new("day", "Day"),
+                        SegmentedControlOption::new("week", "Week"),
+                        SegmentedControlOption::new("month", "Month"),
+                        SegmentedControlOption::new("year", "Year"),
+                    ],
+                )
                 .with_default_value("week")
                 .with_equal_width(true),
                 theme,
@@ -88,11 +93,14 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Content fit (equalWidth=false)",
             secondary,
             js_segmented_control(
-                &SegmentedControlSpec::new(vec![
-                    ChoiceOption::new("1h", "1h").with_aria_label("Last 1 hour"),
-                    ChoiceOption::new("6h", "6h").with_aria_label("Last 6 hours"),
-                    ChoiceOption::new("24h", "24h").with_aria_label("Last 24 hours"),
-                ])
+                &SegmentedControlSpec::new(
+                    "content-fit",
+                    vec![
+                        SegmentedControlOption::new("1h", "1h").with_aria_label("Last 1 hour"),
+                        SegmentedControlOption::new("6h", "6h").with_aria_label("Last 6 hours"),
+                        SegmentedControlOption::new("24h", "24h").with_aria_label("Last 24 hours"),
+                    ],
+                )
                 .with_default_value("24h")
                 .with_size(ControlSize::Xs)
                 .with_equal_width(false),
@@ -125,17 +133,17 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         ))
 }
 
-fn view_opts() -> Vec<ChoiceOption> {
+fn view_opts() -> Vec<SegmentedControlOption> {
     vec![
-        ChoiceOption::new("grid", "Grid"),
-        ChoiceOption::new("list", "List"),
-        ChoiceOption::new("table", "Table"),
+        SegmentedControlOption::new("grid", "Grid"),
+        SegmentedControlOption::new("list", "List"),
+        SegmentedControlOption::new("table", "Table"),
     ]
 }
 
 fn sized(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
     div().w(300.0).child(js_segmented_control(
-        &SegmentedControlSpec::new(view_opts())
+        &SegmentedControlSpec::new(format!("size-{size:?}"), view_opts())
             .with_default_value("grid")
             .with_size(size),
         theme,
@@ -144,7 +152,7 @@ fn sized(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
 
 fn dense(theme: &JetstreamThemeProvider, density: ControlDensity) -> El {
     div().w(300.0).child(js_segmented_control(
-        &SegmentedControlSpec::new(view_opts())
+        &SegmentedControlSpec::new(format!("density-{density:?}"), view_opts())
             .with_default_value("grid")
             .with_density(density),
         theme,

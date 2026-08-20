@@ -3,7 +3,7 @@
 > **Surface elevation**: SegmentedControl is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-07-14
+Updated: 2026-08-20
 
 ## 1. Purpose
 
@@ -263,6 +263,14 @@ Native radio inputs provide keyboard and focus behavior.
 - The hidden radio input pattern does not apply; GPUI must expose radiogroup
   semantics through its accessibility tree directly
 - Equal-width segment layout should use GPUI's flex or grid equivalent
+- Option tooltips project through the reusable `Node.tooltip` field onto GPUI's
+  native `.tooltip()`, not the Tooltip overlay component
+- Interactive instances always receive unique, stable focus identities.
+  `SegmentedControlSpec::new(instance_id, options)` requires the native
+  analogue of the web `name` prop. Hosts must keep that scope stable for the
+  control's lifetime. Composed controls receive their own stable parent scope
+  and derive child scopes from it (for example `picker-a:mode`). Shared render
+  is stateless and never derives identity from render order.
 
 ## 10a. Jetstream Notes
 
@@ -294,7 +302,7 @@ Native radio inputs provide keyboard and focus behavior.
 ### Tier 3: Implementation Freedom
 
 - [ ] hidden radio input vs GPUI native control is internal
-- [ ] module-level ID generation strategy is platform-owned
+- [ ] lifecycle ID ownership is platform-owned
 - [ ] transition timing is platform-owned
 
 ## 12. Known Deltas
@@ -302,9 +310,8 @@ Native radio inputs provide keyboard and focus behavior.
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Hidden radio inputs vs GPUI native controls | web uses native radio for a11y; GPUI exposes semantics directly | allowed | keep selection semantics strict |
-| ID generation strategy | module-level counter vs Rust ID approach | allowed | both must produce unique group names |
+| ID ownership | web lifecycle counter vs caller-owned Rust instance scope | allowed | both must produce unique, lifetime-stable group names |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
-| Icon and icon-only options | currently implemented by the authoritative Svelte component; native option specs do not yet carry icon references | provisional | add equivalent native icon references before claiming strict visual parity for this presentation |
 
 ## 13. Specimen Definitions
 

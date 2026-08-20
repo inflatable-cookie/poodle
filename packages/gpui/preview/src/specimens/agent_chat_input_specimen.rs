@@ -42,7 +42,7 @@ fn demo_picker(theme: &GpuiThemeProvider, size: ControlSize) -> Node {
         .with_size(size)
         // Subdued inside the composer: the editor should hold the eye.
         .with_emphasis(ModelPickerEmphasis::Subdued);
-    ModelPicker::from_spec(spec, theme).into_compat_node()
+    ModelPicker::from_spec(spec, theme, "agent-chat-input").into_compat_node()
 }
 
 fn toolbar_text(theme: &GpuiThemeProvider, value: &'static str) -> Node {

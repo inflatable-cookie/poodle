@@ -67,7 +67,7 @@ Rust render 1 missing (+ 1 not-applicable), GPUI specimen 0 missing
 | Update & settings | — closed by `g15.009` (`UpdateStatusSpec`, `UpdateCenterSpec`, `SettingsShellSpec`) | — closed by `g15.009` (`packages/render/src/{update_status,update_center,settings_shell}.rs`) | — closed by `g15.009` (`packages/gpui/preview/src/specimens/{update_status,update_center,settings_shell}.rs`) | `g15.009` |
 | Radio | — closed by `g15.009` (`RadioSpec`) | — closed by `g15.009` (`packages/render/src/radio.rs`) | — closed by `g15.009` (`packages/gpui/preview/src/specimens/radio.rs`) | `g15.009` |
 | Context providers | — | IconProvider closed by `g15.009` (`packages/render/src/icon_provider.rs`); UiPresentationProvider remains a declared capability absence because ambient presentation cannot cross an already-built Node tree | — | follow-up required before `g15.013` |
-| SegmentedControl option presentation | declaration exists, but `SegmentedControlSpec` reuses `ChoiceOption` and cannot carry the contract's icon, icon-only, or title fields | renderer cannot emit contracted icon-labelled/icon-only segment content | specimen cannot teach the contracted icon-only example | `g15.038` ready; clean dedicated-option migration approved 2026-08-20 |
+| SegmentedControl option presentation | closed by `g15.038`: dedicated public `SegmentedControlOption` (breaking, pre-1.0, operator-approved 2026-08-20) | closed: labelled-icon and icon-only rendering through `poodle-render` | closed: GPUI specimen teaches the contract's Effects/Instruments icon-only example | `g15.038` |
 | AgentTranscript scroll/follow | — | closed by `g15.037`: shared render owns content and the jump-control recipe | closed by `g15.037`: retained GPUI state owns a real tracked viewport, detach latch, and jump-to-bottom | `g15.037` complete in PR #48; no remaining release blocker |
 | Stepper selection and re-run | — | handlers exist in shared composition | `node_compat.rs` wires collapse only; selection and re-run controls shown by the specimen are inert | follow-up card required before `g15.013`; found and accepted out of scope in PR #49 |
 | Specimen axis domains | — closed by `g15.034` | — closed by `g15.034` | fake panes removed by `g15.019`; exact domains closed by `g15.034` | complete in PR #41 |
@@ -107,7 +107,7 @@ the roster is folded into the release-certification card.
 | --- | --- | --- |
 | Licence native completion (`g14.017`) | closed by `g15.007` — declarations, render, and GPUI specimens landed | `g15.007` |
 | Model-connection native completion (`g14.020`) | closed by `g15.008` — declarations, headless mirror, render, and GPUI specimens landed | `g15.008` |
-| Human-centred specimen catalogue audit (`g14.026`) | screening, pilots, defect-led curation, native probe, and first screen-clear child are complete; `g15.028` returned the SegmentedControl blocker now owned by `g15.038`; five review children remain | `g15.011`, `g15.029`–`g15.033`, `g15.038` |
+| Human-centred specimen catalogue audit (`g14.026`) | screening, pilots, defect-led curation, native probe, first screen-clear child, and SegmentedControl native option parity (`g15.038`) are complete; five review children remain | `g15.011`, `g15.029`–`g15.033` |
 | Primitive-first visual conformance lane | seam recorded in `conformance-estate.md`; harness not designed | `g15.012` |
 | Release-gate remediation | closed by PR #31 — `nanoid@3.3.18`; `bun audit` clean | `g15.014` |
 | v0.2.0 release certification | after all Svelte-denominator blockers close | `g15.013` |

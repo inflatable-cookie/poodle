@@ -39,11 +39,7 @@ pub fn js_message_center(spec: &MessageCenterSpec, theme: &JetstreamThemeProvide
         on_mark_all_read: Some(std::sync::Arc::new(|| {})),
         ..Default::default()
     };
-    El(pr::message_center(
-        spec,
-        theme,
-        handlers,
-    ))
+    El(pr::message_center(spec, theme, handlers))
 }
 
 pub fn js_agent_chat_input(
@@ -124,7 +120,9 @@ pub fn js_app_header_with_slots(
     let center: Option<Node> = center.map(Node::from);
     let actions: Option<Node> = actions.map(Node::from);
     let utility: Option<Node> = utility.map(Node::from);
-    El(pr::app_header(spec, theme, identity, center, actions, utility))
+    El(pr::app_header(
+        spec, theme, identity, center, actions, utility,
+    ))
 }
 
 pub fn js_audio_player(spec: &AudioPlayerSpec, theme: &JetstreamThemeProvider) -> El {
@@ -168,11 +166,7 @@ pub fn js_calendar(spec: &CalendarSpec, theme: &JetstreamThemeProvider) -> El {
 }
 
 pub fn js_callout(spec: &CallOutSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::callout(
-        spec,
-        theme,
-        pr::CalloutHandlers::default(),
-    ))
+    El(pr::callout(spec, theme, pr::CalloutHandlers::default()))
 }
 
 pub fn js_card(spec: &CardSpec, theme: &JetstreamThemeProvider, children: Vec<El>) -> El {
@@ -213,10 +207,15 @@ pub fn js_collapsible(
     El(pr::collapsible(spec, theme, content, None))
 }
 
-pub fn js_color_picker(spec: &ColorPickerSpec, theme: &JetstreamThemeProvider) -> El {
+pub fn js_color_picker(
+    spec: &ColorPickerSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: &str,
+) -> El {
     El(pr::color_picker(
         spec,
         theme,
+        instance_id,
         pr::ColorPickerHandlers::default(),
     ))
 }
@@ -458,10 +457,15 @@ pub fn js_file_upload(spec: &FileUploadSpec, theme: &JetstreamThemeProvider) -> 
     El(pr::file_upload(spec, theme, None))
 }
 
-pub fn js_filter_builder(spec: &FilterBuilderSpec, theme: &JetstreamThemeProvider) -> El {
+pub fn js_filter_builder(
+    spec: &FilterBuilderSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: &str,
+) -> El {
     El(pr::filter_builder(
         spec,
         theme,
+        instance_id,
         &pr::FilterBuilderHandlers::default(),
     ))
 }
@@ -681,8 +685,12 @@ pub fn js_metric_tile(spec: &MetricTileSpec, theme: &JetstreamThemeProvider) -> 
     El(pr::metric_tile(spec, theme))
 }
 
-pub fn js_model_picker(spec: &ModelPickerSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::model_picker(spec, theme, None))
+pub fn js_model_picker(
+    spec: &ModelPickerSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: &str,
+) -> El {
+    El(pr::model_picker(spec, theme, instance_id, None))
 }
 
 pub fn js_nav_card(spec: &NavCardSpec, theme: &JetstreamThemeProvider) -> El {

@@ -139,6 +139,19 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
             .size_full(),
         );
     }
+    if let Some(text) = node
+        .tooltip
+        .as_deref()
+        .filter(|text| !text.is_empty())
+        .map(str::to_string)
+    {
+        record_probe_channel("tooltip.projection.received");
+        el = el.tooltip(move |_window, cx| {
+            AnyView::from(cx.new(|_| NodeTooltip {
+                text: SharedString::from(text.clone()),
+            }))
+        });
+    }
     if node.interaction.disabled {
         record_probe_channel("semantic.disabled.blocked");
         return el;
@@ -638,5 +651,24 @@ struct EmptyDragPreview;
 impl gpui::Render for EmptyDragPreview {
     fn render(&mut self, _window: &mut Window, _cx: &mut gpui::Context<Self>) -> impl IntoElement {
         div()
+    }
+}
+
+/// Native hover tooltip for `Node.tooltip`. GPUI's `.tooltip()` requires an
+/// `AnyView`; this is the smallest text view, not Poodle's Tooltip overlay.
+struct NodeTooltip {
+    text: SharedString,
+}
+
+impl gpui::Render for NodeTooltip {
+    fn render(&mut self, _window: &mut Window, _cx: &mut gpui::Context<Self>) -> impl IntoElement {
+        div()
+            .px(px(8.0))
+            .py(px(4.0))
+            .rounded(px(6.0))
+            .bg(gpui::hsla(0.0, 0.0, 0.12, 0.96))
+            .text_color(gpui::hsla(0.0, 0.0, 0.96, 1.0))
+            .text_sm()
+            .child(self.text.clone())
     }
 }

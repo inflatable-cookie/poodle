@@ -73,6 +73,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_show_combinator(true)
                     .with_open(true),
                 theme,
+                "default",
             ),
         ))
         .child(group(
@@ -86,6 +87,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_open(true)
                     .with_draft(FilterDraft::adding(&fields()[3])),
                 theme,
+                "adding",
             ),
         ))
         .child(group(
@@ -99,6 +101,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_open(true)
                     .with_draft(FilterDraft::editing(&value().clauses[0])),
                 theme,
+                "editing",
             ),
         ))
         .child(group(
@@ -109,6 +112,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_fields(fields())
                     .with_open(true),
                 theme,
+                "empty",
             ),
         ))
         .child(group(
@@ -120,6 +124,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_value(single())
                     .with_disabled(true),
                 theme,
+                "disabled",
             ),
         ))
         .child(group(
@@ -141,6 +146,13 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                             .with_value(single())
                             .with_size(size),
                         theme,
+                        match size {
+                            ControlSize::Xs => "size-xs",
+                            ControlSize::Sm => "size-sm",
+                            ControlSize::Md => "size-md",
+                            ControlSize::Lg => "size-lg",
+                            ControlSize::Xl => "size-xl",
+                        },
                     )
                 }),
             ),
@@ -162,6 +174,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                             .with_value(single())
                             .with_density(density),
                         theme,
+                        match density {
+                            ControlDensity::Compact => "density-compact",
+                            ControlDensity::Default => "density-default",
+                            ControlDensity::Comfortable => "density-comfortable",
+                        },
                     )
                 }),
             ),

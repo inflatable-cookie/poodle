@@ -20,7 +20,7 @@ use poodle_specs::{
     ButtonSpec, ButtonVariant, CheckboxSpec, ChoiceOption, ControlDensity, ControlSize,
     FilterBuilderPicker, FilterBuilderSpec, FilterCombinator, FilterFieldDefinition,
     FilterFieldKind, FilterOperand, FilterOperandKind, IconButtonSpec, NumberInputSpec,
-    SegmentedControlSpec, SelectSpec, TextInputSpec,
+    SegmentedControlOption, SegmentedControlSpec, SelectSpec, TextInputSpec,
 };
 
 use crate::button::button;
@@ -72,6 +72,7 @@ fn row(gap: f32) -> Node {
 )]
 fn operand_editor(
     theme: &dyn ThemeProvider,
+    instance_id: &str,
     field: &FilterFieldDefinition,
     operand_kind: FilterOperandKind,
     operand: &FilterOperand,
@@ -84,10 +85,13 @@ fn operand_editor(
     match operand_kind {
         FilterOperandKind::Boolean => {
             let on = matches!(operand, FilterOperand::Boolean(true));
-            let mut s = SegmentedControlSpec::new(vec![
-                ChoiceOption::new("true", "True"),
-                ChoiceOption::new("false", "False"),
-            ])
+            let mut s = SegmentedControlSpec::new(
+                format!("{instance_id}:boolean:{}", field.key),
+                vec![
+                    SegmentedControlOption::new("true", "True"),
+                    SegmentedControlOption::new("false", "False"),
+                ],
+            )
             .with_size(size)
             .with_density(density);
             s.value = Some(if on { "true" } else { "false" }.to_string());
@@ -225,6 +229,7 @@ fn operand_editor(
 pub fn filter_builder(
     spec: &FilterBuilderSpec,
     theme: &dyn ThemeProvider,
+    instance_id: &str,
     handlers: &FilterBuilderHandlers,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -531,6 +536,7 @@ pub fn filter_builder(
             if let Some(op) = field.find_operator(&draft.operator) {
                 editor = editor.child(operand_editor(
                     theme,
+                    instance_id,
                     field,
                     op.operand_kind,
                     &draft.operand,
@@ -658,13 +664,22 @@ mod tests {
     fn outside_interact_refusal_marks_the_open_surface() {
         // Web default `true` + open: no refusal marker anywhere in the tree.
         let spec = FilterBuilderSpec::new().with_open(true);
-        let node = filter_builder(&spec, &theme(), &FilterBuilderHandlers::default());
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
+        let node = filter_builder(&spec, &theme(), "test", &FilterBuilderHandlers::default());
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_none());
 
         // Refusal: the open surface carries the inert activation marker a
         // host keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
-        let node = filter_builder(&refusing, &theme(), &FilterBuilderHandlers::default());
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
+        let node = filter_builder(
+            &refusing,
+            &theme(),
+            "test-refusing",
+            &FilterBuilderHandlers::default(),
+        );
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_some());
     }
 }

@@ -30,7 +30,7 @@ use poodle_node::{
     LayoutSizing, Node, NodePosition, NodeRole, ShadowLayer,
 };
 use poodle_specs::{
-    ChoiceOption, ColorInputMode, ColorPickerSpec, NumberInputSpec, SegmentedControlSpec,
+    ColorInputMode, ColorPickerSpec, NumberInputSpec, SegmentedControlOption, SegmentedControlSpec,
 };
 
 use crate::color::{
@@ -84,6 +84,7 @@ fn inset_overlay() -> Node {
 pub fn color_picker(
     spec: &ColorPickerSpec,
     theme: &dyn ThemeProvider,
+    instance_id: &str,
     handlers: ColorPickerHandlers,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -212,8 +213,16 @@ pub fn color_picker(
 
         // ── Picker area: gradient pad (left) + controls (right) ───
         let gradient_pad = build_gradient_pad(hsv, current_color, radius_control);
-        let controls_panel =
-            build_controls_panel(spec, theme, &current, rgb, hsv, alpha, current_color);
+        let controls_panel = build_controls_panel(
+            spec,
+            theme,
+            instance_id,
+            &current,
+            rgb,
+            hsv,
+            alpha,
+            current_color,
+        );
 
         let mut picker_area = Node::container();
         picker_area.style.descriptor.layout.direction = LayoutDirection::Row;
@@ -327,6 +336,7 @@ fn build_gradient_pad(hsv: Hsv, current_color: ColorValue, radius_control: f32) 
 fn build_controls_panel(
     spec: &ColorPickerSpec,
     theme: &dyn ThemeProvider,
+    instance_id: &str,
     current: &str,
     rgb: Rgb255,
     hsv: Hsv,
@@ -360,11 +370,14 @@ fn build_controls_panel(
         ColorInputMode::Rgb => "rgb",
         ColorInputMode::Hsl => "hsl",
     };
-    let mode_spec = SegmentedControlSpec::new(vec![
-        ChoiceOption::new("hex", "Hex"),
-        ChoiceOption::new("rgb", "RGB"),
-        ChoiceOption::new("hsl", "HSL"),
-    ])
+    let mode_spec = SegmentedControlSpec::new(
+        format!("{instance_id}:mode"),
+        vec![
+            SegmentedControlOption::new("hex", "Hex"),
+            SegmentedControlOption::new("rgb", "RGB"),
+            SegmentedControlOption::new("hsl", "HSL"),
+        ],
+    )
     .with_default_value(mode_value)
     .with_size(spec.size)
     .with_density(spec.density);
