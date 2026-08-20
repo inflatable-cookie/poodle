@@ -79,8 +79,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or("grid")
         .to_string();
 
-    let default_spec =
-        SegmentedControlSpec::new(view_options.clone()).with_default_value(&selected_value);
+    let default_spec = SegmentedControlSpec::new(view_options.clone())
+        .with_default_value(&selected_value)
+        .with_instance_id("default");
 
     // --- With disabled option: All / Active / Archived / Draft (disabled), defaultValue="all" ---
     let status_options: Vec<SegmentedControlOption> = vec![
@@ -90,11 +91,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         SegmentedControlOption::new("draft", "Draft").with_disabled(true),
     ];
 
-    let disabled_opt_spec = SegmentedControlSpec::new(status_options).with_default_value("all");
+    let disabled_opt_spec = SegmentedControlSpec::new(status_options)
+        .with_default_value("all")
+        .with_instance_id("disabled-option");
 
     // --- Fully disabled: Grid / List / Table, defaultValue="list", isDisabled ---
-    let mut fully_disabled_spec =
-        SegmentedControlSpec::new(view_options).with_default_value("list");
+    let mut fully_disabled_spec = SegmentedControlSpec::new(view_options)
+        .with_default_value("list")
+        .with_instance_id("fully-disabled");
     fully_disabled_spec.is_disabled = true;
 
     // --- Equal width: carries an aria label ("Time range") ---
@@ -105,7 +109,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         SegmentedControlOption::new("year", "Year"),
     ])
     .with_default_value("week")
-    .with_equal_width(true);
+    .with_equal_width(true)
+    .with_instance_id("equal-width");
     equal_width_spec.aria_label = Some("Time range".to_string());
 
     // --- Content fit: per-option aria labels + group label "Timeline window" ---
@@ -116,7 +121,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     ])
     .with_default_value("24h")
     .with_size(poodle_specs::ControlSize::Xs)
-    .with_equal_width(false);
+    .with_equal_width(false)
+    .with_instance_id("content-fit");
     content_fit_spec.aria_label = Some("Timeline window".to_string());
 
     // --- Icon-only options: Effects / Instruments, live selection ---
@@ -137,7 +143,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     ])
     .with_default_value(&icon_selected)
     .with_size(ControlSize::Sm)
-    .with_equal_width(false);
+    .with_equal_width(false)
+    .with_instance_id("icon-only");
     icon_only_spec.aria_label = Some("Plugin kind".to_string());
 
     let examples = div()
@@ -250,7 +257,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 node_segmented_control_static(
                     SegmentedControlSpec::new(make_opts())
                         .with_default_value("grid")
-                        .with_size(size),
+                        .with_size(size)
+                        .with_instance_id(format!("size-{size:?}")),
                     theme,
                 )
             })
@@ -258,7 +266,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 node_segmented_control_static(
                     SegmentedControlSpec::new(make_opts())
                         .with_default_value("grid")
-                        .with_density(density),
+                        .with_density(density)
+                        .with_instance_id(format!("density-{density:?}")),
                     theme,
                 )
             }),
@@ -297,7 +306,8 @@ mod icon_only_tests {
         ])
         .with_default_value(selected)
         .with_size(ControlSize::Sm)
-        .with_equal_width(false);
+        .with_equal_width(false)
+        .with_instance_id("icon-only");
         spec.aria_label = Some("Plugin kind".to_string());
         segmented_control(&spec, theme, Some(on_change))
     }

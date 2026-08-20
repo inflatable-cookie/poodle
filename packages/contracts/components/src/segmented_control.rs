@@ -101,6 +101,10 @@ pub struct SegmentedControlSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
+    /// Stable native instance scope. Semantic option ids remain readable;
+    /// backends key focus by the scoped runtime id so two controls that share
+    /// option values never share a focus handle.
+    pub instance_id: Option<String>,
 }
 
 impl Default for SegmentedControlSpec {
@@ -115,6 +119,7 @@ impl Default for SegmentedControlSpec {
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
+            instance_id: None,
         }
     }
 }
@@ -152,6 +157,11 @@ impl SegmentedControlSpec {
 
     pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
         self.size_role = size_role;
+        self
+    }
+
+    pub fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.instance_id = Some(instance_id.into());
         self
     }
 

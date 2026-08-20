@@ -74,14 +74,6 @@ fn sample_property_clamps_outside_keyframe_range_and_skips_absent_properties() {
 }
 
 #[test]
-fn paint_icon_name_falls_back_to_a_real_asset() {
-    assert_eq!(paint_icon_name("audio-waveform"), "audio-waveform");
-    assert_eq!(paint_icon_name("piano"), "piano");
-    assert_eq!(paint_icon_name("spinner"), "loader-circle");
-    assert_eq!(paint_icon_name("not-a-real-icon"), "circle-x");
-}
-
-#[test]
 fn tooltip_forces_element_state() {
     let mut node = Node::button("ok");
     assert!(
@@ -95,6 +87,24 @@ fn tooltip_forces_element_state() {
     );
     node.tooltip = Some(String::new());
     assert!(!needs_state(&node), "an empty tooltip is not a tooltip");
+}
+
+#[test]
+fn focusable_nodes_with_a_focus_patch_are_tracked() {
+    let mut node = Node::button("grid");
+    node.interaction.focusable = true;
+    node.id = Some("segmented:grid".into());
+    node.runtime_id = Some("segmented:a:option:grid".into());
+    assert!(
+        !tracks_focus(&node),
+        "without a focus patch the backend never creates a retrievable handle"
+    );
+    node.style.focus = Some(StylePatch {
+        border_color: Some(ColorValue(0.3, 0.6, 1.0, 1.0)),
+        ..StylePatch::default()
+    });
+    assert!(tracks_focus(&node));
+    assert_eq!(element_id_string(&node), "segmented:a:option:grid");
 }
 
 #[test]

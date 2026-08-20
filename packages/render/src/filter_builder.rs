@@ -89,7 +89,8 @@ fn operand_editor(
                 SegmentedControlOption::new("false", "False"),
             ])
             .with_size(size)
-            .with_density(density);
+            .with_density(density)
+            .with_instance_id(format!("filter-boolean-{}", field.key));
             s.value = Some(if on { "true" } else { "false" }.to_string());
             s.is_disabled = disabled;
             segmented_control(&s, theme, handlers.on_operand_change.clone())

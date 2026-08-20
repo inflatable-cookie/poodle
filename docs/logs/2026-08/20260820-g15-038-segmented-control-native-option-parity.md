@@ -23,15 +23,19 @@ RadioGroup, CardRadioGroup, and every other family.
 ## Change class
 
 - **Packages changed:** `poodle-specs`, `poodle-node`, `poodle-render`,
-  `poodle-gpui-node-backend`, internal GPUI/Jetstream previews, in-repo
-  SegmentedControl callers
+  `poodle-gpui-node-backend`, `@inflatable-cookie/poodle-core`, internal
+  GPUI/Jetstream previews, in-repo SegmentedControl callers
 - **Public-intent entry points:** `SegmentedControlOption` (new);
   `SegmentedControlSpec::new` / `options` now take
   `Vec<SegmentedControlOption>` instead of `Vec<ChoiceOption>`; additive
-  `Node.tooltip`
-- **Compatibility:** clean break, pre-1.0; operator approved 2026-08-20
+  `Node.tooltip`, additive `SegmentedControlSpec::instance_id`; additive
+  default-icon names `audioWaveform` and `piano` on
+  `@inflatable-cookie/poodle-core/icons`
+- **Compatibility:** clean break on the option type, pre-1.0; operator
+  approved 2026-08-20. Icon names and `instance_id` are additive.
 - **Downstream re-check:** any out-of-repo `SegmentedControlSpec` constructor
-  that passed `ChoiceOption` must construct `SegmentedControlOption` instead
+  that passed `ChoiceOption` must construct `SegmentedControlOption` instead.
+  Apps that import the default Lucide set gain `audioWaveform` and `piano`.
 
 ## Implementation
 
@@ -94,9 +98,20 @@ Two HIGH findings, both addressed on this branch:
    `tab_index`, and `interaction.disabled`. Arrow/Home/End move through
    enabled options and skip disabled ones. The old "disabled option stays
    focusable and undimmed" test now asserts the contract.
-2. `audio-waveform` and `piano` are in the default Lucide set. Shared
-   resolve maps aliases and unknown names to `circle-x`; GPUI paints the
-   resolved asset. Evidence checks the SVG file exists, not just the node.
+2. `audio-waveform` and `piano` are in the default Lucide set, with SVG
+   existence evidence.
+
+## Review round 2 (PR #52)
+
+1. Each control takes an `instance_id`. Segment `runtime_id`s are scoped
+   (`segmented:{scope}:option:{value}`). Enabled segments carry a focus-ring
+   patch so GPUI `tracks_focus` creates retrievable handles. Roving keys
+   return that scoped id. Multi-instance evidence checks that `a` and `b`
+   cannot steal each other's focus keys.
+2. Global icon-name rewriting was removed. Shared render and the GPUI
+   backend pass the node name through to the app-owned asset source. Custom
+   names such as `company-logo` stay intact. No generic native fallback.
+3. Change-class now records the additive `poodle-core` default-icon exports.
 
 ## Unresolved
 

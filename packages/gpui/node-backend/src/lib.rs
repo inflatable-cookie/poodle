@@ -40,33 +40,10 @@ use poodle_node::{
     NodePoint, NodePosition, NodeRole, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
 };
 
-mod icon_names {
-    include!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/../../render/src/icon_names.generated.rs"
-    ));
-}
 mod interaction;
 mod layers;
 mod style;
 mod tracked_scroll;
-
-/// Resolve a node icon name onto a paint asset in the default Lucide set.
-pub fn paint_icon_name(name: &str) -> &'static str {
-    if let Some(&canonical) = icon_names::CANONICAL_ICON_NAMES
-        .iter()
-        .find(|candidate| **candidate == name)
-    {
-        return canonical;
-    }
-    if let Some((_, target)) = icon_names::ICON_ALIASES
-        .iter()
-        .find(|(alias, _)| *alias == name)
-    {
-        return target;
-    }
-    icon_names::FALLBACK_ICON_NAME
-}
 
 pub mod file_capability;
 
@@ -418,9 +395,8 @@ fn to_gpui_impl(node: &Node) -> AnyElement {
         NodeKind::Icon { name, size } => {
             record_probe_channel("content.text-icon.icon");
             // Same path convention as the old tier's Icon: the app owns the
-            // asset source; the name is the contract. Unknown names fall back
-            // to `circle-x`, matching web `resolveIconNodes`.
-            let name = paint_icon_name(name);
+            // asset source; the name is the contract. svg() renders tinted by
+            // `text_color`, which the style walk supplies.
             let el = svg()
                 .path(SharedString::from(format!("assets/icons/{name}.svg")))
                 .size(px(*size))

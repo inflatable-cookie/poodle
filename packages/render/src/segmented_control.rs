@@ -15,7 +15,7 @@ use poodle_node::{
 };
 use poodle_specs::{IconSize, SegmentedControlSpec};
 
-use crate::color::{mix_srgb, with_alpha};
+use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
     resolve_supporting_visual_size,
@@ -71,6 +71,8 @@ pub fn segmented_control(
     let selected_highlight = with_alpha(text_inverse, text_inverse.3 * 0.12);
     // Contract §8 Label: inner radius = calc(radius-control - 0.125rem).
     let inner_radius = (control_radius - inner).max(0.0);
+    let focus_ring = theme.resolve_color("color.accent.focusRing");
+    let focus_ring_width = rem_to_px(0.125);
 
     let selected = spec.current_value();
 
@@ -167,6 +169,17 @@ pub fn segmented_control(
                 s.descriptor.layout.spacing.gap = icon_text_gap;
             }
             if is_enabled {
+                // Transparent reserve so the contracted focus ring can paint
+                // without a layout shift, and so GPUI tracks a focus handle
+                // (`tracks_focus` requires focusable + a focus patch).
+                s.descriptor.border.width = focus_ring_width;
+                s.descriptor.border.color = TRANSPARENT;
+                s.focus = Some(StylePatch {
+                    border_color: Some(focus_ring),
+                    background: None,
+                    text_color: None,
+                    opacity: None,
+                });
                 // Old tier: pointer cursor on every enabled segment, whether or
                 // not a change handler is wired.
                 s.descriptor.cursor = CursorHint::Pointer;
@@ -189,7 +202,7 @@ pub fn segmented_control(
         }
 
         if let Some(icon_name) = option.icon.as_deref() {
-            let mut glyph = Node::icon(crate::icon::resolve_icon_name(icon_name), icon_size);
+            let mut glyph = Node::icon(icon_name, icon_size);
             glyph.style.descriptor.text_color = Some(text_color);
             seg = seg.child(glyph);
             if !icon_only {
@@ -204,6 +217,7 @@ pub fn segmented_control(
         }
 
         seg.id = Some(segment_id(&option.value));
+        seg.runtime_id = Some(segment_focus_id(spec.instance_id.as_deref(), &option.value));
         seg.a11y.role = Some(NodeRole::RadioButton);
         seg.a11y.selected = Some(is_selected);
         seg.a11y.toggled = Some(if is_selected {
@@ -226,7 +240,12 @@ pub fn segmented_control(
                 let value = option.value.clone();
                 seg.interaction.on_activate = Some(Arc::new(move || handler(&value)));
             }
-            seg.interaction.on_key = roving_key_handler(&option.value, &roving, on_change.clone());
+            seg.interaction.on_key = roving_key_handler(
+                &option.value,
+                &roving,
+                spec.instance_id.clone(),
+                on_change.clone(),
+            );
         } else {
             seg.interaction.disabled = true;
             seg.interaction.focusable = false;
@@ -263,6 +282,13 @@ fn segment_id(value: &str) -> String {
     format!("segmented:{value}")
 }
 
+fn segment_focus_id(instance_id: Option<&str>, value: &str) -> String {
+    match instance_id {
+        Some(scope) => format!("segmented:{scope}:option:{value}"),
+        None => segment_id(value),
+    }
+}
+
 fn roving_values(spec: &SegmentedControlSpec) -> Vec<String> {
     spec.options
         .iter()
@@ -283,6 +309,7 @@ fn tab_stop_value<'a>(spec: &'a SegmentedControlSpec, roving: &'a [String]) -> O
 fn roving_key_handler(
     value: &str,
     roving: &[String],
+    instance_id: Option<String>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Option<Arc<dyn Fn(NodeKey, poodle_node::NodeModifiers) -> Option<String> + Send + Sync>> {
     let index = roving.iter().position(|candidate| candidate == value)?;
@@ -307,7 +334,7 @@ fn roving_key_handler(
         if let Some(handler) = &on_change {
             handler(&target);
         }
-        Some(segment_id(&target))
+        Some(segment_focus_id(instance_id.as_deref(), &target))
     }))
 }
 
@@ -605,7 +632,8 @@ mod tests {
             SegmentedControlOption::new("list", "List").with_disabled(true),
             SegmentedControlOption::new("table", "Table"),
         ])
-        .with_default_value("grid");
+        .with_default_value("grid")
+        .with_instance_id("view");
         let node = segmented_control(&spec, &theme(), Some(on_change));
         let keys = find_segment(&node, "Grid")
             .interaction
@@ -615,29 +643,82 @@ mod tests {
         let modifiers = NodeModifiers::default();
         assert_eq!(
             keys(NodeKey::ArrowRight, modifiers),
-            Some(segment_id("table"))
+            Some(segment_focus_id(Some("view"), "table"))
         );
         assert_eq!(seen.lock().unwrap().as_slice(), ["table"]);
         assert!(find_segment(&node, "List").interaction.on_key.is_none());
     }
 
     #[test]
-    fn unknown_option_icon_falls_back_to_a_paint_asset() {
+    fn enabled_segments_carry_a_focus_patch_so_gpui_tracks_handles() {
+        let spec = SegmentedControlSpec::new(view_options()).with_default_value("grid");
+        let node = segmented_control(&spec, &theme(), None);
+        let grid = find_segment(&node, "Grid");
+        assert!(grid.style.focus.is_some());
+        assert_eq!(
+            grid.style.focus.and_then(|patch| patch.border_color),
+            Some(theme().resolve_color("color.accent.focusRing"))
+        );
+    }
+
+    #[test]
+    fn instance_scope_keeps_roving_focus_inside_the_originating_control() {
+        use std::sync::Mutex;
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&seen);
+        let on_change: Arc<dyn Fn(&str) + Send + Sync> =
+            Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()));
+        let a = segmented_control(
+            &SegmentedControlSpec::new(view_options())
+                .with_default_value("grid")
+                .with_instance_id("a"),
+            &theme(),
+            Some(Arc::clone(&on_change)),
+        );
+        let b = segmented_control(
+            &SegmentedControlSpec::new(view_options())
+                .with_default_value("grid")
+                .with_instance_id("b"),
+            &theme(),
+            Some(on_change),
+        );
+        let a_grid = find_segment(&a, "Grid");
+        let b_grid = find_segment(&b, "Grid");
+        assert_eq!(a_grid.id.as_deref(), Some("segmented:grid"));
+        assert_eq!(b_grid.id.as_deref(), Some("segmented:grid"));
+        assert_eq!(
+            a_grid.runtime_id.as_deref(),
+            Some("segmented:a:option:grid")
+        );
+        assert_eq!(
+            b_grid.runtime_id.as_deref(),
+            Some("segmented:b:option:grid")
+        );
+        let modifiers = NodeModifiers::default();
+        assert_eq!(
+            (a_grid.interaction.on_key.as_ref().unwrap())(NodeKey::ArrowRight, modifiers),
+            Some("segmented:a:option:list".to_string())
+        );
+        assert_eq!(
+            (b_grid.interaction.on_key.as_ref().unwrap())(NodeKey::ArrowRight, modifiers),
+            Some("segmented:b:option:list".to_string())
+        );
+        assert_eq!(seen.lock().unwrap().as_slice(), ["list", "list"]);
+        assert!(a_grid.style.focus.is_some());
+        assert!(b_grid.style.focus.is_some());
+    }
+
+    #[test]
+    fn custom_option_icon_names_are_preserved() {
         let spec = SegmentedControlSpec::new(vec![SegmentedControlOption::new("grid", "Grid")
-            .with_icon("not-a-real-icon")
+            .with_icon("company-logo")
             .with_icon_only(true)]);
         let node = segmented_control(&spec, &theme(), None);
-        let fallback = find_icon_segment(&node, "circle-x");
-        assert!(matches!(
-            &fallback
-                .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "circle-x"))
-                .expect("fallback icon")
-                .kind,
-            poodle_node::NodeKind::Icon { name, .. } if name == "circle-x"
-        ));
-        assert!(std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("assets/icons/circle-x.svg")
-            .is_file());
+        assert!(find_icon_segment(&node, "company-logo")
+            .find(
+                &|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "company-logo")
+            )
+            .is_some());
     }
 
     fn plugin_kind_options() -> Vec<SegmentedControlOption> {
