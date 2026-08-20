@@ -73,13 +73,13 @@ Totals recounted from the 175 inventory rows.
 
 Headless only. No windowed, native-visual, Jetstream, or release selector ran.
 
-- focused Svelte and React DateTimeZonePicker tests (18 passed)
-- paired Select tests after the `hostElement` plumbing (8 passed)
-- `effigy check:svelte`
-- `effigy react:build`
-- `effigy catalogue:check`
-- `effigy docs:check`
-- `git diff --check origin/main...HEAD`
+- focused Svelte and React DateTimeZonePicker tests — 18 passed
+- paired Select tests after the `hostElement` plumbing — 8 passed
+- `effigy check:svelte` — 0 errors
+- `effigy react:build` — pass
+- `effigy catalogue:check` — pass
+- `effigy docs:check` — pass
+- `git diff --check` — clean on the working tree
 
 ## Unresolved
 
