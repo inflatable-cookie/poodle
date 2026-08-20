@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-20 — `gh pr merge --merge --delete-branch` successfully merges a PR
+  from its worker worktree, then exits non-zero because it tries to check out
+  `main`, which is already owned by the planning worktree. Merge first without
+  local deletion, verify PR state, then remove the worktree/branches from the
+  planning checkout. Affects orchestrator PR closeout.
+
 - 2026-08-20 — `@testing-library/*/fireEvent.click` dispatches only `click`,
   not `mousedown`. Overlay dismiss handlers listen on document `mousedown`,
   so a click-only option test can pass the old broken DateTimeZonePicker
