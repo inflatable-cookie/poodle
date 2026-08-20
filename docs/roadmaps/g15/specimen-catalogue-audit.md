@@ -2,9 +2,11 @@
 
 Status: **partial** — mechanical screening baseline plus live measurement on
 all three runtimes. Human teaching judgment has been applied to the three
-pilots and to 21 screen-clear pages (`g15.028`, `g15.029`); 35 screen-clear
-pages and the remaining defect-led rows still await it.
-Date: 2026-08-20 (revision 9 — `g15.039` closed the DateTimeZonePicker nested-layer
+pilots and to 30 screen-clear pages (`g15.028`, `g15.029`, `g15.030`); 26
+screen-clear pages and the remaining defect-led rows still await it.
+Date: 2026-08-20 (revision 10 — `g15.030` foundation-layout review records a
+GPUI `ResizeHandle` keyboard/focus contract gap as `contract/runtime-blocker`;
+revision 9 — `g15.039` closed the DateTimeZonePicker nested-layer
 pointer blocker; revision 8 was the `g15.029` review-round totals and D
 correction; revision 7 recorded the date/time family review; revision 6 closed
 SegmentedControl native option parity via `g15.038`; revision 5 measured the
@@ -128,24 +130,24 @@ Dispositions used in the rows: `keep`, `pilot-fix`, `curation-tranche`,
 ## Totals
 
 Mechanical recount of the 175 inventory rows at this revision, after the
-`g15.039` DateTimeZonePicker nested-layer repair. These numbers are the rows,
+`g15.030` ResizeHandle GPUI keyboard/focus blocker. These numbers are the rows,
 not a pre-pilot or pre-curation baseline.
 
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Svelte (live) | 89 | 33 | 44 | 9 | — |
 | React (live) | 102 | 26 | 47 | 0 | — |
-| GPUI (headless render + structural) | 103 | 65 | 6 | 0 | 1 |
+| GPUI (headless render + structural) | 102 | 66 | 6 | 0 | 1 |
 | **Worst of the three** | **66** | **48** | **52** | **9** | — |
 
 | Disposition | Count |
 | --- | ---: |
-| `keep` | 56 |
+| `keep` | 55 |
 | `pilot-fix` | 3 |
 | `curation-tranche` | 108 |
 | `curation-complete` | 6 |
 | `verified-no-op` | 2 |
-| `contract/runtime-blocker` | 0 |
+| `contract/runtime-blocker` | 1 |
 
 175 of 175 pages were measured live in both web runtimes. The `g15.028`
 contract/runtime blocker on GPUI `SegmentedControl` is closed by `g15.038`.
@@ -153,6 +155,12 @@ The `g15.029` web `DateTimeZonePicker` nested-layer pointer blocker is closed
 by `g15.039`: a portalled timezone option now commits through the composite
 dismiss stack, and a genuine outside press still dismisses the whole picker
 in one gesture. Sv/Rc return to A; disposition is `keep`.
+The `g15.030` review records a new GPUI `ResizeHandle` contract/runtime
+blocker: the render path wires drag only and does not project focus,
+keyboard-step, or `aria_value_*` semantics from the contract
+(`docs/contracts/components/resize-handle.md` §5–6). Sv/Rc specimen repairs
+land in PR #55; the native renderer gap is routed separately and is not
+hidden as specimen work.
 
 `MeterSurface` is the single `n/a` on GPUI — web-only by fixed decision
 (spec 068), with no native counterpart. It is still graded on the two runtimes
@@ -533,7 +541,7 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | `Grid` | A | A | A | keep | human verdict (`g15.030`): keep — three column layouts teach arrangement, not a prop matrix; Sv/Rc paired; Gp mirrors all three sections |
 | `ListGrid` | C | C | A | curation-tranche | **Sv:** controls do nothing — Export and the row action are unwired · **Rc:** controls do nothing — Export and the row action are unwired |
 | `Region` | A | A | A | keep | human verdict (`g15.030`): keep — default placeholder, labeled stack, and nav/toolbar/content composition teach boundary role; Sv/Rc paired; Gp mirrors all three sections |
-| `ResizeHandle` | A | A | A | keep | human verdict (`g15.030`): keep after specimen repair — interactive splits were inert on all runtimes (captions over geometry only); Sv/Rc now apply drag/keyboard deltas to pane size; Gp wires `on_resize` through specimen state with a focused regression test |
+| `ResizeHandle` | A | A | B | contract/runtime-blocker | human verdict (`g15.030`): **Sv/Rc:** keep after specimen repair — interactive splits were inert; now apply drag/keyboard deltas with specimen bounds (`48–280` horizontal, `40–120` vertical) passed through `ariaValueNow/min/max`. **Gp:** drag-only render path — `packages/render/src/resize_handle.rs` never makes the node focusable, installs keyboard handling, or projects `ResizeHandleSpec.aria_value_*`; native page cannot teach the same keyboard/value evidence as web. Routed component-semantic blocker; renderer fix out of scope for this card |
 | `ScrollShell` | A | A | A | keep | human verdict (`g15.030`): keep — vertical and horizontal scroll with realistic overflow content; Sv/Rc paired; Gp mirrors both sections |
 | `Separator` | A | A | A | keep | human verdict (`g15.030`): keep — horizontal, vertical, and decorative separators with surrounding context; Sv/Rc paired; Gp mirrors all three sections |
 | `Spacer` | A | A | A | keep | human verdict (`g15.030`): keep — toolbar-style push-apart compositions teach flex spacing; Sv/Rc paired; Gp mirrors both sections |

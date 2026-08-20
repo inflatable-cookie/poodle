@@ -32,6 +32,8 @@
           orientation="horizontal"
           ariaLabel="Resize horizontal"
           ariaValueNow={leftWidth}
+          ariaValueMin={MIN_HORIZONTAL}
+          ariaValueMax={MAX_HORIZONTAL}
           onResizeMove={applyHorizontalDelta}
           onResizeStep={applyHorizontalDelta}
         />
@@ -48,6 +50,8 @@
           orientation="vertical"
           ariaLabel="Resize vertical"
           ariaValueNow={topHeight}
+          ariaValueMin={MIN_VERTICAL}
+          ariaValueMax={MAX_VERTICAL}
           onResizeMove={applyVerticalDelta}
           onResizeStep={applyVerticalDelta}
         />

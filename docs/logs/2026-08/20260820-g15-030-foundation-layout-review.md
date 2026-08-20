@@ -11,15 +11,37 @@ PR: #55
 Third serial screen-clear review child. All nine owned foundation-layout pages
 received the human teaching review against the carried rubric — live Svelte and
 React source and routes, GPUI specimen source, and the `g15.026` headless
-construction/axis evidence. **Eight pages keep unchanged, and one page needed
-bounded specimen repairs across Svelte, React, and GPUI.** No contract, public
-API, component, shared-CSS, generated catalogue, or infrastructure file moved
-outside specimen presentation.
+construction/axis evidence. **Eight pages keep unchanged, one page needed bounded
+Sv/Rc specimen repair, and one page records a GPUI contract/runtime blocker.**
+No contract, public API, component, shared-CSS, generated catalogue, or
+infrastructure file moved outside specimen presentation.
 
 The nine human-teaching verdicts are recorded in the existing audit rows in
 `docs/roadmaps/g15/specimen-catalogue-audit.md`; the screening `keep` /
-"no named defect" text was replaced, not extended with a second table. Grades
-and dispositions are unchanged, so totals were not recounted.
+"no named defect" text was replaced, not extended with a second table. Totals
+were recounted once for the ResizeHandle blocker (`keep` 55, blocker 1; GPUI
+B +1 / A −1).
+
+## Review round 1 (orchestrator, PR #55)
+
+The first pass claimed "no stop condition fired" and was wrong on two counts;
+both are addressed in this revision:
+
+1. **Web specimen ARIA range must match the specimen bounds.** The repaired
+   examples start at `120px` horizontal / `80px` vertical while passing only
+   `ariaValueNow`, so the default `0–100` range made the initial
+   `aria-valuenow="120"` invalid. Sv/Rc now pass `48–280` / `40–120` through
+   `ariaValueMin` / `ariaValueMax`, and the focused regression asserts initial
+   and updated ARIA range/value alongside pane geometry.
+2. **GPUI keyboard/focus/value semantics are a routed component blocker, not a
+   bounded keep.** The contract requires a focusable separator with
+   `aria-valuenow/min/max` and Arrow/Home/End resize steps
+   (`docs/contracts/components/resize-handle.md` §5–6). The render path wires
+   drag only (`packages/render/src/resize_handle.rs`); the native specimen
+   therefore cannot teach the same important keyboard/value evidence as web.
+   The audit row now carries disposition `contract/runtime-blocker`, the GPUI
+   grade drops to B, and totals are updated. The renderer fix is **not**
+   implemented here; the orchestrator routes it separately.
 
 ## Verdict inventory
 
@@ -36,26 +58,29 @@ and dispositions are unchanged, so totals were not recounted.
 | `Stack` | keep — column, row, alignment, and wrap teach arrangement within the section budget; Sv/Rc paired; Gp mirrors all five sections |
 | `Surface` | keep — panel/canvas/elevated/no-border teach tone and container role; Sv/Rc paired; Gp adds renderer-owned border/padding/role sections while preserving the tone evidence |
 
-### Repaired (1)
+### Repaired (1, Sv/Rc only)
 
 - **`ResizeHandle`** — the interactive horizontal and vertical split sections
-  were inert on all runtimes: handles sat between panes but nothing consumed
-  `onResizeMove` / `onResizeStep` (web) or `on_resize` (Gp). Captions promised
-  drag gestures the page could not demonstrate. Sv/Rc now keep pane size in
-  specimen state and apply drag/keyboard deltas through the handle callbacks.
-  Gp adds `ResizeHandle::on_resize` in the preview compat wrapper and routes
-  deltas through specimen state the same way `SplitView` does. Disabled
-  sections stay static. Focused regression tests cover the web keyboard step
-  and the native drag handler wiring.
+  were inert on web: handles sat between panes but nothing consumed
+  `onResizeMove` / `onResizeStep`. Captions promised drag gestures the page
+  could not demonstrate. Sv/Rc now keep pane size in specimen state, apply
+  drag/keyboard deltas through the handle callbacks, and pass the specimen's
+  actual bounds through `ariaValueNow/min/max`. Disabled sections stay static.
+  Focused regression tests cover web keyboard steps and ARIA range/value.
 
-No stop condition fired. No contract, public API, or component-semantic change
-was required.
+### Contract/runtime blocker (1)
+
+- **`ResizeHandle` (GPUI)** — the render path wires drag only; it never makes
+  the node focusable, installs an `on_key` handler, or projects
+  `ResizeHandleSpec.aria_value_*` into the node. The GPUI specimen drag wiring
+  remains directionally sound but cannot close the keyboard/value parity gap.
+  Recorded as `contract/runtime-blocker` in the audit; renderer work is routed
+  separately and is not hidden as specimen work.
 
 ## Changed routes for review
 
 Changed Svelte routes: `resize-handle`
 Changed React routes: `resize-handle`
-Changed GPUI routes: `resize-handle`
 
 Operator live review of the Svelte and React `resize-handle` pages is required
 before this child completes. GPUI evidence stays headless per the card.
@@ -68,18 +93,18 @@ before this child completes. GPUI evidence stays headless per the card.
 - `packages/gpui/preview/src/node_compat.rs` — preview-only `ResizeHandle::on_resize`
 - `packages/gpui/preview/src/specimens/resize_handle.rs`
 - `packages/gpui/preview/src/specimens/mod.rs`
-- `docs/roadmaps/g15/specimen-catalogue-audit.md` — nine human verdict rows
+- `docs/roadmaps/g15/specimen-catalogue-audit.md` — nine human verdict rows and recounted totals
 
 ## Validation
 
-- `bunx vitest run packages/svelte/preview/test/g15-030-foundation-layout.test.ts` — 1 passed
+- `bunx vitest run packages/svelte/preview/test/g15-030-foundation-layout.test.ts` — 2 passed
 - `effigy catalogue:check` — passed
 - `effigy check:svelte` — passed
 - `effigy react:build` — passed
 - `effigy docs:check` — passed
 - `effigy check:gpui` — passed
 - `effigy regressions:native` — 50 passed
-- `cargo test --manifest-path packages/gpui/preview/Cargo.toml specimens::resize_handle::drag_tests` — 2 passed
+- `cargo test --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview resize_handle` — 2 passed
 - `git diff --check origin/main...HEAD` — clean
 
 No `*-windowed`, `test:native-visual`, browser, Jetstream, or release
