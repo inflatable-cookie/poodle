@@ -3,7 +3,7 @@
 Date: 2026-08-20
 Card: `docs/roadmaps/g15/038-segmented-control-native-option-parity.md`
 Handoff: `docs/handoffs/20260820-162916-g15-038-segmented-control-native-option-parity.md`
-PR: pending
+PR: #52
 
 ## Outcome
 
