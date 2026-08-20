@@ -325,4 +325,26 @@ describe("g15.025 collections, navigation, and long-tail specimens", () => {
     expect(actions.textContent).toMatch(/Right-click|Read-only/);
     cleanupSvelte();
   });
+
+  it("keeps GPUI FilterBuilder field-kind and overflow teaching in source", () => {
+    const source = readFileSync(join(GPUI_SPECIMENS, "filter_builder_specimen.rs"), "utf8");
+    expect(source).toMatch(/FilterFieldKind::Enum/);
+    expect(source).toMatch(/FilterFieldKind::Range/);
+    expect(source).toMatch(/with_allow_multiple\(true\)/);
+    expect(source).toMatch(/FilterOperand::Range/);
+    expect(source).toMatch(/"tag-2"/);
+  });
+
+  it("keeps GPUI Dialog form controls and Tree large-data teaching in source", () => {
+    const dialog = readFileSync(join(GPUI_SPECIMENS, "dialog.rs"), "utf8");
+    expect(dialog).toMatch(/TextInput::from_spec/);
+    expect(dialog).toMatch(/Select::from_spec/);
+    expect(dialog).toMatch(/Checkbox::from_spec/);
+    expect(dialog).toMatch(/dialog-overlay-open/);
+
+    const tree = readFileSync(join(GPUI_SPECIMENS, "tree.rs"), "utf8");
+    expect(tree).toMatch(/fn large_nodes/);
+    expect(tree).toMatch(/with_aria_label\("Large tree"\)/);
+    expect(tree).toMatch(/with_loading_values/);
+  });
 });

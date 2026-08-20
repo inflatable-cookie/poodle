@@ -118,6 +118,28 @@ fn expanded() -> Vec<String> {
     vec!["src".into(), "src/components".into()]
 }
 
+fn large_nodes() -> Vec<TreeNode> {
+    (0..24)
+        .map(|i| {
+            TreeNode::branch(
+                format!("folder-{i}"),
+                format!("Folder {i}"),
+                (0..6)
+                    .map(|j| {
+                        TreeNode::new(format!("folder-{i}/file-{j}"), format!("file-{j}.ts"))
+                            .with_icon("file")
+                    })
+                    .collect(),
+            )
+            .with_icon("folder")
+        })
+        .collect()
+}
+
+fn large_expanded() -> Vec<String> {
+    (0..24).map(|i| format!("folder-{i}")).collect()
+}
+
 fn flat_nodes() -> Vec<TreeNode> {
     vec![
         TreeNode::new("beige", "BeigeButtonShadow").with_icon("monitor"),
@@ -299,11 +321,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex()
         .flex_col()
         .gap(px(24.0))
-        .child(labelled(
-            theme,
-            "File explorer",
-            framed(theme, interactive),
-        ))
+        .child(labelled(theme, "File explorer", framed(theme, interactive)))
         .child(labelled(
             theme,
             "Selection modes",
@@ -381,126 +399,133 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(labelled(
             theme,
             "Loading and large data",
-            framed(
-                theme,
-                Tree::from_spec(
-                    TreeSpec::new(vec![TreeNode::new("remote", "remote")
-                        .with_icon("folder")
-                        .with_branch(true)])
-                    .with_expanded_values(vec!["remote".into()])
-                    .with_loading_values(vec!["remote".into()])
-                    .with_aria_label("Lazy tree"),
+            stacked([
+                framed(
                     theme,
-                ),
-            ),
-        ))
-        .child(labelled(
-            theme,
-            "Editing and reordering",
-            {
-                let mut rt_spec = TreeSpec::new(state.tree.rename_nodes.clone())
-                    .with_expanded_values(vec!["docs".into()])
-                    .with_reorderable(true)
-                    .with_drag(
-                        None,
-                        state.tree.drop_target.clone(),
-                        state.tree.drop_position,
-                    )
-                    .with_aria_label("Rename tree");
-                if let Some(ev) = &state.tree.editing_value {
-                    rt_spec = rt_spec.with_editing(ev.clone(), state.tree.editing_text.clone());
-                }
-                let rename_nodes = state.tree.rename_nodes.clone();
-                let hover_target = state.tree.drop_target.clone();
-                let hover_position = state.tree.drop_position;
-                let rt = Tree::from_spec(rt_spec, theme)
-                    .on_key({
-                        let queue = Arc::clone(&queue);
-                        let nodes = rename_nodes.clone();
-                        Arc::new(move |v: &str, key: NodeKey, _mods: NodeModifiers| {
-                            if key == NodeKey::F2 {
-                                let label = find_node(&nodes, v)
-                                    .map(|n| n.label.clone())
-                                    .unwrap_or_default();
-                                push(
-                                    &queue,
-                                    TreeEvent::RenameStart {
-                                        value: v.to_string(),
-                                        label,
-                                    },
-                                );
-                            }
-                        })
-                    })
-                    .on_context_menu({
-                        let queue = Arc::clone(&queue);
-                        Arc::new(move |v: &str, point: NodePoint| {
-                            push(
-                                &queue,
-                                TreeEvent::OpenMenu {
-                                    value: v.to_string(),
-                                    x: point.x as i32,
-                                    y: point.y as i32,
-                                },
-                            );
-                        })
-                    })
-                    .on_drag_over({
-                        let queue = Arc::clone(&queue);
-                        Arc::new(move |_from: &str, over: &str, edge: DropEdge| {
-                            push(
-                                &queue,
-                                TreeEvent::SetDrop {
-                                    value: over.to_string(),
-                                    position: drop_position(edge),
-                                },
-                            );
-                        })
-                    })
-                    .on_reorder({
-                        let queue = Arc::clone(&queue);
-                        Arc::new(move |from: &str, over: &str, edge: DropEdge| {
-                            // Prefer the live hover state the last drag-over
-                            // recorded: gpui does not hand `on_drop` a pointer
-                            // position, so the edge it reports is the default.
-                            let to = hover_target.clone().unwrap_or_else(|| over.to_string());
-                            let position = if hover_target.is_some() {
-                                hover_position
-                            } else {
-                                drop_position(edge)
-                            };
-                            push(
-                                &queue,
-                                TreeEvent::Reorder {
-                                    from: from.to_string(),
-                                    to,
-                                    position,
-                                },
-                            );
-                        })
-                    });
-
-                let mut section = div().relative().child(framed(theme, rt));
-                if let Some(menu_value) = state.tree.menu_value.clone() {
-                    let (mx, my) = state.tree.menu_pos;
-                    let menu_label = find_node(&state.tree.rename_nodes, &menu_value)
-                        .map(|node| node.label.clone())
-                        .unwrap_or_default();
-                    let menu = ContextMenu::from_spec(
-                        ContextMenuSpec::new(vec![
-                            MenuEntry::new("rename", "Rename"),
-                            MenuEntry::new("delete", "Delete"),
-                        ])
-                        .with_default_open(true),
+                    Tree::from_spec(
+                        TreeSpec::new(vec![TreeNode::new("remote", "remote")
+                            .with_icon("folder")
+                            .with_branch(true)])
+                        .with_expanded_values(vec!["remote".into()])
+                        .with_loading_values(vec!["remote".into()])
+                        .with_aria_label("Lazy tree"),
                         theme,
-                    )
-                    .anchor_point((mx, my))
-                    .on_select(context_action(state, menu_value, menu_label));
-                    section = section.child(menu);
-                }
-                section
-            },
+                    ),
+                ),
+                framed(
+                    theme,
+                    Tree::from_spec(
+                        TreeSpec::new(large_nodes())
+                            .with_expanded_values(large_expanded())
+                            .with_aria_label("Large tree"),
+                        theme,
+                    ),
+                ),
+            ]),
         ))
+        .child(labelled(theme, "Editing and reordering", {
+            let mut rt_spec = TreeSpec::new(state.tree.rename_nodes.clone())
+                .with_expanded_values(vec!["docs".into()])
+                .with_reorderable(true)
+                .with_drag(
+                    None,
+                    state.tree.drop_target.clone(),
+                    state.tree.drop_position,
+                )
+                .with_aria_label("Rename tree");
+            if let Some(ev) = &state.tree.editing_value {
+                rt_spec = rt_spec.with_editing(ev.clone(), state.tree.editing_text.clone());
+            }
+            let rename_nodes = state.tree.rename_nodes.clone();
+            let hover_target = state.tree.drop_target.clone();
+            let hover_position = state.tree.drop_position;
+            let rt = Tree::from_spec(rt_spec, theme)
+                .on_key({
+                    let queue = Arc::clone(&queue);
+                    let nodes = rename_nodes.clone();
+                    Arc::new(move |v: &str, key: NodeKey, _mods: NodeModifiers| {
+                        if key == NodeKey::F2 {
+                            let label = find_node(&nodes, v)
+                                .map(|n| n.label.clone())
+                                .unwrap_or_default();
+                            push(
+                                &queue,
+                                TreeEvent::RenameStart {
+                                    value: v.to_string(),
+                                    label,
+                                },
+                            );
+                        }
+                    })
+                })
+                .on_context_menu({
+                    let queue = Arc::clone(&queue);
+                    Arc::new(move |v: &str, point: NodePoint| {
+                        push(
+                            &queue,
+                            TreeEvent::OpenMenu {
+                                value: v.to_string(),
+                                x: point.x as i32,
+                                y: point.y as i32,
+                            },
+                        );
+                    })
+                })
+                .on_drag_over({
+                    let queue = Arc::clone(&queue);
+                    Arc::new(move |_from: &str, over: &str, edge: DropEdge| {
+                        push(
+                            &queue,
+                            TreeEvent::SetDrop {
+                                value: over.to_string(),
+                                position: drop_position(edge),
+                            },
+                        );
+                    })
+                })
+                .on_reorder({
+                    let queue = Arc::clone(&queue);
+                    Arc::new(move |from: &str, over: &str, edge: DropEdge| {
+                        // Prefer the live hover state the last drag-over
+                        // recorded: gpui does not hand `on_drop` a pointer
+                        // position, so the edge it reports is the default.
+                        let to = hover_target.clone().unwrap_or_else(|| over.to_string());
+                        let position = if hover_target.is_some() {
+                            hover_position
+                        } else {
+                            drop_position(edge)
+                        };
+                        push(
+                            &queue,
+                            TreeEvent::Reorder {
+                                from: from.to_string(),
+                                to,
+                                position,
+                            },
+                        );
+                    })
+                });
+
+            let mut section = div().relative().child(framed(theme, rt));
+            if let Some(menu_value) = state.tree.menu_value.clone() {
+                let (mx, my) = state.tree.menu_pos;
+                let menu_label = find_node(&state.tree.rename_nodes, &menu_value)
+                    .map(|node| node.label.clone())
+                    .unwrap_or_default();
+                let menu = ContextMenu::from_spec(
+                    ContextMenuSpec::new(vec![
+                        MenuEntry::new("rename", "Rename"),
+                        MenuEntry::new("delete", "Delete"),
+                    ])
+                    .with_default_open(true),
+                    theme,
+                )
+                .anchor_point((mx, my))
+                .on_select(context_action(state, menu_value, menu_label));
+                section = section.child(menu);
+            }
+            section
+        }))
         .child(labelled(
             theme,
             "Disabled nodes",

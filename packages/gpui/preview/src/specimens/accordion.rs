@@ -7,10 +7,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
-use poodle_specs::{
-    AccordionItemSpec, AccordionSelectionValue, AccordionSpec, ControlDensity, ControlSize,
-    EyebrowSpec,
-};
+use poodle_specs::{AccordionItemSpec, AccordionSelectionValue, AccordionSpec, EyebrowSpec};
 use std::sync::Arc;
 
 fn content_node(text: impl Into<String>, color: poodle_node::ColorValue) -> Node {

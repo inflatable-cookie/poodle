@@ -64,8 +64,9 @@ six named teaching groups.
 | Tree | 6 | 6 | 6 |
 
 Svelte and React captions are verbatim identical on every page. GPUI uses the
-same ordered captions. Tree GPUI Loading and large data is lazy-only; native
-Tree has no virtualized window, which is host-truthful.
+same ordered captions. Tree GPUI Loading and large data stacks a lazy branch
+and a 24×6 expanded tree. Native Tree has no virtualized window; the large
+set is the non-windowed large-data posture.
 
 ## Final ordered captions
 
@@ -106,8 +107,24 @@ and large data; Editing and reordering; Disabled nodes
   one group. Every trigger stays live.
 - **FilterBuilder — seven → five.** Combinator cases share **Match all and
   match any**. Empty + max-clause share **Empty and limited builders**. Enum,
-  multi-enum, boolean, text, number, range, and overflow share **Field types
-  and overflow**. Controlled value readout stays in **Building filters**.
+  multi-enum, boolean, text, number, range, `allow_multiple`, repeated tag,
+  and overflowing chips share **Field types and overflow**. GPUI now seeds
+  that group with `overflow_value()` covering those spec states. Controlled
+  value readout stays in **Building filters**.
+- **Dialog GPUI forms.** **Forms and nested controls** now has Create project
+  (Field/TextInput, Select, Checkbox) and Open dialog (Settings with a Select
+  nested overlay). Native Popover is not a Dialog Node child; Select is the
+  host-truthful nested overlay.
+- **Tree GPUI loading.** **Loading and large data** keeps the lazy loading
+  row and adds a 24×6 expanded tree. Native Tree has no virtual window; that
+  large set is the non-windowed large-data posture.
+- **Stepper GPUI host gap (out of scope).** Guided workflow and Re-run paint
+  selection and re-run controls, but `packages/gpui/preview/src/node_compat.rs`
+  only wires `on_collapsed_change`. `StepperHandlers.on_change` and
+  `on_rerun` stay unset. That contradicts the card's live selection/rerun
+  rule and stepper contract § GPUI Interaction. `node_compat.rs` is outside
+  this card's writable scope. Needs an orchestrator re-scope before wiring.
+  Collapse remains live.
 - **ListCard — nineteen → six.** Inherited footer-counter copies, the legacy
   wrapped-context-menu path, and separate Highlighted/Active sections left
   Examples. Highlighted + active remain inside **Visual status**. Last-click
@@ -131,9 +148,21 @@ and large data; Editing and reordering; Disabled nodes
 - **Tree — eight/seven → six.** Multi-select + checkbox cascade share
   **Selection modes**. Flat-tree + no-guides/no-icons share **Presentation
   options**. React gained the missing flat-tree (`collapseTwistyWhenFlat`).
-  Lazy + virtualized share **Loading and large data** (GPUI lazy only).
+  Lazy + virtualized share **Loading and large data**. GPUI keeps the lazy
+  row and adds a 24×6 expanded tree instead of a virtual window.
   Rename/reorder stay in **Editing and reordering**. `node_modules`
   `disabled` moved into its own **Disabled nodes** group.
+- **Debris.** Dialog Svelte width loop now casts `"full"`. Unused GPUI imports
+  dropped from accordion, list_card, and media_preview. Dialog GPUI first
+  `root` is no longer `mut`.
+
+## Open contract/evidence gap
+
+Stepper GPUI Guided workflow and Re-run paint selection and re-run, but
+`node_compat.rs` only wires `on_collapsed_change`. `StepperHandlers.on_change`
+and `on_rerun` stay unset. That is a pre-existing host gap outside this card's
+writable scope. Orchestrator needs to re-scope a `node_compat.rs` wiring
+change before those groups can be live. Collapse is live.
 
 ## Contract coverage
 
@@ -154,17 +183,18 @@ left in place.
 
 ## Validation
 
-- focused `g15-025` parity regression: 64 passed
+- focused `g15-025` parity regression: 66 passed (two source-structure
+  assertions added for FilterBuilder/Dialog/Tree GPUI teaching)
 - `effigy check:svelte`: 0 errors
-- `effigy react:build`: passed
 - `effigy check:gpui`: passed (`poodle-gpui-preview` compiled)
-- `effigy catalogue:check`: passed
 - `effigy docs:check`: passed
-- `git diff --check origin/main...HEAD`: passed
+- `git diff --check`: passed
 
 Headless only. No windowed, native-visual, conformance, Jetstream, or
 release selectors. `effigy test:parity` was not re-run in full; the focused
-file is the card's required regression.
+file is the card's required regression. `effigy react:build` and
+`effigy catalogue:check` were not re-run; React captions and catalogue
+sources did not change in this review batch.
 
 ## Operator review
 

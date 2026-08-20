@@ -234,7 +234,7 @@
 {#each ["sm", "md", "lg", "xl", "full"] as w}
   <Dialog
     open={widthOpenMap[w] ?? false}
-    width={w as "sm" | "md" | "lg" | "xl"}
+    width={w as "sm" | "md" | "lg" | "xl" | "full"}
     title="Width: {w}"
     showCloseButton
     onOpenChange={(open) => (widthOpenMap[w] = open)}

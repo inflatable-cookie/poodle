@@ -7,8 +7,8 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::{
-    AspectRatio, CardVariant, ControlDensity, ControlSize, EyebrowSpec, MediaKind,
-    MediaPreviewSpec, MediaState, SurfaceSpec, SurfaceTone,
+    AspectRatio, ControlDensity, ControlSize, EyebrowSpec, MediaKind, MediaPreviewSpec, MediaState,
+    SurfaceSpec, SurfaceTone,
 };
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {

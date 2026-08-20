@@ -70,6 +70,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         StepperStep::new("apply", "Apply changes"),
     ];
 
+    // Guided workflow and Re-run paint the selection and re-run controls, but
+    // GPUI `Stepper::from_spec` only wires `on_collapsed_change`. `on_change`
+    // and `on_rerun` stay unset in `node_compat.rs`, which is outside this
+    // card's writable scope. Pre-existing host gap; collapse is live.
     let examples = div()
         .flex()
         .flex_col()
