@@ -1,7 +1,7 @@
 # g15.039 — DateTimeZonePicker Nested-Layer Pointer Commit
 
-Status: **ready** — routed stop condition from `g15.029`; dispatch before
-`g15.030`
+Status: **complete** — PR #54 accepted and merged as `cb3d7ede`; `g15.030`
+unblocked
 Parent: `027-screen-clear-human-review.md`
 Found by: `029-review-foundation-date-time.md`, PR #53
 Governing refs: `../../contracts/components/date-time-zone-picker.md`,
@@ -72,3 +72,16 @@ selector.
 - Svelte and React need observably different dismissal semantics.
 - Validation exposes the same defect in another composite whose repair would
   expand this card.
+
+## Closeout
+
+PR #54 moved DateTimeZonePicker and its nested TimeZoneSelect onto the shared
+host-aware dismiss stack in both web runtimes. Real option `mousedown` then
+`click` evidence proves the portalled option commits without dismissing the
+picker; a genuine outside press still closes the whole composite in one
+gesture. Paired tests also lock the shared innermost-first Escape policy.
+
+The full 3,018-test component board, Svelte check, React build, catalogue and
+docs gates, and range diff check passed in review. The operator authorised the
+merge after the paired live routes were opened. No public API, specimen, native,
+windowed, Jetstream, or release surface changed.

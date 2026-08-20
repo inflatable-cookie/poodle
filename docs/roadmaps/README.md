@@ -40,8 +40,9 @@ v0.2.0 release-baseline generation.
   carry icon or icon-only presentation. PR #52 completed `g15.038` with the
   operator-approved clean type split and stable native focus scopes. PR #53
   completed `g15.029`; the operator approved its changed DurationInput pages.
-  DateTimeZonePicker returned a real paired-web nested-layer pointer blocker,
-  routed to ready `g15.039` before `g15.030` resumes the serial review lane.
+  PR #54 completed routed `g15.039`, closing DateTimeZonePicker's paired-web
+  nested-layer pointer blocker; `g15.030` is now ready and resumes the serial
+  review lane.
   `g15.013` remains the final gate after the
   specimen program and `g15.012`.
   Jetstream remains deferred.
@@ -70,8 +71,8 @@ v0.2.0 release-baseline generation.
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
-  `g15.014`–`g15.017`, `g15.019`–`g15.029`, and `g15.034`–`g15.038` complete,
-  `g15.011` partial with four later review children and ready `g15.039`,
+  `g15.014`–`g15.017`, `g15.019`–`g15.029`, and `g15.034`–`g15.039` complete,
+  `g15.011` partial with four later review children and ready `g15.030`,
   `g15.013` final
 
 ## Rules

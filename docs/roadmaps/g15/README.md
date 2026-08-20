@@ -2,7 +2,7 @@
 
 Status: active — `g15.001`–`g15.010` and `g15.014`–`g15.017` complete;
 `g15.019`–`g15.029` and `g15.034`–`g15.038` complete; `g15.011` partial with
-four screen-clear review children; `g15.039` ready
+four screen-clear review children; `g15.039` complete
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -75,7 +75,7 @@ and status advance are the orchestrator's.
 20. [027 — Screen-clear human review](027-screen-clear-human-review.md) — non-dispatchable parent for exact children `028`–`033`
 21. [028–033 — Screen-clear family review children](028-review-foundation-controls-entry.md) — exact 56-page partition; after `026`
 22. [038 — SegmentedControl native option parity](038-segmented-control-native-option-parity.md) — complete; PR #52 landed the clean option-type migration and stable native focus identity
-23. [039 — DateTimeZonePicker nested-layer pointer commit](039-date-time-zone-picker-nested-layer.md) — ready; routed by `g15.029`, before `g15.030`
+23. [039 — DateTimeZonePicker nested-layer pointer commit](039-date-time-zone-picker-nested-layer.md) — complete; PR #54 closed the paired-web pointer blocker and unblocked `g15.030`
 24. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — after `011`, `038`, and routed blockers complete; headless capture required
 25. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
 26. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after the full specimen program, routed blockers, and `012`
@@ -110,11 +110,9 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-`g15.029` is complete through PR #53 with operator approval of the changed
-paired-web DurationInput specimens. It returned one real component blocker:
-DateTimeZonePicker dismisses its outer surface before a portalled timezone
-option can commit by pointer. `g15.039` is the next ready card and must land
-before `g15.030` resumes the four remaining serial screen-clear children.
-`g15.012` follows the completed audit and routed blockers; `g15.013` stays
-blocked as the final certification gate. Release mutation remains behind the
-explicit operator gate.
+`g15.039` is complete through PR #54. DateTimeZonePicker now treats its nested
+portalled TimeZoneSelect as part of the composite without weakening one-gesture
+outside dismissal. `g15.030` is the next ready card and resumes the four
+remaining serial screen-clear children. `g15.012` follows the completed audit
+and routed blockers; `g15.013` stays blocked as the final certification gate.
+Release mutation remains behind the explicit operator gate.

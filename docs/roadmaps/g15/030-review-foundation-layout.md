@@ -1,6 +1,6 @@
 # g15.030 — Review Screen-Clear Foundation Layout
 
-Status: **blocked** — dispatch after the routed `g15.039` component repair
+Status: **ready** — routed `g15.039` component repair complete in PR #54
 Parent: `027-screen-clear-human-review.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Depends on: `g15.026` (live native evidence), `g15.039`

@@ -6,8 +6,8 @@ Updated: 2026-08-20
 
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.029`, and `g15.034`–`g15.038` complete; `g15.011` partial
-    with four later review children; routed `g15.039` ready;
+    `g15.019`–`g15.029`, and `g15.034`–`g15.039` complete; `g15.011` partial
+    with four later review children; `g15.030` ready;
     `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `039`
@@ -17,8 +17,9 @@ Updated: 2026-08-20
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch ready `g15.039`, the paired-web DateTimeZonePicker
-    nested-layer pointer repair returned by `g15.029`. PR #53 completed the
+  - Next: dispatch ready `g15.030`, the nine-page foundation-layout review.
+    PR #54 completed the paired-web DateTimeZonePicker nested-layer pointer
+    repair returned by `g15.029`. PR #53 completed the
     seven-page foundation date/time review with operator sign-off on the
     changed DurationInput specimens; Calendar and DurationInput received
     bounded repairs, while DateTimeZonePicker correctly stopped on a dead

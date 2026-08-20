@@ -108,8 +108,13 @@ Two evidence/contract blockers; both addressed on this branch.
 
 ## Unresolved
 
-- Operator live pointer review of `#components/date-time-zone-picker` in
-  both web previews remains pending; the orchestrator owns opening those
-  routes.
-- Card status, dispatch ledger, merge, and `g15.030` promotion stay with
-  the orchestrator.
+None inside this card. `g15.030` resumes the serial screen-clear review lane.
+
+## Closeout
+
+The orchestrator independently reran the full component board (350 files,
+3,018 tests), `effigy check:svelte`, `effigy react:build`,
+`effigy catalogue:check`, `effigy docs:check`, and
+`git diff --check origin/main...HEAD`. All passed. PR #54 was accepted at
+`b2d45a80` and merged as `cb3d7ede` after the paired live routes were opened
+and the operator authorised merge.
