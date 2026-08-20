@@ -75,6 +75,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex_col()
         .gap(px(24.0))
         .max_w(px(384.0))
+        // --- Double-click to edit (default, interactive) ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Double-click to edit (default)"),
+                    theme,
+                ))
+                .child(
+                    EditableLabel::from_spec(
+                        EditableLabelSpec::new().with_value(&title_value),
+                        theme,
+                    )
+                    .with_id("default")
+                    .on_change(queue_change(state, "editable-label-title"))
+                    .on_commit(queue_commit(
+                        state,
+                        "editable-label-title",
+                        true,
+                    )),
+                ),
+        )
         // --- Editing mode (composed input shown, live) ---
         .child(
             div()
@@ -101,30 +125,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                     .with_id("editing")
                     .on_change(queue_change(state, "editable-label-live")),
-                ),
-        )
-        // --- Double-click to edit (default, interactive) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Double-click to edit (default)"),
-                    theme,
-                ))
-                .child(
-                    EditableLabel::from_spec(
-                        EditableLabelSpec::new().with_value(&title_value),
-                        theme,
-                    )
-                    .with_id("default")
-                    .on_change(queue_change(state, "editable-label-title"))
-                    .on_commit(queue_commit(
-                        state,
-                        "editable-label-title",
-                        true,
-                    )),
                 ),
         )
         // --- Click to edit with icon (enterOrSpace + showEditIcon) ---
