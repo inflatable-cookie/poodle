@@ -3,7 +3,7 @@
 > **Surface elevation**: SegmentedControl is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-07-14
+Updated: 2026-08-20
 
 ## 1. Purpose
 
@@ -263,6 +263,8 @@ Native radio inputs provide keyboard and focus behavior.
 - The hidden radio input pattern does not apply; GPUI must expose radiogroup
   semantics through its accessibility tree directly
 - Equal-width segment layout should use GPUI's flex or grid equivalent
+- Option tooltips project through the reusable `Node.tooltip` field onto GPUI's
+  native `.tooltip()`, not the Tooltip overlay component
 
 ## 10a. Jetstream Notes
 
@@ -304,7 +306,6 @@ Native radio inputs provide keyboard and focus behavior.
 | Hidden radio inputs vs GPUI native controls | web uses native radio for a11y; GPUI exposes semantics directly | allowed | keep selection semantics strict |
 | ID generation strategy | module-level counter vs Rust ID approach | allowed | both must produce unique group names |
 | CSS transition timing | GPUI may not support CSS-style transitions | allowed | match where possible |
-| Icon and icon-only options | currently implemented by the authoritative Svelte component; native option specs do not yet carry icon references | provisional | add equivalent native icon references before claiming strict visual parity for this presentation |
 
 ## 13. Specimen Definitions
 

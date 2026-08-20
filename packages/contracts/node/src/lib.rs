@@ -49,6 +49,9 @@ pub struct Node {
     pub position: NodePosition,
     pub interaction: Interaction,
     pub a11y: NodeA11y,
+    /// Hover tooltip text. Backends project this as native tooltip chrome
+    /// (HTML `title`, GPUI `.tooltip()`). Not the Tooltip overlay component.
+    pub tooltip: Option<String>,
     /// Semantic token roles the component projects onto this node — the
     /// native counterpart of web `data-*` recipe attributes (e.g.
     /// `variant: primary`). Observers read these; nothing executes them.

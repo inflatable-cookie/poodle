@@ -74,6 +74,22 @@ fn sample_property_clamps_outside_keyframe_range_and_skips_absent_properties() {
 }
 
 #[test]
+fn tooltip_forces_element_state() {
+    let mut node = Node::button("ok");
+    assert!(
+        !needs_state(&node),
+        "a plain unfocusable button does not need element state"
+    );
+    node.tooltip = Some("Save".into());
+    assert!(
+        needs_state(&node),
+        "a tooltip must take the stateful path so GPUI can attach .tooltip()"
+    );
+    node.tooltip = Some(String::new());
+    assert!(!needs_state(&node), "an empty tooltip is not a tooltip");
+}
+
+#[test]
 fn gpui_animation_maps_loop_modes_and_easing() {
     let mut once = spin_anim();
     once.loop_mode = AnimLoop::Once;

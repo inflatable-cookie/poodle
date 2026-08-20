@@ -30,7 +30,7 @@ use poodle_node::{
     LayoutSizing, Node, NodePosition, NodeRole, ShadowLayer,
 };
 use poodle_specs::{
-    ChoiceOption, ColorInputMode, ColorPickerSpec, NumberInputSpec, SegmentedControlSpec,
+    ColorInputMode, ColorPickerSpec, NumberInputSpec, SegmentedControlOption, SegmentedControlSpec,
 };
 
 use crate::color::{
@@ -361,9 +361,9 @@ fn build_controls_panel(
         ColorInputMode::Hsl => "hsl",
     };
     let mode_spec = SegmentedControlSpec::new(vec![
-        ChoiceOption::new("hex", "Hex"),
-        ChoiceOption::new("rgb", "RGB"),
-        ChoiceOption::new("hsl", "HSL"),
+        SegmentedControlOption::new("hex", "Hex"),
+        SegmentedControlOption::new("rgb", "RGB"),
+        SegmentedControlOption::new("hsl", "HSL"),
     ])
     .with_default_value(mode_value)
     .with_size(spec.size)

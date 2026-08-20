@@ -20,7 +20,7 @@ use poodle_specs::{
     ButtonSpec, ButtonVariant, CheckboxSpec, ChoiceOption, ControlDensity, ControlSize,
     FilterBuilderPicker, FilterBuilderSpec, FilterCombinator, FilterFieldDefinition,
     FilterFieldKind, FilterOperand, FilterOperandKind, IconButtonSpec, NumberInputSpec,
-    SegmentedControlSpec, SelectSpec, TextInputSpec,
+    SegmentedControlOption, SegmentedControlSpec, SelectSpec, TextInputSpec,
 };
 
 use crate::button::button;
@@ -85,8 +85,8 @@ fn operand_editor(
         FilterOperandKind::Boolean => {
             let on = matches!(operand, FilterOperand::Boolean(true));
             let mut s = SegmentedControlSpec::new(vec![
-                ChoiceOption::new("true", "True"),
-                ChoiceOption::new("false", "False"),
+                SegmentedControlOption::new("true", "True"),
+                SegmentedControlOption::new("false", "False"),
             ])
             .with_size(size)
             .with_density(density);

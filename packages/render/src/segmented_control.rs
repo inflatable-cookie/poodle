@@ -13,11 +13,12 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeRole, ShadowLayer, StylePatch,
 };
-use poodle_specs::SegmentedControlSpec;
+use poodle_specs::{IconSize, SegmentedControlSpec};
 
 use crate::color::{mix_srgb, with_alpha};
 use crate::presentation::{
     control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
+    resolve_supporting_visual_size,
 };
 
 pub fn segmented_control(
@@ -95,9 +96,15 @@ pub fn segmented_control(
         // default main alignment, so silence is the faithful emission.
     }
 
+    let icon_size = theme
+        .resolve_space(IconSize::from(resolve_supporting_visual_size(effective_size)).size_token());
+    // Contract §8 label gap between icon and visible text.
+    let icon_text_gap = rem_to_px(0.375);
+
     for option in &spec.options {
         let is_selected = selected == Some(option.value.as_str());
         let is_enabled = !spec.is_disabled && !option.is_disabled;
+        let icon_only = option.is_icon_only();
 
         let text_color = if is_selected {
             text_inverse
@@ -105,7 +112,13 @@ pub fn segmented_control(
             text_muted
         };
 
-        let mut seg = Node::button(&option.label);
+        // With an icon, children carry the glyph and optional label so the
+        // backend does not duplicate the Button kind's intrinsic text.
+        let mut seg = Node::button(if option.icon.is_some() {
+            String::new()
+        } else {
+            option.label.clone()
+        });
         {
             let s = &mut seg.style;
             s.text_size = Some(font_size);
@@ -140,6 +153,17 @@ pub fn segmented_control(
             if spec.equal_width {
                 s.descriptor.layout.width = LayoutSizing::Grow;
             }
+            if icon_only {
+                // Contract §8 icon-only label: padding-inline 0; square when
+                // `equalWidth=false`.
+                s.descriptor.layout.spacing.padding.left = 0.0;
+                s.descriptor.layout.spacing.padding.right = 0.0;
+                if !spec.equal_width {
+                    s.descriptor.layout.width = LayoutSizing::Fixed(segment_height);
+                }
+            } else if option.icon.is_some() {
+                s.descriptor.layout.spacing.gap = icon_text_gap;
+            }
             if is_enabled {
                 // Old tier: pointer cursor on every enabled segment, whether or
                 // not a change handler is wired.
@@ -161,6 +185,22 @@ pub fn segmented_control(
                 }
             }
         }
+
+        if let Some(icon_name) = option.icon.as_deref() {
+            let mut glyph = Node::icon(icon_name, icon_size);
+            glyph.style.descriptor.text_color = Some(text_color);
+            seg = seg.child(glyph);
+            if !icon_only {
+                let mut label = Node::text(&option.label);
+                label.style.text_size = Some(font_size);
+                label.style.text_weight = Some(600);
+                label.style.descriptor.text_color = Some(text_color);
+                label.style.no_wrap = true;
+                label.style.min_width = Some(0.0);
+                seg = seg.child(label);
+            }
+        }
+
         // Old tier: every segment stays focusable. A disabled option is
         // simply never wired — and, unlike Svelte, never dimmed; the parity
         // gate targets the old tier, so no per-option opacity is baked in.
@@ -172,6 +212,13 @@ pub fn segmented_control(
             let handler = Arc::clone(handler);
             let value = option.value.clone();
             seg.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+        }
+
+        if let Some(name) = option.accessible_name_override() {
+            seg.a11y.label = Some(name.to_string());
+        }
+        if let Some(title) = option.tooltip_text() {
+            seg.tooltip = Some(title.to_string());
         }
 
         el = el.child(seg);
@@ -192,18 +239,18 @@ pub fn segmented_control(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_specs::{ChoiceOption, ControlDensity, ControlSize};
+    use poodle_specs::{ControlDensity, ControlSize, SegmentedControlOption};
 
     /// The real token resolver over the ECLIPSE theme. Pure — no backend.
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
-    fn view_options() -> Vec<ChoiceOption> {
+    fn view_options() -> Vec<SegmentedControlOption> {
         vec![
-            ChoiceOption::new("grid", "Grid"),
-            ChoiceOption::new("list", "List"),
-            ChoiceOption::new("table", "Table"),
+            SegmentedControlOption::new("grid", "Grid"),
+            SegmentedControlOption::new("list", "List"),
+            SegmentedControlOption::new("table", "Table"),
         ]
     }
 
@@ -364,7 +411,7 @@ mod tests {
     #[test]
     fn disabled_option_is_never_wired_but_not_dimmed() {
         let mut options = view_options();
-        options.push(ChoiceOption::new("draft", "Draft").with_disabled(true));
+        options.push(SegmentedControlOption::new("draft", "Draft").with_disabled(true));
         let handlers: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(|_| {});
         let spec = SegmentedControlSpec::new(options).with_default_value("grid");
         let node = segmented_control(&spec, &theme(), Some(handlers));
@@ -443,5 +490,164 @@ mod tests {
         let node = segmented_control(&spec_with_label, &theme(), None);
         assert_eq!(node.a11y.role, Some(NodeRole::RadioGroup));
         assert_eq!(node.a11y.label.as_deref(), Some("View mode"));
+    }
+
+    fn plugin_kind_options() -> Vec<SegmentedControlOption> {
+        vec![
+            SegmentedControlOption::new("effects", "Effects")
+                .with_icon("audio-waveform")
+                .with_icon_only(true),
+            SegmentedControlOption::new("instruments", "Instruments")
+                .with_icon("piano")
+                .with_icon_only(true),
+        ]
+    }
+
+    fn find_icon_segment<'a>(node: &'a Node, icon: &str) -> &'a Node {
+        node.children
+            .iter()
+            .find(|seg| {
+                seg.find(
+                    &|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == icon),
+                )
+                .is_some()
+            })
+            .unwrap_or_else(|| panic!("segment with icon {icon:?} exists"))
+    }
+
+    fn icon_size_of(node: &Node, name: &str) -> f32 {
+        match &node
+            .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name: n, .. } if n == name))
+            .expect("icon exists")
+            .kind
+        {
+            poodle_node::NodeKind::Icon { size, .. } => *size,
+            _ => unreachable!(),
+        }
+    }
+
+    #[test]
+    fn icon_only_hides_visible_label_and_falls_back_for_name_and_tooltip() {
+        let spec = SegmentedControlSpec::new(plugin_kind_options())
+            .with_default_value("effects")
+            .with_equal_width(false);
+        let node = segmented_control(&spec, &theme(), None);
+
+        let effects = find_icon_segment(&node, "audio-waveform");
+        assert!(
+            !node.has_text("Effects"),
+            "icon-only must not expose the required label as visible text"
+        );
+        assert!(
+            !node.has_text("Instruments"),
+            "icon-only must not expose the required label as visible text"
+        );
+        assert_eq!(effects.a11y.label.as_deref(), Some("Effects"));
+        assert_eq!(effects.tooltip.as_deref(), Some("Effects"));
+        assert!(matches!(
+            &effects.kind,
+            poodle_node::NodeKind::Button { label } if label.is_empty()
+        ));
+        assert!(effects
+            .find(&|n| matches!(
+                &n.kind,
+                poodle_node::NodeKind::Text { content } if content == "Effects"
+            ))
+            .is_none());
+    }
+
+    #[test]
+    fn icon_only_without_an_icon_keeps_the_visible_label() {
+        let spec = SegmentedControlSpec::new(vec![
+            SegmentedControlOption::new("grid", "Grid").with_icon_only(true)
+        ]);
+        let node = segmented_control(&spec, &theme(), None);
+        assert!(node.has_text("Grid"));
+        let seg = find_segment(&node, "Grid");
+        assert!(seg.a11y.label.is_none());
+        assert!(seg.tooltip.is_none());
+        assert!(seg
+            .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { .. }))
+            .is_none());
+    }
+
+    #[test]
+    fn labelled_icon_renders_before_text_with_supporting_visual_size_and_gap() {
+        let theme = theme();
+        let expected = theme.resolve_space(
+            poodle_specs::IconSize::from(crate::presentation::resolve_supporting_visual_size(
+                ControlSize::Md,
+            ))
+            .size_token(),
+        );
+        let spec = SegmentedControlSpec::new(vec![
+            SegmentedControlOption::new("grid", "Grid").with_icon("list")
+        ]);
+        let node = segmented_control(&spec, &theme, None);
+        let seg = find_icon_segment(&node, "list");
+        assert!(node.has_text("Grid"));
+        assert_eq!(icon_size_of(&node, "list"), expected);
+        assert_eq!(seg.style.descriptor.layout.spacing.gap, rem_to_px(0.375));
+        assert_eq!(
+            seg.children
+                .iter()
+                .map(|child| match &child.kind {
+                    poodle_node::NodeKind::Icon { name, .. } => name.as_str(),
+                    poodle_node::NodeKind::Text { content } => content.as_str(),
+                    _ => "other",
+                })
+                .collect::<Vec<_>>(),
+            ["list", "Grid"]
+        );
+    }
+
+    #[test]
+    fn icon_only_content_fit_is_square_with_no_inline_padding() {
+        let spec = SegmentedControlSpec::new(plugin_kind_options())
+            .with_default_value("effects")
+            .with_equal_width(false);
+        let node = segmented_control(&spec, &theme(), None);
+        let effects = find_icon_segment(&node, "audio-waveform");
+        assert_eq!(
+            effects.style.descriptor.layout.width,
+            LayoutSizing::Fixed(32.0),
+            "md track 36px minus 0.25rem padding"
+        );
+        assert_eq!(
+            effects.style.descriptor.layout.height,
+            LayoutSizing::Fixed(32.0)
+        );
+        assert_eq!(effects.style.descriptor.layout.spacing.padding.left, 0.0);
+        assert_eq!(effects.style.descriptor.layout.spacing.padding.right, 0.0);
+    }
+
+    #[test]
+    fn explicit_aria_label_and_title_win_over_the_required_label() {
+        let spec = SegmentedControlSpec::new(vec![SegmentedControlOption::new("fx", "FX")
+            .with_icon("audio-waveform")
+            .with_icon_only(true)
+            .with_aria_label("Audio effects")
+            .with_title("Effects plugins")]);
+        let node = segmented_control(&spec, &theme(), None);
+        let seg = find_icon_segment(&node, "audio-waveform");
+        assert_eq!(seg.a11y.label.as_deref(), Some("Audio effects"));
+        assert_eq!(seg.tooltip.as_deref(), Some("Effects plugins"));
+        assert!(!node.has_text("FX"));
+    }
+
+    #[test]
+    fn icon_only_activation_still_reports_the_option_value() {
+        use std::sync::Mutex;
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&seen);
+        let on_change: Arc<dyn Fn(&str) + Send + Sync> =
+            Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()));
+        let spec = SegmentedControlSpec::new(plugin_kind_options())
+            .with_default_value("effects")
+            .with_equal_width(false);
+        let node = segmented_control(&spec, &theme(), Some(on_change));
+        let instruments = find_icon_segment(&node, "piano");
+        (instruments.interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(seen.lock().unwrap().as_slice(), ["instruments"]);
     }
 }

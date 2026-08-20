@@ -15,8 +15,8 @@ use poodle_node::{
     NodeToggled,
 };
 use poodle_specs::{
-    ChoiceOption, ControlDensity, ControlSize, ModelAxisControlKind, ModelAxisKind, ModelAxisValue,
-    ModelPickerSpec, ModelPickerVariant, SegmentedControlSpec, SwitchSpec,
+    ControlDensity, ControlSize, ModelAxisControlKind, ModelAxisKind, ModelAxisValue,
+    ModelPickerSpec, ModelPickerVariant, SegmentedControlOption, SegmentedControlSpec, SwitchSpec,
 };
 
 use crate::color::{mix_srgb, with_alpha};
@@ -412,10 +412,12 @@ pub fn model_picker(
                     section.child(list)
                 }
                 ModelAxisKind::Select => {
-                    let options: Vec<ChoiceOption> = axis
+                    let options: Vec<SegmentedControlOption> = axis
                         .options
                         .iter()
-                        .map(|option| ChoiceOption::new(option.value.clone(), option.label.clone()))
+                        .map(|option| {
+                            SegmentedControlOption::new(option.value.clone(), option.label.clone())
+                        })
                         .collect();
                     let mut control = SegmentedControlSpec::new(options)
                         .with_size(effective_size)

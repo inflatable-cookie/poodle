@@ -12,24 +12,24 @@ use crate::compat::js_segmented_control;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{ChoiceOption, ControlDensity, ControlSize, SegmentedControlSpec};
+use poodle_specs::{ControlDensity, ControlSize, SegmentedControlOption, SegmentedControlSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
 
     // Contract default set: Grid / List / Table (Svelte authority).
     let view_options = vec![
-        ChoiceOption::new("grid", "Grid"),
-        ChoiceOption::new("list", "List"),
-        ChoiceOption::new("table", "Table"),
+        SegmentedControlOption::new("grid", "Grid"),
+        SegmentedControlOption::new("list", "List"),
+        SegmentedControlOption::new("table", "Table"),
     ];
 
     // Contract "With disabled option" set: All / Active / Archived / Draft(disabled).
     let status_options = vec![
-        ChoiceOption::new("all", "All"),
-        ChoiceOption::new("active", "Active"),
-        ChoiceOption::new("archived", "Archived"),
-        ChoiceOption::new("draft", "Draft").with_disabled(true),
+        SegmentedControlOption::new("all", "All"),
+        SegmentedControlOption::new("active", "Active"),
+        SegmentedControlOption::new("archived", "Archived"),
+        SegmentedControlOption::new("draft", "Draft").with_disabled(true),
     ];
 
     div()
@@ -73,10 +73,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             div().w(360.0).child(js_segmented_control(
                 &SegmentedControlSpec::new(vec![
-                    ChoiceOption::new("day", "Day"),
-                    ChoiceOption::new("week", "Week"),
-                    ChoiceOption::new("month", "Month"),
-                    ChoiceOption::new("year", "Year"),
+                    SegmentedControlOption::new("day", "Day"),
+                    SegmentedControlOption::new("week", "Week"),
+                    SegmentedControlOption::new("month", "Month"),
+                    SegmentedControlOption::new("year", "Year"),
                 ])
                 .with_default_value("week")
                 .with_equal_width(true),
@@ -89,9 +89,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             js_segmented_control(
                 &SegmentedControlSpec::new(vec![
-                    ChoiceOption::new("1h", "1h").with_aria_label("Last 1 hour"),
-                    ChoiceOption::new("6h", "6h").with_aria_label("Last 6 hours"),
-                    ChoiceOption::new("24h", "24h").with_aria_label("Last 24 hours"),
+                    SegmentedControlOption::new("1h", "1h").with_aria_label("Last 1 hour"),
+                    SegmentedControlOption::new("6h", "6h").with_aria_label("Last 6 hours"),
+                    SegmentedControlOption::new("24h", "24h").with_aria_label("Last 24 hours"),
                 ])
                 .with_default_value("24h")
                 .with_size(ControlSize::Xs)
@@ -125,11 +125,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         ))
 }
 
-fn view_opts() -> Vec<ChoiceOption> {
+fn view_opts() -> Vec<SegmentedControlOption> {
     vec![
-        ChoiceOption::new("grid", "Grid"),
-        ChoiceOption::new("list", "List"),
-        ChoiceOption::new("table", "Table"),
+        SegmentedControlOption::new("grid", "Grid"),
+        SegmentedControlOption::new("list", "List"),
+        SegmentedControlOption::new("table", "Table"),
     ]
 }
 
