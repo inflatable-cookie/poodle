@@ -42,7 +42,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .w(px(left_px)),
                 ResizeHandleSpec::new()
                     .with_orientation(Orientation::Horizontal)
-                    .with_aria_label("Resize horizontal"),
+                    .with_aria_label("Resize horizontal")
+                    .with_aria_value_now(left_px)
+                    .with_aria_value_min(MIN_HORIZONTAL_PX)
+                    .with_aria_value_max(MAX_HORIZONTAL_PX),
                 Some(resize_delta_handler(
                     HORIZONTAL_LEFT_KEY,
                     Arc::clone(&state.node_events),
@@ -66,7 +69,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .h(px(top_px)),
                 ResizeHandleSpec::new()
                     .with_orientation(Orientation::Vertical)
-                    .with_aria_label("Resize vertical"),
+                    .with_aria_label("Resize vertical")
+                    .with_aria_value_now(top_px)
+                    .with_aria_value_min(MIN_VERTICAL_PX)
+                    .with_aria_value_max(MAX_VERTICAL_PX),
                 Some(resize_delta_handler(
                     VERTICAL_TOP_KEY,
                     Arc::clone(&state.node_events),
@@ -231,11 +237,14 @@ fn pane(
 }
 
 #[cfg(test)]
-mod drag_tests {
-    use super::{resize_delta_handler, HORIZONTAL_LEFT_KEY};
+mod interaction_tests {
+    use super::{
+        resize_delta_handler, HORIZONTAL_LEFT_KEY, MAX_HORIZONTAL_PX, MIN_HORIZONTAL_PX,
+        VERTICAL_TOP_KEY,
+    };
     use crate::app_state::NodeSpecimenEvent;
     use poodle_gpui::GpuiThemeProvider;
-    use poodle_node::NodeDragPhase;
+    use poodle_node::{NodeDragPhase, NodeKey, NodeModifiers};
     use poodle_render::{resize_handle, ResizePhase};
     use poodle_specs::{Orientation, ResizeHandleSpec};
     use std::sync::{Arc, Mutex};
@@ -304,5 +313,108 @@ mod drag_tests {
             }
             _ => panic!("expected Select event"),
         }
+    }
+
+    /// The page's own handler, wired to the page's own spec, driven through
+    /// the node's key seam: an axis arrow moves the pane by the contract's
+    /// step, and Home lands on the specimen's own minimum. Without this the
+    /// native page teaches drag and stays silent about the keyboard.
+    #[test]
+    fn keyboard_steps_move_the_specimen_pane() {
+        let events: Arc<Mutex<Vec<NodeSpecimenEvent>>> = Arc::new(Mutex::new(Vec::new()));
+        let node = resize_handle(
+            &ResizeHandleSpec::new()
+                .with_orientation(Orientation::Horizontal)
+                .with_aria_label("Resize horizontal")
+                .with_aria_value_now(120.0)
+                .with_aria_value_min(MIN_HORIZONTAL_PX)
+                .with_aria_value_max(MAX_HORIZONTAL_PX),
+            &GpuiThemeProvider::new(),
+            Some(resize_delta_handler(
+                HORIZONTAL_LEFT_KEY,
+                Arc::clone(&events),
+                120.0,
+                MIN_HORIZONTAL_PX,
+                MAX_HORIZONTAL_PX,
+            )),
+        );
+        let keys = node
+            .interaction
+            .on_key
+            .as_ref()
+            .expect("the enabled specimen handle routes keys");
+        keys(NodeKey::ArrowRight, NodeModifiers::default());
+        keys(NodeKey::Home, NodeModifiers::default());
+
+        let queue = events.lock().unwrap();
+        let widths: Vec<usize> = queue
+            .iter()
+            .map(|event| match event {
+                NodeSpecimenEvent::Select { key, index } => {
+                    assert_eq!(key.as_str(), HORIZONTAL_LEFT_KEY);
+                    *index
+                }
+                _ => panic!("expected Select event"),
+            })
+            .collect();
+        assert_eq!(widths, [128, MIN_HORIZONTAL_PX as usize]);
+    }
+
+    /// The specimen's value declaration is the pane it actually draws, not a
+    /// default range the current value falls outside of.
+    #[test]
+    fn the_specimen_declares_the_pane_it_draws() {
+        let node = resize_handle(
+            &ResizeHandleSpec::new()
+                .with_orientation(Orientation::Horizontal)
+                .with_aria_label("Resize horizontal")
+                .with_aria_value_now(120.0)
+                .with_aria_value_min(MIN_HORIZONTAL_PX)
+                .with_aria_value_max(MAX_HORIZONTAL_PX),
+            &GpuiThemeProvider::new(),
+            None,
+        );
+        assert_eq!(node.a11y.value, Some(120.0));
+        assert_eq!(node.a11y.value_min, Some(48.0));
+        assert_eq!(node.a11y.value_max, Some(280.0));
+        assert!(node.interaction.focusable);
+    }
+
+    /// Both live sections must be independently focusable, so their ids
+    /// cannot collide in the backend focus registry.
+    #[test]
+    fn the_two_live_sections_do_not_share_an_id() {
+        let build = |orientation, label: &str| {
+            resize_handle(
+                &ResizeHandleSpec::new()
+                    .with_orientation(orientation)
+                    .with_aria_label(label),
+                &GpuiThemeProvider::new(),
+                None,
+            )
+            .id
+            .expect("the handle identifies itself")
+        };
+        let horizontal = build(Orientation::Horizontal, "Resize horizontal");
+        let vertical = build(Orientation::Vertical, "Resize vertical");
+        assert_ne!(horizontal, vertical);
+        assert_ne!(HORIZONTAL_LEFT_KEY, VERTICAL_TOP_KEY);
+    }
+
+    /// A disabled section stays static: no keys, no drag, no focus stop.
+    #[test]
+    fn a_disabled_specimen_section_stays_inert() {
+        let node = resize_handle(
+            &ResizeHandleSpec::new()
+                .with_orientation(Orientation::Horizontal)
+                .with_disabled(true)
+                .with_aria_label("Disabled resize"),
+            &GpuiThemeProvider::new(),
+            None,
+        );
+        assert!(node.interaction.on_key.is_none());
+        assert!(node.interaction.on_drag.is_none());
+        assert!(!node.interaction.focusable);
+        assert!(node.interaction.disabled);
     }
 }

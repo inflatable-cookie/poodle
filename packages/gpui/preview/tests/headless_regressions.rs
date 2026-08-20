@@ -2045,6 +2045,143 @@ fn settings_shell_navigates_and_refused_close_stays_open() {
     });
 }
 
+/// g15.040. The native ResizeHandle was drag-only: its node took no focus,
+/// carried no key handler, and declared no value range, so the native page
+/// could not teach what the web one teaches. This drives the REAL focused key
+/// route — the handler is never called directly — and reads both halves of
+/// the result: the host's pane width, and the renderer-neutral current value
+/// the next node declares.
+#[test]
+fn a_focused_resize_handle_steps_the_pane_and_its_declared_value() {
+    use poodle_render::ResizePhase;
+    use poodle_specs::{Orientation, ResizeHandleSpec};
+
+    const MIN_PX: f32 = 48.0;
+    const MAX_PX: f32 = 280.0;
+
+    run_headless(|cx| {
+        // The host owns the pane, exactly as the specimen does: it applies the
+        // delta, clamps to its own bounds, and supplies the next spec.
+        fn build(width: f32, mounted: Arc<Mutex<Node>>, pane: Arc<Mutex<f32>>) -> Node {
+            let mount = Arc::clone(&mounted);
+            let state = Arc::clone(&pane);
+            let gesture = Arc::new(Mutex::new(width));
+            poodle_render::resize_handle(
+                &ResizeHandleSpec::new()
+                    .with_orientation(Orientation::Horizontal)
+                    .with_aria_label("Resize horizontal")
+                    .with_aria_value_now(width)
+                    .with_aria_value_min(MIN_PX)
+                    .with_aria_value_max(MAX_PX),
+                &theme(),
+                Some(Arc::new(move |phase, delta| match phase {
+                    ResizePhase::Start => {
+                        *gesture.lock().expect("gesture lock") =
+                            *state.lock().expect("pane lock");
+                    }
+                    ResizePhase::Move => {
+                        let mut at = gesture.lock().expect("gesture lock");
+                        *at = (*at + delta).clamp(MIN_PX, MAX_PX);
+                        *state.lock().expect("pane lock") = *at;
+                        *mount.lock().expect("mount lock") =
+                            build(*at, Arc::clone(&mount), Arc::clone(&state));
+                    }
+                    ResizePhase::End => {}
+                })),
+            )
+        }
+
+        let pane = Arc::new(Mutex::new(120.0f32));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(120.0, Arc::clone(&mounted), Arc::clone(&pane));
+
+        let handle_id = poodle_render::resize_handle_focus_id(
+            &ResizeHandleSpec::new()
+                .with_orientation(Orientation::Horizontal)
+                .with_aria_label("Resize horizontal"),
+        );
+
+        let declared_value = || mounted.lock().unwrap().a11y.value;
+        let declared_range = || {
+            let node = mounted.lock().unwrap();
+            (node.a11y.value_min, node.a11y.value_max)
+        };
+
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle(&handle_id);
+        driver.focus_element(&handle_id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&handle_id),
+            Some(true),
+            "the separator is a real focus target, not a node with a handler nobody can reach",
+        );
+        assert_eq!(declared_range(), (Some(48.0), Some(280.0)));
+
+        // An axis arrow: contract §6's 8px step, through the focus chain.
+        driver.dispatch_key_raw("right");
+        assert_eq!(*pane.lock().unwrap(), 128.0);
+        assert_eq!(declared_value(), Some(128.0));
+
+        // A cross-axis arrow belongs to whatever owns the surface.
+        driver.dispatch_key_raw("up");
+        assert_eq!(*pane.lock().unwrap(), 128.0);
+
+        driver.dispatch_key_raw("left");
+        assert_eq!(*pane.lock().unwrap(), 120.0);
+
+        // Home and End saturate; the host's clamp decides where they land.
+        driver.dispatch_key_raw("home");
+        assert_eq!(*pane.lock().unwrap(), MIN_PX);
+        assert_eq!(declared_value(), Some(48.0));
+
+        driver.dispatch_key_raw("end");
+        assert_eq!(*pane.lock().unwrap(), MAX_PX);
+        assert_eq!(declared_value(), Some(280.0));
+        assert_eq!(
+            declared_range(),
+            (Some(48.0), Some(280.0)),
+            "the range survives every rebuild",
+        );
+    });
+}
+
+/// g15.040. The disabled section of the same page must stay out of the focus
+/// order entirely — a disabled separator that still answers keys is worse
+/// than one that never moved.
+#[test]
+fn a_disabled_resize_handle_takes_no_focus_and_answers_no_key() {
+    use poodle_specs::{Orientation, ResizeHandleSpec};
+
+    run_headless(|cx| {
+        let spec = ResizeHandleSpec::new()
+            .with_orientation(Orientation::Horizontal)
+            .with_disabled(true)
+            .with_aria_label("Disabled resize");
+        let moves = Arc::new(Mutex::new(0usize));
+        let sink = Arc::clone(&moves);
+        let node = poodle_render::resize_handle(
+            &spec,
+            &theme(),
+            Some(Arc::new(move |_phase, _delta| {
+                *sink.lock().expect("count lock") += 1;
+            })),
+        );
+        let handle_id = poodle_render::resize_handle_focus_id(&spec);
+        assert_eq!(node.id.as_deref(), Some(handle_id.as_str()));
+
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        driver.draw_frame();
+        driver.focus_element(&handle_id);
+        driver.dispatch_key_raw("right");
+
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&handle_id).is_none(),
+            "a disabled separator never becomes a focus target",
+        );
+        assert_eq!(*moves.lock().unwrap(), 0);
+    });
+}
+
 // ── g15.010 Batch A regressions ───────────────────────────────────────────
 
 /// Callout dismiss is a focusable button. Keyboard activation reaches the

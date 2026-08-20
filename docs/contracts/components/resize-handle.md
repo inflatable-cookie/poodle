@@ -1,7 +1,7 @@
 # ResizeHandle
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-20
 
 ## 1. Purpose
 
@@ -120,6 +120,15 @@ stay adapter-side (drag-gesture effects).
 - focus entry: handle is focusable via `tabindex="0"` when not disabled
 - focus ring: standard focus-visible outline
 - value changes: `aria-valuenow` updates announced by screen reader when host updates the prop
+
+### Renderer-Neutral Semantics
+
+The shared Rust composition states the same six things on its node, whatever
+the backend does with them: separator role, accessible name (defaulting to
+`"Resize"`), axis, and the current/minimum/maximum numeric range. `tabindex`
+has no native counterpart — an enabled handle is a focus stop and a disabled
+one is marked disabled, which is what `0` and `-1` mean here. A current value
+is always paired with its range: alone it announces a number with no span.
 
 ## 7. Layout
 
@@ -255,6 +264,25 @@ A consumer wanting a hairline divider sets `--poodle-resize-handle-thickness:
 - Cursor changes via GPUI cursor API (`col-resize` / `row-resize`)
 - Window-level mouse tracking maps to GPUI's drag capture model
 - Keyboard step size must match (8px)
+- Keyboard resize rides the resize callback rather than a second one: one
+  keystroke is one whole gesture — start, one move carrying the §6 delta, end
+  — so a host that commits on release commits once per key. Cross-axis arrows
+  are not consumed.
+- The node composition is the root plus the grab overlay. §7 already puts the
+  line at `inset: 0`, so root and line are the same pixels, and only the node
+  that holds focus can carry a focus state — a separate line child would put
+  the paint out of the focus channel's reach.
+- focus-visible recolors that hairline to `color.accent.focusRing` instead of
+  drawing an outline. GPUI has no outline that costs no layout, and the
+  handle's whole footprint is the `0.125rem` line, so a border would move the
+  split it is supposed to describe.
+- The root's element id is derived from orientation and accessible name, so
+  two handles on one page never share a backend focus handle.
+- `aria_value_now` / `aria_value_min` / `aria_value_max` reach the node's
+  accessibility range and stop there: gpui 0.2.2 exposes no platform
+  accessibility attributes (`docs/contracts/003-native-accessibility.md`), so
+  nothing announces them yet. The declaration is still the component's job —
+  it is what the backend will project the day upstream ships an API.
 
 ## 10a. Jetstream Notes
 
