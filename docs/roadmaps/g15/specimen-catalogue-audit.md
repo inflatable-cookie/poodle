@@ -2,9 +2,11 @@
 
 Status: **partial** — mechanical screening baseline plus live measurement on
 all three runtimes. Human teaching judgment has been applied to the three
-pilots and to 21 screen-clear pages (`g15.028`, `g15.029`); 35 screen-clear
-pages and the remaining defect-led rows still await it.
-Date: 2026-08-20 (revision 9 — `g15.039` closed the DateTimeZonePicker nested-layer
+pilots and to 30 screen-clear pages (`g15.028`, `g15.029`, `g15.030`); 26
+screen-clear pages and the remaining defect-led rows still await it.
+Date: 2026-08-20 (revision 10 — `g15.030` foundation-layout review records a
+GPUI `ResizeHandle` keyboard/focus contract gap as `contract/runtime-blocker`;
+revision 9 — `g15.039` closed the DateTimeZonePicker nested-layer
 pointer blocker; revision 8 was the `g15.029` review-round totals and D
 correction; revision 7 recorded the date/time family review; revision 6 closed
 SegmentedControl native option parity via `g15.038`; revision 5 measured the
@@ -97,13 +99,13 @@ meaningfully distinct. A later human review may change a grade or disposition
 in the existing row; it does not add a second table.
 
 A person has now answered those questions for the three pilots (Button,
-RangeSlider, Tabs) and for the 21 screen-clear pages owned by `g15.028` and
-`g15.029`. The remaining 35 screen-clear pages still sit in `g15.030`–
+RangeSlider, Tabs) and for the 30 screen-clear pages owned by `g15.028`–
+`g15.030`. The remaining 26 screen-clear pages still sit in `g15.031`–
 `g15.033`. Every child carries a live operator-review checkpoint for changes.
 
 So read an **A** that has no human verdict as "no measured defect", not as
 "judged a good teaching page". A page can screen A and still open on a prop
-showcase. Read an **A** that names a `g15.028`/`g15.029` human verdict as the
+showcase. Read an **A** that names a `g15.028`–`g15.030` human verdict as the
 reviewer's keep. **D** remains the dead-primary-interaction or unusable-as-
 documentation grade even when the defect is a component blocker rather than a
 caption hole.
@@ -128,24 +130,24 @@ Dispositions used in the rows: `keep`, `pilot-fix`, `curation-tranche`,
 ## Totals
 
 Mechanical recount of the 175 inventory rows at this revision, after the
-`g15.039` DateTimeZonePicker nested-layer repair. These numbers are the rows,
+`g15.030` ResizeHandle GPUI keyboard/focus blocker. These numbers are the rows,
 not a pre-pilot or pre-curation baseline.
 
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Svelte (live) | 89 | 33 | 44 | 9 | — |
 | React (live) | 102 | 26 | 47 | 0 | — |
-| GPUI (headless render + structural) | 103 | 65 | 6 | 0 | 1 |
-| **Worst of the three** | **66** | **48** | **52** | **9** | — |
+| GPUI (headless render + structural) | 102 | 66 | 6 | 0 | 1 |
+| **Worst of the three** | **65** | **49** | **52** | **9** | — |
 
 | Disposition | Count |
 | --- | ---: |
-| `keep` | 56 |
+| `keep` | 55 |
 | `pilot-fix` | 3 |
 | `curation-tranche` | 108 |
 | `curation-complete` | 6 |
 | `verified-no-op` | 2 |
-| `contract/runtime-blocker` | 0 |
+| `contract/runtime-blocker` | 1 |
 
 175 of 175 pages were measured live in both web runtimes. The `g15.028`
 contract/runtime blocker on GPUI `SegmentedControl` is closed by `g15.038`.
@@ -153,6 +155,12 @@ The `g15.029` web `DateTimeZonePicker` nested-layer pointer blocker is closed
 by `g15.039`: a portalled timezone option now commits through the composite
 dismiss stack, and a genuine outside press still dismisses the whole picker
 in one gesture. Sv/Rc return to A; disposition is `keep`.
+The `g15.030` review records a new GPUI `ResizeHandle` contract/runtime
+blocker: the render path wires drag only and does not project focus,
+keyboard-step, or `aria_value_*` semantics from the contract
+(`docs/contracts/components/resize-handle.md` §5–6). Sv/Rc specimen repairs
+land in PR #55; the native renderer gap is routed separately and is not
+hidden as specimen work.
 
 `MeterSurface` is the single `n/a` on GPUI — web-only by fixed decision
 (spec 068), with no native counterpart. It is still graded on the two runtimes
@@ -529,17 +537,17 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 
 | Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `Box` | A | A | A | keep | no named defect |
-| `Grid` | A | A | A | keep | no named defect |
+| `Box` | A | A | A | keep | human verdict (`g15.030`): keep — default teaches containment and padding; fixed dimensions and overflow clip are distinct; Sv/Rc paired verbatim; Gp mirrors all four sections |
+| `Grid` | A | A | A | keep | human verdict (`g15.030`): keep — three column layouts teach arrangement, not a prop matrix; Sv/Rc paired; Gp mirrors all three sections |
 | `ListGrid` | C | C | A | curation-tranche | **Sv:** controls do nothing — Export and the row action are unwired · **Rc:** controls do nothing — Export and the row action are unwired |
-| `Region` | A | A | A | keep | no named defect |
-| `ResizeHandle` | A | A | A | keep | no named defect |
-| `ScrollShell` | A | A | A | keep | no named defect |
-| `Separator` | A | A | A | keep | no named defect |
-| `Spacer` | A | A | A | keep | no named defect |
+| `Region` | A | A | A | keep | human verdict (`g15.030`): keep — default placeholder, labeled stack, and nav/toolbar/content composition teach boundary role; Sv/Rc paired; Gp mirrors all three sections |
+| `ResizeHandle` | A | A | B | contract/runtime-blocker | human verdict (`g15.030`): **Sv/Rc:** keep after specimen repair — interactive splits were inert; now apply drag/keyboard deltas with specimen bounds (`48–280` horizontal, `40–120` vertical) passed through `ariaValueNow/min/max`. **Gp:** drag-only render path — `packages/render/src/resize_handle.rs` never makes the node focusable, installs keyboard handling, or projects `ResizeHandleSpec.aria_value_*`; native page cannot teach the same keyboard/value evidence as web. Routed component-semantic blocker; renderer fix out of scope for this card |
+| `ScrollShell` | A | A | A | keep | human verdict (`g15.030`): keep — vertical and horizontal scroll with realistic overflow content; Sv/Rc paired; Gp mirrors both sections |
+| `Separator` | A | A | A | keep | human verdict (`g15.030`): keep — horizontal, vertical, and decorative separators with surrounding context; Sv/Rc paired; Gp mirrors all three sections |
+| `Spacer` | A | A | A | keep | human verdict (`g15.030`): keep — toolbar-style push-apart compositions teach flex spacing; Sv/Rc paired; Gp mirrors both sections |
 | `SplitView` | C | C | B | curation-tranche | **Sv:** Examples long — 7 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** Examples long — 7 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `Stack` | A | A | A | keep | no named defect |
-| `Surface` | A | A | A | keep | no named defect |
+| `Stack` | A | A | A | keep | human verdict (`g15.030`): keep — column, row, alignment, and wrap teach arrangement within the section budget; Sv/Rc paired; Gp mirrors all five sections |
+| `Surface` | A | A | A | keep | human verdict (`g15.030`): keep — panel/canvas/elevated/no-border teach tone and container role; Sv/Rc paired; Gp adds renderer-owned border/padding/role sections while preserving the tone evidence |
 
 ### Content & identity — Foundations (14)
 

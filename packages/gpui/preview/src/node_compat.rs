@@ -2922,6 +2922,7 @@ impl IntoElement for EmptyState {
 pub(crate) struct ResizeHandle {
     spec: ResizeHandleSpec,
     theme: GpuiThemeProvider,
+    on_resize: Option<Arc<dyn Fn(poodle_render::ResizePhase, f32) + Send + Sync>>,
 }
 
 impl ResizeHandle {
@@ -2929,7 +2930,16 @@ impl ResizeHandle {
         Self {
             spec,
             theme: theme.clone(),
+            on_resize: None,
         }
+    }
+
+    pub(crate) fn on_resize(
+        mut self,
+        handler: Arc<dyn Fn(poodle_render::ResizePhase, f32) + Send + Sync>,
+    ) -> Self {
+        self.on_resize = Some(handler);
+        self
     }
 }
 
@@ -2940,7 +2950,7 @@ impl IntoElement for ResizeHandle {
         poodle_gpui_node_backend::to_gpui(&poodle_render::resize_handle(
             &self.spec,
             &self.theme,
-            None,
+            self.on_resize,
         ))
     }
 }
