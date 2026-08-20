@@ -34,7 +34,13 @@ portalled surface. Nested Select already registered its listbox; it now
 also passes `hostElement` so parenthood is containment-based when child
 effects register first. Stack ancestry then spares the picker on an option
 press and still dismisses picker plus list on a true outside press, in one
-gesture. Escape unwinds the innermost layer first.
+gesture.
+
+Escape follows the shared dismiss-stack policy: innermost layer first. That
+is an intentional contract decision, not a side-effect of switching
+handlers. Closing the outer picker on the first Escape while the timezone
+list is open would fight `002-anchored-overlays.md`. The picker-only Escape
+path is unchanged.
 
 This follows `docs/contracts/002-anchored-overlays.md`: a host does not
 widen `contains` into a child's portal.
@@ -43,15 +49,21 @@ widen `contains` into a child's portal.
 
 `docs/contracts/components/date-time-zone-picker.md` now states the nested
 ownership guarantee: a portalled timezone option is inside the composite,
-a genuine outside press dismisses the whole picker in one gesture, and
-Escape closes the innermost dismiss layer first.
+and a genuine outside press dismisses the whole picker in one gesture.
+Escape is an explicit stack decision: first keypress closes the innermost
+layer only (timezone list, then picker). The previous picker-owned
+document handler closed the outer overlay on the first Escape even when
+the list was open; that behavior is not preserved, because it conflicts
+with the shared stack.
 
 ## Evidence
 
-Paired focused tests click a real portalled timezone option (`data-value`,
-not a synthetic callback) and separately mousedown `document.body` while
-that list is open. The option is asserted to sit outside the picker
-surface before the click.
+Paired focused tests dispatch `mousedown` on a real portalled timezone
+option, assert the picker is still open and `onValueChange` has not run,
+then `click` and assert the timezone commit. A separate case mousedowns
+`document.body` while that list is open. A third case proves Escape closes
+the list first and the picker on the next keypress. The option is asserted
+to sit outside the picker surface before the pointer sequence.
 
 ## Audit
 
@@ -73,13 +85,26 @@ Totals recounted from the 175 inventory rows.
 
 Headless only. No windowed, native-visual, Jetstream, or release selector ran.
 
-- focused Svelte and React DateTimeZonePicker tests — 18 passed
+- focused Svelte and React DateTimeZonePicker tests — 20 passed
 - paired Select tests after the `hostElement` plumbing — 8 passed
 - `effigy check:svelte` — 0 errors
 - `effigy react:build` — pass
 - `effigy catalogue:check` — pass
 - `effigy docs:check` — pass
-- `git diff --check` — clean on the working tree
+- `git diff --check origin/main...HEAD`
+
+## Review round 1 (PR #54)
+
+Two evidence/contract blockers; both addressed on this branch.
+
+1. The timezone commit case now dispatches `mousedown` on the real portalled
+   option, asserts the picker is still open and `onValueChange` has not run,
+   then `click` and asserts the commit. `fireEvent.click` alone does not
+   emit `mousedown`, so it could not catch the original defect.
+2. Nested Escape is an explicit contract decision: the shared dismiss stack
+   unwinds innermost-first. Paired tests cover list-then-picker. Restoring
+   "first Escape closes the outer picker" would fight
+   `002-anchored-overlays.md` and is not done here.
 
 ## Unresolved
 

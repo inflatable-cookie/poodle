@@ -3,6 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 
 import { DateTimeZonePicker } from "../src/DateTimeZonePicker";
 
+const timeZoneOptions = [
+  { value: "UTC", label: "UTC" },
+  { value: "Asia/Tokyo", label: "Tokyo" },
+];
+
 describe("DateTimeZonePicker (react)", () => {
   // The surface is portalled by the anchored surface to the theme root, so it is
   // not reachable from the render container — same pattern as DatePicker.
@@ -76,10 +81,7 @@ describe("DateTimeZonePicker (react)", () => {
     const { container } = render(
       <DateTimeZonePicker
         ariaLabel="Event time"
-        timeZoneOptions={[
-          { value: "UTC", label: "UTC" },
-          { value: "Asia/Tokyo", label: "Tokyo" },
-        ]}
+        timeZoneOptions={timeZoneOptions}
         onValueChange={onValueChange}
       />,
     );
@@ -96,6 +98,10 @@ describe("DateTimeZonePicker (react)", () => {
     // synthetic onValueChange call would miss the mousedown-before-commit bug.
     expect(tokyo.closest(".poodle-date-time-zone-picker__surface")).toBeNull();
 
+    fireEvent.mouseDown(tokyo);
+    expect(surfaceOf()).not.toBeNull();
+    expect(onValueChange).not.toHaveBeenCalled();
+
     fireEvent.click(tokyo);
 
     expect(onValueChange).toHaveBeenCalledWith(expect.objectContaining({ timeZone: "Asia/Tokyo" }));
@@ -106,10 +112,7 @@ describe("DateTimeZonePicker (react)", () => {
     const { container } = render(
       <DateTimeZonePicker
         ariaLabel="Event time"
-        timeZoneOptions={[
-          { value: "UTC", label: "UTC" },
-          { value: "Asia/Tokyo", label: "Tokyo" },
-        ]}
+        timeZoneOptions={timeZoneOptions}
       />,
     );
     fireEvent.click(triggerOf(container));
@@ -122,6 +125,27 @@ describe("DateTimeZonePicker (react)", () => {
 
     expect(surfaceOf()).toBeNull();
     expect(document.querySelector('[role="option"]')).toBeNull();
+  });
+
+  it("unwinds Escape through the nested timezone list before closing the picker", () => {
+    const onOpenChange = vi.fn();
+    const { container } = render(
+      <DateTimeZonePicker ariaLabel="Event time" timeZoneOptions={timeZoneOptions} onOpenChange={onOpenChange} />,
+    );
+    fireEvent.click(triggerOf(container));
+
+    const timezoneInput = surfaceOf()?.querySelector(".poodle-select__input") as HTMLInputElement;
+    fireEvent.focus(timezoneInput);
+    expect(document.querySelector('[role="option"]')).not.toBeNull();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(document.querySelector('[role="option"]')).toBeNull();
+    expect(surfaceOf()).not.toBeNull();
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(surfaceOf()).toBeNull();
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
   });
 
   it("commits the chosen date into the value through the composed calendar", () => {

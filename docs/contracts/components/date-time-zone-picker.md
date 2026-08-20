@@ -111,6 +111,7 @@ TimeZoneOption: {
 | dismissed | Escape or click outside | overlay closes without changing value |
 | nested timezone pointer commit | pointer press on a portalled TimeZoneSelect option | timezone identifier commits through `onValueChange`; the picker stays open |
 | nested timezone outside dismiss | pointer press outside the composite while the timezone list is open | picker and timezone list both close in that one gesture |
+| nested timezone Escape | Escape while the timezone list is open | timezone list closes; picker stays open and the value is unchanged |
 
 ### Behavior Machine
 
@@ -152,7 +153,7 @@ this machinery.
 | Key | Behavior |
 |-----|----------|
 | `Enter` / `Space` | toggles overlay open/closed |
-| `Escape` | closes the innermost dismiss layer without changing value: the nested timezone list first, then the picker overlay |
+| `Escape` | closes the innermost dismiss layer without changing value. This is the shared dismiss-stack policy (`002-anchored-overlays.md`), not a picker-owned shortcut: when the timezone list is open, the first Escape closes that list and leaves the picker open; the next Escape closes the picker. When the picker is the innermost layer, Escape closes it in one keypress. |
 | `Tab` | when open, moves focus between calendar, time field, and timezone select; when closed, exits control |
 
 ### Focus And Announcement
@@ -325,8 +326,12 @@ Size sets an **absolute** trigger height (via `--poodle-date-time-zone-picker-tr
   Nested `TimeZoneSelect` registers its own layer for the portalled option
   list. The picker does not widen `contains` into that child portal; stack
   ancestry treats a timezone-option press as inside the composite, and a
-  genuine outside press dismisses picker and list in one gesture. Escape
-  unwinds the innermost layer first.
+  genuine outside press dismisses picker and list in one gesture.
+- Escape follows that same stack, not a leftover picker-owned document
+  handler. The first Escape closes the innermost layer only — the nested
+  timezone list if it is open, otherwise the picker. Closing the outer
+  picker on the first Escape while the list is open would fight
+  `002-anchored-overlays.md`.
 - Composes `Calendar`, `TimeInput`, and `TimeZoneSelect` internally
 - Public value uses contract-owned local date, local time, and timezone string
   fields rather than timestamps
@@ -371,6 +376,7 @@ Size sets an **absolute** trigger height (via `--poodle-date-time-zone-picker-tr
 - [ ] value and onValueChange semantics match (runs on constituent change)
 - [ ] onOpenChange runs on open and close transitions
 - [ ] Escape closes the innermost dismiss layer without changing value
+- [ ] Escape while the timezone list is open closes that list first, then the picker
 - [ ] outside click closes overlay
 - [ ] nested timezone option pointer commit does not dismiss the picker
 - [ ] outside click while the timezone list is open dismisses the whole composite in one gesture
