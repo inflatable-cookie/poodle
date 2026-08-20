@@ -57,8 +57,9 @@ The seven human-teaching verdicts are recorded in the existing audit rows in
   without committing. Keyboard Enter on a highlighted option does commit.
   This is a component dismiss-layer defect, not dead specimen wiring; not
   implemented here. The audit row is `contract/runtime-blocker` with Sv/Rc
-  grade B. GPUI default was empty-aligned with web as a bounded specimen
-  repair; the Open section still shows calendar + time + zone.
+  grade D (dead primary pointer workflow). GPUI default was empty-aligned
+  with web as a bounded specimen repair; the Open section still shows
+  calendar + time + zone.
 
 No other page needed a contract, public API, or component-semantic change.
 Picker, calendar, range, and duration gestures on the kept and repaired pages
@@ -73,6 +74,24 @@ worked in the live web previews.
 Operator sign-off is pending on the changed Svelte and React DurationInput
 routes. This card is not claimed complete. The DateTimeZonePicker blocker is
 not implemented here; the orchestrator routes the follow-up.
+
+## Review round 1 (orchestrator, PR #53)
+
+Two documentation blockers; both addressed in this revision. No specimen
+source moved.
+
+1. **Audit headline and totals were stale.** The header still said teaching
+   judgment applied only to the three pilots, and the published totals did
+   not match the 175 rows (they still used the four original dispositions
+   and pre-curation grade counts). Header, grading explanation, disposition
+   vocabulary, and totals now recount the rows: Svelte 88/33/44/10, React
+   101/26/47/1, GPUI 103/65/6/0 + 1 n/a, worst 65/48/52/10; dispositions
+   55 keep / 3 pilot-fix / 108 curation-tranche / 6 curation-complete /
+   2 verified-no-op / 1 blocker. Recounted after the grade correction below.
+2. **DateTimeZonePicker was undergraded.** Pointer selection in the nested
+   timezone list dismisses the composite without committing, so the page
+   cannot complete its central pointer workflow. Sv/Rc grades move from B
+   to D. Disposition stays `contract/runtime-blocker`.
 
 ## Validation
 

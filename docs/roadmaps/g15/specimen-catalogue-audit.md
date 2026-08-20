@@ -1,10 +1,12 @@
 # g15 — Human-Centred Specimen Catalogue Audit
 
-Status: **partial** — a mechanical screening baseline plus live measurement on
-all three runtimes. Not the completed human-centred audit: the rubric's
-teaching judgment was applied to the three pilots only, not to all 175 pages.
-Date: 2026-08-20 (revision 7 — `g15.029` human review of the foundation date
-and time family; revision 6 closed SegmentedControl native option parity via
+Status: **partial** — mechanical screening baseline plus live measurement on
+all three runtimes. Human teaching judgment has been applied to the three
+pilots and to 21 screen-clear pages (`g15.028`, `g15.029`); 35 screen-clear
+pages and the remaining defect-led rows still await it.
+Date: 2026-08-20 (revision 8 — `g15.029` review-round totals and
+DateTimeZonePicker D correction; revision 7 recorded the date/time family
+review; revision 6 closed SegmentedControl native option parity via
 `g15.038`; revision 5 measured the GPUI column live via the `g15.026` probe;
 first pass 2026-08-17)
 Card: `docs/roadmaps/g15/011-specimen-catalogue-audit.md`
@@ -87,19 +89,24 @@ The card's fixed vocabulary:
 - **D — missing/broken:** no real specimen, dead primary interaction, or the
   page cannot be used as documentation.
 
-**These are screening grades.** They are computed from measured signals —
-caption rendering, example count, axis eligibility, narrow overflow, and a
-source-checked interaction verdict. They are not the carried rubric's human
-judgment. In particular, no grade in this table asserts that a page's *first
-example teaches normal use* or that its *variants are meaningfully distinct*.
-Those two questions need a person, and a person answered them for three pages:
-Button, RangeSlider, and Tabs.
+**Screening grades are the starting point.** They are computed from measured
+signals — caption rendering, example count, axis eligibility, narrow overflow,
+and a source-checked interaction verdict. They do not by themselves assert
+that a page's first example teaches normal use or that its variants are
+meaningfully distinct. A later human review may change a grade or disposition
+in the existing row; it does not add a second table.
 
-So read an **A** as "no measured defect", not as "judged a good teaching page".
-A page can screen A and still open on a prop showcase. Each defect-led curation
-tranche applies the human judgment to its own family. The 56 pages that
-screened clear are covered separately by the exact `g15.028`–`g15.033` review
-partition. Every child carries a live operator-review checkpoint for changes.
+A person has now answered those questions for the three pilots (Button,
+RangeSlider, Tabs) and for the 21 screen-clear pages owned by `g15.028` and
+`g15.029`. The remaining 35 screen-clear pages still sit in `g15.030`–
+`g15.033`. Every child carries a live operator-review checkpoint for changes.
+
+So read an **A** that has no human verdict as "no measured defect", not as
+"judged a good teaching page". A page can screen A and still open on a prop
+showcase. Read an **A** that names a `g15.028`/`g15.029` human verdict as the
+reviewer's keep. **D** remains the dead-primary-interaction or unusable-as-
+documentation grade even when the defect is a component blocker rather than a
+caption hole.
 
 Defects are weighted. A minor defect (one missing axis, a hand-rolled caption
 idiom, narrow overflow) scores 1; a major one (captions that do not render, an
@@ -113,27 +120,31 @@ A cross-runtime caption-count difference is attributed to neither runtime when
 the Svelte page is itself hard-failed: the difference *is* that defect, already
 graded, and charging React for it marked correct pages down.
 
-Dispositions: `keep`, `pilot-fix`, `curation-tranche`, or
-`contract/runtime-blocker`.
+Dispositions used in the rows: `keep`, `pilot-fix`, `curation-tranche`,
+`curation-complete`, `verified-no-op`, or `contract/runtime-blocker`.
+`curation-complete` and `verified-no-op` name the closing card in the row
+(`g15.020` today).
 
 ## Totals
 
-Measured against this branch's head — after the three approved pilot pages
-landed, so these grades describe the catalogue as it now stands, not a
-pre-pilot baseline.
+Mechanical recount of the 175 inventory rows at this revision, after the
+`g15.029` DateTimeZonePicker D correction. These numbers are the rows, not a
+pre-pilot or pre-curation baseline.
 
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Svelte (live) | 80 | 34 | 52 | 9 | — |
-| React (live) | 93 | 27 | 55 | 0 | — |
-| GPUI (headless render + structural) | 100 | 68 | 6 | 0 | 1 |
-| **Worst of the three** | **57** | **49** | **60** | **9** | — |
+| Svelte (live) | 88 | 33 | 44 | 10 | — |
+| React (live) | 101 | 26 | 47 | 1 | — |
+| GPUI (headless render + structural) | 103 | 65 | 6 | 0 | 1 |
+| **Worst of the three** | **65** | **48** | **52** | **10** | — |
 
 | Disposition | Count |
 | --- | ---: |
 | `keep` | 55 |
 | `pilot-fix` | 3 |
-| `curation-tranche` | 116 |
+| `curation-tranche` | 108 |
+| `curation-complete` | 6 |
+| `verified-no-op` | 2 |
 | `contract/runtime-blocker` | 1 |
 
 175 of 175 pages were measured live in both web runtimes. The `g15.028`
@@ -142,7 +153,8 @@ contract/runtime blocker on GPUI `SegmentedControl` is closed by `g15.038`.
 selection of the nested `TimeZoneSelect` is dismissed as an outside click
 because the Select popover is portalled outside the picker's
 `layerContains(root, surface)` check. Keyboard Enter commits. That is a
-component defect, not specimen work.
+dead primary pointer workflow, graded D on both web runtimes, and a
+component defect rather than specimen work.
 
 `MeterSurface` is the single `n/a` on GPUI — web-only by fixed decision
 (spec 068), with no native counterpart. It is still graded on the two runtimes
@@ -150,7 +162,7 @@ it has.
 
 ## What The Audit Found
 
-### 1. Nine pages where no caption renders — the only D grade
+### 1. Nine pages where no caption renders — the original D class
 
 `SpecimenGroup` accepts one caption prop, `label`. Nine agent-surface pages
 pass `title` and `description` instead. Svelte drops unknown props silently,
@@ -348,6 +360,11 @@ Revision 5 replaces the provisional GPUI basis with the live `g15.026` result:
   UiPresentationProvider cascade) are interaction defects, not construction
   defects, and keep their existing owners.
 
+Revision 8 reconciles the published totals with a mechanical recount of the
+175 rows, adds the `curation-complete` and `verified-no-op` dispositions the
+rows already used, and records `DateTimeZonePicker` as D on both web runtimes
+for a dead primary pointer workflow.
+
 ## Pilot Findings
 
 The three pilots were chosen to be representative, and they were. Their rows in
@@ -412,7 +429,7 @@ chevron as evidence.
 
 ## Continuation Runway
 
-The 116 `curation-tranche` entries group into bounded, reviewable families.
+The 108 `curation-tranche` entries group into bounded, reviewable families.
 Each is a planned card requiring orchestrator review before dispatch, and each
 that changes specimen presentation carries a live operator-review checkpoint.
 
@@ -500,7 +517,7 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | `DateRangePicker` | A | A | A | keep | human verdict (`g15.029`): keep — live default range gesture with readout, pre-filled Mar 1–14, disabled; Gp adds a static Open (range calendar) so the composed surface is visible without interaction |
 | `DateTimePicker` | A | A | A | keep | human verdict (`g15.029`): keep — default, pre-filled Mar 14 2:30 PM, disabled; trigger shows the committed date/time; Gp adds Open (calendar + time) |
 | `DateTimeRangePicker` | A | A | A | keep | human verdict (`g15.029`): keep — default, pre-filled Mar 10 9:00–Mar 14 5:00, disabled; start/end time fields visible when open; Gp adds Open (range calendar + start/end time) |
-| `DateTimeZonePicker` | B | B | A | contract/runtime-blocker | human verdict (`g15.029`): **Sv/Rc:** nested `TimeZoneSelect` popover sits outside the picker's `layerContains(root, surface)` outside-click check (`DateTimeZonePicker.svelte` / React equivalent), so a pointer choice dismisses the picker without committing; keyboard Enter works. Not repaired here. **Gp:** empty default now matches web; Open section still shows calendar + time + zone. Follow-up owns the dismiss-layer fix |
+| `DateTimeZonePicker` | D | D | A | contract/runtime-blocker | human verdict (`g15.029`): **Sv/Rc:** nested `TimeZoneSelect` popover sits outside the picker's `layerContains(root, surface)` outside-click check (`DateTimeZonePicker.svelte` / React equivalent), so a pointer choice dismisses the picker without committing — dead primary pointer workflow, not a small presentation defect; keyboard Enter works. Not repaired here. **Gp:** empty default now matches web; Open section still shows calendar + time + zone. Follow-up owns the dismiss-layer fix |
 | `DurationInput` | A | A | A | keep | human verdict (`g15.029`): keep after specimen repair — removed the interaction-only "Last change" group (Total already teaches live binding); Gp dropped Empty/zero and Invalid extras, aligned captions/fixtures to the web three-section set, and made the Total readout follow stored state instead of a hardcoded 01:30:00 |
 | `TimeAgo` | B | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 captioned examples |
 | `TimeInput` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |
