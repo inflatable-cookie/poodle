@@ -7,7 +7,7 @@
 
 <SpecimenLayout>
   <!-- 1. Simple layout with Regions -->
-  <SpecimenGroup label="Basic horizontal layout">
+  <SpecimenGroup label="Horizontal split">
     <div class="poodle-specimen__frame">
       <SplitView orientation="horizontal">
         {#snippet primary()}
@@ -24,7 +24,7 @@
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Basic vertical layout">
+  <SpecimenGroup label="Vertical split">
     <div class="poodle-specimen__frame poodle-specimen__frame--tall">
       <SplitView orientation="vertical">
         {#snippet primary()}
@@ -41,8 +41,8 @@
     </div>
   </SpecimenGroup>
 
-  <!-- 2. Horizontal with collapse toggles -->
-  <SpecimenGroup label="Horizontal with collapse toggles (drag to edge to collapse)">
+  <!-- 2. Collapse controls -->
+  <SpecimenGroup label="Collapse controls">
     <div class="poodle-specimen__frame">
       <SplitView
         orientation="horizontal"
@@ -61,10 +61,6 @@
         {/snippet}
       </SplitView>
     </div>
-  </SpecimenGroup>
-
-  <!-- 3. Vertical with collapse toggles -->
-  <SpecimenGroup label="Vertical with collapse toggles">
     <div class="poodle-specimen__frame poodle-specimen__frame--tall">
       <SplitView
         orientation="vertical"
@@ -86,7 +82,7 @@
   </SpecimenGroup>
 
   <!-- 4. Hover-revealed toggles -->
-  <SpecimenGroup label="Hover-revealed toggles (move the pointer onto the seam)">
+  <SpecimenGroup label="Hover-revealed controls">
     <div class="poodle-specimen__frame">
       <SplitView
         orientation="horizontal"
@@ -109,7 +105,7 @@
   </SpecimenGroup>
 
   <!-- 5. Nested splits (IDE-style layout) -->
-  <SpecimenGroup label="Nested splits (IDE-style layout)">
+  <SpecimenGroup label="Nested workspace">
     <div class="poodle-specimen__frame poodle-specimen__frame--tall">
       <SplitView
         orientation="horizontal"

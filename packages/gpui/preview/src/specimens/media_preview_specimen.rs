@@ -7,8 +7,8 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::{
-    AspectRatio, CardVariant, ControlDensity, ControlSize, EyebrowSpec, MediaKind,
-    MediaPreviewSpec, MediaState, SurfaceSpec, SurfaceTone,
+    AspectRatio, ControlDensity, ControlSize, EyebrowSpec, MediaKind, MediaPreviewSpec, MediaState,
+    SurfaceSpec, SurfaceTone,
 };
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -45,92 +45,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             )
             .with_media_content(media_slot(theme, "Video placeholder")),
         ))
-        // ── File chrome: document kind, caption body, thumbnail meta chip ──
+        // ── Error state ──
         .child(group(
-            "Document preview (caption + thumbnail meta)",
+            "Error state",
             theme,
             MediaPreview::from_spec(
-                MediaPreviewSpec::new(MediaKind::Document, "Q3 report.pdf")
+                MediaPreviewSpec::new(MediaKind::Document, "Corrupted file")
                     .with_eyebrow("Document")
-                    .with_caption("Final draft shared with the leadership team.")
-                    .with_thumbnail_meta("12 pages")
-                    .with_aspect_ratio(AspectRatio::Landscape)
-                    .with_metadata(vec!["1.1 MB".into(), "PDF".into()]),
+                    .with_state(MediaState::Error)
+                    .with_state_title("Preview unavailable")
+                    .with_state_message("This file cannot be previewed.")
+                    .with_aspect_ratio(AspectRatio::Landscape),
                 theme,
             ),
-        ))
-        // ── State postures: loading / error / empty ──
-        .child(group(
-            "States (loading, error, empty)",
-            theme,
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(12.0))
-                .child(MediaPreview::from_spec(
-                    MediaPreviewSpec::new(MediaKind::Image, "Rendering preview")
-                        .with_eyebrow("Image")
-                        .with_state(MediaState::Loading)
-                        .with_state_message("Preview is being generated.")
-                        .with_aspect_ratio(AspectRatio::Landscape),
-                    theme,
-                ))
-                .child(MediaPreview::from_spec(
-                    MediaPreviewSpec::new(MediaKind::Document, "Corrupted file")
-                        .with_eyebrow("Document")
-                        .with_state(MediaState::Error)
-                        .with_state_title("Preview unavailable")
-                        .with_state_message("This file cannot be previewed.")
-                        .with_aspect_ratio(AspectRatio::Landscape),
-                    theme,
-                ))
-                .child(MediaPreview::from_spec(
-                    MediaPreviewSpec::new(MediaKind::Image, "Empty slot")
-                        .with_eyebrow("Image")
-                        .with_state(MediaState::Empty)
-                        .with_state_message("No preview available yet.")
-                        .with_aspect_ratio(AspectRatio::Landscape),
-                    theme,
-                )),
-        ))
-        // ── Card variants ──
-        .child(group(
-            "Variants",
-            theme,
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(12.0))
-                .child(
-                    MediaPreview::from_spec(
-                        MediaPreviewSpec::new(MediaKind::Image, "Default card")
-                            .with_eyebrow("Image")
-                            .with_variant(CardVariant::Default)
-                            .with_aspect_ratio(AspectRatio::Landscape),
-                        theme,
-                    )
-                    .with_media_content(media_slot(theme, "Image placeholder")),
-                )
-                .child(
-                    MediaPreview::from_spec(
-                        MediaPreviewSpec::new(MediaKind::Image, "Elevated card")
-                            .with_eyebrow("Image")
-                            .with_variant(CardVariant::Elevated)
-                            .with_aspect_ratio(AspectRatio::Landscape),
-                        theme,
-                    )
-                    .with_media_content(media_slot(theme, "Image placeholder")),
-                )
-                .child(
-                    MediaPreview::from_spec(
-                        MediaPreviewSpec::new(MediaKind::Image, "Outlined card")
-                            .with_eyebrow("Image")
-                            .with_variant(CardVariant::Outlined)
-                            .with_aspect_ratio(AspectRatio::Landscape),
-                        theme,
-                    )
-                    .with_media_content(media_slot(theme, "Image placeholder")),
-                ),
         ))
         .into_any_element();
 

@@ -118,6 +118,62 @@ fn expanded() -> Vec<String> {
     vec!["src".into(), "src/components".into()]
 }
 
+fn large_nodes() -> Vec<TreeNode> {
+    (0..24)
+        .map(|i| {
+            TreeNode::branch(
+                format!("folder-{i}"),
+                format!("Folder {i}"),
+                (0..6)
+                    .map(|j| {
+                        TreeNode::new(
+                            format!("folder-{i}/file-{j}"),
+                            format!("file-{j}.ts"),
+                        )
+                        .with_icon("file")
+                    })
+                    .collect(),
+            )
+            .with_icon("folder")
+        })
+        .collect()
+}
+
+fn large_expanded() -> Vec<String> {
+    (0..24).map(|i| format!("folder-{i}")).collect()
+}
+
+fn flat_nodes() -> Vec<TreeNode> {
+    vec![
+        TreeNode::new("beige", "BeigeButtonShadow").with_icon("monitor"),
+        TreeNode::new("c28", "Component28").with_icon("monitor"),
+        TreeNode::new("home", "Home").with_icon("monitor"),
+        TreeNode::new("line129", "Line129").with_icon("monitor"),
+    ]
+}
+
+fn nearly_flat_nodes() -> Vec<TreeNode> {
+    let mut nodes = flat_nodes();
+    nodes.insert(
+        2,
+        TreeNode::branch(
+            "group",
+            "A group",
+            vec![TreeNode::new("child", "Nested").with_icon("monitor")],
+        )
+        .with_icon("folder"),
+    );
+    nodes
+}
+
+fn stacked(children: impl IntoIterator<Item = Div>) -> Div {
+    let mut col = div().flex().flex_col().gap(px(16.0));
+    for child in children {
+        col = col.child(child);
+    }
+    col
+}
+
 fn find_node<'a>(nodes: &'a [TreeNode], value: &str) -> Option<&'a TreeNode> {
     for node in nodes {
         if node.value == value {
@@ -139,6 +195,23 @@ fn framed(theme: &GpuiThemeProvider, content: impl IntoElement) -> Div {
         .rounded(px(6.0))
         .overflow_hidden()
         .child(content)
+}
+
+fn framed_scroll(theme: &GpuiThemeProvider, content: impl IntoElement) -> Div {
+    div()
+        .w(px(288.0))
+        .h(px(320.0))
+        .border_1()
+        .border_color(color_to_hsla(theme.resolve_color("color.border.subtle")))
+        .rounded(px(6.0))
+        .overflow_hidden()
+        .child(
+            div()
+                .id("tree-large-scroll")
+                .size_full()
+                .overflow_y_scroll()
+                .child(content),
+        )
 }
 
 fn labelled(theme: &GpuiThemeProvider, label: &str, content: impl IntoElement) -> Div {
@@ -270,36 +343,113 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .gap(px(24.0))
         .child(labelled(
             theme,
-            "File explorer — click · Ctrl/Cmd+click · Shift+click · ↑/↓ ←/→ Space",
+            "File explorer",
             framed(theme, interactive),
         ))
         .child(labelled(
             theme,
-            "Checkbox cascade — click a checkbox",
-            framed(
-                theme,
-                Tree::from_spec(
-                    TreeSpec::new(file_tree())
-                        .with_expanded_values(expanded())
-                        .with_show_checkboxes(true)
-                        .with_checked_values(state.tree.checked.clone()),
+            "Selection modes",
+            stacked([
+                framed(
                     theme,
-                )
-                .on_check({
-                    let queue = Arc::clone(&state.node_events);
-                    Arc::new(move |v: &str| {
-                        let nodes = file_tree();
-                        let spec = TreeSpec::new(nodes.clone());
-                        if let Some(node) = find_node(&nodes, v) {
-                            push(&queue, TreeEvent::Check(spec.checkable_values_under(node)));
-                        }
-                    })
-                }),
-            ),
+                    Tree::from_spec(
+                        TreeSpec::new(file_tree())
+                            .with_expanded_values(expanded())
+                            .with_selected_values(vec![
+                                "src/components/Button.svelte".into(),
+                                "src/components/Tree.svelte".into(),
+                            ])
+                            .with_aria_label("Multi-select files"),
+                        theme,
+                    ),
+                ),
+                framed(
+                    theme,
+                    Tree::from_spec(
+                        TreeSpec::new(file_tree())
+                            .with_expanded_values(expanded())
+                            .with_show_checkboxes(true)
+                            .with_checked_values(state.tree.checked.clone()),
+                        theme,
+                    )
+                    .on_check({
+                        let queue = Arc::clone(&state.node_events);
+                        Arc::new(move |v: &str| {
+                            let nodes = file_tree();
+                            let spec = TreeSpec::new(nodes.clone());
+                            if let Some(node) = find_node(&nodes, v) {
+                                push(&queue, TreeEvent::Check(spec.checkable_values_under(node)));
+                            }
+                        })
+                    }),
+                ),
+            ]),
         ))
         .child(labelled(
             theme,
-            "Rename (F2) · right-click menu · Alt+↑/↓ reorder",
+            "Presentation options",
+            stacked([
+                framed(
+                    theme,
+                    Tree::from_spec(
+                        TreeSpec::new(flat_nodes())
+                            .with_collapse_twisty_when_flat(true)
+                            .with_aria_label("Flat list"),
+                        theme,
+                    ),
+                ),
+                framed(
+                    theme,
+                    Tree::from_spec(
+                        TreeSpec::new(nearly_flat_nodes())
+                            .with_collapse_twisty_when_flat(true)
+                            .with_aria_label("Same list with a branch"),
+                        theme,
+                    ),
+                ),
+                framed(
+                    theme,
+                    Tree::from_spec(
+                        TreeSpec::new(file_tree())
+                            .with_expanded_values(expanded())
+                            .with_show_guides(false)
+                            .with_show_icons(false)
+                            .with_aria_label("Plain tree"),
+                        theme,
+                    ),
+                ),
+            ]),
+        ))
+        .child(labelled(
+            theme,
+            "Loading and large data",
+            stacked([
+                framed(
+                    theme,
+                    Tree::from_spec(
+                        TreeSpec::new(vec![TreeNode::new("remote", "remote")
+                            .with_icon("folder")
+                            .with_branch(true)])
+                        .with_expanded_values(vec!["remote".into()])
+                        .with_loading_values(vec!["remote".into()])
+                        .with_aria_label("Lazy tree"),
+                        theme,
+                    ),
+                ),
+                framed_scroll(
+                    theme,
+                    Tree::from_spec(
+                        TreeSpec::new(large_nodes())
+                            .with_expanded_values(large_expanded())
+                            .with_aria_label("Large tree"),
+                        theme,
+                    ),
+                ),
+            ]),
+        ))
+        .child(labelled(
+            theme,
+            "Editing and reordering",
             {
                 let mut rt_spec = TreeSpec::new(state.tree.rename_nodes.clone())
                     .with_expanded_values(vec!["docs".into()])
@@ -406,29 +556,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ))
         .child(labelled(
             theme,
-            "Lazy / async children (loading row)",
-            framed(
-                theme,
-                Tree::from_spec(
-                    TreeSpec::new(vec![TreeNode::new("remote", "remote")
-                        .with_icon("folder")
-                        .with_branch(true)])
-                    .with_expanded_values(vec!["remote".into()])
-                    .with_loading_values(vec!["remote".into()]),
-                    theme,
-                ),
-            ),
-        ))
-        .child(labelled(
-            theme,
-            "No guides, no icons",
+            "Disabled nodes",
             framed(
                 theme,
                 Tree::from_spec(
                     TreeSpec::new(file_tree())
                         .with_expanded_values(expanded())
-                        .with_show_guides(false)
-                        .with_show_icons(false),
+                        .with_aria_label("Disabled nodes"),
                     theme,
                 ),
             ),

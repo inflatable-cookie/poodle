@@ -1,5 +1,7 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
-use crate::node_compat::{Button, Dialog, Eyebrow, IntoCompatNode, Pill};
+use crate::node_compat::{
+    Button, Checkbox, Dialog, Eyebrow, Field, IntoCompatNode, Pill, Select, TextInput,
+};
 use crate::specimens::specimen_axes::{density_key, size_key};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
@@ -8,8 +10,8 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::{
-    ButtonSpec, ButtonTone, ButtonVariant, DialogKind, DialogSpec, DialogWidth, EyebrowSpec,
-    PillAppearance, PillSpec, PillTone,
+    ButtonSpec, ButtonTone, ButtonVariant, CheckboxSpec, ChoiceOption, DialogKind, DialogSpec,
+    DialogWidth, EyebrowSpec, PillAppearance, PillSpec, PillTone, SelectSpec, TextInputSpec,
 };
 use std::sync::Arc;
 
@@ -113,60 +115,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .into_any_element()
     };
 
-    let button_row = |label: &'static str, button: AnyElement| {
+    let group = |title: &'static str, body: AnyElement| {
         div()
             .flex()
-            .flex_wrap()
-            .items_center()
-            .gap(px(12.0))
+            .flex_col()
+            .gap(px(8.0))
             .child(Eyebrow::from_spec(
-                EyebrowSpec::new().with_content(label),
+                EyebrowSpec::new().with_content(title),
                 theme,
             ))
-            .child(button)
+            .child(body)
     };
 
-    let mut root = div().flex().flex_col().gap(px(12.0));
-    for (label, id, key, text) in [
-        (
-            "Informational",
-            "dialog-shortcuts-trigger",
-            "dialog-shortcuts-open",
-            "View details",
-        ),
-        (
-            "Form",
-            "dialog-form-trigger",
-            "dialog-form-open",
-            "Create project",
-        ),
-        (
-            "Custom header",
-            "dialog-changelog-trigger",
-            "dialog-changelog-open",
-            "View changelog",
-        ),
-        (
-            "Custom footer",
-            "dialog-terms-trigger",
-            "dialog-terms-open",
-            "Terms & conditions",
-        ),
-        (
-            "Bare mode",
-            "dialog-bare-trigger",
-            "dialog-bare-open",
-            "Preview image",
-        ),
-        (
-            "Scrollable",
-            "dialog-scroll-trigger",
-            "dialog-scroll-open",
-            "View log",
-        ),
-    ] {
-        root = root.child(button_row(label, open_button(id, key, text)));
-    }
+    let trigger_row = |buttons: Vec<AnyElement>| {
+        buttons.into_iter().fold(
+            div().flex().flex_wrap().items_center().gap(px(8.0)),
+            |row, button| row.child(button),
+        )
+    };
 
     let width_buttons = [
         ("sm", "dialog-width-sm-trigger", "dialog-width-sm-open"),
@@ -184,23 +150,84 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         div().flex().flex_wrap().items_center().gap(px(8.0)),
         |row, (label, id, key)| row.child(open_button(id, key, label)),
     );
-    root = root.child(button_row(
-        "Width presets",
-        width_buttons.into_any_element(),
-    ));
 
-    root = root.child(button_row(
-        "Alert",
-        open_button("dialog-alert-trigger", "dialog-alert-open", "Delete item"),
-    ));
-    root = root.child(button_row(
-        "Non-dismissible",
-        open_button(
-            "dialog-persistent-trigger",
-            "dialog-persistent-open",
-            "Open persistent",
-        ),
-    ));
+    let root = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .child(group(
+            "Basic and alert dialogs",
+            trigger_row(vec![
+                open_button(
+                    "dialog-shortcuts-trigger",
+                    "dialog-shortcuts-open",
+                    "View details",
+                ),
+                open_button("dialog-alert-trigger", "dialog-alert-open", "Delete item"),
+            ])
+            .into_any_element(),
+        ))
+        .child(group(
+            "Forms and nested controls",
+            trigger_row(vec![
+                open_button("dialog-form-trigger", "dialog-form-open", "Create project"),
+                open_button(
+                    "dialog-overlay-trigger",
+                    "dialog-overlay-open",
+                    "Open dialog",
+                ),
+            ])
+            .into_any_element(),
+        ))
+        .child(group(
+            "Custom header and footer",
+            trigger_row(vec![
+                open_button(
+                    "dialog-changelog-trigger",
+                    "dialog-changelog-open",
+                    "View changelog",
+                ),
+                open_button(
+                    "dialog-terms-trigger",
+                    "dialog-terms-open",
+                    "Terms & conditions",
+                ),
+            ])
+            .into_any_element(),
+        ))
+        .child(group(
+            "Bare content",
+            trigger_row(vec![open_button(
+                "dialog-bare-trigger",
+                "dialog-bare-open",
+                "Preview image",
+            )])
+            .into_any_element(),
+        ))
+        .child(group(
+            "Scrolling and width presets",
+            div()
+                .flex()
+                .flex_wrap()
+                .items_center()
+                .gap(px(8.0))
+                .child(open_button(
+                    "dialog-scroll-trigger",
+                    "dialog-scroll-open",
+                    "View log",
+                ))
+                .child(width_buttons)
+                .into_any_element(),
+        ))
+        .child(group(
+            "Dismissal rules",
+            trigger_row(vec![open_button(
+                "dialog-persistent-trigger",
+                "dialog-persistent-open",
+                "Open persistent",
+            )])
+            .into_any_element(),
+        ));
 
     let mut root = div().flex().flex_col().gap(px(24.0)).child(root);
 
@@ -237,20 +264,48 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     if state.specimens.is_on("dialog-form-open") {
         let fields = [
-            ("Project name", "My project"),
-            ("Template", "Choose a template"),
-            ("Description", "What is this project for?"),
-        ]
-        .into_iter()
-        .map(|(label, placeholder)| {
+            Field::new("dialog-form-name", "Project name", theme)
+                .with_control(
+                    TextInput::from_spec(
+                        TextInputSpec::new().with_placeholder("My project"),
+                        theme,
+                    )
+                    .with_id("dialog-form-name"),
+                )
+                .into_compat_node(),
             column(
                 [
-                    text(theme, label, 13.0, "color.text.primary"),
-                    text(theme, placeholder, 13.0, text_secondary),
+                    text(theme, "Template", 13.0, "color.text.primary"),
+                    Select::from_spec(
+                        SelectSpec::new(vec![
+                            ChoiceOption::new("blank", "Blank"),
+                            ChoiceOption::new("starter", "Starter kit"),
+                            ChoiceOption::new("advanced", "Advanced"),
+                        ])
+                        .with_placeholder("Choose a template"),
+                        theme,
+                    )
+                    .with_id("dialog-form-template")
+                    .into_compat_node(),
                 ],
                 4.0,
+            ),
+            Field::new("dialog-form-description", "Description", theme)
+                .with_control(
+                    TextInput::from_spec(
+                        TextInputSpec::new().with_placeholder("What is this project for?"),
+                        theme,
+                    )
+                    .with_id("dialog-form-description"),
+                )
+                .into_compat_node(),
+            Checkbox::from_spec(
+                CheckboxSpec::new().with_label("Make this project private"),
+                theme,
             )
-        });
+            .with_id("dialog-form-private")
+            .into_compat_node(),
+        ];
         root = root.child(
             Dialog::from_spec(
                 DialogSpec::new()
@@ -278,6 +333,35 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     set_toggle_click(state, "dialog-form-open", false),
                 ),
             ])),
+        );
+    }
+
+    if state.specimens.is_on("dialog-overlay-open") {
+        root = root.child(
+            Dialog::from_spec(
+                DialogSpec::new()
+                    .with_title("Settings")
+                    .with_show_close_button(true),
+                theme,
+            )
+            .on_open_change(set_toggle_open_change(state, "dialog-overlay-open"))
+            .with_content(column(
+                [
+                    text(theme, "Model", 13.0, "color.text.primary"),
+                    Select::from_spec(
+                        SelectSpec::new(vec![
+                            ChoiceOption::new("opus-5-medium", "Opus 5 · Medium"),
+                            ChoiceOption::new("opus-5-high", "Opus 5 · High"),
+                        ])
+                        .with_placeholder("Choose a model")
+                        .with_open(true),
+                        theme,
+                    )
+                    .with_id("dialog-overlay-model")
+                    .into_compat_node(),
+                ],
+                4.0,
+            )),
         );
     }
 

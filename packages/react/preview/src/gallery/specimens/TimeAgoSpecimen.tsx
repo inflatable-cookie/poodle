@@ -23,7 +23,7 @@ export function TimeAgoSpecimen() {
 
   return (
     <div className="poodle-specimen">
-      <SpecimenGroup label="Recent timestamps">
+      <SpecimenGroup label="Recent and future timestamps">
         <div style={rowStyle}>
           <span style={labelStyle}>2 minutes ago:</span>
           <TimeAgo datetime={twoMinutesAgo} />
@@ -36,16 +36,13 @@ export function TimeAgoSpecimen() {
           <span style={labelStyle}>2 days ago:</span>
           <TimeAgo datetime={twoDaysAgo} />
         </div>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Future timestamp">
         <div style={rowStyle}>
           <span style={labelStyle}>In 5 minutes:</span>
           <TimeAgo datetime={inFiveMinutes} />
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Future timestamp after surrounding copy">
+      <SpecimenGroup label="In running prose">
         <p className="poodle-specimen__inline-copy">
           Coverage ends{" "}
           <TimeAgo
@@ -54,9 +51,12 @@ export function TimeAgoSpecimen() {
             typography="inherit"
           />.
         </p>
+        <p className="poodle-specimen__inline-copy">
+          Activity finished <TimeAgo datetime={twoMinutesAgo} typography="inherit" /> in running prose.
+        </p>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Long format">
+      <SpecimenGroup label="Long and static formats">
         <div style={rowStyle}>
           <span style={labelStyle}>2 minutes ago:</span>
           <TimeAgo datetime={twoMinutesAgo} short={false} />
@@ -65,19 +65,10 @@ export function TimeAgoSpecimen() {
           <span style={labelStyle}>2 days ago:</span>
           <TimeAgo datetime={twoDaysAgo} short={false} />
         </div>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Static (live updates off)">
         <TimeAgo datetime={twoMinutesAgo} live={false} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Inherited typography">
-        <p className="poodle-specimen__inline-copy">
-          Activity finished <TimeAgo datetime={twoMinutesAgo} typography="inherit" /> in running prose.
-        </p>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="From ISO string">
+      <SpecimenGroup label="ISO input">
         <TimeAgo datetime="2026-03-14T00:00:00Z" />
       </SpecimenGroup>
     </div>

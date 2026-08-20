@@ -49,17 +49,13 @@
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Default">
+  <SpecimenGroup label="Guided workflow">
     <Stepper
       steps={wizardSteps}
       value={current}
       ariaLabel="DAW sync steps"
       onValueChange={(value) => (current = value)}
     />
-    <p>Current: <strong>{current}</strong></p>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Vertical">
     <div style="max-width: 20rem;">
       <Stepper
         steps={wizardSteps}
@@ -69,9 +65,10 @@
         onValueChange={(value) => (current = value)}
       />
     </div>
+    <p>Current: <strong>{current}</strong></p>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Collapsed">
+  <SpecimenGroup label="Collapsed progress">
     <div style="max-width: 30rem;">
       <Stepper
         steps={doneSteps}
@@ -83,9 +80,6 @@
       />
     </div>
     <p>Collapsed: <strong>{collapsed}</strong></p>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Collapsed statuses">
     <div style="max-width: 30rem;">
       <Stepper
         steps={mixedSteps}
@@ -98,11 +92,8 @@
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Working">
+  <SpecimenGroup label="Running and failed states">
     <Stepper steps={workingSteps} defaultValue="extract" ariaLabel="Import progress" />
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Failed">
     <Stepper steps={failedSteps} defaultValue="gate" ariaLabel="Pipeline steps" />
   </SpecimenGroup>
 

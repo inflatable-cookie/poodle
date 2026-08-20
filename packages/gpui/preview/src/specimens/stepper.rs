@@ -70,33 +70,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         StepperStep::new("apply", "Apply changes"),
     ];
 
+    // Guided workflow and Re-run paint the selection and re-run controls, but
+    // GPUI `Stepper::from_spec` only wires `on_collapsed_change`. `on_change`
+    // and `on_rerun` stay unset in `node_compat.rs`, which is outside this
+    // card's writable scope. Pre-existing host gap; collapse is live.
     let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
         .child(group(
             theme,
-            "Default",
-            Stepper::from_spec(
-                StepperSpec::new(wizard_steps())
-                    .with_value("categories")
-                    .with_aria_label("DAW sync steps"),
-                theme,
-            )
-            .into_any_element(),
-        ))
-        .child(group(
-            theme,
-            "Vertical",
+            "Guided workflow",
             div()
-                .max_w(px(320.0))
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
                 .child(Stepper::from_spec(
                     StepperSpec::new(wizard_steps())
-                        .with_orientation(Orientation::Vertical)
                         .with_value("categories")
-                        .with_aria_label("DAW sync steps, vertical"),
+                        .with_aria_label("DAW sync steps"),
                     theme,
                 ))
+                .child(
+                    div().max_w(px(320.0)).child(Stepper::from_spec(
+                        StepperSpec::new(wizard_steps())
+                            .with_orientation(Orientation::Vertical)
+                            .with_value("categories")
+                            .with_aria_label("DAW sync steps, vertical"),
+                        theme,
+                    )),
+                )
                 .into_any_element(),
         ))
         // Live: clicking the summary really folds and unfolds the track. The
@@ -104,8 +107,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         // starts collapsed, which is the state worth showing first.
         .child(group(
             theme,
-            "Collapsed",
+            "Collapsed progress",
             div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
                 .max_w(px(480.0))
                 .child(
                     Stepper::from_spec(
@@ -127,13 +133,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         })
                     }),
                 )
-                .into_any_element(),
-        ))
-        .child(group(
-            theme,
-            "Collapsed statuses",
-            div()
-                .max_w(px(480.0))
                 .child(Stepper::from_spec(
                     StepperSpec::new(mixed)
                         .with_orientation(Orientation::Vertical)
@@ -147,25 +146,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         ))
         .child(group(
             theme,
-            "Working",
-            Stepper::from_spec(
-                StepperSpec::new(working)
-                    .with_value("extract")
-                    .with_aria_label("Import progress"),
-                theme,
-            )
-            .into_any_element(),
-        ))
-        .child(group(
-            theme,
-            "Failed",
-            Stepper::from_spec(
-                StepperSpec::new(failed)
-                    .with_value("gate")
-                    .with_aria_label("Pipeline steps"),
-                theme,
-            )
-            .into_any_element(),
+            "Running and failed states",
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(16.0))
+                .child(Stepper::from_spec(
+                    StepperSpec::new(working)
+                        .with_value("extract")
+                        .with_aria_label("Import progress"),
+                    theme,
+                ))
+                .child(Stepper::from_spec(
+                    StepperSpec::new(failed)
+                        .with_value("gate")
+                        .with_aria_label("Pipeline steps"),
+                    theme,
+                ))
+                .into_any_element(),
         ))
         .child(group(
             theme,

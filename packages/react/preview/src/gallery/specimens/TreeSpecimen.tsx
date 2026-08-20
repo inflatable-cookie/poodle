@@ -57,6 +57,24 @@ const bigTree: TreeNode[] = Array.from({ length: 60 }, (_, i) => ({
   })),
 }));
 
+const flatNodes: TreeNode[] = [
+  { value: "beige", label: "BeigeButtonShadow", icon: "monitor" },
+  { value: "c28", label: "Component28", icon: "monitor" },
+  { value: "home", label: "Home", icon: "monitor" },
+  { value: "line129", label: "Line129", icon: "monitor" },
+];
+
+const nearlyFlatNodes: TreeNode[] = [
+  ...flatNodes.slice(0, 2),
+  {
+    value: "group",
+    label: "A group",
+    icon: "folder",
+    children: [{ value: "child", label: "Nested", icon: "monitor" }],
+  },
+  ...flatNodes.slice(2),
+];
+
 const menuItems: MenuItem[] = [
   { value: "rename", label: "Rename" },
   { value: "delete", label: "Delete", tone: "danger" },
@@ -252,7 +270,7 @@ export function TreeSpecimen() {
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Multi-select (Ctrl/Cmd + click, Shift + click)">
+        <SpecimenGroup label="Selection modes">
           <div style={frameStyle}>
             <Tree
               ariaLabel="Multi-select files"
@@ -263,21 +281,6 @@ export function TreeSpecimen() {
               onExpandedChange={setMultiExpanded}
             />
           </div>
-        </SpecimenGroup>
-
-        <SpecimenGroup label="No guides, no icons">
-          <div style={frameStyle}>
-            <Tree
-              ariaLabel="Plain tree"
-              nodes={fileTree}
-              showGuides={false}
-              showIcons={false}
-              defaultExpandedValues={["src", "src/components"]}
-            />
-          </div>
-        </SpecimenGroup>
-
-        <SpecimenGroup label={`Checkbox cascade (${checked.length} checked)`}>
           <div style={frameStyle}>
             <Tree
               ariaLabel="Checkbox tree"
@@ -290,7 +293,21 @@ export function TreeSpecimen() {
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Lazy / async children (expand a folder)">
+        <SpecimenGroup label="Presentation options">
+          <Tree nodes={flatNodes} collapseTwistyWhenFlat ariaLabel="Flat list" />
+          <Tree nodes={nearlyFlatNodes} collapseTwistyWhenFlat ariaLabel="Same list with a branch" />
+          <div style={frameStyle}>
+            <Tree
+              ariaLabel="Plain tree"
+              nodes={fileTree}
+              showGuides={false}
+              showIcons={false}
+              defaultExpandedValues={["src", "src/components"]}
+            />
+          </div>
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Loading and large data">
           <div style={frameStyle}>
             <Tree
               ariaLabel="Lazy tree"
@@ -301,9 +318,6 @@ export function TreeSpecimen() {
               onLoadChildren={loadChildren}
             />
           </div>
-        </SpecimenGroup>
-
-        <SpecimenGroup label="Virtualized — 1260 rows, only the window renders">
           <div style={virtualFrameStyle}>
             <Tree
               ariaLabel="Virtual tree"
@@ -316,7 +330,7 @@ export function TreeSpecimen() {
           </div>
         </SpecimenGroup>
 
-        <SpecimenGroup label="Rename (F2) · right-click menu · drag or Alt+↑/↓ to reorder">
+        <SpecimenGroup label="Editing and reordering">
           <div style={frameStyle}>
             <Tree
               ariaLabel="Rename tree"
@@ -339,6 +353,16 @@ export function TreeSpecimen() {
             ariaLabel="Tree node actions"
             onAction={onMenuAction}
           />
+        </SpecimenGroup>
+
+        <SpecimenGroup label="Disabled nodes">
+          <div style={frameStyle}>
+            <Tree
+              ariaLabel="Disabled nodes"
+              nodes={fileTree}
+              defaultExpandedValues={["src", "src/components"]}
+            />
+          </div>
         </SpecimenGroup>
       </div>
     </SpecimenLayout>

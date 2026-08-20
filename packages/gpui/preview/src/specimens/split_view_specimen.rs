@@ -103,11 +103,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new()
-                        .with_content(format!("Drag to resize (ratio: {ratio_pct}%)")),
-                    theme,
-                ))
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child(format!("Drag to resize (ratio: {ratio_pct}%)")),
+                )
                 .child(frame(160.0).child(interactive)),
         )
         // --- Basic horizontal layout ---
@@ -117,7 +118,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Basic horizontal layout"),
+                    EyebrowSpec::new().with_content("Horizontal split"),
                     theme,
                 ))
                 .child(
@@ -139,7 +140,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Basic vertical layout"),
+                    EyebrowSpec::new().with_content("Vertical split"),
                     theme,
                 ))
                 .child(
@@ -153,14 +154,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     ),
                 ),
         )
-        // --- Horizontal with collapse toggles ---
+        // --- Collapse controls ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Horizontal with collapse toggles"),
+                    EyebrowSpec::new().with_content("Collapse controls"),
                     theme,
                 ))
                 .child(
@@ -175,18 +176,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_primary(region("Primary", 220.0))
                         .with_secondary(region("Secondary", 140.0)),
                     ),
-                ),
-        )
-        // --- Vertical with collapse toggles ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Vertical with collapse toggles"),
-                    theme,
-                ))
+                )
                 .child(
                     frame(256.0).child(
                         SplitView::from_spec(
@@ -208,8 +198,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new()
-                        .with_content("Hover-revealed toggles (pointer onto the seam)"),
+                    EyebrowSpec::new().with_content("Hover-revealed controls"),
                     theme,
                 ))
                 .child(
@@ -234,7 +223,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Nested splits (IDE-style layout)"),
+                    EyebrowSpec::new().with_content("Nested workspace"),
                     theme,
                 ))
                 .child(

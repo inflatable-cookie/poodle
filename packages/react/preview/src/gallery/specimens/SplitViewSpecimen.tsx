@@ -42,7 +42,7 @@ export function SplitViewSpecimen() {
       densities={(density) => axisSplit({ density })}
     >
       {/* 1. Simple layout with Regions */}
-      <SpecimenGroup label="Basic horizontal layout">
+      <SpecimenGroup label="Horizontal split">
         <div style={frameStyle}>
           <SplitView
             orientation="horizontal"
@@ -60,7 +60,7 @@ export function SplitViewSpecimen() {
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Basic vertical layout">
+      <SpecimenGroup label="Vertical split">
         <div style={frameTallStyle}>
           <SplitView
             orientation="vertical"
@@ -78,8 +78,8 @@ export function SplitViewSpecimen() {
         </div>
       </SpecimenGroup>
 
-      {/* 2. Horizontal with collapse toggles */}
-      <SpecimenGroup label="Horizontal with collapse toggles (drag to edge to collapse)">
+      {/* 2. Collapse controls */}
+      <SpecimenGroup label="Collapse controls">
         <div style={frameStyle}>
           <SplitView
             orientation="horizontal"
@@ -97,10 +97,6 @@ export function SplitViewSpecimen() {
             }
           />
         </div>
-      </SpecimenGroup>
-
-      {/* 3. Vertical with collapse toggles */}
-      <SpecimenGroup label="Vertical with collapse toggles">
         <div style={frameTallStyle}>
           <SplitView
             orientation="vertical"
@@ -121,7 +117,7 @@ export function SplitViewSpecimen() {
       </SpecimenGroup>
 
       {/* 4. Hover-revealed toggles */}
-      <SpecimenGroup label="Hover-revealed toggles (move the pointer onto the seam)">
+      <SpecimenGroup label="Hover-revealed controls">
         <div style={frameStyle}>
           <SplitView
             orientation="horizontal"
@@ -143,7 +139,7 @@ export function SplitViewSpecimen() {
       </SpecimenGroup>
 
       {/* 5. Nested splits (IDE-style layout) */}
-      <SpecimenGroup label="Nested splits (IDE-style layout)">
+      <SpecimenGroup label="Nested workspace">
         <div style={frameTallStyle}>
           <SplitView
             orientation="horizontal"

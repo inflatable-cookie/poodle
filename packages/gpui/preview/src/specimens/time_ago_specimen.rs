@@ -14,14 +14,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
         .flex_col()
         .gap(px(24.0))
         .max_w(px(384.0))
-        // --- Recent timestamps ---
+        // --- Recent and future timestamps ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Recent timestamps"),
+                    EyebrowSpec::new().with_content("Recent and future timestamps"),
                     theme,
                 ))
                 .child(
@@ -46,34 +46,23 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                             "2026-03-21T11:00:00Z",
                             theme,
                             text_secondary,
+                        ))
+                        .child(time_ago_row(
+                            "In 5 minutes",
+                            "2026-03-23T11:05:00Z",
+                            theme,
+                            text_secondary,
                         )),
                 ),
         )
-        // --- Future ---
+        // --- In running prose ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Future timestamp"),
-                    theme,
-                ))
-                .child(time_ago_row(
-                    "In 5 minutes",
-                    "2026-03-23T11:05:00Z",
-                    theme,
-                    text_secondary,
-                )),
-        )
-        // --- Inherit typography ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Inherit typography"),
+                    EyebrowSpec::new().with_content("In running prose"),
                     theme,
                 ))
                 .child(
@@ -92,14 +81,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .child(div().child("by Clay")),
                 ),
         )
-        // --- Long format ---
+        // --- Long and static formats ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Long format"),
+                    EyebrowSpec::new().with_content("Long and static formats"),
                     theme,
                 ))
                 .child(
@@ -144,52 +133,41 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                                         .with_short(false),
                                     theme,
                                 )),
+                        )
+                        .child(
+                            div()
+                                .flex()
+                                .items_center()
+                                .gap(px(8.0))
+                                .child(TimeAgo::from_spec(
+                                    TimeAgoSpec::new()
+                                        .with_timestamp("2026-03-23T09:00:00Z")
+                                        .with_live(false),
+                                    theme,
+                                ))
+                                .child(
+                                    div()
+                                        .text_xs()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child("(live updates disabled)"),
+                                ),
                         ),
                 ),
         )
-        // --- From ISO string ---
+        // --- ISO input ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("From ISO string"),
+                    EyebrowSpec::new().with_content("ISO input"),
                     theme,
                 ))
                 .child(TimeAgo::from_spec(
                     TimeAgoSpec::new().with_timestamp("2026-03-14T00:00:00Z"),
                     theme,
                 )),
-        )
-        // --- Static (no live update) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Static (no live update)"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .items_center()
-                        .gap(px(8.0))
-                        .child(TimeAgo::from_spec(
-                            TimeAgoSpec::new()
-                                .with_timestamp("2026-03-23T09:00:00Z")
-                                .with_live(false),
-                            theme,
-                        ))
-                        .child(
-                            div()
-                                .text_xs()
-                                .text_color(color_to_hsla(text_secondary))
-                                .child("(live updates disabled)"),
-                        ),
-                ),
         )
 }
 
