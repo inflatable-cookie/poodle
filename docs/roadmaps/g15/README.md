@@ -1,8 +1,8 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.010` and `g15.014`–`g15.017` complete;
-`g15.019`–`g15.025` and `g15.034`–`g15.037` complete; `g15.011` partial with
-bounded continuation cards
+`g15.019`–`g15.026` and `g15.034`–`g15.037` complete; `g15.011` partial with
+six bounded screen-clear review children
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -71,7 +71,7 @@ and status advance are the orchestrator's.
 16. [019 — GPUI specimen structure](019-gpui-specimen-structure.md) — complete; PR #40 landed the 74-axis/6-caption scope and returned two honest axis-domain gaps
 17. [034 — Component-specific specimen axis domains](034-component-specific-specimen-axis-domains.md) — complete; PR #41 closed EmptyState/Icon domains and hardened axis evidence
 18. [020–025 — Overloaded Examples family children](020-curate-model-connection-licence.md) — complete; exact 53-page partition landed through PR #49
-19. [026 — Headless native specimen probe](026-native-specimen-probe.md) — ready; bounded in-binary native completion lane for `011`
+19. [026 — Headless native specimen probe](026-native-specimen-probe.md) — complete; PR #50 proved 174/174 native routes and all admitted axis panes headlessly
 20. [027 — Screen-clear human review](027-screen-clear-human-review.md) — non-dispatchable parent for exact children `028`–`033`
 21. [028–033 — Screen-clear family review children](028-review-foundation-controls-entry.md) — exact 56-page partition; after `026`
 22. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — after `011` completes; headless capture required
@@ -108,13 +108,10 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-`g15.018` and its final child `g15.025` are complete through PR #49. `g15.026`,
-the headless native specimen probe, is ready for one worker. It keeps the GPUI
-preview as a binary and mounts the real `PreviewRoot` in-process; no third
-conformance architecture or windowed runner is admitted. `g15.011` remains
-partial until `g15.026` and all six screen-clear review children
-(`g15.028`–`g15.033`) land; defect-led curation proceeds through
-`g15.015`–`g15.025` is complete. `g15.012` follows the completed audit.
-`g15.013` stays
-blocked as the final certification gate. Release mutation remains behind the
-explicit operator gate.
+`g15.026` is complete through PR #50: all 174 canonical GPUI routes construct
+headlessly and all 126 Sizes / 127 Densities panes open through pointer input.
+`g15.028` is the next ready card, first of the six serial screen-clear review
+children. `g15.011` remains partial until `g15.028`–`g15.033` land. `g15.012`
+then follows the completed audit; `g15.013` stays blocked as the final
+certification gate. Release mutation remains behind the explicit operator
+gate.

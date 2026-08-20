@@ -1,7 +1,6 @@
 # g15.026 — Headless Native Specimen Probe
 
-Status: **ready** — bounded in-binary GPUI probe; task definition approved by
-the operator on 2026-08-20
+Status: **complete** — PR #50 merged as `32df3667` on 2026-08-20
 Depends on: `g15.011`, `g15.019`, `g15.034`
 Role: **native completion lane for `g15.011`.** The separate `g15.027` lane
 owns human teaching judgment for the 56 mechanically clear pages.
@@ -98,17 +97,17 @@ observation architecture.
 
 ## Acceptance
 
-- [ ] The named selector mounts exactly 174 canonical GPUI pages at 768px.
-- [ ] Every route paints a real specimen card; none reaches
+- [x] The named selector mounts exactly 174 canonical GPUI pages at 768px.
+- [x] Every route paints a real specimen card; none reaches
       `missing_specimen` or panics.
-- [ ] Every rendered `Sizes` or `Densities` tab opens its real pane through
+- [x] Every rendered `Sizes` or `Densities` tab opens its real pane through
       pointer input.
-- [ ] `MeterSurface` remains the single explicit native `n/a`.
-- [ ] `probe:gpui-specimens` is composed into `ci:conformance` and
+- [x] `MeterSurface` remains the single explicit native `n/a`.
+- [x] `probe:gpui-specimens` is composed into `ci:conformance` and
       `ci:native`; both remain fully headless.
-- [ ] The audit records the exact live-native result and no longer calls the
+- [x] The audit records the exact live-native result and no longer calls the
       GPUI render result provisional.
-- [ ] One batch log records selectors, denominator, axis-tab totals, runtime,
+- [x] One batch log records selectors, denominator, axis-tab totals, runtime,
       changed claims, and any failures found.
 
 ## Writable Scope

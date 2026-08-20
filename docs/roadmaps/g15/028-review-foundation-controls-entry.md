@@ -1,6 +1,7 @@
 # g15.028 — Review Screen-Clear Foundation Controls and Entry
 
-Status: **planned** — orchestrator review required before dispatch
+Status: **ready** — dependency closed by PR #50; orchestrator reviewed on
+2026-08-20
 Parent: `027-screen-clear-human-review.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Depends on: `g15.026` (live native evidence)

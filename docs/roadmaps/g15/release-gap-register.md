@@ -106,7 +106,7 @@ the roster is folded into the release-certification card.
 | --- | --- | --- |
 | Licence native completion (`g14.017`) | closed by `g15.007` — declarations, render, and GPUI specimens landed | `g15.007` |
 | Model-connection native completion (`g14.020`) | closed by `g15.008` — declarations, headless mirror, render, and GPUI specimens landed | `g15.008` |
-| Human-centred specimen catalogue audit (`g14.026`) | screening, pilots, and defect-led curation complete; native probe and six screen-clear review children remain | `g15.011`, `g15.026`, `g15.028`–`g15.033` |
+| Human-centred specimen catalogue audit (`g14.026`) | screening, pilots, defect-led curation, and the 174-route native probe are complete; six screen-clear review children remain | `g15.011`, `g15.028`–`g15.033` |
 | Primitive-first visual conformance lane | seam recorded in `conformance-estate.md`; harness not designed | `g15.012` |
 | Release-gate remediation | closed by PR #31 — `nanoid@3.3.18`; `bun audit` clean | `g15.014` |
 | v0.2.0 release certification | after all Svelte-denominator blockers close | `g15.013` |

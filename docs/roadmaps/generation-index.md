@@ -6,7 +6,7 @@ Updated: 2026-08-20
 
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.025`, and `g15.034`–`g15.037` complete; `g15.011` partial
+    `g15.019`–`g15.026`, and `g15.034`–`g15.037` complete; `g15.011` partial
     with bounded continuation cards;
     `g15.013` final
   - Posture: release-first v0.2.0 baseline
@@ -17,8 +17,10 @@ Updated: 2026-08-20
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch ready `g15.026`, the bounded in-binary headless native
-    specimen probe.
+  - Next: dispatch ready `g15.028`, the first exact screen-clear human review
+    child.
+    PR #50 completes `g15.026`: 174/174 canonical GPUI routes construct and
+    all 126 Sizes / 127 Densities panes open through headless pointer input.
     PR #49 completes `g15.025` and the six-child overloaded-Examples parent;
     operator sign-off and GitHub `active-cohort` are recorded. PR #48 completes
     `g15.024` and its `g15.037` review prerequisite with a
