@@ -91,6 +91,50 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         })
     });
 
+    // Four-column grid: same open-state ownership as the default example —
+    // the column count only shows in the open popover, which stays deferred.
+    let columns_open_key = "theme-select-columns-open";
+    let columns_value_key = "theme-select-columns-value";
+    let columns_open = state.specimens.is_on(columns_open_key);
+    let columns_current = state
+        .specimens
+        .text
+        .get(columns_value_key)
+        .cloned()
+        .unwrap_or_else(|| "nord".to_string());
+
+    let columns_interactive = ThemeSelect::from_spec(
+        ThemeSelectSpec::new()
+            .with_themes(demo_themes())
+            .with_value(&columns_current)
+            .with_columns(4)
+            .with_open(columns_open),
+        theme,
+    )
+    .on_open_change({
+        let queue = std::sync::Arc::clone(&state.node_events);
+        std::sync::Arc::new(move |open: bool| {
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                key: columns_open_key.to_string(),
+                value: open,
+            });
+        })
+    })
+    .on_change({
+        let queue = std::sync::Arc::clone(&state.node_events);
+        std::sync::Arc::new(move |value: &str| {
+            let mut events = queue.lock().unwrap();
+            events.push(NodeSpecimenEvent::SetText {
+                key: columns_value_key.to_string(),
+                value: value.to_string(),
+            });
+            events.push(NodeSpecimenEvent::SetToggle {
+                key: columns_open_key.to_string(),
+                value: false,
+            });
+        })
+    });
+
     let labelled = |label: &str, body: AnyElement| {
         div()
             .flex()
@@ -113,6 +157,21 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(labelled(
             "Interactive — click the trigger",
             deferred(interactive).into_any_element(),
+        ))
+        .child(labelled(
+            "Compact trigger (no label)",
+            ThemeSelect::from_spec(
+                ThemeSelectSpec::new()
+                    .with_themes(demo_themes())
+                    .with_value("midnight")
+                    .with_show_label(false),
+                theme,
+            )
+            .into_any_element(),
+        ))
+        .child(labelled(
+            "Four columns — click the trigger",
+            deferred(columns_interactive).into_any_element(),
         ))
         .child(labelled(
             "Disabled",

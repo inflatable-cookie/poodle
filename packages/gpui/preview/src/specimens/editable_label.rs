@@ -75,24 +75,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex_col()
         .gap(px(24.0))
         .max_w(px(384.0))
-        // --- Display mode (value + pencil edit-icon) ---
+        // --- Double-click to edit (default, interactive) ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Display mode (value + edit icon)"),
+                    EyebrowSpec::new().with_content("Double-click to edit (default)"),
                     theme,
                 ))
                 .child(
                     EditableLabel::from_spec(
-                        EditableLabelSpec::new()
-                            .with_value("My project title")
-                            .with_show_edit_icon(true),
+                        EditableLabelSpec::new().with_value(&title_value),
                         theme,
                     )
-                    .with_id("display-icon"),
+                    .with_id("default")
+                    .on_change(queue_change(state, "editable-label-title"))
+                    .on_commit(queue_commit(
+                        state,
+                        "editable-label-title",
+                        true,
+                    )),
                 ),
         )
         // --- Editing mode (composed input shown, live) ---
@@ -121,30 +125,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     )
                     .with_id("editing")
                     .on_change(queue_change(state, "editable-label-live")),
-                ),
-        )
-        // --- Double-click to edit (default, interactive) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Double-click to edit (default)"),
-                    theme,
-                ))
-                .child(
-                    EditableLabel::from_spec(
-                        EditableLabelSpec::new().with_value(&title_value),
-                        theme,
-                    )
-                    .with_id("default")
-                    .on_change(queue_change(state, "editable-label-title"))
-                    .on_commit(queue_commit(
-                        state,
-                        "editable-label-title",
-                        true,
-                    )),
                 ),
         )
         // --- Click to edit with icon (enterOrSpace + showEditIcon) ---
@@ -225,27 +205,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         "editable-label-flush",
                         false,
                     )),
-                ),
-        )
-        // --- Flush variant (editing — bottom border only) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Flush variant (editing)"),
-                    theme,
-                ))
-                .child(
-                    EditableLabel::from_spec(
-                        EditableLabelSpec::new()
-                            .with_value("Inline heading")
-                            .with_variant(EditableLabelVariant::Flush)
-                            .with_editing(true),
-                        theme,
-                    )
-                    .with_id("flush-editing"),
                 ),
         )
         // --- With max length (maxLength + placeholder, editing) ---
