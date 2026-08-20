@@ -83,8 +83,9 @@ Changed Svelte routes: `resize-handle`
 Changed React routes: `resize-handle`
 Changed GPUI routes: `resize-handle`
 
-Operator live review of the Svelte and React `resize-handle` pages is required
-before this child completes. GPUI evidence stays headless per the card.
+The operator explicitly waived the remaining live Svelte and React
+`resize-handle` checkpoint when directing the orchestrator to fix the final
+review issues and merge. GPUI evidence stays headless per the card.
 
 ## Changed files
 
