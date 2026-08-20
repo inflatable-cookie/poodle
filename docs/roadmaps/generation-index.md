@@ -6,8 +6,8 @@ Updated: 2026-08-20
 
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.028`, and `g15.034`–`g15.037` complete; `g15.011` partial
-    with ready `g15.038` and five review children;
+    `g15.019`–`g15.028`, and `g15.034`–`g15.038` complete; `g15.011` partial
+    with ready `g15.029` and four later review children;
     `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `038`
@@ -17,11 +17,9 @@ Updated: 2026-08-20
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch ready `g15.038`, the SegmentedControl native option-parity
-    repair returned by the first screen-clear human review. PR #51 completes
-    `g15.028`; its other 13 pages passed or received bounded specimen repairs,
-    while SegmentedControl correctly stopped on the missing Rust icon/icon-only
-    option surface. `g15.029` resumes the serial review lane after `g15.038`.
+  - Next: dispatch ready `g15.029`, the foundation date/time screen-clear
+    review. PR #52 completed `g15.038`, closing the SegmentedControl option
+    surface and stable-focus stop condition returned by `g15.028`.
     PR #50 completes `g15.026`: 174/174 canonical GPUI routes construct and
     all 126 Sizes / 127 Densities panes open through headless pointer input.
     PR #49 completes `g15.025` and the six-child overloaded-Examples parent;

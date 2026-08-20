@@ -1,9 +1,10 @@
 # g15.038 — SegmentedControl Native Option Parity
 
-Status: **ready** — stop condition returned by `g15.028`; clean pre-1.0 Rust
-migration approved by the operator on 2026-08-20
+Status: **complete** — PR #52 merged as `ea34b029`; clean pre-1.0 Rust
+migration and stable native focus identity accepted on 2026-08-20
 Depends on: `g15.028` (gap discovery and audit disposition)
-Blocks: `g15.029`–`g15.033` orchestration, `g15.012`, `g15.013`
+Unblocks: `g15.029`–`g15.033` orchestration; `g15.012` remains behind the
+completed human-centred audit
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/segmented-control.md`,
 `specimen-catalogue-audit.md`, `release-gap-register.md`

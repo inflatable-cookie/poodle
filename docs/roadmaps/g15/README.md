@@ -1,8 +1,8 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.010` and `g15.014`–`g15.017` complete;
-`g15.019`–`g15.028` and `g15.034`–`g15.037` complete; `g15.011` partial with
-five screen-clear review children and ready SegmentedControl repair `g15.038`
+`g15.019`–`g15.028` and `g15.034`–`g15.038` complete; `g15.011` partial with
+five screen-clear review children; `g15.029` ready
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -74,7 +74,7 @@ and status advance are the orchestrator's.
 19. [026 — Headless native specimen probe](026-native-specimen-probe.md) — complete; PR #50 proved 174/174 native routes and all admitted axis panes headlessly
 20. [027 — Screen-clear human review](027-screen-clear-human-review.md) — non-dispatchable parent for exact children `028`–`033`
 21. [028–033 — Screen-clear family review children](028-review-foundation-controls-entry.md) — exact 56-page partition; after `026`
-22. [038 — SegmentedControl native option parity](038-segmented-control-native-option-parity.md) — ready stop-condition repair after `028`; clean Rust option-type migration approved
+22. [038 — SegmentedControl native option parity](038-segmented-control-native-option-parity.md) — complete; PR #52 landed the clean option-type migration and stable native focus identity
 23. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — after `011` and `038` complete; headless capture required
 24. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
 25. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after the full specimen program, `038`, and `012`
@@ -109,10 +109,9 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-`g15.026` is complete through PR #50: all 174 canonical GPUI routes construct
-headlessly and all 126 Sizes / 127 Densities panes open through pointer input.
-`g15.028` is the next ready card, first of the six serial screen-clear review
-children. `g15.011` remains partial until `g15.028`–`g15.033` land. `g15.012`
-then follows the completed audit; `g15.013` stays blocked as the final
-certification gate. Release mutation remains behind the explicit operator
-gate.
+`g15.038` is complete through PR #52. The SegmentedControl stop condition from
+`g15.028` is closed with a dedicated option type and caller-owned, stable
+native focus scopes. `g15.029` is the next ready serial screen-clear child.
+`g15.011` remains partial until `g15.029`–`g15.033` land. `g15.012` then
+follows the completed audit; `g15.013` stays blocked as the final certification
+gate. Release mutation remains behind the explicit operator gate.

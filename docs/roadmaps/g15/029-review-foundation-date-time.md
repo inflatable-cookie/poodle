@@ -1,6 +1,6 @@
 # g15.029 — Review Screen-Clear Foundation Date and Time
 
-Status: **planned** — orchestrator review required before dispatch
+Status: **ready** — `g15.038` closed the routed stop condition; dispatch next
 Parent: `027-screen-clear-human-review.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Depends on: `g15.026` (live native evidence)

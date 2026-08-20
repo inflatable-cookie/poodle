@@ -33,7 +33,7 @@ unfinished earlier card to be waived.
       rendering, and GPUI specimen gaps are closed.
 - [ ] `g15.011` landed: the human-centred specimen catalogue audit is complete.
 - [ ] `g15.012` landed: the primitive-first visual conformance lane is complete.
-- [ ] `g15.038` landed: SegmentedControl's contracted icon and icon-only option
+- [x] `g15.038` landed: SegmentedControl's contracted icon and icon-only option
       surface exists in shared Rust and GPUI without a compatibility twin.
 
 ## Execution Plan
