@@ -1,7 +1,6 @@
 # g15.018 — Overloaded Examples Curation (parent)
 
-Status: **active parent — not dispatchable**; `g15.020`–`g15.024` complete;
-`g15.025` remains
+Status: **complete parent — not dispatchable**; `g15.020`–`g15.025` complete
 Consumes: `g15.011` partial screening baseline and its three approved pilots
 Children: `g15.020`–`g15.025`
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
@@ -32,7 +31,7 @@ and is dispatched separately.
 | `g15.022` | Audio & music | 11 | complete — PR #46 |
 | `g15.023` | Foundations: entry, content, status | 11 | complete — PR #47 |
 | `g15.024` | Agent & tools | 6 | complete — PR #48, including `g15.037` repair |
-| `g15.025` | Collections, navigation, overlays, long tail | 10 | after `g15.016` |
+| `g15.025` | Collections, navigation, overlays, long tail | 10 | complete — PR #49 |
 | **Total** | | **53** | |
 
 **Each child carries its own exact page list.** The counts above and the lists
@@ -54,11 +53,11 @@ rather than silently resizing its set.
 
 ## Acceptance (every child)
 
-- [ ] No page in the family exceeds 9 captioned examples.
-- [ ] Every page's first example is a realistic default use.
-- [ ] A named list of what was removed from each page, and why.
-- [ ] Contract coverage unchanged, or its gaps recorded.
-- [ ] **Operator review of the family's changed pages in the live Svelte and
+- [x] No page in the family exceeds 9 captioned examples.
+- [x] Every page's first example is a realistic default use.
+- [x] A named list of what was removed from each page, and why.
+- [x] Contract coverage unchanged, or its gaps recorded.
+- [x] **Operator review of each family's changed pages in the live Svelte and
       React previews before the child is called complete.** Unreviewed pages
       remain an explicit PR item.
 

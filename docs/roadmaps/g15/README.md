@@ -1,7 +1,7 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.010` and `g15.014`–`g15.017` complete;
-`g15.019`–`g15.024` and `g15.034`–`g15.037` complete; `g15.011` partial with
+`g15.019`–`g15.025` and `g15.034`–`g15.037` complete; `g15.011` partial with
 bounded continuation cards
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
@@ -67,10 +67,10 @@ and status advance are the orchestrator's.
 12. [015 — Specimen caption integrity](015-specimen-caption-integrity.md) — complete; PR #37 restored 52 captions and closed the Svelte-preview gate hole
 13. [016 — Specimen idiom convergence](016-specimen-idiom-convergence.md) — complete; PR #38 converged all 29 paired routes
 14. [017 — Web specimen axis placement](017-specimen-axis-placement.md) — complete; PR #39 plus accepted Dialog follow-up
-15. [018 — Overloaded Examples curation](018-overloaded-examples-curation.md) — non-dispatchable parent for exact children `020`–`025`
+15. [018 — Overloaded Examples curation](018-overloaded-examples-curation.md) — complete parent; exact children `020`–`025` landed
 16. [019 — GPUI specimen structure](019-gpui-specimen-structure.md) — complete; PR #40 landed the 74-axis/6-caption scope and returned two honest axis-domain gaps
 17. [034 — Component-specific specimen axis domains](034-component-specific-specimen-axis-domains.md) — complete; PR #41 closed EmptyState/Icon domains and hardened axis evidence
-18. [020–025 — Overloaded Examples family children](020-curate-model-connection-licence.md) — `020`–`022` complete; exact 53-page partition continues through `023`–`025`
+18. [020–025 — Overloaded Examples family children](020-curate-model-connection-licence.md) — complete; exact 53-page partition landed through PR #49
 19. [026 — Headless native specimen probe](026-native-specimen-probe.md) — native completion lane for `011`; after `034`
 20. [027 — Screen-clear human review](027-screen-clear-human-review.md) — non-dispatchable parent for exact children `028`–`033`
 21. [028–033 — Screen-clear family review children](028-review-foundation-controls-entry.md) — exact 56-page partition; after `026`
@@ -108,11 +108,12 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-`g15.024` and its review prerequisite `g15.037` are complete through PR #48.
-`g15.025` is reviewed and ready as the final defect-led curation child.
-`g15.011` remains
+`g15.018` and its final child `g15.025` are complete through PR #49. The next
+planning task is to review and ready `g15.026`, the headless native specimen
+probe. `g15.011` remains
 partial until `g15.026` and all six screen-clear review children
 (`g15.028`–`g15.033`) land; defect-led curation proceeds through
-`g15.015`–`g15.025`. `g15.012` follows the completed audit. `g15.013` stays
+`g15.015`–`g15.025` is complete. `g15.012` follows the completed audit.
+`g15.013` stays
 blocked as the final certification gate. Release mutation remains behind the
 explicit operator gate.

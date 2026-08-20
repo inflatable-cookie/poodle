@@ -1,12 +1,12 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-19
+Updated: 2026-08-20
 
 ## Active Track
 
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.024`, and `g15.034`–`g15.037` complete; `g15.011` partial
+    `g15.019`–`g15.025`, and `g15.034`–`g15.037` complete; `g15.011` partial
     with bounded continuation cards;
     `g15.013` final
   - Posture: release-first v0.2.0 baseline
@@ -17,8 +17,10 @@ Updated: 2026-08-19
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch `g15.025`, the final overloaded-Examples family child.
-    PR #48 completes `g15.024` and its `g15.037` review prerequisite with a
+  - Next: review and ready `g15.026`, the headless native specimen probe.
+    PR #49 completes `g15.025` and the six-child overloaded-Examples parent;
+    operator sign-off and GitHub `active-cohort` are recorded. PR #48 completes
+    `g15.024` and its `g15.037` review prerequisite with a
     real GPUI tracked viewport and mounted detach/jump/follow proof; the
     rejected specimen counter simulation is gone. PR #47 completed `g15.023`
     with paired live review signed off.

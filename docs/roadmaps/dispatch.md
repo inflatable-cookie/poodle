@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Poodle orchestrator
-Updated: 2026-08-19
+Updated: 2026-08-20
 
 The orchestrator is the only writer. Workers write their scoped deliverables,
 batch log, and papercuts; they do not edit this ledger or roadmap/card status.
@@ -22,7 +22,7 @@ worktree. Paired Jetstream integration is explicit under `ci:jetstream` and
 
 | Batch | Card | Branch | Model | Status | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| `g15-r025-collections-navigation-tail` | `g15/025-curate-collections-navigation-tail.md` | `t3code/curate-collections-navigation-tail` | capable coding model, medium reasoning | ready-to-launch | Orchestrator remeasured all ten pages after `g15.016`/`g15.019`, fixed the exact 2–6-group teaching outline, bounded known SplitView parity debt out of scope, and retained operator live review as the completion gate. |
+| `g15-r025-collections-navigation-tail` | `g15/025-curate-collections-navigation-tail.md` | `t3code/curate-collections-navigation-tail` | capable coding model, medium reasoning | merged | PR #49 accepted at `73211b7a`; merge `cd952cdc`. Curated the final ten-page family across paired web and GPUI. Review repaired native teaching content, made the Dialog nested overlay truthful, bounded the 24x6 Tree, and recorded the pre-existing Stepper handler gap. A tracked GPUI preview lockfile restored fresh-runner Cargo resolution after the `arrayref` yank. Focused parity, GPUI, docs, diff, and GitHub `active-cohort` passed; the operator signed off the specimen review. |
 | `g15-r024-agent-tools-curation` | `g15/024-curate-agent-tools.md` | `t3code/curate-agent-tool-specimens` | capable coding model, medium reasoning | merged | PR #48 accepted at `19759ac5`; merge `8c0624d5`. Review repair closed `g15.037` with a real GPUI tracked viewport and mounted detach/jump/follow evidence, replacing the rejected counter simulation. Full headless `effigy qa` and GitHub `active-cohort` passed; operator directed the orchestrator to resolve and merge without a separate live sweep. |
 | `g15-r023-foundation-entry-curation` | `g15/023-curate-foundation-entry-content.md` | `t3code/curate-foundation-entry-pages` | capable coding model, medium reasoning | merged | PR #47 accepted at `dda190ed`; merge `82e943d0`. Review repaired TextInput's masked async specimen, added focused icon/read-only evidence, and corrected the execution record. All required headless/GitHub gates passed; the operator signed off the six changed paired-web pages. |
 | `g15-r022-audio-music-curation` | `g15/022-curate-audio-music.md` | `t3code/g15-022-audio-music-curation` | capable coding model, medium reasoning | merged | PR #46 accepted at `eddc233e`; merge `4d736469`. Curated AudioMeter, GainReductionMeter, and Knob across Svelte, React, and shared native specimens while preserving the other eight measured pages. Review corrected Knob contract wording and paired narrow-row wrapping. Focused parity/preview, Svelte, React, GPUI, docs, diff, and GitHub `active-cohort` gates passed. The operator authorized the final corrections and merge after the paired previews were opened. |

@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-19
+Updated: 2026-08-20
 
 Roadmaps record Poodle's executable milestone work. `g15` is the active
 v0.2.0 release-baseline generation.
@@ -18,7 +18,7 @@ v0.2.0 release-baseline generation.
   family tranches, and GPUI specimen closure are complete. `g15.011` has
   delivered its screening baseline and three approved pilots; its exact
   curation, native-probe, and screen-clear review children remain. `g15.015`
-  through `g15.017`, `g15.019` through `g15.022`, and `g15.034` are complete. PR #42
+  through `g15.017`, `g15.019` through `g15.025`, and `g15.034` are complete. PR #42
   curated the model-connection and account-lifecycle family after two review
   repair rounds; the operator explicitly waived that child's live visual
   checkpoint when directing merge. PR #41 closed the
@@ -32,8 +32,9 @@ v0.2.0 release-baseline generation.
   curating the audio/music family with paired-web and shared-native coverage.
   PR #47 completed `g15.023`, curating the foundation entry, content, and
   status family. PR #48 completes `g15.024` and its review prerequisite
-  `g15.037`: GPUI now has real detached-scroll/jump/follow behavior. `g15.025`
-  is the next curation child.
+  `g15.037`: GPUI now has real detached-scroll/jump/follow behavior. PR #49
+  completes `g15.025` and the six-child overloaded-Examples parent. The next
+  planning task is `g15.026`, the headless native specimen probe.
   `g15.013` remains the final gate after the
   specimen program and `g15.012`.
   Jetstream remains deferred.
@@ -62,7 +63,7 @@ v0.2.0 release-baseline generation.
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
-  `g15.014`–`g15.017`, `g15.019`–`g15.024`, and `g15.034`–`g15.037` complete,
+  `g15.014`–`g15.017`, `g15.019`–`g15.025`, and `g15.034`–`g15.037` complete,
   `g15.011` partial with bounded continuation cards, `g15.013` final
 
 ## Rules

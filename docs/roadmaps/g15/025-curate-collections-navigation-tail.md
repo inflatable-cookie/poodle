@@ -1,6 +1,6 @@
 # g15.025 — Overloaded Examples: collections, navigation and the long tail
 
-Status: **ready** — reviewed and bounded for one worker PR
+Status: **complete in PR #49** — operator sign-off and CI repair accepted
 Parent: `018-overloaded-examples-curation.md` (method, acceptance, stop
 conditions)
 Consumes: `g15.011` partial screening baseline
@@ -167,23 +167,25 @@ explicit disabled-node case honest without changing Tree itself.
 
 ## Goals
 
-- [ ] Every page uses the exact ordered outline above.
-- [ ] Svelte and React captions and teaching copy match; GPUI teaches the same
+- [x] Every page uses the exact ordered outline above.
+- [x] Svelte and React captions and teaching copy match; GPUI teaches the same
       ordered intent.
-- [ ] The first group answers normal use rather than opening on an edge case.
-- [ ] Removed and combined examples have named dispositions in the batch log.
-- [ ] Contract coverage is unchanged or any pre-existing gap is reported.
-- [ ] Controls presented as interactive remain wired.
+- [x] The first group answers normal use rather than opening on an edge case.
+- [x] Removed and combined examples have named dispositions in the batch log.
+- [x] Contract coverage is unchanged or any pre-existing gap is reported.
+- [x] No previously wired control regressed. GPUI Stepper selection/re-run was
+      already unwired; it is a named release follow-up rather than a curation
+      repair.
 
 ## Acceptance
 
-- [ ] Every page has 2–6 captioned `Examples` groups.
-- [ ] Accordion, ListCardCounter, and MediaPreview are remeasured and preserved
+- [x] Every page has 2–6 captioned `Examples` groups.
+- [x] Accordion, ListCardCounter, and MediaPreview are remeasured and preserved
       unless a concrete defect is found.
-- [ ] Dedicated size and density panes remain outside `Examples`.
-- [ ] Paired-web caption parity and the ten-page count/outline receive focused
+- [x] Dedicated size and density panes remain outside `Examples`.
+- [x] Paired-web caption parity and the ten-page count/outline receive focused
       regression evidence.
-- [ ] The changed pages are reviewed live in the Svelte and React previews by
+- [x] The changed pages are reviewed live in the Svelte and React previews by
       the operator before this card is called complete. Unreviewed pages stay
       explicit in the PR.
 
@@ -222,6 +224,9 @@ Headless only. Do not run windowed, native-visual, or Jetstream selectors.
 
 ## Continuation
 
-After implementation and operator live review, return the PR to the
-orchestrator. This is the last `g15.018` curation child; do not absorb
-`g15.026`, the six screen-clear review cards, or release certification.
+PR #49 accepted worker head `73211b7a` and merged as `cd952cdc`. Review added
+truthful GPUI FilterBuilder, Dialog, and Tree teaching, bounded the large Tree,
+and retained the existing Stepper interaction gap explicitly. A tracked GPUI
+preview lockfile repaired fresh-runner CI after the `arrayref` yank; GitHub
+`active-cohort` passed. This closes the last `g15.018` child. `g15.026`, the
+six screen-clear review cards, and release certification remain separate.

@@ -1,7 +1,7 @@
 # g15 — Release Gap Register
 
-Status: complete — compiled by `g15.001`
-Date: 2026-08-16
+Status: active release register — compiled by `g15.001`, updated by review
+Date: 2026-08-20
 Card: `docs/roadmaps/g15/001-release-baseline-roster-inventory.md`
 Source: `docs/roadmaps/g15/release-baseline-roster.md` (frozen 175-component denominator)
 
@@ -68,6 +68,7 @@ Rust render 1 missing (+ 1 not-applicable), GPUI specimen 0 missing
 | Radio | — closed by `g15.009` (`RadioSpec`) | — closed by `g15.009` (`packages/render/src/radio.rs`) | — closed by `g15.009` (`packages/gpui/preview/src/specimens/radio.rs`) | `g15.009` |
 | Context providers | — | IconProvider closed by `g15.009` (`packages/render/src/icon_provider.rs`); UiPresentationProvider remains a declared capability absence because ambient presentation cannot cross an already-built Node tree | — | follow-up required before `g15.013` |
 | AgentTranscript scroll/follow | — | closed by `g15.037`: shared render owns content and the jump-control recipe | closed by `g15.037`: retained GPUI state owns a real tracked viewport, detach latch, and jump-to-bottom | `g15.037` complete in PR #48; no remaining release blocker |
+| Stepper selection and re-run | — | handlers exist in shared composition | `node_compat.rs` wires collapse only; selection and re-run controls shown by the specimen are inert | follow-up card required before `g15.013`; found and accepted out of scope in PR #49 |
 | Specimen axis domains | EmptyState declares a two-value native size domain that its renderer does not consume; Icon declares a three-value native size domain and an unused density field | EmptyState and Icon renderers cannot yet supply the full web-admitted axis evidence | fake panes removed by `g15.019`; clean breaking migration approved | `g15.034` ready; required before `g15.026` / `g15.013` |
 | Display, workstation & agent specimens | — | — | — closed by `g15.010` (18 named GPUI specimen files under `packages/gpui/preview/src/specimens/`) | `g15.010` |
 | MeterSurface | not-applicable — web-only by fixed decision (spec 068) | not-applicable | not-applicable | none |
