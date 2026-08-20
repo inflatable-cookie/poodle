@@ -96,11 +96,19 @@
 # cross-runtime parity — those live on `check:svelte`, `react:build`, and the
 # component test boards.
 "regressions:native" = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions"
+# Headless native specimen probe (g15.026): mounts the production GPUI
+# `PreviewRoot` on the in-memory test platform and constructs all 174 portable
+# catalogue routes at 768px, asserting each paints a real specimen card (never
+# the fallback) and that every advertised Sizes/Densities tab opens its pane
+# through real pointer input. Construction evidence only — no visual,
+# interaction, or cross-runtime parity claim.
+"probe:gpui-specimens" = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview specimen_probe"
 # Workflow-compatible entrypoint. `.github/workflows/` still calls
 # `effigy ci:conformance`; g14.022 decides whether renaming it is worth the
 # operator approval a workflow edit needs. The name is legacy — the scope is
-# the focused native regression board above and nothing more.
-"ci:conformance" = [{ task = "regressions:native" }]
+# the focused native regression board plus the native specimen construction
+# probe, still with no cross-runtime parity claim.
+"ci:conformance" = [{ task = "regressions:native" }, { task = "probe:gpui-specimens" }]
 
 # Preview (documentation site)
 "svelte:build" = "bun run --cwd packages/svelte/preview build"
@@ -412,6 +420,9 @@
   # Focused native regressions on GPUI's in-memory test platform (g14.023,
   # retained by g14.021): no window, no focus, no OS activation.
   { task = "regressions:native" },
+  # Native specimen construction probe (g15.026): same in-memory platform,
+  # page tier rather than component tier.
+  { task = "probe:gpui-specimens" },
 ]
 
 # Paired-repository Jetstream admission board. The preview, accessibility

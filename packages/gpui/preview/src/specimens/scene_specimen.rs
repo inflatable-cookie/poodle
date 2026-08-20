@@ -332,7 +332,11 @@ fn render_matrix_instance(
 
 #[cfg(test)]
 mod matrix_override_tests {
-    use super::*;
+    // Explicit imports only: `use super::*` would chain the parent's
+    // `use gpui::*` and glob in gpui's `test` proc macro, shadowing the
+    // built-in `#[test]` (gpui-macros 0.2.2 crashes on current rustc).
+    // Same discipline as `file_pick_tests` in `main.rs`.
+    use super::{prop, SpecimenInstance, SpecimenProp};
 
     #[test]
     fn prop_last_binding_wins() {

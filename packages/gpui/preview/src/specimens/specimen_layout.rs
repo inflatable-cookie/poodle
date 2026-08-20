@@ -163,6 +163,9 @@ pub fn specimen_layout(
 
         let mut tab = div()
             .id(SharedString::from(format!("specimen-tab-{name}-{value}")))
+            // Test-only marker for the headless specimen probe (g15.026); a
+            // no-op outside GPUI's `test-support` builds.
+            .debug_selector(|| format!("specimen-tab-{value}"))
             .px(px(12.0))
             .py(px(8.0))
             .text_size(px(13.0))
@@ -228,7 +231,9 @@ pub fn specimen_layout(
         .flex_col()
         .gap(px(12.0))
         .child(tab_bar)
-        .child(body)
+        // Test-only marker for the headless specimen probe (g15.026); a no-op
+        // outside GPUI's `test-support` builds.
+        .child(body.debug_selector(|| format!("specimen-pane-{active_tab}")))
 }
 
 /// The bordered panel both axis panes stack their variant rows inside.
