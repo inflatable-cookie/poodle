@@ -224,6 +224,9 @@ pub fn specimen_card(title: &str, theme: &GpuiThemeProvider, content: impl IntoE
     };
 
     div()
+        // Test-only marker for the headless specimen probe (g15.026); a no-op
+        // outside GPUI's `test-support` builds.
+        .debug_selector(|| "specimen-card".to_string())
         .flex()
         .flex_col()
         .gap(px(8.0))
@@ -261,6 +264,9 @@ pub fn missing_specimen(display_name: &str, theme: &GpuiThemeProvider) -> Div {
     let text_secondary = theme.resolve_color("color.text.secondary");
 
     div()
+        // Test-only marker for the headless specimen probe (g15.026); a no-op
+        // outside GPUI's `test-support` builds.
+        .debug_selector(|| "specimen-missing".to_string())
         .p(px(32.0))
         .rounded(px(8.0))
         .border_1()

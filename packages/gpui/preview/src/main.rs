@@ -9,6 +9,8 @@ mod component_registry;
 mod contract_usage_docs;
 mod node_compat;
 mod providers;
+#[cfg(test)]
+mod specimen_probe;
 mod specimens;
 mod style_bridge;
 mod token_view;

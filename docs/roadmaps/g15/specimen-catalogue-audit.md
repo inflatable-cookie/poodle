@@ -1,10 +1,10 @@
 # g15 — Human-Centred Specimen Catalogue Audit
 
-Status: **partial** — a mechanical screening baseline for the web catalogue.
-Not the completed human-centred audit: GPUI was not rendered (`g15.026`), and
-the rubric's teaching judgment was applied to the three pilots only, not to all
-175 pages.
-Date: 2026-08-18 (revision 4; first pass 2026-08-17)
+Status: **partial** — a mechanical screening baseline plus live measurement on
+all three runtimes. Not the completed human-centred audit: the rubric's
+teaching judgment was applied to the three pilots only, not to all 175 pages.
+Date: 2026-08-20 (revision 5 — GPUI column live-measured by the `g15.026`
+probe; first pass 2026-08-17)
 Card: `docs/roadmaps/g15/011-specimen-catalogue-audit.md`
 Handoff: `docs/handoffs/20260817-214451-g15-011-specimen-catalogue-audit.md`
 Governing refs: `release-baseline-roster.md`, `specimen-plan-outline.md`,
@@ -44,19 +44,23 @@ about a rendered page: the specimen-map inventory, and axis eligibility read
 from each component's `$props()` block — 126 components take `size`, 128 take
 `density`.
 
-**GPUI is not measured live, and its grades are provisional.** The audit did
-not have a headless page probe. `render_single_specimen` depends on
-`PreviewRoot`, `AppState`, and the catalogue shell; the retained headless
-driver mounts a `poodle-node` tree, which is the component tier rather than the
-page tier. Readiness review later found that the existing in-binary
-`TestAppContext` seam can mount `PreviewRoot` without adding the `lib.rs` the
-first `g15.026` draft proposed.
+**GPUI is now measured live for construction, headlessly.** The `g15.026`
+probe (`effigy probe:gpui-specimens`) mounts the production `PreviewRoot` on
+GPUI's in-memory test platform — the in-binary `TestAppContext` seam, no
+`lib.rs` — and walks the canonical 174-entry registry directly at a
+768px-wide viewport. Every route must paint a real specimen card rather than
+the `missing_specimen` fallback, and every `Sizes` or `Densities` tab the
+mounted page advertises is clicked through the real pointer event path with
+its pane asserted to paint. The measured result: **174/174 routes construct,
+none reach the fallback, and all 126 `Sizes` and 127 `Densities` tabs open
+their panes.** `MeterSurface` remains the single native `n/a`.
 
-The GPUI column therefore grades what source can prove — dispatch reachability,
-caption presence, and whether the page uses `specimen_layout` — and nothing
-about render, interaction, or narrow behaviour. `g15.026` builds the seam and
-the probe that close this; until it lands, **no claim in this document about
-pages rendering, interaction being live, or narrow behaviour applies to GPUI.**
+The GPUI column therefore grades what source proves (dispatch reachability,
+caption presence, `specimen_layout` usage) plus live construction and
+axis-pane navigation. The probe does not judge copy, visual quality, arbitrary
+component interactions, or horizontal overflow, and no grade here asserts
+those: **interaction-liveness and narrow-layout claims in this document still
+cover only Svelte and React.**
 
 Measurements that a later pass contradicted were discarded rather than
 reported. Seven did: an apparent 47-page "empty Sizes tab" class was pages that
@@ -120,7 +124,7 @@ pre-pilot baseline.
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Svelte (live) | 81 | 33 | 52 | 9 | — |
 | React (live) | 94 | 26 | 55 | 0 | — |
-| GPUI (structural, provisional) | 100 | 68 | 6 | 0 | 1 |
+| GPUI (headless render + structural) | 100 | 68 | 6 | 0 | 1 |
 | **Worst of the three** | **58** | **48** | **60** | **9** | — |
 
 | Disposition | Count |
@@ -252,7 +256,7 @@ At a 768px window, six pages render content wider than their own pane:
 `MetaBarSpecimen`. The page title names one component; the content teaches
 another.
 
-### 9. GPUI structure (provisional)
+### 9. GPUI structure
 
 Every component in the active cohort has a native page — `g15.010` closed the
 last gap. What those pages *show* still differs: 59 native pages have no
@@ -268,8 +272,10 @@ EmptyState's native renderer ignores its two-value `size`, while Icon's native
 size domain has only `sm`/`md`/`lg` and its renderer ignores `density`. Their
 fake panes were removed and the gaps returned for planning. Native layout
 mechanics are runtime-owned and are not a defect; absent or fabricated evidence
-is. These findings still come from source, not a rendered page — see the
-measurement note above.
+is. These structural findings predate the live probe; `g15.026` has since
+confirmed that all 174 pages — including every corrected axis pane — construct
+and navigate headlessly. The probe adds no caption or axis-domain judgment of
+its own.
 
 The operator resolved the authority on 2026-08-18: `g15.034` owns a clean
 pre-v1.0 migration. EmptyState keeps only its real `default | compact` size,
@@ -285,9 +291,10 @@ must consume the component's explicit ordered domain.
   `accessibility.ts` about assistive-technology claims, a demo activity string
   in `component-docs.ts`, and a comment in `headless_driver.rs` noting the
   retained headless infrastructure. `g14.021`'s removal holds.
-- **No unrendered pages in the web catalogue.** All 175 pages render in both
-  runtimes. None falls through to the "specimen not yet available" placeholder.
-  This claim does **not** extend to GPUI, which was not rendered. Fourteen
+- **No unrendered pages in any active runtime.** All 175 pages render in both
+  web runtimes, and the `g15.026` probe constructs all 174 portable GPUI
+  routes: none falls through to the "specimen not yet available" placeholder
+  (`missing_specimen`) anywhere. Fourteen
   pages do render controls that are not wired — see finding 2 — but the pages
   themselves are alive.
 - **The live web sweep found no contract or semantic defects.** The later
@@ -323,6 +330,17 @@ inspection. Four results changed:
   rubric's teaching judgment, which a person applied to the three pilots,
   defect-led tranches apply to their families, and `g15.028`–`g15.033` apply
   to the 56 pages that screened clear.
+
+Revision 5 replaces the provisional GPUI basis with the live `g15.026` result:
+
+- **GPUI construction is live-measured, not provisional.** All 174 portable
+  routes mount through the production preview root on the in-memory test
+  platform, paint a real specimen card, and open every advertised axis pane
+  through pointer input (126 `Sizes`, 127 `Densities`). No route fell back and
+  no grade changed — the probe exposed no construction defect. The two known
+  native blockers in the release-gap register (Stepper selection re-run,
+  UiPresentationProvider cascade) are interaction defects, not construction
+  defects, and keep their existing owners.
 
 ## Pilot Findings
 
@@ -409,8 +427,9 @@ Ordering matters: `g15.015` first, because it closes the gate that let the
 worst class ship. `g15.017` before `g15.019`, because the native axis work
 depends on `audio_specimens` separating its axis groups.
 
-**`g15.011` has two completion lanes, not one.** `g15.026` replaces the
-provisional GPUI column with live headless evidence. `g15.028`–`g15.033` apply
+**`g15.011` has two completion lanes, not one.** `g15.026` has replaced the
+provisional GPUI column with live headless evidence: 174/174 routes construct
+and every advertised axis pane navigates. `g15.028`–`g15.033` apply
 the human teaching rubric to the 56 pages that screened clear and therefore do
 not belong to a defect-led tranche. The card is complete only when both lanes
 land; until then this artifact is the partial baseline named at the top.
@@ -423,10 +442,11 @@ screen-clear review partition where applicable.
 ## Per-Component Inventory
 
 Grades are per runtime: **Sv** Svelte (live), **Rc** React (live),
-**Gp** GPUI (structural, provisional — see the measurement note). Evidence
+**Gp** GPUI (headless render + structural — see the measurement note). Evidence
 names the defects that decided the grade; a row with no named defect is A.
 
-† GPUI grades are not live-measured. `g15.026` closes that gap.
+† GPUI grades combine source structure with the `g15.026` live construction
+and axis-navigation result; they carry no interaction or narrow-layout signal.
 
 ### Actions & selection — Foundations (12)
 
