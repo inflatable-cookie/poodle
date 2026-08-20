@@ -71,6 +71,59 @@ describe("DateTimeZonePicker (react)", () => {
     expect(surfaceOf()).toBeNull();
   });
 
+  it("commits a portalled timezone option without dismissing the picker", () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <DateTimeZonePicker
+        ariaLabel="Event time"
+        timeZoneOptions={[
+          { value: "UTC", label: "UTC" },
+          { value: "Asia/Tokyo", label: "Tokyo" },
+        ]}
+        onValueChange={onValueChange}
+      />,
+    );
+    fireEvent.click(triggerOf(container));
+
+    const timezoneInput = surfaceOf()?.querySelector(".poodle-select__input") as HTMLInputElement;
+    fireEvent.focus(timezoneInput);
+
+    const tokyo = [...document.querySelectorAll('[role="option"]')].find(
+      (el) => el.getAttribute("data-value") === "Asia/Tokyo",
+    ) as HTMLElement;
+    expect(tokyo).not.toBeNull();
+    // The option lives in Select's portal, not in the picker surface. A
+    // synthetic onValueChange call would miss the mousedown-before-commit bug.
+    expect(tokyo.closest(".poodle-date-time-zone-picker__surface")).toBeNull();
+
+    fireEvent.click(tokyo);
+
+    expect(onValueChange).toHaveBeenCalledWith(expect.objectContaining({ timeZone: "Asia/Tokyo" }));
+    expect(surfaceOf()).not.toBeNull();
+  });
+
+  it("dismisses the whole composite in one outside press while the timezone list is open", () => {
+    const { container } = render(
+      <DateTimeZonePicker
+        ariaLabel="Event time"
+        timeZoneOptions={[
+          { value: "UTC", label: "UTC" },
+          { value: "Asia/Tokyo", label: "Tokyo" },
+        ]}
+      />,
+    );
+    fireEvent.click(triggerOf(container));
+
+    const timezoneInput = surfaceOf()?.querySelector(".poodle-select__input") as HTMLInputElement;
+    fireEvent.focus(timezoneInput);
+    expect(document.querySelector('[role="option"]')).not.toBeNull();
+
+    fireEvent.mouseDown(document.body);
+
+    expect(surfaceOf()).toBeNull();
+    expect(document.querySelector('[role="option"]')).toBeNull();
+  });
+
   it("commits the chosen date into the value through the composed calendar", () => {
     const onValueChange = vi.fn();
     const { container } = render(

@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { layerContains } from "@inflatable-cookie/poodle-core";
+  import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
   import "@inflatable-cookie/poodle-core/styles/date-time-zone-picker.css";
   import { anchored } from "./anchored";
   import { default as Calendar } from "./Calendar.svelte";
@@ -97,31 +97,14 @@
       return;
     }
 
-    function handlePointerDown(event: MouseEvent): void {
-      if (!rootElement) {
-        return;
-      }
-
-      // The surface is portalled out of the root, so both count as inside.
-      if (!layerContains(event.target as Node, rootElement, surfaceElement)) {
-        setOpen(false);
-      }
-    }
-
-    function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeydown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeydown);
-    };
+    // Nested TimeZoneSelect portals its list. Stack ancestry owns that child
+    // layer; do not widen `contains` into the child's portal.
+    return registerDismissLayer({
+      contains: (target) => layerContains(target, rootElement, surfaceElement),
+      dismissOnOutsideInteract: true,
+      onDismiss: () => setOpen(false),
+      hostElement: rootElement,
+    });
   });
 
   function setOpen(nextOpen: boolean): void {
