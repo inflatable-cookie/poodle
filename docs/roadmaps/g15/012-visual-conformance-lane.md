@@ -1,8 +1,9 @@
 # g15.012 — Primitive-First Visual Conformance Lane
 
-Status: **blocked** — `g15.011` must complete first
+Status: **blocked** — `g15.011` and the primitive parity repair `g15.038` must
+complete first
 Depends on: `g15.001` (measured roster), `g15.011` (human-centred catalogue
-audit)
+audit), `g15.038` (SegmentedControl native option parity)
 Governing refs: `release-baseline-roster.md`,
 `../../roadmaps/g14/022-generation-closeout.md` (operator ruling on future
 visual conformance), `../../roadmaps/g14/conformance-estate.md`,

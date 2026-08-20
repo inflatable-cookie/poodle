@@ -1,8 +1,10 @@
 # g15.013 — v0.2.0 Release Certification
 
-Status: **blocked** — final generation gate after `g15.008`–`g15.012`
+Status: **blocked** — final generation gate after `g15.008`–`g15.012` and
+`g15.038`
 Depends on: `g15.002`–`g15.012` (release-baseline implementation, specimens,
-and evidence), `g15.014` (release-gate remediation — security prerequisite)
+and evidence), `g15.014` (release-gate remediation — security prerequisite),
+`g15.038` (SegmentedControl native option parity)
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
 
@@ -31,6 +33,8 @@ unfinished earlier card to be waived.
       rendering, and GPUI specimen gaps are closed.
 - [ ] `g15.011` landed: the human-centred specimen catalogue audit is complete.
 - [ ] `g15.012` landed: the primitive-first visual conformance lane is complete.
+- [ ] `g15.038` landed: SegmentedControl's contracted icon and icon-only option
+      surface exists in shared Rust and GPUI without a compatibility twin.
 
 ## Execution Plan
 

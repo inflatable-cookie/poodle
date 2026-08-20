@@ -1,6 +1,7 @@
 # g15.027 — Screen-Clear Human Specimen Review
 
-Status: **planned parent — not dispatchable**
+Status: **active parent — not dispatchable**; `g15.028` complete, five review
+children remain after the routed `g15.038` stop-condition repair
 Role: human-teaching completion lane for `g15.011`
 Consumes: `g15.011` partial screening baseline
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`,
@@ -19,7 +20,10 @@ file.
 
 ## Exact Partition
 
-The 56 `keep` rows in `specimen-catalogue-audit.md` appear exactly once:
+The 56 rows that screened `keep` in the `g15.011` baseline appear exactly once.
+Human review may change a row's final grade or disposition; that does not move
+the page between child ownership lists. A discovered contract/runtime blocker
+is routed separately before the next child continues.
 
 | Child | Family | Pages |
 | --- | --- | ---: |
@@ -54,7 +58,7 @@ specimen work.
 - [ ] All 56 pages have a recorded human-teaching verdict; none is inferred
       from an A screening grade.
 - [ ] The six child lists still form one exact, duplicate-free partition of
-      the audit's `keep` rows.
+      the 56 screen-clear rows frozen at the start of this lane.
 - [ ] Svelte and React structure/copy agree; GPUI teaches the same evidence
       where the active runtime supports it.
 - [ ] Changed pages are reviewed by the operator in the live Svelte and React

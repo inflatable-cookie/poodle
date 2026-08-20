@@ -1,7 +1,7 @@
 # g15.028 — Review Screen-Clear Foundation Controls and Entry
 
-Status: **ready** — dependency closed by PR #50; orchestrator reviewed on
-2026-08-20
+Status: **complete** — PR #51 merged as `c5a411f4`; the SegmentedControl stop
+condition is routed to ready `g15.038`
 Parent: `027-screen-clear-human-review.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Depends on: `g15.026` (live native evidence)
@@ -29,8 +29,10 @@ Text and value entry:
 - `Slider`
 - `ThemeSelect`
 
-This list is exact and exhaustive. It contains every `keep` page in these two
-audit families, no other child owns them, and this card owns no others.
+This list is exact and exhaustive for the 14 pages that screened `keep` before
+human review. No other child owns them, and this card owns no others. Review
+changed SegmentedControl's disposition to `contract/runtime-blocker`; resolving
+that implementation gap belongs to `g15.038`, not this specimen-review child.
 
 ## Goal
 

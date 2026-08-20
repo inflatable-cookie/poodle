@@ -33,8 +33,13 @@ v0.2.0 release-baseline generation.
   PR #47 completed `g15.023`, curating the foundation entry, content, and
   status family. PR #48 completes `g15.024` and its review prerequisite
   `g15.037`: GPUI now has real detached-scroll/jump/follow behavior. PR #49
-  completes `g15.025` and the six-child overloaded-Examples parent. The next
-  worker task is ready `g15.026`, the headless native specimen probe.
+  completes `g15.025` and the six-child overloaded-Examples parent. PR #50
+  completed the headless native specimen probe. PR #51 completed `g15.028`,
+  the first screen-clear review child, and honestly returned one primitive
+  contract/runtime stop condition: SegmentedControl's Rust option shape cannot
+  carry icon or icon-only presentation. Ready `g15.038` closes that gap with
+  the operator-approved clean type split before `g15.029` resumes the serial
+  review lane.
   `g15.013` remains the final gate after the
   specimen program and `g15.012`.
   Jetstream remains deferred.
@@ -63,8 +68,9 @@ v0.2.0 release-baseline generation.
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
-  `g15.014`–`g15.017`, `g15.019`–`g15.025`, and `g15.034`–`g15.037` complete,
-  `g15.011` partial with bounded continuation cards, `g15.013` final
+  `g15.014`–`g15.017`, `g15.019`–`g15.028`, and `g15.034`–`g15.037` complete,
+  `g15.011` partial with ready `g15.038` and five review children,
+  `g15.013` final
 
 ## Rules
 

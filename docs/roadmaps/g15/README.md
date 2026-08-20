@@ -1,8 +1,8 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.010` and `g15.014`–`g15.017` complete;
-`g15.019`–`g15.026` and `g15.034`–`g15.037` complete; `g15.011` partial with
-six bounded screen-clear review children
+`g15.019`–`g15.028` and `g15.034`–`g15.037` complete; `g15.011` partial with
+five screen-clear review children and ready SegmentedControl repair `g15.038`
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -74,12 +74,13 @@ and status advance are the orchestrator's.
 19. [026 — Headless native specimen probe](026-native-specimen-probe.md) — complete; PR #50 proved 174/174 native routes and all admitted axis panes headlessly
 20. [027 — Screen-clear human review](027-screen-clear-human-review.md) — non-dispatchable parent for exact children `028`–`033`
 21. [028–033 — Screen-clear family review children](028-review-foundation-controls-entry.md) — exact 56-page partition; after `026`
-22. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — after `011` completes; headless capture required
-23. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
-24. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after the full specimen program and `012`
-25. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
-26. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
-27. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
+22. [038 — SegmentedControl native option parity](038-segmented-control-native-option-parity.md) — ready stop-condition repair after `028`; clean Rust option-type migration approved
+23. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — after `011` and `038` complete; headless capture required
+24. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
+25. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after the full specimen program, `038`, and `012`
+26. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
+27. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
+28. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)

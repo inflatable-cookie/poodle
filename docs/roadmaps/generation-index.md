@@ -6,19 +6,22 @@ Updated: 2026-08-20
 
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.026`, and `g15.034`–`g15.037` complete; `g15.011` partial
-    with bounded continuation cards;
+    `g15.019`–`g15.028`, and `g15.034`–`g15.037` complete; `g15.011` partial
+    with ready `g15.038` and five review children;
     `g15.013` final
   - Posture: release-first v0.2.0 baseline
-  - Range: `001` to `037`
+  - Range: `001` to `038`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
     release baseline, not a parity architecture
   - Evidence: the v0.2.0 denominator is every public Svelte component
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch ready `g15.028`, the first exact screen-clear human review
-    child.
+  - Next: dispatch ready `g15.038`, the SegmentedControl native option-parity
+    repair returned by the first screen-clear human review. PR #51 completes
+    `g15.028`; its other 13 pages passed or received bounded specimen repairs,
+    while SegmentedControl correctly stopped on the missing Rust icon/icon-only
+    option surface. `g15.029` resumes the serial review lane after `g15.038`.
     PR #50 completes `g15.026`: 174/174 canonical GPUI routes construct and
     all 126 Sizes / 127 Densities panes open through headless pointer input.
     PR #49 completes `g15.025` and the six-child overloaded-Examples parent;
