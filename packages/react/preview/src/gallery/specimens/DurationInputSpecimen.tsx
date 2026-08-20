@@ -7,7 +7,6 @@ export function DurationInputSpecimen() {
   const [hours, setHours] = useState(1);
   const [minutes, setMinutes] = useState(30);
   const [seconds, setSeconds] = useState(0);
-  const [lastChange, setLastChange] = useState("");
 
   return (
     <SpecimenLayout
@@ -23,7 +22,6 @@ export function DurationInputSpecimen() {
             setHours(detail.hours);
             setMinutes(detail.minutes);
             setSeconds(detail.seconds);
-            setLastChange(`${detail.totalSeconds}s total`);
           }}
         />
         <p style={{ margin: 0 }}>Total: {hours}h {minutes}m {seconds}s</p>
@@ -36,12 +34,6 @@ export function DurationInputSpecimen() {
       <SpecimenGroup label="Disabled">
         <DurationInput hours={2} minutes={15} seconds={30} disabled />
       </SpecimenGroup>
-
-      {lastChange ? (
-        <SpecimenGroup label="Last change">
-          <p style={{ margin: 0 }}>{lastChange}</p>
-        </SpecimenGroup>
-      ) : null}
     </SpecimenLayout>
   );
 }
