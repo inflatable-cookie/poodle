@@ -36,6 +36,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         js_color_picker(
             &ColorPickerSpec::new().with_value("#6366f1").with_open(true),
             theme,
+            "basic",
         ),
     ));
 
@@ -49,6 +50,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_open(true)
                 .with_swatches(swatches.clone()),
             theme,
+            "swatches",
         ),
     ));
 
@@ -62,6 +64,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_open(true)
                 .with_show_alpha(true),
             theme,
+            "alpha",
         ),
     ));
 
@@ -75,6 +78,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_open(true)
                 .with_default_mode(ColorInputMode::Rgb),
             theme,
+            "rgb",
         ),
     ));
 
@@ -88,6 +92,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_open(true)
                 .with_show_input(false),
             theme,
+            "preview-only",
         ),
     ));
 
@@ -95,7 +100,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     root = root.child(group(
         "No color (closed trigger)",
         secondary,
-        js_color_picker(&ColorPickerSpec::new(), theme),
+        js_color_picker(&ColorPickerSpec::new(), theme, "empty"),
     ));
 
     // ── Disabled ──
@@ -107,6 +112,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_value("#22c55e")
                 .with_disabled(true),
             theme,
+            "disabled",
         ),
     ));
 
@@ -125,6 +131,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_color_picker(
                 &ColorPickerSpec::new().with_value("#6366f1").with_size(size),
                 theme,
+                name,
             ),
         ));
     }
@@ -144,6 +151,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_value("#6366f1")
                     .with_density(density),
                 theme,
+                name,
             ),
         ));
     }

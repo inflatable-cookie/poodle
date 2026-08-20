@@ -101,35 +101,25 @@ pub struct SegmentedControlSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
-    /// Optional explicit instance scope, analogue of the web `name` prop.
-    /// Semantic option ids stay readable (`segmented:<value>`). Focus keys are
-    /// always `segmented:{scope}:option:{value}` — never the unscoped option
-    /// id. When omitted, shared render allocates a unique per-frame serial.
-    pub instance_id: Option<String>,
+    /// Stable native instance scope, analogue of the web `name` prop.
+    /// Shared render is stateless, so native callers provide the lifecycle
+    /// identity explicitly rather than relying on render order.
+    pub instance_id: String,
 }
 
-impl Default for SegmentedControlSpec {
-    fn default() -> Self {
+impl SegmentedControlSpec {
+    pub fn new(instance_id: impl Into<String>, options: Vec<SegmentedControlOption>) -> Self {
         Self {
             value: None,
             default_value: None,
-            options: Vec::new(),
+            options,
             is_disabled: false,
             aria_label: None,
             equal_width: true,
             size: ControlSize::Md,
             size_role: SemanticControlSizeRole::Control,
             density: ControlDensity::Default,
-            instance_id: None,
-        }
-    }
-}
-
-impl SegmentedControlSpec {
-    pub fn new(options: Vec<SegmentedControlOption>) -> Self {
-        Self {
-            options,
-            ..Self::default()
+            instance_id: instance_id.into(),
         }
     }
 
@@ -158,11 +148,6 @@ impl SegmentedControlSpec {
 
     pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
         self.size_role = size_role;
-        self
-    }
-
-    pub fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
-        self.instance_id = Some(instance_id.into());
         self
     }
 

@@ -139,7 +139,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         .child(group(
             "Model + axes (open)",
             secondary,
-            js_model_picker(&base().with_open(true), theme),
+            js_model_picker(&base().with_open(true), theme, "default"),
         ))
         .child(group(
             "Rebound axis (Corvid 1: own levels, forced to a list)",
@@ -149,6 +149,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_value(ModelSelection::new("corvid-1"))
                     .with_open(true),
                 theme,
+                "rebound-axis",
             ),
         ))
         .child(group(
@@ -159,6 +160,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_value(ModelSelection::new("corvid-ultra"))
                     .with_open(true),
                 theme,
+                "many-axis",
             ),
         ))
         .child(group(
@@ -169,32 +171,45 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_value(ModelSelection::new("corvid-mini"))
                     .with_open(true),
                 theme,
+                "no-axis",
             ),
         ))
         .child(group(
             "Trigger only (collapsed)",
             secondary,
-            js_model_picker(&base(), theme),
+            js_model_picker(&base(), theme, "collapsed"),
         ))
         .child(group(
             "Emphasis: subdued (recedes beside a louder control)",
             secondary,
-            js_model_picker(&base().with_emphasis(ModelPickerEmphasis::Subdued), theme),
+            js_model_picker(
+                &base().with_emphasis(ModelPickerEmphasis::Subdued),
+                theme,
+                "subdued",
+            ),
         ))
         .child(group(
             "Outlined trigger",
             secondary,
-            js_model_picker(&base().with_variant(ModelPickerVariant::Outlined), theme),
+            js_model_picker(
+                &base().with_variant(ModelPickerVariant::Outlined),
+                theme,
+                "outlined",
+            ),
         ))
         .child(group(
             "No model selected",
             secondary,
-            js_model_picker(&base().with_value(ModelSelection::default()), theme),
+            js_model_picker(
+                &base().with_value(ModelSelection::default()),
+                theme,
+                "empty",
+            ),
         ))
         .child(group(
             "Disabled",
             secondary,
-            js_model_picker(&base().with_disabled(true), theme),
+            js_model_picker(&base().with_disabled(true), theme, "disabled"),
         ))
         .child(group(
             "Sizes",
@@ -208,7 +223,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     ControlSize::Xl,
                 ]
                 .into_iter()
-                .map(|size| js_model_picker(&base().with_size(size), theme)),
+                .map(|size| {
+                    let id = format!("size-{size:?}");
+                    js_model_picker(&base().with_size(size), theme, &id)
+                }),
             ),
         ))
         .child(group(
@@ -221,7 +239,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     ControlDensity::Comfortable,
                 ]
                 .into_iter()
-                .map(|density| js_model_picker(&base().with_density(density), theme)),
+                .map(|density| {
+                    let id = format!("density-{density:?}");
+                    js_model_picker(&base().with_density(density), theme, &id)
+                }),
             ),
         ))
 }

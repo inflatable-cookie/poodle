@@ -111,6 +111,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_value(&basic_value)
                                     .with_open(basic_open),
                                 theme,
+                                "basic",
                             )
                             .with_id("basic")
                             .on_toggle(toggle_handler(
@@ -147,6 +148,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_open(swatches_open)
                             .with_swatches(swatches.clone()),
                         theme,
+                        "swatches",
                     )
                     .with_id("swatches")
                     .on_toggle(toggle_handler(
@@ -181,6 +183,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     .with_open(alpha_open)
                                     .with_show_alpha(true),
                                 theme,
+                                "alpha",
                             )
                             .with_id("alpha")
                             .on_toggle(toggle_handler(
@@ -217,6 +220,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_open(true)
                             .with_default_mode(ColorInputMode::Rgb),
                         theme,
+                        "open",
                     )
                     .with_id("open")
                     .on_change(change_handler(
@@ -242,6 +246,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_show_input(false)
                             .with_open(true),
                         theme,
+                        "preview",
                     )
                     .with_id("preview"),
                 ),
@@ -262,6 +267,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_value("#22c55e")
                             .with_disabled(true),
                         theme,
+                        "disabled",
                     )
                     .with_id("disabled"),
                 ),
@@ -275,16 +281,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         examples,
         SpecimenAxes::examples_only()
             .with_sizes(|size, theme: &GpuiThemeProvider| {
-                ColorPicker::from_spec(ColorPickerSpec::new().with_value("#6366f1"), theme)
-                    .with_id(format!("specimen-size-{:?}", size))
-                    .size(size)
-                    .into_any_element()
+                ColorPicker::from_spec(
+                    ColorPickerSpec::new().with_value("#6366f1"),
+                    theme,
+                    format!("specimen-size-{size:?}"),
+                )
+                .with_id(format!("specimen-size-{:?}", size))
+                .size(size)
+                .into_any_element()
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
-                ColorPicker::from_spec(ColorPickerSpec::new().with_value("#6366f1"), theme)
-                    .with_id(format!("specimen-density-{:?}", density))
-                    .with_density(density)
-                    .into_any_element()
+                ColorPicker::from_spec(
+                    ColorPickerSpec::new().with_value("#6366f1"),
+                    theme,
+                    format!("specimen-density-{density:?}"),
+                )
+                .with_id(format!("specimen-density-{:?}", density))
+                .with_density(density)
+                .into_any_element()
             }),
     )
 }

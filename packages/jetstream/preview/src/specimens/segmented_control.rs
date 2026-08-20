@@ -40,7 +40,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Default (Grid selected)",
             secondary,
             div().w(300.0).child(js_segmented_control(
-                &SegmentedControlSpec::new(view_options.clone()).with_default_value("grid"),
+                &SegmentedControlSpec::new("default", view_options.clone())
+                    .with_default_value("grid"),
                 theme,
             )),
         ))
@@ -49,7 +50,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "With disabled option (Draft)",
             secondary,
             div().w(340.0).child(js_segmented_control(
-                &SegmentedControlSpec::new(status_options).with_default_value("all"),
+                &SegmentedControlSpec::new("disabled-option", status_options)
+                    .with_default_value("all"),
                 theme,
             )),
         ))
@@ -59,8 +61,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             div().w(300.0).child(js_segmented_control(
                 &{
-                    let mut s =
-                        SegmentedControlSpec::new(view_options.clone()).with_default_value("list");
+                    let mut s = SegmentedControlSpec::new("fully-disabled", view_options.clone())
+                        .with_default_value("list");
                     s.is_disabled = true;
                     s
                 },
@@ -72,12 +74,15 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Equal width (default)",
             secondary,
             div().w(360.0).child(js_segmented_control(
-                &SegmentedControlSpec::new(vec![
-                    SegmentedControlOption::new("day", "Day"),
-                    SegmentedControlOption::new("week", "Week"),
-                    SegmentedControlOption::new("month", "Month"),
-                    SegmentedControlOption::new("year", "Year"),
-                ])
+                &SegmentedControlSpec::new(
+                    "equal-width",
+                    vec![
+                        SegmentedControlOption::new("day", "Day"),
+                        SegmentedControlOption::new("week", "Week"),
+                        SegmentedControlOption::new("month", "Month"),
+                        SegmentedControlOption::new("year", "Year"),
+                    ],
+                )
                 .with_default_value("week")
                 .with_equal_width(true),
                 theme,
@@ -88,11 +93,14 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Content fit (equalWidth=false)",
             secondary,
             js_segmented_control(
-                &SegmentedControlSpec::new(vec![
-                    SegmentedControlOption::new("1h", "1h").with_aria_label("Last 1 hour"),
-                    SegmentedControlOption::new("6h", "6h").with_aria_label("Last 6 hours"),
-                    SegmentedControlOption::new("24h", "24h").with_aria_label("Last 24 hours"),
-                ])
+                &SegmentedControlSpec::new(
+                    "content-fit",
+                    vec![
+                        SegmentedControlOption::new("1h", "1h").with_aria_label("Last 1 hour"),
+                        SegmentedControlOption::new("6h", "6h").with_aria_label("Last 6 hours"),
+                        SegmentedControlOption::new("24h", "24h").with_aria_label("Last 24 hours"),
+                    ],
+                )
                 .with_default_value("24h")
                 .with_size(ControlSize::Xs)
                 .with_equal_width(false),
@@ -135,7 +143,7 @@ fn view_opts() -> Vec<SegmentedControlOption> {
 
 fn sized(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
     div().w(300.0).child(js_segmented_control(
-        &SegmentedControlSpec::new(view_opts())
+        &SegmentedControlSpec::new(format!("size-{size:?}"), view_opts())
             .with_default_value("grid")
             .with_size(size),
         theme,
@@ -144,7 +152,7 @@ fn sized(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
 
 fn dense(theme: &JetstreamThemeProvider, density: ControlDensity) -> El {
     div().w(300.0).child(js_segmented_control(
-        &SegmentedControlSpec::new(view_opts())
+        &SegmentedControlSpec::new(format!("density-{density:?}"), view_opts())
             .with_default_value("grid")
             .with_density(density),
         theme,

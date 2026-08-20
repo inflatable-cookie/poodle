@@ -26,15 +26,21 @@ RadioGroup, CardRadioGroup, and every other family.
   `poodle-gpui-node-backend`, `@inflatable-cookie/poodle-core`, internal
   GPUI/Jetstream previews, in-repo SegmentedControl callers
 - **Public-intent entry points:** `SegmentedControlOption` (new);
-  `SegmentedControlSpec::new` / `options` now take
-  `Vec<SegmentedControlOption>` instead of `Vec<ChoiceOption>`; additive
-  `Node.tooltip`, additive `SegmentedControlSpec::instance_id`; additive
+  `SegmentedControlSpec::new(instance_id, options)` now requires a stable
+  native instance scope and takes `Vec<SegmentedControlOption>` instead of
+  `Vec<ChoiceOption>`; shared `color_picker`, `filter_builder`, and
+  `model_picker` render entry points now require their parent instance scope;
+  additive `Node.tooltip`; additive
   default-icon names `audioWaveform` and `piano` on
   `@inflatable-cookie/poodle-core/icons`
-- **Compatibility:** clean break on the option type, pre-1.0; operator
-  approved 2026-08-20. Icon names and `instance_id` are additive.
+- **Compatibility:** clean break on the option type and native constructor /
+  composed-render signatures, pre-1.0; operator approved 2026-08-20. Icon
+  names and `Node.tooltip` are additive.
 - **Downstream re-check:** any out-of-repo `SegmentedControlSpec` constructor
-  that passed `ChoiceOption` must construct `SegmentedControlOption` instead.
+  that passed `ChoiceOption` must construct `SegmentedControlOption` instead
+  and supply a lifetime-stable instance scope. Direct shared-render callers
+  for ColorPicker, FilterBuilder, or ModelPicker must supply their parent
+  scope; nested SegmentedControl scopes are derived from it.
   Apps that import the default Lucide set gain `audioWaveform` and `piano`.
 
 ## Implementation
@@ -78,12 +84,14 @@ RadioGroup, CardRadioGroup, and every other family.
 Headless only. No windowed, native-visual, Jetstream, or release selector ran.
 
 - focused spec test `segmented_control_option_carries_the_contract_icon_surface`
-- focused render tests (16, including icon-only suppression, fallback,
-  geometry, labelled-icon order/size/gap, and activation)
+- focused render tests (25, including icon-only suppression, fallback,
+  geometry, labelled-icon order/size/gap, activation, stable explicit focus
+  identity, and repeated-composition isolation)
 - focused backend test `tooltip_forces_element_state`
+- core icon-catalogue boundary updated for the two admitted default assets
 - GPUI specimen test `icon_only_activation_records_the_picked_value`
 - `effigy ci:rust`
-- `effigy check:gpui` (342 render tests, 21 backend tests, preview check)
+- `effigy check:gpui` (353 render tests, 22 backend tests, preview check)
 - `effigy regressions:native` (50 passed)
 - `effigy probe:gpui-specimens` (7 passed)
 - `effigy docs:check`
@@ -115,15 +123,23 @@ Two HIGH findings, both addressed on this branch:
 
 ## Review round 3 (PR #52)
 
-Unique focus identity is no longer opt-in. Shared render always emits
-`segmented:{scope}:option:{value}`. An explicit `instance_id` is the native
-analogue of the web `name` prop; when it is omitted, render allocates a
-per-frame serial (`auto-N`). ColorPicker, FilterBuilder, and ModelPicker no
-longer stamp type/key literals onto the inner control. The GPUI preview
-resets the serial each frame next to `reset_element_ids`. Evidence: two
-default same-valued controls, two open ColorPickers, two FilterBuilders with
-the same boolean field, and two ModelPickers with the same select axis all
-get distinct runtime ids, and none fall back to `segmented:<value>`.
+The first repair made focus identity mandatory but generated missing scopes
+from a per-frame render-order counter. Orchestrator review rejected it: when a
+preceding conditional control disappeared, a persistent control changed from
+`auto-1` to `auto-0`, invalidating GPUI focus handles. That implementation and
+its reset API were removed.
+
+## Review round 4 (PR #52)
+
+Native identity is explicit and lifetime-stable.
+`SegmentedControlSpec::new(instance_id, options)` requires the scope; shared
+render always emits `segmented:{scope}:option:{value}` and contains no global
+counter or reset lifecycle. ColorPicker, FilterBuilder, and ModelPicker take a
+parent scope and derive `:mode`, `:boolean:{field}`, and `:axis:{axis}` child
+scopes. All GPUI and deferred Jetstream compile callers now supply stable
+scopes. Regression evidence proves a persistent control keeps its runtime id
+when a preceding control disappears, while repeated composed controls remain
+isolated.
 
 ## Unresolved
 

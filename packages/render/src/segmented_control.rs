@@ -6,7 +6,6 @@
 //! (`packages/gpui/components/src/primitives/segmented_control.rs`) for the
 //! g12.019 node-backend migration.
 
-use std::cell::Cell;
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
@@ -22,37 +21,12 @@ use crate::presentation::{
     resolve_supporting_visual_size,
 };
 
-thread_local! {
-    static NEXT_INSTANCE_SCOPE: Cell<u64> = const { Cell::new(0) };
-}
-
-/// Restart auto-assigned instance scopes. Hosts that rebuild the node tree
-/// every frame must call this once per frame before rendering, the same way
-/// GPUI hosts call `poodle_gpui_node_backend::reset_element_ids`.
-pub fn reset_segmented_control_instance_scopes() {
-    NEXT_INSTANCE_SCOPE.with(|counter| counter.set(0));
-}
-
-fn allocate_instance_scope(explicit: Option<&str>) -> String {
-    match explicit {
-        Some(scope) => scope.to_string(),
-        None => {
-            let serial = NEXT_INSTANCE_SCOPE.with(|counter| {
-                let serial = counter.get();
-                counter.set(serial.saturating_add(1));
-                serial
-            });
-            format!("auto-{serial}")
-        }
-    }
-}
-
 pub fn segmented_control(
     spec: &SegmentedControlSpec,
     theme: &dyn ThemeProvider,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let instance_scope = allocate_instance_scope(spec.instance_id.as_deref());
+    let instance_scope = spec.instance_id.as_str();
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     // Fixed per-size/per-density tables, transcribed from the old GPUI tier
     // (g12.019): unlike select/button, this component's old tier is
@@ -244,7 +218,7 @@ pub fn segmented_control(
         }
 
         seg.id = Some(segment_id(&option.value));
-        seg.runtime_id = Some(segment_focus_id(&instance_scope, &option.value));
+        seg.runtime_id = Some(segment_focus_id(instance_scope, &option.value));
         seg.a11y.role = Some(NodeRole::RadioButton);
         seg.a11y.selected = Some(is_selected);
         seg.a11y.toggled = Some(if is_selected {
@@ -270,7 +244,7 @@ pub fn segmented_control(
             seg.interaction.on_key = roving_key_handler(
                 &option.value,
                 &roving,
-                instance_scope.clone(),
+                instance_scope.to_string(),
                 on_change.clone(),
             );
         } else {
@@ -381,6 +355,10 @@ mod tests {
         ]
     }
 
+    fn test_spec(options: Vec<SegmentedControlOption>) -> SegmentedControlSpec {
+        SegmentedControlSpec::new("test", options)
+    }
+
     fn find_segment<'a>(node: &'a Node, label: &str) -> &'a Node {
         node.find(&|n| matches!(&n.kind, poodle_node::NodeKind::Button { label: l } if l == label))
             .unwrap_or_else(|| panic!("segment {label:?} exists"))
@@ -402,7 +380,7 @@ mod tests {
             (ControlSize::Xl, 52.0),
         ];
         for (size, expected) in cases {
-            let spec = SegmentedControlSpec::new(view_options()).with_size(size);
+            let spec = test_spec(view_options()).with_size(size);
             let node = segmented_control(&spec, &theme(), None);
             match node.style.descriptor.layout.height {
                 LayoutSizing::Fixed(h) => assert_eq!(h, expected, "track height for {size:?}"),
@@ -430,7 +408,7 @@ mod tests {
             (ControlDensity::Comfortable, 16.0),
         ];
         for (density, expected) in cases {
-            let spec = SegmentedControlSpec::new(view_options()).with_density(density);
+            let spec = test_spec(view_options()).with_density(density);
             let node = segmented_control(&spec, &theme(), None);
             let seg = find_segment(&node, "List");
             assert_eq!(
@@ -448,7 +426,7 @@ mod tests {
         let text_inverse = theme.resolve_color("color.text.inverse");
         let text_secondary = theme.resolve_color("color.text.secondary");
 
-        let spec = SegmentedControlSpec::new(view_options()).with_default_value("list");
+        let spec = test_spec(view_options()).with_default_value("list");
         let node = segmented_control(&spec, &theme, None);
 
         let selected_seg = find_segment(&node, "List");
@@ -486,7 +464,7 @@ mod tests {
         let hover_fill = mix_srgb(surface, elevated, 0.84);
 
         // No change handler wired: the old tier still shows the affordances.
-        let spec = SegmentedControlSpec::new(view_options()).with_default_value("grid");
+        let spec = test_spec(view_options()).with_default_value("grid");
         let node = segmented_control(&spec, &theme, None);
         // "Grid" is the selected segment and is deliberately excluded below.
         for label in ["List", "Table"] {
@@ -516,7 +494,7 @@ mod tests {
         let theme = theme();
         let accent = theme.resolve_color("color.accent.base");
 
-        let spec = SegmentedControlSpec::new(view_options()).with_default_value("grid");
+        let spec = test_spec(view_options()).with_default_value("grid");
         let node = segmented_control(&spec, &theme, None);
 
         let selected = find_segment(&node, "Grid");
@@ -542,7 +520,7 @@ mod tests {
         let mut options = view_options();
         options.push(SegmentedControlOption::new("draft", "Draft").with_disabled(true));
         let handlers: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(|_| {});
-        let spec = SegmentedControlSpec::new(options).with_default_value("grid");
+        let spec = test_spec(options).with_default_value("grid");
         let node = segmented_control(&spec, &theme, Some(handlers));
 
         let draft = find_segment(&node, "Draft");
@@ -569,7 +547,7 @@ mod tests {
         let handlers: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(|_| {});
         let spec = SegmentedControlSpec {
             is_disabled: true,
-            ..SegmentedControlSpec::new(view_options()).with_default_value("grid")
+            ..test_spec(view_options()).with_default_value("grid")
         };
         let node = segmented_control(&spec, &theme, Some(handlers));
 
@@ -593,7 +571,7 @@ mod tests {
         let sink = Arc::clone(&seen);
         let on_change: Arc<dyn Fn(&str) + Send + Sync> =
             Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()));
-        let spec = SegmentedControlSpec::new(view_options()).with_default_value("grid");
+        let spec = test_spec(view_options()).with_default_value("grid");
         let node = segmented_control(&spec, &theme(), Some(on_change));
 
         let list = find_segment(&node, "List");
@@ -603,12 +581,12 @@ mod tests {
 
     #[test]
     fn equal_width_grows_segments_content_fit_leaves_them_alone() {
-        let spec = SegmentedControlSpec::new(view_options());
+        let spec = test_spec(view_options());
         let node = segmented_control(&spec, &theme(), None);
         let seg = find_segment(&node, "List");
         assert_eq!(seg.style.descriptor.layout.width, LayoutSizing::Grow);
 
-        let spec = SegmentedControlSpec::new(view_options()).with_equal_width(false);
+        let spec = test_spec(view_options()).with_equal_width(false);
         let node = segmented_control(&spec, &theme(), None);
         let seg = find_segment(&node, "List");
         assert_ne!(seg.style.descriptor.layout.width, LayoutSizing::Grow);
@@ -616,7 +594,7 @@ mod tests {
 
     #[test]
     fn radiogroup_role_and_aria_label_ride_the_root() {
-        let spec = SegmentedControlSpec::new(view_options());
+        let spec = test_spec(view_options());
         let mut spec_with_label = spec.clone();
         spec_with_label.aria_label = Some("View mode".to_string());
         let node = segmented_control(&spec_with_label, &theme(), None);
@@ -634,7 +612,7 @@ mod tests {
 
     #[test]
     fn selected_option_is_the_roving_tab_stop() {
-        let spec = SegmentedControlSpec::new(view_options()).with_default_value("list");
+        let spec = test_spec(view_options()).with_default_value("list");
         let node = segmented_control(&spec, &theme(), None);
         assert_eq!(find_segment(&node, "Grid").a11y.tab_index, Some(-1));
         let list = find_segment(&node, "List");
@@ -651,13 +629,15 @@ mod tests {
         let sink = Arc::clone(&seen);
         let on_change: Arc<dyn Fn(&str) + Send + Sync> =
             Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()));
-        let spec = SegmentedControlSpec::new(vec![
-            SegmentedControlOption::new("grid", "Grid"),
-            SegmentedControlOption::new("list", "List").with_disabled(true),
-            SegmentedControlOption::new("table", "Table"),
-        ])
-        .with_default_value("grid")
-        .with_instance_id("view");
+        let spec = SegmentedControlSpec::new(
+            "view",
+            vec![
+                SegmentedControlOption::new("grid", "Grid"),
+                SegmentedControlOption::new("list", "List").with_disabled(true),
+                SegmentedControlOption::new("table", "Table"),
+            ],
+        )
+        .with_default_value("grid");
         let node = segmented_control(&spec, &theme(), Some(on_change));
         let keys = find_segment(&node, "Grid")
             .interaction
@@ -675,7 +655,7 @@ mod tests {
 
     #[test]
     fn enabled_segments_carry_a_focus_patch_so_gpui_tracks_handles() {
-        let spec = SegmentedControlSpec::new(view_options()).with_default_value("grid");
+        let spec = test_spec(view_options()).with_default_value("grid");
         let node = segmented_control(&spec, &theme(), None);
         let grid = find_segment(&node, "Grid");
         assert!(grid.style.focus.is_some());
@@ -693,16 +673,12 @@ mod tests {
         let on_change: Arc<dyn Fn(&str) + Send + Sync> =
             Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()));
         let a = segmented_control(
-            &SegmentedControlSpec::new(view_options())
-                .with_default_value("grid")
-                .with_instance_id("a"),
+            &SegmentedControlSpec::new("a", view_options()).with_default_value("grid"),
             &theme(),
             Some(Arc::clone(&on_change)),
         );
         let b = segmented_control(
-            &SegmentedControlSpec::new(view_options())
-                .with_default_value("grid")
-                .with_instance_id("b"),
+            &SegmentedControlSpec::new("b", view_options()).with_default_value("grid"),
             &theme(),
             Some(on_change),
         );
@@ -733,48 +709,20 @@ mod tests {
     }
 
     #[test]
-    fn default_controls_with_the_same_values_get_distinct_focus_ids() {
-        reset_segmented_control_instance_scopes();
-        let spec = SegmentedControlSpec::new(view_options()).with_default_value("grid");
-        let a = segmented_control(&spec, &theme(), None);
-        let b = segmented_control(&spec, &theme(), None);
-        let a_grid = find_segment(&a, "Grid");
-        let b_grid = find_segment(&b, "Grid");
-        assert_eq!(a_grid.id.as_deref(), Some("segmented:grid"));
-        assert_eq!(b_grid.id.as_deref(), Some("segmented:grid"));
+    fn explicit_scope_is_stable_when_a_preceding_control_disappears() {
+        let preceding = SegmentedControlSpec::new("preceding", view_options());
+        let persistent = SegmentedControlSpec::new("persistent", view_options());
+        let before = Node::container()
+            .child(segmented_control(&preceding, &theme(), None))
+            .child(segmented_control(&persistent, &theme(), None));
+        let after = segmented_control(&persistent, &theme(), None);
         assert_eq!(
-            a_grid.runtime_id.as_deref(),
-            Some("segmented:auto-0:option:grid")
+            collect_runtime_ids(&before, "segmented:grid")[1],
+            find_segment(&after, "Grid").runtime_id.as_deref().unwrap()
         );
         assert_eq!(
-            b_grid.runtime_id.as_deref(),
-            Some("segmented:auto-1:option:grid")
-        );
-        let modifiers = NodeModifiers::default();
-        assert_eq!(
-            (a_grid.interaction.on_key.as_ref().unwrap())(NodeKey::ArrowRight, modifiers),
-            Some("segmented:auto-0:option:list".to_string())
-        );
-        assert_eq!(
-            (b_grid.interaction.on_key.as_ref().unwrap())(NodeKey::ArrowRight, modifiers),
-            Some("segmented:auto-1:option:list".to_string())
-        );
-    }
-
-    #[test]
-    fn resetting_instance_scopes_replays_the_same_auto_ids() {
-        reset_segmented_control_instance_scopes();
-        let spec = SegmentedControlSpec::new(view_options());
-        let first = segmented_control(&spec, &theme(), None);
-        reset_segmented_control_instance_scopes();
-        let second = segmented_control(&spec, &theme(), None);
-        assert_eq!(
-            find_segment(&first, "Grid").runtime_id,
-            find_segment(&second, "Grid").runtime_id
-        );
-        assert_eq!(
-            find_segment(&first, "Grid").runtime_id.as_deref(),
-            Some("segmented:auto-0:option:grid")
+            find_segment(&after, "Grid").runtime_id.as_deref(),
+            Some("segmented:persistent:option:grid")
         );
     }
 
@@ -800,11 +748,13 @@ mod tests {
             .child(crate::color_picker(
                 &spec,
                 &theme(),
+                "picker-a",
                 crate::ColorPickerHandlers::default(),
             ))
             .child(crate::color_picker(
                 &spec,
                 &theme(),
+                "picker-b",
                 crate::ColorPickerHandlers::default(),
             ))
     }
@@ -827,11 +777,13 @@ mod tests {
             .child(crate::filter_builder(
                 &spec,
                 &theme(),
+                "filter-a",
                 &crate::FilterBuilderHandlers::default(),
             ))
             .child(crate::filter_builder(
                 &spec,
                 &theme(),
+                "filter-b",
                 &crate::FilterBuilderHandlers::default(),
             ))
     }
@@ -859,25 +811,23 @@ mod tests {
     fn two_open_model_pickers() -> Node {
         let spec = segmented_axis_model_picker();
         Node::container()
-            .child(crate::model_picker(&spec, &theme(), None))
-            .child(crate::model_picker(&spec, &theme(), None))
+            .child(crate::model_picker(&spec, &theme(), "model-a", None))
+            .child(crate::model_picker(&spec, &theme(), "model-b", None))
     }
 
     #[test]
     fn two_color_pickers_do_not_share_mode_focus_ids() {
-        reset_segmented_control_instance_scopes();
         let ids = collect_runtime_ids(&two_open_color_pickers(), "segmented:hex");
         assert_eq!(ids.len(), 2);
         assert_ne!(ids[0], ids[1]);
         assert!(ids.iter().all(|id| id.ends_with(":option:hex")));
         assert!(ids.iter().all(|id| id != "segmented:hex"));
-        assert_eq!(ids[0], "segmented:auto-0:option:hex");
-        assert_eq!(ids[1], "segmented:auto-1:option:hex");
+        assert_eq!(ids[0], "segmented:picker-a:mode:option:hex");
+        assert_eq!(ids[1], "segmented:picker-b:mode:option:hex");
     }
 
     #[test]
     fn two_filter_builders_do_not_share_boolean_focus_ids() {
-        reset_segmented_control_instance_scopes();
         let ids = collect_runtime_ids(&two_open_filter_builders(), "segmented:true");
         assert_eq!(ids.len(), 2);
         assert_ne!(ids[0], ids[1]);
@@ -887,7 +837,6 @@ mod tests {
 
     #[test]
     fn two_model_pickers_do_not_share_axis_focus_ids() {
-        reset_segmented_control_instance_scopes();
         let ids = collect_runtime_ids(&two_open_model_pickers(), "segmented:fast");
         assert_eq!(ids.len(), 2);
         assert_ne!(ids[0], ids[1]);
@@ -897,7 +846,7 @@ mod tests {
 
     #[test]
     fn custom_option_icon_names_are_preserved() {
-        let spec = SegmentedControlSpec::new(vec![SegmentedControlOption::new("grid", "Grid")
+        let spec = test_spec(vec![SegmentedControlOption::new("grid", "Grid")
             .with_icon("company-logo")
             .with_icon_only(true)]);
         let node = segmented_control(&spec, &theme(), None);
@@ -944,7 +893,7 @@ mod tests {
 
     #[test]
     fn icon_only_hides_visible_label_and_falls_back_for_name_and_tooltip() {
-        let spec = SegmentedControlSpec::new(plugin_kind_options())
+        let spec = test_spec(plugin_kind_options())
             .with_default_value("effects")
             .with_equal_width(false);
         let node = segmented_control(&spec, &theme(), None);
@@ -986,7 +935,7 @@ mod tests {
 
     #[test]
     fn icon_only_without_an_icon_keeps_the_visible_label() {
-        let spec = SegmentedControlSpec::new(vec![
+        let spec = test_spec(vec![
             SegmentedControlOption::new("grid", "Grid").with_icon_only(true)
         ]);
         let node = segmented_control(&spec, &theme(), None);
@@ -1008,7 +957,7 @@ mod tests {
             ))
             .size_token(),
         );
-        let spec = SegmentedControlSpec::new(vec![
+        let spec = test_spec(vec![
             SegmentedControlOption::new("grid", "Grid").with_icon("list")
         ]);
         let node = segmented_control(&spec, &theme, None);
@@ -1031,7 +980,7 @@ mod tests {
 
     #[test]
     fn icon_only_content_fit_is_square_with_no_inline_padding() {
-        let spec = SegmentedControlSpec::new(plugin_kind_options())
+        let spec = test_spec(plugin_kind_options())
             .with_default_value("effects")
             .with_equal_width(false);
         let node = segmented_control(&spec, &theme(), None);
@@ -1051,7 +1000,7 @@ mod tests {
 
     #[test]
     fn explicit_aria_label_and_title_win_over_the_required_label() {
-        let spec = SegmentedControlSpec::new(vec![SegmentedControlOption::new("fx", "FX")
+        let spec = test_spec(vec![SegmentedControlOption::new("fx", "FX")
             .with_icon("audio-waveform")
             .with_icon_only(true)
             .with_aria_label("Audio effects")
@@ -1070,7 +1019,7 @@ mod tests {
         let sink = Arc::clone(&seen);
         let on_change: Arc<dyn Fn(&str) + Send + Sync> =
             Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()));
-        let spec = SegmentedControlSpec::new(plugin_kind_options())
+        let spec = test_spec(plugin_kind_options())
             .with_default_value("effects")
             .with_equal_width(false);
         let node = segmented_control(&spec, &theme(), Some(on_change));

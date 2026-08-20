@@ -777,7 +777,7 @@ mod tests {
 
     #[test]
     fn segmented_control_uses_selected_fill() {
-        let spec = SegmentedControlSpec::new(vec![
+        let spec = SegmentedControlSpec::new("contract-test", vec![
             SegmentedControlOption::new("grid", "Grid"),
             SegmentedControlOption::new("list", "List"),
         ])

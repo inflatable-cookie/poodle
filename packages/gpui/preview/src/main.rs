@@ -398,9 +398,6 @@ impl Render for PreviewRoot {
         // id keeps the same ElementId between frames. gpui keys a click's
         // pending mouse-down by element id, and a real click spans frames.
         poodle_gpui_node_backend::reset_element_ids();
-        // Replay auto-assigned SegmentedControl focus scopes so a rebuilt
-        // default or composed instance keeps the same runtime id across frames.
-        poodle_render::reset_segmented_control_instance_scopes();
         let theme = &self.state.theme;
 
         let canvas_bg = theme.resolve_color("color.background.canvas");

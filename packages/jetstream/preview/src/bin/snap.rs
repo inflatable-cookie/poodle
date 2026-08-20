@@ -630,6 +630,7 @@ fn main() {
             .with_value("#6366f1")
             .with_open(true),
         &theme,
+        "snapshot",
     ));
     let cp_scene = ui_element::div()
         .w(560.0)
@@ -787,7 +788,7 @@ fn main() {
         .gap(16.0)
         .child(row_hov()) // y≈24..72 — pointer here → hover bg
         .child(row_hov()); // y≈88..136 — untouched
-    // Pointer at (230, 48): over the first row.
+                           // Pointer at (230, 48): over the first row.
     snapshot_opts(
         &hov_scene,
         460,

@@ -27,6 +27,7 @@ use crate::switch::switch;
 pub fn model_picker(
     spec: &ModelPickerSpec,
     theme: &dyn ThemeProvider,
+    instance_id: &str,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
@@ -419,9 +420,12 @@ pub fn model_picker(
                             SegmentedControlOption::new(option.value.clone(), option.label.clone())
                         })
                         .collect();
-                    let mut control = SegmentedControlSpec::new(options)
-                        .with_size(effective_size)
-                        .with_density(spec.density);
+                    let mut control = SegmentedControlSpec::new(
+                        format!("{instance_id}:axis:{}", axis.key),
+                        options,
+                    )
+                    .with_size(effective_size)
+                    .with_density(spec.density);
                     control.value = current.as_text().map(|value| value.to_string());
                     control.is_disabled = spec.is_disabled || axis.is_disabled;
                     section.child(segmented_control(&control, theme, None))
@@ -509,13 +513,17 @@ mod tests {
     fn outside_interact_refusal_marks_the_open_surface() {
         // Web default `true` + open: no refusal marker anywhere in the tree.
         let spec = ModelPickerSpec::new().with_open(true);
-        let node = model_picker(&spec, &theme(), None);
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
+        let node = model_picker(&spec, &theme(), "test", None);
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_none());
 
         // Refusal: the open surface carries the inert activation marker a
         // host keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
-        let node = model_picker(&refusing, &theme(), None);
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
+        let node = model_picker(&refusing, &theme(), "test-refusing", None);
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_some());
     }
 }

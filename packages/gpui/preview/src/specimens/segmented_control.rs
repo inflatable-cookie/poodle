@@ -79,9 +79,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or("grid")
         .to_string();
 
-    let default_spec = SegmentedControlSpec::new(view_options.clone())
-        .with_default_value(&selected_value)
-        .with_instance_id("default");
+    let default_spec = SegmentedControlSpec::new("default", view_options.clone())
+        .with_default_value(&selected_value);
 
     // --- With disabled option: All / Active / Archived / Draft (disabled), defaultValue="all" ---
     let status_options: Vec<SegmentedControlOption> = vec![
@@ -91,38 +90,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         SegmentedControlOption::new("draft", "Draft").with_disabled(true),
     ];
 
-    let disabled_opt_spec = SegmentedControlSpec::new(status_options)
-        .with_default_value("all")
-        .with_instance_id("disabled-option");
+    let disabled_opt_spec =
+        SegmentedControlSpec::new("disabled-option", status_options).with_default_value("all");
 
     // --- Fully disabled: Grid / List / Table, defaultValue="list", isDisabled ---
-    let mut fully_disabled_spec = SegmentedControlSpec::new(view_options)
-        .with_default_value("list")
-        .with_instance_id("fully-disabled");
+    let mut fully_disabled_spec =
+        SegmentedControlSpec::new("fully-disabled", view_options).with_default_value("list");
     fully_disabled_spec.is_disabled = true;
 
     // --- Equal width: carries an aria label ("Time range") ---
-    let mut equal_width_spec = SegmentedControlSpec::new(vec![
-        SegmentedControlOption::new("day", "Day"),
-        SegmentedControlOption::new("week", "Week"),
-        SegmentedControlOption::new("month", "Month"),
-        SegmentedControlOption::new("year", "Year"),
-    ])
+    let mut equal_width_spec = SegmentedControlSpec::new(
+        "equal-width",
+        vec![
+            SegmentedControlOption::new("day", "Day"),
+            SegmentedControlOption::new("week", "Week"),
+            SegmentedControlOption::new("month", "Month"),
+            SegmentedControlOption::new("year", "Year"),
+        ],
+    )
     .with_default_value("week")
-    .with_equal_width(true)
-    .with_instance_id("equal-width");
+    .with_equal_width(true);
     equal_width_spec.aria_label = Some("Time range".to_string());
 
     // --- Content fit: per-option aria labels + group label "Timeline window" ---
-    let mut content_fit_spec = SegmentedControlSpec::new(vec![
-        SegmentedControlOption::new("1h", "1h").with_aria_label("Last 1 hour"),
-        SegmentedControlOption::new("6h", "6h").with_aria_label("Last 6 hours"),
-        SegmentedControlOption::new("24h", "24h").with_aria_label("Last 24 hours"),
-    ])
+    let mut content_fit_spec = SegmentedControlSpec::new(
+        "content-fit",
+        vec![
+            SegmentedControlOption::new("1h", "1h").with_aria_label("Last 1 hour"),
+            SegmentedControlOption::new("6h", "6h").with_aria_label("Last 6 hours"),
+            SegmentedControlOption::new("24h", "24h").with_aria_label("Last 24 hours"),
+        ],
+    )
     .with_default_value("24h")
     .with_size(poodle_specs::ControlSize::Xs)
-    .with_equal_width(false)
-    .with_instance_id("content-fit");
+    .with_equal_width(false);
     content_fit_spec.aria_label = Some("Timeline window".to_string());
 
     // --- Icon-only options: Effects / Instruments, live selection ---
@@ -133,18 +134,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .map(|s| s.as_str())
         .unwrap_or("effects")
         .to_string();
-    let mut icon_only_spec = SegmentedControlSpec::new(vec![
-        SegmentedControlOption::new("effects", "Effects")
-            .with_icon("audio-waveform")
-            .with_icon_only(true),
-        SegmentedControlOption::new("instruments", "Instruments")
-            .with_icon("piano")
-            .with_icon_only(true),
-    ])
+    let mut icon_only_spec = SegmentedControlSpec::new(
+        "icon-only",
+        vec![
+            SegmentedControlOption::new("effects", "Effects")
+                .with_icon("audio-waveform")
+                .with_icon_only(true),
+            SegmentedControlOption::new("instruments", "Instruments")
+                .with_icon("piano")
+                .with_icon_only(true),
+        ],
+    )
     .with_default_value(&icon_selected)
     .with_size(ControlSize::Sm)
-    .with_equal_width(false)
-    .with_instance_id("icon-only");
+    .with_equal_width(false);
     icon_only_spec.aria_label = Some("Plugin kind".to_string());
 
     let examples = div()
@@ -255,19 +258,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         SpecimenAxes::examples_only()
             .with_sizes(move |size, theme: &GpuiThemeProvider| {
                 node_segmented_control_static(
-                    SegmentedControlSpec::new(make_opts())
+                    SegmentedControlSpec::new(format!("size-{size:?}"), make_opts())
                         .with_default_value("grid")
-                        .with_size(size)
-                        .with_instance_id(format!("size-{size:?}")),
+                        .with_size(size),
                     theme,
                 )
             })
             .with_densities(move |density, theme: &GpuiThemeProvider| {
                 node_segmented_control_static(
-                    SegmentedControlSpec::new(make_opts())
+                    SegmentedControlSpec::new(format!("density-{density:?}"), make_opts())
                         .with_default_value("grid")
-                        .with_density(density)
-                        .with_instance_id(format!("density-{density:?}")),
+                        .with_density(density),
                     theme,
                 )
             }),
@@ -296,18 +297,20 @@ mod icon_only_tests {
                 value: value.to_string(),
             });
         });
-        let mut spec = SegmentedControlSpec::new(vec![
-            SegmentedControlOption::new("effects", "Effects")
-                .with_icon("audio-waveform")
-                .with_icon_only(true),
-            SegmentedControlOption::new("instruments", "Instruments")
-                .with_icon("piano")
-                .with_icon_only(true),
-        ])
+        let mut spec = SegmentedControlSpec::new(
+            "icon-only-test",
+            vec![
+                SegmentedControlOption::new("effects", "Effects")
+                    .with_icon("audio-waveform")
+                    .with_icon_only(true),
+                SegmentedControlOption::new("instruments", "Instruments")
+                    .with_icon("piano")
+                    .with_icon_only(true),
+            ],
+        )
         .with_default_value(selected)
         .with_size(ControlSize::Sm)
-        .with_equal_width(false)
-        .with_instance_id("icon-only");
+        .with_equal_width(false);
         spec.aria_label = Some("Plugin kind".to_string());
         segmented_control(&spec, theme, Some(on_change))
     }
