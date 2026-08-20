@@ -19,6 +19,12 @@ GPUI Examples on those pages dropped axis and showcase extras so they match.
 Tree gained a React flat-tree case and an explicit Disabled nodes group on
 every host. No component, contract, token, or public API change.
 
+The final review follow-up also makes the GPUI preview's application lockfile
+explicitly tracked. Fresh Cargo resolution stopped before the headless board
+after crates.io yanked every `arrayref ^0.3.6` candidate required through
+`tiny-skia`; the existing checksummed lock remains fetchable and keeps CI
+reproducible without changing the GPUI dependency or public surface.
+
 ## Change class
 
 - **Change class:** specimen curation
@@ -180,7 +186,9 @@ parity debt is recorded, not closed.
 - `packages/svelte/preview/src/specimens/{Dialog,FilterBuilder,ListCard,SplitView,Stepper,TimeAgo,Tree}Specimen.svelte`
 - `packages/react/preview/src/gallery/specimens/{Dialog,FilterBuilder,ListCard,SplitView,Stepper,TimeAgo,Tree}Specimen.tsx`
 - `packages/gpui/preview/src/specimens/{accordion,dialog,filter_builder_specimen,list_card,list_card_counter,media_preview_specimen,split_view_specimen,stepper,time_ago_specimen,tree}.rs`
+- `packages/gpui/preview/Cargo.lock`
 - `test/parity/g15-025-collections-navigation-tail-specimens.test.tsx`
+- `.gitignore`
 - this log
 
 Accordion, ListCardCounter, and MediaPreview web specimens were remeasured and
@@ -190,6 +198,9 @@ left in place.
 
 - focused `g15-025` parity regression: 66 passed
 - `effigy check:gpui`: passed (`poodle-gpui-preview` compiled)
+- clean-cache `cargo fetch --locked` for the GPUI preview: passed, including
+  the checksummed `arrayref 0.3.9` lock entry
+- locked headless regressions: 50 passed
 - `git diff --check origin/main...HEAD`: passed
 
 Headless only. No windowed, native-visual, conformance, Jetstream, or

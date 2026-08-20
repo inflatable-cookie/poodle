@@ -68,6 +68,8 @@ coverage/
 # Rust/GPUI specific
 **/target/
 Cargo.lock
+# The GPUI preview is an application and its CI graph must stay reproducible.
+!packages/gpui/preview/Cargo.lock
 **/*.rs.bk
 *.pdb
 
