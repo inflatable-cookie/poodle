@@ -1,26 +1,58 @@
 <script lang="ts">
   import { ResizeHandle } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+
+  const MIN_HORIZONTAL = 48;
+  const MAX_HORIZONTAL = 280;
+  const MIN_VERTICAL = 40;
+  const MAX_VERTICAL = 120;
+
+  let leftWidth = $state(120);
+  let topHeight = $state(80);
+
+  function clamp(value: number, min: number, max: number): number {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function applyHorizontalDelta(delta: number): void {
+    leftWidth = clamp(leftWidth + delta, MIN_HORIZONTAL, MAX_HORIZONTAL);
+  }
+
+  function applyVerticalDelta(delta: number): void {
+    topHeight = clamp(topHeight + delta, MIN_VERTICAL, MAX_VERTICAL);
+  }
 </script>
 
 <div class="poodle-specimen">
   <SpecimenGroup label="Horizontal split (vertical handle — drag left/right)">
     <div class="poodle-specimen__row">
-      <div class="poodle-specimen__pane">Left</div>
+      <div class="poodle-specimen__pane" style:flex="0 0 {leftWidth}px">Left</div>
       <div class="poodle-specimen__handle-wrapper poodle-specimen__handle-wrapper--horizontal">
-        <ResizeHandle orientation="horizontal" ariaLabel="Resize horizontal" />
+        <ResizeHandle
+          orientation="horizontal"
+          ariaLabel="Resize horizontal"
+          ariaValueNow={leftWidth}
+          onResizeMove={applyHorizontalDelta}
+          onResizeStep={applyHorizontalDelta}
+        />
       </div>
-      <div class="poodle-specimen__pane">Right</div>
+      <div class="poodle-specimen__pane poodle-specimen__pane--grow">Right</div>
     </div>
   </SpecimenGroup>
 
   <SpecimenGroup label="Vertical split (horizontal handle — drag up/down)">
     <div class="poodle-specimen__col">
-      <div class="poodle-specimen__pane">Top</div>
+      <div class="poodle-specimen__pane" style:flex="0 0 {topHeight}px">Top</div>
       <div class="poodle-specimen__handle-wrapper poodle-specimen__handle-wrapper--vertical">
-        <ResizeHandle orientation="vertical" ariaLabel="Resize vertical" />
+        <ResizeHandle
+          orientation="vertical"
+          ariaLabel="Resize vertical"
+          ariaValueNow={topHeight}
+          onResizeMove={applyVerticalDelta}
+          onResizeStep={applyVerticalDelta}
+        />
       </div>
-      <div class="poodle-specimen__pane">Bottom</div>
+      <div class="poodle-specimen__pane poodle-specimen__pane--grow">Bottom</div>
     </div>
   </SpecimenGroup>
 
@@ -78,6 +110,12 @@
     font-size: 0.8125rem;
     color: var(--poodle-color-text-secondary);
     background: color-mix(in srgb, var(--poodle-color-background-panel) 50%, transparent);
+  }
+
+  .poodle-specimen__pane--grow {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
   }
 
   .poodle-specimen__handle-wrapper--horizontal {

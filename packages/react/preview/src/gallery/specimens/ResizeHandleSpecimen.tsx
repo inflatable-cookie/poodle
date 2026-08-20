@@ -1,6 +1,12 @@
 import type { CSSProperties } from "react";
+import { useState } from "react";
 import { ResizeHandle } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
+
+const MIN_HORIZONTAL = 48;
+const MAX_HORIZONTAL = 280;
+const MIN_VERTICAL = 40;
+const MAX_VERTICAL = 120;
 
 const rowStyle: CSSProperties = {
   display: "flex",
@@ -30,29 +36,63 @@ const paneStyle: CSSProperties = {
   background: "color-mix(in srgb, var(--poodle-color-background-panel) 50%, transparent)",
 };
 
+const growPaneStyle: CSSProperties = {
+  ...paneStyle,
+  flex: 1,
+  minWidth: 0,
+  minHeight: 0,
+};
+
 const horizontalHandleWrapper: CSSProperties = { height: "100%" };
 const verticalHandleWrapper: CSSProperties = { width: "100%" };
 
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
 export function ResizeHandleSpecimen() {
+  const [leftWidth, setLeftWidth] = useState(120);
+  const [topHeight, setTopHeight] = useState(80);
+
+  function applyHorizontalDelta(delta: number): void {
+    setLeftWidth((current) => clamp(current + delta, MIN_HORIZONTAL, MAX_HORIZONTAL));
+  }
+
+  function applyVerticalDelta(delta: number): void {
+    setTopHeight((current) => clamp(current + delta, MIN_VERTICAL, MAX_VERTICAL));
+  }
+
   return (
     <div className="poodle-specimen">
       <SpecimenGroup label="Horizontal split (vertical handle — drag left/right)">
         <div style={rowStyle}>
-          <div style={paneStyle}>Left</div>
+          <div style={{ ...paneStyle, flex: `0 0 ${leftWidth}px` }}>Left</div>
           <div style={horizontalHandleWrapper}>
-            <ResizeHandle orientation="horizontal" ariaLabel="Resize horizontal" />
+            <ResizeHandle
+              orientation="horizontal"
+              ariaLabel="Resize horizontal"
+              ariaValueNow={leftWidth}
+              onResizeMove={applyHorizontalDelta}
+              onResizeStep={applyHorizontalDelta}
+            />
           </div>
-          <div style={paneStyle}>Right</div>
+          <div style={growPaneStyle}>Right</div>
         </div>
       </SpecimenGroup>
 
       <SpecimenGroup label="Vertical split (horizontal handle — drag up/down)">
         <div style={colStyle}>
-          <div style={paneStyle}>Top</div>
+          <div style={{ ...paneStyle, flex: `0 0 ${topHeight}px` }}>Top</div>
           <div style={verticalHandleWrapper}>
-            <ResizeHandle orientation="vertical" ariaLabel="Resize vertical" />
+            <ResizeHandle
+              orientation="vertical"
+              ariaLabel="Resize vertical"
+              ariaValueNow={topHeight}
+              onResizeMove={applyVerticalDelta}
+              onResizeStep={applyVerticalDelta}
+            />
           </div>
-          <div style={paneStyle}>Bottom</div>
+          <div style={growPaneStyle}>Bottom</div>
         </div>
       </SpecimenGroup>
 

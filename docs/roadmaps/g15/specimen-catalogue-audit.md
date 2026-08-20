@@ -529,17 +529,17 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 
 | Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `Box` | A | A | A | keep | no named defect |
-| `Grid` | A | A | A | keep | no named defect |
+| `Box` | A | A | A | keep | human verdict (`g15.030`): keep — default teaches containment and padding; fixed dimensions and overflow clip are distinct; Sv/Rc paired verbatim; Gp mirrors all four sections |
+| `Grid` | A | A | A | keep | human verdict (`g15.030`): keep — three column layouts teach arrangement, not a prop matrix; Sv/Rc paired; Gp mirrors all three sections |
 | `ListGrid` | C | C | A | curation-tranche | **Sv:** controls do nothing — Export and the row action are unwired · **Rc:** controls do nothing — Export and the row action are unwired |
-| `Region` | A | A | A | keep | no named defect |
-| `ResizeHandle` | A | A | A | keep | no named defect |
-| `ScrollShell` | A | A | A | keep | no named defect |
-| `Separator` | A | A | A | keep | no named defect |
-| `Spacer` | A | A | A | keep | no named defect |
+| `Region` | A | A | A | keep | human verdict (`g15.030`): keep — default placeholder, labeled stack, and nav/toolbar/content composition teach boundary role; Sv/Rc paired; Gp mirrors all three sections |
+| `ResizeHandle` | A | A | A | keep | human verdict (`g15.030`): keep after specimen repair — interactive splits were inert on all runtimes (captions over geometry only); Sv/Rc now apply drag/keyboard deltas to pane size; Gp wires `on_resize` through specimen state with a focused regression test |
+| `ScrollShell` | A | A | A | keep | human verdict (`g15.030`): keep — vertical and horizontal scroll with realistic overflow content; Sv/Rc paired; Gp mirrors both sections |
+| `Separator` | A | A | A | keep | human verdict (`g15.030`): keep — horizontal, vertical, and decorative separators with surrounding context; Sv/Rc paired; Gp mirrors all three sections |
+| `Spacer` | A | A | A | keep | human verdict (`g15.030`): keep — toolbar-style push-apart compositions teach flex spacing; Sv/Rc paired; Gp mirrors both sections |
 | `SplitView` | C | C | B | curation-tranche | **Sv:** Examples long — 7 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** Examples long — 7 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `Stack` | A | A | A | keep | no named defect |
-| `Surface` | A | A | A | keep | no named defect |
+| `Stack` | A | A | A | keep | human verdict (`g15.030`): keep — column, row, alignment, and wrap teach arrangement within the section budget; Sv/Rc paired; Gp mirrors all five sections |
+| `Surface` | A | A | A | keep | human verdict (`g15.030`): keep — panel/canvas/elevated/no-border teach tone and container role; Sv/Rc paired; Gp adds renderer-owned border/padding/role sections while preserving the tone evidence |
 
 ### Content & identity — Foundations (14)
 

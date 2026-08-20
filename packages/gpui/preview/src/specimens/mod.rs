@@ -761,7 +761,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             specimen_card("CollapseToggle", theme, collapse_toggle::render(state, cx))
         }
         "region" => specimen_card("Region", theme, region::render(theme)),
-        "resize-handle" => specimen_card("ResizeHandle", theme, resize_handle::render(theme)),
+        "resize-handle" => specimen_card("ResizeHandle", theme, resize_handle::render(state, cx)),
 
         // ── App Shell ───────────────────────────────────────────
         "app-header" => specimen_card("AppHeader", theme, app_header::render(state, cx)),
