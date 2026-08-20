@@ -86,30 +86,29 @@ export function FilterBuilderSpecimen() {
         <FilterBuilder fields={fields} density={density} value={densityValue} onChange={setDensityValue} />
       )}
     >
-      <SpecimenGroup label="Filter builder (controlled, live value, combinator on)">
+      <SpecimenGroup
+        label="Building filters"
+        description="A controlled builder. The JSON is the live value."
+      >
         <FilterBuilder fields={fields} value={value} onChange={setValue} showCombinator />
         <pre style={{ margin: 0, fontSize: "0.75rem", maxHeight: "12rem", overflow: "auto" }}>
           {JSON.stringify(value, null, 2)}
         </pre>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Match any (showCombinator)">
+      <SpecimenGroup
+        label="Match all and match any"
+        description="Match all requires every clause. Match any accepts the first match. Hide the toggle when the host is AND-only."
+      >
         <FilterBuilder fields={fields} value={anyValue} onChange={setAnyValue} showCombinator />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="AND-only (combinator toggle hidden — default)">
         <FilterBuilder fields={fields} value={anyValue} onChange={setAnyValue} />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Empty">
+      <SpecimenGroup
+        label="Empty and limited builders"
+        description="An empty builder waits for the first clause. Capping at two hides the add row."
+      >
         <FilterBuilder fields={fields} value={{ combinator: "and", clauses: [] }} />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Overflowing pills + repeated field (allowMultiple)">
-        <FilterBuilder fields={fields} value={overflowValue} onChange={setOverflowValue} />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Max 2 clauses">
         <FilterBuilder
           fields={fields}
           value={{
@@ -123,7 +122,14 @@ export function FilterBuilderSpecimen() {
         />
       </SpecimenGroup>
 
-      <SpecimenGroup label="Disabled">
+      <SpecimenGroup
+        label="Field types and overflow"
+        description="Enum, multi-enum, boolean, text, number, and range, including a repeated field and overflowing pills."
+      >
+        <FilterBuilder fields={fields} value={overflowValue} onChange={setOverflowValue} />
+      </SpecimenGroup>
+
+      <SpecimenGroup label="Disabled" description="Every control is inert.">
         <FilterBuilder
           fields={fields}
           value={{

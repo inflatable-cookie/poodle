@@ -56,17 +56,13 @@ export function StepperSpecimen() {
         />
       )}
     >
-      <SpecimenGroup label="Default">
+      <SpecimenGroup label="Guided workflow">
         <Stepper
           steps={wizardSteps}
           value={current}
           ariaLabel="DAW sync steps"
           onValueChange={setCurrent}
         />
-        <p>Current: <strong>{current}</strong></p>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Vertical">
         <div style={{ maxWidth: "20rem" }}>
           <Stepper
             steps={wizardSteps}
@@ -76,9 +72,10 @@ export function StepperSpecimen() {
             onValueChange={setCurrent}
           />
         </div>
+        <p>Current: <strong>{current}</strong></p>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Collapsed">
+      <SpecimenGroup label="Collapsed progress">
         <div style={{ maxWidth: "30rem" }}>
           <Stepper
             steps={doneSteps}
@@ -91,9 +88,6 @@ export function StepperSpecimen() {
           />
         </div>
         <p>Collapsed: <strong>{String(collapsed)}</strong></p>
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Collapsed statuses">
         <div style={{ maxWidth: "30rem" }}>
           <Stepper
             steps={mixedSteps}
@@ -106,11 +100,8 @@ export function StepperSpecimen() {
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Working">
+      <SpecimenGroup label="Running and failed states">
         <Stepper steps={workingSteps} defaultValue="extract" ariaLabel="Import progress" />
-      </SpecimenGroup>
-
-      <SpecimenGroup label="Failed">
         <Stepper steps={failedSteps} defaultValue="gate" ariaLabel="Pipeline steps" />
       </SpecimenGroup>
 

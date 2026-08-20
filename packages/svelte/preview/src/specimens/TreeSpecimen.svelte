@@ -218,7 +218,7 @@
       </div>
     </SpecimenGroup>
 
-    <SpecimenGroup label="Multi-select (Ctrl/Cmd + click, Shift + click)">
+    <SpecimenGroup label="Selection modes">
       <div class="poodle-specimen__frame">
         <Tree
           ariaLabel="Multi-select files"
@@ -227,29 +227,6 @@
           bind:expandedValues={multiExpanded}
         />
       </div>
-    </SpecimenGroup>
-
-    <SpecimenGroup label="Flat list (collapseTwistyWhenFlat)">
-      <!-- Left: the gutter reclaimed, because nothing can expand.
-           Right: one branch added, so the spacer returns and labels line up
-           with the branch label again. Same prop on both. -->
-      <Tree nodes={flatNodes} collapseTwistyWhenFlat ariaLabel="Flat list" />
-      <Tree nodes={nearlyFlatNodes} collapseTwistyWhenFlat ariaLabel="Same list with a branch" />
-    </SpecimenGroup>
-
-    <SpecimenGroup label="No guides, no icons">
-      <div class="poodle-specimen__frame">
-        <Tree
-          ariaLabel="Plain tree"
-          nodes={fileTree}
-          showGuides={false}
-          showIcons={false}
-          defaultExpandedValues={["src", "src/components"]}
-        />
-      </div>
-    </SpecimenGroup>
-
-    <SpecimenGroup label="Checkbox cascade ({checked.length} checked)">
       <div class="poodle-specimen__frame">
         <Tree
           ariaLabel="Checkbox tree"
@@ -261,7 +238,21 @@
       </div>
     </SpecimenGroup>
 
-    <SpecimenGroup label="Lazy / async children (expand a folder)">
+    <SpecimenGroup label="Presentation options">
+      <Tree nodes={flatNodes} collapseTwistyWhenFlat ariaLabel="Flat list" />
+      <Tree nodes={nearlyFlatNodes} collapseTwistyWhenFlat ariaLabel="Same list with a branch" />
+      <div class="poodle-specimen__frame">
+        <Tree
+          ariaLabel="Plain tree"
+          nodes={fileTree}
+          showGuides={false}
+          showIcons={false}
+          defaultExpandedValues={["src", "src/components"]}
+        />
+      </div>
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Loading and large data">
       <div class="poodle-specimen__frame">
         <Tree
           ariaLabel="Lazy tree"
@@ -271,9 +262,6 @@
           onLoadChildren={loadChildren}
         />
       </div>
-    </SpecimenGroup>
-
-    <SpecimenGroup label="Virtualized — 1260 rows, only the window renders">
       <div class="poodle-specimen__frame poodle-specimen__frame--virtual">
         <Tree
           ariaLabel="Virtual tree"
@@ -285,7 +273,7 @@
       </div>
     </SpecimenGroup>
 
-    <SpecimenGroup label="Rename (F2) · right-click menu · drag or Alt+↑/↓ to reorder">
+    <SpecimenGroup label="Editing and reordering">
       <div class="poodle-specimen__frame">
         <Tree
           ariaLabel="Rename tree"
@@ -305,6 +293,16 @@
         ariaLabel="Tree node actions"
         onAction={onMenuAction}
       />
+    </SpecimenGroup>
+
+    <SpecimenGroup label="Disabled nodes">
+      <div class="poodle-specimen__frame">
+        <Tree
+          ariaLabel="Disabled nodes"
+          nodes={fileTree}
+          defaultExpandedValues={["src", "src/components"]}
+        />
+      </div>
     </SpecimenGroup>
   </div>
 

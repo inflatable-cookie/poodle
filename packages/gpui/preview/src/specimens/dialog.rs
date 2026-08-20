@@ -113,60 +113,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .into_any_element()
     };
 
-    let button_row = |label: &'static str, button: AnyElement| {
+    let group = |title: &'static str, body: AnyElement| {
         div()
             .flex()
-            .flex_wrap()
-            .items_center()
-            .gap(px(12.0))
+            .flex_col()
+            .gap(px(8.0))
             .child(Eyebrow::from_spec(
-                EyebrowSpec::new().with_content(label),
+                EyebrowSpec::new().with_content(title),
                 theme,
             ))
-            .child(button)
+            .child(body)
     };
 
-    let mut root = div().flex().flex_col().gap(px(12.0));
-    for (label, id, key, text) in [
-        (
-            "Informational",
-            "dialog-shortcuts-trigger",
-            "dialog-shortcuts-open",
-            "View details",
-        ),
-        (
-            "Form",
-            "dialog-form-trigger",
-            "dialog-form-open",
-            "Create project",
-        ),
-        (
-            "Custom header",
-            "dialog-changelog-trigger",
-            "dialog-changelog-open",
-            "View changelog",
-        ),
-        (
-            "Custom footer",
-            "dialog-terms-trigger",
-            "dialog-terms-open",
-            "Terms & conditions",
-        ),
-        (
-            "Bare mode",
-            "dialog-bare-trigger",
-            "dialog-bare-open",
-            "Preview image",
-        ),
-        (
-            "Scrollable",
-            "dialog-scroll-trigger",
-            "dialog-scroll-open",
-            "View log",
-        ),
-    ] {
-        root = root.child(button_row(label, open_button(id, key, text)));
-    }
+    let trigger_row = |buttons: Vec<AnyElement>| {
+        buttons.into_iter().fold(
+            div().flex().flex_wrap().items_center().gap(px(8.0)),
+            |row, button| row.child(button),
+        )
+    };
 
     let width_buttons = [
         ("sm", "dialog-width-sm-trigger", "dialog-width-sm-open"),
@@ -184,23 +148,81 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         div().flex().flex_wrap().items_center().gap(px(8.0)),
         |row, (label, id, key)| row.child(open_button(id, key, label)),
     );
-    root = root.child(button_row(
-        "Width presets",
-        width_buttons.into_any_element(),
-    ));
 
-    root = root.child(button_row(
-        "Alert",
-        open_button("dialog-alert-trigger", "dialog-alert-open", "Delete item"),
-    ));
-    root = root.child(button_row(
-        "Non-dismissible",
-        open_button(
-            "dialog-persistent-trigger",
-            "dialog-persistent-open",
-            "Open persistent",
-        ),
-    ));
+    let mut root = div()
+        .flex()
+        .flex_col()
+        .gap(px(24.0))
+        .child(group(
+            "Basic and alert dialogs",
+            trigger_row(vec![
+                open_button(
+                    "dialog-shortcuts-trigger",
+                    "dialog-shortcuts-open",
+                    "View details",
+                ),
+                open_button("dialog-alert-trigger", "dialog-alert-open", "Delete item"),
+            ])
+            .into_any_element(),
+        ))
+        .child(group(
+            "Forms and nested controls",
+            trigger_row(vec![open_button(
+                "dialog-form-trigger",
+                "dialog-form-open",
+                "Create project",
+            )])
+            .into_any_element(),
+        ))
+        .child(group(
+            "Custom header and footer",
+            trigger_row(vec![
+                open_button(
+                    "dialog-changelog-trigger",
+                    "dialog-changelog-open",
+                    "View changelog",
+                ),
+                open_button(
+                    "dialog-terms-trigger",
+                    "dialog-terms-open",
+                    "Terms & conditions",
+                ),
+            ])
+            .into_any_element(),
+        ))
+        .child(group(
+            "Bare content",
+            trigger_row(vec![open_button(
+                "dialog-bare-trigger",
+                "dialog-bare-open",
+                "Preview image",
+            )])
+            .into_any_element(),
+        ))
+        .child(group(
+            "Scrolling and width presets",
+            div()
+                .flex()
+                .flex_wrap()
+                .items_center()
+                .gap(px(8.0))
+                .child(open_button(
+                    "dialog-scroll-trigger",
+                    "dialog-scroll-open",
+                    "View log",
+                ))
+                .child(width_buttons)
+                .into_any_element(),
+        ))
+        .child(group(
+            "Dismissal rules",
+            trigger_row(vec![open_button(
+                "dialog-persistent-trigger",
+                "dialog-persistent-open",
+                "Open persistent",
+            )])
+            .into_any_element(),
+        ));
 
     let mut root = div().flex().flex_col().gap(px(24.0)).child(root);
 

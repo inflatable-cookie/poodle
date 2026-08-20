@@ -7,6 +7,7 @@
   // stops being reactive — every flag here must be $state or its dialog
   // never opens.
   let basicOpen = $state(false);
+  let alertOpen = $state(false);
   let formOpen = $state(false);
   let contentOnlyOpen = $state(false);
   let customFooterOpen = $state(false);
@@ -19,41 +20,59 @@
 </script>
 
 <SpecimenLayout>
-  <SpecimenGroup label="Popover inside a dialog">
-    <Button variant="secondary" onClick={() => (overlayInDialogOpen = true)}>Open dialog</Button>
+  <SpecimenGroup
+    label="Basic and alert dialogs"
+    description="A titled dialog for reading, and Dialog's own alertdialog role for a destructive confirm. Both triggers stay live."
+  >
+    <div class="poodle-dialog-specimen__triggers">
+      <Button variant="secondary" onClick={() => (basicOpen = true)}>View details</Button>
+      <Button variant="secondary" tone="danger" onClick={() => (alertOpen = true)}>Delete item</Button>
+    </div>
   </SpecimenGroup>
 
-      <SpecimenGroup label="Informational">
-    <Button variant="secondary" onClick={() => (basicOpen = true)}>View details</Button>
+  <SpecimenGroup
+    label="Forms and nested controls"
+    description="A create-project form, and a nested popover that stays inside the dialog."
+  >
+    <div class="poodle-dialog-specimen__triggers">
+      <Button variant="secondary" onClick={() => (formOpen = true)}>Create project</Button>
+      <Button variant="secondary" onClick={() => (overlayInDialogOpen = true)}>Open dialog</Button>
+    </div>
   </SpecimenGroup>
 
-      <SpecimenGroup label="Form">
-    <Button variant="secondary" onClick={() => (formOpen = true)}>Create project</Button>
+  <SpecimenGroup
+    label="Custom header and footer"
+    description="Replace the built-in title, or replace the action row with a custom footer."
+  >
+    <div class="poodle-dialog-specimen__triggers">
+      <Button variant="secondary" onClick={() => (contentOnlyOpen = true)}>View changelog</Button>
+      <Button variant="secondary" onClick={() => (customFooterOpen = true)}>Terms &amp; conditions</Button>
+    </div>
   </SpecimenGroup>
 
-      <SpecimenGroup label="Custom header">
-    <Button variant="secondary" onClick={() => (contentOnlyOpen = true)}>View changelog</Button>
-  </SpecimenGroup>
-
-      <SpecimenGroup label="Custom footer">
-    <Button variant="secondary" onClick={() => (customFooterOpen = true)}>Terms &amp; conditions</Button>
-  </SpecimenGroup>
-
-      <SpecimenGroup label="Bare mode">
+  <SpecimenGroup
+    label="Bare content"
+    description="No padding or internal structure — the consumer owns the layout."
+  >
     <Button variant="secondary" onClick={() => (bareOpen = true)}>Preview image</Button>
   </SpecimenGroup>
 
-      <SpecimenGroup label="Scrollable">
-    <Button variant="secondary" onClick={() => (scrollableOpen = true)}>View log</Button>
-  </SpecimenGroup>
-
-      <SpecimenGroup label="Width presets">
-    {#each ["sm", "md", "lg", "xl"] as w}
+  <SpecimenGroup
+    label="Scrolling and width presets"
+    description="A long log that scrolls, plus the width presets."
+  >
+    <div class="poodle-dialog-specimen__triggers">
+      <Button variant="secondary" onClick={() => (scrollableOpen = true)}>View log</Button>
+      {#each ["sm", "md", "lg", "xl", "full"] as w}
         <Button variant="secondary" onClick={() => (widthOpenMap[w] = true)}>{w}</Button>
       {/each}
+    </div>
   </SpecimenGroup>
 
-      <SpecimenGroup label="Non-dismissible">
+  <SpecimenGroup
+    label="Dismissal rules"
+    description="Escape and backdrop can be turned off so only an explicit action closes."
+  >
     <Button variant="secondary" onClick={() => (wideOpen = true)}>Open persistent</Button>
   </SpecimenGroup>
 
@@ -72,6 +91,20 @@
     <div class="poodle-shortcut"><kbd>⌘ ⇧ P</kbd> <span>Quick actions</span></div>
     <div class="poodle-shortcut"><kbd>Esc</kbd> <span>Close dialog</span></div>
   </div>
+</Dialog>
+
+<Dialog
+  open={alertOpen}
+  role="alertdialog"
+  title="Delete item?"
+  description="This will permanently remove the item and all associated data."
+  onOpenChange={(open) => (alertOpen = open)}
+>
+  <p>This action cannot be undone.</p>
+  {#snippet actions()}
+    <Button variant="ghost" onClick={() => (alertOpen = false)}>Cancel</Button>
+    <Button tone="danger" onClick={() => (alertOpen = false)}>Delete</Button>
+  {/snippet}
 </Dialog>
 
 <Dialog
@@ -198,7 +231,7 @@
   {/snippet}
 </Dialog>
 
-{#each ["sm", "md", "lg", "xl"] as w}
+{#each ["sm", "md", "lg", "xl", "full"] as w}
   <Dialog
     open={widthOpenMap[w] ?? false}
     width={w as "sm" | "md" | "lg" | "xl"}
@@ -270,6 +303,12 @@
 </SpecimenLayout>
 
 <style>
+  .poodle-dialog-specimen__triggers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
   .poodle-shortcuts-list { display: flex; flex-direction: column; gap: 0.5rem; }
   .poodle-shortcut { display: flex; align-items: center; gap: 0.75rem; }
   .poodle-shortcut kbd {

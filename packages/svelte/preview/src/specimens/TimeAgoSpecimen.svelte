@@ -10,7 +10,7 @@
 </script>
 
 <div class="poodle-specimen">
-  <SpecimenGroup label="Recent timestamps">
+  <SpecimenGroup label="Recent and future timestamps">
     <div class="poodle-specimen__row">
       <span class="poodle-specimen__label">2 minutes ago:</span>
       <TimeAgo datetime={twoMinutesAgo} />
@@ -23,16 +23,13 @@
       <span class="poodle-specimen__label">2 days ago:</span>
       <TimeAgo datetime={twoDaysAgo} />
     </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Future timestamp">
     <div class="poodle-specimen__row">
       <span class="poodle-specimen__label">In 5 minutes:</span>
       <TimeAgo datetime={inFiveMinutes} />
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Future timestamp after surrounding copy">
+  <SpecimenGroup label="In running prose">
     <p class="poodle-specimen__inline-copy">
       Coverage ends
       <TimeAgo
@@ -41,9 +38,14 @@
         typography="inherit"
       />.
     </p>
+    <p class="poodle-specimen__inline-copy">
+      Activity finished
+      <TimeAgo datetime={twoMinutesAgo} typography="inherit" />
+      in running prose.
+    </p>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Long format">
+  <SpecimenGroup label="Long and static formats">
     <div class="poodle-specimen__row">
       <span class="poodle-specimen__label">2 minutes ago:</span>
       <TimeAgo datetime={twoMinutesAgo} short={false} />
@@ -52,21 +54,10 @@
       <span class="poodle-specimen__label">2 days ago:</span>
       <TimeAgo datetime={twoDaysAgo} short={false} />
     </div>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="Static (live updates off)">
     <TimeAgo datetime={twoMinutesAgo} live={false} />
   </SpecimenGroup>
 
-  <SpecimenGroup label="Inherited typography">
-    <p class="poodle-specimen__inline-copy">
-      Activity finished
-      <TimeAgo datetime={twoMinutesAgo} typography="inherit" />
-      in running prose.
-    </p>
-  </SpecimenGroup>
-
-  <SpecimenGroup label="From ISO string">
+  <SpecimenGroup label="ISO input">
     <TimeAgo datetime="2026-03-14T00:00:00Z" />
   </SpecimenGroup>
 </div>

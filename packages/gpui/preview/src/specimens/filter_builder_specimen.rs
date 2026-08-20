@@ -51,68 +51,50 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
+    let group = |title: &'static str, body: AnyElement| {
+        div()
+            .flex()
+            .flex_col()
+            .gap(px(8.0))
+            .child(Eyebrow::from_spec(
+                EyebrowSpec::new().with_content(title),
+                theme,
+            ))
+            .child(body)
+    };
+
     let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
-        .child(
+        .child(group(
+            "Building filters",
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Filter builder"),
-                    theme,
-                ))
-                .child(
-                    div()
-                        .flex()
-                        .flex_col()
-                        .gap(px(8.0))
-                        .child(FilterBuilder::from_spec(
-                            FilterBuilderSpec::new()
-                                .with_fields(demo_fields())
-                                .with_value(demo_value())
-                                .with_show_combinator(true)
-                                .with_open(true),
-                            theme,
-                        ))
-                        .child(
-                            div()
-                                .text_xs()
-                                .text_color(color_to_hsla(text_secondary))
-                                .child("3 active clauses, Match all"),
-                        ),
-                ),
-        )
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Adding a filter (draft editor)"),
-                    theme,
-                ))
                 .child(FilterBuilder::from_spec(
                     FilterBuilderSpec::new()
                         .with_fields(demo_fields())
                         .with_value(demo_value())
                         .with_show_combinator(true)
-                        .with_open(true)
-                        .with_draft(FilterDraft::adding(&demo_fields()[3])),
+                        .with_open(true),
                     theme,
-                )),
-        )
-        .child(
+                ))
+                .child(
+                    div()
+                        .text_xs()
+                        .text_color(color_to_hsla(text_secondary))
+                        .child("3 active clauses, Match all"),
+                )
+                .into_any_element(),
+        ))
+        .child(group(
+            "Match all and match any",
             div()
                 .flex()
                 .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Editing a clause (combinator hidden)"),
-                    theme,
-                ))
+                .gap(px(12.0))
                 .child(FilterBuilder::from_spec(
                     FilterBuilderSpec::new()
                         .with_fields(demo_fields())
@@ -121,15 +103,34 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_open(true)
                         .with_draft(FilterDraft::editing(&demo_value().clauses[0])),
                     theme,
-                )),
-        )
-        .child(
+                ))
+                .child(FilterBuilder::from_spec(
+                    FilterBuilderSpec::new()
+                        .with_fields(demo_fields())
+                        .with_value(FilterExpression {
+                            combinator: FilterCombinator::Or,
+                            clauses: demo_value().clauses,
+                        })
+                        .with_show_combinator(true)
+                        .with_open(true),
+                    theme,
+                ))
+                .into_any_element(),
+        ))
+        .child(group(
+            "Empty and limited builders",
             div()
                 .flex()
                 .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Disabled"),
+                .gap(px(12.0))
+                .child(FilterBuilder::from_spec(
+                    FilterBuilderSpec::new()
+                        .with_fields(demo_fields())
+                        .with_value(FilterExpression {
+                            combinator: FilterCombinator::And,
+                            clauses: vec![],
+                        })
+                        .with_open(true),
                     theme,
                 ))
                 .child(FilterBuilder::from_spec(
@@ -137,18 +138,59 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_fields(demo_fields())
                         .with_value(FilterExpression {
                             combinator: FilterCombinator::And,
-                            clauses: vec![FilterClause::new(
-                                "hidden-1",
-                                "hidden",
-                                "is",
-                                FilterOperand::Boolean(false),
-                            )],
+                            clauses: vec![
+                                FilterClause::new(
+                                    "hidden-1",
+                                    "hidden",
+                                    "is",
+                                    FilterOperand::Boolean(true),
+                                ),
+                                FilterClause::new(
+                                    "name-1",
+                                    "name",
+                                    "contains",
+                                    FilterOperand::Text("bus".into()),
+                                ),
+                            ],
                         })
-                        .with_disabled(true)
+                        .with_max_clauses(2)
                         .with_open(true),
                     theme,
-                )),
-        )
+                ))
+                .into_any_element(),
+        ))
+        .child(group(
+            "Field types and overflow",
+            FilterBuilder::from_spec(
+                FilterBuilderSpec::new()
+                    .with_fields(demo_fields())
+                    .with_value(demo_value())
+                    .with_open(true)
+                    .with_draft(FilterDraft::adding(&demo_fields()[3])),
+                theme,
+            )
+            .into_any_element(),
+        ))
+        .child(group(
+            "Disabled",
+            FilterBuilder::from_spec(
+                FilterBuilderSpec::new()
+                    .with_fields(demo_fields())
+                    .with_value(FilterExpression {
+                        combinator: FilterCombinator::And,
+                        clauses: vec![FilterClause::new(
+                            "hidden-1",
+                            "hidden",
+                            "is",
+                            FilterOperand::Boolean(false),
+                        )],
+                    })
+                    .with_disabled(true)
+                    .with_open(true),
+                theme,
+            )
+            .into_any_element(),
+        ))
         .into_any_element();
 
     specimen_layout(

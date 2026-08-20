@@ -3,7 +3,7 @@ import { useState, type CSSProperties } from "react";
 import { Button, Checkbox, Dialog, Field, Pill, Popover, Select, TextInput } from "@inflatable-cookie/poodle-react";
 import { SpecimenLayout } from "../SpecimenLayout";
 
-const WIDTHS = ["sm", "md", "lg", "xl"] as const;
+const WIDTHS = ["sm", "md", "lg", "xl", "full"] as const;
 type DialogWidth = (typeof WIDTHS)[number];
 
 const textSecondary = "var(--poodle-color-text-secondary)";
@@ -44,6 +44,7 @@ const logMessages = [
 
 export function DialogSpecimen() {
   const [basicOpen, setBasicOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [contentOnlyOpen, setContentOnlyOpen] = useState(false);
   const [customFooterOpen, setCustomFooterOpen] = useState(false);
@@ -94,60 +95,80 @@ export function DialogSpecimen() {
         </>
       )}
     >
-      <SpecimenGroup label="Popover inside a dialog">
-        <Button variant="secondary" onClick={() => setOverlayInDialogOpen(true)}>
-                      Open dialog
-                    </Button>
+      <SpecimenGroup
+        label="Basic and alert dialogs"
+        description="A titled dialog for reading, and Dialog's own alertdialog role for a destructive confirm. Both triggers stay live."
+      >
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
+          <Button variant="secondary" onClick={() => setBasicOpen(true)}>
+            View details
+          </Button>
+          <Button variant="secondary" tone="danger" onClick={() => setAlertOpen(true)}>
+            Delete item
+          </Button>
+        </div>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Informational">
-        <Button variant="secondary" onClick={() => setBasicOpen(true)}>
-                      View details
-                    </Button>
+      <SpecimenGroup
+        label="Forms and nested controls"
+        description="A create-project form, and a nested popover that stays inside the dialog."
+      >
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
+          <Button variant="secondary" onClick={() => setFormOpen(true)}>
+            Create project
+          </Button>
+          <Button variant="secondary" onClick={() => setOverlayInDialogOpen(true)}>
+            Open dialog
+          </Button>
+        </div>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Form">
-        <Button variant="secondary" onClick={() => setFormOpen(true)}>
-                      Create project
-                    </Button>
+      <SpecimenGroup
+        label="Custom header and footer"
+        description="Replace the built-in title, or replace the action row with a custom footer."
+      >
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
+          <Button variant="secondary" onClick={() => setContentOnlyOpen(true)}>
+            View changelog
+          </Button>
+          <Button variant="secondary" onClick={() => setCustomFooterOpen(true)}>
+            Terms &amp; conditions
+          </Button>
+        </div>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Custom header">
-        <Button variant="secondary" onClick={() => setContentOnlyOpen(true)}>
-                      View changelog
-                    </Button>
-      </SpecimenGroup>
-
-                <SpecimenGroup label="Custom footer">
-        <Button variant="secondary" onClick={() => setCustomFooterOpen(true)}>
-                      Terms &amp; conditions
-                    </Button>
-      </SpecimenGroup>
-
-                <SpecimenGroup label="Bare mode">
+      <SpecimenGroup
+        label="Bare content"
+        description="No padding or internal structure — the consumer owns the layout."
+      >
         <Button variant="secondary" onClick={() => setBareOpen(true)}>
-                      Preview image
-                    </Button>
+          Preview image
+        </Button>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Scrollable">
-        <Button variant="secondary" onClick={() => setScrollableOpen(true)}>
-                      View log
-                    </Button>
+      <SpecimenGroup
+        label="Scrolling and width presets"
+        description="A long log that scrolls, plus the width presets."
+      >
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
+          <Button variant="secondary" onClick={() => setScrollableOpen(true)}>
+            View log
+          </Button>
+          {WIDTHS.map((w) => (
+            <Button key={w} variant="secondary" onClick={() => setWidthOpen(w, true)}>
+              {w}
+            </Button>
+          ))}
+        </div>
       </SpecimenGroup>
 
-                <SpecimenGroup label="Width presets">
-        {WIDTHS.map((w) => (
-                      <Button key={w} variant="secondary" onClick={() => setWidthOpen(w, true)}>
-                        {w}
-                      </Button>
-                    ))}
-      </SpecimenGroup>
-
-                <SpecimenGroup label="Non-dismissible">
+      <SpecimenGroup
+        label="Dismissal rules"
+        description="Escape and backdrop can be turned off so only an explicit action closes."
+      >
         <Button variant="secondary" onClick={() => setWideOpen(true)}>
-                      Open persistent
-                    </Button>
+          Open persistent
+        </Button>
       </SpecimenGroup>
 
       {/* Dialogs (rendered outside the Surface, portaled to [data-theme]) */}
@@ -161,6 +182,26 @@ export function DialogSpecimen() {
             </div>
           ))}
         </div>
+      </Dialog>
+
+      <Dialog
+        open={alertOpen}
+        role="alertdialog"
+        title="Delete item?"
+        description="This will permanently remove the item and all associated data."
+        onOpenChange={setAlertOpen}
+        actions={
+          <>
+            <Button variant="ghost" onClick={() => setAlertOpen(false)}>
+              Cancel
+            </Button>
+            <Button tone="danger" onClick={() => setAlertOpen(false)}>
+              Delete
+            </Button>
+          </>
+        }
+      >
+        <p>This action cannot be undone.</p>
       </Dialog>
 
       <Dialog
