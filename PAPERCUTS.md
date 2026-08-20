@@ -7,6 +7,23 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-20 — gpui 0.2.2's `Frame::clear` never clears `debug_bounds`, so
+  `VisualTestContext::debug_bounds` accumulates selector entries for the life
+  of a window: a second page mounted in the same window still "finds" the
+  previous page's selectors, with stale bounds. Any probe that discovers
+  elements across routes needs a fresh window per route. Found by g15.026.
+
+- 2026-08-20 — The GPUI preview's bin test target did not compile at all:
+  `specimens/scene_specimen.rs`'s test module used `use super::*`, which
+  chains the parent's `use gpui::*` and resolves `#[test]` to gpui-macros
+  0.2.2's `test` proc macro — the known rustc-crashing one — producing a
+  SIGBUS inside `librustc_driver` on every `--test` build. No selector ran
+  that target (`regressions:native` uses `--test headless_regressions`), so
+  the breakage was invisible, and it hid three failing
+  `contract_usage_docs::tests` assertions whose expected contract events/slots
+  no longer match the docs. Found by g15.026; the glob fix landed with the
+  probe, the three stale assertions need an owner.
+
 - 2026-08-19 — `effigy bootstrap:deps` fails in a second worktree of this repo:
   `cargo fetch` for `packages/jetstream/preview` aborts with "package collision
   in the lockfile: packages poodle-layout v0.1.0 (<other worktree>) and
