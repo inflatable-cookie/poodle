@@ -197,6 +197,23 @@ fn framed(theme: &GpuiThemeProvider, content: impl IntoElement) -> Div {
         .child(content)
 }
 
+fn framed_scroll(theme: &GpuiThemeProvider, content: impl IntoElement) -> Div {
+    div()
+        .w(px(288.0))
+        .h(px(320.0))
+        .border_1()
+        .border_color(color_to_hsla(theme.resolve_color("color.border.subtle")))
+        .rounded(px(6.0))
+        .overflow_hidden()
+        .child(
+            div()
+                .id("tree-large-scroll")
+                .size_full()
+                .overflow_y_scroll()
+                .child(content),
+        )
+}
+
 fn labelled(theme: &GpuiThemeProvider, label: &str, content: impl IntoElement) -> Div {
     div()
         .flex()
@@ -419,7 +436,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     ),
                 ),
-                framed(
+                framed_scroll(
                     theme,
                     Tree::from_spec(
                         TreeSpec::new(large_nodes())

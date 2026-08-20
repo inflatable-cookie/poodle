@@ -65,8 +65,9 @@ six named teaching groups.
 
 Svelte and React captions are verbatim identical on every page. GPUI uses the
 same ordered captions. Tree GPUI Loading and large data stacks a lazy branch
-and a 24×6 expanded tree. Native Tree has no virtualized window; the large
-set is the non-windowed large-data posture.
+and a 24×6 expanded tree in a 320px scroll frame. Native Tree has no
+virtualized window; that bounded scroller is the non-windowed large-data
+posture.
 
 ## Final ordered captions
 
@@ -113,11 +114,14 @@ and large data; Editing and reordering; Disabled nodes
   value readout stays in **Building filters**.
 - **Dialog GPUI forms.** **Forms and nested controls** now has Create project
   (Field/TextInput, Select, Checkbox) and Open dialog (Settings with a Select
-  nested overlay). Native Popover is not a Dialog Node child; Select is the
-  host-truthful nested overlay.
+  nested overlay seeded `.with_open(true)`). Native Popover is not a Dialog
+  Node child; Select is the host-truthful nested overlay. The shared wrapper
+  has no `on_toggle`; opening is specimen-seeded, not live.
 - **Tree GPUI loading.** **Loading and large data** keeps the lazy loading
-  row and adds a 24×6 expanded tree. Native Tree has no virtual window; that
-  large set is the non-windowed large-data posture.
+  row and adds a 24×6 expanded tree in a dedicated 320px `framed_scroll`
+  viewport (`overflow_y_scroll`). Ordinary small fixtures keep `framed()`.
+  Native Tree has no virtual window; the bounded scroller is the
+  non-windowed large-data posture.
 - **Stepper GPUI host gap (out of scope).** Guided workflow and Re-run paint
   selection and re-run controls, but `packages/gpui/preview/src/node_compat.rs`
   only wires `on_collapsed_change`. `StepperHandlers.on_change` and
@@ -149,7 +153,8 @@ and large data; Editing and reordering; Disabled nodes
   **Selection modes**. Flat-tree + no-guides/no-icons share **Presentation
   options**. React gained the missing flat-tree (`collapseTwistyWhenFlat`).
   Lazy + virtualized share **Loading and large data**. GPUI keeps the lazy
-  row and adds a 24×6 expanded tree instead of a virtual window.
+  row and adds a 24×6 expanded tree in a 320px scroll frame instead of a
+  virtual window.
   Rename/reorder stay in **Editing and reordering**. `node_modules`
   `disabled` moved into its own **Disabled nodes** group.
 - **Debris.** Dialog Svelte width loop now casts `"full"`. Unused GPUI imports
@@ -183,12 +188,9 @@ left in place.
 
 ## Validation
 
-- focused `g15-025` parity regression: 66 passed (two source-structure
-  assertions added for FilterBuilder/Dialog/Tree GPUI teaching)
-- `effigy check:svelte`: 0 errors
+- focused `g15-025` parity regression: 66 passed
 - `effigy check:gpui`: passed (`poodle-gpui-preview` compiled)
-- `effigy docs:check`: passed
-- `git diff --check`: passed
+- `git diff --check origin/main...HEAD`: passed
 
 Headless only. No windowed, native-visual, conformance, Jetstream, or
 release selectors. `effigy test:parity` was not re-run in full; the focused

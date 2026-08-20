@@ -341,10 +341,17 @@ describe("g15.025 collections, navigation, and long-tail specimens", () => {
     expect(dialog).toMatch(/Select::from_spec/);
     expect(dialog).toMatch(/Checkbox::from_spec/);
     expect(dialog).toMatch(/dialog-overlay-open/);
+    expect(dialog).toMatch(
+      /with_placeholder\("Choose a model"\)\s*\.with_open\(true\)/,
+    );
 
     const tree = readFileSync(join(GPUI_SPECIMENS, "tree.rs"), "utf8");
     expect(tree).toMatch(/fn large_nodes/);
     expect(tree).toMatch(/with_aria_label\("Large tree"\)/);
     expect(tree).toMatch(/with_loading_values/);
+    expect(tree).toMatch(/fn framed_scroll/);
+    expect(tree).toMatch(/\.h\(px\(320\.0\)\)/);
+    expect(tree).toMatch(/\.overflow_y_scroll\(\)/);
+    expect(tree).toMatch(/framed_scroll\(\s*theme,/);
   });
 });

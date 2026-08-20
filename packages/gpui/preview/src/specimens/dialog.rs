@@ -353,7 +353,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             ChoiceOption::new("opus-5-medium", "Opus 5 · Medium"),
                             ChoiceOption::new("opus-5-high", "Opus 5 · High"),
                         ])
-                        .with_placeholder("Choose a model"),
+                        .with_placeholder("Choose a model")
+                        .with_open(true),
                         theme,
                     )
                     .with_id("dialog-overlay-model")
