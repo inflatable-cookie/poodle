@@ -125,75 +125,27 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         }),
                 ),
         )
-        // --- Partial (3 of 6) ---
+        // --- 4-digit masked ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Partial (3 of 6)"),
+                    EyebrowSpec::new().with_content("4-digit masked"),
                     theme,
                 ))
-                .child(CodeInput::from_spec(
-                    CodeInputSpec::new()
-                        .with_value("123")
-                        .with_aria_label("Partial code"),
-                    theme,
-                )),
-        )
-        // --- Complete ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Complete"),
-                    theme,
-                ))
-                .child(CodeInput::from_spec(
-                    CodeInputSpec::new()
-                        .with_value("123456")
-                        .with_aria_label("Complete code"),
-                    theme,
-                )),
-        )
-        // --- Numbers only (default) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Numbers only"),
-                    theme,
-                ))
-                .child(CodeInput::from_spec(
-                    CodeInputSpec::new()
-                        .with_value("042")
-                        .with_numbers_only(true)
-                        .with_aria_label("Numeric code"),
-                    theme,
-                )),
-        )
-        // --- Alphanumeric ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Alphanumeric"),
-                    theme,
-                ))
-                .child(CodeInput::from_spec(
-                    CodeInputSpec::new()
-                        .with_default_value("AB12")
-                        .with_numbers_only(false)
-                        .with_autocomplete("off")
-                        .with_aria_label("Recovery code"),
-                    theme,
+                .child(live_code!(
+                    CodeInput::from_spec(
+                        CodeInputSpec::new()
+                            .with_length(4)
+                            .with_value(&pin_value)
+                            .with_selection(caret("code-input-pin").0, caret("code-input-pin").1)
+                            .with_mask(true)
+                            .with_aria_label("PIN"),
+                        theme,
+                    ),
+                    "code-input-pin"
                 )),
         )
         // --- Grouped key (explicit partition + separator, alphanumeric) ---
@@ -228,27 +180,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(format!("Entered: {}", key_value)),
                 ),
         )
-        // --- 4-digit masked ---
+        // --- Alphanumeric ---
         .child(
             div()
                 .flex()
                 .flex_col()
                 .gap(px(8.0))
                 .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("4-digit masked"),
+                    EyebrowSpec::new().with_content("Alphanumeric"),
                     theme,
                 ))
-                .child(live_code!(
-                    CodeInput::from_spec(
-                        CodeInputSpec::new()
-                            .with_length(4)
-                            .with_value(&pin_value)
-                            .with_selection(caret("code-input-pin").0, caret("code-input-pin").1)
-                            .with_mask(true)
-                            .with_aria_label("PIN"),
-                        theme,
-                    ),
-                    "code-input-pin"
+                .child(CodeInput::from_spec(
+                    CodeInputSpec::new()
+                        .with_default_value("AB12")
+                        .with_numbers_only(false)
+                        .with_autocomplete("off")
+                        .with_aria_label("Recovery code"),
+                    theme,
                 )),
         )
         // --- With error ---

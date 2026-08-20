@@ -64,6 +64,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .get("toggle-group-four")
         .cloned()
         .unwrap_or_else(|| "left".to_string());
+    let multi_value = state
+        .specimens
+        .text
+        .get("toggle-group-multiple")
+        .cloned()
+        .unwrap_or_else(|| "design,docs".to_string());
 
     // --- Single selection: Grid / List / Board ---
     let single_options = vec![
@@ -147,41 +153,58 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Multiple selection"),
                     theme,
                 ))
-                .child(node_toggle_group_static(
-                    ToggleGroupSpec::new(multi_options)
-                        .with_aria_label("Filter tags")
-                        .with_default_value(vec!["design".to_string(), "docs".to_string()])
-                        .with_selection_mode(ToggleGroupSelectionMode::Multiple),
-                    state,
-                ))
+                .child({
+                    // Live multi-select: the node tier only attaches
+                    // `on_activate` when a handler is present, so the specimen
+                    // toggles membership itself and stores the joined set.
+                    let current: Vec<String> = multi_value
+                        .split(',')
+                        .filter(|v| !v.is_empty())
+                        .map(str::to_string)
+                        .collect();
+                    let events = state.node_events.clone();
+                    let on_change: Arc<dyn Fn(&str) + Send + Sync> =
+                        Arc::new(move |value: &str| {
+                            let mut next = current.clone();
+                            if let Some(index) = next.iter().position(|v| v == value) {
+                                next.remove(index);
+                            } else {
+                                next.push(value.to_string());
+                            }
+                            events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                                key: "toggle-group-multiple".to_string(),
+                                value: next.join(","),
+                            });
+                        });
+                    let node = toggle_group(
+                        &ToggleGroupSpec::new(multi_options)
+                            .with_aria_label("Filter tags")
+                            .with_value(
+                                multi_value
+                                    .split(',')
+                                    .filter(|v| !v.is_empty())
+                                    .map(str::to_string)
+                                    .collect(),
+                            )
+                            .with_selection_mode(ToggleGroupSelectionMode::Multiple),
+                        &state.theme,
+                        Some(on_change),
+                    );
+                    poodle_gpui_node_backend::to_gpui(&node)
+                })
                 .child(
                     div()
                         .text_sm()
                         .text_color(color_to_hsla(text_secondary))
-                        .child("Selected: design, docs"),
+                        .child(format!(
+                            "Selected: {}",
+                            if multi_value.is_empty() {
+                                "none".to_string()
+                            } else {
+                                multi_value.replace(',', ", ")
+                            }
+                        )),
                 ),
-        )
-        // --- Allow deactivation (single mode clears on re-select) ---
-        .child(
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(8.0))
-                .child(Eyebrow::from_spec(
-                    EyebrowSpec::new().with_content("Allow deactivation"),
-                    theme,
-                ))
-                .child(node_toggle_group_static(
-                    ToggleGroupSpec::new(vec![
-                        ToggleGroupOption::new("grid", "Grid"),
-                        ToggleGroupOption::new("list", "List"),
-                        ToggleGroupOption::new("board", "Board"),
-                    ])
-                    .with_aria_label("Optional view mode")
-                    .with_default_value(vec!["grid".to_string()])
-                    .with_allow_deactivation(true),
-                    state,
-                )),
         )
         // --- Disabled group ---
         .child(

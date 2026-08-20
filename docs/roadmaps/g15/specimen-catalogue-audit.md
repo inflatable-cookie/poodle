@@ -453,36 +453,36 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
 | `Button` | A | A | A | pilot-fix | no named defect |
-| `Checkbox` | A | A | A | keep | no named defect |
-| `CollapseToggle` | A | A | A | keep | no named defect |
+| `Checkbox` | A | A | A | keep | human verdict (`g15.028`): keep — live default trio teaches normal use; Sv/Rc paired verbatim; Gp mirrors all three sections live |
+| `CollapseToggle` | A | A | A | keep | human verdict (`g15.028`): keep — four live directions with state readout plus Disabled; all runtimes agree |
 | `ConfirmAction` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `IconButton` | C | C | A | curation-tranche | **Sv:** controls do nothing — specimen wires no handler on any IconButton; takes `density`, but the page shows no Densities evidence · **Rc:** controls do nothing — specimen wires no handler on any IconButton; takes `density`, but the page shows no Densities evidence |
-| `Radio` | A | A | A | keep | no named defect |
-| `RadioGroup` | A | A | A | keep | no named defect |
-| `SegmentedControl` | A | A | A | keep | no named defect |
+| `Radio` | A | A | A | keep | human verdict (`g15.028`): keep — live three-option group plus States; Gp matches (custom-color hex is fixture data, not copy) |
+| `RadioGroup` | A | A | A | keep | human verdict (`g15.028`): keep — vertical/horizontal/disabled/custom color all live; Gp adds a bounded disabled-option visual |
+| `SegmentedControl` | A | A | A | keep | human verdict (`g15.028`): keep — live default, disabled option, content fit, icon-only; Gp omits icon-only (node-tier options carry no icon) and adds equal width, both bounded |
 | `SplitButton` | C | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 7 captioned examples |
-| `Switch` | A | A | A | keep | no named defect |
-| `ToggleGroup` | A | A | A | keep | no named defect |
+| `Switch` | A | A | A | keep | human verdict (`g15.028`): keep — live trio, States, custom colors, dual labels/tones; Gp mirrors all four sections |
+| `ToggleGroup` | A | A | A | keep | human verdict (`g15.028`): keep after Gp specimen repair — "Multiple selection" was inert (node tier wires `on_activate` only when a handler exists) with a hardcoded readout; wired live with a real readout, and the inert static "Allow deactivation" section removed. Sv/Rc unchanged |
 | `TriStateSwitch` | B | A | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 
 ### Text & value entry — Foundations (15)
 
 | Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `CodeInput` | A | A | A | keep | no named defect |
-| `ColorPicker` | A | A | A | keep | no named defect |
+| `CodeInput` | A | A | A | keep | human verdict (`g15.028`): keep after Gp specimen repair — static "Partial (3 of 6)", "Complete", and "Numbers only" fill-state sections duplicated what the live default demonstrates; removed and reordered to the web section order (9 → 6 sections). Sv/Rc unchanged |
+| `ColorPicker` | A | A | A | keep | human verdict (`g15.028`): keep — basic/swatches/alpha/default-open/preview-only/disabled; Gp mirrors all six with live open and value state |
 | `DragNumberField` | C | C | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples overloaded — 10 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** size and density matrices sit in the page body, not in panes |
-| `EditableLabel` | A | A | A | keep | no named defect |
+| `EditableLabel` | A | A | A | keep | human verdict (`g15.028`): keep after Gp specimen repair — 10 sections exceeded the outline budget; removed the "Display mode" and "Flush variant (editing)" duplicates, leaving the web section set plus the renderer-owned live editing example. Sv/Rc unchanged |
 | `EmbedInput` | B | B | B | curation-tranche | **Sv:** overflows its pane by 582px at a 768px viewport · **Rc:** overflows its pane by 582px at a 768px viewport · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `FileUpload` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `NumberInput` | A | A | A | keep | no named defect |
+| `NumberInput` | A | A | A | keep | human verdict (`g15.028`): keep — numeric, steppers, string-form binding, disabled, invalid; string-form binding is web-only, Gp adds prefix/suffix/precision within the section budget |
 | `RangeSlider` | A | A | A | pilot-fix | no named defect |
-| `Rating` | A | A | A | keep | no named defect |
+| `Rating` | A | A | A | keep | human verdict (`g15.028`): keep — live default, 10-star, half-step, clearable, disabled; Gp mirrors and adds readonly |
 | `RefSelect` | B | B | A | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 captioned examples |
 | `Select` | C | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `Slider` | A | A | A | keep | no named defect |
+| `Slider` | A | A | A | keep | human verdict (`g15.028`): keep — live volume/step/disabled/embedded with paired axis panes; Gp adds two static fill-evidence sections within budget |
 | `TextInput` | C | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 7 captioned examples |
-| `ThemeSelect` | A | A | A | keep | no named defect |
+| `ThemeSelect` | A | A | A | keep | human verdict (`g15.028`): keep — standalone live selector, compact trigger, columns, disabled; Gp teaches interactive open/select plus Disabled (compact trigger and columns stay web-shown) |
 | `TokenInput` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |
 
 ### Date & time — Foundations (10)
