@@ -1,9 +1,9 @@
 # g15.030 — Review Screen-Clear Foundation Layout
 
-Status: **planned** — orchestrator review required before dispatch
+Status: **blocked** — dispatch after the routed `g15.039` component repair
 Parent: `027-screen-clear-human-review.md` (method, acceptance, stop
 conditions — this card does not restate them)
-Depends on: `g15.026` (live native evidence)
+Depends on: `g15.026` (live native evidence), `g15.039`
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`
 
 ## Pages This Card Owns (9)

@@ -1,6 +1,7 @@
 # g15.029 — Review Screen-Clear Foundation Date and Time
 
-Status: **ready** — `g15.038` closed the routed stop condition; dispatch next
+Status: **complete** — PR #53 merged as `b2e8114b`; operator approved the
+changed paired-web DurationInput specimens
 Parent: `027-screen-clear-human-review.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Depends on: `g15.026` (live native evidence)
@@ -33,3 +34,11 @@ review of every changed Svelte and React page before completion.
 
 - the seven named specimen pages across Svelte, React, and GPUI
 - their audit rows and one August batch log
+
+## Closeout
+
+Four pages stayed unchanged. Calendar and DurationInput received bounded
+specimen repairs. DateTimeZonePicker exposed a real paired-web nested-layer
+defect: pointer selection in its portalled TimeZoneSelect dismisses the outer
+picker without committing. That blocker is routed to `g15.039` before
+`g15.030` resumes the serial review.

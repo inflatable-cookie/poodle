@@ -71,9 +71,9 @@ worked in the live web previews.
 - React: `#components/duration-input`
 - GPUI (headless): `calendar`, `duration-input`, `date-time-zone-picker`
 
-Operator sign-off is pending on the changed Svelte and React DurationInput
-routes. This card is not claimed complete. The DateTimeZonePicker blocker is
-not implemented here; the orchestrator routes the follow-up.
+Operator sign-off is complete on the changed Svelte and React DurationInput
+routes. The DateTimeZonePicker blocker is not implemented here; the
+orchestrator routed it to `g15.039` before the next review child.
 
 ## Review round 1 (orchestrator, PR #53)
 
@@ -102,3 +102,13 @@ source moved.
 - `effigy catalogue:check` — pass (TS and Rust catalogue targets verified)
 - `effigy docs:check` — pass
 - `git diff --check origin/main...HEAD` — clean
+
+## Operator Review and Merge
+
+- Operator reviewed the changed Svelte and React DurationInput pages live and
+  signed them off on 2026-08-20.
+- Orchestrator independently accepted pushed SHA `afc63f33` after the audit
+  recount and D/D grade correction; GitHub `active-cohort` passed.
+- PR #53 merged as `b2e8114b`.
+- `g15.039` owns the DateTimeZonePicker nested-layer pointer commit defect;
+  `g15.030` remains blocked until that repair lands.

@@ -6,19 +6,24 @@ Updated: 2026-08-20
 
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.028`, and `g15.034`–`g15.038` complete; `g15.011` partial
-    with ready `g15.029` and four later review children;
+    `g15.019`–`g15.029`, and `g15.034`–`g15.038` complete; `g15.011` partial
+    with four later review children; routed `g15.039` ready;
     `g15.013` final
   - Posture: release-first v0.2.0 baseline
-  - Range: `001` to `038`
+  - Range: `001` to `039`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
     release baseline, not a parity architecture
   - Evidence: the v0.2.0 denominator is every public Svelte component
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch ready `g15.029`, the foundation date/time screen-clear
-    review. PR #52 completed `g15.038`, closing the SegmentedControl option
+  - Next: dispatch ready `g15.039`, the paired-web DateTimeZonePicker
+    nested-layer pointer repair returned by `g15.029`. PR #53 completed the
+    seven-page foundation date/time review with operator sign-off on the
+    changed DurationInput specimens; Calendar and DurationInput received
+    bounded repairs, while DateTimeZonePicker correctly stopped on a dead
+    primary pointer workflow. PR #52 completed `g15.038`, closing the
+    SegmentedControl option
     surface and stable-focus stop condition returned by `g15.028`.
     PR #50 completes `g15.026`: 174/174 canonical GPUI routes construct and
     all 126 Sizes / 127 Densities panes open through headless pointer input.

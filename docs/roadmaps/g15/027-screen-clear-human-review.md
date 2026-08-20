@@ -1,7 +1,8 @@
 # g15.027 — Screen-Clear Human Specimen Review
 
-Status: **active parent — not dispatchable**; `g15.028` complete, five review
-children remain after the routed `g15.038` stop-condition repair
+Status: **active parent — not dispatchable**; `g15.028` and `g15.029`
+complete, four review children remain; `g15.039` owns the newly routed
+DateTimeZonePicker stop condition before `g15.030`
 Role: human-teaching completion lane for `g15.011`
 Consumes: `g15.011` partial screening baseline
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`,
