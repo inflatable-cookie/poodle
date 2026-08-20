@@ -4,11 +4,11 @@ Status: **partial** — mechanical screening baseline plus live measurement on
 all three runtimes. Human teaching judgment has been applied to the three
 pilots and to 21 screen-clear pages (`g15.028`, `g15.029`); 35 screen-clear
 pages and the remaining defect-led rows still await it.
-Date: 2026-08-20 (revision 8 — `g15.029` review-round totals and
-DateTimeZonePicker D correction; revision 7 recorded the date/time family
-review; revision 6 closed SegmentedControl native option parity via
-`g15.038`; revision 5 measured the GPUI column live via the `g15.026` probe;
-first pass 2026-08-17)
+Date: 2026-08-20 (revision 9 — `g15.039` closed the DateTimeZonePicker nested-layer
+pointer blocker; revision 8 was the `g15.029` review-round totals and D
+correction; revision 7 recorded the date/time family review; revision 6 closed
+SegmentedControl native option parity via `g15.038`; revision 5 measured the
+GPUI column live via the `g15.026` probe; first pass 2026-08-17)
 Card: `docs/roadmaps/g15/011-specimen-catalogue-audit.md`
 Handoff: `docs/handoffs/20260817-214451-g15-011-specimen-catalogue-audit.md`
 Governing refs: `release-baseline-roster.md`, `specimen-plan-outline.md`,
@@ -128,33 +128,31 @@ Dispositions used in the rows: `keep`, `pilot-fix`, `curation-tranche`,
 ## Totals
 
 Mechanical recount of the 175 inventory rows at this revision, after the
-`g15.029` DateTimeZonePicker D correction. These numbers are the rows, not a
-pre-pilot or pre-curation baseline.
+`g15.039` DateTimeZonePicker nested-layer repair. These numbers are the rows,
+not a pre-pilot or pre-curation baseline.
 
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Svelte (live) | 88 | 33 | 44 | 10 | — |
-| React (live) | 101 | 26 | 47 | 1 | — |
+| Svelte (live) | 89 | 33 | 44 | 9 | — |
+| React (live) | 102 | 26 | 47 | 0 | — |
 | GPUI (headless render + structural) | 103 | 65 | 6 | 0 | 1 |
-| **Worst of the three** | **65** | **48** | **52** | **10** | — |
+| **Worst of the three** | **66** | **48** | **52** | **9** | — |
 
 | Disposition | Count |
 | --- | ---: |
-| `keep` | 55 |
+| `keep` | 56 |
 | `pilot-fix` | 3 |
 | `curation-tranche` | 108 |
 | `curation-complete` | 6 |
 | `verified-no-op` | 2 |
-| `contract/runtime-blocker` | 1 |
+| `contract/runtime-blocker` | 0 |
 
 175 of 175 pages were measured live in both web runtimes. The `g15.028`
 contract/runtime blocker on GPUI `SegmentedControl` is closed by `g15.038`.
-`g15.029` records a new blocker on web `DateTimeZonePicker`: pointer
-selection of the nested `TimeZoneSelect` is dismissed as an outside click
-because the Select popover is portalled outside the picker's
-`layerContains(root, surface)` check. Keyboard Enter commits. That is a
-dead primary pointer workflow, graded D on both web runtimes, and a
-component defect rather than specimen work.
+The `g15.029` web `DateTimeZonePicker` nested-layer pointer blocker is closed
+by `g15.039`: a portalled timezone option now commits through the composite
+dismiss stack, and a genuine outside press still dismisses the whole picker
+in one gesture. Sv/Rc return to A; disposition is `keep`.
 
 `MeterSurface` is the single `n/a` on GPUI — web-only by fixed decision
 (spec 068), with no native counterpart. It is still graded on the two runtimes
@@ -365,6 +363,10 @@ Revision 8 reconciles the published totals with a mechanical recount of the
 rows already used, and records `DateTimeZonePicker` as D on both web runtimes
 for a dead primary pointer workflow.
 
+Revision 9 closes that blocker via `g15.039`. DateTimeZonePicker returns to
+A/A/A `keep` after the nested TimeZoneSelect portal joined the composite
+dismiss stack. Totals are recounted from the rows.
+
 ## Pilot Findings
 
 The three pilots were chosen to be representative, and they were. Their rows in
@@ -517,7 +519,7 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | `DateRangePicker` | A | A | A | keep | human verdict (`g15.029`): keep — live default range gesture with readout, pre-filled Mar 1–14, disabled; Gp adds a static Open (range calendar) so the composed surface is visible without interaction |
 | `DateTimePicker` | A | A | A | keep | human verdict (`g15.029`): keep — default, pre-filled Mar 14 2:30 PM, disabled; trigger shows the committed date/time; Gp adds Open (calendar + time) |
 | `DateTimeRangePicker` | A | A | A | keep | human verdict (`g15.029`): keep — default, pre-filled Mar 10 9:00–Mar 14 5:00, disabled; start/end time fields visible when open; Gp adds Open (range calendar + start/end time) |
-| `DateTimeZonePicker` | D | D | A | contract/runtime-blocker | human verdict (`g15.029`): **Sv/Rc:** nested `TimeZoneSelect` popover sits outside the picker's `layerContains(root, surface)` outside-click check (`DateTimeZonePicker.svelte` / React equivalent), so a pointer choice dismisses the picker without committing — dead primary pointer workflow, not a small presentation defect; keyboard Enter works. Not repaired here. **Gp:** empty default now matches web; Open section still shows calendar + time + zone. Follow-up owns the dismiss-layer fix |
+| `DateTimeZonePicker` | A | A | A | keep | human verdict (`g15.029`) plus `g15.039` closeout: **Sv/Rc:** nested `TimeZoneSelect` option press now commits through the shared dismiss stack without closing the picker; a genuine outside press still dismisses the whole composite in one gesture, including while the timezone list is open. Specimen sections unchanged (default, pre-filled, disabled). **Gp:** empty default matches web; Open section still shows calendar + time + zone |
 | `DurationInput` | A | A | A | keep | human verdict (`g15.029`): keep after specimen repair — removed the interaction-only "Last change" group (Total already teaches live binding); Gp dropped Empty/zero and Invalid extras, aligned captions/fixtures to the web three-section set, and made the Total readout follow stored state instead of a hardcoded 01:30:00 |
 | `TimeAgo` | B | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 captioned examples |
 | `TimeInput` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |

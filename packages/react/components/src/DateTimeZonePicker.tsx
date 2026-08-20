@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { formatZonedDateTimeLabel, monthAnchorIso, normalizeZonedDateTimeValue, todayIsoDate, layerContains } from "@inflatable-cookie/poodle-core";
+import { formatZonedDateTimeLabel, monthAnchorIso, normalizeZonedDateTimeValue, todayIsoDate, layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/date-time-zone-picker.css";
 
@@ -87,25 +87,15 @@ export function DateTimeZonePicker({
 
   useEffect(() => {
     if (!isOpen) return;
-    function handlePointerDown(event: MouseEvent): void {
-      // The surface is portalled out of the root, so both count as inside.
-      if (!layerContains(event.target as Node, rootElement, surfaceRef.current)) {
-        setOpenRef.current(false);
-      }
-    }
-    function handleKeydown(event: KeyboardEvent): void {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setOpenRef.current(false);
-      }
-    }
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeydown);
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeydown);
-    };
-  }, [isOpen]);
+    // Nested TimeZoneSelect portals its list. Stack ancestry owns that child
+    // layer; do not widen `contains` into the child's portal.
+    return registerDismissLayer({
+      contains: (target) => layerContains(target as Node, rootElement, surfaceRef.current),
+      dismissOnOutsideInteract: true,
+      onDismiss: () => setOpenRef.current(false),
+      hostElement: rootElement,
+    });
+  }, [isOpen, rootElement]);
 
   function commitValue(nextValue: ZonedDateTimeValue): void {
     const normalized = normalizeZonedDateTimeValue(nextValue);

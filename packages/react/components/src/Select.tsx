@@ -293,6 +293,9 @@ export function Select({
       contains: (target) => layerContains(target as Node, rootElement, listboxRef.current),
       dismissOnOutsideInteract,
       onDismiss: () => setOpenState(false),
+      // Host-aware so a parent composite that registers around this Select
+      // (child effects can run first) still becomes the parent layer.
+      hostElement: rootElement,
     });
   }, [open, rootElement, dismissOnOutsideInteract]);
 

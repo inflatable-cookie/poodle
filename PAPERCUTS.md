@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-20 — `@testing-library/*/fireEvent.click` dispatches only `click`,
+  not `mousedown`. Overlay dismiss handlers listen on document `mousedown`,
+  so a click-only option test can pass the old broken DateTimeZonePicker
+  implementation. Pointer-commit regressions must dispatch `mousedown` on
+  the real target, then `click`. Found on g15.039 review.
+
 - 2026-08-20 — `rustfmt --edition 2021 packages/render/src/lib.rs` walks every
   `mod` and reformats the whole `poodle-render` crate; the same happens for
   `packages/gpui/preview/src/main.rs`. Format only the files you edited, never

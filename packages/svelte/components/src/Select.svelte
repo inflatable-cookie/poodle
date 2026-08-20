@@ -343,6 +343,9 @@
       contains: (target) => layerContains(target, rootElement, listboxElement),
       dismissOnOutsideInteract,
       onDismiss: () => setOpen(false),
+      // Host-aware so a parent composite that registers around this Select
+      // (child effects can run first) still becomes the parent layer.
+      hostElement: rootElement,
     });
   });
 </script>
