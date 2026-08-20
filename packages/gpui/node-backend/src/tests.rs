@@ -74,6 +74,14 @@ fn sample_property_clamps_outside_keyframe_range_and_skips_absent_properties() {
 }
 
 #[test]
+fn paint_icon_name_falls_back_to_a_real_asset() {
+    assert_eq!(paint_icon_name("audio-waveform"), "audio-waveform");
+    assert_eq!(paint_icon_name("piano"), "piano");
+    assert_eq!(paint_icon_name("spinner"), "loader-circle");
+    assert_eq!(paint_icon_name("not-a-real-icon"), "circle-x");
+}
+
+#[test]
 fn tooltip_forces_element_state() {
     let mut node = Node::button("ok");
     assert!(

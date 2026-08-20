@@ -11,7 +11,7 @@ use std::sync::Arc;
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, NodeRole, ShadowLayer, StylePatch,
+    MainAxisAlignment, Node, NodeKey, NodeRole, NodeToggled, ShadowLayer, StylePatch,
 };
 use poodle_specs::{IconSize, SegmentedControlSpec};
 
@@ -100,6 +100,8 @@ pub fn segmented_control(
         .resolve_space(IconSize::from(resolve_supporting_visual_size(effective_size)).size_token());
     // Contract §8 label gap between icon and visible text.
     let icon_text_gap = rem_to_px(0.375);
+    let roving = roving_values(spec);
+    let tab_stop = tab_stop_value(spec, &roving);
 
     for option in &spec.options {
         let is_selected = selected == Some(option.value.as_str());
@@ -187,7 +189,7 @@ pub fn segmented_control(
         }
 
         if let Some(icon_name) = option.icon.as_deref() {
-            let mut glyph = Node::icon(icon_name, icon_size);
+            let mut glyph = Node::icon(crate::icon::resolve_icon_name(icon_name), icon_size);
             glyph.style.descriptor.text_color = Some(text_color);
             seg = seg.child(glyph);
             if !icon_only {
@@ -201,17 +203,38 @@ pub fn segmented_control(
             }
         }
 
-        // Old tier: every segment stays focusable. A disabled option is
-        // simply never wired — and, unlike Svelte, never dimmed; the parity
-        // gate targets the old tier, so no per-option opacity is baked in.
-        seg.interaction.focusable = true;
+        seg.id = Some(segment_id(&option.value));
+        seg.a11y.role = Some(NodeRole::RadioButton);
+        seg.a11y.selected = Some(is_selected);
+        seg.a11y.toggled = Some(if is_selected {
+            NodeToggled::True
+        } else {
+            NodeToggled::False
+        });
 
-        // Re-picking the current segment still fires: the host asked to be
-        // told about clicks, and swallowing one would hide a "confirm".
-        if let (true, Some(handler)) = (is_enabled, &on_change) {
-            let handler = Arc::clone(handler);
-            let value = option.value.clone();
-            seg.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+        if is_enabled {
+            seg.interaction.focusable = true;
+            seg.a11y.tab_index = Some(if tab_stop == Some(option.value.as_str()) {
+                0
+            } else {
+                -1
+            });
+            // Re-picking the current segment still fires: the host asked to
+            // be told about clicks, and swallowing one would hide a "confirm".
+            if let Some(handler) = &on_change {
+                let handler = Arc::clone(handler);
+                let value = option.value.clone();
+                seg.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+            }
+            seg.interaction.on_key = roving_key_handler(&option.value, &roving, on_change.clone());
+        } else {
+            seg.interaction.disabled = true;
+            seg.interaction.focusable = false;
+            seg.a11y.tab_index = Some(-1);
+            if option.is_disabled && !spec.is_disabled {
+                seg.style.descriptor.opacity = disabled_opacity;
+                seg.style.descriptor.cursor = CursorHint::NotAllowed;
+            }
         }
 
         if let Some(name) = option.accessible_name_override() {
@@ -236,9 +259,62 @@ pub fn segmented_control(
     el
 }
 
+fn segment_id(value: &str) -> String {
+    format!("segmented:{value}")
+}
+
+fn roving_values(spec: &SegmentedControlSpec) -> Vec<String> {
+    spec.options
+        .iter()
+        .filter(|option| !spec.is_disabled && !option.is_disabled)
+        .map(|option| option.value.clone())
+        .collect()
+}
+
+fn tab_stop_value<'a>(spec: &'a SegmentedControlSpec, roving: &'a [String]) -> Option<&'a str> {
+    let selected = spec.current_value();
+    if selected.is_some_and(|value| roving.iter().any(|candidate| candidate == value)) {
+        selected
+    } else {
+        roving.first().map(String::as_str)
+    }
+}
+
+fn roving_key_handler(
+    value: &str,
+    roving: &[String],
+    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+) -> Option<Arc<dyn Fn(NodeKey, poodle_node::NodeModifiers) -> Option<String> + Send + Sync>> {
+    let index = roving.iter().position(|candidate| candidate == value)?;
+    let ids = roving.to_vec();
+    Some(Arc::new(move |key, _modifiers| {
+        if ids.is_empty() {
+            return None;
+        }
+        let last = ids.len() - 1;
+        let next = match key {
+            NodeKey::ArrowRight | NodeKey::ArrowDown => {
+                Some(if index == last { 0 } else { index + 1 })
+            }
+            NodeKey::ArrowLeft | NodeKey::ArrowUp => {
+                Some(if index == 0 { last } else { index - 1 })
+            }
+            NodeKey::Home => Some(0),
+            NodeKey::End => Some(last),
+            _ => None,
+        }?;
+        let target = ids[next].clone();
+        if let Some(handler) = &on_change {
+            handler(&target);
+        }
+        Some(segment_id(&target))
+    }))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_node::NodeModifiers;
     use poodle_specs::{ControlDensity, ControlSize, SegmentedControlOption};
 
     /// The real token resolver over the ECLIPSE theme. Pure — no backend.
@@ -409,28 +485,30 @@ mod tests {
     }
 
     #[test]
-    fn disabled_option_is_never_wired_but_not_dimmed() {
+    fn disabled_option_is_out_of_traversal_and_dimmed() {
+        let theme = theme();
+        let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
         let mut options = view_options();
         options.push(SegmentedControlOption::new("draft", "Draft").with_disabled(true));
         let handlers: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(|_| {});
         let spec = SegmentedControlSpec::new(options).with_default_value("grid");
-        let node = segmented_control(&spec, &theme(), Some(handlers));
+        let node = segmented_control(&spec, &theme, Some(handlers));
 
         let draft = find_segment(&node, "Draft");
         assert!(draft.interaction.on_activate.is_none());
-        assert!(!draft.interaction.disabled);
-        assert!(draft.interaction.focusable);
-        assert_ne!(draft.style.descriptor.cursor, CursorHint::Pointer);
+        assert!(draft.interaction.disabled);
+        assert!(!draft.interaction.focusable);
+        assert_eq!(draft.a11y.tab_index, Some(-1));
+        assert_eq!(draft.a11y.role, Some(NodeRole::RadioButton));
+        assert_eq!(draft.style.descriptor.cursor, CursorHint::NotAllowed);
         assert!(draft.style.hover.is_none());
-        // The old GPUI tier does not dim a disabled option (Svelte does);
-        // the parity gate targets the old tier.
-        assert_eq!(draft.style.descriptor.opacity, 1.0);
+        assert_eq!(draft.style.descriptor.opacity, disabled_opacity);
 
-        // Siblings stay wired.
-        assert!(find_segment(&node, "List")
-            .interaction
-            .on_activate
-            .is_some());
+        // Siblings stay wired and in the roving set.
+        let list = find_segment(&node, "List");
+        assert!(list.interaction.on_activate.is_some());
+        assert_eq!(list.a11y.tab_index, Some(-1));
+        assert!(list.interaction.focusable);
     }
 
     #[test]
@@ -449,6 +527,9 @@ mod tests {
         for label in ["Grid", "List", "Table"] {
             let seg = find_segment(&node, label);
             assert!(seg.interaction.on_activate.is_none(), "{label}");
+            assert!(seg.interaction.disabled, "{label}");
+            assert!(!seg.interaction.focusable, "{label}");
+            assert_eq!(seg.a11y.tab_index, Some(-1), "{label}");
             assert!(seg.style.hover.is_none(), "{label}");
             assert_ne!(seg.style.descriptor.cursor, CursorHint::Pointer, "{label}");
         }
@@ -490,6 +571,73 @@ mod tests {
         let node = segmented_control(&spec_with_label, &theme(), None);
         assert_eq!(node.a11y.role, Some(NodeRole::RadioGroup));
         assert_eq!(node.a11y.label.as_deref(), Some("View mode"));
+        let grid = find_segment(&node, "Grid");
+        assert_eq!(grid.a11y.role, Some(NodeRole::RadioButton));
+        assert_eq!(grid.a11y.selected, Some(false));
+        assert_eq!(grid.a11y.toggled, Some(NodeToggled::False));
+        assert_eq!(grid.a11y.tab_index, Some(0));
+        let list = find_segment(&node, "List");
+        assert_eq!(list.a11y.tab_index, Some(-1));
+        assert!(list.interaction.focusable);
+    }
+
+    #[test]
+    fn selected_option_is_the_roving_tab_stop() {
+        let spec = SegmentedControlSpec::new(view_options()).with_default_value("list");
+        let node = segmented_control(&spec, &theme(), None);
+        assert_eq!(find_segment(&node, "Grid").a11y.tab_index, Some(-1));
+        let list = find_segment(&node, "List");
+        assert_eq!(list.a11y.tab_index, Some(0));
+        assert_eq!(list.a11y.selected, Some(true));
+        assert_eq!(list.a11y.toggled, Some(NodeToggled::True));
+        assert_eq!(find_segment(&node, "Table").a11y.tab_index, Some(-1));
+    }
+
+    #[test]
+    fn arrow_keys_move_selection_through_enabled_options_and_skip_disabled() {
+        use std::sync::Mutex;
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&seen);
+        let on_change: Arc<dyn Fn(&str) + Send + Sync> =
+            Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()));
+        let spec = SegmentedControlSpec::new(vec![
+            SegmentedControlOption::new("grid", "Grid"),
+            SegmentedControlOption::new("list", "List").with_disabled(true),
+            SegmentedControlOption::new("table", "Table"),
+        ])
+        .with_default_value("grid");
+        let node = segmented_control(&spec, &theme(), Some(on_change));
+        let keys = find_segment(&node, "Grid")
+            .interaction
+            .on_key
+            .as_ref()
+            .expect("roving handler");
+        let modifiers = NodeModifiers::default();
+        assert_eq!(
+            keys(NodeKey::ArrowRight, modifiers),
+            Some(segment_id("table"))
+        );
+        assert_eq!(seen.lock().unwrap().as_slice(), ["table"]);
+        assert!(find_segment(&node, "List").interaction.on_key.is_none());
+    }
+
+    #[test]
+    fn unknown_option_icon_falls_back_to_a_paint_asset() {
+        let spec = SegmentedControlSpec::new(vec![SegmentedControlOption::new("grid", "Grid")
+            .with_icon("not-a-real-icon")
+            .with_icon_only(true)]);
+        let node = segmented_control(&spec, &theme(), None);
+        let fallback = find_icon_segment(&node, "circle-x");
+        assert!(matches!(
+            &fallback
+                .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "circle-x"))
+                .expect("fallback icon")
+                .kind,
+            poodle_node::NodeKind::Icon { name, .. } if name == "circle-x"
+        ));
+        assert!(std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("assets/icons/circle-x.svg")
+            .is_file());
     }
 
     fn plugin_kind_options() -> Vec<SegmentedControlOption> {
@@ -534,6 +682,18 @@ mod tests {
         let node = segmented_control(&spec, &theme(), None);
 
         let effects = find_icon_segment(&node, "audio-waveform");
+        assert!(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("assets/icons/audio-waveform.svg")
+                .is_file(),
+            "the Effects icon must have a native paint asset"
+        );
+        assert!(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("assets/icons/piano.svg")
+                .is_file(),
+            "the Instruments icon must have a native paint asset"
+        );
         assert!(
             !node.has_text("Effects"),
             "icon-only must not expose the required label as visible text"

@@ -86,12 +86,20 @@ Headless only. No windowed, native-visual, Jetstream, or release selector ran.
 - `effigy qa`
 - `git diff --check` clean on the working tree
 
+## Review round 1 (PR #52)
+
+Two HIGH findings, both addressed on this branch:
+
+1. Segments now emit `RadioButton` role, selected/toggled state, roving
+   `tab_index`, and `interaction.disabled`. Arrow/Home/End move through
+   enabled options and skip disabled ones. The old "disabled option stays
+   focusable and undimmed" test now asserts the contract.
+2. `audio-waveform` and `piano` are in the default Lucide set. Shared
+   resolve maps aliases and unknown names to `circle-x`; GPUI paints the
+   resolved asset. Evidence checks the SVG file exists, not just the node.
+
 ## Unresolved
 
-- `audio-waveform` and `piano` are the contract/web specimen names and are
-  not in Poodle's default Lucide set. Web already falls back; native emits
-  the same names through `Node::icon`. Expanding the icon catalogue is out
-  of this card.
 - Jetstream remains program-deferred. Its specimen constructors were
   migrated to the dedicated type so the crate compiles; no Jetstream
   icon-only teaching page was added.

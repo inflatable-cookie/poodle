@@ -6,6 +6,7 @@ import { arrowLeft } from "./icons/arrow-left";
 import { arrowRight } from "./icons/arrow-right";
 import { arrowUp } from "./icons/arrow-up";
 import { arrowUpDown } from "./icons/arrow-up-down";
+import { audioWaveform } from "./icons/audio-waveform";
 import { bell } from "./icons/bell";
 import { bold } from "./icons/bold";
 import { calendar } from "./icons/calendar";
@@ -76,6 +77,7 @@ import { packageIcon } from "./icons/package";
 import { pause } from "./icons/pause";
 import { pauseCircle } from "./icons/pause-circle";
 import { pencil } from "./icons/pencil";
+import { piano } from "./icons/piano";
 import { play } from "./icons/play";
 import { plus } from "./icons/plus";
 import { quote } from "./icons/quote";
@@ -113,6 +115,7 @@ export {
   arrowRight,
   arrowUp,
   arrowUpDown,
+  audioWaveform,
   bell,
   bold,
   calendar,
@@ -183,6 +186,7 @@ export {
   pause,
   pauseCircle,
   pencil,
+  piano,
   play,
   plus,
   quote,
@@ -221,6 +225,7 @@ export const defaultLucideIconSet: IconSet = {
   "arrow-right": arrowRight,
   "arrow-up": arrowUp,
   "arrow-up-down": arrowUpDown,
+  "audio-waveform": audioWaveform,
   "bell": bell,
   "bold": bold,
   "calendar": calendar,
@@ -291,6 +296,7 @@ export const defaultLucideIconSet: IconSet = {
   "pause": pause,
   "pause-circle": pauseCircle,
   "pencil": pencil,
+  "piano": piano,
   "play": play,
   "plus": plus,
   "quote": quote,
