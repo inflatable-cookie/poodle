@@ -4,6 +4,7 @@ Date: 2026-08-20
 Card: `docs/roadmaps/g15/030-review-foundation-layout.md`
 Handoff: `docs/handoffs/20260820-215106-g15-030-review-foundation-layout.md`
 Parent: `docs/roadmaps/g15/027-screen-clear-human-review.md`
+PR: #55
 
 ## Outcome
 
