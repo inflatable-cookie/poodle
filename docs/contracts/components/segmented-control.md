@@ -265,6 +265,12 @@ Native radio inputs provide keyboard and focus behavior.
 - Equal-width segment layout should use GPUI's flex or grid equivalent
 - Option tooltips project through the reusable `Node.tooltip` field onto GPUI's
   native `.tooltip()`, not the Tooltip overlay component
+- Interactive instances always receive unique focus identities. An explicit
+  `SegmentedControlSpec.instance_id` is the native analogue of the web `name`
+  prop. When it is omitted, shared render allocates a unique per-frame serial
+  (`segmented:auto-N:option:<value>`). Hosts that rebuild the node tree each
+  frame must call `poodle_render::reset_segmented_control_instance_scopes()`
+  before rendering, the same way they reset GPUI generated element ids.
 
 ## 10a. Jetstream Notes
 

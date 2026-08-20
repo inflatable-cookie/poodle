@@ -113,6 +113,18 @@ Two HIGH findings, both addressed on this branch:
    names such as `company-logo` stay intact. No generic native fallback.
 3. Change-class now records the additive `poodle-core` default-icon exports.
 
+## Review round 3 (PR #52)
+
+Unique focus identity is no longer opt-in. Shared render always emits
+`segmented:{scope}:option:{value}`. An explicit `instance_id` is the native
+analogue of the web `name` prop; when it is omitted, render allocates a
+per-frame serial (`auto-N`). ColorPicker, FilterBuilder, and ModelPicker no
+longer stamp type/key literals onto the inner control. The GPUI preview
+resets the serial each frame next to `reset_element_ids`. Evidence: two
+default same-valued controls, two open ColorPickers, two FilterBuilders with
+the same boolean field, and two ModelPickers with the same select axis all
+get distinct runtime ids, and none fall back to `segmented:<value>`.
+
 ## Unresolved
 
 - Jetstream remains program-deferred. Its specimen constructors were

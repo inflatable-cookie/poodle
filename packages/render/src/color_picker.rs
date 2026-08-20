@@ -367,8 +367,7 @@ fn build_controls_panel(
     ])
     .with_default_value(mode_value)
     .with_size(spec.size)
-    .with_density(spec.density)
-    .with_instance_id("color-picker-mode");
+    .with_density(spec.density);
     // The old GPUI SegmentedControl uses `.flex_1()` for equal-width mode
     // buttons. The shared renderer's generic Grow sizing preserves its
     // content-sized behavior for the standalone specimen, so apply the

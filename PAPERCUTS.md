@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-20 — `rustfmt --edition 2021 packages/render/src/lib.rs` walks every
+  `mod` and reformats the whole `poodle-render` crate; the same happens for
+  `packages/gpui/preview/src/main.rs`. Format only the files you edited, never
+  a crate-root `lib.rs`/`main.rs`, or restore the unrelated modules before
+  commit. Found again on g15.038 review round 3.
+
 - 2026-08-20 — gpui 0.2.2's `Frame::clear` never clears `debug_bounds`, so
   `VisualTestContext::debug_bounds` accumulates selector entries for the life
   of a window: a second page mounted in the same window still "finds" the

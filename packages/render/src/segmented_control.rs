@@ -6,6 +6,7 @@
 //! (`packages/gpui/components/src/primitives/segmented_control.rs`) for the
 //! g12.019 node-backend migration.
 
+use std::cell::Cell;
 use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
@@ -21,11 +22,37 @@ use crate::presentation::{
     resolve_supporting_visual_size,
 };
 
+thread_local! {
+    static NEXT_INSTANCE_SCOPE: Cell<u64> = const { Cell::new(0) };
+}
+
+/// Restart auto-assigned instance scopes. Hosts that rebuild the node tree
+/// every frame must call this once per frame before rendering, the same way
+/// GPUI hosts call `poodle_gpui_node_backend::reset_element_ids`.
+pub fn reset_segmented_control_instance_scopes() {
+    NEXT_INSTANCE_SCOPE.with(|counter| counter.set(0));
+}
+
+fn allocate_instance_scope(explicit: Option<&str>) -> String {
+    match explicit {
+        Some(scope) => scope.to_string(),
+        None => {
+            let serial = NEXT_INSTANCE_SCOPE.with(|counter| {
+                let serial = counter.get();
+                counter.set(serial.saturating_add(1));
+                serial
+            });
+            format!("auto-{serial}")
+        }
+    }
+}
+
 pub fn segmented_control(
     spec: &SegmentedControlSpec,
     theme: &dyn ThemeProvider,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
+    let instance_scope = allocate_instance_scope(spec.instance_id.as_deref());
     let effective_size = resolve_semantic_size(spec.size, spec.size_role);
     // Fixed per-size/per-density tables, transcribed from the old GPUI tier
     // (g12.019): unlike select/button, this component's old tier is
@@ -217,7 +244,7 @@ pub fn segmented_control(
         }
 
         seg.id = Some(segment_id(&option.value));
-        seg.runtime_id = Some(segment_focus_id(spec.instance_id.as_deref(), &option.value));
+        seg.runtime_id = Some(segment_focus_id(&instance_scope, &option.value));
         seg.a11y.role = Some(NodeRole::RadioButton);
         seg.a11y.selected = Some(is_selected);
         seg.a11y.toggled = Some(if is_selected {
@@ -243,7 +270,7 @@ pub fn segmented_control(
             seg.interaction.on_key = roving_key_handler(
                 &option.value,
                 &roving,
-                spec.instance_id.clone(),
+                instance_scope.clone(),
                 on_change.clone(),
             );
         } else {
@@ -282,11 +309,8 @@ fn segment_id(value: &str) -> String {
     format!("segmented:{value}")
 }
 
-fn segment_focus_id(instance_id: Option<&str>, value: &str) -> String {
-    match instance_id {
-        Some(scope) => format!("segmented:{scope}:option:{value}"),
-        None => segment_id(value),
-    }
+fn segment_focus_id(instance_scope: &str, value: &str) -> String {
+    format!("segmented:{instance_scope}:option:{value}")
 }
 
 fn roving_values(spec: &SegmentedControlSpec) -> Vec<String> {
@@ -309,7 +333,7 @@ fn tab_stop_value<'a>(spec: &'a SegmentedControlSpec, roving: &'a [String]) -> O
 fn roving_key_handler(
     value: &str,
     roving: &[String],
-    instance_id: Option<String>,
+    instance_scope: String,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Option<Arc<dyn Fn(NodeKey, poodle_node::NodeModifiers) -> Option<String> + Send + Sync>> {
     let index = roving.iter().position(|candidate| candidate == value)?;
@@ -334,7 +358,7 @@ fn roving_key_handler(
         if let Some(handler) = &on_change {
             handler(&target);
         }
-        Some(segment_focus_id(instance_id.as_deref(), &target))
+        Some(segment_focus_id(&instance_scope, &target))
     }))
 }
 
@@ -643,7 +667,7 @@ mod tests {
         let modifiers = NodeModifiers::default();
         assert_eq!(
             keys(NodeKey::ArrowRight, modifiers),
-            Some(segment_focus_id(Some("view"), "table"))
+            Some(segment_focus_id("view", "table"))
         );
         assert_eq!(seen.lock().unwrap().as_slice(), ["table"]);
         assert!(find_segment(&node, "List").interaction.on_key.is_none());
@@ -706,6 +730,169 @@ mod tests {
         assert_eq!(seen.lock().unwrap().as_slice(), ["list", "list"]);
         assert!(a_grid.style.focus.is_some());
         assert!(b_grid.style.focus.is_some());
+    }
+
+    #[test]
+    fn default_controls_with_the_same_values_get_distinct_focus_ids() {
+        reset_segmented_control_instance_scopes();
+        let spec = SegmentedControlSpec::new(view_options()).with_default_value("grid");
+        let a = segmented_control(&spec, &theme(), None);
+        let b = segmented_control(&spec, &theme(), None);
+        let a_grid = find_segment(&a, "Grid");
+        let b_grid = find_segment(&b, "Grid");
+        assert_eq!(a_grid.id.as_deref(), Some("segmented:grid"));
+        assert_eq!(b_grid.id.as_deref(), Some("segmented:grid"));
+        assert_eq!(
+            a_grid.runtime_id.as_deref(),
+            Some("segmented:auto-0:option:grid")
+        );
+        assert_eq!(
+            b_grid.runtime_id.as_deref(),
+            Some("segmented:auto-1:option:grid")
+        );
+        let modifiers = NodeModifiers::default();
+        assert_eq!(
+            (a_grid.interaction.on_key.as_ref().unwrap())(NodeKey::ArrowRight, modifiers),
+            Some("segmented:auto-0:option:list".to_string())
+        );
+        assert_eq!(
+            (b_grid.interaction.on_key.as_ref().unwrap())(NodeKey::ArrowRight, modifiers),
+            Some("segmented:auto-1:option:list".to_string())
+        );
+    }
+
+    #[test]
+    fn resetting_instance_scopes_replays_the_same_auto_ids() {
+        reset_segmented_control_instance_scopes();
+        let spec = SegmentedControlSpec::new(view_options());
+        let first = segmented_control(&spec, &theme(), None);
+        reset_segmented_control_instance_scopes();
+        let second = segmented_control(&spec, &theme(), None);
+        assert_eq!(
+            find_segment(&first, "Grid").runtime_id,
+            find_segment(&second, "Grid").runtime_id
+        );
+        assert_eq!(
+            find_segment(&first, "Grid").runtime_id.as_deref(),
+            Some("segmented:auto-0:option:grid")
+        );
+    }
+
+    fn collect_runtime_ids(node: &Node, semantic_id: &str) -> Vec<String> {
+        let mut ids = Vec::new();
+        fn walk(node: &Node, semantic_id: &str, ids: &mut Vec<String>) {
+            if node.id.as_deref() == Some(semantic_id) {
+                if let Some(runtime_id) = &node.runtime_id {
+                    ids.push(runtime_id.clone());
+                }
+            }
+            for child in &node.children {
+                walk(child, semantic_id, ids);
+            }
+        }
+        walk(node, semantic_id, &mut ids);
+        ids
+    }
+
+    fn two_open_color_pickers() -> Node {
+        let spec = poodle_specs::ColorPickerSpec::new().with_open(true);
+        Node::container()
+            .child(crate::color_picker(
+                &spec,
+                &theme(),
+                crate::ColorPickerHandlers::default(),
+            ))
+            .child(crate::color_picker(
+                &spec,
+                &theme(),
+                crate::ColorPickerHandlers::default(),
+            ))
+    }
+
+    fn boolean_filter_builder() -> poodle_specs::FilterBuilderSpec {
+        let field = poodle_specs::FilterFieldDefinition::new(
+            "active",
+            "Active",
+            poodle_specs::FilterFieldKind::Boolean,
+        );
+        poodle_specs::FilterBuilderSpec::new()
+            .with_fields(vec![field.clone()])
+            .with_draft(poodle_specs::FilterDraft::adding(&field))
+            .with_open(true)
+    }
+
+    fn two_open_filter_builders() -> Node {
+        let spec = boolean_filter_builder();
+        Node::container()
+            .child(crate::filter_builder(
+                &spec,
+                &theme(),
+                &crate::FilterBuilderHandlers::default(),
+            ))
+            .child(crate::filter_builder(
+                &spec,
+                &theme(),
+                &crate::FilterBuilderHandlers::default(),
+            ))
+    }
+
+    fn segmented_axis_model_picker() -> poodle_specs::ModelPickerSpec {
+        let axis = poodle_specs::ModelCapabilityAxis::select(
+            "speed",
+            "Speed",
+            vec![
+                poodle_specs::ModelAxisOption::new("fast", "Fast"),
+                poodle_specs::ModelAxisOption::new("slow", "Slow"),
+            ],
+        )
+        .with_control(poodle_specs::ModelAxisControl::Segmented);
+        poodle_specs::ModelPickerSpec::new()
+            .with_models(vec![poodle_specs::ModelOption::new("gpt", "GPT")])
+            .with_axes(vec![axis])
+            .with_value(
+                poodle_specs::ModelSelection::new("gpt")
+                    .with_axis("speed", poodle_specs::ModelAxisValue::Text("fast".into())),
+            )
+            .with_open(true)
+    }
+
+    fn two_open_model_pickers() -> Node {
+        let spec = segmented_axis_model_picker();
+        Node::container()
+            .child(crate::model_picker(&spec, &theme(), None))
+            .child(crate::model_picker(&spec, &theme(), None))
+    }
+
+    #[test]
+    fn two_color_pickers_do_not_share_mode_focus_ids() {
+        reset_segmented_control_instance_scopes();
+        let ids = collect_runtime_ids(&two_open_color_pickers(), "segmented:hex");
+        assert_eq!(ids.len(), 2);
+        assert_ne!(ids[0], ids[1]);
+        assert!(ids.iter().all(|id| id.ends_with(":option:hex")));
+        assert!(ids.iter().all(|id| id != "segmented:hex"));
+        assert_eq!(ids[0], "segmented:auto-0:option:hex");
+        assert_eq!(ids[1], "segmented:auto-1:option:hex");
+    }
+
+    #[test]
+    fn two_filter_builders_do_not_share_boolean_focus_ids() {
+        reset_segmented_control_instance_scopes();
+        let ids = collect_runtime_ids(&two_open_filter_builders(), "segmented:true");
+        assert_eq!(ids.len(), 2);
+        assert_ne!(ids[0], ids[1]);
+        assert!(ids.iter().all(|id| id.ends_with(":option:true")));
+        assert!(ids.iter().all(|id| id != "segmented:true"));
+    }
+
+    #[test]
+    fn two_model_pickers_do_not_share_axis_focus_ids() {
+        reset_segmented_control_instance_scopes();
+        let ids = collect_runtime_ids(&two_open_model_pickers(), "segmented:fast");
+        assert_eq!(ids.len(), 2);
+        assert_ne!(ids[0], ids[1]);
+        assert!(ids.iter().all(|id| id.ends_with(":option:fast")));
+        assert!(ids.iter().all(|id| id != "segmented:fast"));
     }
 
     #[test]

@@ -421,8 +421,7 @@ pub fn model_picker(
                         .collect();
                     let mut control = SegmentedControlSpec::new(options)
                         .with_size(effective_size)
-                        .with_density(spec.density)
-                        .with_instance_id(format!("model-picker-{}", axis.key));
+                        .with_density(spec.density);
                     control.value = current.as_text().map(|value| value.to_string());
                     control.is_disabled = spec.is_disabled || axis.is_disabled;
                     section.child(segmented_control(&control, theme, None))

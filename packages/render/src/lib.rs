@@ -343,7 +343,7 @@ pub use remediation_banner::{
 };
 pub use resize_handle::{resize_handle, ResizePhase};
 pub use scroll_shell::scroll_shell;
-pub use segmented_control::segmented_control;
+pub use segmented_control::{reset_segmented_control_instance_scopes, segmented_control};
 pub use select::{select, SelectHandlers};
 pub use selection_summary::{selection_summary, SelectionSummaryHandlers};
 pub use separator::separator;

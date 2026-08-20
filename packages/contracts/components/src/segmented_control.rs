@@ -101,9 +101,10 @@ pub struct SegmentedControlSpec {
     pub size: ControlSize,
     pub size_role: SemanticControlSizeRole,
     pub density: ControlDensity,
-    /// Stable native instance scope. Semantic option ids remain readable;
-    /// backends key focus by the scoped runtime id so two controls that share
-    /// option values never share a focus handle.
+    /// Optional explicit instance scope, analogue of the web `name` prop.
+    /// Semantic option ids stay readable (`segmented:<value>`). Focus keys are
+    /// always `segmented:{scope}:option:{value}` — never the unscoped option
+    /// id. When omitted, shared render allocates a unique per-frame serial.
     pub instance_id: Option<String>,
 }
 
