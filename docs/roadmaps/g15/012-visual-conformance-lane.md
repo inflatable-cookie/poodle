@@ -1,7 +1,7 @@
 # g15.012 — Primitive-First Visual Conformance Lane
 
 Status: **non-dispatchable parent** — exact children `g15.044`–`g15.047`;
-`g15.044` is in flight on PR #61
+`g15.044` is complete and `g15.045` is ready
 Depends on: `g15.001` (measured roster), `g15.011` (before fixture freeze),
 `g15.038` (SegmentedControl native option parity)
 Governing refs: `release-baseline-roster.md`,
@@ -37,12 +37,10 @@ still completes before the generation's final release-certification card.
 ## Exact Children
 
 1. [`g15.044`](044-gpui-offscreen-capture-feasibility.md) — prove or reject a
-   GPUI-native offscreen pixel path. **Evidence complete, verdict `go`,
-   awaiting orchestrator/operator review.** It built no fixtures and did not
-   change the production GPUI pin.
+   GPUI-native offscreen pixel path. **Complete in PR #61; reviewed verdict
+   `go`.** It built no fixtures and did not change the production GPUI pin.
 2. [`g15.045`](045-gpui-offscreen-capture-adoption.md) — adopt the exact proved
-   GPUI pin/seam after an operator-reviewed `go` verdict. Not started and not
-   eligible until that review lands.
+   GPUI pin/seam after an operator-reviewed `go` verdict. **Ready.**
 3. [`g15.046`](046-primitive-visual-fixture-inventory.md) — freeze the small
    named primitive batch after the human-centred catalogue audit completes.
 4. [`g15.047`](047-primitive-visual-comparison.md) — capture and compare the
@@ -50,7 +48,7 @@ still completes before the generation's final release-certification card.
 
 ### g15.044 Evidence (2026-08-21)
 
-The native half of this lane is unblocked, pending review. A real Poodle Button
+The native half of this lane is unblocked. A real Poodle Button
 renders offscreen to a deterministic RGBA PNG at
 `zed-industries/zed@1ea16c1ab9dd6d36649e002dc60995634da04daf` with no
 `NSWindow`, no `screencapture`, no focus theft, and no permission prompt —

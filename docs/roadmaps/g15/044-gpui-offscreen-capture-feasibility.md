@@ -1,7 +1,7 @@
 # g15.044 — GPUI Offscreen Capture Feasibility
 
-Status: **in flight** — PR #61; evidence complete, verdict `go`, awaiting
-orchestrator/operator review
+Status: **complete** — PR #61 merged; orchestrator verified and operator
+accepted verdict `go`
 Parent: `012-visual-conformance-lane.md`
 Depends on: `g15.001` (frozen active cohort)
 Unblocks: `g15.045`
@@ -116,9 +116,9 @@ binary — carries that feature.
 
 ## Continuation
 
-The pin is unchanged in this branch, and `g15.045` is neither started nor
-marked. It becomes eligible for planning only after the orchestrator verifies
-this evidence and the operator accepts the `go`.
+The pin stayed unchanged in this card. The orchestrator independently reran
+the retained verifier, the operator accepted the `go` by authorising PR #61's
+merge, and `g15.045` is ready.
 
 `g15.045` inherits three open items this card measured but does not decide:
 whether a 2×-only lane is acceptable or the scale shim is required, whether the

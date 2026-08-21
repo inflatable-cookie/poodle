@@ -1,7 +1,7 @@
 # Longhorn-Backed Poodle Conformance Lab
 
-Status: open — capture-platform feasibility promoted into `g15.044`; full app
-is not a v0.2.0 prerequisite
+Status: open — `g15.044` proved the GPUI capture platform and `g15.045`
+adoption is ready; full app is not a v0.2.0 prerequisite
 Captured: 2026-08-21
 Operator idea: build a small Longhorn-backed Tauri app that agents can control
 over MCP to compare Poodle runtimes without stealing focus or pointer control.
