@@ -29,6 +29,15 @@ const RERUN_CURRENT: &str = "stepper-rerun-current";
 /// The last step the host was asked to re-run.
 const RERUN_LAST: &str = "stepper-rerun-last";
 
+/// Test-only markers (no-ops outside `test-support`), so the mounted specimen
+/// probe can locate these two steppers and aim real clicks at their controls.
+/// Same mechanism `specimen_layout` uses for its axis tabs. What the clicks
+/// then did is read off the retained state above, not off a marker: gpui 0.2.2
+/// never clears `debug_bounds`, so a selector keyed by a live value would keep
+/// reporting the value it held several frames ago.
+pub(crate) const WIZARD_MARKER: &str = "stepper-wizard";
+pub(crate) const RERUN_MARKER: &str = "stepper-rerun-group";
+
 fn retained<'a>(state: &'a AppState, key: &str, fallback: &'a str) -> &'a str {
     state
         .specimens
@@ -128,13 +137,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(16.0))
                 .child(
-                    Stepper::from_spec(
-                        StepperSpec::new(wizard_steps())
-                            .with_value(wizard_current.clone())
-                            .with_aria_label("DAW sync steps"),
-                        theme,
-                    )
-                    .on_change(set_text(state, WIZARD_CURRENT)),
+                    div()
+                        .debug_selector(|| WIZARD_MARKER.to_string())
+                        .child(
+                            Stepper::from_spec(
+                                StepperSpec::new(wizard_steps())
+                                    .with_value(wizard_current.clone())
+                                    .with_aria_label("DAW sync steps"),
+                                theme,
+                            )
+                            .on_change(set_text(state, WIZARD_CURRENT)),
+                        ),
                 )
                 .child(
                     div().max_w(px(320.0)).child(
@@ -228,15 +241,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex_col()
                 .gap(px(8.0))
                 .child(
-                    Stepper::from_spec(
-                        StepperSpec::new(completed.clone())
-                            .with_value(rerun_current.clone())
-                            .with_show_rerun(true)
-                            .with_aria_label("Completed pipeline"),
-                        theme,
-                    )
-                    .on_change(set_text(state, RERUN_CURRENT))
-                    .on_rerun(set_text(state, RERUN_LAST)),
+                    div()
+                        .debug_selector(|| RERUN_MARKER.to_string())
+                        .child(
+                            Stepper::from_spec(
+                                StepperSpec::new(completed.clone())
+                                    .with_value(rerun_current.clone())
+                                    .with_show_rerun(true)
+                                    .with_aria_label("Completed pipeline"),
+                                theme,
+                            )
+                            .on_change(set_text(state, RERUN_CURRENT))
+                            .on_rerun(set_text(state, RERUN_LAST)),
+                        ),
                 )
                 .child(receipt(format!(
                     "Current step: {} — last re-run: {}",

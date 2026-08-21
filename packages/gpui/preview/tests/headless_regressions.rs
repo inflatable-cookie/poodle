@@ -3331,10 +3331,15 @@ fn identify_stepper(root: &mut Node, values: &[&str]) {
 ///
 /// Selection and re-run are separate controls because re-running a finished
 /// step spends whatever that step costs (`stepper.md` §2), so this drives both
-/// through the real mounted tree — pointer and keyboard — and checks that
-/// neither one stands in for the other. Only a mounted window can prove it:
-/// the rerun sits *inside* the clickable step, so an unwired one would let the
-/// press bubble into selection, and gpui's own dispatch is what decides.
+/// through the real mounted tree and checks that neither one stands in for the
+/// other. Only a mounted window can prove it: the rerun sits *inside* the
+/// clickable step, so an unwired one would let the press bubble into
+/// selection, and gpui's own dispatch is what decides.
+///
+/// Keyboard coverage here is activation of an already-focused control. GPUI's
+/// Stepper declares no focus treatment, so nothing registers a focus handle
+/// and focus can only arrive by pointer — an open gap with its own row in the
+/// g15 release-gap register.
 #[test]
 fn stepper_selection_and_rerun_reach_separate_mounted_controls() {
     use poodle_specs::{StepStatus, StepperSpec, StepperStep};
@@ -3381,7 +3386,8 @@ fn stepper_selection_and_rerun_reach_separate_mounted_controls() {
         );
 
         // Keyboard: the press left focus on that same trigger, so Enter walks
-        // the real focus chain to the control the pointer just used.
+        // the real focus chain to the control the pointer just used. This is
+        // activation, not entry — see the note above.
         driver.dispatch_key_raw("enter");
         assert_eq!(
             changes.lock().unwrap().as_slice(),
@@ -3499,7 +3505,8 @@ fn stepper_collapse_stays_independent_in_a_mounted_window() {
         assert_eq!(
             collapses.lock().unwrap().as_slice(),
             [false, true, true],
-            "expanded, the summary asks to collapse — by pointer and by key",
+            "expanded, the summary asks to collapse — by pointer, and by key \
+             once the pointer has focused it",
         );
 
         assert!(

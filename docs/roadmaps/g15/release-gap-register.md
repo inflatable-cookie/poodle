@@ -69,7 +69,7 @@ Rust render 1 missing (+ 1 not-applicable), GPUI specimen 0 missing
 | Context providers | — | IconProvider closed by `g15.009` (`packages/render/src/icon_provider.rs`); UiPresentationProvider remains a declared capability absence because ambient presentation cannot cross an already-built Node tree | — | `g15.043`; architecture decision required before dispatch |
 | SegmentedControl option presentation | closed by `g15.038`: dedicated public `SegmentedControlOption` (breaking, pre-1.0, operator-approved 2026-08-20) | closed: labelled-icon and icon-only rendering through `poodle-render` | closed: GPUI specimen teaches the contract's Effects/Instruments icon-only example | `g15.038` |
 | AgentTranscript scroll/follow | — | closed by `g15.037`: shared render owns content and the jump-control recipe | closed by `g15.037`: retained GPUI state owns a real tracked viewport, detach latch, and jump-to-bottom | `g15.037` complete in PR #48; no remaining release blocker |
-| Stepper selection and re-run | — | — the shared composition already carried `on_change`, `on_rerun`, and `on_collapsed_change` | closed by `g15.042`: `node_compat.rs` binds all three, and the specimen retains the current step plus one re-run receipt; proved through the mounted headless backend in `packages/gpui/preview/tests/headless_regressions.rs` (`stepper_selection_and_rerun_reach_separate_mounted_controls`, `stepper_collapse_stays_independent_in_a_mounted_window`) | `g15.042` on PR #60; found and accepted out of scope in PR #49 |
+| Stepper selection and re-run | — | — the shared composition already carried `on_change`, `on_rerun`, and `on_collapsed_change` | closed by `g15.042`: `node_compat.rs` binds all three, and the specimen retains the current step plus one re-run receipt; proved through the mounted headless backend in `packages/gpui/preview/tests/headless_regressions.rs` (`stepper_selection_and_rerun_reach_separate_mounted_controls`, `stepper_collapse_stays_independent_in_a_mounted_window`) and through the adapter and specimen seam in `specimen_probe.rs` (`stepper_route_selection_and_rerun_run_through_the_preview_adapter`). Pointer activation and keyboard activation after pointer focus only — keyboard **entry** stays open below | `g15.042` on PR #60; found and accepted out of scope in PR #49 |
 | Specimen axis domains | — closed by `g15.034` | — closed by `g15.034` | fake panes removed by `g15.019`; exact domains closed by `g15.034` | complete in PR #41 |
 | Display, workstation & agent specimens | — | — | — closed by `g15.010` (18 named GPUI specimen files under `packages/gpui/preview/src/specimens/`) | `g15.010` |
 | MeterSurface | not-applicable — web-only by fixed decision (spec 068) | not-applicable | not-applicable | none |
@@ -89,8 +89,8 @@ RemediationBanner action and dismiss, ActionDiscoveryPanel selection,
 DockRegion tab and collapse, AgentPlan accept/revise/dismiss,
 AgentPlanRecord and AgentSubagent disclosure, ChangedFiles disclosure and
 file selection, and ToolCall / ToolCallGroup disclosure, and — since `g15.042` —
-Stepper's separate selection, re-run, and collapse controls under both pointer
-and keyboard. Native tranches land their evidence as
+Stepper's separate selection, re-run, and collapse controls under pointer
+activation and under keyboard activation of an already-focused control. Native tranches land their evidence as
 focused owner-local tests, not by extending a shared comparator.
 
 ## Package-Install Surface
@@ -103,6 +103,15 @@ AgentPlanRecord added by `g15.006` as new root exports; the rest as recorded
 in `test/package-install/web-preview.ts`). `g15.048` replaces the vague
 "mount everything" continuation with exact clean-tarball root-import proof for
 all 175 names in both web packages plus a small representative mount set.
+
+## Native Interaction And Focus Gaps
+
+Interaction gaps that survive a component's wiring being correct. These are
+measured from the mounted tree, not inferred from a contract read.
+
+| Gap | Current evidence | Owner |
+| --- | --- | --- |
+| GPUI Stepper keyboard entry and focus ring | The trigger, rerun, and summary set `interaction.focusable` but declare no focus treatment, so the node backend registers no focus handle for them (`tracks_focus` needs `style.focus`) and no focus ring paints. `g15.042`'s mounted regressions reach these controls by key **only after a pointer press has focused one**. `stepper.md` §6 requires `Tab` entry and order between trigger and rerun and activation of a focused control; §8 requires the ring on Trigger and Summary. Arrow / `Home` / `End` movement is a separate, already-recorded web-only delta (`stepper.md` §10). Closing this means a shared-render focus treatment for a control with no resting border to take the ring, and it lands on Jetstream too | open — found by `g15.042`; needs its own card, and a decision on the native focus treatment, before `g15.013` certification |
 
 ## Visual And Release-Path Gaps
 

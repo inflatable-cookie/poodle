@@ -49,7 +49,9 @@ mod range_slider;
 mod segmented_control;
 mod select;
 mod slider;
-mod stepper;
+// `pub(crate)` for its test-only probe markers (g15.042); the render entry
+// point is still reached through `render_single_specimen` like every other.
+pub(crate) mod stepper;
 mod switch;
 mod toggle_group;
 mod tri_state_switch;

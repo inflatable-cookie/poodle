@@ -30,6 +30,9 @@ use gpui::{
     div, point, px, size, AnyElement, App, AppContext, Bounds, IntoElement, Modifiers, Pixels,
     Size, TestAppContext, VisualTestContext, WindowBounds, WindowOptions,
 };
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::sync::RwLock;
 use std::time::{Duration, Instant};
 
 /// The catalogue's portable-route denominator: 174 canonical entries. The
@@ -43,6 +46,23 @@ const MAX_SWEEP_BODY: Duration = Duration::from_secs(120);
 
 /// Parallel sweep shards; each runs its own test context on its own thread.
 const SWEEP_SHARDS: usize = 4;
+
+/// Exclusion between test threads that render node trees.
+///
+/// `poodle-gpui-node-backend`'s generated element-id counter is a process
+/// global, restarted once per rendered frame by `reset_element_ids`. Two test
+/// threads rendering at the same time interleave their resets, so a control
+/// that declares no id can take a different `ElementId` between a press and
+/// its release — and gpui, which keys the pending mouse-down by that id,
+/// silently drops the click. The sweep never clicks a node-backed control, so
+/// its shards share this lock; a test that does takes it exclusively.
+static NODE_TREE_RENDER: RwLock<()> = RwLock::new(());
+
+/// Share the render lock. Poisoning is irrelevant here — the guard carries no
+/// data, and a panicking shard has already failed its own test.
+fn shared_render_guard() -> std::sync::RwLockReadGuard<'static, ()> {
+    NODE_TREE_RENDER.read().unwrap_or_else(|e| e.into_inner())
+}
 
 // Test-only debug selectors, mirrored by the markers in `specimens/mod.rs`
 // and `specimens/specimen_layout.rs`.
@@ -145,6 +165,7 @@ fn exercise_axis_tabs(cx: &mut VisualTestContext, slug: &str) -> (usize, usize) 
 /// `PreviewRoot` and paints a real specimen card, not the fallback.
 #[test]
 fn ordinary_route_constructs_a_real_specimen_card() {
+    let _shared = shared_render_guard();
     let app = TestAppContext::single();
     let mut cx = open_route_window(&app, "region");
     settle(&mut cx);
@@ -155,6 +176,7 @@ fn ordinary_route_constructs_a_real_specimen_card() {
 /// `Densities` tabs and opens both panes through real pointer input.
 #[test]
 fn axis_route_opens_every_advertised_pane() {
+    let _shared = shared_render_guard();
     let app = TestAppContext::single();
     let mut cx = open_route_window(&app, "button");
     settle(&mut cx);
@@ -187,6 +209,7 @@ impl gpui::Render for FallbackHost {
 /// `missing_specimen` arm and paints its marker, never a specimen card.
 #[test]
 fn unknown_dispatch_paints_the_fallback_marker() {
+    let _shared = shared_render_guard();
     let mut app = TestAppContext::single();
     let fallback = {
         let (root, cx) = app.add_window_view(|_window, cx| PreviewRoot::new(cx));
@@ -229,6 +252,7 @@ fn sweep_shard(shard: usize, routes: &'static [crate::component_registry::Canoni
         "MeterSurface is web-only (spec 068) and must stay out of the native denominator"
     );
 
+    let _shared = shared_render_guard();
     let app = TestAppContext::single();
     let started = Instant::now();
     let mut sizes_tabs = 0usize;
@@ -290,4 +314,169 @@ fn canonical_catalogue_constructs_every_route_and_axis_pane_3() {
 #[test]
 fn canonical_catalogue_constructs_every_route_and_axis_pane_4() {
     sweep_shard(4, sweep_shards()[3]);
+}
+
+// ── g15.042 Stepper adapter and specimen seam ──────────────────────────────
+
+/// Open a route in a window tall enough for the whole page to paint, and keep
+/// the root entity so retained specimen state can be read back.
+///
+/// `debug_bounds` cannot answer that question here: gpui 0.2.2 never clears
+/// `debug_bounds` between frames, so a selector keyed by the current value
+/// would still report the value it held three clicks ago. The retained map is
+/// the thing under test anyway.
+fn open_stateful_route_window(
+    app: &TestAppContext,
+    slug: &str,
+    height: f32,
+) -> (gpui::Entity<PreviewRoot>, VisualTestContext) {
+    let holder: Rc<RefCell<Option<gpui::Entity<PreviewRoot>>>> = Rc::default();
+    let captured = Rc::clone(&holder);
+    let window = app.update(|app| {
+        app.open_window(
+            WindowOptions {
+                window_bounds: Some(WindowBounds::Windowed(Bounds {
+                    origin: point(px(0.0), px(0.0)),
+                    size: size(px(768.0), px(height)),
+                })),
+                ..Default::default()
+            },
+            move |_window, cx| {
+                let root = cx.new(|cx| {
+                    let mut root = PreviewRoot::new(cx);
+                    root.state.active_component_slug = Some(slug.to_string());
+                    root
+                });
+                *captured.borrow_mut() = Some(root.clone());
+                root
+            },
+        )
+        .expect("stateful probe window opens")
+    });
+    let root = holder.borrow_mut().take().expect("root entity captured");
+    (root, VisualTestContext::from_window(window.into(), app))
+}
+
+/// Seam proof 4 (g15.042): the Stepper page's live controls run through the
+/// preview adapter's builders and land in retained specimen state.
+///
+/// The mounted regressions in `tests/headless_regressions.rs` drive
+/// `poodle_render::stepper` directly, so they prove the shared renderer and
+/// the backend and would stay green if `node_compat::Stepper::on_change` or
+/// `on_rerun` were replaced with a no-op body. This one would not: every
+/// click here travels the specimen's `Stepper::from_spec(..).on_change(..)`
+/// builders, `IntoElement`, the node backend, and the specimen event queue
+/// before it becomes retained text. It is the original defect, stated as a
+/// test.
+#[test]
+fn stepper_route_selection_and_rerun_run_through_the_preview_adapter() {
+    use crate::specimens::stepper::{RERUN_MARKER, WIZARD_MARKER};
+    use poodle_render::presentation::rem_to_px;
+    use poodle_specs::StepperSpec;
+
+    // Exclusive: this is the one probe that clicks controls the shared render
+    // gives no id, so no other thread may restart the id counter mid-click.
+    let _exclusive = NODE_TREE_RENDER
+        .write()
+        .unwrap_or_else(|e| e.into_inner());
+    let app = TestAppContext::single();
+    let (root, mut cx) = open_stateful_route_window(&app, "stepper", 3200.0);
+    settle(&mut cx);
+    assert_real_specimen(&mut cx, "stepper");
+
+    let retained = |cx: &mut VisualTestContext, key: &str| -> Option<String> {
+        let key = key.to_string();
+        cx.update(|_window, app| root.read(app).state.specimens.text.get(&key).cloned())
+    };
+
+    assert_eq!(
+        retained(&mut cx, "stepper-current"),
+        None,
+        "the page opens on its declared default, with nothing retained yet"
+    );
+
+    let sizing = StepperSpec::new(Vec::new());
+    let marker = rem_to_px(sizing.marker_size_rem());
+    // Trailing inset of a step's rerun control: the contract's inline padding
+    // plus half the marker square it is sized by (`stepper.md` §8).
+    let inset = rem_to_px(sizing.padding_inline_rem()) + marker / 2.0;
+
+    // Every click resets the virtualized page's measurements, so bounds are
+    // re-read each time rather than carried across a repaint.
+    let bounds = |cx: &mut VisualTestContext, marker: &'static str| {
+        cx.debug_bounds(marker)
+            .unwrap_or_else(|| panic!("{marker} paints"))
+    };
+
+    // The wizard's four steps share the track evenly, so the first step is
+    // the first quarter of the mounted control.
+    let wizard = bounds(&mut cx, WIZARD_MARKER);
+    let column = f32::from(wizard.size.width) / 4.0;
+    cx.simulate_click(
+        point(wizard.origin.x + px(column * 0.5), wizard.center().y),
+        Modifiers::none(),
+    );
+    settle(&mut cx);
+    assert_eq!(
+        retained(&mut cx, "stepper-current").as_deref(),
+        Some("state"),
+        "clicking the first step selected it — `on_change` reached the host"
+    );
+
+    // The last step is disabled, so the fourth quarter must change nothing.
+    let wizard = bounds(&mut cx, WIZARD_MARKER);
+    cx.simulate_click(
+        point(wizard.origin.x + px(column * 3.5), wizard.center().y),
+        Modifiers::none(),
+    );
+    settle(&mut cx);
+    assert_eq!(
+        retained(&mut cx, "stepper-current").as_deref(),
+        Some("state"),
+        "the disabled step is not a control, even with the handler wired"
+    );
+
+    // Two equal columns, both complete, so both carry a rerun control. The
+    // second step's trigger sits well inside its own column.
+    let group = bounds(&mut cx, RERUN_MARKER);
+    let half = f32::from(group.size.width) / 2.0;
+    cx.simulate_click(
+        point(group.origin.x + px(half + inset), group.center().y),
+        Modifiers::none(),
+    );
+    settle(&mut cx);
+    assert_eq!(
+        retained(&mut cx, "stepper-rerun-current").as_deref(),
+        Some("extract"),
+        "selecting the second step moved that group's current step"
+    );
+    assert_eq!(
+        retained(&mut cx, "stepper-rerun-last"),
+        None,
+        "and re-ran nothing"
+    );
+
+    // The first step's rerun sits at that column's trailing edge. It is a
+    // fixed square, so it rides the top of its row rather than filling it —
+    // the row's mid-line misses it entirely.
+    let group = bounds(&mut cx, RERUN_MARKER);
+    let half = f32::from(group.size.width) / 2.0;
+    cx.simulate_click(
+        point(
+            group.origin.x + px(half - inset),
+            group.origin.y + px(1.0 + marker / 2.0),
+        ),
+        Modifiers::none(),
+    );
+    settle(&mut cx);
+    assert_eq!(
+        retained(&mut cx, "stepper-rerun-last").as_deref(),
+        Some("read"),
+        "the rerun control recorded its own step — `on_rerun` reached the host"
+    );
+    assert_eq!(
+        retained(&mut cx, "stepper-rerun-current").as_deref(),
+        Some("extract"),
+        "and re-running left the current step where selection put it"
+    );
 }
