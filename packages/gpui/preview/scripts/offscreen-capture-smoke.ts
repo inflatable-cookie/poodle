@@ -4,7 +4,8 @@
  * Drives the `poodle-offscreen-capture` one-shot target: three captures of
  * identical input must hash identically, each receipt must check out against
  * its PNG, and every negative case (unsupported scale, unknown theme, unknown
- * control size, missing output arguments, a tampered PNG) must fail loudly.
+ * control size, missing or colliding outputs, stale receipt retention, and a
+ * tampered PNG) must fail loudly.
  *
  * Everything lands in a temporary directory that is deleted on exit; nothing
  * is written into the repository, and no baseline is created. Unsupported OS
@@ -15,6 +16,7 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -59,6 +61,7 @@ function pngSize(path: string): { width: number; height: number } {
 
 interface Receipt {
   schema: string;
+  component: { name: string; variant: string; label: string };
   gpui_revision: string;
   renderer: string;
   platform: string;
@@ -83,6 +86,15 @@ function verifyPair(pngPath: string, receiptPath: string): string | null {
   if (receipt.schema !== RECEIPT_SCHEMA) return `schema drifted: ${receipt.schema}`;
   if (receipt.gpui_revision !== GPUI_REVISION)
     return `gpui revision drifted: ${receipt.gpui_revision}`;
+  if (receipt.component?.name !== "Button" || receipt.component.variant !== "primary" ||
+      receipt.component.label !== "Save") return "component smoke identity drifted";
+  if (receipt.renderer !== "metal-headless") return `renderer drifted: ${receipt.renderer}`;
+  if (receipt.platform !== "macos") return `platform drifted: ${receipt.platform}`;
+  if (receipt.theme !== THEME) return `theme drifted: ${receipt.theme}`;
+  if (receipt.control_size !== CONTROL_SIZE)
+    return `control size drifted: ${receipt.control_size}`;
+  if (receipt.logical_viewport.width !== WIDTH || receipt.logical_viewport.height !== HEIGHT)
+    return "logical viewport drifted";
   if (receipt.png_sha256 !== sha256(pngPath)) return "receipt hash does not match the PNG";
   const size = pngSize(pngPath);
   if (receipt.device_dimensions.width !== size.width) return "receipt width mismatch";
@@ -178,6 +190,35 @@ try {
     ], { encoding: "utf8" });
     check("missing --receipt fails", result.status !== 0, "unexpectedly succeeded");
     check("missing --receipt writes no PNG", !existsSync(join(work, "neg-missing.png")));
+  }
+  {
+    // A PNG and its receipt must remain two distinct files. Supplying one
+    // destination for both must fail before renderer construction or writes.
+    const same = join(work, "neg-colliding-output");
+    const result = spawnSync(BIN, [
+      "--out", same, "--receipt", same,
+      "--width", String(WIDTH), "--height", String(HEIGHT),
+      "--theme", THEME, "--control-size", CONTROL_SIZE, "--scale", SCALE,
+    ], { encoding: "utf8" });
+    check("colliding PNG and receipt paths fail", result.status !== 0, "unexpectedly succeeded");
+    check("colliding output paths write nothing", !existsSync(same));
+  }
+  {
+    // Seed a prior receipt, then force PNG publication to fail by targeting an
+    // existing directory. The old receipt must be invalidated before the PNG
+    // publish attempt, so the failed invocation cannot retain stale success
+    // evidence.
+    const blockedPng = join(work, "neg-blocked-png");
+    const staleReceipt = join(work, "neg-stale-receipt.json");
+    mkdirSync(blockedPng);
+    writeFileSync(staleReceipt, readFileSync(runs[0].receipt));
+    const result = spawnSync(BIN, [
+      "--out", blockedPng, "--receipt", staleReceipt,
+      "--width", String(WIDTH), "--height", String(HEIGHT),
+      "--theme", THEME, "--control-size", CONTROL_SIZE, "--scale", SCALE,
+    ], { encoding: "utf8" });
+    check("failed PNG publication exits nonzero", result.status !== 0, "unexpectedly succeeded");
+    check("failed publication invalidates the stale receipt", !existsSync(staleReceipt));
   }
   {
     // A tampered PNG must be caught by the receipt check — proves the check

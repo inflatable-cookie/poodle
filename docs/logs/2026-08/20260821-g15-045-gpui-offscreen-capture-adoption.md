@@ -73,10 +73,12 @@ green skip.
 The receipt (`poodle.gpui-offscreen-capture.v1`) records the component smoke
 identity, the immutable GPUI revision, renderer/platform, theme, control size,
 logical viewport, scale, device dimensions, and the PNG's SHA-256 — no
-timestamps, no machine-specific paths. PNG and receipt are written through
-sibling temporary files, PNG first, so an interrupted run can leave a PNG
-without a receipt (a failure by contract) but never a matching-looking
-success pair that did not both come from one capture.
+timestamps, no machine-specific paths. PNG and receipt are fully staged in
+distinct sibling temporary files. Any prior final receipt is invalidated
+before the PNG is published, and the new receipt is published last. A failed
+or interrupted publish can therefore leave a PNG without a receipt (a failure
+by contract), but never stale matching-looking success evidence. Colliding
+PNG/receipt destinations are rejected before renderer construction.
 
 ## Validation
 
@@ -87,8 +89,8 @@ All on the worker worktree, macOS with a real Metal device:
 | `cargo build --bin poodle-preview` (ordinary, no `capture`) | builds; `test-support` absent from the normal feature graph |
 | `cargo build --bin poodle-offscreen-capture --features capture` | builds |
 | `poodle-gpui-node-backend` tests | 24/24, including the two new inset-shadow projection tests |
-| capture bin unit tests | 8/8 (argument validation, revision-constant drift check) |
-| `effigy smoke:gpui-offscreen-capture` | all checks pass — 3 repeated captures at one hash, receipts verified, 5 negative cases fail loudly |
+| capture bin unit tests | 10/10 (argument validation, output collision, stale-receipt invalidation, revision-constant drift check) |
+| `effigy smoke:gpui-offscreen-capture` | all checks pass — 3 repeated captures at one hash, receipts verified, 7 negative cases fail loudly |
 | `effigy regressions:native` | 56/56 |
 | `effigy probe:gpui-specimens` | 8/8 |
 | `effigy check:gpui` | pass |
@@ -111,9 +113,10 @@ production seam reproduces the measured result exactly on this machine. Device
 dimensions are 480×160 (logical × 2). The selector was run twice from the
 worktree with identical results. Negative cases exercised through the selector:
 scale `1.0` rejected, unknown theme rejected, unknown control size rejected,
-missing `--receipt` rejected (and no PNG written), and a tampered PNG detected
-by the receipt check. Generated captures lived in a temporary directory and
-are not in Git.
+missing `--receipt` rejected (and no PNG written), colliding PNG/receipt paths
+rejected before writes, a forced PNG publish failure invalidated a seeded stale
+receipt, and a tampered PNG was detected by the receipt check. Generated
+captures lived in a temporary directory and are not in Git.
 
 Cross-machine byte identity is not claimed: glyphs come from the host Core
 Text stack and rasterisation is device-dependent. Renderer-aware tolerance is

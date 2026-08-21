@@ -154,14 +154,42 @@ fn parse_args(argv: &[String]) -> Result<CaptureArgs> {
         bail!("--scale is required\n{USAGE}");
     }
 
+    let out_png = normalize_output_path(
+        &out_png.with_context(|| format!("--out is required\n{USAGE}"))?,
+        "--out",
+    )?;
+    let out_receipt = normalize_output_path(
+        &out_receipt.with_context(|| format!("--receipt is required\n{USAGE}"))?,
+        "--receipt",
+    )?;
+    if out_png == out_receipt {
+        bail!("--out and --receipt must name different files");
+    }
+
     Ok(CaptureArgs {
-        out_png: out_png.with_context(|| format!("--out is required\n{USAGE}"))?,
-        out_receipt: out_receipt.with_context(|| format!("--receipt is required\n{USAGE}"))?,
+        out_png,
+        out_receipt,
         logical_width: width.with_context(|| format!("--width is required\n{USAGE}"))?,
         logical_height: height.with_context(|| format!("--height is required\n{USAGE}"))?,
         theme: theme.with_context(|| format!("--theme is required\n{USAGE}"))?,
         control_size: control_size.with_context(|| format!("--control-size is required\n{USAGE}"))?,
     })
+}
+
+/// Resolve the output's existing parent before renderer construction. Besides
+/// failing early for unusable destinations, this makes lexical aliases such as
+/// `./capture.png` and `capture.png` compare as the same path.
+fn normalize_output_path(path: &Path, flag: &str) -> Result<PathBuf> {
+    let file_name = path
+        .file_name()
+        .with_context(|| format!("{flag} must name a file"))?;
+    let parent = path
+        .parent()
+        .filter(|parent| !parent.as_os_str().is_empty())
+        .unwrap_or_else(|| Path::new("."));
+    let parent = std::fs::canonicalize(parent)
+        .with_context(|| format!("resolve parent directory for {flag}: {}", parent.display()))?;
+    Ok(parent.join(file_name))
 }
 
 /// Typed capture receipt. Serialized as JSON beside the PNG. The stable
@@ -200,15 +228,79 @@ struct DeviceDimensions {
     height: u32,
 }
 
-/// Write `bytes` to `path` through a sibling temporary file so an interrupted
-/// run never leaves a partial file at the real path.
-fn write_atomic(path: &Path, bytes: &[u8]) -> Result<()> {
-    let tmp = path.with_extension(format!(
-        "tmp-{}",
-        std::process::id()
-    ));
-    std::fs::write(&tmp, bytes).with_context(|| format!("write {}", tmp.display()))?;
-    std::fs::rename(&tmp, path).with_context(|| format!("rename onto {}", path.display()))?;
+fn staged_path(path: &Path, kind: &str) -> Result<PathBuf> {
+    let file_name = path
+        .file_name()
+        .with_context(|| format!("output path must name a file: {}", path.display()))?;
+    let mut staged_name = file_name.to_os_string();
+    staged_name.push(format!(".tmp-{}-{kind}", std::process::id()));
+    Ok(path.with_file_name(staged_name))
+}
+
+fn remove_if_present(path: &Path) -> Result<()> {
+    match std::fs::remove_file(path) {
+        Ok(()) => Ok(()),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(error) => Err(error).with_context(|| format!("remove {}", path.display())),
+    }
+}
+
+/// Stage both files completely, invalidate any prior receipt, then publish the
+/// PNG and receipt in that order. Once the prior receipt is removed, every
+/// failure path leaves no final receipt, so stale evidence cannot validate a
+/// newly published deterministic PNG.
+fn publish_pair(
+    png_path: &Path,
+    png_bytes: &[u8],
+    receipt_path: &Path,
+    receipt_bytes: &[u8],
+) -> Result<()> {
+    if png_path == receipt_path {
+        bail!("PNG and receipt outputs must name different files");
+    }
+
+    let staged_png = staged_path(png_path, "png")?;
+    let staged_receipt = staged_path(receipt_path, "receipt")?;
+    std::fs::write(&staged_png, png_bytes)
+        .with_context(|| format!("stage PNG at {}", staged_png.display()))?;
+    if let Err(error) = std::fs::write(&staged_receipt, receipt_bytes)
+        .with_context(|| format!("stage receipt at {}", staged_receipt.display()))
+    {
+        let _ = std::fs::remove_file(&staged_png);
+        return Err(error);
+    }
+
+    if let Err(error) = remove_if_present(receipt_path) {
+        let _ = std::fs::remove_file(&staged_png);
+        let _ = std::fs::remove_file(&staged_receipt);
+        return Err(error);
+    }
+    if let Err(error) = std::fs::rename(&staged_png, png_path)
+        .with_context(|| format!("publish PNG at {}", png_path.display()))
+    {
+        let _ = std::fs::remove_file(&staged_png);
+        let _ = std::fs::remove_file(&staged_receipt);
+        return Err(error);
+    }
+    // The receipt was absent immediately before publishing the PNG. If it now
+    // exists, the two requested names alias on this filesystem (for example,
+    // case-only variants on a case-insensitive volume) or another writer raced
+    // us. Never let the receipt rename overwrite the published PNG or an
+    // unexpected file.
+    if receipt_path.exists() {
+        let _ = std::fs::remove_file(png_path);
+        let _ = std::fs::remove_file(&staged_receipt);
+        bail!(
+            "receipt output aliases or reappeared during PNG publication: {}",
+            receipt_path.display()
+        );
+    }
+    if let Err(error) = std::fs::rename(&staged_receipt, receipt_path)
+        .with_context(|| format!("publish receipt at {}", receipt_path.display()))
+    {
+        let _ = std::fs::remove_file(&staged_receipt);
+        return Err(error);
+    }
     Ok(())
 }
 
@@ -263,11 +355,6 @@ fn run(args: &CaptureArgs) -> Result<()> {
     }
     let png_sha256 = format!("{:x}", Sha256::digest(&png_bytes));
 
-    // PNG first, receipt second: an interrupted run can leave a PNG without a
-    // receipt (a failure by contract) but never a matching-looking pair that
-    // did not both come from this capture.
-    write_atomic(&args.out_png, &png_bytes)?;
-
     let receipt = CaptureReceipt {
         schema: RECEIPT_SCHEMA,
         component: ComponentSmoke {
@@ -292,7 +379,7 @@ fn run(args: &CaptureArgs) -> Result<()> {
         png_sha256,
     };
     let receipt_json = serde_json::to_vec_pretty(&receipt)?;
-    write_atomic(&args.out_receipt, &receipt_json)?;
+    publish_pair(&args.out_png, &png_bytes, &args.out_receipt, &receipt_json)?;
 
     eprintln!(
         "captured {}x{} (logical {}x{} @ {ACCEPTED_SCALE}) theme={} size={} sha256={}",
@@ -392,6 +479,35 @@ mod tests {
         v.push("--baseline".to_string());
         v.push("x".to_string());
         assert!(parse_args(&v).is_err());
+    }
+
+    #[test]
+    fn colliding_output_paths_are_rejected() {
+        assert!(parse_args(&replace("--receipt", "./button.png")).is_err());
+    }
+
+    #[test]
+    fn publish_failure_invalidates_a_prior_receipt() {
+        let root = std::env::temp_dir().join(format!(
+            "poodle-offscreen-publish-test-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir(&root).expect("create test root");
+
+        let blocked_png = root.join("blocked.png");
+        std::fs::create_dir(&blocked_png).expect("make PNG destination unpublishable");
+        let receipt = root.join("capture.json");
+        std::fs::write(&receipt, b"stale receipt").expect("seed prior receipt");
+
+        let result = publish_pair(&blocked_png, b"png", &receipt, b"new receipt");
+        assert!(result.is_err(), "publishing over a directory must fail");
+        assert!(
+            !receipt.exists(),
+            "a failed publish must not retain the prior receipt"
+        );
+
+        std::fs::remove_dir_all(&root).expect("remove test root");
     }
 
     #[test]
