@@ -4,7 +4,7 @@ Date: 2026-08-22
 Card: `docs/roadmaps/g15/033-review-composition-forms-data-media.md`
 Handoff: `docs/handoffs/20260821-232939-g15-033-review-composition-forms-data-media.md`
 Parent: `docs/roadmaps/g15/027-screen-clear-human-review.md`
-PR: pending
+PR: https://github.com/inflatable-cookie/poodle/pull/63
 
 ## Outcome
 
@@ -101,6 +101,5 @@ selector ran. No screenshot gate or operator sign-off is claimed.
 
 ## Operator checkpoint
 
-Awaiting operator live review of the four changed Svelte/React routes. The next
-step is to push the worker branch and open the review PR; do not merge it from
-this worker.
+Awaiting operator live review of the four changed Svelte/React routes on
+PR #63. Do not merge it from this worker.
