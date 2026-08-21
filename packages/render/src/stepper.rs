@@ -452,3 +452,231 @@ fn summary_row(
 
     summary.child(chevron).child(rail).child(label).child(count)
 }
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Mutex;
+
+    use poodle_specs::StepperStep;
+
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    /// The Soundcheck arrangement, with one completed step carrying a rerun
+    /// and one step disabled.
+    fn steps() -> Vec<StepperStep> {
+        vec![
+            StepperStep::new("state", "Current state").with_status(StepStatus::Complete),
+            StepperStep::new("categories", "Categories"),
+            StepperStep::new("apply", "Apply and verify").with_disabled(true),
+        ]
+    }
+
+    /// A recorder that names which callback fired and with what, so the three
+    /// actions cannot be mistaken for each other.
+    #[derive(Default)]
+    struct Emissions {
+        changes: Arc<Mutex<Vec<String>>>,
+        reruns: Arc<Mutex<Vec<String>>>,
+        collapses: Arc<Mutex<Vec<bool>>>,
+    }
+
+    impl Emissions {
+        fn handlers(&self) -> StepperHandlers {
+            let changes = Arc::clone(&self.changes);
+            let reruns = Arc::clone(&self.reruns);
+            let collapses = Arc::clone(&self.collapses);
+            StepperHandlers {
+                on_change: Some(Arc::new(move |value: &str| {
+                    changes.lock().unwrap().push(value.to_string())
+                })),
+                on_rerun: Some(Arc::new(move |value: &str| {
+                    reruns.lock().unwrap().push(value.to_string())
+                })),
+                on_collapsed_change: Some(Arc::new(move |collapsed: bool| {
+                    collapses.lock().unwrap().push(collapsed)
+                })),
+            }
+        }
+
+        fn changes(&self) -> Vec<String> {
+            self.changes.lock().unwrap().clone()
+        }
+
+        fn reruns(&self) -> Vec<String> {
+            self.reruns.lock().unwrap().clone()
+        }
+
+        fn collapses(&self) -> Vec<bool> {
+            self.collapses.lock().unwrap().clone()
+        }
+    }
+
+    /// The step cells, in order: the list items directly under the root.
+    fn cells(root: &Node) -> Vec<&Node> {
+        root.children
+            .iter()
+            .filter(|child| child.a11y.role == Some(NodeRole::ListItem))
+            .collect()
+    }
+
+    /// A cell's trigger and its rerun control, which are deliberately
+    /// different nodes (contract §2).
+    fn trigger(cell: &Node) -> &Node {
+        &cell.children[0]
+    }
+
+    fn rerun(cell: &Node) -> Option<&Node> {
+        cell.children.get(1)
+    }
+
+    #[test]
+    fn an_enabled_trigger_emits_its_own_value_and_a_disabled_one_emits_nothing() {
+        let emissions = Emissions::default();
+        let root = stepper(
+            &StepperSpec::new(steps()).with_value("categories"),
+            &theme(),
+            emissions.handlers(),
+        );
+        let cells = cells(&root);
+        assert_eq!(cells.len(), 3);
+
+        trigger(cells[0]).interaction.on_activate.as_ref().unwrap()();
+        trigger(cells[1]).interaction.on_activate.as_ref().unwrap()();
+        assert_eq!(emissions.changes(), ["state", "categories"]);
+
+        let disabled = trigger(cells[2]);
+        assert!(disabled.interaction.disabled);
+        assert!(
+            disabled.interaction.on_activate.is_none(),
+            "a disabled step carries no activation at all — suppression is not \
+             a guard inside the handler",
+        );
+        assert_eq!(emissions.changes().len(), 2);
+    }
+
+    #[test]
+    fn rerun_is_a_separate_control_that_never_selects_its_step() {
+        let emissions = Emissions::default();
+        let root = stepper(
+            &StepperSpec::new(steps())
+                .with_value("categories")
+                .with_show_rerun(true),
+            &theme(),
+            emissions.handlers(),
+        );
+        let cells = cells(&root);
+
+        let rerun = rerun(cells[0]).expect("a completed step carries the rerun control");
+        assert!(
+            !std::ptr::eq(rerun, trigger(cells[0])),
+            "rerun and trigger are different nodes",
+        );
+        rerun.interaction.on_activate.as_ref().unwrap()();
+        assert_eq!(emissions.reruns(), ["state"]);
+        assert!(
+            emissions.changes().is_empty(),
+            "re-running a finished step must not also navigate to it",
+        );
+
+        assert_eq!(
+            rerun.a11y.label.as_deref(),
+            Some("Re-run step: Current state"),
+            "each rerun names its own step, not a row of identical buttons",
+        );
+    }
+
+    #[test]
+    fn rerun_appears_only_for_a_completed_step_that_asked_for_it() {
+        let without = stepper(
+            &StepperSpec::new(steps()).with_value("categories"),
+            &theme(),
+            StepperHandlers::default(),
+        );
+        for cell in cells(&without) {
+            assert!(
+                rerun(cell).is_none(),
+                "no rerun control until the host shows it",
+            );
+        }
+
+        let with = stepper(
+            &StepperSpec::new(steps())
+                .with_value("categories")
+                .with_show_rerun(true),
+            &theme(),
+            StepperHandlers::default(),
+        );
+        let cells = cells(&with);
+        assert!(rerun(cells[0]).is_some(), "complete");
+        assert!(rerun(cells[1]).is_none(), "pending");
+        assert!(rerun(cells[2]).is_none(), "pending and disabled");
+    }
+
+    #[test]
+    fn an_unwired_rerun_still_swallows_its_activation() {
+        let emissions = Emissions::default();
+        let mut handlers = emissions.handlers();
+        handlers.on_rerun = None;
+        let root = stepper(
+            &StepperSpec::new(steps())
+                .with_value("categories")
+                .with_show_rerun(true),
+            &theme(),
+            handlers,
+        );
+        let cells = cells(&root);
+
+        let rerun = rerun(cells[0]).expect("the control is still painted");
+        rerun.interaction.on_activate.as_ref().unwrap()();
+        assert!(
+            emissions.changes().is_empty(),
+            "an unwired rerun stays inert rather than bubbling into selection",
+        );
+        assert!(emissions.reruns().is_empty());
+    }
+
+    #[test]
+    fn collapse_is_vertical_only_and_independent_of_the_other_two() {
+        let emissions = Emissions::default();
+        let collapsed = stepper(
+            &StepperSpec::new(steps())
+                .with_orientation(Orientation::Vertical)
+                .with_collapsible(true)
+                .with_collapsed(true)
+                .with_value("categories"),
+            &theme(),
+            emissions.handlers(),
+        );
+        let summary = collapsed
+            .find(&|node| node.id.as_deref() == Some("poodle-stepper-summary"))
+            .expect("a collapsible vertical stepper has a summary row");
+        summary.interaction.on_activate.as_ref().unwrap()();
+        assert_eq!(emissions.collapses(), [false], "the toggle carries the next state");
+        assert!(emissions.changes().is_empty());
+        assert!(emissions.reruns().is_empty());
+        assert!(
+            cells(&collapsed).is_empty(),
+            "collapsed omits the step rows rather than hiding them",
+        );
+
+        let horizontal = stepper(
+            &StepperSpec::new(steps())
+                .with_collapsible(true)
+                .with_collapsed(true)
+                .with_value("categories"),
+            &theme(),
+            StepperHandlers::default(),
+        );
+        assert!(
+            horizontal
+                .find(&|node| node.id.as_deref() == Some("poodle-stepper-summary"))
+                .is_none(),
+            "collapse is ignored in horizontal orientation",
+        );
+        assert_eq!(cells(&horizontal).len(), 3, "the full track still renders");
+    }
+}

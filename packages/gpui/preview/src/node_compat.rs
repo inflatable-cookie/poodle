@@ -7209,6 +7209,20 @@ impl Stepper {
         }
     }
 
+    /// Selection. The trigger navigates and nothing else — see `stepper.md`
+    /// §2 for why this is not the same control as re-run.
+    pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_change = Some(handler);
+        self
+    }
+
+    /// Re-run of one completed step. Separate from `on_change` because a
+    /// re-run spends whatever the step costs and must never also select.
+    pub(crate) fn on_rerun(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_rerun = Some(handler);
+        self
+    }
+
     pub(crate) fn on_collapsed_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
         self.handlers.on_collapsed_change = Some(handler);
         self
