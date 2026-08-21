@@ -1,16 +1,14 @@
 <script lang="ts">
   import { Button, ErrorBoundary, Surface, Text } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
-  import ErrorBoundaryCrashOnce, {
-    armErrorBoundaryCrash,
-    getErrorBoundaryCrashEpoch,
-  } from "./ErrorBoundaryCrashOnce.svelte";
+  import ErrorBoundaryCrashOnce from "./ErrorBoundaryCrashOnce.svelte";
 
-  let crashEpoch = $state(getErrorBoundaryCrashEpoch());
+  let crashKey = $state(0);
+  let crashToken = $state({});
 
   function throwAgain() {
-    armErrorBoundaryCrash();
-    crashEpoch = getErrorBoundaryCrashEpoch();
+    crashKey += 1;
+    crashToken = {};
   }
 </script>
 
@@ -28,8 +26,8 @@
       <Button variant="secondary" size="sm" onClick={throwAgain}>Throw again</Button>
     </div>
     <ErrorBoundary title="Preview failed" retryLabel="Reset boundary">
-      {#key crashEpoch}
-        <ErrorBoundaryCrashOnce />
+      {#key crashKey}
+        <ErrorBoundaryCrashOnce token={crashToken} />
       {/key}
     </ErrorBoundary>
   </SpecimenGroup>

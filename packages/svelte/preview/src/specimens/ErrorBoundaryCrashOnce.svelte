@@ -1,21 +1,14 @@
 <script module lang="ts">
-  let crashEpoch = 0;
-  let hasThrownForEpoch = -1;
-
-  export function armErrorBoundaryCrash(): void {
-    crashEpoch += 1;
-  }
-
-  export function getErrorBoundaryCrashEpoch(): number {
-    return crashEpoch;
-  }
+  const thrownTokens = new WeakSet<object>();
 </script>
 
 <script lang="ts">
   import { Text } from "@inflatable-cookie/poodle-svelte";
 
-  if (hasThrownForEpoch !== crashEpoch) {
-    hasThrownForEpoch = crashEpoch;
+  let { token }: { token: object } = $props();
+
+  if (!thrownTokens.has(token)) {
+    thrownTokens.add(token);
     throw new Error("Preview child failed during render.");
   }
 </script>

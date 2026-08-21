@@ -1,20 +1,11 @@
 import type { ReactNode } from "react";
 import { Text } from "@inflatable-cookie/poodle-react";
 
-let crashEpoch = 0;
-let hasThrownForEpoch = -1;
+const thrownTokens = new WeakSet<object>();
 
-export function armErrorBoundaryCrash(): void {
-  crashEpoch += 1;
-}
-
-export function getErrorBoundaryCrashEpoch(): number {
-  return crashEpoch;
-}
-
-export function ErrorBoundaryCrashOnce(): ReactNode {
-  if (hasThrownForEpoch !== crashEpoch) {
-    hasThrownForEpoch = crashEpoch;
+export function ErrorBoundaryCrashOnce({ token }: { token: object }): ReactNode {
+  if (!thrownTokens.has(token)) {
+    thrownTokens.add(token);
     throw new Error("Preview child failed during render.");
   }
 

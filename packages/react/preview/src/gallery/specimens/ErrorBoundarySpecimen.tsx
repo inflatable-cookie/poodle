@@ -1,14 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button, ErrorBoundary, Surface, Text } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
-import {
-  armErrorBoundaryCrash,
-  ErrorBoundaryCrashOnce,
-  getErrorBoundaryCrashEpoch,
-} from "./ErrorBoundaryCrashOnce";
+import { ErrorBoundaryCrashOnce } from "./ErrorBoundaryCrashOnce";
 
 export function ErrorBoundarySpecimen() {
-  const [crashEpoch, setCrashEpoch] = useState(getErrorBoundaryCrashEpoch());
+  const [crashKey, setCrashKey] = useState(0);
+  const crashToken = useMemo(() => ({}), [crashKey]);
 
   return (
     <div className="poodle-specimen">
@@ -22,19 +19,12 @@ export function ErrorBoundarySpecimen() {
 
       <SpecimenGroup label="Caught render error">
         <div style={{ marginBottom: "0.75rem" }}>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              armErrorBoundaryCrash();
-              setCrashEpoch(getErrorBoundaryCrashEpoch());
-            }}
-          >
+          <Button variant="secondary" size="sm" onClick={() => setCrashKey((key) => key + 1)}>
             Throw again
           </Button>
         </div>
         <ErrorBoundary title="Preview failed" retryLabel="Reset boundary">
-          <ErrorBoundaryCrashOnce key={crashEpoch} />
+          <ErrorBoundaryCrashOnce key={crashKey} token={crashToken} />
         </ErrorBoundary>
       </SpecimenGroup>
     </div>

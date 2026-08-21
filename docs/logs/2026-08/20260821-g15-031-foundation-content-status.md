@@ -40,10 +40,20 @@ unchanged (all nine remain `keep` at A/A/A).
 
 - **`ErrorBoundary`** — the caught-error child threw on every render, so Reset
   boundary never surfaced recovered content and Throw again looked inert while
-  already in the error state. Sv/Rc now use a preview-only crash-once child
-  (matching the component test harness pattern) so Reset shows recovered content
-  and Throw again re-arms the failure. Focused regression test added. Gp keeps
-  static normal/error evidence per the headless native lane.
+  already in the error state. Sv/Rc now use a preview-only crash-once child with
+  an instance-owned token tracked in a module `WeakSet`, so Reset shows recovered
+  content, Throw again re-arms via a fresh token/remount, and catalogue navigation
+  remounts still open in the error state. Focused Sv/Rc regression tests cover
+  reset/re-arm plus remount and second-instance isolation. Gp keeps static
+  normal/error evidence per the headless native lane.
+
+## Review round 2 (orchestrator, PR #57)
+
+The first repair kept crash state in module-scoped epoch counters, so the first
+mounted specimen consumed the throw for the whole module and later route remounts
+opened in the recovered state without a Reset action. Sv/Rc now give each specimen
+instance its own token; the shared `WeakSet` only dedupes throws for that token
+across boundary reset, not across pages or instances.
 
 ## Changed routes for operator review
 
@@ -61,11 +71,13 @@ is **pending**.
 - `packages/react/preview/src/gallery/specimens/ErrorBoundaryCrashOnce.tsx`
 - `packages/react/preview/src/gallery/specimens/ErrorBoundarySpecimen.tsx`
 - `packages/svelte/preview/test/g15-031-foundation-content-status.test.ts`
+- `packages/react/preview/test/g15-031-foundation-content-status.test.tsx`
 - `docs/roadmaps/g15/specimen-catalogue-audit.md` — nine human verdict rows
 
 ## Validation
 
-- `bunx vitest run packages/svelte/preview/test/g15-031-foundation-content-status.test.ts` — 1 passed
+- `bunx vitest run packages/svelte/preview/test/g15-031-foundation-content-status.test.ts` — 2 passed
+- `bunx vitest run packages/react/preview/test/g15-031-foundation-content-status.test.tsx` — 2 passed
 - `effigy catalogue:check` — passed
 - `effigy check:svelte` — passed
 - `effigy react:build` — passed
