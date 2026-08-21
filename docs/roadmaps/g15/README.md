@@ -2,7 +2,7 @@
 
 Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
 `g15.019`–`g15.026`, `g15.028`–`g15.031`, and `g15.034`–`g15.040` complete;
-`g15.011` partial with two later review children
+`g15.011` partial with ready `g15.032` and one later review child
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -114,7 +114,7 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 `g15.031` is complete through PR #57. All nine foundation content/status pages
 have human verdicts; ErrorBoundary's paired-web reset and remount behaviour is
 repaired and operator-approved. `g15.032` is the next planning checkpoint and
-must pass orchestrator readiness review before dispatch; `g15.033` remains
-serial behind it. `g15.012` follows the completed human-centred audit;
+is ready as one serial ten-page navigation/overlays review; `g15.033` remains
+paused behind it. `g15.012` follows the completed human-centred audit;
 `g15.013` stays blocked as the final certification gate. Release mutation
 remains behind the explicit operator gate.

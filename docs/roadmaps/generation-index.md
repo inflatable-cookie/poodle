@@ -7,8 +7,8 @@ Updated: 2026-08-21
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
     `g15.019`–`g15.026`, `g15.028`–`g15.031`, and `g15.034`–`g15.040`
-    complete; `g15.011` partial with two later review children; `g15.013`
-    final
+    complete; `g15.011` partial with ready `g15.032` and one later review
+    child; `g15.013` final
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `040`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
@@ -17,8 +17,8 @@ Updated: 2026-08-21
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: review `g15.032` for readiness, then dispatch the ten-page
-    navigation/overlays human review. PR #57 completed `g15.031`: all nine
+  - Next: dispatch ready `g15.032`, the ten-page navigation/overlays human
+    review. PR #57 completed `g15.031`: all nine
     foundation content/status pages have human verdicts, and ErrorBoundary's
     paired-web reset/remount specimen is repaired and operator-approved. PR #56
     completed routed `g15.040`: ResizeHandle now has

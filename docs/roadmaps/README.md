@@ -76,8 +76,8 @@ v0.2.0 release-baseline generation.
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
   `g15.014`–`g15.017`, `g15.019`–`g15.026`, `g15.028`–`g15.031`, and
-  `g15.034`–`g15.040` complete; `g15.011` partial with two later review
-  children; `g15.013` final
+  `g15.034`–`g15.040` complete; `g15.011` partial with ready `g15.032` and one
+  later review child; `g15.013` final
 
 ## Rules
 
