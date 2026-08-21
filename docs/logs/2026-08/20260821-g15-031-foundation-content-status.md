@@ -62,7 +62,7 @@ Changed React routes: `error-boundary`
 Changed GPUI routes: none
 
 Operator live sign-off on the changed Svelte and React `error-boundary` routes
-is **pending**.
+was accepted before merge.
 
 ## Changed files
 
@@ -90,5 +90,4 @@ Live review used Svelte preview on `http://127.0.0.1:4175` and React preview on
 
 ## Operator checkpoint
 
-Pending live review of changed `error-boundary` routes in Svelte and React
-previews before card closeout.
+Accepted after the orchestrator's second review. PR #57 merged as `59ea127e`.

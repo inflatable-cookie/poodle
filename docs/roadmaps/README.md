@@ -44,7 +44,9 @@ v0.2.0 release-baseline generation.
   nested-layer pointer blocker. PR #55 completed `g15.030`; its ResizeHandle
   review returned the shared native focus/keyboard/value blocker. PR #56
   completed routed `g15.040` with stable caller-owned native focus identity
-  and unblocked ready `g15.031`.
+  and unblocked `g15.031`. PR #57 completed `g15.031`: all nine foundation
+  content/status pages now carry human verdicts, and the operator accepted the
+  repaired paired-web ErrorBoundary reset/remount specimen.
   `g15.013` remains the final gate after the
   specimen program and `g15.012`.
   Jetstream remains deferred.
@@ -73,9 +75,9 @@ v0.2.0 release-baseline generation.
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
-  `g15.014`–`g15.017`, `g15.019`–`g15.026`, `g15.028`–`g15.030`, and
-  `g15.034`–`g15.040` complete; `g15.011` partial with ready `g15.031` and two
-  later review children; `g15.013` final
+  `g15.014`–`g15.017`, `g15.019`–`g15.026`, `g15.028`–`g15.031`, and
+  `g15.034`–`g15.040` complete; `g15.011` partial with two later review
+  children; `g15.013` final
 
 ## Rules
 

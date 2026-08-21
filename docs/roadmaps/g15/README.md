@@ -1,8 +1,8 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
-`g15.019`–`g15.026`, `g15.028`–`g15.030`, and `g15.034`–`g15.040` complete;
-`g15.011` partial with ready `g15.031` and two later review children
+`g15.019`–`g15.026`, `g15.028`–`g15.031`, and `g15.034`–`g15.040` complete;
+`g15.011` partial with two later review children
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -73,7 +73,7 @@ and status advance are the orchestrator's.
 18. [020–025 — Overloaded Examples family children](020-curate-model-connection-licence.md) — complete; exact 53-page partition landed through PR #49
 19. [026 — Headless native specimen probe](026-native-specimen-probe.md) — complete; PR #50 proved 174/174 native routes and all admitted axis panes headlessly
 20. [027 — Screen-clear human review](027-screen-clear-human-review.md) — non-dispatchable parent for exact children `028`–`033`
-21. [028–033 — Screen-clear family review children](028-review-foundation-controls-entry.md) — exact 56-page partition; after `026`
+21. [028–033 — Screen-clear family review children](028-review-foundation-controls-entry.md) — exact 56-page partition; `028`–`031` complete, `032`–`033` remain
 22. [038 — SegmentedControl native option parity](038-segmented-control-native-option-parity.md) — complete; PR #52 landed the clean option-type migration and stable native focus identity
 23. [039 — DateTimeZonePicker nested-layer pointer commit](039-date-time-zone-picker-nested-layer.md) — complete; PR #54 closed the paired-web pointer blocker and unblocked `g15.030`
 24. [040 — ResizeHandle native keyboard and value semantics](040-resize-handle-native-semantics.md) — complete; PR #56 closed stable native focus identity, keyboard, and numeric-range semantics
@@ -111,9 +111,10 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-`g15.040` is complete through PR #56. ResizeHandle now has stable caller-owned
-native focus identity, keyboard resizing, and renderer-neutral numeric-range
-semantics. `g15.031` is the next ready card and resumes the three remaining
-serial screen-clear children. `g15.012` follows the completed human-centred
-audit; `g15.013` stays blocked as the final certification gate. Release
-mutation remains behind the explicit operator gate.
+`g15.031` is complete through PR #57. All nine foundation content/status pages
+have human verdicts; ErrorBoundary's paired-web reset and remount behaviour is
+repaired and operator-approved. `g15.032` is the next planning checkpoint and
+must pass orchestrator readiness review before dispatch; `g15.033` remains
+serial behind it. `g15.012` follows the completed human-centred audit;
+`g15.013` stays blocked as the final certification gate. Release mutation
+remains behind the explicit operator gate.

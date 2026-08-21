@@ -101,13 +101,13 @@ meaningfully distinct. A later human review may change a grade or disposition
 in the existing row; it does not add a second table.
 
 A person has now answered those questions for the three pilots (Button,
-RangeSlider, Tabs) and for the 30 screen-clear pages owned by `g15.028`–
-`g15.030`. The remaining 26 screen-clear pages still sit in `g15.031`–
-`g15.033`. Every child carries a live operator-review checkpoint for changes.
+RangeSlider, Tabs) and for the 39 screen-clear pages owned by `g15.028`–
+`g15.031`. The remaining 17 screen-clear pages sit in `g15.032`–`g15.033`.
+Every child carries a live operator-review checkpoint for changes.
 
 So read an **A** that has no human verdict as "no measured defect", not as
 "judged a good teaching page". A page can screen A and still open on a prop
-showcase. Read an **A** that names a `g15.028`–`g15.030` human verdict as the
+showcase. Read an **A** that names a `g15.028`–`g15.031` human verdict as the
 reviewer's keep. **D** remains the dead-primary-interaction or unusable-as-
 documentation grade even when the defect is a component blocker rather than a
 caption hole.
