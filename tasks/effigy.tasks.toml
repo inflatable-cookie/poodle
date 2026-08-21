@@ -103,6 +103,15 @@
 # through real pointer input. Construction evidence only — no visual,
 # interaction, or cross-runtime parity claim.
 "probe:gpui-specimens" = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview specimen_probe"
+# Offscreen capture smoke (g15.045): the adopted GPUI revision renders a real
+# Poodle Button through the Metal headless renderer with no window, focus, or
+# desktop permission. Identical input captured repeatedly must hash
+# identically, each typed receipt must check out against its PNG, and the
+# negative cases (bad scale/theme/control size, missing or colliding outputs,
+# stale-receipt retention, tampered PNG) must fail. Everything runs in a
+# temporary directory — no baseline, no repository writes. Internal smoke
+# only; not a fixture namespace or a comparison lane.
+"smoke:gpui-offscreen-capture" = "bun packages/gpui/preview/scripts/offscreen-capture-smoke.ts"
 # Workflow-compatible entrypoint. `.github/workflows/` still calls
 # `effigy ci:conformance`; g14.022 decides whether renaming it is worth the
 # operator approval a workflow edit needs. The name is legacy — the scope is

@@ -50,7 +50,7 @@ impl TrackedScrollState {
     }
 
     pub fn max_offset_y(&self) -> f32 {
-        self.handle.max_offset().height.into()
+        self.handle.max_offset().y.into()
     }
 
     pub fn remaining_to_bottom(&self) -> f32 {

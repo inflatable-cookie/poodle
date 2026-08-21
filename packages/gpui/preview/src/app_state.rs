@@ -104,95 +104,11 @@ impl Section {
     }
 }
 
-/// Available theme presets.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ThemePreset {
-    Graphite,
-    Eclipse,
-    Iceberg,
-    Midnight,
-    Nord,
-    Rose,
-    Forest,
-    Solarized,
-    Hornet,
-    Cobalt,
-    Clay,
-    Meadow,
-    Default,
-}
-
-impl ThemePreset {
-    /// Order matches Svelte preview: eclipse, iceberg, graphite.
-    pub const ALL: &[ThemePreset] = &[
-        ThemePreset::Eclipse,
-        ThemePreset::Iceberg,
-        ThemePreset::Graphite,
-        ThemePreset::Midnight,
-        ThemePreset::Nord,
-        ThemePreset::Rose,
-        ThemePreset::Forest,
-        ThemePreset::Solarized,
-        ThemePreset::Hornet,
-        ThemePreset::Cobalt,
-        ThemePreset::Clay,
-        ThemePreset::Meadow,
-    ];
-
-    pub fn label(self) -> &'static str {
-        match self {
-            ThemePreset::Default => "default",
-            ThemePreset::Eclipse => "eclipse",
-            ThemePreset::Iceberg => "iceberg",
-            ThemePreset::Graphite => "graphite",
-            ThemePreset::Midnight => "midnight",
-            ThemePreset::Nord => "nord",
-            ThemePreset::Rose => "rose",
-            ThemePreset::Forest => "forest",
-            ThemePreset::Solarized => "solarized",
-            ThemePreset::Hornet => "hornet",
-            ThemePreset::Cobalt => "cobalt",
-            ThemePreset::Clay => "clay",
-            ThemePreset::Meadow => "meadow",
-        }
-    }
-
-    pub fn build_theme(self) -> GpuiThemeProvider {
-        match self {
-            ThemePreset::Default => GpuiThemeProvider::new(),
-            ThemePreset::Eclipse => {
-                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE)
-            }
-            ThemePreset::Iceberg => {
-                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ICEBERG)
-            }
-            ThemePreset::Graphite => {
-                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::GRAPHITE)
-            }
-            ThemePreset::Midnight => {
-                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::MIDNIGHT)
-            }
-            ThemePreset::Nord => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::NORD),
-            ThemePreset::Rose => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ROSE),
-            ThemePreset::Forest => {
-                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::FOREST)
-            }
-            ThemePreset::Solarized => {
-                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::SOLARIZED)
-            }
-            ThemePreset::Hornet => {
-                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::HORNET)
-            }
-            ThemePreset::Cobalt => {
-                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::COBALT)
-            }
-            ThemePreset::Clay => GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::CLAY),
-            ThemePreset::Meadow => {
-                GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::MEADOW)
-            }
-        }
-    }
-}
+/// Available theme presets and control sizes live in `presentation_axes` —
+/// the one domain authority shared with the offscreen capture target
+/// (g15.045). Re-exported here so existing `app_state::ThemePreset` /
+/// `app_state::ControlSize` paths keep resolving.
+pub use crate::presentation_axes::{ControlSize, ThemePreset};
 
 /// Swatch options for the header theme picker.
 ///
@@ -255,47 +171,7 @@ impl Density {
     }
 }
 
-/// Control size.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ControlSize {
-    Xs,
-    Sm,
-    Md,
-    Lg,
-    Xl,
-}
-
-impl ControlSize {
-    /// Order matches Svelte preview: xs, sm, md, lg, xl.
-    pub const ALL: &[ControlSize] = &[
-        ControlSize::Xs,
-        ControlSize::Sm,
-        ControlSize::Md,
-        ControlSize::Lg,
-        ControlSize::Xl,
-    ];
-
-    pub fn label(self) -> &'static str {
-        match self {
-            ControlSize::Xs => "xs",
-            ControlSize::Sm => "sm",
-            ControlSize::Md => "md",
-            ControlSize::Lg => "lg",
-            ControlSize::Xl => "xl",
-        }
-    }
-
-    /// Return the token control-size definition for this variant.
-    pub fn token_definition(self) -> &'static poodle_tokens::density::ControlSizeDefinition {
-        match self {
-            ControlSize::Xs => &poodle_tokens::density::CONTROL_SIZE_XS,
-            ControlSize::Sm => &poodle_tokens::density::CONTROL_SIZE_SM,
-            ControlSize::Md => &poodle_tokens::density::CONTROL_SIZE_MD,
-            ControlSize::Lg => &poodle_tokens::density::CONTROL_SIZE_LG,
-            ControlSize::Xl => &poodle_tokens::density::CONTROL_SIZE_XL,
-        }
-    }
-}
+/// Control size lives in `presentation_axes` (see the re-export above).
 
 /// The neutral-contrast axis is continuous, like the web preview's range input
 /// and the Jetstream shell's slider. It used to be four preset stops behind a

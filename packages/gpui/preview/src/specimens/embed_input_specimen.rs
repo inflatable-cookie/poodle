@@ -258,7 +258,7 @@ fn provider_header_row(
         )
         .child(
             div()
-                .flex_grow()
+                .flex_grow_1()
                 .px(px(10.0))
                 .py(px(6.0))
                 .text_size(px(11.0))
@@ -309,7 +309,7 @@ fn provider_row(
     )
     .child(
         div()
-            .flex_grow()
+            .flex_grow_1()
             .px(px(10.0))
             .py(px(6.0))
             .text_size(px(11.0))

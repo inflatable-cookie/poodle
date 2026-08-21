@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-21 — A fresh git worktree has no `node_modules`, and
+  `effigy docs:check` fails deep into the board with `Cannot find module
+  '@inflatable-cookie/poodle-core/tokens'` from the Svelte/React preview
+  parity scripts rather than up front with a missing-deps hint. A one-line
+  preflight (or an `effigy init --check` hint) would save the debugging loop.
+  `bun install` in the worktree fixes it. Found on g15.045.
+
 - 2026-08-21 — `poodle-tokens` reaches outside its own crate directory for
   generated code: `src/lib.rs` includes
   `src/../../../tokens/artifacts/rust/mod.rs`. The crate is therefore not

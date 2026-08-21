@@ -1,7 +1,7 @@
 //! Generic headless GPUI test driver (g14.023, retained by g14.021).
 //!
 //! Reusable mount, frame, focus, pointer, drag, and keyboard machinery for
-//! native regressions on GPUI 0.2.2's in-memory test platform
+//! native regressions on GPUI's in-memory test platform
 //! (`TestAppContext`, `VisualTestContext`, `TestWindow`). No component
 //! identifier, part list, or fixture corpus lives here.
 //!
@@ -196,9 +196,9 @@ impl<'a> HeadlessDriver<'a> {
 
     /// Focus the element through the real backend focus registry.
     pub fn focus_element(&mut self, element_id: &str) {
-        self.cx.update(|window, _cx| {
+        self.cx.update(|window, cx| {
             if let Some(handle) = poodle_gpui_node_backend::focus_handle_for(element_id) {
-                handle.focus(window);
+                handle.focus(window, cx);
             }
         });
         self.draw_frame();
@@ -336,9 +336,9 @@ impl<'a> HeadlessDriver<'a> {
     /// overlay dismissal) would never fire. The mount host is focused first;
     /// the same guarantee a document-level key listener has on the web.
     pub fn dispatch_key(&mut self, key: &str) {
-        self.cx.update(|window, _cx| {
+        self.cx.update(|window, cx| {
             let handle = self.root_focus.clone();
-            handle.focus(window);
+            handle.focus(window, cx);
         });
         self.dispatch_key_raw(key);
     }
@@ -351,6 +351,7 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.simulate_event(KeyDownEvent {
             keystroke: keystroke.clone(),
             is_held: false,
+            prefer_character_input: false,
         });
         self.cx.simulate_event(KeyUpEvent { keystroke });
         self.cx.run_until_parked();
