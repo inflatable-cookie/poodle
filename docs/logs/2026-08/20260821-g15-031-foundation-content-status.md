@@ -70,7 +70,7 @@ is **pending**.
 - `effigy check:svelte` — passed
 - `effigy react:build` — passed
 - `effigy docs:check` — passed
-- `git diff --check origin/main...HEAD` — pending
+- `git diff --check origin/main...HEAD` — clean
 
 Live review used Svelte preview on `http://127.0.0.1:4175` and React preview on
 `http://127.0.0.1:4181` with `--strictPort`. No `*-windowed`,
