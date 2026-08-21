@@ -1,7 +1,7 @@
 # g15.041 — Popover Interactive Trigger Semantics
 
-Status: **ready** — clean pre-v0.2 breaking migration approved by the operator
-on 2026-08-21
+Status: **in flight** — dispatched from approved handoff
+`docs/handoffs/20260821-151745-g15-041-popover-interactive-trigger-semantics.md`
 Found by: `032-review-composition-navigation-overlays.md`
 Unblocks: `g15.032` closeout, then `g15.033`; `g15.012` remains behind the
 completed human-centred audit

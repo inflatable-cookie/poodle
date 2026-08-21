@@ -1,13 +1,13 @@
 # g15 — Release Gap Register
 
 Status: active release register — compiled by `g15.001`, updated by review
-Date: 2026-08-20
+Date: 2026-08-21
 Card: `docs/roadmaps/g15/001-release-baseline-roster-inventory.md`
 Source: `docs/roadmaps/g15/release-baseline-roster.md` (frozen 175-component denominator)
 
 Every incomplete surface below was measured from the tree; nothing is inferred
 from another runtime's pass. Owners are the roadmap cards compiled from these
-gaps (`g15.002`–`g15.014`). Absence of downstream use is recorded as context
+gaps (`g15.002`–`g15.050`). Absence of downstream use is recorded as context
 but is **not** a gap — see the note at the end.
 
 ## Svelte Release Blocker Class
@@ -66,10 +66,10 @@ Rust render 1 missing (+ 1 not-applicable), GPUI specimen 0 missing
 | Model connection (approved `g14.020` requirements) | — closed by `g15.008` (`ModelConnectionPickerSpec`, `ModelConnectionSetupSpec`, `ModelConnectionCardSpec`, `ModelCatalogueEditorSpec`) | — closed by `g15.008` (`packages/render/src/model_{connection_picker,connection_setup,connection_card,catalogue_editor}.rs`) | — closed by `g15.008` (`packages/gpui/preview/src/specimens/model_{connection_picker,connection_setup,connection_card,catalogue_editor}_specimen.rs`) | `g15.008` |
 | Update & settings | — closed by `g15.009` (`UpdateStatusSpec`, `UpdateCenterSpec`, `SettingsShellSpec`) | — closed by `g15.009` (`packages/render/src/{update_status,update_center,settings_shell}.rs`) | — closed by `g15.009` (`packages/gpui/preview/src/specimens/{update_status,update_center,settings_shell}.rs`) | `g15.009` |
 | Radio | — closed by `g15.009` (`RadioSpec`) | — closed by `g15.009` (`packages/render/src/radio.rs`) | — closed by `g15.009` (`packages/gpui/preview/src/specimens/radio.rs`) | `g15.009` |
-| Context providers | — | IconProvider closed by `g15.009` (`packages/render/src/icon_provider.rs`); UiPresentationProvider remains a declared capability absence because ambient presentation cannot cross an already-built Node tree | — | follow-up required before `g15.013` |
+| Context providers | — | IconProvider closed by `g15.009` (`packages/render/src/icon_provider.rs`); UiPresentationProvider remains a declared capability absence because ambient presentation cannot cross an already-built Node tree | — | `g15.043`; architecture decision required before dispatch |
 | SegmentedControl option presentation | closed by `g15.038`: dedicated public `SegmentedControlOption` (breaking, pre-1.0, operator-approved 2026-08-20) | closed: labelled-icon and icon-only rendering through `poodle-render` | closed: GPUI specimen teaches the contract's Effects/Instruments icon-only example | `g15.038` |
 | AgentTranscript scroll/follow | — | closed by `g15.037`: shared render owns content and the jump-control recipe | closed by `g15.037`: retained GPUI state owns a real tracked viewport, detach latch, and jump-to-bottom | `g15.037` complete in PR #48; no remaining release blocker |
-| Stepper selection and re-run | — | handlers exist in shared composition | `node_compat.rs` wires collapse only; selection and re-run controls shown by the specimen are inert | follow-up card required before `g15.013`; found and accepted out of scope in PR #49 |
+| Stepper selection and re-run | — | handlers exist in shared composition | `node_compat.rs` wires collapse only; selection and re-run controls shown by the specimen are inert | `g15.042` ready; found and accepted out of scope in PR #49 |
 | Specimen axis domains | — closed by `g15.034` | — closed by `g15.034` | fake panes removed by `g15.019`; exact domains closed by `g15.034` | complete in PR #41 |
 | Display, workstation & agent specimens | — | — | — closed by `g15.010` (18 named GPUI specimen files under `packages/gpui/preview/src/specimens/`) | `g15.010` |
 | MeterSurface | not-applicable — web-only by fixed decision (spec 068) | not-applicable | not-applicable | none |
@@ -98,8 +98,20 @@ Svelte components (DockRegion, LicenceActivation, LicenceSeats, LicenceStatus,
 ModelConnectionPicker, ModelConnectionSetup, ModelConnectionCard,
 ModelCatalogueEditor, MeterSurface) and 13 React components (AgentPlan and
 AgentPlanRecord added by `g15.006` as new root exports; the rest as recorded
-in `test/package-install/web-preview.ts`). Extending the mounted proof across
-the roster is folded into the release-certification card.
+in `test/package-install/web-preview.ts`). `g15.048` replaces the vague
+"mount everything" continuation with exact clean-tarball root-import proof for
+all 175 names in both web packages plus a small representative mount set.
+
+## Visual And Release-Path Gaps
+
+| Gap | Current evidence | Owner |
+| --- | --- | --- |
+| GPUI headless pixels | GPUI 0.2.2's test platform proves layout/interaction but has no raster readback; the retained visual gate launches a window and uses `screencapture` | `g15.044` feasibility, then `g15.045` adoption on a `go` verdict |
+| Primitive named fixtures and comparison | rejected g14 corpus is removed; web/native capture foundations remain separate | `g15.046`–`g15.047` under parent `g15.012` |
+| Packed full-roster reachability | 9 Svelte / 13 React mounted cases only | `g15.048` |
+| Native pre-tag workflow | `.github/workflows/ci-native.yml` references deleted `packages/gpui/components/Cargo.toml` | `g15.049`, blocked on explicit workflow-edit approval |
+| Read-only release-gate claim | `effigy release gates` reports success with zero configured gates; not certification evidence | `g15.049` |
+| v0.2.0 candidate | manifests remain 0.1.0 and no 0.2.0 release note exists | `g15.050`, then operator gate `g15.013` |
 
 ## Carried Requirements (recorded, not implemented)
 
@@ -108,9 +120,9 @@ the roster is folded into the release-certification card.
 | Licence native completion (`g14.017`) | closed by `g15.007` — declarations, render, and GPUI specimens landed | `g15.007` |
 | Model-connection native completion (`g14.020`) | closed by `g15.008` — declarations, headless mirror, render, and GPUI specimens landed | `g15.008` |
 | Human-centred specimen catalogue audit (`g14.026`) | screening, pilots, defect-led curation, native probe, four screen-clear children, SegmentedControl native option parity (`g15.038`), DateTimeZonePicker nested-layer repair (`g15.039`), and ResizeHandle native semantics (`g15.040`) are complete; two review children remain | `g15.011`, `g15.032`–`g15.033` |
-| Primitive-first visual conformance lane | seam recorded in `conformance-estate.md`; harness not designed | `g15.012` |
+| Primitive-first visual conformance lane | recompiled into exact capture feasibility, adoption, fixture, and comparison children | `g15.012`, `g15.044`–`g15.047` |
 | Release-gate remediation | closed by PR #31 — `nanoid@3.3.18`; `bun audit` clean | `g15.014` |
-| v0.2.0 release certification | after all Svelte-denominator blockers close | `g15.013` |
+| v0.2.0 release certification | packed proof, truthful automation, and candidate preparation are explicit children; tag/publish stays operator-owned | `g15.048`–`g15.050`, then `g15.013` |
 
 ## Not Gaps
 

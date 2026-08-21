@@ -13,42 +13,15 @@ v0.2.0 release-baseline generation.
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
   `g14.022` completed the closeout. The generation is complete.
-- `g15` is the release-first v0.2.0 runway. The release-baseline roster, all
-  four focused-evidence tranches, React mirror closure, the three native
-  family tranches, and GPUI specimen closure are complete. `g15.011` has
-  delivered its screening baseline and three approved pilots; its exact
-  curation, native-probe, and screen-clear review children remain. `g15.015`
-  through `g15.017`, `g15.019` through `g15.025`, and `g15.034` are complete. PR #42
-  curated the model-connection and account-lifecycle family after two review
-  repair rounds; the operator explicitly waived that child's live visual
-  checkpoint when directing merge. PR #41 closed the
-  two returned axis-domain gaps and hardened the specimen substrate that
-  admitted them. PR #43 completed `g15.021`, including the review-time native
-  HistoryCenter delete-parity repair; its final live visual checkpoint was
-  explicitly waived by the operator. PR #44 completed `g15.035` and landed
-  solid Callout and RemediationBanner surfaces. PR #45 completed `g15.036`,
-  removed Pill's temporary duplicate `fill` axis, and corrected its four
-  appearance recipes before visual conformance. PR #46 completed `g15.022`,
-  curating the audio/music family with paired-web and shared-native coverage.
-  PR #47 completed `g15.023`, curating the foundation entry, content, and
-  status family. PR #48 completes `g15.024` and its review prerequisite
-  `g15.037`: GPUI now has real detached-scroll/jump/follow behavior. PR #49
-  completes `g15.025` and the six-child overloaded-Examples parent. PR #50
-  completed the headless native specimen probe. PR #51 completed `g15.028`,
-  the first screen-clear review child, and honestly returned one primitive
-  contract/runtime stop condition: SegmentedControl's Rust option shape cannot
-  carry icon or icon-only presentation. PR #52 completed `g15.038` with the
-  operator-approved clean type split and stable native focus scopes. PR #53
-  completed `g15.029`; the operator approved its changed DurationInput pages.
-  PR #54 completed routed `g15.039`, closing DateTimeZonePicker's paired-web
-  nested-layer pointer blocker. PR #55 completed `g15.030`; its ResizeHandle
-  review returned the shared native focus/keyboard/value blocker. PR #56
-  completed routed `g15.040` with stable caller-owned native focus identity
-  and unblocked `g15.031`. PR #57 completed `g15.031`: all nine foundation
-  content/status pages now carry human verdicts, and the operator accepted the
-  repaired paired-web ErrorBoundary reset/remount specimen.
-  `g15.013` remains the final gate after the
-  specimen program and `g15.012`.
+- `g15` is the release-first v0.2.0 runway. The 175-component Svelte and React
+  implementation/evidence rosters, measured native declaration/specimen
+  baseline, defect-led specimen curation, native specimen probe, and four of
+  six screen-clear reviews are complete. `g15.041` is in flight to close the
+  Popover blocker returned by `g15.032`; `g15.033` is the last page-review
+  child. The remaining release path is explicit: Stepper and native
+  presentation blockers (`042`–`043`), offscreen primitive conformance
+  (`044`–`047` under parent `012`), packed roster and release automation
+  (`048`–`049`), one exact candidate (`050`), then operator gate `013`.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
@@ -76,8 +49,9 @@ v0.2.0 release-baseline generation.
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
   `g15.014`–`g15.017`, `g15.019`–`g15.026`, `g15.028`–`g15.031`, and
-  `g15.034`–`g15.040` complete; `g15.011` partial with ready `g15.032` and one
-  later review child; `g15.013` final
+  `g15.034`–`g15.040` complete; `g15.041` in flight; `g15.042` and `g15.044`
+  ready as independent lanes; range recompiled through `g15.050`; `g15.013`
+  final operator gate
 
 ## Rules
 

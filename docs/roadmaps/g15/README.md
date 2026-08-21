@@ -2,8 +2,8 @@
 
 Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
 `g15.019`–`g15.026`, `g15.028`–`g15.031`, and `g15.034`–`g15.040` complete;
-`g15.011` partial with `g15.041` ready to repair the Popover web-trigger
-blocker found by `g15.032`; one later review child remains
+`g15.041` is in flight; `g15.042` and `g15.044` are independent ready lanes;
+the remaining release path is recompiled through `g15.050`
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -46,7 +46,8 @@ unproved, and what each runtime's evidence is — then ship.
 first evidence tranche closed 29 paired gaps. Later cards are listed in
 dependency order and are not dispatched until the orchestrator reviews and
 advances them. `g15.014` was an urgent prerequisite remediation executed out
-of numeric order; `g15.013` remains the final card.
+of numeric order; `g15.013` remains the final operator gate after the compiled
+release children through `g15.050`.
 
 ## Runway
 
@@ -78,13 +79,22 @@ and status advance are the orchestrator's.
 22. [038 — SegmentedControl native option parity](038-segmented-control-native-option-parity.md) — complete; PR #52 landed the clean option-type migration and stable native focus identity
 23. [039 — DateTimeZonePicker nested-layer pointer commit](039-date-time-zone-picker-nested-layer.md) — complete; PR #54 closed the paired-web pointer blocker and unblocked `g15.030`
 24. [040 — ResizeHandle native keyboard and value semantics](040-resize-handle-native-semantics.md) — complete; PR #56 closed stable native focus identity, keyboard, and numeric-range semantics
-25. [041 — Popover interactive trigger semantics](041-popover-interactive-trigger-semantics.md) — ready; clean pre-v0.2 state-aware trigger migration unblocks `g15.032`
-26. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — after `011`, `038`, and routed blockers complete; headless capture required
-27. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
-28. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after the full specimen program, routed blockers, and `012`
-29. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
-30. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
-31. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
+25. [041 — Popover interactive trigger semantics](041-popover-interactive-trigger-semantics.md) — **in flight**; clean pre-v0.2 state-aware trigger migration unblocks `g15.032`
+26. [042 — Stepper native interaction parity](042-stepper-native-interaction-parity.md) — **ready**, independent of `041`; closes inert GPUI selection/re-run controls
+27. [043 — UiPresentationProvider native cascade](043-ui-presentation-provider-native-cascade.md) — planned; orchestrator architecture decision required before dispatch
+28. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — non-dispatchable parent recompiled into `044`–`047`
+29. [044 — GPUI offscreen capture feasibility](044-gpui-offscreen-capture-feasibility.md) — **ready**, independent of `041`; decisive no-focus pixel proof
+30. [045 — GPUI offscreen capture adoption](045-gpui-offscreen-capture-adoption.md) — planned after an operator-reviewed `044` go verdict
+31. [046 — Primitive visual fixture inventory](046-primitive-visual-fixture-inventory.md) — planned after `011` and `045`
+32. [047 — Primitive visual comparison](047-primitive-visual-comparison.md) — planned after `046`; closes parent `012`
+33. [048 — Packed roster reachability](048-packed-roster-reachability.md) — planned after late web API migrations settle
+34. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — blocked on explicit workflow-edit approval
+35. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — planned after every implementation, specimen, conformance, packaging, and automation gate
+36. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
+37. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final operator tag/publication gate after accepted `050`
+38. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
+39. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
+40. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)
@@ -111,12 +121,20 @@ Follows the [worker dispatch ledger](../dispatch.md) contract: the orchestrator
 dispatches one whole card to a fresh thread/worktree when its dependencies are
 met. Workers do not write `dispatch.md` or change roadmap status.
 
-## Current Task
+## Current Task And Parallel Lanes
 
-`g15.041` is the single ready card. It performs the operator-approved clean
-pre-v0.2 Popover trigger migration: core-authored disclosure state flows into
-the real Svelte/React trigger, Button gains the matching `controls` seam, and
-all current Poodle consumers migrate without a compatibility route. After it
-lands, close `g15.032` and dispatch `g15.033`. `g15.012` follows the completed
-human-centred audit; `g15.013` stays blocked as the final certification gate.
-Release mutation remains behind the explicit operator gate.
+`g15.041` is in flight. When it lands, close `g15.032` and dispatch `g15.033`;
+the review order remains serial.
+
+Two independent cards may run beside it:
+
+- `g15.042` wires the already-rendered Stepper selection/re-run controls in
+  GPUI. Its component/runtime files do not overlap Popover's web migration.
+- `g15.044` is the capture-platform feasibility proof. It changes no production
+  package and decides whether a real no-focus GPUI pixel path exists.
+
+Do not dispatch `g15.043` until the orchestrator fixes the native presentation-
+context architecture. Do not dispatch `g15.045` without `g15.044`'s `go`
+verdict, or `g15.046` before the human-centred audit completes. `g15.049`
+requires explicit operator approval because it edits workflows. Release
+mutation remains behind `g15.013`.

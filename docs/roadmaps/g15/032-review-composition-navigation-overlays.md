@@ -1,6 +1,6 @@
 # g15.032 — Review Screen-Clear Navigation and Overlays
 
-Status: **blocked on ready `g15.041`** — review evidence landed in PR #58;
+Status: **blocked on in-flight `g15.041`** — review evidence landed in PR #58;
 Popover's routed web trigger API/semantics defect must be repaired before this
 card closes
 Parent: `027-screen-clear-human-review.md` (method, acceptance, stop

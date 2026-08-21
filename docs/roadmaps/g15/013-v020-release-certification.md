@@ -1,23 +1,19 @@
 # g15.013 — v0.2.0 Release Certification
 
-Status: **blocked** — final generation gate after `g15.008`–`g15.012` and
-`g15.038`
-Depends on: `g15.002`–`g15.012` (release-baseline implementation, specimens,
-and evidence), `g15.014` (release-gate remediation — security prerequisite),
-`g15.038` (SegmentedControl native option parity)
+Status: **operator gate — blocked on `g15.050`**
+Depends on: every earlier g15 implementation/specimen/conformance card,
+`g15.042`–`g15.050`, and one clean accepted v0.2.0 candidate SHA
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
 
 ## Outcome
 
-Certify and package Poodle v0.2.0 only after every earlier g15 implementation,
-specimen, audit, and conformance card is complete **and every release gate is
-green**. The frozen Svelte roster remains the release denominator: 175
-components with contract, implementation, export, specimen, and focused
-evidence. The completed active-cohort cards must also be reported honestly;
-experimental package labels stay explicit and Jetstream remains
-program-deferred. Effigy's release contract does not allow a red gate or an
-unfinished earlier card to be waived.
+Authorise the exact v0.2.0 candidate prepared by `g15.050`, then perform the
+human-owned tag/publication operation. This card contains no implementation
+batch and is never dispatched to a worker. The frozen Svelte roster remains
+the release denominator: 175 components with contract, implementation, export,
+specimen, and focused evidence. React, shared Rust, GPUI, visual evidence, and
+deferred Jetstream are reported independently and honestly.
 
 ## Prerequisites
 
@@ -35,18 +31,22 @@ unfinished earlier card to be waived.
 - [ ] `g15.012` landed: the primitive-first visual conformance lane is complete.
 - [x] `g15.038` landed: SegmentedControl's contracted icon and icon-only option
       surface exists in shared Rust and GPUI without a compatibility twin.
+- [ ] `g15.042` landed: Stepper selection and re-run are live in GPUI.
+- [ ] `g15.043` landed: UiPresentationProvider has a real native cascade.
+- [ ] `g15.048` landed: every public web component is reachable from clean
+      packed roots.
+- [ ] `g15.049` landed: release and native pre-tag automation are truthful.
+- [ ] `g15.050` landed: one clean v0.2.0 candidate, artifacts, notes, and QA
+      receipt are pinned to an exact SHA.
 
-## Execution Plan
+## Compiled Release Children
 
-- [ ] **Batch A — packed-consumer proof:** extend the packed-tarball proof
-      across the roster (beyond the 9 mounted components) and confirm packed
-      reachability per component.
-- [ ] **Batch B — package, documentation, and release notes:** v0.2.0 package
-      metadata, changelog, and documentation reflecting the honest state:
-      Svelte certified; React/Rust/GPUI parity gaps named; Jetstream deferred.
-- [ ] **Batch C — certification run:** full `effigy qa` green, register rows
-      closed where owned by earlier cards, and the release claim handed to
-      the operator.
+- [`g15.048`](048-packed-roster-reachability.md) owns packed public-root proof.
+- [`g15.049`](049-release-automation-truthfulness.md) owns stale/vacuous
+  automation repair and requires explicit operator approval before workflow
+  edits.
+- [`g15.050`](050-v020-release-candidate.md) owns versions, notes, dry-run
+  artifacts, full headless QA, and the exact candidate receipt.
 
 ## Goals
 
@@ -61,9 +61,11 @@ unfinished earlier card to be waived.
 
 ## Operator Gate
 
-- [ ] No tag, publish, or release mutation happens without explicit operator
-      approval on the certification run. This card records the gate; the
-      operator executes the release.
+- [ ] Operator reviews the `g15.050` receipt and exact SHA.
+- [ ] Operator explicitly authorises the tag and publication mutation.
+- [ ] The release is dispatched against that tag; no failed tag is reused.
+- [ ] Registry/GitHub results are checked and the generation closeout records
+      the actual published set.
 
 ## Acceptance
 
@@ -82,19 +84,8 @@ unfinished earlier card to be waived.
 - Packaging proceeds while any `g15.008`–`g15.012` card, Svelte-denominator
   surface, or release gate remains open.
 
-## Writable Scope
-
-- package metadata and release notes for v0.2.0
-- packed-consumer proof under `test/package-install/`
-- roster and register status updates owned by completed cards
-- `PAPERCUTS.md` for newly discovered execution friction
-
 ## Validation
 
-- `effigy qa` (headless local release board — must be fully green)
-- `effigy test:web-pack-install`
-- `effigy docs:check`
-- `git diff --check`
-
-Never run a `*-windowed` selector, `test:native-visual`, `qa:jetstream`, or
-any Jetstream selector.
+Use only the pinned `g15.050` evidence and the repaired release automation.
+Do not rerun a windowed local harness to manufacture late evidence. Release
+mutation remains operator-owned.

@@ -7,60 +7,23 @@ Updated: 2026-08-21
 - `g15`
   - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
     `g15.019`–`g15.026`, `g15.028`–`g15.031`, and `g15.034`–`g15.040`
-    complete; `g15.011` partial with ready `g15.032` and one later review
-    child; `g15.013` final
+    complete; `g15.041` in flight; `g15.042` and `g15.044` ready as
+    independent lanes; `g15.013` is the final operator gate
   - Posture: release-first v0.2.0 baseline
-  - Range: `001` to `040`
+  - Range: `001` to `050` plus final gate `013`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
     release baseline, not a parity architecture
   - Evidence: the v0.2.0 denominator is every public Svelte component
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch ready `g15.032`, the ten-page navigation/overlays human
-    review. PR #57 completed `g15.031`: all nine
-    foundation content/status pages have human verdicts, and ErrorBoundary's
-    paired-web reset/remount specimen is repaired and operator-approved. PR #56
-    completed routed `g15.040`: ResizeHandle now has
-    caller-owned stable native focus identity, keyboard resizing, and
-    renderer-neutral numeric-range semantics. PR #55 completed `g15.030`: all
-    nine pages received human verdicts,
-    ResizeHandle gained live pane resizing, and the remaining native semantic
-    gap was recorded rather than hidden. PR #54 completed the paired-web DateTimeZonePicker nested-layer pointer
-    repair returned by `g15.029`. PR #53 completed the
-    seven-page foundation date/time review with operator sign-off on the
-    changed DurationInput specimens; Calendar and DurationInput received
-    bounded repairs, while DateTimeZonePicker correctly stopped on a dead
-    primary pointer workflow. PR #52 completed `g15.038`, closing the
-    SegmentedControl option
-    surface and stable-focus stop condition returned by `g15.028`.
-    PR #50 completes `g15.026`: 174/174 canonical GPUI routes construct and
-    all 126 Sizes / 127 Densities panes open through headless pointer input.
-    PR #49 completes `g15.025` and the six-child overloaded-Examples parent;
-    operator sign-off and GitHub `active-cohort` are recorded. PR #48 completes
-    `g15.024` and its `g15.037` review prerequisite with a
-    real GPUI tracked viewport and mounted detach/jump/follow proof; the
-    rejected specimen counter simulation is gone. PR #47 completed `g15.023`
-    with paired live review signed off.
-    PR #46 completed `g15.022`, curating the audio/music family across
-    paired web and shared native specimens. PR #45 completed `g15.036`, removed Pill's temporary duplicate
-    `fill` API, and moved solid treatment onto the existing appearance axis.
-    PR #44's Callout and RemediationBanner solid fills remain unchanged.
-    PR #43 completed `g15.021`, including native HistoryCenter delete parity;
-    the operator explicitly waived its final live visual checkpoint.
-    PR #42 completed `g15.020` after two review repair rounds;
-    the operator explicitly waived its live visual checkpoint when directing
-    merge.
-    PR #41 completed the operator-approved clean migration for EmptyState,
-    Icon, and explicit ordered specimen domains.
-    `g15.015` restored all 52 scoped captions and added the missing
-    Svelte-preview type gate; `g15.016` converged 29 paired routes on one
-    caption idiom and added two dedicated pages. The web release roster reads
-    175/175 focused evidence in both Svelte and React, the native
-    implementation/specimen closures are landed, and the independent
-    `bun audit` advisory is closed.
-    `g15.012` follows the completed human-centred audit; `g15.013` remains the
-    final certification gate.
+  - Next: `g15.041` closes the Popover blocker returned by `g15.032`; then the
+    last screen-clear review is `g15.033`. In parallel, `g15.042` can close
+    Stepper's inert native actions and `g15.044` can make the decisive GPUI
+    offscreen-pixel decision. `g15.043` stays non-dispatchable until the native
+    presentation-context architecture is fixed. `g15.012` is now exact
+    children `044`–`047`; release preparation is exact children `048`–`050`;
+    workflow edits in `049` require explicit operator approval.
 
 ## Latest Completed Track
 

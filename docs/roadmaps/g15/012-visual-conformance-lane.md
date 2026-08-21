@@ -1,8 +1,9 @@
 # g15.012 — Primitive-First Visual Conformance Lane
 
-Status: **blocked** — `g15.038` is complete; `g15.011` must complete first
-Depends on: `g15.001` (measured roster), `g15.011` (human-centred catalogue
-audit), `g15.038` (SegmentedControl native option parity)
+Status: **non-dispatchable parent** — exact children `g15.044`–`g15.047`;
+`g15.044` is ready and may run before the catalogue audit completes
+Depends on: `g15.001` (measured roster), `g15.011` (before fixture freeze),
+`g15.038` (SegmentedControl native option parity)
 Governing refs: `release-baseline-roster.md`,
 `../../roadmaps/g14/022-generation-closeout.md` (operator ruling on future
 visual conformance), `../../roadmaps/g14/conformance-estate.md`,
@@ -29,24 +30,26 @@ still completes before the generation's final release-certification card.
 - real harnesses in each runtime rendering the same named fixtures
 - renderer-aware comparison of geometry, tokens, and pixels with
   antialiasing tolerance
-- web snapshot tooling under `test/visual/` and the retained native capture
-  (`effigy test:native-visual` with `--control-size`) as the seam
+- web snapshot tooling under `test/visual/`, plus the GPUI offscreen seam that
+  `g15.044` must prove and `g15.045` must adopt; the retained windowed native
+  capture is evidence to replace, not a release fallback
 
-## Execution Plan
+## Exact Children
 
-- [ ] **Batch 1 — capture-platform decision:** confirm a headless capture path
-      that cannot steal desktop focus exists for every active runtime. If
-      GPUI cannot provide one, this batch stops with that finding recorded —
-      the windowed harness is not run and the lane's native half is blocked
-      until a headless path exists.
-- [ ] **Batch 2 — fixture inventory:** name the bounded variant/style set for
-      the first primitive batch (foundation display & shell) as shared,
-      renderer-neutral fixture identities (component, variant, size/density
-      axis values, tokens under test).
-- [ ] **Batch 3 — paired captures and comparison:** implement the real
-      per-runtime harnesses, capture the same named fixtures, and compare
-      geometry/tokens/pixels within renderer-aware tolerances; land baselines
-      for the first batch as diagnostic evidence.
+1. [`g15.044`](044-gpui-offscreen-capture-feasibility.md) — prove or reject a
+   GPUI-native offscreen pixel path. **Ready now.** It does not build fixtures
+   or change the production GPUI pin.
+2. [`g15.045`](045-gpui-offscreen-capture-adoption.md) — adopt the exact proved
+   GPUI pin/seam after an operator-reviewed `go` verdict.
+3. [`g15.046`](046-primitive-visual-fixture-inventory.md) — freeze the small
+   named primitive batch after the human-centred catalogue audit completes.
+4. [`g15.047`](047-primitive-visual-comparison.md) — capture and compare the
+   first batch across Svelte, React, and GPUI with human-reviewed tolerances.
+
+This parent never dispatches directly. A Longhorn-backed Tauri lab is optional
+control tooling, not one of these children and not a prerequisite for the
+comparator. Longhorn can already control and compose Tauri webviews without
+focus theft; its current contract cannot see genuinely native GPUI pixels.
 
 ## Goals
 
@@ -64,9 +67,8 @@ still completes before the generation's final release-certification card.
 - [ ] Fixtures are never an API/behaviour authority; contracts remain the
       semantic authority and focused functional evidence stays the
       completion surface.
-- [ ] Headless capture evidence exists for the first primitive batch with
-      renderer-aware tolerances; native visual compare remains local-only and
-      operator-owned where it cannot be headless.
+- [ ] Headless capture evidence exists for the first primitive batch in every
+      active runtime with renderer-aware tolerances.
 - [ ] No semantic/behaviour authority or completion gate is introduced; the
       bounded renderer-aware cross-runtime comparator remains diagnostic.
 
@@ -78,10 +80,12 @@ still completes before the generation's final release-certification card.
 - The windowed harness is run to compensate for a missing headless path.
 - Work expands beyond the named batch without a new card.
 
-## Writable Scope
+## Closeout
 
-- fixture identities, capture harnesses, baselines, and batch cards
-- `PAPERCUTS.md` for newly discovered execution friction
+This parent completes only when `g15.044`–`g15.047` have landed, the first
+primitive batch has operator-reviewed evidence for every active runtime, and
+the resulting mechanism still satisfies the forbidden-authority boundaries
+above.
 
 ## Validation
 
