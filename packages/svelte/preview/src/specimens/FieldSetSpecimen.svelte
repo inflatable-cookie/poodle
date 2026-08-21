@@ -5,7 +5,10 @@
 
 <div class="poodle-specimen">
   <SpecimenGroup label="Contact Information">
-    <FieldSet legend="Contact Information">
+    <FieldSet
+      legend="Contact Information"
+      description="We use this to reach you about your account."
+    >
       <Field id="fs-name" label="Full Name" required>
         <TextInput id="fs-name" placeholder="Jane Smith" ariaLabel="Full Name" />
       </Field>
