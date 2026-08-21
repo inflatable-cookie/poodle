@@ -4,7 +4,7 @@ Date: 2026-08-21
 Card: `docs/roadmaps/g15/042-stepper-native-interaction-parity.md`
 Contract: `docs/contracts/components/stepper.md`
 Gap row: `docs/roadmaps/g15/release-gap-register.md`
-PR: pending
+PR: #60
 
 ## Outcome
 
