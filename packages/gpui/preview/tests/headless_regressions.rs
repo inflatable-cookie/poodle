@@ -3303,3 +3303,215 @@ fn empty_state_compact_and_default_render_distinct_geometry() {
     let compact_icon = icon_container_side(&compact).expect("compact icon box");
     assert!(compact_icon < default_icon);
 }
+
+// ── g15.042 Stepper native interaction ────────────────────────────────────
+
+/// Give each mounted Stepper control a stable id keyed by its step value.
+///
+/// Bounds are only recorded for identified elements, so this is how the driver
+/// addresses the real trigger and the real rerun button instead of calling a
+/// closure. The shape is the renderer's: one list item per step, trigger
+/// first, rerun — where the contract permits one — second.
+fn identify_stepper(root: &mut Node, values: &[&str]) {
+    let mut cells = root
+        .children
+        .iter_mut()
+        .filter(|cell| cell.a11y.role == Some(poodle_node::NodeRole::ListItem));
+    for value in values {
+        let cell = cells.next().expect("one list item per step");
+        cell.children[0].id = Some(format!("stepper-trigger-{value}"));
+        if let Some(rerun) = cell.children.get_mut(1) {
+            rerun.id = Some(format!("stepper-rerun-{value}"));
+        }
+    }
+}
+
+/// g15.042: GPUI wired `on_collapsed_change` alone, so the specimen painted
+/// selectable steps and rerun buttons that did nothing.
+///
+/// Selection and re-run are separate controls because re-running a finished
+/// step spends whatever that step costs (`stepper.md` §2), so this drives both
+/// through the real mounted tree and checks that neither one stands in for the
+/// other. Only a mounted window can prove it: the rerun sits *inside* the
+/// clickable step, so an unwired one would let the press bubble into
+/// selection, and gpui's own dispatch is what decides.
+///
+/// Keyboard coverage here is activation of an already-focused control. GPUI's
+/// Stepper declares no focus treatment, so nothing registers a focus handle
+/// and focus can only arrive by pointer — an open gap with its own row in the
+/// g15 release-gap register.
+#[test]
+fn stepper_selection_and_rerun_reach_separate_mounted_controls() {
+    use poodle_specs::{StepStatus, StepperSpec, StepperStep};
+
+    run_headless(|cx| {
+        let changes = Arc::new(Mutex::new(Vec::new()));
+        let reruns = Arc::new(Mutex::new(Vec::new()));
+        let change_sink = Arc::clone(&changes);
+        let rerun_sink = Arc::clone(&reruns);
+
+        let mut node = poodle_render::stepper(
+            &StepperSpec::new(vec![
+                StepperStep::new("read", "Read").with_status(StepStatus::Complete),
+                StepperStep::new("apply", "Apply").with_disabled(true),
+            ])
+            .with_value("apply")
+            .with_show_rerun(true),
+            &theme(),
+            poodle_render::StepperHandlers {
+                on_change: Some(Arc::new(move |value: &str| {
+                    change_sink.lock().unwrap().push(value.to_string())
+                })),
+                on_rerun: Some(Arc::new(move |value: &str| {
+                    rerun_sink.lock().unwrap().push(value.to_string())
+                })),
+                on_collapsed_change: None,
+            },
+        );
+        identify_stepper(&mut node, &["read", "apply"]);
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        // Pointer: the trigger navigates and does nothing else.
+        driver.pointer_activate_id("stepper-trigger-read");
+        assert_eq!(
+            changes.lock().unwrap().as_slice(),
+            ["read"],
+            "an enabled trigger emits its own value exactly once",
+        );
+        assert!(
+            reruns.lock().unwrap().is_empty(),
+            "selecting a completed step must not re-run it",
+        );
+
+        // Keyboard: the press left focus on that same trigger, so Enter walks
+        // the real focus chain to the control the pointer just used. This is
+        // activation, not entry — see the note above.
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            changes.lock().unwrap().as_slice(),
+            ["read", "read"],
+            "keyboard activation reaches the same mounted trigger",
+        );
+        assert!(reruns.lock().unwrap().is_empty());
+
+        // Pointer: the rerun control is a different node with a different job.
+        driver.pointer_activate_id("stepper-rerun-read");
+        assert_eq!(
+            reruns.lock().unwrap().as_slice(),
+            ["read"],
+            "the rerun control emits the completed step's exact value once",
+        );
+        assert_eq!(
+            changes.lock().unwrap().as_slice(),
+            ["read", "read"],
+            "re-running must not also navigate — the press stopped at the rerun",
+        );
+
+        driver.dispatch_key_raw("space");
+        assert_eq!(
+            reruns.lock().unwrap().as_slice(),
+            ["read", "read"],
+            "keyboard activation reaches the same mounted rerun control",
+        );
+        assert_eq!(
+            changes.lock().unwrap().as_slice(),
+            ["read", "read"],
+            "and still does not select the step it re-ran",
+        );
+
+        // A disabled step is not a control: it takes neither the click nor the
+        // focus the click would have moved.
+        driver.pointer_activate_id("stepper-trigger-apply");
+        assert_eq!(
+            changes.lock().unwrap().as_slice(),
+            ["read", "read"],
+            "a disabled step cannot select",
+        );
+        assert_eq!(reruns.lock().unwrap().len(), 2);
+    });
+}
+
+/// g15.042: collapse is the third action and stays its own. It folds the
+/// vertical track, carries the new state, and never selects or re-runs.
+#[test]
+fn stepper_collapse_stays_independent_in_a_mounted_window() {
+    use poodle_node::NodeRole;
+    use poodle_specs::{Orientation, StepStatus, StepperSpec, StepperStep};
+
+    const SUMMARY: &str = "poodle-stepper-summary";
+
+    run_headless(|cx| {
+        let changes = Arc::new(Mutex::new(Vec::new()));
+        let reruns = Arc::new(Mutex::new(Vec::new()));
+        let collapses = Arc::new(Mutex::new(Vec::new()));
+
+        let build = |collapsed: bool| {
+            let change_sink = Arc::clone(&changes);
+            let rerun_sink = Arc::clone(&reruns);
+            let collapse_sink = Arc::clone(&collapses);
+            let mut node = poodle_render::stepper(
+                &StepperSpec::new(vec![
+                    StepperStep::new("read", "Read").with_status(StepStatus::Complete),
+                    StepperStep::new("apply", "Apply"),
+                ])
+                .with_orientation(Orientation::Vertical)
+                .with_collapsible(true)
+                .with_collapsed(collapsed)
+                .with_show_rerun(true)
+                .with_value("apply"),
+                &theme(),
+                poodle_render::StepperHandlers {
+                    on_change: Some(Arc::new(move |value: &str| {
+                        change_sink.lock().unwrap().push(value.to_string())
+                    })),
+                    on_rerun: Some(Arc::new(move |value: &str| {
+                        rerun_sink.lock().unwrap().push(value.to_string())
+                    })),
+                    on_collapsed_change: Some(Arc::new(move |next: bool| {
+                        collapse_sink.lock().unwrap().push(next)
+                    })),
+                },
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            Arc::new(Mutex::new(node))
+        };
+
+        let collapsed = build(true);
+        assert!(
+            !collapsed
+                .lock()
+                .unwrap()
+                .children
+                .iter()
+                .any(|child| child.a11y.role == Some(NodeRole::ListItem)),
+            "collapsed omits the step rows rather than hiding them",
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&collapsed));
+
+        driver.pointer_activate_id(SUMMARY);
+        assert_eq!(
+            collapses.lock().unwrap().as_slice(),
+            [false],
+            "the summary carries the state it is moving to",
+        );
+
+        // The host owns the state, so the expanded tree is a fresh mount. The
+        // same control now asks to fold, and the keyboard reaches it too.
+        driver.mount_node(build(false));
+        driver.pointer_activate_id(SUMMARY);
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            collapses.lock().unwrap().as_slice(),
+            [false, true, true],
+            "expanded, the summary asks to collapse — by pointer, and by key \
+             once the pointer has focused it",
+        );
+
+        assert!(
+            changes.lock().unwrap().is_empty() && reruns.lock().unwrap().is_empty(),
+            "folding the track selects nothing and re-runs nothing",
+        );
+    });
+}

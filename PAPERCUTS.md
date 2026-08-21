@@ -959,3 +959,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   `poodle-preview` unit-test target. Its bin-unit cases need a smaller test
   target or non-optimized test profile; adding more tests to the binary makes
   the compiler failure easier to hit.
+
+- 2026-08-21 — g15.042 found that **the node backend's generated element-id
+  counter is a process global**, so two test threads that render node trees at
+  once make id-less controls unclickable. `reset_element_ids` restarts
+  `NEXT_ID` once per rendered frame precisely so a node that declares no id
+  keeps the same `ElementId` across the frames a real click spans; with a
+  second thread resetting the same counter, the id can change between a press
+  and its release, and gpui — which keys the pending mouse-down by that id —
+  drops the click with no error. The new Stepper route probe passed alone and
+  failed inside `probe:gpui-specimens`, whose sweep runs four shards in
+  parallel. Worked around with an `RwLock` in `specimen_probe.rs`: shards share
+  it, a test that clicks node-backed controls takes it exclusively. A real fix
+  would make the counter thread-local, which is where every other backend
+  registry (`FOCUS_HANDLES`, `ELEMENT_BOUNDS`) already lives — small, but it is
+  backend ownership rather than this card's seam.
