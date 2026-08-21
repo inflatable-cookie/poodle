@@ -2,9 +2,11 @@
 
 Status: **partial** — mechanical screening baseline plus live measurement on
 all three runtimes. Human teaching judgment has been applied to the three
-pilots and to 49 screen-clear pages (`g15.028`–`g15.032`); 7 screen-clear
-pages (`g15.033`) and the remaining defect-led rows still await it.
-Date: 2026-08-21 (revision 14 — `g15.041` repaired the Popover web trigger
+pilots and to all 56 screen-clear pages (`g15.028`–`g15.033`); the remaining
+defect-led rows still await it.
+Date: 2026-08-22 (revision 15 — `g15.033` recorded seven composition, forms,
+data, and media teaching verdicts without changing mechanical grades or
+dispositions; revision 14 — `g15.041` repaired the Popover web trigger
 contract: the state-aware interactive composition lands
 `aria-expanded`/`aria-controls`/disabled on the real control in both web
 runtimes, returning the row to `A / A / A` and `keep` with operator live
@@ -112,13 +114,13 @@ meaningfully distinct. A later human review may change a grade or disposition
 in the existing row; it does not add a second table.
 
 A person has now answered those questions for the three pilots (Button,
-RangeSlider, Tabs) and for the 49 screen-clear pages owned by `g15.028`–
-`g15.032`. The remaining 7 screen-clear pages sit in `g15.033`.
+RangeSlider, Tabs) and for all 56 screen-clear pages owned by `g15.028`–
+`g15.033`.
 Every child carries a live operator-review checkpoint for changes.
 
 So read an **A** that has no human verdict as "no measured defect", not as
 "judged a good teaching page". A page can screen A and still open on a prop
-showcase. Read an **A** that names a `g15.028`–`g15.032` human verdict as the
+showcase. Read an **A** that names a `g15.028`–`g15.033` human verdict as the
 reviewer's keep. **D** remains the dead-primary-interaction or unusable-as-
 documentation grade even when the defect is a component blocker rather than a
 caption hole.
@@ -143,8 +145,9 @@ Dispositions used in the rows: `keep`, `pilot-fix`, `curation-tranche`,
 ## Totals
 
 Mechanical recount of the 175 inventory rows at this revision, after
-`g15.041` closed the Popover web trigger `contract/runtime-blocker`. These
-numbers are the rows, not a pre-pilot or pre-curation baseline.
+`g15.041` closed the Popover web trigger `contract/runtime-blocker` and
+`g15.033` added seven human verdicts without changing grades or dispositions.
+These numbers are the rows, not a pre-pilot or pre-curation baseline.
 
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -654,20 +657,20 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | --- | :-: | :-: | :-: | --- | --- |
 | `BlockEditor` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `Field` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `FieldSet` | A | A | A | keep | no named defect |
+| `FieldSet` | A | A | A | keep | human verdict (`g15.033`): keep — legend/description, two-column span, legendless gap, and multiple form sections teach grouping choices; Sv/Rc paired; Gp mirrors the grouping axes with renderer-owned gap evidence |
 | `FormActions` | C | C | B | curation-tranche | **Sv:** controls do nothing — Cancel, Save, Back, Continue and Delete are all unwired · **Rc:** controls do nothing — Cancel, Save, Back, Continue and Delete are all unwired · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `FormLayout` | C | C | A | curation-tranche | **Sv:** controls do nothing — every form action in the specimen is unwired · **Rc:** controls do nothing — every form action in the specimen is unwired |
 | `InlineListSection` | C | C | A | curation-tranche | **Sv:** controls do nothing — the section's add action is unwired · **Rc:** controls do nothing — the section's add action is unwired |
 | `MarkdownEditor` | B | A | B | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `PasswordRequirements` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `ValidationSummary` | A | A | A | keep | no named defect |
+| `ValidationSummary` | A | A | A | keep | human verdict (`g15.033`): keep — blocking and mixed-pending summaries point to real invalid/pending controls; link clicks stay inside the preview route and focus the target; Sv/Rc paired; Gp covers blocking, pending-only, mixed, and empty states |
 
 ### Data & collections — Composition (16)
 
 | Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
 | `BulkActionBar` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `CardRadioGroup` | A | A | A | keep | no named defect |
+| `CardRadioGroup` | A | A | A | keep | human verdict (`g15.033`): keep — plan and instance choices teach live selection, disabled state, and size/density axes; pointer, disabled, and ArrowLeft gestures verified in Sv/Rc; Gp wires selection and mirrors the disabled/axis evidence |
 | `CardToggleGroup` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `DataTable` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `EditableList` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
@@ -675,12 +678,12 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | `FilterToolbar` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `ListCard` | C | C | B | curation-tranche | **Sv:** Examples overloaded — 19 captioned examples · **Rc:** Examples overloaded — 19 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `ListCardCounter` | C | C | C | curation-tranche | **Sv:** Examples overloaded — 19 captioned examples; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop; page is `ListCardSpecimen.svelte` — it teaches a different component · **Rc:** Examples overloaded — 19 captioned examples; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop; page is `ListCardSpecimen.svelte` — it teaches a different component · **Gp:** examples carry no captions at all |
-| `ListContainer` | A | A | A | keep | no named defect |
+| `ListContainer` | A | A | A | keep | human verdict (`g15.033`): keep — ready slot composition, pagination, filters/batch affordances, and Loading/Empty/Error states are distinct; page and state changes verified in Sv/Rc; Gp mirrors the construction/state surfaces |
 | `LogList` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `OrderBy` | A | A | A | keep | no named defect |
+| `OrderBy` | A | A | A | keep | human verdict (`g15.033`): keep — multi-field builder, direction/remove controls, icon trigger, disabled state, and axes are clear; Sv/Rc paired with live direction/remove/Escape paths; Gp mirrors open, disabled, and axis construction |
 | `PickerShell` | B | B | A | curation-tranche | **Sv:** Densities tab shown for a component with no `density` prop · **Rc:** Densities tab shown for a component with no `density` prop |
 | `RelationPicker` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `SelectionSummary` | A | A | A | keep | no named defect |
+| `SelectionSummary` | A | A | A | keep | human verdict (`g15.033`): keep — selected chips, removal, clear, single-item, and truncation states are distinct; live removal/clear verified in Sv/Rc; Gp adds empty, size, and clear evidence |
 | `Table` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 
 ### Media — Composition (6)
@@ -691,7 +694,7 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | `MediaBrowsePanel` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `MediaPicker` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `MediaPreview` | B | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `MediaThumbnail` | A | A | A | keep | no named defect |
+| `MediaThumbnail` | A | A | A | keep | human verdict (`g15.033`): keep — image/video metadata, compact document/audio, loading, and contained-fit stories are distinct; Sv/Rc paired; Gp extends with kind fallback, aspect, states, and fit evidence |
 | `VideoPlayer` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 
 ### Application shell — Systems (12)
