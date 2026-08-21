@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-20 — `effigy ci:rust` runs `test:contracts`, which lists seven
+  contract crates but not `packages/contracts/node`. `poodle-node` is the
+  vocabulary every component depends on, and its own unit tests run under no
+  selector — only `cargo test --manifest-path packages/contracts/node/...`
+  reaches them. Adding the crate to `test:contracts` is a one-line task edit,
+  which needs the task-file owner. Found on g15.040.
+
 - 2026-08-20 — `gh pr merge --merge --delete-branch` successfully merges a PR
   from its worker worktree, then exits non-zero because it tries to check out
   `main`, which is already owned by the planning worktree. Merge first without

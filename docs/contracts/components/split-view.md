@@ -1,7 +1,7 @@
 # SplitView
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-21
 
 ## 1. Purpose
 
@@ -436,10 +436,16 @@ None.
   [0.05, 0.95]: the divider starts a gpui drag and the split root listens
   for its moves, whose bounds give the axis extent a ratio needs. The drag
   state lives in gpui, not the component, so mid-drag re-renders (each
-  ratio emission causes one) do not drop the gesture. Hosts composing more
-  than one resizable split give each a distinct `with_id`.
-- keyboard resizing is not implemented (no focus/key routing yet); collapse
-  state and orientation semantics are.
+  ratio emission causes one) do not drop the gesture.
+- `SplitViewSpec::new(instance_id, orientation)` requires a caller-owned
+  native instance scope. The split composes a ResizeHandle, whose backend focus
+  and gesture state need an identity no two splits share; the divider's scope
+  is derived (`{scope}:divider`) rather than passed a second time. Hosts keep
+  the scope stable for the split's lifetime.
+- keyboard resizing arrives through the composed ResizeHandle: a focused
+  divider answers the axis arrows and Home/End at that contract's deltas
+  (`docs/contracts/components/resize-handle.md` §6) and reports them through
+  `on_resize`. Collapse state and orientation semantics are unchanged.
 - `toggle_visibility` is honoured through the shared render tier
   (`poodle_render::split_view`): the toggle cluster rests at
   `opacity: 0` with a hover `StylePatch` restoring `1.0`. Opacity is

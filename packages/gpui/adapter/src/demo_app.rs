@@ -203,7 +203,11 @@ fn render_command_and_workspace(a: &GpuiAdapter, t: &dyn ThemeProvider) -> DemoS
     screen.push(a.render(&ActionDiscoveryPanelSpec::new(vec![]), &s, t));
     screen.push(a.render(&DockRegionSpec::new(DockEdge::Left, vec![]), &s, t));
     screen.push(a.render(&DockRegionSpec::new(DockEdge::Right, vec![]), &s, t));
-    screen.push(a.render(&SplitViewSpec::new(SplitOrientation::Horizontal), &s, t));
+    screen.push(a.render(
+        &SplitViewSpec::new("demo-app:split-view", SplitOrientation::Horizontal),
+        &s,
+        t,
+    ));
     screen.push(a.render(&ShellStatusBarSpec::new(), &s, t));
 
     screen

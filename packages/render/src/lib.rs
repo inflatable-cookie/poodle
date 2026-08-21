@@ -341,7 +341,7 @@ pub use remediation_banner::{
     remediation_banner, remediation_banner_action_focus_id, remediation_banner_dismiss_focus_id,
     RemediationBannerHandlers,
 };
-pub use resize_handle::{resize_handle, ResizePhase};
+pub use resize_handle::{resize_handle, resize_handle_focus_id, ResizePhase};
 pub use scroll_shell::scroll_shell;
 pub use segmented_control::segmented_control;
 pub use select::{select, SelectHandlers};

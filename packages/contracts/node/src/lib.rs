@@ -752,6 +752,14 @@ pub struct NodeA11y {
     pub level: Option<usize>,
     /// Current numeric value for value-bearing controls (slider thumbs).
     pub value: Option<f64>,
+    /// Inclusive lower bound of [`Self::value`]. A current value with no range
+    /// is only half a statement: "120" means nothing until the listener knows
+    /// the span it sits in, which is why the ARIA range keeps the three
+    /// together.
+    pub value_min: Option<f64>,
+    /// Inclusive upper bound of [`Self::value`], same argument as
+    /// [`Self::value_min`].
+    pub value_max: Option<f64>,
 }
 
 impl Node {
@@ -910,6 +918,18 @@ mod tests {
         assert_eq!(tree.texts(), ["first", "chevron-down", "last"]);
         assert!(tree.has_text("chevron-down"));
         assert!(!tree.has_text("absent"));
+    }
+
+    /// The numeric range is absent until a component declares it. Defaulting
+    /// it to `0..100` would put a made-up span on every node that only ever
+    /// wanted a role, and a listener cannot tell an invented range from a
+    /// declared one.
+    #[test]
+    fn a_node_declares_no_numeric_range_by_default() {
+        let node = Node::container();
+        assert_eq!(node.a11y.value, None);
+        assert_eq!(node.a11y.value_min, None);
+        assert_eq!(node.a11y.value_max, None);
     }
 
     #[test]

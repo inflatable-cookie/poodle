@@ -37,14 +37,18 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             .overflow_hidden()
             .child(pane("Left"))
             .child(js_resize_handle(
-                &ResizeHandleSpec::new()
-                    .with_orientation(Orientation::Horizontal)
-                    .with_disabled(disabled)
-                    .with_aria_label(if disabled {
-                        "Disabled resize"
-                    } else {
-                        "Resize horizontal"
-                    }),
+                &ResizeHandleSpec::new(if disabled {
+                    "resize-handle:disabled-horizontal"
+                } else {
+                    "resize-handle:horizontal"
+                })
+                .with_orientation(Orientation::Horizontal)
+                .with_disabled(disabled)
+                .with_aria_label(if disabled {
+                    "Disabled resize"
+                } else {
+                    "Resize horizontal"
+                }),
                 theme,
             ))
             .child(pane("Right"))
@@ -61,14 +65,18 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             .overflow_hidden()
             .child(pane("Top"))
             .child(js_resize_handle(
-                &ResizeHandleSpec::new()
-                    .with_orientation(Orientation::Vertical)
-                    .with_disabled(disabled)
-                    .with_aria_label(if disabled {
-                        "Disabled resize vertical"
-                    } else {
-                        "Resize vertical"
-                    }),
+                &ResizeHandleSpec::new(if disabled {
+                    "resize-handle:disabled-vertical"
+                } else {
+                    "resize-handle:vertical"
+                })
+                .with_orientation(Orientation::Vertical)
+                .with_disabled(disabled)
+                .with_aria_label(if disabled {
+                    "Disabled resize vertical"
+                } else {
+                    "Resize vertical"
+                }),
                 theme,
             ))
             .child(pane("Bottom"))

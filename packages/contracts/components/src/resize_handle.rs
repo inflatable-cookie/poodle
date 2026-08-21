@@ -14,6 +14,12 @@ use crate::types::Orientation;
 ///     └── [Visual Affordance] (the line; fills the root)
 #[derive(Clone, Debug, PartialEq)]
 pub struct ResizeHandleSpec {
+    /// Stable native instance scope. Shared render is stateless and two
+    /// handles can legitimately share an axis, a name, and a range, so the
+    /// caller states which handle this is; nothing derived from semantics or
+    /// render order can tell them apart, and the backend keys focus and
+    /// gesture state on it.
+    pub instance_id: String,
     /// Resize axis: `Horizontal` means left/right drag (vertical line),
     /// `Vertical` means up/down drag (horizontal line).
     /// Contract default: `Horizontal`.
@@ -30,9 +36,13 @@ pub struct ResizeHandleSpec {
     pub aria_value_max: f32,
 }
 
-impl Default for ResizeHandleSpec {
-    fn default() -> Self {
+impl ResizeHandleSpec {
+    /// The instance scope has no default: an invented one is indistinguishable
+    /// from a stated one, and the first duplicate silently shares a focus
+    /// handle. There is no `Default` for the same reason.
+    pub fn new(instance_id: impl Into<String>) -> Self {
         Self {
+            instance_id: instance_id.into(),
             orientation: Orientation::Horizontal,
             is_disabled: false,
             aria_label: None,
@@ -40,12 +50,6 @@ impl Default for ResizeHandleSpec {
             aria_value_min: 0.0,
             aria_value_max: 100.0,
         }
-    }
-}
-
-impl ResizeHandleSpec {
-    pub fn new() -> Self {
-        Self::default()
     }
 
     pub fn with_orientation(mut self, orientation: Orientation) -> Self {

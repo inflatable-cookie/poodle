@@ -146,7 +146,9 @@ pub fn split_view(
         SplitOrientation::Horizontal => Orientation::Horizontal,
         SplitOrientation::Vertical => Orientation::Vertical,
     };
-    let handle_spec = ResizeHandleSpec::new()
+    // The divider's scope is the split's own, so two identical splits do not
+    // hand the backend one focus handle for two dividers.
+    let handle_spec = ResizeHandleSpec::new(spec.divider_instance_id())
         .with_orientation(handle_orientation)
         .with_disabled(spec.is_disabled);
     let handle = resize_handle(
@@ -277,7 +279,7 @@ mod tests {
     }
 
     fn toggling_spec() -> SplitViewSpec {
-        SplitViewSpec::new(SplitOrientation::Horizontal)
+        SplitViewSpec::new("split-view-test", SplitOrientation::Horizontal)
             .with_show_collapse_primary(true)
             .with_show_collapse_secondary(true)
     }

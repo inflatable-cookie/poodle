@@ -4,8 +4,10 @@ Status: **partial** — mechanical screening baseline plus live measurement on
 all three runtimes. Human teaching judgment has been applied to the three
 pilots and to 30 screen-clear pages (`g15.028`, `g15.029`, `g15.030`); 26
 screen-clear pages and the remaining defect-led rows still await it.
-Date: 2026-08-20 (revision 10 — `g15.030` foundation-layout review records a
-GPUI `ResizeHandle` keyboard/focus contract gap as `contract/runtime-blocker`;
+Date: 2026-08-20 (revision 11 — `g15.040` closed the GPUI `ResizeHandle`
+keyboard/focus/value gap, returning the row to `A / A / A` and `keep`;
+revision 10 — `g15.030` foundation-layout review recorded that gap as
+`contract/runtime-blocker`;
 revision 9 — `g15.039` closed the DateTimeZonePicker nested-layer
 pointer blocker; revision 8 was the `g15.029` review-round totals and D
 correction; revision 7 recorded the date/time family review; revision 6 closed
@@ -129,25 +131,25 @@ Dispositions used in the rows: `keep`, `pilot-fix`, `curation-tranche`,
 
 ## Totals
 
-Mechanical recount of the 175 inventory rows at this revision, after the
-`g15.030` ResizeHandle GPUI keyboard/focus blocker. These numbers are the rows,
-not a pre-pilot or pre-curation baseline.
+Mechanical recount of the 175 inventory rows at this revision, after
+`g15.040` closed the ResizeHandle GPUI keyboard/focus blocker. These numbers
+are the rows, not a pre-pilot or pre-curation baseline.
 
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Svelte (live) | 89 | 33 | 44 | 9 | — |
 | React (live) | 102 | 26 | 47 | 0 | — |
-| GPUI (headless render + structural) | 102 | 66 | 6 | 0 | 1 |
-| **Worst of the three** | **65** | **49** | **52** | **9** | — |
+| GPUI (headless render + structural) | 103 | 65 | 6 | 0 | 1 |
+| **Worst of the three** | **66** | **48** | **52** | **9** | — |
 
 | Disposition | Count |
 | --- | ---: |
-| `keep` | 55 |
+| `keep` | 56 |
 | `pilot-fix` | 3 |
 | `curation-tranche` | 108 |
 | `curation-complete` | 6 |
 | `verified-no-op` | 2 |
-| `contract/runtime-blocker` | 1 |
+| `contract/runtime-blocker` | 0 |
 
 175 of 175 pages were measured live in both web runtimes. The `g15.028`
 contract/runtime blocker on GPUI `SegmentedControl` is closed by `g15.038`.
@@ -155,12 +157,16 @@ The `g15.029` web `DateTimeZonePicker` nested-layer pointer blocker is closed
 by `g15.039`: a portalled timezone option now commits through the composite
 dismiss stack, and a genuine outside press still dismisses the whole picker
 in one gesture. Sv/Rc return to A; disposition is `keep`.
-The `g15.030` review records a new GPUI `ResizeHandle` contract/runtime
-blocker: the render path wires drag only and does not project focus,
-keyboard-step, or `aria_value_*` semantics from the contract
-(`docs/contracts/components/resize-handle.md` §5–6). Sv/Rc specimen repairs
-land in PR #55; the native renderer gap is routed separately and is not
-hidden as specimen work.
+The GPUI `ResizeHandle` blocker the `g15.030` review recorded is closed by
+`g15.040`: the shared render path now gives an enabled handle a real focus stop
+with a visible focus treatment, routes axis Arrow/Home/End through the existing
+resize callback at the contract's deltas, and declares the value range on the
+node (`docs/contracts/components/resize-handle.md` §5–6, §10). Mounted headless
+GPUI input drives the focused key route and reads the moved pane and the
+declared current value. **No row carries `contract/runtime-blocker` at this
+revision.** GPUI 0.2.2 still exposes no platform accessibility attributes
+(contract 003), so the declarations reach the renderer-neutral node and stop
+there; nothing here claims platform AT projection.
 
 `MeterSurface` is the single `n/a` on GPUI — web-only by fixed decision
 (spec 068), with no native counterpart. It is still graded on the two runtimes
@@ -541,7 +547,7 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | `Grid` | A | A | A | keep | human verdict (`g15.030`): keep — three column layouts teach arrangement, not a prop matrix; Sv/Rc paired; Gp mirrors all three sections |
 | `ListGrid` | C | C | A | curation-tranche | **Sv:** controls do nothing — Export and the row action are unwired · **Rc:** controls do nothing — Export and the row action are unwired |
 | `Region` | A | A | A | keep | human verdict (`g15.030`): keep — default placeholder, labeled stack, and nav/toolbar/content composition teach boundary role; Sv/Rc paired; Gp mirrors all three sections |
-| `ResizeHandle` | A | A | B | contract/runtime-blocker | human verdict (`g15.030`): **Sv/Rc:** keep after specimen repair — interactive splits were inert; now apply drag/keyboard deltas with specimen bounds (`48–280` horizontal, `40–120` vertical) passed through `ariaValueNow/min/max`. **Gp:** drag-only render path — `packages/render/src/resize_handle.rs` never makes the node focusable, installs keyboard handling, or projects `ResizeHandleSpec.aria_value_*`; native page cannot teach the same keyboard/value evidence as web. Routed component-semantic blocker; renderer fix out of scope for this card |
+| `ResizeHandle` | A | A | A | keep | human verdict (`g15.030`): **Sv/Rc:** keep after specimen repair — interactive splits were inert; now apply drag/keyboard deltas with specimen bounds (`48–280` horizontal, `40–120` vertical) passed through `ariaValueNow/min/max`. **Gp:** blocker closed by `g15.040` — the shared render path now makes an enabled handle a real focus stop with a visible focus treatment, routes axis Arrow/Home/End through the resize callback at the contract's exact deltas, and declares `aria_value_now/min/max` with orientation and name on the node; mounted headless input proves the focused key route moves the pane and the declared value. GPUI 0.2.2 still projects no platform accessibility attributes (contract 003), which this row does not claim |
 | `ScrollShell` | A | A | A | keep | human verdict (`g15.030`): keep — vertical and horizontal scroll with realistic overflow content; Sv/Rc paired; Gp mirrors both sections |
 | `Separator` | A | A | A | keep | human verdict (`g15.030`): keep — horizontal, vertical, and decorative separators with surrounding context; Sv/Rc paired; Gp mirrors all three sections |
 | `Spacer` | A | A | A | keep | human verdict (`g15.030`): keep — toolbar-style push-apart compositions teach flex spacing; Sv/Rc paired; Gp mirrors both sections |
