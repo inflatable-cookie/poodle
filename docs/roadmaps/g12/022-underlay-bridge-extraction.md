@@ -6,7 +6,7 @@ Roadmap: g12
 Governing refs: `architecture/002-token-system-and-package-layout.md`; Card 020;
 Card 021
 Depends on: Card 021 complete
-Blocks: nothing — the two consumers are already off every other path reference
+Blocks: nothing — source callers are migrated and fleet manifests and locks are clean
 
 ## Objective
 
@@ -73,7 +73,8 @@ than being replaced by a version.
 
 - no directory in Poodle is named after a consumer product
 - `underlay` renders the Nightfire field block shell unchanged
-- no repository references `@inflatable-cookie/poodle-bridge-underlay`
+- no live manifest, lockfile, config, or source import references
+  `@inflatable-cookie/poodle-bridge-underlay`
 - Poodle's package list contains only publish-intent packages plus previews and
   fixtures
 
@@ -117,3 +118,9 @@ superseded rather than deleted; `g03/007` and the 2026-03 logs are left as
 history. `g03-closeout.json` loses only its one pointer to the deleted file —
 `docs:lint` verifies closeout evidence paths exist — and keeps the other four,
 including spec 040, which is why that spec was superseded rather than removed.
+
+The downstream fleet was cleaned before the Poodle package deletion closed:
+`underlay-reference` (`8885661`), `contact-patch` (`a6d2316`), Composer
+(`29a32c1`), Compli-me (`ee27d84`), and Songsprout (`b031c1a`) removed the
+obsolete override and refreshed every affected Bun lock. Acowtancy was already
+clean. Source searches found no consumer import to migrate.

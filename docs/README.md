@@ -30,8 +30,6 @@ than a public registry.
   explains the token build, published surfaces, themes, and runtime packages.
 - [Component documentation structure](architecture/003-component-docs-ia-and-implementation-substrates.md)
   explains how contracts and implementation evidence relate.
-- [Underlay bridge ownership](architecture/004-underlay-bridge-and-adapter-ownership.md)
-  defines the host-adapter boundary.
 
 ## Look Up Component Behavior
 

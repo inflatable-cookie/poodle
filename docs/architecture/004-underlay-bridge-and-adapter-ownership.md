@@ -2,7 +2,7 @@
 
 Status: superseded
 Updated: 2026-08-21
-Superseded by: `../roadmaps/g12/022-underlay-bridge-extraction.md`
+Superseded by: [001 Poodle System Shape — Application Boundary](001-poodle-system-shape.md#application-boundary)
 
 > **Superseded.** `packages/bridges/underlay` has been removed from Poodle. A
 > design system must not carry a package named after one of its consumers, and
