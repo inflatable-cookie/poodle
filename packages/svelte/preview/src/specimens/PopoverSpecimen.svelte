@@ -5,7 +5,7 @@
 
 <div class="poodle-specimen">
   <SpecimenGroup label="Default (bottom-start)">
-    <Popover ariaLabel="Quick settings">
+    <Popover ariaLabel="Quick settings" triggerIsInteractive>
       {#snippet trigger()}
         <Button variant="secondary">Open popover</Button>
       {/snippet}
@@ -17,7 +17,7 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Top placement">
-    <Popover placement="top" ariaLabel="Help tip">
+    <Popover placement="top" ariaLabel="Help tip" triggerIsInteractive>
       {#snippet trigger()}
         <Button variant="secondary">Show help</Button>
       {/snippet}
