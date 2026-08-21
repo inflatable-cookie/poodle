@@ -72,8 +72,8 @@ Changed Svelte routes: `field-set`, `validation-summary`
 Changed React routes: `field-set`, `validation-summary`
 Changed GPUI routes: none
 
-Operator live sign-off on the changed Svelte and React routes is still pending;
-this worker does not claim it.
+The operator reviewed and approved all four changed Svelte and React routes on
+2026-08-22 before PR #63 merged as `7e2cdb15`.
 
 ## Changed files
 
@@ -97,9 +97,9 @@ this worker does not claim it.
 - `git diff --check origin/main...HEAD` — passed
 
 No `*-windowed`, `test:native-visual`, Jetstream, release, or workflow
-selector ran. No screenshot gate or operator sign-off is claimed.
+selector ran. No screenshot gate is claimed.
 
 ## Operator checkpoint
 
-Awaiting operator live review of the four changed Svelte/React routes on
-PR #63. Do not merge it from this worker.
+Accepted. The operator approved the four changed Svelte/React routes and
+directed merge. PR #63 merged as `7e2cdb15`.

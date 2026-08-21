@@ -1,6 +1,6 @@
 # g15.046 — Primitive Visual Fixture Inventory
 
-Status: **planned — blocked on completion of `g15.011`; `g15.045` complete**
+Status: **ready** — `g15.011` and `g15.045` are complete
 Parent: `012-visual-conformance-lane.md`
 Depends on: completed human-centred catalogue audit and headless capture in
 every active runtime

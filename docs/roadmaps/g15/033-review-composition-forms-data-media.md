@@ -1,6 +1,7 @@
 # g15.033 — Review Screen-Clear Forms, Data, and Media
 
-Status: **ready** — `g15.041` and serial predecessor `g15.032` are complete
+Status: **complete** — PR #63 accepted at `3846866e` and merged as
+`7e2cdb15`; operator live review passed on 2026-08-22
 Parent: `027-screen-clear-human-review.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Depends on: `g15.026` (live native evidence), `g15.032` (serial predecessor)
@@ -44,6 +45,5 @@ review of every changed Svelte and React page before completion.
 
 ## Continuation
 
-Dispatch this final screen-clear child from current `origin/main`. It may run
-beside one independent native, capture, or release-tooling lane with
-non-overlapping writable scope.
+This final screen-clear child closes parent `g15.027` and completes `g15.011`.
+The primitive visual fixture inventory (`g15.046`) is now ready.

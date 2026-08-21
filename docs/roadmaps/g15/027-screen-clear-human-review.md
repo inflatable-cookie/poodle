@@ -1,7 +1,7 @@
 # g15.027 — Screen-Clear Human Specimen Review
 
-Status: **active parent — not dispatchable**; `g15.028`–`g15.032` and routed
-repairs are complete; final child `g15.033` is ready
+Status: **complete — not dispatchable**; all six children `g15.028`–`g15.033`
+and their routed repairs are accepted
 Role: human-teaching completion lane for `g15.011`
 Consumes: `g15.011` partial screening baseline
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`,
@@ -55,18 +55,25 @@ specimen work.
 
 ## Acceptance
 
-- [ ] All 56 pages have a recorded human-teaching verdict; none is inferred
+- [x] All 56 pages have a recorded human-teaching verdict; none is inferred
       from an A screening grade.
-- [ ] The six child lists still form one exact, duplicate-free partition of
+- [x] The six child lists still form one exact, duplicate-free partition of
       the 56 screen-clear rows frozen at the start of this lane.
-- [ ] Svelte and React structure/copy agree; GPUI teaches the same evidence
+- [x] Svelte and React structure/copy agree; GPUI teaches the same evidence
       where the active runtime supports it.
-- [ ] Changed pages are reviewed by the operator in the live Svelte and React
+- [x] Changed pages are reviewed by the operator in the live Svelte and React
       previews before their child completes. Unchanged pages still carry a
       recorded reviewer verdict.
-- [ ] The audit records any grade or disposition changes and names the reason.
-- [ ] No `Conformance` tab, fixture corpus, schema, or generated adapter is
+- [x] The audit records any grade or disposition changes and names the reason.
+- [x] No `Conformance` tab, fixture corpus, schema, or generated adapter is
       introduced.
+
+## Closeout
+
+Children `g15.028`–`g15.033` reviewed the exact 56-page partition. PR #63
+landed the final seven verdicts and two bounded paired-web repairs; the
+operator approved the changed routes before merge. This parent closes with
+`g15.011` and unblocks `g15.046`.
 
 ## Stop Conditions
 

@@ -1,7 +1,7 @@
 # g15 — Release Gap Register
 
 Status: active release register — compiled by `g15.001`, updated by review
-Date: 2026-08-21
+Date: 2026-08-22
 Card: `docs/roadmaps/g15/001-release-baseline-roster-inventory.md`
 Source: `docs/roadmaps/g15/release-baseline-roster.md` (frozen 175-component denominator)
 
@@ -118,8 +118,8 @@ measured from the mounted tree, not inferred from a contract read.
 | Gap | Current evidence | Owner |
 | --- | --- | --- |
 | GPUI headless pixels | adopted by `g15.045` in PR #62: `gpui`/`gpui_platform` pinned to `zed-industries/zed@1ea16c1a` in node-backend and preview; `smoke:gpui-offscreen-capture` renders a real Button offscreen with typed receipts, one hash across repeated captures (`be94eace…`, matching the g15.044 proof), inset shadows now project instead of being dropped; headless regressions 56/56, Rust 1.95 floor preserved. Captures remain 2×-only and macOS-only; cross-machine tolerance is `g15.047` — see `docs/logs/2026-08/20260821-g15-045-gpui-offscreen-capture-adoption.md` | landed |
-| Primitive named fixtures and comparison | rejected g14 corpus is removed; web/native capture foundations remain separate | `g15.046`–`g15.047` under parent `g15.012` |
-| Packed full-roster reachability | 9 Svelte / 13 React mounted cases only | `g15.048` |
+| Primitive named fixtures and comparison | rejected g14 corpus is removed; web/native capture foundations are ready for a bounded inventory | `g15.046` ready, then `g15.047`, under parent `g15.012` |
+| Packed full-roster reachability | 9 Svelte / 13 React mounted cases only; closure card is in flight | `g15.048` |
 | Native pre-tag workflow | `.github/workflows/ci-native.yml` references deleted `packages/gpui/components/Cargo.toml` | `g15.049`, blocked on explicit workflow-edit approval |
 | Read-only release-gate claim | `effigy release gates` reports success with zero configured gates; not certification evidence | `g15.049` |
 | v0.2.0 candidate | manifests remain 0.1.0 and no 0.2.0 release note exists | `g15.050`, then operator gate `g15.013` |
@@ -130,7 +130,7 @@ measured from the mounted tree, not inferred from a contract read.
 | --- | --- | --- |
 | Licence native completion (`g14.017`) | closed by `g15.007` — declarations, render, and GPUI specimens landed | `g15.007` |
 | Model-connection native completion (`g14.020`) | closed by `g15.008` — declarations, headless mirror, render, and GPUI specimens landed | `g15.008` |
-| Human-centred specimen catalogue audit (`g14.026`) | screening, pilots, defect-led curation, native probe, five screen-clear children, and all routed repairs through Popover (`g15.041`) are complete; final review child `g15.033` remains | `g15.011`, `g15.033` |
+| Human-centred specimen catalogue audit (`g14.026`) | complete: screening, pilots, defect-led curation, native probe, all six screen-clear children, routed repairs, and operator review landed through PR #63 | `g15.011` complete |
 | Primitive-first visual conformance lane | recompiled into exact capture feasibility, adoption, fixture, and comparison children | `g15.012`, `g15.044`–`g15.047` |
 | Release-gate remediation | closed by PR #31 — `nanoid@3.3.18`; `bun audit` clean | `g15.014` |
 | v0.2.0 release certification | packed proof, truthful automation, and candidate preparation are explicit children; tag/publish stays operator-owned | `g15.048`–`g15.050`, then `g15.013` |

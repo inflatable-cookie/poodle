@@ -1,8 +1,7 @@
 # g15.011 — Human-Centred Specimen Catalogue Audit
 
-Status: **partial** — screening baseline and three pilots delivered; completion
-requires the native probe (`g15.026`) and the screen-clear human review
-children (`g15.028`–`g15.033`)
+Status: **complete** — screening, pilots, defect-led curation, live native
+probe, and all six screen-clear review children are accepted
 Depends on: `g15.001` (measured roster), `g15.010` (final GPUI specimen set);
 carries forward `g14.026` with its
 rubric and bounded shared specimen-plan boundary intact
@@ -55,32 +54,30 @@ codegen, generated adapter, or runtime consumer.
 
 ## Goals
 
-- [ ] Every generated catalogue entry has an explicit grade and disposition;
+- [x] Every generated catalogue entry has an explicit grade and disposition;
       no page silently skipped because a runtime specimen is missing.
-- [ ] Three pilot `Examples` views concise and free of exhaustive size/density
+- [x] Three pilot `Examples` views concise and free of exhaustive size/density
       expansion.
-- [ ] Svelte and React structure/copy agree; GPUI teaches the same component
+- [x] Svelte and React structure/copy agree; GPUI teaches the same component
       where the active runtime supports it.
-- [ ] Confirm the rejected corpus projection is absent from the catalogue.
+- [x] Confirm the rejected corpus projection is absent from the catalogue.
 
 ## Acceptance
 
-- [ ] Page-by-page inventory with curation grades and named defects.
-- [ ] Operator-approved pilot pages for Button, RangeSlider, and Tabs.
-- [ ] Evidence that no `Conformance` projection tab exists.
-- [ ] Remaining work split into reviewable curation and screen-clear review
+- [x] Page-by-page inventory with curation grades and named defects.
+- [x] Operator-approved pilot pages for Button, RangeSlider, and Tabs.
+- [x] Evidence that no `Conformance` projection tab exists.
+- [x] Remaining work split into reviewable curation and screen-clear review
       tranches (new bounded cards), not one catalogue-wide rewrite.
-- [ ] The operator reviews the three live pilot pages before the worker calls
+- [x] The operator reviews the three live pilot pages before the worker calls
       them approved. Unreviewed pages remain an explicit PR item.
 
 ## Continuation
 
-The delivered A–D table is a mechanical screening baseline, not the completed
-human-centred verdict. `g15.026` replaces the provisional GPUI column with
-live headless evidence. `g15.027` is a non-dispatchable parent whose six exact
-children (`g15.028`–`g15.033`) apply the teaching rubric to the 56 pages that
-screened clear and therefore do not appear in a defect-led curation tranche.
-This card completes only after both lanes land.
+The A–D table, native probe, defect-led curation, and exact 56-page screen-clear
+review are complete. The next dependent card is `g15.046`, which freezes the
+first bounded primitive visual fixture inventory without turning specimens
+into conformance reports.
 
 ## Stop Conditions
 

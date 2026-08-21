@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Poodle orchestrator
-Updated: 2026-08-21
+Updated: 2026-08-22
 
 The orchestrator is the only writer. Workers write their scoped deliverables,
 batch log, and papercuts; they do not edit this ledger or roadmap/card status.
@@ -23,7 +23,7 @@ worktree. Paired Jetstream integration is explicit under `ci:jetstream` and
 | Batch | Card | Branch | Model | Status | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | `g15-r048-packed-roster-reachability` | `g15/048-packed-roster-reachability.md` | `t3code/g15-048-packed-roster-reachability` | capable coding model, medium reasoning | dispatched — awaiting PR | Handoff `docs/handoffs/20260821-234034-g15-048-packed-roster-reachability.md`; planning base `371e385e`. Runs parallel to `g15.033` with non-overlapping package-test/roster scope; `g15.050` remains behind accepted proof. |
-| `g15-r033-review-forms-data-media` | `g15/033-review-composition-forms-data-media.md` | `t3code/g15-033-review-forms-data-media` | capable coding model, medium reasoning | dispatched — awaiting PR | Handoff `docs/handoffs/20260821-232939-g15-033-review-composition-forms-data-media.md`; planning base `44a96ad`. Final seven-page screen-clear review; `g15.011` and `g15.046` remain behind accepted closeout. |
+| `g15-r033-review-forms-data-media` | `g15/033-review-composition-forms-data-media.md` | `t3code/g15-033-review-forms-data-media` | capable coding model, medium reasoning | merged — complete | PR #63 accepted at `3846866e`; merge `7e2cdb15`. Recorded all seven final human-teaching verdicts, repaired paired FieldSet and ValidationSummary specimens, passed focused and headless gates, and received operator live approval. Closes `g15.027` and `g15.011`; `g15.046` is ready. |
 | `g15-r045-gpui-offscreen-capture-adoption` | `g15/045-gpui-offscreen-capture-adoption.md` | `t3code/gpui-offscreen-capture-adoption` | frontier coding model, high reasoning | merged — complete | PR #62 accepted at `533a6a03`; merge `4e420a7b`. Adopted exact Zed revision `1ea16c1a`, preserved ordinary preview feature isolation and Rust 1.95, projected inset shadows truthfully, and landed one no-window Button capture/receipt selector. Review repair made PNG/receipt publication transactional, rejected colliding outputs, invalidated stale receipts on failure, and added negative evidence. GitHub `active-cohort` passed. |
 | `g15-r044-gpui-offscreen-capture-feasibility` | `g15/044-gpui-offscreen-capture-feasibility.md` | `t3code/gpui-offscreen-capture-feasibility` | frontier coding/research model, high reasoning | merged — complete | PR #61 accepted at `5e1b3563`; merge `18781852`. Proved deterministic real-Poodle Metal pixels at exact Zed revision `1ea16c1a` with no window, focus, capture permission, or desktop process; measured 17 mechanical errors across 9 files and 56/56 migrated regressions. Independent rerun passed all 25 verifier claims. |
 | `g15-r042-stepper-native-interaction-parity` | `g15/042-stepper-native-interaction-parity.md` | `t3code/stepper-native-interaction-parity` | capable coding model, medium reasoning | merged — complete | PR #60 accepted at `408577ab`; merge `5e72e2d5`. Landed separate Stepper selection/re-run/collapse wiring and mounted pointer/keyboard evidence. |

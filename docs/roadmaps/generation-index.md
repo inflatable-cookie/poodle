@@ -1,14 +1,13 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-21
+Updated: 2026-08-22
 
 ## Active Track
 
 - `g15`
-  - Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.026`, `g15.028`–`g15.032`, and `g15.034`–`g15.041`
-    complete; `g15.042` and `g15.044`–`g15.045` complete; `g15.033` and
-    `g15.048` ready; `g15.013` is the final operator gate
+  - Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
+    `g15.019`–`g15.042`, and `g15.044`–`g15.045` complete; `g15.046` ready,
+    `g15.048` in flight; `g15.013` is the final operator gate
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `050` plus final gate `013`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
@@ -17,10 +16,10 @@ Updated: 2026-08-21
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: `g15.033` is the last screen-clear review; completing it closes
-    `g15.011` and unblocks `g15.046`. PR #62 (`g15.045`) has adopted the
-    offscreen GPUI seam proved by PR #61. `g15.048` is ready for a free
-    non-overlapping worker slot. `g15.043` stays non-dispatchable until the native
+  - Next: `g15.011` and final child `g15.033` are complete. `g15.046` is the
+    next serial visual card, using the offscreen GPUI seam adopted by PR #62.
+    `g15.048` is in flight on its independent package-proof lane. `g15.043`
+    stays non-dispatchable until the native
     presentation-context architecture is fixed. `g15.012` is now exact
     children `044`–`047`; release preparation is exact children `048`–`050`;
     workflow edits in `049` require explicit operator approval.
