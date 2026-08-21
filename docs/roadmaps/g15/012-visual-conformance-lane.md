@@ -1,7 +1,7 @@
 # g15.012 — Primitive-First Visual Conformance Lane
 
 Status: **non-dispatchable parent** — exact children `g15.044`–`g15.047`;
-`g15.044` is ready and may run before the catalogue audit completes
+`g15.044` is in flight on PR #61
 Depends on: `g15.001` (measured roster), `g15.011` (before fixture freeze),
 `g15.038` (SegmentedControl native option parity)
 Governing refs: `release-baseline-roster.md`,

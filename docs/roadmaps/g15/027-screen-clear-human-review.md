@@ -1,7 +1,7 @@
 # g15.027 — Screen-Clear Human Specimen Review
 
-Status: **active parent — not dispatchable**; `g15.028`–`g15.031` and routed
-repair `g15.040` complete; `g15.032` ready and one later review child remains
+Status: **active parent — not dispatchable**; `g15.028`–`g15.032` and routed
+repairs are complete; final child `g15.033` is ready
 Role: human-teaching completion lane for `g15.011`
 Consumes: `g15.011` partial screening baseline
 Governing refs: `specimen-catalogue-audit.md`, `specimen-plan-outline.md`,

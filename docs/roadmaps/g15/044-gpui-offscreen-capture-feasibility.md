@@ -1,6 +1,6 @@
 # g15.044 — GPUI Offscreen Capture Feasibility
 
-Status: **ready** — independent research/proof lane; may run beside `g15.041`
+Status: **in flight** — PR #61
 Parent: `012-visual-conformance-lane.md`
 Depends on: `g15.001` (frozen active cohort)
 Unblocks: `g15.045`

@@ -1,8 +1,7 @@
 # g15.032 — Review Screen-Clear Navigation and Overlays
 
-Status: **blocked on in-flight `g15.041`** — review evidence landed in PR #58;
-Popover's routed web trigger API/semantics defect must be repaired before this
-card closes
+Status: **complete** — review evidence landed in PR #58; Popover's routed web
+trigger repair landed in PR #59 (`g15.041`)
 Parent: `027-screen-clear-human-review.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Depends on: `g15.026` (live native evidence), `g15.031` (serial predecessor)
@@ -65,10 +64,7 @@ release selectors.
 
 ## Continuation
 
-PR #58 completed the ten-page review with nine keeps and one routed blocker;
-the attempted specimen-level Popover repair was reverted, so no changed route
-awaits operator sign-off. Compile and land a dedicated Popover trigger
-API/semantics repair in
-[`g15.041`](041-popover-interactive-trigger-semantics.md), then return here to
-close the blocker and re-grade the row. Do not start `g15.033`, visual
-conformance, or release certification first.
+PR #58 completed the ten-page review with nine keeps and one routed blocker.
+PR #59 landed the dedicated Popover trigger API/semantics repair, returned the
+row to A/A/A `keep`, and closed this card. `g15.033` is the final screen-clear
+review child and is ready to dispatch.

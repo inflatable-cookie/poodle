@@ -1,6 +1,6 @@
 # g15.033 — Review Screen-Clear Forms, Data, and Media
 
-Status: **planned — blocked on `g15.041` landing and `g15.032` closeout**
+Status: **ready** — `g15.041` and serial predecessor `g15.032` are complete
 Parent: `027-screen-clear-human-review.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Depends on: `g15.026` (live native evidence), `g15.032` (serial predecessor)
@@ -44,7 +44,6 @@ review of every changed Svelte and React page before completion.
 
 ## Continuation
 
-Do not dispatch this child while `g15.041` is in flight. After the Popover
-migration lands, the orchestrator closes `g15.032`, verifies the audit totals,
-then makes this card ready. It may then run beside one independent native or
-release-tooling lane with non-overlapping writable scope.
+Dispatch this final screen-clear child from current `origin/main`. It may run
+beside one independent native, capture, or release-tooling lane with
+non-overlapping writable scope.

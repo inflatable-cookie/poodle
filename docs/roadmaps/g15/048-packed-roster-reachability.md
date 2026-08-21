@@ -1,6 +1,6 @@
 # g15.048 — Packed Roster Reachability
 
-Status: **planned — blocked on `g15.041` public-surface migration**
+Status: **ready** — late web public-surface migrations are complete
 Depends on: all pre-release web public API changes, including `g15.041`
 Unblocks: `g15.050`
 Governing refs: `../../specs/022-packaging-versioning-and-release-channel-rules.md`,

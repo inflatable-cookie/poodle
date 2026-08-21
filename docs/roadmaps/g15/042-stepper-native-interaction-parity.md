@@ -1,6 +1,6 @@
 # g15.042 — Stepper Native Interaction Parity
 
-Status: **ready** — independent of `g15.041`; may run in parallel
+Status: **in flight** — PR #60
 Found by: `g15.025`, confirmed by `g15.026`
 Depends on: `g15.026` (real headless GPUI specimen construction)
 Unblocks: `g15.013`

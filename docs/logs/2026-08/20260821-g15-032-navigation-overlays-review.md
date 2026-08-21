@@ -110,6 +110,8 @@ Svelte and React interactive trigger is a state-aware render that applies it
 to the real control, and the paired Popover specimens compose real Poodle
 Button triggers again. The Popover audit row returns to A/A/A `keep` with
 totals recounted (revision 14); operator live sign-off on the paired Popover
-routes is pending on the `g15.041` PR and is a precondition for this card's
-closeout. Batch log:
+routes was not repeated: the operator explicitly authorised final PR #59 fixes
+and merge without a renewed live-route pass, so no fresh visual evidence is
+claimed. PR #59 merged as `e19aea4b`; the blocker and this card are closed.
+Batch log:
 `docs/logs/2026-08/20260821-g15-041-popover-interactive-trigger-semantics.md`.

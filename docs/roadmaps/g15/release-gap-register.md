@@ -69,7 +69,7 @@ Rust render 1 missing (+ 1 not-applicable), GPUI specimen 0 missing
 | Context providers | — | IconProvider closed by `g15.009` (`packages/render/src/icon_provider.rs`); UiPresentationProvider remains a declared capability absence because ambient presentation cannot cross an already-built Node tree | — | `g15.043`; architecture decision required before dispatch |
 | SegmentedControl option presentation | closed by `g15.038`: dedicated public `SegmentedControlOption` (breaking, pre-1.0, operator-approved 2026-08-20) | closed: labelled-icon and icon-only rendering through `poodle-render` | closed: GPUI specimen teaches the contract's Effects/Instruments icon-only example | `g15.038` |
 | AgentTranscript scroll/follow | — | closed by `g15.037`: shared render owns content and the jump-control recipe | closed by `g15.037`: retained GPUI state owns a real tracked viewport, detach latch, and jump-to-bottom | `g15.037` complete in PR #48; no remaining release blocker |
-| Stepper selection and re-run | — | handlers exist in shared composition | `node_compat.rs` wires collapse only; selection and re-run controls shown by the specimen are inert | `g15.042` ready; found and accepted out of scope in PR #49 |
+| Stepper selection and re-run | — | handlers exist in shared composition | `node_compat.rs` wires collapse only; selection and re-run controls shown by the specimen are inert | `g15.042` in flight on PR #60; found and accepted out of scope in PR #49 |
 | Specimen axis domains | — closed by `g15.034` | — closed by `g15.034` | fake panes removed by `g15.019`; exact domains closed by `g15.034` | complete in PR #41 |
 | Display, workstation & agent specimens | — | — | — closed by `g15.010` (18 named GPUI specimen files under `packages/gpui/preview/src/specimens/`) | `g15.010` |
 | MeterSurface | not-applicable — web-only by fixed decision (spec 068) | not-applicable | not-applicable | none |
@@ -119,7 +119,7 @@ all 175 names in both web packages plus a small representative mount set.
 | --- | --- | --- |
 | Licence native completion (`g14.017`) | closed by `g15.007` — declarations, render, and GPUI specimens landed | `g15.007` |
 | Model-connection native completion (`g14.020`) | closed by `g15.008` — declarations, headless mirror, render, and GPUI specimens landed | `g15.008` |
-| Human-centred specimen catalogue audit (`g14.026`) | screening, pilots, defect-led curation, native probe, four screen-clear children, SegmentedControl native option parity (`g15.038`), DateTimeZonePicker nested-layer repair (`g15.039`), and ResizeHandle native semantics (`g15.040`) are complete; two review children remain | `g15.011`, `g15.032`–`g15.033` |
+| Human-centred specimen catalogue audit (`g14.026`) | screening, pilots, defect-led curation, native probe, five screen-clear children, and all routed repairs through Popover (`g15.041`) are complete; final review child `g15.033` remains | `g15.011`, `g15.033` |
 | Primitive-first visual conformance lane | recompiled into exact capture feasibility, adoption, fixture, and comparison children | `g15.012`, `g15.044`–`g15.047` |
 | Release-gate remediation | closed by PR #31 — `nanoid@3.3.18`; `bun audit` clean | `g15.014` |
 | v0.2.0 release certification | packed proof, truthful automation, and candidate preparation are explicit children; tag/publish stays operator-owned | `g15.048`–`g15.050`, then `g15.013` |

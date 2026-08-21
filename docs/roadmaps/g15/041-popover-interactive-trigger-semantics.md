@@ -1,9 +1,8 @@
 # g15.041 — Popover Interactive Trigger Semantics
 
-Status: **in flight** — dispatched from approved handoff
-`docs/handoffs/20260821-151745-g15-041-popover-interactive-trigger-semantics.md`
+Status: **complete** — PR #59 accepted at `3b4f1571`; merge `e19aea4b`
 Found by: `032-review-composition-navigation-overlays.md`
-Unblocks: `g15.032` closeout, then `g15.033`; `g15.012` remains behind the
+Unblocked: `g15.032` closeout and `g15.033`; `g15.046` remains behind the
 completed human-centred audit
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/popover.md`,
@@ -252,7 +251,7 @@ release selectors.
 
 ## Continuation
 
-Push one PR and stop for orchestrator review and operator live sign-off on the
-paired Popover route. After merge, the orchestrator closes this card and
-`g15.032`, restores the audit/front-door totals, and only then prepares
-`g15.033`.
+PR #59 landed the clean state-aware trigger migration and closed the routed
+Popover blocker. The operator explicitly authorised final fixes and merge
+without a renewed live-route pass; no fresh visual evidence is claimed.
+`g15.032` closes with this repair and `g15.033` is ready.
