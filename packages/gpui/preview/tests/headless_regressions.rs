@@ -2067,7 +2067,7 @@ fn a_focused_resize_handle_steps_the_pane_and_its_declared_value() {
             let state = Arc::clone(&pane);
             let gesture = Arc::new(Mutex::new(width));
             poodle_render::resize_handle(
-                &ResizeHandleSpec::new()
+                &ResizeHandleSpec::new("editor:sidebar")
                     .with_orientation(Orientation::Horizontal)
                     .with_aria_label("Resize horizontal")
                     .with_aria_value_now(width)
@@ -2095,11 +2095,11 @@ fn a_focused_resize_handle_steps_the_pane_and_its_declared_value() {
         let mounted = Arc::new(Mutex::new(Node::container()));
         *mounted.lock().unwrap() = build(120.0, Arc::clone(&mounted), Arc::clone(&pane));
 
-        let handle_id = poodle_render::resize_handle_focus_id(
-            &ResizeHandleSpec::new()
-                .with_orientation(Orientation::Horizontal)
-                .with_aria_label("Resize horizontal"),
-        );
+        // The host derives the key from the scope it supplied — no orientation,
+        // name, or value in it, so a relabelled handle keeps its focus handle.
+        let handle_id = poodle_render::resize_handle_focus_id(&ResizeHandleSpec::new(
+            "editor:sidebar",
+        ));
 
         let declared_value = || mounted.lock().unwrap().a11y.value;
         let declared_range = || {
@@ -2153,7 +2153,7 @@ fn a_disabled_resize_handle_takes_no_focus_and_answers_no_key() {
     use poodle_specs::{Orientation, ResizeHandleSpec};
 
     run_headless(|cx| {
-        let spec = ResizeHandleSpec::new()
+        let spec = ResizeHandleSpec::new("editor:sidebar")
             .with_orientation(Orientation::Horizontal)
             .with_disabled(true)
             .with_aria_label("Disabled resize");
@@ -2167,7 +2167,7 @@ fn a_disabled_resize_handle_takes_no_focus_and_answers_no_key() {
             })),
         );
         let handle_id = poodle_render::resize_handle_focus_id(&spec);
-        assert_eq!(node.id.as_deref(), Some(handle_id.as_str()));
+        assert_eq!(node.runtime_id.as_deref(), Some(handle_id.as_str()));
 
         let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
         driver.draw_frame();
@@ -2179,6 +2179,69 @@ fn a_disabled_resize_handle_takes_no_focus_and_answers_no_key() {
             "a disabled separator never becomes a focus target",
         );
         assert_eq!(*moves.lock().unwrap(), 0);
+    });
+}
+
+/// g15.040 review. Two ordinary `SplitView`s on one page compose two dividers.
+/// While the handle keyed itself on orientation and accessible name, both
+/// derived the same key and resolved ONE backend focus handle: focusing one
+/// divider focused the other, and keys landed on whichever painted last. Each
+/// split now states its own scope and derives the divider's from it.
+#[test]
+fn two_composed_split_views_do_not_share_a_divider_focus_handle() {
+    use poodle_specs::{ResizeHandleSpec, SplitOrientation, SplitViewSpec};
+
+    run_headless(|cx| {
+        // Same orientation, same (absent) label, same ratio — everything a
+        // derived key could see is identical.
+        let left = SplitViewSpec::new("workspace:left", SplitOrientation::Horizontal);
+        let right = SplitViewSpec::new("workspace:right", SplitOrientation::Horizontal);
+        let divider_id = |spec: &SplitViewSpec| {
+            poodle_render::resize_handle_focus_id(&ResizeHandleSpec::new(
+                spec.divider_instance_id(),
+            ))
+        };
+        let (left_id, right_id) = (divider_id(&left), divider_id(&right));
+        assert_ne!(left_id, right_id);
+
+        let build = |spec: &SplitViewSpec| {
+            poodle_render::split_view(
+                spec,
+                &theme(),
+                Some(Node::text("primary")),
+                Some(Node::text("secondary")),
+                poodle_render::SplitViewHandlers {
+                    on_resize: Some(Arc::new(|_phase, _delta| {})),
+                    ..poodle_render::SplitViewHandlers::default()
+                },
+            )
+        };
+        let tree = Node::container().child(build(&left)).child(build(&right));
+
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(tree)));
+        driver.wait_for_focus_handle(&left_id);
+        driver.wait_for_focus_handle(&right_id);
+
+        driver.focus_element(&left_id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_id),
+            Some(true),
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_id),
+            Some(false),
+            "the other split's divider is a different control and stays blurred",
+        );
+
+        driver.focus_element(&right_id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_id),
+            Some(true),
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_id),
+            Some(false),
+        );
     });
 }
 

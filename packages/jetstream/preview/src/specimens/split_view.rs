@@ -26,7 +26,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Horizontal split",
             secondary,
             div().h(h_short).child(js_split_view(
-                &SplitViewSpec::new(SplitOrientation::Horizontal),
+                &SplitViewSpec::new("split-view:horizontal", SplitOrientation::Horizontal),
                 theme,
                 Some(
                     div()
@@ -60,7 +60,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Vertical split",
             secondary,
             div().h(h_tall).child(js_split_view(
-                &SplitViewSpec::new(SplitOrientation::Vertical),
+                &SplitViewSpec::new("split-view:vertical", SplitOrientation::Vertical),
                 theme,
                 Some(
                     div()
@@ -94,9 +94,12 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Horizontal with collapse toggles",
             secondary,
             div().h(h_short).child(js_split_view(
-                &SplitViewSpec::new(SplitOrientation::Horizontal)
-                    .with_show_collapse_primary(true)
-                    .with_show_collapse_secondary(true),
+                &SplitViewSpec::new(
+                    "split-view:collapse-horizontal",
+                    SplitOrientation::Horizontal,
+                )
+                .with_show_collapse_primary(true)
+                .with_show_collapse_secondary(true),
                 theme,
                 Some(
                     div()
@@ -130,7 +133,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Vertical with collapse toggles",
             secondary,
             div().h(h_tall).child(js_split_view(
-                &SplitViewSpec::new(SplitOrientation::Vertical)
+                &SplitViewSpec::new("split-view:collapse-vertical", SplitOrientation::Vertical)
                     .with_show_collapse_primary(true)
                     .with_show_collapse_secondary(true),
                 theme,
@@ -166,7 +169,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Hover-revealed toggles (pointer onto the seam)",
             secondary,
             div().h(h_short).child(js_split_view(
-                &SplitViewSpec::new(SplitOrientation::Horizontal)
+                &SplitViewSpec::new("split-view:hover-toggles", SplitOrientation::Horizontal)
                     .with_show_collapse_primary(true)
                     .with_show_collapse_secondary(true)
                     .with_toggle_visibility(SplitToggleVisibility::Hover),
@@ -203,7 +206,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Primary pane only (secondary empty)",
             secondary,
             div().h(h_short).child(js_split_view(
-                &SplitViewSpec::new(SplitOrientation::Horizontal),
+                &SplitViewSpec::new("split-view:disabled", SplitOrientation::Horizontal),
                 theme,
                 Some(
                     div()

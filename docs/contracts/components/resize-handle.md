@@ -1,7 +1,7 @@
 # ResizeHandle
 
 Status: detailed contract
-Updated: 2026-08-20
+Updated: 2026-08-21
 
 ## 1. Purpose
 
@@ -276,8 +276,16 @@ A consumer wanting a hairline divider sets `--poodle-resize-handle-thickness:
   drawing an outline. GPUI has no outline that costs no layout, and the
   handle's whole footprint is the `0.125rem` line, so a border would move the
   split it is supposed to describe.
-- The root's element id is derived from orientation and accessible name, so
-  two handles on one page never share a backend focus handle.
+- Interactive instances always receive unique, stable backend identities.
+  `ResizeHandleSpec::new(instance_id)` requires a caller-owned native instance
+  scope, carried on `Node.runtime_id` — the vocabulary's backend-state key for
+  focus, editing, and gesture caches. Hosts keep that scope stable for the
+  handle's lifetime. Nothing derived can stand in for it: two handles may
+  legitimately share an axis, a name, and a range, and a name that changes with
+  a translation would move the key of a control that never moved. Shared render
+  is stateless and never derives identity from render order. A composing
+  component supplies its own scope and derives the divider's from it — SplitView
+  derives `{scope}:divider`.
 - `aria_value_now` / `aria_value_min` / `aria_value_max` reach the node's
   accessibility range and stop there: gpui 0.2.2 exposes no platform
   accessibility attributes (`docs/contracts/003-native-accessibility.md`), so

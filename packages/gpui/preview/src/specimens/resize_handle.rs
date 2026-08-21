@@ -40,7 +40,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 pane(text_secondary, panel_bg, "Left")
                     .flex_none()
                     .w(px(left_px)),
-                ResizeHandleSpec::new()
+                ResizeHandleSpec::new(HORIZONTAL_LEFT_KEY)
                     .with_orientation(Orientation::Horizontal)
                     .with_aria_label("Resize horizontal")
                     .with_aria_value_now(left_px)
@@ -67,7 +67,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 pane(text_secondary, panel_bg, "Top")
                     .flex_none()
                     .h(px(top_px)),
-                ResizeHandleSpec::new()
+                ResizeHandleSpec::new(VERTICAL_TOP_KEY)
                     .with_orientation(Orientation::Vertical)
                     .with_aria_label("Resize vertical")
                     .with_aria_value_now(top_px)
@@ -92,7 +92,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 panel_bg,
                 border_subtle,
                 pane(text_secondary, panel_bg, "Left").flex_1(),
-                ResizeHandleSpec::new()
+                ResizeHandleSpec::new("resize-handle:disabled-horizontal")
                     .with_orientation(Orientation::Horizontal)
                     .with_disabled(true)
                     .with_aria_label("Disabled resize"),
@@ -109,7 +109,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 panel_bg,
                 border_subtle,
                 pane(text_secondary, panel_bg, "Top").flex_1(),
-                ResizeHandleSpec::new()
+                ResizeHandleSpec::new("resize-handle:disabled-vertical")
                     .with_orientation(Orientation::Vertical)
                     .with_disabled(true)
                     .with_aria_label("Disabled resize vertical"),
@@ -300,7 +300,7 @@ mod interaction_tests {
             280.0,
         );
         let node = resize_handle(
-            &ResizeHandleSpec::new().with_orientation(Orientation::Horizontal),
+            &ResizeHandleSpec::new(HORIZONTAL_LEFT_KEY).with_orientation(Orientation::Horizontal),
             &theme,
             Some(handler),
         );
@@ -323,7 +323,7 @@ mod interaction_tests {
     fn keyboard_steps_move_the_specimen_pane() {
         let events: Arc<Mutex<Vec<NodeSpecimenEvent>>> = Arc::new(Mutex::new(Vec::new()));
         let node = resize_handle(
-            &ResizeHandleSpec::new()
+            &ResizeHandleSpec::new(HORIZONTAL_LEFT_KEY)
                 .with_orientation(Orientation::Horizontal)
                 .with_aria_label("Resize horizontal")
                 .with_aria_value_now(120.0)
@@ -365,7 +365,7 @@ mod interaction_tests {
     #[test]
     fn the_specimen_declares_the_pane_it_draws() {
         let node = resize_handle(
-            &ResizeHandleSpec::new()
+            &ResizeHandleSpec::new(HORIZONTAL_LEFT_KEY)
                 .with_orientation(Orientation::Horizontal)
                 .with_aria_label("Resize horizontal")
                 .with_aria_value_now(120.0)
@@ -380,32 +380,36 @@ mod interaction_tests {
         assert!(node.interaction.focusable);
     }
 
-    /// Both live sections must be independently focusable, so their ids
-    /// cannot collide in the backend focus registry.
+    /// The page's four sections are four instances. Each scope is the key the
+    /// page already stores its pane under, so backend focus state and specimen
+    /// state cannot drift apart.
     #[test]
-    fn the_two_live_sections_do_not_share_an_id() {
-        let build = |orientation, label: &str| {
+    fn every_section_carries_its_own_backend_identity() {
+        let build = |scope: &str, orientation| {
             resize_handle(
-                &ResizeHandleSpec::new()
-                    .with_orientation(orientation)
-                    .with_aria_label(label),
+                &ResizeHandleSpec::new(scope).with_orientation(orientation),
                 &GpuiThemeProvider::new(),
                 None,
             )
-            .id
+            .runtime_id
             .expect("the handle identifies itself")
         };
-        let horizontal = build(Orientation::Horizontal, "Resize horizontal");
-        let vertical = build(Orientation::Vertical, "Resize vertical");
-        assert_ne!(horizontal, vertical);
-        assert_ne!(HORIZONTAL_LEFT_KEY, VERTICAL_TOP_KEY);
+        let ids = [
+            build(HORIZONTAL_LEFT_KEY, Orientation::Horizontal),
+            build(VERTICAL_TOP_KEY, Orientation::Vertical),
+            build("resize-handle:disabled-horizontal", Orientation::Horizontal),
+            build("resize-handle:disabled-vertical", Orientation::Vertical),
+        ];
+        let unique: std::collections::BTreeSet<&String> = ids.iter().collect();
+        assert_eq!(unique.len(), ids.len(), "four sections, four identities");
+        assert!(ids[0].ends_with(HORIZONTAL_LEFT_KEY));
     }
 
     /// A disabled section stays static: no keys, no drag, no focus stop.
     #[test]
     fn a_disabled_specimen_section_stays_inert() {
         let node = resize_handle(
-            &ResizeHandleSpec::new()
+            &ResizeHandleSpec::new("resize-handle:disabled-horizontal")
                 .with_orientation(Orientation::Horizontal)
                 .with_disabled(true)
                 .with_aria_label("Disabled resize"),

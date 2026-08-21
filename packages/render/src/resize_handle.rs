@@ -41,18 +41,15 @@ const KEY_STEP_PX: f32 = 8.0;
 /// — the same sentinel the web implementations emit. Contract §6.
 const KEY_SATURATING_PX: f32 = 9999.0;
 
-/// The element id the handle's focusable root carries.
+/// The backend-state key the handle's focusable root carries.
 ///
-/// Derived rather than passed: two handles on one page must not share a
-/// backend focus handle, and orientation plus accessible name is what already
-/// tells them apart on the page a reader sees. Hosts that drive focus or read
-/// bounds call this instead of rebuilding the format.
+/// Built from the caller's instance scope and nothing else. Orientation, name
+/// and value are semantics: two handles may legitimately share all three, and
+/// a name that changes — a translation, a host relabelling a pane — would move
+/// the key of a control that never went anywhere. Hosts that drive focus or
+/// read bounds call this instead of rebuilding the format.
 pub fn resize_handle_focus_id(spec: &ResizeHandleSpec) -> String {
-    format!(
-        "resize-handle:{}:{}",
-        spec.aria_orientation(),
-        spec.effective_aria_label()
-    )
+    format!("resize-handle:{}", spec.instance_id)
 }
 
 /// The resize delta a key asks for, or `None` when the key is not this
@@ -257,7 +254,10 @@ pub fn resize_handle(
     }
 
     let mut el = arm(el);
-    el.id = Some(resize_handle_focus_id(spec));
+    // `runtime_id`, not `id`: this is the backend's key for focus and gesture
+    // state, and it must be unique per mounted instance. The semantic id may
+    // repeat across instances by design (`poodle_node::Node`).
+    el.runtime_id = Some(resize_handle_focus_id(spec));
     // Contract §6: the separator states its axis and its position within the
     // host's range. `aria_value_now` is the host's to update; the range is
     // declared either way, because a current value without one says nothing.
@@ -313,7 +313,7 @@ mod tests {
     /// a node no one can reach.
     #[test]
     fn only_an_enabled_handle_takes_focus() {
-        let (enabled, _) = armed(&ResizeHandleSpec::new());
+        let (enabled, _) = armed(&ResizeHandleSpec::new("split"));
         assert!(enabled.interaction.focusable);
         assert!(!enabled.interaction.disabled);
         assert!(
@@ -321,7 +321,7 @@ mod tests {
             "the focus state is both the visible treatment and the backend's focus channel"
         );
 
-        let (disabled, _) = armed(&ResizeHandleSpec::new().with_disabled(true));
+        let (disabled, _) = armed(&ResizeHandleSpec::new("split").with_disabled(true));
         assert!(!disabled.interaction.focusable);
         assert!(disabled.interaction.disabled);
         assert!(disabled.style.focus.is_none());
@@ -334,7 +334,7 @@ mod tests {
     /// the reader is looking at.
     #[test]
     fn focus_recolors_the_visible_hairline() {
-        let (node, _) = armed(&ResizeHandleSpec::new());
+        let (node, _) = armed(&ResizeHandleSpec::new("split"));
         let idle = node
             .style
             .descriptor
@@ -355,7 +355,7 @@ mod tests {
     #[test]
     fn horizontal_answers_left_and_right_only() {
         let (node, trace) =
-            armed(&ResizeHandleSpec::new().with_orientation(Orientation::Horizontal));
+            armed(&ResizeHandleSpec::new("split").with_orientation(Orientation::Horizontal));
         press(&node, NodeKey::ArrowLeft);
         press(&node, NodeKey::ArrowRight);
         press(&node, NodeKey::Home);
@@ -374,7 +374,8 @@ mod tests {
 
     #[test]
     fn vertical_answers_up_and_down_only() {
-        let (node, trace) = armed(&ResizeHandleSpec::new().with_orientation(Orientation::Vertical));
+        let (node, trace) =
+            armed(&ResizeHandleSpec::new("split").with_orientation(Orientation::Vertical));
         press(&node, NodeKey::ArrowUp);
         press(&node, NodeKey::ArrowDown);
         press(&node, NodeKey::Home);
@@ -391,7 +392,7 @@ mod tests {
     /// release commits once per key.
     #[test]
     fn a_keystroke_is_a_whole_gesture() {
-        let (node, trace) = armed(&ResizeHandleSpec::new());
+        let (node, trace) = armed(&ResizeHandleSpec::new("split"));
         press(&node, NodeKey::ArrowRight);
         assert_eq!(
             trace.lock().expect("trace lock").as_slice(),
@@ -407,7 +408,7 @@ mod tests {
     /// spec → node crossing. A current value with no range announces nothing.
     #[test]
     fn the_separator_declares_its_axis_name_and_range() {
-        let spec = ResizeHandleSpec::new()
+        let spec = ResizeHandleSpec::new("split")
             .with_orientation(Orientation::Vertical)
             .with_aria_label("Resize vertical")
             .with_aria_value_now(80.0)
@@ -426,7 +427,7 @@ mod tests {
     /// spec — an unnamed separator is the a11y defect this prevents.
     #[test]
     fn an_unnamed_handle_still_announces_itself() {
-        let (node, _) = armed(&ResizeHandleSpec::new());
+        let (node, _) = armed(&ResizeHandleSpec::new("split"));
         assert_eq!(node.a11y.label.as_deref(), Some("Resize"));
         assert_eq!(node.a11y.orientation.as_deref(), Some("horizontal"));
         assert_eq!(node.a11y.value, None);
@@ -434,27 +435,72 @@ mod tests {
         assert_eq!(node.a11y.value_max, Some(100.0));
     }
 
-    /// Two handles on one page must not share a backend focus handle.
+    /// Two handles that agree on every semantic — same axis, same name, same
+    /// range — are still two handles. Only the caller's scope separates them,
+    /// which is why nothing derived can.
     #[test]
-    fn each_handle_carries_its_own_id() {
-        let (horizontal, _) = armed(
-            &ResizeHandleSpec::new()
-                .with_orientation(Orientation::Horizontal)
-                .with_aria_label("Resize horizontal"),
-        );
-        let (vertical, _) = armed(
-            &ResizeHandleSpec::new()
-                .with_orientation(Orientation::Vertical)
-                .with_aria_label("Resize vertical"),
+    fn identical_handles_keep_distinct_backend_identities() {
+        let build = |scope: &str| {
+            armed(
+                &ResizeHandleSpec::new(scope)
+                    .with_orientation(Orientation::Horizontal)
+                    .with_aria_label("Resize")
+                    .with_aria_value_now(50.0),
+            )
+            .0
+        };
+        let left = build("editor:left");
+        let right = build("editor:right");
+        assert_eq!(
+            left.runtime_id.as_deref(),
+            Some("resize-handle:editor:left")
         );
         assert_eq!(
-            horizontal.id.as_deref(),
-            Some("resize-handle:horizontal:Resize horizontal")
+            right.runtime_id.as_deref(),
+            Some("resize-handle:editor:right")
         );
-        assert_ne!(horizontal.id, vertical.id);
-        let derived =
-            resize_handle_focus_id(&ResizeHandleSpec::new().with_aria_label("Resize horizontal"));
-        assert_eq!(horizontal.id.as_deref(), Some(derived.as_str()));
+        assert_ne!(left.runtime_id, right.runtime_id);
+        assert_eq!(
+            left.a11y.label, right.a11y.label,
+            "the semantics are identical; only the scope is not"
+        );
+    }
+
+    /// The key is the instance, not what the instance currently says. A
+    /// relabelled, revalued, re-oriented handle is the same handle, and a
+    /// backend that lost its focus handle on a translation would be wrong.
+    #[test]
+    fn one_instance_keeps_its_identity_across_rebuilds() {
+        let first = armed(&ResizeHandleSpec::new("editor:left").with_aria_label("Resize"))
+            .0
+            .runtime_id;
+        let relabelled = armed(
+            &ResizeHandleSpec::new("editor:left")
+                .with_orientation(Orientation::Vertical)
+                .with_aria_label("Ancho del panel")
+                .with_aria_value_now(200.0)
+                .with_aria_value_max(400.0),
+        )
+        .0
+        .runtime_id;
+        assert_eq!(first, relabelled);
+        assert_eq!(first.as_deref(), Some("resize-handle:editor:left"));
+        assert_eq!(
+            resize_handle_focus_id(&ResizeHandleSpec::new("editor:left")).as_str(),
+            "resize-handle:editor:left",
+            "hosts derive the same key from the scope alone",
+        );
+    }
+
+    /// The disabled handle is identified too: a host that re-enables it must
+    /// find the same node, not a new one.
+    #[test]
+    fn a_disabled_handle_is_still_identified() {
+        let (node, _) = armed(&ResizeHandleSpec::new("editor:left").with_disabled(true));
+        assert_eq!(
+            node.runtime_id.as_deref(),
+            Some("resize-handle:editor:left")
+        );
     }
 
     /// Pointer drag is untouched by the keyboard work: the per-frame delta is
@@ -465,7 +511,8 @@ mod tests {
             (Orientation::Horizontal, 12.0, 3.0, 12.0),
             (Orientation::Vertical, 3.0, 12.0, 12.0),
         ] {
-            let (node, trace) = armed(&ResizeHandleSpec::new().with_orientation(orientation));
+            let (node, trace) =
+                armed(&ResizeHandleSpec::new("split").with_orientation(orientation));
             let targets: Vec<&Node> = std::iter::once(&node).chain(node.children.iter()).collect();
             assert_eq!(targets.len(), 2, "the hairline and its grab overlay");
             for target in targets {

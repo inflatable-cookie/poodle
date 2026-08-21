@@ -4,7 +4,7 @@ Date: 2026-08-20
 Card: `docs/roadmaps/g15/040-resize-handle-native-semantics.md`
 Handoff: `docs/handoffs/20260820-230943-g15-040-resize-handle-native-semantics.md`
 Parent: `docs/roadmaps/g15/027-screen-clear-human-review.md`
-PR: pending
+PR: #56
 
 ## Outcome
 
@@ -20,16 +20,27 @@ implementation, public callback, or platform accessibility claim changed.
 
 ## Change class
 
-- **Packages changed:** `poodle-node` (additive), `poodle-render`, GPUI
-  preview specimen and its tests
-- **Public-intent entry points:** additive `NodeA11y.value_min` /
-  `NodeA11y.value_max`; new `poodle_render::resize_handle_focus_id`. The
-  `resize_handle` signature and `ResizeHandleSpec` are unchanged.
-- **Compatibility:** additive only. No alias, no second callback, no dual API.
-- **Downstream re-check:** a mounted ResizeHandle now takes focus and consumes
-  axis Arrow/Home/End while focused, and its root node carries an id derived
-  from orientation and accessible name. A host that assigned its own id to the
-  handle root must assign it after the render call, as before.
+This is a **breaking, pre-1.0, operator-approved** public Rust API migration,
+taken after review round 1 rejected a derived focus key. No alias, optional
+twin, `Default`, or silent fallback remains.
+
+- **Packages changed:** `poodle-specs`, `poodle-node` (additive),
+  `poodle-render`, GPUI preview specimens and tests, GPUI adapter demo app,
+  Jetstream preview specimens and adapter compile callers
+- **Public-intent entry points:** `ResizeHandleSpec::new(instance_id)` and
+  `SplitViewSpec::new(instance_id, orientation)` now require a caller-owned
+  native instance scope; `ResizeHandleSpec` no longer implements `Default`;
+  new `SplitViewSpec::divider_instance_id()`; new
+  `poodle_render::resize_handle_focus_id`; additive `NodeA11y.value_min` /
+  `NodeA11y.value_max`
+- **Compatibility:** clean break on both constructors, pre-1.0; operator
+  approved 2026-08-21. The `NodeA11y` fields are additive.
+- **Downstream re-check:** every out-of-repo `ResizeHandleSpec::new()` and
+  `SplitViewSpec::new(orientation)` call must supply a lifetime-stable scope.
+  A mounted ResizeHandle now takes focus and consumes axis Arrow/Home/End while
+  focused, and its root carries `runtime_id` (not `id`), so a host reading the
+  semantic `id` finds none. No Svelte, React, or other web surface changed:
+  the browser owns identity there.
 
 ## Implementation
 
@@ -54,8 +65,12 @@ implementation, public callback, or platform accessibility claim changed.
   no outline that costs no layout, and the handle's whole footprint is the
   `0.125rem` line, so a border would move the split it describes. Recorded in
   the contract's GPUI notes rather than left as an undocumented deviation.
-- The root's element id is derived from orientation and accessible name, so
-  the page's two live sections cannot share a backend focus handle.
+- Identity is caller-supplied and carried on `Node.runtime_id`, the
+  vocabulary's backend-state key. Orientation, name, and value are semantics —
+  two handles may legitimately share all three, and a name that changes with a
+  translation would move the key of a control that never moved. `SplitView`
+  states its own scope and derives the divider's (`{scope}:divider`), so two
+  ordinary splits no longer resolve one focus handle.
 - Drag repair found on the way: the horizontal handle's grab overlay carried
   no drag handler (the vertical one did), so grabbing anywhere but the 2px
   line did nothing. Drags do not bubble; both hit targets now carry it in both
@@ -66,21 +81,28 @@ implementation, public callback, or platform accessibility claim changed.
 
 ## Evidence
 
-- render (9 focused tests): focus stop only when enabled; the focus patch
+- render (11 focused tests): focus stop only when enabled; the focus patch
   repaints the visible hairline; per-axis key filtering with exact deltas;
   one keystroke = Start/Move/End; role, name, axis and full range on the node;
-  contract default name and default range on a bare spec; distinct ids;
-  per-frame axis drag delta from both hit targets in both orientations
+  contract default name and default range on a bare spec; per-frame axis drag
+  delta from both hit targets in both orientations
+- identity (3 of those): two handles that agree on axis, name and value still
+  keep distinct backend identities; one instance keeps its identity across a
+  rebuild that changes orientation, label and value; a disabled handle is
+  identified too, so re-enabling it finds the same node
 - node: a node declares no numeric range until a component states one
-- mounted GPUI (`headless_regressions`, 2 new): a focused separator steps the
+- mounted GPUI (`headless_regressions`, 3 new): a focused separator steps the
   host pane and the declared current value through the real key route
   (`right` → 128, `up` → unchanged, `left` → 120, `home` → 48, `end` → 280,
   range intact across every rebuild); a disabled separator never becomes a
-  focus target and answers no key
+  focus target and answers no key; **two composed `SplitView`s with identical
+  orientation, label and ratio do not share a divider focus handle** —
+  focusing one leaves the other blurred, both ways round
 - GPUI specimen (4 tests): the page's own handler moves the pane from the
   keyboard and clamps at the page's own minimum; the declared range is the
-  pane drawn; the two live sections do not share an id; the disabled section
-  stays inert
+  pane drawn; all four sections carry their own backend identity, scoped by
+  the same key the page stores its pane under; the disabled section stays
+  inert
 
 ## Audit
 
@@ -95,29 +117,36 @@ Headless only. No windowed, `test:native-visual`, browser, Jetstream, or
 release selector ran.
 
 - `cargo test --manifest-path packages/contracts/node/Cargo.toml` — 3 passed
-- `cargo test --manifest-path packages/render/Cargo.toml` — 362 passed
+- `cargo test --manifest-path packages/render/Cargo.toml` — 364 passed
 - `cargo test --manifest-path packages/gpui/preview/Cargo.toml --bin
   poodle-preview resize_handle` — 6 passed
 - `effigy ci:rust` — passed
-- `effigy check:gpui` — passed
-- `effigy regressions:native` — 52 passed
+- `effigy check:gpui` — passed (364 render, 22 backend, preview check)
+- `effigy regressions:native` — 53 passed
 - `effigy probe:gpui-specimens` — 7 passed
 - `effigy docs:check` — passed
 - `effigy qa` — passed
 - `git diff --check origin/main...HEAD` — clean
 
+`packages/jetstream/preview` cannot compile in this worktree: its
+`jetstream-input` path dependency resolves to a sibling checkout that does not
+exist here. Its two migrated specimen files parse and are type-trivial (a
+`&str` scope into `impl Into<String>`); `poodle-jetstream` itself, which
+`poodle-render` builds against, compiles clean.
+
+## Review round 1 (PR #56)
+
+One blocker: the first implementation derived `Node.id` from orientation plus
+accessible name. Those are semantics, not identity — two same-axis handles with
+the same label collided, a relabelling moved the key, and `SplitView` composed
+every divider with the default `"Resize"` name, so ordinary splits resolved one
+focus handle. The batch log recorded that as an accepted residual while the
+contract claimed the opposite. Both are gone: identity is caller-supplied,
+carried on `runtime_id`, proven by the three tests above, and the contract now
+states what is true. Operator approved the breaking constructor change.
+
 ## Unresolved
 
-- **Anonymous composed handles share one focus identity.** The id is derived
-  from orientation and accessible name, which is enough for a page that names
-  its handles. `SplitView` passes neither, so every divider it composes
-  derives the same id and therefore the same backend focus handle. Before this
-  card those dividers were not focusable at all, so nothing collided; now a
-  page with several SplitViews has several dividers resolving one handle. The
-  honest fix is composer-supplied, lifetime-stable identity — the same
-  conclusion `g15.038` reached for SegmentedControl — which is a breaking
-  `SplitViewSpec` change outside this card's scope. Routed to the
-  orchestrator, not fixed here.
 - **No platform AT projection.** GPUI 0.2.2 exposes no accessibility
   attributes (`docs/contracts/003-native-accessibility.md`). The role, name,
   axis, and range reach the renderer-neutral node and stop there. Nothing in

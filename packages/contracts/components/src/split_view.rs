@@ -3,6 +3,11 @@ use crate::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SplitViewSpec {
+    /// Stable native instance scope. The split composes a ResizeHandle, whose
+    /// backend focus and gesture state need an identity no two splits share;
+    /// this is where that identity enters, and the divider's scope is derived
+    /// from it.
+    pub instance_id: String,
     pub orientation: SplitOrientation,
     pub ratio: Option<f32>,
     pub default_ratio: f32,
@@ -75,8 +80,12 @@ impl SplitViewSpec {
         self
     }
 
-    pub fn new(orientation: SplitOrientation) -> Self {
+    /// The instance scope has no default, for the reason `ResizeHandleSpec`
+    /// states: a derived or render-order key cannot tell two identical splits
+    /// apart, and the divider they compose would share one focus handle.
+    pub fn new(instance_id: impl Into<String>, orientation: SplitOrientation) -> Self {
         Self {
+            instance_id: instance_id.into(),
             orientation,
             ratio: None,
             default_ratio: 0.5,
@@ -102,6 +111,13 @@ impl SplitViewSpec {
             primary_collapsed_size: None,
             secondary_collapsed_size: None,
         }
+    }
+
+    /// Scope for the ResizeHandle this split composes. Derived, not passed:
+    /// one split has exactly one divider, so a second caller-stated id would
+    /// be a second chance to get it wrong.
+    pub fn divider_instance_id(&self) -> String {
+        format!("{}:divider", self.instance_id)
     }
 
     pub fn with_ratio(mut self, ratio: f32) -> Self {

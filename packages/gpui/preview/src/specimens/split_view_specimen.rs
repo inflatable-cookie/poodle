@@ -75,7 +75,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         pct => pct,
     };
     let interactive = SplitView::from_spec(
-        SplitViewSpec::new(SplitOrientation::Horizontal).with_ratio(ratio_pct as f32 / 100.0),
+        SplitViewSpec::new("split-view:interactive", SplitOrientation::Horizontal)
+            .with_ratio(ratio_pct as f32 / 100.0),
         theme,
     )
     .with_primary(region("Sidebar", 220.0))
@@ -124,8 +125,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     frame(160.0).child(
                         SplitView::from_spec(
-                            SplitViewSpec::new(SplitOrientation::Horizontal)
-                                .with_default_ratio(0.5),
+                            SplitViewSpec::new(
+                                "split-view:horizontal",
+                                SplitOrientation::Horizontal,
+                            )
+                            .with_default_ratio(0.5),
                             theme,
                         )
                         .with_primary(region("Sidebar", 220.0))
@@ -146,7 +150,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     frame(256.0).child(
                         SplitView::from_spec(
-                            SplitViewSpec::new(SplitOrientation::Vertical).with_default_ratio(0.5),
+                            SplitViewSpec::new("split-view:vertical", SplitOrientation::Vertical)
+                                .with_default_ratio(0.5),
                             theme,
                         )
                         .with_primary(region("Editor", 220.0))
@@ -167,10 +172,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     frame(160.0).child(
                         SplitView::from_spec(
-                            SplitViewSpec::new(SplitOrientation::Horizontal)
-                                .with_default_ratio(0.35)
-                                .with_show_collapse_primary(true)
-                                .with_show_collapse_secondary(true),
+                            SplitViewSpec::new(
+                                "split-view:collapse-horizontal",
+                                SplitOrientation::Horizontal,
+                            )
+                            .with_default_ratio(0.35)
+                            .with_show_collapse_primary(true)
+                            .with_show_collapse_secondary(true),
                             theme,
                         )
                         .with_primary(region("Primary", 220.0))
@@ -180,10 +188,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     frame(256.0).child(
                         SplitView::from_spec(
-                            SplitViewSpec::new(SplitOrientation::Vertical)
-                                .with_default_ratio(0.6)
-                                .with_show_collapse_primary(true)
-                                .with_show_collapse_secondary(true),
+                            SplitViewSpec::new(
+                                "split-view:collapse-vertical",
+                                SplitOrientation::Vertical,
+                            )
+                            .with_default_ratio(0.6)
+                            .with_show_collapse_primary(true)
+                            .with_show_collapse_secondary(true),
                             theme,
                         )
                         .with_primary(region("Top", 220.0))
@@ -204,11 +215,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     frame(160.0).child(
                         SplitView::from_spec(
-                            SplitViewSpec::new(SplitOrientation::Horizontal)
-                                .with_default_ratio(0.35)
-                                .with_show_collapse_primary(true)
-                                .with_show_collapse_secondary(true)
-                                .with_toggle_visibility(SplitToggleVisibility::Hover),
+                            SplitViewSpec::new(
+                                "split-view:hover-toggles",
+                                SplitOrientation::Horizontal,
+                            )
+                            .with_default_ratio(0.35)
+                            .with_show_collapse_primary(true)
+                            .with_show_collapse_secondary(true)
+                            .with_toggle_visibility(SplitToggleVisibility::Hover),
                             theme,
                         )
                         .with_primary(region("Primary", 220.0))
@@ -229,7 +243,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     frame(256.0).child(
                         SplitView::from_spec(
-                            SplitViewSpec::new(SplitOrientation::Horizontal)
+                            SplitViewSpec::new("split-view:nested", SplitOrientation::Horizontal)
                                 .with_default_ratio(0.25)
                                 .with_show_collapse_primary(true),
                             theme,
@@ -237,9 +251,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_primary(region("Explorer", 220.0))
                         .with_secondary(
                             SplitView::from_spec(
-                                SplitViewSpec::new(SplitOrientation::Vertical)
-                                    .with_default_ratio(0.65)
-                                    .with_show_collapse_secondary(true),
+                                SplitViewSpec::new(
+                                    "split-view:nested:inner",
+                                    SplitOrientation::Vertical,
+                                )
+                                .with_default_ratio(0.65)
+                                .with_show_collapse_secondary(true),
                                 theme,
                             )
                             .with_primary(region("Editor", 140.0))
@@ -261,7 +278,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     frame(160.0).child(
                         SplitView::from_spec(
-                            SplitViewSpec::new(SplitOrientation::Horizontal)
+                            SplitViewSpec::new("split-view:disabled", SplitOrientation::Horizontal)
                                 .with_default_ratio(0.5)
                                 .with_disabled(true)
                                 .with_show_collapse_primary(true)
@@ -293,9 +310,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         SpecimenAxes::examples_only()
             .with_sizes(|size, theme: &GpuiThemeProvider| {
                 SplitView::from_spec(
-                    SplitViewSpec::new(SplitOrientation::Horizontal)
-                        .with_ratio(0.4)
-                        .with_size(size),
+                    SplitViewSpec::new(
+                        format!("split-view:sizes:{size:?}"),
+                        SplitOrientation::Horizontal,
+                    )
+                    .with_ratio(0.4)
+                    .with_size(size),
                     theme,
                 )
                 .with_primary(region("Sidebar", 220.0))
@@ -305,9 +325,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
                 SplitView::from_spec(
-                    SplitViewSpec::new(SplitOrientation::Horizontal)
-                        .with_ratio(0.4)
-                        .with_density(density),
+                    SplitViewSpec::new(
+                        format!("split-view:densities:{density:?}"),
+                        SplitOrientation::Horizontal,
+                    )
+                    .with_ratio(0.4)
+                    .with_density(density),
                     theme,
                 )
                 .with_primary(region("Sidebar", 220.0))
