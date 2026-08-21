@@ -2,9 +2,11 @@
 
 Status: **partial** — mechanical screening baseline plus live measurement on
 all three runtimes. Human teaching judgment has been applied to the three
-pilots and to 30 screen-clear pages (`g15.028`, `g15.029`, `g15.030`); 26
-screen-clear pages and the remaining defect-led rows still await it.
-Date: 2026-08-20 (revision 11 — `g15.040` closed the GPUI `ResizeHandle`
+pilots and to 49 screen-clear pages (`g15.028`–`g15.032`); 7 screen-clear
+pages (`g15.033`) and the remaining defect-led rows still await it.
+Date: 2026-08-21 (revision 12 — `g15.032` navigation/overlays review recorded
+ten human verdicts and repaired the Popover Sv/Rc trigger composition;
+revision 11 — `g15.040` closed the GPUI `ResizeHandle`
 keyboard/focus/value gap, returning the row to `A / A / A` and `keep`;
 revision 10 — `g15.030` foundation-layout review recorded that gap as
 `contract/runtime-blocker`;
@@ -101,13 +103,13 @@ meaningfully distinct. A later human review may change a grade or disposition
 in the existing row; it does not add a second table.
 
 A person has now answered those questions for the three pilots (Button,
-RangeSlider, Tabs) and for the 39 screen-clear pages owned by `g15.028`–
-`g15.031`. The remaining 17 screen-clear pages sit in `g15.032`–`g15.033`.
+RangeSlider, Tabs) and for the 49 screen-clear pages owned by `g15.028`–
+`g15.032`. The remaining 7 screen-clear pages sit in `g15.033`.
 Every child carries a live operator-review checkpoint for changes.
 
 So read an **A** that has no human verdict as "no measured defect", not as
 "judged a good teaching page". A page can screen A and still open on a prop
-showcase. Read an **A** that names a `g15.028`–`g15.031` human verdict as the
+showcase. Read an **A** that names a `g15.028`–`g15.032` human verdict as the
 reviewer's keep. **D** remains the dead-primary-interaction or unusable-as-
 documentation grade even when the defect is a component blocker rather than a
 caption hole.
@@ -597,11 +599,11 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 
 | Component | Sv | Rc | Gp† | Disposition | Evidence |
 | --- | :-: | :-: | :-: | --- | --- |
-| `Breadcrumbs` | A | A | A | keep | no named defect |
+| `Breadcrumbs` | A | A | A | keep | human verdict (`g15.032`): keep — live-navigation basic trail, deep path, and collapsed ellipsis teach location hierarchy; Sv/Rc paired; Gp mirrors the three sections and both axes statically |
 | `NavCard` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `NavigationMenu` | A | A | A | keep | no named defect |
-| `Pagination` | A | A | A | keep | no named defect |
-| `PaginationSummary` | A | A | A | keep | no named defect |
+| `NavigationMenu` | A | A | A | keep | human verdict (`g15.032`): keep — live horizontal navigation plus outline, underline, solid-fill, hover-solid, and no-fill sections each teach a distinct activeEdge/activeFill treatment (six sections, within budget); disabled item shown; Sv/Rc paired; Gp mirrors all six with a live first example |
+| `Pagination` | A | A | A | keep | human verdict (`g15.032`): keep — numbered, middle-range, few-pages, simple with limit selector, full, and chrome variants are distinct and live; Sv/Rc paired; Gp keeps one fully interactive full variant plus renderer-owned standalone and last-page boundary evidence |
+| `PaginationSummary` | A | A | A | keep | human verdict (`g15.032`): keep — default, single-page, and large-dataset derived copy; read-only component, static by design; Sv/Rc/Gp aligned |
 | `SidebarNav` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `Stepper` | B | B | A | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples |
 | `Tabs` | A | A | B | pilot-fix | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
@@ -613,17 +615,17 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | --- | :-: | :-: | :-: | --- | --- |
 | `Accordion` | B | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `AlertDialog` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence; hand-rolled captions instead of SpecimenGroup · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `Collapsible` | A | A | A | keep | no named defect |
+| `Collapsible` | A | A | A | keep | human verdict (`g15.032`): keep — closed, open, disabled, highlighted, and custom-trigger sections teach the disclosure gesture; live toggle verified; Sv/Rc paired; Gp toggles live and omits only the custom-trigger composition example |
 | `CommandPalette` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `ContextMenu` | A | A | A | keep | **Sv:** note — 1 clicks changed nothing: a right-click surface; a left click is the wrong gesture · **Rc:** note — 1 clicks changed nothing: a right-click surface; a left click is the wrong gesture |
-| `DebugDialog` | A | A | A | keep | no named defect |
+| `ContextMenu` | A | A | A | keep | human verdict (`g15.032`): keep — right-click opens at the pointer, actions fire a readout, Escape and outside press dismiss; the recorded left-click no-op is the contract's gesture, not dead wiring; Sv/Rc paired; Gp presents the menu open by default for headless visibility with live select |
+| `DebugDialog` | A | A | A | keep | human verdict (`g15.032`): keep — payload and custom-trigger examples open live with the serialized value; the "Hidden when null" caption teaches that a null value renders no trigger; Sv/Rc paired; Gp mirrors the three sections |
 | `Dialog` | C | C | B | curation-tranche | **Sv:** Examples long — 9 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 9 captioned examples; takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `Drawer` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence; hand-rolled captions instead of SpecimenGroup · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `FormDialog` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `HoverCard` | A | A | A | keep | **Sv:** note — 2 clicks changed nothing: a hover surface; a click is the wrong gesture · **Rc:** note — 2 clicks changed nothing: a hover surface; a click is the wrong gesture |
+| `HoverCard` | A | A | A | keep | human verdict (`g15.032`): keep — hover and keyboard focus both open after the contract's intent delays and Escape closes; the recorded click no-op is the wrong gesture and proves nothing; Sv/Rc paired; Gp wires real hover-intent delays |
 | `Menu` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |
-| `Menubar` | A | A | A | keep | no named defect |
-| `Popover` | A | A | A | keep | no named defect |
+| `Menubar` | A | A | A | keep | human verdict (`g15.032`): keep — File/Edit/View bar with live action readout, hover-to-switch between open menus, and item-focused Escape focus return verified; Sv/Rc paired; Gp adds live checkbox/radio state and a disabled trigger |
+| `Popover` | A | A | A | keep | human verdict (`g15.032`): keep after Sv/Rc specimen repair — both examples anchored the popover to a real Button inside the default trigger wrapper, nesting a second button role and returning Escape focus to the inert wrapper; now composed with `triggerIsInteractive` per the contract so the wrapper only observes and focus returns to the inner button; Gp unchanged (native composes its trigger directly and adds placement, surface-width, and disabled evidence) |
 | `Tooltip` | C | C | A | curation-tranche | **Sv:** note — 5 clicks changed nothing: a hover surface; a click is the wrong gesture; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop · **Rc:** note — 5 clicks changed nothing: a hover surface; a click is the wrong gesture; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop |
 
 ### Forms & validation — Composition (9)
