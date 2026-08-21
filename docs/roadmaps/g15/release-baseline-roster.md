@@ -342,8 +342,8 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 
 ### Agent surfaces
 
-| Component | React impl/export | React gallery | Focused React test | Rust declaration | Rust render | GPUI specimen |
-| --- | --- | --- | --- | --- | --- | --- |
+| Component | React impl/export | React gallery | Focused React test | Pack-install | Rust declaration | Rust render | GPUI specimen |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | `AgentMessage` | complete | complete | `AgentMessage.test.tsx` | `test:web-pack-install` | `AgentMessageSpec` (`packages/contracts/components/src/agent_message.rs`) | `packages/render/src/agent_message.rs` | `packages/gpui/preview/src/specimens/agent_message.rs` |
 | `AgentPlan` | complete | complete | `AgentPlan.test.tsx` | `test:web-pack-install` | `AgentPlanSpec` (`packages/contracts/components/src/agent_plan.rs`) | `packages/render/src/agent_plan.rs` | `packages/gpui/preview/src/specimens/agent_plan.rs` |
 | `AgentPlanRecord` | complete | complete | `AgentPlanRecord.test.tsx` | `test:web-pack-install` | `AgentPlanRecordSpec` (`packages/contracts/components/src/agent_plan_record.rs`) | `packages/render/src/agent_plan_record.rs` | `packages/gpui/preview/src/specimens/agent_plan_record.rs` |
@@ -357,8 +357,8 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 
 ### Workstation systems
 
-| Component | React impl/export | React gallery | Focused React test | Rust declaration | Rust render | GPUI specimen |
-| --- | --- | --- | --- | --- | --- | --- |
+| Component | React impl/export | React gallery | Focused React test | Pack-install | Rust declaration | Rust render | GPUI specimen |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | `StatusBar` | complete | complete | `StatusBar.test.tsx` | `test:web-pack-install` | `ShellStatusBarSpec` (`shell_status_bar.rs`, documented rename) | `packages/render/src/shell_status_bar.rs` | `packages/gpui/preview/src/specimens/status_bar.rs` |
 | `StatusIndicator` | complete | complete | `StatusIndicator.test.tsx` | `test:web-pack-install` | `StatusIndicatorSpec` (`packages/contracts/components/src/status_indicator.rs`) | `packages/render/src/status_indicator.rs` | `packages/gpui/preview/src/specimens/status_indicator.rs` |
 | `Surface` | complete | complete | `Surface.test.tsx` | `test:web-pack-install` | `SurfaceSpec` (`packages/contracts/components/src/surface.rs`) | `packages/render/src/surface.rs` | `packages/gpui/preview/src/specimens/surface.rs` |
@@ -384,8 +384,8 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 
 ### Composites
 
-| Component | React impl/export | React gallery | Focused React test | Rust declaration | Rust render | GPUI specimen |
-| --- | --- | --- | --- | --- | --- | --- |
+| Component | React impl/export | React gallery | Focused React test | Pack-install | Rust declaration | Rust render | GPUI specimen |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | `ActionDiscoveryPanel` | complete | complete | `ActionDiscoveryPanel.test.tsx` | `test:web-pack-install` | `ActionDiscoveryPanelSpec` (`packages/contracts/components/src/action_discovery_panel.rs`) | `packages/render/src/action_discovery_panel.rs` | `packages/gpui/preview/src/specimens/action_discovery_panel.rs` |
 | `AppHeader` | complete | complete | `AppHeader.test.tsx` | `test:web-pack-install` | `AppHeaderSpec` (`packages/contracts/components/src/app_header.rs`) | `packages/render/src/app_header.rs` | `packages/gpui/preview/src/specimens/app_header.rs` |
 | `EditableList` | complete | complete | `EditableList.test.tsx` | `test:web-pack-install` | `EditableListSpec` (`packages/contracts/components/src/editable_list.rs`) | `packages/render/src/editable_list.rs` | `packages/gpui/preview/src/specimens/editable_list_specimen.rs` |
@@ -444,8 +444,8 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 
 ### Audio controls
 
-| Component | React impl/export | React gallery | Focused React test | Rust declaration | Rust render | GPUI specimen |
-| --- | --- | --- | --- | --- | --- | --- |
+| Component | React impl/export | React gallery | Focused React test | Pack-install | Rust declaration | Rust render | GPUI specimen |
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | `AudioMeter` | complete | complete | `AudioControls.test.tsx`, `MeterSurface.test.tsx` | `test:web-pack-install` | `AudioMeterSpec` (`packages/contracts/components/src/audio_meter.rs`) | `packages/render/src/audio.rs` (batched family) | `packages/gpui/preview/src/specimens/audio_controls.rs` (batched family) |
 | `MeterSurface` | complete | complete | `MeterSurface.test.tsx` | `test:web-pack-install` | not-applicable — web-only (spec 068) | not-applicable — web-only (spec 068) | not-applicable — web-only (spec 068) |
 | `AudioSwitch` | complete | complete | `AudioControls.test.tsx` | `test:web-pack-install` | `AudioSwitchSpec` (`packages/contracts/components/src/audio_switch.rs`) | `packages/render/src/audio.rs` (batched family) | `packages/gpui/preview/src/specimens/audio_controls.rs` (batched family) |

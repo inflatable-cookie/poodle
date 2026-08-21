@@ -20,17 +20,19 @@ The new checkable inventory parser derives the 175-name denominator from the
 frozen Svelte roster and checks both package-root indexes. The generated clean
 consumer proof imports both installed roots as namespaces, compares exact
 component and runtime export sets, and reports missing or extra names. It does
-not mount the full roster.
+not mount the full roster. React's non-roster root exports are an explicit,
+bounded authority, and the runner includes an in-memory regression that rejects
+`AccidentalExtraComponent` by its exact name.
 
 ## Packed Boundary Evidence
 
 The actual archives and installed roots passed these checks:
 
-| Package | Tarball entries | Declared wildcard matches |
-| --- | ---: | --- |
-| `@inflatable-cookie/poodle-core` | 391 | 166 styles; 106 generated icon modules |
-| `@inflatable-cookie/poodle-svelte` | 214 | 176 `src/*.svelte` entries |
-| `@inflatable-cookie/poodle-react` | 208 | none |
+| Package | Version | Tarball entries | Declared wildcard matches |
+| --- | ---: | ---: | --- |
+| `@inflatable-cookie/poodle-core` | 0.1.0 | 391 | 166 styles; 106 generated icon modules |
+| `@inflatable-cookie/poodle-svelte` | 0.1.0 | 214 | 176 `src/*.svelte` entries |
+| `@inflatable-cookie/poodle-react` | 0.1.0 | 208 | none |
 
 Manifest-derived exact export targets were checked for every package,
 including package manifests, READMEs, licences, source entry points, type
@@ -38,6 +40,12 @@ entry points, styles, generated tokens, generated icons, and the core's 32
 exact public subpaths. The installed Svelte `./types` subpath was also
 resolved. The clean roots expose exactly 175 Svelte and 175 React component
 names.
+
+The same selector was rerun against a temporary v0.2.0 candidate mutation of
+all three release package manifests and their core dependency pins. It packed,
+installed, and emitted `0.2.0` tarballs for all three packages with the same
+20-test pass and exact roster proof. The manifests were restored before the
+worker commit.
 
 ## Representative Runtime Evidence
 
@@ -66,6 +74,7 @@ consumer suite; none is presented as full-roster behavior evidence.
 | Check | Result |
 | --- | --- |
 | `effigy test:web-pack-install` | pass — 10 files, 20 tests; 175/175 Svelte and 175/175 React |
+| `effigy test:web-pack-install` with temporary v0.2.0 package mutation | pass — 10 files, 20 tests; emitted `0.2.0` tarballs for core, Svelte, and React |
 | Tarball archive and installed-root boundary checks | pass — exact targets and required files |
 | `effigy check:svelte-components` | pass — 0 errors, 4 existing warnings |
 | `effigy react:build` | pass |

@@ -3,6 +3,32 @@ import { join } from "node:path";
 
 export const FROZEN_COMPONENT_COUNT = 175;
 
+// These are public React-root runtime exports outside the frozen component
+// denominator. Keep this authority explicit and bounded: a new root export
+// must either join the frozen roster or be deliberately classified here.
+const REACT_NON_COMPONENT_ROOT_EXPORTS = [
+  "AnchoredSurface",
+  "DEFAULT_COMPRESSION",
+  "MenuSurface",
+  "PillContext",
+  "ThemeControllerProvider",
+  "ThemePortal",
+  "agentQuestionCanSubmit",
+  "compressImage",
+  "detectParsedEmbed",
+  "formatFileSize",
+  "generateFileUploadId",
+  "iconForToolCallLabel",
+  "resolveEmbedParseState",
+  "resolveIconNodes",
+  "resolveSemanticControlSize",
+  "resolveSupportingVisualSize",
+  "usePillContext",
+  "useThemeController",
+  "useUiPresentation",
+  "validateUploadFile",
+] as const;
+
 export type FrameworkRoster = {
   componentNames: string[];
   rootRuntimeNames: string[];
@@ -24,6 +50,12 @@ function sortedUnique(names: Iterable<string>): string[] {
 function difference(left: Iterable<string>, right: Iterable<string>): string[] {
   const rightSet = new Set(right);
   return sortedUnique([...left].filter((name) => !rightSet.has(name)));
+}
+
+function duplicateNames(names: string[]): string[] {
+  return sortedUnique(
+    names.filter((name, index) => names.indexOf(name) !== index),
+  );
 }
 
 function parseExplicitRootExports(source: string): string[] {
@@ -73,42 +105,56 @@ function buildFrameworkRoster(
   frozenNames: string[],
   sourceComponentNames: string[],
   rootRuntimeNames: string[],
+  nonComponentRootNames = difference(rootRuntimeNames, frozenNames),
 ): FrameworkRoster {
   return {
     componentNames: [...frozenNames],
     rootRuntimeNames: sortedUnique(rootRuntimeNames),
-    nonComponentRootNames: difference(rootRuntimeNames, frozenNames),
+    nonComponentRootNames: sortedUnique(nonComponentRootNames),
     sourceMissingNames: difference(frozenNames, sourceComponentNames),
     sourceExtraNames: difference(sourceComponentNames, frozenNames),
   };
 }
 
-export function readWebPackageRoster(repoRoot: string): WebPackageRoster {
-  const frozenNames = parseFrozenNames(
-    readFileSync(
-      join(repoRoot, "docs/roadmaps/g15/release-baseline-roster.md"),
-      "utf8",
-    ),
-  );
+function validateFrozenNames(frozenNames: string[]): void {
   if (frozenNames.length !== FROZEN_COMPONENT_COUNT) {
     throw new Error(
       `Frozen roster denominator changed: expected ${FROZEN_COMPONENT_COUNT}, found ${frozenNames.length}`,
     );
   }
+  const duplicates = duplicateNames(frozenNames);
+  if (duplicates.length > 0) {
+    throw new Error(
+      `Frozen roster contains duplicate component name(s): ${duplicates.join(", ")}`,
+    );
+  }
+}
 
-  const svelteSource = readFileSync(
-    join(repoRoot, "packages/svelte/components/src/index.ts"),
-    "utf8",
-  );
-  const reactSource = readFileSync(
-    join(repoRoot, "packages/react/components/src/index.ts"),
-    "utf8",
-  );
+export function buildWebPackageRoster(
+  frozenNames: string[],
+  svelteSource: string,
+  reactSource: string,
+): WebPackageRoster {
+  validateFrozenNames(frozenNames);
 
   const svelteSourceNames = parseSvelteComponentExports(svelteSource);
+  const svelteRootNames = parseExplicitRootExports(svelteSource);
   const reactRootNames = parseExplicitRootExports(reactSource);
-  const reactSourceNames = frozenNames.filter((name) =>
-    reactRootNames.includes(name),
+  const reactNonComponentRootNames = [
+    ...REACT_NON_COMPONENT_ROOT_EXPORTS,
+  ];
+  const missingReactNonComponentRootNames = difference(
+    reactNonComponentRootNames,
+    reactRootNames,
+  );
+  if (missingReactNonComponentRootNames.length > 0) {
+    throw new Error(
+      `React non-component root export authority references missing name(s): ${missingReactNonComponentRootNames.join(", ")}`,
+    );
+  }
+  const reactSourceNames = difference(
+    reactRootNames,
+    reactNonComponentRootNames,
   );
 
   const roster = {
@@ -116,12 +162,13 @@ export function readWebPackageRoster(repoRoot: string): WebPackageRoster {
     svelte: buildFrameworkRoster(
       frozenNames,
       svelteSourceNames,
-      parseExplicitRootExports(svelteSource),
+      svelteRootNames,
     ),
     react: buildFrameworkRoster(
       frozenNames,
       reactSourceNames,
       reactRootNames,
+      reactNonComponentRootNames,
     ),
   } satisfies WebPackageRoster;
 
@@ -143,4 +190,23 @@ export function readWebPackageRoster(repoRoot: string): WebPackageRoster {
   }
 
   return roster;
+}
+
+export function readWebPackageRoster(repoRoot: string): WebPackageRoster {
+  const frozenNames = parseFrozenNames(
+    readFileSync(
+      join(repoRoot, "docs/roadmaps/g15/release-baseline-roster.md"),
+      "utf8",
+    ),
+  );
+  const svelteSource = readFileSync(
+    join(repoRoot, "packages/svelte/components/src/index.ts"),
+    "utf8",
+  );
+  const reactSource = readFileSync(
+    join(repoRoot, "packages/react/components/src/index.ts"),
+    "utf8",
+  );
+
+  return buildWebPackageRoster(frozenNames, svelteSource, reactSource);
 }

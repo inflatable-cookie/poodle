@@ -7,9 +7,10 @@ import {
   readFileSync,
   realpathSync,
 } from "node:fs";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 
 import {
+  buildWebPackageRoster,
   readWebPackageRoster,
   type WebPackageRoster,
 } from "./roster";
@@ -34,24 +35,26 @@ const packages = [
   {
     name: "@inflatable-cookie/poodle-core",
     directory: "packages/core",
-    filename: "inflatable-cookie-poodle-core-0.1.0.tgz",
     requiredFiles: ["package.json", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"],
   },
   {
     name: "@inflatable-cookie/poodle-svelte",
     directory: "packages/svelte/components",
-    filename: "inflatable-cookie-poodle-svelte-0.1.0.tgz",
     requiredFiles: ["package.json", "README.md", "LICENSE"],
   },
   {
     name: "@inflatable-cookie/poodle-react",
     directory: "packages/react/components",
-    filename: "inflatable-cookie-poodle-react-0.1.0.tgz",
     requiredFiles: ["package.json", "README.md", "LICENSE"],
   },
 ] as const;
 
 type PackageEntry = (typeof packages)[number];
+
+type PackedPackage = PackageEntry & {
+  manifest: PackageManifest;
+  archivePath: string;
+};
 
 type PackedBoundaryEvidence = {
   archiveFileCount: number;
@@ -89,6 +92,23 @@ async function runCapture(command: string[], cwd: string): Promise<string> {
     );
   }
   return stdout;
+}
+
+function archivePathFromPackOutput(
+  packageEntry: PackageEntry,
+  output: string,
+): string {
+  const archivePath = output
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.endsWith(".tgz"))
+    .at(-1);
+  if (!archivePath) {
+    throw new Error(
+      `${packageEntry.name} pack did not report a .tgz archive path:\n${output.trim()}`,
+    );
+  }
+  return resolve(join(repoRoot, packageEntry.directory), archivePath);
 }
 
 function normalizeArchiveEntry(entry: string): string {
@@ -253,8 +273,45 @@ function sortedUnique(values: Iterable<string>): string[] {
   return [...new Set(values)].sort();
 }
 
+function assertReactExtraExportRegression(
+  repoRoot: string,
+  roster: WebPackageRoster,
+): { exportName: string; rejected: true } {
+  const extraExportName = "AccidentalExtraComponent";
+  const svelteSource = readFileSync(
+    join(repoRoot, "packages/svelte/components/src/index.ts"),
+    "utf8",
+  );
+  const reactSource = readFileSync(
+    join(repoRoot, "packages/react/components/src/index.ts"),
+    "utf8",
+  );
+
+  try {
+    buildWebPackageRoster(
+      roster.frozenNames,
+      svelteSource,
+      `${reactSource}\nexport { Button as ${extraExportName} } from "./Button";\n`,
+    );
+  } catch (error) {
+    const message = String(error);
+    if (!message.includes(`\"extra\":[\"${extraExportName}\"]`)) {
+      throw new Error(
+        `React extra-export regression failed with the wrong error: ${message}`,
+      );
+    }
+    return { exportName: extraExportName, rejected: true };
+  }
+
+  throw new Error(
+    `React extra-export regression accepted ${extraExportName}`,
+  );
+}
+
 const roster = readWebPackageRoster(repoRoot);
+const rosterRegression = assertReactExtraExportRegression(repoRoot, roster);
 const packageManifests = new Map<string, PackageManifest>();
+const packedPackages: PackedPackage[] = [];
 
 for (const packageEntry of packages) {
   const manifest = JSON.parse(
@@ -263,37 +320,47 @@ for (const packageEntry of packages) {
       "utf8",
     ),
   ) as PackageManifest;
-  if (manifest.name !== packageEntry.name || manifest.version !== "0.1.0") {
+  if (
+    manifest.name !== packageEntry.name ||
+    typeof manifest.version !== "string" ||
+    manifest.version.length === 0
+  ) {
     throw new Error(
-      `${packageEntry.directory} must be ${packageEntry.name}@0.1.0`,
+      `${packageEntry.directory} must declare ${packageEntry.name} and a non-empty version`,
     );
   }
   packageManifests.set(packageEntry.name, manifest);
-  await run(
+  const packOutput = await runCapture(
     ["bun", "pm", "pack", "--destination", packRoot, "--quiet"],
     join(repoRoot, packageEntry.directory),
   );
+  packedPackages.push({
+    ...packageEntry,
+    manifest,
+    archivePath: archivePathFromPackOutput(packageEntry, packOutput),
+  });
 }
 
 const packedBoundaries = new Map<string, PackedBoundaryEvidence>();
-for (const packageEntry of packages) {
-  const archivePath = join(packRoot, packageEntry.filename);
-  const archiveEntries = (await runCapture(["tar", "-tzf", archivePath], repoRoot))
+for (const packedPackage of packedPackages) {
+  const archiveEntries = (
+    await runCapture(["tar", "-tzf", packedPackage.archivePath], repoRoot)
+  )
     .split("\n")
     .filter(Boolean)
     .map(normalizeArchiveEntry);
-  const manifest = packageManifests.get(packageEntry.name);
-  if (!manifest) throw new Error(`Missing manifest for ${packageEntry.name}`);
+  const manifest = packageManifests.get(packedPackage.name);
+  if (!manifest) throw new Error(`Missing manifest for ${packedPackage.name}`);
   packedBoundaries.set(
-    packageEntry.name,
-    inspectPackedBoundary(packageEntry, manifest, archiveEntries),
+    packedPackage.name,
+    inspectPackedBoundary(packedPackage, manifest, archiveEntries),
   );
 }
 
 const tarballDependencies = Object.fromEntries(
-  packages.map((packageEntry) => [
-    packageEntry.name,
-    `file:${join(packRoot, packageEntry.filename)}`,
+  packedPackages.map((packedPackage) => [
+    packedPackage.name,
+    `file:${packedPackage.archivePath}`,
   ]),
 );
 const consumerManifest = {
@@ -371,13 +438,13 @@ for (const packageEntry of packages) {
 await run(["bunx", "vitest", "run"], consumerRoot);
 
 const artifacts = await Promise.all(
-  packages.map(async (packageEntry) => {
-    const path = join(packRoot, packageEntry.filename);
+  packedPackages.map(async (packedPackage) => {
+    const path = packedPackage.archivePath;
     const bytes = new Uint8Array(await Bun.file(path).arrayBuffer());
     return {
-      name: packageEntry.name,
-      version: "0.1.0",
-      filename: packageEntry.filename,
+      name: packedPackage.name,
+      version: packedPackage.manifest.version,
+      filename: basename(path),
       path,
       bytes: bytes.byteLength,
       sha256: createHash("sha256").update(bytes).digest("hex"),
@@ -418,6 +485,7 @@ const evidence = {
       react: roster.react.componentNames.length,
     },
     installedRootExactExportSets: true,
+    extraReactExportRegression: rosterRegression,
     coreExactPublicSubpaths: coreSubpaths,
     svelteExactPublicSubpaths: ["types"],
   },
