@@ -561,15 +561,15 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | --- | :-: | :-: | :-: | --- | --- |
 | `Avatar` | B | B | A | curation-tranche | **Sv:** Densities tab shown for a component with no `density` prop · **Rc:** Densities tab shown for a component with no `density` prop |
 | `Card` | B | B | B | curation-tranche | **Sv:** Examples long — 9 captioned examples · **Rc:** Examples long — 9 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `Code` | A | A | A | keep | **Sv:** note — 4 clicks changed nothing: Code owns the copy button and writes to the clipboard (navigator.clipboard.writeText); no markup change is expected · **Rc:** note — 4 clicks changed nothing: Code owns the copy button and writes to the clipboard (navigator.clipboard.writeText); no markup change is expected |
+| `Code` | A | A | A | keep | human verdict (`g15.031`): keep — block/inline/no-copy examples teach highlighted code display; copy writes to clipboard (no DOM change expected); Sv/Rc paired; Gp mirrors web sections plus renderer-owned inline-variant evidence in Sizes/Densities panes |
 | `DetailItem` | B | B | B | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `EmbedPreview` | A | A | A | keep | no named defect |
+| `EmbedPreview` | A | A | A | keep | human verdict (`g15.031`): keep — provider, trusted raw, loading, error, and empty states are distinct; Sv/Rc paired; Gp mirrors the same state set (generic iframe is renderer-owned fixture data) |
 | `Eyebrow` | C | C | B | curation-tranche | **Sv:** Examples long — 8 captioned examples; takes `size`, but the page shows no Sizes evidence; hand-rolled captions instead of SpecimenGroup · **Rc:** Examples long — 8 captioned examples; takes `size`, but the page shows no Sizes evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `Icon` | C | C | A | curation-tranche | **Sv:** overflows its pane by 119px at a 768px viewport; takes `density`, but the page shows no Densities evidence · **Rc:** overflows its pane by 119px at a 768px viewport; takes `density`, but the page shows no Densities evidence |
-| `IconProvider` | A | A | A | keep | no named defect |
+| `IconProvider` | A | A | A | keep | human verdict (`g15.031`): keep — three sections teach the provider boundary, custom set, and default fallback without becoming an icon catalogue; Sv/Rc paired; Gp states the compatibility boundary with representative icons |
 | `MetaBar` | C | C | A | curation-tranche | **Sv:** controls do nothing — the specimen's only control is unwired · **Rc:** controls do nothing — the specimen's only control is unwired |
 | `MetaItem` | C | C | A | curation-tranche | **Sv:** controls do nothing — shares MetaBarSpecimen, whose control is unwired; page is `MetaBarSpecimen.svelte` — it teaches a different component · **Rc:** controls do nothing — shares MetaBarSpecimen, whose control is unwired; page is `MetaBarSpecimen.svelte` — it teaches a different component |
-| `Pill` | A | A | A | keep | no named defect |
+| `Pill` | A | A | A | keep | human verdict (`g15.031`): keep — generated Examples cover tone, mono, muted, badge, typography inherit, accent, and appearance vocabulary; sizes/densities stay in panes; Sv/Rc/Gp aligned |
 | `Text` | B | B | C | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence · **Rc:** takes `size`, but the page shows no Sizes evidence · **Gp:** examples carry no captions at all; no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `TextLink` | A | A | C | curation-tranche | **Sv:** note — 1 clicks changed nothing: the anchors navigate; the clicked control is an explicit `onClick={() => undefined}` demo · **Rc:** note — 1 clicks changed nothing: the anchors navigate; the clicked control is an explicit `onClick={() => undefined}` demo · **Gp:** examples carry no captions at all |
 | `UiPresentationProvider` | C | C | B | curation-tranche | **Sv:** controls do nothing — both Save buttons are unwired; takes `density`, but the page shows no Densities evidence · **Rc:** controls do nothing — both Save buttons are unwired; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
@@ -580,15 +580,15 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | --- | :-: | :-: | :-: | --- | --- |
 | `Callout` | C | C | A | curation-tranche | **Sv:** controls do nothing — generated scene; the dismiss control has no handler · **Rc:** controls do nothing — generated scene; the dismiss control has no handler |
 | `EmptyState` | B | B | A | curation-tranche | **Sv:** Examples long — 8 captioned examples · **Rc:** Examples long — 8 captioned examples |
-| `ErrorBoundary` | A | A | A | keep | **Sv:** note — 2 clicks changed nothing: Throw again is wired (`shouldThrow = true`); the boundary was already in its error state, so nothing changed · **Rc:** note — 2 clicks changed nothing: Throw again is wired (`shouldThrow = true`); the boundary was already in its error state, so nothing changed |
+| `ErrorBoundary` | A | A | A | keep | human verdict (`g15.031`): keep after Sv/Rc specimen repair — the caught-error child threw on every render, so Reset boundary never showed recovery; crash-once preview child now lets Reset surface recovered content and Throw again re-arm the failure. Gp keeps static error/normal evidence (no live throw cycle) |
 | `Meter` | B | B | B | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 captioned examples · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `MetricTile` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
-| `PageLoading` | A | A | A | keep | no named defect |
-| `Progress` | A | A | A | keep | no named defect |
+| `PageLoading` | A | A | A | keep | human verdict (`g15.031`): keep — inline, indeterminate overlay, determinate overlay, and cancellable loading are live and distinct from Progress/Spinner; Sv/Rc paired; Gp mirrors the four presentations with static overlay evidence |
+| `Progress` | A | A | A | keep | human verdict (`g15.031`): keep — determinate ladder, indeterminate, and custom max teach bar semantics separately from PageLoading spinners; Sv/Rc paired; Gp mirrors with label/value-text evidence |
 | `RemediationBanner` | C | C | A | curation-tranche | **Sv:** controls do nothing — Try again, View details and dismiss are unwired · **Rc:** controls do nothing — Try again, View details and dismiss are unwired |
 | `Skeleton` | B | B | A | curation-tranche | **Sv:** Examples long — 7 captioned examples · **Rc:** Examples long — 7 captioned examples |
-| `Spinner` | A | A | A | keep | no named defect |
-| `StateTile` | A | A | A | keep | no named defect |
+| `Spinner` | A | A | A | keep | human verdict (`g15.031`): keep — ring, CLI grid, and context-tone sections teach standalone waiting indicators; sizes/densities stay in panes; Sv/Rc/Gp aligned |
+| `StateTile` | A | A | A | keep | human verdict (`g15.031`): keep — one grid shows plain, trend, and sparkline metric tiles; Sv/Rc paired; Gp mirrors the same four states |
 | `StatusIndicator` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `ToastHost` | C | C | B | curation-tranche | **Sv:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Rc:** takes `size`, but the page shows no Sizes evidence; takes `density`, but the page shows no Densities evidence · **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |
 | `ToastStack` | A | A | B | curation-tranche | **Gp:** no Sizes/Densities panes — axis evidence the web page shows is absent |

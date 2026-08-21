@@ -1,11 +1,16 @@
 <script lang="ts">
   import { Button, ErrorBoundary, Surface, Text } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
+  import ErrorBoundaryCrashOnce, {
+    armErrorBoundaryCrash,
+    getErrorBoundaryCrashEpoch,
+  } from "./ErrorBoundaryCrashOnce.svelte";
 
-  let shouldThrow = $state(true);
+  let crashEpoch = $state(getErrorBoundaryCrashEpoch());
 
-  function throwRenderError(): string {
-    throw new Error("Preview child failed during render.");
+  function throwAgain() {
+    armErrorBoundaryCrash();
+    crashEpoch = getErrorBoundaryCrashEpoch();
   }
 </script>
 
@@ -20,14 +25,12 @@
 
   <SpecimenGroup label="Caught render error">
     <div class="poodle-specimen__actions">
-      <Button variant="secondary" size="sm" onClick={() => (shouldThrow = true)}>Throw again</Button>
+      <Button variant="secondary" size="sm" onClick={throwAgain}>Throw again</Button>
     </div>
     <ErrorBoundary title="Preview failed" retryLabel="Reset boundary">
-      {#if shouldThrow}
-        {throwRenderError()}
-      {:else}
-        <Text>Recovered child content.</Text>
-      {/if}
+      {#key crashEpoch}
+        <ErrorBoundaryCrashOnce />
+      {/key}
     </ErrorBoundary>
   </SpecimenGroup>
 </div>
