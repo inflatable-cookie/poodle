@@ -26,8 +26,10 @@ existing headless construction and interaction evidence.
   fail, never pass as an empty comparison.
 - Keep the old windowed visual tool local-only until later cleanup; do not run
   it or route release/CI through it.
-- Keep `test-support` and `gpui_platform` on capture/test tooling only; do not
-  pull the feature into the shipping preview binary.
+- Keep GPUI's `test-support` feature on capture/test tooling only; do not pull
+  it into the shipping preview binary. `gpui_platform` itself is the one new
+  normal preview dependency required by upstream's
+  `gpui_platform::application()` replacement.
 - Use a bounded one-shot capture command for adoption. Process pooling and a
   long-running sidecar belong to the later lab, not this card.
 - Do not add named component fixtures or comparison thresholds yet.
@@ -39,6 +41,8 @@ existing headless construction and interaction evidence.
 - [ ] Existing GPUI construction and interaction selectors remain green.
 - [ ] The new selector can run from an ordinary worktree without sibling
       repositories or desktop permissions.
+- [ ] The adopted graph, headless regressions, and Metal capture stay green on
+      Rust 1.95; public `rust-version = "1.95"` claims do not drift.
 - [ ] Dependency and public-intent package changes are documented under spec
       022 before merge.
 
@@ -48,6 +52,17 @@ existing headless construction and interaction evidence.
 - The upgrade introduces broad component behavior changes or an unbounded API
   migration.
 - Headless output differs nondeterministically under fixed inputs.
+- The adopted graph cannot preserve Poodle's declared Rust 1.95 floor. Stop
+  for an operator decision rather than raising public package MSRV metadata.
+
+## Pre-Dispatch Evidence
+
+The orchestrator reran the complete retained `g15.044` verifier from a clean
+detached checkout with `RUSTUP_TOOLCHAIN=1.95.0`. The production baseline,
+17-error migration, migrated preview and tests, 56/56 headless regressions,
+Metal capture, 10-capture hash, PNG dimensions, and viewport checks all passed.
+Upstream's own 1.97.1 toolchain pin therefore does not require Poodle to raise
+its declared Rust floor for this adoption.
 
 ## Continuation
 
