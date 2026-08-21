@@ -1,6 +1,6 @@
 # g15.045 — GPUI Offscreen Capture Adoption
 
-Status: **ready** — `g15.044` verdict `go` accepted with PR #61
+Status: **complete** — PR #62 merged as `4e420a7b`
 Parent: `012-visual-conformance-lane.md`
 Depends on: `g15.044` (complete), operator approval of the exact GPUI
 dependency migration (satisfied by accepted PR #61 verdict)
@@ -36,14 +36,14 @@ existing headless construction and interaction evidence.
 
 ## Acceptance Envelope
 
-- [ ] A real Poodle primitive renders repeatedly to identical 2× offscreen
+- [x] A real Poodle primitive renders repeatedly to identical 2× offscreen
       pixels without opening or focusing a window.
-- [ ] Existing GPUI construction and interaction selectors remain green.
-- [ ] The new selector can run from an ordinary worktree without sibling
+- [x] Existing GPUI construction and interaction selectors remain green.
+- [x] The new selector can run from an ordinary worktree without sibling
       repositories or desktop permissions.
-- [ ] The adopted graph, headless regressions, and Metal capture stay green on
+- [x] The adopted graph, headless regressions, and Metal capture stay green on
       Rust 1.95; public `rust-version = "1.95"` claims do not drift.
-- [ ] Dependency and public-intent package changes are documented under spec
+- [x] Dependency and public-intent package changes are documented under spec
       022 before merge.
 
 ## Stop Conditions

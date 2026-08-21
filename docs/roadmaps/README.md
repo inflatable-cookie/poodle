@@ -18,9 +18,9 @@ v0.2.0 release-baseline generation.
   baseline, defect-led specimen curation, native specimen probe, and five of
   six screen-clear reviews are complete. `g15.041` closed the Popover blocker
   returned by `g15.032`; `g15.033` is ready as the last page-review child.
-  The remaining release path is explicit: Stepper and native
-  presentation blockers (`042`–`043`), offscreen primitive conformance
-  (`044`–`047` under parent `012`), packed roster and release automation
+  The remaining release path is explicit: the native presentation blocker
+  (`043`), offscreen primitive conformance (`046`–`047` under parent `012`,
+  after completed adoption `044`–`045`), packed roster and release automation
   (`048`–`049`), one exact candidate (`050`), then operator gate `013`.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
@@ -49,7 +49,7 @@ v0.2.0 release-baseline generation.
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
   `g15.014`–`g15.017`, `g15.019`–`g15.026`, `g15.028`–`g15.032`, and
-  `g15.034`–`g15.041` complete; `g15.042` and `g15.044` in flight;
+  `g15.034`–`g15.042` and `g15.044`–`g15.045` complete;
   `g15.033` and `g15.048` ready; range recompiled through `g15.050`;
   `g15.013` final operator gate
 

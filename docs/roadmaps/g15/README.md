@@ -2,7 +2,7 @@
 
 Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
 `g15.019`–`g15.026`, `g15.028`–`g15.032`, and `g15.034`–`g15.041` complete;
-`g15.042` and `g15.044` are complete; `g15.033`, `g15.045`, and `g15.048`
+`g15.042`, `g15.044`, and `g15.045` are complete; `g15.033` and `g15.048`
 are ready;
 the remaining release path is recompiled through `g15.050`
 Posture: release-first; no new parity architecture
@@ -85,8 +85,8 @@ and status advance are the orchestrator's.
 27. [043 — UiPresentationProvider native cascade](043-ui-presentation-provider-native-cascade.md) — planned; orchestrator architecture decision required before dispatch
 28. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — non-dispatchable parent recompiled into `044`–`047`
 29. [044 — GPUI offscreen capture feasibility](044-gpui-offscreen-capture-feasibility.md) — complete; PR #61 proved a deterministic no-focus Metal pixel path
-30. [045 — GPUI offscreen capture adoption](045-gpui-offscreen-capture-adoption.md) — **ready**; the reviewed `044` verdict is `go`
-31. [046 — Primitive visual fixture inventory](046-primitive-visual-fixture-inventory.md) — planned after `011` and `045`
+30. [045 — GPUI offscreen capture adoption](045-gpui-offscreen-capture-adoption.md) — complete; PR #62 adopted the exact no-focus Metal seam
+31. [046 — Primitive visual fixture inventory](046-primitive-visual-fixture-inventory.md) — planned after `011`; `045` is complete
 32. [047 — Primitive visual comparison](047-primitive-visual-comparison.md) — planned after `046`; closes parent `012`
 33. [048 — Packed roster reachability](048-packed-roster-reachability.md) — **ready**; late web API migrations are complete
 34. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — blocked on explicit workflow-edit approval
@@ -124,10 +124,10 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task And Parallel Lanes
 
-`g15.042` and `g15.044` are complete. The accepted `g15.044` verdict is `go`:
-the exact upstream GPUI revision can render deterministic pixels through Metal
-without a window or focus. `g15.045` is ready to adopt that seam. `g15.033` is
-the final serial screen-clear review and is also ready.
+`g15.042`, `g15.044`, and `g15.045` are complete. The exact upstream GPUI
+revision now renders deterministic pixels through Metal without a window or
+focus. `g15.033` is the final serial screen-clear review and is ready; its
+completion closes `g15.011` and unblocks `g15.046`.
 
 `g15.048` is also ready now that the late web public-surface migrations have
 settled; dispatch it only when a worker slot is free and its writable scope

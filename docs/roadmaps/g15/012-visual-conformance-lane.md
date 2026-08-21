@@ -1,7 +1,7 @@
 # g15.012 — Primitive-First Visual Conformance Lane
 
 Status: **non-dispatchable parent** — exact children `g15.044`–`g15.047`;
-`g15.044` is complete and `g15.045` is ready
+`g15.044`–`g15.045` are complete; `g15.046` waits on `g15.011`
 Depends on: `g15.001` (measured roster), `g15.011` (before fixture freeze),
 `g15.038` (SegmentedControl native option parity)
 Governing refs: `release-baseline-roster.md`,
@@ -40,7 +40,8 @@ still completes before the generation's final release-certification card.
    GPUI-native offscreen pixel path. **Complete in PR #61; reviewed verdict
    `go`.** It built no fixtures and did not change the production GPUI pin.
 2. [`g15.045`](045-gpui-offscreen-capture-adoption.md) — adopt the exact proved
-   GPUI pin/seam after an operator-reviewed `go` verdict. **Ready.**
+   GPUI pin/seam after an operator-reviewed `go` verdict. **Complete in PR
+   #62.**
 3. [`g15.046`](046-primitive-visual-fixture-inventory.md) — freeze the small
    named primitive batch after the human-centred catalogue audit completes.
 4. [`g15.047`](047-primitive-visual-comparison.md) — capture and compare the
