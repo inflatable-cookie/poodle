@@ -7,6 +7,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-21 — `poodle-tokens` reaches outside its own crate directory for
+  generated code: `src/lib.rs` includes
+  `src/../../../tokens/artifacts/rust/mod.rs`. The crate is therefore not
+  self-contained, and any disposable copy, vendoring, or `cargo package`-style
+  relocation fails with `couldn't read ... No such file or directory` unless
+  `packages/tokens/artifacts` is copied alongside it. Every crate in the Rust
+  graph inherits the constraint, since they all depend on `poodle-tokens`.
+  A build script or an in-crate generated module would remove it. Found on
+  g15.044 while vendoring the Rust graph into a throwaway proof workspace.
+
 - 2026-08-21 — `effigy qa` reproducibly reaches `gate-tree-guard --compare`
   with no snapshot even when run alone from a clean committed worktree; every
   preceding component, package, type, and docs step passes. The earlier entry

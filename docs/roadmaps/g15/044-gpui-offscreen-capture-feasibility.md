@@ -1,6 +1,7 @@
 # g15.044 — GPUI Offscreen Capture Feasibility
 
-Status: **in flight** — PR #61
+Status: **in flight** — PR #61; evidence complete, verdict `go`, awaiting
+orchestrator/operator review
 Parent: `012-visual-conformance-lane.md`
 Depends on: `g15.001` (frozen active cohort)
 Unblocks: `g15.045`
@@ -49,17 +50,80 @@ and quantify the migration before authorising adoption.
 
 ## Acceptance
 
-- [ ] The report distinguishes layout/interaction headlessness from actual
+- [x] The report distinguishes layout/interaction headlessness from actual
       raster readback.
-- [ ] A successful result names an immutable GPUI revision, produces a real
+- [x] A successful result names an immutable GPUI revision, produces a real
       Poodle primitive PNG with no desktop focus/window, and gives a bounded
       adoption cost.
-- [ ] A failed result names the exact missing capability and leaves the native
+- [x] A failed result names the exact missing capability and leaves the native
       conformance lane blocked; it does not fall back to the windowed harness.
-- [ ] The Longhorn/Tauri lab is assessed as a control plane, not component
+      *(Not reached — the result is a `go`. The windowed harness was neither
+      run nor wrapped.)*
+- [x] The Longhorn/Tauri lab is assessed as a control plane, not component
       authority or a Poodle package dependency.
-- [ ] No production package, public API, committed baseline, workflow, or
+- [x] No production package, public API, committed baseline, workflow, or
       sibling repository changes.
+
+## Verdict — `go`
+
+Evidence: [`../../research/gpui-offscreen-capture-feasibility.md`](../../research/gpui-offscreen-capture-feasibility.md),
+log [`../../logs/2026-08/20260821-g15-044-gpui-offscreen-capture-feasibility.md`](../../logs/2026-08/20260821-g15-044-gpui-offscreen-capture-feasibility.md).
+Reproduce with
+[`reproduce.sh`](../../logs/2026-08/assets/g15-044/reproduce.sh) — the complete
+recipe, asserting every claim; verbatim output retained as
+[`receipt.txt`](../../logs/2026-08/assets/g15-044/receipt.txt).
+
+**Current pin.** GPUI 0.2.2 has no raster readback by construction:
+`PlatformWindow` declares no readback method, and
+`platform/test/window.rs:269` is `fn draw(&self, _scene: &Scene) {}` — the test
+window discards the scene. 0.2.2 is also the newest published version, so no
+registry bump can supply this. The existing gate opens a real window, resolves
+its own window id through `CGWindowListCopyWindowInfo`, forces frontmost via
+`osascript`, and shells `screencapture`.
+
+**Immutable candidate.**
+`https://github.com/zed-industries/zed` @
+`1ea16c1ab9dd6d36649e002dc60995634da04daf` (2026-08-21, Apache-2.0). Adds
+`PlatformHeadlessRenderer`, `PlatformWindow::render_to_image`,
+`HeadlessAppContext::capture_screenshot`, and `MetalHeadlessRenderer`. Its
+`rust-toolchain.toml` pins 1.97.1, which the local toolchain already matches.
+
+**Real-Poodle result.** `ButtonSpec` → `poodle_render::button` →
+`poodle_gpui_node_backend::to_gpui` → `capture_screenshot` produces a 480×160
+RGBA PNG (`../../logs/2026-08/assets/g15-044/button-offscreen.png`, SHA-256
+`be94eace…`). No `NSWindow` exists at all — `TestPlatform::open_window` builds
+an in-memory `TestWindow`, and `MetalRenderer::new_headless` is constructed
+with `layer: None`, rendering into a private `MTLTexture`. No subprocess, no
+permission, no focus.
+
+**Repeatability.** 10 captures of identical input — 1 canonical, 5 in-process,
+3 cross-process, 1 after a clean rebuild — are byte-identical: one SHA-256,
+distinct hashes 1. Proved on one machine only; cross-machine font/GPU
+reproducibility is explicitly not claimed.
+
+**Migration cost.** 17 mechanical compile errors across 9 files, plus
+`gpui_platform` as one new direct dependency. `poodle-gpui` needs zero changes
+(it has no `gpui` dependency). Lock delta 704 → 702. The migrated disposable
+copy passes `headless_regressions` 56/56. Upstream's new `BoxShadow.inset`
+retires the standing `APPROXIMATION` in `node-backend/src/style.rs:300`.
+
+**Measured constraints for `g15.045`.** `TestWindow::scale_factor` is hardcoded
+`2.0`, so 1× captures need an upstream change or a local shim. The renderer is
+macOS-only and needs a real Metal device (`create_device` exits on failure);
+runner support is unverified. The zed git checkout is 474 MB. `render_to_image`
+is behind `test-support`, so the capture target — not the shipping preview
+binary — carries that feature.
+
+## Continuation
+
+The pin is unchanged in this branch, and `g15.045` is neither started nor
+marked. It becomes eligible for planning only after the orchestrator verifies
+this evidence and the operator accepts the `go`.
+
+`g15.045` inherits three open items this card measured but does not decide:
+whether a 2×-only lane is acceptable or the scale shim is required, whether the
+project's macOS runners expose Metal, and whether captures run as a
+long-running process (~15 ms marginal) or one process per fixture (~117 ms).
 
 ## Stop Conditions
 

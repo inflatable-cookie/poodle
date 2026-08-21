@@ -117,7 +117,7 @@ measured from the mounted tree, not inferred from a contract read.
 
 | Gap | Current evidence | Owner |
 | --- | --- | --- |
-| GPUI headless pixels | GPUI 0.2.2's test platform proves layout/interaction but has no raster readback; the retained visual gate launches a window and uses `screencapture` | `g15.044` feasibility, then `g15.045` adoption on a `go` verdict |
+| GPUI headless pixels | `g15.044` verdict **`go`**: a real Poodle Button renders offscreen to a hash-stable RGBA PNG at `zed-industries/zed@1ea16c1a`, no window/capture/permission; migration measured at 17 mechanical errors across 9 files, `headless_regressions` 56/56. Pin unchanged; captures are 2×-only and macOS-only | `g15.045` adoption, eligible only after operator review of the verdict |
 | Primitive named fixtures and comparison | rejected g14 corpus is removed; web/native capture foundations remain separate | `g15.046`–`g15.047` under parent `g15.012` |
 | Packed full-roster reachability | 9 Svelte / 13 React mounted cases only | `g15.048` |
 | Native pre-tag workflow | `.github/workflows/ci-native.yml` references deleted `packages/gpui/components/Cargo.toml` | `g15.049`, blocked on explicit workflow-edit approval |

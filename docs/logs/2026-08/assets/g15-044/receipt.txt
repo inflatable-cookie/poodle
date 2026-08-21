@@ -1,0 +1,106 @@
+# g15.044 reproduction receipt
+repo:          /Users/tom/.t3/worktrees/poodle/t3code-709e1bfc
+repo commit:   a1f6c2f2b590bc3084e5b620aae611b5f9990a7c
+repo describe: a1f6c2f2 docs(g15.044): GPUI offscreen capture feasibility — verdict go
+repo dirty:    no
+workdir:       /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K
+upstream:      https://github.com/zed-industries/zed @ 1ea16c1ab9dd6d36649e002dc60995634da04daf
+rustc:         rustc 1.97.1 (8bab26f4f 2026-07-14)
+uname:         Darwin 25.5.0 arm64
+date:          2026-08-21T20:15:33Z
+
+## 1. vendor
+vendored 14 manifests
+
+## 4. baseline at the production pin (gpui 0.2.2)
+  PASS  poodle-gpui-node-backend @ gpui 0.2.2 builds
+
+## 5. repoint at 1ea16c1ab9dd6d36649e002dc60995634da04daf
+  PASS  dependency repointing applied
+
+## 6. migration cost
+### poodle-gpui (adapter)
+  PASS  adapter has no gpui dependency: 0 errors
+
+### poodle-gpui-node-backend
+vendor/packages/gpui/node-backend/src/interaction.rs:59:32: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+vendor/packages/gpui/node-backend/src/interaction.rs:543:32: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+vendor/packages/gpui/node-backend/src/style.rs:23:39: error[E0061]: this method takes 1 argument but 0 arguments were supplied
+vendor/packages/gpui/node-backend/src/style.rs:71:17: error[E0061]: this method takes 1 argument but 0 arguments were supplied
+vendor/packages/gpui/node-backend/src/style.rs:306:22: error[E0063]: missing field `inset` in initializer of `BoxShadow`: missing `inset`
+vendor/packages/gpui/node-backend/src/style.rs:317:29: error[E0063]: missing field `inset` in initializer of `BoxShadow`: missing `inset`
+vendor/packages/gpui/node-backend/src/tracked_scroll.rs:53:34: error[E0609]: no field `height` on type `gpui::Point<gpui::Pixels>`: unknown field
+vendor/packages/gpui/node-backend/src/input_text.rs:462:22: error[E0061]: this method takes 6 arguments but 4 arguments were supplied
+  PASS  node-backend error count: 8
+  PASS  node-backend builds after patch
+
+### poodle-gpui-preview (bin)
+vendor/packages/gpui/preview/src/specimens/embed_input_specimen.rs:261:18: error[E0061]: this method takes 1 argument but 0 arguments were supplied
+vendor/packages/gpui/preview/src/specimens/embed_input_specimen.rs:312:14: error[E0061]: this method takes 1 argument but 0 arguments were supplied
+vendor/packages/gpui/preview/src/specimens/region.rs:97:34: error[E0061]: this method takes 1 argument but 0 arguments were supplied
+vendor/packages/gpui/preview/src/specimens/mod.rs:241:13: error[E0063]: missing field `inset` in initializer of `BoxShadow`: missing `inset`
+vendor/packages/gpui/preview/src/specimens/mod.rs:247:13: error[E0063]: missing field `inset` in initializer of `BoxShadow`: missing `inset`
+vendor/packages/gpui/preview/src/main.rs:2250:18: error[E0599]: no associated function or constant named `new` found for struct `gpui::Application` in the current scope: associated function or constant not found in `gpui::Application`
+  PASS  preview error count: 6
+  PASS  preview builds after patch
+
+### poodle-gpui-preview headless tests
+vendor/packages/gpui/preview/tests/../src/headless_driver.rs:201:24: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+vendor/packages/gpui/preview/tests/../src/headless_driver.rs:341:20: error[E0061]: this method takes 2 arguments but 1 argument was supplied
+vendor/packages/gpui/preview/tests/../src/headless_driver.rs:351:32: error[E0063]: missing field `prefer_character_input` in initializer of `gpui::KeyDownEvent`: missing `prefer_character_input`
+  PASS  headless-test error count: 3
+  PASS  headless tests build after patch
+
+  PASS  total migration errors: 17
+
+### lock delta
+  PASS  packages in lock: 702
+  PASS  packages from the zed git source: 23
+
+## 7. headless regressions on the migrated copy
+test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.63s
+  PASS  regressions passed: 56
+  PASS  regressions failed: 0
+
+## 8. offscreen capture
+context ready in 83.205875ms
+capture 0 -> /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/button.png (480x160) in 29.808708ms
+context ready in 43.320167ms
+capture 0 -> /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/rep.0.png (480x160) in 24.193292ms
+capture 1 -> /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/rep.1.png (480x160) in 18.961125ms
+capture 2 -> /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/rep.2.png (480x160) in 19.387541ms
+capture 3 -> /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/rep.3.png (480x160) in 16.630334ms
+capture 4 -> /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/rep.4.png (480x160) in 16.4195ms
+clean rebuild of the proof binary: 45s  (observational, not asserted)
+
+## 9. repeatability — equal-input captures (240x80 logical, default args)
+  PASS  equal-input capture count: 10
+be94eaceb6c310c4e067c012b579c53d2c6d4147fc63160673316538c9997c6d  /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/button.png
+be94eaceb6c310c4e067c012b579c53d2c6d4147fc63160673316538c9997c6d  /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/rep.0.png
+be94eaceb6c310c4e067c012b579c53d2c6d4147fc63160673316538c9997c6d  /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/rep.1.png
+be94eaceb6c310c4e067c012b579c53d2c6d4147fc63160673316538c9997c6d  /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/rep.2.png
+be94eaceb6c310c4e067c012b579c53d2c6d4147fc63160673316538c9997c6d  /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/rep.3.png
+be94eaceb6c310c4e067c012b579c53d2c6d4147fc63160673316538c9997c6d  /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/rep.4.png
+be94eaceb6c310c4e067c012b579c53d2c6d4147fc63160673316538c9997c6d  /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/proc1.png
+be94eaceb6c310c4e067c012b579c53d2c6d4147fc63160673316538c9997c6d  /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/proc2.png
+be94eaceb6c310c4e067c012b579c53d2c6d4147fc63160673316538c9997c6d  /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/proc3.png
+be94eaceb6c310c4e067c012b579c53d2c6d4147fc63160673316538c9997c6d  /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/after-clean.png
+  PASS  distinct hashes across the equal-input set: 1
+  PASS  canonical capture SHA-256: be94eaceb6c310c4e067c012b579c53d2c6d4147fc63160673316538c9997c6d
+  PASS  canonical capture size: 480x160
+  PASS  committed evidence PNG SHA-256: be94eaceb6c310c4e067c012b579c53d2c6d4147fc63160673316538c9997c6d
+  PASS  committed evidence PNG size: 480x160
+
+## 10. viewport control (different inputs — these must differ)
+capture 0 -> /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/v320.png (640x240) in 40.089125ms
+capture 0 -> /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/v160.png (320x96) in 17.271917ms
+a4ffa57105a0d2d4b256404da58ee590c043afc981465dc7a415ae39d1099939  /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/v320.png
+56f775b1db939e6afa8e68a0dbcb2dfaeb9b36a1e90948f055ba5f23d0e1f966  /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/out/v160.png
+  PASS  320x120 logical -> device pixels: 640x240
+  PASS  160x48 logical -> device pixels: 320x96
+  PASS  320x120 capture differs from canonical
+  PASS  160x48 capture differs from canonical
+  PASS  the two viewport captures differ
+
+## RESULT: all documented claims reproduced (0 failures)
+receipt: /var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/tmp.vuzE7YQ45K/receipt.txt
