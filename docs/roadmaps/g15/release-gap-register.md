@@ -117,7 +117,7 @@ measured from the mounted tree, not inferred from a contract read.
 
 | Gap | Current evidence | Owner |
 | --- | --- | --- |
-| GPUI headless pixels | `g15.044` verdict **`go`** accepted in PR #61: a real Poodle Button renders offscreen to a hash-stable RGBA PNG at `zed-industries/zed@1ea16c1a`, no window/capture/permission; migration measured at 17 mechanical errors across 9 files, `headless_regressions` 56/56. Pin unchanged; captures are 2×-only and macOS-only | `g15.045` adoption — ready |
+| GPUI headless pixels | adopted by `g15.045` (PR pending): `gpui`/`gpui_platform` pinned to `zed-industries/zed@1ea16c1a` in node-backend and preview; `smoke:gpui-offscreen-capture` renders a real Button offscreen with typed receipts, one hash across repeated captures (`be94eace…`, matching the g15.044 proof), inset shadows now project instead of being dropped; headless regressions 56/56, Rust 1.95 floor preserved. Captures remain 2×-only and macOS-only; cross-machine tolerance is `g15.047` — see `docs/logs/2026-08/20260821-g15-045-gpui-offscreen-capture-adoption.md` | landed |
 | Primitive named fixtures and comparison | rejected g14 corpus is removed; web/native capture foundations remain separate | `g15.046`–`g15.047` under parent `g15.012` |
 | Packed full-roster reachability | 9 Svelte / 13 React mounted cases only | `g15.048` |
 | Native pre-tag workflow | `.github/workflows/ci-native.yml` references deleted `packages/gpui/components/Cargo.toml` | `g15.049`, blocked on explicit workflow-edit approval |

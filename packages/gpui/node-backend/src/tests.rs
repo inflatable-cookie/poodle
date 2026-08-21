@@ -3,6 +3,7 @@
 //! visual gate, not by unit tests.
 
 use super::*;
+use poodle_node::{ShadowLayer, ShadowValue};
 
 /// Round-trip a ColorValue through the backend's conversion and back to
 /// Rgba; the path must be an sRGB identity (alpha included). This pins the
@@ -105,6 +106,75 @@ fn focusable_nodes_with_a_focus_patch_are_tracked() {
     });
     assert!(tracks_focus(&node));
     assert_eq!(element_id_string(&node), "segmented:a:option:grid");
+}
+
+// ── Shadow projection (g15.045) ─────────────────────────────────────
+// The adopted GPUI revision's `BoxShadow` carries a real `inset` flag, so the
+// backend projects inset (highlight) layers faithfully instead of dropping
+// them — the gpui 0.2.2 approximation is gone.
+
+#[test]
+fn inset_shadow_layers_project_with_the_inset_flag() {
+    let mut node = Node::button("ok");
+    node.style.shadow_layers = vec![
+        ShadowLayer {
+            offset_x: 0.0,
+            offset_y: 2.0,
+            blur: 8.0,
+            spread: 1.0,
+            color: ColorValue(0.0, 0.0, 0.0, 0.2),
+            inset: false,
+        },
+        ShadowLayer {
+            offset_x: 0.0,
+            offset_y: 1.0,
+            blur: 0.0,
+            spread: 0.0,
+            color: ColorValue(1.0, 1.0, 1.0, 0.4),
+            inset: true,
+        },
+    ];
+    let mut el = apply_paint(div(), &node);
+    let shadows = el
+        .style()
+        .box_shadow
+        .as_ref()
+        .expect("shadow layers project into the refinement");
+    assert_eq!(
+        shadows.len(),
+        2,
+        "inset layers are projected, not filtered out"
+    );
+    assert!(!shadows[0].inset);
+    assert_eq!(f32::from(shadows[0].offset.y), 2.0);
+    assert_eq!(f32::from(shadows[0].blur_radius), 8.0);
+    assert_eq!(f32::from(shadows[0].spread_radius), 1.0);
+    assert!(shadows[1].inset, "the inset layer keeps its inset flag");
+    assert_eq!(f32::from(shadows[1].offset.y), 1.0);
+}
+
+#[test]
+fn fallback_descriptor_shadow_stays_outset() {
+    let mut node = Node::button("ok");
+    node.style.descriptor.shadow = Some(ShadowValue {
+        offset_x: 0.0,
+        offset_y: 3.0,
+        blur: 6.0,
+        color: ColorValue(0.0, 0.0, 0.0, 0.3),
+    });
+    let mut el = apply_paint(div(), &node);
+    let shadows = el
+        .style()
+        .box_shadow
+        .as_ref()
+        .expect("the descriptor shadow projects into the refinement");
+    assert_eq!(shadows.len(), 1);
+    assert!(
+        !shadows[0].inset,
+        "the one-token descriptor shadow is always a drop shadow"
+    );
+    assert_eq!(f32::from(shadows[0].offset.y), 3.0);
+    assert_eq!(f32::from(shadows[0].spread_radius), 0.0);
 }
 
 #[test]

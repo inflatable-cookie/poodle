@@ -56,7 +56,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
                     // overlay host) is applied here, in the paint pass, once
                     // the target element exists and has a handle.
                     if super::layers::take_focus_request(&id) {
-                        handle.focus(window);
+                        handle.focus(window, cx);
                         cx.refresh_windows();
                     }
                     let now = handle.is_focused(window);
@@ -540,7 +540,7 @@ fn apply_selection_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div
             if let Some(key) = node_key(event.keystroke.key.as_str()) {
                 if let Some(target) = keys(key, node_modifiers(&event.keystroke.modifiers)) {
                     if let Some(handle) = focus_handle_for(&target) {
-                        handle.focus(window);
+                        handle.focus(window, cx);
                     }
                 }
                 cx.refresh_windows();
