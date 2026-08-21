@@ -69,7 +69,7 @@ Rust render 1 missing (+ 1 not-applicable), GPUI specimen 0 missing
 | Context providers | — | IconProvider closed by `g15.009` (`packages/render/src/icon_provider.rs`); UiPresentationProvider remains a declared capability absence because ambient presentation cannot cross an already-built Node tree | — | `g15.043`; architecture decision required before dispatch |
 | SegmentedControl option presentation | closed by `g15.038`: dedicated public `SegmentedControlOption` (breaking, pre-1.0, operator-approved 2026-08-20) | closed: labelled-icon and icon-only rendering through `poodle-render` | closed: GPUI specimen teaches the contract's Effects/Instruments icon-only example | `g15.038` |
 | AgentTranscript scroll/follow | — | closed by `g15.037`: shared render owns content and the jump-control recipe | closed by `g15.037`: retained GPUI state owns a real tracked viewport, detach latch, and jump-to-bottom | `g15.037` complete in PR #48; no remaining release blocker |
-| Stepper selection and re-run | — | handlers exist in shared composition | `node_compat.rs` wires collapse only; selection and re-run controls shown by the specimen are inert | `g15.042` in flight on PR #60; found and accepted out of scope in PR #49 |
+| Stepper selection and re-run | — | — the shared composition already carried `on_change`, `on_rerun`, and `on_collapsed_change` | closed by `g15.042`: `node_compat.rs` binds all three, and the specimen retains the current step plus one re-run receipt; proved through the mounted headless backend in `packages/gpui/preview/tests/headless_regressions.rs` (`stepper_selection_and_rerun_reach_separate_mounted_controls`, `stepper_collapse_stays_independent_in_a_mounted_window`) | `g15.042` on PR #60; found and accepted out of scope in PR #49 |
 | Specimen axis domains | — closed by `g15.034` | — closed by `g15.034` | fake panes removed by `g15.019`; exact domains closed by `g15.034` | complete in PR #41 |
 | Display, workstation & agent specimens | — | — | — closed by `g15.010` (18 named GPUI specimen files under `packages/gpui/preview/src/specimens/`) | `g15.010` |
 | MeterSurface | not-applicable — web-only by fixed decision (spec 068) | not-applicable | not-applicable | none |
@@ -88,7 +88,9 @@ navigate plus refused close, and — since `g15.010` — Callout dismiss,
 RemediationBanner action and dismiss, ActionDiscoveryPanel selection,
 DockRegion tab and collapse, AgentPlan accept/revise/dismiss,
 AgentPlanRecord and AgentSubagent disclosure, ChangedFiles disclosure and
-file selection, and ToolCall / ToolCallGroup disclosure. Native tranches land their evidence as
+file selection, and ToolCall / ToolCallGroup disclosure, and — since `g15.042` —
+Stepper's separate selection, re-run, and collapse controls under both pointer
+and keyboard. Native tranches land their evidence as
 focused owner-local tests, not by extending a shared comparator.
 
 ## Package-Install Surface
