@@ -7,6 +7,14 @@ so minor releases may contain documented breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- **Button `controls` prop** in Svelte and React, rendered as `aria-controls`
+  when non-null, with `ButtonSpec::controls` / `with_controls` in
+  `poodle-specs` projected to `NodeA11y.controls` on the shared render path
+  (the existing IconButton seam). Both web roots also re-export the
+  core-authored `PopoverTriggerState` type.
+
 ### Fixed
 
 - **Tabs drag dead in WebKit hosts.** `draggable` and `dragstart` sat on the
@@ -40,6 +48,28 @@ so minor releases may contain documented breaking changes.
 
 ### Changed
 
+- **Breaking — Popover interactive trigger composition.** Composing a real
+  Button or IconButton as a Popover trigger no longer forces a choice between
+  nested interactive semantics and a missing disclosure relationship. In
+  interactive mode (`triggerIsInteractive`) the trigger is now a state-aware
+  render that receives the core-authored `PopoverTriggerState` (`expanded`,
+  `controls`, `disabled`): Svelte `trigger: Snippet<[PopoverTriggerState]>`,
+  React `trigger: (state: PopoverTriggerState) => ReactNode`. The actual
+  control owns `aria-expanded`, `aria-controls`, and the disabled state — in
+  server output and hydrated DOM alike — while the wrapper stays a roleless,
+  untabbable layout host. The old interactive shape (a static node or
+  zero-argument snippet beside `triggerIsInteractive`) is gone: React rejects
+  it at compile time; Svelte's discriminated snippet typing rejects a
+  wrongly-typed payload and wrong-branch usage but cannot reject a
+  zero-argument snippet (TypeScript function assignability), so Svelte
+  migration is enforced by search and review.
+
+  Migrate: give every interactive trigger the state parameter and apply all
+  three fields to the real control — `Button` takes `ariaExpanded` /
+  `controls` / `disabled`, `IconButton` takes `expanded` / `controls` /
+  `disabled`, a native button takes `aria-expanded` / `aria-controls` /
+  `disabled`. Direct Rust `ButtonSpec` struct literals must initialize the new
+  `controls` field; builder callers are source-compatible.
 - **Breaking — Tabs `bordered` now defaults to `false`.** This is a silent
   visual change: tabs rendered above a panel lose their separating line with no
   type or build error. Add `bordered` explicitly to any usage that draws tabs

@@ -93,6 +93,26 @@ describe("popoverParts", () => {
     expect(trigger["aria-controls"]).toBeUndefined();
   });
 
+  test("triggerState payload follows open and disabled state", () => {
+    const closed = popoverParts("closed", ctx(), props).triggerState;
+    expect(closed).toEqual({ expanded: false, controls: null, disabled: false });
+
+    const open = popoverParts("open", ctx(), props).triggerState;
+    expect(open).toEqual({ expanded: true, controls: "poodle-popover-1", disabled: false });
+
+    const disabled = popoverParts("closed", ctx({ disabled: true }), props).triggerState;
+    expect(disabled).toEqual({ expanded: false, controls: null, disabled: true });
+  });
+
+  test("triggerState payload is computed in interactive mode too", () => {
+    const interactiveProps = { ...props, triggerIsInteractive: true };
+    const closed = popoverParts("closed", ctx(), interactiveProps).triggerState;
+    expect(closed).toEqual({ expanded: false, controls: null, disabled: false });
+
+    const open = popoverParts("open", ctx(), interactiveProps).triggerState;
+    expect(open).toEqual({ expanded: true, controls: "poodle-popover-1", disabled: false });
+  });
+
   test("surface tabindex follows initialFocus", () => {
     expect(popoverParts("open", ctx({ initialFocus: "content" }), props).surface["tabindex"]).toBe(0);
     expect(popoverParts("open", ctx(), props).surface["tabindex"]).toBe(-1);

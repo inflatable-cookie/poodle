@@ -13,6 +13,7 @@
     type HistoryCenterRowId,
     type HistoryContinuation,
     type HistoryPathPage,
+    type PopoverTriggerState,
   } from "@inflatable-cookie/poodle-core";
   import { tick } from "svelte";
 
@@ -672,7 +673,7 @@
       surfaceMaxWidth="min(38rem, calc(100vw - 2rem))"
       onOpenChange={handleOpenChange}
     >
-      {#snippet trigger()}
+      {#snippet trigger(state: PopoverTriggerState)}
         <!-- A bare glyph, not an IconButton. The disclosure sits between undo
              and redo, and it must read narrower than them rather than as a
              third control of equal weight. It stays a real button, so the
@@ -684,7 +685,9 @@
           data-part="list-trigger"
           data-size={resolvedSize}
           aria-label={listLabel}
-          aria-expanded={isOpen}
+          aria-expanded={state.expanded}
+          aria-controls={state.controls ?? undefined}
+          disabled={state.disabled}
           title={listLabel}
         >
           <Icon name="chevron-down" size={resolvedSize} />

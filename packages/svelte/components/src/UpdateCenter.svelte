@@ -3,6 +3,7 @@
   import {
     updateDownloadLabel,
     type Channel,
+    type PopoverTriggerState,
     type UpdateAheadOfChannel,
     type UpdateAvailabilityProjection,
     type UpdateControllerStatus,
@@ -142,7 +143,7 @@
       surfaceMaxWidth="min(24rem, calc(100vw - 2rem))"
       onOpenChange={handleOpenChange}
     >
-      {#snippet trigger()}
+      {#snippet trigger(state: PopoverTriggerState)}
         <span class="poodle-update-center__trigger" data-presence={currentPresence}>
           <IconButton
             icon="download"
@@ -151,7 +152,9 @@
             variant="ghost"
             size={resolvedSize}
             density={resolvedDensity}
-            expanded={isOpen}
+            expanded={state.expanded}
+            controls={state.controls}
+            disabled={state.disabled}
           >
             {#snippet children()}
               {#if isDownloading}

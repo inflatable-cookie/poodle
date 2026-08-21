@@ -332,6 +332,7 @@ pub fn button(
     if let Some(expanded) = spec.aria_expanded {
         el.a11y.expanded = Some(expanded);
     }
+    el.a11y.controls = spec.controls.clone();
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
     }
@@ -687,6 +688,22 @@ mod tests {
             None,
         );
         assert_eq!(disclosure.a11y.expanded, Some(true));
+    }
+
+    /// Disclosure targets mirror the web `aria-controls` (contract §3):
+    /// a spec carrying `with_controls(...)` lands on `node.a11y.controls`;
+    /// a bare spec omits it, exactly like the web omits the attribute.
+    #[test]
+    fn controls_target_reaches_the_accessibility_channel() {
+        let plain = button(&ButtonSpec::new().with_label("Save"), &theme(), None);
+        assert_eq!(plain.a11y.controls, None);
+
+        let node = button(
+            &ButtonSpec::new().with_label("Details").with_controls("details"),
+            &theme(),
+            None,
+        );
+        assert_eq!(node.a11y.controls.as_deref(), Some("details"));
     }
 
     /// g14.001 retained regression: the semantic token roles the web projects

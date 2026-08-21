@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
-  createInstanceId,
   getFocusableElements,
   layerContains,
   popoverParts,
@@ -8,6 +7,7 @@ import {
   registerDismissLayer,
   type PopoverContext,
   type PopoverEvent,
+  type PopoverTriggerState,
   type OverlaySurfaceGeometryChangeHandler,
 } from "@inflatable-cookie/poodle-core";
 
@@ -26,7 +26,7 @@ import type { OverlayPlacement, PopoverInitialFocus } from "./types";
  * `packages/svelte/components/src/Popover.svelte`; the Rust counterpart is
  * `poodle_specs::PopoverSpec`.
  */
-export interface PopoverProps {
+interface PopoverCommonProps {
   open?: boolean | null;
   defaultOpen?: boolean;
   placement?: OverlayPlacement;
@@ -39,12 +39,24 @@ export interface PopoverProps {
   surfaceWidth?: "content" | "trigger";
   surfaceMinWidth?: string | null;
   surfaceMaxWidth?: string | null;
-  triggerIsInteractive?: boolean;
   onOpenChange?: (open: boolean) => void;
   onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler;
-  trigger?: ReactNode;
   children?: ReactNode;
 }
+
+/**
+ * Trigger composition is a compile-time choice (contract §3, "Trigger
+ * Modes"). In default mode `trigger` is a plain node and the wrapper owns the
+ * button role, tab stop, keyboard activation, and disclosure ARIA. In
+ * interactive mode `trigger` is a state-aware render: the caller applies all
+ * three `PopoverTriggerState` fields (`expanded` → `aria-expanded`,
+ * `controls` → `aria-controls`, `disabled`) to the real control inside.
+ */
+export type PopoverTriggerProps =
+  | { triggerIsInteractive?: false; trigger?: ReactNode }
+  | { triggerIsInteractive: true; trigger: (state: PopoverTriggerState) => ReactNode };
+
+export type PopoverProps = PopoverCommonProps & PopoverTriggerProps;
 
 export function Popover({
   open = null,
@@ -65,8 +77,10 @@ export function Popover({
   trigger,
   children,
 }: PopoverProps) {
-  const popoverId = useRef<string | null>(null);
-  if (popoverId.current === null) popoverId.current = createInstanceId("popover");
+  // React's own id keeps the server render and hydration in agreement, so
+  // the trigger's `aria-controls` and the surface id match without any
+  // post-mount repair (SSR evidence lives in PopoverInteractiveTrigger.test).
+  const popoverId = useId();
 
   // The root is state, not a ref: the portalled surface has to re-render once
   // it exists so it can be positioned against it.
@@ -149,7 +163,7 @@ export function Popover({
   }, [isOpen, dismissOnOutsideInteract, rootElement]);
 
   const parts = popoverParts(isOpen ? "open" : "closed", machineContext, {
-    surfaceId: popoverId.current,
+    surfaceId: popoverId,
     ariaLabel,
     block,
     triggerIsInteractive,
@@ -177,7 +191,7 @@ export function Popover({
           }
         }}
       >
-        {trigger}
+        {typeof trigger === "function" ? trigger(parts.triggerState) : trigger}
       </div>
 
       {isOpen ? (

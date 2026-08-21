@@ -1,7 +1,7 @@
 # Button
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-21
 
 ## 1. Purpose
 
@@ -67,6 +67,7 @@ Updated: 2026-07-10
 | `defaultPressed` | `boolean \| null` | `null` | no | initial pressed state for uncontrolled toggle mode; toggle mode activates when `pressed` or `defaultPressed` is non-null |
 | `ariaLabel` | `string \| null` | `null` | no | required when no visible label |
 | `ariaExpanded` | `boolean \| null` | `null` | no | disclosure-state hint for menu and accordion triggers |
+| `controls` | `string \| null` | `null` | no | `aria-controls` target — the id of the element the button controls, such as an open disclosure surface |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target |
 | `className` | `string` | `""` | no | additional CSS classes |
 | `style` | `string \| null` | `null` | no | inline style passthrough for dynamic sizing and CSS-variable overrides |
@@ -76,6 +77,7 @@ Updated: 2026-07-10
 | Contract / web prop | In `ButtonSpec` | Notes |
 |---------------------|-----------------|-------|
 | `ariaExpanded` | yes — `aria_expanded: Option<bool>` | `None` means do not set `aria-expanded`; `Some(true \| false)` mirrors disclosure state. |
+| `controls` | yes — `controls: Option<String>` | `None` means do not set `aria-controls`; `Some(id)` names the controlled element, projected to `NodeA11y.controls` on the shared render path. |
 | `type`, `form`, `formaction`, `formenctype`, `formmethod`, `formnovalidate`, `formtarget` | no | HTML form submission only; native/desktop renderers use different models. |
 
 ### Snippets
@@ -134,6 +136,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - Native form override attrs: `form`, `formaction`, `formenctype`, `formmethod`, `formnovalidate`, and `formtarget` pass through directly when provided
 - `aria-label`: from prop (required for icon-only)
 - `aria-expanded`: set from `ariaExpanded` when the button acts as a disclosure trigger
+- `aria-controls`: set from `controls` when the button controls another element (such as an open disclosure surface); omitted when `controls` is null
 - `aria-describedby`: from describedBy prop
 - `style`: passes through directly to the native `<button>` when instance-level sizing or CSS-variable overrides are required
 - `aria-pressed`: `"true"` or `"false"` when button is in toggle mode (pressed non-null or defaultPressed set); omitted for non-toggle buttons

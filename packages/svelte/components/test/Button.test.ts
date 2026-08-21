@@ -28,4 +28,13 @@ describe("Button (svelte)", () => {
     const { getByRole } = render(Button, { props: { disabled: true } });
     expect((getByRole("button") as HTMLButtonElement).disabled).toBe(true);
   });
+
+  it("projects controls as aria-controls, absent when null", () => {
+    const withControls = render(Button, { props: { controls: "popover-1" } });
+    expect(withControls.getByRole("button").getAttribute("aria-controls")).toBe("popover-1");
+    withControls.unmount();
+
+    const without = render(Button, { props: {} });
+    expect(without.getByRole("button").getAttribute("aria-controls")).toBeNull();
+  });
 });

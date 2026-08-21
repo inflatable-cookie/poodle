@@ -1,14 +1,17 @@
 <script lang="ts">
   import type { PopoverTriggerState } from "@inflatable-cookie/poodle-core";
 
-  import Popover from "../src/Popover.svelte";
+  import Button from "../../src/Button.svelte";
+  import Popover from "../../src/Popover.svelte";
 
+  // SSR counterpart of PopoverRetainedHarness.svelte: same two-mode shape, but
+  // the interactive trigger is a real Poodle Button so the server HTML also
+  // exercises Button's `controls` projection.
   interface Props {
     open?: boolean | null;
     defaultOpen?: boolean;
     disabled?: boolean;
     triggerIsInteractive?: boolean;
-    onOpenChange?: (open: boolean) => void;
   }
 
   let {
@@ -16,23 +19,20 @@
     defaultOpen = false,
     disabled = false,
     triggerIsInteractive = false,
-    onOpenChange = undefined,
   }: Props = $props();
 </script>
 
 <div data-poodle-theme-root>
   {#if triggerIsInteractive}
-    <Popover {open} {defaultOpen} {disabled} triggerIsInteractive {onOpenChange}>
+    <Popover {open} {defaultOpen} {disabled} triggerIsInteractive>
       {#snippet trigger(state: PopoverTriggerState)}
-        <button
-          type="button"
-          data-testid="inner-trigger"
-          aria-expanded={state.expanded}
-          aria-controls={state.controls ?? undefined}
+        <Button
+          ariaExpanded={state.expanded}
+          controls={state.controls}
           disabled={state.disabled}
         >
           Open
-        </button>
+        </Button>
       {/snippet}
       <button type="button" data-testid="surface-action">Surface action</button>
     </Popover>

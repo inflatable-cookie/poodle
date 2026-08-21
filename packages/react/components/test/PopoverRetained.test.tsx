@@ -40,11 +40,17 @@ describe("Popover — retained regressions", () => {
       <Popover
         defaultOpen
         triggerIsInteractive
-        trigger={
-          <button type="button" data-testid="inner-trigger">
+        trigger={(state) => (
+          <button
+            type="button"
+            data-testid="inner-trigger"
+            aria-expanded={state.expanded}
+            aria-controls={state.controls ?? undefined}
+            disabled={state.disabled}
+          >
             Open
           </button>
-        }
+        )}
       >
         <button type="button" data-testid="surface-action">
           Surface action

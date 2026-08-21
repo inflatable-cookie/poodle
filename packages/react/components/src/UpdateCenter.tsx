@@ -122,7 +122,7 @@ export function UpdateCenter({
         surfaceMinWidth="min(16rem, calc(100vw - 2rem))"
         surfaceMaxWidth="min(24rem, calc(100vw - 2rem))"
         onOpenChange={handleOpenChange}
-        trigger={
+        trigger={(state) => (
           <span className="poodle-update-center__trigger" data-presence={presence}>
             <IconButton
               icon="download"
@@ -131,7 +131,9 @@ export function UpdateCenter({
               variant="ghost"
               size={resolvedSize}
               density={resolvedDensity}
-              expanded={isOpen}
+              expanded={state.expanded}
+              controls={state.controls}
+              disabled={state.disabled}
             >
               {isDownloading ? (
                 <span
@@ -162,7 +164,7 @@ export function UpdateCenter({
               <span className="poodle-update-center__indicator" aria-hidden="true" />
             ) : null}
           </span>
-        }
+        )}
       >
         <section className="poodle-update-center__surface" aria-label={ariaLabel ?? title}>
           <header className="poodle-update-center__header">

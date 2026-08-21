@@ -36,3 +36,161 @@ describe("Popover — retained regressions", () => {
     expect(document.activeElement).toBe(screen.getByTestId("inner-trigger"));
   });
 });
+
+/**
+ * g15.041: interactive trigger semantics. In interactive mode the wrapper is
+ * inert layout — no role, tab stop, keydown handler, or ARIA — and the
+ * `PopoverTriggerState` payload lands on the caller's real control.
+ *
+ * Server-render evidence for the same semantics lives in
+ * `test/ssr/PopoverSsr.test.ts` (the `svelte-components-ssr` project).
+ */
+describe("Popover — interactive trigger semantics (g15.041)", () => {
+  function wrapperOf(container: HTMLElement): HTMLElement {
+    const wrapper = container.querySelector<HTMLElement>(".poodle-popover__trigger");
+    if (!wrapper) throw new Error("trigger wrapper not rendered");
+    return wrapper;
+  }
+
+  function surfaceId(): string {
+    const surface = document.querySelector<HTMLElement>('[data-part="surface"]');
+    if (!surface?.id) throw new Error("surface not rendered");
+    return surface.id;
+  }
+
+  it("renders the wrapper roleless and untabbable with the disclosure ARIA on the real control", () => {
+    const { container } = render(Harness, { props: { triggerIsInteractive: true } });
+
+    const wrapper = wrapperOf(container);
+    expect(wrapper.getAttribute("role")).toBeNull();
+    expect(wrapper.getAttribute("tabindex")).toBeNull();
+    expect(wrapper.getAttribute("aria-expanded")).toBeNull();
+    expect(wrapper.getAttribute("aria-controls")).toBeNull();
+    expect(wrapper.getAttribute("aria-disabled")).toBeNull();
+
+    const control = screen.getByTestId("inner-trigger");
+    expect(control.getAttribute("aria-expanded")).toBe("false");
+    expect(control.getAttribute("aria-controls")).toBeNull();
+  });
+
+  it("threads expanded and controls onto the real control while open", async () => {
+    render(Harness, { props: { triggerIsInteractive: true } });
+
+    const control = screen.getByTestId("inner-trigger");
+    await fireEvent.click(control);
+
+    expect(control.getAttribute("aria-expanded")).toBe("true");
+    expect(control.getAttribute("aria-controls")).toBe(surfaceId());
+  });
+
+  it("toggles repeatedly from the real control, click and keyboard activation alike", async () => {
+    render(Harness, { props: { triggerIsInteractive: true } });
+
+    const control = screen.getByTestId("inner-trigger");
+
+    // Keyboard: the wrapper owns no keydown handler in interactive mode, so a
+    // bare keydown must not toggle — happy-dom cannot replay the browser's
+    // native Enter/Space activation of a real button, which arrives as a
+    // click and is covered by the click assertions in this same test.
+    await fireEvent.keyDown(control, { key: "Enter" });
+    await fireEvent.keyDown(control, { key: " " });
+    expect(screen.queryByTestId("surface-action")).toBeNull();
+
+    await fireEvent.click(control);
+    expect(screen.getByTestId("surface-action")).toBeTruthy();
+    expect(control.getAttribute("aria-expanded")).toBe("true");
+
+    await fireEvent.click(control);
+    expect(screen.queryByTestId("surface-action")).toBeNull();
+    expect(control.getAttribute("aria-expanded")).toBe("false");
+
+    await fireEvent.click(control);
+    expect(screen.getByTestId("surface-action")).toBeTruthy();
+  });
+
+  it("closes on outside pointerdown and on Escape", async () => {
+    render(Harness, { props: { triggerIsInteractive: true, defaultOpen: true } });
+
+    const control = screen.getByTestId("inner-trigger");
+    await fireEvent.mouseDown(document.body);
+    expect(screen.queryByTestId("surface-action")).toBeNull();
+    expect(document.activeElement).toBe(control);
+
+    await fireEvent.click(control);
+    expect(screen.getByTestId("surface-action")).toBeTruthy();
+    await fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByTestId("surface-action")).toBeNull();
+    expect(document.activeElement).toBe(control);
+  });
+
+  it("follows a controlled open prop driven through onOpenChange", async () => {
+    const calls: boolean[] = [];
+    const onOpenChange = (next: boolean) => calls.push(next);
+    const { rerender } = render(Harness, {
+      props: { triggerIsInteractive: true, open: false, onOpenChange },
+    });
+
+    expect(screen.queryByTestId("surface-action")).toBeNull();
+
+    // The host applies the requested state, as a controlled host does.
+    await rerender({ triggerIsInteractive: true, open: true, onOpenChange });
+    const control = screen.getByTestId("inner-trigger");
+    expect(screen.getByTestId("surface-action")).toBeTruthy();
+    expect(control.getAttribute("aria-controls")).toBe(surfaceId());
+
+    // A toggle request against a controlled popover emits the intent…
+    await fireEvent.click(control);
+    expect(calls).toEqual([false]);
+
+    // …and the host drives the close by re-passing the prop.
+    await rerender({ triggerIsInteractive: true, open: false, onOpenChange });
+    expect(screen.queryByTestId("surface-action")).toBeNull();
+    expect(control.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("runs uncontrolled from defaultOpen", () => {
+    render(Harness, { props: { triggerIsInteractive: true, defaultOpen: true } });
+
+    const control = screen.getByTestId("inner-trigger");
+    expect(screen.getByTestId("surface-action")).toBeTruthy();
+    expect(control.getAttribute("aria-expanded")).toBe("true");
+    expect(control.getAttribute("aria-controls")).toBe(surfaceId());
+  });
+
+  it("carries disabled onto the real control and blocks opening", async () => {
+    render(Harness, { props: { triggerIsInteractive: true, disabled: true } });
+
+    const control = screen.getByTestId("inner-trigger");
+    expect((control as HTMLButtonElement).disabled).toBe(true);
+
+    await fireEvent.click(control);
+    expect(screen.queryByTestId("surface-action")).toBeNull();
+  });
+});
+
+describe("Popover — default trigger mode unchanged (g15.041)", () => {
+  it("keeps role, tab stop, and disclosure ARIA on the wrapper", async () => {
+    const { container } = render(Harness, { props: {} });
+
+    const wrapper = container.querySelector<HTMLElement>(".poodle-popover__trigger");
+    expect(wrapper?.getAttribute("role")).toBe("button");
+    expect(wrapper?.getAttribute("tabindex")).toBe("0");
+    expect(wrapper?.getAttribute("aria-expanded")).toBe("false");
+    expect(wrapper?.getAttribute("aria-controls")).toBeNull();
+
+    await fireEvent.click(wrapper!);
+    expect(wrapper?.getAttribute("aria-expanded")).toBe("true");
+    expect(wrapper?.getAttribute("aria-controls")).toBe(
+      document.querySelector<HTMLElement>('[data-part="surface"]')?.id,
+    );
+  });
+
+  it("opens from Enter on the wrapper in default mode", async () => {
+    const { container } = render(Harness, { props: {} });
+
+    const wrapper = container.querySelector<HTMLElement>(".poodle-popover__trigger")!;
+    await fireEvent.keyDown(wrapper, { key: "Enter" });
+
+    expect(screen.getByTestId("surface-action")).toBeTruthy();
+  });
+});

@@ -1,5 +1,7 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/message-center.css";
+  import type { PopoverTriggerState } from "@inflatable-cookie/poodle-core";
+
   import { default as Button } from "./Button.svelte";
   import { default as EmptyState } from "./EmptyState.svelte";
   import { default as Icon } from "./Icon.svelte";
@@ -95,7 +97,7 @@
     surfaceMaxWidth="min(30rem, calc(100vw - 2rem))"
     onOpenChange={handleOpenChange}
   >
-    {#snippet trigger()}
+    {#snippet trigger(state: PopoverTriggerState)}
       <span class="poodle-message-center__trigger" data-unread={unreadCount > 0}>
         <IconButton
           icon={triggerIcon}
@@ -104,7 +106,9 @@
           variant="ghost"
           size={resolvedSize}
           density={resolvedDensity}
-          expanded={isOpen}
+          expanded={state.expanded}
+          controls={state.controls}
+          disabled={state.disabled}
         />
         {#if unreadCount > 0}
           <span class="poodle-message-center__indicator" aria-hidden="true">

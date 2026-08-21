@@ -1,7 +1,7 @@
 # Popover
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-21
 
 ## 1. Purpose
 
@@ -59,19 +59,51 @@ OverlayPlacement:
   "bottom" | "bottom-start" | "bottom-end" |
   "left" | "left-start" | "left-end" |
   "right" | "right-start" | "right-end"
+
+PopoverTriggerState (authored in @inflatable-cookie/poodle-core, re-exported
+by both web packages):
+  expanded: boolean        — false while closed, true while open
+  controls: string | null  — null while closed; the rendered surface id while open
+  disabled: boolean        — the effective Popover disabled state
 ```
 
 ### Snippets
 
 | Snippet | Purpose |
 |------|---------|
-| `trigger` | trigger element |
+| `trigger` | trigger element; in interactive mode it receives the `PopoverTriggerState` payload |
 | `children` | popover body content |
 
-Web adapters also accept `triggerIsInteractive`. Set it when `trigger` is
-already an interactive control such as `IconButton`; the wrapper then observes
-clicks without adding a second button role or keyboard handler. Native adapters
-compose their trigger directly and do not need this DOM-only switch.
+### Trigger Modes (web adapters)
+
+Web adapters accept `triggerIsInteractive` as a discriminating prop with two
+compile-time shapes. Native adapters compose their trigger directly and do not
+need this DOM-only switch.
+
+- **Default mode** (`triggerIsInteractive` absent or `false`): `trigger` is a
+  zero-argument Svelte snippet / React node. The wrapper owns `role="button"`,
+  the tab stop, Enter/Space handling, disabled suppression, and the disclosure
+  ARIA, exactly as the part-output table below states. Use this for plain text
+  or non-interactive trigger content.
+- **Interactive mode** (`triggerIsInteractive: true`): `trigger` is a
+  state-aware render — `Snippet<[PopoverTriggerState]>` in Svelte,
+  `(state: PopoverTriggerState) => ReactNode` in React. The caller must apply
+  all three state fields to the actual interactive control inside the snippet
+  (`aria-expanded`, `aria-controls`, disabled). The wrapper keeps its layout
+  and `data-*` hooks and observes bubbled clicks, but owns no role, tab stop,
+  keyboard handler, disabled semantics, or disclosure ARIA. Focus restoration
+  still targets the real interactive descendant.
+
+Pre-v0.2 migration: the old interactive shape — `triggerIsInteractive` with a
+static node or zero-argument snippet — is removed. React rejects it at compile
+time: a static node is not a state render function. Svelte's discriminated
+snippet typing rejects a wrongly-typed payload and wrong-branch usage, but
+TypeScript function assignability means a zero-argument snippet still satisfies
+`Snippet<[PopoverTriggerState]>`; a Svelte caller who keeps one renders a
+trigger with no disclosure semantics and gets no type error. Svelte migration
+is therefore enforced by search and review: change every interactive trigger
+to the state-aware render and pass `expanded`, `controls`, and `disabled`
+through to the real control.
 
 ### Controlled And Uncontrolled
 
@@ -156,16 +188,21 @@ and outside listeners are document-level and active only while open.
 | root | `data-state` | `open` \| `closed` |
 | root | `data-block` | `block` |
 | trigger | `data-part` | `trigger` |
-| trigger | `role` / `tabindex` | `"button"` / `0` (`-1` when `disabled`) |
-| trigger | `aria-expanded` | `"true"` \| `"false"` |
-| trigger | `aria-controls` | surface id while open |
-| trigger | `aria-disabled` / `data-disabled` | `"true"` when `disabled` |
+| trigger | `role` / `tabindex` | `"button"` / `0` (`-1` when `disabled`); both omitted in interactive mode |
+| trigger | `aria-expanded` | `"true"` \| `"false"` (default mode only) |
+| trigger | `aria-controls` | surface id while open (default mode only) |
+| trigger | `aria-disabled` / `data-disabled` | `"true"` when `disabled` (`aria-disabled` is default mode only) |
 | trigger | `data-state` | `open` \| `closed` |
 | surface | `data-part` / `id` | `surface` / generated instance id |
 | surface | `role` | `"dialog"` |
 | surface | `aria-label` | `ariaLabel` |
 | surface | `tabindex` | `0` when `initialFocus="content"`, else `-1` |
 | surface | `data-state` / `data-placement` / `data-surface-width` | `open` / resolved placement / resolved width strategy |
+
+Beside the part attributes, `popoverParts` returns the framework-neutral
+`triggerState` payload (`expanded`, `controls`, `disabled` — see §3). It is
+computed in both modes; interactive mode exists so the caller can apply it to
+the real control, while default mode projects the same values onto the wrapper.
 
 Note: `data-scope`/`data-part`/`data-state` are added during the core swap
 (additive); existing attributes above match the current implementation.
@@ -190,6 +227,11 @@ wiring, presence (if open/close animation is added later).
 ### Semantics
 
 - Trigger: `role="button"`, `tabindex="0"` (`-1` when `disabled`), `aria-expanded` (true/false), `aria-controls` (surface id when open)
+- Interactive mode: the wrapper is roleless and untabbable; exactly one actual
+  control inside the trigger is operable and carries `aria-expanded`
+  (`"false"` while closed, `"true"` while open), `aria-controls` matching the
+  rendered surface id while open (absent while closed), and the effective
+  disabled state, all from the `PopoverTriggerState` payload
 - Disabled trigger: `data-disabled="true"`, `aria-disabled="true"`, `tabindex=-1`; click/keydown are ignored and the popover cannot open
 - Surface: `role="dialog"`, `tabindex` set to `0` when `initialFocus="content"` or `-1` otherwise
 - Required attributes: trigger-to-content relationship via `aria-controls` and accessible naming
@@ -212,7 +254,9 @@ wiring, presence (if open/close animation is added later).
   `initialFocus`
 - focus exit: non-modal popovers do not trap focus; leaving the content may
   dismiss according to implementation policy
-- focus restoration: explicit close returns focus to the trigger
+- focus restoration: explicit close returns focus to the trigger — in
+  interactive mode, to the actual interactive descendant the state payload was
+  applied to, never the inert wrapper
 - live-region behavior: none by default; content semantics should carry the
   meaning
 - GPUI-native accessibility mapping notes: GPUI must expose popover ownership,

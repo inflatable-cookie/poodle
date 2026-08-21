@@ -556,6 +556,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "chevron", type: "boolean", default: "false", description: "Whether to show a dropdown chevron." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the button." },
       { name: "ariaExpanded", type: "boolean | null", default: "null", description: "Disclosure state for expandable triggers." },
+      { name: "controls", type: "string | null", default: "null", description: "ID of the element the button controls, such as an open disclosure surface; renders aria-controls when set." },
       { name: "describedBy", type: "string | null", default: "null", description: "ID of the element describing this button." },
       { name: "className", type: "string", default: '""', description: "Additional CSS class name." },
       { name: "style", type: "string | null", default: "null", description: "Inline style passthrough for dynamic sizing or CSS variables." },
@@ -3472,22 +3473,24 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "dismissOnOutsideInteract", type: "boolean", default: "true", description: "Whether clicking outside dismisses the popover." },
       { name: "initialFocus", type: "PopoverInitialFocus", default: '"first-focusable"', description: "Which element receives focus when the popover opens." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the popover." },
-      { name: "triggerIsInteractive", type: "boolean", default: "false", description: "Delegates trigger semantics and keyboard activation to an interactive child." },
+      { name: "triggerIsInteractive", type: "boolean", default: "false", description: "Delegates trigger semantics and keyboard activation to an interactive child. When true, the trigger snippet receives the PopoverTriggerState payload (expanded, controls, disabled) and must apply it to the real control; the wrapper stays roleless and untabbable." },
     ],
     slots: [
-      { name: "trigger", description: "Trigger element that toggles the popover." },
+      { name: "trigger", description: "Trigger element that toggles the popover. Zero-argument by default; with triggerIsInteractive it receives PopoverTriggerState." },
       { name: "default", description: "Content rendered inside the popover." },
     ],
     events: [
       { name: "openChange", payload: "{ open: boolean }", description: "Fires when the open state changes." },
     ],
     usage: `<script lang="ts">
-  import { Popover, Button } from "@inflatable-cookie/poodle-svelte";
+  import { Popover, Button, type PopoverTriggerState } from "@inflatable-cookie/poodle-svelte";
 </script>
 
 <Popover placement="bottom-start" triggerIsInteractive onOpenChange={(open) => console.log(open)}>
-  {#snippet trigger()}
-    <Button>Open Popover</Button>
+  {#snippet trigger(state: PopoverTriggerState)}
+    <Button ariaExpanded={state.expanded} controls={state.controls} disabled={state.disabled}>
+      Open Popover
+    </Button>
   {/snippet}
   <div style="padding: 1rem;">
     <p>Popover content goes here.</p>

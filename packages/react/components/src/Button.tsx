@@ -40,6 +40,7 @@ export interface ButtonProps {
   defaultPressed?: boolean | null;
   ariaLabel?: string | null;
   ariaExpanded?: boolean | null;
+  controls?: string | null;
   describedBy?: string | null;
   type?: "button" | "submit" | "reset";
   form?: string | null;
@@ -81,6 +82,7 @@ export function Button({
   defaultPressed = null,
   ariaLabel = null,
   ariaExpanded = null,
+  controls = null,
   describedBy = null,
   className = "",
   onClick = null,
@@ -138,6 +140,7 @@ export function Button({
       aria-label={ariaLabel ?? undefined}
       aria-pressed={isToggle ? currentPressed : undefined}
       aria-expanded={ariaExpanded === null ? undefined : ariaExpanded}
+      aria-controls={controls ?? undefined}
       aria-describedby={describedBy ?? undefined}
       aria-busy={loading ? "true" : undefined}
       onClick={handleClick}

@@ -7,6 +7,22 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-21 — The contract drift checkers (`contract-prop-drift.ts`,
+  `contract-callback-drift.ts`, `contract-value-domain-drift.ts`) parsed only
+  `interface Props`; a discriminated-union props shape
+  (`type Props = Common & (A | B)`, the LicenceActivation pattern) failed
+  prop-drift outright and was silently skipped by the other two. Fixed on
+  g15.041 with a shared `unionPropsBody()` fallback — any future union-typed
+  props get it for free, but a third props shape will need the same visit.
+
+- 2026-08-21 — No SSR-capable vitest project existed for Svelte: every
+  `.svelte` file compiled client-only, so `render` from `svelte/server`
+  throws. vite-plugin-svelte ignores `compilerOptions.generate`; the working
+  knob is omitting `resolve.conditions: ["browser"]` in the SSR project so the
+  plugin server-compiles through vitest's SSR transform. Fixed on g15.041 with
+  the `svelte-components-ssr` project (server-render evidence for
+  `defaultOpen`/SSR-dependent components now has a home).
+
 - 2026-08-20 — `effigy ci:rust` runs `test:contracts`, which lists seven
   contract crates but not `packages/contracts/node`. `poodle-node` is the
   vocabulary every component depends on, and its own unit tests run under no

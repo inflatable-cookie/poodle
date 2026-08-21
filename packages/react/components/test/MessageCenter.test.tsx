@@ -15,10 +15,14 @@ describe("MessageCenter (react)", () => {
 
     const trigger = screen.getByRole("button", { name: "Notifications, 1 unread" });
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(trigger.getAttribute("aria-controls")).toBeNull();
 
     fireEvent.click(trigger);
 
-    expect(screen.getByRole("dialog", { name: "Notifications" })).toBeTruthy();
+    const dialog = screen.getByRole("dialog", { name: "Notifications" });
+    expect(dialog).toBeTruthy();
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(trigger.getAttribute("aria-controls")).toBe(dialog.id);
     expect(screen.getByText("Build complete")).toBeTruthy();
   });
 

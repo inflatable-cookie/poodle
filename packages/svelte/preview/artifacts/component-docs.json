@@ -1467,6 +1467,12 @@
         "description": "Disclosure state for expandable triggers."
       },
       {
+        "name": "controls",
+        "type": "string | null",
+        "default": "null",
+        "description": "ID of the element the button controls, such as an open disclosure surface; renders aria-controls when set."
+      },
+      {
         "name": "describedBy",
         "type": "string | null",
         "default": "null",
@@ -8611,13 +8617,13 @@
         "name": "triggerIsInteractive",
         "type": "boolean",
         "default": "false",
-        "description": "Delegates trigger semantics and keyboard activation to an interactive child."
+        "description": "Delegates trigger semantics and keyboard activation to an interactive child. When true, the trigger snippet receives the PopoverTriggerState payload (expanded, controls, disabled) and must apply it to the real control; the wrapper stays roleless and untabbable."
       }
     ],
     "slots": [
       {
         "name": "trigger",
-        "description": "Trigger element that toggles the popover."
+        "description": "Trigger element that toggles the popover. Zero-argument by default; with triggerIsInteractive it receives PopoverTriggerState."
       },
       {
         "name": "default",
@@ -8631,7 +8637,7 @@
         "description": "Fires when the open state changes."
       }
     ],
-    "usage": "<script lang=\"ts\">\n  import { Popover, Button } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Popover placement=\"bottom-start\" triggerIsInteractive onOpenChange={(open) => console.log(open)}>\n  {#snippet trigger()}\n    <Button>Open Popover</Button>\n  {/snippet}\n  <div style=\"padding: 1rem;\">\n    <p>Popover content goes here.</p>\n  </div>\n</Popover>"
+    "usage": "<script lang=\"ts\">\n  import { Popover, Button, type PopoverTriggerState } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<Popover placement=\"bottom-start\" triggerIsInteractive onOpenChange={(open) => console.log(open)}>\n  {#snippet trigger(state: PopoverTriggerState)}\n    <Button ariaExpanded={state.expanded} controls={state.controls} disabled={state.disabled}>\n      Open Popover\n    </Button>\n  {/snippet}\n  <div style=\"padding: 1rem;\">\n    <p>Popover content goes here.</p>\n  </div>\n</Popover>"
   },
   "progress": {
     "props": [

@@ -15,4 +15,12 @@ describe("Button (react)", () => {
     const { getByRole } = render(<Button disabled>Go</Button>);
     expect((getByRole("button") as HTMLButtonElement).disabled).toBe(true);
   });
+
+  it("renders aria-controls only when controls is set", () => {
+    const { getByRole, rerender } = render(<Button controls="panel-1">Go</Button>);
+    expect(getByRole("button").getAttribute("aria-controls")).toBe("panel-1");
+
+    rerender(<Button>Go</Button>);
+    expect(getByRole("button").getAttribute("aria-controls")).toBeNull();
+  });
 });
