@@ -76,10 +76,12 @@ consumer suite; none is presented as full-roster behavior evidence.
 | `effigy test:web-pack-install` | pass — 10 files, 20 tests; 175/175 Svelte and 175/175 React |
 | `effigy test:web-pack-install` with temporary v0.2.0 package mutation | pass — 10 files, 20 tests; emitted `0.2.0` tarballs for core, Svelte, and React |
 | Tarball archive and installed-root boundary checks | pass — exact targets and required files |
+| React roster table structure check | pass — 5 tables, 8 cells per row including Pack-install |
 | `effigy check:svelte-components` | pass — 0 errors, 4 existing warnings |
 | `effigy react:build` | pass |
 | `effigy docs:check` | pass |
 | `git diff --check origin/main...HEAD` | pass |
 
-No workflow, release, version, publication, specimen, component, native,
-windowed, Jetstream, or GPUI preview surface changed or ran.
+No committed workflow, release, version, publication, specimen, component,
+native, windowed, Jetstream, or GPUI preview surface changed or ran. The
+v0.2.0 manifest mutation was validation-only and was restored before commit.
