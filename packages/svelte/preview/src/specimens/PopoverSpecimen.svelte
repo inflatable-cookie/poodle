@@ -1,13 +1,20 @@
 <script lang="ts">
-  import { Popover, Button } from "@inflatable-cookie/poodle-svelte";
+  import { Popover, Button, type PopoverTriggerState } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
 </script>
 
 <div class="poodle-specimen">
   <SpecimenGroup label="Default (bottom-start)">
-    <Popover ariaLabel="Quick settings">
-      {#snippet trigger()}
-        <Button variant="secondary">Open popover</Button>
+    <Popover ariaLabel="Quick settings" triggerIsInteractive>
+      {#snippet trigger(state: PopoverTriggerState)}
+        <Button
+          variant="secondary"
+          ariaExpanded={state.expanded}
+          controls={state.controls}
+          disabled={state.disabled}
+        >
+          Open popover
+        </Button>
       {/snippet}
       <div class="poodle-popover-content">
         <strong>Quick settings</strong>
@@ -17,9 +24,16 @@
   </SpecimenGroup>
 
   <SpecimenGroup label="Top placement">
-    <Popover placement="top" ariaLabel="Help tip">
-      {#snippet trigger()}
-        <Button variant="secondary">Show help</Button>
+    <Popover placement="top" ariaLabel="Help tip" triggerIsInteractive>
+      {#snippet trigger(state: PopoverTriggerState)}
+        <Button
+          variant="secondary"
+          ariaExpanded={state.expanded}
+          controls={state.controls}
+          disabled={state.disabled}
+        >
+          Show help
+        </Button>
       {/snippet}
       <div class="poodle-popover-content">
         <p>Popovers can be anchored to any side of their trigger element.</p>

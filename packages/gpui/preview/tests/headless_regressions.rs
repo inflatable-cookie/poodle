@@ -125,6 +125,34 @@ fn a_pointer_press_reaches_the_backend_listener_once() {
     });
 }
 
+/// g15.041: Button disclosure targets (contract §3 `controls`) ride the same
+/// renderer-neutral node channel as IconButton's — a Button built with
+/// `with_controls(...)` mounts through the real backend carrying
+/// `a11y.controls`. Structural evidence only: gpui 0.2.2 projects no
+/// platform accessibility attributes from this field.
+#[test]
+fn a_mounted_button_carries_its_controls_target() {
+    run_headless(|cx| {
+        let node = Arc::new(Mutex::new(button_node(
+            poodle_specs::ButtonSpec::new()
+                .with_label("Details")
+                .with_controls("details"),
+            None,
+        )));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        assert_eq!(
+            node.lock().expect("node lock").a11y.controls.as_deref(),
+            Some("details"),
+        );
+
+        // Absence stays absence: a bare spec mounts carrying no target.
+        let bare = button_node(poodle_specs::ButtonSpec::new().with_label("Save"), None);
+        assert_eq!(bare.a11y.controls, None);
+    });
+}
+
 // ── Retained backend regressions ───────────────────────────────────────────
 
 /// g14.001 retained regression. The node backend bound Enter/Space through

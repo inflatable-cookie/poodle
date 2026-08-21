@@ -18,6 +18,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { allComponents } from "../src/component-registry.ts";
+import { unionPropsBody } from "./contract-prop-drift.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
 const contractsDir = path.join(repoRoot, "docs/contracts/components");
@@ -42,10 +43,15 @@ export function propsBody(src: string): string | null {
   } else {
     // `let { … }: { … } = $props()` — the annotation brace, not the destructure.
     const anchor = src.indexOf("= $props()");
-    if (anchor < 0) return null;
+    if (anchor < 0) return unionPropsBody(src);
     const colon = src.lastIndexOf("}:", anchor);
-    if (colon < 0) return null;
-    open = src.indexOf("{", colon + 1);
+    if (colon < 0) return unionPropsBody(src);
+    // `}: Props = $props()` (a named Props type — including the
+    // `type Props = CommonProps & ({ … } | { … })` discriminated union) is not
+    // the inline shape; only a `{` right after `}:` is.
+    const annotation = /^\s*\{/.exec(src.slice(colon + 2));
+    if (!annotation) return unionPropsBody(src);
+    open = colon + 2 + annotation[0].length - 1;
   }
   if (open < 0) return null;
   let depth = 0;

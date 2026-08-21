@@ -43,6 +43,7 @@
     defaultPressed?: boolean | null;
     ariaLabel?: string | null;
     ariaExpanded?: boolean | null;
+    controls?: string | null;
     describedBy?: string | null;
     type?: HTMLButtonElement["type"];
     form?: string | null;
@@ -94,6 +95,7 @@
     defaultPressed = null,
     ariaLabel = null,
     ariaExpanded = null,
+    controls = null,
     describedBy = null,
     className = "",
     style = null,
@@ -197,6 +199,7 @@
   aria-label={ariaLabel ?? undefined}
   aria-pressed={isToggle ? (currentPressed ? "true" : "false") : undefined}
   aria-expanded={ariaExpanded === null ? undefined : ariaExpanded ? "true" : "false"}
+  aria-controls={controls ?? undefined}
   aria-describedby={describedBy ?? undefined}
   aria-busy={loading ? "true" : undefined}
   onclick={(event) => {

@@ -4,7 +4,12 @@ Status: **partial** — mechanical screening baseline plus live measurement on
 all three runtimes. Human teaching judgment has been applied to the three
 pilots and to 49 screen-clear pages (`g15.028`–`g15.032`); 7 screen-clear
 pages (`g15.033`) and the remaining defect-led rows still await it.
-Date: 2026-08-21 (revision 13 — the `g15.032` Popover web trigger
+Date: 2026-08-21 (revision 14 — `g15.041` repaired the Popover web trigger
+contract: the state-aware interactive composition lands
+`aria-expanded`/`aria-controls`/disabled on the real control in both web
+runtimes, returning the row to `A / A / A` and `keep` with operator live
+sign-off pending on the paired routes;
+revision 13 — the `g15.032` Popover web trigger
 composition was recorded as a `contract/runtime-blocker` at C/C/A after
 orchestrator review showed no supported web composition satisfies the
 trigger contract; the specimen-level repair was reverted;
@@ -138,25 +143,24 @@ Dispositions used in the rows: `keep`, `pilot-fix`, `curation-tranche`,
 ## Totals
 
 Mechanical recount of the 175 inventory rows at this revision, after
-`g15.032` recorded the Popover web trigger composition as a
-`contract/runtime-blocker`. These numbers
-are the rows, not a pre-pilot or pre-curation baseline.
+`g15.041` closed the Popover web trigger `contract/runtime-blocker`. These
+numbers are the rows, not a pre-pilot or pre-curation baseline.
 
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Svelte (live) | 88 | 33 | 45 | 9 | — |
-| React (live) | 101 | 26 | 48 | 0 | — |
+| Svelte (live) | 89 | 33 | 44 | 9 | — |
+| React (live) | 102 | 26 | 47 | 0 | — |
 | GPUI (headless render + structural) | 103 | 65 | 6 | 0 | 1 |
-| **Worst of the three** | **65** | **48** | **53** | **9** | — |
+| **Worst of the three** | **66** | **48** | **52** | **9** | — |
 
 | Disposition | Count |
 | --- | ---: |
-| `keep` | 55 |
+| `keep` | 56 |
 | `pilot-fix` | 3 |
 | `curation-tranche` | 108 |
 | `curation-complete` | 6 |
 | `verified-no-op` | 2 |
-| `contract/runtime-blocker` | 1 |
+| `contract/runtime-blocker` | 0 |
 
 175 of 175 pages were measured live in both web runtimes. The `g15.028`
 contract/runtime blocker on GPUI `SegmentedControl` is closed by `g15.038`.
@@ -174,15 +178,17 @@ declared current value. GPUI 0.2.2 still exposes no platform accessibility
 attributes (contract 003), so the declarations reach the renderer-neutral
 node and stop there; nothing here claims platform AT projection.
 
-**One row carries `contract/runtime-blocker` at this revision.** The `g15.032`
-review found that Popover's two web compositions cannot both avoid a nested
-button role and keep the contract's `aria-expanded`/`aria-controls` trigger
-relationship: the default wrapper becomes a second `role="button"` around an
-interactive child and captures focus return, while `triggerIsInteractive`
-strips the relationship attributes with no API to transfer them to the child
-(`docs/contracts/components/popover.md` §5–6). Sv/Rc grade C; GPUI grades A
-because native composes its trigger directly. A dedicated Popover
-API/semantics repair is routed outside the specimen lane.
+The Popover web trigger blocker the `g15.032` review recorded is closed by
+`g15.041`: core now authors a framework-neutral `PopoverTriggerState` payload
+(`expanded` / `controls` / `disabled`) beside the part attributes, and the
+Svelte and React interactive trigger is a state-aware render that applies it
+to the real control, leaving the wrapper a roleless, untabbable layout host
+(`docs/contracts/components/popover.md` §3–6). Server output and hydrated DOM
+carry the relationship without post-mount repair in both runtimes, and
+HistoryCenter, MessageCenter, and UpdateCenter thread the payload into their
+actual Button/IconButton/native-button triggers. Sv/Rc return to A; GPUI was
+already A. Operator live sign-off on the paired Popover routes is pending at
+this revision and is not claimed here.
 
 `MeterSurface` is the single `n/a` on GPUI — web-only by fixed decision
 (spec 068), with no native counterpart. It is still graded on the two runtimes
@@ -639,7 +645,7 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | `HoverCard` | A | A | A | keep | human verdict (`g15.032`): keep — hover and keyboard focus both open after the contract's intent delays and Escape closes; the recorded click no-op is the wrong gesture and proves nothing; Sv/Rc paired; Gp wires real hover-intent delays |
 | `Menu` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |
 | `Menubar` | A | A | A | keep | human verdict (`g15.032`): keep — File/Edit/View bar with live action readout, hover-to-switch between open menus, and item-focused Escape focus return verified; Sv/Rc paired; Gp adds live checkbox/radio state and a disabled trigger |
-| `Popover` | C | C | A | contract/runtime-blocker | human verdict (`g15.032`): **Sv/Rc:** both examples anchor the popover to a real Button. In the default composition the wrapper adds its own `role="button"`/`tabindex=0` around the interactive child and Escape focus returns to the inert wrapper; `triggerIsInteractive` removes the wrapper role but drops the `aria-expanded`/`aria-controls` trigger relationship the contract requires (`docs/contracts/components/popover.md` §5 part attributes, §6 semantics) — no supported web composition satisfies the trigger contract today. Routed component/contract blocker; API/semantics repair out of scope for this card. **Gp:** keep — native composes its trigger directly; placement, surface-width, and disabled evidence live |
+| `Popover` | A | A | A | keep | human verdict (`g15.032`): C/C/A `contract/runtime-blocker` — repaired by `g15.041`: both examples anchor the popover to a real Button driven by the core-authored `PopoverTriggerState` payload, so the actual control owns `aria-expanded`/`aria-controls`/disabled while the wrapper stays a roleless layout host; Sv/Rc paired with server-render and hydrated-DOM evidence; operator live sign-off pending on the paired routes. **Gp:** keep — native composes its trigger directly; placement, surface-width, and disabled evidence live |
 | `Tooltip` | C | C | A | curation-tranche | **Sv:** note — 5 clicks changed nothing: a hover surface; a click is the wrong gesture; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop · **Rc:** note — 5 clicks changed nothing: a hover surface; a click is the wrong gesture; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop |
 
 ### Forms & validation — Composition (9)

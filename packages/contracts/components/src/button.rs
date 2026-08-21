@@ -39,6 +39,7 @@ pub struct ButtonSpec {
     pub label: Option<String>,
     pub aria_label: Option<String>,
     pub aria_expanded: Option<bool>,
+    pub controls: Option<String>,
     pub described_by: Option<String>,
 }
 
@@ -63,6 +64,7 @@ impl Default for ButtonSpec {
             label: None,
             aria_label: None,
             aria_expanded: None,
+            controls: None,
             described_by: None,
         }
     }
@@ -143,6 +145,10 @@ impl ButtonSpec {
     }
     pub fn with_aria_expanded(mut self, value: bool) -> Self {
         self.aria_expanded = Some(value);
+        self
+    }
+    pub fn with_controls(mut self, value: impl Into<String>) -> Self {
+        self.controls = Some(value.into());
         self
     }
     pub fn with_described_by(mut self, value: impl Into<String>) -> Self {

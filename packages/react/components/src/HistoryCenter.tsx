@@ -654,7 +654,7 @@ export function HistoryCenter({
           surfaceMinWidth="min(28rem, calc(100vw - 2rem))"
           surfaceMaxWidth="min(38rem, calc(100vw - 2rem))"
           onOpenChange={handleOpenChange}
-          trigger={
+          trigger={(state) => (
             /* A bare glyph, not an IconButton. The disclosure sits between
                undo and redo, and it must read narrower than them rather than
                as a third control of equal weight. It stays a real button, so
@@ -666,12 +666,14 @@ export function HistoryCenter({
               data-part="list-trigger"
               data-size={resolvedSize}
               aria-label={listLabel}
-              aria-expanded={isOpen}
+              aria-expanded={state.expanded}
+              aria-controls={state.controls ?? undefined}
+              disabled={state.disabled}
               title={listLabel}
             >
               <Icon name="chevron-down" size={resolvedSize} />
             </button>
-          }
+          )}
         >
           <section
             ref={sectionRef}

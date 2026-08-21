@@ -256,6 +256,7 @@ export {
   type PopoverResult,
   type PopoverPartProps,
   type PopoverParts,
+  type PopoverTriggerState,
 } from "./popover";
 
 export {

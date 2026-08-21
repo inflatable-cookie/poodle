@@ -143,6 +143,7 @@ export type {
   OverlaySurfaceGeometryChange,
   OverlaySurfaceGeometryChangeHandler,
   OverlayViewportRect,
+  PopoverTriggerState,
 } from "@inflatable-cookie/poodle-core";
 
 // --- Composites ---

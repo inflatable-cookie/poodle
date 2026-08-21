@@ -1,7 +1,6 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/popover.css";
   import {
-    createInstanceId,
     getFocusableElements,
     layerContains,
     popoverParts,
@@ -9,9 +8,10 @@
     registerDismissLayer,
     type PopoverContext,
     type PopoverEvent,
+    type PopoverTriggerState,
     type OverlaySurfaceGeometryChangeHandler,
   } from "@inflatable-cookie/poodle-core";
-  import { tick, type Snippet } from "svelte";
+  import { tick, untrack, type Snippet } from "svelte";
 
   import { anchored } from "./anchored";
   import type { OverlayPlacement, PopoverInitialFocus } from "./types";
@@ -21,10 +21,16 @@
    * snippets; `triggerIsInteractive` and `onSurfaceGeometryChange` are
    * documented web-only extensions kept beside this adapter.
    *
+   * `triggerIsInteractive` discriminates the two compile-time trigger shapes
+   * (contract §3): default mode takes a zero-argument `trigger` snippet and the
+   * wrapper owns role/tab stop/disclosure ARIA; interactive mode requires a
+   * `Snippet<[PopoverTriggerState]>` and the caller applies the payload to the
+   * real control inside.
+   *
    * Contract: `docs/contracts/components/popover.md`. The Rust counterpart is
    * `poodle_specs::PopoverSpec`.
    */
-  interface Props {
+  interface CommonProps {
     open?: boolean | null;
     defaultOpen?: boolean;
     placement?: OverlayPlacement;
@@ -37,12 +43,22 @@
     surfaceWidth?: "content" | "trigger";
     surfaceMinWidth?: string | null;
     surfaceMaxWidth?: string | null;
-    triggerIsInteractive?: boolean;
     onOpenChange?: (open: boolean) => void;
     onSurfaceGeometryChange?: OverlaySurfaceGeometryChangeHandler | undefined;
-    trigger?: Snippet<[]>;
     children?: Snippet<[]>;
   }
+
+  type Props = CommonProps &
+    (
+      | {
+          triggerIsInteractive?: false;
+          trigger?: Snippet<[]>;
+        }
+      | {
+          triggerIsInteractive: true;
+          trigger: Snippet<[PopoverTriggerState]>;
+        }
+    );
 
   let {
     open = $bindable<boolean | null>(null),
@@ -64,20 +80,27 @@
     children,
   }: Props = $props();
 
-  const popoverId = createInstanceId("popover");
+  // Destructuring breaks the Props discriminated union's correlation between
+  // `triggerIsInteractive` and the `trigger` snippet arity, so each render
+  // branch below casts back to the shape its mode guarantees (contract §3).
+  const triggerDefault = $derived(trigger as Snippet<[]> | undefined);
+  const triggerWithState = $derived(trigger as Snippet<[PopoverTriggerState]> | undefined);
+
+  // Svelte carries this identity from server output into hydration. A shared
+  // module counter cannot do that in a long-lived SSR process because server
+  // requests and client bundles advance independent counters.
+  const componentId = $props.id();
+  const popoverId = `poodle-popover-${componentId}`;
   let rootElement = $state<HTMLDivElement | null>(null);
   let triggerElement = $state<HTMLDivElement | null>(null);
   let surfaceElement = $state<HTMLDivElement | null>(null);
-  let uncontrolledOpen = $state(false);
+  // Seeded directly from the prop, not in `$effect.pre`: effects are stripped
+  // from server output, so an effect-seeded initial state would render a
+  // `defaultOpen` popover closed in SSR. The `untrack` closure is the explicit
+  // "initial value only" read — the same value the effect applied before
+  // first render on the client.
+  let uncontrolledOpen = $state(untrack(() => defaultOpen));
   let previousOpen = $state(false);
-  let seededDefaultOpen = $state(false);
-
-  $effect.pre(() => {
-    if (!seededDefaultOpen) {
-      uncontrolledOpen = defaultOpen;
-      seededDefaultOpen = true;
-    }
-  });
 
   const isControlled = $derived(open !== null);
   // Disabled blocks open in every direction (contract §3): a controlled
@@ -204,7 +227,11 @@
       }
     }}
   >
-    {@render trigger?.()}
+    {#if triggerIsInteractive}
+      {@render triggerWithState?.(parts.triggerState)}
+    {:else}
+      {@render triggerDefault?.()}
+    {/if}
   </div>
 
   {#if isOpen}

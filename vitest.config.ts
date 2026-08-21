@@ -1,5 +1,5 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 // Component-shell smoke tests for the Svelte and React implementations.
 // Verifies the machine -> DOM wiring per framework: components mount, contract
@@ -17,6 +17,21 @@ export default defineConfig({
           environment: "happy-dom",
           globals: true,
           include: ["packages/svelte/components/test/**/*.test.ts"],
+          // The SSR suite needs server-compiled components; running it under
+          // this client-compiled project crashes `svelte/server`'s render.
+          exclude: [...configDefaults.exclude, "packages/svelte/components/test/ssr/**"],
+          setupFiles: ["./test/vitest.setup.ts"],
+        },
+      },
+      {
+        // Server-render evidence for the Svelte adapter (g15.041): no browser
+        // resolve condition, so vite-plugin-svelte compiles .svelte for the
+        // server and `render` from `svelte/server` works.
+        plugins: [svelte()],
+        test: {
+          name: "svelte-components-ssr",
+          environment: "node",
+          include: ["packages/svelte/components/test/ssr/**/*.test.ts"],
           setupFiles: ["./test/vitest.setup.ts"],
         },
       },

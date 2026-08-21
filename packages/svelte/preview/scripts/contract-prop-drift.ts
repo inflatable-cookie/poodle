@@ -203,6 +203,57 @@ export function svelteProps(src: string): Set<string> {
 // which contracts document separately. Mirrors the parser
 // contract-value-domain-drift.ts uses; excluded here so the reverse drift
 // direction sees props, not snippets.
+/**
+ * Member text of a discriminated-union Props declaration —
+ * `interface CommonProps { … }` plus `type Props = CommonProps & ({ … } | { … })`
+ * (LicenceActivation, Popover). Neither primary shape above matches it, so
+ * without this fallback Snippet-typed members leak into the prop set as false
+ * drift. Returns the concatenated member text, or null when the component
+ * declares neither part.
+ */
+export function unionPropsBody(src: string): string | null {
+  const bodies: string[] = [];
+  const common = src.search(/interface CommonProps\s*\{/);
+  if (common >= 0) bodies.push(...braceGroupBodies(src, common));
+  const alias = src.search(/type Props\s*=/);
+  if (alias >= 0) bodies.push(...braceGroupBodies(src, alias));
+  return bodies.length > 0 ? bodies.join("\n") : null;
+}
+
+/** Bodies of every balanced `{ … }` group in the declaration starting at
+ *  `from`, stopping at the first top-level `;`. String-aware, so braces inside
+ *  string literals are content. */
+function braceGroupBodies(src: string, from: number): string[] {
+  const bodies: string[] = [];
+  let depth = 0;
+  let start = -1;
+  let quote: string | null = null;
+  for (let i = from; i < src.length; i++) {
+    const ch = src[i];
+    if (quote !== null) {
+      if (ch === "\\") i++;
+      else if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") {
+      quote = ch;
+      continue;
+    }
+    if (ch === ";" && depth === 0) break;
+    if (ch === "{") {
+      if (depth === 0) start = i + 1;
+      depth++;
+    } else if (ch === "}") {
+      depth--;
+      if (depth === 0 && start >= 0) {
+        bodies.push(src.slice(start, i));
+        start = -1;
+      }
+    }
+  }
+  return bodies;
+}
+
 export function snippetProps(src: string): Set<string> {
   const out = new Set<string>();
   let body: string | null = null;
@@ -212,6 +263,7 @@ export function snippetProps(src: string): Set<string> {
     const m = src.match(/\}\s*:\s*\{([\s\S]*?)\n\s*\}\s*=\s*\$props\(\)/);
     if (m) body = m[1];
   }
+  if (!body) body = unionPropsBody(src);
   if (!body) return out;
   let depth = 0;
   let cur = "";

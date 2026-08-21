@@ -101,3 +101,15 @@ release selector ran.
 No changed routes remain, so no live operator sign-off is owed by this batch.
 The lane stays open on the routed Popover blocker: the orchestrator owns the
 dedicated API/semantics repair and the return to `g15.032` closeout.
+
+## Addendum (2026-08-21, `g15.041`)
+
+The routed Popover API/semantics repair landed as `g15.041`: core authors a
+`PopoverTriggerState` payload (`expanded` / `controls` / `disabled`), the
+Svelte and React interactive trigger is a state-aware render that applies it
+to the real control, and the paired Popover specimens compose real Poodle
+Button triggers again. The Popover audit row returns to A/A/A `keep` with
+totals recounted (revision 14); operator live sign-off on the paired Popover
+routes is pending on the `g15.041` PR and is a precondition for this card's
+closeout. Batch log:
+`docs/logs/2026-08/20260821-g15-041-popover-interactive-trigger-semantics.md`.

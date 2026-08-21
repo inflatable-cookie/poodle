@@ -114,7 +114,7 @@ export function MessageCenter({
         surfaceMinWidth="min(24rem, calc(100vw - 2rem))"
         surfaceMaxWidth="min(30rem, calc(100vw - 2rem))"
         onOpenChange={handleOpenChange}
-        trigger={
+        trigger={(state) => (
           <span className="poodle-message-center__trigger" data-unread={unreadCount > 0}>
             <IconButton
               icon={triggerIcon}
@@ -123,7 +123,9 @@ export function MessageCenter({
               variant="ghost"
               size={resolvedSize}
               density={resolvedDensity}
-              expanded={isOpen}
+              expanded={state.expanded}
+              controls={state.controls}
+              disabled={state.disabled}
             />
             {unreadCount > 0 ? (
               <span className="poodle-message-center__indicator" aria-hidden="true">
@@ -131,7 +133,7 @@ export function MessageCenter({
               </span>
             ) : null}
           </span>
-        }
+        )}
       >
         <section className="poodle-message-center" data-size={resolvedSize} data-density={resolvedDensity} aria-label={ariaLabel ?? title}>
           <header className="poodle-message-center__header">

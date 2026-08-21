@@ -49,6 +49,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 import { allComponents } from "../src/component-registry.ts";
+import { unionPropsBody } from "./contract-prop-drift.ts";
 
 const repoRoot = path.resolve(import.meta.dir, "../../../..");
 const contractsDir = path.join(repoRoot, "docs/contracts/components");
@@ -377,6 +378,7 @@ function tsProps(src: string): Record<string, string> {
     const m = src.match(/\}\s*:\s*\{([\s\S]*?)\n\s*\}\s*=\s*\$props\(\)/);
     if (m) body = m[1];
   }
+  if (!body) body = unionPropsBody(src);
   if (!body) return out;
   let depth = 0;
   let cur = "";

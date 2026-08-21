@@ -83,10 +83,24 @@ export interface PopoverPartProps {
   surfaceWidth: "content" | "trigger";
 }
 
+/**
+ * Framework-neutral trigger state the web adapters hand to the caller's real
+ * interactive control in interactive mode. `expanded` follows the open state,
+ * `controls` is the rendered surface id while open and `null` while closed
+ * (preserving the conditional `aria-controls` contract), and `disabled`
+ * mirrors the effective Popover disabled state.
+ */
+export type PopoverTriggerState = Readonly<{
+  expanded: boolean;
+  controls: string | null;
+  disabled: boolean;
+}>;
+
 export interface PopoverParts {
   root: PartAttrs;
   trigger: PartAttrs;
   surface: PartAttrs;
+  triggerState: PopoverTriggerState;
 }
 
 export function popoverParts(
@@ -125,6 +139,11 @@ export function popoverParts(
       role: "dialog",
       "aria-label": props.ariaLabel ?? undefined,
       tabindex: context.initialFocus === "content" ? 0 : -1,
+    },
+    triggerState: {
+      expanded: isOpen,
+      controls: isOpen ? props.surfaceId : null,
+      disabled: context.disabled,
     },
   };
 }
