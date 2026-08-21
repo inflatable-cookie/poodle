@@ -128,7 +128,7 @@ export { Field, type FieldProps, type FieldControlProps } from "./Field";
 export { FieldSet, type FieldSetProps } from "./FieldSet";
 export { PasswordRequirements, type PasswordRequirementsProps } from "./PasswordRequirements";
 export { Select, type SelectProps } from "./Select";
-export { Popover, type PopoverProps, type PopoverTriggerProps } from "./Popover";
+export { Popover, type PopoverProps } from "./Popover";
 export type { PopoverTriggerState } from "@inflatable-cookie/poodle-core";
 export { DataTable, type DataTableProps } from "./DataTable";
 export { DatePicker, type DatePickerProps } from "./DatePicker";

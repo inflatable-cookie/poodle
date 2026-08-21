@@ -1,7 +1,6 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/popover.css";
   import {
-    createInstanceId,
     getFocusableElements,
     layerContains,
     popoverParts,
@@ -87,7 +86,11 @@
   const triggerDefault = $derived(trigger as Snippet<[]> | undefined);
   const triggerWithState = $derived(trigger as Snippet<[PopoverTriggerState]> | undefined);
 
-  const popoverId = createInstanceId("popover");
+  // Svelte carries this identity from server output into hydration. A shared
+  // module counter cannot do that in a long-lived SSR process because server
+  // requests and client bundles advance independent counters.
+  const componentId = $props.id();
+  const popoverId = `poodle-popover-${componentId}`;
   let rootElement = $state<HTMLDivElement | null>(null);
   let triggerElement = $state<HTMLDivElement | null>(null);
   let surfaceElement = $state<HTMLDivElement | null>(null);

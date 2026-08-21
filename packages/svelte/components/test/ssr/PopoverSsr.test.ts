@@ -61,6 +61,20 @@ describe("Popover SSR — interactive trigger semantics (g15.041)", () => {
     expect(control).toContain(`aria-controls="${surfaceId}"`);
   });
 
+  it("reuses the framework identity across independent server renders", () => {
+    // A module-global counter advances between these calls and would make a
+    // later request impossible for a fresh client bundle to hydrate. Svelte's
+    // component identity is request-local and therefore produces the same
+    // relationship in each independently rendered document.
+    const first = render(Harness, { props: { triggerIsInteractive: true, defaultOpen: true } }).body;
+    const second = render(Harness, { props: { triggerIsInteractive: true, defaultOpen: true } }).body;
+
+    const firstId = idOf(openingTag(first, 'data-part="surface"'));
+    const secondId = idOf(openingTag(second, 'data-part="surface"'));
+    expect(secondId).toBe(firstId);
+    expect(openingTag(second, "poodle-button")).toContain(`aria-controls="${secondId}"`);
+  });
+
   it("disabled: the disabled state reaches the real control and the surface stays unmounted", () => {
     const { body } = render(Harness, { props: { triggerIsInteractive: true, disabled: true } });
 

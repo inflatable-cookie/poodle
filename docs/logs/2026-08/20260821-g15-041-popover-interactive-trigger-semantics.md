@@ -4,7 +4,7 @@ Date: 2026-08-21
 Card: `docs/roadmaps/g15/041-popover-interactive-trigger-semantics.md`
 Handoff: `docs/handoffs/20260821-151745-g15-041-popover-interactive-trigger-semantics.md`
 Parent: `docs/roadmaps/g15/032-review-composition-navigation-overlays.md`
-PR: pending (worker branch `g15-041-popover-interactive-trigger-semantics`)
+PR: #59 (`g15-041-popover-interactive-trigger-semantics`)
 
 ## Outcome
 
@@ -77,10 +77,10 @@ remains.
   requires `Snippet<[PopoverTriggerState]>`. React mirrors with
   `trigger?: ReactNode` vs `trigger: (state) => ReactNode`. Neither adapter
   clones children, walks the DOM, mutates attributes, or depends on an effect
-  for semantics. React's surface id moved to framework-native `useId()`
-  (hydration-safe); Svelte keeps `createInstanceId` — within one server render
-  the trigger's `controls` and the surface id agree, and no repository-wide
-  id change was needed. Focus restoration keeps the existing real-descendant
+  for semantics. React's surface id moved to framework-native `useId()` and
+  Svelte's to framework-native `$props.id()`; both carry the server identity
+  through hydration without a shared counter or post-mount repair. No
+  repository-wide id change was needed. Focus restoration keeps the existing real-descendant
   lookup, which is permitted for focus only.
 - Svelte `defaultOpen` seeding moved from `$effect.pre` to `$state(untrack(...))`:
   Svelte's server runtime strips effects, so effect-seeded initial state made
@@ -104,13 +104,15 @@ remains.
   repeated; outside-`mousedown` and Escape close with focus returned to the
   real control; controlled and uncontrolled; disabled reaches the real control
   and blocks open; default-mode regression (wrapper role/tabindex/ARIA +
-  Enter). Package suite: 169 files / 1150 tests pass.
+  Enter); real server markup hydrates without changing the advertised control
+  or surface id. Package suite: 169 files / 1151 tests pass.
 - Svelte SSR (new bounded `svelte-components-ssr` vitest project,
   `svelte/server` `render`): closed interactive output has
   `aria-expanded="false"` and no `aria-controls` on the real control;
   `defaultOpen` output has `aria-expanded="true"` with `aria-controls`
   string-equal to the rendered surface id in the same HTML — no post-mount
-  repair; disabled and both default-mode states covered. 5 tests pass.
+  repair; independent server renders reuse the framework identity instead of
+  advancing shared process state; disabled and both default-mode states covered.
 - React (vitest): same client matrix plus `renderToString` server evidence
   and a `hydrateRoot` check that the server-advertised `aria-controls` id
   survives hydration unchanged with zero console errors. Package suite:
@@ -131,8 +133,9 @@ remains.
 `specimen-catalogue-audit.md` revision 14: Popover returns to `A / A / A`
 with disposition `keep`. Totals recounted mechanically: Svelte A 89 / C 44;
 React A 102 / C 47; worst-of-three A 66 / C 52; `keep` 56;
-`contract/runtime-blocker` 0. Operator live sign-off on the paired Popover
-routes is pending and not claimed here.
+`contract/runtime-blocker` 0. The operator authorized the reviewed fixes and
+merge on 2026-08-21 without requesting another paired live-route pass; this is
+recorded as an explicit gate disposition, not as new visual evidence.
 
 ## Changed routes for operator review
 
@@ -140,8 +143,8 @@ routes is pending and not claimed here.
   now compose real Poodle Button triggers driven by the state payload.
 - React preview: `http://127.0.0.1:4181/#components/popover` — the paired page.
 
-Operator live sign-off on these two routes is pending and is a precondition
-for merging and for `g15.032` closeout.
+The operator authorized merge on 2026-08-21 after the orchestrator review and
+final identity/API fixes. No separate renewed live-route pass is claimed.
 
 ## Validation
 
@@ -149,7 +152,7 @@ Headless only. No `*-windowed`, `test:native-visual`, Jetstream,
 visual-conformance, or release selector ran.
 
 - `effigy test:core` — 767 passed
-- `effigy test:components` — 355 files / 3047 passed (includes the SSR project)
+- `effigy test:components` — 355 files / 3049 passed (includes the SSR project)
 - `effigy check:svelte` — 0 errors
 - `effigy react:build` — passed
 - `effigy ci:rust` — exit 0

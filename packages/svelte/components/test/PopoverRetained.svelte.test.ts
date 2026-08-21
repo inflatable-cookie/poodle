@@ -1,7 +1,16 @@
 import { fireEvent, render, screen } from "@testing-library/svelte";
+import { hydrate, tick, unmount } from "svelte";
 import { describe, expect, it } from "vitest";
 
 import Harness from "./PopoverRetainedHarness.svelte";
+import SsrHarness from "./ssr/PopoverSsrHarness.svelte";
+
+// Server output from PopoverSsrHarness with an initially open interactive
+// trigger. Keeping the real hydration markers here lets the client suite prove
+// the server-advertised controls relationship survives hydration. The paired
+// server suite separately renders this shape and verifies request-local ids.
+const OPEN_INTERACTIVE_SSR_HTML =
+  '<!--[--><div data-poodle-theme-root=""><!--[0--><!--$s1--><div data-scope="popover" data-part="root" data-state="open" data-block="false" data-placement="bottom-start" data-surface-width="content" class="poodle-popover"><div data-part="trigger" data-state="open" data-block="false" data-disabled="false" class="poodle-popover__trigger"><!--[0--><button type="button" class="poodle-button" data-variant="secondary" data-size="md" data-density="default" data-loading="false" aria-expanded="true" aria-controls="poodle-popover-s1"><!--[-1--><!--]--> <!--[-1--><!--]--> <!--[0--><span class="poodle-button__label"><!---->Open<!----></span><!--]--> <!--[-1--><!--]--> <!--[-1--><!--]--></button><!----><!--]--></div> <!--[0--><div data-part="surface" data-state="open" data-placement="bottom-start" data-surface-width="content" id="poodle-popover-s1" role="dialog" tabindex="-1" class="poodle-popover__surface" style=""><button type="button" data-testid="surface-action">Surface action</button><!----></div><!--]--></div><!--]--></div><!--]-->';
 
 /**
  * Two shipped Popover defects, retained from the rejected g14 conformance
@@ -165,6 +174,26 @@ describe("Popover — interactive trigger semantics (g15.041)", () => {
 
     await fireEvent.click(control);
     expect(screen.queryByTestId("surface-action")).toBeNull();
+  });
+
+  it("hydrates the server-advertised controls relationship without changing its id", async () => {
+    const target = document.createElement("div");
+    target.innerHTML = OPEN_INTERACTIVE_SSR_HTML;
+    document.body.appendChild(target);
+
+    const component = hydrate(SsrHarness, {
+      target,
+      props: { triggerIsInteractive: true, defaultOpen: true },
+    });
+    await tick();
+
+    const control = target.querySelector<HTMLElement>(".poodle-button");
+    const surface = screen.getByTestId("surface-action").closest<HTMLElement>('[data-part="surface"]');
+    expect(control?.getAttribute("aria-controls")).toBe("poodle-popover-s1");
+    expect(surface?.id).toBe("poodle-popover-s1");
+
+    await unmount(component);
+    target.remove();
   });
 });
 

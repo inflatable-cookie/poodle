@@ -52,7 +52,7 @@ interface PopoverCommonProps {
  * three `PopoverTriggerState` fields (`expanded` → `aria-expanded`,
  * `controls` → `aria-controls`, `disabled`) to the real control inside.
  */
-export type PopoverTriggerProps =
+type PopoverTriggerProps =
   | { triggerIsInteractive?: false; trigger?: ReactNode }
   | { triggerIsInteractive: true; trigger: (state: PopoverTriggerState) => ReactNode };
 
