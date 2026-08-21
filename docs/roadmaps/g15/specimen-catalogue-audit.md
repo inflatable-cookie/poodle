@@ -4,8 +4,12 @@ Status: **partial** — mechanical screening baseline plus live measurement on
 all three runtimes. Human teaching judgment has been applied to the three
 pilots and to 49 screen-clear pages (`g15.028`–`g15.032`); 7 screen-clear
 pages (`g15.033`) and the remaining defect-led rows still await it.
-Date: 2026-08-21 (revision 12 — `g15.032` navigation/overlays review recorded
-ten human verdicts and repaired the Popover Sv/Rc trigger composition;
+Date: 2026-08-21 (revision 13 — the `g15.032` Popover web trigger
+composition was recorded as a `contract/runtime-blocker` at C/C/A after
+orchestrator review showed no supported web composition satisfies the
+trigger contract; the specimen-level repair was reverted;
+revision 12 — `g15.032` navigation/overlays review recorded
+ten human verdicts;
 revision 11 — `g15.040` closed the GPUI `ResizeHandle`
 keyboard/focus/value gap, returning the row to `A / A / A` and `keep`;
 revision 10 — `g15.030` foundation-layout review recorded that gap as
@@ -134,24 +138,25 @@ Dispositions used in the rows: `keep`, `pilot-fix`, `curation-tranche`,
 ## Totals
 
 Mechanical recount of the 175 inventory rows at this revision, after
-`g15.040` closed the ResizeHandle GPUI keyboard/focus blocker. These numbers
+`g15.032` recorded the Popover web trigger composition as a
+`contract/runtime-blocker`. These numbers
 are the rows, not a pre-pilot or pre-curation baseline.
 
 | Runtime | A | B | C | D | n/a |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Svelte (live) | 89 | 33 | 44 | 9 | — |
-| React (live) | 102 | 26 | 47 | 0 | — |
+| Svelte (live) | 88 | 33 | 45 | 9 | — |
+| React (live) | 101 | 26 | 48 | 0 | — |
 | GPUI (headless render + structural) | 103 | 65 | 6 | 0 | 1 |
-| **Worst of the three** | **66** | **48** | **52** | **9** | — |
+| **Worst of the three** | **65** | **48** | **53** | **9** | — |
 
 | Disposition | Count |
 | --- | ---: |
-| `keep` | 56 |
+| `keep` | 55 |
 | `pilot-fix` | 3 |
 | `curation-tranche` | 108 |
 | `curation-complete` | 6 |
 | `verified-no-op` | 2 |
-| `contract/runtime-blocker` | 0 |
+| `contract/runtime-blocker` | 1 |
 
 175 of 175 pages were measured live in both web runtimes. The `g15.028`
 contract/runtime blocker on GPUI `SegmentedControl` is closed by `g15.038`.
@@ -165,10 +170,19 @@ with a visible focus treatment, routes axis Arrow/Home/End through the existing
 resize callback at the contract's deltas, and declares the value range on the
 node (`docs/contracts/components/resize-handle.md` §5–6, §10). Mounted headless
 GPUI input drives the focused key route and reads the moved pane and the
-declared current value. **No row carries `contract/runtime-blocker` at this
-revision.** GPUI 0.2.2 still exposes no platform accessibility attributes
-(contract 003), so the declarations reach the renderer-neutral node and stop
-there; nothing here claims platform AT projection.
+declared current value. GPUI 0.2.2 still exposes no platform accessibility
+attributes (contract 003), so the declarations reach the renderer-neutral
+node and stop there; nothing here claims platform AT projection.
+
+**One row carries `contract/runtime-blocker` at this revision.** The `g15.032`
+review found that Popover's two web compositions cannot both avoid a nested
+button role and keep the contract's `aria-expanded`/`aria-controls` trigger
+relationship: the default wrapper becomes a second `role="button"` around an
+interactive child and captures focus return, while `triggerIsInteractive`
+strips the relationship attributes with no API to transfer them to the child
+(`docs/contracts/components/popover.md` §5–6). Sv/Rc grade C; GPUI grades A
+because native composes its trigger directly. A dedicated Popover
+API/semantics repair is routed outside the specimen lane.
 
 `MeterSurface` is the single `n/a` on GPUI — web-only by fixed decision
 (spec 068), with no native counterpart. It is still graded on the two runtimes
@@ -625,7 +639,7 @@ and axis-navigation result; they carry no interaction or narrow-layout signal.
 | `HoverCard` | A | A | A | keep | human verdict (`g15.032`): keep — hover and keyboard focus both open after the contract's intent delays and Escape closes; the recorded click no-op is the wrong gesture and proves nothing; Sv/Rc paired; Gp wires real hover-intent delays |
 | `Menu` | B | A | A | curation-tranche | **Sv:** hand-rolled captions instead of SpecimenGroup |
 | `Menubar` | A | A | A | keep | human verdict (`g15.032`): keep — File/Edit/View bar with live action readout, hover-to-switch between open menus, and item-focused Escape focus return verified; Sv/Rc paired; Gp adds live checkbox/radio state and a disabled trigger |
-| `Popover` | A | A | A | keep | human verdict (`g15.032`): keep after Sv/Rc specimen repair — both examples anchored the popover to a real Button inside the default trigger wrapper, nesting a second button role and returning Escape focus to the inert wrapper; now composed with `triggerIsInteractive` per the contract so the wrapper only observes and focus returns to the inner button; Gp unchanged (native composes its trigger directly and adds placement, surface-width, and disabled evidence) |
+| `Popover` | C | C | A | contract/runtime-blocker | human verdict (`g15.032`): **Sv/Rc:** both examples anchor the popover to a real Button. In the default composition the wrapper adds its own `role="button"`/`tabindex=0` around the interactive child and Escape focus returns to the inert wrapper; `triggerIsInteractive` removes the wrapper role but drops the `aria-expanded`/`aria-controls` trigger relationship the contract requires (`docs/contracts/components/popover.md` §5 part attributes, §6 semantics) — no supported web composition satisfies the trigger contract today. Routed component/contract blocker; API/semantics repair out of scope for this card. **Gp:** keep — native composes its trigger directly; placement, surface-width, and disabled evidence live |
 | `Tooltip` | C | C | A | curation-tranche | **Sv:** note — 5 clicks changed nothing: a hover surface; a click is the wrong gesture; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop · **Rc:** note — 5 clicks changed nothing: a hover surface; a click is the wrong gesture; Sizes tab shown for a component with no `size` prop; Densities tab shown for a component with no `density` prop |
 
 ### Forms & validation — Composition (9)
