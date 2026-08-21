@@ -1,6 +1,7 @@
 # g15.032 — Review Screen-Clear Navigation and Overlays
 
-Status: **ready** — `g15.031` complete and operator-approved in PR #57
+Status: **blocked** — review evidence landed in PR #58; Popover's routed web
+trigger API/semantics defect must be repaired before this card closes
 Parent: `027-screen-clear-human-review.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Depends on: `g15.026` (live native evidence), `g15.031` (serial predecessor)
@@ -63,8 +64,8 @@ release selectors.
 
 ## Continuation
 
-Finish one ten-page review/repair PR and stop for orchestrator review plus live
-operator sign-off on every changed web route. Do not start `g15.033`, visual
-conformance, or release certification. A component, contract, public API,
-shared runtime, or native semantic defect is a routed stop condition rather
-than hidden specimen work.
+PR #58 completed the ten-page review with nine keeps and one routed blocker;
+the attempted specimen-level Popover repair was reverted, so no changed route
+awaits operator sign-off. Compile and land a dedicated Popover trigger
+API/semantics repair, then return here to close the blocker and re-grade the
+row. Do not start `g15.033`, visual conformance, or release certification first.

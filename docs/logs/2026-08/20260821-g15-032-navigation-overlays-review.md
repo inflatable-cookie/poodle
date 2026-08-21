@@ -5,6 +5,7 @@ Card: `docs/roadmaps/g15/032-review-composition-navigation-overlays.md`
 Handoff: `docs/handoffs/20260821-111649-g15-032-review-composition-navigation-overlays.md`
 Parent: `docs/roadmaps/g15/027-screen-clear-human-review.md`
 PR: https://github.com/inflatable-cookie/poodle/pull/58
+Merge: `8021ce93`
 
 ## Outcome
 
