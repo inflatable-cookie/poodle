@@ -31,34 +31,6 @@
       ]
     },
     {
-      "id": "underlay-bridge-consumer",
-      "label": "Underlay bridge-mediated reference app",
-      "format": "reference-app-shape",
-      "status": "proof-backed",
-      "audience": "teams preserving an existing app-local API while adopting Poodle internally",
-      "packageEntryPoints": [
-        "@inflatable-cookie/poodle-bridge-underlay"
-      ],
-      "exampleSectionIds": [
-        "catalog-hub",
-        "browse-suite",
-        "notification-suite"
-      ],
-      "onboardingSteps": [
-        "Adopt Poodle only behind bridge-owned aliases and wrappers.",
-        "Keep app imports Poodle-agnostic and route all compatibility translation through the bridge.",
-        "Treat wrapper translation, host integration, and rollout pacing as downstream-owned concerns."
-      ],
-      "evidencePaths": [
-        "packages/bridges/underlay/README.md",
-        "packages/bridges/underlay/ts/zero-leak-proof.ts",
-        "docs/specs/040-underlay-bridge-zero-leak-adoption-proof-baseline.md"
-      ],
-      "blockers": [
-        "Reference guidance exists, but real downstream wrapper and accessibility rollout evidence remains outside this repo."
-      ]
-    },
-    {
       "id": "workstation-foundation-consumer",
       "label": "Workstation-oriented reference app",
       "format": "reference-app-shape",
@@ -146,19 +118,6 @@
       "nonGoals": [
         "Do not bypass contracts with deep imports or ad hoc wrappers that redefine canonical meaning.",
         "Do not import workstation shells unless the app actually needs them."
-      ]
-    },
-    {
-      "id": "bridge-adoption",
-      "label": "Bridge-mediated adoption",
-      "startPaths": [
-        "packages/bridges/underlay/README.md",
-        "docs/specs/040-underlay-bridge-zero-leak-adoption-proof-baseline.md"
-      ],
-      "primaryReferenceShapeId": "underlay-bridge-consumer",
-      "nonGoals": [
-        "Do not expose Poodle package names directly in downstream app imports.",
-        "Do not widen bridge aliases without concrete downstream pressure."
       ]
     },
     {

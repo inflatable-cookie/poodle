@@ -79,7 +79,8 @@ destination.
 
 `poodle-svelte` and `poodle-react` are unchanged in name and surface. The
 `0.0.0` internals are untouched: `packages/tokens` (the generator), both
-previews, `install-smoke`, and `bridges/underlay`.
+previews, and `install-smoke`. `bridges/underlay` was retired outright by
+Card 022 rather than consolidated.
 
 The token generator now writes to `packages/core/src/tokens/generated`. GPUI
 reads `packages/tokens/artifacts/` directly and is unaffected.

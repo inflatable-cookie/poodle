@@ -23,10 +23,6 @@
         "vitest": "^4.1.10",
       },
     },
-    "packages/bridges/underlay": {
-      "name": "@inflatable-cookie/poodle-bridge-underlay",
-      "version": "0.0.0",
-    },
     "packages/core": {
       "name": "@inflatable-cookie/poodle-core",
       "version": "0.1.0",
@@ -118,8 +114,6 @@
     "@babel/helper-validator-identifier": ["@babel/helper-validator-identifier@7.29.7", "", {}, "sha512-qehxGkRj55h/ff8EMaJ+cYhyaKlHIxqYDn682wQD7RNp9UujOQsHog2uS0r2vzr4pW+sXf90NeeayjcNaX3fFg=="],
 
     "@babel/runtime": ["@babel/runtime@7.29.7", "", {}, "sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw=="],
-
-    "@inflatable-cookie/poodle-bridge-underlay": ["@inflatable-cookie/poodle-bridge-underlay@workspace:packages/bridges/underlay"],
 
     "@inflatable-cookie/poodle-core": ["@inflatable-cookie/poodle-core@workspace:packages/core"],
 

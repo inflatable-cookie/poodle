@@ -276,7 +276,7 @@ per specimen — a scene-IR subsume target.
   which pins this repo to a sibling checkout and forces `local-only` gates.
 - Web packages are a bun workspace: `workspaces` in root `package.json`
   (`core`, `tokens`, `svelte/components`, `svelte/preview`,
-  `react/components`, `react/preview`, `bridges/underlay`).
+  `react/components`, `react/preview`).
 
 ### 7.2 Publication metadata (all `publish = false`, but public-intent varies)
 

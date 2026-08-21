@@ -99,7 +99,6 @@ packages/render/            shared Rust component implementation
 packages/gpui/              GPUI adapter, node backend, and preview
 packages/jetstream/         Jetstream adapter and preview
 packages/tokens/            canonical token schema and generated artifacts
-packages/bridges/underlay/  internal Underlay bridge
 docs/contracts/components/  component contracts
 docs/guides/                operator and integration guides
 ```

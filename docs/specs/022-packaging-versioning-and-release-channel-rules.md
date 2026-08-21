@@ -77,7 +77,6 @@ The current release posture is:
 ### Internal Packages
 
 - `@inflatable-cookie/poodle-tokens`
-- `@inflatable-cookie/poodle-bridge-underlay`
 - `@inflatable-cookie/poodle-svelte-preview`
 - `@inflatable-cookie/poodle-react-preview`
 - `@inflatable-cookie/poodle-install-smoke`
@@ -111,7 +110,6 @@ Each release-capable tranche should document:
 - `packages/svelte/components/package.json`
 - `packages/react/components/package.json`
 - `packages/svelte/preview/package.json`
-- `packages/bridges/underlay/package.json`
 - `packages/contracts/*/Cargo.toml`
 - `packages/render/Cargo.toml`
 - `packages/gpui/*/Cargo.toml`

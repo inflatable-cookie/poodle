@@ -9,7 +9,6 @@
     "packages/core",
     "packages/tokens",
     "packages/svelte/components",
-    "packages/bridges/underlay",
     "packages/svelte/preview",
     "packages/react/components",
     "packages/react/preview"

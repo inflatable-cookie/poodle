@@ -197,10 +197,10 @@ Applications own routing, data fetching, persistence, authorization, product
 language, and service orchestration. Poodle may expose state and events needed
 to implement those workflows, but it does not own them.
 
-Underlay-facing integration is isolated in `packages/bridges/underlay/` and in
-Underlay-owned adapters. Underlay application code imports Underlay APIs; it
-does not acquire a direct dependency on Poodle. This allows either side to
-change without leaking design-system implementation details into applications.
+Consumer-facing integration is owned by the consumer. Underlay imports Poodle's
+published packages directly and keeps any translation in its own source. Poodle
+carries no directory named after a consumer product; see
+`../roadmaps/g12/022-underlay-bridge-extraction.md`.
 
 ## Extension Rules
 

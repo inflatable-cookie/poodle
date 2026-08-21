@@ -133,7 +133,7 @@ They must not require one storage backend or one sync mechanism.
 Persistence mechanics remain:
 
 - app-owned
-- Underlay-bridge-owned
+- consumer-owned
 - or future orchestration-layer work
 
 depending on the milestone.

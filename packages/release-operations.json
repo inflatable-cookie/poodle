@@ -111,15 +111,6 @@
       "removalGate": "owner-directed-with-doc-update"
     },
     {
-      "name": "@inflatable-cookie/poodle-bridge-underlay",
-      "channel": "internal",
-      "publicIntent": false,
-      "changeControl": "proof-backed",
-      "requiresReleaseNotes": false,
-      "requiresDeprecationRecord": false,
-      "removalGate": "bridge-proof-preserving"
-    },
-    {
       "name": "@inflatable-cookie/poodle-svelte-preview",
       "channel": "internal",
       "publicIntent": false,

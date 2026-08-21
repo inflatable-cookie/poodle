@@ -48,14 +48,6 @@
       "channel": "internal"
     },
     {
-      "name": "@inflatable-cookie/poodle-bridge-underlay",
-      "path": "packages/bridges/underlay",
-      "kind": "bridge",
-      "language": "typescript",
-      "publicIntent": false,
-      "channel": "internal"
-    },
-    {
       "name": "@inflatable-cookie/poodle-svelte-preview",
       "path": "packages/svelte/preview",
       "kind": "tooling",

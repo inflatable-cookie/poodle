@@ -1,7 +1,15 @@
 # 040 Underlay Bridge Zero-Leak Adoption Proof Baseline
 
-Status: active
-Updated: 2026-03-12
+Status: superseded
+Updated: 2026-08-21
+Superseded by: `../roadmaps/g12/022-underlay-bridge-extraction.md`
+
+> **Superseded.** `packages/bridges/underlay` has been removed from Poodle. A
+> design system must not carry a package named after one of its consumers, and
+> the bridge's only real caller was a single Nightfire import in Underlay.
+> Underlay now consumes Poodle's published packages directly and owns any
+> translation in its own source. Retained for the reasoning; not current
+> guidance.
 Depends on: `004-underlay-bridge-and-adapter-ownership.md`, `008-parity-evidence-documented-delta-and-downstream-extension-rules.md`, `039-extension-sdk-composition-guidance-and-starter-package-baseline.md`
 
 ## Purpose

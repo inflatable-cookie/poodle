@@ -1,7 +1,15 @@
 # 007 Underlay Bridge And Wrapper Preservation Rules
 
-Status: active
-Updated: 2026-03-11
+Status: superseded
+Updated: 2026-08-21
+Superseded by: `../roadmaps/g12/022-underlay-bridge-extraction.md`
+
+> **Superseded.** `packages/bridges/underlay` has been removed from Poodle. A
+> design system must not carry a package named after one of its consumers, and
+> the bridge's only real caller was a single Nightfire import in Underlay.
+> Underlay now consumes Poodle's published packages directly and owns any
+> translation in its own source. Retained for the reasoning; not current
+> guidance.
 Depends on: `001-token-source-and-artifact-contract.md`, `002-component-contract-template-and-parity-rules.md`, `003-accessibility-and-assistive-technology-baseline.md`, `005-product-composite-composition-and-information-architecture-rules.md`, `006-workstation-shell-and-panel-system-rules.md`
 
 ## Purpose

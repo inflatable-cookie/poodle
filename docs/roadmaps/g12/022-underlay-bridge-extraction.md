@@ -1,6 +1,7 @@
 # 022 — Underlay Bridge Extraction
 
-Status: ready
+Status: completed
+Updated: 2026-08-21
 Roadmap: g12
 Governing refs: `architecture/002-token-system-and-package-layout.md`; Card 020;
 Card 021
@@ -86,3 +87,33 @@ something that is in the wrong repository, not something that needs publishing.
 
 The alternative was to publish it as a fourth Poodle package, which would have
 made the layering error permanent and public.
+
+## Outcome 2026-08-21
+
+Done, with one deviation from step 1: nothing was carried across verbatim.
+
+Only `nightfire-block-editor` had a caller. It was reimplemented in Underlay as
+`ts/src/nightfire/editor/poodle-block-editor.ts` — 79 lines against the original
+180 — typed against Poodle's exported `BlockTypeDefinition` and `BlockTypeGroup`
+instead of hand-copied structural mirrors, and dropping `pickerMode` and
+`nightfireTypePickerNeedsSlotOverride`, which had no reader.
+
+The other four modules and the stylesheet were **not** moved, because step 5's
+check applied to all of them:
+
+- `token-map`, `theme-map`, `component-wrappers` and `zero-leak-proof` were
+  imported by nothing in any repository. `validateUnderlayZeroLeakProof()` was
+  exported and never called. The "proof" derived its surfaces from a static list
+  in the same package and hard-coded `appImportsPoodleDirectly: false` as a type
+  literal — while `NightfireFieldBlockShell` had been importing `BlockEditor`
+  straight from `@inflatable-cookie/poodle-svelte` all along.
+- `poodle-to-underlay.css` was never imported, and its `--underlay-*` aliases
+  are already defined canonically in Underlay's own `ts/src/styles/tokens.css`.
+  Its `@import`s also used relative paths into `packages/tokens/artifacts/`, so
+  it could not have moved verbatim.
+
+Shipped in Underlay v0.9.1. Specs 007 and 040 and architecture 004 are marked
+superseded rather than deleted; `g03/007` and the 2026-03 logs are left as
+history. `g03-closeout.json` loses only its one pointer to the deleted file —
+`docs:lint` verifies closeout evidence paths exist — and keeps the other four,
+including spec 040, which is why that spec was superseded rather than removed.

@@ -36,37 +36,6 @@
       ]
     },
     {
-      "id": "underlay-bridge-adoption",
-      "label": "Underlay bridge-mediated adoption",
-      "consumerShape": "bridge-owned wrapper adoption inside an existing downstream app stack",
-      "runtime": "web",
-      "adoptionModel": "bridge-mediated",
-      "status": "proof-backed",
-      "coveredPackages": [
-        "@inflatable-cookie/poodle-bridge-underlay",
-        "@inflatable-cookie/poodle-core",
-        "@inflatable-cookie/poodle-svelte"
-      ],
-      "evidenceArtifacts": [
-        "packages/bridges/underlay/ts/zero-leak-proof.ts",
-        "packages/bridges/underlay/README.md",
-        "docs/specs/040-underlay-bridge-zero-leak-adoption-proof-baseline.md"
-      ],
-      "regressionClasses": [
-        "downstream-boundaries-and-ownership",
-        "tokens-and-themes",
-        "accessibility-and-keyboard",
-        "release-metadata-and-change-control"
-      ],
-      "requiredChecks": [
-        "bun run docs:lint",
-        "bun run docs:build"
-      ],
-      "blockers": [
-        "Real downstream wrapper translation and assistive-technology evidence still belong to Underlay rollout work."
-      ]
-    },
-    {
       "id": "loophole-foundation-adoption",
       "label": "Loophole foundation adoption",
       "consumerShape": "direct downstream Svelte adoption on top of Poodle primitives and composites",
@@ -183,9 +152,8 @@
     {
       "id": "downstream-boundaries-and-ownership",
       "label": "Downstream boundaries and ownership",
-      "scope": "bridge boundaries, extension ownership, and app-specific surface isolation",
+      "scope": "extension ownership and app-specific surface isolation",
       "primaryEvidence": [
-        "packages/bridges/underlay/ts/zero-leak-proof.ts",
         "docs/specs/039-extension-sdk-composition-guidance-and-starter-package-baseline.md",
         "docs/specs/041-loophole-foundation-adoption-and-daw-extension-boundary.md"
       ]
@@ -214,7 +182,7 @@
   ],
   "ecosystemReadinessGate": [
     "Preview docs harness remains buildable and machine-checked.",
-    "Underlay bridge and Loophole adoption proofs remain explicit and internally coherent.",
+    "Loophole adoption proofs remain explicit and internally coherent.",
     "GPUI validation remains honest about matrix-only versus runnable evidence.",
     "Accessibility, release operations, and package-surface checks stay aligned with the acceptance suites they support."
   ]

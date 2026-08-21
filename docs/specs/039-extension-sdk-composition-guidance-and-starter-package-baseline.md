@@ -36,7 +36,7 @@ The current extension-facing surface is:
 - `@inflatable-cookie/poodle-core/tokens`
 - `@inflatable-cookie/poodle-svelte`
 - `@inflatable-cookie/poodle-svelte-workstation`
-- bridge-owned adapter packages such as `packages/bridges/underlay`
+- consumer-owned adapter packages, which live in the consumer's repository
 - contract docs under `docs/contracts/`
 - normative specs under `docs/specs/`
 
@@ -177,4 +177,3 @@ The current `g03.006` seed baseline is:
 - `docs/specs/008-parity-evidence-documented-delta-and-downstream-extension-rules.md`
 - `docs/specs/026-appearance-recipes-and-downstream-override-strategy.md`
 - `docs/roadmaps/g03/006-extension-sdk-composition-guidance-and-starter-packages.md`
-- `packages/bridges/underlay/README.md`

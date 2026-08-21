@@ -169,12 +169,12 @@ packages/contracts/tokens/  generated Rust token consumer
 packages/render/            shared Rust component renderer
 packages/gpui/              GPUI adapter and node backend
 packages/jetstream/         Jetstream adapter
-packages/bridges/underlay/  internal host token bridge
 ```
 
-Downstream bridges may translate Poodle tokens into host-owned names. They do
-not become token authorities, and application code should not need to know
-which design system produced the host values.
+Downstream consumers may translate Poodle tokens into host-owned names, in
+their own repositories. Those aliases do not become token authorities, and
+application code should not need to know which design system produced the host
+values.
 
 ## Change Rules
 

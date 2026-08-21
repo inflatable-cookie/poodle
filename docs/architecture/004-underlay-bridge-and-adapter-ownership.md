@@ -1,7 +1,15 @@
 # 004 Underlay Bridge and Adapter Ownership
 
-Status: active
-Updated: 2026-08-09
+Status: superseded
+Updated: 2026-08-21
+Superseded by: `../roadmaps/g12/022-underlay-bridge-extraction.md`
+
+> **Superseded.** `packages/bridges/underlay` has been removed from Poodle. A
+> design system must not carry a package named after one of its consumers, and
+> the bridge's only real caller was a single Nightfire import in Underlay.
+> Underlay now consumes Poodle's published packages directly and owns any
+> translation in its own source. Retained for the reasoning; not current
+> guidance.
 Depends on: [001 Poodle System Shape](001-poodle-system-shape.md),
 [002 Token System and Package Layout](002-token-system-and-package-layout.md)
 

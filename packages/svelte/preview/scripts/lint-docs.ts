@@ -1022,7 +1022,6 @@ function validateEcosystemAcceptance(errors: string[]): { suiteCount: number; re
   };
   const requiredSuiteIds = [
     "preview-docs-harness",
-    "underlay-bridge-adoption",
     "loophole-foundation-adoption",
     "gpui-target-matrix",
   ];
@@ -1191,14 +1190,12 @@ function validateReferenceApps(errors: string[]): { shapeCount: number; laneCoun
   };
   const requiredReferenceShapeIds = [
     "direct-svelte-consumer",
-    "underlay-bridge-consumer",
     "workstation-foundation-consumer",
     "public-example-surface",
   ];
   const requiredOnboardingLaneIds = [
     "evaluate",
     "direct-adoption",
-    "bridge-adoption",
     "workstation-adoption",
   ];
   const shapeIds = referenceApps.referenceShapes.map((entry) => entry.id);
