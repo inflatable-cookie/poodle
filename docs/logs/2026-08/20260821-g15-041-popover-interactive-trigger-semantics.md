@@ -161,5 +161,8 @@ visual-conformance, or release selector ran.
 - `effigy test:web-pack-install` — passed (packs, installs, runs fixture suite)
 - `effigy catalogue:check` — passed
 - `effigy docs:check` — passed
-- `effigy qa` — passed (exit 0; tree guard clean on the committed tree)
+- `effigy qa` — worker branch passed before orchestrator review fixes. Two
+  final clean-tree reruns passed every preceding component, package, type, and
+  docs step, then hit the recorded `gate-tree-guard --compare` missing-snapshot
+  infrastructure fault; focused final gates and CI carry the final-SHA evidence.
 - `git diff --check origin/main...HEAD` — clean
