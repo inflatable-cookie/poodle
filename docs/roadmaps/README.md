@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-20
+Updated: 2026-08-21
 
 Roadmaps record Poodle's executable milestone work. `g15` is the active
 v0.2.0 release-baseline generation.
@@ -42,8 +42,9 @@ v0.2.0 release-baseline generation.
   completed `g15.029`; the operator approved its changed DurationInput pages.
   PR #54 completed routed `g15.039`, closing DateTimeZonePicker's paired-web
   nested-layer pointer blocker. PR #55 completed `g15.030`; its ResizeHandle
-  review returned the shared native focus/keyboard/value blocker now routed as
-  ready `g15.040` before the serial review lane resumes at `g15.031`.
+  review returned the shared native focus/keyboard/value blocker. PR #56
+  completed routed `g15.040` with stable caller-owned native focus identity
+  and unblocked ready `g15.031`.
   `g15.013` remains the final gate after the
   specimen program and `g15.012`.
   Jetstream remains deferred.
@@ -72,9 +73,9 @@ v0.2.0 release-baseline generation.
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
-  `g15.014`–`g15.017`, `g15.019`–`g15.030`, and `g15.034`–`g15.039` complete,
-  `g15.011` partial with three later review children and ready routed
-  `g15.040`, `g15.013` final
+  `g15.014`–`g15.017`, `g15.019`–`g15.026`, `g15.028`–`g15.030`, and
+  `g15.034`–`g15.040` complete; `g15.011` partial with ready `g15.031` and two
+  later review children; `g15.013` final
 
 ## Rules
 

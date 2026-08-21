@@ -1,6 +1,6 @@
 # g15.031 — Review Screen-Clear Foundation Content and Status
 
-Status: **planned** — orchestrator review required before dispatch
+Status: **ready** — `g15.026` and routed blocker `g15.040` complete
 Parent: `027-screen-clear-human-review.md` (method, acceptance, stop
 conditions — this card does not restate them)
 Depends on: `g15.026` (live native evidence)

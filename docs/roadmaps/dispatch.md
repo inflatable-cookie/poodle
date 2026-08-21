@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Poodle orchestrator
-Updated: 2026-08-20
+Updated: 2026-08-21
 
 The orchestrator is the only writer. Workers write their scoped deliverables,
 batch log, and papercuts; they do not edit this ledger or roadmap/card status.
@@ -22,7 +22,7 @@ worktree. Paired Jetstream integration is explicit under `ci:jetstream` and
 
 | Batch | Card | Branch | Model | Status | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| `g15-r040-resize-handle-native-semantics` | `g15/040-resize-handle-native-semantics.md` | `t3code/g15-040-resize-handle-native-semantics` | frontier coding model, high reasoning | ready-to-launch | Handoff `20260820-230943-g15-040-resize-handle-native-semantics.md` published from pushed planning base `763ff922`. One serial shared-native primitive repair: focus, axis keyboard deltas, and renderer-neutral value range for ResizeHandle, with mounted headless GPUI evidence. `g15.031` remains paused; web, platform-AT claims, Jetstream, visual conformance, release, and unrelated primitive work stay out of scope. |
+| `g15-r040-resize-handle-native-semantics` | `g15/040-resize-handle-native-semantics.md` | `t3code/resize-handle-native-semantics` | frontier coding model, high reasoning | merged | PR #56 accepted at `a401ed06`; merge `8954658a`. Required caller-owned native instance scopes replaced the rejected semantic-derived focus key; ResizeHandle now carries stable `runtime_id`, keyboard/value semantics, and mounted two-SplitView identity evidence. Focused Rust/GPUI, docs, diff, Jetstream adapter compile, audit recount, and GitHub `active-cohort` passed. The PR description was corrected before approval. `g15.031` is unblocked. |
 | `g15-r030-review-foundation-layout` | `g15/030-review-foundation-layout.md` | `t3code/g15-030-review-foundation-layout` | capable coding model, medium reasoning | merged | PR #55 accepted at `37915cba`; merge `120a0062`. All nine pages received human verdicts; eight stayed unchanged and ResizeHandle gained live paired-web pane resizing plus GPUI drag state. Review repaired invalid web ARIA ranges and honestly routed the native focus/keyboard/value gap to `g15.040`. Focused evidence, docs, GitHub `active-cohort`, and diff gates passed; the operator waived the final live web checkpoint when directing merge. |
 | `g15-r039-date-time-zone-picker-nested-layer` | `g15/039-date-time-zone-picker-nested-layer.md` | `t3code/date-time-zone-picker-layer` | capable coding model, medium reasoning | merged | PR #54 accepted at `b2d45a80`; merge `cb3d7ede`. Paired web now uses explicit host-aware dismiss ancestry, with real `mousedown`→`click`, one-gesture outside dismissal, and nested Escape regressions. Full component, Svelte, React, catalogue, docs, and range-diff gates passed; the operator authorised merge after the paired live routes were opened. No public API, specimen, native, windowed, Jetstream, or release work landed. |
 | `g15-r029-review-foundation-date-time` | `g15/029-review-foundation-date-time.md` | `t3code/g15-029-review-foundation-date-time` | capable coding model, medium reasoning | merged | PR #53 accepted at `afc63f33`; merge `b2e8114b`. Reviewed all seven pages, repaired Calendar and DurationInput specimens, and recorded DateTimeZonePicker's paired-web nested-layer pointer blocker at D/D. The audit recount, focused/headless checks, GitHub `active-cohort`, and operator live DurationInput sign-off passed. The blocker is routed to `g15.039` before `g15.030`. |

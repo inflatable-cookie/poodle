@@ -1,6 +1,6 @@
 # g15.040 — ResizeHandle Native Keyboard and Value Semantics
 
-Status: **ready** — routed by `g15.030` / PR #55
+Status: **complete** — PR #56, merge `8954658a`
 Parent: `027-screen-clear-human-review.md`
 Found by: `030-review-foundation-layout.md`
 Unblocks: `g15.031`–`g15.033`; `g15.012` remains behind the completed

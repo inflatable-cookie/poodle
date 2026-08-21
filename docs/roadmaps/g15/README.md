@@ -1,8 +1,8 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.001`–`g15.010` and `g15.014`–`g15.017` complete;
-`g15.019`–`g15.030` and `g15.034`–`g15.039` complete; `g15.011` partial with
-three screen-clear review children; routed `g15.040` ready
+Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
+`g15.019`–`g15.026`, `g15.028`–`g15.030`, and `g15.034`–`g15.040` complete;
+`g15.011` partial with ready `g15.031` and two later review children
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -76,7 +76,7 @@ and status advance are the orchestrator's.
 21. [028–033 — Screen-clear family review children](028-review-foundation-controls-entry.md) — exact 56-page partition; after `026`
 22. [038 — SegmentedControl native option parity](038-segmented-control-native-option-parity.md) — complete; PR #52 landed the clean option-type migration and stable native focus identity
 23. [039 — DateTimeZonePicker nested-layer pointer commit](039-date-time-zone-picker-nested-layer.md) — complete; PR #54 closed the paired-web pointer blocker and unblocked `g15.030`
-24. [040 — ResizeHandle native keyboard and value semantics](040-resize-handle-native-semantics.md) — ready; routed by `g15.030` before `g15.031`
+24. [040 — ResizeHandle native keyboard and value semantics](040-resize-handle-native-semantics.md) — complete; PR #56 closed stable native focus identity, keyboard, and numeric-range semantics
 25. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — after `011`, `038`, and routed blockers complete; headless capture required
 26. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
 27. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after the full specimen program, routed blockers, and `012`
@@ -111,10 +111,9 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-`g15.030` is complete through PR #55. All nine foundation-layout pages have
-human verdicts; ResizeHandle's specimens now resize real panes and the audit
-honestly records the shared native focus/keyboard/value gap. `g15.040` is the
-next ready card and must close that routed blocker before `g15.031` resumes the
-three remaining serial screen-clear children. `g15.012` follows the completed
-audit and routed blockers; `g15.013` stays blocked as the final certification
-gate. Release mutation remains behind the explicit operator gate.
+`g15.040` is complete through PR #56. ResizeHandle now has stable caller-owned
+native focus identity, keyboard resizing, and renderer-neutral numeric-range
+semantics. `g15.031` is the next ready card and resumes the three remaining
+serial screen-clear children. `g15.012` follows the completed human-centred
+audit; `g15.013` stays blocked as the final certification gate. Release
+mutation remains behind the explicit operator gate.
