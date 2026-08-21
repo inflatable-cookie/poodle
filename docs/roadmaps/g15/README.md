@@ -2,8 +2,8 @@
 
 Status: active — `g15.001`–`g15.010`, `g15.014`–`g15.017`,
 `g15.019`–`g15.026`, `g15.028`–`g15.031`, and `g15.034`–`g15.040` complete;
-`g15.011` partial with `g15.032` blocked on the routed Popover web-trigger
-repair and one later review child
+`g15.011` partial with `g15.041` ready to repair the Popover web-trigger
+blocker found by `g15.032`; one later review child remains
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -78,12 +78,13 @@ and status advance are the orchestrator's.
 22. [038 — SegmentedControl native option parity](038-segmented-control-native-option-parity.md) — complete; PR #52 landed the clean option-type migration and stable native focus identity
 23. [039 — DateTimeZonePicker nested-layer pointer commit](039-date-time-zone-picker-nested-layer.md) — complete; PR #54 closed the paired-web pointer blocker and unblocked `g15.030`
 24. [040 — ResizeHandle native keyboard and value semantics](040-resize-handle-native-semantics.md) — complete; PR #56 closed stable native focus identity, keyboard, and numeric-range semantics
-25. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — after `011`, `038`, and routed blockers complete; headless capture required
-26. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
-27. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after the full specimen program, routed blockers, and `012`
-28. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
-29. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
-30. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
+25. [041 — Popover interactive trigger semantics](041-popover-interactive-trigger-semantics.md) — ready; clean pre-v0.2 state-aware trigger migration unblocks `g15.032`
+26. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — after `011`, `038`, and routed blockers complete; headless capture required
+27. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
+28. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final gate after the full specimen program, routed blockers, and `012`
+29. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
+30. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
+31. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)
@@ -112,11 +113,10 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task
 
-`g15.032` review evidence landed through PR #58: nine pages keep and Popover is
-an honest C/C/A `contract/runtime-blocker`. No supported web trigger
-composition both avoids nested interactive semantics and retains the required
-`aria-expanded`/`aria-controls` relationship. The next planning checkpoint is
-the dedicated Popover trigger API/semantics repair; `g15.032` closes only after
-that repair, and `g15.033` remains paused behind it. `g15.012` follows the
-completed human-centred audit; `g15.013` stays blocked as the final
-certification gate. Release mutation remains behind the explicit operator gate.
+`g15.041` is the single ready card. It performs the operator-approved clean
+pre-v0.2 Popover trigger migration: core-authored disclosure state flows into
+the real Svelte/React trigger, Button gains the matching `controls` seam, and
+all current Poodle consumers migrate without a compatibility route. After it
+lands, close `g15.032` and dispatch `g15.033`. `g15.012` follows the completed
+human-centred audit; `g15.013` stays blocked as the final certification gate.
+Release mutation remains behind the explicit operator gate.
