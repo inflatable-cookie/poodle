@@ -19,6 +19,11 @@ import type { ButtonFixture } from "../fixtures/button-visual-inventory.ts";
 import { pinPage } from "../capture.ts";
 import { ensureUp, startPreviews, type PreviewServers } from "../server.ts";
 import {
+  CaptureIntegrityError,
+  isRecoverableTransportError,
+  PreviewTransportError,
+} from "./capture-set.ts";
+import {
   parseButtonCaptureReceipt,
   RECEIPT_SCHEMA,
   sha256Hex,
@@ -291,13 +296,25 @@ type CapturedScene = {
 };
 
 async function captureOnce(page: Page, url: string): Promise<CapturedScene> {
-  // about:blank first: the fixture host reads its params once on mount, and a
-  // search-only change does not reload the page.
-  await page.goto("about:blank");
-  await page.goto(url, { waitUntil: "load", timeout: 60_000 });
+  // The navigation/marker phase is the only transport-failure surface: a
+  // degraded page or dead preview fails here, before any frame exists, and
+  // the batch may recover from exactly this class (once, on a fresh page).
+  // Everything after it — measurement, screenshot, hashing — is evidence and
+  // fails the batch without retry.
+  try {
+    // about:blank first: the fixture host reads its params once on mount, and a
+    // search-only change does not reload the page.
+    await page.goto("about:blank");
+    await page.goto(url, { waitUntil: "load", timeout: 60_000 });
 
-  // The host reports param problems in-page; either marker wins the race.
-  await page.waitForSelector("[data-fixture-error], [data-fixture-ready]", { timeout: 60_000 });
+    // The host reports param problems in-page; either marker wins the race.
+    await page.waitForSelector("[data-fixture-error], [data-fixture-ready]", { timeout: 60_000 });
+  } catch (error) {
+    throw new PreviewTransportError(
+      `preview navigation failed for ${url}: ${(error as Error).message}`,
+      error,
+    );
+  }
   const errorElement = await page.$("[data-fixture-error]");
   if (errorElement) {
     const text = await errorElement.textContent();
@@ -340,7 +357,7 @@ async function captureFixtureRuntime(
   const sha256 = sha256Hex(first.png);
   const repeatSha256 = sha256Hex(repeat.png);
   if (!first.png.equals(repeat.png)) {
-    throw new Error(
+    throw new CaptureIntegrityError(
       `repeat captures differ for ${id}: ${sha256} vs ${repeatSha256} — ` +
         "fixed input must render byte-identically; the batch stops rather than choosing a frame",
     );
@@ -367,7 +384,7 @@ async function captureFixtureRuntime(
   const parsedReceipt = parseButtonCaptureReceipt(receipt, { fixture, runtime });
   const problems = verifyReceiptAgainstPng(parsedReceipt, first.png);
   if (problems.length > 0) {
-    throw new Error(`web receipt does not verify for ${id}:\n  - ${problems.join("\n  - ")}`);
+    throw new CaptureIntegrityError(`web receipt does not verify for ${id}:\n  - ${problems.join("\n  - ")}`);
   }
 
   const dir = join(outDir, runtime);
@@ -416,9 +433,11 @@ export async function captureWebBatch(
     // A page degrades after a dozen or so SPA navigations (vite client state
     // accumulates) until navigations stop settling — the same failure the
     // g12.009 gate recycles pages for. Recycle on a fixed cadence, and on a
-    // capture failure restart a dead preview and retry once on a young page.
-    // This is infrastructure recovery, never frame picking: the byte-identity
-    // rule inside captureFixtureRuntime is untouched.
+    // PRE-CAPTURE transport failure restart a dead preview and retry once on
+    // a young page. Determinism, receipt, and host-rejection failures are
+    // evidence failures: they rethrow immediately and stop the batch. This is
+    // infrastructure recovery, never frame picking — the byte-identity rule
+    // inside captureFixtureRuntime can never reach this branch.
     const RECYCLE_AFTER = 12;
     let page = await context.newPage();
     // Fixed clock + seeded Math.random; the freeze stylesheet lands per
@@ -443,6 +462,7 @@ export async function captureWebBatch(
             await captureFixtureRuntime(page, browser, servers.urls[runtime], fixture, runtime, outDir),
           );
         } catch (error) {
+          if (!isRecoverableTransportError(error)) throw error;
           if (servers && (await ensureUp(runtime))) {
             console.log(`  restarted ${runtime} preview after capture failure`);
           }

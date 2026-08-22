@@ -5,7 +5,7 @@
  * exactly and Svelte↔GPUI under the fixed renderer-aware policy, and writes
  * the machine-readable summary, 36 diffs, and the operator contact sheet.
  *
- *   bun test/visual/button-comparison/run.ts [--out=<dir>] [--fixture=<name>]...
+ *   bun test/visual/button-comparison/run.ts [--out=<dir>]
  *
  * Default output is the disposable `test/visual/button-comparison/out`. An
  * explicit `--out` directory is only cleaned when it carries this tool's own
@@ -21,7 +21,6 @@ import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 
 import {
-  BUTTON_FIXTURE_NAMES,
   loadButtonVisualInventory,
   type ButtonFixture,
 } from "../fixtures/button-visual-inventory.ts";
@@ -53,13 +52,13 @@ import {
 const DEFAULT_OUT = "test/visual/button-comparison/out";
 const MARKER = ".g15-047-output";
 
-function args(): { outDir: string; only: string[] } {
+function args(): { outDir: string } {
   const out = process.argv.find((value) => value.startsWith("--out="));
-  const only = process.argv
-    .filter((value) => value.startsWith("--fixture="))
-    .flatMap((value) => value.slice("--fixture=".length).split(","))
-    .filter(Boolean);
-  return { outDir: out ? out.slice("--out=".length) : DEFAULT_OUT, only };
+  const unknown = process.argv.slice(2).filter((value) => !value.startsWith("--out="));
+  if (unknown.length > 0) {
+    throw new Error(`unknown arguments: ${unknown.join(" ")} — the batch is the fixed 18 fixtures, no subset mode`);
+  }
+  return { outDir: out ? out.slice("--out=".length) : DEFAULT_OUT };
 }
 
 function prepareOutDir(outDir: string): void {
@@ -134,24 +133,21 @@ function annotate(verdict: PairVerdict, web: CaptureEvidence, gpui: CaptureEvide
 }
 
 function pairBlockingFailures(annotated: AnnotatedPair): Finding[] {
-  const excused = new Set(annotated.knownDeltas.map((entry) => entry.finding));
-  return Object.values(annotated.verdict.channels)
-    .flatMap((channelVerdict) => channelVerdict.findings)
-    .filter((finding) => !excused.has(finding));
+  // Known-delta classification annotates a finding with its contract
+  // citation; it never excuses it. Every fixed-policy finding blocks the run
+  // — changing exit semantics is an orchestrator card decision, not something
+  // this runner may do.
+  return Object.values(annotated.verdict.channels).flatMap(
+    (channelVerdict) => channelVerdict.findings,
+  );
 }
 
 async function main(): Promise<void> {
-  const { outDir, only } = args();
+  const { outDir } = args();
   const inventory = loadButtonVisualInventory();
-  let fixtures = inventory.fixtures;
-  if (only.length > 0) {
-    for (const name of only) {
-      if (!BUTTON_FIXTURE_NAMES.includes(name as (typeof BUTTON_FIXTURE_NAMES)[number])) {
-        throw new Error(`--fixture names an identity outside the accepted batch: ${name}`);
-      }
-    }
-    fixtures = fixtures.filter((fixture) => only.includes(fixture.name));
-  }
+  // The denominator is fixed: the accepted 18 fixtures, no subset mode. A
+  // partial run could otherwise masquerade as a complete closed batch.
+  const fixtures = inventory.fixtures;
 
   prepareOutDir(outDir);
   const capturesDir = join(outDir, "captures");

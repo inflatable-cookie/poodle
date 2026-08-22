@@ -10,6 +10,41 @@
 import type { ButtonFixture } from "../fixtures/button-visual-inventory.ts";
 import { RUNTIMES, type RuntimeName } from "./receipt.ts";
 
+/**
+ * A pre-capture preview transport failure: the navigation or marker wait
+ * failed before any frame existed (page degradation, dead preview server).
+ * This is the ONLY failure class the batch may recover from, once, on a fresh
+ * page — infrastructure recovery, never evidence selection.
+ */
+export class PreviewTransportError extends Error {
+  constructor(message: string, readonly cause?: unknown) {
+    super(message);
+    this.name = "PreviewTransportError";
+  }
+}
+
+/**
+ * A capture-integrity failure: repeat captures diverged, or a receipt does
+ * not verify against its PNG. These are evidence failures, not
+ * infrastructure — they must stop the batch immediately.
+ */
+export class CaptureIntegrityError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "CaptureIntegrityError";
+  }
+}
+
+/**
+ * The batch loop's recovery decision. Only a pre-capture transport failure is
+ * recoverable; determinism, receipt, and comparison failures rethrow. Kept as
+ * one exported predicate so the focused tests drive the exact production
+ * decision.
+ */
+export function isRecoverableTransportError(error: unknown): boolean {
+  return error instanceof PreviewTransportError;
+}
+
 export type CaptureId = { fixture: string; runtime: RuntimeName };
 
 /**

@@ -28,15 +28,15 @@ dimensions, zero landmark edge delta, exactly equal role evidence, zero
 differing pixels — the two web shells are pixel-identical on every case.
 
 **Svelte ↔ GPUI passes the fixed renderer-aware policy on geometry, fill,
-border, text, and pixels on all 18 fixtures, and stops with one named
-blocker** (below). Three real cross-runtime drifts were measured and repaired
-under Bounded Repair Authority; the initial measurements are preserved in
-`assets/g15-047/initial-mismatches.json`.
+border, text, and pixels on all 18 fixtures, and stops red on two reported
+categories** (below). Three real cross-runtime drifts were measured and
+repaired under Bounded Repair Authority; the initial measurements are
+preserved in `assets/g15-047/initial-mismatches.json`.
 
-The comparator exits non-zero today because of the named blocker. That is the
-card's designed terminal state for an unresolved policy failure, not a tooling
-fault: the run completes, produces the full evidence set, and names exactly
-one finding.
+The comparator exits non-zero today, by design: the fixed policy is not met
+(the named focus-ring blocker), and the shadow known-delta findings — though
+contract-cited — remain blocking, because the card did not authorize a second
+acceptance layer. Changing exit semantics is an orchestrator card decision.
 
 ## The named blocker: GPUI focus indicator is not the contract's focus ring
 
@@ -60,12 +60,13 @@ and the run stays red until the operator rules.
 
 ## What was measured and repaired
 
-Initial full-batch run (preserved): 78 blocking findings. Final run: 16 (all
-the named blocker) plus 16 contract-cited known-delta findings.
+Initial full-batch run (preserved): 78 blocking findings. Final run: 32
+blocking findings — 16 the named focus-ring blocker, 16 the contract-cited
+shadow absence (annotated, still blocking; see the review-changes section).
 
 | # | Initial mismatch (measured) | Contract authority | Repair | Focused regression |
 | --- | --- | --- | --- | --- |
-| R1 | GPUI secondary default fill = raw `surface` token (0.067 vs web 0.171, ~26/255 off on 13 fixtures, both themes) | §8: `color-mix(surface 88%, text-primary)` elevation stacking | `packages/render/src/button.rs`: idle/hover/active secondary-default ramp now mixes toward `text_primary` at 88/80/84% | `secondary_default_idle_fill_is_elevation_stacked`; updated hover/active expectations |
+| R1 | GPUI secondary default fill = raw `surface` token (0.067 vs web 0.171, ~26/255 off on 13 fixtures, both themes) | §8: `color-mix(surface 88%, text-primary)` elevation stacking | `packages/render/src/button.rs`: the **idle** fill now mixes 88% toward `text_primary`. (The first revision of this PR also moved hover/active to the contract's 80/84% stacking; the orchestrator review reverted that as unmeasured — see below.) | `secondary_default_idle_fill_is_elevation_stacked` |
 | R2 | GPUI primary border darkened 86% (2.4–4.8/255 off); pressed non-primary border 86% | §8: `color-mix(accent-base 84%, black)`; pressed: 85% | same file: ratio corrections | `primary_border_is_the_darkened_fill`, `pressed_non_primary_toggle_takes_the_accent_treatment` |
 | R3 | GPUI icon/spinner reserved only the 12px glyph box; web reserves the 16px wrapper, so labels sat 2px left (`content centre.x` delta 2.0) and icon boxes read 12 vs 16 | §8 icon wrapper: `size.icon.md` (16px) | same file: icons and spinner ride in a 16px `Container` with the 12px glyph centred (leading, trailing, spinner; glyph size unchanged) | `icons_and_spinner_ride_in_the_icon_md_wrapper_box` |
 | — | xl Button captured 48px tall, not 52px | §8 size ladder | **harness scene bug, not a component defect**: the GPUI scene's column-flex shrank the button to the 48px content box; scene is now row-flex like the web host | covered by the `size-xl` geometry channel itself |
@@ -81,9 +82,12 @@ wrapper. `cargo test -p poodle-render`: 372/372.
 Reported, not repaired (visible in every output, none per-fixture):
 
 - **Shadow layer count** (16 fixtures): web secondary/primary paint the §8
-  shadows; GPUI paints none. This is the contract §12 known delta
-  `gpui-omits-box-shadow` — classified by a closed two-entry registry in
-  `policy.ts`, never silently.
+  shadows; GPUI paints none — the contract §12 known delta
+  `gpui-omits-box-shadow`. Per the orchestrator review, classification is
+  annotation only: these findings carry their citation in the summary and
+  contact sheet **and remain blocking** under the fixed policy (layer
+  count/inset are exact). Excusing them needs an orchestrator card change with
+  coherent aggregate semantics, not a runner edit.
 
 Measurement-semantics decisions (comparator definitions, not component
 changes), each verified against painted pixels:
@@ -136,7 +140,7 @@ have poisoned evidence silently):
 
 ## Negative evidence
 
-`compare.test.ts` (22 tests) plants the card's failure set through the
+`compare.test.ts` (26 tests) plants the card's failure set through the
 production compare/verify functions, in memory: missing capture (capture-set
 completeness, named by fixture and runtime), two-logical-pixel root shift
 (geometry fails while pixels pass — channel independence), missing icon/
@@ -144,7 +148,9 @@ spinner landmark (receipt verifier, exact fixture name), changed role colour,
 changed shadow (layer count, and a non-empty layer-geometry delta that must
 NOT classify as the known delta), PNG tamper (hash and dimension checks), a
 pixel change beyond 3% (fails) beside a 1% change (passes), duplicate/extra
-captures, and repeat-capture divergence. The GPUI bin carries 18 unit tests
+captures, repeat-capture divergence, and the recovery boundary (a repeat
+mismatch or receipt failure can never enter the batch's retry branch; only a
+pre-capture transport failure can). The GPUI bin carries 18 unit tests
 (arg contract, publish safety, revision drift, id-stamped icon bounds); the
 moved Rust inventory parser keeps all 15 planted-fault tests green; the
 TypeScript inventory suite (43 tests) now names the loader's new home and its
@@ -156,13 +162,13 @@ one sanctioned non-test consumer.
 | --- | --- | --- |
 | `test/visual/button-comparison/receipt.ts` | 412 | closed receipt schema + PNG/hash verification |
 | `test/visual/button-comparison/compare.ts` | 427 | exact + renderer-aware comparator |
-| `test/visual/button-comparison/policy.ts` | 115 | the card's fixed table + known-delta registry |
-| `test/visual/button-comparison/capture-set.ts` | 56 | completeness + repeat rule |
-| `test/visual/button-comparison/capture-web.ts` | 462 | Playwright capture driver |
-| `test/visual/button-comparison/capture-gpui.ts` | 108 | one-shot binary driver |
+| `test/visual/button-comparison/policy.ts` | 121 | the card's fixed table + known-delta registry |
+| `test/visual/button-comparison/capture-set.ts` | 91 | completeness + repeat rule + recovery boundary |
+| `test/visual/button-comparison/capture-web.ts` | 482 | Playwright capture driver |
+| `test/visual/button-comparison/capture-gpui.ts` | 109 | one-shot binary driver |
 | `test/visual/button-comparison/contact-sheet.ts` | 123 | operator review surface |
-| `test/visual/button-comparison/run.ts` | 316 | batch orchestration + summary |
-| `test/visual/button-comparison/compare.test.ts` | 447 | 22 planted-failure tests |
+| `test/visual/button-comparison/run.ts` | 312 | batch orchestration + summary |
+| `test/visual/button-comparison/compare.test.ts` | 483 | 26 planted-failure tests |
 | `test/visual/button-comparison/README.md` | 82 | boundary documentation |
 | `packages/svelte/preview/src/fixture-host/FixtureHost.svelte` | 281 | private capture host (+5-line `main.ts` branch) |
 | `packages/react/preview/src/fixture-host/FixtureHost.tsx` | 293 | mirror (+11-line `main.tsx` branch) |
@@ -211,10 +217,10 @@ producer's output is parsed by the TypeScript verifier on every batch.
 | comparisons | 36 (18 exact + 18 renderer-aware) |
 | Svelte↔React | all channels pass on all 18; zero differing pixels |
 | Svelte↔GPUI geometry | pass on all 18 |
-| Svelte↔GPUI roles | pass except the named focus-ring blocker (16 fixtures) |
+| Svelte↔GPUI roles | pass except: the named focus-ring blocker (16 fixtures) and the annotated-but-blocking shadow absence (16 fixtures) |
 | Svelte↔GPUI pixels | pass on all 18; max diff 0.133% of viewport (cap 3%) |
-| known-delta findings | 16, all `gpui-omits-box-shadow` (contract §12) |
-| blocking failures | 16, all the named focus-ring width blocker |
+| known-delta findings | 16, all `gpui-omits-box-shadow` (contract §12) — annotated, still blocking |
+| blocking failures | 32 (16 focus-ring blocker + 16 shadow) |
 | environment | chromium 151.0.7922.34; gpui `87d9afbe…` (macos/aarch64, metal-headless) |
 
 ## Environment and evidence
@@ -237,20 +243,48 @@ them, and no update/refresh command exists.
 - **Effigy:** one new selector, `test:visual-button-comparison` (focused
   comparator tests + the full headless batch into a disposable directory). Not
   composed into `ci:*` or `qa` — gate composition remains the orchestrator's
-  call, and the selector currently exits non-zero on the named blocker by
+  call, and the selector currently exits non-zero on the blocking findings by
   design.
 - **GPUI revision receipts** now record the actual fork pin `87d9afbe…`; the
   pre-licence-fix upstream SHA is gone from the bin and the smoke script.
 - **`PAPERCUTS.md`:** one entry (page-recycling/preview-restart knowledge for
   new capture harnesses).
 
+## Review changes (PR #68, round 1)
+
+The orchestrator review requested four changes; all landed before this
+evidence set was generated:
+
+1. **Subset mode removed from the batch runner.** `run.ts` accepted
+   `--fixture` and ran the completeness check over the filtered list, so a
+   one-fixture run could report a "complete" batch. The batch is now always
+   the fixed 18 fixtures; unknown arguments are rejected. `--fixture` remains
+   on the `poodle-offscreen-capture` one-shot target only.
+2. **Capture recovery can no longer retry evidence failures.** The web batch
+   loop previously caught every capture error — including a repeat mismatch —
+   and retried once. Recovery is now gated on one exported predicate
+   (`isRecoverableTransportError`) that admits only the new
+   `PreviewTransportError` class (the pre-capture navigation/marker phase).
+   Repeat mismatches and receipt failures throw `CaptureIntegrityError` and
+   rethrow immediately. Four regression tests drive the production predicate
+   with the exact error classes the capture paths throw.
+3. **Known-delta classification no longer changes exit semantics.** The
+   runner previously subtracted contract-cited findings from the blocking
+   count. Classification is now annotation-only (citation in summary, contact
+   sheet, console); every fixed-policy finding blocks.
+4. **Unmeasured hover/active repair reverted.** The R1 repair now covers only
+   the measured idle fill; secondary-default hover/active keep the old-tier
+   formula (mix from the final fill toward `elevated`), which now computes
+   from the repaired idle fill. The contract §8 text-primary stacking for
+   hover/active joins the unmeasured-suspicion record.
+
 ## Validation
 
 | check | result |
 | --- | --- |
-| `bun test test/visual/button-comparison/compare.test.ts` | 22 pass, 0 fail |
+| `bun test test/visual/button-comparison/compare.test.ts` | 26 pass, 0 fail |
 | `effigy test:visual-fixtures` | pass (43 bun + 15 cargo; updated loader path) |
-| `effigy test:visual-button-comparison` ×2 | full batch ran end to end twice; identical metrics both runs (54 captures, 0 repeat mismatches, 16 blocking = the named blocker, 16 known-delta); exit 1 by design on the named blocker |
+| `effigy test:visual-button-comparison` ×2 | full batch ran end to end twice; byte-identical summary hashes (`1531b935…`), identical metrics (54 captures, 0 repeat mismatches, 32 blocking, 16 annotated known-delta); exit 1 by design on the blocking findings |
 | `effigy smoke:gpui-offscreen-capture` | pass (legacy smoke unchanged, corrected revision) |
 | `cargo test -p poodle-render` | 372 pass, 0 fail |
 | `cargo test --bin poodle-offscreen-capture --features capture` | 18 pass, 0 fail |
@@ -271,11 +305,11 @@ selector, release mutation, tag, publication, or workflow edit ran.
   mark Button — or anything — done, and the named blocker stays open until
   the operator rules.
 - Nothing about hover/active/focused frames. The batch captures rest,
-  disabled, loading, and pressed only. Two unmeasured contract suspicions were
+  disabled, loading, and pressed only. Unmeasured contract suspicions were
   noted but deliberately not repaired (outside Bounded Repair Authority
-  without a measurement): GPUI's primary hover/active fills mix toward
-  `elevated` rather than the contract's white/black mixes, and its primary
-  hover border ratio differs from §8.
+  without a measurement): GPUI's secondary-default hover/active stacking, its
+  primary hover/active fills mixing toward `elevated` rather than the
+  contract's white/black mixes, and its primary hover border ratio.
 - Nothing about a second component, other themes beyond eclipse/iceberg, or
   cross-machine native determinism (Core Text glyphs are per-host; receipts
   record the environment, same-run comparison only).

@@ -42,7 +42,7 @@
     "captures": 54,
     "repeatMismatches": 0,
     "comparisons": 36,
-    "blockingFailures": 16,
+    "blockingFailures": 32,
     "knownDeltas": 16
   },
   "fixtures": [

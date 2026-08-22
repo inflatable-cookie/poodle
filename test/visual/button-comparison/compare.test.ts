@@ -18,7 +18,13 @@ import {
   loadButtonVisualInventory,
   type ButtonFixture,
 } from "../fixtures/button-visual-inventory.ts";
-import { captureSetProblems, repeatMismatchProblem } from "./capture-set.ts";
+import {
+  CaptureIntegrityError,
+  captureSetProblems,
+  isRecoverableTransportError,
+  PreviewTransportError,
+  repeatMismatchProblem,
+} from "./capture-set.ts";
 import {
   compareExactPair,
   compareRendererAwarePair,
@@ -226,6 +232,36 @@ describe("capture set completeness and determinism", () => {
     const id = { fixture: "button/state-loading", runtime: "react" as const };
     expect(repeatMismatchProblem(id, "aaa", "aaa")).toBeNull();
     expect(repeatMismatchProblem(id, "aaa", "bbb")).toMatch(/repeat captures differ/);
+  });
+});
+
+describe("capture recovery boundary", () => {
+  // The batch loop's single recovery decision, driven by the exact error
+  // classes the production capture paths throw. A repeat-mismatch or receipt
+  // failure is a CaptureIntegrityError and must never enter the retry branch;
+  // only a pre-capture transport failure may.
+  test("a repeat mismatch cannot enter the recovery branch", () => {
+    const repeatMismatch = new CaptureIntegrityError(
+      "repeat captures differ for button/state-loading [svelte]: aaa vs bbb",
+    );
+    expect(isRecoverableTransportError(repeatMismatch)).toBe(false);
+  });
+
+  test("a receipt verification failure cannot enter the recovery branch", () => {
+    const receiptFailure = new CaptureIntegrityError(
+      "web receipt does not verify for button/rest-secondary [react]",
+    );
+    expect(isRecoverableTransportError(receiptFailure)).toBe(false);
+  });
+
+  test("a host param rejection cannot enter the recovery branch", () => {
+    expect(
+      isRecoverableTransportError(new Error("fixture host rejected the params: missing 'label'")),
+    ).toBe(false);
+  });
+
+  test("a pre-capture transport failure is the only recoverable class", () => {
+    expect(isRecoverableTransportError(new PreviewTransportError("navigation timeout"))).toBe(true);
   });
 });
 

@@ -91,7 +91,13 @@ export type KnownDeltaId = (typeof KNOWN_RENDERER_DELTAS)[number]["id"];
 /**
  * Classify a roles-channel finding against the known-delta registry. Returns
  * the delta id only when the finding is exactly the contract-approved
- * absence; anything else is `null` and remains a failure.
+ * absence; anything else is `null`.
+ *
+ * Classification is ANNOTATION ONLY: it attaches the contract citation to the
+ * finding in every output. It never excuses the finding — a classified
+ * finding still fails its channel and still blocks the run, because the fixed
+ * policy says shadow layer count/inset are exact. Changing those exit
+ * semantics requires an orchestrator card change, not a runner edit.
  *
  * The shadow delta is recognized structurally: the web receipt carries one or
  * more shadow layers and the GPUI receipt carries none, which is precisely

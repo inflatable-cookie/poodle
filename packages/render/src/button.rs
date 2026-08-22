@@ -192,19 +192,12 @@ pub fn button(
             )
         }
         _ => {
-            // Secondary default keeps elevation stacking toward text-primary
-            // (hover 80%, active 84% — contract §8). Ghost and pressed
-            // buttons keep the old tier's mix from the final fill toward
-            // elevated; this batch's fixtures do not measure those states.
-            let (hover, active) = if matches!(spec.variant, ButtonVariant::Secondary) && !is_pressed
-            {
-                (
-                    mix_srgb(surface, text_primary, 0.80),
-                    mix_srgb(surface, text_primary, 0.84),
-                )
-            } else {
-                (mix_srgb(fill, elevated, 0.84), mix_srgb(fill, elevated, 0.72))
-            };
+            // Old-tier formula, retained: hover/active mix from the FINAL
+            // fill toward elevated. The g15.047 batch captures no hover or
+            // active frame, so the contract §8 text-primary stacking for
+            // those states stays an unmeasured suspicion, not a repair.
+            let hover = mix_srgb(fill, elevated, 0.84);
+            let active = mix_srgb(fill, elevated, 0.72);
             // Ghost's idle border is transparent; its hover border mixes from
             // border-default instead (the old tier's special case).
             let border_base = if is_ghost {
@@ -579,6 +572,7 @@ mod tests {
         let theme = theme();
         let danger = theme.resolve_color("color.status.danger");
         let surface = theme.resolve_color("color.background.surface");
+        let elevated = theme.resolve_color("color.background.elevated");
         let border_default = theme.resolve_color("color.border.default");
         let text_primary = theme.resolve_color("color.text.primary");
 
@@ -618,13 +612,17 @@ mod tests {
         assert_eq!(active.background, Some(mix_srgb(danger, BLACK, 0.88)));
         assert_eq!(hover.border_color, Some(mix_black(hover_fill, 0.86)));
 
-        // Default secondary: elevation stacking toward text-primary
-        // (contract §8: hover 80%, active 84%).
+        // Default secondary: hover/active keep the old-tier mix from the
+        // final fill toward elevated — unmeasured by the g15.047 batch, so
+        // the contract §8 text-primary stacking for these states is recorded
+        // as a suspicion, not repaired here. The idle-fill repair means the
+        // mix now starts from the stacked fill.
         let node = button(&ButtonSpec::new(), &theme, None);
         let hover = node.style.hover.expect("hover patch");
         let active = node.style.active.expect("active patch");
-        assert_eq!(hover.background, Some(mix_srgb(surface, text_primary, 0.80)));
-        assert_eq!(active.background, Some(mix_srgb(surface, text_primary, 0.84)));
+        let idle_fill = mix_srgb(surface, text_primary, 0.88);
+        assert_eq!(hover.background, Some(mix_srgb(idle_fill, elevated, 0.84)));
+        assert_eq!(active.background, Some(mix_srgb(idle_fill, elevated, 0.72)));
         assert_eq!(
             hover.border_color,
             Some(mix_srgb(border_default, text_primary, 0.78))

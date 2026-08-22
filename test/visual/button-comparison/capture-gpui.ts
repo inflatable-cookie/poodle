@@ -11,6 +11,7 @@ import { mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
 import type { ButtonFixture } from "../fixtures/button-visual-inventory.ts";
+import { CaptureIntegrityError } from "./capture-set.ts";
 import {
   parseButtonCaptureReceipt,
   sha256Hex,
@@ -75,7 +76,7 @@ export function captureGpuiBatch(fixtures: ButtonFixture[], outDir: string): Gpu
     const sha256 = sha256Hex(png);
     const repeatSha256 = sha256Hex(repeat);
     if (!png.equals(repeat)) {
-      throw new Error(
+      throw new CaptureIntegrityError(
         `repeat captures differ for ${fixture.name} [gpui]: ${sha256} vs ${repeatSha256} — fixed input must render byte-identically`,
       );
     }
@@ -86,7 +87,7 @@ export function captureGpuiBatch(fixtures: ButtonFixture[], outDir: string): Gpu
     );
     const problems = verifyReceiptAgainstPng(receipt, png);
     if (problems.length > 0) {
-      throw new Error(`gpui receipt does not verify for ${fixture.name}:\n  - ${problems.join("\n  - ")}`);
+      throw new CaptureIntegrityError(`gpui receipt does not verify for ${fixture.name}:\n  - ${problems.join("\n  - ")}`);
     }
     // The receipt is written by the binary itself; assert the repeat receipt
     // agrees, then discard the repeat pair — one retained capture per runtime.
@@ -95,7 +96,7 @@ export function captureGpuiBatch(fixtures: ButtonFixture[], outDir: string): Gpu
       { fixture, runtime: "gpui" },
     );
     if (repeatReceipt.pngSha256 !== receipt.pngSha256) {
-      throw new Error(`repeat receipt hash disagrees for ${fixture.name} [gpui]`);
+      throw new CaptureIntegrityError(`repeat receipt hash disagrees for ${fixture.name} [gpui]`);
     }
     // One retained capture per runtime/fixture: the verified repeat pair is
     // discarded, its hash recorded on the record.

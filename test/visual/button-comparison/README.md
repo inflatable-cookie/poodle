@@ -9,8 +9,11 @@ not a completion gate, and not a baseline system.
 effigy test:visual-button-comparison        # focused tests + full batch, disposable output
 bun test/visual/button-comparison/run.ts    # the batch alone
 bun test/visual/button-comparison/run.ts --out=<dir>          # explicit evidence directory
-bun test/visual/button-comparison/run.ts --fixture=button/rest-secondary  # slice
 ```
+
+The batch is always the fixed 18 fixtures — there is deliberately no subset
+mode, so a partial run can never masquerade as the complete closed batch.
+(`--fixture` exists only on the `poodle-offscreen-capture` one-shot target.)
 
 ## What happens in one run
 
@@ -41,9 +44,11 @@ bun test/visual/button-comparison/run.ts --fixture=button/rest-secondary  # slic
    - Channels are independent: a pixel pass never hides a geometry or role
      failure.
 5. Findings the current Button contract already decides (§12 known deltas,
-   e.g. GPUI paints no box-shadow) are reported as **known deltas** with their
-   citation — visible in every output, never silently allowlisted, and never
-   per-fixture. Anything else fails the run.
+   e.g. GPUI paints no box-shadow) are **annotated** with their citation in
+   every output — never silently dropped, never per-fixture, and **never
+   excused**: a classified finding still fails its channel and blocks the run,
+   because the fixed policy says shadow layer count/inset are exact. Changing
+   exit semantics is an orchestrator card decision, not a runner edit.
 
 ## Output
 
