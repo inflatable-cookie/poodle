@@ -9,6 +9,8 @@ Governing refs: `../../roadmaps/g15/release-gap-register.md`,
 Handoff: `../../handoffs/20260822-090530-g15-049-release-automation-truthfulness.md`
 Worker branch: `t3code/release-automation-truthfulness`
 PR: [#66](https://github.com/inflatable-cookie/poodle/pull/66)
+Review: accepted at `d8e293fa`
+Merge: `e47c44e5`
 
 ## Outcome
 
@@ -93,6 +95,9 @@ and no tag, package, registry, or release mutation occurred.
 
 ## Continuation
 
-The release-automation truthfulness surface is ready for review. The
-orchestrator should review the known cargo-deny baseline failure alongside the
-workflow diff and continue the remaining release runway with `g15.050`.
+PR #66 was accepted and merged. `g15.049` is complete; release automation is
+now truthful and fail-closed. The cargo-deny dependency-licence failure remains
+an open release-policy gap under
+`docs/triage/20260822-104657-gpui-zed-license-policy.md` and must be promoted
+into a bounded roadmap card before `g15.050`. No tag or publication work is
+unblocked while that gap, `g15.043`, or `g15.047` remains open.

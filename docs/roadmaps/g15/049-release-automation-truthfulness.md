@@ -1,6 +1,6 @@
 # g15.049 — Release Automation Truthfulness
 
-Status: **ready** — operator approved the required workflow edits on 2026-08-22
+Status: **complete** — PR #66 accepted at `d8e293fa` and merged as `e47c44e5`
 Depends on: none; may run in parallel once approved
 Unblocks: `g15.050`
 Governing refs: `../../specs/022-packaging-versioning-and-release-channel-rules.md`,
@@ -80,20 +80,20 @@ integration change belongs here.
 
 ## Acceptance Envelope
 
-- [ ] No retained workflow references a deleted package or duplicates a named
+- [x] No retained workflow references a deleted package or duplicates a named
       Effigy selector with raw commands.
-- [ ] The manual native workflow exercises the same supported headless native
+- [x] The manual native workflow exercises the same supported headless native
       board named by release documentation.
-- [ ] `effigy release gates` executes exactly one configured `headless` gate,
+- [x] `effigy release gates` executes exactly one configured `headless` gate,
       which runs `effigy qa`; zero-gate success is impossible.
-- [ ] Dry-run release evidence packs exactly the intended npm artifacts and
+- [x] Dry-run release evidence packs exactly the intended npm artifacts and
       preserves the no-publish default.
-- [ ] Retained action references use reviewed immutable SHAs, tool versions are
+- [x] Retained action references use reviewed immutable SHAs, tool versions are
       explicit, permissions remain least-privilege, and trusted publishing
       still uses OIDC with no long-lived npm token.
-- [ ] The stale conformance workflow and alias are gone; `ci:native` remains the
+- [x] The stale conformance workflow and alias are gone; `ci:native` remains the
       single truthful owner of their retained headless native evidence.
-- [ ] No release, tag, or registry mutation occurs.
+- [x] No release, tag, or registry mutation occurs.
 
 ## Validation
 
@@ -120,6 +120,7 @@ visual or Jetstream selectors.
 
 ## Continuation
 
-Accepted `g15.049` unblocks the automation input to `g15.050`. It does not
-unblock the candidate while `g15.012`/`g15.043` or any other release gap stays
-open.
+Accepted `g15.049` closes the automation input to `g15.050`. The now-truthful
+release board exposes an existing GPUI/Zed dependency-licence policy failure;
+that decision remains open alongside `g15.012`/`g15.047`, `g15.043`, and the
+other release gaps. No candidate work starts while any of them remains open.

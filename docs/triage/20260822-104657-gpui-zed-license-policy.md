@@ -1,6 +1,7 @@
 # GPUI/Zed dependency licence policy
 
-Status: open triage
+Status: promoted to `docs/roadmaps/g15/release-gap-register.md`; roadmap card
+pending
 Found: PR #66 review, 2026-08-22
 Candidate home: a bounded release-gap card before `g15.050`
 
@@ -20,3 +21,6 @@ Do not weaken or bypass the gate. Route a separate evidence-led card after
 `g15.049` and before the release candidate. The card should verify the actual
 distributed artifact graph, record the licence/source rationale, and either
 approve narrowly reviewed exceptions or remove/replace the dependencies.
+
+Disposition: keep this note open until that bounded card is compiled, then
+remove it once the card carries the full evidence and decision boundary.

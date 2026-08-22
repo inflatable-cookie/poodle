@@ -119,8 +119,9 @@ measured from the mounted tree, not inferred from a contract read.
 | GPUI headless pixels | adopted by `g15.045` in PR #62: `gpui`/`gpui_platform` pinned to `zed-industries/zed@1ea16c1a` in node-backend and preview; `smoke:gpui-offscreen-capture` renders a real Button offscreen with typed receipts, one hash across repeated captures (`be94eace…`, matching the g15.044 proof), inset shadows now project instead of being dropped; headless regressions 56/56, Rust 1.95 floor preserved. Captures remain 2×-only and macOS-only; cross-machine tolerance is `g15.047` — see `docs/logs/2026-08/20260821-g15-045-gpui-offscreen-capture-adoption.md` | landed |
 | Primitive named fixtures and comparison | rejected g14 corpus is removed; web/native capture foundations are ready for a bounded inventory | `g15.046` ready, then `g15.047`, under parent `g15.012` |
 | Packed full-roster reachability | closed by PR #64: exact 175/175 Svelte and 175/175 React clean-root imports plus bounded 9/13 runtime mounts | `g15.048` complete |
-| Native pre-tag workflow | `.github/workflows/ci-native.yml` references deleted `packages/gpui/components/Cargo.toml`; bounded workflow repair is operator-approved | `g15.049` ready |
-| Read-only release-gate claim | `effigy release gates` reports success with zero configured gates; `g15.049` will bind it to the complete headless `qa` board | `g15.049` ready |
+| Native pre-tag workflow | closed by PR #66: the pinned manual workflow installs Bun 1.3.14 and Rust 1.95, then executes the supported `effigy ci:native` board | `g15.049` complete |
+| Read-only release-gate claim | closed by PR #66: `effigy release gates` executes exactly one configured `headless` gate backed by the complete `effigy qa` board | `g15.049` complete |
+| GPUI/Zed dependency licence policy | the truthful release board rejects `libbz2-rs-sys` (`bzip2-1.0.6`) and GPL-3.0-or-later `zlog`, `ztracing`, and `ztracing_macro`; distribution scope, compatibility, and any exact source/licence exceptions need an evidence-led decision rather than a weakened gate | open — promote `docs/triage/20260822-104657-gpui-zed-license-policy.md` into a bounded card before `g15.050` |
 | v0.2.0 candidate | manifests remain 0.1.0 and no 0.2.0 release note exists | `g15.050`, then operator gate `g15.013` |
 
 ## Carried Requirements (recorded, not implemented)

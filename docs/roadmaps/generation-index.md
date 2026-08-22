@@ -6,7 +6,8 @@ Updated: 2026-08-22
 
 - `g15`
   - Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.042`, `g15.044`–`g15.046`, and `g15.048` complete;
+    `g15.019`–`g15.042`, `g15.044`–`g15.046`, and `g15.048`–`g15.049`
+    complete;
     `g15.047` awaits exact compilation; `g15.013` is the final operator gate
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `050` plus final gate `013`
@@ -16,14 +17,13 @@ Updated: 2026-08-22
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: `g15.046` is complete in PR #65. Compile the exact `g15.047`
-    comparator envelope before dispatch. `g15.048` is complete in PR #64,
-    closing its independent package-proof lane. `g15.043` stays
-    non-dispatchable until the native
-    presentation-context architecture is fixed. `g15.012` is now exact
-    children `044`–`047`; release preparation is exact children `048`–`050`;
-    `g15.049` is in review on PR #66 and must rebase over PR #65's focused
-    visual-fixture selector.
+  - Next: compile the exact `g15.047` comparator envelope before dispatch.
+    `g15.048` and `g15.049` are complete in PRs #64 and #66. The truthful
+    release board exposed a GPUI/Zed dependency-licence policy gap; promote it
+    from triage into a bounded card before `g15.050`. `g15.043` stays
+    non-dispatchable until the native presentation-context architecture is
+    fixed. `g15.012` is now exact children `044`–`047`; release preparation is
+    exact children `048`–`050` plus the newly measured policy gap.
 
 ## Latest Completed Track
 

@@ -1,7 +1,8 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
-`g15.019`–`g15.042`, `g15.044`–`g15.046`, and `g15.048` complete;
+`g15.019`–`g15.042`, `g15.044`–`g15.046`, and `g15.048`–`g15.049`
+complete;
 `g15.047` awaits exact card compilation;
 the remaining release path is recompiled through `g15.050`
 Posture: release-first; no new parity architecture
@@ -88,7 +89,7 @@ and status advance are the orchestrator's.
 31. [046 — Primitive visual fixture inventory](046-primitive-visual-fixture-inventory.md) — complete; PR #65 froze the exact 18-case Button inventory and paired validators
 32. [047 — Primitive visual comparison](047-primitive-visual-comparison.md) — planned after accepted `046`; exact execution envelope still needs compilation; closes parent `012`
 33. [048 — Packed roster reachability](048-packed-roster-reachability.md) — complete; PR #64 proves exact 175/175 packed-root reachability for both web runtimes
-34. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — **ready**; operator approved the bounded workflow edits on 2026-08-22
+34. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — complete; PR #66 made every retained workflow a pinned Effigy launcher and made the release board non-vacuous
 35. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — planned after every implementation, specimen, conformance, packaging, and automation gate
 36. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
 37. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final operator tag/publication gate after accepted `050`
@@ -130,9 +131,10 @@ writable, validation, and human-review envelope before dispatch.
 `g15.048` is complete in PR #64. Its exact packed-package proof is ready for
 `g15.050`, but the candidate remains behind the other release gates.
 
-`g15.049` is in review on PR #66 with changes requested. Its rebase must
-preserve PR #65's `test:visual-fixtures` selector in the shared Effigy task
-manifest.
+`g15.049` is complete in PR #66. The retained workflows are pinned Effigy
+launchers, branch publication fails closed, and `effigy release gates` now
+executes the complete headless board. That truthful board exposes an existing
+GPUI/Zed dependency-licence policy failure. The open triage note must be
+promoted into a bounded release-gap card before `g15.050`.
 
 Do not dispatch `g15.043` until the orchestrator fixes the native presentation-
-context architecture. Release mutation remains behind `g15.013`.

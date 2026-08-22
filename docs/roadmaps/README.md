@@ -16,11 +16,13 @@ v0.2.0 release-baseline generation.
 - `g15` is the release-first v0.2.0 runway. The 175-component Svelte and React
   implementation/evidence rosters, measured native declaration/specimen
   baseline, specimen curation and review, native specimen probe, packed roster,
-  and the first primitive fixture inventory are complete. PR #65 accepted
-  `g15.046`; `g15.047` now needs its exact comparator envelope compiled. The
-  remaining release path is explicit: the native presentation blocker (`043`),
-  comparator closeout (`047` under parent `012`), release automation (`049`),
-  one exact candidate (`050`), then operator gate `013`.
+  the first primitive fixture inventory, and truthful release automation are
+  complete. PR #65 accepted `g15.046`; `g15.047` now needs its exact comparator
+  envelope compiled. PR #66 closed `g15.049` and exposed a real GPUI/Zed
+  dependency-licence policy gap. The remaining release path is explicit: the
+  native presentation blocker (`043`), comparator closeout (`047` under parent
+  `012`), the dependency-licence decision, one exact candidate (`050`), then
+  operator gate `013`.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
@@ -48,7 +50,7 @@ v0.2.0 release-baseline generation.
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
   `g15.014`–`g15.017`, `g15.019`–`g15.026`, `g15.028`–`g15.032`, and
-  `g15.034`–`g15.042`, `g15.044`–`g15.046`, and `g15.048` complete;
+  `g15.034`–`g15.042`, `g15.044`–`g15.046`, and `g15.048`–`g15.049` complete;
   `g15.047` awaits exact compilation; range recompiled through `g15.050`;
   `g15.013` final operator gate
 
