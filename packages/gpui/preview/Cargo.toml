@@ -98,6 +98,15 @@ path = "tests/catalogue.rs"
 name = "headless_regressions"
 path = "tests/headless_regressions.rs"
 
+# g15.046 Button visual fixture inventory. Data parsing only: this target
+# renders nothing, opens no window, and captures no pixels. It lives here
+# because GPUI is the runtime that consumes the inventory in g15.047, and it
+# validates theme / control-size names against the same `presentation_axes`
+# domain the offscreen capture target parses its CLI against.
+[[test]]
+name = "visual_fixture_inventory"
+path = "tests/visual_fixture_inventory.rs"
+
 # The focused native regressions run through GPUI's in-memory test platform
 # (TestAppContext / VisualTestContext / TestWindow). test-support is a
 # dev-dependency so ordinary builds and the preview bin never pull it in.
