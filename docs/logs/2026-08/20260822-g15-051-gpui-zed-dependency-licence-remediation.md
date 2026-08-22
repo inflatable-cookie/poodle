@@ -52,8 +52,8 @@ revisions are accepted in Cargo manifests and lockfiles.
 
 ## Validation
 
-All checks ran on the worker worktree. No windowed, workflow, release
-mutation, tag, publication, or merge path was run.
+Implementation checks ran on the worker worktree. No windowed, workflow,
+release mutation, tag, or publication path was run.
 
 | Check | Result |
 | --- | --- |
@@ -70,7 +70,9 @@ mutation, tag, publication, or merge path was run.
 
 ## Continuation
 
-Implementation commit `c84dcc11` is on the worker branch and PR #67 is open
-for orchestrator review. Merge authorization is absent. The orchestrator
-owns review, any narrowly requested follow-up, merge authorization, and
-g15.051 runway closeout.
+The orchestrator found that the original notice used generic SPDX bzip2 text
+rather than the exact `libbz2-rs 0.2.5` COPYING text. Fix `0954aa1f` restored
+all dependency-specific attribution and tightened the executable notice
+markers. PR #67 was then accepted and merged as `30e2aae3` with operator
+authorization. `g15.051` is complete. The next planning checkpoint is the
+exact `g15.047` comparator envelope.

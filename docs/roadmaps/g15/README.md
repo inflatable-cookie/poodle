@@ -1,9 +1,9 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
-`g15.019`–`g15.042`, `g15.044`–`g15.046`, and `g15.048`–`g15.049`
-complete;
-`g15.047` awaits exact card compilation; `g15.051` is ready;
+`g15.019`–`g15.042`, `g15.044`–`g15.046`, `g15.048`–`g15.049`, and
+`g15.051` complete;
+`g15.047` awaits exact card compilation;
 the remaining release path is recompiled through `g15.051`
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
@@ -90,7 +90,7 @@ and status advance are the orchestrator's.
 32. [047 — Primitive visual comparison](047-primitive-visual-comparison.md) — planned after accepted `046`; exact execution envelope still needs compilation; closes parent `012`
 33. [048 — Packed roster reachability](048-packed-roster-reachability.md) — complete; PR #64 proves exact 175/175 packed-root reachability for both web runtimes
 34. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — complete; PR #66 made every retained workflow a pinned Effigy launcher and made the release board non-vacuous
-35. [051 — GPUI/Zed dependency licence remediation](051-gpui-zed-dependency-licence-remediation.md) — ready; a minimal exact-revision fork removes GPL tracing from the resolved GPUI graph and hardens licence/source policy
+35. [051 — GPUI/Zed dependency licence remediation](051-gpui-zed-dependency-licence-remediation.md) — complete; PR #67 removed GPL tracing from the resolved GPUI graph through a minimal exact-revision fork and hardened licence/source policy
 36. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — planned after every implementation, specimen, conformance, packaging, automation, and dependency-policy gate
 37. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
 38. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final operator tag/publication gate after accepted `050`
@@ -134,17 +134,14 @@ writable, validation, and human-review envelope before dispatch.
 
 `g15.049` is complete in PR #66. The retained workflows are pinned Effigy
 launchers, branch publication fails closed, and `effigy release gates` now
-executes the complete headless board. That truthful board exposed an existing
-GPUI/Zed dependency-licence policy failure. The operator accepted the fixed
-permissive-only direction, now compiled as ready card `g15.051`. It may run
-without touching the unfinished comparator or presentation-context lanes.
+executes the complete headless board.
 
-`g15.051` is the current dispatchable task. It replaces GPUI's normal GPL
-tracing graph through one minimal exact-revision Poodle-owned Zed fork, admits
-the permissive bzip2 licence with its notice, and hardens exact Git-source
-policy. `g15.050` remains blocked after it lands.
+`g15.051` is complete in PR #67. GPUI's normal GPL tracing graph is gone,
+the exact Poodle-owned Zed fork is pinned, the permissive bzip2 licence carries
+its dependency-specific notice, and exact Git-source policy fails closed.
+`g15.050` remains blocked.
 
 Do not dispatch `g15.043` until the orchestrator fixes the native
 presentation-context architecture. Do not dispatch `g15.047` until its exact
-comparison, tolerance, and operator-review envelope is compiled. Neither lane
-shares writable scope with `g15.051`, but no second worker is ready today.
+comparison, tolerance, and operator-review envelope is compiled. Compiling
+that `g15.047` envelope is the next planning checkpoint.

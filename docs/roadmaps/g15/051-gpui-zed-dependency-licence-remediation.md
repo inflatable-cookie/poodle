@@ -1,7 +1,6 @@
 # g15.051 — GPUI/Zed Dependency Licence Remediation
 
-Status: **ready — operator accepted the fixed licence/source direction on
-2026-08-22**
+Status: **complete — PR #67 accepted and merged on 2026-08-22**
 Depends on: `g15.045`, `g15.049`
 Unblocks: `g15.050`
 Governing refs: `../../specs/022-packaging-versioning-and-release-channel-rules.md`,
@@ -107,22 +106,22 @@ unrelated dependency update belongs here.
 
 ## Acceptance Envelope
 
-- [ ] `inflatable-cookie/zed` contains one reviewable patch based on exact
+- [x] `inflatable-cookie/zed` contains one reviewable patch based on exact
       upstream `1ea16c1ab9dd6d36649e002dc60995634da04daf`; the log records both
       immutable commits and the bounded diff.
-- [ ] Poodle's GPUI node-backend and preview manifests pin the exact fork
+- [x] Poodle's GPUI node-backend and preview manifests pin the exact fork
       commit, and their lockfiles resolve the same commit.
-- [ ] The resolved normal graph for both manifests contains no `zlog`,
+- [x] The resolved normal graph for both manifests contains no `zlog`,
       `ztracing`, `ztracing_macro`, GPL-3.0-or-later, or other unapproved
       licence.
-- [ ] `bzip2-1.0.6` is allowed as a permissive licence and its redistribution
+- [x] `bzip2-1.0.6` is allowed as a permissive licence and its redistribution
       terms are retained; no GPL exception exists.
-- [ ] Every Git source is from the five fixed repositories and every direct
+- [x] Every Git source is from the five fixed repositories and every direct
       dependency plus lockfile entry uses its reviewed full revision. Unknown
       or mutable sources still fail.
-- [ ] GPUI adapter, node-backend, preview, headless regressions, and offscreen
+- [x] GPUI adapter, node-backend, preview, headless regressions, and offscreen
       capture remain green on Rust 1.95 with no window or focus acquisition.
-- [ ] Licence, source, notice, repository-security, and read-only release gates
+- [x] Licence, source, notice, repository-security, and read-only release gates
       pass without a bypass. No release mutation occurs.
 
 ## Validation
@@ -157,6 +156,8 @@ tag, or publish path.
 
 ## Continuation
 
-After review and merge, close the dependency-licence row in the release gap
-register. `g15.050` remains blocked on `g15.043`, `g15.047`, and every other
-open release gap; this card does not authorise candidate or publication work.
+PR #67 was accepted at `0954aa1f` and merged as `30e2aae3`. The dependency
+licence row is closed. `g15.050` remains blocked on `g15.043`, `g15.047`, and
+every other open release gap; this card does not authorise candidate or
+publication work. The next planning checkpoint is compiling `g15.047`'s exact
+comparison and operator-review envelope.

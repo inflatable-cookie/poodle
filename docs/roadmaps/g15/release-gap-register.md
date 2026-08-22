@@ -121,7 +121,7 @@ measured from the mounted tree, not inferred from a contract read.
 | Packed full-roster reachability | closed by PR #64: exact 175/175 Svelte and 175/175 React clean-root imports plus bounded 9/13 runtime mounts | `g15.048` complete |
 | Native pre-tag workflow | closed by PR #66: the pinned manual workflow installs Bun 1.3.14 and Rust 1.95, then executes the supported `effigy ci:native` board | `g15.049` complete |
 | Read-only release-gate claim | closed by PR #66: `effigy release gates` executes exactly one configured `headless` gate backed by the complete `effigy qa` board | `g15.049` complete |
-| GPUI/Zed dependency licence policy | fixed policy: admit permissive `bzip2-1.0.6` with its notice; reject GPL tracing crates; replace their normal GPUI graph use through a minimal exact-revision `inflatable-cookie/zed` fork; approve only five fixed immutable Git sources | `g15.051` ready; blocks `g15.050` |
+| GPUI/Zed dependency licence policy | closed by PR #67: exact fork `inflatable-cookie/zed@87d9afbe` removes GPL tracing from both normal GPUI graphs; `libbz2-rs` terms and attribution ship on both notice surfaces; five immutable Git sources are admitted fail-closed | `g15.051` complete; merge `30e2aae3` |
 | v0.2.0 candidate | manifests remain 0.1.0 and no 0.2.0 release note exists | `g15.050`, then operator gate `g15.013` |
 
 ## Carried Requirements (recorded, not implemented)

@@ -6,9 +6,9 @@ Updated: 2026-08-22
 
 - `g15`
   - Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.042`, `g15.044`–`g15.046`, and `g15.048`–`g15.049`
-    complete;
-    `g15.047` awaits exact compilation; `g15.051` is ready;
+    `g15.019`–`g15.042`, `g15.044`–`g15.046`, `g15.048`–`g15.049`, and
+    `g15.051` complete;
+    `g15.047` awaits exact compilation;
     `g15.013` is the final operator gate
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `051` plus final gate `013`
@@ -18,10 +18,9 @@ Updated: 2026-08-22
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch ready `g15.051` to remove the GPL tracing graph through a
-    minimal exact-revision Zed fork and harden licence/source policy.
-    `g15.048` and `g15.049` are complete in PRs #64 and #66. `g15.047` still
-    needs its exact comparator envelope before dispatch. `g15.043` stays
+  - Next: compile `g15.047`'s exact comparator, tolerance, and operator-review
+    envelope. `g15.048`, `g15.049`, and `g15.051` are complete in PRs #64,
+    #66, and #67. `g15.043` stays
     non-dispatchable until the native presentation-context architecture is
     fixed. `g15.012` is now exact children `044`–`047`; release preparation is
     exact children `048`–`051`.

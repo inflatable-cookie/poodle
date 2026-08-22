@@ -18,12 +18,11 @@ v0.2.0 release-baseline generation.
   baseline, specimen curation and review, native specimen probe, packed roster,
   the first primitive fixture inventory, and truthful release automation are
   complete. PR #65 accepted `g15.046`; `g15.047` now needs its exact comparator
-  envelope compiled. PR #66 closed `g15.049` and exposed a real GPUI/Zed
-  dependency-licence policy gap. The operator accepted the permissive-only
-  remediation and `g15.051` is ready. The remaining release path is explicit:
-  the
+  envelope compiled. PR #66 closed `g15.049`; PR #67 closed the GPUI/Zed
+  dependency-licence policy gap without admitting GPL code. The remaining
+  release path is explicit: the
   native presentation blocker (`043`), comparator closeout (`047` under parent
-  `012`), dependency remediation (`051`), one exact candidate (`050`), then
+  `012`), one exact candidate (`050`), then
   operator gate `013`.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
@@ -52,8 +51,9 @@ v0.2.0 release-baseline generation.
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
   `g15.014`–`g15.017`, `g15.019`–`g15.026`, `g15.028`–`g15.032`, and
-  `g15.034`–`g15.042`, `g15.044`–`g15.046`, and `g15.048`–`g15.049` complete;
-  `g15.047` awaits exact compilation; `g15.051` is ready; range recompiled
+  `g15.034`–`g15.042`, `g15.044`–`g15.046`, `g15.048`–`g15.049`, and
+  `g15.051` complete;
+  `g15.047` awaits exact compilation; range recompiled
   through `g15.051`;
   `g15.013` final operator gate
 
