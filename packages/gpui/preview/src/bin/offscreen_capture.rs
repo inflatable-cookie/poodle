@@ -10,6 +10,12 @@
 //! not a public component API, a fixture namespace, a baseline, or a portable
 //! scene representation.
 //!
+//! g15.047 adds fixture mode: `--fixture <exact-name> --out <png> --receipt
+//! <json>` renders any of the 18 accepted Button inventory fixtures and writes
+//! a typed `poodle.button-visual-capture.v1` receipt (see
+//! `offscreen_capture/fixture_capture.rs`). Without `--fixture` the legacy
+//! smoke contract below applies unchanged.
+//!
 //! One-shot contract: every invocation captures once and writes a PNG plus a
 //! typed JSON receipt. All inputs are explicit and validated before any
 //! renderer is constructed; unsupported scale, unknown theme or control size,
@@ -32,11 +38,22 @@ use sha2::{Digest, Sha256};
 #[path = "../presentation_axes.rs"]
 mod presentation_axes;
 
+// g15.046/g15.047 inventory parser, shared with the `visual_fixture_inventory`
+// test target by path — one Rust parser, two consumers. The capture binary
+// needs only the roster and the typed loader; the validator's test-surface
+// items stay reachable through the shared module.
+#[allow(dead_code)]
+#[path = "offscreen_capture/inventory.rs"]
+mod inventory;
+
+#[path = "offscreen_capture/fixture_capture.rs"]
+mod fixture_capture;
+
 use presentation_axes::{ControlSize, ThemePreset};
 
 /// The immutable upstream revision this seam is adopted at. Keep identical to
 /// the `gpui` / `gpui_platform` manifest pins.
-const GPUI_REVISION: &str = "1ea16c1ab9dd6d36649e002dc60995634da04daf";
+const GPUI_REVISION: &str = "87d9afbe71ef06ea0634499dc35d104bb29dc020";
 
 /// The adopted revision's `TestWindow::scale_factor` is hardcoded `2.0`. This
 /// lane is 2×-only by measured upstream constraint; any other requested scale
@@ -81,6 +98,75 @@ struct CaptureArgs {
 const USAGE: &str = "usage: poodle-offscreen-capture \
 --out <png> --receipt <json> --width <logical> --height <logical> \
 --theme <name> --control-size <xs|sm|md|lg|xl> --scale 2.0";
+
+const FIXTURE_USAGE: &str =
+    "usage: poodle-offscreen-capture --fixture <exact-name> --out <png> --receipt <json>";
+
+/// The two capture modes. `--fixture` selects fixture mode; without it the
+/// legacy smoke contract applies unchanged.
+enum CaptureMode {
+    Smoke(CaptureArgs),
+    Fixture(fixture_capture::FixtureArgs),
+}
+
+fn parse_cli(argv: &[String]) -> Result<CaptureMode> {
+    if argv.iter().any(|arg| arg == "--fixture") {
+        parse_fixture_args(argv).map(CaptureMode::Fixture)
+    } else {
+        parse_args(argv).map(CaptureMode::Smoke)
+    }
+}
+
+/// Fixture mode is a closed contract: exactly `--fixture`, `--out`, and
+/// `--receipt`, all required, every other flag rejected. The fixture name
+/// must be one of the 18 accepted g15.046 identities; anything else is a hard
+/// error naming the offender.
+fn parse_fixture_args(argv: &[String]) -> Result<fixture_capture::FixtureArgs> {
+    let mut fixture: Option<String> = None;
+    let mut out_png: Option<PathBuf> = None;
+    let mut out_receipt: Option<PathBuf> = None;
+
+    let mut i = 0;
+    while i < argv.len() {
+        let flag = argv[i].as_str();
+        let value = argv
+            .get(i + 1)
+            .with_context(|| format!("missing value for {flag}\n{FIXTURE_USAGE}"))?;
+        i += 2;
+        match flag {
+            "--fixture" => {
+                if !inventory::BUTTON_FIXTURE_NAMES.contains(&value.as_str()) {
+                    bail!(
+                        "unknown fixture '{value}': not one of the {} g15.046 identities",
+                        inventory::BUTTON_FIXTURE_NAMES.len()
+                    );
+                }
+                fixture = Some(value.to_string());
+            }
+            "--out" => out_png = Some(PathBuf::from(value)),
+            "--receipt" => out_receipt = Some(PathBuf::from(value)),
+            other => bail!("argument '{other}' is not accepted in fixture mode\n{FIXTURE_USAGE}"),
+        }
+    }
+
+    let out_png = normalize_output_path(
+        &out_png.with_context(|| format!("--out is required\n{FIXTURE_USAGE}"))?,
+        "--out",
+    )?;
+    let out_receipt = normalize_output_path(
+        &out_receipt.with_context(|| format!("--receipt is required\n{FIXTURE_USAGE}"))?,
+        "--receipt",
+    )?;
+    if out_png == out_receipt {
+        bail!("--out and --receipt must name different files");
+    }
+
+    Ok(fixture_capture::FixtureArgs {
+        fixture: fixture.with_context(|| format!("--fixture is required\n{FIXTURE_USAGE}"))?,
+        out_png,
+        out_receipt,
+    })
+}
 
 fn parse_args(argv: &[String]) -> Result<CaptureArgs> {
     let mut out_png: Option<PathBuf> = None;
@@ -396,8 +482,10 @@ fn run(args: &CaptureArgs) -> Result<()> {
 
 fn main() -> Result<()> {
     let argv: Vec<String> = std::env::args().skip(1).collect();
-    let args = parse_args(&argv)?;
-    run(&args)
+    match parse_cli(&argv)? {
+        CaptureMode::Smoke(args) => run(&args),
+        CaptureMode::Fixture(args) => fixture_capture::run(&args),
+    }
 }
 
 #[cfg(test)]
@@ -519,5 +607,144 @@ mod tests {
             manifest.contains(&format!("rev = \"{GPUI_REVISION}\"")),
             "GPUI_REVISION drifted from the manifest pin"
         );
+    }
+
+    // ── g15.047 fixture mode ────────────────────────────────────────────
+
+    const FIXTURE_VALID: &[&str] = &[
+        "--fixture", "button/rest-secondary",
+        "--out", "fixture.png",
+        "--receipt", "fixture.json",
+    ];
+
+    #[test]
+    fn fixture_invocation_parses() {
+        let mode = parse_cli(&argv(FIXTURE_VALID)).expect("the canonical fixture invocation parses");
+        let CaptureMode::Fixture(args) = mode else {
+            panic!("--fixture must select fixture mode");
+        };
+        assert_eq!(args.fixture, "button/rest-secondary");
+    }
+
+    #[test]
+    fn unknown_fixture_is_rejected_by_name() {
+        let args = argv(&[
+            "--fixture", "button/bogus",
+            "--out", "fixture.png",
+            "--receipt", "fixture.json",
+        ]);
+        let result = parse_cli(&args);
+        assert!(result.is_err(), "an unknown fixture must not parse");
+        let error = result.err().expect("checked above");
+        assert!(
+            format!("{error:#}").contains("unknown fixture 'button/bogus'"),
+            "the error must name the offender, got {error:#}"
+        );
+    }
+
+    #[test]
+    fn legacy_flags_are_rejected_in_fixture_mode() {
+        for (flag, value) in [
+            ("--width", "240"),
+            ("--height", "80"),
+            ("--theme", "eclipse"),
+            ("--control-size", "md"),
+            ("--scale", "2.0"),
+        ] {
+            let mut v = argv(FIXTURE_VALID);
+            v.push(flag.to_string());
+            v.push(value.to_string());
+            assert!(
+                parse_cli(&v).is_err(),
+                "{flag} must be rejected in fixture mode"
+            );
+        }
+    }
+
+    #[test]
+    fn fixture_mode_requires_all_three_flags() {
+        for flag in ["--fixture", "--out", "--receipt"] {
+            let mut v = argv(FIXTURE_VALID);
+            let i = v.iter().position(|a| a == flag).expect("flag present");
+            v.drain(i..=i + 1);
+            assert!(parse_cli(&v).is_err(), "missing {flag} must fail");
+        }
+    }
+
+    #[test]
+    fn fixture_flag_requires_a_value() {
+        let args = argv(&["--fixture"]);
+        assert!(parse_cli(&args).is_err(), "a bare --fixture must fail");
+    }
+
+    #[test]
+    fn fixture_mode_rejects_colliding_output_paths() {
+        let args = argv(&[
+            "--fixture", "button/rest-secondary",
+            "--out", "same.png",
+            "--receipt", "./same.png",
+        ]);
+        assert!(parse_cli(&args).is_err());
+    }
+
+    #[test]
+    fn without_fixture_flag_the_legacy_contract_applies() {
+        let mode = parse_cli(&argv(VALID)).expect("the legacy invocation parses");
+        assert!(
+            matches!(mode, CaptureMode::Smoke(_)),
+            "no --fixture flag must keep the legacy smoke mode"
+        );
+    }
+
+    /// The node-backend observation change behind the fixture landmarks: an
+    /// id-stamped icon (an svg leaf) must go through the wrapper path so its
+    /// paint bounds are recorded. A plain in-memory test-platform window
+    /// proves it — no Metal, no screenshot, no OS window.
+    #[test]
+    fn id_stamped_icon_records_paint_bounds() {
+        struct IconRoot {
+            node: poodle_node::Node,
+        }
+        impl Render for IconRoot {
+            fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+                poodle_gpui_node_backend::reset_element_ids();
+                div()
+                    .size_full()
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .child(poodle_gpui_node_backend::to_gpui(&self.node))
+            }
+        }
+
+        let mut cx = gpui::TestAppContext::single();
+        let mut node = poodle_node::Node::icon("check", 12.0);
+        node.id = Some("fixture-icon".to_owned());
+        let (root, vc) = cx.add_window_view(|window, _cx| {
+            window.refresh();
+            IconRoot { node }
+        });
+        root.update(vc, |_root, cx| cx.notify());
+        vc.update(|window, cx| {
+            window.refresh();
+            let _ = window.draw(cx);
+        });
+        vc.run_until_parked();
+
+        // The recorded box is the wrapper's own geometry: an svg leaf's id
+        // forces the wrapper path, and the wrapper shrink-wraps the leaf
+        // inside a centered flex row — the same arrangement a Button's icon
+        // slot uses.
+        let bounds = poodle_gpui_node_backend::bounds_for("fixture-icon")
+            .expect("an id-stamped icon must record its paint bounds");
+        assert_eq!(f32::from(bounds.size.width), 12.0);
+        assert_eq!(f32::from(bounds.size.height), 12.0);
+
+        // The same teardown the headless regressions mirror from the
+        // `#[gpui::test]` macro (which crashes on current rustc).
+        cx.dispatcher.run_until_parked();
+        cx.background_executor.forbid_parking();
+        cx.quit();
+        cx.dispatcher.run_until_parked();
     }
 }

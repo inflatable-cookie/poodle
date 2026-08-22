@@ -1003,3 +1003,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   would make the counter thread-local, which is where every other backend
   registry (`FOCUS_HANDLES`, `ELEMENT_BOUNDS`) already lives — small, but it is
   backend ownership rather than this card's seam.
+
+- 2026-08-22 — g15.047 rediscovered that **any new multi-capture Playwright
+  harness must recycle its page and restart dead previews**: a single page
+  degrades after ~15-20 SPA navigations (vite client state accumulates) until
+  `waitForSelector` stops seeing markers, and a preview spawned earlier in a
+  long batch can die mid-run. The knowledge exists in `test/visual/run.ts`
+  (`RECYCLE_AFTER`, `ensureUp`) but is not exported as a helper, so the
+  Button-comparison harness (`test/visual/button-comparison/capture-web.ts`)
+  re-learned it from a timeout at fixture nine. A small shared
+  `captureSession()` helper in `test/visual/` would save the next harness the
+  same failure.

@@ -1,0 +1,75 @@
+{
+  "schema": "poodle.button-visual-capture.v1",
+  "fixture": "button/size-sm",
+  "runtime": "gpui",
+  "logicalViewport": {
+    "width": 240,
+    "height": 80
+  },
+  "scale": 2,
+  "deviceDimensions": {
+    "width": 480,
+    "height": 160
+  },
+  "pngSha256": "07d7a612d6d46803c18031a149a82023b8c0eb7f539df8417fcdb59da403f5df",
+  "environment": {
+    "kind": "metal-headless",
+    "os": "macos",
+    "arch": "aarch64",
+    "gpuiRevision": "87d9afbe71ef06ea0634499dc35d104bb29dc020"
+  },
+  "landmarks": {
+    "root": {
+      "x": 16.0,
+      "y": 16.0,
+      "width": 68.0,
+      "height": 28.0
+    },
+    "content": {
+      "x": 38.8935546875,
+      "y": 24.0,
+      "width": 22.212892532348633,
+      "height": 12.0
+    }
+  },
+  "roles": {
+    "fill": {
+      "color": [
+        0.1709178,
+        0.1829347,
+        0.19493887,
+        1.0
+      ]
+    },
+    "border": {
+      "color": [
+        0.8901961,
+        0.9098039,
+        0.93333334,
+        0.11
+      ],
+      "width": 1.0
+    },
+    "text": {
+      "color": [
+        0.93333334,
+        0.9490196,
+        0.9647059,
+        1.0
+      ]
+    },
+    "shadow": {
+      "layers": []
+    },
+    "focus-ring": {
+      "color": [
+        1.0,
+        0.7921569,
+        0.4509804,
+        1.0
+      ],
+      "width": 1.0,
+      "status": "dormant"
+    }
+  }
+}

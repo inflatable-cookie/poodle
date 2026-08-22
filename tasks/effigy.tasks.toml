@@ -216,6 +216,18 @@
   { run = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test visual_fixture_inventory" },
 ]
 
+# g15.047 Button visual comparison. Headless same-run capture of the accepted
+# 18 Button fixtures through Svelte, React (pinned Chromium), and GPUI (Metal
+# headless one-shot), each captured twice for byte-identity, verified against
+# typed receipts, then compared: Svelte↔React exact, Svelte↔GPUI under the
+# card's fixed renderer-aware policy. Diagnostic only — no baselines, no
+# refresh mode, no completion claim. Output goes to the disposable
+# test/visual/button-comparison/out directory.
+"test:visual-button-comparison" = [
+  { run = "bun test test/visual/button-comparison/compare.test.ts" },
+  { run = "bun test/visual/button-comparison/run.ts" },
+]
+
 # Native visual gate (g12.014). Baseline-based rather than cross-target: GPUI is
 # a different renderer, so a diff against Svelte would be all noise. LOCAL-ONLY —
 # the GPUI preview screenshots its own window, so it needs a live macOS window

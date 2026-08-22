@@ -28,7 +28,7 @@ import { join } from "node:path";
 const PREVIEW = new URL("..", import.meta.url).pathname;
 const MANIFEST = join(PREVIEW, "Cargo.toml");
 const BIN = join(PREVIEW, "target", "debug", "poodle-offscreen-capture");
-const GPUI_REVISION = "1ea16c1ab9dd6d36649e002dc60995634da04daf";
+const GPUI_REVISION = "87d9afbe71ef06ea0634499dc35d104bb29dc020";
 const RECEIPT_SCHEMA = "poodle.gpui-offscreen-capture.v1";
 const WIDTH = 240;
 const HEIGHT = 80;

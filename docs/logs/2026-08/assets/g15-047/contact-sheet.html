@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>g15.047 Button visual comparison — contact sheet</title>
+<style>
+  body { font: 13px/1.45 system-ui, sans-serif; margin: 24px; background: #111; color: #ddd; }
+  h1 { font-size: 18px; }
+  .fixture { border-top: 1px solid #333; padding-top: 12px; margin-top: 20px; }
+  .group { color: #888; font-size: 12px; }
+  .captures { display: flex; gap: 12px; }
+  figure { margin: 0; }
+  figcaption { text-align: center; color: #999; }
+  img { image-rendering: pixelated; display: block; background: #000; }
+  .pairs { display: flex; gap: 24px; margin-top: 12px; align-items: flex-start; }
+  table { border-collapse: collapse; margin-top: 8px; }
+  td { padding: 2px 10px 2px 0; vertical-align: top; }
+  ul { margin: 0; padding-left: 18px; max-width: 460px; }
+  .pass { color: #7d7; }
+  .known-delta, .known { color: #dc4; }
+  .fail, .FAIL { color: #e66; }
+  td.fail { color: #e66; font-weight: 600; }
+  .env { color: #888; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1>g15.047 Button visual comparison — 18 fixtures × 3 runtimes</h1>
+<p class="env">chromium 151.0.7922.34 · gpui 87d9afbe71ef06ea0634499dc35d104bb29dc020 (macos/aarch64, metal-headless)</p>
+<p>All captures are same-run evidence, shown at native device scale (480×160 = 240×80 logical @ 2×),
+in canonical inventory order. Diff images highlight pixels outside the fixed policy; they are
+diagnostics, never baselines.</p>
+
+  <section class="fixture" id="button--rest-secondary">
+    <h3><code>button/rest-secondary</code> <span class="group">resting-variants</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--rest-secondary.png" alt="button/rest-secondary [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--rest-secondary.png" alt="button/rest-secondary [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--rest-secondary.png" alt="button/rest-secondary [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--rest-secondary--svelte-react.png" alt="svelte-react diff for button/rest-secondary" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--rest-secondary--svelte-gpui.png" alt="svelte-gpui diff for button/rest-secondary" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--variant-primary">
+    <h3><code>button/variant-primary</code> <span class="group">resting-variants</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--variant-primary.png" alt="button/variant-primary [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--variant-primary.png" alt="button/variant-primary [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--variant-primary.png" alt="button/variant-primary [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--variant-primary--svelte-react.png" alt="svelte-react diff for button/variant-primary" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--variant-primary--svelte-gpui.png" alt="svelte-gpui diff for button/variant-primary" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 2 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--variant-ghost">
+    <h3><code>button/variant-ghost</code> <span class="group">resting-variants</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--variant-ghost.png" alt="button/variant-ghost [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--variant-ghost.png" alt="button/variant-ghost [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--variant-ghost.png" alt="button/variant-ghost [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--variant-ghost--svelte-react.png" alt="svelte-react diff for button/variant-ghost" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--variant-ghost--svelte-gpui.png" alt="svelte-gpui diff for button/variant-ghost" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--tone-danger">
+    <h3><code>button/tone-danger</code> <span class="group">secondary-status-tones</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--tone-danger.png" alt="button/tone-danger [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--tone-danger.png" alt="button/tone-danger [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--tone-danger.png" alt="button/tone-danger [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--tone-danger--svelte-react.png" alt="svelte-react diff for button/tone-danger" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--tone-danger--svelte-gpui.png" alt="svelte-gpui diff for button/tone-danger" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--tone-success">
+    <h3><code>button/tone-success</code> <span class="group">secondary-status-tones</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--tone-success.png" alt="button/tone-success [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--tone-success.png" alt="button/tone-success [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--tone-success.png" alt="button/tone-success [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--tone-success--svelte-react.png" alt="svelte-react diff for button/tone-success" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--tone-success--svelte-gpui.png" alt="svelte-gpui diff for button/tone-success" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--tone-warning">
+    <h3><code>button/tone-warning</code> <span class="group">secondary-status-tones</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--tone-warning.png" alt="button/tone-warning [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--tone-warning.png" alt="button/tone-warning [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--tone-warning.png" alt="button/tone-warning [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--tone-warning--svelte-react.png" alt="svelte-react diff for button/tone-warning" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--tone-warning--svelte-gpui.png" alt="svelte-gpui diff for button/tone-warning" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--size-xs">
+    <h3><code>button/size-xs</code> <span class="group">size-ladder</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--size-xs.png" alt="button/size-xs [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--size-xs.png" alt="button/size-xs [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--size-xs.png" alt="button/size-xs [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--size-xs--svelte-react.png" alt="svelte-react diff for button/size-xs" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--size-xs--svelte-gpui.png" alt="svelte-gpui diff for button/size-xs" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--size-sm">
+    <h3><code>button/size-sm</code> <span class="group">size-ladder</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--size-sm.png" alt="button/size-sm [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--size-sm.png" alt="button/size-sm [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--size-sm.png" alt="button/size-sm [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--size-sm--svelte-react.png" alt="svelte-react diff for button/size-sm" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--size-sm--svelte-gpui.png" alt="svelte-gpui diff for button/size-sm" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--size-lg">
+    <h3><code>button/size-lg</code> <span class="group">size-ladder</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--size-lg.png" alt="button/size-lg [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--size-lg.png" alt="button/size-lg [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--size-lg.png" alt="button/size-lg [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--size-lg--svelte-react.png" alt="svelte-react diff for button/size-lg" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--size-lg--svelte-gpui.png" alt="svelte-gpui diff for button/size-lg" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--size-xl">
+    <h3><code>button/size-xl</code> <span class="group">size-ladder</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--size-xl.png" alt="button/size-xl [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--size-xl.png" alt="button/size-xl [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--size-xl.png" alt="button/size-xl [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--size-xl--svelte-react.png" alt="svelte-react diff for button/size-xl" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--size-xl--svelte-gpui.png" alt="svelte-gpui diff for button/size-xl" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--density-compact">
+    <h3><code>button/density-compact</code> <span class="group">density-ladder</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--density-compact.png" alt="button/density-compact [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--density-compact.png" alt="button/density-compact [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--density-compact.png" alt="button/density-compact [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--density-compact--svelte-react.png" alt="svelte-react diff for button/density-compact" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--density-compact--svelte-gpui.png" alt="svelte-gpui diff for button/density-compact" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--density-comfortable">
+    <h3><code>button/density-comfortable</code> <span class="group">density-ladder</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--density-comfortable.png" alt="button/density-comfortable [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--density-comfortable.png" alt="button/density-comfortable [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--density-comfortable.png" alt="button/density-comfortable [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--density-comfortable--svelte-react.png" alt="svelte-react diff for button/density-comfortable" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--density-comfortable--svelte-gpui.png" alt="svelte-gpui diff for button/density-comfortable" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--state-disabled">
+    <h3><code>button/state-disabled</code> <span class="group">visual-states</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--state-disabled.png" alt="button/state-disabled [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--state-disabled.png" alt="button/state-disabled [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--state-disabled.png" alt="button/state-disabled [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--state-disabled--svelte-react.png" alt="svelte-react diff for button/state-disabled" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--state-disabled--svelte-gpui.png" alt="svelte-gpui diff for button/state-disabled" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="known-delta">known-delta</td></tr><tr><td></td><td><ul><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--state-loading">
+    <h3><code>button/state-loading</code> <span class="group">visual-states</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--state-loading.png" alt="button/state-loading [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--state-loading.png" alt="button/state-loading [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--state-loading.png" alt="button/state-loading [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--state-loading--svelte-react.png" alt="svelte-react diff for button/state-loading" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--state-loading--svelte-gpui.png" alt="svelte-gpui diff for button/state-loading" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="known-delta">known-delta</td></tr><tr><td></td><td><ul><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--state-pressed">
+    <h3><code>button/state-pressed</code> <span class="group">visual-states</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--state-pressed.png" alt="button/state-pressed [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--state-pressed.png" alt="button/state-pressed [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--state-pressed.png" alt="button/state-pressed [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--state-pressed--svelte-react.png" alt="svelte-react diff for button/state-pressed" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--state-pressed--svelte-gpui.png" alt="svelte-gpui diff for button/state-pressed" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--content-leading-icon">
+    <h3><code>button/content-leading-icon</code> <span class="group">content-shapes</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--content-leading-icon.png" alt="button/content-leading-icon [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--content-leading-icon.png" alt="button/content-leading-icon [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--content-leading-icon.png" alt="button/content-leading-icon [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--content-leading-icon--svelte-react.png" alt="svelte-react diff for button/content-leading-icon" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--content-leading-icon--svelte-gpui.png" alt="svelte-gpui diff for button/content-leading-icon" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--content-icon-only">
+    <h3><code>button/content-icon-only</code> <span class="group">content-shapes</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--content-icon-only.png" alt="button/content-icon-only [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--content-icon-only.png" alt="button/content-icon-only [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--content-icon-only.png" alt="button/content-icon-only [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--content-icon-only--svelte-react.png" alt="svelte-react diff for button/content-icon-only" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--content-icon-only--svelte-gpui.png" alt="svelte-gpui diff for button/content-icon-only" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+
+  <section class="fixture" id="button--theme-iceberg">
+    <h3><code>button/theme-iceberg</code> <span class="group">reference-theme</span></h3>
+    <div class="captures"><figure><img src="captures/svelte/button--theme-iceberg.png" alt="button/theme-iceberg [svelte]" /><figcaption>svelte</figcaption></figure>
+<figure><img src="captures/react/button--theme-iceberg.png" alt="button/theme-iceberg [react]" /><figcaption>react</figcaption></figure>
+<figure><img src="captures/gpui/button--theme-iceberg.png" alt="button/theme-iceberg [gpui]" /><figcaption>gpui</figcaption></figure></div>
+    <div class="pairs">
+    <section class="pair">
+      <h4>Svelte ↔ React (exact)</h4>
+      <img src="diffs/button--theme-iceberg--svelte-react.png" alt="svelte-react diff for button/theme-iceberg" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="pass">pass</td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section>
+
+    <section class="pair">
+      <h4>Svelte ↔ GPUI (renderer-aware)</h4>
+      <img src="diffs/button--theme-iceberg--svelte-gpui.png" alt="svelte-gpui diff for button/theme-iceberg" />
+      <table><tr><td>dimensions</td><td class="pass">pass</td></tr>
+<tr><td>geometry</td><td class="pass">pass</td></tr>
+<tr><td>roles</td><td class="fail">FAIL</td></tr><tr><td></td><td><ul><li class="fail">focus-ring width: web 2 vs gpui 1 (delta 1 &gt; 0.5 logical px)</li><li class="known">shadow layer count: web 1 vs gpui 0 — exact match required <em>(button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed))</em></li></ul></td></tr>
+<tr><td>pixels</td><td class="pass">pass</td></tr></table>
+    </section></div>
+  </section>
+</body>
+</html>

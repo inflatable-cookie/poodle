@@ -127,12 +127,24 @@ pub fn button(
             )
         }
         (ButtonVariant::Primary, _) => {
-            // Border: the primary fill darkened toward black.
-            (base_fill, mix_black(base_fill, 0.86), base_text)
+            // Border: the primary fill darkened toward black (contract §8:
+            // color-mix(accent-base 84%, black)).
+            (base_fill, mix_black(base_fill, 0.84), base_text)
         }
         (ButtonVariant::Ghost, Some(status_color)) => {
             // Ghost × status: text takes the status colour.
             (base_fill, base_border, status_color)
+        }
+        (ButtonVariant::Secondary, None) => {
+            // Secondary default: elevation stacking (contract §8) — the
+            // surface mixed 88% toward text-primary, not the raw surface
+            // token. The g15.047 comparator measured the raw-surface fill
+            // ~26/255 off the web reference.
+            (
+                mix_srgb(surface, text_primary, 0.88),
+                base_border,
+                base_text,
+            )
         }
         _ => (base_fill, base_border, base_text),
     };
@@ -151,7 +163,8 @@ pub fn button(
         if is_pressed && !matches!(spec.variant, ButtonVariant::Primary) {
             let accent = theme.resolve_color("color.accent.base");
             let text_inverse = theme.resolve_color("color.text.inverse");
-            (accent, mix_black(accent, 0.86), text_inverse)
+            // Contract §8 pressed: color-mix(accent-base 85%, black) border.
+            (accent, mix_black(accent, 0.85), text_inverse)
         } else {
             (fill, border_color, text_color)
         };
@@ -179,6 +192,10 @@ pub fn button(
             )
         }
         _ => {
+            // Old-tier formula, retained: hover/active mix from the FINAL
+            // fill toward elevated. The g15.047 batch captures no hover or
+            // active frame, so the contract §8 text-primary stacking for
+            // those states stays an unmeasured suspicion, not a repair.
             let hover = mix_srgb(fill, elevated, 0.84);
             let active = mix_srgb(fill, elevated, 0.72);
             // Ghost's idle border is transparent; its hover border mixes from
@@ -279,16 +296,31 @@ pub fn button(
 
     // ── Children (only when icons/spinner present) ──
     if has_icons {
+        // Contract §8 icon wrapper: icons and the spinner ride in a fixed
+        // icon-md box that reserves layout space, glyph centred inside — the
+        // native counterpart of the web `.poodle-button__icon` /
+        // `.poodle-button__spinner` wrapper. The g15.047 comparator measured
+        // GPUI reserving only the 12px glyph box, which shifted the label
+        // 2px against the web layout.
+        let icon_box = theme.resolve_space("size.icon.md");
+        let wrap_glyph = |glyph: Node| -> Node {
+            let mut wrapper = Node::container();
+            wrapper.style.descriptor.layout.width = LayoutSizing::Fixed(icon_box);
+            wrapper.style.descriptor.layout.height = LayoutSizing::Fixed(icon_box);
+            wrapper.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+            wrapper.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+            wrapper.child(glyph)
+        };
         if spec.is_loading {
             let mut spinner = Node::icon("spinner", spinner_size);
             spinner.style.descriptor.text_color = Some(text_color);
             spinner.style.animation = Some(NodeAnimation::spin("poodle-spinner-ring", 0.8));
-            el = el.child(spinner);
+            el = el.child(wrap_glyph(spinner));
         }
         if let Some(ref icon_name) = spec.leading_icon {
             let mut icon = Node::icon(icon_name.as_str(), icon_size);
             icon.style.descriptor.text_color = Some(text_color);
-            el = el.child(icon);
+            el = el.child(wrap_glyph(icon));
         }
         if !label_text.is_empty() {
             let mut label = Node::text(&label_text);
@@ -302,7 +334,7 @@ pub fn button(
         if let Some(ref icon_name) = spec.trailing_icon {
             let mut icon = Node::icon(icon_name.as_str(), icon_size);
             icon.style.descriptor.text_color = Some(text_color);
-            el = el.child(icon);
+            el = el.child(wrap_glyph(icon));
         }
         if spec.chevron {
             // Old tier: the chevron sits in a flex/center wrapper at 0.5
@@ -489,7 +521,27 @@ mod tests {
         let spec = ButtonSpec::new().with_variant(ButtonVariant::Primary);
         let node = button(&spec, &theme, None);
         assert_eq!(node.style.descriptor.background, Some(accent));
-        assert_eq!(node.style.descriptor.border.color, mix_black(accent, 0.86));
+        // Contract §8: color-mix(in srgb, accent-base 84%, black).
+        assert_eq!(node.style.descriptor.border.color, mix_black(accent, 0.84));
+    }
+
+    #[test]
+    fn secondary_default_idle_fill_is_elevation_stacked() {
+        // Contract §8: color-mix(in srgb, surface 88%, text-primary) — the
+        // g15.047 comparator measured the raw-surface fill drifting ~26/255
+        // from the web reference; this pins the repaired formula.
+        let theme = theme();
+        let surface = theme.resolve_color("color.background.surface");
+        let text_primary = theme.resolve_color("color.text.primary");
+        let border_default = theme.resolve_color("color.border.default");
+
+        let node = button(&ButtonSpec::new(), &theme, None);
+        assert_eq!(
+            node.style.descriptor.background,
+            Some(mix_srgb(surface, text_primary, 0.88))
+        );
+        assert_eq!(node.style.descriptor.border.color, border_default);
+        assert_eq!(node.style.descriptor.text_color, Some(text_primary));
     }
 
     #[test]
@@ -501,7 +553,8 @@ mod tests {
         let spec = ButtonSpec::new().with_pressed(true);
         let node = button(&spec, &theme, None);
         assert_eq!(node.style.descriptor.background, Some(accent));
-        assert_eq!(node.style.descriptor.border.color, mix_black(accent, 0.86));
+        // Contract §8 pressed: color-mix(accent-base 85%, black) border.
+        assert_eq!(node.style.descriptor.border.color, mix_black(accent, 0.85));
         assert_eq!(node.style.descriptor.text_color, Some(inverse));
 
         // Primary keeps its own recipe when pressed.
@@ -559,12 +612,17 @@ mod tests {
         assert_eq!(active.background, Some(mix_srgb(danger, BLACK, 0.88)));
         assert_eq!(hover.border_color, Some(mix_black(hover_fill, 0.86)));
 
-        // Default secondary: fill toward elevated, border toward text-primary.
+        // Default secondary: hover/active keep the old-tier mix from the
+        // final fill toward elevated — unmeasured by the g15.047 batch, so
+        // the contract §8 text-primary stacking for these states is recorded
+        // as a suspicion, not repaired here. The idle-fill repair means the
+        // mix now starts from the stacked fill.
         let node = button(&ButtonSpec::new(), &theme, None);
         let hover = node.style.hover.expect("hover patch");
         let active = node.style.active.expect("active patch");
-        assert_eq!(hover.background, Some(mix_srgb(surface, elevated, 0.84)));
-        assert_eq!(active.background, Some(mix_srgb(surface, elevated, 0.72)));
+        let idle_fill = mix_srgb(surface, text_primary, 0.88);
+        assert_eq!(hover.background, Some(mix_srgb(idle_fill, elevated, 0.84)));
+        assert_eq!(active.background, Some(mix_srgb(idle_fill, elevated, 0.72)));
         assert_eq!(
             hover.border_color,
             Some(mix_srgb(border_default, text_primary, 0.78))
@@ -596,6 +654,56 @@ mod tests {
         let padding = node.style.descriptor.layout.spacing.padding;
         assert_eq!(padding.left, 0.0);
         assert_eq!(padding.right, 0.0);
+    }
+
+    #[test]
+    fn icons_and_spinner_ride_in_the_icon_md_wrapper_box() {
+        // Contract §8 icon wrapper: `.poodle-button__icon` / `__spinner`
+        // reserve a fixed icon-md box with the glyph centred inside. The
+        // g15.047 comparator measured GPUI reserving only the 12px glyph box,
+        // shifting the label 2px against the web layout.
+        let theme = theme();
+        let wrapper_edge = theme.resolve_space("size.icon.md");
+
+        let spec = ButtonSpec::new()
+            .with_label("Run")
+            .with_leading_icon("play");
+        let node = button(&spec, &theme, None);
+        let wrapper = node
+            .children
+            .iter()
+            .find(|child| {
+                child
+                    .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "play"))
+                    .is_some()
+            })
+            .expect("leading icon wrapper exists");
+        assert!(matches!(wrapper.kind, poodle_node::NodeKind::Container));
+        assert_eq!(
+            wrapper.style.descriptor.layout.width,
+            LayoutSizing::Fixed(wrapper_edge)
+        );
+        assert_eq!(
+            wrapper.style.descriptor.layout.height,
+            LayoutSizing::Fixed(wrapper_edge)
+        );
+        // The glyph itself keeps the sm icon token inside the wrapper.
+        assert_eq!(icon_size_of(&node, "play"), theme.resolve_space("size.icon.sm"));
+
+        let loading = button(&ButtonSpec::new().with_loading(true), &theme, None);
+        let spinner_wrapper = loading
+            .children
+            .iter()
+            .find(|child| {
+                child
+                    .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "spinner"))
+                    .is_some()
+            })
+            .expect("spinner wrapper exists");
+        assert_eq!(
+            spinner_wrapper.style.descriptor.layout.width,
+            LayoutSizing::Fixed(wrapper_edge)
+        );
     }
 
     #[test]

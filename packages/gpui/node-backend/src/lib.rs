@@ -447,13 +447,20 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
     let el = apply_paint(el, node);
     let el = apply_text(el, node);
     let el = apply_cursor(el, node);
+    // `node.id` forces the wrapper: an identified leaf must go through
+    // `build_box` so its paint bounds are recorded for `bounds_for`
+    // observation (the g15.047 capture seam). The wrapper carries the
+    // animation channels then — opacity only, so an identified spinning leaf
+    // keeps its clock but not its rotation; no production tree identifies an
+    // animated icon, and the capture host freezes motion regardless.
     let needs_wrapper = node.style.hover.is_some()
         || node.style.active.is_some()
         || node.interaction.focusable
         || node.interaction.on_activate.is_some()
         || node.interaction.on_text_change.is_some()
         || node.interaction.on_drag.is_some()
-        || !node.children.is_empty();
+        || !node.children.is_empty()
+        || node.id.is_some();
     if needs_wrapper {
         return build_box(node, div().child(el));
     }
