@@ -36,10 +36,17 @@ revisions are accepted in Cargo manifests and lockfiles.
   retained `unknown-git = "deny"` and `required-git-spec = "rev"`.
 - Added the bzip2/libbzip2 notice to the repository root and the public-intent
   native package, with executable notice-marker checks. The terms are from the
-  [SPDX bzip2-1.0.6 text](https://spdx.org/licenses/bzip2-1.0.6.html).
+  exact [`libbz2-rs-sys` v0.2.5 `COPYING` text](https://github.com/trifectatechfoundation/libbzip2-rs/blob/v0.2.5/COPYING);
+  [SPDX](https://spdx.org/licenses/bzip2-1.0.6.html) remains the identifier
+  reference.
 - Added exact Cargo manifest/lock URL-plus-revision validation and focused
   negative tests for unknown repositories, mutable references, changed
   revisions, and missing notices.
+- `cargo deny` reports `no-license-field` warnings for `gpui_util` and
+  `gpui_shared_string`. Both crates carry tracked
+  `LICENSE-APACHE -> ../../LICENSE-APACHE` symlinks at fork commit `87d9afbe`;
+  their Apache-2.0 licence evidence is present even though their manifests omit
+  the metadata field.
 - Added one small `PAPERCUTS.md` entry for the zsh lowercase `path`
   variable collision found during repository probing.
 
