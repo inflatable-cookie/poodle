@@ -1,34 +1,9 @@
 # Third-Party Notices
 
-Poodle includes the following third-party assets. These assets remain under
-their upstream licenses; Poodle's MIT license does not replace those terms.
-
-## Lucide Icons
-
-Lucide 1.31.0 supplies both the scoped icon data in
-`packages/core/src/icons/icons/` and the SVG assets in
-`packages/render/assets/icons/`. Both outputs are generated from one
-canonical Poodle manifest. [Lucide](https://github.com/lucide-icons/lucide) is
-licensed under the ISC License and includes icons derived from Feather under
-the MIT License.
-
-- Published core-package notice: [`packages/core/THIRD_PARTY_NOTICES.md`](packages/core/THIRD_PARTY_NOTICES.md)
-- Rust asset license: [`packages/render/assets/icons/LICENSE.txt`](packages/render/assets/icons/LICENSE.txt)
-
-## Inter
-
-The Inter 4.001 font files in `packages/gpui/preview/assets/fonts/` come from
-[Inter](https://github.com/rsms/inter) and remain licensed under the SIL Open
-Font License, Version 1.1.
-
-- Font license: [`packages/gpui/preview/assets/fonts/LICENSE.txt`](packages/gpui/preview/assets/fonts/LICENSE.txt)
-
-## bzip2 and libbzip2
-
-The native GPUI graph includes `libbz2-rs-sys`, which is distributed under the
-bzip2 and libbzip2 License v1.0.6. The notice below preserves the upstream
-copyright, conditions, disclaimer, patent statement, and endorsement clause
-from the [SPDX licence text](https://spdx.org/licenses/bzip2-1.0.6.html).
+The native GPUI backend includes `libbz2-rs-sys`, which is distributed under
+the bzip2 and libbzip2 License v1.0.6. This notice is carried beside the
+public-intent native crate because the repository-root notice is not part of a
+crate-local distribution surface.
 
 This program, "bzip2", the associated library "libbzip2", and all
 documentation, are copyright (C) 1996-2010 Julian R Seward. All rights reserved.

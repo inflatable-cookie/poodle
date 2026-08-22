@@ -18,6 +18,7 @@ allow = [
   "BSD-2-Clause",
   "BSD-3-Clause",
   "BSL-1.0",
+  "bzip2-1.0.6",
   "CC0-1.0",
   "ISC",
   "MIT",
@@ -31,8 +32,15 @@ allow = [
 confidence-threshold = 0.8
 
 [sources]
-# Public crates may use crates.io and local path dependencies. Remote Git or
-# alternate registry sources require an explicit policy change.
+# Only the reviewed immutable Git repositories used by the GPUI graphs are
+# admitted. Every dependency must still declare a full `rev` below.
+allow-git = [
+  "https://github.com/inflatable-cookie/zed",
+  "https://github.com/zed-industries/font-kit",
+  "https://github.com/zed-industries/scap",
+  "https://github.com/zed-industries/wasm_thread",
+  "https://github.com/proptest-rs/proptest",
+]
 unknown-registry = "deny"
 unknown-git = "deny"
 required-git-spec = "rev"

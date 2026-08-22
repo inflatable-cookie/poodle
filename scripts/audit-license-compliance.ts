@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
+import { missingNoticeMarkers } from "./license-compliance-policy.ts";
 
 const errors: string[] = [];
 const list = Bun.spawnSync(["git", "ls-files", "-z"], {
@@ -73,17 +74,32 @@ const requiredNotices = [
   },
   {
     path: "THIRD_PARTY_NOTICES.md",
-    markers: ["Lucide 1.31.0", "canonical Poodle manifest", "Inter 4.001"],
+    markers: [
+      "Lucide 1.31.0",
+      "canonical Poodle manifest",
+      "Inter 4.001",
+      "bzip2 and libbzip2 License v1.0.6",
+      "This program, \"bzip2\", the associated library \"libbzip2\"",
+      "PATENTS: To the best of my knowledge",
+    ],
+  },
+  {
+    path: "packages/gpui/node-backend/THIRD_PARTY_NOTICES.md",
+    markers: [
+      "bzip2 and libbzip2 License v1.0.6",
+      "This program, \"bzip2\", the associated library \"libbzip2\"",
+      "Redistribution and use in source and binary forms",
+      "PATENTS: To the best of my knowledge",
+      "Neither the names of the copyright holder",
+    ],
   },
 ];
 
 for (const notice of requiredNotices) {
   try {
     const source = readFileSync(notice.path, "utf8");
-    for (const marker of notice.markers) {
-      if (!source.includes(marker)) {
-        errors.push(`${notice.path}: missing required marker ${JSON.stringify(marker)}`);
-      }
+    for (const marker of missingNoticeMarkers(source, notice.markers)) {
+      errors.push(`${notice.path}: missing required marker ${JSON.stringify(marker)}`);
     }
   } catch {
     errors.push(`${notice.path}: required third-party notice is missing`);
