@@ -63,8 +63,8 @@ pub struct FixtureArgs {
 /// Real asset source for fixture scenes: the same files the interactive
 /// preview serves. A requested icon that is not on disk is an error, never a
 /// silently empty frame.
-struct FixtureAssets {
-    base: PathBuf,
+pub(crate) struct FixtureAssets {
+    pub(crate) base: PathBuf,
 }
 
 impl AssetSource for FixtureAssets {
@@ -117,7 +117,7 @@ fn preflight_icon_assets(fixture: &ButtonFixture) -> Result<()> {
 /// Inter static weights, loaded before the window opens so label shaping is
 /// the same real text stack the interactive preview uses. The files are part
 /// of the scene contract: a missing font is a hard failure.
-fn inter_fonts() -> Result<Vec<Cow<'static, [u8]>>> {
+pub(crate) fn inter_fonts() -> Result<Vec<Cow<'static, [u8]>>> {
     let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets/fonts");
     ["Inter-Regular.ttf", "Inter-Medium.ttf"]
         .iter()
@@ -389,10 +389,11 @@ fn srgb(color: ColorValue) -> [f32; 4] {
 /// The five fixed visual roles, read from the rendered node tree (post-render,
 /// pre-conversion). The GPUI Button paints no shadow, ever, so the layer list
 /// is honestly empty. The focus ring is dormant declared evidence (no fixture
-/// captures a focused frame): GPUI's focus treatment is the border recoloured
-/// to the accent ring, so the visible indicator width is the border width —
-/// recorded as such. The web's 2px outline has no native counterpart; the
-/// comparator reports that delta rather than hiding it.
+/// captures a focused frame): it is read from the node's dedicated focus-ring
+/// channel — the g15.052 native counterpart of the web `outline` — so the
+/// recorded width is the declared ring width (2px), not the resting border's.
+/// Absent ring (disabled/loading) means no focus treatment exists in this
+/// state — an honest null pair.
 #[derive(Serialize)]
 struct RolesEvidence {
     fill: FillRole,
@@ -443,19 +444,8 @@ fn roles_evidence(node: &Node) -> Result<RolesEvidence> {
         text: FillRole { color: srgb(text) },
         shadow: ShadowRole { layers: Vec::new() },
         focus_ring: FocusRingRole {
-            color: node
-                .style
-                .focus
-                .and_then(|patch| patch.border_color)
-                .map(srgb),
-            // The focus patch recolours the border; the painted indicator is
-            // exactly the border width. Absent focus patch (disabled) means
-            // no focus treatment exists in this state — an honest null pair.
-            width: if node.style.focus.is_some() {
-                Some(descriptor.border.width)
-            } else {
-                None
-            },
+            color: node.style.focus_ring.map(|ring| srgb(ring.color)),
+            width: node.style.focus_ring.map(|ring| ring.width),
             status: "dormant",
         },
     })
