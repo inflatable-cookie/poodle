@@ -1,6 +1,6 @@
 # Native Presentation Explicitness
 
-Status: promoted into the `g15.043` architecture decision
+Status: closed — promoted into architecture 010 and `g15.043`
 Captured: 2026-08-23
 Found while auditing `UiPresentationProvider`'s native cascade.
 
@@ -27,7 +27,7 @@ ineffective.
 
 ## Promotion
 
-`g15.043` now records the candidate audit and recommends a real shared Rust
-render context plus optional presentation inputs. That is a pre-v1 breaking
-migration and remains behind operator approval. This note is evidence for that
-decision, not a separate work item.
+The operator approved the clean pre-v1 break on 2026-08-23. Architecture 010
+now fixes the shared Rust render context, optional presentation inputs, scoped
+construction, and backend boundary. `g15.043` owns implementation. This note is
+closed evidence, not a separate work item.

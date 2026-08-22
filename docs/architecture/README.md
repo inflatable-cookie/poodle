@@ -1,7 +1,7 @@
 # Architecture
 
 Status: active
-Updated: 2026-08-15
+Updated: 2026-08-23
 
 Architecture documents define Poodle's stable ownership and runtime boundaries.
 They explain the current system; milestone sequencing belongs in roadmaps.
@@ -28,3 +28,6 @@ current delivery status.
   — superseded; current consumer ownership lives in the system shape
 - [Cross-runtime component conformance](009-cross-runtime-component-conformance.md)
   — rejected g14 pilot record; not standing architecture
+- [Native presentation construction context](010-native-presentation-construction-context.md)
+  — accepted shared-Rust context, inheritance, composition, and explicit-
+  override rules

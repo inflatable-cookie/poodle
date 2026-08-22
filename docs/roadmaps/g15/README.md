@@ -2,7 +2,7 @@
 
 Status: active — `g15.001`–`g15.012`, `g15.014`–`g15.017`,
 `g15.019`–`g15.042`, `g15.044`–`g15.049`, and `g15.051`–`g15.052`
-complete; `g15.043` is the current planning checkpoint;
+complete; `g15.043` is ready after operator architecture approval;
 the remaining release path is `g15.043` → `g15.050` → `g15.013`
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
@@ -81,7 +81,7 @@ and status advance are the orchestrator's.
 24. [040 — ResizeHandle native keyboard and value semantics](040-resize-handle-native-semantics.md) — complete; PR #56 closed stable native focus identity, keyboard, and numeric-range semantics
 25. [041 — Popover interactive trigger semantics](041-popover-interactive-trigger-semantics.md) — complete; PR #59 landed the clean state-aware trigger migration and closed `g15.032`
 26. [042 — Stepper native interaction parity](042-stepper-native-interaction-parity.md) — complete; PR #60 closed inert GPUI selection/re-run controls
-27. [043 — UiPresentationProvider native cascade](043-ui-presentation-provider-native-cascade.md) — planned; orchestrator architecture decision required before dispatch
+27. [043 — UiPresentationProvider native cascade](043-ui-presentation-provider-native-cascade.md) — ready; architecture 010 accepted and atomic Rust migration approved by the operator
 28. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — non-dispatchable parent recompiled into `044`–`047`
 29. [044 — GPUI offscreen capture feasibility](044-gpui-offscreen-capture-feasibility.md) — complete; PR #61 proved a deterministic no-focus Metal pixel path
 30. [045 — GPUI offscreen capture adoption](045-gpui-offscreen-capture-adoption.md) — complete; PR #62 adopted the exact no-focus Metal seam
@@ -146,7 +146,7 @@ its dependency-specific notice, and exact Git-source policy fails closed.
 the Button defect measured by `g15.047` and the Stepper keyboard-entry/focus
 gap retained from `g15.042`, without widening comparator policy.
 
-`g15.043` is now the current planning checkpoint. Its native presentation-
-context architecture is still unresolved, so the card remains
-non-dispatchable until the orchestrator records that decision and recompiles
-the exact implementation scope. `g15.050` remains blocked on it.
+`g15.043` is ready. Architecture 010 fixes an explicit shared Rust
+`RenderContext`, optional presentation inputs, scoped child construction, and
+the backend boundary. The operator approved the atomic pre-v1 migration on
+2026-08-23. `g15.050` remains blocked until its worker PR is accepted.
