@@ -7,6 +7,7 @@ Governing refs: `../../specs/022-packaging-versioning-and-release-channel-rules.
 `../../roadmaps/g15/013-v020-release-certification.md`
 Handoff: `../../handoffs/20260821-234034-g15-048-packed-roster-reachability.md`
 Worker branch: `t3code/improve-packed-roster-reachability`
+PR: #64, accepted at `db1e2632`, merged as `1bb30492`
 
 ## Outcome
 
@@ -85,3 +86,11 @@ consumer suite; none is presented as full-roster behavior evidence.
 No committed workflow, release, version, publication, specimen, component,
 native, windowed, Jetstream, or GPUI preview surface changed or ran. The
 v0.2.0 manifest mutation was validation-only and was restored before commit.
+
+## Orchestrator Closeout
+
+The final review confirmed the manifest-derived archive path, bounded React
+non-component export authority, explicit extra-export rejection, and all five
+React roster tables. The operator authorised merge. `g15.048` is complete;
+its proof feeds `g15.050` without advancing the still-open visual,
+presentation-context, automation, or release-certification gates.

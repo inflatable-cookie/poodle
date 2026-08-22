@@ -1,8 +1,8 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
-`g15.019`–`g15.042`, and `g15.044`–`g15.045` complete; `g15.046` is ready
-and `g15.048` is in flight;
+`g15.019`–`g15.042`, `g15.044`–`g15.045`, and `g15.048` complete;
+`g15.046` is ready;
 the remaining release path is recompiled through `g15.050`
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
@@ -87,7 +87,7 @@ and status advance are the orchestrator's.
 30. [045 — GPUI offscreen capture adoption](045-gpui-offscreen-capture-adoption.md) — complete; PR #62 adopted the exact no-focus Metal seam
 31. [046 — Primitive visual fixture inventory](046-primitive-visual-fixture-inventory.md) — **ready**; `011` and `045` are complete
 32. [047 — Primitive visual comparison](047-primitive-visual-comparison.md) — planned after `046`; closes parent `012`
-33. [048 — Packed roster reachability](048-packed-roster-reachability.md) — **in flight**; late web API migrations are complete
+33. [048 — Packed roster reachability](048-packed-roster-reachability.md) — complete; PR #64 proves exact 175/175 packed-root reachability for both web runtimes
 34. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — blocked on explicit workflow-edit approval
 35. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — planned after every implementation, specimen, conformance, packaging, and automation gate
 36. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
@@ -127,7 +127,8 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 with the adopted no-focus GPUI capture seam from `g15.045`, that makes
 `g15.046` the next serial visual-conformance card and it is ready.
 
-`g15.048` is in flight on its independent packed-package proof lane.
+`g15.048` is complete in PR #64. Its exact packed-package proof is ready for
+`g15.050`, but the candidate remains behind the other release gates.
 
 Do not dispatch `g15.043` until the orchestrator fixes the native presentation-
 context architecture. `g15.049` requires explicit operator approval because

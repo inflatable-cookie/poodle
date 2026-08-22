@@ -27,13 +27,13 @@ deferred Jetstream are reported independently and honestly.
       gap register are current before certification begins.
 - [x] `g15.008`–`g15.010` landed: remaining native declarations, shared Rust
       rendering, and GPUI specimen gaps are closed.
-- [ ] `g15.011` landed: the human-centred specimen catalogue audit is complete.
+- [x] `g15.011` landed: the human-centred specimen catalogue audit is complete.
 - [ ] `g15.012` landed: the primitive-first visual conformance lane is complete.
 - [x] `g15.038` landed: SegmentedControl's contracted icon and icon-only option
       surface exists in shared Rust and GPUI without a compatibility twin.
-- [ ] `g15.042` landed: Stepper selection and re-run are live in GPUI.
+- [x] `g15.042` landed: Stepper selection and re-run are live in GPUI.
 - [ ] `g15.043` landed: UiPresentationProvider has a real native cascade.
-- [ ] `g15.048` landed: every public web component is reachable from clean
+- [x] `g15.048` landed: every public web component is reachable from clean
       packed roots.
 - [ ] `g15.049` landed: release and native pre-tag automation are truthful.
 - [ ] `g15.050` landed: one clean v0.2.0 candidate, artifacts, notes, and QA

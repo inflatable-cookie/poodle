@@ -6,8 +6,8 @@ Updated: 2026-08-22
 
 - `g15`
   - Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.042`, and `g15.044`–`g15.045` complete; `g15.046` ready,
-    `g15.048` in flight; `g15.013` is the final operator gate
+    `g15.019`–`g15.042`, `g15.044`–`g15.045`, and `g15.048` complete;
+    `g15.046` ready; `g15.013` is the final operator gate
   - Posture: release-first v0.2.0 baseline
   - Range: `001` to `050` plus final gate `013`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
@@ -18,8 +18,8 @@ Updated: 2026-08-22
     does not borrow another runtime's pass.
   - Next: `g15.011` and final child `g15.033` are complete. `g15.046` is the
     next serial visual card, using the offscreen GPUI seam adopted by PR #62.
-    `g15.048` is in flight on its independent package-proof lane. `g15.043`
-    stays non-dispatchable until the native
+    `g15.048` is complete in PR #64, closing its independent package-proof
+    lane. `g15.043` stays non-dispatchable until the native
     presentation-context architecture is fixed. `g15.012` is now exact
     children `044`–`047`; release preparation is exact children `048`–`050`;
     workflow edits in `049` require explicit operator approval.

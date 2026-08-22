@@ -1,6 +1,6 @@
 # g15.048 — Packed Roster Reachability
 
-Status: **ready** — late web public-surface migrations are complete
+Status: **complete** — PR #64 merged as `1bb30492`
 Depends on: all pre-release web public API changes, including `g15.041`
 Unblocks: `g15.050`
 Governing refs: `../../specs/022-packaging-versioning-and-release-channel-rules.md`,
@@ -28,15 +28,24 @@ specimen or behavior suite.
 
 ## Acceptance
 
-- [ ] All 175 Svelte and all 175 React component names import from clean packed
+- [x] All 175 Svelte and all 175 React component names import from clean packed
       roots; a missing or extra export fails with the exact name.
-- [ ] Core, Svelte, and React tarballs contain their declared entry points,
+- [x] Core, Svelte, and React tarballs contain their declared entry points,
       types, styles, generated tokens/icons, licence, README, and manifests.
-- [ ] Representative Svelte and React mounts run from installed tarballs.
-- [ ] The proof does not maintain 175 fake prop fixtures or claim behavior from
+- [x] Representative Svelte and React mounts run from installed tarballs.
+- [x] The proof does not maintain 175 fake prop fixtures or claim behavior from
       import success.
-- [ ] The React package is packed and certified even if `g15.050` keeps it
+- [x] The React package is packed and certified even if `g15.050` keeps it
       unpublished.
+
+## Completion Evidence
+
+PR #64 was accepted at `db1e2632` and merged as `1bb30492`. The packed-root
+proof imports exactly 175 Svelte and 175 React components, rejects named extra
+exports, retains a bounded 9-Svelte/13-React runtime mount set, and passed an
+independent temporary `0.2.0` package-version mutation. This unblocks the
+package-proof input to `g15.050`; visual conformance, native presentation
+context, release automation, and the remaining release gates stay separate.
 
 ## Stop Conditions
 

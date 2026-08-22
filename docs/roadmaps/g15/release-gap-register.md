@@ -95,14 +95,13 @@ focused owner-local tests, not by extending a shared comparator.
 
 ## Package-Install Surface
 
-`test:web-pack-install` proves packed-tarball reachability and mounting for 9
-Svelte components (DockRegion, LicenceActivation, LicenceSeats, LicenceStatus,
-ModelConnectionPicker, ModelConnectionSetup, ModelConnectionCard,
-ModelCatalogueEditor, MeterSurface) and 13 React components (AgentPlan and
-AgentPlanRecord added by `g15.006` as new root exports; the rest as recorded
-in `test/package-install/web-preview.ts`). `g15.048` replaces the vague
-"mount everything" continuation with exact clean-tarball root-import proof for
-all 175 names in both web packages plus a small representative mount set.
+PR #64 (`g15.048`) proves exact clean-tarball root-import reachability for all
+175 Svelte and all 175 React component names. Missing and extra names fail
+explicitly, package contents and public subpaths are checked, and an
+independent temporary `0.2.0` manifest mutation passed. Runtime behavior stays
+bounded to the representative mount set: 9 Svelte and 13 React components in
+`test/package-install/web-preview.ts`. Import reachability is not presented as
+behavior evidence.
 
 ## Native Interaction And Focus Gaps
 
@@ -119,7 +118,7 @@ measured from the mounted tree, not inferred from a contract read.
 | --- | --- | --- |
 | GPUI headless pixels | adopted by `g15.045` in PR #62: `gpui`/`gpui_platform` pinned to `zed-industries/zed@1ea16c1a` in node-backend and preview; `smoke:gpui-offscreen-capture` renders a real Button offscreen with typed receipts, one hash across repeated captures (`be94eace…`, matching the g15.044 proof), inset shadows now project instead of being dropped; headless regressions 56/56, Rust 1.95 floor preserved. Captures remain 2×-only and macOS-only; cross-machine tolerance is `g15.047` — see `docs/logs/2026-08/20260821-g15-045-gpui-offscreen-capture-adoption.md` | landed |
 | Primitive named fixtures and comparison | rejected g14 corpus is removed; web/native capture foundations are ready for a bounded inventory | `g15.046` ready, then `g15.047`, under parent `g15.012` |
-| Packed full-roster reachability | 9 Svelte / 13 React mounted cases only; closure card is in flight | `g15.048` |
+| Packed full-roster reachability | closed by PR #64: exact 175/175 Svelte and 175/175 React clean-root imports plus bounded 9/13 runtime mounts | `g15.048` complete |
 | Native pre-tag workflow | `.github/workflows/ci-native.yml` references deleted `packages/gpui/components/Cargo.toml` | `g15.049`, blocked on explicit workflow-edit approval |
 | Read-only release-gate claim | `effigy release gates` reports success with zero configured gates; not certification evidence | `g15.049` |
 | v0.2.0 candidate | manifests remain 0.1.0 and no 0.2.0 release note exists | `g15.050`, then operator gate `g15.013` |
