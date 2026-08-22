@@ -17,8 +17,9 @@ v0.2.0 release-baseline generation.
   implementation/evidence rosters, measured native declaration/specimen
   baseline, specimen curation and review, native specimen probe, packed roster,
   the first primitive fixture inventory, and truthful release automation are
-  complete. PR #65 accepted `g15.046`; `g15.047` now needs its exact comparator
-  envelope compiled. PR #66 closed `g15.049`; PR #67 closed the GPUI/Zed
+  complete. PR #65 accepted `g15.046`; `g15.047` is ready with one exact
+  Button comparison and operator-review envelope. PR #66 closed `g15.049`;
+  PR #67 closed the GPUI/Zed
   dependency-licence policy gap without admitting GPL code. The remaining
   release path is explicit: the
   native presentation blocker (`043`), comparator closeout (`047` under parent
@@ -53,7 +54,7 @@ v0.2.0 release-baseline generation.
   `g15.014`–`g15.017`, `g15.019`–`g15.026`, `g15.028`–`g15.032`, and
   `g15.034`–`g15.042`, `g15.044`–`g15.046`, `g15.048`–`g15.049`, and
   `g15.051` complete;
-  `g15.047` awaits exact compilation; range recompiled
+  `g15.047` is ready; range recompiled
   through `g15.051`;
   `g15.013` final operator gate
 

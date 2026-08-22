@@ -1,7 +1,7 @@
 # g15.012 — Primitive-First Visual Conformance Lane
 
 Status: **non-dispatchable parent** — exact children `g15.044`–`g15.047`;
-`g15.044`–`g15.045` are complete; Button-only `g15.046` is ready
+`g15.044`–`g15.046` are complete; Button-only `g15.047` is ready
 Depends on: `g15.001` (measured roster), `g15.011` (before fixture freeze),
 `g15.038` (SegmentedControl native option parity)
 Governing refs: `release-baseline-roster.md`,
@@ -44,8 +44,10 @@ still completes before the generation's final release-certification card.
    #62.**
 3. [`g15.046`](046-primitive-visual-fixture-inventory.md) — freeze the small
    named primitive batch after the human-centred catalogue audit completes.
+   **Complete in PR #65.**
 4. [`g15.047`](047-primitive-visual-comparison.md) — capture and compare the
    first batch across Svelte, React, and GPUI with human-reviewed tolerances.
+   **Ready with one exact 18-fixture comparison and review envelope.**
 
 ### g15.044 Evidence (2026-08-21)
 
