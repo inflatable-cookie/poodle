@@ -49,6 +49,7 @@ pub mod color;
 pub mod color_picker;
 pub mod command_palette;
 pub mod confirm_action;
+pub mod context;
 pub mod context_menu;
 pub mod data_table;
 pub mod date_picker;
