@@ -1,10 +1,9 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
-`g15.019`–`g15.042`, `g15.044`–`g15.046`, `g15.048`–`g15.049`, and
-`g15.051` complete;
-`g15.047` is ready;
-the remaining release path is recompiled through `g15.051`
+Status: active — `g15.001`–`g15.012`, `g15.014`–`g15.017`,
+`g15.019`–`g15.042`, `g15.044`–`g15.049`, and `g15.051` complete;
+`g15.052` is ready;
+the remaining release path is `g15.052` → `g15.043` → `g15.050` → `g15.013`
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -87,7 +86,7 @@ and status advance are the orchestrator's.
 29. [044 — GPUI offscreen capture feasibility](044-gpui-offscreen-capture-feasibility.md) — complete; PR #61 proved a deterministic no-focus Metal pixel path
 30. [045 — GPUI offscreen capture adoption](045-gpui-offscreen-capture-adoption.md) — complete; PR #62 adopted the exact no-focus Metal seam
 31. [046 — Primitive visual fixture inventory](046-primitive-visual-fixture-inventory.md) — complete; PR #65 froze the exact 18-case Button inventory and paired validators
-32. [047 — Primitive visual comparison](047-primitive-visual-comparison.md) — ready; exact 18-fixture same-run comparison, fixed tolerance policy, planted failures, and operator review envelope; closes parent `012`
+32. [047 — Primitive visual comparison](047-primitive-visual-comparison.md) — complete; PR #68 landed the exact 18-fixture comparison after operator review and routed the measured native focus defect to `052`; closes parent `012`
 33. [048 — Packed roster reachability](048-packed-roster-reachability.md) — complete; PR #64 proves exact 175/175 packed-root reachability for both web runtimes
 34. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — complete; PR #66 made every retained workflow a pinned Effigy launcher and made the release board non-vacuous
 35. [051 — GPUI/Zed dependency licence remediation](051-gpui-zed-dependency-licence-remediation.md) — complete; PR #67 removed GPL tracing from the resolved GPUI graph through a minimal exact-revision fork and hardened licence/source policy
@@ -97,6 +96,7 @@ and status advance are the orchestrator's.
 39. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
 40. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
 41. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
+42. [052 — Native focus-ring parity](052-native-focus-ring-parity.md) — ready; one reusable node channel closes the measured Button ring and Stepper keyboard-entry/focus gaps
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)
@@ -125,8 +125,10 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task And Parallel Lanes
 
-`g15.046` is complete in PR #65. Its exact 18-case Button inventory and paired
-validators feed ready card `g15.047` without adding another schema or registry.
+`g15.012` and its exact children are complete. PR #68 landed `g15.047` after
+operator review of all 54 captures. The diagnostic mechanism worked: web is
+exact, native geometry and pixels are close, and it exposed a real focus-ring
+defect without weakening policy.
 
 `g15.048` is complete in PR #64. Its exact packed-package proof is ready for
 `g15.050`, but the candidate remains behind the other release gates.
@@ -140,8 +142,11 @@ the exact Poodle-owned Zed fork is pinned, the permissive bzip2 licence carries
 its dependency-specific notice, and exact Git-source policy fails closed.
 `g15.050` remains blocked.
 
-`g15.047` is the current dispatchable task. It captures the 18 Button fixtures
-through Svelte, React, and GPUI, applies one fixed renderer-aware policy, and
-stops for operator review of all 54 captures. Do not dispatch `g15.043` until
-the orchestrator fixes the native presentation-context architecture. No second
-worker lane is ready.
+`g15.052` is the current dispatchable task. It adds the smallest reusable
+native focus-ring channel and closes both the Button defect measured by
+`g15.047` and the Stepper keyboard-entry/focus gap retained from `g15.042`.
+Do not widen the comparator or turn the repair into a focus sweep.
+
+`g15.043` follows after `g15.052`; its native presentation-context architecture
+is still unresolved. The two cards overlap shared Rust/GPUI substrate and are
+not parallel lanes. `g15.050` remains blocked on both.

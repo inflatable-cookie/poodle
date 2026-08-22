@@ -1,8 +1,9 @@
 # g15.013 — v0.2.0 Release Certification
 
-Status: **operator gate — blocked on `g15.050`**
+Status: **operator gate — blocked on `g15.052`, `g15.043`, and `g15.050`**
 Depends on: every earlier g15 implementation/specimen/conformance card,
-`g15.042`–`g15.050`, and one clean accepted v0.2.0 candidate SHA
+`g15.042`–`g15.052` as sequenced by the runway, and one clean accepted v0.2.0
+candidate SHA
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
 
@@ -28,14 +29,16 @@ deferred Jetstream are reported independently and honestly.
 - [x] `g15.008`–`g15.010` landed: remaining native declarations, shared Rust
       rendering, and GPUI specimen gaps are closed.
 - [x] `g15.011` landed: the human-centred specimen catalogue audit is complete.
-- [ ] `g15.012` landed: the primitive-first visual conformance lane is complete.
+- [x] `g15.012` landed: the primitive-first visual conformance lane is complete.
 - [x] `g15.038` landed: SegmentedControl's contracted icon and icon-only option
       surface exists in shared Rust and GPUI without a compatibility twin.
 - [x] `g15.042` landed: Stepper selection and re-run are live in GPUI.
 - [ ] `g15.043` landed: UiPresentationProvider has a real native cascade.
 - [x] `g15.048` landed: every public web component is reachable from clean
       packed roots.
-- [ ] `g15.049` landed: release and native pre-tag automation are truthful.
+- [x] `g15.049` landed: release and native pre-tag automation are truthful.
+- [ ] `g15.052` landed: Button and Stepper use the reusable native focus-ring
+      channel, and Stepper accepts keyboard entry without a pointer prelude.
 - [ ] `g15.050` landed: one clean v0.2.0 candidate, artifacts, notes, and QA
       receipt are pinned to an exact SHA.
 
@@ -47,6 +50,8 @@ deferred Jetstream are reported independently and honestly.
   edits.
 - [`g15.050`](050-v020-release-candidate.md) owns versions, notes, dry-run
   artifacts, full headless QA, and the exact candidate receipt.
+- [`g15.052`](052-native-focus-ring-parity.md) owns the native focus-ring and
+  Stepper keyboard-entry blocker found by `g15.042`/`g15.047`.
 
 ## Goals
 

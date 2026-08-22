@@ -326,4 +326,14 @@ component, or Longhorn-lab work happened here.
 
 ## Operator verdict
 
-_pending — awaiting operator visual review and a ruling on the named blocker._
+Accepted and merged in PR #68 on 2026-08-22 after review of the 54-capture
+contact sheet.
+
+- The capture/comparison mechanism and fixed policy are accepted.
+- The existing `gpui-omits-box-shadow` contract delta is accepted for v0.2.0
+  as a visible reported limitation. It remains annotated in the evidence and
+  is not converted into a passing comparison.
+- The native focus treatment is rejected as Button parity: recolouring the
+  existing 1px border is not the contracted 2px focus ring. Tolerances and
+  known-delta classification remain unchanged. `g15.052` owns the reusable
+  native focus-ring channel plus Button and Stepper closure before release.

@@ -1,7 +1,7 @@
 # g15.012 — Primitive-First Visual Conformance Lane
 
-Status: **non-dispatchable parent** — exact children `g15.044`–`g15.047`;
-`g15.044`–`g15.046` are complete; Button-only `g15.047` is ready
+Status: **complete — exact children `g15.044`–`g15.047` landed; PR #68
+completed the operator-reviewed Button comparison on 2026-08-22**
 Depends on: `g15.001` (measured roster), `g15.011` (before fixture freeze),
 `g15.038` (SegmentedControl native option parity)
 Governing refs: `release-baseline-roster.md`,
@@ -47,7 +47,8 @@ still completes before the generation's final release-certification card.
    **Complete in PR #65.**
 4. [`g15.047`](047-primitive-visual-comparison.md) — capture and compare the
    first batch across Svelte, React, and GPUI with human-reviewed tolerances.
-   **Ready with one exact 18-fixture comparison and review envelope.**
+   **Complete in PR #68.** The mechanism exposed the native focus-ring defect
+   now owned by `g15.052`; its diagnostic success does not waive that defect.
 
 ### g15.044 Evidence (2026-08-21)
 
@@ -79,23 +80,23 @@ focus theft; its current contract cannot see genuinely native GPUI pixels.
 
 ## Goals
 
-- [ ] The lane is primitive-first and bounded to named components per batch.
-- [ ] Captures are headless and cannot steal desktop focus; if that is
+- [x] The lane is primitive-first and bounded to named components per batch.
+- [x] Captures are headless and cannot steal desktop focus; if that is
       impossible for a runtime, the finding is recorded and that runtime's
       half stops rather than falling back to a windowed harness.
-- [ ] Green baselines are diagnostic only: they never count as component
+- [x] Green baselines are diagnostic only: they never count as component
       completion, and every capture is reviewed by a human.
 
 ## Acceptance
 
-- [ ] The fixture inventory is renderer-neutral and is not a universal scene
+- [x] The fixture inventory is renderer-neutral and is not a universal scene
       or component representation.
-- [ ] Fixtures are never an API/behaviour authority; contracts remain the
+- [x] Fixtures are never an API/behaviour authority; contracts remain the
       semantic authority and focused functional evidence stays the
       completion surface.
-- [ ] Headless capture evidence exists for the first primitive batch in every
+- [x] Headless capture evidence exists for the first primitive batch in every
       active runtime with renderer-aware tolerances.
-- [ ] No semantic/behaviour authority or completion gate is introduced; the
+- [x] No semantic/behaviour authority or completion gate is introduced; the
       bounded renderer-aware cross-runtime comparator remains diagnostic.
 
 ## Stop Conditions
@@ -108,10 +109,9 @@ focus theft; its current contract cannot see genuinely native GPUI pixels.
 
 ## Closeout
 
-This parent completes only when `g15.044`–`g15.047` have landed, the first
-primitive batch has operator-reviewed evidence for every active runtime, and
-the resulting mechanism still satisfies the forbidden-authority boundaries
-above.
+Complete. `g15.044`–`g15.047` landed, all 54 first-batch captures received
+operator review, and the mechanism remains Button-only and diagnostic. Its
+red native focus-ring finding was routed to `g15.052`, not normalized away.
 
 ## Validation
 

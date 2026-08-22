@@ -110,14 +110,14 @@ measured from the mounted tree, not inferred from a contract read.
 
 | Gap | Current evidence | Owner |
 | --- | --- | --- |
-| GPUI Stepper keyboard entry and focus ring | The trigger, rerun, and summary set `interaction.focusable` but declare no focus treatment, so the node backend registers no focus handle for them (`tracks_focus` needs `style.focus`) and no focus ring paints. `g15.042`'s mounted regressions reach these controls by key **only after a pointer press has focused one**. `stepper.md` §6 requires `Tab` entry and order between trigger and rerun and activation of a focused control; §8 requires the ring on Trigger and Summary. Arrow / `Home` / `End` movement is a separate, already-recorded web-only delta (`stepper.md` §10). Closing this means a shared-render focus treatment for a control with no resting border to take the ring, and it lands on Jetstream too | open — found by `g15.042`; needs its own card, and a decision on the native focus treatment, before `g15.013` certification |
+| GPUI Button and Stepper focus rings; Stepper keyboard entry | `g15.047` measured Button's dormant focus role as a 1px resting-border recolour against the contracted 2px ring on 16/18 fixtures. The trigger, rerun, and summary in Stepper declare no focus treatment, so the backend registers no focus handle and `g15.042` can reach them by key only after pointer focus. `g15.052` fixes one reusable `poodle-node` ring channel with color, width, and offset, then applies it only to Button and the named Stepper controls. Arrow / `Home` / `End` movement remains the separately recorded web-only Stepper delta | `g15.052` ready; release blocker |
 
 ## Visual And Release-Path Gaps
 
 | Gap | Current evidence | Owner |
 | --- | --- | --- |
 | GPUI headless pixels | adopted by `g15.045` in PR #62, then repinned by `g15.051` to the minimal licence-safe fork `inflatable-cookie/zed@87d9afbe`; `smoke:gpui-offscreen-capture` still renders a real Button offscreen with typed receipts and one hash across repeated captures (`be94eace…`, matching the g15.044 proof); inset shadows project, headless regressions remain green, and Rust 1.95 holds. Captures remain 2×-only and macOS-only; cross-renderer tolerance is `g15.047` | landed |
-| Primitive named fixtures and comparison | `g15.046` froze 18 Button identities in PR #65; web/native capture foundations are accepted; `g15.047` has one fixed same-run geometry/role/pixel policy and operator-review boundary | `g15.047` ready; closes parent `g15.012` |
+| Primitive named fixtures and comparison | closed by PR #68: 18 Button identities produced 54 deterministic captures; Svelte↔React is exact; Svelte↔GPUI geometry and pixels pass the fixed renderer-aware policy; the operator accepted the mechanism and existing shadow annotation. The measured native focus-ring defect was not waived and moved to `g15.052` | `g15.047` and parent `g15.012` complete |
 | Packed full-roster reachability | closed by PR #64: exact 175/175 Svelte and 175/175 React clean-root imports plus bounded 9/13 runtime mounts | `g15.048` complete |
 | Native pre-tag workflow | closed by PR #66: the pinned manual workflow installs Bun 1.3.14 and Rust 1.95, then executes the supported `effigy ci:native` board | `g15.049` complete |
 | Read-only release-gate claim | closed by PR #66: `effigy release gates` executes exactly one configured `headless` gate backed by the complete `effigy qa` board | `g15.049` complete |
@@ -131,7 +131,7 @@ measured from the mounted tree, not inferred from a contract read.
 | Licence native completion (`g14.017`) | closed by `g15.007` — declarations, render, and GPUI specimens landed | `g15.007` |
 | Model-connection native completion (`g14.020`) | closed by `g15.008` — declarations, headless mirror, render, and GPUI specimens landed | `g15.008` |
 | Human-centred specimen catalogue audit (`g14.026`) | complete: screening, pilots, defect-led curation, native probe, all six screen-clear children, routed repairs, and operator review landed through PR #63 | `g15.011` complete |
-| Primitive-first visual conformance lane | recompiled into exact capture feasibility, adoption, fixture, and comparison children | `g15.012`, `g15.044`–`g15.047` |
+| Primitive-first visual conformance lane | complete through PR #68: exact capture feasibility, adoption, fixture inventory, comparison, and operator review landed without becoming component authority | `g15.012`, `g15.044`–`g15.047` complete |
 | Release-gate remediation | closed by PR #31 — `nanoid@3.3.18`; `bun audit` clean | `g15.014` |
 | v0.2.0 release certification | packed proof, truthful automation, dependency-licence remediation, and candidate preparation are explicit children; tag/publish stays operator-owned | `g15.048`–`g15.051`, then `g15.013` |
 

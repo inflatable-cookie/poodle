@@ -1,7 +1,7 @@
 # g15.047 — Primitive Visual Comparison
 
-Status: **ready — exact Button comparison and operator-review envelope
-compiled on 2026-08-22**
+Status: **complete — PR #68 merged 2026-08-22; operator-reviewed mechanism
+accepted, native focus-ring defect routed to `g15.052`**
 Parent: `012-visual-conformance-lane.md`
 Depends on: `g15.045`, accepted `g15.046`
 Unblocks: `g15.012` closeout, then release certification
@@ -155,28 +155,28 @@ workflows, Jetstream, the Longhorn lab, or release/tag/publication surfaces.
 
 ## Acceptance Envelope
 
-- [ ] The exact 18 accepted fixtures produce 54 verified capture/receipt pairs
+- [x] The exact 18 accepted fixtures produce 54 verified capture/receipt pairs
       and 36 pairwise diffs. Missing, extra, duplicated, stale, or hash-invalid
       output fails.
-- [ ] Both repeat captures for every runtime/fixture are byte-identical.
-- [ ] Svelte and React pass the exact policy. Web and GPUI pass the fixed
+- [x] Both repeat captures for every runtime/fixture are byte-identical.
+- [x] Svelte and React pass the exact policy. Web and GPUI pass the fixed
       renderer-aware policy or the card stops with a named blocker; nothing is
       silently allowlisted.
-- [ ] Geometry, role, and pixel verdicts remain separate in the report. A
+- [x] Geometry, role, and pixel verdicts remain separate in the report. A
       pixel pass cannot hide a geometry or role failure.
-- [ ] In-memory planted failures prove missing capture, two-logical-pixel root
+- [x] In-memory planted failures prove missing capture, two-logical-pixel root
       shift, missing icon/spinner landmark, changed role colour/shadow, PNG
       tamper, and a pixel change exceeding 3% each fail through the production
       comparator path.
-- [ ] Contact sheets and the full machine-readable report preserve all 54
+- [x] Contact sheets and the full machine-readable report preserve all 54
       captures in canonical fixture order. The operator reviews them before
       merge.
-- [ ] No committed capture is consumed as a future expected baseline. No
+- [x] No committed capture is consumed as a future expected baseline. No
       update/refresh command exists.
-- [ ] The execution log records source cost, duplicated registry count,
+- [x] The execution log records source cost, duplicated registry count,
       initial mismatches, repairs, final metrics, environment, and operator
       verdict.
-- [ ] The mechanism remains Button-only and diagnostic. It cannot mark Button
+- [x] The mechanism remains Button-only and diagnostic. It cannot mark Button
       or another component complete.
 
 ## Validation
@@ -215,9 +215,11 @@ selector, a release mutation, tag, publication, or workflow edit.
 
 ## Continuation
 
-After the worker PR is ready, the orchestrator and operator review the contact
-sheets and report. Merge needs explicit operator authorization. An accepted
-merge completes parent `g15.012`; it does not expand the fixture roster.
+PR #68 merged after technical review and explicit operator visual sign-off.
+The 54 captures were accepted as an honest point-in-time diagnostic set. The
+existing GPUI shadow omission remains a reported v0.2 known delta; it was not
+hidden by the comparator. The 1px border-recolour focus treatment was rejected
+as a substitute for the contracted focus ring and is owned by `g15.052`.
 
-The Longhorn-backed conformance lab remains a separate post-comparator design
-decision. `g15.050` remains blocked on `g15.043` and other open release gaps.
+This merge completes parent `g15.012`; it does not expand the fixture roster.
+The Longhorn-backed conformance lab remains a separate later decision.
