@@ -8,7 +8,7 @@ Governing refs: `../../roadmaps/g15/release-gap-register.md`,
 `../../tasks/effigy.tasks.toml`, `../../packages/release-operations.json`
 Handoff: `../../handoffs/20260822-090530-g15-049-release-automation-truthfulness.md`
 Worker branch: `t3code/release-automation-truthfulness`
-PR: pending
+PR: [#66](https://github.com/inflatable-cookie/poodle/pull/66)
 
 ## Outcome
 
