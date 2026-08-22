@@ -8,22 +8,23 @@ Updated: 2026-08-22
   - Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
     `g15.019`–`g15.042`, `g15.044`–`g15.046`, and `g15.048`–`g15.049`
     complete;
-    `g15.047` awaits exact compilation; `g15.013` is the final operator gate
+    `g15.047` awaits exact compilation; `g15.051` is ready;
+    `g15.013` is the final operator gate
   - Posture: release-first v0.2.0 baseline
-  - Range: `001` to `050` plus final gate `013`
+  - Range: `001` to `051` plus final gate `013`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
     release baseline, not a parity architecture
   - Evidence: the v0.2.0 denominator is every public Svelte component
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: compile the exact `g15.047` comparator envelope before dispatch.
-    `g15.048` and `g15.049` are complete in PRs #64 and #66. The truthful
-    release board exposed a GPUI/Zed dependency-licence policy gap; promote it
-    from triage into a bounded card before `g15.050`. `g15.043` stays
+  - Next: dispatch ready `g15.051` to remove the GPL tracing graph through a
+    minimal exact-revision Zed fork and harden licence/source policy.
+    `g15.048` and `g15.049` are complete in PRs #64 and #66. `g15.047` still
+    needs its exact comparator envelope before dispatch. `g15.043` stays
     non-dispatchable until the native presentation-context architecture is
     fixed. `g15.012` is now exact children `044`–`047`; release preparation is
-    exact children `048`–`050` plus the newly measured policy gap.
+    exact children `048`–`051`.
 
 ## Latest Completed Track
 

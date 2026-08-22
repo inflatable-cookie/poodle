@@ -7,7 +7,7 @@ Source: `docs/roadmaps/g15/release-baseline-roster.md` (frozen 175-component den
 
 Every incomplete surface below was measured from the tree; nothing is inferred
 from another runtime's pass. Owners are the roadmap cards compiled from these
-gaps (`g15.002`–`g15.050`). Absence of downstream use is recorded as context
+gaps (`g15.002`–`g15.051`). Absence of downstream use is recorded as context
 but is **not** a gap — see the note at the end.
 
 ## Svelte Release Blocker Class
@@ -121,7 +121,7 @@ measured from the mounted tree, not inferred from a contract read.
 | Packed full-roster reachability | closed by PR #64: exact 175/175 Svelte and 175/175 React clean-root imports plus bounded 9/13 runtime mounts | `g15.048` complete |
 | Native pre-tag workflow | closed by PR #66: the pinned manual workflow installs Bun 1.3.14 and Rust 1.95, then executes the supported `effigy ci:native` board | `g15.049` complete |
 | Read-only release-gate claim | closed by PR #66: `effigy release gates` executes exactly one configured `headless` gate backed by the complete `effigy qa` board | `g15.049` complete |
-| GPUI/Zed dependency licence policy | the truthful release board rejects `libbz2-rs-sys` (`bzip2-1.0.6`) and GPL-3.0-or-later `zlog`, `ztracing`, and `ztracing_macro`; distribution scope, compatibility, and any exact source/licence exceptions need an evidence-led decision rather than a weakened gate | open — promote `docs/triage/20260822-104657-gpui-zed-license-policy.md` into a bounded card before `g15.050` |
+| GPUI/Zed dependency licence policy | fixed policy: admit permissive `bzip2-1.0.6` with its notice; reject GPL tracing crates; replace their normal GPUI graph use through a minimal exact-revision `inflatable-cookie/zed` fork; approve only five fixed immutable Git sources | `g15.051` ready; blocks `g15.050` |
 | v0.2.0 candidate | manifests remain 0.1.0 and no 0.2.0 release note exists | `g15.050`, then operator gate `g15.013` |
 
 ## Carried Requirements (recorded, not implemented)
@@ -133,7 +133,7 @@ measured from the mounted tree, not inferred from a contract read.
 | Human-centred specimen catalogue audit (`g14.026`) | complete: screening, pilots, defect-led curation, native probe, all six screen-clear children, routed repairs, and operator review landed through PR #63 | `g15.011` complete |
 | Primitive-first visual conformance lane | recompiled into exact capture feasibility, adoption, fixture, and comparison children | `g15.012`, `g15.044`–`g15.047` |
 | Release-gate remediation | closed by PR #31 — `nanoid@3.3.18`; `bun audit` clean | `g15.014` |
-| v0.2.0 release certification | packed proof, truthful automation, and candidate preparation are explicit children; tag/publish stays operator-owned | `g15.048`–`g15.050`, then `g15.013` |
+| v0.2.0 release certification | packed proof, truthful automation, dependency-licence remediation, and candidate preparation are explicit children; tag/publish stays operator-owned | `g15.048`–`g15.051`, then `g15.013` |
 
 ## Not Gaps
 

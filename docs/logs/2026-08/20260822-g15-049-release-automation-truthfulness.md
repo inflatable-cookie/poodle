@@ -88,16 +88,16 @@ documented npm `>=11.5.1` and Node `>=22.14.0` trusted-publishing requirements.
 | `git diff --check origin/main...HEAD` | pass |
 
 The release-gate run proves the gate is configured and executed; its failure
-is an existing dependency-license policy issue outside this batch and remains
-tracked by `docs/triage/20260822-104657-gpui-zed-license-policy.md`. No release
+was an existing dependency-licence policy issue outside this batch. The
+operator later fixed the direction in
+`docs/specs/022-packaging-versioning-and-release-channel-rules.md` and
+`docs/roadmaps/g15/051-gpui-zed-dependency-licence-remediation.md`. No release
 workflow was dispatched, no windowed/native-visual/Jetstream selector was run,
 and no tag, package, registry, or release mutation occurred.
 
 ## Continuation
 
 PR #66 was accepted and merged. `g15.049` is complete; release automation is
-now truthful and fail-closed. The cargo-deny dependency-licence failure remains
-an open release-policy gap under
-`docs/triage/20260822-104657-gpui-zed-license-policy.md` and must be promoted
-into a bounded roadmap card before `g15.050`. No tag or publication work is
-unblocked while that gap, `g15.043`, or `g15.047` remains open.
+now truthful and fail-closed. The cargo-deny dependency-licence failure is
+owned by ready card `g15.051`. No tag or publication work is unblocked while
+that card, `g15.043`, or `g15.047` remains open.

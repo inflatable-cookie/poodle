@@ -1,7 +1,7 @@
 # Specs
 
 Status: active
-Updated: 2026-08-15
+Updated: 2026-08-22
 
 Specs define repository-wide rules that are broader than one component:
 tokens, artifact generation, parity evidence, accessibility, packaging,

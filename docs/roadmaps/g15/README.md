@@ -3,8 +3,8 @@
 Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
 `g15.019`–`g15.042`, `g15.044`–`g15.046`, and `g15.048`–`g15.049`
 complete;
-`g15.047` awaits exact card compilation;
-the remaining release path is recompiled through `g15.050`
+`g15.047` awaits exact card compilation; `g15.051` is ready;
+the remaining release path is recompiled through `g15.051`
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -48,7 +48,7 @@ first evidence tranche closed 29 paired gaps. Later cards are listed in
 dependency order and are not dispatched until the orchestrator reviews and
 advances them. `g15.014` was an urgent prerequisite remediation executed out
 of numeric order; `g15.013` remains the final operator gate after the compiled
-release children through `g15.050`.
+release children through `g15.051`.
 
 ## Runway
 
@@ -90,12 +90,13 @@ and status advance are the orchestrator's.
 32. [047 — Primitive visual comparison](047-primitive-visual-comparison.md) — planned after accepted `046`; exact execution envelope still needs compilation; closes parent `012`
 33. [048 — Packed roster reachability](048-packed-roster-reachability.md) — complete; PR #64 proves exact 175/175 packed-root reachability for both web runtimes
 34. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — complete; PR #66 made every retained workflow a pinned Effigy launcher and made the release board non-vacuous
-35. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — planned after every implementation, specimen, conformance, packaging, and automation gate
-36. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
-37. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final operator tag/publication gate after accepted `050`
-38. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
-39. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
-40. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
+35. [051 — GPUI/Zed dependency licence remediation](051-gpui-zed-dependency-licence-remediation.md) — ready; a minimal exact-revision fork removes GPL tracing from the resolved GPUI graph and hardens licence/source policy
+36. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — planned after every implementation, specimen, conformance, packaging, automation, and dependency-policy gate
+37. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
+38. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final operator tag/publication gate after accepted `050`
+39. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
+40. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
+41. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)
@@ -133,8 +134,17 @@ writable, validation, and human-review envelope before dispatch.
 
 `g15.049` is complete in PR #66. The retained workflows are pinned Effigy
 launchers, branch publication fails closed, and `effigy release gates` now
-executes the complete headless board. That truthful board exposes an existing
-GPUI/Zed dependency-licence policy failure. The open triage note must be
-promoted into a bounded release-gap card before `g15.050`.
+executes the complete headless board. That truthful board exposed an existing
+GPUI/Zed dependency-licence policy failure. The operator accepted the fixed
+permissive-only direction, now compiled as ready card `g15.051`. It may run
+without touching the unfinished comparator or presentation-context lanes.
 
-Do not dispatch `g15.043` until the orchestrator fixes the native presentation-
+`g15.051` is the current dispatchable task. It replaces GPUI's normal GPL
+tracing graph through one minimal exact-revision Poodle-owned Zed fork, admits
+the permissive bzip2 licence with its notice, and hardens exact Git-source
+policy. `g15.050` remains blocked after it lands.
+
+Do not dispatch `g15.043` until the orchestrator fixes the native
+presentation-context architecture. Do not dispatch `g15.047` until its exact
+comparison, tolerance, and operator-review envelope is compiled. Neither lane
+shares writable scope with `g15.051`, but no second worker is ready today.
