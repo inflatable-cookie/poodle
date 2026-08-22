@@ -239,13 +239,40 @@ fn check_viewport(problems: &mut Problems, where_: &str, row: &Map<String, Value
     }
     for key in ["width", "height"] {
         let Some(side) = viewport.get(key) else { continue };
-        let ok = side.as_u64().is_some_and(|side| side > 0);
+        let ok = integral_number(side).is_some_and(|side| side > 0);
         if !ok {
             problems.fail(format!(
                 "{where_}: viewport.{key} must be a positive whole number of logical pixels, got {side}"
             ));
         }
     }
+}
+
+/// The largest integer both languages represent exactly: JavaScript's
+/// `Number.MAX_SAFE_INTEGER`, 2^53 - 1. Above it, `JSON.parse` and `f64` stop
+/// agreeing with `u64`, so the loaders would drift again.
+const MAX_EXACT_INTEGER: u64 = 9_007_199_254_740_991;
+
+/// The numeric acceptance rule, shared with the TypeScript loader.
+///
+/// JSON has one number type, so `2`, `2.0`, and `2e0` are the same value.
+/// `Value::as_u64()` alone is not that rule: it returns `None` for `2.0`, which
+/// would reject bytes TypeScript accepts — TypeScript cannot even tell the two
+/// spellings apart after `JSON.parse`. A fixture number is accepted when it is
+/// finite, non-negative, mathematically integral, and no larger than
+/// `MAX_EXACT_INTEGER`.
+///
+/// Returns the normalized value, or `None` when the rule rejects it.
+fn integral_number(value: &Value) -> Option<u64> {
+    if let Some(integer) = value.as_u64() {
+        return (integer <= MAX_EXACT_INTEGER).then_some(integer);
+    }
+    let float = value.as_f64()?;
+    let integral = float.is_finite()
+        && float >= 0.0
+        && float.fract() == 0.0
+        && float <= MAX_EXACT_INTEGER as f64;
+    integral.then(|| float as u64)
 }
 
 /// Compare a declared array against an expected one element by element.
@@ -419,16 +446,17 @@ fn validate(raw: &Value) -> Problems {
         problems.fail("inventory batch must be a non-empty string");
     }
 
+    // Normalized once, so a row's `scale` is compared by value rather than by
+    // spelling: `captureScales: [2.0]` and `scale: 2` are the same declaration.
     let capture_scales: Vec<u64> = root
         .get("captureScales")
         .and_then(Value::as_array)
-        .map(|scales| scales.iter().filter_map(Value::as_u64).collect())
+        .map(|scales| scales.iter().filter_map(integral_number).collect())
         .unwrap_or_default();
     match root.get("captureScales").and_then(Value::as_array) {
         Some(scales) if !scales.is_empty() => {
             for scale in scales {
-                let accepted = scale
-                    .as_u64()
+                let accepted = integral_number(scale)
                     .is_some_and(|scale| SUPPORTED_CAPTURE_SCALES.contains(&scale));
                 if !accepted {
                     problems.fail(format!(
@@ -551,9 +579,8 @@ fn validate(raw: &Value) -> Problems {
                 problems.fail(format!("{where_}: missing required field 'scale'"));
             }
             Some(scale) => {
-                let accepted = scale
-                    .as_u64()
-                    .is_some_and(|scale| capture_scales.contains(&scale));
+                let accepted =
+                    integral_number(scale).is_some_and(|scale| capture_scales.contains(&scale));
                 if !accepted {
                     problems.fail(format!(
                         "{where_}: scale {scale} is not one of the inventory captureScales {capture_scales:?}"
@@ -819,6 +846,100 @@ fn shape_faults_keep_the_format_button_specific() {
 
     let not_an_object = validate(&Value::Array(vec![]));
     assert_problem(&not_an_object, "inventory root must be an object");
+}
+
+/// JSON has one number type, so `2` and `2.0` are the same value and both
+/// loaders must agree about them. The accepted-spelling case is planted on the
+/// canonical *text*, because that is the only place the spelling exists —
+/// after parsing, `2.0` and `2` are indistinguishable to the TypeScript
+/// sibling. Mirrors the `numeric spelling is normalized, numeric domain is not`
+/// block in `button-visual-inventory.test.ts`.
+#[test]
+fn numeric_spelling_is_normalized_consistently() {
+    let path = inventory_path();
+    let text = fs::read_to_string(&path)
+        .unwrap_or_else(|error| panic!("cannot read {}: {error}", path.display()))
+        .replace("\"captureScales\": [2]", "\"captureScales\": [2.0]")
+        .replace("\"scale\": 2", "\"scale\": 2.0")
+        .replace("\"width\": 240", "\"width\": 240.0")
+        .replace("\"height\": 80", "\"height\": 80.0");
+
+    assert!(text.contains("\"captureScales\": [2.0]"));
+    assert!(text.contains("\"scale\": 2.0"));
+    assert!(text.contains("\"width\": 240.0"));
+    assert!(text.contains("\"height\": 80.0"));
+
+    let decimal: Value = serde_json::from_str(&text).expect("decimal spelling is valid JSON");
+    let problems = validate(&decimal);
+    assert!(
+        problems.0.is_empty(),
+        "integral decimal spellings must be accepted: {:#?}",
+        problems.0
+    );
+    assert_eq!(
+        decimal["fixtures"].as_array().expect("fixtures array").len(),
+        18
+    );
+}
+
+#[test]
+fn numeric_domain_faults_are_still_rejected() {
+    let fractional_scale = problems_for(|inventory| {
+        row_at(inventory, "button/size-xs").insert("scale".into(), Value::from(2.5));
+    });
+    assert_problem(&fractional_scale, "fixture 'button/size-xs': scale 2.5 is not one of");
+
+    let fractional_declared = problems_for(|inventory| {
+        inventory["captureScales"] = serde_json::json!([2.5]);
+    });
+    assert_problem(
+        &fractional_declared,
+        "inventory captureScales entry 2.5 is outside the supported set",
+    );
+
+    let negative_viewport = problems_for(|inventory| {
+        row_at(inventory, "button/size-sm")["viewport"]["width"] = Value::from(-240);
+    });
+    assert_problem(
+        &negative_viewport,
+        "fixture 'button/size-sm': viewport.width must be a positive whole",
+    );
+
+    let negative_scale = problems_for(|inventory| {
+        row_at(inventory, "button/size-lg").insert("scale".into(), Value::from(-2));
+    });
+    assert_problem(&negative_scale, "fixture 'button/size-lg': scale -2 is not one of");
+
+    let numeric_string = problems_for(|inventory| {
+        row_at(inventory, "button/variant-ghost").insert("scale".into(), Value::String("2".into()));
+    });
+    assert_problem(
+        &numeric_string,
+        "fixture 'button/variant-ghost': scale \"2\" is not one of",
+    );
+
+    // 1e16 is integral but beyond 2^53 - 1, where the two languages stop
+    // agreeing. Both reject it, so neither can accept a size the other cannot.
+    let beyond_exact_range = problems_for(|inventory| {
+        row_at(inventory, "button/theme-iceberg")["viewport"]["width"] = Value::from(1e16);
+    });
+    assert_problem(
+        &beyond_exact_range,
+        "fixture 'button/theme-iceberg': viewport.width must be a positive whole",
+    );
+}
+
+#[test]
+fn the_numeric_rule_itself() {
+    assert_eq!(integral_number(&Value::from(2)), Some(2));
+    assert_eq!(integral_number(&Value::from(2.0)), Some(2));
+    assert_eq!(integral_number(&Value::from(0)), Some(0));
+    assert_eq!(integral_number(&Value::from(2.5)), None);
+    assert_eq!(integral_number(&Value::from(-2)), None);
+    assert_eq!(integral_number(&Value::from(MAX_EXACT_INTEGER)), Some(MAX_EXACT_INTEGER));
+    assert_eq!(integral_number(&Value::from(MAX_EXACT_INTEGER + 2)), None);
+    assert_eq!(integral_number(&Value::String("2".into())), None);
+    assert_eq!(integral_number(&Value::Null), None);
 }
 
 /// Arrays are compared element by element, never joined and never filtered.

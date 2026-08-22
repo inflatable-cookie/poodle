@@ -51,12 +51,12 @@ the variant × tone cross-product.
 | file | lines | note |
 | --- | --- | --- |
 | `test/visual/fixtures/button-visual-inventory.json` | 261 | canonical data, 18 rows |
-| `test/visual/fixtures/button-visual-inventory.ts` | 486 | TypeScript loader/validator |
-| `test/visual/fixtures/button-visual-inventory.test.ts` | 393 | 37 focused tests |
-| `packages/gpui/preview/tests/visual_fixture_inventory.rs` | 942 | Rust loader/validator + 12 focused tests |
-| `test/visual/fixtures/README.md` | 146 | boundary documentation |
+| `test/visual/fixtures/button-visual-inventory.ts` | 507 | TypeScript loader/validator |
+| `test/visual/fixtures/button-visual-inventory.test.ts` | 476 | 43 focused tests |
+| `packages/gpui/preview/tests/visual_fixture_inventory.rs` | 1,063 | Rust loader/validator + 15 focused tests |
+| `test/visual/fixtures/README.md` | 170 | boundary documentation |
 
-Two mechanisms, ~2,228 lines, to name 18 cases. That ratio is the honest price
+Two mechanisms, ~2,477 lines, to name 18 cases. That ratio is the honest price
 of refusing code generation, and it is why the card's stop conditions matter: a
 second component must not double it before the comparator earns the cost.
 
@@ -92,13 +92,31 @@ cross-language logic comparison. If one loader is loosened or tightened and the
 canonical file is not changed to exercise the difference, both commands still
 pass and the drift ships silently.
 
-That is not hypothetical. Review of PR #65 found exactly this: TypeScript
-compared `reportRoles` and `landmarks` with `join(" ")`, which accepts a
-collapsed element, while Rust built the same arrays with
-`filter_map(Value::as_str)`, which silently discards a non-string. Each
-language accepted bytes the other rejected, and the green selector said
-nothing. Both now compare element by element, and both suites plant the
-collapsed and non-string cases.
+That is not hypothetical. Review of PR #65 found it twice.
+
+First, in declared arrays: TypeScript compared `reportRoles` and `landmarks`
+with `join(" ")`, which accepts a collapsed element, while Rust built the same
+arrays with `filter_map(Value::as_str)`, which silently discards a non-string.
+Each language accepted bytes the other rejected. Both now compare element by
+element, and both suites plant the collapsed and non-string cases.
+
+Second, in numbers. Rust used `Value::as_u64()` for `captureScales`, a row's
+`scale`, and viewport sides, so it rejected `2.0` where TypeScript accepted it
+— and TypeScript accepted integral values beyond 2^53 that Rust could not
+represent. JSON has one number type, so a shared file cannot have two numeric
+domains. The rule is now stated once and applied identically:
+
+> A fixture number is accepted when it is finite, non-negative, mathematically
+> integral, and no larger than 2^53 − 1 (`Number.MAX_SAFE_INTEGER`, the largest
+> integer both languages represent exactly).
+
+Each language has one helper for it (`integralNumber` / `integral_number`) used
+by all three numeric paths. Fractional, negative, zero-viewport, numeric-string,
+unsupported-scale, and beyond-exact-range cases stay rejected. The accepted
+decimal-spelling evidence is planted on the canonical *text* rather than a
+parsed clone, because the spelling only exists before parsing.
+
+The green selector said nothing about either defect.
 
 The residual risk stands for every one of the 13 duplicated items above. It is
 mitigated by planted negative cases on both sides using identical fixtures and
@@ -121,8 +139,10 @@ its CLI against.
 ## Negative Evidence
 
 Every planted fault is applied to an in-memory clone at run time, so no broken
-canonical inventory is committed. Both suites assert the offender is named
-exactly:
+canonical inventory is committed. The one exception is the accepted
+decimal-spelling case, which is planted on the canonical *text* because a
+number's spelling stops existing once it is parsed. Both suites assert the
+offender is named exactly:
 
 - **missing** — `missing fixture name 'button/size-lg'`
 - **extra** — `unknown fixture name 'button/tone-info'`
@@ -143,6 +163,10 @@ exactly:
   inserted, and a bare string where an array is required, for both
   `reportRoles` and fixture `landmarks`; every landmark failure names its
   fixture
+- **numeric domain** — fractional `scale` and `captureScales`, negative
+  viewport side and scale, a numeric string, and an integral value beyond
+  2^53 - 1; paired with positive evidence that integral decimal spellings
+  (`2.0`, `240.0`, `80.0`) are accepted on all three numeric paths
 
 A test also asserts the canonical JSON contains none of `expected`, `baseline`,
 `threshold`, `tolerance`, `sha256`, or `#`, so expected renderer output cannot
@@ -183,8 +207,8 @@ no published package source imports the inventory.
 
 | check | result |
 | --- | --- |
-| `bun test test/visual/fixtures/button-visual-inventory.test.ts` | 37 pass, 0 fail, 516 assertions |
-| `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test visual_fixture_inventory` | 12 pass, 0 fail |
+| `bun test test/visual/fixtures/button-visual-inventory.test.ts` | 43 pass, 0 fail, 539 assertions |
+| `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test visual_fixture_inventory` | 15 pass, 0 fail |
 | `effigy docs:check` | pass |
 | `git diff --check origin/main...HEAD` | clean |
 

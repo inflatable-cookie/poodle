@@ -19,6 +19,7 @@ import {
   INVENTORY_PATH,
   INVENTORY_SCHEMA,
   REPORT_ROLES,
+  integralNumber,
   SUPPORTED_CAPTURE_SCALES,
   loadButtonVisualInventory,
   parseButtonVisualInventory,
@@ -288,6 +289,88 @@ describe("shape faults keep the format Button-specific", () => {
       noIcon,
       "fixture 'button/content-leading-icon': landmarks must be exactly [root, content, icon]",
     );
+  });
+});
+
+/**
+ * JSON has one number type, so `2` and `2.0` are the same value and both
+ * loaders must agree about them. The accepted-spelling case is planted on the
+ * canonical *text*, because after `JSON.parse` TypeScript cannot tell the two
+ * spellings apart — which is exactly why the rule has to be stated once and
+ * applied identically in Rust. Mirrors
+ * `numeric_spelling_is_normalized_consistently` in the Rust suite.
+ */
+describe("numeric spelling is normalized, numeric domain is not", () => {
+  test("integral decimal spellings are accepted on every numeric path", () => {
+    const text = readFileSync(INVENTORY_PATH, "utf8")
+      .replace('"captureScales": [2]', '"captureScales": [2.0]')
+      .replaceAll('"scale": 2', '"scale": 2.0')
+      .replaceAll('"width": 240', '"width": 240.0')
+      .replaceAll('"height": 80', '"height": 80.0');
+
+    expect(text).toContain('"captureScales": [2.0]');
+    expect(text).toContain('"scale": 2.0');
+    expect(text).toContain('"width": 240.0');
+    expect(text).toContain('"height": 80.0');
+
+    const inventory = parseButtonVisualInventory(JSON.parse(text));
+    expect(inventory.fixtures).toHaveLength(18);
+    expect(inventory.fixtures.every((fixture) => fixture.scale === 2)).toBe(true);
+  });
+
+  test("fractional scale is still rejected", () => {
+    const row = problemsFor((inventory) => {
+      rowAt(inventory, "button/size-xs").scale = 2.5;
+    });
+    expectProblem(row, "fixture 'button/size-xs': scale 2.5 is not one of");
+
+    const declared = problemsFor((inventory) => {
+      inventory.captureScales = [2.5];
+    });
+    expectProblem(declared, "inventory captureScales entry 2.5 is outside the supported set");
+  });
+
+  test("negative numbers are still rejected", () => {
+    const viewport = problemsFor((inventory) => {
+      rowAt(inventory, "button/size-sm").viewport = { width: -240, height: 80 };
+    });
+    expectProblem(viewport, "fixture 'button/size-sm': viewport.width must be a positive whole");
+
+    const scale = problemsFor((inventory) => {
+      rowAt(inventory, "button/size-lg").scale = -2;
+    });
+    expectProblem(scale, "fixture 'button/size-lg': scale -2 is not one of");
+  });
+
+  test("a numeric string is not a number", () => {
+    const problems = problemsFor((inventory) => {
+      rowAt(inventory, "button/variant-ghost").scale = "2";
+    });
+    expectProblem(problems, `fixture 'button/variant-ghost': scale "2" is not one of`);
+  });
+
+  test("integers beyond the shared exact range are rejected", () => {
+    const problems = problemsFor((inventory) => {
+      rowAt(inventory, "button/theme-iceberg").viewport = { width: 1e16, height: 80 };
+    });
+    expectProblem(
+      problems,
+      "fixture 'button/theme-iceberg': viewport.width must be a positive whole",
+    );
+  });
+
+  test("the rule itself: spelling is irrelevant, domain is not", () => {
+    expect(integralNumber(2)).toBe(2);
+    expect(integralNumber(2.0)).toBe(2);
+    expect(integralNumber(0)).toBe(0);
+    expect(integralNumber(2.5)).toBeNull();
+    expect(integralNumber(-2)).toBeNull();
+    expect(integralNumber(Number.NaN)).toBeNull();
+    expect(integralNumber(Number.POSITIVE_INFINITY)).toBeNull();
+    expect(integralNumber(Number.MAX_SAFE_INTEGER)).toBe(Number.MAX_SAFE_INTEGER);
+    expect(integralNumber(Number.MAX_SAFE_INTEGER + 2)).toBeNull();
+    expect(integralNumber("2")).toBeNull();
+    expect(integralNumber(null)).toBeNull();
   });
 });
 

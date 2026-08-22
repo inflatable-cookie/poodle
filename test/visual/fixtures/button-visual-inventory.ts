@@ -198,6 +198,24 @@ function keyDiff(actual: string[], expected: string[]): { missing: string[]; ext
 }
 
 /**
+ * The numeric acceptance rule, shared with the Rust loader.
+ *
+ * JSON has one number type, so `2`, `2.0`, and `2e0` are the same value and no
+ * loader may treat them differently — TypeScript cannot even tell them apart
+ * after `JSON.parse`. A fixture number is accepted when it is finite,
+ * non-negative, mathematically integral, and no larger than 2^53 - 1, which is
+ * the largest integer both languages represent exactly.
+ *
+ * Returns the normalized value, or `null` when the rule rejects it.
+ */
+export function integralNumber(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  if (!Number.isInteger(value)) return null;
+  if (value < 0 || value > Number.MAX_SAFE_INTEGER) return null;
+  return value;
+}
+
+/**
  * Compare a declared array against an expected one element by element.
  *
  * Deliberately not `join()` and not a filter: joining accepts a collapsed
@@ -296,7 +314,8 @@ function checkViewport(check: Checker, where: string, value: unknown): void {
   for (const key of ["width", "height"] as const) {
     const side = value[key];
     if (side === undefined) continue;
-    if (typeof side !== "number" || !Number.isInteger(side) || side <= 0) {
+    const normalized = integralNumber(side);
+    if (normalized === null || normalized <= 0) {
       check.fail(
         `${where}: viewport.${key} must be a positive whole number of logical pixels, got ${JSON.stringify(side)}`,
       );
@@ -380,10 +399,14 @@ export function parseButtonVisualInventory(raw: unknown): ButtonVisualInventory 
       `inventory captureScales must be a non-empty array, got ${JSON.stringify(raw.captureScales)}`,
     );
   }
-  for (const scale of captureScales) {
+  // Normalized once, so a row's `scale` is compared by value rather than by
+  // spelling: `captureScales: [2.0]` and `scale: 2` are the same declaration.
+  const normalizedScales: (number | null)[] = captureScales.map(integralNumber);
+  for (const [index, scale] of captureScales.entries()) {
+    const normalized = normalizedScales[index];
     if (
-      typeof scale !== "number" ||
-      !(SUPPORTED_CAPTURE_SCALES as readonly number[]).includes(scale)
+      normalized === null ||
+      !(SUPPORTED_CAPTURE_SCALES as readonly number[]).includes(normalized)
     ) {
       check.fail(
         `inventory captureScales entry ${JSON.stringify(scale)} is outside the supported set [${SUPPORTED_CAPTURE_SCALES.join(", ")}]`,
@@ -440,12 +463,10 @@ export function parseButtonVisualInventory(raw: unknown): ButtonVisualInventory 
     const state = requireResolvedString(check, where, "state", entry.state, STATES);
     checkViewport(check, where, entry.viewport);
 
+    const rowScale = integralNumber(entry.scale);
     if (entry.scale === undefined || entry.scale === null) {
       check.fail(`${where}: missing required field 'scale'`);
-    } else if (
-      typeof entry.scale !== "number" ||
-      !(captureScales as unknown[]).includes(entry.scale)
-    ) {
+    } else if (rowScale === null || !normalizedScales.includes(rowScale)) {
       check.fail(
         `${where}: scale ${JSON.stringify(entry.scale)} is not one of the inventory captureScales [${captureScales.join(", ")}]`,
       );

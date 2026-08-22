@@ -55,6 +55,30 @@ revision's headless window at a hardcoded 2× factor. A fixture at any other
 scale cannot be captured in every runtime, so it is rejected here rather than
 approximated later.
 
+## The numeric acceptance rule
+
+JSON has one number type. `2`, `2.0`, and `2e0` are the same value, and
+TypeScript cannot tell them apart at all after `JSON.parse`. So the rule is
+about value, never spelling, and it is identical in both loaders:
+
+> A fixture number is accepted when it is finite, non-negative, mathematically
+> integral, and no larger than 2^53 − 1.
+
+That upper bound is JavaScript's `Number.MAX_SAFE_INTEGER` — the largest
+integer both languages represent exactly. Past it, `JSON.parse` and `f64` stop
+agreeing with `u64`, so accepting more would reintroduce the drift the rule
+exists to prevent.
+
+It applies to all three numeric paths — `captureScales`, a row's `scale`, and
+viewport `width` / `height` — through one helper per language
+(`integralNumber` / `integral_number`). Rust must not use `Value::as_u64()`
+directly for these: it returns `None` for `2.0`, which would reject bytes
+TypeScript accepts.
+
+Rejected regardless of spelling: fractional values, negatives, a zero viewport
+side, a scale outside `captureScales`, a numeric string, and anything beyond
+the exact range.
+
 ## Authority boundary
 
 This inventory names **observable inputs**. It is not, and must not become:
