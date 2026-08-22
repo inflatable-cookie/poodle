@@ -233,7 +233,9 @@ fn a_scrub_reports_change_while_dragging_and_commits_once_at_release() {
 
         driver.pointer_scrub_at(0.9, "press");
         // A real drag moves while held — gpui arms the drag once the pointer
-        // exceeds its movement threshold, then dispatches drag moves.
+        // exceeds its movement threshold. That arming move establishes the
+        // payload; the following move is the first captured drag dispatch.
+        driver.pointer_scrub_at(0.93, "drag");
         driver.pointer_scrub_at(0.95, "drag");
         driver.pointer_scrub_at(0.95, "release");
 

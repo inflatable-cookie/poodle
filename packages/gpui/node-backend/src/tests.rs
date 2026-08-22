@@ -132,6 +132,44 @@ fn a_declared_focus_ring_is_tracked_and_takes_the_stateful_path() {
     assert!(needs_state(&ring_only));
 }
 
+/// Generated identities belong to one GPUI render thread. A second headless
+/// app may reset its own frame while this one is still walking a tree; that
+/// must not rewind either counter in this app.
+#[test]
+fn generated_identity_counters_are_isolated_per_thread() {
+    use std::sync::{Arc, Barrier};
+
+    let node = Node::button("proof");
+    reset_element_ids();
+    assert_eq!(element_id_text(&element_id(&node)), "poodle-node-0");
+    assert_eq!(next_gesture_id(), "gesture-0");
+
+    let before_worker_reset = Arc::new(Barrier::new(2));
+    let after_main_progress = Arc::new(Barrier::new(2));
+    let worker_before = Arc::clone(&before_worker_reset);
+    let worker_after = Arc::clone(&after_main_progress);
+    let worker = std::thread::spawn(move || {
+        let node = Node::button("worker");
+        reset_element_ids();
+        assert_eq!(element_id_text(&element_id(&node)), "poodle-node-0");
+        assert_eq!(next_gesture_id(), "gesture-0");
+        worker_before.wait();
+        worker_after.wait();
+        reset_element_ids();
+        assert_eq!(element_id_text(&element_id(&node)), "poodle-node-0");
+        assert_eq!(next_gesture_id(), "gesture-0");
+    });
+
+    before_worker_reset.wait();
+    assert_eq!(element_id_text(&element_id(&node)), "poodle-node-1");
+    assert_eq!(next_gesture_id(), "gesture-1");
+    after_main_progress.wait();
+    worker.join().expect("worker identity proof");
+
+    assert_eq!(element_id_text(&element_id(&node)), "poodle-node-2");
+    assert_eq!(next_gesture_id(), "gesture-2");
+}
+
 // ── Shadow projection (g15.045) ─────────────────────────────────────
 // The adopted GPUI revision's `BoxShadow` carries a real `inset` flag, so the
 // backend projects inset (highlight) layers faithfully instead of dropping

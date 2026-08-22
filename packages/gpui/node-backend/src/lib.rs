@@ -20,9 +20,8 @@
 //! alpha is coverage and passes through. All mixing happened render-side
 //! (`poodle-render::color`); nodes carry final values.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
-use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -101,11 +100,20 @@ pub fn color(c: ColorValue) -> Hsla {
     .into()
 }
 
-/// Deterministic per-tree ids for nodes that need element state (interaction)
-/// but declare none. Tree order is stable across frames for a stable tree, so
-/// a counter keeps the same node on the same id between rebuilds — but ONLY if
-/// the counter restarts each frame. See [`reset_element_ids`].
-static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+thread_local! {
+    /// Deterministic per-tree ids for nodes that need element state
+    /// (interaction) but declare none. Tree order is stable across frames for
+    /// a stable tree, so a counter keeps the same node on the same id between
+    /// rebuilds — but ONLY if the counter restarts each frame. The counter is
+    /// local to the UI thread, matching GPUI's render model and the
+    /// thread-local focus/ring registries it keys. Independent headless apps
+    /// must not reset one another while Rust runs their tests in parallel.
+    static NEXT_ID: Cell<u64> = const { Cell::new(0) };
+
+    /// Per-frame counter for gesture-drag identities. It shares the element
+    /// counter's thread boundary for the same reason.
+    static NEXT_GESTURE_ID: Cell<usize> = const { Cell::new(0) };
+}
 
 /// Restart the generated-id counter. Call once per frame, before building.
 ///
@@ -120,8 +128,8 @@ static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 /// frames, and the in-process click driver posts press and release inside a
 /// single frame, so it never crosses a rebuild.
 pub fn reset_element_ids() {
-    NEXT_ID.store(0, Ordering::Relaxed);
-    NEXT_GESTURE_ID.store(0, Ordering::Relaxed);
+    NEXT_ID.with(|next| next.set(0));
+    NEXT_GESTURE_ID.with(|next| next.set(0));
 }
 
 /// Per-frame counter for gesture-drag identities.
@@ -129,13 +137,12 @@ pub fn reset_element_ids() {
 /// Reset with the element ids, so a node gets the same gesture id on every
 /// frame: the tree is walked in the same order each time, and a drag begun on
 /// one frame has to still recognise itself on the next.
-static NEXT_GESTURE_ID: AtomicUsize = AtomicUsize::new(0);
-
 fn next_gesture_id() -> String {
-    format!(
-        "gesture-{}",
-        NEXT_GESTURE_ID.fetch_add(1, Ordering::Relaxed)
-    )
+    NEXT_GESTURE_ID.with(|next| {
+        let id = next.get();
+        next.set(id + 1);
+        format!("gesture-{id}")
+    })
 }
 
 fn element_id(node: &Node) -> ElementId {
@@ -150,10 +157,11 @@ fn element_id(node: &Node) -> ElementId {
         // nodes sharing a key share a clock.
         return ElementId::Name(SharedString::from(anim.key.clone()));
     }
-    ElementId::Name(SharedString::from(format!(
-        "poodle-node-{}",
-        NEXT_ID.fetch_add(1, Ordering::Relaxed)
-    )))
+    NEXT_ID.with(|next| {
+        let id = next.get();
+        next.set(id + 1);
+        ElementId::Name(SharedString::from(format!("poodle-node-{id}")))
+    })
 }
 
 /// The string form of a resolved element id. `element_id` only ever mints

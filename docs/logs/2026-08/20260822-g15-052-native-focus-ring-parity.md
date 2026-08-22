@@ -221,14 +221,29 @@ before this evidence set was finalized:
    return a ring that is not on screen. Regression:
    `a_removed_focused_node_leaves_no_painted_ring`.
 
+## Review changes (PR #69, round 2)
+
+The headless root's new production-equivalent `reset_element_ids` call exposed
+one isolation mismatch: generated element and gesture counters were
+process-global atomics, while the focus/ring registries they key and GPUI's
+render work are UI-thread local. Parallel Rust tests could therefore reset one
+another mid-tree and intermittently collapse generated element state.
+
+Both counters are now thread-local `Cell`s. A deterministic two-thread backend
+test proves that reset and progress in one app cannot rewind another. The
+retained scrub regression also sends a distinct drag-arming move before its
+captured drag move, matching GPUI's gesture boundary rather than depending on
+whether the arming event itself is redispatched. The normal default-threaded
+`effigy regressions:native` selector then passed five consecutive runs.
+
 ## Validation
 
 | check | result |
 | --- | --- |
 | `cargo test -p poodle-node` | 4 pass, 0 fail |
 | `cargo test -p poodle-render` | 373 pass, 0 fail |
-| `cargo test -p poodle-gpui-node-backend` | 26 pass, 0 fail |
-| `effigy regressions:native` (mounted headless) | 63 pass, 0 fail |
+| `cargo test -p poodle-gpui-node-backend` | 27 pass, 0 fail |
+| `effigy regressions:native` (mounted headless, default threading) | 63 pass, 0 fail × 5 consecutive runs |
 | `cargo test --bin poodle-preview specimen_probe` | 8 pass, 0 fail |
 | `effigy test:visual-button-comparison` | comparator tests 26 pass; batch: 54 captures, 0 repeat mismatches, **0 focus-ring findings**, 16 blocking shadow-only; exit 1 by design |
 | `effigy smoke:gpui-offscreen-capture` | pass (legacy smoke unchanged) |
