@@ -91,6 +91,25 @@ requireRun(rust, "effigy ci:rust", ".github/workflows/ci-rust.yml");
 requireRun(native, "effigy ci:native", ".github/workflows/ci-native.yml");
 requireRun(release, "effigy release gates", ".github/workflows/release.yml");
 
+const rustSetup = "uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c";
+for (const [source, file] of [
+  [rust, ".github/workflows/ci-rust.yml"],
+  [native, ".github/workflows/ci-native.yml"],
+  [release, ".github/workflows/release.yml"],
+] as const) {
+  assert(source.includes(rustSetup), `${file} must use the reviewed Rust action`);
+  assert(source.includes('toolchain: "1.95"'), `${file} must select Rust 1.95 explicitly`);
+}
+assert(
+  native.includes("uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6") &&
+    native.includes('bun-version: "1.3.14"'),
+  "ci-native.yml must install the reviewed Bun 1.3.14 runtime",
+);
+assert(
+  native.indexOf("uses: oven-sh/setup-bun@") < native.indexOf("run: effigy ci:native"),
+  "ci-native.yml must install Bun before the native selector",
+);
+
 const visualActive = withoutComments(visual);
 for (const selector of ["effigy test:visual-smoke", "effigy ci:visual", "effigy test:visual-sweep"]) {
   assert(visualActive.includes(selector), `ci-visual.yml must map an input to ${selector}`);
@@ -128,9 +147,24 @@ assert(releaseActive.includes("id-token: write"), "release publishing must retai
 assert(releaseActive.includes('node-version: "22.22.2"'), "release Node version must be exact");
 assert(releaseActive.includes("npm@12.0.2"), "release npm CLI version must be exact");
 assert(!releaseActive.includes("run: effigy ci"), "release must not maintain the old partial CI gate");
+assert(
+  releaseActive.includes("if: ${{ !startsWith(github.ref, 'refs/tags/v') }}") &&
+    releaseActive.includes("Release workflow must be dispatched against refs/tags/v*"),
+  "release must fail early when it is not dispatched against a versioned tag",
+);
+assert(
+  releaseActive.includes("cargo install cargo-deny --version 0.19.4 --locked") &&
+    releaseActive.indexOf("cargo install cargo-deny --version 0.19.4 --locked") <
+      releaseActive.indexOf("run: effigy release gates"),
+  "release must install the reviewed cargo-deny CLI before its gate",
+);
 
 const publishStart = releaseActive.indexOf("- name: Publish");
 const publishBlock = publishStart === -1 ? "" : releaseActive.slice(publishStart);
+assert(
+  publishBlock.includes("if: ${{ startsWith(github.ref, 'refs/tags/v') && !inputs.dry-run }}"),
+  "Publish must require a versioned release tag and an explicit non-dry-run input",
+);
 assert(publishBlock.includes("packages/core"), "release must publish core");
 assert(publishBlock.includes("packages/svelte/components"), "release must publish Svelte");
 assert(!publishBlock.includes("packages/react/components"), "release must not publish React");

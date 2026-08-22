@@ -149,8 +149,8 @@
 ]
 
 # CI gates — light, ubuntu-only. No native (gpui/jetstream) crates, no vite
-# preview builds. The GitHub workflows (.github/workflows/ci-*.yml) mirror
-# ci:web / ci:rust so CI needs no effigy bootstrap; `effigy ci` is the local gate.
+# preview builds. The GitHub workflows bootstrap their pinned runtimes and
+# Effigy before launching the named selectors; `effigy ci` is the local gate.
 "check:release-automation" = "bun scripts/check-release-automation.ts"
 "test:core" = "bun run --cwd packages/core test"
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
