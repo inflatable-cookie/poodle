@@ -1,5 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { basename } from "node:path";
+import {
+  validateCargoLockSources,
+  validateCargoManifestSources,
+} from "./repository-security-policy.ts";
 
 const errors: string[] = [];
 const lifecycleHooks = new Set([
@@ -25,7 +29,6 @@ const secretPatterns = [
 const sensitiveName =
   /(?:^|\/)(?:\.env(?:\..+)?|credentials?|secrets?)(?:$|\.)|\.(?:jks|kdbx|key|keystore|p12|pem|pfx)$/i;
 const environmentExample = /(?:^|\/)\.env(?:\.[^/]+)?\.example$/;
-const remoteDependency = /^(?:git\+|github:|https?:\/\/)/;
 
 const tracked = Bun.spawnSync([
   "git",
@@ -47,6 +50,16 @@ const paths = new TextDecoder()
   .split("\0")
   .filter(Boolean);
 
+// Cargo.lock is ignored for library crates, but the two GPUI graph lockfiles
+// are reviewed source evidence even when a local checkout generated one
+// before it was staged. Keep their exact Git pairs inside this audit surface.
+for (const lockPath of [
+  "packages/gpui/node-backend/Cargo.lock",
+  "packages/gpui/preview/Cargo.lock",
+]) {
+  if (existsSync(lockPath) && !paths.includes(lockPath)) paths.push(lockPath);
+}
+
 for (const path of paths) {
   // `git ls-files --cached` includes paths deleted in an uncommitted change.
   // Audit the working tree that would be committed without crashing on them.
@@ -64,13 +77,11 @@ for (const path of paths) {
   }
 
   if (basename(path) === "Cargo.toml") {
-    const activeSource = source
-      .split("\n")
-      .filter((line) => !line.trimStart().startsWith("#"))
-      .join("\n");
-    if (/(?:^|[,{\s])git\s*=\s*"/m.test(activeSource)) {
-      errors.push(`${path}: declares a remote Git dependency`);
-    }
+    errors.push(...validateCargoManifestSources(path, source));
+  }
+
+  if (basename(path) === "Cargo.lock") {
+    errors.push(...validateCargoLockSources(path, source));
   }
 
   if (basename(path) !== "package.json") continue;
@@ -93,7 +104,7 @@ for (const path of paths) {
     manifest.peerDependencies,
   ]) {
     for (const [name, source] of Object.entries(dependencies ?? {})) {
-      if (remoteDependency.test(source)) {
+      if (/^(?:git\+|github:|https?:\/\/)/.test(source)) {
         errors.push(`${path}: dependency ${name} uses a remote source`);
       }
     }

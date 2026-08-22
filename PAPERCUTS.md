@@ -7,6 +7,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-22 — zsh reserves the lowercase `path` variable for `PATH`; a shell
+  inventory loop using `path` silently removed `git`, `rg`, and `sort` from the
+  command search path. Use a neutral loop variable in repository probes.
+  Found on g15.051.
+
 - 2026-08-22 — `effigy doctor` can fail before `tasks.health` starts because
   writing `.effigy/runtime/tasks/active/*.json` hits the machine-wide
   `Too many open files in system` limit. The health command and useful doctor

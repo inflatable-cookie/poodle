@@ -15,10 +15,9 @@ publish = false
 path = "src/lib.rs"
 
 [dependencies]
-# GPUI framework — Zed's GPU-accelerated UI framework (macOS/Metal), pinned to
-# the immutable revision adopted by g15.045 (offscreen capture seam). The
-# offscreen readback capability is git-only; no registry release carries it.
-gpui = { git = "https://github.com/zed-industries/zed", rev = "1ea16c1ab9dd6d36649e002dc60995634da04daf" }
+# GPUI framework — Poodle's minimal Zed fork keeps the offscreen capture seam
+# while replacing the normal GPL tracing graph with standard tracing.
+gpui = { git = "https://github.com/inflatable-cookie/zed", rev = "87d9afbe71ef06ea0634499dc35d104bb29dc020" }
 poodle-node = { version = "0.1.0", path = "../../contracts/node" }
 # Undo coalescing only. The backend owns the history *storage* because history
 # is ephemeral per-field UI state and only the backend persists anything across
