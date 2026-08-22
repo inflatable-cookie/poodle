@@ -32,6 +32,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
             el = el.track_focus(&handle);
         }
         let on_focus_change = node.interaction.on_focus_change.clone();
+        let tab_index = node.a11y.tab_index;
         el = el.child(
             gpui::canvas(
                 move |_bounds, window, cx| {
@@ -42,7 +43,19 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
                             .entry(id.clone())
                             .or_insert_with(|| {
                                 created = true;
-                                cx.focus_handle()
+                                let mut handle = cx.focus_handle();
+                                // The tracked handle must carry the node's
+                                // declared sequential-focus behavior: gpui
+                                // creates handles with tab_stop OFF, and once
+                                // `track_focus` attaches, the element's own
+                                // tab_index/tab_stop refinement no longer
+                                // decides — the handle's flags do.
+                                if let Some(tab_index) = tab_index {
+                                    handle = handle
+                                        .tab_index(tab_index.max(0) as isize)
+                                        .tab_stop(tab_index >= 0);
+                                }
+                                handle
                             })
                             .clone()
                     });
@@ -91,6 +104,85 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
                 |_, _, _, _| {},
             )
             .absolute()
+            .size_full(),
+        );
+    }
+    // The declared focus ring, painted while — and only while — the node's
+    // real focus handle holds focus. A canvas child, not a style refinement:
+    // the ring is out-of-flow (layout never sees it), it must preserve the
+    // resting border rather than replace it, and hover/active patches — gpui
+    // refines hover after focus — must not overwrite it. The canvas is
+    // anchored at the element's top-left inset, so its bounds ARE the padding
+    // box (an unanchored absolute child would sit at the justify-static
+    // position instead); the border box is one border-width outward per side,
+    // and the ring's outer edge sits `offset + width` beyond that, exactly
+    // CSS `outline` + `outline-offset` (a negative offset insets the ring).
+    if let Some(ring) = node.style.focus_ring {
+        let ring_id = element_id_string(node);
+        let border = &node.style.descriptor.border;
+        let border_left = node.style.border_left_width.unwrap_or(border.width);
+        let border_right = node.style.border_right_width.unwrap_or(border.width);
+        let border_top = node.style.border_top_width.unwrap_or(border.width);
+        let border_bottom = node.style.border_bottom_width.unwrap_or(border.width);
+        let radii = node.style.descriptor.corner_radii;
+        el = el.child(
+            gpui::canvas(
+                move |_, _, _| {},
+                move |bounds, (), window, _cx| {
+                    let focused = super::focus_handle_for(&ring_id)
+                        .is_some_and(|handle| handle.is_focused(window));
+                    if !focused {
+                        super::clear_painted_ring(&ring_id);
+                        return;
+                    }
+                    let expand = ring.offset + ring.width;
+                    let x = f32::from(bounds.origin.x) - border_left - expand;
+                    let y = f32::from(bounds.origin.y) - border_top - expand;
+                    let width = f32::from(bounds.size.width)
+                        + border_left
+                        + border_right
+                        + 2.0 * expand;
+                    let height = f32::from(bounds.size.height)
+                        + border_top
+                        + border_bottom
+                        + 2.0 * expand;
+                    if width <= 0.0 || height <= 0.0 {
+                        super::clear_painted_ring(&ring_id);
+                        return;
+                    }
+                    // The ring is concentric with the element: each corner
+                    // radius grows by the same expansion, so the inner edge
+                    // parallels the border box instead of rounding harder.
+                    let corner = |r: f32| px((r + expand).max(0.0));
+                    window.paint_quad(
+                        gpui::outline(
+                            gpui::Bounds {
+                                origin: point(px(x), px(y)),
+                                size: size(px(width), px(height)),
+                            },
+                            super::color(ring.color),
+                            gpui::BorderStyle::default(),
+                        )
+                        .corner_radii(gpui::Corners {
+                            top_left: corner(radii.top_left),
+                            top_right: corner(radii.top_right),
+                            bottom_right: corner(radii.bottom_right),
+                            bottom_left: corner(radii.bottom_left),
+                        })
+                        .border_widths(px(ring.width)),
+                    );
+                    super::record_painted_ring(
+                        &ring_id,
+                        super::PaintedRing {
+                            ring,
+                            bounds: [x, y, width, height],
+                        },
+                    );
+                },
+            )
+            .absolute()
+            .top(px(0.0))
+            .left(px(0.0))
             .size_full(),
         );
     }

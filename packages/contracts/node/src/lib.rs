@@ -230,6 +230,15 @@ pub struct NodeStyle {
     /// at all before this existed, so a clicked text field looked identical to
     /// an idle one. Only meaningful on a focusable node.
     pub focus: Option<StylePatch>,
+    /// The focus ring (contracts' `outline` + `outline-offset`), painted by
+    /// the backend only while the node holds real focus. Kept out of
+    /// [`StylePatch`] on purpose: a ring is not a restyle of the element — it
+    /// draws outside (or inside, at a negative offset) the border box without
+    /// touching the resting border, fill, shadows, radius, or layout, and a
+    /// borderless control can carry one. Declaring a ring asks the backend to
+    /// track this node's focus handle even when no `focus` patch exists; the
+    /// two channels compose when both are set.
+    pub focus_ring: Option<FocusRing>,
     /// Multi-layer shadow stack (inset highlights, outset drops). When
     /// non-empty it wins over `descriptor.shadow`, which stays the one-token
     /// single-shadow convenience.
@@ -345,6 +354,7 @@ impl Default for NodeStyle {
             text_align: None,
             active: None,
             focus: None,
+            focus_ring: None,
             shadow_layers: Vec::new(),
             overlay: false,
             min_width: None,
@@ -353,6 +363,28 @@ impl Default for NodeStyle {
             max_height: None,
         }
     }
+}
+
+/// A resolved focus ring: the contracts' `outline` focus treatment, carried
+/// as its own channel rather than a [`StylePatch`] because it is an
+/// out-of-flow affordance, not a restyle. It must preserve the resting border
+/// (a focus patch can only recolour it), it must work on a borderless
+/// control, and it must not move layout — an outline never does.
+///
+/// All values are resolved by the component, which owns the tokens. The
+/// backend observes real focus and paints the ring only while the node's own
+/// focus handle holds it; a declared ring is what makes the backend track
+/// that handle. Absent is the default: no ring, no tracking.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct FocusRing {
+    /// Ring colour, resolved from the component's focus-ring token.
+    pub color: ColorValue,
+    /// Ring thickness in logical pixels (`border.width.focus`).
+    pub width: f32,
+    /// Distance in logical pixels from the element's border-box edge to the
+    /// ring's inner edge (CSS `outline-offset`): positive draws the ring
+    /// outside the element, negative insets it inside.
+    pub offset: f32,
 }
 
 /// The subset of style a state change may swap in. Fields are `None` to keep
@@ -930,6 +962,14 @@ mod tests {
         assert_eq!(node.a11y.value, None);
         assert_eq!(node.a11y.value_min, None);
         assert_eq!(node.a11y.value_max, None);
+    }
+
+    /// The ring is opt-in: a node that said nothing about focus draws no ring
+    /// and asks for no focus tracking. Defaulting one in would put a ring on
+    /// every focusable node and a tracked handle on all of them.
+    #[test]
+    fn a_node_declares_no_focus_ring_by_default() {
+        assert_eq!(Node::container().style.focus_ring, None);
     }
 
     #[test]

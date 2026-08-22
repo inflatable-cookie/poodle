@@ -27,7 +27,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use gpui::{
-    canvas, deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, svg,
+    canvas, deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, size, svg,
     AnyElement, AnyView, App, AppContext, ClickEvent, CursorStyle, Div, ElementId, Hsla,
     InteractiveElement, IntoElement, KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent,
     MouseUpEvent, ParentElement, PathBuilder, SharedString, Stateful,
@@ -35,7 +35,7 @@ use gpui::{
 };
 use poodle_node::{
     AnimEasing, AnimLoop, AnimProperty, ColorValue, CrossAxisAlignment, CursorHint, DropEdge,
-    FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
+    FocusRing, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
     NodeAnimation, NodeDragEvent, NodeDragPhase, NodeDropEvent, NodeKey, NodeKind, NodeModifiers,
     NodePoint, NodePosition, NodeRole, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
 };
@@ -426,6 +426,7 @@ where
     let el = apply_cursor(el, node);
     let needs_wrapper = node.style.hover.is_some()
         || node.style.active.is_some()
+        || node.style.focus_ring.is_some()
         || node.interaction.focusable
         || node.interaction.on_activate.is_some()
         || node.interaction.on_text_change.is_some()
@@ -455,6 +456,7 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
     // animated icon, and the capture host freezes motion regardless.
     let needs_wrapper = node.style.hover.is_some()
         || node.style.active.is_some()
+        || node.style.focus_ring.is_some()
         || node.interaction.focusable
         || node.interaction.on_activate.is_some()
         || node.interaction.on_text_change.is_some()
@@ -528,6 +530,9 @@ fn needs_state(node: &Node) -> bool {
         || node.interaction.on_select_range.is_some()
         || node.interaction.on_focus_change.is_some()
         || node.id.is_some()
+        // A declared focus ring paints through a canvas child and implies
+        // focus tracking — both need element state.
+        || node.style.focus_ring.is_some()
         // `active` style patches and scroll overflow live on gpui 0.2.2's
         // StatefulInteractiveElement — both need element state.
         || node.style.active.is_some()
@@ -572,6 +577,35 @@ thread_local! {
         RefCell::new(std::collections::HashMap::new());
     static FOCUS_STATES: RefCell<std::collections::HashMap<String, bool>> =
         RefCell::new(std::collections::HashMap::new());
+    // What the ring paint pass last painted per element id. Written only from
+    // the real paint pass; absent means no ring is on screen.
+    static PAINTED_RINGS: RefCell<std::collections::HashMap<String, PaintedRing>> =
+        RefCell::new(std::collections::HashMap::new());
+}
+
+/// What the focus-ring paint pass last painted for one tracked element: the
+/// declared ring values and the outer-edge bounds it drew, in logical pixels.
+/// Same observation posture as [`bounds_for`]: the paint pass records, tests
+/// and capture hosts read — nothing here steers what is painted.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct PaintedRing {
+    pub ring: FocusRing,
+    /// Outer edge of the painted ring: `[x, y, width, height]`.
+    pub bounds: [f32; 4],
+}
+
+/// The ring painted for this element id as of the last paint pass, or `None`
+/// when no ring is on screen (the node is not focused, or declares none).
+pub fn painted_ring_for(id: &str) -> Option<PaintedRing> {
+    PAINTED_RINGS.with(|r| r.borrow().get(id).copied())
+}
+
+pub(crate) fn record_painted_ring(id: &str, painted: PaintedRing) {
+    PAINTED_RINGS.with(|r| r.borrow_mut().insert(id.to_owned(), painted));
+}
+
+pub(crate) fn clear_painted_ring(id: &str) {
+    PAINTED_RINGS.with(|r| r.borrow_mut().remove(id));
 }
 
 /// The focus handle of whatever holds focus right now.
@@ -604,8 +638,11 @@ fn is_focused(id: &str) -> bool {
     FOCUS_STATES.with(|s| s.borrow().get(id).copied().unwrap_or(false))
 }
 
-/// Whether a node wants focus tracked: it draws differently when focused, or
-/// it asked to be told.
+/// Whether a node wants focus tracked: it draws differently when focused, it
+/// asked to be told, or it declares a focus ring — a ring is painted only
+/// while the real handle holds focus, so declaring one is meaningless without
+/// a tracked handle. A bare `focusable` stays untracked: most focusable nodes
+/// never draw a focus treatment of their own.
 fn tracks_focus(node: &Node) -> bool {
     // Deliberately not "every input": a field's value node is an input too,
     // and gpui focuses the *innermost* focusable element under the pointer, so
@@ -613,6 +650,7 @@ fn tracks_focus(node: &Node) -> bool {
     // listeners — clicks focused something that could not type. The value node
     // learns it is focused by inheritance instead (see `apply_children`).
     node.interaction.on_focus_change.is_some()
+        || node.style.focus_ring.is_some()
         || (node.interaction.focusable && node.style.focus.is_some())
 }
 

@@ -108,10 +108,63 @@ fn focusable_nodes_with_a_focus_patch_are_tracked() {
     assert_eq!(element_id_string(&node), "segmented:a:option:grid");
 }
 
+/// A declared focus ring is sufficient for focus tracking on its own — the
+/// whole point of the channel: a borderless control with no focus patch still
+/// gets a real, retrievable handle, so keyboard entry does not depend on a
+/// prior pointer press. Bare `focusable` stays untracked.
+#[test]
+fn a_declared_focus_ring_is_tracked_and_takes_the_stateful_path() {
+    let mut node = Node::button("rerun");
+    node.interaction.focusable = true;
+    assert!(!tracks_focus(&node));
+    node.style.focus_ring = Some(FocusRing {
+        color: ColorValue(0.3, 0.6, 1.0, 1.0),
+        width: 2.0,
+        offset: 2.0,
+    });
+    assert!(tracks_focus(&node));
+    assert!(needs_state(&node));
+
+    // Tracking does not require `focusable`: the ring declares the need.
+    let mut ring_only = Node::container();
+    ring_only.style.focus_ring = node.style.focus_ring;
+    assert!(tracks_focus(&ring_only));
+    assert!(needs_state(&ring_only));
+}
+
 // ── Shadow projection (g15.045) ─────────────────────────────────────
 // The adopted GPUI revision's `BoxShadow` carries a real `inset` flag, so the
 // backend projects inset (highlight) layers faithfully instead of dropping
 // them — the gpui 0.2.2 approximation is gone.
+
+/// The ring is its own paint channel: declaring one must not disturb the
+/// element's shadow stack (or any other refinement) — composition, not
+/// replacement.
+#[test]
+fn a_focus_ring_leaves_the_shadow_stack_untouched() {
+    let mut node = Node::button("ok");
+    node.style.shadow_layers = vec![ShadowLayer {
+        offset_x: 0.0,
+        offset_y: 2.0,
+        blur: 8.0,
+        spread: 1.0,
+        color: ColorValue(0.0, 0.0, 0.0, 0.2),
+        inset: false,
+    }];
+    node.style.focus_ring = Some(FocusRing {
+        color: ColorValue(0.3, 0.6, 1.0, 1.0),
+        width: 2.0,
+        offset: 2.0,
+    });
+    let mut el = apply_paint(div(), &node);
+    let shadows = el
+        .style()
+        .box_shadow
+        .as_ref()
+        .expect("the shadow stack still projects with a ring declared");
+    assert_eq!(shadows.len(), 1);
+    assert_eq!(f32::from(shadows[0].offset.y), 2.0);
+}
 
 #[test]
 fn inset_shadow_layers_project_with_the_inset_flag() {
