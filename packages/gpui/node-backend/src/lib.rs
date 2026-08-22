@@ -156,6 +156,15 @@ fn element_id(node: &Node) -> ElementId {
     )))
 }
 
+/// The string form of a resolved element id. `element_id` only ever mints
+/// `Name` ids, so this is lossless.
+fn element_id_text(id: &ElementId) -> String {
+    match id {
+        ElementId::Name(name) => name.to_string(),
+        other => unreachable!("the node backend only mints Name element ids, got {other:?}"),
+    }
+}
+
 /// Interpret one node (and its subtree) as a GPUI element.
 pub fn to_gpui(node: &Node) -> AnyElement {
     // Layer registration runs for every independently converted root; the
@@ -495,12 +504,19 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
         DEFERRED_SCOPE.with(|scope| scope.set(true));
     }
     let element = if needs_state(node) {
-        let el = base.id(element_id(node));
-        let el = apply_shared(el, node);
-        let el = apply_listeners(el, node);
+        // Resolve the element id ONCE and use the same identity for the
+        // element and every focus/ring registry: `element_id` mints a fresh
+        // generated name per call, and keying the registries by
+        // `element_id_string` ("" for an id-less node) made every unstamped
+        // control share one focus handle.
+        let id = element_id(node);
+        let id_string = element_id_text(&id);
+        let el = base.id(id);
+        let el = apply_shared(el, node, &id_string);
+        let el = apply_listeners(el, node, &id_string);
         maybe_animated(el, node)
     } else {
-        let el = apply_shared(base, node);
+        let el = apply_shared(base, node, "");
         maybe_animated(el, node)
     };
     if node.style.overlay {
@@ -543,8 +559,10 @@ fn needs_state(node: &Node) -> bool {
 }
 
 /// The channels every box gets, in the Jetstream walk's order: layout,
-/// position, paint, text, cursor, state patches, children.
-fn apply_shared<E>(el: E, node: &Node) -> E
+/// position, paint, text, cursor, state patches, children. `id` is the
+/// resolved element identity (see `build_box`) — "" only on the stateless
+/// path, which never tracks focus.
+fn apply_shared<E>(el: E, node: &Node, id: &str) -> E
 where
     E: Styled + InteractiveElement + ParentElement + 'static,
 {
@@ -553,8 +571,8 @@ where
     let el = apply_paint(el, node);
     let el = apply_text(el, node);
     let el = apply_cursor(el, node);
-    let el = apply_state_patches(el, node);
-    apply_children(el, node)
+    let el = apply_state_patches(el, node, id);
+    apply_children(el, node, id)
 }
 
 // The id `element_id` would assign, as a string, for keying editor state.
@@ -586,7 +604,9 @@ thread_local! {
 /// What the focus-ring paint pass last painted for one tracked element: the
 /// declared ring values and the outer-edge bounds it drew, in logical pixels.
 /// Same observation posture as [`bounds_for`]: the paint pass records, tests
-/// and capture hosts read — nothing here steers what is painted.
+/// and capture hosts read — nothing here steers what is painted. The registry
+/// is frame-scoped: [`overlay_frame_begin`] clears it and the frame's paint
+/// repopulates it, so an entry can never outlive the node that painted it.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct PaintedRing {
     pub ring: FocusRing,
@@ -595,9 +615,22 @@ pub struct PaintedRing {
 }
 
 /// The ring painted for this element id as of the last paint pass, or `None`
-/// when no ring is on screen (the node is not focused, or declares none).
+/// when no ring is on screen (the node is not focused, declares none, or is
+/// gone from the tree).
 pub fn painted_ring_for(id: &str) -> Option<PaintedRing> {
     PAINTED_RINGS.with(|r| r.borrow().get(id).copied())
+}
+
+/// Every ring painted in the current frame, keyed by element id. The
+/// observation surface for "exactly one ring is on screen, and it is this
+/// one" claims where the element id is backend-generated.
+pub fn painted_rings() -> Vec<(String, PaintedRing)> {
+    PAINTED_RINGS.with(|r| {
+        r.borrow()
+            .iter()
+            .map(|(id, painted)| (id.clone(), *painted))
+            .collect()
+    })
 }
 
 pub(crate) fn record_painted_ring(id: &str, painted: PaintedRing) {
@@ -606,6 +639,12 @@ pub(crate) fn record_painted_ring(id: &str, painted: PaintedRing) {
 
 pub(crate) fn clear_painted_ring(id: &str) {
     PAINTED_RINGS.with(|r| r.borrow_mut().remove(id));
+}
+
+/// Frame boundary for the ring registry, called from
+/// [`layers::overlay_frame_begin`] beside `ELEMENT_BOUNDS`.
+pub(crate) fn clear_painted_rings() {
+    PAINTED_RINGS.with(|r| r.borrow_mut().clear());
 }
 
 /// The focus handle of whatever holds focus right now.
@@ -664,13 +703,13 @@ fn element_id_string(node: &Node) -> String {
     }
 }
 
-fn apply_children<E: ParentElement>(mut el: E, node: &Node) -> E {
+fn apply_children<E: ParentElement>(mut el: E, node: &Node, id: &str) -> E {
     // A focused field's caret sits on the *value* node, several levels below
     // the focusable root that actually holds focus (affixes and icons are
     // siblings of the value). Focus is inherited down the subtree here, the
     // same way a real input's caret shows because its wrapper has focus.
     let inherited = FOCUS_SCOPE.with(|f| f.get());
-    let scope = inherited || (tracks_focus(node) && is_focused(&element_id_string(node)));
+    let scope = inherited || (tracks_focus(node) && is_focused(id));
     FOCUS_SCOPE.with(|f| f.set(scope));
     for child in &node.children {
         el = el.child(to_gpui(child));

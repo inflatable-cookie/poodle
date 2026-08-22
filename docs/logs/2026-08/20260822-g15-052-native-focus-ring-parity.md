@@ -75,6 +75,22 @@ Painting is a canvas child of the focused element, not a style refinement:
 - Corner radii are concentric: each element radius grows by the same
   `offset + width` expansion, so the ring's inner edge parallels the border
   box instead of rounding harder or going square.
+- `build_box` resolves the element id ONCE and threads the same identity
+  through the element and every focus/ring registry. Previously the
+  registries keyed on `element_id_string`, which is "" for an id-less node —
+  two ordinary unstamped Buttons would have shared one handle, one focus
+  state, and one ring. The headless driver root now also performs the
+  production root's per-frame `reset_element_ids`, so generated identities
+  are stable across frames in mounted tests exactly as in the app.
+- The tracked handle's `tab_index`/`tab_stop` flags are re-applied from the
+  node's CURRENT `a11y.tab_index` on every paint, not frozen at handle
+  creation — a roving component's 0 ↔ −1 changes take effect (gpui
+  default-creates handles with `tab_stop` off, and once `track_focus`
+  attaches, the handle's flags decide traversal).
+- The painted-ring registry is frame-scoped: `overlay_frame_begin` clears it
+  beside `ELEMENT_BOUNDS`, so `painted_ring_for` can never claim a ring that
+  is no longer on screen (a focused node that leaves the tree leaves no
+  entry).
 
 Why this preserves everything else: the ring never touches the element's
 style refinement, so the resting border, shadow stack, radius, and fill are
@@ -92,9 +108,13 @@ the mounted proofs and the evidence receipts read.
 
 `packages/render/src/button.rs` declares the ring on enabled buttons —
 `accent.focusRing`, `border.width.focus` (resolves 2px), offset
-`rem_to_px(0.125)` = 2px — replacing the focus-time border recolour. No
+`rem_to_px(0.125)` = 2px — replacing the focus-time border recolour, and
+`a11y.tab_index = Some(0)` so the enabled Button is a sequential focus stop
+(contract §6: Tab reaches it; the review caught that the ring painted but
+was not keyboard-reachable). No
 idle/hover/active/pressed/disabled/loading/layout output changed; disabled
-and loading buttons declare no ring, matching the web's dormant-ring absence.
+and loading buttons declare no ring and no stop, matching the web's
+dormant-ring absence.
 The receipt observation in `fixture_capture.rs` learned the new field
 (`color`/`width` read from `style.focus_ring`, `status: "dormant"` unchanged);
 the closed receipt schema, its key sets, and the TypeScript verifier are
@@ -146,6 +166,15 @@ Mounted proofs in `packages/gpui/preview/tests/headless_regressions.rs`
   `a_borderless_node_paints_the_declared_ring_without_a_resting_border` —
   the channel's proof nodes: exact painted ring geometry against a known
   border box, focus/blur, hover composition, resting-border preservation.
+- `two_unstamped_buttons_hold_independent_focus_identities` — the review's
+  registry-collision regression: two production (unstamped) Buttons get
+  separate handles, sequential keyboard entry in tree order, one ring at a
+  time, independent activation, blur clears the ring.
+- `a_tracked_handle_follows_roving_tab_index_changes` — a real tracked
+  handle follows dynamic 0 → −1 → 0 roving declarations instead of freezing
+  the first frame's flags.
+- `a_removed_focused_node_leaves_no_painted_ring` — the frame-scoped ring
+  registry drops the entry when the focused node leaves the tree.
 - Backend unit tests pin the new tracking rule (a declared ring is
   sufficient; bare `focusable` stays untracked) and shadow composition.
 
@@ -167,6 +196,31 @@ verified schema). `contact-sheet.html` frames the three captures:
 Every scene captured twice: byte-identical repeats (hashes above match the
 committed receipts). The g15.047 assets are untouched.
 
+## Review changes (PR #69, round 1)
+
+The orchestrator review requested three backend/coverage changes; all landed
+before this evidence set was finalized:
+
+1. **One resolved identity for element and registries.** `build_box` resolves
+   the element id once and threads it through `apply_shared`,
+   `apply_state_patches`, `apply_children`, and `apply_listeners`; the
+   focus/ring registries no longer key id-less nodes under "" (two unstamped
+   Buttons would have shared a handle). The headless driver root gained the
+   production root's per-frame `reset_element_ids`, without which generated
+   identities are not stable across frames. Regression:
+   `two_unstamped_buttons_hold_independent_focus_identities`.
+2. **Button is a sequential stop; handle flags stay fresh.** Enabled Buttons
+   declare `a11y.tab_index = Some(0)` (disabled/loading excluded), and the
+   focus canvas re-applies `tab_index`/`tab_stop` from the node's current
+   declaration on every paint instead of freezing first-frame flags.
+   Regressions: Button tab entry/activation/blur is covered by the unstamped
+   pair above; `a_tracked_handle_follows_roving_tab_index_changes` covers the
+   dynamic 0 ↔ −1 case through a real tracked handle.
+3. **Frame-scoped ring registry.** `overlay_frame_begin` clears
+   `PAINTED_RINGS` beside `ELEMENT_BOUNDS`; `painted_ring_for` can no longer
+   return a ring that is not on screen. Regression:
+   `a_removed_focused_node_leaves_no_painted_ring`.
+
 ## Validation
 
 | check | result |
@@ -174,7 +228,7 @@ committed receipts). The g15.047 assets are untouched.
 | `cargo test -p poodle-node` | 4 pass, 0 fail |
 | `cargo test -p poodle-render` | 373 pass, 0 fail |
 | `cargo test -p poodle-gpui-node-backend` | 26 pass, 0 fail |
-| `effigy regressions:native` (mounted headless) | 60 pass, 0 fail |
+| `effigy regressions:native` (mounted headless) | 63 pass, 0 fail |
 | `cargo test --bin poodle-preview specimen_probe` | 8 pass, 0 fail |
 | `effigy test:visual-button-comparison` | comparator tests 26 pass; batch: 54 captures, 0 repeat mismatches, **0 focus-ring findings**, 16 blocking shadow-only; exit 1 by design |
 | `effigy smoke:gpui-offscreen-capture` | pass (legacy smoke unchanged) |
@@ -196,8 +250,7 @@ Jetstream selector, release mutation, tag, publication, or workflow edit ran.
   determinism is not claimed (same posture as g15.047).
 - Native arrow/`Home`/`End` stepper movement remains the separately recorded
   web-only delta (contract §10); sequential Tab entry is what this card
-  closed. Native Button tab traversal beyond the ring is untouched — the
-  card scoped Button to the ring channel only.
+  closed.
 - Nothing about Jetstream, which compiles the new field but does not project
   it (program-deferred).
 

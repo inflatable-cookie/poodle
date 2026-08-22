@@ -3829,3 +3829,185 @@ fn stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring() {
         );
     });
 }
+
+// ── g15.052 review: registry identity, tab-stop freshness, frame lifetime ──
+
+/// Two UNSTAMPED production Buttons — `poodle_render::button` mints no id —
+/// must not share a focus registry key. Proves separate handles, sequential
+/// keyboard entry in tree order, one ring at a time, and independent
+/// activation, all through the real traversal with no pointer.
+#[test]
+fn two_unstamped_buttons_hold_independent_focus_identities() {
+    run_headless(|cx| {
+        let (handler_one, clicks_one) = counting_handler();
+        let (handler_two, clicks_two) = counting_handler();
+        let one = poodle_render::button(
+            &poodle_specs::ButtonSpec::new()
+                .with_label("One")
+                .with_size(poodle_specs::ControlSize::Sm),
+            &theme(),
+            Some(handler_one),
+        );
+        let two = poodle_render::button(
+            &poodle_specs::ButtonSpec::new()
+                .with_label("Two")
+                .with_size(poodle_specs::ControlSize::Sm),
+            &theme(),
+            Some(handler_two),
+        );
+        assert!(
+            one.id.is_none() && one.runtime_id.is_none(),
+            "the production path stamps no identity — the backend mints it",
+        );
+        assert!(two.id.is_none() && two.runtime_id.is_none());
+
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = poodle_node::LayoutDirection::Row;
+        row.style.descriptor.layout.spacing.gap = 8.0;
+        let mut row = row.child(one).child(two);
+        row.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(row));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        // The tracked handles are created in the first paint pass and attach
+        // from the next build; settle both before traversing.
+        driver.draw_frame();
+        driver.draw_frame();
+
+        // Keyboard entry: the first button is the first tab stop.
+        driver.focus_next_tab_stop();
+        let rings = poodle_gpui_node_backend::painted_rings();
+        assert_eq!(rings.len(), 1, "exactly one ring is on screen");
+        let (first_key, first_ring) = rings[0].clone();
+        assert!(
+            !first_key.is_empty(),
+            "an unstamped control gets a real registry identity, not the shared empty key",
+        );
+
+        driver.dispatch_key_raw("enter");
+        assert_eq!(*clicks_one.lock().unwrap(), 1);
+        assert_eq!(
+            *clicks_two.lock().unwrap(),
+            0,
+            "activation stays with the focused control",
+        );
+
+        // The next stop is the second button: the ring moves, and only one
+        // control reports focused at a time.
+        driver.focus_next_tab_stop();
+        let rings = poodle_gpui_node_backend::painted_rings();
+        assert_eq!(rings.len(), 1, "one ring at a time");
+        let (second_key, second_ring) = rings[0].clone();
+        assert_ne!(
+            first_key, second_key,
+            "two unstamped controls hold separate handles",
+        );
+        assert!(
+            second_ring.bounds[0] > first_ring.bounds[0],
+            "the ring moved to the second button: {:?} -> {:?}",
+            first_ring.bounds,
+            second_ring.bounds,
+        );
+
+        driver.dispatch_key_raw("space");
+        assert_eq!(*clicks_two.lock().unwrap(), 1);
+        assert_eq!(*clicks_one.lock().unwrap(), 1);
+
+        driver.blur_element_focus(&second_key);
+        assert!(
+            poodle_gpui_node_backend::painted_rings().is_empty(),
+            "blur clears the last ring",
+        );
+    });
+}
+
+/// A simple focusable proof node with a declared ring and a caller-chosen
+/// roving tab index.
+fn roving_proof_node(id: &str, tab_index: i32) -> Node {
+    let mut node = Node::container();
+    node.id = Some(id.to_owned());
+    node.interaction.focusable = true;
+    node.a11y.tab_index = Some(tab_index);
+    node.style.descriptor.layout.width = poodle_node::LayoutSizing::Fixed(40.0);
+    node.style.descriptor.layout.height = poodle_node::LayoutSizing::Fixed(20.0);
+    node.style.focus_ring = Some(poodle_node::FocusRing {
+        color: poodle_node::ColorValue(0.3, 0.6, 1.0, 1.0),
+        width: 2.0,
+        offset: 2.0,
+    });
+    node
+}
+
+fn roving_pair(a_tab_index: i32) -> Arc<Mutex<Node>> {
+    let mut row = Node::container();
+    row.style.descriptor.layout.direction = poodle_node::LayoutDirection::Row;
+    row.style.descriptor.layout.spacing.gap = 8.0;
+    let mut row = row
+        .child(roving_proof_node("roving-a", a_tab_index))
+        .child(roving_proof_node("roving-b", 0));
+    row.id = Some(FIXTURE_ID.to_owned());
+    Arc::new(Mutex::new(row))
+}
+
+/// A retained handle's tab flags follow the node's CURRENT declaration, not
+/// the first frame's: a roving component that moves `a11y.tab_index` 0 → -1
+/// drops out of sequential traversal, and 0 again re-enters it.
+#[test]
+fn a_tracked_handle_follows_roving_tab_index_changes() {
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new(cx, roving_pair(0));
+        driver.draw_frame();
+        driver.draw_frame();
+
+        tab_until_focused(&mut driver, "roving-a");
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for("roving-a").is_some(),
+            "the first stop paints its ring",
+        );
+
+        // Rove A out of the order. Focus still sits on A's handle; the next
+        // Tab must skip A and land on B.
+        driver.mount_node(roving_pair(-1));
+        driver.draw_frame();
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("roving-b"),
+            Some(true),
+            "with A at tab_index -1, traversal skips it",
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("roving-a"),
+            Some(false),
+        );
+
+        // Rove A back in: traversal reaches it again — the retained handle's
+        // flags were refreshed, not frozen at first paint.
+        driver.mount_node(roving_pair(0));
+        driver.draw_frame();
+        tab_until_focused(&mut driver, "roving-a");
+    });
+}
+
+/// The painted-ring registry is frame-scoped: a focused node that leaves the
+/// tree paints nothing this frame, so its entry must not survive. Before the
+/// frame boundary cleared the registry, the entry lived forever and
+/// `painted_ring_for` could claim a ring that is no longer on screen.
+#[test]
+fn a_removed_focused_node_leaves_no_painted_ring() {
+    run_headless(|cx| {
+        let node = Arc::new(Mutex::new(ring_proof_node(true)));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        driver.wait_for_focus_handle("ring-proof");
+        driver.focus_element("ring-proof");
+        assert!(poodle_gpui_node_backend::painted_ring_for("ring-proof").is_some());
+
+        let mut empty = Node::container();
+        empty.id = Some(FIXTURE_ID.to_owned());
+        driver.mount_node(Arc::new(Mutex::new(empty)));
+        assert_eq!(
+            poodle_gpui_node_backend::painted_ring_for("ring-proof"),
+            None,
+            "the observation cannot outlive the node that painted it",
+        );
+        assert!(poodle_gpui_node_backend::painted_rings().is_empty());
+    });
+}

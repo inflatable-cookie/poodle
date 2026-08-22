@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
+pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> Stateful<Div> {
     // A disabled control is not focusable: gpui would otherwise take focus on
     // pointer-down, and a browser never focuses a disabled control. The focus
     // tracking canvas below still attaches (the patch may exist), so blur and
@@ -27,7 +27,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
     // attached from the next build onward. That makes *blur* observable, which
     // is what a latched-on-click flag could never do.
     if tracks_focus(node) {
-        let id = element_id_string(node);
+        let id = id.to_owned();
         if let Some(handle) = focus_handle_for(&id) {
             el = el.track_focus(&handle);
         }
@@ -38,26 +38,25 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
                 move |_bounds, window, cx| {
                     let mut created = false;
                     let handle = FOCUS_HANDLES.with(|handles| {
-                        handles
-                            .borrow_mut()
-                            .entry(id.clone())
-                            .or_insert_with(|| {
-                                created = true;
-                                let mut handle = cx.focus_handle();
-                                // The tracked handle must carry the node's
-                                // declared sequential-focus behavior: gpui
-                                // creates handles with tab_stop OFF, and once
-                                // `track_focus` attaches, the element's own
-                                // tab_index/tab_stop refinement no longer
-                                // decides — the handle's flags do.
-                                if let Some(tab_index) = tab_index {
-                                    handle = handle
-                                        .tab_index(tab_index.max(0) as isize)
-                                        .tab_stop(tab_index >= 0);
-                                }
-                                handle
-                            })
+                        let mut handles = handles.borrow_mut();
+                        let entry = handles.entry(id.clone()).or_insert_with(|| {
+                            created = true;
+                            cx.focus_handle()
+                        });
+                        // Re-apply the declared sequential-focus flags on
+                        // every frame, not only at creation: a roving
+                        // component changes `a11y.tab_index` over time, and a
+                        // flag frozen at first paint would make the initially
+                        // selected item the permanent tab stop. gpui
+                        // default-creates handles with tab_stop off, and once
+                        // `track_focus` attaches, the handle's flags — not
+                        // the element refinement's — decide traversal.
+                        let updated = entry
                             .clone()
+                            .tab_index(tab_index.unwrap_or(0).max(0) as isize)
+                            .tab_stop(tab_index.is_some_and(|index| index >= 0));
+                        *entry = updated.clone();
+                        updated
                     });
                     if created {
                         // The element that wants this handle was already built
@@ -118,7 +117,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
     // and the ring's outer edge sits `offset + width` beyond that, exactly
     // CSS `outline` + `outline-offset` (a negative offset insets the ring).
     if let Some(ring) = node.style.focus_ring {
-        let ring_id = element_id_string(node);
+        let ring_id = id.to_owned();
         let border = &node.style.descriptor.border;
         let border_left = node.style.border_left_width.unwrap_or(border.width);
         let border_right = node.style.border_right_width.unwrap_or(border.width);
@@ -206,7 +205,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
     // the layer registry so outside-interaction containment and relative
     // logical-bounds observation read real geometry.
     if let Some(layer_id) = &node.interaction.dismiss_layer {
-        let element_id = element_id_string(node);
+        let element_id = id.to_owned();
         let layer = layer_id.clone();
         el = el.child(
             gpui::canvas(
@@ -219,7 +218,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
             .size_full(),
         );
     } else if node.id.is_some() {
-        let element_id = element_id_string(node);
+        let element_id = id.to_owned();
         el = el.child(
             gpui::canvas(
                 move |bounds, _window, _cx| {
@@ -273,7 +272,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
     // question — "which character is under this x?" — answered from the
     // last painted line, because only a painted line has been measured.
     if let Some(select) = node.interaction.on_select_range.clone() {
-        let id = element_id_string(node);
+        let id = id.to_owned();
         let down_id = id.clone();
         let down_select = select.clone();
         el = el.on_mouse_down(
@@ -362,7 +361,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
         let insert = node.interaction.on_edit_insert.clone();
         // Undo needs the *value* node's id, because that is what paint records
         // history under; the keys arrive at the focusable root above it.
-        let value_id = input_text::history_key(&element_id_string(node));
+        let value_id = input_text::history_key(id);
         let text_change = node.interaction.on_text_change.clone();
         let select_range = node.interaction.on_select_range.clone();
         let selection_text = node.caret.map(|c| c.selection).and_then(|(a, b)| {

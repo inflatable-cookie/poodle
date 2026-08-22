@@ -431,7 +431,7 @@ pub(super) fn apply_patch(mut s: StyleRefinement, patch: StylePatch) -> StyleRef
     s
 }
 
-pub(super) fn apply_state_patches<E: InteractiveElement>(mut el: E, node: &Node) -> E {
+pub(super) fn apply_state_patches<E: InteractiveElement>(mut el: E, node: &Node, id: &str) -> E {
     // Disabled nodes keep their baked style and get no patches — the
     // vocabulary's contract is "renders in the disabled state the style
     // already describes".
@@ -445,10 +445,7 @@ pub(super) fn apply_state_patches<E: InteractiveElement>(mut el: E, node: &Node)
         // ring — a focused field lost its ring the moment you moved the mouse
         // over it. Fold the focus patch back on top inside the hover closure
         // while this node actually holds focus, so the last word is focus's.
-        let focus_patch = node
-            .style
-            .focus
-            .filter(|_| is_focused(&element_id_string(node)));
+        let focus_patch = node.style.focus.filter(|_| is_focused(id));
         el = el.hover(move |s| {
             let s = apply_patch(s, patch);
             match focus_patch {

@@ -284,6 +284,9 @@ pub fn button(
             width: theme.resolve_border_width(spec.focus_ring_width_token()),
             offset: rem_to_px(0.125),
         });
+        // Contract §6: Tab moves focus to the button — a plain sequential
+        // stop, the web `<button>`'s implicit tabindex=0.
+        el.a11y.tab_index = Some(0);
         el.style.descriptor.cursor = CursorHint::Pointer;
         if let Some(handler) = on_click {
             el.interaction.on_activate = Some(Arc::new(move || handler()));
@@ -754,6 +757,7 @@ mod tests {
         // An unavailable control is unfocusable and declares no ring, matching
         // the web's dormant-ring absence for disabled/loading.
         assert!(node.style.focus_ring.is_none());
+        assert_eq!(node.a11y.tab_index, None);
         let spinner = SpinnerSpec::new().with_size(SpinnerSize::Sm).size_px();
         assert_eq!(icon_size_of(&node, "spinner"), spinner);
         assert!(node
@@ -787,6 +791,8 @@ mod tests {
         );
         assert_eq!(ring.width, 2.0);
         assert_eq!(ring.offset, 2.0);
+        // Contract §6: an enabled button is a sequential focus stop.
+        assert_eq!(plain.a11y.tab_index, Some(0));
 
         let pressed = button(
             &ButtonSpec::new().with_label("Mute").with_pressed(true),
