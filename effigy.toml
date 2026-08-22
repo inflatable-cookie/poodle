@@ -2,12 +2,16 @@
 alias = "poodle"
 
 [manifest]
-minimum_effigy_version = "0.7.0"
+minimum_effigy_version = "0.11.0"
 include = [
   "tasks/effigy.tasks.toml",
   "quality/effigy.scan.toml",
   "demos/effigy.demos.toml",
 ]
+
+[release.gates.headless]
+command = "effigy qa"
+description = "Run Poodle's complete self-contained headless release board"
 
 [bootstrap]
 setup = ["bootstrap:deps"]
