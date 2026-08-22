@@ -204,6 +204,15 @@ impl<'a> HeadlessDriver<'a> {
         self.draw_frame();
     }
 
+    /// Move focus to the next tab stop through the window's real traversal —
+    /// the native counterpart of pressing Tab, with no pointer involved.
+    pub fn focus_next_tab_stop(&mut self) {
+        self.cx.update(|window, cx| {
+            window.focus_next(cx);
+        });
+        self.draw_frame();
+    }
+
     /// Move focus to the mount root and keep painting until the backend
     /// reports the element as blurred.
     pub fn blur_element_focus(&mut self, element_id: &str) {
@@ -249,6 +258,15 @@ impl<'a> HeadlessDriver<'a> {
             position,
             modifiers: Modifiers::none(),
             pressed_button: Some(MouseButton::Left),
+        }));
+    }
+
+    /// Pointer hover: a move with no button held.
+    pub fn pointer_hover(&mut self, position: Point<Pixels>) {
+        self.pointer_event(PlatformInput::MouseMove(MouseMoveEvent {
+            position,
+            modifiers: Modifiers::none(),
+            pressed_button: None,
         }));
     }
 

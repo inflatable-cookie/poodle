@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>g15.052 — native focus-ring evidence</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #1c1c1e; color: #eee; margin: 24px; }
+  h1 { font-size: 1.1rem; } h2 { font-size: 0.95rem; margin-top: 1.6em; }
+  figure { margin: 0; } img { display: block; max-width: 100%; image-rendering: auto; border: 1px solid #333; }
+  figcaption, p, li { font-size: 0.8rem; color: #aaa; max-width: 72ch; }
+  code { color: #ddd; }
+</style>
+</head>
+<body>
+<h1>g15.052 — native focus-ring evidence (point-in-time, not a baseline)</h1>
+<p>Headless Metal captures (<code>poodle-offscreen-capture --focus-evidence</code>), eclipse theme,
+2× device scale, 2026-08-22. Focus moved through the backend's real focus registry — no pointer,
+no OS window. Each receipt (<code>*.json</code>) records the paint pass's own ring record
+(<code>painted_ring_for</code>); a run where the ring never painted fails instead of capturing.
+Repeats are byte-identical (sha256 in the receipts).</p>
+
+<h2>Bordered Button — resting twin left, focused right</h2>
+<figure>
+  <img src="button.png" alt="Two secondary Save buttons; the right one carries the 2px focus ring at a 2px offset">
+  <figcaption>Secondary Button, md. The focused control paints the contracted 2px
+  <code>accent-focusRing</code> ring 2px outside the preserved 1px resting border (width 2, offset 2
+  in <code>button.json</code>).</figcaption>
+</figure>
+
+<h2>Borderless Stepper trigger — focused "Read" row</h2>
+<figure>
+  <img src="stepper-trigger.png" alt="Vertical collapsible stepper; the Read trigger row carries the outset focus ring">
+  <figcaption>The trigger has no resting border; the ring (width 2, offset 2,
+  <code>stepper-trigger.json</code>) is the channel's reason to exist. Focus arrived by keyboard
+  entry (backend focus registry), not a pointer press.</figcaption>
+</figure>
+
+<h2>Stepper summary — the contracted inset ring</h2>
+<figure>
+  <img src="stepper-summary.png" alt="The same stepper with the summary row focused, ring drawn inside the row">
+  <figcaption>The summary spans the track edge to edge, so its ring is inset 2px
+  (offset −2, <code>stepper-summary.json</code>) per contract §8.</figcaption>
+</figure>
+</body>
+</html>

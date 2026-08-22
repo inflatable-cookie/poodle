@@ -427,6 +427,12 @@ siblings, so it is density.
   with bottom dividers.
 - Keyboard navigation between triggers does not exist on the natives (no key
   routing), so the per-orientation arrow keys are web-only.
+- GPUI paints the §8 focus rings through the shared node focus-ring channel:
+  2px of `accent-focusRing` 2px outside the trigger and rerun border boxes,
+  inset 2px on the edge-to-edge summary. Each contracted control carries a
+  stable id and declares a sequential focus stop, so the backend tracks a real
+  focus handle and keyboard entry (Tab traversal, `Enter`/`Space` activation)
+  works without a prior pointer press.
 
 ## 10a. Jetstream Notes
 

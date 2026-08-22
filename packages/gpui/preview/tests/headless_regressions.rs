@@ -3515,3 +3515,317 @@ fn stepper_collapse_stays_independent_in_a_mounted_window() {
         );
     });
 }
+
+// ── g15.052 native focus ring ───────────────────────────────────────────
+//
+// The reusable node channel (`NodeStyle::focus_ring`) and its GPUI
+// projection: the backend paints the declared ring only while the node's real
+// focus handle holds focus, outside layout and without touching the resting
+// border. Component adoption (Button, Stepper) is proven separately; these
+// are the bordered and borderless proof nodes the channel was built against.
+
+/// A fixed-size proof node with a declared ring. Centered in the driver's
+/// 160×60 mount box at (32, 32), a 100×40 node's border box lands at exactly
+/// (62, 42), so the painted ring's outer edge is exact: the border box
+/// outset by `offset + width` = 4 logical px.
+fn ring_proof_node(bordered: bool) -> Node {
+    let mut node = Node::container();
+    node.id = Some("ring-proof".to_owned());
+    node.interaction.focusable = true;
+    node.style.descriptor.layout.width = poodle_node::LayoutSizing::Fixed(100.0);
+    node.style.descriptor.layout.height = poodle_node::LayoutSizing::Fixed(40.0);
+    node.style.focus_ring = Some(poodle_node::FocusRing {
+        color: poodle_node::ColorValue(0.3, 0.6, 1.0, 1.0),
+        width: 2.0,
+        offset: 2.0,
+    });
+    if bordered {
+        node.style.descriptor.border.width = 1.0;
+        node.style.descriptor.border.color = poodle_node::ColorValue(0.5, 0.5, 0.5, 1.0);
+        let radii = &mut node.style.descriptor.corner_radii;
+        radii.top_left = 6.0;
+        radii.top_right = 6.0;
+        radii.bottom_right = 6.0;
+        radii.bottom_left = 6.0;
+        node.style.shadow_layers = vec![poodle_node::ShadowLayer {
+            offset_x: 0.0,
+            offset_y: 2.0,
+            blur: 8.0,
+            spread: 0.0,
+            color: poodle_node::ColorValue(0.0, 0.0, 0.0, 0.2),
+            inset: false,
+        }];
+        // A hover patch alongside the ring: gpui refines hover after focus,
+        // so this is the composition that used to erase focus treatments.
+        node.style.hover = Some(poodle_node::StylePatch {
+            background: Some(poodle_node::ColorValue(0.2, 0.2, 0.2, 1.0)),
+            ..poodle_node::StylePatch::default()
+        });
+    }
+    node
+}
+
+/// The ring painted for `id` matches the expected outer-edge bounds exactly
+/// (all proof geometry is integral logical pixels).
+fn assert_ring_bounds(id: &str, expected: [f32; 4]) -> poodle_gpui_node_backend::PaintedRing {
+    let painted = poodle_gpui_node_backend::painted_ring_for(id)
+        .unwrap_or_else(|| panic!("a ring is painted for {id}"));
+    for (got, want) in painted.bounds.iter().zip(expected.iter()) {
+        assert!(
+            (got - want).abs() < 0.01,
+            "ring bounds for {id}: got {:?}, want {expected:?}",
+            painted.bounds,
+        );
+    }
+    painted
+}
+
+/// Bordered node: the ring draws OUTSIDE the resting 1px border — the
+/// border is preserved, not widened or recoloured — only while the real
+/// handle holds focus, alongside an existing shadow stack, and a hover patch
+/// cannot overwrite it.
+#[test]
+fn a_declared_ring_paints_outside_a_bordered_node_only_while_focused() {
+    run_headless(|cx| {
+        let node = Arc::new(Mutex::new(ring_proof_node(true)));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        assert_eq!(
+            poodle_gpui_node_backend::painted_ring_for("ring-proof"),
+            None,
+            "nothing paints before focus arrives",
+        );
+
+        driver.wait_for_focus_handle("ring-proof");
+        driver.focus_element("ring-proof");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("ring-proof"),
+            Some(true),
+        );
+        let painted = assert_ring_bounds("ring-proof", [58.0, 38.0, 108.0, 48.0]);
+        assert_eq!(painted.ring.width, 2.0);
+        assert_eq!(painted.ring.offset, 2.0);
+        assert_eq!(painted.ring.color, poodle_node::ColorValue(0.3, 0.6, 1.0, 1.0));
+
+        // The resting border is still the descriptor's — the ring did not
+        // become a wider replacement border.
+        let node = node.lock().unwrap();
+        assert_eq!(node.style.descriptor.border.width, 1.0);
+        drop(node);
+
+        // Hover applies its own patch and the ring survives it.
+        driver.pointer_hover(headless_driver::mount_box_center());
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for("ring-proof").is_some(),
+            "hover must not overwrite the ring",
+        );
+
+        driver.blur_element_focus("ring-proof");
+        assert_eq!(
+            poodle_gpui_node_backend::painted_ring_for("ring-proof"),
+            None,
+            "blur clears the ring",
+        );
+    });
+}
+
+/// Borderless node: the same ring projects with no resting border at all —
+/// the channel's reason to exist (a `StylePatch` focus recolour has nothing
+/// to recolour on a borderless control).
+#[test]
+fn a_borderless_node_paints_the_declared_ring_without_a_resting_border() {
+    run_headless(|cx| {
+        let node = ring_proof_node(false);
+        assert_eq!(node.style.descriptor.border.width, 0.0);
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        driver.wait_for_focus_handle("ring-proof");
+        driver.focus_element("ring-proof");
+        assert_ring_bounds("ring-proof", [58.0, 38.0, 108.0, 48.0]);
+
+        driver.blur_element_focus("ring-proof");
+        assert_eq!(
+            poodle_gpui_node_backend::painted_ring_for("ring-proof"),
+            None,
+        );
+    });
+}
+
+// ── g15.052 Stepper keyboard entry ──────────────────────────────────────
+//
+// The retained half of the focus gap: the trigger, rerun, and summary
+// controls are borderless, so no `StylePatch` focus recolour could ever give
+// them a tracked focus handle — keyboard entry only worked after a pointer
+// press. The declared focus ring makes the backend track a real handle per
+// control, and these tests drive entry through the window's real tab-stop
+// traversal with no pointer input at all.
+
+/// Traverse the window's real tab stops until `element_id` holds focus.
+/// Fails after a bounded number of hops, so a control that never enters the
+/// tab order is a loud failure, not a silent pass.
+fn tab_until_focused(driver: &mut HeadlessDriver, element_id: &str) {
+    for _ in 0..8 {
+        driver.focus_next_tab_stop();
+        if poodle_gpui_node_backend::focus_state_for(element_id) == Some(true) {
+            return;
+        }
+    }
+    panic!("`{element_id}` never received focus through tab-stop traversal");
+}
+
+/// Keyboard entry reaches the trigger and the rerun control in contract
+/// order (trigger, then its rerun, then the next step) without any prior
+/// pointer press; `Enter`/`Space` activates the focused action; the ring
+/// follows focus and clears behind it.
+#[test]
+fn stepper_keyboard_entry_focuses_and_activates_without_a_pointer_press() {
+    use poodle_specs::{StepStatus, StepperSpec, StepperStep};
+
+    const TRIGGER_READ: &str = "poodle-stepper:trigger:read";
+    const RERUN_READ: &str = "poodle-stepper:rerun:read";
+    const TRIGGER_APPLY: &str = "poodle-stepper:trigger:apply";
+
+    run_headless(|cx| {
+        let changes = Arc::new(Mutex::new(Vec::new()));
+        let reruns = Arc::new(Mutex::new(Vec::new()));
+        let change_sink = Arc::clone(&changes);
+        let rerun_sink = Arc::clone(&reruns);
+
+        let mut node = poodle_render::stepper(
+            &StepperSpec::new(vec![
+                StepperStep::new("read", "Read").with_status(StepStatus::Complete),
+                StepperStep::new("apply", "Apply"),
+            ])
+            .with_value("apply")
+            .with_show_rerun(true),
+            &theme(),
+            poodle_render::StepperHandlers {
+                on_change: Some(Arc::new(move |value: &str| {
+                    change_sink.lock().unwrap().push(value.to_string())
+                })),
+                on_rerun: Some(Arc::new(move |value: &str| {
+                    rerun_sink.lock().unwrap().push(value.to_string())
+                })),
+                on_collapsed_change: None,
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        // The declared rings give every contracted control a tracked handle —
+        // before g15.052 none of these existed until a pointer press.
+        driver.wait_for_focus_handle(TRIGGER_READ);
+        driver.wait_for_focus_handle(RERUN_READ);
+        driver.wait_for_focus_handle(TRIGGER_APPLY);
+        assert_eq!(
+            poodle_gpui_node_backend::painted_ring_for(TRIGGER_READ),
+            None,
+            "no ring is painted before focus arrives",
+        );
+
+        // Entry: the trigger is in the window's tab order. No pointer input
+        // has occurred anywhere in this test.
+        tab_until_focused(&mut driver, TRIGGER_READ);
+        let ring = poodle_gpui_node_backend::painted_ring_for(TRIGGER_READ)
+            .expect("the focused trigger paints its ring");
+        assert_eq!(ring.ring.width, 2.0);
+        assert_eq!(ring.ring.offset, 2.0);
+
+        // Activation: Enter on the focused trigger selects its step.
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            changes.lock().unwrap().as_slice(),
+            ["read"],
+            "keyboard activation reaches the trigger with no prior pointer press",
+        );
+        assert!(reruns.lock().unwrap().is_empty());
+
+        // Contract order: the rerun control is the next stop after its
+        // trigger. The ring moves with focus and clears behind it.
+        tab_until_focused(&mut driver, RERUN_READ);
+        assert_eq!(
+            poodle_gpui_node_backend::painted_ring_for(TRIGGER_READ),
+            None,
+            "the ring clears when focus leaves the trigger",
+        );
+        assert!(
+            poodle_gpui_node_backend::painted_ring_for(RERUN_READ).is_some(),
+            "the focused rerun control paints its ring",
+        );
+
+        driver.dispatch_key_raw("space");
+        assert_eq!(
+            reruns.lock().unwrap().as_slice(),
+            ["read"],
+            "Space activates the focused rerun control",
+        );
+        assert_eq!(
+            changes.lock().unwrap().as_slice(),
+            ["read"],
+            "re-running still does not select the step",
+        );
+
+        // Traversal continues to the next step's trigger.
+        tab_until_focused(&mut driver, TRIGGER_APPLY);
+
+        driver.blur_element_focus(TRIGGER_APPLY);
+        assert_eq!(
+            poodle_gpui_node_backend::painted_ring_for(TRIGGER_APPLY),
+            None,
+            "blur clears the last ring",
+        );
+    });
+}
+
+/// The collapsible summary is the first stop when collapsible (contract §6)
+/// and paints the contracted INSET ring (-0.125rem): the row spans the track
+/// edge to edge, so an outset ring would clip against it.
+#[test]
+fn stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring() {
+    use poodle_specs::{Orientation, StepStatus, StepperSpec, StepperStep};
+
+    const SUMMARY: &str = "poodle-stepper-summary";
+
+    run_headless(|cx| {
+        let collapses = Arc::new(Mutex::new(Vec::new()));
+        let collapse_sink = Arc::clone(&collapses);
+
+        let mut node = poodle_render::stepper(
+            &StepperSpec::new(vec![
+                StepperStep::new("read", "Read").with_status(StepStatus::Complete),
+                StepperStep::new("apply", "Apply"),
+            ])
+            .with_orientation(Orientation::Vertical)
+            .with_collapsible(true)
+            .with_collapsed(false)
+            .with_value("apply"),
+            &theme(),
+            poodle_render::StepperHandlers {
+                on_change: None,
+                on_rerun: None,
+                on_collapsed_change: Some(Arc::new(move |next: bool| {
+                    collapse_sink.lock().unwrap().push(next)
+                })),
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+
+        driver.wait_for_focus_handle(SUMMARY);
+        tab_until_focused(&mut driver, SUMMARY);
+        let ring = poodle_gpui_node_backend::painted_ring_for(SUMMARY)
+            .expect("the focused summary paints its ring");
+        assert_eq!(ring.ring.width, 2.0);
+        assert_eq!(ring.ring.offset, -2.0, "the summary ring is inset");
+
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            collapses.lock().unwrap().as_slice(),
+            [true],
+            "Enter on the focused summary toggles collapse with no pointer press",
+        );
+    });
+}

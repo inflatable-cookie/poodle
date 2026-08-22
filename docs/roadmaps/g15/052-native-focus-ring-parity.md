@@ -1,7 +1,8 @@
 # g15.052 — Native Focus-Ring Parity
 
-Status: **ready — reusable node capability and exact Button/Stepper closure
-compiled 2026-08-22**
+Status: **in flight** — worker evidence landed 2026-08-22
+(`../../logs/2026-08/20260822-g15-052-native-focus-ring-parity.md`), PR up
+for orchestrator review
 Found by: `g15.042`, measured by `g15.047`
 Depends on: `g15.042`, `g15.047`
 Unblocks: `g15.050`, then `g15.013`

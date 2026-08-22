@@ -1,0 +1,32 @@
+{
+  "schema": "poodle.gpui-focus-evidence.v1",
+  "scene": "button",
+  "focused_element": "evidence:button:focus",
+  "backend_focused": true,
+  "painted_ring": {
+    "color": [
+      1.0,
+      0.7921569,
+      0.4509804,
+      1.0
+    ],
+    "width": 2.0,
+    "offset": 2.0,
+    "bounds": [
+      116.0,
+      12.0,
+      88.0,
+      44.0
+    ]
+  },
+  "gpui_revision": "87d9afbe71ef06ea0634499dc35d104bb29dc020",
+  "renderer": "metal-headless",
+  "platform": "macos",
+  "theme": "eclipse",
+  "logical_viewport": [
+    320.0,
+    88.0
+  ],
+  "scale": 2.0,
+  "png_sha256": "df21a0761791f5f5e0407648ded87d38054c14fbc9a04b426cb157cdaadf2f61"
+}
