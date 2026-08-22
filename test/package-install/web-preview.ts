@@ -7,7 +7,13 @@ import {
   readFileSync,
   realpathSync,
 } from "node:fs";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
+
+import {
+  buildWebPackageRoster,
+  readWebPackageRoster,
+  type WebPackageRoster,
+} from "./roster";
 
 const repoRoot = resolve(import.meta.dir, "../..");
 const artifactRoot = join(repoRoot, ".artifacts");
@@ -18,26 +24,44 @@ const consumerRoot = join(runRoot, "consumer");
 mkdirSync(packRoot);
 mkdirSync(consumerRoot);
 
+type PackageManifest = {
+  name: string;
+  version: string;
+  files?: string[];
+  exports?: unknown;
+};
+
 const packages = [
   {
     name: "@inflatable-cookie/poodle-core",
     directory: "packages/core",
-    filename: "inflatable-cookie-poodle-core-0.1.0.tgz",
-    requiredFiles: ["LICENSE", "THIRD_PARTY_NOTICES.md"],
+    requiredFiles: ["package.json", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"],
   },
   {
     name: "@inflatable-cookie/poodle-svelte",
     directory: "packages/svelte/components",
-    filename: "inflatable-cookie-poodle-svelte-0.1.0.tgz",
-    requiredFiles: ["LICENSE"],
+    requiredFiles: ["package.json", "README.md", "LICENSE"],
   },
   {
     name: "@inflatable-cookie/poodle-react",
     directory: "packages/react/components",
-    filename: "inflatable-cookie-poodle-react-0.1.0.tgz",
-    requiredFiles: ["LICENSE"],
+    requiredFiles: ["package.json", "README.md", "LICENSE"],
   },
 ] as const;
+
+type PackageEntry = (typeof packages)[number];
+
+type PackedPackage = PackageEntry & {
+  manifest: PackageManifest;
+  archivePath: string;
+};
+
+type PackedBoundaryEvidence = {
+  archiveFileCount: number;
+  requiredFiles: string[];
+  declaredExportTargets: string[];
+  wildcardExportMatches: Record<string, number>;
+};
 
 async function run(command: string[], cwd: string): Promise<void> {
   const process = Bun.spawn(command, {
@@ -51,28 +75,292 @@ async function run(command: string[], cwd: string): Promise<void> {
   }
 }
 
+async function runCapture(command: string[], cwd: string): Promise<string> {
+  const process = Bun.spawn(command, {
+    cwd,
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(process.stdout).text(),
+    new Response(process.stderr).text(),
+    process.exited,
+  ]);
+  if (exitCode !== 0) {
+    throw new Error(
+      `Command failed (${exitCode}): ${command.join(" ")}\n${stderr.trim()}`,
+    );
+  }
+  return stdout;
+}
+
+function archivePathFromPackOutput(
+  packageEntry: PackageEntry,
+  output: string,
+): string {
+  const archivePath = output
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.endsWith(".tgz"))
+    .at(-1);
+  if (!archivePath) {
+    throw new Error(
+      `${packageEntry.name} pack did not report a .tgz archive path:\n${output.trim()}`,
+    );
+  }
+  return resolve(join(repoRoot, packageEntry.directory), archivePath);
+}
+
+function normalizeArchiveEntry(entry: string): string {
+  return entry.replace(/\/$/, "");
+}
+
+function normalizePackagePath(path: string): string {
+  return path.replace(/^\.\//, "");
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function archiveMatches(
+  archiveEntries: string[],
+  packagePath: string,
+): string[] {
+  const pattern = new RegExp(
+    `^package/${packagePath
+      .split("*")
+      .map(escapeRegExp)
+      .join("[^/]+")}$`,
+  );
+  return archiveEntries.filter((entry) => pattern.test(entry));
+}
+
+function collectExportTargets(value: unknown): string[] {
+  if (typeof value === "string") return [normalizePackagePath(value)];
+  if (Array.isArray(value)) return value.flatMap(collectExportTargets);
+  if (value && typeof value === "object") {
+    return Object.values(value).flatMap(collectExportTargets);
+  }
+  return [];
+}
+
+function inspectPackedBoundary(
+  packageEntry: PackageEntry,
+  manifest: PackageManifest,
+  archiveEntries: string[],
+): PackedBoundaryEvidence {
+  const requiredFiles = [
+    ...packageEntry.requiredFiles,
+    ...(manifest.files ?? []),
+  ];
+  const missingRequiredFiles = requiredFiles.filter((file) => {
+    const normalized = normalizePackagePath(file);
+    if (normalized.includes("*")) {
+      return archiveMatches(archiveEntries, normalized).length === 0;
+    }
+    if (normalized === "src") {
+      return !archiveEntries.some((entry) => entry.startsWith("package/src/"));
+    }
+    return !archiveEntries.includes(`package/${normalized}`);
+  });
+  if (missingRequiredFiles.length > 0) {
+    throw new Error(
+      `${packageEntry.name} tarball omitted required file(s): ${missingRequiredFiles.join(", ")}`,
+    );
+  }
+
+  const declaredExportTargets = sortedUnique(
+    collectExportTargets(manifest.exports),
+  );
+  const missingExportTargets = declaredExportTargets.filter((target) => {
+    if (target.includes("*")) {
+      return archiveMatches(archiveEntries, target).length === 0;
+    }
+    return !archiveEntries.includes(`package/${target}`);
+  });
+  if (missingExportTargets.length > 0) {
+    throw new Error(
+      `${packageEntry.name} tarball omitted declared export target(s): ${missingExportTargets.join(", ")}`,
+    );
+  }
+
+  const wildcardExportMatches = Object.fromEntries(
+    declaredExportTargets
+      .filter((target) => target.includes("*"))
+      .map((target) => [target, archiveMatches(archiveEntries, target).length]),
+  );
+  return {
+    archiveFileCount: archiveEntries.length,
+    requiredFiles: sortedUnique(requiredFiles),
+    declaredExportTargets,
+    wildcardExportMatches,
+  };
+}
+
+function importProofTest(
+  roster: WebPackageRoster,
+  coreSubpaths: string[],
+): string {
+  const frameworkProof = (
+    framework: "svelte" | "react",
+    rootIdentifier: "svelteRoot" | "reactRoot",
+  ) => {
+    const frameworkRoster = roster[framework];
+    return `
+  it("imports the exact frozen ${framework} component roster from the packed root", () => {
+    const expectedComponents = ${JSON.stringify(frameworkRoster.componentNames)};
+    const expectedRootExports = ${JSON.stringify(frameworkRoster.rootRuntimeNames)};
+    const nonComponentRootExports = new Set(${JSON.stringify(frameworkRoster.nonComponentRootNames)});
+    const actualRootExports = Object.keys(${rootIdentifier}).sort();
+    const missingComponents = expectedComponents.filter((name) => !(name in ${rootIdentifier}));
+    const actualComponents = actualRootExports.filter((name) => !nonComponentRootExports.has(name));
+    const extraComponents = actualComponents.filter((name) => !expectedComponents.includes(name));
+    const missingRootExports = expectedRootExports.filter((name) => !actualRootExports.includes(name));
+    const extraRootExports = actualRootExports.filter((name) => !expectedRootExports.includes(name));
+
+    expect(expectedComponents).toHaveLength(175);
+    expect({ missingComponents, extraComponents }).toEqual({
+      missingComponents: [],
+      extraComponents: [],
+    });
+    expect({ missingRootExports, extraRootExports }).toEqual({
+      missingRootExports: [],
+      extraRootExports: [],
+    });
+  });`;
+  };
+
+  const publicImportSpecifiers = [
+    ...coreSubpaths.map((subpath) =>
+      subpath
+        ? `@inflatable-cookie/poodle-core/${subpath}`
+        : "@inflatable-cookie/poodle-core",
+    ),
+    "@inflatable-cookie/poodle-svelte/types",
+  ];
+  const coreImportChecks = publicImportSpecifiers
+    .map((specifier) => {
+      return `    [${JSON.stringify(specifier)}, () => import(${JSON.stringify(specifier)})],`;
+    })
+    .join("\n");
+
+  return `import { describe, expect, it } from "vitest";
+import * as svelteRoot from "@inflatable-cookie/poodle-svelte";
+import * as reactRoot from "@inflatable-cookie/poodle-react";
+
+  describe("packed public root reachability", () => {${frameworkProof("svelte", "svelteRoot")}${frameworkProof("react", "reactRoot")}
+
+  it("resolves every declared exact core public subpath from the packed root", async () => {
+    const checks = [
+${coreImportChecks}
+    ] as const;
+    const failures: string[] = [];
+    for (const [specifier, load] of checks) {
+      try {
+        await load();
+      } catch (error) {
+        failures.push(specifier + ": " + String(error));
+      }
+    }
+    expect(failures).toEqual([]);
+  });
+});
+`;
+}
+
+function sortedUnique(values: Iterable<string>): string[] {
+  return [...new Set(values)].sort();
+}
+
+function assertReactExtraExportRegression(
+  repoRoot: string,
+  roster: WebPackageRoster,
+): { exportName: string; rejected: true } {
+  const extraExportName = "AccidentalExtraComponent";
+  const svelteSource = readFileSync(
+    join(repoRoot, "packages/svelte/components/src/index.ts"),
+    "utf8",
+  );
+  const reactSource = readFileSync(
+    join(repoRoot, "packages/react/components/src/index.ts"),
+    "utf8",
+  );
+
+  try {
+    buildWebPackageRoster(
+      roster.frozenNames,
+      svelteSource,
+      `${reactSource}\nexport { Button as ${extraExportName} } from "./Button";\n`,
+    );
+  } catch (error) {
+    const message = String(error);
+    if (!message.includes(`\"extra\":[\"${extraExportName}\"]`)) {
+      throw new Error(
+        `React extra-export regression failed with the wrong error: ${message}`,
+      );
+    }
+    return { exportName: extraExportName, rejected: true };
+  }
+
+  throw new Error(
+    `React extra-export regression accepted ${extraExportName}`,
+  );
+}
+
+const roster = readWebPackageRoster(repoRoot);
+const rosterRegression = assertReactExtraExportRegression(repoRoot, roster);
+const packageManifests = new Map<string, PackageManifest>();
+const packedPackages: PackedPackage[] = [];
+
 for (const packageEntry of packages) {
   const manifest = JSON.parse(
     readFileSync(
       join(repoRoot, packageEntry.directory, "package.json"),
       "utf8",
     ),
-  ) as { name: string; version: string };
-  if (manifest.name !== packageEntry.name || manifest.version !== "0.1.0") {
+  ) as PackageManifest;
+  if (
+    manifest.name !== packageEntry.name ||
+    typeof manifest.version !== "string" ||
+    manifest.version.length === 0
+  ) {
     throw new Error(
-      `${packageEntry.directory} must be ${packageEntry.name}@0.1.0`,
+      `${packageEntry.directory} must declare ${packageEntry.name} and a non-empty version`,
     );
   }
-  await run(
+  packageManifests.set(packageEntry.name, manifest);
+  const packOutput = await runCapture(
     ["bun", "pm", "pack", "--destination", packRoot, "--quiet"],
     join(repoRoot, packageEntry.directory),
+  );
+  packedPackages.push({
+    ...packageEntry,
+    manifest,
+    archivePath: archivePathFromPackOutput(packageEntry, packOutput),
+  });
+}
+
+const packedBoundaries = new Map<string, PackedBoundaryEvidence>();
+for (const packedPackage of packedPackages) {
+  const archiveEntries = (
+    await runCapture(["tar", "-tzf", packedPackage.archivePath], repoRoot)
+  )
+    .split("\n")
+    .filter(Boolean)
+    .map(normalizeArchiveEntry);
+  const manifest = packageManifests.get(packedPackage.name);
+  if (!manifest) throw new Error(`Missing manifest for ${packedPackage.name}`);
+  packedBoundaries.set(
+    packedPackage.name,
+    inspectPackedBoundary(packedPackage, manifest, archiveEntries),
   );
 }
 
 const tarballDependencies = Object.fromEntries(
-  packages.map((packageEntry) => [
-    packageEntry.name,
-    `file:${join(packRoot, packageEntry.filename)}`,
+  packedPackages.map((packedPackage) => [
+    packedPackage.name,
+    `file:${packedPackage.archivePath}`,
   ]),
 );
 const consumerManifest = {
@@ -100,6 +388,18 @@ await Bun.write(
   `${JSON.stringify(consumerManifest, null, 2)}\n`,
 );
 cpSync(join(import.meta.dir, "fixture"), consumerRoot, { recursive: true });
+
+const coreManifest = packageManifests.get("@inflatable-cookie/poodle-core");
+if (!coreManifest || !coreManifest.exports || typeof coreManifest.exports !== "object") {
+  throw new Error("Core package manifest must declare its public exports");
+}
+const coreSubpaths = Object.keys(coreManifest.exports)
+  .filter((subpath) => subpath !== "./styles/*" && subpath !== "./icons/*")
+  .map((subpath) => (subpath === "." ? "" : subpath.replace(/^\.\//, "")));
+await Bun.write(
+  join(consumerRoot, "PackedRosterReachability.test.ts"),
+  importProofTest(roster, coreSubpaths),
+);
 
 await run(["bun", "install", "--ignore-scripts"], consumerRoot);
 
@@ -138,13 +438,13 @@ for (const packageEntry of packages) {
 await run(["bunx", "vitest", "run"], consumerRoot);
 
 const artifacts = await Promise.all(
-  packages.map(async (packageEntry) => {
-    const path = join(packRoot, packageEntry.filename);
+  packedPackages.map(async (packedPackage) => {
+    const path = packedPackage.archivePath;
     const bytes = new Uint8Array(await Bun.file(path).arrayBuffer());
     return {
-      name: packageEntry.name,
-      version: "0.1.0",
-      filename: packageEntry.filename,
+      name: packedPackage.name,
+      version: packedPackage.manifest.version,
+      filename: basename(path),
       path,
       bytes: bytes.byteLength,
       sha256: createHash("sha256").update(bytes).digest("hex"),
@@ -178,6 +478,18 @@ const evidence = {
     privateDomSelectors: false,
     privateMimeKnowledge: false,
   },
+  rosterProof: {
+    denominator: 175,
+    sourceComponentCounts: {
+      svelte: roster.svelte.componentNames.length,
+      react: roster.react.componentNames.length,
+    },
+    installedRootExactExportSets: true,
+    extraReactExportRegression: rosterRegression,
+    coreExactPublicSubpaths: coreSubpaths,
+    svelteExactPublicSubpaths: ["types"],
+  },
+  packedTarballs: Object.fromEntries(packedBoundaries),
   mountedProof: {
     svelte: {
       components: [
