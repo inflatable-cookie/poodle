@@ -14,8 +14,8 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeAnimation, StylePatch, TextAlign,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing,
+    MainAxisAlignment, Node, NodeAnimation, StylePatch, TextAlign,
 };
 use poodle_specs::{
     ButtonSpec, ButtonTone, ButtonVariant, ControlDensity, SpinnerSize, SpinnerSpec,
@@ -272,16 +272,21 @@ pub fn button(
             text_color: None,
             opacity: None,
         });
-        // Focus-visible treatment (contract §8): the accent focus-ring color
-        // takes the border while the node holds focus — the native counterpart
-        // of the web `:focus-visible` outline. Its presence is also the
+        // Focus-visible treatment (contract §8): the dedicated focus-ring
+        // channel — `border.width.focus` of `accent.focusRing` at the
+        // contracted 2px (0.125rem) offset, the native counterpart of the web
+        // `:focus-visible` outline. The backend paints it as an out-of-flow
+        // ring only while the real focus handle is held; the resting 1px
+        // border is preserved, not recoloured. Its presence is also the
         // observation channel for the focus-visible state.
-        el.style.focus = Some(StylePatch {
-            background: None,
-            border_color: Some(theme.resolve_color(spec.focus_ring_color_token())),
-            text_color: None,
-            opacity: None,
+        el.style.focus_ring = Some(FocusRing {
+            color: theme.resolve_color(spec.focus_ring_color_token()),
+            width: theme.resolve_border_width(spec.focus_ring_width_token()),
+            offset: rem_to_px(0.125),
         });
+        // Contract §6: Tab moves focus to the button — a plain sequential
+        // stop, the web `<button>`'s implicit tabindex=0.
+        el.a11y.tab_index = Some(0);
         el.style.descriptor.cursor = CursorHint::Pointer;
         if let Some(handler) = on_click {
             el.interaction.on_activate = Some(Arc::new(move || handler()));
@@ -749,6 +754,10 @@ mod tests {
         assert!(node.interaction.disabled);
         assert_eq!(node.style.descriptor.cursor, CursorHint::NotAllowed);
         assert!(node.style.shadow_layers.is_empty());
+        // An unavailable control is unfocusable and declares no ring, matching
+        // the web's dormant-ring absence for disabled/loading.
+        assert!(node.style.focus_ring.is_none());
+        assert_eq!(node.a11y.tab_index, None);
         let spinner = SpinnerSpec::new().with_size(SpinnerSize::Sm).size_px();
         assert_eq!(icon_size_of(&node, "spinner"), spinner);
         assert!(node
@@ -772,9 +781,18 @@ mod tests {
         assert_eq!(plain.a11y.expanded, None);
         assert_eq!(plain.a11y.role, Some(poodle_node::NodeRole::Button));
         // The focus-visible treatment is also the observation channel for the
-        // state, so a focusable control without one is unobservable.
+        // state, so a focusable control without one is unobservable. Contract
+        // §8: `border-width-focus` of `accent-focusRing` at a 2px offset.
         assert!(plain.interaction.focusable);
-        assert!(plain.style.focus.is_some());
+        let ring = plain.style.focus_ring.expect("an enabled button declares a ring");
+        assert_eq!(
+            ring.color,
+            theme().resolve_color(ButtonSpec::new().focus_ring_color_token()),
+        );
+        assert_eq!(ring.width, 2.0);
+        assert_eq!(ring.offset, 2.0);
+        // Contract §6: an enabled button is a sequential focus stop.
+        assert_eq!(plain.a11y.tab_index, Some(0));
 
         let pressed = button(
             &ButtonSpec::new().with_label("Mute").with_pressed(true),

@@ -54,6 +54,11 @@ impl Focusable for HeadlessRoot {
 
 impl Render for HeadlessRoot {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        // The same per-frame reset the production root performs
+        // (`main.rs`): without it, generated element ids mint fresh every
+        // frame, and an unstamped node's identity — click state, focus
+        // handle, ring registry key — changes between frames.
+        poodle_gpui_node_backend::reset_element_ids();
         let content = match &self.content {
             HeadlessContent::Node(node) => {
                 let node = node.lock().expect("node lock").clone();
@@ -204,6 +209,15 @@ impl<'a> HeadlessDriver<'a> {
         self.draw_frame();
     }
 
+    /// Move focus to the next tab stop through the window's real traversal —
+    /// the native counterpart of pressing Tab, with no pointer involved.
+    pub fn focus_next_tab_stop(&mut self) {
+        self.cx.update(|window, cx| {
+            window.focus_next(cx);
+        });
+        self.draw_frame();
+    }
+
     /// Move focus to the mount root and keep painting until the backend
     /// reports the element as blurred.
     pub fn blur_element_focus(&mut self, element_id: &str) {
@@ -249,6 +263,15 @@ impl<'a> HeadlessDriver<'a> {
             position,
             modifiers: Modifiers::none(),
             pressed_button: Some(MouseButton::Left),
+        }));
+    }
+
+    /// Pointer hover: a move with no button held.
+    pub fn pointer_hover(&mut self, position: Point<Pixels>) {
+        self.pointer_event(PlatformInput::MouseMove(MouseMoveEvent {
+            position,
+            modifiers: Modifiers::none(),
+            pressed_button: None,
         }));
     }
 

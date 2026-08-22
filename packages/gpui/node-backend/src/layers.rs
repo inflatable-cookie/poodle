@@ -71,6 +71,10 @@ thread_local! {
 pub fn overlay_frame_begin() {
     LAYERS.with(|layers| layers.borrow_mut().clear());
     ELEMENT_BOUNDS.with(|bounds| bounds.borrow_mut().clear());
+    // The ring registry is frame observation with the same lifetime: a
+    // focused node that vanished paints nothing this frame, and its entry
+    // must not survive it.
+    crate::clear_painted_rings();
 }
 
 /// End a rendered frame: drop focus requests the frame's paint never applied

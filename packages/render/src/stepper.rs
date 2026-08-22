@@ -12,13 +12,26 @@ use std::sync::Arc;
 
 use poodle_adapter::ThemeProvider;
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeRole, StylePatch,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing,
+    MainAxisAlignment, Node, NodeRole, StylePatch,
 };
 use poodle_specs::{Orientation, StepStatus, StepperSpec};
 
 use crate::color::with_alpha;
 use crate::presentation::{rem_to_px, resolve_supporting_visual_size, size_font_rem};
+
+/// The contracted focus ring (§4/§8): `border-width-focus` of
+/// `accent-focusRing`. The trigger and rerun draw it 2px (0.125rem) outside
+/// the border box; the summary draws it inset. Declaring it is also what
+/// gives each control a tracked native focus handle, so keyboard entry no
+/// longer depends on a prior pointer press.
+fn stepper_focus_ring(theme: &dyn ThemeProvider, offset: f32) -> FocusRing {
+    FocusRing {
+        color: theme.resolve_color("color.accent.focusRing"),
+        width: theme.resolve_border_width("border.width.focus"),
+        offset,
+    }
+}
 
 /// Host callbacks: change and rerun, each carrying the step's value, plus the
 /// summary's collapse toggle carrying the new state.
@@ -162,6 +175,10 @@ pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperH
         // glyph do not. `pending` is omitted as the unremarkable case.
         trigger.a11y.label = Some(format!("{}{}", step.label, status_word));
         trigger.a11y.role = Some(NodeRole::Button);
+        // A stable identity per step value, like the summary's: the focus
+        // ring makes the backend track a real handle under this id, which is
+        // what lets keyboard entry reach the control without a pointer press.
+        trigger.id = Some(format!("poodle-stepper:trigger:{}", step.value));
         {
             let s = &mut trigger.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
@@ -181,6 +198,17 @@ pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperH
             s.descriptor.background = Some(ColorValue(0.0, 0.0, 0.0, 0.0));
             s.text_size = Some(font_size);
             s.descriptor.text_color = Some(text_color);
+            // Contract §8: the trigger's focus ring is cornered at
+            // `radius-control` so the first and last steps' rings do not
+            // render square inside the track's rounded corners. The resting
+            // background is transparent, so the radius is invisible until the
+            // ring draws.
+            let ring_radius = theme.resolve_radius("radius.control");
+            let c = &mut s.descriptor.corner_radii;
+            c.top_left = ring_radius;
+            c.top_right = ring_radius;
+            c.bottom_right = ring_radius;
+            c.bottom_left = ring_radius;
         }
         trigger.interaction.focusable = true;
         let mut label = Node::text(step.label.clone());
@@ -194,6 +222,13 @@ pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperH
             trigger.interaction.disabled = true;
         } else {
             trigger.style.descriptor.cursor = CursorHint::Pointer;
+            // Contract §6: Tab moves between the trigger and its rerun
+            // control — each is a sequential focus stop (the web buttons'
+            // implicit tabindex=0).
+            trigger.a11y.tab_index = Some(0);
+            // Contract §8 trigger focus ring: `border-width-focus` of
+            // `accent-focusRing`, 2px (0.125rem) outside the border box.
+            trigger.style.focus_ring = Some(stepper_focus_ring(theme, rem_to_px(0.125)));
             if let Some(handler) = &handlers.on_change {
                 let handler = Arc::clone(handler);
                 let value = step.value.clone();
@@ -238,6 +273,7 @@ pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperH
             let mut rerun = Node::button("");
             rerun.a11y.label = Some(format!("{}: {}", spec.rerun_label, step.label));
             rerun.a11y.role = Some(NodeRole::Button);
+            rerun.id = Some(format!("poodle-stepper:rerun:{}", step.value));
             {
                 let s = &mut rerun.style;
                 s.descriptor.layout.width = LayoutSizing::Fixed(marker_size);
@@ -261,6 +297,10 @@ pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperH
                 rerun.interaction.disabled = true;
             } else {
                 rerun.style.descriptor.cursor = CursorHint::Pointer;
+                rerun.a11y.tab_index = Some(0);
+                // Contract §4: keyboard focus on the rerun control draws the
+                // same focus ring the trigger draws.
+                rerun.style.focus_ring = Some(stepper_focus_ring(theme, rem_to_px(0.125)));
                 // Its own handler, inert when unwired: clicks bubble to the
                 // nearest handler, so an unwired rerun would select the step.
                 if let Some(handler) = &handlers.on_rerun {
@@ -358,6 +398,15 @@ fn summary_row(
         pad.bottom = pad_y;
         s.descriptor.background = Some(ColorValue(0.0, 0.0, 0.0, 0.0));
         s.text_size = Some(font_size);
+        // Contract §8: the summary's resting `radius-control` rounds the
+        // full-width row so the hover fill and the inset focus ring do not
+        // render square inside the track's rounded corners.
+        let row_radius = theme.resolve_radius("radius.control");
+        let c = &mut s.descriptor.corner_radii;
+        c.top_left = row_radius;
+        c.top_right = row_radius;
+        c.bottom_right = row_radius;
+        c.bottom_left = row_radius;
         // Expanded, the summary sits above the list and draws the same divider
         // the steps draw between themselves. Collapsed it is the last row.
         if !is_collapsed {
@@ -371,6 +420,12 @@ fn summary_row(
         summary.interaction.disabled = true;
     } else {
         summary.style.descriptor.cursor = CursorHint::Pointer;
+        // Contract §6: the summary is the FIRST stop when collapsible.
+        summary.a11y.tab_index = Some(0);
+        // Contract §8 summary focus ring: the same ring, drawn 2px
+        // (-0.125rem) INSIDE the border box — the row spans the track edge
+        // to edge, so an outset ring would clip against the track.
+        summary.style.focus_ring = Some(stepper_focus_ring(theme, rem_to_px(-0.125)));
         summary.style.hover = Some(StylePatch {
             background: Some(with_alpha(
                 colors.active_label,
@@ -531,6 +586,65 @@ mod tests {
 
     fn rerun(cell: &Node) -> Option<&Node> {
         cell.children.get(1)
+    }
+
+    /// g15.052: the three contracted controls declare the focus ring and a
+    /// stable identity — the declaration is what makes the backend track a
+    /// real focus handle, so keyboard entry no longer needs a pointer press.
+    /// A disabled step is unfocusable and declares no ring, matching the web.
+    #[test]
+    fn the_contracted_controls_declare_the_focus_ring_and_stable_identities() {
+        let theme = theme();
+        let ring_color = theme.resolve_color("color.accent.focusRing");
+        let root = stepper(
+            &StepperSpec::new(steps())
+                .with_value("categories")
+                .with_show_rerun(true),
+            &theme,
+            StepperHandlers::default(),
+        );
+        let cells = cells(&root);
+
+        let first_trigger = trigger(cells[0]);
+        let ring = first_trigger.style.focus_ring.expect("the trigger declares a ring");
+        assert_eq!(ring.color, ring_color);
+        assert_eq!(ring.width, 2.0);
+        assert_eq!(ring.offset, 2.0, "the trigger ring draws 2px outside");
+        assert_eq!(
+            first_trigger.id.as_deref(),
+            Some("poodle-stepper:trigger:state"),
+            "a stable focus identity keyed by the step value",
+        );
+
+        let rerun = rerun(cells[0]).expect("a completed step carries the rerun control");
+        let ring = rerun.style.focus_ring.expect("the rerun control declares a ring");
+        assert_eq!(ring.color, ring_color);
+        assert_eq!(ring.offset, 2.0);
+        assert_eq!(rerun.id.as_deref(), Some("poodle-stepper:rerun:state"));
+
+        let disabled = trigger(cells[2]);
+        assert!(
+            disabled.style.focus_ring.is_none(),
+            "a disabled step is unfocusable and declares no ring",
+        );
+
+        // The summary's ring is INSET (contract §8: -0.125rem) — the row
+        // spans the track edge to edge, so an outset ring would clip.
+        let collapsible = stepper(
+            &StepperSpec::new(steps())
+                .with_orientation(Orientation::Vertical)
+                .with_collapsible(true)
+                .with_value("categories"),
+            &theme,
+            StepperHandlers::default(),
+        );
+        let summary = collapsible
+            .find(&|node| node.id.as_deref() == Some("poodle-stepper-summary"))
+            .expect("a collapsible vertical stepper has a summary row");
+        let ring = summary.style.focus_ring.expect("the summary declares a ring");
+        assert_eq!(ring.color, ring_color);
+        assert_eq!(ring.width, 2.0);
+        assert_eq!(ring.offset, -2.0);
     }
 
     #[test]

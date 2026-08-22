@@ -108,10 +108,101 @@ fn focusable_nodes_with_a_focus_patch_are_tracked() {
     assert_eq!(element_id_string(&node), "segmented:a:option:grid");
 }
 
+/// A declared focus ring is sufficient for focus tracking on its own — the
+/// whole point of the channel: a borderless control with no focus patch still
+/// gets a real, retrievable handle, so keyboard entry does not depend on a
+/// prior pointer press. Bare `focusable` stays untracked.
+#[test]
+fn a_declared_focus_ring_is_tracked_and_takes_the_stateful_path() {
+    let mut node = Node::button("rerun");
+    node.interaction.focusable = true;
+    assert!(!tracks_focus(&node));
+    node.style.focus_ring = Some(FocusRing {
+        color: ColorValue(0.3, 0.6, 1.0, 1.0),
+        width: 2.0,
+        offset: 2.0,
+    });
+    assert!(tracks_focus(&node));
+    assert!(needs_state(&node));
+
+    // Tracking does not require `focusable`: the ring declares the need.
+    let mut ring_only = Node::container();
+    ring_only.style.focus_ring = node.style.focus_ring;
+    assert!(tracks_focus(&ring_only));
+    assert!(needs_state(&ring_only));
+}
+
+/// Generated identities belong to one GPUI render thread. A second headless
+/// app may reset its own frame while this one is still walking a tree; that
+/// must not rewind either counter in this app.
+#[test]
+fn generated_identity_counters_are_isolated_per_thread() {
+    use std::sync::{Arc, Barrier};
+
+    let node = Node::button("proof");
+    reset_element_ids();
+    assert_eq!(element_id_text(&element_id(&node)), "poodle-node-0");
+    assert_eq!(next_gesture_id(), "gesture-0");
+
+    let before_worker_reset = Arc::new(Barrier::new(2));
+    let after_main_progress = Arc::new(Barrier::new(2));
+    let worker_before = Arc::clone(&before_worker_reset);
+    let worker_after = Arc::clone(&after_main_progress);
+    let worker = std::thread::spawn(move || {
+        let node = Node::button("worker");
+        reset_element_ids();
+        assert_eq!(element_id_text(&element_id(&node)), "poodle-node-0");
+        assert_eq!(next_gesture_id(), "gesture-0");
+        worker_before.wait();
+        worker_after.wait();
+        reset_element_ids();
+        assert_eq!(element_id_text(&element_id(&node)), "poodle-node-0");
+        assert_eq!(next_gesture_id(), "gesture-0");
+    });
+
+    before_worker_reset.wait();
+    assert_eq!(element_id_text(&element_id(&node)), "poodle-node-1");
+    assert_eq!(next_gesture_id(), "gesture-1");
+    after_main_progress.wait();
+    worker.join().expect("worker identity proof");
+
+    assert_eq!(element_id_text(&element_id(&node)), "poodle-node-2");
+    assert_eq!(next_gesture_id(), "gesture-2");
+}
+
 // ── Shadow projection (g15.045) ─────────────────────────────────────
 // The adopted GPUI revision's `BoxShadow` carries a real `inset` flag, so the
 // backend projects inset (highlight) layers faithfully instead of dropping
 // them — the gpui 0.2.2 approximation is gone.
+
+/// The ring is its own paint channel: declaring one must not disturb the
+/// element's shadow stack (or any other refinement) — composition, not
+/// replacement.
+#[test]
+fn a_focus_ring_leaves_the_shadow_stack_untouched() {
+    let mut node = Node::button("ok");
+    node.style.shadow_layers = vec![ShadowLayer {
+        offset_x: 0.0,
+        offset_y: 2.0,
+        blur: 8.0,
+        spread: 1.0,
+        color: ColorValue(0.0, 0.0, 0.0, 0.2),
+        inset: false,
+    }];
+    node.style.focus_ring = Some(FocusRing {
+        color: ColorValue(0.3, 0.6, 1.0, 1.0),
+        width: 2.0,
+        offset: 2.0,
+    });
+    let mut el = apply_paint(div(), &node);
+    let shadows = el
+        .style()
+        .box_shadow
+        .as_ref()
+        .expect("the shadow stack still projects with a ring declared");
+    assert_eq!(shadows.len(), 1);
+    assert_eq!(f32::from(shadows[0].offset.y), 2.0);
+}
 
 #[test]
 fn inset_shadow_layers_project_with_the_inset_flag() {

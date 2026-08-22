@@ -462,6 +462,11 @@ Toggle mode is activated when `pressed` is non-null OR `defaultPressed` is non-n
 - Border radius resolves directly from `--poodle-radius-control`.
 - Active translateY(0.03125rem) — half a pixel press-down — may be omitted in GPUI (known delta)
 - GPUI uses the shared `Spinner` primitive rather than a button-owned loader treatment
+- GPUI paints the §8 focus ring through the shared node focus-ring channel: the
+  backend draws `border-width-focus` of `accent-focusRing` 2px outside the border
+  box as an out-of-flow quad, only while the control's real focus handle is held.
+  The resting 1px border is preserved, not recoloured or widened, and layout is
+  unaffected — the native counterpart of the web `outline` + `outline-offset`.
 
 ## 10a. Jetstream Notes
 

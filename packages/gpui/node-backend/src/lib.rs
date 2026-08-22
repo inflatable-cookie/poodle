@@ -20,14 +20,13 @@
 //! alpha is coverage and passes through. All mixing happened render-side
 //! (`poodle-render::color`); nodes carry final values.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
-use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
 use gpui::{
-    canvas, deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, svg,
+    canvas, deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, size, svg,
     AnyElement, AnyView, App, AppContext, ClickEvent, CursorStyle, Div, ElementId, Hsla,
     InteractiveElement, IntoElement, KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent,
     MouseUpEvent, ParentElement, PathBuilder, SharedString, Stateful,
@@ -35,7 +34,7 @@ use gpui::{
 };
 use poodle_node::{
     AnimEasing, AnimLoop, AnimProperty, ColorValue, CrossAxisAlignment, CursorHint, DropEdge,
-    FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
+    FocusRing, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
     NodeAnimation, NodeDragEvent, NodeDragPhase, NodeDropEvent, NodeKey, NodeKind, NodeModifiers,
     NodePoint, NodePosition, NodeRole, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
 };
@@ -101,11 +100,20 @@ pub fn color(c: ColorValue) -> Hsla {
     .into()
 }
 
-/// Deterministic per-tree ids for nodes that need element state (interaction)
-/// but declare none. Tree order is stable across frames for a stable tree, so
-/// a counter keeps the same node on the same id between rebuilds — but ONLY if
-/// the counter restarts each frame. See [`reset_element_ids`].
-static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+thread_local! {
+    /// Deterministic per-tree ids for nodes that need element state
+    /// (interaction) but declare none. Tree order is stable across frames for
+    /// a stable tree, so a counter keeps the same node on the same id between
+    /// rebuilds — but ONLY if the counter restarts each frame. The counter is
+    /// local to the UI thread, matching GPUI's render model and the
+    /// thread-local focus/ring registries it keys. Independent headless apps
+    /// must not reset one another while Rust runs their tests in parallel.
+    static NEXT_ID: Cell<u64> = const { Cell::new(0) };
+
+    /// Per-frame counter for gesture-drag identities. It shares the element
+    /// counter's thread boundary for the same reason.
+    static NEXT_GESTURE_ID: Cell<usize> = const { Cell::new(0) };
+}
 
 /// Restart the generated-id counter. Call once per frame, before building.
 ///
@@ -120,8 +128,8 @@ static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 /// frames, and the in-process click driver posts press and release inside a
 /// single frame, so it never crosses a rebuild.
 pub fn reset_element_ids() {
-    NEXT_ID.store(0, Ordering::Relaxed);
-    NEXT_GESTURE_ID.store(0, Ordering::Relaxed);
+    NEXT_ID.with(|next| next.set(0));
+    NEXT_GESTURE_ID.with(|next| next.set(0));
 }
 
 /// Per-frame counter for gesture-drag identities.
@@ -129,13 +137,12 @@ pub fn reset_element_ids() {
 /// Reset with the element ids, so a node gets the same gesture id on every
 /// frame: the tree is walked in the same order each time, and a drag begun on
 /// one frame has to still recognise itself on the next.
-static NEXT_GESTURE_ID: AtomicUsize = AtomicUsize::new(0);
-
 fn next_gesture_id() -> String {
-    format!(
-        "gesture-{}",
-        NEXT_GESTURE_ID.fetch_add(1, Ordering::Relaxed)
-    )
+    NEXT_GESTURE_ID.with(|next| {
+        let id = next.get();
+        next.set(id + 1);
+        format!("gesture-{id}")
+    })
 }
 
 fn element_id(node: &Node) -> ElementId {
@@ -150,10 +157,20 @@ fn element_id(node: &Node) -> ElementId {
         // nodes sharing a key share a clock.
         return ElementId::Name(SharedString::from(anim.key.clone()));
     }
-    ElementId::Name(SharedString::from(format!(
-        "poodle-node-{}",
-        NEXT_ID.fetch_add(1, Ordering::Relaxed)
-    )))
+    NEXT_ID.with(|next| {
+        let id = next.get();
+        next.set(id + 1);
+        ElementId::Name(SharedString::from(format!("poodle-node-{id}")))
+    })
+}
+
+/// The string form of a resolved element id. `element_id` only ever mints
+/// `Name` ids, so this is lossless.
+fn element_id_text(id: &ElementId) -> String {
+    match id {
+        ElementId::Name(name) => name.to_string(),
+        other => unreachable!("the node backend only mints Name element ids, got {other:?}"),
+    }
 }
 
 /// Interpret one node (and its subtree) as a GPUI element.
@@ -426,6 +443,7 @@ where
     let el = apply_cursor(el, node);
     let needs_wrapper = node.style.hover.is_some()
         || node.style.active.is_some()
+        || node.style.focus_ring.is_some()
         || node.interaction.focusable
         || node.interaction.on_activate.is_some()
         || node.interaction.on_text_change.is_some()
@@ -455,6 +473,7 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
     // animated icon, and the capture host freezes motion regardless.
     let needs_wrapper = node.style.hover.is_some()
         || node.style.active.is_some()
+        || node.style.focus_ring.is_some()
         || node.interaction.focusable
         || node.interaction.on_activate.is_some()
         || node.interaction.on_text_change.is_some()
@@ -493,12 +512,19 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
         DEFERRED_SCOPE.with(|scope| scope.set(true));
     }
     let element = if needs_state(node) {
-        let el = base.id(element_id(node));
-        let el = apply_shared(el, node);
-        let el = apply_listeners(el, node);
+        // Resolve the element id ONCE and use the same identity for the
+        // element and every focus/ring registry: `element_id` mints a fresh
+        // generated name per call, and keying the registries by
+        // `element_id_string` ("" for an id-less node) made every unstamped
+        // control share one focus handle.
+        let id = element_id(node);
+        let id_string = element_id_text(&id);
+        let el = base.id(id);
+        let el = apply_shared(el, node, &id_string);
+        let el = apply_listeners(el, node, &id_string);
         maybe_animated(el, node)
     } else {
-        let el = apply_shared(base, node);
+        let el = apply_shared(base, node, "");
         maybe_animated(el, node)
     };
     if node.style.overlay {
@@ -528,6 +554,9 @@ fn needs_state(node: &Node) -> bool {
         || node.interaction.on_select_range.is_some()
         || node.interaction.on_focus_change.is_some()
         || node.id.is_some()
+        // A declared focus ring paints through a canvas child and implies
+        // focus tracking — both need element state.
+        || node.style.focus_ring.is_some()
         // `active` style patches and scroll overflow live on gpui 0.2.2's
         // StatefulInteractiveElement — both need element state.
         || node.style.active.is_some()
@@ -538,8 +567,10 @@ fn needs_state(node: &Node) -> bool {
 }
 
 /// The channels every box gets, in the Jetstream walk's order: layout,
-/// position, paint, text, cursor, state patches, children.
-fn apply_shared<E>(el: E, node: &Node) -> E
+/// position, paint, text, cursor, state patches, children. `id` is the
+/// resolved element identity (see `build_box`) — "" only on the stateless
+/// path, which never tracks focus.
+fn apply_shared<E>(el: E, node: &Node, id: &str) -> E
 where
     E: Styled + InteractiveElement + ParentElement + 'static,
 {
@@ -548,8 +579,8 @@ where
     let el = apply_paint(el, node);
     let el = apply_text(el, node);
     let el = apply_cursor(el, node);
-    let el = apply_state_patches(el, node);
-    apply_children(el, node)
+    let el = apply_state_patches(el, node, id);
+    apply_children(el, node, id)
 }
 
 // The id `element_id` would assign, as a string, for keying editor state.
@@ -572,6 +603,56 @@ thread_local! {
         RefCell::new(std::collections::HashMap::new());
     static FOCUS_STATES: RefCell<std::collections::HashMap<String, bool>> =
         RefCell::new(std::collections::HashMap::new());
+    // What the ring paint pass last painted per element id. Written only from
+    // the real paint pass; absent means no ring is on screen.
+    static PAINTED_RINGS: RefCell<std::collections::HashMap<String, PaintedRing>> =
+        RefCell::new(std::collections::HashMap::new());
+}
+
+/// What the focus-ring paint pass last painted for one tracked element: the
+/// declared ring values and the outer-edge bounds it drew, in logical pixels.
+/// Same observation posture as [`bounds_for`]: the paint pass records, tests
+/// and capture hosts read — nothing here steers what is painted. The registry
+/// is frame-scoped: [`overlay_frame_begin`] clears it and the frame's paint
+/// repopulates it, so an entry can never outlive the node that painted it.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct PaintedRing {
+    pub ring: FocusRing,
+    /// Outer edge of the painted ring: `[x, y, width, height]`.
+    pub bounds: [f32; 4],
+}
+
+/// The ring painted for this element id as of the last paint pass, or `None`
+/// when no ring is on screen (the node is not focused, declares none, or is
+/// gone from the tree).
+pub fn painted_ring_for(id: &str) -> Option<PaintedRing> {
+    PAINTED_RINGS.with(|r| r.borrow().get(id).copied())
+}
+
+/// Every ring painted in the current frame, keyed by element id. The
+/// observation surface for "exactly one ring is on screen, and it is this
+/// one" claims where the element id is backend-generated.
+pub fn painted_rings() -> Vec<(String, PaintedRing)> {
+    PAINTED_RINGS.with(|r| {
+        r.borrow()
+            .iter()
+            .map(|(id, painted)| (id.clone(), *painted))
+            .collect()
+    })
+}
+
+pub(crate) fn record_painted_ring(id: &str, painted: PaintedRing) {
+    PAINTED_RINGS.with(|r| r.borrow_mut().insert(id.to_owned(), painted));
+}
+
+pub(crate) fn clear_painted_ring(id: &str) {
+    PAINTED_RINGS.with(|r| r.borrow_mut().remove(id));
+}
+
+/// Frame boundary for the ring registry, called from
+/// [`layers::overlay_frame_begin`] beside `ELEMENT_BOUNDS`.
+pub(crate) fn clear_painted_rings() {
+    PAINTED_RINGS.with(|r| r.borrow_mut().clear());
 }
 
 /// The focus handle of whatever holds focus right now.
@@ -604,8 +685,11 @@ fn is_focused(id: &str) -> bool {
     FOCUS_STATES.with(|s| s.borrow().get(id).copied().unwrap_or(false))
 }
 
-/// Whether a node wants focus tracked: it draws differently when focused, or
-/// it asked to be told.
+/// Whether a node wants focus tracked: it draws differently when focused, it
+/// asked to be told, or it declares a focus ring — a ring is painted only
+/// while the real handle holds focus, so declaring one is meaningless without
+/// a tracked handle. A bare `focusable` stays untracked: most focusable nodes
+/// never draw a focus treatment of their own.
 fn tracks_focus(node: &Node) -> bool {
     // Deliberately not "every input": a field's value node is an input too,
     // and gpui focuses the *innermost* focusable element under the pointer, so
@@ -613,6 +697,7 @@ fn tracks_focus(node: &Node) -> bool {
     // listeners — clicks focused something that could not type. The value node
     // learns it is focused by inheritance instead (see `apply_children`).
     node.interaction.on_focus_change.is_some()
+        || node.style.focus_ring.is_some()
         || (node.interaction.focusable && node.style.focus.is_some())
 }
 
@@ -626,13 +711,13 @@ fn element_id_string(node: &Node) -> String {
     }
 }
 
-fn apply_children<E: ParentElement>(mut el: E, node: &Node) -> E {
+fn apply_children<E: ParentElement>(mut el: E, node: &Node, id: &str) -> E {
     // A focused field's caret sits on the *value* node, several levels below
     // the focusable root that actually holds focus (affixes and icons are
     // siblings of the value). Focus is inherited down the subtree here, the
     // same way a real input's caret shows because its wrapper has focus.
     let inherited = FOCUS_SCOPE.with(|f| f.get());
-    let scope = inherited || (tracks_focus(node) && is_focused(&element_id_string(node)));
+    let scope = inherited || (tracks_focus(node) && is_focused(id));
     FOCUS_SCOPE.with(|f| f.set(scope));
     for child in &node.children {
         el = el.child(to_gpui(child));

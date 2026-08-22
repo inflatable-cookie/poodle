@@ -49,6 +49,11 @@ mod inventory;
 #[path = "offscreen_capture/fixture_capture.rs"]
 mod fixture_capture;
 
+// g15.052 focused-state evidence: real-focus captures of the ring channel
+// for operator review. Point-in-time evidence, never a baseline.
+#[path = "offscreen_capture/focus_evidence.rs"]
+mod focus_evidence;
+
 use presentation_axes::{ControlSize, ThemePreset};
 
 /// The immutable upstream revision this seam is adopted at. Keep identical to
@@ -102,16 +107,20 @@ const USAGE: &str = "usage: poodle-offscreen-capture \
 const FIXTURE_USAGE: &str =
     "usage: poodle-offscreen-capture --fixture <exact-name> --out <png> --receipt <json>";
 
-/// The two capture modes. `--fixture` selects fixture mode; without it the
+/// The capture modes. `--fixture` selects fixture mode; `--focus-evidence`
+/// selects the g15.052 focused-state evidence mode; without either the
 /// legacy smoke contract applies unchanged.
 enum CaptureMode {
     Smoke(CaptureArgs),
     Fixture(fixture_capture::FixtureArgs),
+    FocusEvidence(focus_evidence::FocusEvidenceArgs),
 }
 
 fn parse_cli(argv: &[String]) -> Result<CaptureMode> {
     if argv.iter().any(|arg| arg == "--fixture") {
         parse_fixture_args(argv).map(CaptureMode::Fixture)
+    } else if argv.iter().any(|arg| arg == "--focus-evidence") {
+        focus_evidence::parse_args(argv).map(CaptureMode::FocusEvidence)
     } else {
         parse_args(argv).map(CaptureMode::Smoke)
     }
@@ -485,6 +494,7 @@ fn main() -> Result<()> {
     match parse_cli(&argv)? {
         CaptureMode::Smoke(args) => run(&args),
         CaptureMode::Fixture(args) => fixture_capture::run(&args),
+        CaptureMode::FocusEvidence(args) => focus_evidence::run(&args),
     }
 }
 

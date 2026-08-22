@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div> {
+pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> Stateful<Div> {
     // A disabled control is not focusable: gpui would otherwise take focus on
     // pointer-down, and a browser never focuses a disabled control. The focus
     // tracking canvas below still attaches (the patch may exist), so blur and
@@ -27,24 +27,36 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
     // attached from the next build onward. That makes *blur* observable, which
     // is what a latched-on-click flag could never do.
     if tracks_focus(node) {
-        let id = element_id_string(node);
+        let id = id.to_owned();
         if let Some(handle) = focus_handle_for(&id) {
             el = el.track_focus(&handle);
         }
         let on_focus_change = node.interaction.on_focus_change.clone();
+        let tab_index = node.a11y.tab_index;
         el = el.child(
             gpui::canvas(
                 move |_bounds, window, cx| {
                     let mut created = false;
                     let handle = FOCUS_HANDLES.with(|handles| {
-                        handles
-                            .borrow_mut()
-                            .entry(id.clone())
-                            .or_insert_with(|| {
-                                created = true;
-                                cx.focus_handle()
-                            })
+                        let mut handles = handles.borrow_mut();
+                        let entry = handles.entry(id.clone()).or_insert_with(|| {
+                            created = true;
+                            cx.focus_handle()
+                        });
+                        // Re-apply the declared sequential-focus flags on
+                        // every frame, not only at creation: a roving
+                        // component changes `a11y.tab_index` over time, and a
+                        // flag frozen at first paint would make the initially
+                        // selected item the permanent tab stop. gpui
+                        // default-creates handles with tab_stop off, and once
+                        // `track_focus` attaches, the handle's flags — not
+                        // the element refinement's — decide traversal.
+                        let updated = entry
                             .clone()
+                            .tab_index(tab_index.unwrap_or(0).max(0) as isize)
+                            .tab_stop(tab_index.is_some_and(|index| index >= 0));
+                        *entry = updated.clone();
+                        updated
                     });
                     if created {
                         // The element that wants this handle was already built
@@ -94,6 +106,85 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
             .size_full(),
         );
     }
+    // The declared focus ring, painted while — and only while — the node's
+    // real focus handle holds focus. A canvas child, not a style refinement:
+    // the ring is out-of-flow (layout never sees it), it must preserve the
+    // resting border rather than replace it, and hover/active patches — gpui
+    // refines hover after focus — must not overwrite it. The canvas is
+    // anchored at the element's top-left inset, so its bounds ARE the padding
+    // box (an unanchored absolute child would sit at the justify-static
+    // position instead); the border box is one border-width outward per side,
+    // and the ring's outer edge sits `offset + width` beyond that, exactly
+    // CSS `outline` + `outline-offset` (a negative offset insets the ring).
+    if let Some(ring) = node.style.focus_ring {
+        let ring_id = id.to_owned();
+        let border = &node.style.descriptor.border;
+        let border_left = node.style.border_left_width.unwrap_or(border.width);
+        let border_right = node.style.border_right_width.unwrap_or(border.width);
+        let border_top = node.style.border_top_width.unwrap_or(border.width);
+        let border_bottom = node.style.border_bottom_width.unwrap_or(border.width);
+        let radii = node.style.descriptor.corner_radii;
+        el = el.child(
+            gpui::canvas(
+                move |_, _, _| {},
+                move |bounds, (), window, _cx| {
+                    let focused = super::focus_handle_for(&ring_id)
+                        .is_some_and(|handle| handle.is_focused(window));
+                    if !focused {
+                        super::clear_painted_ring(&ring_id);
+                        return;
+                    }
+                    let expand = ring.offset + ring.width;
+                    let x = f32::from(bounds.origin.x) - border_left - expand;
+                    let y = f32::from(bounds.origin.y) - border_top - expand;
+                    let width = f32::from(bounds.size.width)
+                        + border_left
+                        + border_right
+                        + 2.0 * expand;
+                    let height = f32::from(bounds.size.height)
+                        + border_top
+                        + border_bottom
+                        + 2.0 * expand;
+                    if width <= 0.0 || height <= 0.0 {
+                        super::clear_painted_ring(&ring_id);
+                        return;
+                    }
+                    // The ring is concentric with the element: each corner
+                    // radius grows by the same expansion, so the inner edge
+                    // parallels the border box instead of rounding harder.
+                    let corner = |r: f32| px((r + expand).max(0.0));
+                    window.paint_quad(
+                        gpui::outline(
+                            gpui::Bounds {
+                                origin: point(px(x), px(y)),
+                                size: size(px(width), px(height)),
+                            },
+                            super::color(ring.color),
+                            gpui::BorderStyle::default(),
+                        )
+                        .corner_radii(gpui::Corners {
+                            top_left: corner(radii.top_left),
+                            top_right: corner(radii.top_right),
+                            bottom_right: corner(radii.bottom_right),
+                            bottom_left: corner(radii.bottom_left),
+                        })
+                        .border_widths(px(ring.width)),
+                    );
+                    super::record_painted_ring(
+                        &ring_id,
+                        super::PaintedRing {
+                            ring,
+                            bounds: [x, y, width, height],
+                        },
+                    );
+                },
+            )
+            .absolute()
+            .top(px(0.0))
+            .left(px(0.0))
+            .size_full(),
+        );
+    }
     if !node.interaction.disabled {
         if let Some(patch) = &node.style.active {
             let patch = *patch;
@@ -114,7 +205,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
     // the layer registry so outside-interaction containment and relative
     // logical-bounds observation read real geometry.
     if let Some(layer_id) = &node.interaction.dismiss_layer {
-        let element_id = element_id_string(node);
+        let element_id = id.to_owned();
         let layer = layer_id.clone();
         el = el.child(
             gpui::canvas(
@@ -127,7 +218,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
             .size_full(),
         );
     } else if node.id.is_some() {
-        let element_id = element_id_string(node);
+        let element_id = id.to_owned();
         el = el.child(
             gpui::canvas(
                 move |bounds, _window, _cx| {
@@ -181,7 +272,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
     // question — "which character is under this x?" — answered from the
     // last painted line, because only a painted line has been measured.
     if let Some(select) = node.interaction.on_select_range.clone() {
-        let id = element_id_string(node);
+        let id = id.to_owned();
         let down_id = id.clone();
         let down_select = select.clone();
         el = el.on_mouse_down(
@@ -270,7 +361,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Di
         let insert = node.interaction.on_edit_insert.clone();
         // Undo needs the *value* node's id, because that is what paint records
         // history under; the keys arrive at the focusable root above it.
-        let value_id = input_text::history_key(&element_id_string(node));
+        let value_id = input_text::history_key(id);
         let text_change = node.interaction.on_text_change.clone();
         let select_range = node.interaction.on_select_range.clone();
         let selection_text = node.caret.map(|c| c.selection).and_then(|(a, b)| {

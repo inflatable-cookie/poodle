@@ -1,0 +1,32 @@
+{
+  "schema": "poodle.gpui-focus-evidence.v1",
+  "scene": "stepper-summary",
+  "focused_element": "poodle-stepper-summary",
+  "backend_focused": true,
+  "painted_ring": {
+    "color": [
+      1.0,
+      0.7921569,
+      0.4509804,
+      1.0
+    ],
+    "width": 2.0,
+    "offset": -2.0,
+    "bounds": [
+      17.0,
+      17.0,
+      318.0,
+      52.0
+    ]
+  },
+  "gpui_revision": "87d9afbe71ef06ea0634499dc35d104bb29dc020",
+  "renderer": "metal-headless",
+  "platform": "macos",
+  "theme": "eclipse",
+  "logical_viewport": [
+    360.0,
+    300.0
+  ],
+  "scale": 2.0,
+  "png_sha256": "e0e6a83a716fb5fe710c5ae48faba45290fd2284786a5d82c8a98aaba3232234"
+}

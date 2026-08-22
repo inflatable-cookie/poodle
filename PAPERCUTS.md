@@ -7,6 +7,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-23 — The headless GPUI root began calling the production
+  `reset_element_ids` boundary in every render, but the generated element and
+  gesture counters were process-global atomics while Rust ran independent
+  test apps in parallel. One app could rewind another app's in-progress tree
+  walk, making generated identity proofs intermittent. Fixed on g15.052 by
+  matching the counters to GPUI's UI-thread model and the thread-local
+  registries they key.
+
 - 2026-08-22 — zsh reserves the lowercase `path` variable for `PATH`; a shell
   inventory loop using `path` silently removed `git`, `rg`, and `sort` from the
   command search path. Use a neutral loop variable in repository probes.
