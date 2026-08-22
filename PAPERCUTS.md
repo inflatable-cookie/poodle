@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-22 — `effigy doctor` can fail before `tasks.health` starts because
+  writing `.effigy/runtime/tasks/active/*.json` hits the machine-wide
+  `Too many open files in system` limit. The health command and useful doctor
+  findings then share one red result. A bounded retry or an early file-limit
+  diagnostic would make the failure actionable. Found while dispatching
+  g15.046.
+
 - 2026-08-21 — A fresh git worktree has no `node_modules`, and
   `effigy docs:check` fails deep into the board with `Cannot find module
   '@inflatable-cookie/poodle-core/tokens'` from the Svelte/React preview
