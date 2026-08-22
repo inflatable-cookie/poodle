@@ -1,0 +1,1959 @@
+{
+  "schema": "poodle.button-visual-comparison.v1",
+  "batch": "g15.046",
+  "generated": "same-run evidence; no timestamps by design",
+  "environment": [
+    "chromium 151.0.7922.34",
+    "gpui 87d9afbe71ef06ea0634499dc35d104bb29dc020 (macos/aarch64, metal-headless)"
+  ],
+  "policy": {
+    "exact": "svelte↔react: identical dimensions, zero landmark edge delta, exact roles, zero differing pixels",
+    "rendererAware": {
+      "geometry": {
+        "rootEdge": 0.5,
+        "contentCentre": 1,
+        "contentSize": 1,
+        "contentExtent": 2
+      },
+      "roles": {
+        "colorChannel8Bit": 1,
+        "lineWidth": 0.5,
+        "shadowGeometry": 0.5
+      },
+      "pixels": {
+        "threshold": 0.1,
+        "includeAA": false,
+        "maxDiffRatio": 0.03
+      }
+    },
+    "knownRendererDeltas": [
+      {
+        "id": "gpui-omits-box-shadow",
+        "citation": "button.md §12: box-shadow omitted in GPUI — GPUI lacks CSS box-shadow support (allowed)"
+      },
+      {
+        "id": "gpui-omits-letter-spacing",
+        "citation": "button.md §12: letter-spacing omitted in GPUI — no letter-spacing API (allowed)"
+      }
+    ]
+  },
+  "metrics": {
+    "fixtures": 18,
+    "captures": 54,
+    "repeatMismatches": 0,
+    "comparisons": 36,
+    "blockingFailures": 78,
+    "knownDeltas": 16
+  },
+  "fixtures": [
+    {
+      "fixture": "button/rest-secondary",
+      "group": "resting-variants",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--rest-secondary.png",
+          "receipt": "captures/svelte/button--rest-secondary.json",
+          "sha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+          "repeatSha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--rest-secondary.png",
+          "receipt": "captures/react/button--rest-secondary.json",
+          "sha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+          "repeatSha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--rest-secondary.png",
+          "receipt": "captures/gpui/button--rest-secondary.json",
+          "sha256": "4e4ccc5afaf269e4c8a49483201ae75da9ecd1086c45c40309345c3c4d913fbb",
+          "repeatSha256": "4e4ccc5afaf269e4c8a49483201ae75da9ecd1086c45c40309345c3c4d913fbb",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill r channel: web 0.1709 vs gpui 0.0670 (delta 26.5118 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill g channel: web 0.1829 vs gpui 0.0785 (delta 26.6389 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill b channel: web 0.1949 vs gpui 0.0900 (delta 26.7669 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "pixels",
+                  "subject": "pixels",
+                  "detail": "9897/76800 pixels differ (12.887% > 3% cap, pixelmatch threshold 0.1, includeAA false)",
+                  "knownDelta": null
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/variant-primary",
+      "group": "resting-variants",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--variant-primary.png",
+          "receipt": "captures/svelte/button--variant-primary.json",
+          "sha256": "cea75d51fa568fa927784bac3d8f291e7e441a620feb20490576045037c24d1e",
+          "repeatSha256": "cea75d51fa568fa927784bac3d8f291e7e441a620feb20490576045037c24d1e",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--variant-primary.png",
+          "receipt": "captures/react/button--variant-primary.json",
+          "sha256": "cea75d51fa568fa927784bac3d8f291e7e441a620feb20490576045037c24d1e",
+          "repeatSha256": "cea75d51fa568fa927784bac3d8f291e7e441a620feb20490576045037c24d1e",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--variant-primary.png",
+          "receipt": "captures/gpui/button--variant-primary.json",
+          "sha256": "5feea20805fa23211bec8d12842afec6eb214b18ee608b591314b4002f1e7ad1",
+          "repeatSha256": "5feea20805fa23211bec8d12842afec6eb214b18ee608b591314b4002f1e7ad1",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "border",
+                  "detail": "border r channel: web 0.7906 vs gpui 0.8094 (delta 4.8001 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "border",
+                  "detail": "border g channel: web 0.5864 vs gpui 0.6003 (delta 3.5600 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "border",
+                  "detail": "border b channel: web 0.2536 vs gpui 0.2597 (delta 1.5400 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 2 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/variant-ghost",
+      "group": "resting-variants",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--variant-ghost.png",
+          "receipt": "captures/svelte/button--variant-ghost.json",
+          "sha256": "1e9a0e84d27e2b89db8ba45f8c2ea4aaad918b9e42e6770586b641c642eca2ac",
+          "repeatSha256": "1e9a0e84d27e2b89db8ba45f8c2ea4aaad918b9e42e6770586b641c642eca2ac",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--variant-ghost.png",
+          "receipt": "captures/react/button--variant-ghost.json",
+          "sha256": "1e9a0e84d27e2b89db8ba45f8c2ea4aaad918b9e42e6770586b641c642eca2ac",
+          "repeatSha256": "1e9a0e84d27e2b89db8ba45f8c2ea4aaad918b9e42e6770586b641c642eca2ac",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--variant-ghost.png",
+          "receipt": "captures/gpui/button--variant-ghost.json",
+          "sha256": "719ba799c282aa3f15c24a50bb37c7f766baa2eba9f3cab7ad033d795c2d9951",
+          "repeatSha256": "719ba799c282aa3f15c24a50bb37c7f766baa2eba9f3cab7ad033d795c2d9951",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                }
+              ]
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/tone-danger",
+      "group": "secondary-status-tones",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--tone-danger.png",
+          "receipt": "captures/svelte/button--tone-danger.json",
+          "sha256": "1dfb07cb81104c82a09e37c376ab22446d98c0681f207214c23dd1b8d357a58c",
+          "repeatSha256": "1dfb07cb81104c82a09e37c376ab22446d98c0681f207214c23dd1b8d357a58c",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--tone-danger.png",
+          "receipt": "captures/react/button--tone-danger.json",
+          "sha256": "1dfb07cb81104c82a09e37c376ab22446d98c0681f207214c23dd1b8d357a58c",
+          "repeatSha256": "1dfb07cb81104c82a09e37c376ab22446d98c0681f207214c23dd1b8d357a58c",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--tone-danger.png",
+          "receipt": "captures/gpui/button--tone-danger.json",
+          "sha256": "f0af0bd0a3e5aedb5947fc3989c4ad6ccf82b09627a255b8ac787c2e983b9675",
+          "repeatSha256": "f0af0bd0a3e5aedb5947fc3989c4ad6ccf82b09627a255b8ac787c2e983b9675",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/tone-success",
+      "group": "secondary-status-tones",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--tone-success.png",
+          "receipt": "captures/svelte/button--tone-success.json",
+          "sha256": "d58116fe39646e17e10c56980c735806e012e8eb74a042e1fdc5f9a639178a2e",
+          "repeatSha256": "d58116fe39646e17e10c56980c735806e012e8eb74a042e1fdc5f9a639178a2e",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--tone-success.png",
+          "receipt": "captures/react/button--tone-success.json",
+          "sha256": "d58116fe39646e17e10c56980c735806e012e8eb74a042e1fdc5f9a639178a2e",
+          "repeatSha256": "d58116fe39646e17e10c56980c735806e012e8eb74a042e1fdc5f9a639178a2e",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--tone-success.png",
+          "receipt": "captures/gpui/button--tone-success.json",
+          "sha256": "5e8a3e16ba84152d65129a6ebe1ffecc62a0160be96dac0c1e7223564a4a1e61",
+          "repeatSha256": "5e8a3e16ba84152d65129a6ebe1ffecc62a0160be96dac0c1e7223564a4a1e61",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/tone-warning",
+      "group": "secondary-status-tones",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--tone-warning.png",
+          "receipt": "captures/svelte/button--tone-warning.json",
+          "sha256": "86a44ba1e17e414b0813683bfaa8feafa6476ab5d3614725091b932650b7a8ca",
+          "repeatSha256": "86a44ba1e17e414b0813683bfaa8feafa6476ab5d3614725091b932650b7a8ca",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--tone-warning.png",
+          "receipt": "captures/react/button--tone-warning.json",
+          "sha256": "86a44ba1e17e414b0813683bfaa8feafa6476ab5d3614725091b932650b7a8ca",
+          "repeatSha256": "86a44ba1e17e414b0813683bfaa8feafa6476ab5d3614725091b932650b7a8ca",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--tone-warning.png",
+          "receipt": "captures/gpui/button--tone-warning.json",
+          "sha256": "a287fd9099b4da153da50194a005dc1912485aa9e137cfea772b1c1e05e7e707",
+          "repeatSha256": "a287fd9099b4da153da50194a005dc1912485aa9e137cfea772b1c1e05e7e707",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/size-xs",
+      "group": "size-ladder",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--size-xs.png",
+          "receipt": "captures/svelte/button--size-xs.json",
+          "sha256": "38e29d578d1a85514250fe12cff18a9d3e609fe820f244f2b6e3082540bd5b9e",
+          "repeatSha256": "38e29d578d1a85514250fe12cff18a9d3e609fe820f244f2b6e3082540bd5b9e",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--size-xs.png",
+          "receipt": "captures/react/button--size-xs.json",
+          "sha256": "38e29d578d1a85514250fe12cff18a9d3e609fe820f244f2b6e3082540bd5b9e",
+          "repeatSha256": "38e29d578d1a85514250fe12cff18a9d3e609fe820f244f2b6e3082540bd5b9e",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--size-xs.png",
+          "receipt": "captures/gpui/button--size-xs.json",
+          "sha256": "25c7fe957d864d4d42972cb2d091443afcd8ca8d03f7a6f616d31d757c30d10f",
+          "repeatSha256": "25c7fe957d864d4d42972cb2d091443afcd8ca8d03f7a6f616d31d757c30d10f",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill r channel: web 0.1709 vs gpui 0.0670 (delta 26.5118 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill g channel: web 0.1829 vs gpui 0.0785 (delta 26.6389 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill b channel: web 0.1949 vs gpui 0.0900 (delta 26.7669 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "pixels",
+                  "subject": "pixels",
+                  "detail": "4537/76800 pixels differ (5.908% > 3% cap, pixelmatch threshold 0.1, includeAA false)",
+                  "knownDelta": null
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/size-sm",
+      "group": "size-ladder",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--size-sm.png",
+          "receipt": "captures/svelte/button--size-sm.json",
+          "sha256": "67ec4ab3fec845894e46722a7e36dcfb5145c71b37af7dba977447ecbaf90d0a",
+          "repeatSha256": "67ec4ab3fec845894e46722a7e36dcfb5145c71b37af7dba977447ecbaf90d0a",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--size-sm.png",
+          "receipt": "captures/react/button--size-sm.json",
+          "sha256": "67ec4ab3fec845894e46722a7e36dcfb5145c71b37af7dba977447ecbaf90d0a",
+          "repeatSha256": "67ec4ab3fec845894e46722a7e36dcfb5145c71b37af7dba977447ecbaf90d0a",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--size-sm.png",
+          "receipt": "captures/gpui/button--size-sm.json",
+          "sha256": "c677654c3cf5372aca51e7b79edbea52c105fa80d20ebb940cb3624a63cafcc4",
+          "repeatSha256": "c677654c3cf5372aca51e7b79edbea52c105fa80d20ebb940cb3624a63cafcc4",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill r channel: web 0.1709 vs gpui 0.0670 (delta 26.5118 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill g channel: web 0.1829 vs gpui 0.0785 (delta 26.6389 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill b channel: web 0.1949 vs gpui 0.0900 (delta 26.7669 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "pixels",
+                  "subject": "pixels",
+                  "detail": "6201/76800 pixels differ (8.074% > 3% cap, pixelmatch threshold 0.1, includeAA false)",
+                  "knownDelta": null
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/size-lg",
+      "group": "size-ladder",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--size-lg.png",
+          "receipt": "captures/svelte/button--size-lg.json",
+          "sha256": "125e8dc348521ce539aee4b445b4ad37504346bb9047fbca0571522611974940",
+          "repeatSha256": "125e8dc348521ce539aee4b445b4ad37504346bb9047fbca0571522611974940",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--size-lg.png",
+          "receipt": "captures/react/button--size-lg.json",
+          "sha256": "125e8dc348521ce539aee4b445b4ad37504346bb9047fbca0571522611974940",
+          "repeatSha256": "125e8dc348521ce539aee4b445b4ad37504346bb9047fbca0571522611974940",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--size-lg.png",
+          "receipt": "captures/gpui/button--size-lg.json",
+          "sha256": "21fe541eafdc2658e5f961fce765bd56a18e0418cd637a05e05d0d5876a6173b",
+          "repeatSha256": "21fe541eafdc2658e5f961fce765bd56a18e0418cd637a05e05d0d5876a6173b",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill r channel: web 0.1709 vs gpui 0.0670 (delta 26.5118 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill g channel: web 0.1829 vs gpui 0.0785 (delta 26.6389 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill b channel: web 0.1949 vs gpui 0.0900 (delta 26.7669 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "pixels",
+                  "subject": "pixels",
+                  "detail": "14363/76800 pixels differ (18.702% > 3% cap, pixelmatch threshold 0.1, includeAA false)",
+                  "knownDelta": null
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/size-xl",
+      "group": "size-ladder",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--size-xl.png",
+          "receipt": "captures/svelte/button--size-xl.json",
+          "sha256": "fc2b0e48666b44901e00b1717a50f79c805fa81caa882dc609143bb117b25f8b",
+          "repeatSha256": "fc2b0e48666b44901e00b1717a50f79c805fa81caa882dc609143bb117b25f8b",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--size-xl.png",
+          "receipt": "captures/react/button--size-xl.json",
+          "sha256": "fc2b0e48666b44901e00b1717a50f79c805fa81caa882dc609143bb117b25f8b",
+          "repeatSha256": "fc2b0e48666b44901e00b1717a50f79c805fa81caa882dc609143bb117b25f8b",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--size-xl.png",
+          "receipt": "captures/gpui/button--size-xl.json",
+          "sha256": "945b53221da20f9a87c4bbfae7b68eaa7c8dfbf0f0c5a372cb371c71cfb5043a",
+          "repeatSha256": "945b53221da20f9a87c4bbfae7b68eaa7c8dfbf0f0c5a372cb371c71cfb5043a",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "geometry",
+                  "subject": "root",
+                  "detail": "root.bottom: web 68 vs gpui 64 (delta 4 > 0.5 logical px)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "geometry",
+                  "subject": "content",
+                  "detail": "content centre.y: web 42 vs gpui 40 (delta 2 > 1 logical px)",
+                  "knownDelta": null
+                }
+              ]
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill r channel: web 0.1709 vs gpui 0.0670 (delta 26.5118 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill g channel: web 0.1829 vs gpui 0.0785 (delta 26.6389 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill b channel: web 0.1949 vs gpui 0.0900 (delta 26.7669 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "pixels",
+                  "subject": "pixels",
+                  "detail": "19586/76800 pixels differ (25.503% > 3% cap, pixelmatch threshold 0.1, includeAA false)",
+                  "knownDelta": null
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/density-compact",
+      "group": "density-ladder",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--density-compact.png",
+          "receipt": "captures/svelte/button--density-compact.json",
+          "sha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+          "repeatSha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--density-compact.png",
+          "receipt": "captures/react/button--density-compact.json",
+          "sha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+          "repeatSha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--density-compact.png",
+          "receipt": "captures/gpui/button--density-compact.json",
+          "sha256": "4e4ccc5afaf269e4c8a49483201ae75da9ecd1086c45c40309345c3c4d913fbb",
+          "repeatSha256": "4e4ccc5afaf269e4c8a49483201ae75da9ecd1086c45c40309345c3c4d913fbb",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill r channel: web 0.1709 vs gpui 0.0670 (delta 26.5118 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill g channel: web 0.1829 vs gpui 0.0785 (delta 26.6389 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill b channel: web 0.1949 vs gpui 0.0900 (delta 26.7669 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "pixels",
+                  "subject": "pixels",
+                  "detail": "9897/76800 pixels differ (12.887% > 3% cap, pixelmatch threshold 0.1, includeAA false)",
+                  "knownDelta": null
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/density-comfortable",
+      "group": "density-ladder",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--density-comfortable.png",
+          "receipt": "captures/svelte/button--density-comfortable.json",
+          "sha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+          "repeatSha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--density-comfortable.png",
+          "receipt": "captures/react/button--density-comfortable.json",
+          "sha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+          "repeatSha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--density-comfortable.png",
+          "receipt": "captures/gpui/button--density-comfortable.json",
+          "sha256": "4e4ccc5afaf269e4c8a49483201ae75da9ecd1086c45c40309345c3c4d913fbb",
+          "repeatSha256": "4e4ccc5afaf269e4c8a49483201ae75da9ecd1086c45c40309345c3c4d913fbb",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill r channel: web 0.1709 vs gpui 0.0670 (delta 26.5118 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill g channel: web 0.1829 vs gpui 0.0785 (delta 26.6389 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill b channel: web 0.1949 vs gpui 0.0900 (delta 26.7669 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "pixels",
+                  "subject": "pixels",
+                  "detail": "9897/76800 pixels differ (12.887% > 3% cap, pixelmatch threshold 0.1, includeAA false)",
+                  "knownDelta": null
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/state-disabled",
+      "group": "visual-states",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--state-disabled.png",
+          "receipt": "captures/svelte/button--state-disabled.json",
+          "sha256": "6c729f76983e0ce11aee91b92a906795c11d26634466269dfc43b244ccac8d6d",
+          "repeatSha256": "6c729f76983e0ce11aee91b92a906795c11d26634466269dfc43b244ccac8d6d",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--state-disabled.png",
+          "receipt": "captures/react/button--state-disabled.json",
+          "sha256": "6c729f76983e0ce11aee91b92a906795c11d26634466269dfc43b244ccac8d6d",
+          "repeatSha256": "6c729f76983e0ce11aee91b92a906795c11d26634466269dfc43b244ccac8d6d",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--state-disabled.png",
+          "receipt": "captures/gpui/button--state-disabled.json",
+          "sha256": "99b1efaca462e4f60e28019625a44dc3a774df7d8781b8ceb7dd331b48057ad3",
+          "repeatSha256": "99b1efaca462e4f60e28019625a44dc3a774df7d8781b8ceb7dd331b48057ad3",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill r channel: web 0.1709 vs gpui 0.0670 (delta 26.5118 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill g channel: web 0.1829 vs gpui 0.0785 (delta 26.6389 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill b channel: web 0.1949 vs gpui 0.0900 (delta 26.7669 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/state-loading",
+      "group": "visual-states",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--state-loading.png",
+          "receipt": "captures/svelte/button--state-loading.json",
+          "sha256": "810094774813c8438167769176066400c1bd42a997393ef30546d512d80ade10",
+          "repeatSha256": "810094774813c8438167769176066400c1bd42a997393ef30546d512d80ade10",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--state-loading.png",
+          "receipt": "captures/react/button--state-loading.json",
+          "sha256": "810094774813c8438167769176066400c1bd42a997393ef30546d512d80ade10",
+          "repeatSha256": "810094774813c8438167769176066400c1bd42a997393ef30546d512d80ade10",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--state-loading.png",
+          "receipt": "captures/gpui/button--state-loading.json",
+          "sha256": "58b980ae0a3b390eda2e866397b39cb6a4aa70038a79e29cd4b60b549fedec8c",
+          "repeatSha256": "58b980ae0a3b390eda2e866397b39cb6a4aa70038a79e29cd4b60b549fedec8c",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "geometry",
+                  "subject": "content",
+                  "detail": "content centre.x: web 66 vs gpui 64.0000 (delta 2.0000 > 1 logical px)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "geometry",
+                  "subject": "spinner",
+                  "detail": "spinner width: web 16 vs gpui 12 (delta 4 > 1 logical px)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "geometry",
+                  "subject": "spinner",
+                  "detail": "spinner height: web 16 vs gpui 12 (delta 4 > 1 logical px)",
+                  "knownDelta": null
+                }
+              ]
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill r channel: web 0.1709 vs gpui 0.0670 (delta 26.5118 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill g channel: web 0.1829 vs gpui 0.0785 (delta 26.6389 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill b channel: web 0.1949 vs gpui 0.0900 (delta 26.7669 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/state-pressed",
+      "group": "visual-states",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--state-pressed.png",
+          "receipt": "captures/svelte/button--state-pressed.json",
+          "sha256": "2dc753d9a841e242b80e1e08735408927a791c4323821382b5bfe73ff3556cb6",
+          "repeatSha256": "2dc753d9a841e242b80e1e08735408927a791c4323821382b5bfe73ff3556cb6",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--state-pressed.png",
+          "receipt": "captures/react/button--state-pressed.json",
+          "sha256": "2dc753d9a841e242b80e1e08735408927a791c4323821382b5bfe73ff3556cb6",
+          "repeatSha256": "2dc753d9a841e242b80e1e08735408927a791c4323821382b5bfe73ff3556cb6",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--state-pressed.png",
+          "receipt": "captures/gpui/button--state-pressed.json",
+          "sha256": "5feea20805fa23211bec8d12842afec6eb214b18ee608b591314b4002f1e7ad1",
+          "repeatSha256": "5feea20805fa23211bec8d12842afec6eb214b18ee608b591314b4002f1e7ad1",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "border",
+                  "detail": "border r channel: web 0.8000 vs gpui 0.8094 (delta 2.4000 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "border",
+                  "detail": "border g channel: web 0.5933 vs gpui 0.6003 (delta 1.7801 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                }
+              ]
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/content-leading-icon",
+      "group": "content-shapes",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--content-leading-icon.png",
+          "receipt": "captures/svelte/button--content-leading-icon.json",
+          "sha256": "c90d0b0e1d987d483969d2efaf1651169a43dec6a5e856e831f461214b021422",
+          "repeatSha256": "c90d0b0e1d987d483969d2efaf1651169a43dec6a5e856e831f461214b021422",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--content-leading-icon.png",
+          "receipt": "captures/react/button--content-leading-icon.json",
+          "sha256": "c90d0b0e1d987d483969d2efaf1651169a43dec6a5e856e831f461214b021422",
+          "repeatSha256": "c90d0b0e1d987d483969d2efaf1651169a43dec6a5e856e831f461214b021422",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--content-leading-icon.png",
+          "receipt": "captures/gpui/button--content-leading-icon.json",
+          "sha256": "25ddae26bc96d105401ca028c5961cb5028a725cfb96fc13e4bc8c50045deb08",
+          "repeatSha256": "25ddae26bc96d105401ca028c5961cb5028a725cfb96fc13e4bc8c50045deb08",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "geometry",
+                  "subject": "content",
+                  "detail": "content centre.x: web 66 vs gpui 64.0000 (delta 2.0000 > 1 logical px)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "geometry",
+                  "subject": "icon",
+                  "detail": "icon width: web 16 vs gpui 12 (delta 4 > 1 logical px)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "geometry",
+                  "subject": "icon",
+                  "detail": "icon height: web 16 vs gpui 12 (delta 4 > 1 logical px)",
+                  "knownDelta": null
+                }
+              ]
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill r channel: web 0.1709 vs gpui 0.0670 (delta 26.5118 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill g channel: web 0.1829 vs gpui 0.0785 (delta 26.6389 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill b channel: web 0.1949 vs gpui 0.0900 (delta 26.7669 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "pixels",
+                  "subject": "pixels",
+                  "detail": "9866/76800 pixels differ (12.846% > 3% cap, pixelmatch threshold 0.1, includeAA false)",
+                  "knownDelta": null
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/content-icon-only",
+      "group": "content-shapes",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--content-icon-only.png",
+          "receipt": "captures/svelte/button--content-icon-only.json",
+          "sha256": "5384fc21bc3c685f29d985b95a5fb033d8f1f2e812b489f02cd8c1b7b22958d7",
+          "repeatSha256": "5384fc21bc3c685f29d985b95a5fb033d8f1f2e812b489f02cd8c1b7b22958d7",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--content-icon-only.png",
+          "receipt": "captures/react/button--content-icon-only.json",
+          "sha256": "5384fc21bc3c685f29d985b95a5fb033d8f1f2e812b489f02cd8c1b7b22958d7",
+          "repeatSha256": "5384fc21bc3c685f29d985b95a5fb033d8f1f2e812b489f02cd8c1b7b22958d7",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--content-icon-only.png",
+          "receipt": "captures/gpui/button--content-icon-only.json",
+          "sha256": "64930e90625f61e165aae6f527e425d00bf319a409bd4e09bfe57ae928f555cf",
+          "repeatSha256": "64930e90625f61e165aae6f527e425d00bf319a409bd4e09bfe57ae928f555cf",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "geometry",
+                  "subject": "content",
+                  "detail": "content width: web 16 vs gpui 12 (delta 4 > 2 logical px)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "geometry",
+                  "subject": "content",
+                  "detail": "content height: web 16 vs gpui 12 (delta 4 > 2 logical px)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "geometry",
+                  "subject": "icon",
+                  "detail": "icon width: web 16 vs gpui 12 (delta 4 > 1 logical px)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "geometry",
+                  "subject": "icon",
+                  "detail": "icon height: web 16 vs gpui 12 (delta 4 > 1 logical px)",
+                  "knownDelta": null
+                }
+              ]
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill r channel: web 0.1709 vs gpui 0.0670 (delta 26.5118 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill g channel: web 0.1829 vs gpui 0.0785 (delta 26.6389 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill b channel: web 0.1949 vs gpui 0.0900 (delta 26.7669 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "pixels",
+                  "subject": "pixels",
+                  "detail": "4326/76800 pixels differ (5.633% > 3% cap, pixelmatch threshold 0.1, includeAA false)",
+                  "knownDelta": null
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "fixture": "button/theme-iceberg",
+      "group": "reference-theme",
+      "captures": {
+        "svelte": {
+          "png": "captures/svelte/button--theme-iceberg.png",
+          "receipt": "captures/svelte/button--theme-iceberg.json",
+          "sha256": "2ed827784b21e4a17afd93e1a99c9a79b5bd7c0cc392fbea491f05004fb10d50",
+          "repeatSha256": "2ed827784b21e4a17afd93e1a99c9a79b5bd7c0cc392fbea491f05004fb10d50",
+          "repeatIdentical": true
+        },
+        "react": {
+          "png": "captures/react/button--theme-iceberg.png",
+          "receipt": "captures/react/button--theme-iceberg.json",
+          "sha256": "2ed827784b21e4a17afd93e1a99c9a79b5bd7c0cc392fbea491f05004fb10d50",
+          "repeatSha256": "2ed827784b21e4a17afd93e1a99c9a79b5bd7c0cc392fbea491f05004fb10d50",
+          "repeatIdentical": true
+        },
+        "gpui": {
+          "png": "captures/gpui/button--theme-iceberg.png",
+          "receipt": "captures/gpui/button--theme-iceberg.json",
+          "sha256": "9ed17079d939cde0c1104855415ef33a12925bee85f5587030d4ee21a8c4b846",
+          "repeatSha256": "9ed17079d939cde0c1104855415ef33a12925bee85f5587030d4ee21a8c4b846",
+          "repeatIdentical": true
+        }
+      },
+      "pairs": [
+        {
+          "pair": "svelte-react",
+          "ok": true,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "pass",
+              "findings": []
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        },
+        {
+          "pair": "svelte-gpui",
+          "ok": false,
+          "channels": {
+            "dimensions": {
+              "status": "pass",
+              "findings": []
+            },
+            "geometry": {
+              "status": "pass",
+              "findings": []
+            },
+            "roles": {
+              "status": "fail",
+              "findings": [
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill r channel: web 0.7809 vs gpui 0.8772 (delta 24.5608 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill g channel: web 0.8188 vs gpui 0.9165 (delta 24.9248 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "fill",
+                  "detail": "fill b channel: web 0.8572 vs gpui 0.9559 (delta 25.1695 > 1 in 8-bit sRGB)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "focus-ring",
+                  "detail": "focus-ring width declared on one side only (web: 2, gpui: absent)",
+                  "knownDelta": null
+                },
+                {
+                  "channel": "roles",
+                  "subject": "shadow",
+                  "detail": "shadow layer count: web 1 vs gpui 0 — exact match required",
+                  "knownDelta": "gpui-omits-box-shadow"
+                }
+              ]
+            },
+            "pixels": {
+              "status": "pass",
+              "findings": []
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

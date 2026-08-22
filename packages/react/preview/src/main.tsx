@@ -16,9 +16,17 @@ import "./gallery/gallery.css";
 import "../../../svelte/preview/src/catalogue.css";
 
 import { App } from "./gallery/App";
+import { FixtureHost } from "./fixture-host/FixtureHost";
+
+// g15.047: `?fixture=…` swaps the gallery for the capture-only fixture host.
+const isFixtureCapture = new URLSearchParams(window.location.search).has("fixture");
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+  isFixtureCapture ? (
+    <FixtureHost />
+  ) : (
+    <StrictMode>
+      <App />
+    </StrictMode>
+  ),
 );

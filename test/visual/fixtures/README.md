@@ -9,7 +9,8 @@ the same visual case in every renderer.**
 | `button-visual-inventory.json` | the canonical inventory — the only fixture-list authority |
 | `button-visual-inventory.ts` | TypeScript loader/validator over that file |
 | `button-visual-inventory.test.ts` | focused evidence, including planted negative cases |
-| `../../../packages/gpui/preview/tests/visual_fixture_inventory.rs` | Rust loader/validator over the same bytes |
+| `../../../packages/gpui/preview/src/bin/offscreen_capture/inventory.rs` | Rust loader/validator over the same bytes (moved here in g15.047 so the capture binary consumes the same parser — no third parser) |
+| `../../../packages/gpui/preview/tests/visual_fixture_inventory.rs` | Rust focused evidence, including the planted negative cases |
 
 Run both loaders:
 
@@ -163,8 +164,9 @@ join or filter a declared array again.
 
 ## Continuation
 
-`g15.047` builds the comparator: per-renderer adapters that take a fixture
-name, render the real component under that fixture's resolved values, capture
-at the stated viewport and scale, and report geometry landmarks and token roles
-beside the pixels. Baselines, tolerance policy, and any expansion of this batch
-belong to that card and the operator review that follows it.
+`g15.047` built the comparator over this inventory: per-renderer adapters take
+a fixture name, render the real component under the fixture's resolved values,
+capture at the stated viewport and scale, and report geometry landmarks and
+token roles beside the pixels. It lives in `../button-comparison/` with its own
+README; the comparison ran once over the exact 18 identities above, and any
+expansion of this batch waits for the operator review of that evidence.

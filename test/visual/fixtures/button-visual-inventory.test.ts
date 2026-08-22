@@ -27,7 +27,20 @@ import {
 
 /** Repo root, so the suite does not depend on the caller's working directory. */
 const ROOT = resolve(import.meta.dir, "../../..");
-const RUST_LOADER = resolve(ROOT, "packages/gpui/preview/tests/visual_fixture_inventory.rs");
+/**
+ * g15.047 moved the Rust loader here so the offscreen capture binary consumes
+ * the same parser — still one parser per language, no third one. The g15.046
+ * planted-fault suite at `packages/gpui/preview/tests/visual_fixture_inventory.rs`
+ * includes this module by path.
+ */
+const RUST_LOADER = resolve(
+  ROOT,
+  "packages/gpui/preview/src/bin/offscreen_capture/inventory.rs",
+);
+/** The card-sanctioned non-test consumer: the GPUI capture binary's loader. */
+const SANCTIONED_CONSUMERS = new Set([
+  "packages/gpui/preview/src/bin/offscreen_capture/inventory.rs",
+]);
 
 type RawInventory = Record<string, unknown> & { fixtures: Record<string, unknown>[] };
 
@@ -470,6 +483,7 @@ describe("authority boundary", () => {
   test("no published package source imports the inventory", () => {
     const hits = Array.from(new Bun.Glob("packages/**/*.{ts,tsx,svelte,rs}").scanSync(ROOT))
       .filter((path) => !path.includes("node_modules") && !path.includes("/tests/"))
+      .filter((path) => !SANCTIONED_CONSUMERS.has(path))
       .filter((path) => readFileSync(resolve(ROOT, path), "utf8").includes("button-visual-inventory"));
     expect(hits).toEqual([]);
   });

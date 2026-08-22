@@ -14,8 +14,12 @@ import "./catalogue.css";
 
 import { mount } from "svelte";
 import App from "./App.svelte";
+import FixtureHost from "./fixture-host/FixtureHost.svelte";
 
-const app = mount(App, {
+// g15.047: `?fixture=…` swaps the catalogue for the capture-only fixture host.
+const isFixtureCapture = new URLSearchParams(window.location.search).has("fixture");
+
+const app = mount(isFixtureCapture ? FixtureHost : App, {
   target: document.getElementById("app")!,
 });
 

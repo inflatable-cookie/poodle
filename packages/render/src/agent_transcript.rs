@@ -243,9 +243,16 @@ mod tests {
         );
 
         assert_eq!(jump.a11y.role, Some(NodeRole::Button));
-        match &jump.children[0].kind {
+        // The leading icon rides in the contract §8 icon-md wrapper box; look
+        // through it for the glyph node.
+        let leading = jump
+            .find(
+                &|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "arrow-down"),
+            )
+            .expect("jump leading icon exists inside its wrapper");
+        match &leading.kind {
             poodle_node::NodeKind::Icon { name, .. } => assert_eq!(name, "arrow-down"),
-            _ => panic!("jump leading child must be an icon"),
+            _ => unreachable!(),
         }
         assert_eq!(
             jump.style.descriptor.background,

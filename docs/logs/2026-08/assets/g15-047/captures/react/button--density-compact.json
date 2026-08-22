@@ -1,0 +1,87 @@
+{
+  "schema": "poodle.button-visual-capture.v1",
+  "fixture": "button/density-compact",
+  "runtime": "react",
+  "logicalViewport": {
+    "width": 240,
+    "height": 80
+  },
+  "scale": 2,
+  "deviceDimensions": {
+    "width": 480,
+    "height": 160
+  },
+  "pngSha256": "6c9304e9b0026d584060f808349df1044216a899fa41fd950b4fd001485f5a84",
+  "environment": {
+    "kind": "chromium",
+    "version": "151.0.7922.34"
+  },
+  "landmarks": {
+    "root": {
+      "x": 16,
+      "y": 16,
+      "width": 80,
+      "height": 36
+    },
+    "content": {
+      "x": 43.765625,
+      "y": 27.5,
+      "width": 24.46875,
+      "height": 13
+    }
+  },
+  "roles": {
+    "fill": {
+      "color": [
+        0.17092,
+        0.182935,
+        0.194939,
+        1
+      ]
+    },
+    "border": {
+      "color": [
+        0.8901960784313725,
+        0.9098039215686274,
+        0.9333333333333333,
+        0.11
+      ],
+      "width": 1
+    },
+    "text": {
+      "color": [
+        0.9333333333333333,
+        0.9490196078431372,
+        0.9647058823529412,
+        1
+      ]
+    },
+    "shadow": {
+      "layers": [
+        {
+          "inset": true,
+          "offsetX": 0,
+          "offsetY": 1,
+          "blur": 0,
+          "spread": 0,
+          "color": [
+            1,
+            1,
+            1,
+            0.08
+          ]
+        }
+      ]
+    },
+    "focus-ring": {
+      "color": [
+        1,
+        0.792156862745098,
+        0.45098039215686275,
+        1
+      ],
+      "width": 2,
+      "status": "dormant"
+    }
+  }
+}
