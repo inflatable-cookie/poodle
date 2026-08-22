@@ -1,6 +1,7 @@
 # g15.047 — Primitive Visual Comparison
 
-Status: **planned — blocked on `g15.046`**
+Status: **planned** — `g15.046` is accepted; compile the exact writable,
+validation, and human-review envelope before dispatch
 Parent: `012-visual-conformance-lane.md`
 Depends on: accepted first-batch fixture inventory
 Unblocks: `g15.012` closeout, then release certification

@@ -1,8 +1,8 @@
 # g15 — v0.2.0 Release Baseline
 
 Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
-`g15.019`–`g15.042`, `g15.044`–`g15.045`, and `g15.048` complete;
-`g15.046` is ready;
+`g15.019`–`g15.042`, `g15.044`–`g15.046`, and `g15.048` complete;
+`g15.047` awaits exact card compilation;
 the remaining release path is recompiled through `g15.050`
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
@@ -85,8 +85,8 @@ and status advance are the orchestrator's.
 28. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — non-dispatchable parent recompiled into `044`–`047`
 29. [044 — GPUI offscreen capture feasibility](044-gpui-offscreen-capture-feasibility.md) — complete; PR #61 proved a deterministic no-focus Metal pixel path
 30. [045 — GPUI offscreen capture adoption](045-gpui-offscreen-capture-adoption.md) — complete; PR #62 adopted the exact no-focus Metal seam
-31. [046 — Primitive visual fixture inventory](046-primitive-visual-fixture-inventory.md) — **ready**; `011` and `045` are complete
-32. [047 — Primitive visual comparison](047-primitive-visual-comparison.md) — planned after `046`; closes parent `012`
+31. [046 — Primitive visual fixture inventory](046-primitive-visual-fixture-inventory.md) — complete; PR #65 froze the exact 18-case Button inventory and paired validators
+32. [047 — Primitive visual comparison](047-primitive-visual-comparison.md) — planned after accepted `046`; exact execution envelope still needs compilation; closes parent `012`
 33. [048 — Packed roster reachability](048-packed-roster-reachability.md) — complete; PR #64 proves exact 175/175 packed-root reachability for both web runtimes
 34. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — **ready**; operator approved the bounded workflow edits on 2026-08-22
 35. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — planned after every implementation, specimen, conformance, packaging, and automation gate
@@ -123,15 +123,16 @@ met. Workers do not write `dispatch.md` or change roadmap status.
 
 ## Current Task And Parallel Lanes
 
-`g15.011` and its final screen-clear child `g15.033` are complete. Combined
-with the adopted no-focus GPUI capture seam from `g15.045`, that makes
-`g15.046` the next serial visual-conformance card and it is ready.
+`g15.046` is complete in PR #65. Its exact 18-case Button inventory and paired
+validators now unblock `g15.047`, but that comparator card still needs an exact
+writable, validation, and human-review envelope before dispatch.
 
 `g15.048` is complete in PR #64. Its exact packed-package proof is ready for
 `g15.050`, but the candidate remains behind the other release gates.
 
-`g15.049` is ready as an independent parallel automation lane after explicit
-operator approval. It does not overlap `g15.046`'s fixture/test-data scope.
+`g15.049` is in review on PR #66 with changes requested. Its rebase must
+preserve PR #65's `test:visual-fixtures` selector in the shared Effigy task
+manifest.
 
 Do not dispatch `g15.043` until the orchestrator fixes the native presentation-
 context architecture. Release mutation remains behind `g15.013`.

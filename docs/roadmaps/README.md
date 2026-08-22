@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-21
+Updated: 2026-08-22
 
 Roadmaps record Poodle's executable milestone work. `g15` is the active
 v0.2.0 release-baseline generation.
@@ -15,13 +15,12 @@ v0.2.0 release-baseline generation.
   `g14.022` completed the closeout. The generation is complete.
 - `g15` is the release-first v0.2.0 runway. The 175-component Svelte and React
   implementation/evidence rosters, measured native declaration/specimen
-  baseline, defect-led specimen curation, native specimen probe, and five of
-  six screen-clear reviews are complete. `g15.041` closed the Popover blocker
-  returned by `g15.032`; `g15.033` is ready as the last page-review child.
-  The remaining release path is explicit: the native presentation blocker
-  (`043`), offscreen primitive conformance (`046`–`047` under parent `012`,
-  after completed adoption `044`–`045`), packed roster and release automation
-  (`048`–`049`), one exact candidate (`050`), then operator gate `013`.
+  baseline, specimen curation and review, native specimen probe, packed roster,
+  and the first primitive fixture inventory are complete. PR #65 accepted
+  `g15.046`; `g15.047` now needs its exact comparator envelope compiled. The
+  remaining release path is explicit: the native presentation blocker (`043`),
+  comparator closeout (`047` under parent `012`), release automation (`049`),
+  one exact candidate (`050`), then operator gate `013`.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
@@ -49,8 +48,8 @@ v0.2.0 release-baseline generation.
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
   `g15.014`–`g15.017`, `g15.019`–`g15.026`, `g15.028`–`g15.032`, and
-  `g15.034`–`g15.042`, `g15.044`–`g15.045`, and `g15.048` complete;
-  `g15.046` ready; range recompiled through `g15.050`;
+  `g15.034`–`g15.042`, `g15.044`–`g15.046`, and `g15.048` complete;
+  `g15.047` awaits exact compilation; range recompiled through `g15.050`;
   `g15.013` final operator gate
 
 ## Rules

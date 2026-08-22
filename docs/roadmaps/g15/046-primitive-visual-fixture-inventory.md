@@ -1,7 +1,7 @@
 # g15.046 — Primitive Visual Fixture Inventory
 
-Status: **ready** — exact Button-only batch compiled; `g15.011` and `g15.045`
-are complete
+Status: **complete** — PR #65 accepted the exact 18-case Button inventory and
+paired TypeScript/Rust validators
 Parent: `012-visual-conformance-lane.md`
 Depends on: completed human-centred catalogue audit and headless capture in
 every active runtime
@@ -117,6 +117,6 @@ edits, release mutations, Jetstream work, or a second component.
 - `git diff --check origin/main...HEAD`
 
 Never run a `*-windowed`, `test:native-visual`, GPUI preview, or Jetstream
-selector. Use existing Effigy routing for the focused tests; do not edit
-`effigy.toml` or `tasks/effigy.tasks.toml`, which belong to the parallel
-`g15.049` automation lane.
+selector. The focused `test:visual-fixtures` selector was committed before the
+parallel `g15.049` boundary was narrowed, then reviewed and accepted in PR #65.
+`g15.049` must preserve it when rebasing its automation changes.

@@ -236,3 +236,14 @@ at the stated viewport and scale, and report geometry landmarks and token roles
 beside the pixels. Baselines, tolerance policy, gate composition, and any
 expansion beyond these 18 cases belong to that card and the operator review
 that follows it.
+
+## Orchestrator Closeout
+
+PR #65 was accepted and squash-merged to `main` as `68e56f7a` on 2026-08-22.
+The focused selector, both validators, all 18 canonical identities, and the
+review repairs landed together. `g15.046` is complete.
+
+`g15.047` is unblocked but not dispatch-ready: its exact writable scope,
+validation routes, tolerance evidence, and operator review loop still need to
+be compiled. PR #66 must rebase over this merge and preserve
+`test:visual-fixtures` in the shared Effigy task manifest.
