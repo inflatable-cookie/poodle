@@ -2,7 +2,7 @@
 
 Status: active
 Owner: Poodle orchestrator
-Updated: 2026-08-22
+Updated: 2026-08-23
 
 The orchestrator is the only writer. Workers write their scoped deliverables,
 batch log, and papercuts; they do not edit this ledger or roadmap/card status.
@@ -22,7 +22,8 @@ worktree. Paired Jetstream integration is explicit under `ci:jetstream` and
 
 | Batch | Card | Branch | Model | Status | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| `g15-r047-primitive-visual-comparison` | `g15/047-primitive-visual-comparison.md` | `t3code/g15-047-primitive-visual-comparison` | frontier coding model, high reasoning | handoff ready — awaiting worker PR | Handoff `docs/handoffs/20260822-130425-g15-047-primitive-visual-comparison.md`; planning base `41d3a4fd`. Exact 18-case Button-only same-run Svelte/React/GPUI capture, fixed geometry/role/pixel policy, determinism and planted-failure proof, full contact-sheet review. No specimens, second component, generic schema, windowed capture, workflow, Jetstream, Longhorn, or release mutation. |
+| `g15-r052-native-focus-ring-parity` | `g15/052-native-focus-ring-parity.md` | `t3code/g15-052-native-focus-ring-parity` | frontier coding model, high reasoning | merged — complete | PR #69 accepted at `56dd6093` and merged as `b2cc1dff`. One reusable node focus-ring channel closes Button's measured ring defect and Stepper keyboard entry/focus. Review repaired generated identity, Button tab entry, dynamic roving flags, frame-scoped observations, and parallel test isolation. The default-threaded native board passed five consecutive runs; comparator policy and the accepted shadow finding remain unchanged. |
+| `g15-r047-primitive-visual-comparison` | `g15/047-primitive-visual-comparison.md` | `t3code/g15-047-primitive-visual-comparison` | frontier coding model, high reasoning | merged — complete | PR #68 accepted and merged before `g15.052`. The exact 18-case Button-only same-run Svelte/React/GPUI comparison passed fixed geometry/role/pixel policy and exposed the native focus-ring defect routed to `g15.052`; no tolerance or known-delta policy was weakened. |
 | `g15-r051-gpui-zed-dependency-licence-remediation` | `g15/051-gpui-zed-dependency-licence-remediation.md` | `t3code/remediate-gpui-zed-dependency-license` | frontier coding model, high reasoning | merged — complete | PR #67 accepted at `0954aa1f` and merged as `30e2aae3`. Exact fork `inflatable-cookie/zed@87d9afbe` removes GPL tracing from both normal GPUI graphs; dependency-specific `libbz2-rs` attribution ships on both notice surfaces; immutable Git-source policy remains fail-closed. |
 | `g15-r049-release-automation-truthfulness` | `g15/049-release-automation-truthfulness.md` | `t3code/release-automation-truthfulness` | capable coding model, medium reasoning | merged — complete | PR #66 accepted at `d8e293fa` and merged as `e47c44e5`. Retained workflows are pinned Effigy launchers, the stale conformance workflow/alias is gone, branch publication fails closed, and `effigy release gates` executes the complete headless `qa` board. That board truthfully exposed the separate GPUI/Zed licence gap now owned by `g15.051`. |
 | `g15-r046-primitive-visual-fixture-inventory` | `g15/046-primitive-visual-fixture-inventory.md` | `t3code/primitive-visual-fixture-inventory` | capable coding model, medium reasoning | merged — complete | PR #65 accepted at `e11e79bd` and merged as `68e56f7a`. Froze the exact 18-case Button inventory and paired validators; `g15.047` is ready. |

@@ -1,8 +1,7 @@
 # g15.052 — Native Focus-Ring Parity
 
-Status: **in flight** — worker evidence landed 2026-08-22
-(`../../logs/2026-08/20260822-g15-052-native-focus-ring-parity.md`), PR up
-for orchestrator review
+Status: **complete** — PR #69 merged as `b2cc1dff` on 2026-08-23;
+evidence: `../../logs/2026-08/20260822-g15-052-native-focus-ring-parity.md`
 Found by: `g15.042`, measured by `g15.047`
 Depends on: `g15.042`, `g15.047`
 Unblocks: `g15.050`, then `g15.013`
@@ -118,19 +117,19 @@ notes, tag/publication surfaces, or `g15.043`.
 
 ## Acceptance
 
-- [ ] `poodle-node` has one reusable, renderer-neutral focus-ring channel with
+- [x] `poodle-node` has one reusable, renderer-neutral focus-ring channel with
       resolved color, width, and offset; absent remains the default.
-- [ ] GPUI paints the ring outside layout without replacing the resting border
+- [x] GPUI paints the ring outside layout without replacing the resting border
       or dropping its offset; bordered and borderless proofs pass.
-- [ ] Button's comparator reports zero focus-ring findings across all 18
+- [x] Button's comparator reports zero focus-ring findings across all 18
       fixtures under the unchanged fixed policy.
-- [ ] Button has no unrelated visual or interaction change; the existing
+- [x] Button has no unrelated visual or interaction change; the existing
       shadow limitation stays explicit rather than being repaired incidentally.
-- [ ] Stepper accepts keyboard focus without a preceding pointer press, paints
+- [x] Stepper accepts keyboard focus without a preceding pointer press, paints
       the ring on the contracted controls, and activates the focused action.
-- [ ] Real mounted/headless evidence covers focus entry, movement, activation,
+- [x] Real mounted/headless evidence covers focus entry, movement, activation,
       blur, and painted output without opening or focusing a desktop window.
-- [ ] No component-specific focus-ring drawing appears in the GPUI backend and
+- [x] No component-specific focus-ring drawing appears in the GPUI backend and
       no universal scene/component authority is introduced.
 
 ## Validation
@@ -162,6 +161,6 @@ Jetstream selector, a release mutation, tag, publication, or workflow edit.
 
 ## Continuation
 
-After operator review and merge, close both native focus rows in the release
-gap register. `g15.043` remains the final implementation card before
-`g15.050`; do not start the release candidate while either is open.
+The native focus row is closed by PR #69. `g15.043` is now the final
+implementation planning checkpoint before `g15.050`; do not start the release
+candidate while it remains open.

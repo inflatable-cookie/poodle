@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-22
+Updated: 2026-08-23
 
 Roadmaps record Poodle's executable milestone work. `g15` is the active
 v0.2.0 release-baseline generation.
@@ -17,14 +17,12 @@ v0.2.0 release-baseline generation.
   implementation/evidence rosters, measured native declaration/specimen
   baseline, specimen curation and review, native specimen probe, packed roster,
   the first primitive fixture inventory, and truthful release automation are
-  complete. PR #65 accepted `g15.046`; `g15.047` is ready with one exact
-  Button comparison and operator-review envelope. PR #66 closed `g15.049`;
-  PR #67 closed the GPUI/Zed
-  dependency-licence policy gap without admitting GPL code. The remaining
-  release path is explicit: the
-  native presentation blocker (`043`), comparator closeout (`047` under parent
-  `012`), one exact candidate (`050`), then
-  operator gate `013`.
+  complete. PR #68 closed the exact Button comparison; PR #69 then closed its
+  measured native focus-ring defect and Stepper keyboard-entry gap. PR #66
+  closed `g15.049`; PR #67 closed the GPUI/Zed dependency-licence policy gap
+  without admitting GPL code. The remaining release path is explicit: resolve
+  and execute the native presentation blocker (`043`), build one exact
+  candidate (`050`), then run operator gate `013`.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
@@ -52,10 +50,8 @@ v0.2.0 release-baseline generation.
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
   `g15.014`–`g15.017`, `g15.019`–`g15.026`, `g15.028`–`g15.032`, and
-  `g15.034`–`g15.042`, `g15.044`–`g15.046`, `g15.048`–`g15.049`, and
-  `g15.051` complete;
-  `g15.047` is ready; range recompiled
-  through `g15.051`;
+  `g15.034`–`g15.042`, `g15.044`–`g15.049`, and `g15.051`–`g15.052`
+  complete; `g15.043` is the current planning checkpoint;
   `g15.013` final operator gate
 
 ## Rules

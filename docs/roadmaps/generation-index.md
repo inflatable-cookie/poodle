@@ -1,29 +1,27 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-22
+Updated: 2026-08-23
 
 ## Active Track
 
 - `g15`
   - Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.042`, `g15.044`–`g15.046`, `g15.048`–`g15.049`, and
-    `g15.051` complete;
-    `g15.047` is ready;
+    `g15.019`–`g15.042`, `g15.044`–`g15.049`, and `g15.051`–`g15.052`
+    complete; `g15.043` is the current planning checkpoint;
     `g15.013` is the final operator gate
   - Posture: release-first v0.2.0 baseline
-  - Range: `001` to `051` plus final gate `013`
+  - Range: `001` to `052` plus final gate `013`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
     release baseline, not a parity architecture
   - Evidence: the v0.2.0 denominator is every public Svelte component
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: dispatch ready `g15.047`, then review all 54 Button captures and its
-    fixed comparator policy. `g15.048`, `g15.049`, and `g15.051` are complete
-    in PRs #64, #66, and #67. `g15.043` stays
-    non-dispatchable until the native presentation-context architecture is
-    fixed. `g15.012` is now exact children `044`–`047`; release preparation is
-    exact children `048`–`051`.
+  - Next: resolve the native presentation-context architecture and recompile
+    `g15.043` into an exact dispatchable card. `g15.047` and its measured
+    focus-ring follow-up `g15.052` are complete in PRs #68 and #69.
+    `g15.050` remains blocked until `g15.043` closes; `g15.013` remains the
+    final operator release gate.
 
 ## Latest Completed Track
 
