@@ -212,6 +212,16 @@
 "visual:report" = "bun test/visual/run.ts --tier=sweep --report"
 "ci:visual" = [{ task = "test:visual" }]
 
+# g15.046 Button visual fixture inventory. Data validation only: no browser, no
+# preview server, no window, no capture. The two commands are the two loaders
+# over the one checked-in file, so a shape change that only one language
+# accepts fails here. `bun test` rather than vitest, matching packages/core --
+# the module is plain TypeScript with no DOM.
+"test:visual-fixtures" = [
+  { run = "bun test test/visual/fixtures/button-visual-inventory.test.ts" },
+  { run = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test visual_fixture_inventory" },
+]
+
 # Native visual gate (g12.014). Baseline-based rather than cross-target: GPUI is
 # a different renderer, so a diff against Svelte would be all noise. LOCAL-ONLY —
 # the GPUI preview screenshots its own window, so it needs a live macOS window

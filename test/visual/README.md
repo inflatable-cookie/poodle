@@ -63,6 +63,7 @@ Order of suspicion, learned from wave 1:
 | `run.ts` | drives the matrix, diffs, writes the summary |
 | `probe.ts` | side-by-side measurement helper for triage |
 | `allowlist.ts` | accepted deltas — each needs a written reason |
+| `fixtures/` | g15.046 Button visual fixture inventory — named cases for the g15.047 comparator, no captures |
 
 ## What the gate does not cover
 
