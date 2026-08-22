@@ -51,12 +51,12 @@ the variant × tone cross-product.
 | file | lines | note |
 | --- | --- | --- |
 | `test/visual/fixtures/button-visual-inventory.json` | 261 | canonical data, 18 rows |
-| `test/visual/fixtures/button-visual-inventory.ts` | 455 | TypeScript loader/validator |
-| `test/visual/fixtures/button-visual-inventory.test.ts` | 307 | 29 focused tests |
-| `packages/gpui/preview/tests/visual_fixture_inventory.rs` | 829 | Rust loader/validator + 11 focused tests |
-| `test/visual/fixtures/README.md` | 128 | boundary documentation |
+| `test/visual/fixtures/button-visual-inventory.ts` | 486 | TypeScript loader/validator |
+| `test/visual/fixtures/button-visual-inventory.test.ts` | 393 | 37 focused tests |
+| `packages/gpui/preview/tests/visual_fixture_inventory.rs` | 942 | Rust loader/validator + 12 focused tests |
+| `test/visual/fixtures/README.md` | 146 | boundary documentation |
 
-Two mechanisms, ~1,980 lines, to name 18 cases. That ratio is the honest price
+Two mechanisms, ~2,228 lines, to name 18 cases. That ratio is the honest price
 of refusing code generation, and it is why the card's stop conditions matter: a
 second component must not double it before the comparator earns the cost.
 
@@ -80,9 +80,30 @@ Held twice, once per language, because no generator connects them:
 Plus one duplicated rule: the landmark derivation (`root` + `content` always,
 `icon` when the content carries one, `spinner` when the state is `loading`).
 
-**12 duplicated lists + 1 duplicated rule.** Both loaders must therefore be
-edited together; a change to one alone fails `effigy test:visual-fixtures`,
-because both commands run over the same file.
+**12 duplicated lists + 1 duplicated rule.**
+
+What `effigy test:visual-fixtures` actually guarantees: both loaders run over
+the same canonical file, so a change to *the data* that only one language
+accepts fails the selector. That is the whole of it.
+
+What it does not do — and an earlier draft of this log wrongly claimed it did —
+is compare the two validators against each other. The selector executes no
+cross-language logic comparison. If one loader is loosened or tightened and the
+canonical file is not changed to exercise the difference, both commands still
+pass and the drift ships silently.
+
+That is not hypothetical. Review of PR #65 found exactly this: TypeScript
+compared `reportRoles` and `landmarks` with `join(" ")`, which accepts a
+collapsed element, while Rust built the same arrays with
+`filter_map(Value::as_str)`, which silently discards a non-string. Each
+language accepted bytes the other rejected, and the green selector said
+nothing. Both now compare element by element, and both suites plant the
+collapsed and non-string cases.
+
+The residual risk stands for every one of the 13 duplicated items above. It is
+mitigated by planted negative cases on both sides using identical fixtures and
+identical expected message text — not by the selector. Any change to one loader
+requires the matching change and the matching planted case in the other.
 
 Four domains are *not* duplicated — they are read from existing authority:
 
@@ -117,6 +138,11 @@ exactly:
 - **content and landmark shape** — `icon-only` missing `ariaLabel`, a stray
   `icon` on a label-only case, `loading` without `spinner`, leading-icon
   without `icon`
+- **declared array shape** — a collapsed element (`["root content"]`,
+  `["fill border", ...]`), a non-string element in place, a non-string element
+  inserted, and a bare string where an array is required, for both
+  `reportRoles` and fixture `landmarks`; every landmark failure names its
+  fixture
 
 A test also asserts the canonical JSON contains none of `expected`, `baseline`,
 `threshold`, `tolerance`, `sha256`, or `#`, so expected renderer output cannot
@@ -157,8 +183,8 @@ no published package source imports the inventory.
 
 | check | result |
 | --- | --- |
-| `bun test test/visual/fixtures/button-visual-inventory.test.ts` | 29 pass, 0 fail, 508 assertions |
-| `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test visual_fixture_inventory` | 11 pass, 0 fail |
+| `bun test test/visual/fixtures/button-visual-inventory.test.ts` | 37 pass, 0 fail, 516 assertions |
+| `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test visual_fixture_inventory` | 12 pass, 0 fail |
 | `effigy docs:check` | pass |
 | `git diff --check origin/main...HEAD` | clean |
 

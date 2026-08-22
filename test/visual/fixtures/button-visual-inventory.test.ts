@@ -291,6 +291,92 @@ describe("shape faults keep the format Button-specific", () => {
   });
 });
 
+/**
+ * Arrays are compared element by element, never joined and never filtered.
+ * A join accepts a collapsed element; a filter accepts an inserted non-string.
+ * Both would let this loader and the Rust one disagree about the same bytes.
+ */
+describe("declared arrays must match element by element", () => {
+  test("collapsed report role", () => {
+    const problems = problemsFor((inventory) => {
+      inventory.reportRoles = ["fill border", "text", "shadow", "focus-ring"];
+    });
+    expectProblem(
+      problems,
+      "inventory reportRoles must be exactly [fill, border, text, shadow, focus-ring] (5 entries)",
+    );
+  });
+
+  test("non-string report role in place", () => {
+    const problems = problemsFor((inventory) => {
+      inventory.reportRoles = ["fill", "border", 3, "shadow", "focus-ring"];
+    });
+    expectProblem(problems, "inventory reportRoles entry 2 must be the string 'text', got 3");
+  });
+
+  test("non-string report role inserted", () => {
+    const problems = problemsFor((inventory) => {
+      inventory.reportRoles = ["fill", "border", "text", "shadow", "focus-ring", null];
+    });
+    expectProblem(
+      problems,
+      "inventory reportRoles must be exactly [fill, border, text, shadow, focus-ring] (5 entries)",
+    );
+  });
+
+  test("report roles that are not an array", () => {
+    const problems = problemsFor((inventory) => {
+      inventory.reportRoles = "fill border text shadow focus-ring";
+    });
+    expectProblem(problems, "inventory reportRoles must be an array of strings");
+  });
+
+  test("collapsed landmark names its fixture", () => {
+    const problems = problemsFor((inventory) => {
+      rowAt(inventory, "button/rest-secondary").landmarks = ["root content"];
+    });
+    expectProblem(
+      problems,
+      "fixture 'button/rest-secondary': landmarks must be exactly [root, content] (2 entries)",
+    );
+  });
+
+  test("non-string landmark in place names its fixture", () => {
+    const problems = problemsFor((inventory) => {
+      rowAt(inventory, "button/state-loading").landmarks = ["root", "content", 7];
+    });
+    expectProblem(
+      problems,
+      "fixture 'button/state-loading': landmarks entry 2 must be the string 'spinner', got 7",
+    );
+  });
+
+  test("non-string landmark inserted names its fixture", () => {
+    const problems = problemsFor((inventory) => {
+      rowAt(inventory, "button/content-leading-icon").landmarks = [
+        "root",
+        "content",
+        "icon",
+        null,
+      ];
+    });
+    expectProblem(
+      problems,
+      "fixture 'button/content-leading-icon': landmarks must be exactly [root, content, icon] (3 entries)",
+    );
+  });
+
+  test("landmarks that are not an array names its fixture", () => {
+    const problems = problemsFor((inventory) => {
+      rowAt(inventory, "button/theme-iceberg").landmarks = "root content";
+    });
+    expectProblem(
+      problems,
+      "fixture 'button/theme-iceberg': landmarks must be an array of strings",
+    );
+  });
+});
+
 describe("authority boundary", () => {
   test("the Rust loader reads this same checked-in file", () => {
     const rust = readFileSync(RUST_LOADER, "utf8");

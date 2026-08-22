@@ -109,6 +109,24 @@ Every negative case in both suites is planted on an in-memory clone at run
 time, so a broken inventory is never committed, and every rejection names its
 exact offender.
 
+**What the selector does and does not guarantee.** `effigy test:visual-fixtures`
+runs both loaders over the same canonical file, so a change to *the data* that
+only one language accepts fails. It does **not** compare the two validators
+against each other. Loosen one loader without changing the file and both
+commands still pass.
+
+So the duplicated lists are held honest by the planted negative cases, not by
+the selector. The two suites use the same fixtures and the same expected
+message text on purpose. Editing one loader means editing the other and adding
+the matching planted case in both — there is no mechanism that will remind you.
+
+This is not theoretical: TypeScript once compared `reportRoles` and `landmarks`
+with `join(" ")`, which accepts `["root content"]` as `["root", "content"]`,
+while Rust used `filter_map(Value::as_str)`, which silently discards an
+inserted number or null. Each accepted bytes the other rejected and the
+selector stayed green. Both now compare element by element, and neither may
+join or filter a declared array again.
+
 ## What this cannot prove
 
 - Nothing about pixels. No image is captured, compared, or stored by this card.

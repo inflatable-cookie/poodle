@@ -248,6 +248,51 @@ fn check_viewport(problems: &mut Problems, where_: &str, row: &Map<String, Value
     }
 }
 
+/// Compare a declared array against an expected one element by element.
+///
+/// Deliberately not `filter_map(Value::as_str)` and not a join: filtering
+/// would silently discard an inserted number or null, and joining would accept
+/// a collapsed element (`["root content"]` reading as `["root", "content"]`).
+/// Either would let this loader and its TypeScript sibling disagree about the
+/// same bytes, which is the one thing a shared fixture parser must not do.
+///
+/// Returns a problem string, or `None` when the array matches exactly.
+fn exact_string_array_problem(
+    label: &str,
+    value: Option<&Value>,
+    expected: &[&str],
+) -> Option<String> {
+    let Some(Value::Array(entries)) = value else {
+        return Some(format!(
+            "{label} must be an array of strings, got {}",
+            value.unwrap_or(&Value::Null)
+        ));
+    };
+    if entries.len() != expected.len() {
+        return Some(format!(
+            "{label} must be exactly [{}] ({} entries), got {}",
+            expected.join(", "),
+            expected.len(),
+            Value::Array(entries.clone())
+        ));
+    }
+    for (index, entry) in entries.iter().enumerate() {
+        let Some(text) = entry.as_str() else {
+            return Some(format!(
+                "{label} entry {index} must be the string '{}', got {entry}",
+                expected[index]
+            ));
+        };
+        if text != expected[index] {
+            return Some(format!(
+                "{label} entry {index} must be '{}', got {entry}",
+                expected[index]
+            ));
+        }
+    }
+    None
+}
+
 /// The landmark set is derived from the case, not authored freely.
 fn expected_landmarks(content_kind: &str, state: &str) -> Vec<&'static str> {
     let mut landmarks = vec!["root", "content"];
@@ -395,17 +440,12 @@ fn validate(raw: &Value) -> Problems {
         _ => problems.fail("inventory captureScales must be a non-empty array"),
     }
 
-    let roles: Vec<&str> = root
-        .get("reportRoles")
-        .and_then(Value::as_array)
-        .map(|roles| roles.iter().filter_map(Value::as_str).collect())
-        .unwrap_or_default();
-    if roles != REPORT_ROLES {
-        problems.fail(format!(
-            "inventory reportRoles must be exactly [{}], got {:?}",
-            REPORT_ROLES.join(", "),
-            roles
-        ));
+    if let Some(problem) = exact_string_array_problem(
+        "inventory reportRoles",
+        root.get("reportRoles"),
+        REPORT_ROLES,
+    ) {
+        problems.fail(problem);
     }
 
     let Some(fixtures) = root.get("fixtures").and_then(Value::as_array) else {
@@ -526,16 +566,12 @@ fn validate(raw: &Value) -> Problems {
 
         if let (Some(kind), Some(state)) = (kind, state) {
             let expected = expected_landmarks(&kind, &state);
-            let actual: Vec<&str> = row
-                .get("landmarks")
-                .and_then(Value::as_array)
-                .map(|entries| entries.iter().filter_map(Value::as_str).collect())
-                .unwrap_or_default();
-            if actual != expected {
-                problems.fail(format!(
-                    "{where_}: landmarks must be exactly [{}] for content '{kind}' in state '{state}', got {actual:?}",
-                    expected.join(", ")
-                ));
+            if let Some(problem) = exact_string_array_problem(
+                &format!("{where_}: landmarks"),
+                row.get("landmarks"),
+                &expected,
+            ) {
+                problems.fail(format!("{problem} — content '{kind}', state '{state}'"));
             }
         }
     }
@@ -783,6 +819,83 @@ fn shape_faults_keep_the_format_button_specific() {
 
     let not_an_object = validate(&Value::Array(vec![]));
     assert_problem(&not_an_object, "inventory root must be an object");
+}
+
+/// Arrays are compared element by element, never joined and never filtered.
+/// A filter accepts an inserted non-string; a join accepts a collapsed
+/// element. Both would let this loader and the TypeScript one disagree about
+/// the same bytes. Mirrors the `declared arrays must match element by element`
+/// block in `button-visual-inventory.test.ts`.
+#[test]
+fn declared_arrays_must_match_element_by_element() {
+    let collapsed_role = problems_for(|inventory| {
+        inventory["reportRoles"] =
+            serde_json::json!(["fill border", "text", "shadow", "focus-ring"]);
+    });
+    assert_problem(
+        &collapsed_role,
+        "inventory reportRoles must be exactly [fill, border, text, shadow, focus-ring] (5 entries)",
+    );
+
+    let non_string_role = problems_for(|inventory| {
+        inventory["reportRoles"] = serde_json::json!(["fill", "border", 3, "shadow", "focus-ring"]);
+    });
+    assert_problem(
+        &non_string_role,
+        "inventory reportRoles entry 2 must be the string 'text', got 3",
+    );
+
+    let inserted_role = problems_for(|inventory| {
+        inventory["reportRoles"] =
+            serde_json::json!(["fill", "border", "text", "shadow", "focus-ring", null]);
+    });
+    assert_problem(
+        &inserted_role,
+        "inventory reportRoles must be exactly [fill, border, text, shadow, focus-ring] (5 entries)",
+    );
+
+    let not_an_array = problems_for(|inventory| {
+        inventory["reportRoles"] = Value::String("fill border text shadow focus-ring".into());
+    });
+    assert_problem(&not_an_array, "inventory reportRoles must be an array of strings");
+
+    let collapsed_landmark = problems_for(|inventory| {
+        row_at(inventory, "button/rest-secondary")
+            .insert("landmarks".into(), serde_json::json!(["root content"]));
+    });
+    assert_problem(
+        &collapsed_landmark,
+        "fixture 'button/rest-secondary': landmarks must be exactly [root, content] (2 entries)",
+    );
+
+    let non_string_landmark = problems_for(|inventory| {
+        row_at(inventory, "button/state-loading")
+            .insert("landmarks".into(), serde_json::json!(["root", "content", 7]));
+    });
+    assert_problem(
+        &non_string_landmark,
+        "fixture 'button/state-loading': landmarks entry 2 must be the string 'spinner', got 7",
+    );
+
+    let inserted_landmark = problems_for(|inventory| {
+        row_at(inventory, "button/content-leading-icon").insert(
+            "landmarks".into(),
+            serde_json::json!(["root", "content", "icon", null]),
+        );
+    });
+    assert_problem(
+        &inserted_landmark,
+        "fixture 'button/content-leading-icon': landmarks must be exactly [root, content, icon] (3 entries)",
+    );
+
+    let landmarks_not_an_array = problems_for(|inventory| {
+        row_at(inventory, "button/theme-iceberg")
+            .insert("landmarks".into(), Value::String("root content".into()));
+    });
+    assert_problem(
+        &landmarks_not_an_array,
+        "fixture 'button/theme-iceberg': landmarks must be an array of strings",
+    );
 }
 
 #[test]

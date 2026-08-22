@@ -198,6 +198,39 @@ function keyDiff(actual: string[], expected: string[]): { missing: string[]; ext
 }
 
 /**
+ * Compare a declared array against an expected one element by element.
+ *
+ * Deliberately not `join()` and not a filter: joining accepts a collapsed
+ * element (`["root content"]` reading as `["root", "content"]`), and filtering
+ * non-strings out would silently accept an inserted number or null. Either
+ * would let this loader and its Rust sibling disagree about the same bytes,
+ * which is the one thing a shared fixture parser must not do.
+ *
+ * Returns a problem string, or `null` when the array matches exactly.
+ */
+function exactStringArrayProblem(
+  label: string,
+  value: unknown,
+  expected: readonly string[],
+): string | null {
+  if (!Array.isArray(value)) {
+    return `${label} must be an array of strings, got ${JSON.stringify(value)}`;
+  }
+  if (value.length !== expected.length) {
+    return `${label} must be exactly [${expected.join(", ")}] (${expected.length} entries), got ${JSON.stringify(value)}`;
+  }
+  for (const [index, entry] of value.entries()) {
+    if (typeof entry !== "string") {
+      return `${label} entry ${index} must be the string '${expected[index]}', got ${JSON.stringify(entry)}`;
+    }
+    if (entry !== expected[index]) {
+      return `${label} entry ${index} must be '${expected[index]}', got ${JSON.stringify(entry)}`;
+    }
+  }
+  return null;
+}
+
+/**
  * The landmark set is derived, not free text: a later receipt can only ask for
  * a landmark the case actually renders. `icon` exists when the content shape
  * carries one; `spinner` exists when the state is `loading`.
@@ -358,12 +391,8 @@ export function parseButtonVisualInventory(raw: unknown): ButtonVisualInventory 
     }
   }
 
-  const declaredRoles = Array.isArray(raw.reportRoles) ? raw.reportRoles : null;
-  if (declaredRoles === null || declaredRoles.join(" ") !== REPORT_ROLES.join(" ")) {
-    check.fail(
-      `inventory reportRoles must be exactly [${REPORT_ROLES.join(", ")}], got ${JSON.stringify(raw.reportRoles)}`,
-    );
-  }
+  const rolesProblem = exactStringArrayProblem("inventory reportRoles", raw.reportRoles, REPORT_ROLES);
+  if (rolesProblem !== null) check.fail(rolesProblem);
 
   if (!Array.isArray(raw.fixtures)) {
     problems.push(`inventory fixtures must be an array, got ${JSON.stringify(raw.fixtures)}`);
@@ -426,11 +455,13 @@ export function parseButtonVisualInventory(raw: unknown): ButtonVisualInventory 
 
     if (content !== null && state !== null) {
       const expected = expectedLandmarks(content, state as VisualStateName);
-      const actual = Array.isArray(entry.landmarks) ? entry.landmarks : null;
-      if (actual === null || actual.join(" ") !== expected.join(" ")) {
-        check.fail(
-          `${where}: landmarks must be exactly [${expected.join(", ")}] for content '${content.kind}' in state '${state}', got ${JSON.stringify(entry.landmarks)}`,
-        );
+      const landmarkProblem = exactStringArrayProblem(
+        `${where}: landmarks`,
+        entry.landmarks,
+        expected,
+      );
+      if (landmarkProblem !== null) {
+        check.fail(`${landmarkProblem} — content '${content.kind}', state '${state}'`);
       }
     }
 
