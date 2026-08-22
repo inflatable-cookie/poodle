@@ -92,8 +92,6 @@ result.
 
 - `test/visual/fixtures/` and the smallest adjacent validator/test/doc surfaces
 - a focused GPUI preview test module needed to parse and validate the same data
-- `effigy.toml` only for one narrow focused selector when existing routing is
-  insufficient
 - this card's August execution log
 - package/dev metadata only if a loader needs an already-present dependency
   made explicit; stop before adding a new production dependency
@@ -119,4 +117,6 @@ edits, release mutations, Jetstream work, or a second component.
 - `git diff --check origin/main...HEAD`
 
 Never run a `*-windowed`, `test:native-visual`, GPUI preview, or Jetstream
-selector.
+selector. Use existing Effigy routing for the focused tests; do not edit
+`effigy.toml` or `tasks/effigy.tasks.toml`, which belong to the parallel
+`g15.049` automation lane.

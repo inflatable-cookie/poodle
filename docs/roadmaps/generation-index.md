@@ -22,7 +22,8 @@ Updated: 2026-08-22
     lane. `g15.043` stays non-dispatchable until the native
     presentation-context architecture is fixed. `g15.012` is now exact
     children `044`–`047`; release preparation is exact children `048`–`050`;
-    workflow edits in `049` require explicit operator approval.
+    `g15.049` workflow edits are operator-approved and may run in parallel with
+    `g15.046`.
 
 ## Latest Completed Track
 

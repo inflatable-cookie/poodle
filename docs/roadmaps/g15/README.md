@@ -88,7 +88,7 @@ and status advance are the orchestrator's.
 31. [046 — Primitive visual fixture inventory](046-primitive-visual-fixture-inventory.md) — **ready**; `011` and `045` are complete
 32. [047 — Primitive visual comparison](047-primitive-visual-comparison.md) — planned after `046`; closes parent `012`
 33. [048 — Packed roster reachability](048-packed-roster-reachability.md) — complete; PR #64 proves exact 175/175 packed-root reachability for both web runtimes
-34. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — blocked on explicit workflow-edit approval
+34. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — **ready**; operator approved the bounded workflow edits on 2026-08-22
 35. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — planned after every implementation, specimen, conformance, packaging, and automation gate
 36. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
 37. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final operator tag/publication gate after accepted `050`
@@ -130,6 +130,8 @@ with the adopted no-focus GPUI capture seam from `g15.045`, that makes
 `g15.048` is complete in PR #64. Its exact packed-package proof is ready for
 `g15.050`, but the candidate remains behind the other release gates.
 
+`g15.049` is ready as an independent parallel automation lane after explicit
+operator approval. It does not overlap `g15.046`'s fixture/test-data scope.
+
 Do not dispatch `g15.043` until the orchestrator fixes the native presentation-
-context architecture. `g15.049` requires explicit operator approval because
-it edits workflows. Release mutation remains behind `g15.013`.
+context architecture. Release mutation remains behind `g15.013`.

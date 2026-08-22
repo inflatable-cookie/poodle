@@ -68,8 +68,9 @@ small, explicit, and diagnostic, the comparator must not scale.
 - **Dispatch topology:** serial visual lane; no open PR or overlapping worker
   exists at dispatch.
 - **Parallel safety check:** the next comparator (`g15.047`) is blocked on this
-  accepted inventory. Release, presentation-context, and automation lanes do
-  not share this card's test-data surface and remain undispatched.
+  accepted inventory. The operator-approved `g15.049` automation lane may run
+  in parallel because this worker must not edit `effigy.toml`,
+  `tasks/effigy.tasks.toml`, or workflows.
 - **Canonical refs:** `AGENTS.md`, `.agents/skills/effigy/SKILL.md`,
   `docs/contracts/001-working-rules.md`,
   `docs/contracts/components/button.md`,
@@ -86,8 +87,9 @@ small, explicit, and diagnostic, the comparator must not scale.
   release mutation, or workflow edit.
 - **Required validation:** focused TypeScript inventory tests, focused Rust
   inventory tests, `effigy docs:check`, and
-  `git diff --check origin/main...HEAD`. Add one narrow `effigy.toml` selector
-  only if no existing selector can route the focused inventory tests cleanly.
+  `git diff --check origin/main...HEAD`. Use existing Effigy routing; if it
+  cannot run a focused test, report the limitation rather than adding a
+  selector.
 - **PR base/head:** `main` <- worker branch.
 - **PR URL:** pending.
 - **Review state:** awaiting implementation and orchestrator review.
@@ -122,8 +124,6 @@ Writable scope:
 
 - `test/visual/fixtures/` and the smallest adjacent validator/test/doc files;
 - one focused GPUI preview test module needed to parse the same data;
-- `effigy.toml` only for one narrow selector if existing routing is genuinely
-  insufficient;
 - one August `g15.046` log;
 - dev/test metadata only if an already-present dependency must be declared;
 - root `PAPERCUTS.md` only for newly encountered small execution friction.
