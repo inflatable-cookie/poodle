@@ -92,6 +92,8 @@ result.
 
 - `test/visual/fixtures/` and the smallest adjacent validator/test/doc surfaces
 - a focused GPUI preview test module needed to parse and validate the same data
+- `effigy.toml` only for one narrow focused selector when existing routing is
+  insufficient
 - this card's August execution log
 - package/dev metadata only if a loader needs an already-present dependency
   made explicit; stop before adding a new production dependency
