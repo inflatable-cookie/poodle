@@ -112,13 +112,6 @@
 # temporary directory — no baseline, no repository writes. Internal smoke
 # only; not a fixture namespace or a comparison lane.
 "smoke:gpui-offscreen-capture" = "bun packages/gpui/preview/scripts/offscreen-capture-smoke.ts"
-# Workflow-compatible entrypoint. `.github/workflows/` still calls
-# `effigy ci:conformance`; g14.022 decides whether renaming it is worth the
-# operator approval a workflow edit needs. The name is legacy — the scope is
-# the focused native regression board plus the native specimen construction
-# probe, still with no cross-runtime parity claim.
-"ci:conformance" = [{ task = "regressions:native" }, { task = "probe:gpui-specimens" }]
-
 # Preview (documentation site)
 "svelte:build" = "bun run --cwd packages/svelte/preview build"
 "svelte:run" = "bun run --cwd packages/svelte/preview dev"
@@ -158,6 +151,7 @@
 # CI gates — light, ubuntu-only. No native (gpui/jetstream) crates, no vite
 # preview builds. The GitHub workflows (.github/workflows/ci-*.yml) mirror
 # ci:web / ci:rust so CI needs no effigy bootstrap; `effigy ci` is the local gate.
+"check:release-automation" = "bun scripts/check-release-automation.ts"
 "test:core" = "bun run --cwd packages/core test"
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
 # Verifies the machine -> DOM wiring the framework packages add on top of the
@@ -485,6 +479,7 @@ health = [{ task = "docs:lint" }]
 # `qa:jetstream`). Was previously misnamed `health`, which made every
 # `effigy doctor` run the whole suite.
 qa = [
+  { task = "check:release-automation" },
   { task = "ci" },
   { task = "ci:native" },
   { task = "test:web-pack-install" },

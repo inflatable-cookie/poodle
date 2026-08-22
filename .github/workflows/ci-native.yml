@@ -1,15 +1,11 @@
-# Native compile-rot check — mirrors `effigy ci:native` (gpui half).
-# macOS only: gpui 0.2.2 pulls metal, which bills at 10x the Linux rate.
-# MANUAL DISPATCH ONLY. This ran nightly behind a "did the default branch move
-# in 24h" guard, which fires every day during active development and is what
-# exhausted the org's Actions allowance. Run it before a tag, or when contract
-# or spec changes could plausibly rot the native build.
-# The native component crates have no unit tests yet; `cargo check` catches build
-# rot from contract/spec changes.
+# Native headless gate — executes `effigy ci:native`.
+# macOS only: GPUI pulls Metal and the board owns Poodle's native compile,
+# adapter, regression, and specimen-construction checks.
+# MANUAL DISPATCH ONLY. Run it before a tag, or when contract or spec changes
+# could plausibly rot the native build.
 #
-# jetstream/components is NOT built here: it depends on the sibling jetstream-runtime
-# repo (../../../../jetstream), which isn't part of this checkout. Verify it locally
-# with `effigy check:jetstream`.
+# The board stops at Poodle-owned Rust, GPUI, and the in-repo Jetstream adapter;
+# it does not require the sibling Jetstream engine repository.
 name: ci-native
 
 on:
@@ -27,16 +23,21 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 40
     # Shared target dir so the adapter, components, and preview crates reuse one
-    # compiled gpui dep tree instead of building it per crate.
+    # compiled GPUI dependency tree instead of building it per crate.
     env:
       CARGO_TARGET_DIR: ${{ github.workspace }}/ci-target
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
 
-      # gpui's dep tree is large — cache aggressively to keep macOS minutes down.
-      - uses: actions/cache@v4
+      - uses: inflatable-cookie/setup-effigy@987fd556617ea2c3e0ab5cef6b47b250817f50c8 # v1.0.0
+        with:
+          version: "0.11.0"
+
+      # GPUI's dependency tree is large — cache aggressively to keep macOS
+      # minutes down.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry/index
@@ -46,8 +47,5 @@ jobs:
           key: native-${{ runner.os }}-${{ hashFiles('packages/gpui/**/Cargo.lock', 'packages/gpui/**/Cargo.toml') }}
           restore-keys: native-${{ runner.os }}-
 
-      # ── effigy check:gpui ──────────────────────────────────────────
-      - name: gpui components compile-check
-        run: cargo check -p poodle-gpui-components --manifest-path packages/gpui/components/Cargo.toml
-      - name: gpui preview compile-check
-        run: cargo check -p poodle-gpui-preview --manifest-path packages/gpui/preview/Cargo.toml
+      - name: Execute Effigy native gate
+        run: effigy ci:native

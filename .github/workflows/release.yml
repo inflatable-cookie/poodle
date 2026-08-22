@@ -2,18 +2,19 @@ name: Release
 
 # Publishes poodle-core and poodle-svelte to npm.
 #
-# No NPM_TOKEN. Publication uses npm trusted publishing: npmjs.com is
+# No long-lived npm registry token. Publication uses npm trusted publishing: npmjs.com is
 # configured to accept publishes for each package only from this repository and
 # this workflow file, and npm authenticates with a short-lived OIDC token minted
 # per run. Nothing long-lived is stored in GitHub, so there is no secret for a
 # compromised dependency to exfiltrate and nothing to rotate. Provenance
 # attestation comes with it rather than being a separate step.
 #
-# Gates run through Effigy via inflatable-cookie/setup-effigy, so this workflow
-# executes the same selectors as a local run rather than a hand-transcribed
-# copy of them that can drift. Do not reach for `bunx effigy` -- an unrelated
-# package of that name exists on npm, and fetching it inside a workflow holding
-# publish rights is the exact hazard trusted publishing exists to remove.
+# The release authority is the single Effigy gate configured in `effigy.toml`.
+# `effigy release gates` runs the same complete headless `effigy qa` board as a
+# local release check; this workflow does not maintain a second selector list.
+# Do not reach for `bunx effigy` -- an unrelated package of that name exists on
+# npm, and fetching it inside a workflow holding publish rights is the exact
+# hazard trusted publishing exists to remove.
 #
 # Before the first run, each package needs its trusted publisher configured at
 # npmjs.com -> package -> Settings -> Trusted Publisher, naming this repository
@@ -25,10 +26,10 @@ name: Release
 
 # Dispatch this workflow AGAINST THE TAG, not against main:
 #
-#     git tag v0.1.0 && git push origin v0.1.0
-#     gh workflow run release.yml --ref v0.1.0 -f dry-run=false
+#     git tag v0.2.0 && git push origin v0.2.0
+#     gh workflow run release.yml --ref v0.2.0 -f dry-run=false
 #
-# workflow_dispatch accepts a tag ref, so `github.ref` is `refs/tags/v0.1.0`
+# workflow_dispatch accepts a tag ref, so `github.ref` is `refs/tags/v0.2.0`
 # and the version-agrees-with-tag check below still fires. There is no
 # `push: tags` trigger: publication should be an act someone performs, not a
 # side effect of pushing a tag, and during first publication a tag push would
@@ -50,55 +51,46 @@ concurrency:
 
 jobs:
   release:
-    name: Publish to npm
-    # ubuntu, not macos: `effigy ci` is ci:web + ci:rust, and ci:native -- the
-    # only macOS-bound lane, because gpui pulls metal -- is deliberately not in
-    # it. macOS runners bill at ten times the Linux rate on a private
-    # repository and queue behind everything else.
-    runs-on: ubuntu-latest
+    name: Validate and publish to npm
+    # The configured `effigy qa` release board includes the headless native
+    # lane, which needs macOS for GPUI/Metal. Native visual and paired Jetstream
+    # sweeps remain outside the board.
+    runs-on: macos-latest
     permissions:
       contents: read
       # Mints the OIDC token npm exchanges for publish rights. This is the
       # whole reason no secret is needed.
       id-token: write
     steps:
-      # TODO harden: pin these to commit SHAs rather than tags. Tags are
-      # mutable and a compromised action is the other half of the supply-chain
-      # problem trusted publishing solves for tokens.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: latest
+          bun-version: "1.3.14"
 
-      - uses: inflatable-cookie/setup-effigy@v1
+      - uses: inflatable-cookie/setup-effigy@987fd556617ea2c3e0ab5cef6b47b250817f50c8 # v1.0.0
         with:
-          version: '0.9.1'
+          version: "0.11.0"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 22
+          node-version: "22.22.2"
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
 
-      # Trusted publishing needs a recent npm; the one bundled with Node is
-      # usually older than the OIDC support.
-      - name: Use an npm that supports trusted publishing
+      # npm trusted publishing requires npm >=11.5.1 and Node >=22.14.0.
+      - name: Install the reviewed npm trusted-publishing CLI
         run: |
-          npm install -g npm@latest
-          npm --version
+          set -euo pipefail
+          npm install --global npm@12.0.2
+          test "$(npm --version)" = "12.0.2"
 
       - run: bun install --frozen-lockfile
 
-      # `effigy ci` covers audit:icons and audit:tokens -- the generated icon and
-      # token artifacts are committed, and these fail if the tree and the
-      # generators disagree. Nothing here regenerates: packing regenerated
-      # output would ship whatever the runner produced rather than what was
-      # reviewed and tagged.
-      - name: Full CI gate
-        run: effigy ci
-
-      - name: Packed-consumer install proof
-        run: effigy test:web-pack-install
+      # The configured gate runs the complete headless board: web, Rust, native,
+      # packed-install, licence, security, and release-automation checks.
+      - name: Release gates
+        run: effigy release gates
 
       # Within this repository, every Rust crate and every TypeScript package
       # carries one version, so a tag names all of them at once. Lockstep stops
@@ -122,19 +114,21 @@ jobs:
           done
           # Lockstep spans languages, not just the published packages: the tag
           # is the Rust distribution point too, so every crate must carry it.
-          while read -r name version; do
-            if [ "$version" != "$tag" ]; then
+          while IFS= read -r -d '' manifest; do
+            name=$(grep -m1 '^name' "$manifest" | cut -d'"' -f2)
+            version=$(grep -m1 '^version' "$manifest" | cut -d'"' -f2)
+            if [ -n "$version" ] && [ "$version" != "$tag" ]; then
               echo "crate $name is $version, tag is $tag"
               status=1
             fi
-          done < <(find packages -name Cargo.toml -not -path '*/target/*' -print0 \
-            | xargs -0 -n1 -I{} sh -c 'n=$(grep -m1 "^name" "{}" | cut -d\" -f2); v=$(grep -m1 "^version" "{}" | cut -d\" -f2); [ -n "$v" ] && echo "$n $v"')
+          done < <(find packages -name Cargo.toml -not -path '*/target/*' -print0)
           exit "$status"
 
       # Asserts rather than prints. A listing of the first twenty entries is
       # alphabetical CSS and proves nothing; what matters is that the generated
       # icon and token artifacts survived into the tarball, since they are
-      # committed source that `effigy ci` checks but `files` could still miss.
+      # committed source that the release gate checks but `files` could still
+      # miss.
       #
       # Do not pipe `tar -tzf` into `head`: GNU tar treats the EPIPE as an error
       # and `set -o pipefail` fails the step. BSD tar does not, so it passes on
@@ -153,7 +147,7 @@ jobs:
             local n
             n=$(grep -c -- "$3" "$listing" || true)
             if [ "$n" -lt "$4" ]; then
-              echo "  MISSING $2: $n matching '"'"'$3'"'"', expected at least $4"
+              echo "  MISSING $2: $n matching [$3], expected at least $4"
               status=1
             else
               echo "  ok $2: $n"
@@ -162,9 +156,11 @@ jobs:
 
           listing=$(mktemp)
           for tarball in release-artifacts/*.tgz; do
-            echo "== $tarball ($(wc -c < "$tarball") bytes)"
+            bytes=$(wc -c < "$tarball")
+            echo "== $tarball ($bytes bytes)"
             tar -tzf "$tarball" > "$listing"
-            echo "  $(wc -l < "$listing") entries"
+            entries=$(wc -l < "$listing")
+            echo "  $entries entries"
             require "$tarball" "licence"      "^package/LICENSE$"          1
             require "$tarball" "readme"       "^package/README.md$"        1
             require "$tarball" "manifest"     "^package/package.json$"     1
@@ -196,7 +192,7 @@ jobs:
       # skips hidden files unless told otherwise. It warned and passed. This is
       # the artifact a first publication is bootstrapped from, so its absence
       # has to fail the run.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: packed-tarballs
           path: release-artifacts/*.tgz

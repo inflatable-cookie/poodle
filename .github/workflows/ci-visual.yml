@@ -1,4 +1,4 @@
-# Cross-framework visual gate — mirrors `effigy ci:visual` (g12.009).
+# Cross-framework visual gate — dispatches one of the named Effigy selectors.
 # Diffs the Svelte and React previews pixel-for-pixel at the same specimen slug
 # and display axis. Kept OUT of ci-web: it downloads a browser and boots two vite
 # dev servers, which that gate deliberately excludes.
@@ -27,13 +27,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: "1.3.14"
 
-      - uses: actions/cache@v4
+      - uses: inflatable-cookie/setup-effigy@987fd556617ea2c3e0ab5cef6b47b250817f50c8 # v1.0.0
+        with:
+          version: "0.11.0"
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.bun/install/cache
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
@@ -41,25 +45,36 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      # Browser binaries are versioned with the playwright package.
-      - uses: actions/cache@v4
+      # Browser binaries are versioned with the Playwright package.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: playwright-${{ runner.os }}-
 
-      - name: install chromium
+      - name: Install Chromium
         run: bunx playwright install --with-deps chromium
 
-      # ── effigy ci:visual ───────────────────────────────────────────
-      - name: cross-framework visual diff
-        run: bun test/visual/run.ts --tier=${{ inputs.tier || 'axis' }}
+      - name: Execute selected Effigy visual gate
+        env:
+          TIER: ${{ inputs.tier || 'axis' }}
+        run: |
+          set -euo pipefail
+          case "$TIER" in
+            smoke) effigy test:visual-smoke ;;
+            axis) effigy ci:visual ;;
+            sweep) effigy test:visual-sweep ;;
+            *)
+              echo "Unsupported visual tier: $TIER" >&2
+              exit 1
+              ;;
+          esac
 
       # Diff images only exist when something failed; they are the whole point of
       # the run when it does.
-      - name: upload diffs
+      - name: Upload diffs
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: visual-diffs
           path: test/visual/out/
