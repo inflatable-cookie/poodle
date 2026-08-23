@@ -918,7 +918,7 @@ pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::slider(spec, &pr::RenderContext::new(theme), &pr::SliderHandlers::default()))
 }
 
-pub fn js_spacer(spec: &SpacerSpec) -> El {
+pub fn js_spacer(spec: &SpacerSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::spacer(spec, &pr::RenderContext::new(theme)))
 }
 

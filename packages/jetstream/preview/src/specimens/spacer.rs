@@ -42,7 +42,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .rounded(4.0)
                 .p(8.0)
                 .child(boxed("Logo"))
-                .child(js_spacer(&SpacerSpec::new().with_grow(1.0)))
+                .child(js_spacer(&SpacerSpec::new().with_grow(1.0), theme))
                 .child(boxed("Sign in")),
         ))
         // --- Between three items (left / center / right) ---
@@ -59,9 +59,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .rounded(4.0)
                 .p(8.0)
                 .child(boxed("Left"))
-                .child(js_spacer(&SpacerSpec::new().with_grow(1.0)))
+                .child(js_spacer(&SpacerSpec::new().with_grow(1.0), theme))
                 .child(boxed("Center"))
-                .child(js_spacer(&SpacerSpec::new().with_grow(1.0)))
+                .child(js_spacer(&SpacerSpec::new().with_grow(1.0), theme))
                 .child(boxed("Right")),
         ))
         // --- Spacer with min-size (grow 0, reserved width) ---
@@ -77,7 +77,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .p(8.0)
                 .child(boxed("A"))
                 .child(
-                    js_spacer(&SpacerSpec::new().with_grow(0.0).with_min_size(64.0))
+                    js_spacer(&SpacerSpec::new().with_grow(0.0).with_min_size(64.0), theme)
                         .bg(tint(accent, 0.12))
                         .rounded(2.0),
                 )
@@ -96,7 +96,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .p(8.0)
                 .child(boxed("X"))
                 .child(
-                    js_spacer(&SpacerSpec::new().with_grow(0.0).with_min_size(32.0))
+                    js_spacer(&SpacerSpec::new().with_grow(0.0).with_min_size(32.0), theme)
                         .bg(tint(accent, 0.08))
                         .rounded(2.0),
                 )
