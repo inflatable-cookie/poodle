@@ -15,6 +15,33 @@ Prepare one exact, reviewable v0.2.0 candidate without tagging or publishing:
 lockstep versions, honest release notes, clean packed artifacts, full headless
 QA, and an operator-readable certification receipt pinned to one commit.
 
+## Fixed Decisions
+
+- Version the three public-intent TypeScript packages
+  (`poodle-core`, `poodle-svelte`, `poodle-react`) and every Rust crate below
+  `packages/` at `0.2.0`. Update intra-repository dependency requirements and
+  lockfiles with them. Private/internal TypeScript tooling manifests are not
+  release-bearing and keep their current versions.
+- The v0.2.0 publication set remains core + Svelte. React is packed and
+  certified as experimental but is not published. Rust crates are certified
+  as source/tag distribution. Jetstream stays deferred and must not be
+  described as active-cohort parity.
+- Use two commits for honest exact-SHA evidence:
+  1. a **candidate commit** containing every version, lockfile, release-note,
+     changelog, metadata, guide, and candidate-facing documentation change;
+  2. an **evidence-only commit** adding the August `g15.050` execution log and
+     receipt, which names the candidate commit, commands, artifact filenames,
+     sizes, and SHA-256 checksums.
+- Run every candidate gate from a clean checkout of the candidate commit. If
+  any candidate-bearing file changes afterward, create a new candidate commit,
+  rerun the complete board, and replace the receipt. Editing only the receipt
+  does not repin the candidate.
+- Keep tarballs outside the tracked tree. The committed receipt proves how to
+  reproduce them; it is not an artifact store.
+- `effigy release gates` is read-only and allowed. `effigy release prepare`,
+  `effigy release execute`, workflow dispatch, tag creation/push, GitHub
+  release creation, `npm publish`, and registry mutation are forbidden.
+
 ## Scope Envelope
 
 - Set every release-bearing TypeScript package and Rust crate to `0.2.0` in
@@ -30,6 +57,23 @@ QA, and an operator-readable certification receipt pinned to one commit.
 - Run the complete supported headless board. Native/windowed or publish actions
   remain separate operator gates.
 
+## Writable Scope
+
+- the three public-intent TypeScript package manifests and relevant Bun
+  lockfile entries;
+- every Rust crate manifest below `packages/`, intra-repository version
+  requirements, and Cargo lockfiles;
+- `CHANGELOG.md`, `docs/release-notes/0.2.0.md`, package/readme/operator guides,
+  release manifest/operations metadata, and release-facing front doors whose
+  current wording would otherwise contradict the candidate;
+- `docs/logs/2026-08/20260823-g15-050-*.md` for the evidence-only receipt;
+- `PAPERCUTS.md` for newly found execution friction.
+
+Do not edit component contracts or implementations, specimens, visual
+baselines, workflow files, Effigy task definitions, dependency policy, or
+Jetstream admission state. A required change to one of those surfaces means
+the candidate is not ready: stop and report it.
+
 ## Acceptance Envelope
 
 - [ ] Version `0.2.0` agrees across every release-bearing manifest and lockfile.
@@ -40,7 +84,28 @@ QA, and an operator-readable certification receipt pinned to one commit.
 - [ ] Release notes state exactly what publishes and what remains experimental
       or deferred.
 - [ ] Candidate artifacts can be reproduced from the pinned SHA.
+- [ ] The committed receipt pins the candidate commit rather than its later
+      evidence-only commit, and no candidate-bearing file changed after the
+      recorded gates ran.
 - [ ] No tag, GitHub release, npm publish, or registry mutation occurs.
+
+## Required Validation
+
+From the clean candidate commit:
+
+- exact version/lockfile checks across the fixed manifest denominator;
+- `effigy test:web-pack-install` and clean local packs for core, Svelte, and
+  experimental React; record filenames, byte sizes, and SHA-256 checksums;
+- `effigy check:release-automation`;
+- `effigy audit:licenses` and `effigy audit:security`;
+- `effigy qa`;
+- `effigy release gates` and proof that its one `headless` gate ran;
+- `effigy docs:check`;
+- `git diff --check` before the candidate commit and
+  `git diff --check origin/main...HEAD` before PR handoff.
+
+Use only supported headless selectors. Do not run `*-windowed`, native-visual,
+Jetstream preview/QA, or any release mutation.
 
 ## Stop Conditions
 
