@@ -25,7 +25,9 @@ component semantics               W3C DTCG token source
    core + Svelte + React     specs + headless + node
                                       |
                               poodle-render
-                           Spec + Theme -> Node
+                     Spec + RenderContext -> Node
+                  (context: borrowed theme + presentation
+                   defaults — architecture 010)
                               /             \
                     GPUI node backend   Jetstream backend
 ```

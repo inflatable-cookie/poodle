@@ -29,6 +29,7 @@ GPUI boundary:
 ```rust
 use gpui::IntoElement;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_render::context::RenderContext;
 use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant};
 
 let theme = GpuiThemeProvider::new()
@@ -36,12 +37,16 @@ let theme = GpuiThemeProvider::new()
     .with_density(&poodle_tokens::density::DEFAULT)
     .with_control_size(&poodle_tokens::density::CONTROL_SIZE_SM);
 
+// The construction context carries the borrowed theme plus the effective
+// presentation defaults (root: md size scale, default density).
+let ctx = RenderContext::new(&theme);
+
 let spec = ButtonSpec::new()
     .with_label("Save changes")
     .with_variant(ButtonVariant::Primary)
     .with_tone(ButtonTone::Default);
 
-let node = poodle_render::button(&spec, &theme, None);
+let node = poodle_render::button(&spec, &ctx, None);
 let element = poodle_gpui_node_backend::to_gpui(&node);
 
 element.into_element()
@@ -57,7 +62,7 @@ let on_save = Arc::new(|| {
     // Send an application action or update application state.
 });
 
-let node = poodle_render::button(&spec, &theme, Some(on_save));
+let node = poodle_render::button(&spec, &ctx, Some(on_save));
 ```
 
 The exact render signature is part of the Rust API. Check the function in
@@ -104,12 +109,53 @@ cannot express it.
 ## Slots and Composition
 
 Simple content is carried in specs. Rich child content and component handlers
-are additional render-function arguments. Slots are `poodle_node::Node` values,
-so components can compose without depending on GPUI types.
+are additional render-function arguments. Ordinary slots are
+`poodle_node::Node` values, so components can compose without depending on
+GPUI types. The exception is a composite whose web pair wraps host content in
+an internal `UiPresentationProvider` (AppHeader, Field, FilterToolbar,
+MediaPreview, PageHeader, BlockEditor): those slots are `SlotBuilder` closures
+the component invokes immediately inside its scoped context, so the host
+child inherits the scope instead of arriving prebuilt.
 
 Convert the completed tree to GPUI once, near the view boundary. Avoid
 converting child nodes individually and then trying to insert GPUI elements
 back into shared rendering.
+
+## Presentation Scopes (UiPresentationProvider)
+
+`UiPresentationProvider` is a construction-time boundary, not a painted node.
+`poodle_render::context::ui_presentation_provider` derives a nested
+`RenderContext`, builds its child through an immediate closure, and returns
+that child unchanged — no wrapper layout, paint, focus target, or
+accessibility entry.
+
+Component specs keep omission in the type system: semantic `size` and
+`density` inputs are `Option`. A renderer resolves an omitted input from the
+context, then applies the component's `size_role`. An explicit value always
+wins — including an explicit `md` or `default` inside a non-default scope.
+Root defaults are `md` / `default`; nested providers replace both defaults
+only for construction inside their closure.
+
+```rust
+use poodle_render::context::ui_presentation_provider;
+use poodle_specs::{ControlDensity, ControlSize, UiPresentationProviderSpec};
+
+let scope = UiPresentationProviderSpec::new()
+    .with_size_scale(ControlSize::Xl)
+    .with_density(ControlDensity::Comfortable);
+
+let node = ui_presentation_provider(&scope, &ctx, |scoped| {
+    // Omitted inputs inherit xl / comfortable here.
+    poodle_render::button(&ButtonSpec::new().with_label("Save"), scoped, None)
+    // An explicit `.with_size(ControlSize::Md)` would stay md in this scope.
+    // A nested `ui_presentation_provider(&inner, scoped, ...)` would replace
+    // both defaults for its own closure only.
+});
+```
+
+See the
+[UiPresentationProvider contract](../contracts/components/ui-presentation-provider.md)
+for the resolution tables and the breaking-migration notes.
 
 ## Run the Preview
 
@@ -129,7 +175,7 @@ semantic review; specimen output alone is not proof of parity.
 1. Update the contract under `docs/contracts/components/`.
 2. Update or add the spec in `poodle-specs`.
 3. Put reusable interaction logic in `poodle-headless` when appropriate.
-4. Implement `Spec + Theme -> Node` in `poodle-render`.
+4. Implement `Spec + RenderContext -> Node` in `poodle-render`.
 5. Extend `poodle-node` only for a genuinely reusable rendering capability.
 6. Add GPUI backend behavior only for GPUI-specific interpretation.
 7. Add preview coverage and update parity evidence.
