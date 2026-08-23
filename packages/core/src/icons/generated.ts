@@ -52,6 +52,8 @@ import { gripVertical } from "./icons/grip-vertical";
 import { heading } from "./icons/heading";
 import { heart } from "./icons/heart";
 import { helpCircle } from "./icons/help-circle";
+import { home } from "./icons/home";
+import { house } from "./icons/house";
 import { image } from "./icons/image";
 import { inbox } from "./icons/inbox";
 import { info } from "./icons/info";
@@ -161,6 +163,8 @@ export {
   heading,
   heart,
   helpCircle,
+  home,
+  house,
   image,
   inbox,
   info,
@@ -271,6 +275,8 @@ export const defaultLucideIconSet: IconSet = {
   "heading": heading,
   "heart": heart,
   "help-circle": helpCircle,
+  "home": home,
+  "house": house,
   "image": image,
   "inbox": inbox,
   "info": info,

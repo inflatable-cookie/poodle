@@ -321,6 +321,7 @@ export type {
   // Shared types
   ActiveSort,
   BreadcrumbItem,
+  BreadcrumbItemBase,
   BulkAction,
   CardVariant,
   FilterClause,
