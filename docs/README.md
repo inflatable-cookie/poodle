@@ -18,9 +18,12 @@ Choose the runtime used by your application:
 - [Application pattern recipes](guides/README.md) — forms, lists, dialogs,
   media workflows, and admin shells
 
-Poodle is currently a pre-1.0 source preview. Public-intent packages are not
-published yet and are consumed through workspace or file dependencies rather
-than a public registry.
+Poodle is pre-1.0. `@inflatable-cookie/poodle-core` and
+`@inflatable-cookie/poodle-svelte` publish to npm on the preview channel;
+`@inflatable-cookie/poodle-react` is packed and certified but stays
+source-only; the Rust crates are source/tag distribution. Preview means
+pre-release: breaking changes may ship in `0.x` minor releases and no `stable`
+channel exists yet. See the [release notes](release-notes/README.md).
 
 ## Understand the System
 

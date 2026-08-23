@@ -4,8 +4,18 @@
 contains shared component behavior, generated design tokens, component CSS,
 and icon infrastructure used by the Svelte and React packages.
 
-This is a pre-1.0 source preview and is not published to a registry. Use a
-workspace or file dependency.
+`0.2.0` is a preview-channel npm release. Breaking changes may still ship in
+`0.x` minor releases; no `stable` channel exists yet, so pin an exact version
+and read the [release notes](https://github.com/inflatable-cookie/poodle/blob/main/docs/release-notes/0.2.0.md) before
+upgrading.
+
+```sh
+bun add @inflatable-cookie/poodle-core@0.2.0
+# or: npm install @inflatable-cookie/poodle-core@0.2.0
+```
+
+`0.2.0` is the first published version — earlier versions were source
+baselines and are not on the registry.
 
 ## Public Surfaces
 
@@ -67,5 +77,5 @@ web modules and shared Rust SVG assets from pinned Lucide data. Regenerate
 tokens with `effigy tokens:build` and validate documentation with
 `effigy docs:check`.
 
-See the [token architecture](../../docs/architecture/002-token-system-and-package-layout.md)
-and [repository README](../../README.md) for the full system.
+See the [token architecture](https://github.com/inflatable-cookie/poodle/blob/main/docs/architecture/002-token-system-and-package-layout.md)
+and [repository README](https://github.com/inflatable-cookie/poodle/blob/main/README.md) for the full system.

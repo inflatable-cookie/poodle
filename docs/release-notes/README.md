@@ -20,5 +20,8 @@ exists yet.
 
 ## Versions
 
+- [0.2.0](0.2.0.md) — 2026-08-23 — first release on the frozen 175-component
+  Svelte denominator (42 new components, Breadcrumb item icons, focus-ring
+  channel; Tabs/Popover/Pill/Icon and Rust presentation-cascade breaks)
 - [0.1.0](0.1.0.md) — 2026-07-24 — first documented preview release (12-theme
   set, ThemeSelect, FilterBuilder, `@inflatable-cookie/poodle-react`; theme id renames)

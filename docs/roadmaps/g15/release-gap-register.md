@@ -57,8 +57,8 @@ decision (spec 068) and is excluded from every missing count. Reproducible
 count method: `docs/roadmaps/g15/release-baseline-roster.md#count-method`.
 
 Summary of native gaps: Rust declaration 0 missing (+ 1 not-applicable),
-Rust render 1 missing (+ 1 not-applicable), GPUI specimen 0 missing
-(+ 1 not-applicable).
+Rust render 0 missing (+ 1 not-applicable) since `g15.043` landed the
+UiPresentationProvider cascade, GPUI specimen 0 missing (+ 1 not-applicable).
 
 | Family | Missing Rust declaration | Missing Rust render | Missing GPUI specimen | Owner |
 | --- | --- | --- | --- | --- |
@@ -123,7 +123,7 @@ measured from the mounted tree, not inferred from a contract read.
 | Read-only release-gate claim | closed by PR #66: `effigy release gates` executes exactly one configured `headless` gate backed by the complete `effigy qa` board | `g15.049` complete |
 | GPUI/Zed dependency licence policy | closed by PR #67: exact fork `inflatable-cookie/zed@87d9afbe` removes GPL tracing from both normal GPUI graphs; `libbz2-rs` terms and attribution ship on both notice surfaces; five immutable Git sources are admitted fail-closed | `g15.051` complete; merge `30e2aae3` |
 | Breadcrumb item icons | closed by PR #71: every authored crumb supports text-only, icon-plus-label, or accessible icon-only presentation; Svelte, React, shared Rust, and the GPUI specimen share the contract and explicit size semantics | `g15.053` complete |
-| v0.2.0 candidate | manifests remain 0.1.0 and no 0.2.0 release note exists | `g15.050`, then operator gate `g15.013` |
+| v0.2.0 candidate | closed by `g15.050`: the three public TypeScript manifests and all 17 Rust crates under `packages/` carry `0.2.0` in lockstep with their intra-repository requirements and both lockfile families, `docs/release-notes/0.2.0.md` and the `CHANGELOG.md` disposition are written, and the complete headless board plus packed core/Svelte/React artifacts are recorded against one exact candidate SHA. Tag and publication remain unperformed | `g15.050` prepared the candidate; operator gate `g15.013` owns tag and publication |
 
 ## Carried Requirements (recorded, not implemented)
 

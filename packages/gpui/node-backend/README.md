@@ -6,7 +6,11 @@ is the runtime boundary between Poodle's shared Rust renderer and GPUI.
 This crate is a pre-1.0 source preview and is not published to crates.io.
 
 ```rust
-let node = poodle_render::button(&spec, &theme, on_click);
+use poodle_render::RenderContext;
+
+// Renderers take the construction context, not a bare ThemeProvider.
+let ctx = RenderContext::new(&theme);
+let node = poodle_render::button(&spec, &ctx, on_click);
 let element = poodle_gpui_node_backend::to_gpui(&node);
 ```
 

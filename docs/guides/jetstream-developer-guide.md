@@ -34,22 +34,34 @@ passing the element to Jetstream:
 
 ```rust
 use poodle_jetstream::JetstreamThemeProvider;
+use poodle_render::RenderContext;
 use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant};
 
 let theme = JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     .with_density(&poodle_tokens::density::DEFAULT)
     .with_control_size(&poodle_tokens::density::CONTROL_SIZE_SM);
 
+// The construction context borrows the theme and carries the effective
+// presentation defaults (root: md size scale, default density). Renderers take
+// this, not a bare ThemeProvider. Nested scopes come from
+// `ctx.scoped(size, density)`.
+let ctx = RenderContext::new(&theme);
+
 let spec = ButtonSpec::new()
     .with_label("Save changes")
     .with_variant(ButtonVariant::Primary)
     .with_tone(ButtonTone::Default);
 
-let node = poodle_render::button(&spec, &theme, None);
+let node = poodle_render::button(&spec, &ctx, None);
 let element = jetstream_poodle::to_js_el(&node);
 
 game_ui.render_immediate(&element);
 ```
+
+Consuming the same shared node tree as GPUI is composition reuse, not parity
+evidence. Jetstream's backend integration stays program-deferred: it is not
+passing parity, it is outside the active cohort, and no Poodle release claims
+Jetstream parity for any component.
 
 Interactive render functions accept typed handlers. The application owns the
 action performed by those handlers; Poodle owns when an intent is emitted and

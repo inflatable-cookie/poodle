@@ -8,10 +8,13 @@ Poodle is intended for teams that need one UI language across several
 renderers. Applications choose the runtime package they need; they do not need
 to understand the other implementations.
 
-> **Project status:** Poodle is a pre-1.0 source preview. Its public-intent npm
-> packages and Rust crates are not published to a registry yet. They are
-> currently consumed through workspace or file dependencies. APIs may change
-> before the first public release.
+> **Project status:** Poodle is pre-1.0. `@inflatable-cookie/poodle-core` and
+> `@inflatable-cookie/poodle-svelte` publish to npm on the preview channel;
+> `@inflatable-cookie/poodle-react` is packed and certified but stays
+> source-only; the Rust crates are source/tag distribution and are not on
+> crates.io. Preview means pre-release: breaking changes may ship in `0.x`
+> minor releases and no `stable` channel exists yet, so pin an exact version
+> and read the [release notes](docs/release-notes/README.md) before upgrading.
 
 ## Choose a Runtime
 

@@ -45,7 +45,7 @@
     "stable": {
       "enabled": false,
       "publicIntent": true,
-      "consumerExpectation": "Stable release channel is not available during g03.",
+      "consumerExpectation": "Stable release channel is unavailable until a later generation explicitly enables it.",
       "deprecationRecord": "reserved-for-later-generation"
     }
   },

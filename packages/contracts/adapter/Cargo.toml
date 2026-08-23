@@ -1,6 +1,6 @@
 [package]
 name = "poodle-adapter"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
 rust-version = "1.95"
@@ -15,10 +15,10 @@ publish = false
 path = "src/lib.rs"
 
 [dependencies]
-poodle-events = { version = "0.1.0", path = "../events" }
-poodle-layout = { version = "0.1.0", path = "../layout" }
-poodle-style = { version = "0.1.0", path = "../style" }
-poodle-tokens = { version = "0.1.0", path = "../tokens" }
+poodle-events = { version = "0.2.0", path = "../events" }
+poodle-layout = { version = "0.2.0", path = "../layout" }
+poodle-style = { version = "0.2.0", path = "../style" }
+poodle-tokens = { version = "0.2.0", path = "../tokens" }
 
 [package.metadata.poodle]
 public-intent = true

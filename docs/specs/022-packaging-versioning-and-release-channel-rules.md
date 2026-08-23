@@ -69,8 +69,8 @@ The current release posture is:
 - `@inflatable-cookie/poodle-svelte`
 - `@inflatable-cookie/poodle-react`
 - Rust contracts: `poodle-adapter`, `poodle-events`, `poodle-headless`,
-  `poodle-layout`, `poodle-markdown`, `poodle-node`, `poodle-specs`,
-  `poodle-style`, and `poodle-tokens`
+  `poodle-ir`, `poodle-layout`, `poodle-markdown`, `poodle-node`,
+  `poodle-specs`, `poodle-style`, and `poodle-tokens`
 - Rust renderers: `poodle-render`, `poodle-gpui`,
   `poodle-gpui-node-backend`, and `poodle-jetstream`
 
