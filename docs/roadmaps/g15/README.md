@@ -2,7 +2,7 @@
 
 Status: active — every implementation, specimen, conformance, packaging,
 automation, dependency-policy, and adopter card through `g15.053` is complete;
-the remaining release path is `g15.050` → `g15.013`
+`g15.050` is accepted and landed, leaving only the `g15.013` operator gate
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -90,7 +90,7 @@ and status advance are the orchestrator's.
 34. [048 — Packed roster reachability](048-packed-roster-reachability.md) — complete; PR #64 proves exact 175/175 packed-root reachability for both web runtimes
 35. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — complete; PR #66 made every retained workflow a pinned Effigy launcher and made the release board non-vacuous
 36. [051 — GPUI/Zed dependency licence remediation](051-gpui-zed-dependency-licence-remediation.md) — complete; PR #67 removed GPL tracing from the resolved GPUI graph through a minimal exact-revision fork and hardened licence/source policy
-37. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — planned after every implementation, specimen, conformance, packaging, automation, dependency-policy, and adopter gate
+37. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — complete; PR #72 landed candidate `4428ad10` and evidence-only receipt `42f46a9b`
 38. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
 39. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final operator tag/publication gate after accepted `050`
 40. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
@@ -130,8 +130,8 @@ operator review of all 54 captures. The diagnostic mechanism worked: web is
 exact, native geometry and pixels are close, and it exposed a real focus-ring
 defect without weakening policy.
 
-`g15.048` is complete in PR #64. Its exact packed-package proof is ready for
-`g15.050`, but the candidate remains behind the other release gates.
+`g15.048` is complete in PR #64. Its exact packed-package proof is included in
+the accepted `g15.050` candidate.
 
 `g15.049` is complete in PR #66. The retained workflows are pinned Effigy
 launchers, branch publication fails closed, and `effigy release gates` now
@@ -140,7 +140,6 @@ executes the complete headless board.
 `g15.051` is complete in PR #67. GPUI's normal GPL tracing graph is gone,
 the exact Poodle-owned Zed fork is pinned, the permissive bzip2 licence carries
 its dependency-specific notice, and exact Git-source policy fails closed.
-`g15.050` remains blocked.
 
 `g15.052` is complete in PR #69. Its reusable focus-ring channel closed both
 the Button defect measured by `g15.047` and the Stepper keyboard-entry/focus
@@ -151,5 +150,9 @@ across the native resolver and architecture evidence in PR #71: explicit size
 is final; `sizeRole` maps inherited presentation scale only.
 
 `g15.053` is complete in PR #71. Per-item icons and the accessible icon-only
-root are accepted across the active cohort. `g15.050` is now the only
-dispatchable implementation card before the final `g15.013` operator gate.
+root are accepted across the active cohort.
+
+`g15.050` is complete in PR #72. Candidate `4428ad10` and its evidence-only
+receipt `42f46a9b` are accepted and preserved under merge commit `c60abf6b`.
+No tag or publication occurred. `g15.013` is now the sole remaining gate and
+requires explicit operator authorisation.

@@ -1,6 +1,7 @@
 # g15.013 — v0.2.0 Release Certification
 
-Status: **operator gate — blocked on `g15.050`**
+Status: **operator gate — `g15.050` accepted and landed; awaiting explicit tag
+and publication authorisation**
 Depends on: every earlier g15 implementation/specimen/conformance card,
 `g15.042`–`g15.052` as sequenced by the runway, and one clean accepted v0.2.0
 candidate SHA
@@ -39,7 +40,7 @@ deferred Jetstream are reported independently and honestly.
 - [x] `g15.049` landed: release and native pre-tag automation are truthful.
 - [x] `g15.052` landed: Button and Stepper use the reusable native focus-ring
       channel, and Stepper accepts keyboard entry without a pointer prelude.
-- [ ] `g15.050` landed: one clean v0.2.0 candidate, artifacts, notes, and QA
+- [x] `g15.050` landed: one clean v0.2.0 candidate, artifacts, notes, and QA
       receipt are pinned to an exact SHA.
 
 ## Compiled Release Children
