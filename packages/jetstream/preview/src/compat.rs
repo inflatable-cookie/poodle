@@ -116,10 +116,14 @@ pub fn js_app_header_with_slots(
     actions: Option<El>,
     utility: Option<El>,
 ) -> El {
-    let identity: Option<Node> = identity.map(Node::from);
-    let center: Option<Node> = center.map(Node::from);
-    let actions: Option<Node> = actions.map(Node::from);
-    let utility: Option<Node> = utility.map(Node::from);
+    // Compile-only jetstream adaptation: this preview's `El` chrome is built
+    // eagerly, so the already-built node is wrapped in the slot builder the
+    // shared renderer now requires. The internal scope cannot reach it until
+    // this preview defers construction; no parity claim is made.
+    let identity = identity.map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>);
+    let center = center.map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>);
+    let actions = actions.map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>);
+    let utility = utility.map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>);
     El(pr::app_header(
         spec,
         &pr::context::RenderContext::new(theme),
@@ -449,7 +453,11 @@ pub fn js_eyebrow(spec: &EyebrowSpec, theme: &JetstreamThemeProvider) -> El {
 }
 
 pub fn js_field(spec: &FieldSpec, theme: &JetstreamThemeProvider, control: Option<El>) -> El {
-    let control: Option<Node> = control.map(Node::from);
+    // Compile-only jetstream adaptation: this preview's `El` chrome is built
+    // eagerly, so the already-built node is wrapped in the slot builder the
+    // shared renderer now requires. The internal scope cannot reach it until
+    // this preview defers construction; no parity claim is made.
+    let control = control.map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>);
     El(pr::field(spec, &pr::context::RenderContext::new(theme), control))
 }
 
@@ -482,9 +490,16 @@ pub fn js_filter_toolbar(
     actions: Option<El>,
     secondary: Option<El>,
 ) -> El {
-    let children: Vec<Node> = children.into_iter().map(Node::from).collect();
-    let actions: Option<Node> = actions.map(Node::from);
-    let secondary: Option<Node> = secondary.map(Node::from);
+    // Compile-only jetstream adaptation: this preview's `El` chrome is built
+    // eagerly, so the already-built node is wrapped in the slot builder the
+    // shared renderer now requires. The internal scope cannot reach it until
+    // this preview defers construction; no parity claim is made.
+    let children: Vec<pr::context::SlotBuilder<'static>> = children
+        .into_iter()
+        .map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>)
+        .collect();
+    let actions = actions.map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>);
+    let secondary = secondary.map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>);
     El(pr::filter_toolbar(
         spec,
         &pr::context::RenderContext::new(theme),
@@ -734,10 +749,20 @@ pub fn js_page_header_with_slots(
     actions: Option<El>,
     meta: Option<El>,
 ) -> El {
-    let breadcrumbs: Option<Node> = breadcrumbs.map(Node::from);
-    let actions: Option<Node> = actions.map(Node::from);
-    let meta: Option<Node> = meta.map(Node::from);
-    El(pr::page_header(spec, &pr::context::RenderContext::new(theme), breadcrumbs, actions, meta))
+    // Compile-only jetstream adaptation: this preview's `El` chrome is built
+    // eagerly, so the already-built node is wrapped in the slot builder the
+    // shared renderer now requires. The internal scope cannot reach it until
+    // this preview defers construction; no parity claim is made.
+    let breadcrumbs = breadcrumbs.map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>);
+    let actions = actions.map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>);
+    let meta = meta.map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>);
+    El(pr::page_header(
+        spec,
+        &pr::context::RenderContext::new(theme),
+        breadcrumbs,
+        actions,
+        meta,
+    ))
 }
 
 pub fn js_page_loading(spec: &PageLoadingSpec, theme: &JetstreamThemeProvider) -> El {
@@ -1116,8 +1141,11 @@ pub fn js_list_container_with_slots(
             content: content.map(Node::from),
             filters: filters.map(Node::from),
             batch: batch.map(Node::from),
-            breadcrumbs: breadcrumbs.map(Node::from),
-            actions: actions.map(Node::from),
+            // Eager-`El` compile-only wrap, same caveat as above.
+            breadcrumbs: breadcrumbs
+                .map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>),
+            actions: actions
+                .map(|el| Box::new(move |_| Node::from(el)) as pr::context::SlotBuilder<'static>),
         },
         None,
     ))

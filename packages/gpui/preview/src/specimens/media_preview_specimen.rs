@@ -1,11 +1,12 @@
 use crate::app_state::AppState;
-use crate::node_compat::{Eyebrow, IntoCompatNode, MediaPreview, Surface};
+use crate::node_compat::{Eyebrow, MediaPreview, Surface};
 use crate::specimens::specimen_axes::{density_key, size_key};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
+use poodle_render::context::SlotBuilder;
 use poodle_specs::{
     AspectRatio, ControlDensity, ControlSize, EyebrowSpec, MediaKind, MediaPreviewSpec, MediaState,
     SurfaceSpec, SurfaceTone,
@@ -104,20 +105,25 @@ fn density_preview(theme: &GpuiThemeProvider, density: ControlDensity) -> MediaP
     .with_media_content(media_slot(theme, "Image placeholder"))
 }
 
-/// Real Surface-based media slot content (token-resolved tone + radius).
-fn media_slot(theme: &GpuiThemeProvider, text: &str) -> Node {
-    let mut content = Node::container();
-    content.style.descriptor.layout.direction = LayoutDirection::Row;
-    content.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-    content.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
-    content.style.descriptor.layout.height = LayoutSizing::Constrained {
-        min: Some(140.0),
-        max: None,
-    };
-    content = content.child(Node::text(text));
-    Surface::from_spec(SurfaceSpec::new().with_tone(SurfaceTone::Elevated), theme)
-        .with_content(content)
-        .into_compat_node()
+/// Real Surface-based media slot content (token-resolved tone + radius),
+/// built inside the preview's scoped construction context.
+fn media_slot(theme: &GpuiThemeProvider, text: &str) -> SlotBuilder<'static> {
+    let theme = theme.clone();
+    let text = text.to_string();
+    Box::new(move |ctx| {
+        let mut content = Node::container();
+        content.style.descriptor.layout.direction = LayoutDirection::Row;
+        content.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        content.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
+        content.style.descriptor.layout.height = LayoutSizing::Constrained {
+            min: Some(140.0),
+            max: None,
+        };
+        content = content.child(Node::text(text));
+        Surface::from_spec(SurfaceSpec::new().with_tone(SurfaceTone::Elevated), &theme)
+            .with_content(content)
+            .into_node_with(ctx)
+    })
 }
 
 fn group(label: &str, theme: &GpuiThemeProvider, content: impl IntoElement) -> Div {

@@ -14,7 +14,7 @@ use gpui::{
 };
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_render::context::RenderContext;
+use poodle_render::context::{RenderContext, SlotBuilder};
 use poodle_specs::{
     AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentMessageSpec,
     AgentPlanRecordSpec, AgentPlanSpec, AgentQuestionRecordSpec, AgentQuestionSpec,
@@ -416,18 +416,18 @@ pub(crate) struct StatusBar {
 pub(crate) struct PageHeader {
     spec: PageHeaderSpec,
     theme: GpuiThemeProvider,
-    breadcrumbs: Option<poodle_node::Node>,
-    actions: Option<poodle_node::Node>,
-    meta: Option<poodle_node::Node>,
+    breadcrumbs: Option<SlotBuilder<'static>>,
+    actions: Option<SlotBuilder<'static>>,
+    meta: Option<SlotBuilder<'static>>,
 }
 
 pub(crate) struct AppHeader {
     spec: AppHeaderSpec,
     theme: GpuiThemeProvider,
-    identity: Option<poodle_node::Node>,
-    center: Option<poodle_node::Node>,
-    actions: Option<poodle_node::Node>,
-    utility: Option<poodle_node::Node>,
+    identity: Option<SlotBuilder<'static>>,
+    center: Option<SlotBuilder<'static>>,
+    actions: Option<SlotBuilder<'static>>,
+    utility: Option<SlotBuilder<'static>>,
 }
 
 impl AppHeader {
@@ -442,27 +442,42 @@ impl AppHeader {
         }
     }
 
-    pub(crate) fn with_primary_actions(mut self, actions: impl IntoCompatNode) -> Self {
-        self.actions = Some(actions.into_compat_node());
+    pub(crate) fn with_primary_actions(
+        mut self,
+        actions: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.actions = Some(std::boxed::Box::new(actions));
         self
     }
 
-    pub(crate) fn with_utility_items(mut self, utility: impl IntoCompatNode) -> Self {
-        self.utility = Some(utility.into_compat_node());
+    pub(crate) fn with_utility_items(
+        mut self,
+        utility: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.utility = Some(std::boxed::Box::new(utility));
         self
     }
 
-    pub(crate) fn with_center(mut self, center: impl IntoCompatNode) -> Self {
-        self.center = Some(center.into_compat_node());
+    pub(crate) fn with_center(
+        mut self,
+        center: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.center = Some(std::boxed::Box::new(center));
         self
     }
 
-    pub(crate) fn with_identity(mut self, identity: impl IntoCompatNode) -> Self {
-        self.identity = Some(identity.into_compat_node());
+    pub(crate) fn with_identity(
+        mut self,
+        identity: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.identity = Some(std::boxed::Box::new(identity));
         self
     }
 
-    pub(crate) fn with_leading(self, leading: impl IntoCompatNode) -> Self {
+    pub(crate) fn with_leading(
+        self,
+        leading: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
         self.with_identity(leading)
     }
 
@@ -495,9 +510,9 @@ impl IntoElement for AppHeader {
 pub(crate) struct FilterToolbar {
     spec: FilterToolbarSpec,
     theme: GpuiThemeProvider,
-    children: Vec<poodle_node::Node>,
-    actions: Option<poodle_node::Node>,
-    secondary: Option<poodle_node::Node>,
+    children: Vec<SlotBuilder<'static>>,
+    actions: Option<SlotBuilder<'static>>,
+    secondary: Option<SlotBuilder<'static>>,
     on_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
 
@@ -513,18 +528,27 @@ impl FilterToolbar {
         }
     }
 
-    pub(crate) fn with_child(mut self, child: impl IntoCompatNode) -> Self {
-        self.children.push(child.into_compat_node());
+    pub(crate) fn with_child(
+        mut self,
+        child: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.children.push(std::boxed::Box::new(child));
         self
     }
 
-    pub(crate) fn with_actions(mut self, actions: impl IntoCompatNode) -> Self {
-        self.actions = Some(actions.into_compat_node());
+    pub(crate) fn with_actions(
+        mut self,
+        actions: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.actions = Some(std::boxed::Box::new(actions));
         self
     }
 
-    pub(crate) fn with_secondary(mut self, secondary: impl IntoCompatNode) -> Self {
-        self.secondary = Some(secondary.into_compat_node());
+    pub(crate) fn with_secondary(
+        mut self,
+        secondary: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.secondary = Some(std::boxed::Box::new(secondary));
         self
     }
 
@@ -628,7 +652,7 @@ pub(crate) struct MediaThumbnail {
 pub(crate) struct MediaPreview {
     spec: MediaPreviewSpec,
     theme: GpuiThemeProvider,
-    media_content: Option<poodle_node::Node>,
+    media_content: Option<SlotBuilder<'static>>,
 }
 
 pub(crate) struct CardRadioGroup {
@@ -875,8 +899,11 @@ impl MediaPreview {
         }
     }
 
-    pub(crate) fn with_media_content(mut self, content: impl IntoCompatNode) -> Self {
-        self.media_content = Some(content.into_compat_node());
+    pub(crate) fn with_media_content(
+        mut self,
+        content: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.media_content = Some(std::boxed::Box::new(content));
         self
     }
 
@@ -2447,18 +2474,27 @@ impl PageHeader {
         }
     }
 
-    pub(crate) fn with_breadcrumbs(mut self, breadcrumbs: impl IntoCompatNode) -> Self {
-        self.breadcrumbs = Some(breadcrumbs.into_compat_node());
+    pub(crate) fn with_breadcrumbs(
+        mut self,
+        breadcrumbs: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.breadcrumbs = Some(std::boxed::Box::new(breadcrumbs));
         self
     }
 
-    pub(crate) fn with_actions(mut self, actions: impl IntoCompatNode) -> Self {
-        self.actions = Some(actions.into_compat_node());
+    pub(crate) fn with_actions(
+        mut self,
+        actions: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.actions = Some(std::boxed::Box::new(actions));
         self
     }
 
-    pub(crate) fn with_meta(mut self, meta: impl IntoCompatNode) -> Self {
-        self.meta = Some(meta.into_compat_node());
+    pub(crate) fn with_meta(
+        mut self,
+        meta: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.meta = Some(std::boxed::Box::new(meta));
         self
     }
 
@@ -3210,12 +3246,17 @@ impl Pill {
         self
     }
 
-    fn into_node(self) -> poodle_node::Node {
-        let mut node = poodle_render::pill_with_remove(&self.spec, &RenderContext::new(&self.theme), self.on_remove);
+    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
+        let mut node = poodle_render::pill_with_remove(&self.spec, ctx, self.on_remove);
         // The old GPUI Pill made its root focusable even though the shared
         // contract treats Pill as display metadata. Keep that preview-local.
         node.interaction.focusable = true;
         node
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        let theme = self.theme.clone();
+        self.into_node_with(&RenderContext::new(&theme))
     }
 }
 
@@ -3419,8 +3460,13 @@ impl Surface {
         self
     }
 
+    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
+        poodle_render::surface(&self.spec, ctx, self.content.into_iter().collect())
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::surface(&self.spec, &RenderContext::new(&self.theme), self.content.into_iter().collect())
+        let theme = self.theme.clone();
+        self.into_node_with(&RenderContext::new(&theme))
     }
 }
 
@@ -3736,10 +3782,10 @@ impl TextInput {
         self
     }
 
-    fn into_node(self) -> poodle_node::Node {
+    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
         let mut node = poodle_render::text_input_with_handlers(
             &self.spec,
-            &RenderContext::new(&self.theme),
+            ctx,
             poodle_render::TextInputHandlers {
                 on_change: self.on_change,
                 on_selection_change: self.on_selection_change,
@@ -3751,6 +3797,17 @@ impl TextInput {
             node.id = Some(format!("poodle-input-{id}"));
         }
         node
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        let theme = self.theme.clone();
+        self.into_node_with(&RenderContext::new(&theme))
+    }
+
+    /// Deferred construction for a scoped slot (architecture 010): the
+    /// boundary invokes the builder with its internal presentation scope.
+    pub(crate) fn into_slot(self) -> SlotBuilder<'static> {
+        std::boxed::Box::new(move |ctx| self.into_node_with(ctx))
     }
 }
 
@@ -3794,10 +3851,10 @@ impl Select {
         self
     }
 
-    fn into_node(self) -> poodle_node::Node {
+    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
         let mut node = poodle_render::select(
             &self.spec,
-            &RenderContext::new(&self.theme),
+            ctx,
             &poodle_render::SelectHandlers {
                 toggle: self.on_toggle,
                 change: self.on_change,
@@ -3808,6 +3865,17 @@ impl Select {
             node.id = Some(format!("poodle-select-{id}"));
         }
         node
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        let theme = self.theme.clone();
+        self.into_node_with(&RenderContext::new(&theme))
+    }
+
+    /// Deferred construction for a scoped slot (architecture 010): the
+    /// boundary invokes the builder with its internal presentation scope.
+    pub(crate) fn into_slot(self) -> SlotBuilder<'static> {
+        std::boxed::Box::new(move |ctx| self.into_node_with(ctx))
     }
 }
 
@@ -4659,23 +4727,34 @@ impl Breadcrumbs {
         self.spec.density = Some(density);
         self
     }
+
+    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
+        poodle_render::breadcrumbs(&self.spec, ctx, self.on_navigate)
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        let theme = self.theme.clone();
+        self.into_node_with(&RenderContext::new(&theme))
+    }
+
+    /// Deferred construction for a scoped slot (architecture 010): the
+    /// boundary invokes the builder with its internal presentation scope.
+    pub(crate) fn into_slot(self) -> SlotBuilder<'static> {
+        std::boxed::Box::new(move |ctx| self.into_node_with(ctx))
+    }
 }
 
 impl IntoElement for Breadcrumbs {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::breadcrumbs(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            self.on_navigate,
-        ))
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 
 impl IntoCompatNode for Breadcrumbs {
     fn into_compat_node(self) -> poodle_node::Node {
-        poodle_render::breadcrumbs(&self.spec, &RenderContext::new(&self.theme), self.on_navigate)
+        self.into_node()
     }
 }
 
@@ -5395,8 +5474,19 @@ impl EmbedInput {
         }
     }
 
+    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
+        poodle_render::embed_input(&self.spec, ctx)
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::embed_input(&self.spec, &RenderContext::new(&self.theme))
+        let theme = self.theme.clone();
+        self.into_node_with(&RenderContext::new(&theme))
+    }
+
+    /// Deferred construction for a scoped slot (architecture 010): the
+    /// boundary invokes the builder with its internal presentation scope.
+    pub(crate) fn into_slot(self) -> SlotBuilder<'static> {
+        std::boxed::Box::new(move |ctx| self.into_node_with(ctx))
     }
 }
 
@@ -5411,7 +5501,7 @@ impl IntoElement for EmbedInput {
 pub(crate) struct Field {
     spec: FieldSpec,
     theme: GpuiThemeProvider,
-    control: Option<poodle_node::Node>,
+    control: Option<SlotBuilder<'static>>,
 }
 
 impl Field {
@@ -5431,14 +5521,19 @@ impl Field {
         }
     }
 
-    pub(crate) fn with_control(mut self, control: TextInput) -> Self {
-        self.control = Some(control.into_node());
+    pub(crate) fn with_control(
+        mut self,
+        control: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.control = Some(std::boxed::Box::new(control));
         self
     }
 
-    pub(crate) fn with_embed_control(mut self, control: EmbedInput) -> Self {
-        self.control = Some(control.into_node());
-        self
+    pub(crate) fn with_embed_control(
+        self,
+        control: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.with_control(control)
     }
 
     pub(crate) fn validation_state(mut self, state: poodle_specs::ValidationState) -> Self {
@@ -5497,13 +5592,24 @@ impl Button {
         self
     }
 
-    fn into_node(self) -> poodle_node::Node {
+    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
         let id = self
             .id_suffix
             .unwrap_or_else(|| self.spec.label.clone().unwrap_or_default());
-        let mut node = poodle_render::button(&self.spec, &RenderContext::new(&self.theme), self.on_click);
+        let mut node = poodle_render::button(&self.spec, ctx, self.on_click);
         node.id = Some(format!("poodle-btn-{id}"));
         node
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        let theme = self.theme.clone();
+        self.into_node_with(&RenderContext::new(&theme))
+    }
+
+    /// Deferred construction for a scoped slot (architecture 010): the
+    /// boundary invokes the builder with its internal presentation scope.
+    pub(crate) fn into_slot(self) -> SlotBuilder<'static> {
+        std::boxed::Box::new(move |ctx| self.into_node_with(ctx))
     }
 }
 
@@ -7262,13 +7368,24 @@ impl IconButton {
         self
     }
 
-    fn into_node(self) -> poodle_node::Node {
+    pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
         let id = self
             .id_suffix
             .unwrap_or_else(|| self.spec.icon.clone().unwrap_or_default());
-        let mut node = poodle_render::icon_button(&self.spec, &RenderContext::new(&self.theme), None);
+        let mut node = poodle_render::icon_button(&self.spec, ctx, None);
         node.id = Some(format!("poodle-icon-btn-{id}"));
         node
+    }
+
+    fn into_node(self) -> poodle_node::Node {
+        let theme = self.theme.clone();
+        self.into_node_with(&RenderContext::new(&theme))
+    }
+
+    /// Deferred construction for a scoped slot (architecture 010): the
+    /// boundary invokes the builder with its internal presentation scope.
+    pub(crate) fn into_slot(self) -> SlotBuilder<'static> {
+        std::boxed::Box::new(move |ctx| self.into_node_with(ctx))
     }
 }
 
@@ -7503,7 +7620,7 @@ impl IntoElement for DockRegion {
 pub(crate) struct BlockEditor {
     spec: BlockEditorSpec,
     theme: GpuiThemeProvider,
-    children: Vec<poodle_node::Node>,
+    children: Vec<SlotBuilder<'static>>,
 }
 
 impl BlockEditor {
@@ -7517,8 +7634,11 @@ impl BlockEditor {
 
     /// Caller-owned block bodies, for consumers that own the block vocabulary
     /// instead of driving it through `spec.blocks`.
-    pub(crate) fn with_child(mut self, child: impl IntoCompatNode) -> Self {
-        self.children.push(child.into_compat_node());
+    pub(crate) fn with_child(
+        mut self,
+        child: impl FnOnce(&RenderContext<'_>) -> poodle_node::Node + 'static,
+    ) -> Self {
+        self.children.push(std::boxed::Box::new(child));
         self
     }
 

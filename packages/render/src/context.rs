@@ -19,6 +19,7 @@
 //! closure, so exiting the closure restores the parent context by construction.
 
 use poodle_adapter::ThemeProvider;
+use poodle_node::Node;
 use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole, UiPresentationProviderSpec};
 
 use crate::presentation::resolve_semantic_size;
@@ -108,6 +109,14 @@ pub fn ui_presentation_provider<R>(
 ) -> R {
     build_child(&ctx.scoped(spec.size_scale, spec.density))
 }
+
+/// A host-content child builder for a composite that establishes an internal
+/// presentation scope (architecture 010). The composite invokes the builder
+/// immediately with its scoped context, so the host child resolves its omitted
+/// size/density against the scope instead of arriving as an already-built
+/// `Node` frozen under the caller's scope. This is a bounded construction
+/// closure, not a stored scene or component abstraction.
+pub type SlotBuilder<'a> = Box<dyn FnOnce(&RenderContext<'_>) -> Node + 'a>;
 
 #[cfg(test)]
 mod tests {

@@ -19,7 +19,7 @@ use poodle_specs::{
 };
 
 use crate::color::mix_srgb;
-use crate::context::RenderContext;
+use crate::context::{RenderContext, SlotBuilder};
 use crate::pill::pill;
 use crate::presentation::{rem_to_px, resolve_supporting_visual_size, size_font_rem};
 
@@ -55,11 +55,18 @@ fn styled_text(content: &str, color: ColorValue, size: f32) -> Node {
 pub fn page_header(
     spec: &PageHeaderSpec,
     ctx: &RenderContext<'_>,
-    breadcrumbs: Option<Node>,
-    actions: Option<Node>,
-    meta: Option<Node>,
+    breadcrumbs: Option<SlotBuilder<'_>>,
+    actions: Option<SlotBuilder<'_>>,
+    meta: Option<SlotBuilder<'_>>,
 ) -> Node {
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    // The web pair wraps the whole header — breadcrumbs, actions, and meta
+    // included — in a UiPresentationProvider publishing the resolved values
+    // (PageHeader.svelte): host regions build inside that scope.
+    let host_scope = ctx.scoped(effective_size, ctx.resolve_density(spec.density));
+    let breadcrumbs = breadcrumbs.map(|build| build(&host_scope));
+    let actions = actions.map(|build| build(&host_scope));
+    let meta = meta.map(|build| build(&host_scope));
     let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
         effective_size,
     )));

@@ -23,7 +23,7 @@ use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAli
 use poodle_specs::AppHeaderSpec;
 
 use crate::color::with_alpha;
-use crate::context::RenderContext;
+use crate::context::{RenderContext, SlotBuilder};
 use crate::presentation::rem_to_px;
 
 /// A region container: row, centered cross-axis, region gap, never shrinking
@@ -49,10 +49,10 @@ fn region_container(region_gap: f32, justify_end: bool) -> Node {
 pub fn app_header(
     spec: &AppHeaderSpec,
     ctx: &RenderContext<'_>,
-    identity: Option<Node>,
-    center: Option<Node>,
-    actions: Option<Node>,
-    utility: Option<Node>,
+    identity: Option<SlotBuilder<'_>>,
+    center: Option<SlotBuilder<'_>>,
+    actions: Option<SlotBuilder<'_>>,
+    utility: Option<SlotBuilder<'_>>,
 ) -> Node {
     // ── Token / contract-rem resolution ──────────────────────────
     let panel = ctx.theme().resolve_color(spec.background_token());
@@ -67,6 +67,15 @@ pub fn app_header(
     // the scope, then the spec ladders key off the resolved values.
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
+    // The web pair wraps all four host regions in a UiPresentationProvider
+    // publishing this component's resolved values (AppHeader.svelte): build
+    // the host children inside that scope rather than accepting prebuilt
+    // nodes frozen under the caller's scope.
+    let host_scope = ctx.scoped(effective_size, density);
+    let identity = identity.map(|build| build(&host_scope));
+    let center = center.map(|build| build(&host_scope));
+    let actions = actions.map(|build| build(&host_scope));
+    let utility = utility.map(|build| build(&host_scope));
     let min_height = rem_to_px(spec.min_height_rem(effective_size));
     let title_font = rem_to_px(spec.title_size_rem(effective_size));
     let subtitle_font = rem_to_px(spec.subtitle_size_rem(effective_size));
@@ -217,6 +226,10 @@ mod tests {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
+    fn text_slot(text: &'static str) -> Option<SlotBuilder<'static>> {
+        Some(Box::new(move |_| Node::text(text)))
+    }
+
     fn header(
         center: bool,
         actions: bool,
@@ -230,9 +243,9 @@ mod tests {
                 .with_center(center),
             &ctx,
             None,
-            center.then(|| Node::text("centre")),
-            actions.then(|| Node::text("action")),
-            utility.then(|| Node::text("utility")),
+            if center { text_slot("centre") } else { None },
+            if actions { text_slot("action") } else { None },
+            if utility { text_slot("utility") } else { None },
         )
     }
 
@@ -340,7 +353,7 @@ mod tests {
             &spec,
             &ctx,
             None,
-            Some(Node::text("centre")),
+            text_slot("centre"),
             None,
             None,
         );

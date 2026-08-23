@@ -9,11 +9,21 @@ use poodle_node::{
 use poodle_specs::{FieldSpec, ValidationState};
 
 use crate::color::{mix_srgb, with_alpha};
-use crate::context::RenderContext;
+use crate::context::{RenderContext, SlotBuilder};
 
-pub fn field(spec: &FieldSpec, ctx: &RenderContext<'_>, control: Option<Node>) -> Node {
+pub fn field(
+    spec: &FieldSpec,
+    ctx: &RenderContext<'_>,
+    control: Option<SlotBuilder<'_>>,
+) -> Node {
     let base_size = ctx.base_size(spec.size);
     let density = ctx.resolve_density(spec.density);
+    // The web pair builds the slotted control inside a UiPresentationProvider
+    // publishing this field's role-resolved size and resolved density
+    // (Field.svelte): the host control is built inside that scope.
+    let control = control.map(|build| {
+        build(&ctx.scoped(ctx.resolve_size(spec.size, spec.size_role), density))
+    });
     let label_size = ctx
         .theme()
         .resolve_space(spec.label_typography_token(base_size));

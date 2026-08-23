@@ -18,7 +18,7 @@ use poodle_specs::{
 };
 
 use crate::color::with_alpha;
-use crate::context::RenderContext;
+use crate::context::{RenderContext, SlotBuilder};
 use crate::presentation::rem_to_px;
 use crate::select::{select, SelectHandlers};
 
@@ -216,19 +216,26 @@ pub fn block_editor(spec: &BlockEditorSpec, ctx: &RenderContext<'_>) -> Node {
 /// Block editor with caller-owned block bodies.
 ///
 /// The spec drives blocks whenever `spec.blocks` is non-empty; `children` is
-/// the escape hatch for consumers that own their block vocabulary and hand
-/// over already-rendered bodies. Each child is wrapped in the same block shell
-/// so spacing and background stay contract-consistent, but without a toolbar —
-/// there is no block-type metadata to drive the selects. Ignored when the spec
-/// carries blocks.
+/// the escape hatch for consumers that own their block vocabulary. The web
+/// pair renders the `block` snippet inside the component's
+/// UiPresentationProvider scope (BlockEditor.svelte), so each child arrives as
+/// an immediate builder invoked with that scope — never a prebuilt node.
+/// Each built child is wrapped in the same block shell so spacing and
+/// background stay contract-consistent, but without a toolbar — there is no
+/// block-type metadata to drive the selects. Ignored when the spec carries
+/// blocks.
 pub fn block_editor_with_children(
     spec: &BlockEditorSpec,
     ctx: &RenderContext<'_>,
-    children: Vec<Node>,
+    children: Vec<SlotBuilder<'_>>,
 ) -> Node {
     let theme = ctx.theme();
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
+    // The web provider publishes the role-resolved size and resolved density;
+    // host block bodies build inside that scope.
+    let host_scope = ctx.scoped(effective_size, density);
+    let children: Vec<Node> = children.into_iter().map(|build| build(&host_scope)).collect();
 
     // ── Resolve chrome from tokens / contract recipe rems ───────────────────
     let fill = theme.resolve_color(spec.fill_token());

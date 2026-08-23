@@ -15,20 +15,28 @@ use poodle_node::{
 };
 use poodle_specs::FilterToolbarSpec;
 
-use crate::context::RenderContext;
+use crate::context::{RenderContext, SlotBuilder};
 use crate::presentation::rem_to_px;
 
 /// `on_toggle` fires with the expanded state the toolbar is moving **to**.
 pub fn filter_toolbar(
     spec: &FilterToolbarSpec,
     ctx: &RenderContext<'_>,
-    children: Vec<Node>,
-    actions: Option<Node>,
-    secondary: Option<Node>,
+    children: Vec<SlotBuilder<'_>>,
+    actions: Option<SlotBuilder<'_>>,
+    secondary: Option<SlotBuilder<'_>>,
     on_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 ) -> Node {
     let base_size = ctx.base_size(spec.size);
     let density = ctx.resolve_density(spec.density);
+    // The web pair wraps the whole toolbar — summary, actions, the filter-
+    // controls grid, and secondary — in a UiPresentationProvider publishing
+    // the raw (not role-mapped) base size and resolved density
+    // (FilterToolbar.svelte): host children build inside that scope.
+    let host_scope = ctx.scoped(base_size, density);
+    let children: Vec<Node> = children.into_iter().map(|build| build(&host_scope)).collect();
+    let actions = actions.map(|build| build(&host_scope));
+    let secondary = secondary.map(|build| build(&host_scope));
     // Contract §8 summary size table (size-scaled label-size).
     let font_size = rem_to_px(spec.summary_font_size_rem(base_size));
 

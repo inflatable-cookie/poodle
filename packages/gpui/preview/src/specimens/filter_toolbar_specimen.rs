@@ -76,14 +76,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_collapsible(false),
                         theme,
                     )
-                    .with_child(search_input(theme, "filter-search"))
-                    .with_child(select_input(theme, "filter-status", status_options()))
-                    .with_child(select_input(theme, "filter-type", type_options()))
-                    .with_child(select_input(
-                        theme,
-                        "filter-owner",
-                        owner_options(),
-                    )),
+                    .with_child(search_input(theme, "filter-search").into_slot())
+                    .with_child(select_input(theme, "filter-status", status_options()).into_slot())
+                    .with_child(select_input(theme, "filter-type", type_options()).into_slot())
+                    .with_child(
+                        select_input(theme, "filter-owner", owner_options()).into_slot(),
+                    ),
                 ),
         )
         // --- Collapsible with actions (expanded) ---
@@ -112,15 +110,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_aria_label("Refresh"),
                             theme,
                         )
-                        .with_id("ft-refresh-1"),
+                        .with_id("ft-refresh-1")
+                        .into_slot(),
                     )
-                    .with_child(search_input(theme, "col-search"))
-                    .with_child(select_input(theme, "col-status", status_options()))
-                    .with_child(select_input(
-                        theme,
-                        "col-type",
-                        type_options(),
-                    )),
+                    .with_child(search_input(theme, "col-search").into_slot())
+                    .with_child(select_input(theme, "col-status", status_options()).into_slot())
+                    .with_child(select_input(theme, "col-type", type_options()).into_slot()),
                 ),
         )
         // --- Explicit collapsed state ---
@@ -149,14 +144,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_aria_label("Refresh"),
                             theme,
                         )
-                        .with_id("ft-refresh-2"),
+                        .with_id("ft-refresh-2")
+                        .into_slot(),
                     )
-                    .with_child(search_input(theme, "col2-search"))
-                    .with_child(select_input(
-                        theme,
-                        "col2-status",
-                        status_options(),
-                    )),
+                    .with_child(search_input(theme, "col2-search").into_slot())
+                    .with_child(
+                        select_input(theme, "col2-status", status_options()).into_slot(),
+                    ),
                 ),
         )
         // --- With secondary slot ---
@@ -177,9 +171,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_columns(3),
                         theme,
                     )
-                    .with_child(search_input(theme, "proj-search"))
-                    .with_child(select_input(theme, "proj-status", status_options()))
-                    .with_child(select_input(theme, "proj-type", type_options()))
+                    .with_child(search_input(theme, "proj-search").into_slot())
+                    .with_child(select_input(theme, "proj-status", status_options()).into_slot())
+                    .with_child(select_input(theme, "proj-type", type_options()).into_slot())
                     .with_secondary(
                         Button::from_spec(
                             ButtonSpec::new()
@@ -187,7 +181,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_label("Reset all"),
                             theme,
                         )
-                        .with_id("proj-reset"),
+                        .with_id("proj-reset")
+                        .into_slot(),
                     ),
                 ),
         )
@@ -208,15 +203,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_size(size),
                     theme,
                 )
-                .with_child(search_input(
-                    theme,
-                    &format!("size-search-{}", size_key(size)),
-                ))
-                .with_child(select_input(
-                    theme,
-                    &format!("size-status-{}", size_key(size)),
-                    status_options(),
-                ))
+                .with_child(
+                    search_input(theme, &format!("size-search-{}", size_key(size))).into_slot(),
+                )
+                .with_child(
+                    select_input(theme, &format!("size-status-{}", size_key(size)), status_options())
+                        .into_slot(),
+                )
                 .into_any_element()
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
@@ -228,15 +221,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_density(density),
                     theme,
                 )
-                .with_child(search_input(
-                    theme,
-                    &format!("density-search-{}", density_key(density)),
-                ))
-                .with_child(select_input(
-                    theme,
-                    &format!("density-status-{}", density_key(density)),
-                    status_options(),
-                ))
+                .with_child(
+                    search_input(theme, &format!("density-search-{}", density_key(density)))
+                        .into_slot(),
+                )
+                .with_child(
+                    select_input(
+                        theme,
+                        &format!("density-status-{}", density_key(density)),
+                        status_options(),
+                    )
+                    .into_slot(),
+                )
                 .into_any_element()
             }),
     )

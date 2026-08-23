@@ -80,7 +80,7 @@ fn group(theme: &GpuiThemeProvider, label: &str, spec: FormShellSpec, fields: Fi
                 .with_disabled(disabled || busy),
             theme,
         )
-        .with_id(format!("fs-name-{label}")),
+        .with_id(format!("fs-name-{label}")).into_slot(),
     );
 
     let mut email_field = Field::new("fs-email", "Email", theme);
@@ -99,7 +99,7 @@ fn group(theme: &GpuiThemeProvider, label: &str, spec: FormShellSpec, fields: Fi
         }
     };
     let email_field = email_field.with_control(
-        TextInput::from_spec(email_input, theme).with_id(format!("fs-email-{label}")),
+        TextInput::from_spec(email_input, theme).with_id(format!("fs-email-{label}")).into_slot(),
     );
 
     let account_slot = node_column(
@@ -120,7 +120,7 @@ fn group(theme: &GpuiThemeProvider, label: &str, spec: FormShellSpec, fields: Fi
                     .with_disabled(disabled || busy),
                 theme,
             )
-            .with_id(format!("fs-bio-{label}")),
+            .with_id(format!("fs-bio-{label}")).into_slot(),
         )
         .into_compat_node();
 

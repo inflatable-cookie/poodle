@@ -73,21 +73,24 @@ fn missing_options() -> Vec<ModelConnectionOption> {
         .collect()
 }
 
-/// Host configuration content. Poodle never sees these values: the field and
-/// its input are nodes the host built and handed over.
+/// Host configuration content. Poodle never sees these values: the host
+/// supplies a builder the field invokes inside its scoped context.
 fn api_key_field(theme: &GpuiThemeProvider, id: &str, value: &str) -> Node {
     let ctx = RenderContext::new(theme);
+    let value = value.to_string();
     poodle_render::field(
         &FieldSpec::new(id, "API key"),
         &ctx,
-        Some(poodle_render::text_input(
-            &TextInputSpec::new()
-                .with_value(value)
-                .with_type("password")
-                .with_placeholder("sk-demo-placeholder"),
-            &ctx,
-            None,
-        )),
+        Some(Box::new(move |ctx: &RenderContext<'_>| {
+            poodle_render::text_input(
+                &TextInputSpec::new()
+                    .with_value(value)
+                    .with_type("password")
+                    .with_placeholder("sk-demo-placeholder"),
+                ctx,
+                None,
+            )
+        })),
     )
 }
 
@@ -96,13 +99,15 @@ fn endpoint_field(theme: &GpuiThemeProvider, id: &str) -> Node {
     poodle_render::field(
         &FieldSpec::new(id, "Endpoint URL"),
         &ctx,
-        Some(poodle_render::text_input(
-            &TextInputSpec::new()
-                .with_value("http://127.0.0.1:11434")
-                .with_placeholder("http://127.0.0.1:11434"),
-            &ctx,
-            None,
-        )),
+        Some(Box::new(move |ctx: &RenderContext<'_>| {
+            poodle_render::text_input(
+                &TextInputSpec::new()
+                    .with_value("http://127.0.0.1:11434")
+                    .with_placeholder("http://127.0.0.1:11434"),
+                ctx,
+                None,
+            )
+        })),
     )
 }
 

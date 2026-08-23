@@ -117,7 +117,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_placeholder("https://youtube.com/watch?v=..."),
                             theme,
                         )
-                    )
+                    .into_slot())
                 )
         )
         // --- Restricted providers ---

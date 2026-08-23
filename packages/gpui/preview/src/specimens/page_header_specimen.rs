@@ -1,5 +1,5 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
-use crate::node_compat::{Breadcrumbs, Eyebrow, IntoCompatNode, PageHeader, Pill};
+use crate::node_compat::{Breadcrumbs, Eyebrow, PageHeader, Pill};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -8,7 +8,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
-use poodle_render::context::RenderContext;
+use poodle_render::context::{RenderContext, SlotBuilder};
 use poodle_render::icon_button;
 use poodle_specs::PageHeaderSpec;
 use poodle_specs::{
@@ -30,7 +30,7 @@ fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div
 }
 
 fn icon_action(
-    theme: &GpuiThemeProvider,
+    ctx: &RenderContext<'_>,
     icon: &str,
     aria_label: &str,
     action_key: &'static str,
@@ -45,7 +45,7 @@ fn icon_action(
             .with_icon(icon)
             .with_aria_label(aria_label)
             .with_variant(ButtonVariant::Secondary),
-        &RenderContext::new(theme),
+        ctx,
         Some(Arc::new(move || {
             events.lock().unwrap().push(NodeSpecimenEvent::SetText {
                 key: action_key.to_string(),
@@ -56,7 +56,7 @@ fn icon_action(
 }
 
 fn icon_actions(
-    theme: &GpuiThemeProvider,
+    ctx: &RenderContext<'_>,
     action_key: &'static str,
     items: &[(&'static str, &'static str, &'static str)],
     events: &Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
@@ -65,7 +65,7 @@ fn icon_actions(
     row.style.descriptor.layout.direction = LayoutDirection::Row;
     row.style.descriptor.layout.spacing.gap = 6.0;
     for (icon, aria, value) in items {
-        row = row.child(icon_action(theme, icon, aria, action_key, value, events));
+        row = row.child(icon_action(ctx, icon, aria, action_key, value, events));
     }
     row
 }
@@ -81,41 +81,44 @@ fn last_action_hint(theme: &GpuiThemeProvider, action: &str) -> Div {
     })
 }
 
-fn meta(theme: &GpuiThemeProvider) -> Node {
-    let secondary = theme.resolve_color("color.text.secondary");
-    let mut row = Node::container();
-    row.style.descriptor.layout.direction = LayoutDirection::Row;
-    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-    row.style.descriptor.layout.spacing.gap = 12.0;
-    row = row.child(
-        Pill::from_spec(
-            PillSpec::new()
-                .with_label("Active")
-                .with_tone(PillTone::Success)
-                .with_appearance(PillAppearance::Badge),
-            theme,
+fn meta(theme: &GpuiThemeProvider) -> SlotBuilder<'static> {
+    let theme = theme.clone();
+    Box::new(move |ctx| {
+        let secondary = ctx.theme().resolve_color("color.text.secondary");
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        row.style.descriptor.layout.spacing.gap = 12.0;
+        row = row.child(
+            Pill::from_spec(
+                PillSpec::new()
+                    .with_label("Active")
+                    .with_tone(PillTone::Success)
+                    .with_appearance(PillAppearance::Badge),
+                &theme,
+            )
+            .into_node_with(ctx),
+        );
+        let mut every = Node::text("Every 6 hours");
+        every.style.text_size = Some(13.0);
+        every.style.descriptor.text_color = Some(secondary);
+        row = row.child(every);
+        let mut last = Node::container();
+        last.style.descriptor.layout.direction = LayoutDirection::Row;
+        last.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        last.style.descriptor.layout.spacing.gap = 4.0;
+        let mut last_label = Node::text("Last run");
+        last_label.style.text_size = Some(13.0);
+        last_label.style.descriptor.text_color = Some(secondary);
+        row.child(
+            last.child(last_label).child({
+                let mut last_value = Node::text("4mo ago");
+                last_value.style.text_size = Some(13.0);
+                last_value.style.descriptor.text_color = Some(secondary);
+                last_value
+            }),
         )
-        .into_compat_node(),
-    );
-    let mut every = Node::text("Every 6 hours");
-    every.style.text_size = Some(13.0);
-    every.style.descriptor.text_color = Some(secondary);
-    row = row.child(every);
-    let mut last = Node::container();
-    last.style.descriptor.layout.direction = LayoutDirection::Row;
-    last.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-    last.style.descriptor.layout.spacing.gap = 4.0;
-    let mut last_label = Node::text("Last run");
-    last_label.style.text_size = Some(13.0);
-    last_label.style.descriptor.text_color = Some(secondary);
-    row.child(
-        last.child(last_label).child({
-            let mut last_value = Node::text("4mo ago");
-            last_value.style.text_size = Some(13.0);
-            last_value.style.descriptor.text_color = Some(secondary);
-            last_value
-        }),
-    )
+    })
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -182,15 +185,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_back("/dashboard", "Dashboard"),
                             theme,
                         )
-                        .with_actions(icon_actions(
-                            theme,
-                            "page-header-nav-action",
-                            &[
-                                ("upload", "Upload", "Upload"),
-                                ("settings", "Settings", "Settings"),
-                            ],
-                            &events,
-                        )),
+                        .with_actions({
+                            let events = Arc::clone(&events);
+                            move |ctx: &RenderContext<'_>| {
+                                icon_actions(
+                                    ctx,
+                                    "page-header-nav-action",
+                                    &[
+                                        ("upload", "Upload", "Upload"),
+                                        ("settings", "Settings", "Settings"),
+                                    ],
+                                    &events,
+                                )
+                            }
+                        }),
                     )
                     .child(
                         PageHeader::from_spec(
@@ -200,23 +208,31 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_back("/learning/pathways", "Pathways"),
                             theme,
                         )
-                        .with_breadcrumbs(Breadcrumbs::from_spec(
-                            BreadcrumbsSpec::new(vec![
-                                BreadcrumbItem::new("pathways", "Pathways"),
-                                BreadcrumbItem::new("foundation", "Foundation"),
-                                BreadcrumbItem::new("module", "Module"),
-                            ]),
-                            theme,
-                        ))
-                        .with_actions(icon_actions(
-                            theme,
-                            "page-header-nav-action",
-                            &[
-                                ("upload", "Upload", "Upload module"),
-                                ("settings", "Settings", "Settings module"),
-                            ],
-                            &events,
-                        )),
+                        .with_breadcrumbs(
+                            Breadcrumbs::from_spec(
+                                BreadcrumbsSpec::new(vec![
+                                    BreadcrumbItem::new("pathways", "Pathways"),
+                                    BreadcrumbItem::new("foundation", "Foundation"),
+                                    BreadcrumbItem::new("module", "Module"),
+                                ]),
+                                theme,
+                            )
+                            .into_slot(),
+                        )
+                        .with_actions({
+                            let events = Arc::clone(&events);
+                            move |ctx: &RenderContext<'_>| {
+                                icon_actions(
+                                    ctx,
+                                    "page-header-nav-action",
+                                    &[
+                                        ("upload", "Upload", "Upload module"),
+                                        ("settings", "Settings", "Settings module"),
+                                    ],
+                                    &events,
+                                )
+                            }
+                        }),
                     )
                     .child(last_action_hint(theme, &nav_action)),
             ),
@@ -238,15 +254,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 ),
                             theme,
                         )
-                        .with_actions(icon_actions(
-                            theme,
-                            "page-header-hierarchy-action",
-                            &[
-                                ("code", "View source", "View source"),
-                                ("pencil", "Edit", "Edit"),
-                            ],
-                            &events,
-                        )),
+                        .with_actions({
+                            let events = Arc::clone(&events);
+                            move |ctx: &RenderContext<'_>| {
+                                icon_actions(
+                                    ctx,
+                                    "page-header-hierarchy-action",
+                                    &[("code", "View source", "View source"), ("pencil", "Edit", "Edit")],
+                                    &events,
+                                )
+                            }
+                        }),
                     )
                     .child(PageHeader::from_spec(
                         PageHeaderSpec::new("Users")
@@ -274,15 +292,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_banner("This task is currently paused.", StatusTone::Warning),
                             theme,
                         )
-                        .with_actions(icon_actions(
-                            theme,
-                            "page-header-status-action",
-                            &[
-                                ("play", "Run now", "Run now"),
-                                ("pencil", "Edit", "Edit task"),
-                            ],
-                            &events,
-                        )),
+                        .with_actions({
+                            let events = Arc::clone(&events);
+                            move |ctx: &RenderContext<'_>| {
+                                icon_actions(
+                                    ctx,
+                                    "page-header-status-action",
+                                    &[
+                                        ("play", "Run now", "Run now"),
+                                        ("pencil", "Edit", "Edit task"),
+                                    ],
+                                    &events,
+                                )
+                            }
+                        }),
                     )
                     .child(last_action_hint(theme, &status_action)),
             ),
@@ -303,15 +326,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             theme,
                         )
                         .with_meta(meta(theme))
-                        .with_actions(icon_actions(
-                            theme,
-                            "page-header-meta-action",
-                            &[
-                                ("play", "Run now", "Run now"),
-                                ("calendar", "Edit schedule", "Edit schedule"),
-                            ],
-                            &events,
-                        )),
+                        .with_actions({
+                            let events = Arc::clone(&events);
+                            move |ctx: &RenderContext<'_>| {
+                                icon_actions(
+                                    ctx,
+                                    "page-header-meta-action",
+                                    &[
+                                        ("play", "Run now", "Run now"),
+                                        ("calendar", "Edit schedule", "Edit schedule"),
+                                    ],
+                                    &events,
+                                )
+                            }
+                        }),
                     )
                     .child(last_action_hint(theme, &meta_action)),
             ),
@@ -332,15 +360,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_size(size),
                     theme,
                 )
-                .with_actions(icon_actions(
-                    theme,
-                    "page-header-nav-action",
-                    &[
-                        ("upload", "Upload", "Upload"),
-                        ("settings", "Settings", "Settings"),
-                    ],
-                    &Arc::new(std::sync::Mutex::new(Vec::new())),
-                ))
+                .with_actions(|ctx: &RenderContext<'_>| {
+                    icon_actions(
+                        ctx,
+                        "page-header-nav-action",
+                        &[
+                            ("upload", "Upload", "Upload"),
+                            ("settings", "Settings", "Settings"),
+                        ],
+                        &Arc::new(std::sync::Mutex::new(Vec::new())),
+                    )
+                })
                 .into_any_element()
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
@@ -351,15 +381,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_density(density),
                     theme,
                 )
-                .with_actions(icon_actions(
-                    theme,
-                    "page-header-nav-action",
-                    &[
-                        ("upload", "Upload", "Upload"),
-                        ("settings", "Settings", "Settings"),
-                    ],
-                    &Arc::new(std::sync::Mutex::new(Vec::new())),
-                ))
+                .with_actions(|ctx: &RenderContext<'_>| {
+                    icon_actions(
+                        ctx,
+                        "page-header-nav-action",
+                        &[
+                            ("upload", "Upload", "Upload"),
+                            ("settings", "Settings", "Settings"),
+                        ],
+                        &Arc::new(std::sync::Mutex::new(Vec::new())),
+                    )
+                })
                 .into_any_element()
             }),
     )

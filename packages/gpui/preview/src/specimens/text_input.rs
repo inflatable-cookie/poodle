@@ -63,7 +63,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                         state,
                         "text-input-name",
-                    )),
+                    ).into_slot()),
                 ),
         )
         .child(
@@ -102,7 +102,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                                 state,
                                 "text-input-email",
-                            )),
+                            ).into_slot()),
                         )
                         .child(
                             Field::from_spec(
@@ -122,7 +122,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 theme,
                                 state,
                                 "text-input-workspace",
-                            )),
+                            ).into_slot()),
                         ),
                 ),
         )
@@ -182,7 +182,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_show_char_count(true)
                                 .with_placeholder("Enter a description..."),
                             theme,
-                        )),
+                        ).into_slot()),
                 ),
         )
         .child(
@@ -202,7 +202,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_value("sk-xxxx-xxxx-xxxx")
                                 .with_disabled(true),
                             theme,
-                        )),
+                        ).into_slot()),
                 ),
         )
         .into_any_element();

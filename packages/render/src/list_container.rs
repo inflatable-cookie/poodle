@@ -17,21 +17,25 @@ use poodle_specs::{
 };
 
 use crate::callout::{callout, CalloutHandlers};
-use crate::context::RenderContext;
+use crate::context::{RenderContext, SlotBuilder};
 use crate::empty_state::empty_state;
 use crate::page_header::page_header;
 use crate::pagination::pagination;
 use crate::pagination_summary::pagination_summary;
 
-/// Host-composed slots for the list container. All optional; each is a
-/// pre-built `Node` cluster (mirrors the GPUI `with_*` channels).
+/// Host-composed slots for the list container. All optional; `content`,
+/// `filters`, and `batch` are pre-built `Node` clusters rendered in the
+/// container's own regions, while `breadcrumbs` and `actions` forward into
+/// the composed `PageHeader` — whose web pair builds slot content inside its
+/// UiPresentationProvider scope — so those two arrive as immediate child
+/// builders (mirrors the laziness of the web snippets).
 #[derive(Default)]
-pub struct ListContainerSlots {
+pub struct ListContainerSlots<'a> {
     pub content: Option<Node>,
     pub filters: Option<Node>,
     pub batch: Option<Node>,
-    pub breadcrumbs: Option<Node>,
-    pub actions: Option<Node>,
+    pub breadcrumbs: Option<SlotBuilder<'a>>,
+    pub actions: Option<SlotBuilder<'a>>,
 }
 
 fn region(gap: f32, child: Node) -> Node {
@@ -49,7 +53,7 @@ fn region(gap: f32, child: Node) -> Node {
 pub fn list_container(
     spec: &ListContainerSpec,
     ctx: &RenderContext<'_>,
-    slots: ListContainerSlots,
+    slots: ListContainerSlots<'_>,
     on_page_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
 ) -> Node {
     // Contract §8: root gap = space.stack.lg (between major regions);

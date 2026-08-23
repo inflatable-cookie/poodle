@@ -11,7 +11,7 @@ use poodle_specs::{CardSpec, MediaPreviewSpec, MediaThumbnailSpec};
 
 use crate::card::card;
 use crate::color::with_alpha;
-use crate::context::RenderContext;
+use crate::context::{RenderContext, SlotBuilder};
 use crate::presentation::rem_to_px;
 
 pub fn media_preview(spec: &MediaPreviewSpec, ctx: &RenderContext<'_>) -> Node {
@@ -19,10 +19,14 @@ pub fn media_preview(spec: &MediaPreviewSpec, ctx: &RenderContext<'_>) -> Node {
 }
 
 /// Render a media preview with an optional caller-owned media slot.
+///
+/// The web pair renders the `mediaContent` snippet inside the component's
+/// UiPresentationProvider scope (MediaPreview.svelte): the slot arrives as an
+/// immediate child builder invoked with that scope, not a prebuilt node.
 pub fn media_preview_with_content(
     spec: &MediaPreviewSpec,
     ctx: &RenderContext<'_>,
-    media_content: Option<Node>,
+    media_content: Option<SlotBuilder<'_>>,
 ) -> Node {
     let text_primary = ctx.theme().resolve_color(spec.title_color_token());
     let text_secondary = ctx.theme().resolve_color(spec.secondary_text_token());
@@ -32,6 +36,9 @@ pub fn media_preview_with_content(
     let density = ctx.resolve_density(spec.density);
 
     let base_size = ctx.base_size(spec.size);
+    // The web provider publishes the role-resolved size and resolved density.
+    let host_scope = ctx.scoped(ctx.resolve_size(spec.size, spec.size_role), density);
+    let media_content = media_content.map(|build| build(&host_scope));
     let eyebrow_size = rem_to_px(spec.eyebrow_size_rem(base_size));
     let title_size = rem_to_px(spec.title_size_rem(base_size));
     let body_size = rem_to_px(spec.body_size_rem(base_size));

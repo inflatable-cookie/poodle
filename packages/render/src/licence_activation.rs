@@ -417,15 +417,19 @@ fn free_form_key_view(
         density: Some(ctx.resolve_density(spec.density)),
         ..TextInputSpec::default()
     };
-    let control = text_input_with_handlers(
-        &text_spec,
-        ctx,
-        crate::text_input::TextInputHandlers {
-            on_change: handlers.on_key_change.clone(),
-            on_selection_change: handlers.on_key_selection_change.clone(),
-            ..crate::text_input::TextInputHandlers::default()
-        },
-    );
+    // The control builds inside the field's presentation scope (Field wraps
+    // its control slot in a provider on the web), so it arrives as a builder.
+    let control: crate::context::SlotBuilder = Box::new(move |scoped| {
+        text_input_with_handlers(
+            &text_spec,
+            scoped,
+            crate::text_input::TextInputHandlers {
+                on_change: handlers.on_key_change.clone(),
+                on_selection_change: handlers.on_key_selection_change.clone(),
+                ..crate::text_input::TextInputHandlers::default()
+            },
+        )
+    });
     field(&field_spec, ctx, Some(control))
 }
 

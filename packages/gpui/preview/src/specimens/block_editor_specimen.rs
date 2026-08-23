@@ -3,9 +3,9 @@ use crate::node_compat::{BlockEditor, Eyebrow};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
-use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{FontFamily, LayoutDirection, Node};
+use poodle_render::context::RenderContext;
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{BlockEditorMode, BlockEditorSpec, BlockTypeDefinition, EditorBlock};
 use poodle_tokens::typed::ColorValue;
@@ -23,9 +23,6 @@ fn text_block(text: &str, size: f32, color: ColorValue) -> Node {
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let accent = theme.resolve_color("color.accent.base");
     let examples = div().flex().flex_col().gap(px(24.0))
         // --- Default blocks ---
         .child(
@@ -33,17 +30,25 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Default blocks"), theme))
                 .child(
                     BlockEditor::from_spec(BlockEditorSpec::new(), theme)
-                        .with_child({
-                            let mut heading = text_block("Getting Started", 18.0, text_primary);
+                        .with_child(|ctx: &RenderContext<'_>| {
+                            let mut heading = text_block(
+                                "Getting Started",
+                                18.0,
+                                ctx.theme().resolve_color("color.text.primary"),
+                            );
                             heading.style.text_weight = Some(700);
                             heading
                         })
-                        .with_child(text_block(
-                            "This is a paragraph block. Each block can be reordered, changed, or removed using the toolbar that appears on hover.",
-                            14.0,
-                            text_primary,
-                        ))
-                        .with_child({
+                        .with_child(|ctx: &RenderContext<'_>| {
+                            text_block(
+                                "This is a paragraph block. Each block can be reordered, changed, or removed using the toolbar that appears on hover.",
+                                14.0,
+                                ctx.theme().resolve_color("color.text.primary"),
+                            )
+                        })
+                        .with_child(|ctx: &RenderContext<'_>| {
+                            let text_secondary =
+                                ctx.theme().resolve_color("color.text.secondary");
                             // Blockquote: italic, tinted left rule, inset text.
                             let mut quote = Node::container();
                             {
@@ -61,7 +66,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 text_secondary,
                             ))
                         })
-                        .with_child({
+                        .with_child(|ctx: &RenderContext<'_>| {
+                            let text_primary = ctx.theme().resolve_color("color.text.primary");
+                            let text_secondary =
+                                ctx.theme().resolve_color("color.text.secondary");
                             // Code block: mono face on a faint panel.
                             let mut code = Node::container();
                             {
@@ -99,12 +107,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(Eyebrow::from_spec(EyebrowSpec::new().with_content("Custom blocks"), theme))
                 .child(
                     BlockEditor::from_spec(BlockEditorSpec::new(), theme)
-                        .with_child(text_block(
-                            "A text block with regular content.",
-                            14.0,
-                            text_primary,
-                        ))
-                        .with_child({
+                        .with_child(|ctx: &RenderContext<'_>| {
+                            text_block(
+                                "A text block with regular content.",
+                                14.0,
+                                ctx.theme().resolve_color("color.text.primary"),
+                            )
+                        })
+                        .with_child(|ctx: &RenderContext<'_>| {
+                            let text_primary = ctx.theme().resolve_color("color.text.primary");
+                            let accent = ctx.theme().resolve_color("color.accent.base");
                             // Callout: accent left rule over an accent wash.
                             let mut callout = Node::container();
                             {
@@ -195,20 +207,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         SpecimenAxes::examples_only()
             .with_sizes(|size, theme: &GpuiThemeProvider| {
                 BlockEditor::from_spec(BlockEditorSpec::new().with_size(size), theme)
-                    .with_child(text_block(
-                        "A text block with regular content.",
-                        14.0,
-                        theme.resolve_color("color.text.primary"),
-                    ))
+                    .with_child(|ctx: &RenderContext<'_>| {
+                        text_block(
+                            "A text block with regular content.",
+                            14.0,
+                            ctx.theme().resolve_color("color.text.primary"),
+                        )
+                    })
                     .into_any_element()
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
                 BlockEditor::from_spec(BlockEditorSpec::new().with_density(density), theme)
-                    .with_child(text_block(
-                        "A text block with regular content.",
-                        14.0,
-                        theme.resolve_color("color.text.primary"),
-                    ))
+                    .with_child(|ctx: &RenderContext<'_>| {
+                        text_block(
+                            "A text block with regular content.",
+                            14.0,
+                            ctx.theme().resolve_color("color.text.primary"),
+                        )
+                    })
                     .into_any_element()
             }),
     )
