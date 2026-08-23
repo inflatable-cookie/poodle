@@ -12,10 +12,12 @@ import { renderIconSetModule, selectIconSet } from "../src/icons/build.mjs";
 describe("icon catalogue boundary", () => {
   test("the default Lucide set contains only Poodle's component dependencies", () => {
     // The count is a deliberate ceiling: the default set is what every consumer
-    // ships, so it grows only when a component genuinely needs an icon. Last
-    // moved to 106 by SegmentedControl's audio-waveform and piano specimen
-    // options. Both are component-owned teaching assets, not catalogue creep.
-    expect(Object.keys(defaultLucideIconSet)).toHaveLength(106);
+    // ships, so it grows only when a component genuinely needs an icon. Moved
+    // to 106 by SegmentedControl's audio-waveform and piano specimen options,
+    // then to 108 by g15.053's Breadcrumbs item icons — the canonical `house`
+    // plus its `home` alias, which the accessible icon-only root crumb needs.
+    // All four are component-owned, not catalogue creep.
+    expect(Object.keys(defaultLucideIconSet)).toHaveLength(108);
     expect(defaultLucideIconSet.search).toBe(search);
     expect(defaultLucideIconSet.x).toBe(x);
     expect("biohazard" in defaultLucideIconSet).toBe(false);

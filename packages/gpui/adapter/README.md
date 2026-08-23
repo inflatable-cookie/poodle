@@ -34,8 +34,12 @@ than introduce local values.
 
 ## Component Flow
 
+Renderers take a `poodle_render::RenderContext`, not a bare `ThemeProvider`.
+Build the context once from the provider and thread it down; nested scopes come
+from `ctx.scoped(size, density)`.
+
 ```text
-poodle-specs + GpuiThemeProvider
+poodle-specs + RenderContext (built from GpuiThemeProvider)
               |
         poodle-render
               |
@@ -47,7 +51,10 @@ poodle-gpui-node-backend
 ```
 
 ```rust
-let node = poodle_render::button(&spec, &theme, on_click);
+use poodle_render::RenderContext;
+
+let ctx = RenderContext::new(&theme);
+let node = poodle_render::button(&spec, &ctx, on_click);
 let element = poodle_gpui_node_backend::to_gpui(&node);
 ```
 

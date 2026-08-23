@@ -16,24 +16,34 @@ also use [Guides Index](./README.md), especially
 
 ## Quick Start
 
-### 1. Link packages
+### 1. Install packages
 
-Poodle is currently a source preview; its npm packages are not published to a
-registry. Link them from a sibling checkout or workspace in your application's
-`package.json`:
+`@inflatable-cookie/poodle-core` and `@inflatable-cookie/poodle-svelte` publish
+to npm on the preview channel. Preview means pre-release: breaking changes may
+ship in `0.x` minor releases and no `stable` channel exists yet, so pin an
+exact version and read the
+[release notes](../release-notes/README.md) before upgrading.
+
+```sh
+bun add @inflatable-cookie/poodle-svelte@0.2.0 @inflatable-cookie/poodle-core@0.2.0 lucide-static@1.31.0
+```
 
 ```json
 {
   "dependencies": {
-    "@inflatable-cookie/poodle-core": "file:../poodle/packages/core",
-    "@inflatable-cookie/poodle-svelte": "file:../poodle/packages/svelte/components",
+    "@inflatable-cookie/poodle-core": "0.2.0",
+    "@inflatable-cookie/poodle-svelte": "0.2.0",
     "lucide-static": "1.31.0"
   }
 }
 ```
 
-Then run `bun install` in the consuming application. Adjust the relative paths
-for a vendored checkout or monorepo workspace.
+To work against an unreleased Poodle instead, point both packages at a sibling
+checkout with `file:../poodle/packages/core` and
+`file:../poodle/packages/svelte/components`, then run `bun install`. Adjust the
+relative paths for a vendored checkout or monorepo workspace.
+
+`@inflatable-cookie/poodle-react` is not published; consume it from source.
 
 `@inflatable-cookie/poodle-core/tokens` provides CSS custom properties and theme
 helpers, `@inflatable-cookie/poodle-svelte` provides the Svelte component

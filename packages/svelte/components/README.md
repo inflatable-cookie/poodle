@@ -3,20 +3,32 @@
 Unified Svelte component library for Poodle. All components in a single
 `@inflatable-cookie/poodle-svelte` package.
 
-This package is a pre-1.0 source preview and is not published to a registry.
-Use a workspace or file dependency and pair it with
-`@inflatable-cookie/poodle-core` for tokens, styles, behavior, and icons.
+`0.2.0` is a preview-channel npm release. Breaking changes may still ship in
+`0.x` minor releases; no `stable` channel exists yet, so pin an exact version
+and read the [release notes](https://github.com/inflatable-cookie/poodle/blob/main/docs/release-notes/0.2.0.md) before
+upgrading. `0.2.0` is the first published version — earlier versions were
+source baselines and are not on the registry.
 
 ## Setup
+
+Install the package and its `@inflatable-cookie/poodle-core` peer, which
+carries tokens, styles, behavior, and icons:
+
+```sh
+bun add @inflatable-cookie/poodle-svelte@0.2.0 @inflatable-cookie/poodle-core@0.2.0
+# or: npm install @inflatable-cookie/poodle-svelte@0.2.0 @inflatable-cookie/poodle-core@0.2.0
+```
 
 ```json
 {
   "dependencies": {
-    "@inflatable-cookie/poodle-core": "file:../poodle/packages/core",
-    "@inflatable-cookie/poodle-svelte": "file:../poodle/packages/svelte/components"
+    "@inflatable-cookie/poodle-core": "0.2.0",
+    "@inflatable-cookie/poodle-svelte": "0.2.0"
   }
 }
 ```
+
+Svelte 5 (`>=5.38.6 <6`) is a peer dependency.
 
 Import the token stylesheet once at the application entry:
 
@@ -53,5 +65,5 @@ import type { ControlSize, ControlDensity, SelectOption } from "@inflatable-cook
   of the public package contract for now
 - GPUI and Jetstream parity for this family is documented in contracts
 
-See the [Svelte developer guide](../../../docs/guides/svelte-developer-guide.md)
+See the [Svelte developer guide](https://github.com/inflatable-cookie/poodle/blob/main/docs/guides/svelte-developer-guide.md)
 for themes, icon generation, component conventions, and application recipes.

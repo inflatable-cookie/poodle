@@ -1,6 +1,6 @@
 {
   "name": "@inflatable-cookie/poodle-react",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -36,7 +36,7 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@inflatable-cookie/poodle-core": "0.1.0",
+    "@inflatable-cookie/poodle-core": "0.2.0",
     "marked": "^18.0.9"
   },
   "poodleRelease": {

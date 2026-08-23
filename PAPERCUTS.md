@@ -7,6 +7,26 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-23 — Bumping a workspace package version leaves `bun.lock` stale and
+  there is no supported way to refresh only that. `bun install`,
+  `bun install --force`, and `bun install --lockfile-only` all leave the
+  `workspaces` block's `version` and intra-repo range strings at the old
+  values, and `--frozen-lockfile` still passes, so the drift is silent.
+  Deleting the lock and reinstalling does pick them up, but it also re-resolves
+  every registry range (here: rolldown, oxc, vitest all moved), which is a
+  dependency-policy change a release candidate must not make. A
+  `bun install --lockfile-only --no-update` or an explicit workspace-metadata
+  refresh would remove the hand-edit. Found by g15.050.
+
+- 2026-08-23 — Every release-bearing Rust crate version bump forces a
+  regeneration pass: `poodle-codegen`'s version is stamped into all 45
+  generated artifacts through `GENERATOR_VERSION`, so `ir:check` and
+  `catalogue:check` go red until `ir:build` and `catalogue:build` restamp them.
+  Neither check is on the `qa` board, so the drift is only visible if someone
+  runs them. Either put the two `*:check` selectors on the board or drop the
+  generator version from the header (source path + schema version already
+  identify the artifact). Found by g15.050.
+
 - 2026-08-23 — The headless GPUI root began calling the production
   `reset_element_ids` boundary in every render, but the generated element and
   gesture counters were process-global atomics while Rust ran independent

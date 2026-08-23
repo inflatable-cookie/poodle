@@ -36,8 +36,12 @@ than introduce backend-only values.
 
 ## Component Flow
 
+Renderers take a `poodle_render::RenderContext`, not a bare `ThemeProvider`.
+Build the context once from the provider and thread it down; nested scopes come
+from `ctx.scoped(size, density)`.
+
 ```text
-poodle-specs + JetstreamThemeProvider
+poodle-specs + RenderContext (built from JetstreamThemeProvider)
                 |
           poodle-render
                 |
@@ -51,9 +55,16 @@ poodle-specs + JetstreamThemeProvider
 ```
 
 ```rust
-let node = poodle_render::button(&spec, &theme, on_click);
+use poodle_render::RenderContext;
+
+let ctx = RenderContext::new(&theme);
+let node = poodle_render::button(&spec, &ctx, on_click);
 let element = jetstream_poodle::to_js_el(&node);
 ```
+
+This crate compiles against the shared contracts and consumes the same node
+tree as GPUI. That is composition reuse, not parity evidence: Jetstream's
+backend integration is program-deferred and is not passing parity.
 
 Convert the completed node tree once at the engine boundary. Shared component
 composition belongs in `poodle-render`; widget materialization, layout, drawing,
