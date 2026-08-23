@@ -170,10 +170,11 @@ fn generated_identity_counters_are_isolated_per_thread() {
     assert_eq!(next_gesture_id(), "gesture-2");
 }
 
-// ── Shadow projection (g15.045) ─────────────────────────────────────
-// The adopted GPUI revision's `BoxShadow` carries a real `inset` flag, so the
-// backend projects inset (highlight) layers faithfully instead of dropping
-// them — the gpui 0.2.2 approximation is gone.
+// ── Shadow projection ───────────────────────────────────────────────
+// crates.io gpui 0.2.2 `BoxShadow` has no inset flag (g16.005 restored that
+// published identity), so inset (highlight) layers are dropped and drop
+// layers map exactly. These tests pin the approximation so it stays visible
+// rather than becoming folklore.
 
 /// The ring is its own paint channel: declaring one must not disturb the
 /// element's shadow stack (or any other refinement) — composition, not
@@ -204,8 +205,11 @@ fn a_focus_ring_leaves_the_shadow_stack_untouched() {
     assert_eq!(f32::from(shadows[0].offset.y), 2.0);
 }
 
+/// Drop layers project exactly; inset (highlight) layers are dropped because
+/// crates.io `gpui::BoxShadow` cannot express them. This asserts the loss so
+/// a future upstream `inset` field is a visible test change, not a silent one.
 #[test]
-fn inset_shadow_layers_project_with_the_inset_flag() {
+fn inset_shadow_layers_are_dropped_and_drop_layers_map_exactly() {
     let mut node = Node::button("ok");
     node.style.shadow_layers = vec![
         ShadowLayer {
@@ -233,19 +237,36 @@ fn inset_shadow_layers_project_with_the_inset_flag() {
         .expect("shadow layers project into the refinement");
     assert_eq!(
         shadows.len(),
-        2,
-        "inset layers are projected, not filtered out"
+        1,
+        "the inset layer is dropped: gpui 0.2.2 BoxShadow has no inset flag"
     );
-    assert!(!shadows[0].inset);
     assert_eq!(f32::from(shadows[0].offset.y), 2.0);
     assert_eq!(f32::from(shadows[0].blur_radius), 8.0);
     assert_eq!(f32::from(shadows[0].spread_radius), 1.0);
-    assert!(shadows[1].inset, "the inset layer keeps its inset flag");
-    assert_eq!(f32::from(shadows[1].offset.y), 1.0);
+}
+
+/// An all-inset stack projects nothing at all rather than an empty shadow
+/// refinement — the same shape the pre-g15.045 backend had.
+#[test]
+fn an_all_inset_shadow_stack_projects_no_shadow_refinement() {
+    let mut node = Node::button("ok");
+    node.style.shadow_layers = vec![ShadowLayer {
+        offset_x: 0.0,
+        offset_y: 1.0,
+        blur: 0.0,
+        spread: 0.0,
+        color: ColorValue(1.0, 1.0, 1.0, 0.4),
+        inset: true,
+    }];
+    let mut el = apply_paint(div(), &node);
+    assert!(
+        el.style().box_shadow.is_none(),
+        "no projectable layer means no shadow refinement"
+    );
 }
 
 #[test]
-fn fallback_descriptor_shadow_stays_outset() {
+fn the_fallback_descriptor_shadow_projects_its_single_drop_layer() {
     let mut node = Node::button("ok");
     node.style.descriptor.shadow = Some(ShadowValue {
         offset_x: 0.0,
@@ -260,10 +281,6 @@ fn fallback_descriptor_shadow_stays_outset() {
         .as_ref()
         .expect("the descriptor shadow projects into the refinement");
     assert_eq!(shadows.len(), 1);
-    assert!(
-        !shadows[0].inset,
-        "the one-token descriptor shadow is always a drop shadow"
-    );
     assert_eq!(f32::from(shadows[0].offset.y), 3.0);
     assert_eq!(f32::from(shadows[0].spread_radius), 0.0);
 }

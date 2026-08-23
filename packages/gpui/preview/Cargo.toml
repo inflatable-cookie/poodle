@@ -11,37 +11,11 @@ publish = false
 name = "poodle-preview"
 path = "src/main.rs"
 
-# g15.045 offscreen capture smoke target. `required-features` keeps it out of
-# every ordinary build: an ordinary `cargo build --bin poodle-preview` never
-# sees it, and the `capture` feature below is the only place the shipping
-# graph's `test-support` can be switched on outside dev tests.
-[[bin]]
-name = "poodle-offscreen-capture"
-path = "src/bin/offscreen_capture.rs"
-required-features = ["capture"]
-
-[features]
-# Offscreen capture needs GPUI's `test-support` (render_to_image and the
-# headless renderer factory are `cfg(test-support)` upstream). Test-only
-# dependencies (proptest, leak-detection) ride along, which is exactly why
-# this is a required feature of the capture binary and never a default.
-capture = [
-    "gpui/test-support",
-    "gpui_platform/test-support",
-    "dep:image",
-    "dep:sha2",
-]
-
 [dependencies]
-# GPUI framework — Poodle's minimal Zed fork keeps the offscreen capture seam
-# while replacing the normal GPL tracing graph with standard tracing.
-gpui = { git = "https://github.com/inflatable-cookie/zed", rev = "87d9afbe71ef06ea0634499dc35d104bb29dc020" }
-# Application construction moved to the platform crate at the adopted
-# revision (`gpui_platform::application()` replaces `Application::new()`).
-# `font-kit` is required: without it the macOS platform silently has no real
-# text rendering. test-support stays out of this normal dependency — it is
-# enabled only by dev tests and the dedicated capture target below.
-gpui_platform = { git = "https://github.com/inflatable-cookie/zed", rev = "87d9afbe71ef06ea0634499dc35d104bb29dc020", features = ["font-kit"] }
+# GPUI framework — the published crates.io release, matching the node
+# backend's public source. `Application::new()` is the framework's own
+# constructor here; there is no separate platform crate to depend on.
+gpui = "0.2.2"
 
 # Poodle adapter + contracts + real components
 poodle-gpui = { path = "../adapter" }
@@ -55,11 +29,6 @@ poodle-style = { path = "../../contracts/style" }
 poodle-tokens = { path = "../../contracts/tokens" }
 anyhow = "1"
 
-# Offscreen capture only (the `capture` feature): PNG encoding and the
-# receipt's content hash. Both already sit in the graph as transitive crates;
-# they stay optional so the ordinary preview binary never links them.
-image = { version = "0.25", optional = true, default-features = false, features = ["png"] }
-sha2 = { version = "0.10", optional = true }
 
 # The interactive preview app posts real NSEvents to its own window through
 # the AppKit queue (preview click/key drive — not the conformance path).
@@ -110,4 +79,4 @@ path = "tests/visual_fixture_inventory.rs"
 # (TestAppContext / VisualTestContext / TestWindow). test-support is a
 # dev-dependency so ordinary builds and the preview bin never pull it in.
 [dev-dependencies]
-gpui = { git = "https://github.com/inflatable-cookie/zed", rev = "87d9afbe71ef06ea0634499dc35d104bb29dc020", features = ["test-support"] }
+gpui = { version = "0.2.2", features = ["test-support"] }

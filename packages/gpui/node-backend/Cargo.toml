@@ -15,9 +15,11 @@ publish = false
 path = "src/lib.rs"
 
 [dependencies]
-# GPUI framework — Poodle's minimal Zed fork keeps the offscreen capture seam
-# while replacing the normal GPL tracing graph with standard tracing.
-gpui = { git = "https://github.com/inflatable-cookie/zed", rev = "87d9afbe71ef06ea0634499dc35d104bb29dc020" }
+# GPUI framework — the published crates.io release. This is a public-intent
+# package: a consumer that also depends on crates.io `gpui` must receive the
+# SAME crate identity, so this source is never a Git fork, patch, or override
+# (g16.005). Optional visual tooling does not get to choose it.
+gpui = "0.2.2"
 poodle-node = { version = "0.2.1", path = "../../contracts/node" }
 # Undo coalescing only. The backend owns the history *storage* because history
 # is ephemeral per-field UI state and only the backend persists anything across
