@@ -1,7 +1,7 @@
 # g16 — Published Consumer Adoption
 
 Status: active — the exact consumer inventory and adoption policy are frozen;
-three independent foundation repositories are ready for parallel upgrade
+Underlay is adopted; Longhorn and Soundcheck Library remain active foundations
 Posture: adoption-first; no Poodle API or architecture changes
 Opened: 2026-08-23
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -51,7 +51,7 @@ trees, and in-repository archived applications are excluded.
 
 | Lane | Repositories | State |
 | --- | --- | --- |
-| Foundation | Longhorn, Underlay, Soundcheck Library | ready in parallel |
+| Foundation | Longhorn, Underlay, Soundcheck Library | Underlay complete; Longhorn and Soundcheck Library ready |
 | Adapter follow-up | Jetstream | waits for Longhorn |
 | Product applications | Acowtancy, Bovine Accelerator Desktop, Compli Me, Composer, Contact Patch, Figmatic, Finch, Loophole, Nucleus, Songsprout, Soundcheck, Underlay Reference | waits for the foundation it consumes |
 | Legacy product | Loophole Legacy | final wave; verify that it remains supported before merge |
@@ -63,7 +63,7 @@ trees, and in-repository archived applications are excluded.
 2. [002 — Longhorn Poodle 0.2.1 adoption](002-longhorn-poodle-v021-adoption.md) —
    ready; independent foundation lane
 3. [003 — Underlay Poodle 0.2.1 adoption](003-underlay-poodle-v021-adoption.md) —
-   ready; independent foundation lane
+   complete; PR 4 merged at `750005eb`
 4. [004 — Soundcheck Library Poodle 0.2.1 adoption](004-soundcheck-library-poodle-v021-adoption.md) —
    ready; independent foundation lane
 5. `005` — Jetstream adoption — compile after `002` lands
@@ -72,10 +72,11 @@ trees, and in-repository archived applications are excluded.
 
 ## Current Task And Parallel Lanes
 
-Dispatch `g16.002`, `g16.003`, and `g16.004` in parallel to separate
-repository worktrees. They share no mutable files or release authority.
-Do not dispatch Jetstream or product applications until the relevant foundation
-PR is merged and its installed peer/lockfile shape is known.
+Longhorn `g16.002` and Soundcheck Library `g16.004` remain independent active
+lanes. Underlay `g16.003` is merged and proved that its consumers need no
+adapter migration: Underlay-dependent application cards may now compile.
+Do not dispatch applications behind Longhorn or Soundcheck Library until their
+foundation PR is merged and its installed peer/lockfile shape is known.
 
 ## Completion
 

@@ -5,14 +5,14 @@ Updated: 2026-08-23
 ## Active Track
 
 - `g16`
-  - Status: active — consumer inventory complete; three foundation lanes ready
+  - Status: active — inventory complete; Underlay adopted; two foundations ready
   - Posture: published-package adoption, no Poodle API or architecture changes
   - Range: `001` to `004`; application cards compile after foundation evidence
   - Evidence: 17 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: dispatch Longhorn `002`, Underlay `003`, and Soundcheck Library
-    `004` in parallel.
+  - Next: finish Longhorn `002` and Soundcheck Library `004`; compile the
+    Underlay-dependent application lanes from the clean `003` result.
 
 ## Latest Completed Track
 

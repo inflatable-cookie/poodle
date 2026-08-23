@@ -1,6 +1,6 @@
 # g16.003 — Underlay Poodle 0.2.1 Adoption
 
-Status: **ready**
+Status: **complete — Underlay PR 4 merged at `750005eb`**
 Depends on: `g16.001`, published npm `0.2.1`
 Target repository: `/Users/tom/Dev/projects/underlay`
 Governing refs: `README.md`, `../../../README.md`,
@@ -47,3 +47,14 @@ adapter/template surface without leaking Poodle into application-owned APIs.
 
 Record the public registry resolution, changed files, exact validation, and any
 bounded migration in the Underlay PR. Do not merge.
+
+## Closeout
+
+Underlay PR [#4](https://github.com/inflatable-cookie/underlay/pull/4)
+merged on 2026-08-23 at `750005eb`. The root dependency is exact `0.2.1`,
+both committed sibling overrides are gone, and the lock resolves Poodle core
+and Svelte `0.2.1` from npm. No adapter or template migration was required.
+
+Orchestrator validation passed `effigy validate`: 125 unit files / 770 tests,
+12 component files / 49 tests, Svelte and TypeScript checks, package exports,
+guardrails, and Poodle prop-name checks. `git diff --check` was clean.
