@@ -230,9 +230,9 @@ mod tests {
         .with_size(ControlSize::Lg);
         let tree = breadcrumbs(&spec, &ctx, None);
 
-        // `chrome` role maps lg -> md; the icon follows that resolved size, and
-        // does not shift a second time.
-        let expected = theme.resolve_space(IconSize::Md.size_token());
+        // Explicit lg is the final Breadcrumbs size; the icon follows it and
+        // does not apply the chrome role a second time.
+        let expected = theme.resolve_space(IconSize::Lg.size_token());
         assert_eq!(icon_of(&tree.children[0].children[0]).map(|(_, size)| size), Some(expected));
     }
 

@@ -9,9 +9,10 @@
 //! control-size scale and density) that a `UiPresentationProvider` scope
 //! establishes. Component specs keep omission in the type system
 //! (`Option<ControlSize>` / `Option<ControlDensity>`); a renderer resolves an
-//! omitted input from this context, then applies the component's semantic size
-//! role. An explicit value always wins — including an explicit `md` or
-//! `default` inside a non-default scope.
+//! omitted size from this context and applies the component's semantic size
+//! role to that inherited scale. An explicit value bypasses role mapping and
+//! always wins — including an explicit `md` or `default` inside a non-default
+//! scope.
 //!
 //! The context is a plain borrowed value. There is no global, thread-local,
 //! task-local, backend, or `poodle-node` presentation state anywhere in the
@@ -77,15 +78,15 @@ impl<'a> RenderContext<'a> {
         explicit.unwrap_or(self.size_scale)
     }
 
-    /// A component's semantic size: explicit-or-inherited base size first,
-    /// then the component's size role. An explicit `md` under an `xl` scope
-    /// stays `md`-based.
+    /// A component's semantic size. An explicit value is already the final
+    /// component size and wins unchanged. When size is omitted, the current
+    /// presentation scale is mapped through the component's semantic role.
     pub fn resolve_size(
         &self,
         explicit: Option<ControlSize>,
         role: SemanticControlSizeRole,
     ) -> ControlSize {
-        resolve_semantic_size(self.base_size(explicit), role)
+        explicit.unwrap_or_else(|| resolve_semantic_size(self.size_scale, role))
     }
 
     /// A component's density: the explicit value when present, otherwise this
@@ -215,7 +216,7 @@ mod tests {
     }
 
     #[test]
-    fn role_mapping_happens_after_base_size_selection() {
+    fn role_mapping_applies_only_to_inherited_size() {
         with_root(|ctx| {
             let outer = ctx.scoped(ControlSize::Xl, ControlDensity::Comfortable);
             // Inherited base: xl mapped through Chrome shifts one stop down.
@@ -223,11 +224,11 @@ mod tests {
                 outer.resolve_size(None, SemanticControlSizeRole::Chrome),
                 ControlSize::Lg
             );
-            // Explicit base: md mapped through Prominent shifts one stop up,
-            // independent of the xl scope.
+            // Explicit md is already the final component size. The prominent
+            // role affects inherited scale only.
             assert_eq!(
                 outer.resolve_size(Some(ControlSize::Md), SemanticControlSizeRole::Prominent),
-                ControlSize::Lg
+                ControlSize::Md
             );
             // Control role is identity on the chosen base.
             assert_eq!(

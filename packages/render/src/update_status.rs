@@ -598,7 +598,9 @@ mod tests {
                     && child.id.as_deref() != Some("update-status-install")
             })
             .expect("confirmation button");
-        assert_eq!(confirm.roles.get("size").map(String::as_str), Some("lg"));
+        // Explicit md is the final authored size; Prominent maps only an
+        // inherited presentation scale.
+        assert_eq!(confirm.roles.get("size").map(String::as_str), Some("md"));
         assert_eq!(
             confirm.roles.get("density").map(String::as_str),
             Some("compact")

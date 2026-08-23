@@ -1,7 +1,6 @@
 # g15.053 — Breadcrumb Item Icons
 
-Status: **ready, serial behind `g15.043`** — do not dispatch until PR #70 is
-accepted and merged
+Status: **complete — implemented and operator-accepted in PR #71 (2026-08-23)**
 Requested by: active downstream adopter, 2026-08-23
 Depends on: `g15.043` (`RenderContext` migration touches the same Rust spec and
 renderer surfaces)
@@ -116,27 +115,27 @@ content. Do not turn Examples into an icon matrix.
 
 ## Acceptance
 
-- [ ] Every authored breadcrumb item can render without an icon, with an icon
+- [x] Every authored breadcrumb item can render without an icon, with an icon
       and visible label, or as an icon-only item.
-- [ ] The canonical root home crumb has no visible text but is exposed as
+- [x] The canonical root home crumb has no visible text but is exposed as
       `Home` to assistive technology and remains one link/button target.
-- [ ] Icon-plus-label anchors, buttons, and current spans keep the icon and
+- [x] Icon-plus-label anchors, buttons, and current spans keep the icon and
       label inside the same semantic element.
-- [ ] Icons are decorative; separators and the synthetic ellipsis remain
+- [x] Icons are decorative; separators and the synthetic ellipsis remain
       hidden from assistive technology as before.
-- [ ] `iconOnly` requires an icon in paired web types; Rust's
+- [x] `iconOnly` requires an icon in paired web types; Rust's
       `with_icon_only(icon)` constructs the valid state atomically; invalid
       direct native input cannot render a blank crumb.
-- [ ] Icon size follows Breadcrumbs' resolved size exactly, icon-label spacing
+- [x] Icon size follows Breadcrumbs' resolved size exactly, icon-label spacing
       uses `space.inline.xs`, and existing crumb/separator spacing is unchanged.
-- [ ] Truncation preserves icons on retained authored items and synthesizes a
+- [x] Truncation preserves icons on retained authored items and synthesizes a
       plain ellipsis without copied icon state.
-- [ ] Navigation, current-item behavior, focus, wrapping, size, and density
+- [x] Navigation, current-item behavior, focus, wrapping, size, and density
       retain focused regressions.
-- [ ] Svelte, React, shared Rust output, and the GPUI specimen implement the
+- [x] Svelte, React, shared Rust output, and the GPUI specimen implement the
       same contract; no runtime-specific Breadcrumbs API or second renderer is
       introduced.
-- [ ] The curated Icons example is human-readable in the paired web previews
+- [x] The curated Icons example is human-readable in the paired web previews
       and GPUI specimen probe. Operator live review is required before merge.
 
 ## Writable Scope
@@ -191,7 +190,6 @@ publication, or workflow command.
 
 ## Continuation
 
-After `g15.043` merges, dispatch this card as one isolated worker lane. The
-orchestrator reviews the three active-runtime specimens with the operator,
-then merges and closes the new adopter requirement. `g15.050` remains blocked
-until both `g15.043` and `g15.053` are accepted.
+PR #71 closes the adopter requirement after paired-web live review, shared
+native headless evidence, and the explicit-size resolver correction found in
+orchestrator review. `g15.050` is the next dispatchable card.

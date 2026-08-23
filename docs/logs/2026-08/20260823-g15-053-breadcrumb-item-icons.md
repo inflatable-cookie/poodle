@@ -115,13 +115,10 @@ Run in this worktree, headless only:
   `jetstream-input` sibling checkout is absent from this worktree. Environment,
   not diff — it is not in the card's validation list, and the card forbids
   adding a paired checkout.
-- Explicit `size` resolves differently across runtimes: the web takes it
-  verbatim (`size ?? resolveSemanticControlSize(...)`) while Rust applies the
-  component's size role on top of it (`RenderContext::resolve_size`). So
-  `size="lg"` yields an `lg` item icon on the web and an `md` one natively.
-  This is pre-existing `g15.043` `RenderContext` behavior affecting font size
-  and gap equally, not something item icons introduced, and `context.rs` is
-  outside this card's writable scope. Flagged for the orchestrator.
+- Orchestrator review exposed a g15.043 resolver mismatch: the web treated an
+  explicit `size` as final while Rust reapplied `sizeRole`. The review repair
+  makes explicit size final in `RenderContext`, updates architecture 010, and
+  aligns all three Breadcrumbs icon-size proofs on `lg`.
 - Jetstream is program-deferred as the card directs. No Jetstream source
   needed compile adaptation: every caller builds items through
   `BreadcrumbItem::new`, so the two added fields are source-compatible.

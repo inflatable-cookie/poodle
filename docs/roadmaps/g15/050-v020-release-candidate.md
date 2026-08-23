@@ -1,7 +1,7 @@
 # g15.050 — v0.2.0 Release Candidate
 
-Status: **planned — blocked on all implementation, specimen, conformance,
-packaging, and automation children**
+Status: **ready — all implementation, specimen, conformance, packaging,
+automation, dependency-policy, and adopter children are complete**
 Depends on: `g15.011`, `g15.012`, `g15.042`, `g15.043`, `g15.048`, `g15.049`,
 `g15.051`, `g15.052`, `g15.053`
 Unblocks: `g15.013` operator certification gate

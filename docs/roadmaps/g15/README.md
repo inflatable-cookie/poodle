@@ -1,10 +1,8 @@
 # g15 — v0.2.0 Release Baseline
 
-Status: active — `g15.001`–`g15.012`, `g15.014`–`g15.017`,
-`g15.019`–`g15.042`, `g15.044`–`g15.049`, and `g15.051`–`g15.052`
-complete; `g15.043` is in review on PR #70 and `g15.053` is queued serially
-behind it; the remaining release path is
-`g15.043` → `g15.053` → `g15.050` → `g15.013`
+Status: active — every implementation, specimen, conformance, packaging,
+automation, dependency-policy, and adopter card through `g15.053` is complete;
+the remaining release path is `g15.050` → `g15.013`
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -82,8 +80,8 @@ and status advance are the orchestrator's.
 24. [040 — ResizeHandle native keyboard and value semantics](040-resize-handle-native-semantics.md) — complete; PR #56 closed stable native focus identity, keyboard, and numeric-range semantics
 25. [041 — Popover interactive trigger semantics](041-popover-interactive-trigger-semantics.md) — complete; PR #59 landed the clean state-aware trigger migration and closed `g15.032`
 26. [042 — Stepper native interaction parity](042-stepper-native-interaction-parity.md) — complete; PR #60 closed inert GPUI selection/re-run controls
-27. [043 — UiPresentationProvider native cascade](043-ui-presentation-provider-native-cascade.md) — in review on PR #70; changes requested before merge
-28. [053 — Breadcrumb item icons](053-breadcrumb-item-icons.md) — ready, serial behind `043`; adds icon-plus-label and accessible icon-only items across the active cohort
+27. [043 — UiPresentationProvider native cascade](043-ui-presentation-provider-native-cascade.md) — complete; PR #70 landed the cascade and PR #71 corrected explicit-size parity found in review
+28. [053 — Breadcrumb item icons](053-breadcrumb-item-icons.md) — complete; PR #71 adds icon-plus-label and accessible icon-only items across the active cohort
 29. [012 — Primitive-first visual conformance lane](012-visual-conformance-lane.md) — non-dispatchable parent recompiled into `044`–`047`
 30. [044 — GPUI offscreen capture feasibility](044-gpui-offscreen-capture-feasibility.md) — complete; PR #61 proved a deterministic no-focus Metal pixel path
 31. [045 — GPUI offscreen capture adoption](045-gpui-offscreen-capture-adoption.md) — complete; PR #62 adopted the exact no-focus Metal seam
@@ -148,12 +146,10 @@ its dependency-specific notice, and exact Git-source policy fails closed.
 the Button defect measured by `g15.047` and the Stepper keyboard-entry/focus
 gap retained from `g15.042`, without widening comparator policy.
 
-`g15.043` is in review on PR #70. Architecture 010 fixes an explicit shared
-Rust `RenderContext`, optional presentation inputs, scoped child construction,
-and the backend boundary. Review requested completion of the public renderer
-and crate-root API contract before merge.
+`g15.043` is complete in PR #70, with the explicit-size semantics corrected
+across the native resolver and architecture evidence in PR #71: explicit size
+is final; `sizeRole` maps inherited presentation scale only.
 
-`g15.053` is ready but deliberately not parallel: it changes the same
-Breadcrumbs Rust spec and renderer surfaces as PR #70. Once `g15.043` lands,
-it adds per-item icons and an accessible icon-only root across the active
-cohort. `g15.050` remains blocked until both cards are accepted.
+`g15.053` is complete in PR #71. Per-item icons and the accessible icon-only
+root are accepted across the active cohort. `g15.050` is now the only
+dispatchable implementation card before the final `g15.013` operator gate.
