@@ -432,6 +432,12 @@
 # The adapter crates cover theme/token resolution, layout mapping, and their
 # direct manifest claims independently of the shared renderer.
 "test:jetstream-adapter" = "cargo test -p poodle-jetstream --manifest-path packages/jetstream/adapter/Cargo.toml"
+# The native presentation cascade (architecture 010, g15.043): component specs
+# keep size/density omission, public renderers take RenderContext rather than
+# a bare ThemeProvider, and the GPUI preview never regains a passthrough or
+# manual-equivalent UiPresentationProvider. Planted regressions of all three
+# classes were proven caught.
+"drift:presentation-cascade" = "bun scripts/check-presentation-cascade.ts"
 # Self-contained native board. This intentionally stops at Poodle-owned Rust,
 # GPUI, and the in-repo Jetstream adapter; it must run from an ordinary Poodle
 # worktree with no sibling engine checkout.
@@ -439,6 +445,7 @@
   { task = "drift:handlers" },
   { task = "drift:events" },
   { task = "drift:adapter-manifests" },
+  { task = "drift:presentation-cascade" },
   { task = "check:gpui" },
   { task = "gpui:test" },
   { task = "test:jetstream-adapter" },

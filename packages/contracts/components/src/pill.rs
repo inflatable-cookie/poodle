@@ -56,7 +56,8 @@ pub struct PillSpec {
     pub is_removable: bool,
     pub is_selected: bool,
     pub is_disabled: bool,
-    pub density: crate::types::ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<crate::types::ControlDensity>,
     /// Optional CSS hex string for a custom accent color (overrides tone fill).
     pub accent_color: Option<String>,
     /// Accessible name (contract §7). `None` falls back to the visible label.
@@ -85,7 +86,7 @@ impl Default for PillSpec {
             is_removable: false,
             is_selected: false,
             is_disabled: false,
-            density: crate::types::ControlDensity::default(),
+            density: None,
             accent_color: None,
             aria_label: None,
             size_role: SemanticControlSizeRole::Control,
@@ -181,7 +182,7 @@ impl PillSpec {
     }
 
     pub fn with_density(mut self, density: crate::types::ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
