@@ -273,4 +273,206 @@ mod tests {
             assert_eq!(accent, expected);
         });
     }
+
+    // ── Provider cascade proofs through real components ─────────────────────
+    //
+    // Architecture 010 completion evidence: inherited output must be
+    // indistinguishable from the explicit equivalent and distinguishable from
+    // the root default — proving the cascade did the work, not the host.
+
+    use poodle_specs::{ButtonSpec, FilterToolbarSpec, TextInputSpec};
+
+    fn fixed_height(node: &Node) -> f32 {
+        match node.style.descriptor.layout.height {
+            poodle_node::LayoutSizing::Fixed(h) => h,
+            ref other => panic!("expected fixed height, got {other:?}"),
+        }
+    }
+
+    fn role<'a>(node: &'a Node, key: &str) -> Option<&'a str> {
+        node.roles.get(key).map(String::as_str)
+    }
+
+    #[test]
+    fn button_and_text_input_inherit_the_provider_scope() {
+        with_root(|ctx| {
+            let scope = UiPresentationProviderSpec::new()
+                .with_size_scale(ControlSize::Xl)
+                .with_density(ControlDensity::Comfortable);
+
+            let (inherited_button, inherited_input) =
+                ui_presentation_provider(&scope, ctx, |scoped| {
+                    (
+                        crate::button::button(
+                            &ButtonSpec::new().with_label("Save"),
+                            scoped,
+                            None,
+                        ),
+                        crate::text_input::text_input(
+                            &TextInputSpec::new().with_default_value("Save"),
+                            scoped,
+                            None,
+                        ),
+                    )
+                });
+
+            let explicit_button = crate::button::button(
+                &ButtonSpec::new()
+                    .with_label("Save")
+                    .with_size(ControlSize::Xl)
+                    .with_density(ControlDensity::Comfortable),
+                ctx,
+                None,
+            );
+            let explicit_input = crate::text_input::text_input(
+                &TextInputSpec::new()
+                    .with_default_value("Save")
+                    .with_size(ControlSize::Xl)
+                    .with_density(ControlDensity::Comfortable),
+                ctx,
+                None,
+            );
+            let root_button =
+                crate::button::button(&ButtonSpec::new().with_label("Save"), ctx, None);
+
+            // xl control height = 3.25rem = 52px (contract §8 ladder).
+            assert_eq!(fixed_height(&inherited_button), 52.0);
+            // Inherited output matches the explicit reference exactly...
+            assert_eq!(fixed_height(&inherited_button), fixed_height(&explicit_button));
+            assert_eq!(
+                inherited_button.style.descriptor.layout.spacing,
+                explicit_button.style.descriptor.layout.spacing
+            );
+            assert_eq!(role(&inherited_button, "size"), Some("xl"));
+            assert_eq!(role(&inherited_button, "density"), Some("comfortable"));
+            assert_eq!(role(&explicit_button, "size"), Some("xl"));
+            // ...and differs from the root default, so the scope did the work.
+            assert_eq!(fixed_height(&root_button), 36.0);
+            assert_ne!(fixed_height(&inherited_button), fixed_height(&root_button));
+
+            // TextInput: inherited equals explicit, and the resolved roles
+            // reach the node exactly like the web's data-* projection.
+            assert_eq!(
+                inherited_input.style.descriptor.layout,
+                explicit_input.style.descriptor.layout
+            );
+            assert_eq!(role(&inherited_input, "size"), Some("xl"));
+            assert_eq!(role(&inherited_input, "density"), Some("comfortable"));
+        });
+    }
+
+    #[test]
+    fn explicit_md_and_default_reset_wins_inside_a_non_default_scope() {
+        with_root(|ctx| {
+            let scope = UiPresentationProviderSpec::new()
+                .with_size_scale(ControlSize::Xl)
+                .with_density(ControlDensity::Comfortable);
+            let reset = ui_presentation_provider(&scope, ctx, |scoped| {
+                crate::button::button(
+                    &ButtonSpec::new()
+                        .with_label("Save")
+                        .with_size(ControlSize::Md)
+                        .with_density(ControlDensity::Default),
+                    scoped,
+                    None,
+                )
+            });
+            let root = crate::button::button(&ButtonSpec::new().with_label("Save"), ctx, None);
+            // md control height = 2.25rem = 36px, exactly the root default.
+            assert_eq!(fixed_height(&reset), 36.0);
+            assert_eq!(reset.style.descriptor.layout, root.style.descriptor.layout);
+            assert_eq!(role(&reset, "size"), Some("md"));
+            assert_eq!(role(&reset, "density"), Some("default"));
+        });
+    }
+
+    #[test]
+    fn nested_provider_replaces_the_outer_scope_for_its_closure_only() {
+        with_root(|ctx| {
+            let outer = UiPresentationProviderSpec::new()
+                .with_size_scale(ControlSize::Xl)
+                .with_density(ControlDensity::Comfortable);
+            let (inner_child, outer_sibling) = ui_presentation_provider(&outer, ctx, |outer_ctx| {
+                let inner = UiPresentationProviderSpec::new()
+                    .with_size_scale(ControlSize::Sm)
+                    .with_density(ControlDensity::Compact);
+                let inner_child = ui_presentation_provider(&inner, outer_ctx, |inner_ctx| {
+                    crate::button::button(&ButtonSpec::new().with_label("In"), inner_ctx, None)
+                });
+                let outer_sibling = crate::button::button(
+                    &ButtonSpec::new().with_label("Out"),
+                    outer_ctx,
+                    None,
+                );
+                (inner_child, outer_sibling)
+            });
+            // sm = 1.75rem = 28px inside the nested scope; xl = 52px outside it.
+            assert_eq!(fixed_height(&inner_child), 28.0);
+            assert_eq!(role(&inner_child, "size"), Some("sm"));
+            assert_eq!(role(&inner_child, "density"), Some("compact"));
+            assert_eq!(fixed_height(&outer_sibling), 52.0);
+            assert_eq!(role(&outer_sibling, "size"), Some("xl"));
+        });
+    }
+
+    #[test]
+    fn a_scoped_host_slot_builds_inside_the_composites_scope() {
+        with_root(|ctx| {
+            // FilterToolbar's web pair wraps host content in a provider
+            // publishing the toolbar's raw base size and resolved density.
+            // Under an outer xl/comfortable provider, an omitted-size host
+            // button in the toolbar's controls grid must inherit xl/comfortable.
+            let outer = UiPresentationProviderSpec::new()
+                .with_size_scale(ControlSize::Xl)
+                .with_density(ControlDensity::Comfortable);
+            let toolbar = ui_presentation_provider(&outer, ctx, |scoped| {
+                crate::filter_toolbar::filter_toolbar(
+                    &FilterToolbarSpec::new().with_collapsed(false),
+                    scoped,
+                    vec![Box::new(|slot_ctx| {
+                        crate::button::button(
+                            &ButtonSpec::new().with_label("Host filter"),
+                            slot_ctx,
+                            None,
+                        )
+                    })],
+                    None,
+                    None,
+                    None,
+                )
+            });
+            let host_button = toolbar
+                .find(&|n| matches!(n.a11y.role, Some(poodle_node::NodeRole::Button)))
+                .expect("host button inside the toolbar");
+            assert_eq!(fixed_height(host_button), 52.0);
+            assert_eq!(role(host_button, "size"), Some("xl"));
+            assert_eq!(role(host_button, "density"), Some("comfortable"));
+        });
+    }
+
+    #[test]
+    fn the_provider_adds_no_wrapper_node_layout_or_accessibility_entry() {
+        with_root(|ctx| {
+            let scope = UiPresentationProviderSpec::new()
+                .with_size_scale(ControlSize::Lg)
+                .with_density(ControlDensity::Compact);
+            // The provider returns exactly what its child builder produced:
+            // the button node itself, not a container around it.
+            let provided = ui_presentation_provider(&scope, ctx, |scoped| {
+                crate::button::button(&ButtonSpec::new().with_label("Save"), scoped, None)
+            });
+            assert!(matches!(provided.kind, poodle_node::NodeKind::Button { .. }));
+            assert_eq!(provided.a11y.role, Some(poodle_node::NodeRole::Button));
+            assert_eq!(provided.a11y.tab_index, Some(0));
+            assert!(provided.interaction.focusable);
+            // The a11y projection carries no grouping a wrapper would add:
+            // the provided node's accessible name is the button's own.
+            assert_eq!(provided.a11y.label, None);
+            // Geometry comes from the scope (lg = 2.75rem = 44px)...
+            assert_eq!(fixed_height(&provided), 44.0);
+            // ...and no provider shell sits between: the child's own subtree
+            // is all there is (buttons without icons have no children).
+            assert!(provided.children.is_empty());
+        });
+    }
 }

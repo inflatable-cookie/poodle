@@ -25,8 +25,11 @@ use std::sync::{Arc, Mutex};
 use gpui::TestAppContext;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
-use poodle_render::context::RenderContext;
-use poodle_specs::{AgentTranscriptSpec, PopoverSpec, RangeSliderSpec};
+use poodle_render::context::{ui_presentation_provider, RenderContext};
+use poodle_specs::{
+    AgentTranscriptSpec, ControlDensity, ControlSize, PopoverSpec, RangeSliderSpec,
+    UiPresentationProviderSpec,
+};
 
 #[path = "../src/headless_driver.rs"]
 mod headless_driver;
@@ -104,6 +107,62 @@ fn the_driver_mounts_and_tracks_real_backend_focus() {
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for(FIXTURE_ID),
             Some(false)
+        );
+    });
+}
+
+/// g15.043 (architecture 010): the UiPresentationProvider cascade is
+/// construction-time and layout-neutral. A button that omits size and density
+/// inside an xl/comfortable scope mounts at the inherited xl geometry (52px
+/// control height), the mounted node IS the button (no provider wrapper exists
+/// to paint, lay out, or hold focus), and the backend's real focus machinery
+/// reaches it directly.
+#[test]
+fn a_provider_scope_cascades_to_mounted_geometry_without_a_wrapper_node() {
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let scope = UiPresentationProviderSpec::new()
+            .with_size_scale(ControlSize::Xl)
+            .with_density(ControlDensity::Comfortable);
+        let mut scoped_button = ui_presentation_provider(&scope, &ctx, |scoped| {
+            poodle_render::button(
+                &poodle_specs::ButtonSpec::new().with_label("scoped"),
+                scoped,
+                None,
+            )
+        });
+        // No wrapper: the returned node is the button itself.
+        assert!(matches!(scoped_button.kind, poodle_node::NodeKind::Button { .. }));
+        assert_eq!(scoped_button.a11y.role, Some(poodle_node::NodeRole::Button));
+        scoped_button.id = Some(FIXTURE_ID.to_owned());
+        let mut root_button = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label("root"),
+            &ctx,
+            None,
+        );
+        root_button.id = Some("headless-fixture-root".to_owned());
+        let pair = Node::container().child(scoped_button).child(root_button);
+        let node = Arc::new(Mutex::new(pair));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        driver.draw_frame();
+
+        // Mounted paint bounds observe the inherited xl geometry against the
+        // root-default md sibling (recorded bounds exclude the 1px border per
+        // side: 52→50 and 36→34). The scope, not the host, did the work.
+        let scoped = poodle_gpui_node_backend::bounds_for(FIXTURE_ID).expect("scoped bounds");
+        let root =
+            poodle_gpui_node_backend::bounds_for("headless-fixture-root").expect("root bounds");
+        assert_eq!(f32::from(scoped.size.height), 50.0);
+        assert_eq!(f32::from(root.size.height), 34.0);
+
+        // The accessibility surface is the button's own: a plain sequential
+        // focus stop reached by the backend's real focus machinery.
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        driver.focus_element(FIXTURE_ID);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FIXTURE_ID),
+            Some(true)
         );
     });
 }
